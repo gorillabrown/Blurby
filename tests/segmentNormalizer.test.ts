@@ -105,4 +105,40 @@ describe("SegmentNormalizer", () => {
       "heteronym-disambiguation",
     ]);
   });
+
+  it("speaks common four-digit years in vernacular form instead of thousands form", () => {
+    const result = normalizeSegmentText("In 1989, support rose again in 2005 and 2024.", { locale: "en-US" });
+
+    expect(result.normalizedText).toBe(
+      "In nineteen eighty nine, support rose again in two thousand five and twenty twenty four.",
+    );
+    expect(result.transforms.map((transform) => transform.id)).toEqual([
+      "cardinal-expansion",
+    ]);
+  });
+
+  it("normalizes grouped years and decade notation into vernacular speech", () => {
+    const result = normalizeSegmentText("In 1,989 the 1980s echoed through the '90s.", { locale: "en-US" });
+
+    expect(result.normalizedText).toBe(
+      "In nineteen eighty nine the nineteen eighties echoed through the nineteen nineties.",
+    );
+    expect(result.transforms.map((transform) => transform.id)).toEqual([
+      "decade-expansion",
+      "cardinal-expansion",
+    ]);
+  });
+
+  it("expands compact times and grouped currency values for smoother prosody", () => {
+    const result = normalizeSegmentText("Meet at 3pm on 05/21/2026 with $1,250.75.", { locale: "en-US" });
+
+    expect(result.normalizedText).toBe(
+      "Meet at three P M on May twenty first, twenty twenty six with one thousand two hundred fifty dollars and seventy five cents.",
+    );
+    expect(result.transforms.map((transform) => transform.id)).toEqual([
+      "date-expansion",
+      "time-expansion",
+      "currency-expansion",
+    ]);
+  });
 });

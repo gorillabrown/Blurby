@@ -1,7 +1,10 @@
 import type { ChunkReadingVisualState } from "../types/chunkReading";
 import type { FlowRenderedWordRootDescriptor } from "./FlowScrollEngine";
 
-export type FoliateWordHighlightClass = "page-word--flow-cursor" | "page-word--highlighted";
+export type FoliateWordHighlightClass =
+  | "page-word--flow-cursor"
+  | "page-word--narrate-cursor"
+  | "page-word--highlighted";
 
 export function shouldSuppressNarrateFlowCursor(
   readingMode: string | undefined,
@@ -20,11 +23,11 @@ export type ChunkReadingScrollTarget = "follow-word" | "chunk-start";
 
 export function resolveFoliateWordHighlightClass(
   readingMode: string | undefined,
-  styleHint?: "flow",
+  styleHint?: "flow" | "narrate",
 ): FoliateWordHighlightClass {
-  return styleHint === "flow" || readingMode === "flow" || readingMode === "narrate"
-    ? "page-word--flow-cursor"
-    : "page-word--highlighted";
+  if (styleHint === "narrate" || readingMode === "narrate") return "page-word--narrate-cursor";
+  if (styleHint === "flow" || readingMode === "flow") return "page-word--flow-cursor";
+  return "page-word--highlighted";
 }
 
 function parseWordIndex(el: Element): number | null {

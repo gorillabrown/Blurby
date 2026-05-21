@@ -11,7 +11,7 @@ const pageReaderCss = fs.readFileSync(PAGE_READER_CSS, "utf-8");
 
 describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   it("highlightWordByIndex accepts a flow hint and no-motion options", () => {
-    expect(src).toContain('highlightWordByIndex: (wordIndex: number, styleHint?: "flow", options?: FoliateHighlightOptions) => boolean;');
+    expect(src).toContain('highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: FoliateHighlightOptions) => boolean;');
   });
 
   it("does not render narration overlay element", () => {
@@ -19,9 +19,9 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
     expect(src).not.toContain("ref={highlightRef}");
   });
 
-  it("flow mode narration index uses flow cursor style", () => {
+  it("narrate mode narration index uses a dedicated narrate cursor style", () => {
     expect(src).toContain('if ((readingMode !== "flow" && readingMode !== "narrate") || narrationWordIndex == null) return;');
-    expect(src).toContain('applyVisualHighlightByIndex(narrationWordIndex, "flow", false);');
+    expect(src).toContain('applyVisualHighlightByIndex(narrationWordIndex, "narrate", false);');
   });
 
   it("imperative highlight API keeps motion enabled only by default", () => {

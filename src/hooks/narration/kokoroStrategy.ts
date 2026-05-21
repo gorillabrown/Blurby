@@ -18,7 +18,12 @@ import type { KokoroPreflightReport, KokoroPreflightStatus, PronunciationOverrid
 import { perfStart, perfEnd } from "../../utils/narratePerf";
 import { recordDiagEvent } from "../../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../../utils/kokoroRatePlan";
-import { KOKORO_MODEL_ID, KOKORO_SAMPLE_RATE } from "../../constants";
+import {
+  KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS,
+  KOKORO_LIVE_RATE_MIN_SEGMENT_WORDS,
+  KOKORO_MODEL_ID,
+  KOKORO_SAMPLE_RATE,
+} from "../../constants";
 import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
 import type { TtsProviderWordBoundaryCallback } from "../../types/ttsProvider";
 import { filterSpokenWords, isPunctuationOnlyWord } from "../../utils/spokenWordFilter";
@@ -411,7 +416,10 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
         // Wave A: keep generation/cache on the snapped bucket and expose
         // exact UI speed recovery via pre-playback pitch-preserving tempo shaping.
         kokoroRatePlan: getRatePlan(),
-      } satisfies typeof chunk & KokoroSchedulerRatePlanMetadata);
+      } satisfies typeof chunk & KokoroSchedulerRatePlanMetadata, {
+        maxSegmentDurationMs: KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS,
+        minSegmentWords: KOKORO_LIVE_RATE_MIN_SEGMENT_WORDS,
+      });
 
       // TTS-7G: Instrument the first-chunk response path for BUG-117 verification.
       const isFirst = !firstChunkReceived;
@@ -505,14 +513,21 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
             timingTruth: boundaryEvent?.timingTruth ?? "none",
           });
         },
-        // TTS-7Q: Chunk handoff — forward last audio-confirmed word to the word-advance callback
-        // so useNarration updates the canonical cursor position at each chunk boundary.
-        onChunkHandoff: (lastConfirmedWordIndex: number) => {
+        // NARR-FIX-4: Chunk handoff is diagnostics-only. We do not push a synthetic
+        // word-advance on handoff because TtsStrategy.onWordAdvance cannot carry trust
+        // metadata, and defaulting to trusted can cause large visual fast-forwards.
+        onChunkHandoff: (lastConfirmedWordIndex: number, isTrustedWordTiming = false, boundaryEvent) => {
           recordDiagEvent("chunk-handoff", `lastConfirmedWordIndex=${lastConfirmedWordIndex}`);
           if (import.meta.env.DEV) {
-            console.debug("[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex =", lastConfirmedWordIndex);
+            console.debug(
+              "[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex =",
+              lastConfirmedWordIndex,
+              "trusted =",
+              isTrustedWordTiming,
+              "timingTruth =",
+              boundaryEvent?.timingTruth ?? "none",
+            );
           }
-          onWordAdvance(lastConfirmedWordIndex);
         },
       });
 

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   getSectionGlobalOffset,
+  resolveTrustedRenderedWordIndexToGlobal,
   resolveRenderedWordIndexToGlobal,
   resolveGlobalWordIndexToRendered,
 } from "../src/utils/foliateWordOffsets";
@@ -110,6 +111,38 @@ describe("foliateWordOffsets", () => {
       });
 
       expect(resolveRenderedWordIndexToGlobal(7, 503, loadedWords, bookWordSections)).toBe(503);
+    });
+  });
+
+  describe("resolveTrustedRenderedWordIndexToGlobal", () => {
+    it("returns null instead of trusting a rendered index when section boundaries are missing", () => {
+      const loadedWords = [...makeLoadedWords(7, 3)];
+
+      expect(resolveTrustedRenderedWordIndexToGlobal(7, 1, loadedWords)).toBeNull();
+    });
+
+    it("maps a section-local rendered index only when section boundaries prove the global section", () => {
+      const loadedWords = [...makeLoadedWords(7, 3)];
+      const bookWordSections = makeSections({
+        sectionIndex: 7,
+        startWordIdx: 500,
+        endWordIdx: 503,
+        wordCount: 3,
+      });
+
+      expect(resolveTrustedRenderedWordIndexToGlobal(7, 1, loadedWords, bookWordSections)).toBe(501);
+    });
+
+    it("returns null when the resolved index still falls outside the proven section", () => {
+      const loadedWords = [...makeLoadedWords(7, 3)];
+      const bookWordSections = makeSections({
+        sectionIndex: 7,
+        startWordIdx: 500,
+        endWordIdx: 503,
+        wordCount: 3,
+      });
+
+      expect(resolveTrustedRenderedWordIndexToGlobal(7, 999, loadedWords, bookWordSections)).toBeNull();
     });
   });
 

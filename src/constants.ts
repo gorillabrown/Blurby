@@ -94,8 +94,8 @@ export const TTS_FOOTNOTE_MODE = "skip" as const;
 export const TTS_COLD_START_CHUNK_WORDS = 13;
 /** Steady-state chunk size after ramp-up completes */
 export const TTS_CRUISE_CHUNK_WORDS = 148;
-/** Crossfade overlap at chunk boundaries — eliminates splice artifacts (ms) */
-export const TTS_CROSSFADE_MS = 8;
+/** Crossfade overlap at chunk boundaries — slightly longer to suppress splice clicks at rapid segment joins (ms) */
+export const TTS_CROSSFADE_MS = 14;
 /** TTS-7O: Cursor truth-sync interval — re-snap visual cursor to scheduler position every N words */
 export const TTS_CURSOR_TRUTH_SYNC_INTERVAL = 6;
 /** Forward pre-schedule target in words (~2 paragraphs of buffered audio) */
@@ -111,10 +111,14 @@ export const NARRATION_BAND_MIN_WIDTH_PX = 8;
  *  The word timer and getAudioProgress both use (audioTime - lag) as the
  *  effective clock, creating a hard ceiling the cursor cannot exceed. */
 export const NARRATION_CURSOR_LAG_MS = 350;
-/** NARR-FIX-1: Trusted word-native timing still has audio output latency (DAC buffer, OS audio
- *  pipeline). This smaller lag prevents the visual cursor from outpacing heard speech when
- *  Kokoro provides real word timestamps. Falls back to audioCtx.outputLatency when available. */
-export const TTS_TRUSTED_CURSOR_LAG_MS = 120;
+/** NARR-FIX-3: Trusted word-native timing still has audio output latency (DAC buffer,
+ *  OS audio pipeline, Chromium internal buffers). This lag prevents the visual cursor
+ *  from outpacing heard speech when Kokoro provides real word timestamps.
+ *  History: 120→220→350ms. getOutputTimestamp().contextTime only reports ~57ms of
+ *  latency on Windows, but the full Electron/WASAPI/Chromium pipeline adds significantly
+ *  more buffering that the API doesn't account for. Empirically, 350ms matches the
+ *  untrusted lag ceiling and eliminates progressive cursor-ahead drift. */
+export const TTS_TRUSTED_CURSOR_LAG_MS = 350;
 /** NARR-CURSOR-2: Ignore tiny inter-word timing gaps; hold cursor only for meaningful silence. */
 export const TTS_SILENCE_HOLD_THRESHOLD_MS = 30;
 
@@ -162,7 +166,7 @@ export const NARRATE_BG_EXTRACT_DELAY_MS = 1000;
 /** Maximum number of pronunciation overrides a user can create */
 export const MAX_PRONUNCIATION_OVERRIDES = 100;
 /** Segment normalizer schema/version for spoken text identity. */
-export const TTS_NORMALIZER_VERSION = "en-v2";
+export const TTS_NORMALIZER_VERSION = "en-v3";
 /** Disk TTS cache identity schema/version for structured cache entries. */
 export const TTS_CACHE_SCHEMA_VERSION = 2;
 /** Timing metadata sidecar extension written next to generated audio chunks. */
@@ -256,8 +260,10 @@ export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
 export type KokoroRateBucket = (typeof KOKORO_RATE_BUCKETS)[number];
 /** Default Kokoro rate bucket */
 export const KOKORO_DEFAULT_RATE_BUCKET: KokoroRateBucket = 1.0;
-/** TTS-RATE-2: Same-bucket live rate edits must become audible by the next short playback segment. */
-export const KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS = 400;
+/** TTS-RATE-2: Same-bucket live rate edits must become audible quickly without over-fragmenting into click-prone micro-segments. */
+export const KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS = 850;
+/** TTS-RATE-2: Keep floor permissive so long chunks can still split instead of collapsing into a single seam-prone block. */
+export const KOKORO_LIVE_RATE_MIN_SEGMENT_WORDS = 1;
 
 /**
  * Resolve an arbitrary numeric rate to the nearest supported Kokoro bucket.

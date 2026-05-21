@@ -184,7 +184,10 @@ describe("kokoroStrategy live rate continuity", () => {
         });
         expect(timestamps).not.toBeNull();
         expect(timestamps?.[0]?.startTime ?? Number.NaN).toBeCloseTo(0, 6);
-        expect((timestamps?.[timestamps.length - 1]?.endTime ?? Number.POSITIVE_INFINITY) * 1000)
+        const playbackDurationMs =
+          ((timestamps?.[timestamps.length - 1]?.endTime ?? Number.POSITIVE_INFINITY) * 1000) /
+          (segment.kokoroRatePlan?.tempoFactor ?? 1);
+        expect(playbackDurationMs)
           .toBeLessThanOrEqual(KOKORO_LIVE_RATE_MAX_SEGMENT_DURATION_MS);
 
         flattenedWords.push(...segment.words);

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
 import { extractWordsFromSection } from "../src/utils/foliateHelpers";
-import { wrapWordsInSpans } from "../src/components/FoliatePageView";
+import { wrapWordsInSpans } from "../src/utils/foliateWordWrapping";
 
 type WrappedSpanInfo = {
   text: string;

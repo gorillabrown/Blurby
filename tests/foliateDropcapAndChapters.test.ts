@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import { wrapWordsInSpans } from "../src/components/FoliatePageView";
+import { wrapWordsInSpans } from "../src/utils/foliateWordWrapping";
 import { currentChapterIndex } from "../src/utils/text";
 
 describe("Foliate drop-cap wrapping", () => {

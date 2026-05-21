@@ -101,6 +101,36 @@ export function resolveRenderedWordIndexToGlobal(
 }
 
 /**
+ * Convert a rendered word index into a global index only when section metadata
+ * proves the mapping. Click-to-narrate must fail closed here; otherwise a
+ * section-local `data-word-index` can be mistaken for a book-global index and
+ * send narration to a completely different location.
+ */
+export function resolveTrustedRenderedWordIndexToGlobal(
+  sectionIndex: number,
+  renderedWordIndex: number,
+  loadedWords: SectionIndexedWordLike[],
+  bookWordSections?: SectionBoundary[],
+  stitchedRenderedWordIndexes?: number[],
+): number | null {
+  const bookSection = bookWordSections?.find((s) => s.sectionIndex === sectionIndex);
+  if (!bookSection) return null;
+
+  const resolved = resolveRenderedWordIndexToGlobal(
+    sectionIndex,
+    renderedWordIndex,
+    loadedWords,
+    bookWordSections,
+    stitchedRenderedWordIndexes,
+  );
+
+  if (resolved >= bookSection.startWordIdx && resolved < bookSection.endWordIdx) {
+    return resolved;
+  }
+  return null;
+}
+
+/**
  * Convert a global book index into the currently rendered `data-word-index`.
  *
  * Used as a fallback when the DOM has not yet been re-stamped with global

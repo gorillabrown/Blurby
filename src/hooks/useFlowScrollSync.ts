@@ -14,7 +14,7 @@ import type { TtsEvalTraceSink } from "../types/eval";
 
 const api = window.electronAPI;
 
-type ReadingMode = "page" | "focus" | "flow";
+type ReadingMode = "page" | "focus" | "flow" | "narrate";
 
 interface NarrationFlowBridge {
   cursorWordIndex: number;
@@ -171,6 +171,8 @@ export function useFlowScrollSync({
   libraryRef.current = library;
   const isNarratingRef = useRef(isNarrating);
   isNarratingRef.current = isNarrating;
+  const bookWordMetaRef = useRef(bookWordMeta);
+  bookWordMetaRef.current = bookWordMeta;
 
   const waitForFoliateFlowReady = async (): Promise<boolean> => {
     if (!useFoliate) return true;
@@ -262,6 +264,24 @@ export function useFlowScrollSync({
         },
         onComplete: () => {
           if (isNarratingRef.current) return;
+          // BUG-176: Check for next section in current EPUB before assuming book-end
+          const currentWord = highlightedWordIndexRef.current;
+          const meta = bookWordMetaRef.current;
+          const totalWords = meta?.totalWords || activeDocRef.current.wordCount || wordsRef.current.length;
+          const nextSection = meta?.sections?.find((section: any) => section.startWordIdx > currentWord);
+          if (nextSection && currentWord < totalWords - 1) {
+            const sectionPromise = foliateApiRef.current?.goToSection?.(nextSection.sectionIndex);
+            Promise.resolve(sectionPromise)
+              .then(() => foliateApiRef.current?.waitForSectionReady?.(nextSection.sectionIndex))
+              .then(() => {
+                const engine = flowScrollEngineRef.current;
+                if (engine) {
+                  engine.rebuildLineMap();
+                }
+              })
+              .catch(() => {});
+            return;
+          }
           const doc = activeDocRef.current;
           const nextDoc = getNextQueuedBook(doc.id, libraryRef.current);
           if (!nextDoc) {

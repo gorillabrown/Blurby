@@ -58,8 +58,9 @@ export function injectStyles(
     .page-word:hover { background: ${accent}22; }
     .page-word--highlighted { background: ${accent}4D; box-shadow: inset 0 -0.26em 0 ${accent}55; }
     .page-word--flow-cursor { border-bottom: 3px solid ${accent}; padding-bottom: 1px; }
+    .page-word--narrate-cursor { background: ${accent}2E; box-shadow: inset 0 -0.18em 0 ${accent}80; border-radius: 2px; }
     .page-word--chunk-active {
-      color: #ffffff;
+      color: ${fg};
     }
     .page-word--active-word {
       background: ${accent}55;

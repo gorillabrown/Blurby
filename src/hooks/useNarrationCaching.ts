@@ -3,7 +3,7 @@ import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgrou
 import { mergeOverrides, overrideHash } from "../utils/pronunciationOverrides";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
-import { wrapWordsInSpans, unwrapWordSpans } from "../components/FoliatePageView";
+import { wrapWordsInSpans, unwrapWordSpans } from "../utils/foliateWordWrapping";
 import type { BlurbyDoc, BlurbySettings } from "../types";
 import type { BookWordArray } from "../types/narration";
 

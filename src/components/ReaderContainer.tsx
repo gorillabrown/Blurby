@@ -109,7 +109,7 @@ function sectionIndexForGlobalWord(
   return section?.sectionIndex;
 }
 
-export function createChunkSourceWords(params: {
+function createChunkSourceWords(params: {
   words: string[];
   foliateWords?: FoliateWord[];
   paragraphBreaks?: Set<number>;
@@ -664,7 +664,7 @@ export default function ReaderContainer({
   const {
     flowScrollEngineRef,
   } = useFlowScrollSync({
-    readingMode: compatibilityReadingMode,
+    readingMode,
     isNarrating,
     effectiveWpm,
     settings,

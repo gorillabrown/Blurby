@@ -11,7 +11,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { snapToSentenceBoundary } from "../src/utils/generationPipeline";
 import { FlowScrollEngine } from "../src/utils/FlowScrollEngine";
-import { wrapWordsInSpans } from "../src/components/FoliatePageView";
+import { wrapWordsInSpans } from "../src/utils/foliateWordWrapping";
 import * as fs from "fs";
 import * as path from "path";
 

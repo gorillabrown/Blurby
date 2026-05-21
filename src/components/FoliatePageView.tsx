@@ -11,11 +11,11 @@
  */
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { BlurbyDoc, BlurbySettings } from "../types";
-import { segmentWordSpans } from "../utils/segmentWords";
 import {
   getSectionGlobalOffset,
   resolveGlobalWordIndexToRendered,
   resolveRenderedWordIndexToGlobal,
+  resolveTrustedRenderedWordIndexToGlobal,
 } from "../utils/foliateWordOffsets";
 import {
   DEFAULT_WPM,
@@ -24,13 +24,13 @@ import {
   FOLIATE_MARGIN_PX,
   FOLIATE_MAX_INLINE_SIZE_PX,
   FOLIATE_SECTION_READY_TIMEOUT_MS,
-  FOLIATE_TWO_COLUMN_BREAKPOINT_PX,
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_LINES_DEFAULT,
   TTS_SILENCE_HOLD_THRESHOLD_MS,
 } from "../constants";
 import { recordDiagEvent } from "../utils/narrateDiagnostics";
 import { injectStyles } from "../utils/foliateStyles";
+import { getFoliateMaxColumnCount } from "../utils/foliateLayout";
 import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
@@ -51,11 +51,8 @@ import {
   isFootnoteBodyElement,
   isSuppressedNarrationTextNode,
   getBlockParent,
-  collectBlockTextNodes,
   locateTextOffset,
-  makeFoliateTokenId,
   buildWordsFromTextNodes,
-  buildWrappedFragmentForNode,
   extractWordsFromView,
   extractWordsFromSection,
   queryWordSpans,
@@ -66,85 +63,10 @@ import { WordPositionIndex, type WordPositionEntry } from "../utils/wordPosition
 import type { AudioProgressReport } from "../utils/audioScheduler";
 import type { PauseReason } from "../types/narration";
 import { resolveCursorHoldDecision } from "../utils/silenceAwareCursor";
+import { unwrapWordSpans, wrapWordsInSpans } from "../utils/foliateWordWrapping";
 export type { FoliateWord } from "../utils/foliateHelpers";
 
 const api = window.electronAPI;
-
-/** Remove all .page-word wrapper spans and restore their text as plain text nodes.
- *  Used by HOTFIX-10 to re-stamp sections with corrected global indices. */
-export function unwrapWordSpans(doc: Document): void {
-  const spans = doc.querySelectorAll("span.page-word");
-  for (const span of spans) {
-    const parent = span.parentNode;
-    if (!parent) continue;
-    const text = doc.createTextNode(span.textContent || "");
-    parent.replaceChild(text, span);
-  }
-  // Normalize adjacent text nodes (merge consecutive text nodes created by unwrapping)
-  doc.body.normalize();
-}
-
-/** STAB-1A (BUG-162b): Batch size for async wrapWordsInSpans — number of block groups
- *  processed before yielding to the event loop via setTimeout(0). */
-const WRAP_BATCH_SIZE = 50;
-
-/** Walk the EPUB section DOM and wrap each word in a <span class="page-word" data-word-index="N">.
- *  Must be called AFTER extractWordsFromView (which needs raw text nodes for Range creation).
- *  Returns the next available global index.
- *
- *  STAB-1A (BUG-162b): Now async — processes block groups in batches of WRAP_BATCH_SIZE,
- *  yielding to the event loop between batches so the loading indicator can render and the
- *  UI stays responsive during word wrapping. */
-export async function wrapWordsInSpans(
-  doc: Document,
-  sectionIndex: number,
-  globalOffset: number,
-  sectionWords: FoliateWord[] = [],
-): Promise<number> {
-  let globalIndex = globalOffset;
-  const groups = collectBlockTextNodes(doc.body);
-  const tokenPartById = new Map<string, number>();
-  let sectionWordCursor = 0;
-
-  for (let i = 0; i < groups.length; i++) {
-    const { nodes } = groups[i];
-    const combined = nodes.map((node) => node.textContent || "").join("");
-    const logicalSpans = segmentWordSpans(combined);
-    const wordSpans = logicalSpans.map((span, idx) => {
-      const sourceWord = sectionWords[sectionWordCursor + idx];
-      return {
-        ...span,
-        globalIndex: globalIndex + idx,
-        tokenId: sourceWord?.tokenId || makeFoliateTokenId(sectionIndex, sectionWordCursor + idx),
-      };
-    });
-    sectionWordCursor += logicalSpans.length;
-    globalIndex += wordSpans.length;
-
-    let nodeStart = 0;
-    for (const textNode of nodes) {
-      const text = textNode.textContent || "";
-      const parent = textNode.parentNode;
-      if (!parent) {
-        nodeStart += text.length;
-        continue;
-      }
-
-      const frag = buildWrappedFragmentForNode(doc, text, nodeStart, wordSpans, tokenPartById);
-      if (frag) {
-        parent.replaceChild(frag, textNode);
-      }
-      nodeStart += text.length;
-    }
-
-    // Yield to event loop every WRAP_BATCH_SIZE groups so UI stays responsive
-    if ((i + 1) % WRAP_BATCH_SIZE === 0 && i + 1 < groups.length) {
-      await new Promise<void>((resolve) => setTimeout(resolve, 0));
-    }
-  }
-
-  return globalIndex;
-}
 
 interface RenderedTokenResolution {
   renderedWordIndex: number;
@@ -363,7 +285,7 @@ export interface FoliateViewAPI {
   prev: () => void;
   highlightWord: (range: Range | null, sectionIndex: number) => void;
   /** Highlight a word by global index. Returns true if found, false if span not in DOM. */
-  highlightWordByIndex: (wordIndex: number, styleHint?: "flow", options?: FoliateHighlightOptions) => boolean;
+  highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: FoliateHighlightOptions) => boolean;
   clearHighlight: () => void;
   getView: () => any;
   /** Find the first word span visible on the current page. Returns its data-word-index or -1 if no words visible. */
@@ -493,6 +415,9 @@ export default function FoliatePageView({
         });
         d?.querySelectorAll?.(".page-word--flow-cursor")?.forEach((el: Element) => {
           el.classList.remove("page-word--flow-cursor");
+        });
+        d?.querySelectorAll?.(".page-word--narrate-cursor")?.forEach((el: Element) => {
+          el.classList.remove("page-word--narrate-cursor");
         });
         d?.querySelectorAll?.(".page-word--soft-selected")?.forEach((el: Element) => {
           el.classList.remove("page-word--soft-selected");
@@ -715,7 +640,7 @@ export default function FoliatePageView({
 
   const applyVisualHighlightByIndex = useCallback((
     wordIndex: number,
-    styleHint?: "flow",
+    styleHint?: "flow" | "narrate",
     allowMotion = true,
   ): boolean => {
     const view = viewRef.current;
@@ -967,7 +892,7 @@ export default function FoliatePageView({
           if (v2) {
             // During active flow reading, only wrap the new section without re-extracting everything
             // (re-extraction shifts indices, breaking the global word array mapping)
-            const isActiveMode = readingModeRef.current === "flow";
+            const isActiveMode = readingModeRef.current === "flow" || readingModeRef.current === "narrate";
             const liveSections = bookWordSectionsRef.current;
 
             if (isActiveMode && foliateWordsRef.current.length > 0) {
@@ -1045,7 +970,7 @@ export default function FoliatePageView({
                 fallbackRange.selectNodeContents(target);
                 const cfi = v.getCFI(match.index, tokenRange ?? fallbackRange);
                 const liveSections = bookWordSectionsRef.current;
-                const exactIdx = resolveRenderedWordIndexToGlobal(
+                const exactIdx = resolveTrustedRenderedWordIndexToGlobal(
                   match.index,
                   resolvedToken.renderedWordIndex,
                   foliateWordsRef.current,
@@ -1053,13 +978,13 @@ export default function FoliatePageView({
                   resolvedToken.renderedWordIndexes,
                 );
                 const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
-                const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                const wordOffsetInSection = exactIdx != null && sectionBase >= 0 ? exactIdx - sectionBase : 0;
                 onWordClickRef.current?.(
                   cfi,
                   resolvedToken.canonicalWord,
                   match.index,
                   wordOffsetInSection,
-                  exactIdx,
+                  exactIdx ?? undefined,
                 );
               }
             }
@@ -1091,7 +1016,7 @@ export default function FoliatePageView({
                   const tokenRange = buildResolvedTokenRange(doc, resolvedToken);
                   const cfi = v.getCFI(match.index, tokenRange ?? range);
                   const liveSections = bookWordSectionsRef.current;
-                  const exactIdx = resolveRenderedWordIndexToGlobal(
+                  const exactIdx = resolveTrustedRenderedWordIndexToGlobal(
                     match.index,
                     resolvedToken.renderedWordIndex,
                     foliateWordsRef.current,
@@ -1099,7 +1024,7 @@ export default function FoliatePageView({
                     resolvedToken.renderedWordIndexes,
                   );
                   const sectionBase = getSectionGlobalOffset(match.index, foliateWordsRef.current, liveSections);
-                  const wordOffsetInSection = sectionBase >= 0 ? exactIdx - sectionBase : 0;
+                  const wordOffsetInSection = exactIdx != null && sectionBase >= 0 ? exactIdx - sectionBase : 0;
                   const canonicalWord = resolvedToken.canonicalWord || word;
                   if (import.meta.env.DEV) {
                     console.debug(
@@ -1114,7 +1039,7 @@ export default function FoliatePageView({
                     canonicalWord,
                     match.index,
                     wordOffsetInSection,
-                    exactIdx,
+                    exactIdx ?? undefined,
                   );
                   return;
                 }
@@ -1157,7 +1082,7 @@ export default function FoliatePageView({
         // Setting "48px" causes parseFloat→48 /100→0.48, consuming ~92% of width as gap.
         view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
         view.renderer.setAttribute("max-inline-size", `${FOLIATE_MAX_INLINE_SIZE_PX}px`);
-        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+        view.renderer.setAttribute("max-column-count", getFoliateMaxColumnCount(!!flowMode, container.clientWidth));
 
         // Provide TOC
         if (view.book?.toc) {
@@ -1221,7 +1146,7 @@ export default function FoliatePageView({
             highlightWord: (_range, _sectionIndex) => {
               // No-op: use highlightWordByIndex instead
             },
-            highlightWordByIndex: (wordIndex: number, styleHint?: "flow", options?: FoliateHighlightOptions): boolean => {
+            highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: FoliateHighlightOptions): boolean => {
               // TTS-7O ANCHOR CONTRACT: The wordIndex parameter is the CANONICAL narration
               // position for start, resume, save, and replay. Context words (N+1, N+2) applied
               // below in the narration 3-word window are VISUAL ONLY and must never be written
@@ -1525,7 +1450,7 @@ export default function FoliatePageView({
     const container = containerRef.current;
     if (!container) return;
 
-    view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+    view.renderer.setAttribute("max-column-count", getFoliateMaxColumnCount(!!flowMode, container.clientWidth));
     view.renderer.setAttribute("max-block-size", `${container.clientHeight - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
 
     // Re-inject styles on settings change
@@ -1542,6 +1467,7 @@ export default function FoliatePageView({
     settings.fontFamily,
     focusTextSize,
     settings.layoutSpacing,
+    flowMode,
     getFlowLeadingInsetPx,
     getFlowTrailingInsetPx,
     invalidateWordPositionIndex,
@@ -1553,14 +1479,9 @@ export default function FoliatePageView({
     const view = viewRef.current;
     if (!view?.renderer) return;
     view.renderer.setAttribute("flow", flowMode ? "scrolled" : "paginated");
-    // When switching to scrolled mode, disable column layout
-    if (flowMode) {
-      view.renderer.setAttribute("max-column-count", "1");
-    } else {
-      const container = containerRef.current;
-      if (container) {
-        view.renderer.setAttribute("max-column-count", container.clientWidth >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
-      }
+    const container = containerRef.current;
+    if (container) {
+      view.renderer.setAttribute("max-column-count", getFoliateMaxColumnCount(!!flowMode, container.clientWidth));
     }
     // Expose the scroll container for FlowScrollEngine
     if (scrollContainerRef) {
@@ -1660,15 +1581,14 @@ export default function FoliatePageView({
       const view = viewRef.current;
       if (!view?.renderer) return;
       const h = container.clientHeight;
-      const w = container.clientWidth;
       view.renderer.setAttribute("max-block-size", `${h - FOLIATE_RENDERER_HEIGHT_MARGIN_PX}px`);
-      view.renderer.setAttribute("max-column-count", w >= FOLIATE_TWO_COLUMN_BREAKPOINT_PX ? "2" : "1");
+      view.renderer.setAttribute("max-column-count", getFoliateMaxColumnCount(!!flowModeRef.current, container.clientWidth));
       invalidateWordPositionIndex();
       scheduleWordPositionIndexRebuild("container-resize");
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, []);
+  }, [invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
 
   // Flow mode overlay cursor animation (EPUB-only, Range-based)
   // FLOW-3A: When flowMode is active, FlowScrollEngine handles cursor — skip this legacy cursor
@@ -1759,7 +1679,7 @@ export default function FoliatePageView({
 
   useEffect(() => {
     if ((readingMode !== "flow" && readingMode !== "narrate") || narrationWordIndex == null) return;
-    applyVisualHighlightByIndex(narrationWordIndex, "flow", false);
+    applyVisualHighlightByIndex(narrationWordIndex, "narrate", false);
   }, [applyVisualHighlightByIndex, narrationWordIndex, readingMode]);
 
   // Narrate-mode scroll follow — keep the narrated word in view as narration advances.
@@ -1940,7 +1860,7 @@ export default function FoliatePageView({
 
   return (
     <div
-      className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}${chunkReadingVisualState ? " foliate-page-view--chunk-visual" : ""}`}
+      className={`foliate-page-view${flowMode ? " foliate-page-view--flow" : ""}${chunkReadingVisualState?.mode === "narrate" ? " foliate-page-view--chunk-visual" : ""}`}
       ref={containerRef}
       style={{ overflow: flowMode ? "auto" : "hidden" }}
     >

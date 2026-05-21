@@ -117,8 +117,13 @@ function findSentenceBoundary(words: string[], startIdx: number, chunkSize: numb
       }
     }
   }
-  // Still no boundary — use the chunk size limit
-  return maxEnd;
+  // Hard policy: never break mid-sentence unless we truly hit the end of the available range.
+  for (let i = maxEnd; i < hardMax; i++) {
+    if (isSentenceEnd(words[i], i + 1 < words.length ? words[i + 1] : undefined)) {
+      return Math.min(i + 1, hardMax);
+    }
+  }
+  return hardMax;
 }
 
 const api = window.electronAPI;
@@ -207,6 +212,11 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     fromRate: number;
     toRate: number;
     context: string;
+  } | null>(null);
+  const lastCursorStartRef = useRef<{
+    startWordIndex: number;
+    wordsLength: number;
+    startedAtMs: number;
   } | null>(null);
   const highlightSyncDecisionsRef = useRef<Record<string, unknown>[]>([]);
   const wordBoundaryEventsRef = useRef<Record<string, unknown>[]>([]);
@@ -554,8 +564,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           `sourceWordIndex=${event.sourceWordIndex ?? "null"} resolvedWordIndex=${event.resolvedWordIndex} alignmentCorrected=${event.alignmentCorrected ? 1 : 0} trusted=${event.isTrustedWordTiming ? 1 : 0}`,
         );
         if (!event.isTrustedWordTiming) return;
-        if (onWordAdvanceRef.current) onWordAdvanceRef.current(event.resolvedWordIndex);
-        if (onTruthSyncRef.current) onTruthSyncRef.current(event.resolvedWordIndex);
+        try {
+          onWordAdvanceRef.current?.(event.resolvedWordIndex);
+        } catch (error) {
+          if (import.meta.env.DEV) console.warn("[narrate] onWordAdvance callback failed:", error);
+        }
+        try {
+          onTruthSyncRef.current?.(event.resolvedWordIndex);
+        } catch (error) {
+          if (import.meta.env.DEV) console.warn("[narrate] onTruthSync callback failed:", error);
+        }
       },
       onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => {
         onChunkBoundaryRef.current?.(endIdx, metadata);
@@ -1151,12 +1169,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         // boundary crossing. This must happen before the dispatch so stateRef reads
         // are always behind or equal to the confirmed audio word.
         lastConfirmedAudioWordRef.current = wordIndex;
+        stateRef.current = { ...stateRef.current, cursorWordIndex: wordIndex };
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         isTrustedWordTimingRef.current = isTrustedWordTiming;
         if (import.meta.env.DEV) {
           const visualIdx = stateRef.current.cursorWordIndex;
-          if (Math.abs(wordIndex - visualIdx) > 5) {
-            console.warn(`[TTS-7R] cursor divergence: audio=${wordIndex} visual=${visualIdx} delta=${wordIndex - visualIdx}`);
+          const delta = wordIndex - visualIdx;
+          if (Math.abs(delta) > 5) {
+            const words = allWordsRef.current;
+            const audioWord = words[wordIndex] ?? "??";
+            const visualWord = words[visualIdx] ?? "??";
+            console.warn(
+              `[TTS-7R] cursor divergence: audio=${wordIndex}("${audioWord}") visual=${visualIdx}("${visualWord}") ` +
+              `delta=${delta} trusted=${isTrustedWordTiming}`
+            );
           }
         }
       },
@@ -1285,6 +1311,29 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     wpm: number,
     onWordAdvance: (wordIndex: number) => void
   ): "started" | "warming" | "error" => {
+    const nowMs = Date.now();
+    const priorStart = lastCursorStartRef.current;
+    const currentState = stateRef.current;
+    // NARR-FIX-5: Guard against duplicate narrate start requests firing in the same
+    // UI burst (button/key double dispatch, stale event replay). Re-entering here
+    // tears down the active scheduler and causes audible boundary pops + cursor jumps.
+    if (
+      currentState.status === "speaking" &&
+      priorStart &&
+      priorStart.startWordIndex === startWordIndex &&
+      priorStart.wordsLength === words.length &&
+      nowMs - priorStart.startedAtMs < 1000
+    ) {
+      onWordAdvanceRef.current = onWordAdvance;
+      if (import.meta.env.DEV) {
+        console.debug(
+          "[narrate] start deduped — ignoring duplicate startCursorDriven at word",
+          startWordIndex,
+        );
+      }
+      return "started";
+    }
+
     // Stop any existing playback
     webStrategy.stop();
     kokoroStrategy.stop();
@@ -1471,6 +1520,11 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7R (BUG-145c): Seed the canonical audio ref so the first Kokoro chunk
     // reads from the correct starting word rather than whatever the ref held before.
     lastConfirmedAudioWordRef.current = startWordIndex;
+    lastCursorStartRef.current = {
+      startWordIndex,
+      wordsLength: words.length,
+      startedAtMs: nowMs,
+    };
 
     // TTS-7A: Diagnostics
     recordDiagEvent("start", `engine=${stateRef.current.engine} cursor=${startWordIndex} words=${words.length}`);

@@ -13,6 +13,10 @@ import type { TtsProviderTimingTruth } from "../types/ttsProvider";
 import { createTimingMetadataRecord, type TimingMetadataRecord } from "./timingMetadataStore";
 import { isPunctuationOnlyWord } from "./spokenWordFilter";
 
+// NARR-FIX-3: getOutputTimestamp() was tried (NARR-FIX-2) but reports only
+// ~57ms on Windows. The real Electron/WASAPI pipeline latency is ~350ms.
+// Reverted to constant-lag approach with TTS_TRUSTED_CURSOR_LAG_MS = 350.
+
 // ── Telemetry (TTS-6F) ─────────────────────────────────────────────────────
 
 /** Per-chunk timing diagnostics — dev/test only, not emitted in production */
@@ -256,6 +260,9 @@ export function createAudioScheduler(): AudioScheduler {
   let currentWordBoundaries: SchedulerWordBoundary[] = [];
   let nextWordBoundaryIdx = 0;
   let playbackStartTime: number | null = null; // Set on first scheduleChunk — gates tick()
+  let _driftDiagCounter = 0; // DEV: throttle drift diagnostics
+  let _driftSumMs = 0; // DEV: accumulate boundary-fire lateness for averaging
+  let _driftSamples = 0; // DEV: count of boundary fires measured
 
   function getAudioContext(): AudioContext {
     if (!audioCtx) {
@@ -353,16 +360,20 @@ export function createAudioScheduler(): AudioScheduler {
   function applyCrossfade(pcm: Float32Array, fadeIn: boolean, fadeOut: boolean): Float32Array {
     if (crossfadeSamples <= 0 || pcm.length < crossfadeSamples * 2) return pcm;
     const result = new Float32Array(pcm);
+    const denom = Math.max(1, crossfadeSamples - 1);
 
     if (fadeIn) {
       for (let i = 0; i < crossfadeSamples; i++) {
-        result[i] *= i / crossfadeSamples;
+        // Equal-power ramp reduces perceptual "edge" clicks vs linear gain ramps.
+        const gain = Math.sin((i / denom) * (Math.PI / 2));
+        result[i] *= gain;
       }
     }
     if (fadeOut) {
       const start = result.length - crossfadeSamples;
       for (let i = 0; i < crossfadeSamples; i++) {
-        result[start + i] *= (crossfadeSamples - i) / crossfadeSamples;
+        const gain = Math.cos((i / denom) * (Math.PI / 2));
+        result[start + i] *= gain;
       }
     }
     return result;
@@ -441,6 +452,9 @@ export function createAudioScheduler(): AudioScheduler {
         }
 
         if (import.meta.env.DEV) {
+          console.debug(
+            `[audioScheduler] chunk@${chunk.startIdx} → WORD-NATIVE timing (${wordCount} words, ${chunk.durationMs.toFixed(0)}ms)`
+          );
           _telemetry.push({
             chunkStartIdx: chunk.startIdx,
             wordCount,
@@ -458,7 +472,8 @@ export function createAudioScheduler(): AudioScheduler {
       // Validation failed — log and fall through to heuristic
       if (import.meta.env.DEV) {
         console.warn(
-          `[audioScheduler] Real timestamps failed validation for chunk at word ${chunk.startIdx}, falling back to heuristic`
+          `[audioScheduler] chunk@${chunk.startIdx} → HEURISTIC timing (validation failed, ${wordCount} words, ` +
+          `timestamps=${chunk.wordTimestamps?.length ?? 0}, expected=${wordCount})`
         );
       }
     }
@@ -501,20 +516,29 @@ export function createAudioScheduler(): AudioScheduler {
    * which word boundary we've crossed, then schedules the next tick.
    */
   function startWordTimer(): void {
+    // NARR-FIX-4: Keep a single live timer loop. Restarting on every chunk
+    // causes jitter/drift and "word timer started" spam under rapid chunking.
+    if (wordRafHandle != null || wordTimerHandle != null) return;
     clearWordTimer();
     if (!callbacks || !audioCtx) return;
     if (currentWordBoundaries.length === 0 && !hasPendingBoundaryDelivery()) return;
 
-    // BUG-151 fallback lag offset. Trusted word-native boundaries use a smaller
-    // lag that accounts for audio output latency (DAC buffer, OS audio pipeline);
-    // heuristic fallback paths use the larger fixed lag to avoid visual lead.
+    // BUG-151 fallback lag offset. Untrusted/heuristic timing stays lagged so the
+    // visual cursor cannot outpace speech on non-word-native engines.
     const cursorLagSec = NARRATION_CURSOR_LAG_MS / 1000;
-    // NARR-FIX-1: Trusted timing still needs output-latency compensation.
-    // Use audioCtx.outputLatency when the browser exposes it; floor at constant.
-    const trustedLagSec = Math.max(
-      TTS_TRUSTED_CURSOR_LAG_MS / 1000,
-      (audioCtx as any).outputLatency ?? 0,
-    );
+    // NARR-FIX-3: Constant lag for trusted word-native timing. Electron/WASAPI
+    // pipeline adds buffering beyond what getOutputTimestamp() reports (~57ms vs
+    // the real ~350ms), so we use the constant TTS_TRUSTED_CURSOR_LAG_MS.
+    const trustedLagSec = TTS_TRUSTED_CURSOR_LAG_MS / 1000;
+    if (import.meta.env.DEV) {
+      console.debug(
+        `[audioScheduler] word timer started — ` +
+        `trustedLag=${(trustedLagSec * 1000).toFixed(0)}ms, heuristicLag=${NARRATION_CURSOR_LAG_MS}ms`
+      );
+      _driftDiagCounter = 0;
+      _driftSumMs = 0;
+      _driftSamples = 0;
+    }
 
     function tick(): void {
       if (stopped || !callbacks || !audioCtx) return;
@@ -531,7 +555,10 @@ export function createAudioScheduler(): AudioScheduler {
       // BUG-151 fallback path: untrusted/heuristic timing stays lagged so the
       // visual cursor cannot outpace speech on non-word-native engines.
       const cursorNow = now - cursorLagSec;
-      // NARR-FIX-1: Trusted word-native timing uses smaller output-latency lag.
+      // NARR-FIX-3: Use constant lag for trusted timing. getOutputTimestamp()
+      // reports only ~57ms on Windows but the full Electron/WASAPI pipeline
+      // buffers significantly more. The constant TTS_TRUSTED_CURSOR_LAG_MS
+      // (350ms) covers the full pipeline and prevents cursor-ahead drift.
       const trustedCursorNow = now - trustedLagSec;
 
       // Advance past ALL boundaries we've crossed in this tick.
@@ -542,6 +569,25 @@ export function createAudioScheduler(): AudioScheduler {
         // the larger fixed cursor lag.
         const boundaryComparatorTime = currentBoundary.isTrustedWordTiming ? trustedCursorNow : cursorNow;
         if (currentBoundary.time > boundaryComparatorTime) break;
+
+        // DEV: Drift diagnostic — how late is this boundary firing relative to
+        // its scheduled time? Positive = boundary fired after scheduled (cursor
+        // behind audio). Negative = boundary fired before (cursor ahead).
+        if (import.meta.env.DEV) {
+          const latenessMs = (boundaryComparatorTime - currentBoundary.time) * 1000;
+          _driftSumMs += latenessMs;
+          _driftSamples++;
+          if (++_driftDiagCounter % 30 === 0) {
+            const avgMs = _driftSamples > 0 ? _driftSumMs / _driftSamples : 0;
+            console.debug(
+              `[audioScheduler] boundary drift: lateness=${latenessMs.toFixed(1)}ms, ` +
+              `avg=${avgMs.toFixed(1)}ms over ${_driftSamples} boundaries, ` +
+              `word=${currentBoundary.wordIndex}, lagMs=${trustedLagSec * 1000}, ` +
+              `currentTime=${now.toFixed(3)}, boundaryTime=${currentBoundary.time.toFixed(3)}`
+            );
+          }
+        }
+
         const advancedWordIndex = currentBoundary.wordIndex;
         const boundaryEvent = toBoundaryEvent(currentBoundary, advancedWordIndex);
         callbacks.onWordAdvance(advancedWordIndex, currentBoundary.isTrustedWordTiming, boundaryEvent);
@@ -694,7 +740,7 @@ export function createAudioScheduler(): AudioScheduler {
     flushDueChunkBoundaries(ctx.currentTime);
 
     // If word timer isn't running, start it
-    if (!wordTimerHandle && !stopped) {
+    if (wordRafHandle == null && wordTimerHandle == null && !stopped) {
       startWordTimer();
     }
 
@@ -872,13 +918,11 @@ export function createAudioScheduler(): AudioScheduler {
     // is at index (nextWordBoundaryIdx - 1), clamped to [0, total-1].
     const currentIdx = Math.max(0, Math.min(nextWordBoundaryIdx - 1, total - 1));
     const current = boundaries[currentIdx];
-    // Match boundary delivery semantics: trusted word timing uses output-latency
-    // lag; fallback/heuristic timing keeps the larger cursor lag to prevent visual lead.
-    const trustedLag = Math.max(
-      TTS_TRUSTED_CURSOR_LAG_MS / 1000,
-      (audioCtx as any).outputLatency ?? 0,
-    );
-    const lagSec = current.isTrustedWordTiming ? trustedLag : cursorLagSec;
+    // NARR-FIX-3: Match boundary delivery — constant lag for both trusted and
+    // heuristic timing. getOutputTimestamp() underreports Electron pipeline latency.
+    const lagSec = current.isTrustedWordTiming
+      ? TTS_TRUSTED_CURSOR_LAG_MS / 1000
+      : cursorLagSec;
     const now = Math.max(0, audioCtx.currentTime - lagSec);
     if (now < boundaries[0].time) return null;
 

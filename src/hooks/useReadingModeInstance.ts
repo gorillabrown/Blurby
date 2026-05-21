@@ -126,11 +126,6 @@ export function useReadingModeInstance({
     const config = buildConfig(words, paragraphBreaks);
     let instance: ReadingMode;
 
-    // Clear any stale truth-sync callback whenever we create a visual reading mode.
-    if (narration.setOnTruthSync) {
-      narration.setOnTruthSync(null);
-    }
-
     switch (mode) {
       case "focus":
         // FocusMode's onWordAdvance also syncs useReader's wordIndex for ReaderView display
@@ -147,7 +142,7 @@ export function useReadingModeInstance({
           config.callbacks.onWordAdvance = (idx: number) => {
             onWordAdvanceRef.current(idx);
             if (foliateApiRefStable.current) {
-              const found = foliateApiRefStable.current.highlightWordByIndex(idx, "flow");
+              const found = foliateApiRefStable.current.highlightWordByIndex(idx, "flow", { allowMotion: false });
               if (!found) {
                 // Word not in loaded sections — pause, turn page, wait for section load
                 modeRef.current?.pause();

@@ -18,6 +18,7 @@ export type SegmentNormalizationTransformId =
   | "fraction-expansion"
   | "decimal-expansion"
   | "number-range-expansion"
+  | "decade-expansion"
   | "abbreviation-expansion"
   | "spaced-initials"
   | "ordinal-expansion"
@@ -155,6 +156,18 @@ const ORDINAL_TENS: Record<number, string> = {
   70: "seventieth",
   80: "eightieth",
   90: "ninetieth",
+};
+
+const DECADE_WORDS: Record<number, string> = {
+  10: "tens",
+  20: "twenties",
+  30: "thirties",
+  40: "forties",
+  50: "fifties",
+  60: "sixties",
+  70: "seventies",
+  80: "eighties",
+  90: "nineties",
 };
 
 const ROMAN_VALUES: Record<string, number> = {
@@ -319,7 +332,8 @@ export function stableSegmentTextHash(text: string): string {
   return (h >>> 0).toString(36);
 }
 
-function numberToWords(value: number): string {
+function numberToWords(value: number, options: { preferYearLike?: boolean } = {}): string {
+  const { preferYearLike = true } = options;
   if (!Number.isInteger(value) || value < 0 || value > 999999) return String(value);
   if (value < 20) return SMALL_NUMBERS[value];
   if (value < 100) {
@@ -334,15 +348,33 @@ function numberToWords(value: number): string {
       ? `${SMALL_NUMBERS[hundreds]} hundred`
       : `${SMALL_NUMBERS[hundreds]} hundred ${numberToWords(rest)}`;
   }
-  if (value < 10000 && value >= 2000 && value <= 2099) {
-    const rest = value % 2000;
-    return rest === 0 ? "two thousand" : `twenty ${numberToWords(rest)}`;
+  if (preferYearLike) {
+    const vernacularYear = fourDigitYearLikeToWords(value);
+    if (vernacularYear) {
+      return vernacularYear;
+    }
   }
   const thousands = Math.floor(value / 1000);
   const rest = value % 1000;
   return rest === 0
     ? `${numberToWords(thousands)} thousand`
     : `${numberToWords(thousands)} thousand ${numberToWords(rest)}`;
+}
+
+function fourDigitYearLikeToWords(value: number): string | null {
+  if (value >= 1100 && value <= 1999) {
+    const leading = Math.floor(value / 100);
+    const rest = value % 100;
+    if (rest === 0) return `${numberToWords(leading)} hundred`;
+    return rest < 10
+      ? `${numberToWords(leading)} oh ${numberToWords(rest)}`
+      : `${numberToWords(leading)} ${numberToWords(rest)}`;
+  }
+
+  if (value === 2000) return "two thousand";
+  if (value >= 2001 && value <= 2009) return `two thousand ${numberToWords(value - 2000)}`;
+  if (value >= 2010 && value <= 2099) return `twenty ${numberToWords(value - 2000)}`;
+  return null;
 }
 
 function ordinalToWords(value: number): string {
@@ -364,12 +396,32 @@ function ordinalToWords(value: number): string {
 }
 
 function yearToWords(value: number): string {
-  if (value >= 2000 && value <= 2099) return numberToWords(value);
-  if (value >= 1900 && value <= 1999) {
-    const rest = value % 1900;
-    return rest === 0 ? "nineteen hundred" : `nineteen ${numberToWords(rest)}`;
-  }
+  const vernacularYear = fourDigitYearLikeToWords(value);
+  if (vernacularYear) return vernacularYear;
   return numberToWords(value);
+}
+
+function parseNumericToken(value: string): number {
+  return Number(value.replace(/,/g, ""));
+}
+
+function twoDigitDecadeToWords(value: number): string {
+  const tens = Math.floor(value / 10) * 10;
+  return DECADE_WORDS[tens] ?? `${numberToWords(value)}s`;
+}
+
+function yearDecadeToWords(yearValue: number): string {
+  if (yearValue >= 1900 && yearValue <= 1999) {
+    return `nineteen ${twoDigitDecadeToWords(yearValue % 100)}`;
+  }
+  if (yearValue >= 2000 && yearValue <= 2099) {
+    return `twenty ${twoDigitDecadeToWords(yearValue % 100)}`;
+  }
+  const thousands = Math.floor(yearValue / 1000);
+  const remainder = yearValue % 1000;
+  return remainder > 0
+    ? `${numberToWords(thousands)} thousand ${numberToWords(remainder)}s`
+    : `${numberToWords(thousands)} thousand`;
 }
 
 function romanToNumber(value: string): number | null {
@@ -476,7 +528,7 @@ function expandDates(text: string): string {
 }
 
 function expandTimes(text: string): string {
-  return text.replace(
+  let result = text.replace(
     /\b(\d{1,2}):(\d{2})\s*(a\.m\.|p\.m\.|am|pm|a\.m|p\.m)(?=\s|[.,!?;:]|$)/gi,
     (_match, hour: string, minute: string, marker: string) => {
       const minuteValue = Number(minute);
@@ -485,16 +537,24 @@ function expandTimes(text: string): string {
       return `${numberToWords(Number(hour))} ${minuteWords} ${markerWords}`;
     },
   );
+  result = result.replace(
+    /\b(\d{1,2})\s*(a\.m\.|p\.m\.|am|pm|a\.m|p\.m)(?=\s|[.,!?;:]|$)/gi,
+    (_match, hour: string, marker: string) => {
+      const markerWords = marker.toLowerCase().startsWith("a") ? "A M" : "P M";
+      return `${numberToWords(Number(hour))} ${markerWords}`;
+    },
+  );
+  return result;
 }
 
 function expandCurrency(text: string): string {
-  return text.replace(/\$(\d{1,6})(?:\.(\d{2}))?/g, (_match, dollars: string, cents?: string) => {
-    const dollarValue = Number(dollars);
+  return text.replace(/\$(\d{1,3}(?:,\d{3})+|\d{1,9})(?:\.(\d{2}))?/g, (_match, dollars: string, cents?: string) => {
+    const dollarValue = parseNumericToken(dollars);
     const centValue = cents == null ? 0 : Number(cents);
     const dollarUnit = dollarValue === 1 ? "dollar" : "dollars";
-    if (centValue === 0) return `${numberToWords(dollarValue)} ${dollarUnit}`;
+    if (centValue === 0) return `${numberToWords(dollarValue, { preferYearLike: false })} ${dollarUnit}`;
     const centUnit = centValue === 1 ? "cent" : "cents";
-    return `${numberToWords(dollarValue)} ${dollarUnit} and ${numberToWords(centValue)} ${centUnit}`;
+    return `${numberToWords(dollarValue, { preferYearLike: false })} ${dollarUnit} and ${numberToWords(centValue)} ${centUnit}`;
   });
 }
 
@@ -516,8 +576,8 @@ function expandFractions(text: string): string {
 }
 
 function expandDecimals(text: string): string {
-  return text.replace(/\b(\d{1,6})\.(\d+)\b(?!\.)/g, (_match, whole: string, fractional: string) => {
-    const wholeWords = numberToWords(Number(whole));
+  return text.replace(/\b(\d{1,3}(?:,\d{3})+|\d{1,9})\.(\d+)\b(?!\.)/g, (_match, whole: string, fractional: string) => {
+    const wholeWords = numberToWords(parseNumericToken(whole));
     const fractionalWords = fractional
       .split("")
       .map((digit) => numberToWords(Number(digit)))
@@ -527,9 +587,27 @@ function expandDecimals(text: string): string {
 }
 
 function expandNumberRanges(text: string): string {
-  return text.replace(/\b(\d{1,6})\s*[-–—]\s*(\d{1,6})\b/g, (_match, start: string, end: string) => {
-    return `${numberToWords(Number(start))} to ${numberToWords(Number(end))}`;
+  return text.replace(/\b(\d{1,3}(?:,\d{3})+|\d{1,9})\s*[-–—]\s*(\d{1,3}(?:,\d{3})+|\d{1,9})\b/g, (_match, start: string, end: string) => {
+    return `${numberToWords(parseNumericToken(start))} to ${numberToWords(parseNumericToken(end))}`;
   });
+}
+
+function expandDecades(text: string): string {
+  let result = text.replace(/\b(\d{4})s\b/g, (_match, year: string) => {
+    const value = Number(year);
+    if (value >= 1900 && value <= 2099 && value % 10 === 0) {
+      return yearDecadeToWords(value);
+    }
+    return _match;
+  });
+
+  result = result.replace(/(^|[\s([{"“‘])'(\d{2})s\b/g, (_match, prefix: string, yearSuffix: string) => {
+    const suffix = Number(yearSuffix);
+    if (!Number.isFinite(suffix) || suffix % 10 !== 0) return _match;
+    return `${prefix}nineteen ${twoDigitDecadeToWords(suffix)}`;
+  });
+
+  return result;
 }
 
 function expandAbbreviations(text: string): string {
@@ -551,7 +629,7 @@ function expandOrdinals(text: string): string {
 }
 
 function expandCardinals(text: string): string {
-  return text.replace(/\b\d{1,6}\b/g, (match) => numberToWords(Number(match)));
+  return text.replace(/\b(?:\d{1,3}(?:,\d{3})+|\d{1,6})\b/g, (match) => numberToWords(parseNumericToken(match)));
 }
 
 function enforceTerminalPunctuation(text: string): string {
@@ -750,6 +828,7 @@ export function normalizeSegmentText(
   normalizedText = applyTracked(normalizedText, transforms, "fraction-expansion", expandFractions);
   normalizedText = applyTracked(normalizedText, transforms, "decimal-expansion", expandDecimals);
   normalizedText = applyTracked(normalizedText, transforms, "number-range-expansion", expandNumberRanges);
+  normalizedText = applyTracked(normalizedText, transforms, "decade-expansion", expandDecades);
   normalizedText = applyTracked(normalizedText, transforms, "abbreviation-expansion", expandAbbreviations);
   normalizedText = applyTracked(normalizedText, transforms, "spaced-initials", collapseSpacedInitials);
   normalizedText = applyTracked(normalizedText, transforms, "ordinal-expansion", expandOrdinals);
