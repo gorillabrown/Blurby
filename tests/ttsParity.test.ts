@@ -194,12 +194,12 @@ describe("TTS-PARITY-1: trusted progress should not lag", () => {
       ],
     });
 
-    // NARR-FIX-1: Trusted timing now applies TTS_TRUSTED_CURSOR_LAG_MS (120ms)
+    // NARR-FIX-3: Trusted timing applies TTS_TRUSTED_CURSOR_LAG_MS (350ms)
     // to compensate for audio output latency. audioTime reflects the lagged clock.
     mockCurrentTime = 1.0;
     const report = scheduler.getAudioProgress();
     expect(report).not.toBeNull();
-    expect(report?.audioTime).toBeCloseTo(0.88, 2);
+    expect(report?.audioTime).toBeCloseTo(0.65, 2);
 
     scheduler.stop();
   });

@@ -72,11 +72,11 @@ describe("NARR-LAYER-1B consolidation", () => {
     expect(src).not.toContain("highlightRef");
   });
 
-  it("FoliatePageView highlight API styleHint is flow-only", () => {
+  it("FoliatePageView highlight API styleHint is flow-or-narrate", () => {
     const src = read("src/components/FoliatePageView.tsx");
     expect(src).toMatch(/export interface FoliateHighlightOptions\s*{[\s\S]*allowMotion\?:\s*boolean;[\s\S]*}/);
-    expect(src).toMatch(/highlightWordByIndex:\s*\(wordIndex:\s*number,\s*styleHint\?:\s*"flow",\s*options\?:\s*FoliateHighlightOptions\)\s*=>\s*boolean;/);
-    expect(src).not.toMatch(/styleHint\?:\s*(?:string|ReadingMode|"page"|"narrate"|"flow"\s*\|)/);
+    expect(src).toMatch(/highlightWordByIndex:\s*\(wordIndex:\s*number,\s*styleHint\?:\s*"flow"\s*\|\s*"narrate",\s*options\?:\s*FoliateHighlightOptions\)\s*=>\s*boolean;/);
+    expect(src).not.toMatch(/styleHint\?:\s*(?:string|ReadingMode|"page")/);
   });
 
   it("ReaderContainer treats narrate as the narration-selected source of truth", () => {

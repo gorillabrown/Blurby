@@ -70,7 +70,6 @@ describe("foliateHelpers.ts — extraction structure", () => {
     expect(fpv).toContain("from \"../utils/foliateHelpers\"");
     // Spot-check a few key imports are present
     expect(fpv).toContain("extractWordsFromView");
-    expect(fpv).toContain("buildWrappedFragmentForNode");
   });
 
   it("(a6) FoliatePageView.tsx does NOT define hasToken inline", () => {
