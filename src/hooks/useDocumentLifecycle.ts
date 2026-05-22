@@ -124,13 +124,6 @@ export function useDocumentLifecycle({
   wordIndex,
   onUpdateProgress,
 }: UseDocumentLifecycleParams): UseDocumentLifecycleReturn {
-  const resolveRestoredMode = (): ReaderMode => {
-    const savedMode = settings.readingMode;
-    if (savedMode === "page" || savedMode === "focus" || savedMode === "flow" || savedMode === "narrate") {
-      return savedMode;
-    }
-    return "page";
-  };
 
   // ── Refs initialized here, returned to ReaderContainer ──────────────────
 
@@ -166,17 +159,15 @@ export function useDocumentLifecycle({
 
   // ── 2. Init reader on mount / doc change ────────────────────────────────
   useEffect(() => {
-    const restoredMode = resolveRestoredMode();
-    initReader(activeDoc.position || 0);
-    setHighlightedWordIndex(activeDoc.position || 0);
-    // TTS-7M (BUG-135): Set resume anchor from saved position on reopen.
-    // This prevents passive onLoad/onRelocate from downgrading the start point.
-    resumeAnchorRef.current = (activeDoc.position || 0) > 0 ? activeDoc.position! : null;
+    const restoredWordIndex = activeDoc.position || 0;
+    initReader(restoredWordIndex);
+    setHighlightedWordIndex(restoredWordIndex);
+    resumeAnchorRef.current = restoredWordIndex;
     userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
     hasShownRestoreToastRef.current = false; // BUG-148: Reset toast gate on doc change
     sessionStartRef.current = Date.now();
     sessionStartWordRef.current = activeDoc.position || 0;
-    setReadingMode(restoredMode);
+    setReadingMode("page");
     api.getDocChapters(activeDoc.id).then((ch: any) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
     // BUG-148: Inform the user their reading position was restored. Fire once per book open,
     // only when position > 0 (not a fresh start). Timer is cancelled on doc change so a rapid
