@@ -68,7 +68,9 @@ Read:
 
 Checklist:
 
-- [ ] confirm narration is a flow-layer behavior, not still treated as a standalone reading mode anywhere live
+- [ ] confirm `Narrate` is an explicit reader mode, not a hidden flow-layer behavior
+- [ ] confirm selecting `Narrate` does not auto-start playback; Play/Space is the start boundary
+- [ ] confirm `Narrate` startup consumes the hard-selected/current word exactly, before resume or soft anchors
 - [ ] trace `isNarrating` ownership from `ReaderContainer` into the reader hooks and bottom bar
 - [ ] confirm mode start/stop/pause/resume routes do not still assume a separate narration mode
 - [ ] confirm active-reading state, selected-TTS state, and visual mode state all agree
@@ -79,12 +81,14 @@ Red flags to explicitly check for:
 - `readingMode === "narration"` assumptions still surviving in active code
 - stale type surface drift in `ElectronAPI`
 - resume logic that assumes sequential word advancement or old narration-mode ownership
+- delayed Foliate startup retries that drop `{ targetMode: "narrate", resumeNarration: true }`
 
 Evidence notes:
 
 - live ownership source:
 - stale mode assumptions:
 - type drift:
+- exact selected-word startup:
 
 Nano product gate addendum:
 
@@ -108,16 +112,18 @@ Checklist:
 
 - [ ] identify the one true owner of `setOnSectionEnd`
 - [ ] confirm whether both flow sync and foliate sync wire section-end behavior
-- [ ] trace what happens at same-book section end during active narration
+- [ ] trace what happens at same-book section end during active Flow
 - [ ] confirm whether handoff code only swaps refs or actually re-arms playback
 - [ ] check whether chapter labels, flow cursor, and narration cursor stay coherent through handoff
 - [ ] verify end-of-book fallback behavior is explicit
+- [ ] confirm Flow restart semantics do not become Narrate pacing semantics
 
 Known contradiction probes:
 
 - [ ] does `useFlowScrollSync` call `narration.updateWords(...)` without restarting the chunk chain
 - [ ] does any layer assume that changing words is equivalent to continuing playback
 - [ ] can handoff complete while `lastConfirmedAudioWordRef` still points to the old section
+- [ ] does a Flow section-handoff fix call into Narrate or `FlowScrollEngine` as Narrate's clock
 
 Evidence notes:
 
@@ -125,6 +131,7 @@ Evidence notes:
 - handoff action:
 - replay continuation explicit or implicit:
 - stale audio cursor risk:
+- Narrate owner preserved:
 
 ---
 

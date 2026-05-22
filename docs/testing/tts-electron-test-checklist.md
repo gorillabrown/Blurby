@@ -46,7 +46,22 @@ Each item: `[ID] Action | Expected | Severity`
 
 ---
 
-## 1. Cold Start & Ramp-Up (COLD)
+## 1. Narrate Lock-In Smoke Tests (NLOCK)
+
+These tests protect the Flow/Narrate boundary before deeper audio QA.
+
+| ID | Action | Expected | Severity |
+|----|--------|----------|----------|
+| NLOCK-01 | Click Narrate in the bottom bar | Narrate mode is selected paused; no audio starts until Play/Space | CRIT |
+| NLOCK-02 | Press `N` from Page, Focus, Flow, and Narrate | Narrate is available as a mode selection from every mode and does not auto-start playback | CRIT |
+| NLOCK-03 | Select a visible word, switch to Narrate, press Play/Space | Audio starts on that exact selected word | CRIT |
+| NLOCK-04 | Navigate to a later chapter, select the first word, switch to Narrate, press Play/Space | Narration starts at the selected chapter word; it does not jump to book start or an older resume anchor | CRIT |
+| NLOCK-05 | Open chapter/book navigation with `C` while Narrate is selected or playing | Navigation UI is available and does not start, stop, or retarget narration by itself | HIGH |
+| NLOCK-06 | Switch Flow -> Narrate -> Flow around the same current word | Current word remains stable; Flow cursor and Narrate visual state do not bleed into each other | HIGH |
+
+---
+
+## 2. Cold Start & Ramp-Up (COLD)
 
 Tests the geometric chunk sizing: 13 → 44 → 148 words.
 
@@ -60,7 +75,7 @@ Tests the geometric chunk sizing: 13 → 44 → 148 words.
 
 ---
 
-## 2. Chunk Boundaries & Crossfade (XFADE)
+## 3. Chunk Boundaries & Crossfade (XFADE)
 
 Tests pre-scheduled playback and 8ms crossfade at splice points.
 
@@ -73,7 +88,7 @@ Tests pre-scheduled playback and 8ms crossfade at splice points.
 
 ---
 
-## 3. Word Highlight Accuracy (HIGHLIGHT)
+## 4. Word Highlight Accuracy (HIGHLIGHT)
 
 Tests the AudioContext.currentTime self-correcting word timer.
 
@@ -87,7 +102,7 @@ Tests the AudioContext.currentTime self-correcting word timer.
 
 ---
 
-## 4. Pause / Resume — Audio Quality (PAUSE)
+## 5. Pause / Resume — Audio Quality (PAUSE)
 
 Tests AudioContext.suspend()/resume() and smart pause heuristics.
 
@@ -101,7 +116,7 @@ Tests AudioContext.suspend()/resume() and smart pause heuristics.
 
 ---
 
-## 5. Chapter Boundary & Section Advance (CHAPTER)
+## 6. Chapter Boundary & Section Advance (CHAPTER)
 
 Tests NAR-3 foliate inversion — seamless chapter transitions.
 
@@ -115,7 +130,7 @@ Tests NAR-3 foliate inversion — seamless chapter transitions.
 
 ---
 
-## 6. PCM Disk Cache (CACHE)
+## 7. PCM Disk Cache (CACHE)
 
 Tests NAR-2 cache write/read and NAR-4 Opus compression.
 
@@ -132,7 +147,7 @@ Tests NAR-2 cache write/read and NAR-4 Opus compression.
 
 ---
 
-## 7. Background Caching (BGCACHE)
+## 8. Background Caching (BGCACHE)
 
 Tests NAR-4 proactive caching.
 
@@ -144,7 +159,7 @@ Tests NAR-4 proactive caching.
 
 ---
 
-## 8. LRU Eviction & Disk Pressure (EVICT)
+## 9. LRU Eviction & Disk Pressure (EVICT)
 
 Tests cache size limits and eviction policy.
 
@@ -157,7 +172,7 @@ Tests cache size limits and eviction policy.
 
 ---
 
-## 9. Voice — Engine & Fallback (VOICE)
+## 10. Voice — Engine & Fallback (VOICE)
 
 Tests voice switching mid-narration, model management, and fallback.
 
@@ -169,7 +184,7 @@ Tests voice switching mid-narration, model management, and fallback.
 
 ---
 
-## 10. IPC & Data Transfer (IPC)
+## 11. IPC & Data Transfer (IPC)
 
 Tests Transferable zero-copy transfer and IPC pipeline.
 
@@ -181,7 +196,7 @@ Tests Transferable zero-copy transfer and IPC pipeline.
 
 ---
 
-## 11. AudioContext Warm-Up (WARMUP)
+## 12. AudioContext Warm-Up (WARMUP)
 
 Tests pre-creation of AudioContext on book open.
 
@@ -193,7 +208,7 @@ Tests pre-creation of AudioContext on book open.
 
 ---
 
-## 12. Error Recovery (ERR)
+## 13. Error Recovery (ERR)
 
 Tests graceful degradation and error handling.
 
@@ -207,7 +222,7 @@ Tests graceful degradation and error handling.
 
 ---
 
-## 13. Position Persistence & Resume (PERSIST)
+## 14. Position Persistence & Resume (PERSIST)
 
 Tests position save/restore across app restarts.
 
@@ -220,7 +235,7 @@ Tests position save/restore across app restarts.
 
 ---
 
-## 14. Abbreviation & Punctuation Handling (ABBREV)
+## 15. Abbreviation & Punctuation Handling (ABBREV)
 
 Tests smart chunk splitting (isSentenceEnd) and pause detection.
 

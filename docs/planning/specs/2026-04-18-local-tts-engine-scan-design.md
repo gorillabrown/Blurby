@@ -389,7 +389,7 @@ Each candidate should be evaluated against these dimensions.
 | Long-form continuity | Directly addresses Kokoro's short-context weakness |
 | Punctuation prosody | One of the most visible current complaints |
 | Seam count / per-inference window | Determines how much stitching Blurby still has to do |
-| Timing metadata or timing compatibility | Affects Narrate follower model |
+| Timing metadata or timing compatibility | Affects Narrate truth-sync model |
 | Speed-control compatibility | Prevents regression against Kokoro's exact-speed work |
 | Packaging / distribution complexity | Determines whether the quality win is affordable |
 | Overall narration feel | Final user-facing outcome |

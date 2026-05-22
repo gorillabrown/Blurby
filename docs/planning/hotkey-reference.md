@@ -93,14 +93,16 @@ Page view is the default when opening a document. Paginated, book-like reading w
 | `←` / `→` | Previous / next page |
 | `Ctrl+↑` / `Ctrl+↓` | First / last page |
 | `[` or `P` | Previous chapter |
-| `]` or `N` | Next chapter |
+| `]` | Next chapter |
+| `C` | Open chapter/book navigation list across Page, Focus, Flow, and Narrate |
 
 ### Launching Speed-Reading Modes
 
 | Key | Action |
 |-----|--------|
-| `Space` | Enter Focus (RSVP) at highlighted word |
-| `Shift+Space` | Enter Flow (scroll highlight) at highlighted word |
+| `N` | Select Narrate mode paused from any reader mode |
+| `Space` | Start/pause the currently selected mode from the highlighted/current word |
+| `Shift+Space` | Enter/select Flow from Page at highlighted word |
 
 ### Word Selection & Annotation
 
@@ -158,6 +160,20 @@ Entered via `Shift+Space` from Page view. Full text scrolls with word-level high
 
 On pause: same as Focus — lands in Page view with word highlighted.
 
+## Reader — Narrate Mode
+
+Entered by selecting Narrate with the bottom-bar button or `N`; playback starts only after Play/Space.
+
+| Key | Action |
+|-----|--------|
+| `Space` | Start/pause narration from the exact selected/current word |
+| `N` | Re-select Narrate paused from any mode |
+| `C` | Open chapter/book navigation without starting or retargeting narration |
+| `↑` / `↓` | Adjust narration speed/rate controls as mapped by the current reader surface |
+| `Escape` | Exit to Page view |
+
+Narrate shares the Foliate scrolled surface with Flow, but not Flow's pacer. Flow is driven by `FlowScrollEngine`; Narrate is driven by TTS/audio truth-sync.
+
 ---
 
 ## Escape Layering (Priority Order)
@@ -186,6 +202,7 @@ Pressing `Escape` closes the topmost layer:
 | `B` | Toggle favorite | `S` |
 | `=` / `-` (bare) | Font size | `Ctrl+=` / `Ctrl+-` |
 | `Shift+F` | Toggle reading mode | `Space` / `Shift+Space` from Page |
+| `N` as next chapter | Chapter navigation | `C` for chapter list, `]` for next chapter |
 | `Tab` (reader) | Menu flap | `M` |
 | `Shift+Space` (flow) | Toggle flow playback | `Shift+Space` from Page to enter Flow |
 | `Space` (flow, old) | Switch to focus mode | Pause → Page view |

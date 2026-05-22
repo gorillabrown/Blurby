@@ -19,13 +19,17 @@ Each item: `[ID] Action | Expected | Severity`
 
 | ID | Action | Expected | Severity |
 |----|--------|----------|----------|
-| NAR-01 | Click "Narrate" button in bottom bar | Mode switches to Narrate, play button appears, first word highlighted | CRIT |
-| NAR-02 | Press N key in any reading mode | Switches to Narrate mode, narration begins automatically | CRIT |
+| NAR-01 | Click "Narrate" button in bottom bar | Mode switches to Narrate paused; playback does not start until Play/Space | CRIT |
+| NAR-02 | Press N key in any reading mode | Switches/selects Narrate mode without auto-starting playback | CRIT |
 | NAR-03 | Press Space while narration is playing | Narration pauses, highlight freezes on current word, icon changes to ▶ | CRIT |
 | NAR-04 | Press Space while narration is paused | Narration resumes from exact paused position, icon changes to ❚❚ | CRIT |
 | NAR-05 | Press Escape while narrating | Exits Narrate mode, returns to previous mode (Page/Focus/Flow) | HIGH |
 | NAR-06 | Click "Focus" button while narrating | Exits Narrate, switches to Focus at current word position | HIGH |
 | NAR-07 | Press Shift+Space while narrating | Cycles to Focus mode, narration stops, position preserved | HIGH |
+| NAR-08 | Select a word, switch to Narrate, press Play/Space | Narration starts on that exact selected word, not one sentence earlier | CRIT |
+| NAR-09 | Jump to a later chapter, hard-select the first word, switch to Narrate, press Play/Space | Narration starts in that chapter at the selected word; it does not return to book start | CRIT |
+| NAR-10 | Switch Flow -> Narrate -> Flow around the same selected word | Current word remains stable; no stale Flow cursor or Narrate band controls the other mode | HIGH |
+| NAR-11 | Open chapter/book navigation with `C` while in Narrate | Navigation UI is available; opening it does not start, stop, or retarget narration | HIGH |
 
 ---
 

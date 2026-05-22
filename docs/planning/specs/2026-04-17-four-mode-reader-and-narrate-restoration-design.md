@@ -1,8 +1,20 @@
 # Four-Mode Reader and Narrate Restoration Design
 
 **Date:** 2026-04-17  
-**Status:** Approved design, pending implementation plan  
+**Status:** Approved design; runtime details superseded by 2026-05-21 Flow/Narrate lock-in docs
 **Scope:** Restore `Narrate` as a true fourth reader mode, fix broken foliate infinite-scroll flow behavior, and unify mode transitions around a single canonical word anchor.
+
+---
+
+## Supersession Note (2026-05-21)
+
+This design remains authoritative for the product model: four explicit modes, a shared canonical word anchor, and in-mode pause/resume. Its runtime guidance is now tightened by `TECHNICAL_REFERENCE.md`, `TTS_ARCHITECTURE_DECISIONS.md`, and `2026-05-10-chunk-synchronized-reading-design.md`.
+
+- Flow and Narrate may share the Foliate scrolled surface and visual family, but they do not share a pacing owner.
+- Foliate Flow is paced by `FlowScrollEngine`; Narrate is paced by TTS/audio truth-sync.
+- Selecting Narrate does not auto-start playback.
+- Play/Space starts Narrate from the exact selected/current word.
+- `C` chapter/book navigation is available across Page, Focus, Flow, and Narrate.
 
 ---
 
@@ -54,7 +66,7 @@ These decisions were explicitly approved during design review:
 - `Flow` and `Narrate` preserve the same position when switching between each other.
 - Saved word progress is a **single global word anchor** shared by all modes.
 - `Narrate` should mirror `Flow` structurally and visually as much as possible.
-- `Narrate` should use the **same underline indicator** as `Flow`.
+- `Narrate` should use the same visual indicator family as `Flow`, while retaining a separate TTS/audio pacing owner.
 - The `N` shortcut now means **switch to Narrate mode**, not toggle narration inside `Flow`.
 - Switching to `Narrate` via `N` or button always lands in paused state.
 - The bottom bar shows four explicit mode buttons in this order:
@@ -124,7 +136,7 @@ type ReadingMode = "page" | "focus" | "flow" | "narrate";
 `Flow` and `Narrate` share the same infinite-scroll foliate surface:
 
 - same scroll container
-- same underline indicator
+- same visual indicator family, with separate mode-specific cursor classes when needed
 - same word-anchor semantics
 - same section handoff model
 - same saved-position model
@@ -195,7 +207,7 @@ There should not be separate "mode-local saved positions" for `Flow` or `Narrate
 
 - infinite-scroll reading surface
 - TTS-driven reading mode
-- same underline indicator family as `Flow`
+- same visual indicator family as `Flow`
 - starts from canonical word anchor
 - enters **paused**
 - play begins speaking from the canonical word anchor
@@ -261,7 +273,7 @@ We should treat infinite-scroll rendering as a shared substrate used by both `Fl
 Recommended split:
 
 - shared foliate scrolled-surface plumbing
-- shared cursor/underline rendering
+- shared cursor/underline rendering without shared pacing ownership
 - shared section readiness and handoff support
 - `Flow` driver
 - `Narrate` driver
@@ -360,7 +372,7 @@ Any migration should prefer continuity of saved reading position over preservati
 This design does **not** cover:
 
 - redesigning the visual style of the reader UI
-- changing the underline indicator style between `Flow` and `Narrate`
+- redesigning the shared visual indicator family beyond the cursor-class/runtime separation needed to keep Flow and Narrate decoupled
 - new audio-routing or device-selection behavior
 - a new fifth reader mode
 - unrelated TTS voice-quality work

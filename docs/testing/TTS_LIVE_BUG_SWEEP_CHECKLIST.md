@@ -149,15 +149,15 @@ Capture:
 - controls state quality:
 - notes:
 
-## 5. Flow and Narration Sync
+## 5. Flow and Narrate Lock-In / Sync
 
 Primary lane: flow-sync follow-up
 
-Goal: verify the current product model where narration follows the Flow layer.
+Goal: verify the current product model where Flow and Narrate share a visual surface but keep separate runtime owners. Flow is paced by FlowScrollEngine; Narrate is paced by TTS/audio truth-sync and must start from the exact selected/current word.
 
 | ID | Action | Expected | Severity |
 |----|--------|----------|----------|
-| LIVE-FLOW-01 | Start narration while in Flow | Flow becomes the active visual reading layer during narration | CRIT |
+| LIVE-FLOW-01 | Select Narrate while in Flow | Narrate becomes the selected mode without auto-starting audio; Flow pacer stops or is suppressed cleanly | CRIT |
 | LIVE-FLOW-02 | Watch cursor/highlight for 30-60 seconds at `1.0x` | Visual movement is stable and tracks spoken progress without obvious jumping | CRIT |
 | LIVE-FLOW-03 | Let narration cross a section or chapter boundary in Flow | Handoff is smooth; Flow remains visually coherent | CRIT |
 | LIVE-FLOW-04 | Pause during Flow narration | Visual position freezes exactly where narration stops | HIGH |
@@ -169,6 +169,9 @@ Goal: verify the current product model where narration follows the Flow layer.
 | LIVE-FLOW-10 | Observe the first visible state immediately after the Flow jump | The active zone resets to the top reading position after the jump and continues descending from there | CRIT |
 | LIVE-FLOW-11 | Switch `Flow -> Narrate -> Flow` during the same active reading session | Continuity is preserved: same active chunk/word neighborhood, no duplicate cursor, no stale Flow highlight left behind | CRIT |
 | LIVE-FLOW-12 | If Kokoro is downloaded, switch to Narrate, press Play, and listen while watching the active box | TTS plays and the Narrate box tracks the spoken chunk/word; if trusted word timing exists, the active word visibly advances | CRIT |
+| LIVE-NARR-LOCK-01 | Hard-select a visible word, switch to Narrate, press Play/Space | Narration begins on that exact selected word, not the prior sentence or first visible page word | CRIT |
+| LIVE-NARR-LOCK-02 | Jump to a later chapter, hard-select the first word, switch to Narrate, press Play/Space | Narration starts in that chapter at the selected word; no reset to book start or older resume anchor | CRIT |
+| LIVE-NARR-LOCK-03 | Open chapter/book navigation with `C` while Narrate is selected or playing | Navigation remains available across modes and does not retarget narration unless the user explicitly navigates/selects | HIGH |
 
 Capture:
 

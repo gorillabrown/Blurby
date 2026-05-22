@@ -4,7 +4,7 @@
 
 - Purpose: capture the durable architecture decisions that govern Blurby's TTS pipeline after the TTS Architecture Completion conveyor.
 - Scope: engine posture, pipeline layers, invariants, dormancy/reactivation rules, research provenance, and deferred architecture lanes.
-- Last updated: 2026-05-17.
+- Last updated: 2026-05-21.
 - Runtime implementation detail reference: `docs/governance/TECHNICAL_REFERENCE.md` (see Narrate Mode Architecture section).
 
 ## 1. Engine Posture Decisions
@@ -36,6 +36,7 @@ Notes:
 | Audio scheduler | `src/utils/audioScheduler.ts` | `TTS-7Q` + `NARR-TIMING`; event-sync integration in `TTS-EVENT-SYNC-1` | Confirmed audio boundaries own canonical progress truth; invalid timing falls back to heuristic/segment-safe behavior. |
 | Generation pipeline | `src/utils/generationPipeline.ts` | `TTS-7B/7C`, planner integration in `TTS-7P`, parity proven in `TTS-PIPELINE-1` | Start/pause/resume/backpressure rules preserve queue continuity and avoid stale generation reuse. |
 | Word position index | `src/utils/wordPositionIndex.ts` | `TTS-RENDER-MAP-1` | Index-first lookup is primary path; fallback to live DOM query is mandatory when entries are stale/missing. |
+| Narrate runtime ownership | `src/hooks/useReaderMode.ts`, `src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`, `src/components/ReaderContainer.tsx` | FLOW-SECTION-HANDOFF-RESTART-1 guardrail audit | Narrate startup consumes the exact selected/current word and is paced by TTS/audio truth-sync, not FlowScrollEngine or mode-instance Flow timers. |
 
 ## 3. Adopt/Reject/Defer Register
 
@@ -65,6 +66,10 @@ Notes:
 8. Timing sidecars are advisory metadata; sidecar corruption/mismatch must not discard decodable audio.
 9. Provider capability metadata is authoritative for selectability/timing truth; no implicit runtime-only posture drift.
 10. Index-first word lookup must preserve continuity by falling back to direct DOM query when index entries are stale/missing.
+11. Narrate's authoritative clock is TTS/audio truth-sync. Flow clocks, WPM pacing, and `FlowScrollEngine` restart semantics must not drive Narrate word progress.
+12. Narrate startup must consume the exact selected/current word anchor. Explicit selection beats resume, hard highlight, soft visible-word heuristics, and sentence-boundary backoff.
+13. Mode selection is separate from playback. Selecting Narrate prepares the surface; Play/Space starts TTS from the current word.
+14. Delayed Foliate word extraction must preserve startup intent. Retrying a Narrate start must retain `{ targetMode: "narrate", resumeNarration: true }` and must not default to Flow.
 
 ## 5. Dormancy Contract
 

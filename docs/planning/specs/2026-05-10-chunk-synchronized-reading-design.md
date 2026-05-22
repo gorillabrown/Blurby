@@ -1,7 +1,7 @@
 # Chunk-Synchronized Reading for Flow and Narrate
 
 **Date:** 2026-05-10
-**Status:** Approved design, pending implementation plan
+**Status:** Approved design; runtime lock-in guardrails added after FLOW-SECTION-HANDOFF-RESTART-1 (2026-05-21)
 **Scope:** Define the shared chunk-based visual reading model for `Flow` and `Narrate`.
 
 ---
@@ -35,6 +35,9 @@ The difference between modes is the clock:
 - `Narrate` must not use Flow WPM, estimated timers, or generic scheduler pacing to fake spoken-word sync.
 - If trustworthy narration word timing does not exist, `Narrate` falls back to chunk-only highlighting.
 - `Qwen` is retired for now and is not the implementation target for this design. This design applies to the supported narration engines and future engines that satisfy the timing contract.
+- Selecting a mode does not start playback. Play/Space starts the selected mode from the current word.
+- A hard-selected word is the shared current word across Page, Focus, Flow, and Narrate until a mode advances it or the user hard-selects another word.
+- Narrate must always start at the selected/current word, not one sentence earlier, not the first visible page word, and not a stale resume anchor.
 
 ---
 
@@ -59,6 +62,24 @@ Mode differences:
 | `Flow` | Natural chunk containing the paced word | Selected WPM clock |
 | `Narrate` with timing | Natural chunk containing the spoken word | TTS word or character timing |
 | `Narrate` without timing | Current spoken chunk | None |
+
+---
+
+## Mode Ownership Contract
+
+Flow and Narrate may share the Foliate scrolled surface and chunk renderer, but they do not share a pacer.
+
+| Mode | Runtime owner | May write active word? | Must not do |
+|---|---|---|---|
+| `Flow` | `FlowScrollEngine` through `useFlowScrollSync` | Yes, from WPM/line pacing | Use TTS truth-sync or narration cursor as its clock |
+| `Narrate` | `useNarration`/`audioScheduler` truth-sync through `useReaderMode` and `ReaderContainer` | Yes, only from trusted speech timing | Use Flow WPM, `FlowScrollEngine`, or `modeInstance.startMode("flow", ...)` as a pacer |
+
+Startup rules:
+
+- `handleSelectMode("narrate")` selects Narrate paused.
+- Play/Space starts Narrate via `startFlow({ resumeNarration: true, targetMode: "narrate" })`.
+- Delayed Foliate word extraction must retry with the original Narrate options.
+- `explicitSelectionAnchorRef` is consumed before resume, highlighted, soft-visible, or fallback anchors.
 
 ---
 
@@ -233,7 +254,7 @@ It emits:
 
 ### Narrate Driver
 
-Narrate owns speech truth.
+Narrate owns speech truth. It is the only reader mode whose clock is external audio output, so every visual update must remain downstream of TTS/audio truth.
 
 It consumes:
 
@@ -248,6 +269,8 @@ It emits either:
 - `chunk-synced`: active chunk id plus no active word index
 
 Narrate must never use Flow's WPM clock to fake word sync.
+
+Narrate startup must never use a sentence-boundary backoff. Sentence and paragraph boundaries shape chunk/prosody decisions, but the first spoken word is always the selected/current word.
 
 ### Shared Rendering Layer
 

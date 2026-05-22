@@ -17,6 +17,9 @@ Required pass conditions:
 - Flow performs an instant viewport/page jump when the active zone bottom crosses roughly 67% of the visible page.
 - After each jump, the active zone resets to the top reading position and resumes descending.
 - Flow, Narrate, and Flow again preserve continuity across mode switches.
+- Selecting Flow or Narrate does not auto-start playback; Play/Space starts the selected mode.
+- A hard-selected word remains the shared current word across mode switches until playback advances or the user selects another word.
+- Narrate starts on the exact selected/current word, including after jumping to a later chapter.
 - Narrate with Kokoro playback keeps the active box aligned to spoken progress.
 - Trusted word timing, when available, visibly advances the active word; without trusted timing, the chunk highlight remains truthful and no fake word progress appears.
 - User scroll/browse-away is allowed, and recenter returns the active sentence/chunk to the top of the active reading box.
@@ -123,16 +126,18 @@ Fail if:
 ### Step D: Flow -> Narrate -> Flow Continuity
 
 1. While Flow is active, switch to Narrate.
-2. Confirm the Flow cursor is removed or suppressed.
-3. Confirm Narrate keeps the same active chunk/word neighborhood.
-4. Switch back to Flow.
-5. Confirm Flow resumes from the same active area without a stale Narrate highlight.
+2. Confirm selecting Narrate does not auto-start playback unless Play/Space is pressed.
+3. Confirm the Flow cursor is removed or suppressed.
+4. Confirm Narrate keeps the same active chunk/word neighborhood.
+5. Switch back to Flow.
+6. Confirm Flow resumes from the same active area without a stale Narrate highlight.
 
 Expected result:
 
 - One visual owner is active at a time.
 - No duplicate cursor, stale band, or ghost highlight remains.
 - The user does not lose their place.
+- The shared current word remains stable until playback advances it or the user selects another word.
 
 Fail if:
 
@@ -144,16 +149,20 @@ Fail if:
 
 Run this step only if Kokoro is downloaded and ready.
 
-1. Enter Narrate mode.
-2. Press Play.
-3. Listen for TTS audio.
-4. Watch the active chunk box for 60 seconds.
-5. Confirm the box follows spoken progress.
-6. Confirm the active word advances only when trusted word timing exists.
+1. Hard-select a visible word.
+2. Enter Narrate mode.
+3. Confirm no audio starts until Play/Space.
+4. Press Play.
+5. Listen for TTS audio.
+6. Confirm the first spoken word is the selected word.
+7. Watch the active chunk box for 60 seconds.
+8. Confirm the box follows spoken progress.
+9. Confirm the active word advances only when trusted word timing exists.
 
 Expected result:
 
 - Audio starts and continues.
+- Audio starts at the exact selected/current word.
 - The active box moves with narration.
 - Trusted word timing visibly drives the active word.
 - Chunk-only fallback remains truthful if timing is unavailable.
@@ -161,6 +170,7 @@ Expected result:
 Fail if:
 
 - Audio plays but the visual box stays behind.
+- Audio starts before the selected word or jumps back to the start of the book.
 - The visual box moves without matching audio progress.
 - The active word advances from a fake timer when trusted timing is absent.
 - Speed changes cause crackle, long gaps, or stale runtime rate.

@@ -103,15 +103,17 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 
 | ID | Action | Expected | Screenshot? | Console |
 |----|--------|----------|-------------|---------|
-| NAR-01 | Open Meditations, enter Narrate mode (click Narrate) | Narration starts, word highlighting follows speech | Y | `[stub] kokoroGenerate` or Web Speech activity |
-| NAR-02 | Observe word-level tracking | Highlighted word advances in sync with audio | N | `[audio] play` in console |
-| NAR-03 | Press `Space` to pause | Audio pauses, highlight freezes | N | none |
-| NAR-04 | Press `Space` to resume | Audio resumes, highlight continues | N | none |
-| NAR-05 | Press `Up Arrow` to increase speed | WPM/rate increases | N | none |
-| NAR-06 | Press `Down Arrow` to decrease speed | WPM/rate decreases | N | none |
-| NAR-07 | Press `Escape` | Narration stops, exits to page view | N | none |
-| NAR-08 | Switch engine (if Kokoro toggle visible) | Engine switches between web/kokoro | N | `[stub] kokoroModelStatus` |
-| NAR-09 | Verify Kokoro mock generates audible tone | 440Hz sine wave plays through speakers | N | `[stub] kokoroGenerate` with sample/duration info |
+| NAR-01 | Open Meditations, click Narrate | Narrate is selected paused; audio does not start until Play/Space | Y | no generation call yet |
+| NAR-02 | Hard-select a visible word, then press Play/Space | Narration starts on that exact word; word highlighting follows speech | N | `[stub] kokoroGenerate` or Web Speech activity |
+| NAR-03 | Observe word-level tracking | Highlighted word advances in sync with audio truth, not Flow WPM | N | `[audio] play` or scheduler truth logs |
+| NAR-04 | Press `Space` to pause | Audio pauses, highlight freezes | N | none |
+| NAR-05 | Press `Space` to resume | Audio resumes, highlight continues from the same word | N | none |
+| NAR-06 | Press `C` while Narrate is selected or playing | Chapter/book navigation opens without starting, stopping, or retargeting Narrate | N | none |
+| NAR-07 | Press `Up Arrow` to increase speed | Narrate rate increases | N | none |
+| NAR-08 | Press `Down Arrow` to decrease speed | Narrate rate decreases | N | none |
+| NAR-09 | Press `Escape` | Narration stops, exits to page view | N | none |
+| NAR-10 | Switch engine (if Kokoro toggle visible) | Engine switches between web/kokoro | N | `[stub] kokoroModelStatus` |
+| NAR-11 | Verify Kokoro mock generates audible tone | 440Hz sine wave plays through speakers after Play/Space | N | `[stub] kokoroGenerate` with sample/duration info |
 
 ## 9. Bottom Bar Controls (BAR)
 
@@ -122,9 +124,10 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 | BAR-03 | Click WPM down button | WPM decreases by step | N | none |
 | BAR-04 | Click Focus mode button | Switches to Focus mode | N | none |
 | BAR-05 | Click Flow mode button | Switches to Flow mode | N | none |
-| BAR-06 | Click Narrate mode button | Switches to Narrate mode | N | none |
-| BAR-07 | Press `Shift+Space` in a mode | Cycles to next mode (Focus → Flow → Narrate → Focus) | N | none |
-| BAR-08 | Verify font size controls (if visible) | Text size adjusts | N | none |
+| BAR-06 | Click Narrate mode button | Switches/selects Narrate paused; no auto-start | N | none |
+| BAR-07 | Press `N` in any reader mode | Switches/selects Narrate paused; no auto-start | N | none |
+| BAR-08 | Press `C` in any reader mode | Opens chapter/book navigation | N | none |
+| BAR-09 | Verify font size controls (if visible) | Text size adjusts | N | none |
 
 ## 10. Settings Pages (SET)
 
@@ -210,9 +213,9 @@ Each item: `[ID] Action | Expected | Screenshot? | Console check`
 | ID | Action | Expected | Screenshot? | Console |
 |----|--------|----------|-------------|---------|
 | MODE-01 | Open reader, start Focus mode | Focus mode active | N | none |
-| MODE-02 | Press `Shift+Space` | Transitions to Flow mode | N | none |
-| MODE-03 | Press `Shift+Space` | Transitions to Narrate mode | N | none |
-| MODE-04 | Press `Shift+Space` | Cycles back to Focus mode | N | none |
+| MODE-02 | Select Flow, then press Play/Space | Flow starts from current word | N | none |
+| MODE-03 | Press `N` | Transitions/selects Narrate paused at current word | N | none |
+| MODE-04 | Press Play/Space | Narrate starts from the exact current word | N | TTS generation/playback activity |
 | MODE-05 | Press `Escape` from any mode | Returns to Page mode | N | none |
 | MODE-06 | Start Focus, advance 50 words, switch to Flow | Flow starts near same position | N | none |
 

@@ -90,7 +90,7 @@ Read these in order before scoring anything:
 Trace the live path in this order:
 
 1. Reader entry and mode orchestration
-2. Flow/narration sync ownership
+2. Flow/Narrate sync ownership and selected-word startup
 3. Narration hook state machine
 4. Kokoro strategy generation contract
 5. Generation pipeline and cache lookup
@@ -101,6 +101,8 @@ Trace the live path in this order:
 10. Back up through tests and eval harnesses to verify the path is actually covered
 
 Use this map to ensure every handoff has one clear owner and one truthful source of state.
+
+Narrate lock-in rule: Flow and Narrate may share the Foliate scrolled surface, but Narrate's pacer is TTS/audio truth-sync. Any review that touches `useReaderMode.ts`, `useFlowScrollSync.ts`, `ReaderContainer.tsx`, `FoliatePageView.tsx`, or `audioScheduler.ts` must prove Narrate still starts at the exact selected/current word and never inherits Flow's WPM/engine clock.
 
 ## 1. Audit Metadata
 
@@ -247,6 +249,11 @@ Primary lane: `TTS-HARDEN-2`
 - [ ] end-of-book handoff behavior is explicit
 - [ ] cross-book continuation behavior is explicit when queue logic is active
 - [ ] no layer assumes that swapping refs alone is equivalent to replay continuation
+- [ ] Narrate startup consumes `explicitSelectionAnchorRef` before resume/highlight/soft anchors
+- [ ] delayed Foliate extraction retries preserve `{ targetMode: "narrate", resumeNarration: true }`
+- [ ] Foliate Flow's single-pacer rule is not generalized to Narrate
+- [ ] selecting Narrate does not auto-start playback; Play/Space is the start boundary
+- [ ] chapter/book navigation remains available while Narrate is selected or playing
 
 ### Evidence to Capture
 

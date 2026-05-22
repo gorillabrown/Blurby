@@ -7,6 +7,12 @@
 
 ---
 
+## Supersession Note (2026-05-21)
+
+This remediation plan is historical. Its `NarrateMode.ts` references describe the pre-restoration mode-vertical class that has since been removed. Current Narrate governance is defined by `TECHNICAL_REFERENCE.md`, `TTS_ARCHITECTURE_DECISIONS.md`, and the Flow/Narrate lock-in tests: selecting Narrate does not auto-start, Play/Space starts from the exact selected/current word, and Narrate remains owned by TTS/audio truth-sync rather than Flow pacing.
+
+---
+
 ## 1. Overall Assessment
 
 The external audit is thorough and well-structured. It confirms every issue from our internal audit, adds valuable context from standards (SSML 1.1, WCAG 2.2, ITU-T P.800/808, NIST AI RMF, BCP-47), and identifies governance gaps we hadn't considered. The findings matrix covers 12 dimensions with clear severity/effort ratings.

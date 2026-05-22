@@ -6,6 +6,8 @@
 
 **Architecture:** Add a shared chunk model and visual-state layer between the existing word extraction, Flow engine, Narration hook, and Foliate renderer. Flow remains WPM-clocked. Narrate becomes timing-truth-clocked: word highlight only from trusted word or character timestamps, otherwise chunk-only highlight. The renderer renders declared state only and never invents timing.
 
+**2026-05-21 lock-in note:** Later Flow section-handoff work proved that "shared surface" and "shared pacer" must stay separate. Foliate Flow is paced by `FlowScrollEngine`; Narrate is paced by TTS/audio truth-sync. Selecting Narrate does not auto-start, Play/Space starts from the exact selected/current word, and any delayed startup retry must preserve `{ targetMode: "narrate", resumeNarration: true }`.
+
 **Tech Stack:** React 19, TypeScript, Electron preload/main bridge as currently wired, foliate-js rendered word spans, Vitest/jsdom, existing audio scheduler and narration strategies.
 
 ## Source Material
@@ -34,7 +36,7 @@
 - `src/utils/foliateHelpers.ts` already groups text nodes by block, identifies heading tags via `BLOCK_TAGS`, extracts words, and records paragraph breaks.
 - `src/utils/foliateStyles.ts` injects word highlight CSS into Foliate iframe documents.
 - `src/utils/FlowScrollEngine.ts` currently owns WPM advancement, line maps, scroll positioning, and the shrinking/timer cursor.
-- `src/hooks/useFlowScrollSync.ts` currently starts Flow only for `readingMode === "flow"` and drives `FlowScrollEngine`; Narrate can put the engine in follower mode.
+- `src/hooks/useFlowScrollSync.ts` starts Flow only for `readingMode === "flow"` and drives `FlowScrollEngine`; Narrate must not use that engine as its pacer or word-truth source.
 - `src/hooks/useNarration.ts` owns cursor-driven narration, engine strategies, `cursorWordIndex`, `onWordAdvance`, `onTruthSync`, and scheduler bridge callbacks.
 - `src/hooks/narration/kokoroStrategy.ts` can pass `wordTimestamps` through Kokoro-generated chunks.
 - `src/hooks/narration/mossNanoStrategy.ts` and `src/hooks/narration/pocketTtsStrategy.ts` currently mark segments as `timingTruth: "segment-following"` with `wordTimestamps: null`.

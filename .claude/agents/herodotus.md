@@ -40,7 +40,7 @@ The herodotus maintains all living documentation. After code changes, discoverie
 
 | Document | Trigger | What to update |
 |----------|---------|-----------------|
-| .governance/sprint-queue.md | Sprint completed and verified | Remove completed sprint block, log one-line summary in Completed Sprints table, check queue depth (must be >= 3 — flag for planning if not) |
+| docs/governance/sprint-queue.xlsx | Sprint completed and verified | Remove completed sprint block, log one-line summary in Completed Sprints table, check queue depth (must be >= 3 — flag for planning if not) |
 
 ### Priority 2 (Update when relevant)
 

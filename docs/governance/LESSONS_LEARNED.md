@@ -1648,3 +1648,19 @@ speakChunk() {
 **Pattern:** Use conservative trusted lag defaults plus diagnostics, then tune via real playback evidence. Optimize with equal-power crossfades and segment-duration tuning to reduce seam artifacts without sacrificing correction responsiveness.
 
 **Related:** `src/utils/audioScheduler.ts`, `src/hooks/narration/kokoroStrategy.ts`, `src/constants.ts`, `tests/kokoroStrategyRateContinuity.test.ts`.
+
+---
+
+### [2026-05-21] LL-125: Narrate Must Stay Audio-Owned Even When Flow Shares Its Surface
+
+**Area:** reader modes, narration ownership, Foliate surface
+**Status:** active
+**Priority:** critical
+
+**Context:** SRL-047 correctly made Foliate Flow a single-pacer mode, but the shared `startFlow(...)` helper also carried Narrate startup options. A delayed Foliate word-extraction retry could drop `{ targetMode: "narrate", resumeNarration: true }` and restart with Flow defaults, making Narrate appear to regress even though the Flow change was nominally scoped.
+
+**Guardrail:** Treat "shared Foliate surface" and "shared runtime owner" as different concepts. Flow may own `FlowScrollEngine`; Narrate must remain owned by TTS/audio truth-sync. Any retry, section handoff, mode switch, or delayed extraction path must preserve Narrate intent and exact selected-word startup.
+
+**Pattern:** When a shared helper accepts mode-specific options, retry by passing the original options through unchanged. Lock this with tests that start Narrate after delayed Foliate extraction, hard-select a nonzero word, and assert `narration.startCursorDriven(words, selectedWord, ...)`.
+
+**Related:** `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `tests/useReaderMode.test.ts`, `docs/governance/TECHNICAL_REFERENCE.md`.

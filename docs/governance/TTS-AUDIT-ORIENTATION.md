@@ -6,6 +6,17 @@
 
 ---
 
+## Supersession Note (2026-05-21)
+
+This is a historical audit orientation package. It remains useful for understanding the original Kokoro/TTS pipeline, but its reader-mode entry points are no longer authoritative. `src/modes/NarrateMode.ts` was removed during the later four-mode reader restoration, and current Narrate startup is owned by `ReaderContainer.tsx`, `useReaderMode.ts`, `useNarration.ts`, and the audio scheduler/truth-sync path.
+
+Current lock-in contract:
+
+- Selecting Narrate with the button or `N` selects the mode only; it does not auto-start playback.
+- Play/Space starts Narrate through `startFlow({ resumeNarration: true, targetMode: "narrate" })`, while Narrate remains TTS/audio truth-sync owned.
+- The first spoken word must be the hard-selected/current word exactly, not a prior sentence, stale resume anchor, or Flow cursor.
+- Flow may use `FlowScrollEngine` and section-handoff restarts; Narrate must not borrow Flow pacing.
+
 ## What Is Blurby?
 
 Blurby is a desktop speed-reading application built on Electron 41 + React 19. It supports four reading modes: Page (paginated EPUB), Focus (RSVP single-word), Flow (scrolling highlight), and Narrate (TTS-driven with word tracking). The Narrate mode is the subject of this audit.
@@ -14,7 +25,7 @@ Narrate mode uses a local neural TTS engine called Kokoro (82M-parameter ONNX mo
 
 ## What's in This Package
 
-The zip contains 13 source files that constitute the complete TTS pipeline, from main-process inference through IPC to renderer playback. No files outside this set participate in TTS.
+The historical zip contained 13 source files that constituted the TTS pipeline at the time, from main-process inference through IPC to renderer playback. Current implementation files outside this set now participate in mode entry, selected-word anchoring, and Foliate visual synchronization; use `TECHNICAL_REFERENCE.md` and `TTS_ARCHITECTURE_DECISIONS.md` for current authority.
 
 ### File Inventory
 
@@ -31,14 +42,14 @@ The zip contains 13 source files that constitute the complete TTS pipeline, from
 | 9 | `src/utils/audioPlayer.ts` | Renderer (audio) | Web Audio API playback, word timer, pause/resume with AudioContext.currentTime tracking |
 | 10 | `src/utils/rhythm.ts` | Renderer (timing) | Chunk boundary pause calculation (comma/sentence/paragraph) |
 | 11 | `src/types/narration.ts` | Renderer (types) | Reducer state shape, action types, TtsStrategy interface, narrationReducer |
-| 12 | `src/modes/NarrateMode.ts` | Renderer (mode) | Mode vertical — start/pause/resume/jumpTo, rate control, rhythm pause delegation |
+| 12 | `src/modes/NarrateMode.ts` | Renderer (mode, historical/removed) | Former mode vertical. Current Narrate entry is hook-driven through `useReaderMode.ts` + `useNarration.ts`. |
 | 13 | `src/constants.ts` | Renderer (config) | TTS tuning constants (chunk size, rate limits, pause durations, voice names) |
 
-### Data Flow
+### Historical Data Flow
 
 ```
-User presses N (Narrate)
-    → NarrateMode.start()
+Historical Narrate shortcut
+    → removed mode-class start method
     → useNarration.startCursorDriven(words, startIdx, wpm, onWordAdvance)
     → speakNextChunkKokoro()
     → kokoroStrategy.speakChunk(text, words, ...)
@@ -53,6 +64,19 @@ User presses N (Narrate)
         → setInterval fires onWordAdvance(offset) at estimated intervals
         → onEnd → CHUNK_COMPLETE → computeChunkPauseMs → setTimeout → speakNextChunkKokoro()
         → Meanwhile: preBufferNext(afterEndIdx) generates next chunk in background
+```
+
+### Current Reader-Mode Entry Flow (2026-05-21)
+
+```
+User clicks Narrate or presses N
+    → ReaderContainer selects readingMode = "narrate"
+    → no audio starts
+    → user presses Play/Space
+    → useReaderMode.startFlow({ resumeNarration: true, targetMode: "narrate" })
+    → consume explicit selected/current word anchor
+    → useNarration.startCursorDriven(words, selectedWordIndex, rate, onWordAdvance)
+    → audioScheduler / engine timing truth drives visual word updates
 ```
 
 ### Key Architecture Patterns
