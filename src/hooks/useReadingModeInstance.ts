@@ -123,6 +123,7 @@ export function useReadingModeInstance({
 
   // Create mode instance for the given mode type
   const createInstance = useCallback((mode: ModeType, words: string[], paragraphBreaks: Set<number>): ReadingMode => {
+    narration.setOnTruthSync?.(null);
     const config = buildConfig(words, paragraphBreaks);
     let instance: ReadingMode;
 

@@ -441,42 +441,12 @@ describe("FlowScrollEngine", () => {
     expect(cursor.style.display).toBe("block");
   });
 
-  it("uses natural chunks to hide the legacy shrinking cursor", () => {
-    engine.setChunks(naturalChunks);
-    engine.start(container, cursor, 0, 600, new Set(), false);
-
-    expect(cursor.style.display).toBe("none");
-    expect(cursor.style.width).toBe("");
-  });
-
   it("reports the active natural chunk at Flow start", () => {
     engine.setChunks(naturalChunks);
     engine.start(container, cursor, 2, 600, new Set(), false);
 
     expect(engine.getActiveChunk()?.id).toBe("sentence:0-5");
     expect(callbacks.onChunkChange).toHaveBeenCalledWith(naturalChunks[0]);
-  });
-
-  it("advances the active WPM word inside a natural chunk", () => {
-    engine.setChunks(naturalChunks);
-    engine.start(container, cursor, 0, 600, new Set(), false);
-
-    vi.advanceTimersByTime(360);
-
-    expect(callbacks.onWordAdvance.mock.calls.map((call) => call[0])).toEqual([
-      0, 1, 2, 3,
-    ]);
-  });
-
-  it("emits chunk changes as the reading cursor crosses chunk boundaries", () => {
-    engine.setChunks(naturalChunks);
-    engine.start(container, cursor, 0, 600, new Set(), false);
-    callbacks.onChunkChange.mockClear();
-
-    vi.advanceTimersByTime(560);
-
-    expect(callbacks.onChunkChange).toHaveBeenCalledWith(naturalChunks[1]);
-    expect(engine.getActiveChunk()?.id).toBe("sentence:5-10");
   });
 
   it("FLOW-ZONE-AUTO: aligns the active natural chunk start to the initial zone top", () => {

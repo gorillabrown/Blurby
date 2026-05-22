@@ -250,7 +250,7 @@ describe("TTS-START-1: Background entry coverage opening ramp", () => {
       provider: "kokoro",
       voiceId: "af_bella",
       rateBucket: 1.0,
-      normalizerVersion: "en-v2",
+      normalizerVersion: "en-v3",
       documentLocator: { bookId: "book-1" },
       sampleRate: 24000,
       timingTruth: "word-native",

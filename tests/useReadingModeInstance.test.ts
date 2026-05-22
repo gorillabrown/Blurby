@@ -32,6 +32,6 @@ describe("useReadingModeInstance (NARR-LAYER-1B)", () => {
   });
 
   it("clears any stale narration truth-sync callback when a visual mode instance is created", () => {
-    expect(src).toContain("narration.setOnTruthSync(null);");
+    expect(src).toContain("narration.setOnTruthSync?.(null);");
   });
 });

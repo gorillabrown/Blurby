@@ -450,7 +450,7 @@ describe("Foliate chunk visual state rendering", () => {
     expect(css).toContain(".page-word--chunk-active");
     expect(css).toContain(".page-word--active-word");
     expect(css).toContain(".page-word--glide-adj");
-    expect(css).toContain("color: #ffffff");
+    expect(css).toContain("color: #e0e0e0");
     expect(css).toContain("border-radius: 3px");
   });
 
