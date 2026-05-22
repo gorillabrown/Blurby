@@ -35,6 +35,7 @@ import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
   clearChunkReadingVisualStateFromRoots,
+  resolveChunkReadingFollowWordIndex,
   scrollChunkReadingVisualStateToTopOfRoots,
   shouldSuppressNarrateFlowCursor,
   resolveFoliateWordHighlightClass,
@@ -856,11 +857,17 @@ export default function FoliatePageView({
         && scrollKey
         && scrollKey !== lastChunkTopScrollKeyRef.current
         && !userBrowsingRef.current
-        && scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), chunkReadingVisualState, {
+      ) {
+        const scrolled = scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), chunkReadingVisualState, {
           scrollContainer: resolveFoliateScrollContainer(),
           topOffsetPx: getFlowFollowOffsetPx(),
-        })
-      ) {
+        });
+        if (!scrolled && readingMode === "flow") {
+          const followIdx = resolveChunkReadingFollowWordIndex(chunkReadingVisualState);
+          if (followIdx != null) {
+            applyVisualHighlightByIndex(followIdx, "flow", true);
+          }
+        }
         lastChunkTopScrollKeyRef.current = scrollKey;
       }
       if (shouldSuppressNarrateFlowCursor(readingMode, chunkReadingVisualState)) {

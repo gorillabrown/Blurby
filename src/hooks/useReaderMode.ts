@@ -322,7 +322,7 @@ export function useReaderMode({
       return;
     }
     const focusStartSource = consumeModeStartAnchor();
-    const startWord = useFoliate
+    let startWord = useFoliate
       ? resolveFoliateStartWord(
         focusStartSource,
         effectiveWords.length,
@@ -330,6 +330,11 @@ export function useReaderMode({
         bookWordsTotalWords
       )
       : focusStartSource;
+    if (useFoliate && startWord >= effectiveWords.length && effectiveWords.length > 0
+      && !(bookWordsTotalWords != null && startWord < bookWordsTotalWords)) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? 0;
+      startWord = firstVisible >= 0 ? firstVisible : 0;
+    }
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);
     setReadingMode("focus");
@@ -377,7 +382,7 @@ export function useReaderMode({
       return;
     }
     const flowStartSource = consumeModeStartAnchor();
-    const startWord = useFoliate
+    let startWord = useFoliate
       ? resolveFoliateStartWord(
         flowStartSource,
         effectiveWords.length,
@@ -385,6 +390,11 @@ export function useReaderMode({
         bookWordsTotalWords
       )
       : flowStartSource;
+    if (useFoliate && startWord >= effectiveWords.length && effectiveWords.length > 0
+      && !(bookWordsTotalWords != null && startWord < bookWordsTotalWords)) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? 0;
+      startWord = firstVisible >= 0 ? firstVisible : 0;
+    }
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     const targetMode = options?.targetMode ?? "flow";
     if (targetMode === "narrate") {
