@@ -699,6 +699,15 @@ export default function ReaderContainer({
 
   // narrationStateFlushRaf cleanup and cancel-on-mode-exit handled by useDocumentLifecycle
 
+  // ── Post-mode-switch anchor queue ──────────────────────────────────
+  const pendingModeSurfaceAnchorRef = useRef<{ wordIndex: number; mode: "focus" | "flow" | "narrate" } | null>(null);
+  const [pendingModeSurfaceAnchorVersion, setPendingModeSurfaceAnchorVersion] = useState(0);
+
+  const queuePostModeAnchorSync = useCallback((wordIndex: number, mode: "focus" | "flow" | "narrate") => {
+    pendingModeSurfaceAnchorRef.current = { wordIndex, mode };
+    setPendingModeSurfaceAnchorVersion((version) => version + 1);
+  }, []);
+
   // ── Mode transitions (extracted to useReaderMode hook) ──────────────
   const modeHook = useReaderMode({
     reader: { playing, wordIndex, wordsRef, togglePlay, jumpToWord },
@@ -734,6 +743,10 @@ export default function ReaderContainer({
     resumeAnchorRef,
     explicitSelectionAnchorRef,
     softWordIndexRef,
+    persistentWordIndexRef,
+    commitPersistentWordIndex,
+    syncVisualToPersistentWord,
+    queuePostModeAnchorSync,
     onNarrateTruthSync: applyNarrationActiveWord,
     evalTrace: evalTraceSink,
   });
@@ -799,6 +812,43 @@ export default function ReaderContainer({
       flowScrollEngineRef.current?.jumpToWord(wordIndex);
     }
   }, [flowPlaying, focusPlaying, flowScrollEngineRef, modeInstanceHook]);
+
+  useEffect(() => {
+    const pending = pendingModeSurfaceAnchorRef.current;
+    if (!pending || pending.mode !== readingMode) return;
+
+    let firstRaf = 0;
+    let secondRaf = 0;
+
+    firstRaf = requestAnimationFrame(() => {
+      secondRaf = requestAnimationFrame(() => {
+        const latest = pendingModeSurfaceAnchorRef.current;
+        if (!latest || latest.mode !== readingMode) return;
+        syncVisualToPersistentWord({ navigate: true });
+        foliateApiRef.current?.clearUserBrowsing?.();
+        setIsBrowsedAway(false);
+        pendingModeSurfaceAnchorRef.current = null;
+      });
+    });
+
+    return () => {
+      cancelAnimationFrame(firstRaf);
+      cancelAnimationFrame(secondRaf);
+    };
+  }, [
+    foliateApiRef,
+    foliateRenderVersion,
+    pendingModeSurfaceAnchorVersion,
+    readingMode,
+    setIsBrowsedAway,
+    syncVisualToPersistentWord,
+  ]);
+
+  useEffect(() => {
+    if (readingMode !== "flow" || !flowPlaying || !isBrowsedAway) return;
+    modeInstanceHook.pauseMode();
+    setFlowPlaying(false);
+  }, [flowPlaying, isBrowsedAway, modeInstanceHook, readingMode]);
 
   // Exit reader — uses both mode hook and progress hook
   const handleExitReader = useCallback(() => {

@@ -137,6 +137,10 @@ describe("useReaderMode foliate handoff", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -252,6 +256,10 @@ describe("useReaderMode foliate handoff", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -361,6 +369,10 @@ describe("useReaderMode foliate handoff", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -476,6 +488,10 @@ describe("useReaderMode foliate handoff", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -590,6 +606,10 @@ describe("useReaderMode foliate handoff", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -605,23 +625,11 @@ describe("useReaderMode foliate handoff", () => {
       await flushPromises();
     });
 
-    expect(observedReadingMode).toBe("narrate");
+    // Page-mode Play is a no-op — mode, narration, and settings are all unchanged.
+    expect(observedReadingMode).toBe("page");
     expect(modeInstance.startMode).not.toHaveBeenCalled();
-    expect(narration.startCursorDriven).toHaveBeenCalledWith(
-      ["alpha", "beta", "gamma"],
-      0,
-      180,
-      expect.any(Function),
-    );
-    expect(updateSettings).toHaveBeenCalledWith({
-      readingMode: "narrate",
-      lastReadingMode: "narrate",
-    });
-    expect(updateSettings).toHaveBeenCalledWith({
-      readingMode: "narrate",
-      lastReadingMode: "narrate",
-      isNarrating: true,
-    });
+    expect(narration.startCursorDriven).not.toHaveBeenCalled();
+    expect(updateSettings).not.toHaveBeenCalled();
   });
 });
 
@@ -761,6 +769,10 @@ describe("useReaderMode four-mode foundation", () => {
         explicitSelectionAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
         evalTrace: options?.evalTrace ?? null,
+        persistentWordIndexRef: { current: options?.resumeAnchor ?? options?.explicitSelectionAnchor ?? options?.initialHighlightedWordIndex ?? 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => options?.resumeAnchor ?? options?.explicitSelectionAnchor ?? options?.initialHighlightedWordIndex ?? 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -818,7 +830,7 @@ describe("useReaderMode four-mode foundation", () => {
     });
 
     expect(harness.reader.jumpToWord).toHaveBeenCalledWith(2);
-    expect(harness.resumeAnchorRef.current).toBeNull();
+    expect(harness.resumeAnchorRef.current).toBe(2);
   });
 
   it("starts narrate from an explicit selection even when an older resume anchor is still active", async () => {
@@ -845,7 +857,7 @@ describe("useReaderMode four-mode foundation", () => {
       180,
       expect.any(Function),
     );
-    expect(harness.resumeAnchorRef.current).toBeNull();
+    expect(harness.resumeAnchorRef.current).toBe(2);
     expect(harness.explicitSelectionAnchorRef.current).toBeNull();
   });
 
@@ -889,7 +901,7 @@ describe("useReaderMode four-mode foundation", () => {
       180,
       expect.any(Function),
     );
-    expect(harness.resumeAnchorRef.current).toBeNull();
+    expect(harness.resumeAnchorRef.current).toBe(2);
     expect(harness.explicitSelectionAnchorRef.current).toBeNull();
   });
 
@@ -920,7 +932,7 @@ describe("useReaderMode four-mode foundation", () => {
     });
   });
 
-  it("page-mode play still restores plain flow when flow is the persisted visible mode", async () => {
+  it("page-mode play is a no-op — mode and playback state are unchanged", async () => {
     const harness = await renderReaderModeHarness({
       settings: {
         lastReadingMode: "flow",
@@ -933,13 +945,11 @@ describe("useReaderMode four-mode foundation", () => {
       await flushPromises();
     });
 
-    expect(harness.observed.readingMode).toBe("flow");
-    expect(harness.observed.flowPlaying).toBe(true);
+    // Page-mode Play is a no-op — nothing changes.
+    expect(harness.observed.readingMode).toBe("page");
+    expect(harness.observed.flowPlaying).toBe(false);
     expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
-    expect(harness.updateSettings).toHaveBeenCalledWith({
-      readingMode: "flow",
-      lastReadingMode: "flow",
-    });
+    expect(harness.updateSettings).not.toHaveBeenCalled();
   });
 
   it("selecting flow from page mode updates the selected mode without auto-playing it", async () => {
@@ -1129,7 +1139,7 @@ describe("useReaderMode four-mode foundation", () => {
       transition: "handoff",
       from: "page",
       to: "flow",
-      context: "mode-switch-anchor-preserved",
+      context: "mode-switch-persistent-anchor-paused",
       latencyMs: 0,
     });
   });
@@ -1244,6 +1254,10 @@ describe("useReaderMode four-mode foundation", () => {
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
         onNarrateTruthSync,
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
@@ -1454,6 +1468,10 @@ describe("useReaderMode four-mode foundation", () => {
         bookWordsTotalWords: 3,
         resumeAnchorRef: { current: null },
         softWordIndexRef: { current: 0 },
+        persistentWordIndexRef: { current: 0 },
+        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        syncVisualToPersistentWord: vi.fn(() => 0),
+        queuePostModeAnchorSync: vi.fn(),
       });
       return null;
     }
