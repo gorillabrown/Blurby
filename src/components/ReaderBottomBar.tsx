@@ -340,17 +340,22 @@ export default function ReaderBottomBar({
           </button>
         </div>
 
-        {/* Play/Pause button — visible in all modes */}
-        {onTogglePlay && (
-          <button
-            className={`rbb-play-btn ${playing ? "rbb-play-btn--active" : ""}`}
-            onClick={() => { triggerCoachHint("play"); onTogglePlay(); }}
-            aria-label={playing ? "Pause" : "Play"}
-            title={playing ? "Pause (Space)" : "Play (Space)"}
-          >
-            {playing ? "❚❚" : "▶"}
-          </button>
-        )}
+        {/* Play/Pause button — visible in all modes, disabled in Page */}
+        {onTogglePlay && (() => {
+          const playDisabled = readingMode === "page";
+          return (
+            <button
+              className={`rbb-play-btn ${playing ? "rbb-play-btn--active" : ""}${playDisabled ? " rbb-play-btn--disabled" : ""}`}
+              onClick={() => { if (playDisabled) return; triggerCoachHint("play"); onTogglePlay(); }}
+              disabled={playDisabled}
+              aria-disabled={playDisabled}
+              aria-label={playing ? "Pause" : "Play"}
+              title={playDisabled ? "Page mode is browsing only" : playing ? "Pause (Space)" : "Play (Space)"}
+            >
+              {playing ? "❚❚" : "▶"}
+            </button>
+          );
+        })()}
 
         {/* Mode buttons */}
         <div className="rbb-mode-group" role="group" aria-label="Reading modes">
