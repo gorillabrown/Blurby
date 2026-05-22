@@ -486,8 +486,8 @@
   color: #fff;
 }
 .rbb-mode-btn--last {
-  background: var(--accent-faded, rgba(196,168,130,0.2));
-  border-color: var(--accent);
+  background: transparent;
+  border-color: var(--border, rgba(196,168,130,0.3));
   color: var(--text);
 }
 
