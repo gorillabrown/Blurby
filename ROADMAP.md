@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-22 — Roadmap review applied: Reader Runtime Solidification is the active conveyor ahead of UX polish and CI gating.
-**Current state**: v1.75.1 stable baseline plus uncommitted Phase 0 and governance-sweep changes. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-22 — TEST-GREEN-1 complete; READER-ISO-1A is the next Reader Runtime Solidification dispatch.
+**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 10). 5 full specs + 5 stubs. Next dispatch: BASELINE-SYNC-1.
-**Last sprint**: GOVERNANCE-SWEEP (2026-05-22) — doc hygiene and queue-source recovery completed after READER-MODE-ISOLATION-1 Phase 0.
+**Queue**: GREEN (depth 8). 3 full specs + 5 stubs. Next dispatch: READER-ISO-1A.
+**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -43,6 +43,8 @@
 | FLOW-ZONE-AUTO | 2026-05-19 | Descending auto-advancing reading zone + render-loop fix | — |
 | READER-MODE-ISOLATION-1 Phase 0 | 2026-05-21 | Preflight stabilization for Foliate Flow/Narrate word-0 recentering and browse-away reset | `CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md` |
 | GOVERNANCE-SWEEP | 2026-05-22 | Doc hygiene sweep: moved 1 memo, archived 7 dispatch files, created 6 hub readmes, repaired queue/agent references | — |
+| BASELINE-SYNC-1 | 2026-05-22 | Committed Phase 0 reader stabilization, governance sweep, and roadmap queue recovery in three pushed commits | `CloseOut.BASELINE-SYNC-1.2026-05-22.md` |
+| TEST-GREEN-1 | 2026-05-22 | Classified and resolved 12 broad-suite failures: 10 fixed, 1 quarantined, obsolete tests removed, and environmental flakes documented | `CloseOut.TEST-GREEN-1.2026-05-22.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -78,63 +80,9 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 ### Phase: Reader Runtime Solidification
 
-#### Stage 0 — Baseline Sync
-
-#### BASELINE-SYNC-1 — Commit Phase 0 + Governance Sweep Baseline *(position 1 — full spec)*
-
-- **What:** Review, explicitly stage, verify, and commit the current uncommitted Phase 0 reader stabilization plus GOVERNANCE-SWEEP hygiene changes. This sprint is a baseline-recovery dispatch: it separates intentional work from unrelated local dirt and leaves `main` in a named, recoverable state before adapter extraction starts.
-- **Why:** Phase 0 fixed load-bearing Flow/Narrate guardrails, and GOVERNANCE-SWEEP fixed source-of-truth hygiene. Starting adapter work before committing those changes would make rollback, bisecting, and future review muddy.
-- **Prerequisites:** READER-MODE-ISOLATION-1 Phase 0 complete; GOVERNANCE-SWEEP complete; current dirty worktree available for review.
-- **Done when:**
-  1. Phase 0 runtime/test/spec files are reviewed and staged intentionally.
-  2. GOVERNANCE-SWEEP moves, archives, readmes, and content repairs are reviewed and staged intentionally.
-  3. Roadmap-review artifacts and queue updates are staged intentionally.
-  4. Unrelated dirt is excluded or explicitly documented as deferred.
-  5. Focused Phase 0 tests pass: `npm test -- tests/useReaderMode.test.ts tests/phase0Stabilization.test.ts`.
-  6. Governance sweep verification passes: no `Hephaestus`, no `v1.76.0`, no active `sprint-queue.md`, no `~20k`, and no ghost agents in tracked governance docs.
-  7. `git diff --check` passes.
-  8. Commits are split by concern where practical: Phase 0 runtime/test/spec, governance sweep hygiene, roadmap/workbook sync.
-- **Effort:** M. Mostly git/document hygiene with enough judgment required to avoid staging unrelated dirt.
-- **Roster:** codex-parent / CLI worker only. No parallel workers; the value is coherent staging and review.
-- **Source:** `docs/planning/roadmap-reviews/2026-05-21-plan.md`; `docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md`; GOVERNANCE-SWEEP Phase 6 summary; `governance-sweep-spec.2026-05-21.md`.
-
-##### Implementation detail
-
-- **Edit sites:** No feature edits expected. Review current diffs in `src/components/FoliatePageView.tsx`, `tests/useReaderMode.test.ts`, `tests/phase0Stabilization.test.ts`, governance sweep archive/readme/content files, `ROADMAP.md`, and `docs/governance/sprint-queue.xlsx`.
-- **Tests:** `npm test -- tests/useReaderMode.test.ts tests/phase0Stabilization.test.ts`; governance grep checks from GOVERNANCE-SWEEP; `git diff --check`.
-- **Constants:** None.
-- **Branch:** No new feature branch required; this sprint reconciles current dirty `main`. If a branch is required by tooling, create `sprint/baseline-sync-1` only after preserving the dirty state.
-- **Commit hygiene:** Explicit-stage only. Do not use destructive cleanup. Do not stage `.idea/workspace.xml`, `tests/perf-baseline-results.json`, `.governance-sweep-backup/`, or other local-only artifacts unless deliberately approved.
-
-#### Stage 1 — Test Health
-
-#### TEST-GREEN-1 — Broad Suite Failure Triage *(position 2 — full spec)*
-
-- **What:** Reproduce and classify the 12 broad-suite failures reported during Phase 0: PDF export, FlowScrollEngine chunks, TTS cache/parity, silence cursor, CSS injection, and structural checks. Fix only failures that are cheap and clearly in-scope; otherwise document a formal classification and unblock path.
-- **Why:** `TTS-QUAL-CI-1` cannot be meaningful while broad-suite failures are waived as unrelated debt. A failing default suite also makes adapter isolation riskier because regressions are harder to distinguish from noise.
-- **Prerequisites:** BASELINE-SYNC-1 completed; working tree clean except explicitly deferred local artifacts.
-- **Done when:**
-  1. Full `npm test` is rerun and the current failing files are captured.
-  2. Each failure is classified as fix-now, quarantine/skip-with-ticket, obsolete test, product bug, or environmental flake.
-  3. Any fix-now failures are repaired with focused tests.
-  4. Any deferred failures have an explicit owner document or follow-up row.
-  5. Default verification path for future reader-mode work is documented.
-  6. `npx tsc --noEmit` passes or failures are classified separately.
-- **Effort:** M. Investigation-heavy but bounded by classification, not mandatory repair of every historical failure.
-- **Roster:** codex-parent; optional explorer only if failures span unrelated subsystems.
-- **Source:** READER-MODE-ISOLATION-1 Phase 0 close-out full-suite note; `docs/planning/roadmap-reviews/2026-05-21-assessment.md`.
-
-##### Implementation detail
-
-- **Edit sites:** Likely `tests/*`, possibly source files for cheap obvious failures. Do not modify reader-mode runtime unless a failure directly proves a reader regression.
-- **Tests:** `npm test`; focused reruns for each failed file; `npx tsc --noEmit`; `git diff --check`.
-- **Constants:** None expected.
-- **Branch:** `sprint/test-green-1-broad-suite-triage` from clean `main`.
-- **Commit hygiene:** One classification artifact plus fixes if any. Keep broad-suite evidence concise; do not commit large generated logs.
-
 #### Stage 2 — Adapter Isolation
 
-#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(position 3 — full spec)*
+#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(position 1 — full spec)*
 
 - **What:** Add type-only reader mode adapter contracts and a tested current-word anchor service. This phase creates the boundary without moving runtime behavior yet.
 - **Why:** Flow, Narrate, Focus, and Page need an explicit contract before implementation moves. The anchor service must preserve word `0`, hard selection precedence, resume anchors, and soft visible fallback ordering.
@@ -159,7 +107,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1a-adapter-anchor-contracts` from clean `main`.
 - **Commit hygiene:** Behavior-preserving contract commit only. If runtime wiring becomes necessary, stop and amend scope.
 
-#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 4 — full spec)*
+#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 2 — full spec)*
 
 - **What:** Extract mode selection/start/pause/stop routing from `useReaderMode.ts` into an orchestrator shell while preserving current behavior. Keep mode selection separate from playback and preserve delayed readiness retry intent.
 - **Why:** `startFlow(...)` still carries mode-specific meaning for both Flow and Narrate. The orchestrator shell is the first step toward preventing Flow fixes from erasing Narrate intent.
@@ -184,7 +132,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1b-orchestrator-shell` from clean `main`.
 - **Commit hygiene:** One orchestrator extraction commit plus test commit if helpful. Do not combine with Flow/Narrate adapter migration.
 
-#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 5 — full spec)*
+#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 3 — full spec)*
 
 - **What:** Move Focus lifecycle behind the new adapter boundary and begin typing passive Foliate surface commands without moving Flow or Narrate ownership yet.
 - **Why:** Focus is the lowest-risk adapter migration and proves that the adapter contract can own lifecycle and anchor updates without disturbing Flow or Narrate.

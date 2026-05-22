@@ -357,3 +357,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Adapter `select()` / `start()` contracts should include visual-state reset guarantees for local refs, browse-away state, cursor baselines, and recenter affordances.
 **Applies to:** Flow/Narrate adapters, Foliate surface bridge, mode lifecycle specs.
 **Status:** Observation
+
+### SRL-048 — Baseline-sync closeouts must advance the queue before next-pointer (BASELINE-SYNC-1, 2026-05-22)
+**Verdict:** A baseline-sync sprint is not fully closed just because the intended commits are pushed; the workbook queue must also mark the completed head and expose the next real sprint.
+**Evidence:** `BASELINE-SYNC-1` landed as three pushed commits on `main` with `main...origin/main = 0/0`, but `/next-pointer` still saw `BASELINE-SYNC-1` as Seq 1 because `docs/governance/sprint-queue.xlsx` had not advanced.
+**Recommendation:** Closeout for any queue-management or baseline-sync sprint should update `ROADMAP.md` and `docs/governance/sprint-queue.xlsx` before running `/next-pointer`.
+**Applies to:** Baseline sync, roadmap review, phase closeout, sprint closeout, and next-pointer dispatch readiness.
+**Status:** Observation
+
+### SRL-049 — Shared constants and behavioral gates require full-suite verification (TEST-GREEN-1, 2026-05-22)
+**Verdict:** Targeted tests are insufficient when a sprint changes shared constants or adds a behavioral gate, because stale expectations can survive outside the focused scope.
+**Evidence:** Seven of twelve TEST-GREEN-1 failures traced to constant-change or gate-change drift: `TTS_TRUSTED_CURSOR_LAG_MS`, `TTS_NORMALIZER_VERSION`, and the `followerMode` gate.
+**Recommendation:** Any sprint changing shared constants, cache/version constants, timing constants, or broad behavioral gates should run the full suite before closeout or explicitly record why it cannot.
+**Applies to:** Runtime constants, narration timing, normalizer/cache identity, reader-mode gates, and CI gating.
+**Status:** Observation
