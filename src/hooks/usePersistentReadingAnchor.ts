@@ -67,9 +67,11 @@ export function usePersistentReadingAnchor({
     highlightedWordIndexRef.current = wordIndex;
     softWordIndexRef.current = wordIndex;
     resumeAnchorRef.current = wordIndex;
-    explicitSelectionAnchorRef.current = cause === "hard-selection" || cause === "explicit-navigation"
-      ? wordIndex
-      : null;
+    if (cause === "hard-selection" || cause === "explicit-navigation") {
+      explicitSelectionAnchorRef.current = wordIndex;
+    } else if (cause === "book-open") {
+      explicitSelectionAnchorRef.current = null;
+    }
   }, [
     explicitSelectionAnchorRef,
     highlightedWordIndexRef,
