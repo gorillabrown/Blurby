@@ -371,3 +371,45 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Any sprint changing shared constants, cache/version constants, timing constants, or broad behavioral gates should run the full suite before closeout or explicitly record why it cannot.
 **Applies to:** Runtime constants, narration timing, normalizer/cache identity, reader-mode gates, and CI gating.
 **Status:** Observation
+
+### SRL-050 — Foliate recovery actions need renderer-level movement, not only shared reader state (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A persistent anchor is not user-visible unless the active Foliate surface is explicitly navigated to it.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 needed `jumpFoliateToWordAnchor` because Page jump-back could show and clear the button without moving the Foliate viewport.
+**Recommendation:** Any Foliate-visible action like jump-back, mode start, or recenter must call a surface API that can highlight, scroll, and section-recover the target word.
+**Applies to:** Foliate Page/Focus/Flow/Narrate surfaces, jump-back, mode-start anchoring, section recovery.
+**Status:** Observation
+
+### SRL-051 — Render-path getters must be side-effect free (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A function called like a getter becomes dangerous when it logs or records diagnostics on every render.
+**Evidence:** `getEffectiveWords` spammed the console and diagnostics during Focus startup until the effective word source was stabilized.
+**Recommendation:** Split source resolution into pure memoized values for render and explicit one-shot diagnostics for source transitions.
+**Applies to:** React render paths, word-source selection, diagnostics, performance-sensitive reader hooks.
+**Status:** Observation
+
+### SRL-052 — Mode playing state must follow runtime start, not precede it (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** UI "playing" state should not flip before the mode runtime has actually started.
+**Evidence:** Focus could render a blank active overlay when `focusPlaying=true` preceded delayed `startMode("focus", ...)`.
+**Recommendation:** For Focus/Flow/Narrate, resolve anchor and start the runtime before publishing active playback state, or expose a distinct "starting" state.
+**Applies to:** Reader mode start flows, async Foliate readiness, overlay rendering, Play/Space handlers.
+**Status:** Observation
+
+### SRL-053 — Manual screen QA is mandatory for Foliate reader-mode runtime changes (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Automated tests are necessary but not sufficient for reader-mode runtime changes that move the Foliate surface.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 reported 2794 passing tests and clean TypeScript, but the live 18-scenario manual QA gate found 10 failures, including Page jump-back, Focus blank overlay, Flow non-follow, Narrate wrong start, and hard-click retarget failures.
+**Recommendation:** Any sprint touching Foliate surface movement, mode start, jump-back, playback visual follow, or hard-selection anchoring should require screen-interaction manual QA before merge or roadmap advancement.
+**Applies to:** Page/Focus/Flow/Narrate runtime changes, Foliate surface bridge, jump-back, active playback follow, mode handoff.
+**Status:** Observation
+
+### SRL-054 — Specs must distinguish hard-selected anchor from last-read/progress anchor (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A "current word" contract is ambiguous unless it names the difference between hard selection, live playback cursor, durable progress, and browse-away visible position.
+**Evidence:** Manual QA showed hard clicks moved the visible highlight box, but playback resumed from a prior "persistent last-read word" or section start. Narrate's Jump back tooltip also exposed the implementation mismatch by targeting "persistent last-read word" rather than the hard-selected playback anchor.
+**Recommendation:** Future reader-anchor specs should define separate owners and precedence for hard-selected anchor, last-read progress, live playback cursor, and temporary browse-away position, then test Play, Space, Jump back, active retarget, and reopen against that precedence.
+**Applies to:** Reader anchor service, mode start, progress persistence, CFI restore, active retarget, cross-mode handoff.
+**Status:** Observation
+
+### SRL-055 — Shared Foliate surfaces need live UI gates, not only structural/unit tests (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Structural gates can confirm the right helpers exist while the live renderer still fails to move, render, or follow.
+**Evidence:** Step 2 added Foliate jump-back helpers, Flow follow fixes, Focus startup changes, and targeted tests, yet manual QA found Page jump-back hiding without returning, Focus rendering a blank overlay, Flow cursor advancing outside the reading window, and Flow browse-away failing to pause or show Jump back.
+**Recommendation:** Add at least one live UI gate, manual or automated, for each shared Foliate surface behavior that depends on real layout: Page jump-back motion, Focus first-word render, Flow cursor follow, Narrate exact start, and cross-mode hard-click retarget.
+**Applies to:** FoliatePageView, reader mode adapters, FlowScrollEngine integration, Focus overlay, Narrate cursor sync, persistent-anchor repairs.
+**Status:** Observation

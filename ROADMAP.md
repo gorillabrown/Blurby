@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-22 — TEST-GREEN-1 complete; READER-ISO-1A is the next Reader Runtime Solidification dispatch.
-**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-22 — READER-PERSISTENT-ANCHOR Step 2 manual QA failed; repair required before READER-ISO-1A.
+**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged after manual QA failure and is the active blocker before adapter isolation. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 8). 3 full specs + 5 stubs. Next dispatch: READER-ISO-1A.
-**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction.
+**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. Next dispatch: READER-PERSISTENT-ANCHOR-STEP3-REPAIR.
+**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction. Latest branch close-out: READER-PERSISTENT-ANCHOR Step 2 is branch-complete/manual-QA-failed and not main-landed.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -71,6 +71,9 @@
 12. **SRL-047:** Mode adapter specs must include lifecycle reset requirements for local visual refs, browse-away state, cursor baselines, and recenter affordances.
 13. **Broad-suite-before-CI:** Do not dispatch CI gate wiring while default broad-suite failures are being waived as unrelated debt; first classify or fix them.
 14. **Agent rename propagation:** Any agent rename must include a grep-and-replace pass across governing docs and workflow references before the rename sprint closes.
+15. **SRL-053:** Foliate reader-mode runtime changes require screen-interaction manual QA before merge or roadmap advancement.
+16. **SRL-054:** Reader-anchor specs must distinguish hard-selected anchor, last-read progress, live playback cursor, and temporary browse-away position.
+17. **SRL-055:** Shared Foliate surface behavior needs at least one live UI gate for real layout movement, rendering, and follow behavior.
 
 Deviation protocol: a skeleton may override a standing rule only by naming the rule and justifying the waiver in its spec.
 
@@ -80,13 +83,43 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 ### Phase: Reader Runtime Solidification
 
+#### Stage 1 — Manual QA Repair Gate
+
+#### READER-PERSISTENT-ANCHOR-STEP3-REPAIR — Persistent Anchor Manual QA Repair *(position 1 — full spec)*
+
+- **What:** Repair the user-facing persistent-anchor failures discovered by Step 2 manual QA across Page, Focus, Flow, and Narrate while preserving the Step 2 wins that passed.
+- **Why:** The branch is automation-green but manual-QA-red. Adapter isolation should not extract or codify broken Page jump-back, blank Focus playback, Flow non-follow, Narrate wrong-start, or hard-click retarget behavior.
+- **Prerequisites:** `hotfix/reader-persistent-anchor` remains unmerged; `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` and `docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP-2.2026-05-22.md` accepted as source evidence.
+- **Done when:**
+  1. Page mode opens paused with Play disabled, and Page Jump back returns to the exact hard-selected anchor after paginated browsing away.
+  2. Focus paused mode keeps the infinite-scroll surface, shows Jump back after browsing away, and Focus Play renders the first active word exactly at the hard-selected anchor with no blank overlay.
+  3. Flow Play centers the current hard-selected word, keeps a single underline cursor, rolls the text through the reading window, and manual browse-away pauses Flow while showing Jump back.
+  4. Narrate Play starts exactly at the hard-selected word, active narration continues on browse-away, and Narrate Jump back continues to work without restarting audio.
+  5. Hard-clicking a new word updates the hard-selected anchor and retargets playback consistently in paused and active Focus, Flow, and Narrate.
+  6. Book reopen uses Page mode at the persistent hard-selected/last-read word without stale CFI overriding it; switching to Narrate does not jump to a different restore position.
+  7. Inactive mode buttons do not show selected-looking ghost fills while Page is active.
+  8. Preserved contracts remain intact: mode selection never auto-starts, paused cross-mode handoff lands on the anchor, Flow has no double highlight, Narrate browse-away remains audio-owned, and `getEffectiveWords` does not flood the console.
+  9. The 18-scenario manual QA matrix passes or any remaining miss has explicit user-approved disposition.
+  10. Focused regression tests, `npx tsc --noEmit`, and `git diff --check` pass.
+- **Effort:** L. Cross-mode Foliate runtime repair with manual QA gate.
+- **Roster:** codex-parent for implementation; one manual screen QA pass after automated verification.
+- **Source:** Step 2 manual QA report; Step 2 close-out; SRL-053; SRL-054; SRL-055.
+
+##### Implementation detail
+
+- **Primary edit sites:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/ReaderBottomBar.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/usePersistentReadingAnchor.ts`, `src/hooks/useFoliateSync.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/utils/persistentAnchor.ts`.
+- **Test roster:** existing persistent-anchor matrix tests plus focused additions for Page jump-back motion, Focus first-word render, Flow follow/auto-pause, Narrate exact hard-selected start, active hard-click retarget, reopen CFI precedence, and inactive button styling.
+- **Manual QA roster:** rerun `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` scenario list as the Step 3 acceptance matrix, updating the report or creating a Step 3 manual QA report.
+- **Branch:** continue from `hotfix/reader-persistent-anchor` or create `hotfix/reader-persistent-anchor-step3-repair` from that branch. Do not merge to `main` until manual QA passes.
+- **Commit hygiene:** Preserve passing Step 2 behavior. Prefer commits grouped by failure cluster: jump-back/reopen, Focus/Flow playback, Narrate exact start/retarget, button polish/tests.
+
 #### Stage 2 — Adapter Isolation
 
-#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(position 1 — full spec)*
+#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(position 2 — full spec)*
 
 - **What:** Add type-only reader mode adapter contracts and a tested current-word anchor service. This phase creates the boundary without moving runtime behavior yet.
 - **Why:** Flow, Narrate, Focus, and Page need an explicit contract before implementation moves. The anchor service must preserve word `0`, hard selection precedence, resume anchors, and soft visible fallback ordering.
-- **Prerequisites:** TEST-GREEN-1 complete or current broad-suite failures formally classified; `docs/planning/specs/2026-05-21-reader-mode-runtime-isolation-design.md` accepted as source.
+- **Prerequisites:** `READER-PERSISTENT-ANCHOR-STEP3-REPAIR` complete with manual QA pass; TEST-GREEN-1 complete or current broad-suite failures formally classified; `docs/planning/specs/2026-05-21-reader-mode-runtime-isolation-design.md` accepted as source.
 - **Done when:**
   1. `src/reader/modes/ReaderModeAdapter.ts` or equivalent typed contract exists.
   2. `src/reader/anchors/useCurrentWordAnchor.ts` or equivalent anchor service exists.
@@ -107,7 +140,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1a-adapter-anchor-contracts` from clean `main`.
 - **Commit hygiene:** Behavior-preserving contract commit only. If runtime wiring becomes necessary, stop and amend scope.
 
-#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 2 — full spec)*
+#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 3 — full spec)*
 
 - **What:** Extract mode selection/start/pause/stop routing from `useReaderMode.ts` into an orchestrator shell while preserving current behavior. Keep mode selection separate from playback and preserve delayed readiness retry intent.
 - **Why:** `startFlow(...)` still carries mode-specific meaning for both Flow and Narrate. The orchestrator shell is the first step toward preventing Flow fixes from erasing Narrate intent.
@@ -132,7 +165,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1b-orchestrator-shell` from clean `main`.
 - **Commit hygiene:** One orchestrator extraction commit plus test commit if helpful. Do not combine with Flow/Narrate adapter migration.
 
-#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 3 — full spec)*
+#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 4 — full spec)*
 
 - **What:** Move Focus lifecycle behind the new adapter boundary and begin typing passive Foliate surface commands without moving Flow or Narrate ownership yet.
 - **Why:** Focus is the lowest-risk adapter migration and proves that the adapter contract can own lifecycle and anchor updates without disturbing Flow or Narrate.
@@ -157,9 +190,31 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1c-focus-adapter` from clean `main`.
 - **Commit hygiene:** Focus adapter only. Do not migrate Flow or Narrate in this sprint.
 
-#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(stub)*
+#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 5 — full spec)*
 
-Move Flow lifecycle and FlowScrollEngine ownership behind a Flow adapter. Flow section-handoff restart must live only inside Flow adapter ownership and must not touch Narrate truth-sync.
+- **What:** Move Flow lifecycle, `FlowScrollEngine` ownership, section-handoff restart, browse-away pause, and visual-follow commands behind a Flow adapter.
+- **Why:** Flow has repeatedly regressed Narrate and shared Foliate behavior because its scroll engine, restart logic, and visual cursor live in shared component paths. After Step 3 repair, Flow ownership must be isolated without changing Narrate truth-sync.
+- **Prerequisites:** READER-ISO-1C complete; READER-PERSISTENT-ANCHOR-STEP3-REPAIR manual QA pass remains green; Flow manual QA scenarios 6-10 have passing baseline evidence.
+- **Done when:**
+  1. `FlowModeAdapter` or equivalent owns Flow select/start/pause/stop, FlowScrollEngine construction, restart, teardown, and browse-away pause behavior.
+  2. Flow start uses the shared current-word anchor and preserves exact word `0`.
+  3. Flow section-handoff restart lives inside Flow adapter ownership and does not call or mutate Narrate runtime state.
+  4. Flow visual commands are typed as surface requests and use the single underline cursor path.
+  5. Manual browse-away pauses Flow, shows Jump back, and does not persist browse-away as progress.
+  6. Narrate exact-start, Narrate browse-away, and Narrate audio truth-sync regression tests still pass.
+  7. `npm test -- tests/flowModeAdapter.test.ts tests/useReaderMode.test.ts tests/foliate-bridge.test.ts` or equivalent focused suite passes.
+  8. `npx tsc --noEmit` and `git diff --check` pass.
+- **Effort:** L. Cross-cutting runtime migration with high shared-surface regression risk.
+- **Roster:** codex-parent with explorer assistance for current FlowScrollEngine call graph before edits if available.
+- **Source:** Isolation spec Phase 4; SRL-046; SRL-047; SRL-053; SRL-055; Step 3 manual QA pass.
+
+##### Implementation detail
+
+- **Edit sites:** new `src/reader/modes/FlowModeAdapter.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`, `src/utils/FlowScrollEngine.ts`, shared surface command types, `tests/flowModeAdapter.test.ts`, `tests/useReaderMode.test.ts`, `tests/foliate-bridge.test.ts`.
+- **Tests:** Flow adapter lifecycle, exact anchor start including word `0`, section handoff restart after `onComplete`, browse-away pause, jump-back visibility, single underline cursor, and Narrate non-interference.
+- **Constants:** Preserve existing Flow WPM and line-window settings. Do not tune pacing in this sprint unless a failing test proves the adapter migration changed behavior.
+- **Branch:** `sprint/reader-iso-1d-flow-adapter` from clean `main` after prior isolation sprints land.
+- **Commit hygiene:** Flow adapter only. Do not migrate Narrate or add new Flow UX features.
 
 ---
 
