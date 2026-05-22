@@ -817,6 +817,7 @@ export default function ReaderContainer({
     onOpenDocByIdRef,
     evalTrace: evalTraceSink,
     foliateRenderVersion,
+    onFlowUserBrowseAway: () => setIsBrowsedAway(true),
   });
 
   const retargetActiveModeToWord = useCallback((wordIndex: number) => {
@@ -828,8 +829,14 @@ export default function ReaderContainer({
     if (mode === "flow" && flowPlaying) {
       modeInstanceHook.jumpToWordInMode(wordIndex);
       flowScrollEngineRef.current?.jumpToWord(wordIndex);
+      return;
     }
-  }, [flowPlaying, focusPlaying, flowScrollEngineRef, modeInstanceHook]);
+    if (mode === "narrate" && isNarratingRef.current) {
+      modeInstanceHook.jumpToWordInMode(wordIndex);
+      flowScrollEngineRef.current?.jumpToWord(wordIndex);
+      narration.resyncToCursor(wordIndex, effectiveWpm);
+    }
+  }, [effectiveWpm, flowPlaying, focusPlaying, flowScrollEngineRef, modeInstanceHook, narration]);
 
   useEffect(() => {
     const pending = pendingModeSurfaceAnchorRef.current;
@@ -1375,17 +1382,21 @@ export default function ReaderContainer({
             // (already done by init) and findFirstVisibleWordIndex for DOM highlight.
             const savedPos = activeDoc.position || 0;
             if (savedPos >= FOLIATE_MIN_ENGAGEMENT_POSITION) {
-              // Set state to saved position (for narration/flow start point)
               setHighlightedWordIndex(savedPos);
-              // Highlight the first visible word in the DOM (CFI already navigated here)
               if (foliateApiRef.current) {
-                const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
-                if (firstVisible >= 0) {
-                  foliateApiRef.current.highlightWordByIndex(firstVisible);
-                  // SELECTION-1: Also set soft selection to first visible word
-                  softWordIndexRef.current = firstVisible;
-                  foliateApiRef.current.applySoftHighlight(firstVisible);
-                }
+                jumpFoliateToWordAnchor(foliateApiRef.current, savedPos).then((hit) => {
+                  if (!hit) {
+                    const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? -1;
+                    if (firstVisible >= 0) {
+                      foliateApiRef.current?.highlightWordByIndex(firstVisible);
+                      softWordIndexRef.current = firstVisible;
+                      foliateApiRef.current?.applySoftHighlight(firstVisible);
+                    }
+                  } else {
+                    softWordIndexRef.current = savedPos;
+                    foliateApiRef.current?.applySoftHighlight(savedPos);
+                  }
+                });
               }
             } else if (foliateApiRef.current) {
               const firstVisible = foliateApiRef.current.findFirstVisibleWordIndex();
@@ -1601,15 +1612,15 @@ export default function ReaderContainer({
 
       {menuFlap}
       <ReturnToReadingPill
-        visible={isBrowsedAway && isScrolledSurfaceMode && isNarrating && !narration.speaking}
+        visible={isBrowsedAway && isScrolledSurfaceMode && !narration.speaking}
         activeOverlay={menuFlapOpen || showBacktrackPrompt}
-        onReturn={handleReturnToReading}
+        onReturn={handleJumpBackToPersistentWord}
       />
       {/* BUG-147: Return to narration position when actively speaking but user has paged away */}
       {!useFoliate && isBrowsedAway && isScrolledSurfaceMode && isNarrating && narration.speaking && (
         <button
           className="return-to-narration-btn"
-          onClick={handleReturnToReading}
+          onClick={handleJumpBackToPersistentWord}
           title="Return to narration position"
         >
           ↩ Return to narration

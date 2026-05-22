@@ -100,6 +100,8 @@ export interface UseFlowScrollSyncParams {
   evalTrace?: TtsEvalTraceSink | null;
   /** Monotonic bump when Foliate re-renders/stamps a new live word surface. */
   foliateRenderVersion?: number;
+  /** Called when FlowScrollEngine detects manual user scroll during playback. */
+  onFlowUserBrowseAway?: () => void;
 }
 
 export interface UseFlowScrollSyncReturn {
@@ -153,8 +155,11 @@ export function useFlowScrollSync({
   onOpenDocByIdRef,
   evalTrace = null,
   foliateRenderVersion = 0,
+  onFlowUserBrowseAway,
 }: UseFlowScrollSyncParams): UseFlowScrollSyncReturn {
   const flowScrollEngineRef = useRef<FlowScrollEngine | null>(null);
+  const onFlowUserBrowseAwayRef = useRef(onFlowUserBrowseAway);
+  onFlowUserBrowseAwayRef.current = onFlowUserBrowseAway;
   const ownsSectionEndCallbackRef = useRef(false);
   const lastHandledFoliateRenderVersionRef = useRef(foliateRenderVersion);
   const isEinkRef = useRef(isEink);
@@ -321,6 +326,9 @@ export function useFlowScrollSync({
               bookPct: progress.bookPct,
             });
           }
+        },
+        onUserBrowseAway: () => {
+          onFlowUserBrowseAwayRef.current?.();
         },
       });
     }

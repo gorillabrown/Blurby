@@ -23,7 +23,15 @@ export async function jumpFoliateToWordAnchor(
   api.clearUserBrowsing?.();
 
   const hit = api.highlightWordByIndex?.(wordIndex, styleHint, { allowMotion: true }) ?? false;
-  if (hit) return true;
+  if (hit) {
+    // In paginated mode (CSS columns), scrollToAnchor may not take effect
+    // synchronously. Yield a frame to let the layout settle, then re-apply
+    // the highlight+scroll so the page reliably navigates to the word.
+    await new Promise((r) => setTimeout(r, 60));
+    api.clearUserBrowsing?.();
+    api.highlightWordByIndex?.(wordIndex, styleHint, { allowMotion: true });
+    return true;
+  }
 
   const sectionIndex = api.getSectionForWordIndex?.(wordIndex) ?? null;
   if (sectionIndex == null) return false;
