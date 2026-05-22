@@ -10,6 +10,8 @@ import { usePersistentReadingAnchor } from "../hooks/usePersistentReadingAnchor"
 import {
   resolveBookOpenInitialCfi,
   shouldClearBrowseAwayOnAnchorEvent,
+  shouldPersistRelocateProgress,
+  shouldWriteRelocateCfi,
 } from "../utils/persistentReadingAnchor";
 import useNarration from "../hooks/useNarration";
 import { type BookWordArray } from "../types/narration";
@@ -267,7 +269,7 @@ export default function ReaderContainer({
     readingMode === "narrate" ? "flow" : readingMode;
   const compatibilityLastReadingMode: "focus" | "flow" =
     settings.lastReadingMode === "narrate" ? "flow" : (settings.lastReadingMode || "flow");
-  const isFlowSurfaceMode = readingMode === "flow" || readingMode === "narrate";
+  const isScrolledSurfaceMode = readingMode === "focus" || readingMode === "flow" || readingMode === "narrate";
   const modePlaying = readingMode === "focus"
     ? focusPlaying
     : readingMode === "flow"
@@ -879,6 +881,16 @@ export default function ReaderContainer({
     setIsBrowsedAway(isBrowsed);
   }, []);
 
+  const handleJumpBackToPersistentWord = useCallback(() => {
+    syncVisualToPersistentWord({ navigate: true });
+    foliateApiRef.current?.clearUserBrowsing?.();
+    setIsBrowsedAway(false);
+  }, [setIsBrowsedAway, syncVisualToPersistentWord]);
+
+  const handleFoliateUserBrowseAway = useCallback(() => {
+    setIsBrowsedAway(true);
+  }, [setIsBrowsedAway]);
+
   const handleScrollExit = useCallback((finalPos: number) => {
     setHighlightedWordIndex(finalPos);
     setReadingMode("page");
@@ -1190,7 +1202,7 @@ export default function ReaderContainer({
           // would reopen at the wrong section instead of the real reading position.
           const mode = readingModeRef.current;
           const isBrowsingAway = foliateApiRef.current?.isUserBrowsing?.() ?? false;
-          if (!(isBrowsingAway && (mode === "flow" || mode === "narrate"))) {
+          if (shouldWriteRelocateCfi({ mode, userBrowsing: isBrowsingAway })) {
             activeDoc.cfi = detail.cfi;
           }
           // During narration/flow, the word-advance callback owns highlightedWordIndex —
@@ -1219,7 +1231,13 @@ export default function ReaderContainer({
           }
           // Only PERSIST progress after engagement (prevents saving false progress on browse)
           // TTS-7M: Also skip progress save when resume anchor is active (passive event noise)
-          if (!hasEngagedRef.current || hasResumeAnchor) return;
+          const shouldPersistRelocate = shouldPersistRelocateProgress({
+            mode,
+            hasEngaged: hasEngagedRef.current,
+            hasResumeAnchor,
+            userBrowsing: isBrowsingAway,
+          });
+          if (!shouldPersistRelocate) return;
           markPageActivity();
           const progressAnchor = resolveCanonicalWordAnchor({
             readingMode: mode,
@@ -1312,8 +1330,8 @@ export default function ReaderContainer({
         setTimeout(() => {
           setFoliateRenderVersion((prev) => prev + 1);
           const mode = readingModeRef.current;
-          const isFlowSurfaceMode = mode === "flow" || mode === "narrate";
-          if (!isFlowSurfaceMode) {
+          const isScrolledSurfaceMode = mode === "focus" || mode === "flow" || mode === "narrate";
+          if (!isScrolledSurfaceMode) {
             extractFoliateWords();
             // TTS-7M (BUG-135): When a resume anchor is active, passive onLoad
             // must not replace the authoritative start point.
@@ -1361,18 +1379,9 @@ export default function ReaderContainer({
         }, 200); // Slightly longer delay to ensure foliate has finished rendering
       }}
       viewApiRef={foliateApiRef}
-      isReading={isBrowsedAway && isFlowSurfaceMode}
-      onJumpToHighlight={() => {
-        // Recenter the current chunk first; fall back to the legacy narration return path.
-        if (foliateApiRef.current?.recenterChunkReadingBox?.()) {
-          setIsBrowsedAway(false);
-        } else if (foliateApiRef.current?.returnToNarration) {
-          foliateApiRef.current.returnToNarration();
-          setIsBrowsedAway(false);
-        } else if (activeDoc.cfi) {
-          foliateApiRef.current?.goTo?.(activeDoc.cfi);
-        }
-      }}
+      showJumpBackToAnchor={isBrowsedAway}
+      onJumpBackToAnchor={handleJumpBackToPersistentWord}
+      onUserBrowseAway={handleFoliateUserBrowseAway}
       readingMode={readingMode}
       flowPlaying={flowPlaying}
       highlightedWordIndex={highlightedWordIndex}
@@ -1382,7 +1391,7 @@ export default function ReaderContainer({
       getAudioProgress={narration.speaking ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
       chunkReadingVisualState={chunkReadingVisualState}
-      flowMode={isFlowSurfaceMode}
+      flowMode={isScrolledSurfaceMode}
       scrollContainerRef={flowScrollContainerRef}
       flowCursorRef={flowScrollCursorRef}
       foliateRenderVersion={foliateRenderVersion}
@@ -1445,11 +1454,13 @@ export default function ReaderContainer({
     />
   ) : null;
 
+  const showFocusOverlay = readingMode === "focus" && focusPlaying;
+
   const renderView = () => {
     // For foliate EPUBs in Page/Flow: show foliate view
     // Focus mode overlays ReaderView on top of foliate
     if (useFoliate) {
-      if (readingMode === "focus") {
+      if (showFocusOverlay) {
         // Focus overlay on top of foliate (RSVP display)
         return (
           <>
@@ -1536,9 +1547,9 @@ export default function ReaderContainer({
           isEink={isEink}
           chapters={docChapters}
           onSetWpm={setWpm}
-          flowProgress={isFlowSurfaceMode ? flowProgress ?? undefined : undefined}
+          flowProgress={isScrolledSurfaceMode ? flowProgress ?? undefined : undefined}
           currentChapterName={(() => {
-            if (!isFlowSurfaceMode || docChapters.length === 0) return undefined;
+            if (!isScrolledSurfaceMode || docChapters.length === 0) return undefined;
             const idx = getCurChIdx(chaptersFromCharOffsets(activeDoc.content, docChapters), currentWordIndex);
             return docChapters[idx]?.title;
           })()}
@@ -1569,12 +1580,12 @@ export default function ReaderContainer({
 
       {menuFlap}
       <ReturnToReadingPill
-        visible={isBrowsedAway && isFlowSurfaceMode && isNarrating && !narration.speaking}
+        visible={isBrowsedAway && isScrolledSurfaceMode && isNarrating && !narration.speaking}
         activeOverlay={menuFlapOpen || showBacktrackPrompt}
         onReturn={handleReturnToReading}
       />
       {/* BUG-147: Return to narration position when actively speaking but user has paged away */}
-      {!useFoliate && isBrowsedAway && isFlowSurfaceMode && isNarrating && narration.speaking && (
+      {!useFoliate && isBrowsedAway && isScrolledSurfaceMode && isNarrating && narration.speaking && (
         <button
           className="return-to-narration-btn"
           onClick={handleReturnToReading}

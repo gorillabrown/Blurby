@@ -242,6 +242,12 @@ interface FoliatePageViewProps {
   isReading?: boolean;
   /** Callback to scroll foliate to where the current highlight is */
   onJumpToHighlight?: () => void;
+  /** Whether to show the jump-back button (user has browsed away from persistent anchor) */
+  showJumpBackToAnchor?: boolean;
+  /** Callback when the user clicks the jump-back button */
+  onJumpBackToAnchor?: () => void;
+  /** Callback when user actively browses away from the persistent reading position */
+  onUserBrowseAway?: () => void;
   /** Current reading mode — "page", "flow", or "focus" */
   readingMode?: string;
   /** Whether Flow mode is actively playing */
@@ -334,6 +340,8 @@ export interface FoliateViewAPI {
   applyChunkReadingVisualState: (state: ChunkReadingVisualState | null) => void;
   /** CHUNK-SYNC-2: Clear chunk/active-word visual state across rendered Foliate roots. */
   clearChunkReadingVisualState: () => void;
+  /** Clear the user browsing flag and reset the scroll displacement baseline. */
+  clearUserBrowsing: () => void;
 }
 
 export default function FoliatePageView({
@@ -349,6 +357,9 @@ export default function FoliatePageView({
   viewApiRef,
   isReading,
   onJumpToHighlight,
+  showJumpBackToAnchor,
+  onJumpBackToAnchor,
+  onUserBrowseAway,
   readingMode,
   flowPlaying,
   highlightedWordIndex,
@@ -385,6 +396,8 @@ export default function FoliatePageView({
   onFlowWordAdvanceRef.current = onFlowWordAdvance;
   const onWordClickRef = useRef(onWordClick);
   onWordClickRef.current = onWordClick;
+  const onUserBrowseAwayRef = useRef(onUserBrowseAway);
+  onUserBrowseAwayRef.current = onUserBrowseAway;
   const onLoadRef = useRef(onLoad);
   onLoadRef.current = onLoad;
   const onWordsReextractedRef = useRef(onWordsReextracted);
@@ -602,6 +615,17 @@ export default function FoliatePageView({
 
   const invalidateWordPositionIndex = useCallback(() => {
     wordPositionIndexRef.current.invalidate();
+  }, []);
+
+  const markUserBrowsingAway = useCallback(() => {
+    const mode = readingModeRef.current;
+    if (mode === "page" || mode === "focus" || mode === "flow" || mode === "narrate") {
+      userBrowsingRef.current = true;
+      onUserBrowseAwayRef.current?.();
+      if (import.meta.env.DEV) {
+        console.debug("[foliate] user browsing away (mode:", mode, ")");
+      }
+    }
   }, []);
 
   const clearSoftHighlight = useCallback(() => {
@@ -1416,6 +1440,10 @@ export default function FoliatePageView({
             // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
             applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
             clearSoftHighlight: () => clearSoftHighlight(),
+            clearUserBrowsing: () => {
+              userBrowsingRef.current = false;
+              lastScrollFollowPosRef.current = null;
+            },
           };
         }
 
@@ -1884,20 +1912,22 @@ export default function FoliatePageView({
     if (!flowMode) return;
 
     const handleWheel = () => {
-      const mode = readingModeRef.current;
-      if (mode === "flow" || mode === "narrate") {
-        userBrowsingRef.current = true;
-        if (import.meta.env.DEV) console.debug("[foliate] wheel → userBrowsingRef=true (mode:", mode, ")");
-      }
+      markUserBrowsingAway();
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true, capture: true });
     return () => window.removeEventListener("wheel", handleWheel, { capture: true });
-  }, [flowMode]);
+  }, [flowMode, markUserBrowsingAway]);
 
   // Expose navigation methods via ref
-  const goNext = useCallback(() => viewRef.current?.renderer?.next(), []);
-  const goPrev = useCallback(() => viewRef.current?.renderer?.prev(), []);
+  const goNext = useCallback(() => {
+    markUserBrowsingAway();
+    viewRef.current?.renderer?.next();
+  }, [markUserBrowsingAway]);
+  const goPrev = useCallback(() => {
+    markUserBrowsingAway();
+    viewRef.current?.renderer?.prev();
+  }, [markUserBrowsingAway]);
   const goTo = useCallback((target: string | number) => viewRef.current?.goTo(target), []);
   const goToFraction = useCallback((frac: number) => viewRef.current?.goToFraction(frac), []);
 
@@ -1922,15 +1952,15 @@ export default function FoliatePageView({
           >&#x203A;</button>
         </>
       )}
-      {/* Jump to reading position button — shown when reading mode is active */}
-      {isReading && onJumpToHighlight && (
+      {/* Jump back to persistent last-read word — shown when user has browsed away */}
+      {showJumpBackToAnchor && onJumpBackToAnchor && (
         <button
           className="recenter-reading-box-btn"
-          onClick={onJumpToHighlight}
-          aria-label="Recenter reading box on current sentence"
-          title="Recenter reading box on current sentence"
+          onClick={onJumpBackToAnchor}
+          aria-label="Jump back to persistent last-read word"
+          title="Jump back to persistent last-read word"
         >
-          ↩ Recenter box
+          Jump back
         </button>
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}

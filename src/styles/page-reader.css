@@ -309,6 +309,7 @@
   transition: opacity var(--transition-normal), transform var(--transition-fast);
   box-shadow: var(--shadow-sm);
   -webkit-app-region: no-drag;
+  white-space: nowrap;
 }
 .recenter-reading-box-btn:hover {
   opacity: 1;

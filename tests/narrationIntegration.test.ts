@@ -16,7 +16,8 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
   it("ReaderContainer passes spoken-word truth into FoliatePageView while narration is active", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("readingMode={readingMode}");
-    expect(src).toContain("flowMode={isFlowSurfaceMode}");
+    expect(src).toContain("flowMode={isScrolledSurfaceMode}");
+    expect(src).toContain('readingMode === "focus" || readingMode === "flow" || readingMode === "narrate"');
     expect(src).toContain("isNarrating={isNarrating && narration.speaking && !narration.warming}");
     expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
     expect(src).toContain("narrationPauseReason={narration.pauseReason}");
@@ -38,8 +39,8 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
 
   it("ReaderContainer treats narrate as a flow-surface mode during Foliate onLoad", () => {
     const src = read("src/components/ReaderContainer.tsx");
-    expect(src).toContain("const isFlowSurfaceMode = mode === \"flow\" || mode === \"narrate\";");
-    expect(src).toContain("if (!isFlowSurfaceMode) {");
+    expect(src).toContain("const isScrolledSurfaceMode = mode === \"focus\" || mode === \"flow\" || mode === \"narrate\";");
+    expect(src).toContain("if (!isScrolledSurfaceMode) {");
     expect(src).not.toContain("onLoad={() => {\n        // Extract words from DOM after each section loads\n        // BUT NOT during active narration/flow — rebuilding the word array mid-mode\n        // shifts all data-word-index attributes, causing highlight/page jumps.\n        // Uses ref (not state) because this callback is captured in a closure at render time.\n        setTimeout(() => {\n          setFoliateRenderVersion((prev) => prev + 1);\n          const mode = readingModeRef.current;\n          if (mode !== \"flow\") {");
   });
 

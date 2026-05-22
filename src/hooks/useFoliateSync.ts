@@ -127,11 +127,15 @@ export function useFoliateSync({
   // Polls foliateApiRef.isUserBrowsing on an interval while in flow surface
   // mode (flow or narrate), regardless of play/pause state. The "recenter"
   // button should remain visible if the user scrolls away while paused.
-  const isActivelyReading = isNarrating || !!flowPlaying || readingMode === "flow";
+  const isBrowseAwareSurface = readingMode === "page"
+    || readingMode === "focus"
+    || readingMode === "flow"
+    || isNarrating
+    || !!flowPlaying;
   const [isBrowsedAway, setIsBrowsedAway] = useState(false);
 
   useEffect(() => {
-    if (!useFoliate || !isActivelyReading) {
+    if (!useFoliate || !isBrowseAwareSurface) {
       if (isBrowsedAway) setIsBrowsedAway(false);
       return;
     }
@@ -141,7 +145,7 @@ export function useFoliateSync({
     };
     const timer = setInterval(checkBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
     return () => clearInterval(timer);
-  }, [useFoliate, isActivelyReading]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [useFoliate, isBrowseAwareSurface]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── 2. Chapter charOffset sync ───────────────────────────────────────────
   // Once bookWordMeta arrives, replace each chapter's charOffset with the
