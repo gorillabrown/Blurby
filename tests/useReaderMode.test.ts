@@ -657,6 +657,7 @@ describe("useReaderMode four-mode foundation", () => {
     pendingNarrationResume?: boolean;
     narrationOverrides?: Record<string, unknown>;
     foliateApiCurrent?: Record<string, unknown>;
+    getEffectiveWords?: () => string[];
     evalTrace?: any;
   }) {
     const modeInstance = {
@@ -737,7 +738,7 @@ describe("useReaderMode four-mode foundation", () => {
         wpm: 180,
         setWpm: vi.fn(),
         effectiveWpm: 180,
-        getEffectiveWords: () => ["alpha", "beta", "gamma"],
+        getEffectiveWords: options?.getEffectiveWords ?? (() => ["alpha", "beta", "gamma"]),
         extractFoliateWords: vi.fn(),
         paragraphBreaks: new Set<number>(),
         highlightedWordIndex,
@@ -838,6 +839,50 @@ describe("useReaderMode four-mode foundation", () => {
       await flushPromises();
     });
 
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      ["alpha", "beta", "gamma"],
+      2,
+      180,
+      expect.any(Function),
+    );
+    expect(harness.resumeAnchorRef.current).toBeNull();
+    expect(harness.explicitSelectionAnchorRef.current).toBeNull();
+  });
+
+  it("preserves narrate startup options across delayed Foliate word extraction", async () => {
+    let wordsReady = false;
+    const getEffectiveWords = vi.fn(() => (wordsReady ? ["alpha", "beta", "gamma"] : []));
+    const next = vi.fn(() => {
+      wordsReady = true;
+    });
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialHighlightedWordIndex: 2,
+      softWordIndex: 2,
+      resumeAnchor: 0,
+      explicitSelectionAnchor: 2,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+      },
+      foliateApiCurrent: { next },
+      getEffectiveWords,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+      await flushPromises();
+    });
+
+    expect(harness.observed.readingMode).toBe("narrate");
+    expect(harness.observed.flowPlaying).toBe(false);
     expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
       ["alpha", "beta", "gamma"],
       2,
@@ -1275,5 +1320,155 @@ describe("useReaderMode four-mode foundation", () => {
 
     expect(harness.narration.setOnTruthSync).toHaveBeenLastCalledWith(null);
     expect(harness.observed.readingMode).toBe("flow");
+  });
+
+  it("treats word index 0 as a valid explicit narrate anchor", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialHighlightedWordIndex: 0,
+      softWordIndex: 5,
+      explicitSelectionAnchor: 0,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      ["alpha", "beta", "gamma"],
+      0,
+      180,
+      expect.any(Function),
+    );
+    expect(harness.explicitSelectionAnchorRef.current).toBeNull();
+  });
+
+  it("preserves narrate options across delayed extraction with word 0 anchor", async () => {
+    let wordsReady = false;
+    const getEffectiveWords = vi.fn(() => (wordsReady ? ["alpha", "beta", "gamma"] : []));
+    const next = vi.fn(() => {
+      wordsReady = true;
+    });
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialHighlightedWordIndex: 0,
+      softWordIndex: 0,
+      explicitSelectionAnchor: 0,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+      },
+      foliateApiCurrent: { next },
+      getEffectiveWords,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
+
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+      await flushPromises();
+    });
+
+    expect(harness.observed.readingMode).toBe("narrate");
+    expect(harness.observed.flowPlaying).toBe(false);
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      ["alpha", "beta", "gamma"],
+      0,
+      180,
+      expect.any(Function),
+    );
+  });
+
+  it("selecting a mode clears isBrowsedAway via stopAllModes", async () => {
+    const setIsBrowsedAway = vi.fn();
+    const modeInstance = {
+      modeRef: { current: null },
+      startMode: vi.fn(),
+      stopMode: vi.fn(),
+      pauseMode: vi.fn(),
+      resumeMode: vi.fn(),
+      setSpeed: vi.fn(),
+      jumpToWordInMode: vi.fn(),
+      updateModeWords: vi.fn(),
+      pendingResumeRef: { current: null },
+    };
+
+    const narration = createNarration();
+    const reader = {
+      playing: false,
+      wordIndex: 0,
+      wordsRef: { current: ["alpha", "beta", "gamma"] as string[] },
+      togglePlay: vi.fn(),
+      jumpToWord: vi.fn(),
+    };
+
+    let snapshot: UseReaderModeReturn | null = null;
+
+    function Harness() {
+      const [readingMode, setReadingMode] = useState<ReaderMode>("flow");
+      const [isNarrating, setIsNarrating] = useState(true);
+      const [focusPlaying, setFocusPlaying] = useState(false);
+      const [flowPlaying, setFlowPlaying] = useState(true);
+      const [highlightedWordIndex, setHighlightedWordIndex] = useState(5);
+
+      snapshot = useReaderMode({
+        reader,
+        narration,
+        modeInstance: modeInstance as any,
+        foliateApiRef: { current: { clearSoftHighlight: vi.fn(), findFirstVisibleWordIndex: vi.fn(() => 0), highlightWordByIndex: vi.fn(() => true), getSectionForWordIndex: vi.fn(() => 0), goToSection: vi.fn() } } as any,
+        foliateWordsRef: { current: [] },
+        useFoliate: true,
+        settings: { lastReadingMode: "flow", readingMode: "flow", ttsEngine: "web", isNarrating: true } as any,
+        updateSettings: vi.fn(),
+        wpm: 180,
+        setWpm: vi.fn(),
+        effectiveWpm: 180,
+        getEffectiveWords: () => ["alpha", "beta", "gamma"],
+        extractFoliateWords: vi.fn(),
+        paragraphBreaks: new Set<number>(),
+        highlightedWordIndex,
+        setHighlightedWordIndex,
+        hasEngagedRef: { current: true },
+        focusPlaying,
+        setFocusPlaying,
+        flowPlaying,
+        setFlowPlaying,
+        isBrowsedAway: true,
+        setIsBrowsedAway,
+        pageNavRef: { current: { returnToHighlight: vi.fn(), getCurrentPageStart: vi.fn(() => 0) } },
+        readingMode,
+        setReadingMode,
+        isNarrating,
+        setIsNarrating,
+        pendingNarrationResumeRef: { current: false },
+        bookWordsTotalWords: 3,
+        resumeAnchorRef: { current: null },
+        softWordIndexRef: { current: 0 },
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+      await flushPromises();
+    });
+
+    await act(async () => {
+      snapshot?.handleSelectMode("narrate");
+      await flushPromises();
+    });
+
+    expect(setIsBrowsedAway).toHaveBeenCalledWith(false);
   });
 });

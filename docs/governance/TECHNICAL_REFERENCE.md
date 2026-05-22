@@ -1,8 +1,8 @@
 # Blurby Technical Reference
 
-**Version:** 2.3.1
-**Last updated:** 2026-05-13
-**Branch:** `main` (v1.5.0)
+**Version:** 2.3.2
+**Last updated:** 2026-05-21
+**Branch:** `main` (v1.75.1)
 
 This document is the governing technical reference for Blurby. It covers architecture, data model, reading modes, rendering, TTS, build/release, and known technical debt. A new developer should be able to understand the entire system by reading this document and following the file path references.
 
@@ -246,7 +246,7 @@ Sync uses revision counters and tombstones for conflict resolution:
 
 ## 5. Reading Modes
 
-Blurby implements four reading modes via the strategy pattern defined in `src/modes/ModeInterface.ts`.
+Blurby exposes four user-facing reading modes: Page, Focus, Flow, and Narrate. Page/Focus/legacy Flow still use the mode-interface pattern where appropriate, but current Foliate Flow and Narrate are orchestrated by hook-level runtime owners in `ReaderContainer.tsx`, `useReaderMode.ts`, `useFlowScrollSync.ts`, and `useNarration.ts`.
 
 ### ReadingMode Interface Contract
 
@@ -270,7 +270,7 @@ destroy()           — Final cleanup, instance should not be reused
 create(config) → start(wordIdx) → [advance / pause / resume / setSpeed] → stop → destroy
 ```
 
-`ReaderContainer` orchestrates transitions between modes. When switching modes, the current mode is `stop()`'d and `destroy()`'d, and the new mode is created and `start()`'d.
+`ReaderContainer` orchestrates transitions between modes. Selecting a mode changes the visible mode only; playback starts only when the user presses Play/Space. When playback begins, the selected mode consumes the current word anchor and starts the mode-specific owner.
 
 **ReaderContainer decomposition (REFACTOR-1A, v1.48.0):** The 33 useEffect hooks that previously lived in `ReaderContainer.tsx` were extracted into 5 domain-specific custom hooks to reduce re-render cost and improve maintainability. `ReaderContainer` is now a thin orchestrator that composes these hooks:
 
@@ -295,13 +295,26 @@ Three-tier system that guarantees a definite starting word for every reading mod
 
 | Tier | Ref | Set by | Visual | Priority |
 |------|-----|--------|--------|----------|
-| **Soft selection** | `softWordIndexRef` | Auto — `findFirstVisibleWordIndex()` on every `onRelocate`/`onLoad` | `.page-word--soft-selected` (2px left-border accent). Page mode only — cleared on mode start. | Lowest |
+| **Soft selection** | `softWordIndexRef` | Auto - `findFirstVisibleWordIndex()` on every `onRelocate`/`onLoad` | `.page-word--soft-selected` (2px left-border accent). Page mode only - cleared on mode start. | Lowest |
 | **Hard selection** | `highlightedWordIndex` | User clicks a word | Distinct highlight. Persists across page turns. | Middle |
-| **Resume anchor** | `resumeAnchorRef` | Mode pause/reopen (captures live cursor) | None (internal) | Highest |
+| **Resume anchor** | `resumeAnchorRef` | Mode pause/reopen (captures live cursor) | None (internal) | High |
+| **Explicit selection anchor** | `explicitSelectionAnchorRef` | User hard-clicks/selects a word immediately before mode start or while selecting a mode | None (internal; mirrored by hard highlight) | Highest |
 
-**Mode start resolution order:** `resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`
+**Mode start resolution order for mode start:** `explicitSelectionAnchorRef > resumeAnchorRef > highlightedWordIndex > softWordIndex > 0`. Word index `0` is valid and must never be dropped by truthiness checks.
 
 Soft selection uses refs + direct shadow DOM class mutation (not React state) to avoid re-renders on every page turn. See LL-083.
+
+### Reader Runtime Lock-In Contracts (FLOW-SECTION-HANDOFF-RESTART-1, 2026-05-21)
+
+These contracts prevent future Flow work from regressing Narrate:
+
+- **Mode selection is not playback:** Clicking/selecting Focus, Flow, or Narrate only selects the mode. Play/Space starts the selected mode from the current word.
+- **Current word is shared and stable:** A hard-selected word becomes the global mode-start anchor until a mode advances it or the user hard-selects another word.
+- **Narrate starts exactly at the selected word:** Narrate startup must pass the consumed anchor directly to `narration.startCursorDriven(...)`. It must not back up to a sentence boundary, visible-page heuristic, or stale resume anchor.
+- **Delayed Foliate extraction preserves mode intent:** If Foliate words are not ready, retry startup with the original options, including `{ targetMode: "narrate", resumeNarration: true }`.
+- **Flow and Narrate may share a Foliate surface but not a pacer:** Foliate Flow is paced by `FlowScrollEngine`; Narrate is paced by TTS/audio truth-sync from `useNarration` and `audioScheduler`.
+- **Flow-specific restart semantics do not apply to Narrate:** `restartEngineFromRefs(...)` is a Foliate Flow section-handoff helper. Narrate continuity is governed by full-book word extraction, selected-word anchors, and audio-confirmed cursor truth.
+- **Chapter/navigation shortcuts stay global:** Book/chapter navigation affordances (including the `C` navigation entry point when enabled) must remain available in Page, Focus, Flow, and Narrate unless an input field owns the key.
 
 ### Focus Mode (`src/modes/FocusMode.ts`)
 
@@ -314,27 +327,32 @@ RSVP (Rapid Serial Visual Presentation). Displays one word at a time centered on
 
 ### Flow Mode (`src/modes/FlowMode.ts` + `src/utils/FlowScrollEngine.ts`)
 
-Infinite-scroll reading with a shrinking underline cursor pacing the reader line-by-line.
+Infinite-scroll reading with a reading-window/line progression pacer.
 
-- **Architecture (FLOW-3A):** Timing engine (`FlowMode.ts`) drives word advancement via `setTimeout` chain with half-duration rhythm pauses. Visual rendering handled by `FlowScrollEngine` — an imperative TypeScript class (per LL-014) that owns the scroll container, cursor DOM element, animation timers, and line map.
-- **Rendering path:** FoliatePageView switches to `flow="scrolled"` (foliate-js native scrolled mode) when `flowMode=true`. All documents are EPUB (since EPUB-2B), so FlowScrollEngine always operates on foliate's scrollable container. `FlowScrollView.tsx` exists as a non-EPUB fallback but is effectively dead code.
+- **Architecture:** Foliate Flow is paced by `FlowScrollEngine` through `useFlowScrollSync`. Non-Foliate/legacy Flow can still use `FlowMode.ts` via `modeInstance.startMode("flow", ...)`.
+- **Single-pacer rule:** For Foliate Flow, `useReaderMode.ts` sets `flowPlaying=true` but skips `modeInstance.startMode("flow", ...)`. This prevents dual timers. Do not copy this owner to Narrate.
+- **Rendering path:** FoliatePageView switches to `flow="scrolled"` (foliate-js native scrolled mode) when `flowMode=true`. All documents are EPUB (since EPUB-2B), so FlowScrollEngine operates on foliate's scrollable container. `FlowScrollView.tsx` exists as a non-EPUB fallback but is effectively dead code.
 - **Shrinking underline cursor:** A `var(--accent)` underline spans the full width of the active line, then contracts from left-to-right via CSS `transition: width Xms linear` (duration derived from WPM and word count per line). When width reaches 0, the next line's underline appears at full width. Forced reflow (`offsetWidth`) used between `transition:none` and the new transition (per LL-015).
 - **Reading zone:** Active line auto-scrolled to ~25% from top of viewport (`FLOW_READING_ZONE_POSITION`). Upcoming text visible below, already-read text scrolls off top. E-ink mode uses jump-scroll instead of smooth scroll.
 - **Line map:** `buildLineMap()` scans all `[data-word-index]` spans in the scroll container, groups them into lines by vertical position (y-coordinate threshold = 0.5 * element height).
+- **Section handoff:** When Flow reaches the end of a Foliate section, `useFlowScrollSync` calls `goToSection()`, waits for section readiness, and explicitly restarts `FlowScrollEngine` at the next section start. Rebuilding a line map alone is insufficient after `onComplete` has stopped engine state.
 - **Pause/resume:** Space pauses cursor animation (freezes current width via `getComputedStyle`). Mouse wheel triggers manual scroll pause with 2s auto-resume delay (`FLOW_SCROLL_RESUME_DELAY_MS`).
 - **Keyboard:** ↑/↓ = line jump, Shift+↑/↓ = paragraph jump, ←/→ = WPM adjust (±25), Space = pause/resume, Escape = exit.
 - **Constants:** `FLOW_READING_ZONE_POSITION` (0.25), `FLOW_CURSOR_HEIGHT_PX` (3), `FLOW_CURSOR_EINK_HEIGHT_PX` (4), `FLOW_SCROLL_RESUME_DELAY_MS` (2000), `FLOW_LINE_ADVANCE_BUFFER_MS` (50).
 - **Reverses LL-013** ("Flow belongs in Page View") — see LL-067. Infinite scroll is fundamentally incompatible with CSS multi-column pagination.
 
-### Narrate Mode (`src/modes/NarrateMode.ts`)
+### Narrate Mode (hook-driven via `useReaderMode.ts` + `useNarration.ts`)
 
-TTS-driven reading with word highlight and auto page turn.
+TTS-driven reading with chunk/word highlight and audio-owned progress.
 
-- Delegates all timing to the narration engine (`useNarration` hook)
-- Web Speech uses boundary events for word advancement; Kokoro uses estimated timers from audio duration / word count
+- Delegates all playback timing to the narration engine (`useNarration` hook)
+- Kokoro uses trusted word-native timing when accepted by `audioScheduler`; Web Speech uses browser boundary events when available
 - Speed controlled by TTS rate (0.5-2.0x), not WPM
 - Effective WPM derived as: `ttsRate * TTS_RATE_BASELINE_WPM` (150)
-- Uses `NarrationInterface` to bridge with the React hook without importing React
+- Uses `NarrationInterface` to bridge with hook consumers without importing React into mode abstractions
+- Starts only when Play/Space calls `startFlow({ resumeNarration: true, targetMode: "narrate" })`
+- Starts from the consumed explicit/current word anchor and preserves that intent across delayed Foliate word extraction
+- Uses `installNarrateTruthSync()` and `narration.setOnTruthSync(...)` as the visual update owner; `FlowScrollEngine` never paces Narrate
 
 ### ModeConfig
 
@@ -559,6 +577,8 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 ### Narrate Mode Architecture (Post-Stabilization) — TTS-7G Final Closeout
 
 Standing architecture-decision reference: `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` (engine posture, invariants, adopt/reject/defer register, and cache-evolution roadmap).
+
+**Narrate lock-in contract (2026-05-21):** Narrate is not a Flow timer with audio attached. It may reuse the Foliate scrolled surface and natural chunk renderer, but its authoritative clock is TTS/audio truth-sync. The runtime must preserve exact selected-word startup, keep `flowPlaying=false` for Narrate, avoid `modeInstance.startMode("flow", ...)`, and route trusted word updates through `setOnTruthSync`. If Foliate extraction is delayed, retry with the original Narrate options rather than falling back to Flow defaults.
 
 **Stabilization scope:** TTS-7A through TTS-7G (7 sprints + hotfixes, 21 bugs resolved: BUG-101 through BUG-121). TTS-7G was the final verification sprint — confirmed BUG-117 (910ms first-chunk IPC handler) was resolved by TTS-7C (Float32Array IPC), NAR-5 (13-word first chunk), and TTS-7E (deferred ack). Response path measured at < 2ms. DEV instrumentation added to `kokoroStrategy.ts` (`first-chunk-response` and `schedule-chunk` perf events via `narratePerf.ts`).
 

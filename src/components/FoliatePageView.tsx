@@ -1536,7 +1536,7 @@ export default function FoliatePageView({
     scheduleWordPositionIndexRebuild("flow-mode-change");
     if (flowMode) {
       const targetIdx = highlightedWordIndexRef.current;
-      if (targetIdx > 0) {
+      if (targetIdx >= 0) {
         const scrollAfterLayout = () => {
           const roots = getRenderedWordRoots();
           for (const { root } of roots) {
@@ -1732,6 +1732,10 @@ export default function FoliatePageView({
   // drifts beyond a threshold, the user must have scrolled away manually —
   // regardless of input method (wheel, keyboard, touch, etc.).
   const lastScrollFollowPosRef = useRef<number | null>(null);
+  useEffect(() => {
+    userBrowsingRef.current = false;
+    lastScrollFollowPosRef.current = null;
+  }, [readingMode]);
   useEffect(() => {
     if (readingMode !== "narrate" || narrationWordIndex == null) return;
     const view = viewRef.current;

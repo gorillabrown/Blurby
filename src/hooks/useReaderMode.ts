@@ -361,7 +361,7 @@ export function useReaderMode({
       setTimeout(() => {
         extractFoliateWords();
         const words = getEffectiveWords();
-        if (words.length > 0) startFlow();
+        if (words.length > 0) startFlow(options);
       }, FOLIATE_SECTION_LOAD_WAIT_MS);
       return;
     }

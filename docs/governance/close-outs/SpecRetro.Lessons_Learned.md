@@ -343,3 +343,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** For sprints that exercise existing infrastructure rather than building new runtime code, the spec can be tighter and the effort estimate more reliable. Flag these as "infrastructure execution" in the spec so reviewers calibrate expectations correctly.
 **Applies to:** Any sprint whose primary work is running tooling, capturing baselines, or wiring existing scripts into CI.
 **Status:** Observation
+
+### SRL-046 — Isolation sprints need preflight stabilization gates before extraction (READER-MODE-ISOLATION-1-PHASE-0, 2026-05-21)
+**Verdict:** Adapter isolation is safer when known shared-surface guardrails are fixed before extraction begins.
+**Evidence:** Phase 0 closed word-0 recentering and stale browse-away reset before moving Flow/Narrate ownership into adapters, and locked those seams with 10 regression tests plus code-search gates.
+**Recommendation:** For cross-mode refactors, require a Phase 0 gate that locks exact-anchor, visual-follow, and mode-switch invariants before restructuring.
+**Applies to:** Reader modes, shared-surface refactors, adapter extraction sprints.
+**Status:** Observation
+
+### SRL-047 — Mode lifecycle must reset local visual refs, not only runtime owners (READER-MODE-ISOLATION-1-PHASE-0, 2026-05-21)
+**Verdict:** Runtime ownership contracts are incomplete if local view refs can survive mode switches and block the new owner.
+**Evidence:** `userBrowsingRef` and `lastScrollFollowPosRef` could carry stale Flow/Narrate state into the next mode until a reading-mode reset effect was added.
+**Recommendation:** Adapter `select()` / `start()` contracts should include visual-state reset guarantees for local refs, browse-away state, cursor baselines, and recenter affordances.
+**Applies to:** Flow/Narrate adapters, Foliate surface bridge, mode lifecycle specs.
+**Status:** Observation
