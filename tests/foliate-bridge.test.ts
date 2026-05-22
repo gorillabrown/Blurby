@@ -107,4 +107,9 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   it("passes showJumpBackToAnchor={isBrowsedAway} to FoliatePageView", () => {
     expect(readerSrc).toContain("showJumpBackToAnchor={isBrowsedAway}");
   });
+
+  it("uses mode-aware highlight class for click, selection, and return-to-narration paths", () => {
+    expect(src).toContain("resolveFoliateWordHighlightClass(readingModeRef.current)");
+    expect(src).not.toMatch(/classList\.add\("page-word--highlighted"\)/);
+  });
 });

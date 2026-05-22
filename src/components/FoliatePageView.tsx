@@ -1010,11 +1010,12 @@ export default function FoliatePageView({
             const resolvedToken = resolveRenderedToken(doc.body, target);
             if (!resolvedToken) return;
 
-            doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
-              el.classList.remove("page-word--highlighted")
-            );
+            const clickHighlightClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+            doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
+              el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
+            });
             getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
-              el.classList.add("page-word--highlighted")
+              el.classList.add(clickHighlightClass)
             );
             centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
@@ -1066,11 +1067,12 @@ export default function FoliatePageView({
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
                 if (resolvedToken) {
-                  doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
-                    el.classList.remove("page-word--highlighted")
-                  );
+                  const selHighlightClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+                  doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
+                    el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
+                  });
                   getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
-                    el.classList.add("page-word--highlighted")
+                    el.classList.add(selHighlightClass)
                   );
                   centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
@@ -1384,8 +1386,8 @@ export default function FoliatePageView({
               // the same unified path that live narration uses.
               const state = viewApiRef!.current!.resolveWordState(currentIdx);
               if (state.found && state.span) {
-                // Apply narration highlight class
-                state.span.classList.add("page-word--highlighted");
+                const returnClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+                state.span.classList.add(returnClass);
                 // Scroll to the word if it's off the visible page
                 if (!state.visible && state.doc) {
                   try {
