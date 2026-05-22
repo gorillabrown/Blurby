@@ -215,3 +215,15 @@ describe("usePersistentReadingAnchor", () => {
     expect(onUpdateProgress).not.toHaveBeenCalled();
   });
 });
+
+describe("persistent anchor click retargeting matrix", () => {
+  it("click retargeting is the only user browse action that mutates the persistent anchor", () => {
+    let anchor = 10;
+
+    anchor = reducePersistentWordAnchor(anchor, { type: "browse-away", visibleWordIndex: 90 }, 100);
+    expect(anchor).toBe(10);
+
+    anchor = reducePersistentWordAnchor(anchor, { type: "hard-selection", wordIndex: 90 }, 100);
+    expect(anchor).toBe(90);
+  });
+});

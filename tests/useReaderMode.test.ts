@@ -1490,3 +1490,119 @@ describe("useReaderMode four-mode foundation", () => {
     expect(setIsBrowsedAway).toHaveBeenCalledWith(false);
   });
 });
+
+describe("useReaderMode persistent anchor mode matrix", () => {
+  let container: HTMLDivElement;
+  let root: Root | null = null;
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+    container = document.createElement("div");
+    document.body.appendChild(container);
+  });
+
+  afterEach(() => {
+    if (root) {
+      flushSync(() => root?.unmount());
+      root = null;
+    }
+    container.remove();
+    vi.useRealTimers();
+  });
+
+  it.each(["focus", "flow", "narrate"] as const)(
+    "selecting %s does not start playback and uses the persistent anchor",
+    async (mode) => {
+      const modeInstance = {
+        modeRef: { current: null },
+        startMode: vi.fn(),
+        stopMode: vi.fn(),
+        pauseMode: vi.fn(),
+        resumeMode: vi.fn(),
+        setSpeed: vi.fn(),
+        jumpToWordInMode: vi.fn(),
+        updateModeWords: vi.fn(),
+        pendingResumeRef: { current: null },
+      };
+      const narration = createNarration();
+      const setIsBrowsedAway = vi.fn();
+      const setReadingModeFn = vi.fn();
+      const setFocusPlayingFn = vi.fn();
+      const setFlowPlayingFn = vi.fn();
+      const setIsNarratingFn = vi.fn();
+      const syncVisualToPersistentWord = vi.fn(() => 64);
+      const queuePostModeAnchorSync = vi.fn();
+      let snapshot: UseReaderModeReturn | null = null;
+
+      function Harness() {
+        const [readingMode, setReadingMode] = useState<ReaderMode>("page");
+        const [isNarrating, setIsNarrating] = useState(false);
+        const [focusPlaying, setFocusPlaying] = useState(false);
+        const [flowPlaying, setFlowPlaying] = useState(false);
+        const [highlightedWordIndex, setHighlightedWordIndex] = useState(0);
+
+        setReadingModeFn.mockImplementation(setReadingMode);
+        setFocusPlayingFn.mockImplementation(setFocusPlaying);
+        setFlowPlayingFn.mockImplementation(setFlowPlaying);
+        setIsNarratingFn.mockImplementation(setIsNarrating);
+
+        snapshot = useReaderMode({
+          reader: { playing: false, wordIndex: 0, wordsRef: { current: ["a", "b"] }, togglePlay: vi.fn(), jumpToWord: vi.fn() },
+          narration,
+          modeInstance: modeInstance as any,
+          foliateApiRef: { current: { clearSoftHighlight: vi.fn(), findFirstVisibleWordIndex: vi.fn(() => 0), highlightWordByIndex: vi.fn(() => true), getSectionForWordIndex: vi.fn(() => 0), goToSection: vi.fn() } } as any,
+          foliateWordsRef: { current: [] },
+          useFoliate: true,
+          settings: { lastReadingMode: "flow", readingMode: "page", ttsEngine: "web" } as any,
+          updateSettings: vi.fn(),
+          wpm: 180,
+          setWpm: vi.fn(),
+          effectiveWpm: 180,
+          getEffectiveWords: () => ["a", "b"],
+          extractFoliateWords: vi.fn(),
+          paragraphBreaks: new Set<number>(),
+          highlightedWordIndex,
+          setHighlightedWordIndex,
+          hasEngagedRef: { current: false },
+          focusPlaying,
+          setFocusPlaying,
+          flowPlaying,
+          setFlowPlaying,
+          isBrowsedAway: false,
+          setIsBrowsedAway,
+          pageNavRef: { current: { returnToHighlight: vi.fn(), getCurrentPageStart: vi.fn(() => 0) } },
+          readingMode,
+          setReadingMode,
+          isNarrating,
+          setIsNarrating,
+          pendingNarrationResumeRef: { current: false },
+          bookWordsTotalWords: 2,
+          resumeAnchorRef: { current: null },
+          softWordIndexRef: { current: 0 },
+          persistentWordIndexRef: { current: 64 },
+          commitPersistentWordIndex: vi.fn((_w: number) => _w),
+          syncVisualToPersistentWord,
+          queuePostModeAnchorSync,
+        });
+        return null;
+      }
+
+      root = createRoot(container);
+      await act(async () => {
+        root?.render(React.createElement(Harness));
+        await flushPromises();
+      });
+
+      await act(async () => {
+        snapshot?.handleSelectMode(mode);
+        await flushPromises();
+      });
+
+      expect(syncVisualToPersistentWord).toHaveBeenCalledWith({ navigate: false });
+      expect(queuePostModeAnchorSync).toHaveBeenCalledWith(64, mode);
+      expect(modeInstance.startMode).not.toHaveBeenCalled();
+      expect(narration.startCursorDriven).not.toHaveBeenCalled();
+    },
+  );
+});
