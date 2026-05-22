@@ -306,8 +306,6 @@ export default function ReaderContainer({
     if (useFoliate) {
       // Prefer full-book global words when available
       if (bookWordsRef.current?.complete) {
-        if (import.meta.env.DEV) console.debug("[TTS-7K] getEffectiveWords: using full-book source:", bookWordsRef.current.words.length, "words");
-        recordDiagEvent("source-promoted", `full-book: ${bookWordsRef.current.words.length} words`);
         return bookWordsRef.current.words;
       }
       // Fallback: DOM-loaded slice (pre-extraction or non-EPUB)
@@ -367,12 +365,29 @@ export default function ReaderContainer({
     footnoteCuesRef,
   });
 
+  // Memoized resolved words — recalculates when Foliate re-renders or words change.
+  // Avoids redundant DOM reads on every render that uses getEffectiveWords().
+  const effectiveWords = useMemo((): string[] => {
+    if (useFoliate) {
+      if (bookWordsRef.current?.complete) {
+        return bookWordsRef.current.words;
+      }
+      if (foliateApiRef.current) {
+        const foliateWords = foliateApiRef.current.getWords();
+        foliateWordsRef.current = foliateWords;
+        return foliateWords.map(w => w.word);
+      }
+    }
+    return words;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useFoliate, words, foliateRenderVersion]);
+
   const chunkSourceWords = useMemo(() => createChunkSourceWords({
-    words: getEffectiveWords(),
+    words: effectiveWords,
     foliateWords: foliateWordsRef.current,
     paragraphBreaks: tokenized.paragraphBreaks,
     sections: bookWordMeta?.sections,
-  }), [getEffectiveWords, tokenized.paragraphBreaks, bookWordMeta?.sections, foliateRenderVersion]);
+  }), [effectiveWords, tokenized.paragraphBreaks, bookWordMeta?.sections]);
 
   const naturalReadingChunks = useMemo(
     () => buildNaturalChunks(chunkSourceWords),

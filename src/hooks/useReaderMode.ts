@@ -393,6 +393,9 @@ export function useReaderMode({
       clearNarrateTruthSync();
     }
     reader.jumpToWord(startWord);
+    if (useFoliate && targetMode === "flow" && foliateApiRef.current?.highlightWordByIndex) {
+      foliateApiRef.current.highlightWordByIndex(startWord, "flow", { allowMotion: true });
+    }
     setReadingMode(targetMode);
     updateSettings({ readingMode: targetMode, lastReadingMode: targetMode });
     const pBreaks = getEffectiveParagraphBreaks();

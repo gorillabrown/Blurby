@@ -666,6 +666,7 @@ describe("useReaderMode four-mode foundation", () => {
     narrationOverrides?: Record<string, unknown>;
     foliateApiCurrent?: Record<string, unknown>;
     getEffectiveWords?: () => string[];
+    bookWordsTotalWords?: number;
     evalTrace?: any;
   }) {
     const modeInstance = {
@@ -764,7 +765,7 @@ describe("useReaderMode four-mode foundation", () => {
         isNarrating,
         setIsNarrating,
         pendingNarrationResumeRef,
-        bookWordsTotalWords: 3,
+        bookWordsTotalWords: options?.bookWordsTotalWords ?? 3,
         resumeAnchorRef,
         explicitSelectionAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
@@ -1488,6 +1489,62 @@ describe("useReaderMode four-mode foundation", () => {
     });
 
     expect(setIsBrowsedAway).toHaveBeenCalledWith(false);
+  });
+
+  it("Focus Play starts at the persistent word anchor, not word 0", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "focus",
+      initialHighlightedWordIndex: 3322,
+      softWordIndex: 0,
+      bookWordsTotalWords: 10000,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    // Flush the FOCUS_MODE_START_DELAY_MS timer so startMode is called
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+      await flushPromises();
+    });
+
+    // Should start Focus at 3322, not at 0
+    expect(harness.modeInstance.startMode).toHaveBeenCalledWith(
+      "focus",
+      3322,
+      expect.any(Array),
+      expect.any(Object),
+    );
+    expect(harness.reader.jumpToWord).toHaveBeenCalledWith(3322);
+  });
+
+  it("Focus start after hard-click uses persistent anchor, not stale state", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "focus",
+      initialHighlightedWordIndex: 0,
+      explicitSelectionAnchor: 3322,
+      bookWordsTotalWords: 10000,
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    // Flush the FOCUS_MODE_START_DELAY_MS timer so startMode is called
+    await act(async () => {
+      vi.runOnlyPendingTimers();
+      await flushPromises();
+    });
+
+    expect(harness.modeInstance.startMode).toHaveBeenCalledWith(
+      "focus",
+      3322,
+      expect.any(Array),
+      expect.any(Object),
+    );
   });
 });
 
