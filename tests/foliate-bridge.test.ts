@@ -87,4 +87,24 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
     expect(readerSrc).toContain('const showFocusOverlay = readingMode === "focus" && focusPlaying');
     expect(readerSrc).toContain('readingMode === "focus" || readingMode === "flow" || readingMode === "narrate"');
   });
+
+  it("imports and calls jumpFoliateToWordAnchor for jump-back", () => {
+    expect(readerSrc).toContain("jumpFoliateToWordAnchor");
+    expect(readerSrc).toContain("handleJumpBackToPersistentWord");
+    expect(readerSrc).toContain("persistentWordIndexRef.current");
+  });
+
+  it("routes Foliate displacement detection through markUserBrowsingAway", () => {
+    expect(src).toContain("markUserBrowsingAway()");
+    expect(src).not.toMatch(/displacement.*userBrowsingRef\.current\s*=\s*true/);
+  });
+
+  it("routes keyboard browse-away through markUserBrowsingAway", () => {
+    const keyboardSection = src.slice(src.indexOf("ArrowRight"));
+    expect(keyboardSection).toContain("markUserBrowsingAway()");
+  });
+
+  it("passes showJumpBackToAnchor={isBrowsedAway} to FoliatePageView", () => {
+    expect(readerSrc).toContain("showJumpBackToAnchor={isBrowsedAway}");
+  });
 });

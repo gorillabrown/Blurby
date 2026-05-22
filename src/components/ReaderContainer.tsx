@@ -7,6 +7,7 @@ import { useReaderMode } from "../hooks/useReaderMode";
 import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { resolveCanonicalWordAnchor } from "../utils/startWordIndex";
 import { usePersistentReadingAnchor } from "../hooks/usePersistentReadingAnchor";
+import { jumpFoliateToWordAnchor } from "../utils/foliateAnchorNavigation";
 import {
   resolveBookOpenInitialCfi,
   shouldClearBrowseAwayOnAnchorEvent,
@@ -882,10 +883,15 @@ export default function ReaderContainer({
   }, []);
 
   const handleJumpBackToPersistentWord = useCallback(() => {
+    const anchor = persistentWordIndexRef.current;
     syncVisualToPersistentWord({ navigate: true });
-    foliateApiRef.current?.clearUserBrowsing?.();
+    if (useFoliate && foliateApiRef.current) {
+      const mode = readingModeRef.current;
+      const styleHint = mode === "narrate" ? "narrate" as const : mode === "flow" ? "flow" as const : undefined;
+      jumpFoliateToWordAnchor(foliateApiRef.current, anchor, styleHint);
+    }
     setIsBrowsedAway(false);
-  }, [setIsBrowsedAway, syncVisualToPersistentWord]);
+  }, [persistentWordIndexRef, setIsBrowsedAway, syncVisualToPersistentWord, useFoliate]);
 
   const handleFoliateUserBrowseAway = useCallback(() => {
     setIsBrowsedAway(true);

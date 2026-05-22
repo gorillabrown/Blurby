@@ -1783,7 +1783,7 @@ export default function FoliatePageView({
       const displacement = Math.abs(currentPos - lastScrollFollowPosRef.current);
       const viewportHeight = containerRef.current?.clientHeight ?? 400;
       if (displacement > viewportHeight * 0.3) {
-        userBrowsingRef.current = true;
+        markUserBrowsingAway();
         if (import.meta.env.DEV) console.debug("[foliate] displacement detection — user browsed away, displacement:", displacement, "threshold:", viewportHeight * 0.3);
         return;
       }
@@ -1876,7 +1876,7 @@ export default function FoliatePageView({
         const mode = readingModeRef.current;
         if ((mode === "flow" || mode === "narrate") &&
             (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp")) {
-          userBrowsingRef.current = true;
+          markUserBrowsingAway();
           // Navigate the Foliate renderer so the user sees different content.
           // The iframe's native handler won't see this window-level event.
           if (e.key === "ArrowRight" || e.key === "PageDown") {
@@ -1890,12 +1890,11 @@ export default function FoliatePageView({
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
-        // During active flow reading, flag that user is browsing away — don't yank back
-        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
+        markUserBrowsingAway();
         view.renderer.next();
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
-        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
+        markUserBrowsingAway();
         view.renderer.prev();
       }
     };
