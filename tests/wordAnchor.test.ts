@@ -23,6 +23,7 @@
 //     n) BUG-151: Narration band fallback height capped at 40px
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { readFileSync } from "node:fs";
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord } from "../src/utils/startWordIndex";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -430,5 +431,42 @@ describe("Group E: BUG regressions", () => {
     expect(capAt40(20)).toBe(20);
     expect(capAt40(40)).toBe(40); // exact boundary
     expect(capAt40(39)).toBe(39); // just below cap
+  });
+});
+
+// ── Group F: Persistent anchor integration ──────────────────────────────────
+
+describe("persistent anchor integration policy", () => {
+  it("documents that hard clicks must update the persistent anchor before any mode start", () => {
+    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+
+    expect(source).toContain("usePersistentReadingAnchor");
+    expect(source).toContain("commitSharedWordAnchor(resolvedClickWordIndex, \"hard-selection\"");
+    expect(source).toContain("persistentWordIndexRef");
+  });
+
+  it("documents that mode advancement writes the persistent anchor without immediate disk writes", () => {
+    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+
+    expect(source).toContain("commitPersistentWordIndex(idx, \"mode-advance\"");
+    expect(source).toContain("persist: false");
+    expect(source).toContain("publishState: false");
+    expect(source).toContain("navigate: false");
+  });
+
+  it("documents that hard clicks clear browse-away and hide the jump-back affordance", () => {
+    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+
+    expect(source).toContain("foliateApiRef.current?.clearUserBrowsing?.()");
+    expect(source).toContain("setIsBrowsedAway(false)");
+    expect(source).toContain("shouldClearBrowseAwayOnAnchorEvent({ type: \"hard-selection\"");
+  });
+
+  it("documents that stale CFI cannot override persistent word on Foliate startup", () => {
+    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+
+    expect(source).toContain("resolveBookOpenInitialCfi");
+    expect(source).toContain("initialCfi={initialFoliateCfi}");
+    expect(source).not.toContain("initialCfi={activeDoc.cfi || null}");
   });
 });
