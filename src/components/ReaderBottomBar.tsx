@@ -361,7 +361,7 @@ export default function ReaderBottomBar({
         <div className="rbb-mode-group" role="group" aria-label="Reading modes">
           <button
             className={`rbb-mode-btn ${readingMode === "page" ? "rbb-mode-btn--active" : ""}`}
-            onClick={() => onEnterPage?.()}
+            onClick={(e) => { onEnterPage?.(); if (e.detail > 0) e.currentTarget.blur(); }}
             aria-label="Page mode"
             aria-pressed={readingMode === "page"}
           >
@@ -369,7 +369,7 @@ export default function ReaderBottomBar({
           </button>
           <button
             className={`rbb-mode-btn ${readingMode === "focus" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "focus" ? " rbb-mode-btn--last" : ""}`}
-            onClick={() => { triggerCoachHint("enterFocus"); onEnterFocus(); }}
+            onClick={(e) => { triggerCoachHint("enterFocus"); onEnterFocus(); if (e.detail > 0) e.currentTarget.blur(); }}
             aria-label="Focus mode"
             aria-pressed={readingMode === "focus"}
           >
@@ -377,7 +377,7 @@ export default function ReaderBottomBar({
           </button>
           <button
             className={`rbb-mode-btn ${readingMode === "flow" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "flow" ? " rbb-mode-btn--last" : ""}`}
-            onClick={() => { triggerCoachHint("enterFlow"); onEnterFlow(); }}
+            onClick={(e) => { triggerCoachHint("enterFlow"); onEnterFlow(); if (e.detail > 0) e.currentTarget.blur(); }}
             aria-label="Flow mode"
             aria-pressed={readingMode === "flow"}
           >
@@ -385,7 +385,7 @@ export default function ReaderBottomBar({
           </button>
           <button
             className={`rbb-mode-btn ${readingMode === "narrate" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narrate" ? " rbb-mode-btn--last" : ""}`}
-            onClick={() => onToggleNarration?.()}
+            onClick={(e) => { onToggleNarration?.(); if (e.detail > 0) e.currentTarget.blur(); }}
             aria-label="Narrate mode"
             aria-pressed={readingMode === "narrate"}
           >
