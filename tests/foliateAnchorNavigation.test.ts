@@ -39,7 +39,7 @@ describe("jumpFoliateToWordAnchor", () => {
   it("calls highlightWordByIndex with allowMotion: true", async () => {
     const api = makeApi();
     await jumpFoliateToWordAnchor(api, 42, "flow");
-    expect(api.highlightWordByIndex).toHaveBeenCalledWith(42, "flow", { allowMotion: true });
+    expect(api.highlightWordByIndex).toHaveBeenCalledWith(42, "flow", { allowMotion: true, forceMotion: true });
   });
 
   it("returns true when highlight hits on first attempt", async () => {
@@ -90,6 +90,6 @@ describe("jumpFoliateToWordAnchor", () => {
     const api = makeApi();
     const result = await jumpFoliateToWordAnchor(api, 0, "flow");
     expect(result).toBe(true);
-    expect(api.highlightWordByIndex).toHaveBeenCalledWith(0, "flow", { allowMotion: true });
+    expect(api.highlightWordByIndex).toHaveBeenCalledWith(0, "flow", { allowMotion: true, forceMotion: true });
   });
 });

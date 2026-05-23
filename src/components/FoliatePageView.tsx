@@ -281,6 +281,7 @@ interface FoliatePageViewProps {
 
 export interface FoliateHighlightOptions {
   allowMotion?: boolean;
+  forceMotion?: boolean;
 }
 
 export interface FoliateViewAPI {
@@ -667,6 +668,7 @@ export default function FoliatePageView({
     wordIndex: number,
     styleHint?: "flow" | "narrate",
     allowMotion = true,
+    forceMotion = false,
   ): boolean => {
     const view = viewRef.current;
     if (!view?.renderer || !viewApiRef?.current) return false;
@@ -699,7 +701,7 @@ export default function FoliatePageView({
       });
     }
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && !state.visible) {
+    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
       try {
         const range = state.doc.createRange();
         range.selectNodeContents(state.span);
@@ -710,13 +712,12 @@ export default function FoliatePageView({
     }
 
     // Auto-clear browsed-away flag when the highlighted word becomes visible again,
-    // BUT only in page/focus modes where visibility detection is real. In flow/narrate
-    // modes, the Foliate iframe reports ALL words as visible (see narrate scroll-follow
-    // comment at line ~1673), so this auto-clear would fire on every word advance and
-    // immediately cancel any user scroll-away. Flow/narrate rely on returnToNarration()
-    // (recenter button) to clear the flag instead.
+    // BUT only in page mode where paginated visibility detection is meaningful.
+    // Focus/flow/narrate use the scrolled Foliate surface where the iframe reports
+    // ALL words as visible, so auto-clear would fire on every advance and immediately
+    // cancel any user scroll-away. Those modes rely on explicit jump-back to clear.
     const mode = readingModeRef.current;
-    if (userBrowsingRef.current && state.visible && mode !== "flow" && mode !== "narrate") {
+    if (userBrowsingRef.current && state.visible && mode === "page") {
       userBrowsingRef.current = false;
     }
 
@@ -1225,7 +1226,7 @@ export default function FoliatePageView({
               // back as resume anchors or saved progress. See handlePauseToPage() in useReaderMode.ts
               // and resumeAnchorRef usage — both correctly read getCurrentWord() which returns
               // only this first highlighted word.
-              return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true);
+              return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false);
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes

@@ -25,7 +25,7 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   });
 
   it("imperative highlight API keeps motion enabled only by default", () => {
-    expect(src).toContain('return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true);');
+    expect(src).toContain('return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false);');
   });
 
   it("renders the shrinking Flow cursor only in real Flow mode, not Narrate's shared scroll surface", () => {

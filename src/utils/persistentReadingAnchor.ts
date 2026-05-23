@@ -62,16 +62,11 @@ export function shouldClearBrowseAwayOnAnchorEvent(event: PersistentAnchorEvent)
 }
 
 export function resolveBookOpenInitialCfi({
-  persistentWordIndex,
   cfi,
 }: {
-  persistentWordIndex: number | null | undefined;
+  persistentWordIndex?: number | null | undefined;
   cfi?: string | null;
 }): string | null {
-  const hasPersistentWord = typeof persistentWordIndex === "number"
-    && Number.isFinite(persistentWordIndex)
-    && persistentWordIndex >= 0;
-  if (hasPersistentWord) return null;
   return cfi || null;
 }
 

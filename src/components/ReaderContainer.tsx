@@ -702,8 +702,13 @@ export default function ReaderContainer({
       // TTS-7A: Update background cacher with live cursor position
       backgroundCacherRef.current?.updateCursorPosition(idx);
       // ReaderView DOM updates are only relevant when narration is not active.
-      if (!isNarratingRef.current && onWordUpdateRef.current && wordsRef.current[idx]) {
-        onWordUpdateRef.current(wordsRef.current[idx], idx);
+      // Use full-book global array when available — wordsRef is a section-local
+      // DOM slice for Foliate EPUBs and won't contain global-indexed words.
+      const wordText = bookWordsRef.current?.complete
+        ? bookWordsRef.current.words[idx]
+        : wordsRef.current[idx];
+      if (!isNarratingRef.current && onWordUpdateRef.current && wordText) {
+        onWordUpdateRef.current(wordText, idx);
       }
     },
     onComplete: () => {

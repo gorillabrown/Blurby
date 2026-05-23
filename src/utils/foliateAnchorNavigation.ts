@@ -5,7 +5,7 @@ export interface FoliateAnchorNavigationApi {
   highlightWordByIndex?: (
     wordIndex: number,
     styleHint?: "flow" | "narrate",
-    options?: { allowMotion?: boolean },
+    options?: { allowMotion?: boolean; forceMotion?: boolean },
   ) => boolean;
   getSectionForWordIndex?: (wordIndex: number) => number | null;
   goToSection?: (sectionIndex: number) => Promise<void> | void;
@@ -22,14 +22,16 @@ export async function jumpFoliateToWordAnchor(
 
   api.clearUserBrowsing?.();
 
-  const hit = api.highlightWordByIndex?.(wordIndex, styleHint, { allowMotion: true }) ?? false;
+  const forceOpts = { allowMotion: true, forceMotion: true };
+
+  const hit = api.highlightWordByIndex?.(wordIndex, styleHint, forceOpts) ?? false;
   if (hit) {
     // In paginated mode (CSS columns), scrollToAnchor may not take effect
     // synchronously. Yield a frame to let the layout settle, then re-apply
     // the highlight+scroll so the page reliably navigates to the word.
     await new Promise((r) => setTimeout(r, 60));
     api.clearUserBrowsing?.();
-    api.highlightWordByIndex?.(wordIndex, styleHint, { allowMotion: true });
+    api.highlightWordByIndex?.(wordIndex, styleHint, forceOpts);
     return true;
   }
 
@@ -39,5 +41,5 @@ export async function jumpFoliateToWordAnchor(
   await Promise.resolve(api.goToSection?.(sectionIndex));
   await api.waitForSectionReady?.(sectionIndex);
 
-  return api.highlightWordByIndex?.(wordIndex, styleHint, { allowMotion: true }) ?? false;
+  return api.highlightWordByIndex?.(wordIndex, styleHint, forceOpts) ?? false;
 }

@@ -48,19 +48,22 @@ describe("persistentReadingAnchor", () => {
     expect(shouldClearBrowseAwayOnAnchorEvent({ type: "browse-away", visibleWordIndex: 80 })).toBe(false);
   });
 
-  it("does not let a stale CFI override a persistent word on book open", () => {
+  it("always uses stored CFI for initial Foliate positioning", () => {
     expect(resolveBookOpenInitialCfi({
       persistentWordIndex: 0,
       cfi: "epubcfi(/6/2!/4/1:20)",
-    })).toBeNull();
+    })).toBe("epubcfi(/6/2!/4/1:20)");
     expect(resolveBookOpenInitialCfi({
       persistentWordIndex: 42,
       cfi: "epubcfi(/6/2!/4/1:20)",
-    })).toBeNull();
+    })).toBe("epubcfi(/6/2!/4/1:20)");
     expect(resolveBookOpenInitialCfi({
       persistentWordIndex: null,
       cfi: "epubcfi(/6/2!/4/1:20)",
     })).toBe("epubcfi(/6/2!/4/1:20)");
+    expect(resolveBookOpenInitialCfi({
+      cfi: null,
+    })).toBeNull();
   });
 
   it("detects browse-away relative to the persistent anchor", () => {
