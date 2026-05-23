@@ -222,8 +222,15 @@ export function snapToSentenceBoundary(
 ): number {
   const maxIdx = words.length;
   const clampedEnd = Math.min(targetEndIdx, maxIdx);
-  // Don't snap very small chunks (ramp-up) — they're too short for sentence detection to help
-  if (clampedEnd - startIdx <= 20) return clampedEnd;
+  if (clampedEnd - startIdx <= 20) {
+    // Cold-start chunks: extend forward to the next sentence boundary so the
+    // first audio out the gate always ends at a natural pause point.
+    for (let i = clampedEnd - 1; i < Math.min(maxIdx, clampedEnd + tolerance); i++) {
+      const next = i + 1 < maxIdx ? words[i + 1] : undefined;
+      if (isSentenceEnd(words[i], next)) return i + 1;
+    }
+    return clampedEnd;
+  }
 
   // Search backward first (prefer shorter chunk at sentence boundary)
   for (let i = clampedEnd - 1; i >= Math.max(startIdx + 10, clampedEnd - tolerance); i--) {
@@ -578,7 +585,7 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     const secondSize = openingRampPlan[1]?.targetWordCount ?? getConfiguredChunkSize(1);
     if (firstSize < cruiseChunkWords && secondSize < cruiseChunkWords && nextProduceIdx < words.length) {
       const idx0 = nextProduceIdx;
-      const idx1 = Math.min(idx0 + firstSize, words.length);
+      const idx1 = openingRampPlan[0]?.endIdx ?? Math.min(idx0 + firstSize, words.length);
       // Fire both requests concurrently
       const [consumed0, consumed1] = await Promise.all([
         produceChunk(idx0, firstSize, myGenId),

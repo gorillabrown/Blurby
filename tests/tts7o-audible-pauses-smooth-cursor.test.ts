@@ -95,10 +95,11 @@ describe("TTS-7O: punctuation-safe pre-send chunk rounding", () => {
     expect(result).toBe(40); // Only case where mid-text cut is acceptable
   });
 
-  it("skips snapping for very small chunks (≤20 words)", () => {
+  it("extends small chunk forward when no boundary at or after target end", () => {
     const words = makeWordsWithSentences(15, [5]);
     const result = snapToSentenceBoundary(words, 0, 15);
-    // Small chunk — should return clampedEnd without snapping
+    // Sentence boundary at word 5 is before the target end; no boundary at or
+    // after word 14 within the 15-word array, so returns raw clampedEnd.
     expect(result).toBe(15);
   });
 });
