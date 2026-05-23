@@ -441,3 +441,52 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Same-section Foliate navigation should either force motion for recovery actions or validate target rects live before deciding the word is already visible.
 **Applies to:** Page Jump Back, reopen restore, same-section anchor recovery, mode-switch recentering, Foliate word-position indexes.
 **Status:** Observation
+
+### SRL-060 — Narrate sync gates must verify heard audio, not only visual cursor position (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Narrate can visually start at the right word while the spoken audio lags behind or skips at chunk boundaries.
+**Evidence:** Step 3.1 manual QA showed S12/S13 failing after the cursor started at the hard-clicked anchor but then outran the heard audio; at chunk boundaries the audio skipped ahead to the cursor location.
+**Recommendation:** Future Narrate specs and manual QA gates should explicitly verify cursor lead/lag against heard audio and include chunk-boundary transition checks, not only visual start position.
+**Applies to:** Narrate playback, audio scheduler changes, cursor sync, chunk-boundary handoff, TTS progress sources.
+**Status:** Observation
+
+### SRL-061 — Cross-surface cursor visuals need one declared owner per mode (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Flow cursor regressions can appear when multiple surfaces render cursor affordances for the same active word.
+**Evidence:** Step 3.1 manual QA found S8 failing because both the parent-document `.flow-shrink-cursor` overlay and the iframe `.page-word--flow-cursor` underline rendered at once.
+**Recommendation:** Mode specs should declare the single visual cursor owner for each mode and include an acceptance check that duplicate cursor affordances are suppressed.
+**Applies to:** Flow cursor rendering, Foliate iframe highlights, parent overlay cursors, reader mode adapter isolation.
+**Status:** Observation
+
+### SRL-062 — Narrate timing repairs should be sized as investigation-heavy (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** Narrate cursor fixes can require high-effort root-cause tracing even when the final patch is small.
+**Evidence:** Step 3.2's final Narrate change was a one-line cursor-lag constant update, but the work required tracing audio scheduler progress, word boundaries, output latency, tempo stretch, and chunk-boundary behavior.
+**Recommendation:** Future Narrate timing dispatches should pre-flag investigation effort separately from implementation effort so expectations match the real diagnostic burden.
+**Applies to:** Narrate timing, audio scheduler work, TTS cursor sync, chunk-boundary repairs, manual audio QA.
+**Status:** Observation
+
+### SRL-063 — Fixed cursor-lag constants are provisional when audio output latency is hardware-dependent (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** A fixed trusted cursor lag can be a useful repair lever, but repeated tuning signals the need for a measured or adaptive model.
+**Evidence:** `TTS_TRUSTED_CURSOR_LAG_MS` has moved `120→220→350→450ms` as real Electron/Chromium/WASAPI output latency exceeded timestamp-derived expectations.
+**Recommendation:** Plan a future hardening sprint for adaptive lag calibration or measured output delay rather than continuing to hand-tune a fixed cursor-lag constant.
+**Applies to:** Narrate cursor sync, audio scheduler calibration, hardware-dependent playback latency, TTS UX polish.
+**Status:** Observation
+
+### SRL-064 — Narrate exact-start and continuous sync are separate acceptance gates (READER-PERSISTENT-ANCHOR Step 3.2 QA, 2026-05-22)
+**Verdict:** Narrate can improve chunk-boundary continuity while still failing exact selected-word audio start.
+**Evidence:** Step 3.2 manual QA showed S8 fixed and chunk-boundary skip-ahead improved, but selecting "At" in "At this point" started audio from "Cusco" in the prior sentence.
+**Recommendation:** Future Narrate sync specs should separately test selected-word audio start, cursor/audio lead-lag during playback, and chunk-boundary transition behavior.
+**Applies to:** Narrate playback start, audio scheduler chunk mapping, cursor sync, hard-click retargeting, manual audio QA.
+**Status:** Observation
+
+### SRL-065 — Active retarget paths must have a single resync owner (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Active playback retargeting becomes race-prone when more than one path can stop and restart the audio pipeline for the same click.
+**Evidence:** Step 3.3 found that `onWordClick` could trigger `narration.resyncToCursor` twice during active Narrate: once from `commitSharedWordAnchor` and again from `retargetActiveModeToWord`, causing two rapid pipeline stop/start cycles per click.
+**Recommendation:** For active Focus, Flow, and Narrate retargeting, assign one resync owner per click path and make secondary anchor updates explicitly skip runtime resync.
+**Applies to:** Active word-click retargeting, Narrate resync, audio pipeline restarts, Flow/Focus adapter ownership.
+**Status:** Observation
+
+### SRL-066 — Downstream chunk dispatch must use resolved plan boundaries, not raw targets (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Chunk-planning refinements can invalidate downstream assumptions that raw target sizes equal resolved chunk boundaries.
+**Evidence:** Step 3.3 sentence-boundary snapping extended cold-start chunk 0 beyond the raw `firstSize` target, exposing a parallel ramp overlap because chunk 1 started from raw `firstSize` instead of `openingRampPlan[0].endIdx`.
+**Recommendation:** Any sprint that changes chunk sizing, snapping, ramping, or natural-boundary logic should audit all downstream dispatch math and require consumers to use resolved plan boundaries.
+**Applies to:** TTS chunk planning, Kokoro pipeline ramping, sentence-boundary snapping, parallel chunk dispatch.
+**Status:** Observation

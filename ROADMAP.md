@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-22 — READER-PERSISTENT-ANCHOR Step 3.1 is code-complete; manual QA revalidation remains required before READER-ISO-1A.
-**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged; Step 3.1 commit `e6ebb07` landed fixes for S1, S4, S5, and S18 after Step 3 improved manual QA to 13 pass / 2 partial / 3 fail. S9 Flow lazy-follow is intentionally deferred as high-risk, and the full 18-scenario manual QA rerun is the active blocker before adapter isolation. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-22 — READER-PERSISTENT-ANCHOR Step 3.3 is code-complete through `48c23ac`; manual audio QA with diagnostics remains required before READER-ISO-1A.
+**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged; Step 3.1 commit `e6ebb07` fixed S1, S4, and S18 and improved S5, Step 3.2 commit `bb00e17` fixed S8 Flow double-cursor and improved Narrate chunk-boundary continuity, and Step 3.3 commits `881b01d` and `48c23ac` fixed a double-`resyncToCursor` active-click race, added Narrate/pipeline start-word diagnostics, snapped cold-start chunks forward to sentence boundaries, and fixed parallel ramp overlap from resolved chunk boundaries. S9 Flow lazy-follow remains intentionally deferred as high-risk. The Step 3.3 manual audio QA gate is the active blocker before adapter isolation. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. Active gate: READER-PERSISTENT-ANCHOR Step 3.1 full 18-scenario manual QA rerun.
-**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction. Latest branch close-out: READER-PERSISTENT-ANCHOR Step 3.1 is code-complete/manual-QA-pending and still not main-landed.
+**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. Active gate: READER-PERSISTENT-ANCHOR Step 3.3 manual audio QA with diagnostics.
+**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction. Latest branch close-out: READER-PERSISTENT-ANCHOR Step 3.3 is code-complete/manual-QA-pending and still not main-landed.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -78,6 +78,13 @@
 19. **SRL-057:** Same-section and cross-section Foliate movement must be accepted separately.
 20. **SRL-058:** Each reading mode needs its own active-render QA gate.
 21. **SRL-059:** CSS-column word-position indexes need live rect validation before same-section movement decisions.
+22. **SRL-060:** Narrate sync gates must verify heard audio, not only visual cursor position.
+23. **SRL-061:** Cross-surface cursor visuals need one declared owner per mode.
+24. **SRL-062:** Narrate timing repairs should be sized as investigation-heavy.
+25. **SRL-063:** Fixed cursor-lag constants are provisional when audio output latency is hardware-dependent.
+26. **SRL-064:** Narrate exact-start and continuous sync are separate acceptance gates.
+27. **SRL-065:** Active retarget paths must have a single resync owner.
+28. **SRL-066:** Downstream chunk dispatch must use resolved plan boundaries, not raw targets.
 
 Deviation protocol: a skeleton may override a standing rule only by naming the rule and justifying the waiver in its spec.
 
@@ -91,15 +98,15 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 #### READER-PERSISTENT-ANCHOR-STEP3-REPAIR — Persistent Anchor Manual QA Repair *(position 1 — full spec)*
 
-- **Status:** Code-complete on `hotfix/reader-persistent-anchor` through `e6ebb07`; Step 3 manual QA rerun complete at 13 pass / 2 partial / 3 fail; Step 3.1 fixes landed for S1, S4, S5, and S18; manual QA rerun required before merge or queue advancement.
+- **Status:** Code-complete on `hotfix/reader-persistent-anchor` through `48c23ac`; Step 3.1 manual QA rerun complete at 12 pass / 2 partial / 3 fail / 1 not re-run; Step 3.2 fixed S8 Flow double-cursor but failed S12/S13 because Narrate audio starts behind the selected word; Step 3.3 fixed a double-`resyncToCursor` active-click race, added start-word diagnostics, snapped cold-start chunks to sentence boundaries, and fixed parallel ramp overlap from resolved chunk boundaries. Step 3.3 manual audio QA is required before merge or queue advancement.
 - **What:** Repair the user-facing persistent-anchor failures discovered by Step 2 manual QA across Page, Focus, Flow, and Narrate while preserving the Step 2 wins that passed.
 - **Why:** The branch is automation-green but manual-QA-red. Adapter isolation should not extract or codify broken Page jump-back, blank Focus playback, Flow non-follow, Narrate wrong-start, or hard-click retarget behavior.
 - **Prerequisites:** `hotfix/reader-persistent-anchor` remains unmerged; `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` and `docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP-2.2026-05-22.md` accepted as source evidence.
 - **Done when:**
   1. Page mode opens paused with Play disabled, and Page Jump back returns to the exact hard-selected anchor after paginated browsing away.
   2. Focus paused mode keeps the infinite-scroll surface, shows Jump back after browsing away, and Focus Play renders the first active word exactly at the hard-selected anchor with no blank overlay.
-  3. Flow Play centers the current hard-selected word, keeps a single underline cursor, rolls the text through the reading window, and manual browse-away pauses Flow while showing Jump back.
-  4. Narrate Play starts exactly at the hard-selected word, active narration continues on browse-away, and Narrate Jump back continues to work without restarting audio.
+  3. Flow Play centers the current hard-selected word, keeps a single underline cursor with no visible overlay duplicate, rolls the text through the reading window, and manual browse-away pauses Flow while showing Jump back.
+  4. Narrate Play starts exactly at the hard-selected word, the visual cursor follows heard audio without leading, chunk boundaries do not skip audio forward, active narration continues on browse-away, and Narrate Jump back continues to work without restarting audio.
   5. Hard-clicking a new word updates the hard-selected anchor and retargets playback consistently in paused and active Focus, Flow, and Narrate.
   6. Book reopen uses Page mode at the persistent hard-selected/last-read word without stale CFI overriding it; switching to Narrate does not jump to a different restore position.
   7. Inactive mode buttons do not show selected-looking ghost fills while Page is active.
@@ -108,13 +115,13 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
   10. Focused regression tests, `npx tsc --noEmit`, and `git diff --check` pass.
 - **Effort:** L. Cross-mode Foliate runtime repair with manual QA gate.
 - **Roster:** codex-parent for implementation; one manual screen QA pass after automated verification.
-- **Source:** Step 2 manual QA report; Step 2 close-out; SRL-053; SRL-054; SRL-055.
+- **Source:** Step 2 manual QA report; Step 2 close-out; Step 3, Step 3.1, and Step 3.2 manual QA reports; Step 3.2 and Step 3.3 closeouts; SRL-053; SRL-054; SRL-055; SRL-060; SRL-061; SRL-062; SRL-063; SRL-064; SRL-065; SRL-066.
 
 ##### Implementation detail
 
 - **Primary edit sites:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/ReaderBottomBar.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/usePersistentReadingAnchor.ts`, `src/hooks/useFoliateSync.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/utils/persistentAnchor.ts`.
 - **Test roster:** existing persistent-anchor matrix tests plus focused additions for Page jump-back motion, Focus first-word render, Flow follow/auto-pause, Narrate exact hard-selected start, active hard-click retarget, reopen CFI precedence, and inactive button styling.
-- **Manual QA roster:** Step 3 rerun saved at `docs/studies/reviews/Reader_Persistent_Anchor_Step3_Repair_Manual_QA_2026-05-22.md`; Step 3.1 must rerun the same 18-scenario matrix after repair.
+- **Manual QA roster:** Step 3 rerun saved at `docs/studies/reviews/Reader_Persistent_Anchor_Step3_Repair_Manual_QA_2026-05-22.md`; Step 3.1 rerun saved at `docs/studies/reviews/Reader_Persistent_Anchor_Step3.1_Manual_QA_2026-05-22.md`; Step 3.2 rerun saved at `docs/studies/reviews/Reader_Persistent_Anchor_Step3.2_Manual_QA_2026-05-22.md`; Step 3.3 must recheck S12/S13 with DevTools diagnostics and spot-check S8/S1/S4/S18.
 - **Branch:** continue from `hotfix/reader-persistent-anchor` or create `hotfix/reader-persistent-anchor-step3-repair` from that branch. Do not merge to `main` until manual QA passes.
 - **Commit hygiene:** Preserve passing Step 2 behavior. Prefer commits grouped by failure cluster: jump-back/reopen, Focus/Flow playback, Narrate exact start/retarget, button polish/tests.
 
@@ -123,8 +130,28 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Problem:** Step 3 resolved the highest-risk Narrate and Flow failures, but three manual-QA failures remain: S1 Page same-section Jump Back no-op, S4 Focus active overlay blank/frozen, and S5 Focus paused browse-away missing Jump Back.
 - **Scope:** Fix S1, S4, and S5 first. Investigate S18 Page reopen lag alongside S1 if it shares the same same-section movement or stale-CFI root. Treat S9 Flow lazy follow as secondary polish unless it is cheap and low-risk.
 - **Done when:** S1, S4, and S5 pass in screen-interaction manual QA; S9 and S18 are either fixed or explicitly dispositioned; the full 18-scenario matrix is rerun; focused tests, `npx tsc --noEmit`, and `git diff --check` pass.
-- **Merge gate:** Do not merge `hotfix/reader-persistent-anchor` or dispatch `READER-ISO-1A` until this Step 3.1 gate passes.
+- **Merge gate:** Do not merge `hotfix/reader-persistent-anchor` or dispatch `READER-ISO-1A` until this Step 3.1/3.2 gate passes.
 - **Step 3.1 code result:** Commit `e6ebb07` fixed S1 with `forceMotion` in the highlight pipeline, S4 by using global words in `onWordAdvance`, S5 by preserving Focus browse-away state, and S18 with a separate cheap reopen-position fix. S9 was investigated and deferred as a dedicated Flow-Foliate scroll coordination problem.
+- **Step 3.1 manual QA result:** S1, S4, and S18 passed and S5 improved, but S8 failed from Flow double-cursor rendering and S12/S13 failed from Narrate cursor/audio desync with chunk-boundary skip-ahead. Step 3.1 is manual-QA-failed and required Step 3.2.
+
+##### Step 3.2 repair gate
+
+- **Problem:** Step 3.1 repaired the original focus checks, but introduced or exposed two merge-blocking regressions: Flow renders two cursor affordances at once, and Narrate's visual cursor outruns heard audio, causing audio skip-ahead at chunk boundaries.
+- **Scope:** Fold `FLOW-DOUBLE-CURSOR-1` and `NARRATE-CURSOR-SYNC-1` into this existing repair lane rather than adding independent queue rows. Suppress the visible `.flow-shrink-cursor` overlay while keeping `.page-word--flow-cursor`; investigate and repair Narrate cursor scheduling so audio progress remains the truth source.
+- **Done when:** S8, S12, and S13 pass in screen-interaction manual QA; Step 3.1 wins for S1, S4, and S18 remain green; Focus S5 paused browse-away is either fixed if cheap or explicitly dispositioned; the full 18-scenario matrix is rerun; focused tests, `npx tsc --noEmit`, and `git diff --check` pass.
+- **Merge gate:** Do not merge `hotfix/reader-persistent-anchor` or dispatch `READER-ISO-1A` until Step 3.2 passes or any remaining miss has explicit user-approved disposition.
+- **Step 3.2 code result:** Commit `bb00e17` hides `.flow-shrink-cursor` visually while preserving the DOM element for FlowScrollEngine positioning, and increases `TTS_TRUSTED_CURSOR_LAG_MS` from `350ms` to `450ms`. Reported verification: 2,794 tests pass and TypeScript is clean.
+- **Step 3.2 manual QA result:** S8 passed and S1/S4/S18 held; chunk-boundary skip-ahead improved, but S12/S13 failed because Narrate audio starts behind the selected word. Step 3.2 is manual-QA-failed.
+- **Future hardening note:** `TTS_TRUSTED_CURSOR_LAG_MS` has moved `120→220→350→450ms`; plan adaptive lag calibration or measured output delay after the merge gate is clean.
+
+##### Step 3.3 repair gate / NARRATE-CURSOR-SYNC-2
+
+- **Problem:** Step 3.2 removed the Flow double-cursor and improved Narrate chunk-boundary behavior, but Narrate still fails exact selected-word audio start. Manual QA repro: selecting `At` in "At this point" starts audio from `Cusco` in the prior sentence.
+- **Scope:** Repair the mapping from hard-selected word index to TTS chunk/utterance start and audio scheduler start offset so audio begins at the selected word, not an earlier sentence or chunk boundary. Investigate `audioScheduler.ts`, the Narrate cursor tick around `FoliatePageView.tsx:1688-1712`, and any chunk-start fallback that snaps audio to the start of the containing sentence.
+- **Done when:** S12 and S13 pass by ear; selecting a word starts audio at that word; chunk-boundary skip-ahead remains gone; S8 remains single-cursor; regression spot checks S1, S4, and S18 hold; focused tests, `npx tsc --noEmit`, and `git diff --check` pass.
+- **Merge gate:** Do not merge `hotfix/reader-persistent-anchor` or dispatch `READER-ISO-1A` until Step 3.3 passes or the S12/S13 miss is explicitly accepted.
+- **Step 3.3 code result:** Commit `881b01d` eliminated the double `resyncToCursor` path on active word click by adding `skipNarrationResync` and delegating runtime resync to `retargetActiveModeToWord`; it also added DEV diagnostics at `speakNextChunkKokoro` and `produceChunk`. Commit `48c23ac` snaps cold-start chunks forward to sentence boundaries and fixes parallel ramp overlap by using `openingRampPlan[0].endIdx` instead of raw `firstSize`.
+- **Step 3.3 manual QA gate:** Open DevTools, click a word, start Narrate, and confirm `[narrate] speakNextChunkKokoro` plus `[pipeline] produceChunk` log the clicked word as the start word and heard audio begins there. If logs show the clicked word but audio starts earlier, investigate residual buffer/audio scheduling; if logs show the earlier word, continue index mapping/anchor propagation work. The first chunk should now end at a sentence boundary when sentence-ending punctuation exists within the forward search window.
 
 #### Stage 2 — Adapter Isolation
 
