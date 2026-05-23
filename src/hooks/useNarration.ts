@@ -1188,6 +1188,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // cursorWordIndex can be advanced by wall-clock visual callbacks; using it here
     // would cause the pipeline to restart from the wrong word after a stall.
     const startIdx = lastConfirmedAudioWordRef.current;
+    if (import.meta.env.DEV) {
+      const startWord = words[startIdx] ?? "??";
+      const prevWord = startIdx > 0 ? words[startIdx - 1] ?? "??" : "(start)";
+      console.debug(
+        `[narrate] speakNextChunkKokoro: startIdx=${startIdx}, word="${startWord}", prev="${prevWord}", totalWords=${words.length}`
+      );
+    }
     const callbackGeneration = kokoroPlaybackGenerationRef.current + 1;
     kokoroPlaybackGenerationRef.current = callbackGeneration;
     const requireExactFirstBoundary = nextKokoroExactStartRef.current === startIdx;

@@ -527,6 +527,7 @@ export default function ReaderContainer({
     wordIndex: number,
     cause: "hard-selection" | "explicit-navigation" | "mode-advance" = "explicit-navigation",
     cfi?: string | null,
+    options?: { skipNarrationResync?: boolean },
   ) => {
     const clamped = commitPersistentWordIndex(wordIndex, cause, {
       cfi,
@@ -535,7 +536,7 @@ export default function ReaderContainer({
       navigate: true,
     });
 
-    if (isNarratingRef.current && narration.speaking && !narration.warming) {
+    if (!options?.skipNarrationResync && isNarratingRef.current && narration.speaking && !narration.warming) {
       narration.resyncToCursor(clamped, effectiveWpm);
     }
 
@@ -1333,7 +1334,7 @@ export default function ReaderContainer({
           }
           resumeAnchorRef.current = resolvedClickWordIndex;
           explicitSelectionAnchorRef.current = resolvedClickWordIndex;
-          const anchoredWordIndex = commitSharedWordAnchor(resolvedClickWordIndex, "hard-selection", cfi);
+          const anchoredWordIndex = commitSharedWordAnchor(resolvedClickWordIndex, "hard-selection", cfi, { skipNarrationResync: true });
           retargetActiveModeToWord(anchoredWordIndex);
           if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchoredWordIndex })) {
             foliateApiRef.current?.clearUserBrowsing?.();

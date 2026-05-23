@@ -418,6 +418,11 @@ export function createGenerationPipeline(config: PipelineConfig): GenerationPipe
     const { endIdx, plannedSilenceMs, isDialogue } = resolveChunkEnd(words, startIdx, chunkSize);
     const chunkWords = words.slice(startIdx, endIdx);
     const text = buildChunkText(chunkWords, startIdx, chunkWords.length);
+    if (import.meta.env.DEV && chunkWords.length > 0) {
+      console.debug(
+        `[pipeline] produceChunk: startIdx=${startIdx}, endIdx=${endIdx}, firstWord="${chunkWords[0]}", text="${text.slice(0, 60)}..."`
+      );
+    }
     const cacheIdentity = config.getCacheIdentity?.(text, chunkWords, startIdx);
 
     // Check cache first — cached chunk may be larger than requested (e.g. cruise-sized)
