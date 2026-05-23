@@ -369,9 +369,9 @@ describe("BUG-145b: getAudioProgress() contract", () => {
       ],
     });
 
-    // NARR-FIX-3: Trusted timing applies output-latency lag (TTS_TRUSTED_CURSOR_LAG_MS = 350ms).
-    // Set audio clock to 0.53 so effective cursor time is 0.53 - 0.35 = 0.18, mid-gap (0.15–0.21).
-    setAudioTime(0.53);
+    // NARR-FIX-3: Trusted timing applies output-latency lag (TTS_TRUSTED_CURSOR_LAG_MS = 450ms).
+    // Set audio clock to 0.63 so effective cursor time is 0.63 - 0.45 = 0.18, mid-gap (0.15–0.21).
+    setAudioTime(0.63);
     const report = scheduler.getAudioProgress();
     expect(report).not.toBeNull();
     expect(report?.silenceGapMs).toBeCloseTo(60, 6);

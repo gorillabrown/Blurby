@@ -34,7 +34,9 @@
   );
 }
 
-/* FLOW-INF-B: Timer bar cursor for flow mode — prominent depleting bar */
+/* FLOW-INF-B: Timer bar cursor for flow mode — prominent depleting bar.
+   FLOW-3A uses the per-word .page-word--flow-cursor underline inside the iframe;
+   this overlay is kept in the DOM for FlowScrollEngine positioning but hidden. */
 .flow-shrink-cursor {
   position: absolute;
   background: var(--accent);
@@ -44,6 +46,7 @@
   z-index: 10;
   transition: opacity 100ms ease;
   display: none; /* shown via JS: cursorRef.current.style.display = "block" */
+  visibility: hidden !important;
 }
 
 .foliate-page-view--chunk-visual .flow-shrink-cursor,

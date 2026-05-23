@@ -114,11 +114,9 @@ export const NARRATION_CURSOR_LAG_MS = 350;
 /** NARR-FIX-3: Trusted word-native timing still has audio output latency (DAC buffer,
  *  OS audio pipeline, Chromium internal buffers). This lag prevents the visual cursor
  *  from outpacing heard speech when Kokoro provides real word timestamps.
- *  History: 120→220→350ms. getOutputTimestamp().contextTime only reports ~57ms of
- *  latency on Windows, but the full Electron/WASAPI/Chromium pipeline adds significantly
- *  more buffering that the API doesn't account for. Empirically, 350ms matches the
- *  untrusted lag ceiling and eliminates progressive cursor-ahead drift. */
-export const TTS_TRUSTED_CURSOR_LAG_MS = 350;
+ *  History: 120→220→350→450ms. Step 3.1 QA found cursor-ahead drift and chunk-boundary
+ *  skip-ahead at 350ms on Windows; 450ms adds headroom for hardware-specific latency. */
+export const TTS_TRUSTED_CURSOR_LAG_MS = 450;
 /** NARR-CURSOR-2: Ignore tiny inter-word timing gaps; hold cursor only for meaningful silence. */
 export const TTS_SILENCE_HOLD_THRESHOLD_MS = 30;
 
