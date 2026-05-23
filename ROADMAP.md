@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-22 — READER-PERSISTENT-ANCHOR Step 2 manual QA failed; repair required before READER-ISO-1A.
-**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged after manual QA failure and is the active blocker before adapter isolation. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-22 — READER-PERSISTENT-ANCHOR Step 3.1 is code-complete; manual QA revalidation remains required before READER-ISO-1A.
+**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged; Step 3.1 commit `e6ebb07` landed fixes for S1, S4, S5, and S18 after Step 3 improved manual QA to 13 pass / 2 partial / 3 fail. S9 Flow lazy-follow is intentionally deferred as high-risk, and the full 18-scenario manual QA rerun is the active blocker before adapter isolation. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. Next dispatch: READER-PERSISTENT-ANCHOR-STEP3-REPAIR.
-**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction. Latest branch close-out: READER-PERSISTENT-ANCHOR Step 2 is branch-complete/manual-QA-failed and not main-landed.
+**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. Active gate: READER-PERSISTENT-ANCHOR Step 3.1 full 18-scenario manual QA rerun.
+**Last sprint**: TEST-GREEN-1 (2026-05-22) — classified and resolved 12 broad-suite failures before adapter extraction. Latest branch close-out: READER-PERSISTENT-ANCHOR Step 3.1 is code-complete/manual-QA-pending and still not main-landed.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -74,6 +74,10 @@
 15. **SRL-053:** Foliate reader-mode runtime changes require screen-interaction manual QA before merge or roadmap advancement.
 16. **SRL-054:** Reader-anchor specs must distinguish hard-selected anchor, last-read progress, live playback cursor, and temporary browse-away position.
 17. **SRL-055:** Shared Foliate surface behavior needs at least one live UI gate for real layout movement, rendering, and follow behavior.
+18. **SRL-056:** Hard-selected anchors must only be cleared by cause-aware lifecycle events that truly invalidate them.
+19. **SRL-057:** Same-section and cross-section Foliate movement must be accepted separately.
+20. **SRL-058:** Each reading mode needs its own active-render QA gate.
+21. **SRL-059:** CSS-column word-position indexes need live rect validation before same-section movement decisions.
 
 Deviation protocol: a skeleton may override a standing rule only by naming the rule and justifying the waiver in its spec.
 
@@ -87,6 +91,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 #### READER-PERSISTENT-ANCHOR-STEP3-REPAIR — Persistent Anchor Manual QA Repair *(position 1 — full spec)*
 
+- **Status:** Code-complete on `hotfix/reader-persistent-anchor` through `e6ebb07`; Step 3 manual QA rerun complete at 13 pass / 2 partial / 3 fail; Step 3.1 fixes landed for S1, S4, S5, and S18; manual QA rerun required before merge or queue advancement.
 - **What:** Repair the user-facing persistent-anchor failures discovered by Step 2 manual QA across Page, Focus, Flow, and Narrate while preserving the Step 2 wins that passed.
 - **Why:** The branch is automation-green but manual-QA-red. Adapter isolation should not extract or codify broken Page jump-back, blank Focus playback, Flow non-follow, Narrate wrong-start, or hard-click retarget behavior.
 - **Prerequisites:** `hotfix/reader-persistent-anchor` remains unmerged; `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` and `docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP-2.2026-05-22.md` accepted as source evidence.
@@ -109,9 +114,17 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 - **Primary edit sites:** `src/components/FoliatePageView.tsx`, `src/components/ReaderContainer.tsx`, `src/components/ReaderBottomBar.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/usePersistentReadingAnchor.ts`, `src/hooks/useFoliateSync.ts`, `src/hooks/useDocumentLifecycle.ts`, `src/utils/persistentAnchor.ts`.
 - **Test roster:** existing persistent-anchor matrix tests plus focused additions for Page jump-back motion, Focus first-word render, Flow follow/auto-pause, Narrate exact hard-selected start, active hard-click retarget, reopen CFI precedence, and inactive button styling.
-- **Manual QA roster:** rerun `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` scenario list as the Step 3 acceptance matrix, updating the report or creating a Step 3 manual QA report.
+- **Manual QA roster:** Step 3 rerun saved at `docs/studies/reviews/Reader_Persistent_Anchor_Step3_Repair_Manual_QA_2026-05-22.md`; Step 3.1 must rerun the same 18-scenario matrix after repair.
 - **Branch:** continue from `hotfix/reader-persistent-anchor` or create `hotfix/reader-persistent-anchor-step3-repair` from that branch. Do not merge to `main` until manual QA passes.
 - **Commit hygiene:** Preserve passing Step 2 behavior. Prefer commits grouped by failure cluster: jump-back/reopen, Focus/Flow playback, Narrate exact start/retarget, button polish/tests.
+
+##### Step 3.1 repair gate
+
+- **Problem:** Step 3 resolved the highest-risk Narrate and Flow failures, but three manual-QA failures remain: S1 Page same-section Jump Back no-op, S4 Focus active overlay blank/frozen, and S5 Focus paused browse-away missing Jump Back.
+- **Scope:** Fix S1, S4, and S5 first. Investigate S18 Page reopen lag alongside S1 if it shares the same same-section movement or stale-CFI root. Treat S9 Flow lazy follow as secondary polish unless it is cheap and low-risk.
+- **Done when:** S1, S4, and S5 pass in screen-interaction manual QA; S9 and S18 are either fixed or explicitly dispositioned; the full 18-scenario matrix is rerun; focused tests, `npx tsc --noEmit`, and `git diff --check` pass.
+- **Merge gate:** Do not merge `hotfix/reader-persistent-anchor` or dispatch `READER-ISO-1A` until this Step 3.1 gate passes.
+- **Step 3.1 code result:** Commit `e6ebb07` fixed S1 with `forceMotion` in the highlight pipeline, S4 by using global words in `onWordAdvance`, S5 by preserving Focus browse-away state, and S18 with a separate cheap reopen-position fix. S9 was investigated and deferred as a dedicated Flow-Foliate scroll coordination problem.
 
 #### Stage 2 — Adapter Isolation
 

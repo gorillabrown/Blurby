@@ -413,3 +413,31 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Add at least one live UI gate, manual or automated, for each shared Foliate surface behavior that depends on real layout: Page jump-back motion, Focus first-word render, Flow cursor follow, Narrate exact start, and cross-mode hard-click retarget.
 **Applies to:** FoliatePageView, reader mode adapters, FlowScrollEngine integration, Focus overlay, Narrate cursor sync, persistent-anchor repairs.
 **Status:** Observation
+
+### SRL-056 — Hard-selection anchors need cause-aware clearing (READER-PERSISTENT-ANCHOR Step 3, 2026-05-22)
+**Verdict:** A hard-selected anchor must not be cleared by generic progress or visual-ref writes before mode start consumes it.
+**Evidence:** `explicitSelectionAnchorRef` was cleared by `writeRefs` calls with non-hard-selection causes, including jump-back from `syncVisualToPersistentWord`, which caused Narrate and Flow starts to ignore the newly selected word.
+**Recommendation:** Anchor state mutation APIs should use explicit causes and only clear hard-selection anchors on lifecycle events that truly invalidate them, such as book-open or explicit replacement.
+**Applies to:** Reader persistent anchors, mode start, jump-back, active retargeting, resume/progress writes, cross-mode handoff.
+**Status:** Observation
+
+### SRL-057 — Same-section and cross-section Foliate movement are separate acceptance cases (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** A Jump Back or anchor recovery path that works across chapter or section boundaries does not prove same-section movement works.
+**Evidence:** Step 3 Page Jump Back returned correctly when the target anchor was in another section, but dismissed without moving when the anchor was in the same chapter.
+**Recommendation:** Any Foliate anchor navigation helper must test both same-section and cross-section return paths before being accepted.
+**Applies to:** Page Jump Back, reopen restore, section recovery, mode-switch recentering, persistent-anchor navigation.
+**Status:** Observation
+
+### SRL-058 — Each reading mode needs its own active-render QA gate (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** Shared anchor plumbing can pass while a specific mode's playback renderer remains broken.
+**Evidence:** Step 3 fixed Flow playback and Narrate exact start, but Focus still rendered a blank active overlay and did not expose paused Jump Back.
+**Recommendation:** Manual QA and dispatch specs must verify active render output per mode, not infer mode health from shared anchor or surface state.
+**Applies to:** Focus, Flow, Narrate, Page-mode restore, adapter extraction.
+**Status:** Observation
+
+### SRL-059 — CSS-column word-position indexes need live rect validation before same-section movement decisions (READER-PERSISTENT-ANCHOR Step 3.1, 2026-05-22)
+**Verdict:** Cached word-position rects can go stale after Foliate page turns in CSS-column paginated mode.
+**Evidence:** Step 3.1 found that `FoliatePageView`'s word position index stores `getBoundingClientRect()` snapshots; same-section Jump Back could trust stale `visible` state and dismiss without moving.
+**Recommendation:** Same-section Foliate navigation should either force motion for recovery actions or validate target rects live before deciding the word is already visible.
+**Applies to:** Page Jump Back, reopen restore, same-section anchor recovery, mode-switch recentering, Foliate word-position indexes.
+**Status:** Observation
