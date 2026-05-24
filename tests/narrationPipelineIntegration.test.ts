@@ -457,3 +457,161 @@ describe("Narration Pipeline Integration", () => {
     pipelineRef.stop();
   });
 });
+
+describe("content-contiguous synthesis — Step 3.6 NARRATE-CURSOR-SYNC-5", () => {
+  it("automatic continuation starts at previous chunk's produced-end, not cursor position", async () => {
+    // Use a word count sized so the ramp-up produces multiple chunks before onEnd.
+    // The pipeline ramp emits chunks at 13, 26, 52 words; 100 words is enough for
+    // several ramp-up chunks plus an end, giving us the sequence to check.
+    const words = Array.from({ length: 100 }, (_, i) => (i % 13 === 12 ? `word${i}.` : `word${i}`));
+    const emitted: Array<{ startIdx: number; wordCount: number }> = [];
+    let pipelineRef!: GenerationPipeline;
+    const onEnd = vi.fn();
+
+    const config: PipelineConfig = {
+      generateFn: vi.fn().mockRejectedValue(new Error("generateFn should not run")),
+      getWords: () => words,
+      getVoiceId: () => "af_heart",
+      getSpeed: () => 1,
+      getParagraphBreaks: () => new Set<number>([words.length - 1]),
+      onChunkReady: (chunk) => {
+        emitted.push({ startIdx: chunk.startIdx, wordCount: chunk.words.length });
+        queueMicrotask(() => pipelineRef.acknowledgeChunk());
+      },
+      getCacheIdentity: (_text, _chunkWords, startIdx) => buildKokoroCacheIdentity({
+        text: words.slice(startIdx, Math.min(startIdx + 13, words.length)).join(" "),
+        startIdx,
+        bookId: "book-contiguity-1",
+        voiceId: "af_heart",
+        rateBucket: 1,
+      }).identity,
+      isCached: vi.fn().mockResolvedValue(true),
+      // loadCached: return as many words as the planner requested via the words slice
+      // The planner computes endIdx and the pipeline passes startIdx; the returned chunk
+      // must have startIdx matching what the pipeline asked for.
+      loadCached: vi.fn(async (startIdx: number) => {
+        // Return whatever words remain from startIdx up to the next sentence boundary
+        // (mimicking a real cache hit that respects planner boundaries).
+        const maxEnd = Math.min(words.length, startIdx + 52);
+        // Snap to sentence end if possible, otherwise take all remaining
+        let endIdx = maxEnd;
+        for (let i = startIdx; i < maxEnd; i += 1) {
+          if (words[i].endsWith(".")) { endIdx = i + 1; break; }
+        }
+        const chunkWords = words.slice(startIdx, endIdx);
+        return {
+          audio: makePcm(Math.max(2400, chunkWords.length * 300)),
+          sampleRate: 24000,
+          durationMs: chunkWords.length * 80,
+          words: chunkWords,
+          startIdx,
+          boundaryType: (chunkWords[chunkWords.length - 1]?.endsWith(".") ? "sentence" : "none") as "sentence" | "none",
+          timingTruth: "word-native" as const,
+          chunkId: `book-contiguity-1:${startIdx}`,
+          wordTimestamps: makeWordTimestamps(chunkWords, 0.08),
+          sourceWordIndexes: chunkWords.map((_, idx) => idx),
+        } satisfies ScheduledChunk;
+      }),
+      onError: vi.fn(),
+      onEnd,
+    };
+
+    pipelineRef = createGenerationPipeline(config);
+    pipelineRef.start(0);
+
+    // Wait for the pipeline to finish the full 100-word corpus
+    await vi.waitFor(() => expect(onEnd).toHaveBeenCalled(), { timeout: 3000 });
+    pipelineRef.stop();
+
+    expect(emitted.length).toBeGreaterThanOrEqual(2);
+
+    // The invariant: every chunk's startIdx equals the previous chunk's produced-end.
+    // This is the content-contiguity guarantee — no words are skipped.
+    for (let i = 1; i < emitted.length; i += 1) {
+      const prev = emitted[i - 1];
+      const curr = emitted[i];
+      expect(curr.startIdx).toBe(prev.startIdx + prev.wordCount);
+    }
+
+    // Verify total coverage: all words were covered contiguously from 0 to end
+    const lastChunk = emitted[emitted.length - 1];
+    expect(lastChunk.startIdx + lastChunk.wordCount).toBe(words.length);
+  });
+
+  it("hard-click re-anchor overrides contiguous chain", async () => {
+    const words = Array.from({ length: 100 }, (_, i) => (i % 13 === 12 ? `word${i}.` : `word${i}`));
+    const emitted: Array<{ startIdx: number; wordCount: number }> = [];
+    let pipelineRef!: GenerationPipeline;
+    const onEnd = vi.fn();
+    const hardClickTarget = 40;
+
+    const makeConfig = (bookId: string): PipelineConfig => ({
+      generateFn: vi.fn().mockRejectedValue(new Error("generateFn should not run")),
+      getWords: () => words,
+      getVoiceId: () => "af_heart",
+      getSpeed: () => 1,
+      getParagraphBreaks: () => new Set<number>([words.length - 1]),
+      onChunkReady: (chunk) => {
+        emitted.push({ startIdx: chunk.startIdx, wordCount: chunk.words.length });
+        queueMicrotask(() => pipelineRef.acknowledgeChunk());
+      },
+      getCacheIdentity: (_text, _chunkWords, startIdx) => buildKokoroCacheIdentity({
+        text: words.slice(startIdx, Math.min(startIdx + 13, words.length)).join(" "),
+        startIdx,
+        bookId,
+        voiceId: "af_heart",
+        rateBucket: 1,
+      }).identity,
+      isCached: vi.fn().mockResolvedValue(true),
+      loadCached: vi.fn(async (startIdx: number) => {
+        const maxEnd = Math.min(words.length, startIdx + 52);
+        let endIdx = maxEnd;
+        for (let i = startIdx; i < maxEnd; i += 1) {
+          if (words[i].endsWith(".")) { endIdx = i + 1; break; }
+        }
+        const chunkWords = words.slice(startIdx, endIdx);
+        return {
+          audio: makePcm(Math.max(2400, chunkWords.length * 300)),
+          sampleRate: 24000,
+          durationMs: chunkWords.length * 80,
+          words: chunkWords,
+          startIdx,
+          boundaryType: (chunkWords[chunkWords.length - 1]?.endsWith(".") ? "sentence" : "none") as "sentence" | "none",
+          timingTruth: "word-native" as const,
+          chunkId: `${bookId}:${startIdx}`,
+          wordTimestamps: makeWordTimestamps(chunkWords, 0.08),
+          sourceWordIndexes: chunkWords.map((_, idx) => idx),
+        } satisfies ScheduledChunk;
+      }),
+      onError: vi.fn(),
+      onEnd,
+    });
+
+    // Phase 1: start at word 0, let at least one chunk through
+    pipelineRef = createGenerationPipeline(makeConfig("book-contiguity-2a"));
+    pipelineRef.start(0);
+
+    await vi.waitFor(() => expect(emitted.length).toBeGreaterThanOrEqual(1), { timeout: 2000 });
+
+    // Record the produced-end of what was generated so far
+    const lastEmittedBeforeStop = emitted[emitted.length - 1];
+    const contiguousNext = lastEmittedBeforeStop.startIdx + lastEmittedBeforeStop.wordCount;
+
+    pipelineRef.stop();
+    const emittedBeforeRestart = emitted.length;
+
+    // Phase 2: hard-click to a position that is NOT the contiguous continuation
+    expect(hardClickTarget).not.toBe(contiguousNext);
+    pipelineRef = createGenerationPipeline(makeConfig("book-contiguity-2b"));
+    pipelineRef.start(hardClickTarget);
+
+    await vi.waitFor(() => expect(emitted.length).toBeGreaterThan(emittedBeforeRestart), { timeout: 2000 });
+    pipelineRef.stop();
+
+    // The first chunk after hard-click starts at the clicked position, not contiguousNext
+    const chunkAfterRestart = emitted[emittedBeforeRestart];
+    expect(chunkAfterRestart).toBeDefined();
+    expect(chunkAfterRestart.startIdx).toBe(hardClickTarget);
+    expect(chunkAfterRestart.startIdx).not.toBe(contiguousNext);
+  });
+});

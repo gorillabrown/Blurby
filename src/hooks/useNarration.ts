@@ -185,6 +185,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
    *  confirmed boundary crossings. Used as the authoritative start index for chunk generation
    *  so that visual-advance callbacks cannot contaminate the pipeline's read head. */
   const lastConfirmedAudioWordRef = useRef<number>(0);
+  const nextGenWordIndexRef = useRef<number>(0);
   /** TTS-7R Task-5 truth gate: trust only real timing for per-word visual updates. */
   const isTrustedWordTimingRef = useRef<boolean>(true);
   const kokoroBoundaryGateRef = useRef<{
@@ -625,6 +626,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       },
       onChunkBoundary: (endIdx: number, metadata?: ChunkBoundaryPayload) => {
         onChunkBoundaryRef.current?.(endIdx, metadata);
+      },
+      onChunkProduced: (endIdx: number) => {
+        nextGenWordIndexRef.current = endIdx;
       },
       onFallbackToWeb: () => {
         // TTS-7B: Stop Kokoro pipeline+scheduler before switching to Web Speech (BUG-109)
@@ -1184,10 +1188,10 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const s = stateRef.current;
     if (s.status === "idle") return;
     const words = allWordsRef.current;
-    // TTS-7R (BUG-145c): Read from audio-confirmed ref, NOT cursorWordIndex.
-    // cursorWordIndex can be advanced by wall-clock visual callbacks; using it here
-    // would cause the pipeline to restart from the wrong word after a stall.
-    const startIdx = lastConfirmedAudioWordRef.current;
+    // Step 3.6: Read from produced-content truth, NOT the boundary-driven
+    // lastConfirmedAudioWordRef (which carries the cursor's lead and causes
+    // content omission at re-entry).
+    const startIdx = nextGenWordIndexRef.current;
     if (import.meta.env.DEV) {
       const startWord = words[startIdx] ?? "??";
       const prevWord = startIdx > 0 ? words[startIdx - 1] ?? "??" : "(start)";
@@ -1477,6 +1481,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           chunkWords: [],
         };
         lastConfirmedAudioWordRef.current = startWordIndex;
+        nextGenWordIndexRef.current = startWordIndex;
         if (api?.qwenPreload) {
           api.qwenPreload().then((result) => {
             if (!result?.error) return;
@@ -1535,6 +1540,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       // TTS-7R (BUG-145c): Seed canonical audio ref in warming path too — the
       // auto-start effect reads lastConfirmedAudioWordRef via speakNextChunkKokoro.
       lastConfirmedAudioWordRef.current = startWordIndex;
+      nextGenWordIndexRef.current = startWordIndex;
       // Trigger prewarm if available
       if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
       return "warming";
@@ -1593,6 +1599,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7R (BUG-145c): Seed the canonical audio ref so the first Kokoro chunk
     // reads from the correct starting word rather than whatever the ref held before.
     lastConfirmedAudioWordRef.current = startWordIndex;
+    nextGenWordIndexRef.current = startWordIndex;
     lastCursorStartRef.current = {
       startWordIndex,
       wordsLength: words.length,
@@ -1625,6 +1632,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     clearPendingRateResponseTrace();
     const newSpeed = normalizeNarrationRate(stateRef.current.speed, stateRef.current.engine);
     nextKokoroExactStartRef.current = wordIndex;
+    nextGenWordIndexRef.current = wordIndex;
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     if (pauseReason && stateRef.current.status === "paused" && stateRef.current.pauseReason === pauseReason) {
       dispatch({ type: "RESUME" });
@@ -1659,6 +1667,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     allWordsRef.current = words;
     const isHandoff = options.mode === "handoff";
     const s = syncNarrationCursor(globalStartIdx, { syncConfirmedAudioAnchor: isHandoff });
+    if (isHandoff) {
+      nextGenWordIndexRef.current = globalStartIdx;
+    }
     if (s.status === "idle") return;
     if (!isHandoff) {
       if (import.meta.env.DEV) console.debug("[narrate] updateWords — swapped to", words.length, "words at global idx", globalStartIdx, "(no restart)");
@@ -1918,6 +1929,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         mode: getEvalTraceMode(),
       });
       lastConfirmedAudioWordRef.current = currentWordIndex;
+      nextGenWordIndexRef.current = currentWordIndex;
       speakNextChunkRef.current();
       return;
     }
@@ -1932,6 +1944,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearPocketOwnership();
       clearPendingRateResponseTrace();
       lastConfirmedAudioWordRef.current = s.cursorWordIndex;
+      nextGenWordIndexRef.current = s.cursorWordIndex;
       dispatch({ type: "RESUME" });
       stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       emitEvalTrace({

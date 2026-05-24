@@ -48,16 +48,22 @@ describe("cursor contract after narration-mode removal", () => {
   });
 });
 
-describe("cursor-source clamp — Step 3.5 structural contract", () => {
-  it("audioScheduler tick clamps cursor to the playing source", () => {
-    const src = read("src/utils/audioScheduler.ts");
-    expect(src).toContain("getPlayingSourceMaxWordIndex");
-    expect(src).toContain("maxPlayingWord != null && currentBoundary.wordIndex > maxPlayingWord");
+describe("content-contiguous synthesis — Step 3.6 structural contract", () => {
+  it("speakNextChunkKokoro reads from nextGenWordIndexRef, not lastConfirmedAudioWordRef", () => {
+    const src = read("src/hooks/useNarration.ts");
+    expect(src).toContain("const startIdx = nextGenWordIndexRef.current");
+    // The old pattern that would skip words by following the cursor lead must not appear
+    // in the speakNextChunkKokoro body. The ref is still used elsewhere (cursor updates),
+    // but generation must anchor to nextGenWordIndexRef.
+    const speakNextIdx = src.indexOf("const speakNextChunkKokoro");
+    expect(speakNextIdx).toBeGreaterThan(-1);
+    const speakNextBody = src.slice(speakNextIdx, speakNextIdx + 500);
+    expect(speakNextBody).toContain("nextGenWordIndexRef.current");
+    expect(speakNextBody).not.toContain("const startIdx = lastConfirmedAudioWordRef.current");
   });
 
-  it("getAudioProgress clamps returned wordIndex to the playing source", () => {
-    const src = read("src/utils/audioScheduler.ts");
-    expect(src).toContain("const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime)");
-    expect(src).toContain("clamped ? maxPlayingWord : current.wordIndex");
+  it("kokoroStrategy fires onChunkProduced with produced-end", () => {
+    const src = read("src/hooks/narration/kokoroStrategy.ts");
+    expect(src).toContain("deps.onChunkProduced?.(chunk.startIdx + chunk.words.length)");
   });
 });

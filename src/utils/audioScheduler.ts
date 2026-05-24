@@ -731,6 +731,10 @@ export function createAudioScheduler(): AudioScheduler {
     }
 
     // Schedule playback
+    if (import.meta.env.DEV) {
+      const drift = (ctx.currentTime - chunkStartTime) * 1000;
+      console.debug(`[scheduler] scheduleChunk: drift=${drift.toFixed(1)}ms (ctx=${ctx.currentTime.toFixed(3)} start=${chunkStartTime.toFixed(3)})`);
+    }
     source.start(chunkStartTime);
 
     const endTime = chunkStartTime + chunkDurationSec;
