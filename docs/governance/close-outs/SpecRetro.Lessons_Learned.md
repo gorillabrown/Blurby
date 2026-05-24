@@ -490,3 +490,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Any sprint that changes chunk sizing, snapping, ramping, or natural-boundary logic should audit all downstream dispatch math and require consumers to use resolved plan boundaries.
 **Applies to:** TTS chunk planning, Kokoro pipeline ramping, sentence-boundary snapping, parallel chunk dispatch.
 **Status:** Observation
+
+### SRL-067 — Visual and audio pipelines must not share raw word indexes unless they share tokenization (READER-PERSISTENT-ANCHOR Step 3.3 QA, 2026-05-22)
+**Verdict:** A numeric word index is not a stable cross-subsystem contract when Foliate/click resolution and TTS chunking tokenize text differently.
+**Evidence:** Step 3.3 DevTools diagnostics showed `globalWordIndex: 3370` meant `Medicare` to `onWordClick`, but the same `startIdx=3370` meant `Many` to `speakNextChunkKokoro` and `produceChunk`; the TTS chunk also rendered `sixty-five` as `sixty five`, indicating tokenization drift.
+**Recommendation:** Narrate exact-start work should use one canonical word/token index source across click resolution, highlighting, and TTS chunking, or explicitly translate indexes at subsystem boundaries before audio scheduling.
+**Applies to:** Narrate exact-start, TTS chunking, Foliate word indexes, click retargeting, cursor/audio sync, tokenizer normalization.
+**Status:** Observation
+
+### SRL-068 — Prefer canonical content alignment over tokenizer unification across renderer/source boundaries (READER-PERSISTENT-ANCHOR Step 3.4, 2026-05-23)
+**Verdict:** When the renderer and source extractor see the same book through different DOM/XHTML views, making one canonical index source and aligning rendered content to it is safer than trying to force tokenizer parity.
+**Evidence:** Step 3.4 repaired the click/TTS index mismatch by stamping Foliate DOM spans from canonical extractor words in `wrapWordsInSpans`, instead of trying to make renderer `segmentWordSpans` and main-process `epub-word-extractor` tokenize identically across stitching, punctuation-gap, footnote, and block-selection differences.
+**Recommendation:** For reader surfaces that bridge rendered DOM and source extraction, choose one canonical word/index source, align content to it, and make unmatched content warn/recover instead of silently drifting by position.
+**Applies to:** Foliate word wrapping, TTS word indexes, rendered/source text alignment, Narrate exact-start, click retargeting, adapter extraction.
+**Status:** Observation
