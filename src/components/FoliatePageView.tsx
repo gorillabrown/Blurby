@@ -277,6 +277,9 @@ interface FoliatePageViewProps {
   flowCursorRef?: React.MutableRefObject<HTMLDivElement | null>;
   /** Reader-driven render revision marker for invalidation/rebuild hooks. */
   foliateRenderVersion?: number;
+  /** Returns the canonical (extractor) word strings for a section when available.
+   *  Used by content-align wrapping so click index === TTS index (SRL-067). */
+  getCanonicalSectionWords?: (sectionIndex: number) => string[] | undefined;
 }
 
 export interface FoliateHighlightOptions {
@@ -376,6 +379,7 @@ export default function FoliatePageView({
   flowCursorRef,
   getAudioProgress,
   foliateRenderVersion = 0,
+  getCanonicalSectionWords,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -408,6 +412,8 @@ export default function FoliatePageView({
   getAudioProgressRef.current = getAudioProgress;
   const bookWordSectionsRef = useRef(bookWordSections);
   bookWordSectionsRef.current = bookWordSections;
+  const getCanonicalSectionWordsRef = useRef(getCanonicalSectionWords);
+  getCanonicalSectionWordsRef.current = getCanonicalSectionWords;
   const highlightedWordIndexRef = useRef<number>(highlightedWordIndex ?? -1);
   highlightedWordIndexRef.current = highlightedWordIndex ?? -1;
   const narrationWordIndexRef = useRef<number | null>(narrationWordIndex ?? null);
@@ -971,8 +977,9 @@ export default function FoliatePageView({
               const existingWithoutSection = foliateWordsRef.current.filter(w => w.sectionIndex !== index);
               const existingEnd = existingWithoutSection.length;
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
+              const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
-              await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -1001,7 +1008,8 @@ export default function FoliatePageView({
               const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections);
               if (sectionStart >= 0) {
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
-                await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+                const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
               }
             }
           }
@@ -1506,7 +1514,8 @@ export default function FoliatePageView({
         if (sectionStart < 0) continue;
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
-        await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+        const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);

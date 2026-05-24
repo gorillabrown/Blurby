@@ -647,6 +647,14 @@ export default function ReaderContainer({
     }
   }, [useFoliate, wordsRef]);
 
+  const getCanonicalSectionWords = useCallback((sectionIndex: number): string[] | undefined => {
+    const data = bookWordsRef.current;
+    if (!data?.complete) return undefined;
+    const section = data.sections?.find((s: { sectionIndex: number }) => s.sectionIndex === sectionIndex);
+    if (!section) return undefined;
+    return data.words.slice(section.startWordIdx, section.endWordIdx);
+  }, []);
+
   // ── Foliate sync effects (extracted to useFoliateSync hook) ──────────────
   // Owns: browse-away detection, chapter charOffset sync, section navigation
   // (focus/flow), and section-end callback wiring.
@@ -1433,6 +1441,7 @@ export default function ReaderContainer({
       scrollContainerRef={flowScrollContainerRef}
       flowCursorRef={flowScrollCursorRef}
       foliateRenderVersion={foliateRenderVersion}
+      getCanonicalSectionWords={getCanonicalSectionWords}
       onFlowWordAdvance={setHighlightedWordIndex}
       onWordsReextracted={() => {
         // New EPUB section loaded — may need to update DOM highlight state.

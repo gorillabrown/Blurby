@@ -240,8 +240,9 @@ export function useNarrationCaching({
         for (const { doc: sectionDoc, index: sectionIndex } of contents) {
           const sec = bookWords.sections.find(s => s.sectionIndex === sectionIndex);
           if (sec && sectionDoc?.body) {
+            const canonicalWords = bookWords.words.slice(sec.startWordIdx, sec.endWordIdx);
             unwrapWordSpans(sectionDoc);
-            wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx);
+            wrapWordsInSpans(sectionDoc, sectionIndex, sec.startWordIdx, [], canonicalWords);
           }
         }
       };
