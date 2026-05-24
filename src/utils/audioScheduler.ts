@@ -515,6 +515,20 @@ export function createAudioScheduler(): AudioScheduler {
    * Self-correcting word timer — uses AudioContext.currentTime to determine
    * which word boundary we've crossed, then schedules the next tick.
    */
+  // Step 3.5 / NARRATE-CURSOR-SYNC-4: Find the max word index of the source
+  // currently being heard. Cursor advancement and getAudioProgress clamp to
+  // this value so the cursor can never outrun the audio.
+  function getPlayingSourceMaxWordIndex(now: number): number | null {
+    let playingSource: ActiveSource | null = null;
+    for (const s of activeSources) {
+      if (s.startTime <= now) {
+        playingSource = s;
+      }
+    }
+    if (!playingSource || playingSource.boundaries.length === 0) return null;
+    return playingSource.boundaries[playingSource.boundaries.length - 1].wordIndex;
+  }
+
   function startWordTimer(): void {
     // NARR-FIX-4: Keep a single live timer loop. Restarting on every chunk
     // causes jitter/drift and "word timer started" spam under rapid chunking.
@@ -561,6 +575,10 @@ export function createAudioScheduler(): AudioScheduler {
       // (350ms) covers the full pipeline and prevents cursor-ahead drift.
       const trustedCursorNow = now - trustedLagSec;
 
+      // Step 3.5: Clamp cursor to the currently-playing source so it
+      // cannot outrun heard audio or skip ahead at chunk-load.
+      const maxPlayingWord = getPlayingSourceMaxWordIndex(now);
+
       // Advance past ALL boundaries we've crossed in this tick.
       let advancedAny = false;
       while (nextWordBoundaryIdx < currentWordBoundaries.length) {
@@ -569,6 +587,7 @@ export function createAudioScheduler(): AudioScheduler {
         // the larger fixed cursor lag.
         const boundaryComparatorTime = currentBoundary.isTrustedWordTiming ? trustedCursorNow : cursorNow;
         if (currentBoundary.time > boundaryComparatorTime) break;
+        if (maxPlayingWord != null && currentBoundary.wordIndex > maxPlayingWord) break;
 
         // DEV: Drift diagnostic — how late is this boundary firing relative to
         // its scheduled time? Positive = boundary fired after scheduled (cursor
@@ -954,14 +973,19 @@ export function createAudioScheduler(): AudioScheduler {
       isInSilenceGap = now >= currentWordEndTime && now < nextWordStartTime;
     }
 
+    // Step 3.5: Belt-and-suspenders clamp — even if tick() hasn't run yet
+    // this frame, never report a wordIndex past the currently-playing source.
+    const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime);
+    const clamped = maxPlayingWord != null && current.wordIndex > maxPlayingWord;
+
     return {
-      wordIndex: current.wordIndex,
-      fraction,
+      wordIndex: clamped ? maxPlayingWord : current.wordIndex,
+      fraction: clamped ? 0 : fraction,
       audioTime: now,
-      currentWordEndTime,
-      nextWordStartTime,
-      silenceGapMs,
-      isInSilenceGap,
+      currentWordEndTime: clamped ? null : currentWordEndTime,
+      nextWordStartTime: clamped ? null : nextWordStartTime,
+      silenceGapMs: clamped ? null : silenceGapMs,
+      isInSilenceGap: clamped ? false : isInSilenceGap,
     };
   }
 

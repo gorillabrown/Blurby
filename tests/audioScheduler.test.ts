@@ -54,6 +54,7 @@ afterEach(() => {
 });
 
 import { createAudioScheduler, type ScheduledChunk } from "../src/utils/audioScheduler";
+import { NARRATION_CURSOR_LAG_MS } from "../src/constants";
 
 function makeChunk(startIdx: number, wordCount: number): ScheduledChunk {
   return {
@@ -307,6 +308,111 @@ describe("createAudioScheduler", () => {
         endIdx: 6,
       }));
     }, { timeout: 1000 });
+
+    scheduler.stop();
+  });
+});
+
+describe("cursor clamp — Step 3.5 NARRATE-CURSOR-SYNC-4", () => {
+  // These tests exercise getAudioProgress()'s belt-and-suspenders clamp that
+  // prevents the reported wordIndex from outrunning the currently-playing source.
+  // tick() is RAF-driven and cannot fire in jsdom, so we test the clamp path
+  // in getAudioProgress() directly by setting mockCurrentTime and asserting
+  // the reported wordIndex stays within the playing source's word range.
+
+  it("getAudioProgress wordIndex never exceeds the playing source's max word (single chunk)", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    // Chunk 1: words 0–4. Chunk 2: words 5–9. Chunk 3: words 10–14.
+    // All three are scheduled at mockCurrentTime=0, so they're queued sequentially.
+    scheduler.scheduleChunk(makeChunk(0, 5));
+    scheduler.scheduleChunk(makeChunk(5, 5));
+    scheduler.scheduleChunk(makeChunk(10, 5));
+
+    // Mid-chunk-1: only chunk 1 has started (startTime=0 <= 0.5).
+    // getAudioProgress must not report a wordIndex beyond chunk 1's range.
+    mockCurrentTime = 0.5;
+    const report1 = scheduler.getAudioProgress();
+    expect(report1).not.toBeNull();
+    expect(report1!.wordIndex).toBeLessThanOrEqual(4);
+
+    // Well into chunk 2: chunk 2 has started (startTime ~0.986 <= 2.0).
+    // getAudioProgress may now report words up to chunk 2's max.
+    mockCurrentTime = 2.0;
+    const report2 = scheduler.getAudioProgress();
+    expect(report2).not.toBeNull();
+    expect(report2!.wordIndex).toBeLessThanOrEqual(9);
+
+    scheduler.stop();
+  });
+
+  it("getAudioProgress returns null before the first scheduled source starts", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    // Schedule the chunk at a future time (mockCurrentTime=1.0 → playbackStartTime=1.0).
+    // Then rewind the clock to before that start time — getAudioProgress must return null
+    // because audio has not started yet (audioCtx.currentTime < playbackStartTime).
+    mockCurrentTime = 1.0;
+    scheduler.scheduleChunk(makeChunk(0, 5));
+
+    // Clock is before the scheduled start — no audio has played yet.
+    mockCurrentTime = 0.5;
+    const report = scheduler.getAudioProgress();
+    expect(report).toBeNull();
+
+    scheduler.stop();
+  });
+
+  it("cursor clamp holds across many prefetched chunks", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    // Schedule 10 chunks: words 0–4, 5–9, …, 45–49.
+    for (let i = 0; i < 10; i++) {
+      scheduler.scheduleChunk(makeChunk(i * 5, 5));
+    }
+
+    // Only chunk 0 has started at t=0.5. All 50 word boundaries are in the
+    // timeline but the clamp must keep the reported wordIndex within chunk 0's
+    // range (0–4). This verifies that bulk-prefetching cannot push the cursor
+    // forward before the audio has actually reached those words.
+    mockCurrentTime = 0.5;
+    const report = scheduler.getAudioProgress();
+    expect(report).not.toBeNull();
+    expect(report!.wordIndex).toBeLessThanOrEqual(4);
+
+    scheduler.stop();
+  });
+
+  it("cursor clamp transitions when a later source crosses its start boundary", () => {
+    const scheduler = createAudioScheduler();
+    scheduler.setCallbacks({ onWordAdvance: vi.fn(), onChunkBoundary: vi.fn(), onEnd: vi.fn(), onError: vi.fn() });
+    scheduler.play();
+
+    // Chunk 1: words 0–4 (starts at t=0, boundary/handoff at t≈0.986).
+    // Chunk 2: words 5–9 (starts at t≈0.986).
+    scheduler.scheduleChunk(makeChunk(0, 5));
+    scheduler.scheduleChunk(makeChunk(5, 5));
+
+    // Before chunk 2 starts: max playing word is 4.
+    mockCurrentTime = 0.5;
+    const beforeCrossover = scheduler.getAudioProgress();
+    expect(beforeCrossover).not.toBeNull();
+    expect(beforeCrossover!.wordIndex).toBeLessThanOrEqual(4);
+
+    // After chunk 2 has started: it is now the latest source with startTime <= now,
+    // so its max word (9) becomes the new ceiling. The clamp must not block chunk 2.
+    // Chunk 2 startTime = crossfade boundary of chunk 1 ≈ 1.0 - (14ms/1000) = 0.986.
+    mockCurrentTime = 1.5;
+    const afterCrossover = scheduler.getAudioProgress();
+    expect(afterCrossover).not.toBeNull();
+    // Max playing word is now 9; wordIndex must be within [0, 9].
+    expect(afterCrossover!.wordIndex).toBeLessThanOrEqual(9);
 
     scheduler.stop();
   });

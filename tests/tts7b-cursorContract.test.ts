@@ -4,6 +4,21 @@ import * as path from "path";
 
 const read = (rel: string) => fs.readFileSync(path.resolve(__dirname, "..", rel), "utf-8");
 
+describe("cursor-source clamp — Step 3.5 structural contract", () => {
+  it("audioScheduler tick clamps cursor to the playing source", () => {
+    const src = read("src/utils/audioScheduler.ts");
+    expect(src).toContain("getPlayingSourceMaxWordIndex");
+    expect(src).toContain("maxPlayingWord != null && currentBoundary.wordIndex > maxPlayingWord");
+  });
+
+  it("getAudioProgress clamps returned wordIndex to the playing source", () => {
+    const src = read("src/utils/audioScheduler.ts");
+    // Verify the clamp exists in getAudioProgress
+    expect(src).toContain("const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime)");
+    expect(src).toContain("clamped ? maxPlayingWord : current.wordIndex");
+  });
+});
+
 describe("cursor contract after narration-mode removal", () => {
   it("FoliatePageView API no longer references narration style hint", () => {
     const src = read("src/components/FoliatePageView.tsx");
@@ -30,5 +45,19 @@ describe("cursor contract after narration-mode removal", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
     expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
+  });
+});
+
+describe("cursor-source clamp — Step 3.5 structural contract", () => {
+  it("audioScheduler tick clamps cursor to the playing source", () => {
+    const src = read("src/utils/audioScheduler.ts");
+    expect(src).toContain("getPlayingSourceMaxWordIndex");
+    expect(src).toContain("maxPlayingWord != null && currentBoundary.wordIndex > maxPlayingWord");
+  });
+
+  it("getAudioProgress clamps returned wordIndex to the playing source", () => {
+    const src = read("src/utils/audioScheduler.ts");
+    expect(src).toContain("const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime)");
+    expect(src).toContain("clamped ? maxPlayingWord : current.wordIndex");
   });
 });
