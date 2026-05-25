@@ -5,7 +5,7 @@ import { createRoot, type Root } from "react-dom/client";
 import { flushSync } from "react-dom";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { FOLIATE_SECTION_LOAD_WAIT_MS } from "../src/constants";
-import { useReaderMode, type UseReaderModeReturn } from "../src/hooks/useReaderMode";
+import { useReaderModeOrchestrator, type UseReaderModeOrchestratorReturn } from "../src/reader/useReaderModeOrchestrator";
 import type { ReaderMode } from "../src/types";
 
 function flushPromises() {
@@ -95,7 +95,7 @@ describe("useReaderMode foliate handoff", () => {
       }
     });
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
 
     function Harness() {
       const [readingMode, setReadingMode] = useState<ReaderMode>("page");
@@ -104,7 +104,7 @@ describe("useReaderMode foliate handoff", () => {
       const [flowPlaying, setFlowPlaying] = useState(false);
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(0);
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -212,7 +212,7 @@ describe("useReaderMode foliate handoff", () => {
       ttsEngine: "web",
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
     let observedFlowPlaying = false;
 
     function Harness() {
@@ -223,7 +223,7 @@ describe("useReaderMode foliate handoff", () => {
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(0);
       observedFlowPlaying = flowPlaying;
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -325,7 +325,7 @@ describe("useReaderMode foliate handoff", () => {
       isNarrating: false,
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
     let observedReadingMode: ReaderMode = "page";
 
     function Harness() {
@@ -336,7 +336,7 @@ describe("useReaderMode foliate handoff", () => {
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(1);
       observedReadingMode = readingMode;
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -443,7 +443,7 @@ describe("useReaderMode foliate handoff", () => {
       isNarrating: false,
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
     const observed = { highlightedWordIndex: 1, readingMode: "flow" as ReaderMode };
 
     function Harness() {
@@ -455,7 +455,7 @@ describe("useReaderMode foliate handoff", () => {
       observed.highlightedWordIndex = highlightedWordIndex;
       observed.readingMode = readingMode;
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -562,7 +562,7 @@ describe("useReaderMode foliate handoff", () => {
       isNarrating: true,
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
     let observedReadingMode: ReaderMode = "page";
 
     function Harness() {
@@ -573,7 +573,7 @@ describe("useReaderMode foliate handoff", () => {
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(0);
       observedReadingMode = readingMode;
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -715,7 +715,7 @@ describe("useReaderMode four-mode foundation", () => {
       ...options?.settings,
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
     const observed = {
       readingMode: options?.initialReadingMode ?? "page" as ReaderMode,
       isNarrating: options?.initialIsNarrating ?? false,
@@ -735,7 +735,7 @@ describe("useReaderMode four-mode foundation", () => {
       observed.flowPlaying = flowPlaying;
       observed.highlightedWordIndex = highlightedWordIndex;
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -1212,7 +1212,7 @@ describe("useReaderMode four-mode foundation", () => {
       isNarrating: false,
     } as any;
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
 
     function Harness() {
       const [readingMode, setReadingMode] = useState<ReaderMode>("flow");
@@ -1221,7 +1221,7 @@ describe("useReaderMode four-mode foundation", () => {
       const [flowPlaying, setFlowPlaying] = useState(true);
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(1);
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -1427,7 +1427,7 @@ describe("useReaderMode four-mode foundation", () => {
       jumpToWord: vi.fn(),
     };
 
-    let snapshot: UseReaderModeReturn | null = null;
+    let snapshot: UseReaderModeOrchestratorReturn | null = null;
 
     function Harness() {
       const [readingMode, setReadingMode] = useState<ReaderMode>("flow");
@@ -1436,7 +1436,7 @@ describe("useReaderMode four-mode foundation", () => {
       const [flowPlaying, setFlowPlaying] = useState(true);
       const [highlightedWordIndex, setHighlightedWordIndex] = useState(5);
 
-      snapshot = useReaderMode({
+      snapshot = useReaderModeOrchestrator({
         reader,
         narration,
         modeInstance: modeInstance as any,
@@ -1590,7 +1590,7 @@ describe("useReaderMode persistent anchor mode matrix", () => {
       const setIsNarratingFn = vi.fn();
       const syncVisualToPersistentWord = vi.fn(() => 64);
       const queuePostModeAnchorSync = vi.fn();
-      let snapshot: UseReaderModeReturn | null = null;
+      let snapshot: UseReaderModeOrchestratorReturn | null = null;
 
       function Harness() {
         const [readingMode, setReadingMode] = useState<ReaderMode>("page");
@@ -1604,7 +1604,7 @@ describe("useReaderMode persistent anchor mode matrix", () => {
         setFlowPlayingFn.mockImplementation(setFlowPlaying);
         setIsNarratingFn.mockImplementation(setIsNarrating);
 
-        snapshot = useReaderMode({
+        snapshot = useReaderModeOrchestrator({
           reader: { playing: false, wordIndex: 0, wordsRef: { current: ["a", "b"] }, togglePlay: vi.fn(), jumpToWord: vi.fn() },
           narration,
           modeInstance: modeInstance as any,
