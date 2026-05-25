@@ -504,3 +504,31 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** For reader surfaces that bridge rendered DOM and source extraction, choose one canonical word/index source, align content to it, and make unmatched content warn/recover instead of silently drifting by position.
 **Applies to:** Foliate word wrapping, TTS word indexes, rendered/source text alignment, Narrate exact-start, click retargeting, adapter extraction.
 **Status:** Observation
+
+### SRL-069 — Prefetched audio boundaries must be source-owned before driving heard-audio cursors (READER-PERSISTENT-ANCHOR Step 3.5, 2026-05-24)
+**Verdict:** A flat boundary timeline can advance visual cursor state beyond the currently audible source when chunks are prefetched.
+**Evidence:** NARRATE-CURSOR-SYNC-4 fixed S13 by clamping `tick()` and `getAudioProgress()` to the active source window, so prefetched future boundaries cannot drive Narrate cursor progress before their source starts playing.
+**Recommendation:** Any TTS cursor driven by prefetched chunk boundaries must gate emitted progress by the currently-playing source, not just by `audioCtx.currentTime` minus lag.
+**Applies to:** `audioScheduler`, Narrate cursor sync, chunk prefetch, streaming TTS, source handoff.
+**Status:** Observation
+
+### SRL-070 — Self-referential telemetry cannot gate a sync fix; verify with audio-independent ground truth (READER-PERSISTENT-ANCHOR Step 3.5/3.6 QA, 2026-05-24)
+**Verdict:** The boundary-drift metric (~9ms) measured cursor-vs-schedule, not cursor-vs-heard-audio, so it reported "tight" while the cursor actually led the audio — masking S13 across four repair rounds (3.2–3.5).
+**Evidence:** In The Raven, every chunk logged `WORD-NATIVE` timing with ~9ms boundary drift, yet Evan's ear confirmed the cursor led and narration omitted content at re-entry. Every scheduler-derived number is computed from the same predicted timeline, so none can detect a schedule-vs-audio offset. Step 3.6 added the first non-self-referential instrument (`ctx.currentTime − chunkStartTime`).
+**Recommendation:** PROMOTED TO STANDING RULE — Narrate/sync QA gates require an audio-independent ground truth (Evan's ear, or a non-self-referential instrument such as schedule-vs-wallclock drift); scheduler-derived metrics (boundary drift, scroll-follow, handoff index) are NOT sync evidence. Recorded in `docs/governance/LESSONS_LEARNED.md`.
+**Applies to:** Narrate cursor/audio sync gates, TTS QA, any open-loop-vs-closed-loop verification.
+**Status:** Promoted to standing rule (second occurrence with SRL-060).
+
+### SRL-071 — Cowork pre-dispatch root-cause investigation shrinks investigation-heavy repairs to read-and-run sprints (READER-PERSISTENT-ANCHOR Step 3.6, 2026-05-24)
+**Verdict:** Pinning the exact seam before dispatch turned a Narrate-timing repair (which SRL-062 sized as investigation-heavy) into a small, clean implementation sprint.
+**Evidence:** Step 3.6 dispatched a single core change (`nextGenWordIndexRef`) plus tests with file:line targets and reset conditions; CLI landed it green on the first pass (2,821 tests, tsc clean) at M effort with no investigation tasks.
+**Recommendation:** For investigation-heavy subsystem repairs, have Cowork complete live root-cause tracing and identify the exact seam (refs, file:line, reset conditions) before authoring the dispatch; the CLI sprint then sizes as a normal read-and-run implementation.
+**Applies to:** Narrate/TTS timing repairs, tangled-subsystem bug fixes, the investigate-then-dispatch workflow.
+**Status:** Observation (refines SRL-062).
+
+### SRL-072 — Don't iterate fixes on "ahead-of-heard" references; audible continuity needs a real heard-position signal (READER-PERSISTENT-ANCHOR Step 3.6 QA, 2026-05-24)
+**Verdict:** Six pre-isolation rounds (3.1–3.6) each partially worked then skipped because every reference the code could seed playback from — `cursorWordIndex`, `lastConfirmedAudioWordRef`, and finally `nextGenWordIndexRef` (produced-end) — is AHEAD of what the listener has actually heard. Step 3.6 made generation contiguous yet the audio still dropped a line, proving the content-omission (Bug 2) and the cursor-lead (Bug 1) are one defect that cannot be fixed without a "what was actually spoken" signal.
+**Evidence:** Step 3.6 console showed `produceChunk 0→…→1111` (contiguous generation) and `scheduleChunk drift ≈ −227s` (whole book prefetched); Evan did not hear "This it is and nothing more." — playback continued from the ahead-of-heard frontier. Each prior fix swapped one ahead-of-heard ref for another.
+**Recommendation:** When an audio/playback sync defect recurs across multiple targeted fixes, stop substituting predicted/generation references and first establish the real playback-position signal (closed-loop). Prefer doing the closed-loop rework once — ideally after the owning module is isolated — over repeated open-loop patches that each add scheduler risk. Tie acceptance to an audio-independent ground truth (ear or a non-self-referential instrument), per SRL-070.
+**Applies to:** TTS cursor/audio sync, streaming playback continuation, any open-loop "predict then display/seed" subsystem; pre- vs post-isolation sequencing of high-risk fixes.
+**Status:** Observation (third in the Narrate-sync arc with SRL-060 and SRL-070; promotion candidate — "audio sync fixes require a real heard-position signal, not predicted references").
