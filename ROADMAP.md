@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-24 — Step 3.6 manual QA FAILED: generation went contiguous but audio still omitted a line (played from an ahead-of-heard position). Proven that Bug 2 (content omission) is NOT separable from Bug 1 (cursor lead) — both need the real playing-source heard position as the single source of truth. Decision (Evan): stop pre-isolation patching; the persistent-anchor repair lane closes with S1/S4/S8/S12/S18 fixed; the unified Narrate-sync fix moves to the post-isolation `NARRATE-CLOSED-LOOP-CURSOR` item; **READER-ISO-1A is unblocked and is the next dispatch.**
-**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, and broad-suite drift triage. The reader persistent-anchor hotfix branch remains unmerged; Step 3.1 commit `e6ebb07` fixed S1, S4, and S18 and improved S5, Step 3.2 commit `bb00e17` fixed S8 Flow double-cursor and improved Narrate chunk-boundary continuity, Step 3.3 commits `881b01d` and `48c23ac` fixed a double-`resyncToCursor` active-click race plus cold-start sentence/ramp issues, Step 3.4 commit `2142d4a` implemented content-alignment stamping from canonical extractor words so click indexes and TTS indexes share one word space by construction, and Step 3.5 commit `c647362` clamps Narrate cursor advancement to the currently-playing audio source. S9 Flow lazy-follow remains intentionally deferred as high-risk. Step 3.6 commit `816bff7` made narration *generation* contiguous (`nextGenWordIndexRef`), but Step 3.6 manual QA FAILED: the audio still omitted a line on The Raven because playback continuation seeds from a position ahead of what was actually heard (the whole poem is prefetched; `drift ≈ −227s`), so the produced-end is as far ahead as the cursor was. This proved Bug 2 (content omission) is NOT separable from Bug 1 (cursor lead): every reference (`cursorWordIndex`, `lastConfirmedAudioWordRef`, `nextGenWordIndexRef`) is ahead-of-heard, and the system lacks a "what was actually spoken" signal. Decision (Evan, 2026-05-24): the persistent-anchor repair lane closes with S1/S4/S8/S12/S18 fixed (S5 accepted partial, S9 deferred); the unified Narrate cursor+content sync fix moves to the post-isolation `NARRATE-CLOSED-LOOP-CURSOR` item (real playing-source position as the single source of truth for cursor and continuation seeding); READER-ISO-1A is unblocked and is the next dispatch. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-24 — READER-ISO-1A completed and merged (`234e12f` implementation, `32f4543` merge): typed reader-mode adapter contracts plus the current-word anchor service landed with 73 new tests and no runtime behavior change. **READER-ISO-1B is the next dispatch.**
+**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, broad-suite drift triage, persistent-anchor repairs, and READER-ISO-1A. The reader persistent-anchor hotfix merged at `25b6a26`; Step 3.6 manual QA proved Narrate content omission and cursor lead are one closed-loop heard-position problem, now deferred to post-isolation `NARRATE-CLOSED-LOOP-CURSOR`. READER-ISO-1A then landed typed mode adapter contracts and a seven-tier current-word anchor service without runtime behavior changes. S9 Flow lazy-follow remains intentionally deferred as high-risk. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN (depth 9). 5 full specs + 4 stubs. **Next dispatch: READER-ISO-1A** (persistent-anchor repair lane closed; Narrate cursor+content sync deferred to post-isolation `NARRATE-CLOSED-LOOP-CURSOR`). Branch `hotfix/reader-persistent-anchor` ready to merge (git action for Evan/CLI).
-**Last sprint**: READER-PERSISTENT-ANCHOR Step 3.6 / NARRATE-CURSOR-SYNC-5 (2026-05-24) — content-contiguous *generation* landed (`816bff7`, 2,821 tests) but manual audio QA FAILED (audio still skipped via ahead-of-heard seeding). Repair lane closed with S1/S4/S8/S12/S18 fixed; unified Narrate-sync fix deferred post-isolation.
+**Queue**: GREEN by depth (8), but eager-spec buffer is running low (3 full specs + 5 stubs). **Next dispatch: READER-ISO-1B** — Orchestrator Shell + Mode Selection Semantics.
+**Last sprint**: READER-ISO-1A (2026-05-24) — added behavior-preserving reader mode adapter contracts and current-word anchor service; 73 new tests; merged to `main` at `32f4543`.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -45,6 +45,7 @@
 | GOVERNANCE-SWEEP | 2026-05-22 | Doc hygiene sweep: moved 1 memo, archived 7 dispatch files, created 6 hub readmes, repaired queue/agent references | — |
 | BASELINE-SYNC-1 | 2026-05-22 | Committed Phase 0 reader stabilization, governance sweep, and roadmap queue recovery in three pushed commits | `CloseOut.BASELINE-SYNC-1.2026-05-22.md` |
 | TEST-GREEN-1 | 2026-05-22 | Classified and resolved 12 broad-suite failures: 10 fixed, 1 quarantined, obsolete tests removed, and environmental flakes documented | `CloseOut.TEST-GREEN-1.2026-05-22.md` |
+| READER-ISO-1A | 2026-05-24 | Added typed reader-mode adapter contracts and current-word anchor service with 73 tests and no runtime behavior change | `CloseOut.READER-ISO-1A.2026-05-24.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -101,7 +102,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 #### READER-PERSISTENT-ANCHOR-STEP3-REPAIR — Persistent Anchor Manual QA Repair *(position 1 — full spec)*
 
-- **Status:** Code-complete on `hotfix/reader-persistent-anchor` through `2142d4a`; Step 3.1 manual QA rerun complete at 12 pass / 2 partial / 3 fail / 1 not re-run; Step 3.2 fixed S8 Flow double-cursor but failed S12/S13 because Narrate audio starts behind the selected word; Step 3.3 fixed a double-`resyncToCursor` active-click race, added start-word diagnostics, snapped cold-start chunks to sentence boundaries, and fixed parallel ramp overlap from resolved chunk boundaries, but Step 3.3 manual QA failed S12/S13 because the same numeric index resolves to different words in click/highlight space and TTS chunk space. Step 3.4 commit `2142d4a` implements content-alignment stamping from canonical extractor words; manual audio QA remains required before merge or queue advancement.
+- **Status:** Complete by explicit disposition and merged to `main` at `25b6a26`. Steps 3.1–3.4 fixed the accepted persistent-anchor regressions (S1/S4/S8/S12/S18); Step 3.5/3.6 proved remaining S13 Narrate cursor/content sync requires a post-isolation closed-loop heard-position fix, now queued as `NARRATE-CLOSED-LOOP-CURSOR`.
 - **What:** Repair the user-facing persistent-anchor failures discovered by Step 2 manual QA across Page, Focus, Flow, and Narrate while preserving the Step 2 wins that passed.
 - **Why:** The branch is automation-green but manual-QA-red. Adapter isolation should not extract or codify broken Page jump-back, blank Focus playback, Flow non-follow, Narrate wrong-start, or hard-click retarget behavior.
 - **Prerequisites:** `hotfix/reader-persistent-anchor` remains unmerged; `docs/studies/reviews/Reader_Persistent_Anchor_Step2_Manual_QA_2026-05-22.md` and `docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP-2.2026-05-22.md` accepted as source evidence.
@@ -229,20 +230,20 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
   4. `[sonnet]` Add the `scheduleChunk` schedule-drift DEV log.
   5. `[sonnet]` Herodotus docs pass — **do not main-merge**; lands on the hotfix branch pending manual audio QA.
 - **Test targets:** `tests/narrationPipelineIntegration.test.ts` + `tests/narrationContinuity.test.ts` — invariant: drive two automatic continuations where `lastConfirmedAudioWordRef`/cursor has advanced PAST the produced-end, and assert the second chunk's `startIdx === previous chunk endIdx` (no words skipped); complementary case: a hard-click (`resyncToCursor`/`nextKokoroExactStartRef`) DOES override the contiguous chain and re-anchors to the clicked word.
-- **Merge gate:** Bug 2 (content omission) must pass manual audio QA before merging `hotfix/reader-persistent-anchor` or dispatching `READER-ISO-1A`. **Bug 1 (visual cursor lead) is explicitly deferred to post-isolation (Evan, 2026-05-24) and does NOT block** — it is the gate's dispositioned remaining miss.
-- **Manual QA gate:** Narrate **The Raven** (poetry maximizes re-entries/pauses). Confirm by ear: no words omitted at handoffs; a hard-click starts exactly on the clicked word; (expected) the visual cursor may still lead — that's Bug 1. Use the new schedule-drift log + existing `scroll-follow`/`speakNextChunkKokoro` diagnostics.
+- **Superseded gate:** The original Step 3.6 gate required Bug 2 to pass manual audio QA before merge or READER-ISO-1A. Manual QA failed and proved Bug 2 is not separable from Bug 1, so the gate was superseded by Evan's explicit disposition: close the repair lane, merge the non-sync repairs, and move unified S13 work to `NARRATE-CLOSED-LOOP-CURSOR`.
+- **Deferred QA target:** The Raven remains the acceptance fixture for the future closed-loop Narrate sprint: no omitted words at handoffs, cursor tracks heard audio, and hard-click exact-start holds.
 - **Branch:** Continue from `hotfix/reader-persistent-anchor`.
 - **Step 3.6 code result:** Commit `816bff7` introduced `nextGenWordIndexRef` (produced-content truth, updated by an `onChunkProduced` callback); `speakNextChunkKokoro` seeds automatic continuation from it instead of the cursor-twin `lastConfirmedAudioWordRef`; reset only on hard-click (`resyncToCursor`) and authoritative section handoff (`updateWords` handoff); all other re-entry paths seeded correctly; exact-start gate preserved. Added a `scheduleChunk` schedule-vs-wallclock DEV log (`ctx.currentTime − chunkStartTime`). Reported verification: 2,821 tests pass, TypeScript clean, `git diff --check` clean. 4 new tests (2 structural + 2 behavioral: content-contiguity invariant + hard-click override).
 - **Step 3.6 manual QA result:** **FAILED (2026-05-24).** Generation became contiguous (`produceChunk 0→…→1111`, no gaps) but the audio still omitted a line on The Raven — Evan did not hear "This it is and nothing more."; playback continued from an ahead-of-heard position. Root: the pipeline prefetches the whole poem (DEV log `drift ≈ −227s`), so `nextGenWordIndexRef` (produced-end) is as far ahead of the heard audio as the cursor was — re-entry seeds from "ahead of heard" either way and skips. **Conclusion: Bug 2 (content omission) is NOT separable from Bug 1 (cursor lead).** Every available reference (`cursorWordIndex`, `lastConfirmedAudioWordRef`, `nextGenWordIndexRef`) is ahead-of-heard; the system lacks a "what was actually spoken" signal. **Decision (Evan, 2026-05-24): stop pre-isolation patching; merge Bug 2 into the post-isolation `NARRATE-CLOSED-LOOP-CURSOR` unified fix; revise the gate so READER-ISO-1A proceeds now.** Report: `docs/studies/reviews/Reader_Persistent_Anchor_Step3.6_Manual_QA_2026-05-24.md`. Close-out: `docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md`.
-- **Repair-lane disposition:** S1, S4, S8, S12 (exact-start), and S18 are FIXED and verified across Steps 3.1–3.4; S5 accepted partial; S9 deferred. Only S13 (Narrate cursor/audio sync + content contiguity) remains, now deferred to post-isolation as the unified `NARRATE-CLOSED-LOOP-CURSOR`. The `hotfix/reader-persistent-anchor` branch may merge to `main` (its non-Narrate-sync repairs are sound; Steps 3.5/3.6 are net-positive with 2,821 tests green and no regressions). **READER-ISO-1A is unblocked.** (Branch merge is a git action for Evan/CLI — see git-handoff.)
+- **Repair-lane disposition:** S1, S4, S8, S12 (exact-start), and S18 are FIXED and verified across Steps 3.1–3.4; S5 accepted partial; S9 deferred. Only S13 (Narrate cursor/audio sync + content contiguity) remains, now deferred to post-isolation as the unified `NARRATE-CLOSED-LOOP-CURSOR`. The `hotfix/reader-persistent-anchor` branch merged to `main` at `25b6a26`, and `READER-ISO-1A` has since completed.
 
 #### Stage 2 — Adapter Isolation
 
-#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(position 2 — full spec)*
+#### READER-ISO-1A — Adapter Contracts + Current Word Anchor Service *(complete — 2026-05-24)*
 
 - **What:** Add type-only reader mode adapter contracts and a tested current-word anchor service. This phase creates the boundary without moving runtime behavior yet.
 - **Why:** Flow, Narrate, Focus, and Page need an explicit contract before implementation moves. The anchor service must preserve word `0`, hard selection precedence, resume anchors, and soft visible fallback ordering.
-- **Prerequisites:** `READER-PERSISTENT-ANCHOR-STEP3-REPAIR` complete with manual QA pass; TEST-GREEN-1 complete or current broad-suite failures formally classified; `docs/planning/specs/2026-05-21-reader-mode-runtime-isolation-design.md` accepted as source.
+- **Prerequisites:** `READER-PERSISTENT-ANCHOR-STEP3-REPAIR` complete by explicit disposition; TEST-GREEN-1 complete; `docs/planning/specs/2026-05-21-reader-mode-runtime-isolation-design.md` accepted as source.
 - **Done when:**
   1. `src/reader/modes/ReaderModeAdapter.ts` or equivalent typed contract exists.
   2. `src/reader/anchors/useCurrentWordAnchor.ts` or equivalent anchor service exists.
@@ -262,8 +263,9 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Constants:** None.
 - **Branch:** `sprint/reader-iso-1a-adapter-anchor-contracts` from clean `main`.
 - **Commit hygiene:** Behavior-preserving contract commit only. If runtime wiring becomes necessary, stop and amend scope.
+- **Result:** Complete. `234e12f` added `src/reader/modes/ReaderModeAdapter.ts`, `src/reader/anchors/useCurrentWordAnchor.ts`, `tests/currentWordAnchor.test.ts`, and `tests/readerModeAdapterContract.test.ts`; `32f4543` merged the sprint to `main`. Close-out: `docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md`.
 
-#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 3 — full spec)*
+#### READER-ISO-1B — Orchestrator Shell + Mode Selection Semantics *(position 1 — full spec)*
 
 - **What:** Extract mode selection/start/pause/stop routing from `useReaderMode.ts` into an orchestrator shell while preserving current behavior. Keep mode selection separate from playback and preserve delayed readiness retry intent.
 - **Why:** `startFlow(...)` still carries mode-specific meaning for both Flow and Narrate. The orchestrator shell is the first step toward preventing Flow fixes from erasing Narrate intent.
@@ -288,7 +290,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1b-orchestrator-shell` from clean `main`.
 - **Commit hygiene:** One orchestrator extraction commit plus test commit if helpful. Do not combine with Flow/Narrate adapter migration.
 
-#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 4 — full spec)*
+#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 2 — full spec)*
 
 - **What:** Move Focus lifecycle behind the new adapter boundary and begin typing passive Foliate surface commands without moving Flow or Narrate ownership yet.
 - **Why:** Focus is the lowest-risk adapter migration and proves that the adapter contract can own lifecycle and anchor updates without disturbing Flow or Narrate.
@@ -313,7 +315,7 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 - **Branch:** `sprint/reader-iso-1c-focus-adapter` from clean `main`.
 - **Commit hygiene:** Focus adapter only. Do not migrate Flow or Narrate in this sprint.
 
-#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 5 — full spec)*
+#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 3 — full spec)*
 
 - **What:** Move Flow lifecycle, `FlowScrollEngine` ownership, section-handoff restart, browse-away pause, and visual-follow commands behind a Flow adapter.
 - **Why:** Flow has repeatedly regressed Narrate and shared Foliate behavior because its scroll engine, restart logic, and visual cursor live in shared component paths. After Step 3 repair, Flow ownership must be isolated without changing Narrate truth-sync.
@@ -341,13 +343,13 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 ---
 
-#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(stub)*
+#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(position 4 — stub)*
 
 Move Narrate lifecycle behind a Narrate adapter. Narrate remains audio/TTS truth-sync owned, starts at the exact selected/current word, and never starts or follows FlowScrollEngine.
 
 ---
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(post-isolation; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
+#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 5 — post-isolation stub; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
 
 **Scope (unified):** This item now covers BOTH failures, which Step 3.6 proved are one defect:
 - **Bug 1 — visual cursor lead.** The cursor advances on a predicted boundary schedule (`audioScheduler.ts` `tick`, `boundary.time` vs `audioCtx.currentTime − lag`) that accumulates ahead of real audio; the 450ms lag and the Step 3.5 source-clamp only *cap* the lead. Confirmed by ear in The Raven and prose; the ~9ms boundary-drift metric is self-referential and not sync evidence.

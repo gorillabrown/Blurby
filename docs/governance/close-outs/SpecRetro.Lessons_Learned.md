@@ -532,3 +532,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When an audio/playback sync defect recurs across multiple targeted fixes, stop substituting predicted/generation references and first establish the real playback-position signal (closed-loop). Prefer doing the closed-loop rework once — ideally after the owning module is isolated — over repeated open-loop patches that each add scheduler risk. Tie acceptance to an audio-independent ground truth (ear or a non-self-referential instrument), per SRL-070.
 **Applies to:** TTS cursor/audio sync, streaming playback continuation, any open-loop "predict then display/seed" subsystem; pre- vs post-isolation sequencing of high-risk fixes.
 **Status:** Observation (third in the Narrate-sync arc with SRL-060 and SRL-070; promotion candidate — "audio sync fixes require a real heard-position signal, not predicted references").
+
+### SRL-073 — Stateful adapter services need before/after cleanup tests for mode transitions (READER-ISO-1A, 2026-05-24)
+**Verdict:** State services can pass happy-path precedence tests while cleanup paths are dead if the implementation overwrites owner state before comparing old and new ownership.
+**Evidence:** READER-ISO-1A initially had a `setActiveMode` assignment-before-comparison bug that made stale mode-advance cleanup unreachable; parent review caught and fixed it before merge.
+**Recommendation:** Adapter and anchor-service specs that mutate active owner state should include explicit transition tests proving cleanup happens when ownership changes, plus no-op tests proving same-owner selection does not clear valid state.
+**Applies to:** Reader mode adapters, current-word anchor services, active runtime ownership, stale-mode cleanup, future orchestrator extraction.
+**Status:** Observation.
