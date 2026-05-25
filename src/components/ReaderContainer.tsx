@@ -3,7 +3,7 @@ import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapt
 import { DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE, TTS_RATE_STEP, TTS_MAX_RATE, TTS_MIN_RATE, DEFAULT_EINK_WPM_CEILING, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
-import { useReaderMode } from "../hooks/useReaderMode";
+import { useReaderModeOrchestrator } from "../reader/useReaderModeOrchestrator";
 import { useReadingModeInstance } from "../hooks/useReadingModeInstance";
 import { resolveCanonicalWordAnchor } from "../utils/startWordIndex";
 import { usePersistentReadingAnchor } from "../hooks/usePersistentReadingAnchor";
@@ -740,8 +740,8 @@ export default function ReaderContainer({
     setPendingModeSurfaceAnchorVersion((version) => version + 1);
   }, []);
 
-  // ── Mode transitions (extracted to useReaderMode hook) ──────────────
-  const modeHook = useReaderMode({
+  // ── Mode transitions (orchestrator owns routing; useReaderMode owns implementations) ──
+  const modeHook = useReaderModeOrchestrator({
     reader: { playing, wordIndex, wordsRef, togglePlay, jumpToWord },
     narration,
     modeInstance: modeInstanceHook,

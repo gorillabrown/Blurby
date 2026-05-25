@@ -61,16 +61,16 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
     expect(src).toContain("toggleNarrationInFlow");
   });
 
-  it("useReaderMode allows explicit paused narrate selection", () => {
-    const src = read("src/hooks/useReaderMode.ts");
+  it("orchestrator allows explicit paused narrate selection", () => {
+    const src = read("src/reader/useReaderModeOrchestrator.ts");
     expect(src).toContain("handleSelectMode: (mode: \"focus\" | \"flow\" | \"narrate\") => void;");
-    expect(src).toContain("const handleSelectMode = useCallback((mode: \"focus\" | \"flow\" | \"narrate\") => {");
+    expect(src).toContain("const handleSelectMode = useCallback((target: \"focus\" | \"flow\" | \"narrate\") => {");
   });
 
-  it("useReaderMode cycles focus, flow, and narrate without auto-starting them", () => {
-    const src = read("src/hooks/useReaderMode.ts");
-    expect(src).toContain("if (mode === \"focus\") return \"flow\";");
-    expect(src).toContain("if (mode === \"flow\") return \"narrate\";");
+  it("orchestrator cycles focus, flow, and narrate without auto-starting them", () => {
+    const src = read("src/reader/useReaderModeOrchestrator.ts");
+    expect(src).toContain("if (current === \"focus\") return \"flow\";");
+    expect(src).toContain("if (current === \"flow\") return \"narrate\";");
     expect(src).toContain("return \"focus\";");
   });
 

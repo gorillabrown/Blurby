@@ -7,10 +7,6 @@ import type { TtsEvalTraceSink } from "../types/eval";
 import type { FoliateViewAPI, FoliateWord } from "../components/FoliatePageView";
 import type { UseReadingModeInstanceReturn } from "./useReadingModeInstance";
 
-function toCompatibilityMode(mode: ReaderMode): "page" | "focus" | "flow" {
-  return mode === "narrate" ? "flow" : mode;
-}
-
 export interface UseReaderModeParams {
   reader: {
     playing: boolean;
@@ -70,23 +66,17 @@ export interface UseReaderModeParams {
 }
 
 export interface UseReaderModeReturn {
-  readingMode: ReaderMode;
-  readingModeRef: React.MutableRefObject<ReaderMode>;
-  setReadingMode: React.Dispatch<React.SetStateAction<ReaderMode>>;
   stopAllModes: () => void;
   startFocus: () => void;
   startFlow: (options?: { resumeNarration?: boolean; targetMode?: "flow" | "narrate" }) => void;
   toggleNarrationInFlow: () => void;
-  handleTogglePlay: () => void;
-  handleSelectMode: (mode: "focus" | "flow" | "narrate") => void;
-  handlePauseToPage: () => void;
-  handleExitReader: () => void;
-  handleEnterFocus: () => void;
-  handleEnterFlow: () => void;
+  captureCurrentAnchor: () => void;
+  clearNarrateTruthSync: () => void;
   handleStopTts: () => void;
   handleReturnToReading: () => void;
-  handleCycleMode: () => void;
-  handleCycleAndStart: () => void;
+  isNarratingRef: React.MutableRefObject<boolean>;
+  highlightedWordIndexRef: React.MutableRefObject<number>;
+  readingModeRef: React.MutableRefObject<ReaderMode>;
   preCapWpmRef: React.MutableRefObject<number | null>;
 }
 
@@ -124,11 +114,7 @@ export function useReaderMode({
   explicitSelectionAnchorRef,
   softWordIndexRef,
   persistentWordIndexRef,
-  commitPersistentWordIndex,
-  syncVisualToPersistentWord,
-  queuePostModeAnchorSync,
   onNarrateTruthSync,
-  evalTrace,
 }: UseReaderModeParams): UseReaderModeReturn {
   const readingModeRef = useRef<ReaderMode>(readingMode);
   readingModeRef.current = readingMode;
@@ -144,12 +130,6 @@ export function useReaderMode({
   const narrateTruthRafRef = useRef<number | null>(null);
   const narrationCursorPendingWordRef = useRef<number | null>(null);
   const narrationCursorRafRef = useRef<number | null>(null);
-  const compatibilityMode = toCompatibilityMode(readingMode);
-  const getNextSelectableMode = useCallback((mode: ReaderMode): "focus" | "flow" | "narrate" => {
-    if (mode === "focus") return "flow";
-    if (mode === "flow") return "narrate";
-    return "focus";
-  }, []);
 
   const captureCurrentAnchor = useCallback(() => {
     const instance = modeInstance.modeRef.current;
@@ -189,7 +169,6 @@ export function useReaderMode({
         const latestWord = narrateTruthPendingWordRef.current;
         narrateTruthPendingWordRef.current = null;
         if (latestWord == null) return;
-        // In Foliate Narrate mode, truth-sync is the single source of word-following.
         highlightedWordIndexRef.current = latestWord;
         setHighlightedWordIndex(latestWord);
         onNarrateTruthSync?.(latestWord);
@@ -270,8 +249,6 @@ export function useReaderMode({
   }, [explicitSelectionAnchorRef, persistentWordIndexRef, resumeAnchorRef, softWordIndexRef]);
 
   const syncFoliateNarrationCursor = useCallback((idx: number, surface: "flow" | "narrate") => {
-    // Narrate-on-Foliate uses installNarrateTruthSync as the single source of truth.
-    // Do not run this parallel path there, or callbacks can race and drift.
     if (surface === "narrate" && useFoliate) {
       return;
     }
@@ -291,8 +268,6 @@ export function useReaderMode({
     if (!useFoliate || !foliateApiRef.current) return;
 
     if (surface === "narrate") {
-      // Narrate highlighting is driven by trusted onTruthSync so we don't duplicate
-      // expensive DOM highlight work on every scheduler boundary.
       return;
     }
 
@@ -410,9 +385,6 @@ export function useReaderMode({
     updateSettings({ readingMode: targetMode, lastReadingMode: targetMode });
     const pBreaks = getEffectiveParagraphBreaks();
     if (targetMode === "flow") {
-      // FlowScrollEngine lifecycle is gated by flowPlaying in ReaderContainer.
-      // Non-foliate flow already sets this via useReadingModeInstance; foliate flow
-      // must raise the same gate here so the engine actually boots.
       setFlowPlaying(true);
       modeInstance.startMode("flow", startWord, effectiveWords, pBreaks);
     } else {
@@ -452,6 +424,7 @@ export function useReaderMode({
   ]);
 
   const toggleNarrationInFlow = useCallback(() => {
+    const compatibilityMode = readingMode === "narrate" ? "flow" : readingMode;
     if (compatibilityMode !== "flow") return;
     if (isNarratingRef.current) {
       pendingNarrationResumeRef.current = false;
@@ -486,13 +459,11 @@ export function useReaderMode({
     clearNarrateTruthSync,
     effectiveWpm,
     extractFoliateWords,
-    foliateApiRef,
     getEffectiveWords,
     narration,
     pendingNarrationResumeRef,
     installNarrateTruthSync,
-    compatibilityMode,
-    setHighlightedWordIndex,
+    readingMode,
     setIsNarrating,
     setReadingMode,
     setWpm,
@@ -502,203 +473,23 @@ export function useReaderMode({
     wpm,
   ]);
 
-  const handlePauseToPage = useCallback(() => {
-    const fromMode = readingModeRef.current;
-    captureCurrentAnchor();
-    if (isBrowsedAway && compatibilityMode === "flow" && isNarratingRef.current) {
-      const pageStart = pageNavRef.current.getCurrentPageStart?.();
-      if (pageStart != null) {
-        setHighlightedWordIndex(pageStart);
-        highlightedWordIndexRef.current = pageStart;
-        resumeAnchorRef.current = pageStart;
-      }
-      setIsBrowsedAway(false);
-    }
-    if (compatibilityMode === "flow" && isNarratingRef.current) {
-      pendingNarrationResumeRef.current = true;
-    }
-    if (isNarratingRef.current) {
-      narration.stop("mode-switch");
-      clearNarrateTruthSync();
-      setIsNarrating(false);
-      updateSettings({ isNarrating: false });
-    }
-    stopAllModes();
-    setReadingMode("page");
-    updateSettings({ readingMode: "page" });
-    if (evalTrace?.enabled && fromMode !== "page") {
-      evalTrace.record({
-        kind: "transition",
-        transition: "handoff",
-        from: fromMode,
-        to: "page",
-        context: "mode-switch-anchor-preserved",
-        latencyMs: 0,
-      });
-    }
-  }, [
-    captureCurrentAnchor,
-    clearNarrateTruthSync,
-    evalTrace,
-    isBrowsedAway,
-    narration,
-    pageNavRef,
-    pendingNarrationResumeRef,
-    compatibilityMode,
-    resumeAnchorRef,
-    setHighlightedWordIndex,
-    setIsBrowsedAway,
-    setIsNarrating,
-    setReadingMode,
-    stopAllModes,
-    updateSettings,
-  ]);
-
-  const handleSelectMode = useCallback((mode: "focus" | "flow" | "narrate") => {
-    const fromMode = readingModeRef.current;
-    if (fromMode === mode) return;
-    pendingNarrationResumeRef.current = false;
-    stopAllModes();
-    setFocusPlaying(false);
-    setFlowPlaying(false);
-    setIsNarrating(false);
-    const anchor = syncVisualToPersistentWord({ navigate: false });
-    queuePostModeAnchorSync(anchor, mode);
-    setIsBrowsedAway(false);
-    setReadingMode(mode);
-    updateSettings({
-      readingMode: mode,
-      lastReadingMode: mode,
-      isNarrating: false,
-    });
-    if (evalTrace?.enabled) {
-      evalTrace.record({
-        kind: "transition",
-        transition: "handoff",
-        from: fromMode,
-        to: mode,
-        context: "mode-switch-persistent-anchor-paused",
-        latencyMs: 0,
-      });
-    }
-  }, [
-    evalTrace,
-    pendingNarrationResumeRef,
-    setFlowPlaying,
-    setFocusPlaying,
-    setIsBrowsedAway,
-    setIsNarrating,
-    setReadingMode,
-    stopAllModes,
-    syncVisualToPersistentWord,
-    queuePostModeAnchorSync,
-    updateSettings,
-  ]);
-
-  const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
-  const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
-
   const handleReturnToReading = useCallback(() => {
     pageNavRef.current.returnToHighlight();
     setIsBrowsedAway(false);
   }, [pageNavRef, setIsBrowsedAway]);
 
-  const handleTogglePlay = useCallback(() => {
-    if (readingMode === "page") {
-      return;
-    }
-
-    if (readingMode === "focus") {
-      const focusInstance = modeInstance.modeRef.current;
-      const focusPlaying = focusInstance?.type === "focus" && focusInstance.getState().isPlaying;
-      if (focusPlaying) {
-        captureCurrentAnchor();
-        modeInstance.pauseMode();
-        setFocusPlaying(false);
-        return;
-      }
-      if (focusInstance?.type === "focus") {
-        setFocusPlaying(true);
-        modeInstance.resumeMode();
-        return;
-      }
-      startFocus();
-      return;
-    }
-
-    if (readingMode === "flow") {
-      if (flowPlaying) {
-        modeInstance.pauseMode();
-        setFlowPlaying(false);
-        return;
-      }
-      startFlow();
-      return;
-    }
-
-    if (readingMode === "narrate") {
-      if (isNarratingRef.current) {
-        modeInstance.pauseMode();
-        setFlowPlaying(false);
-        narration.stop("mode-switch");
-        clearNarrateTruthSync();
-        setIsNarrating(false);
-        updateSettings({
-          readingMode: "narrate",
-          lastReadingMode: "narrate",
-          isNarrating: false,
-        });
-        return;
-      }
-      startFlow({ resumeNarration: true, targetMode: "narrate" });
-    }
-  }, [captureCurrentAnchor, clearNarrateTruthSync, modeInstance, narration, readingMode, setFlowPlaying, setFocusPlaying, setIsNarrating, startFlow, startFocus, updateSettings, flowPlaying]);
-
-  const handleExitReader = useCallback(() => {
-    if (readingMode !== "page") {
-      const instance = modeInstance.modeRef.current;
-      if (instance && readingMode === "focus") {
-        const currentWord = instance.getCurrentWord();
-        setHighlightedWordIndex(currentWord);
-        highlightedWordIndexRef.current = currentWord;
-      }
-      stopAllModes();
-      setReadingMode("page");
-    }
-  }, [modeInstance, readingMode, setHighlightedWordIndex, setReadingMode, stopAllModes]);
-
-  const handleCycleMode = useCallback(() => {
-    const current = settings.lastReadingMode || "flow";
-    const next = getNextSelectableMode(current);
-    updateSettings({ lastReadingMode: next });
-  }, [getNextSelectableMode, settings.lastReadingMode, updateSettings]);
-
-  const handleCycleAndStart = useCallback(() => {
-    const current = readingModeRef.current === "page"
-      ? (settings.lastReadingMode || "flow")
-      : readingModeRef.current;
-    const next = getNextSelectableMode(current);
-    handleSelectMode(next);
-  }, [getNextSelectableMode, handleSelectMode, settings.lastReadingMode]);
-
   return {
-    readingMode,
-    readingModeRef,
-    setReadingMode,
     stopAllModes,
     startFocus,
     startFlow,
     toggleNarrationInFlow,
-    handleTogglePlay,
-    handleSelectMode,
-    handlePauseToPage,
-    handleExitReader,
-    handleEnterFocus,
-    handleEnterFlow,
+    captureCurrentAnchor,
+    clearNarrateTruthSync,
     handleStopTts,
     handleReturnToReading,
-    handleCycleMode,
-    handleCycleAndStart,
+    isNarratingRef,
+    highlightedWordIndexRef,
+    readingModeRef,
     preCapWpmRef,
   };
 }
