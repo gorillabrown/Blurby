@@ -1664,3 +1664,19 @@ speakChunk() {
 **Pattern:** When a shared helper accepts mode-specific options, retry by passing the original options through unchanged. Lock this with tests that start Narrate after delayed Foliate extraction, hard-select a nonzero word, and assert `narration.startCursorDriven(words, selectedWord, ...)`.
 
 **Related:** `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`, `src/components/ReaderContainer.tsx`, `tests/useReaderMode.test.ts`, `docs/governance/TECHNICAL_REFERENCE.md`.
+
+---
+
+### [2026-05-24] LL-126: Narrate Synthesis Continuity Must Use Produced-Content Truth, Not the Cursor Twin
+
+**Area:** narration, audio scheduler, cursor sync
+**Status:** active
+**Priority:** critical
+
+**Context:** At Narrate chunk re-entry (section handoff, stall, pause/resume), `speakNextChunkKokoro` seeded the next chunk from `lastConfirmedAudioWordRef`. Despite its name and the TTS-7R/BUG-145c intent ("decouple synthesis from `cursorWordIndex`"), that ref is written in the same boundary callback that advances the visual cursor — so it is the cursor's twin, not independent audio truth. When the cursor leads the heard audio (the open-loop schedule drift, Bug 1), synthesis restarts from the led position and the words between the previous chunk's real audio end and the cursor are never spoken. Step 3.6 (`816bff7`) introduced `nextGenWordIndexRef` (produced-end) and seeded continuation from it, which made *generation* contiguous — but manual QA FAILED: the audio still skipped a line, because the pipeline prefetches the whole book (`drift ≈ −227s`) so the produced-end is also AHEAD of the heard audio. This proved Bug 2 (content omission) is not separable from Bug 1 (cursor lead): every available reference is ahead-of-heard. The durable fix is deferred post-isolation (`NARRATE-CLOSED-LOOP-CURSOR`): seed from the real playing-source heard position, not the cursor, the boundary-twin, or the produced-end.
+
+**Guardrail (corrected after Step 3.6 QA):** There are FOUR distinct quantities and only ONE may seed audible playback continuation: (i) the **visual cursor** (`cursorWordIndex`, boundary-driven, ahead-of-heard); (ii) `lastConfirmedAudioWordRef` (a boundary-driven twin, ahead-of-heard); (iii) `nextGenWordIndexRef` (**produced-end**, ahead-of-heard because the book is prefetched); (iv) the **real playing-source heard position** (derivable from `getPlayingSourceMaxWordIndex` / the active source whose `startTime ≤ now < endTime`). (i), (ii), and (iii) are ALL ahead of what the listener has heard, so seeding playback re-entry from any of them drops content. **Only (iv) may seed re-entry/continuation, and (iv) must also drive the visual cursor.** A "decouple from the cursor" change is only real if the replacement signal is the actually-heard position — not the cursor, its boundary-twin, or the generation/prefetch frontier.
+
+**PROMOTED STANDING RULE (from SRL-070, second occurrence with SRL-060):** Narrate / cursor-audio sync QA gates require an **audio-independent ground truth** — Evan's ear, or a non-self-referential instrument such as the `scheduleChunk` schedule-vs-wallclock drift log (`ctx.currentTime − chunkStartTime`). Scheduler-derived metrics (boundary drift, `scroll-follow` word, handoff `lastConfirmedWordIndex`) are computed from the same predicted timeline and CANNOT detect a schedule-vs-audio offset; they are not sync evidence. The ~9ms boundary-drift reading masked S13 across four repair rounds (3.2–3.5).
+
+**Related:** `src/hooks/useNarration.ts` (`speakNextChunkKokoro`, boundary callback, `resyncToCursor`, `updateWords`), `src/utils/generationPipeline.ts` (`nextProduceIdx`, `onChunkProduced`), `src/utils/audioScheduler.ts` (`scheduleChunk` drift log), `tests/narrationPipelineIntegration.test.ts`, `tests/narrationContinuity.test.ts`. Post-isolation follow-up: `NARRATE-CLOSED-LOOP-CURSOR` (Bug 1, the open-loop cursor lead itself).

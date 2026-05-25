@@ -62,6 +62,8 @@ export interface KokoroStrategyDeps {
    * For segmented chunks, metadata includes the parent generated chunk identity.
    */
   onChunkBoundary?: (endIdx: number, metadata?: ChunkBoundaryPayload) => void;
+  /** Step 3.6: Fires when the pipeline produces a chunk, with the word index past the last produced word. */
+  onChunkProduced?: (endIdx: number) => void;
   /** TTS-SYNC-1: Receives scheduler timing metadata for centralized highlight policy. */
   onTimingMetadata?: (metadata: TimingMetadataRecord) => void;
   /**
@@ -451,6 +453,8 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
           scheduler.scheduleChunk(schedulerSegment);
         }
       }
+
+      deps.onChunkProduced?.(chunk.startIdx + chunk.words.length);
 
       queueMicrotask(() => {
         // TTS-7C: Acknowledge chunk consumption to release backpressure (BUG-115)

@@ -57,6 +57,14 @@ export interface UseReaderModeParams {
   resumeAnchorRef: React.MutableRefObject<number | null>;
   explicitSelectionAnchorRef?: React.MutableRefObject<number | null>;
   softWordIndexRef: React.MutableRefObject<number>;
+  persistentWordIndexRef: React.MutableRefObject<number>;
+  commitPersistentWordIndex: (
+    wordIndex: number,
+    cause: "book-open" | "hard-selection" | "mode-advance" | "explicit-navigation" | "jump-back",
+    options?: { cfi?: string | null; navigate?: boolean; persist?: boolean; publishState?: boolean; syncVisual?: boolean },
+  ) => number;
+  syncVisualToPersistentWord: (options?: { navigate?: boolean }) => number;
+  queuePostModeAnchorSync: (wordIndex: number, mode: "focus" | "flow" | "narrate") => void;
   onNarrateTruthSync?: (wordIndex: number) => void;
   evalTrace?: TtsEvalTraceSink | null;
 }
@@ -115,6 +123,10 @@ export function useReaderMode({
   resumeAnchorRef,
   explicitSelectionAnchorRef,
   softWordIndexRef,
+  persistentWordIndexRef,
+  commitPersistentWordIndex,
+  syncVisualToPersistentWord,
+  queuePostModeAnchorSync,
   onNarrateTruthSync,
   evalTrace,
 }: UseReaderModeParams): UseReaderModeReturn {
@@ -243,6 +255,7 @@ export function useReaderMode({
     const explicitAnchor = explicitSelectionAnchorRef?.current ?? null;
     const startAnchor = resolveModeStartWordIndex(
       explicitAnchor,
+      persistentWordIndexRef.current,
       resumeAnchorRef.current,
       highlightedWordIndexRef.current,
       softWordIndexRef.current,
@@ -251,12 +264,10 @@ export function useReaderMode({
     if (explicitSelectionAnchorRef) {
       explicitSelectionAnchorRef.current = null;
     }
-    if (resumeAnchorRef.current != null) {
-      resumeAnchorRef.current = null;
-    }
+    resumeAnchorRef.current = startAnchor;
 
     return startAnchor;
-  }, [explicitSelectionAnchorRef, resumeAnchorRef, softWordIndexRef]);
+  }, [explicitSelectionAnchorRef, persistentWordIndexRef, resumeAnchorRef, softWordIndexRef]);
 
   const syncFoliateNarrationCursor = useCallback((idx: number, surface: "flow" | "narrate") => {
     // Narrate-on-Foliate uses installNarrateTruthSync as the single source of truth.
@@ -311,7 +322,7 @@ export function useReaderMode({
       return;
     }
     const focusStartSource = consumeModeStartAnchor();
-    const startWord = useFoliate
+    let startWord = useFoliate
       ? resolveFoliateStartWord(
         focusStartSource,
         effectiveWords.length,
@@ -319,6 +330,11 @@ export function useReaderMode({
         bookWordsTotalWords
       )
       : focusStartSource;
+    if (useFoliate && startWord >= effectiveWords.length && effectiveWords.length > 0
+      && !(bookWordsTotalWords != null && startWord < bookWordsTotalWords)) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? 0;
+      startWord = firstVisible >= 0 ? firstVisible : 0;
+    }
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     reader.jumpToWord(startWord);
     setReadingMode("focus");
@@ -366,7 +382,7 @@ export function useReaderMode({
       return;
     }
     const flowStartSource = consumeModeStartAnchor();
-    const startWord = useFoliate
+    let startWord = useFoliate
       ? resolveFoliateStartWord(
         flowStartSource,
         effectiveWords.length,
@@ -374,6 +390,11 @@ export function useReaderMode({
         bookWordsTotalWords
       )
       : flowStartSource;
+    if (useFoliate && startWord >= effectiveWords.length && effectiveWords.length > 0
+      && !(bookWordsTotalWords != null && startWord < bookWordsTotalWords)) {
+      const firstVisible = foliateApiRef.current?.findFirstVisibleWordIndex?.() ?? 0;
+      startWord = firstVisible >= 0 ? firstVisible : 0;
+    }
     if (useFoliate && startWord !== highlightedWordIndexRef.current) setHighlightedWordIndex(startWord);
     const targetMode = options?.targetMode ?? "flow";
     if (targetMode === "narrate") {
@@ -382,6 +403,9 @@ export function useReaderMode({
       clearNarrateTruthSync();
     }
     reader.jumpToWord(startWord);
+    if (useFoliate && targetMode === "flow" && foliateApiRef.current?.highlightWordByIndex) {
+      foliateApiRef.current.highlightWordByIndex(startWord, "flow", { allowMotion: true });
+    }
     setReadingMode(targetMode);
     updateSettings({ readingMode: targetMode, lastReadingMode: targetMode });
     const pBreaks = getEffectiveParagraphBreaks();
@@ -534,10 +558,13 @@ export function useReaderMode({
     const fromMode = readingModeRef.current;
     if (fromMode === mode) return;
     pendingNarrationResumeRef.current = false;
-    captureCurrentAnchor();
-    // Mode selection is intentionally non-playing: selecting a mode should
-    // never auto-start it. Space/Play is the only start trigger.
     stopAllModes();
+    setFocusPlaying(false);
+    setFlowPlaying(false);
+    setIsNarrating(false);
+    const anchor = syncVisualToPersistentWord({ navigate: false });
+    queuePostModeAnchorSync(anchor, mode);
+    setIsBrowsedAway(false);
     setReadingMode(mode);
     updateSettings({
       readingMode: mode,
@@ -550,11 +577,23 @@ export function useReaderMode({
         transition: "handoff",
         from: fromMode,
         to: mode,
-        context: "mode-switch-anchor-preserved",
+        context: "mode-switch-persistent-anchor-paused",
         latencyMs: 0,
       });
     }
-  }, [captureCurrentAnchor, evalTrace, pendingNarrationResumeRef, setReadingMode, stopAllModes, updateSettings]);
+  }, [
+    evalTrace,
+    pendingNarrationResumeRef,
+    setFlowPlaying,
+    setFocusPlaying,
+    setIsBrowsedAway,
+    setIsNarrating,
+    setReadingMode,
+    stopAllModes,
+    syncVisualToPersistentWord,
+    queuePostModeAnchorSync,
+    updateSettings,
+  ]);
 
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
   const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
@@ -566,10 +605,6 @@ export function useReaderMode({
 
   const handleTogglePlay = useCallback(() => {
     if (readingMode === "page") {
-      const lastMode = settings.lastReadingMode || "flow";
-      if (lastMode === "focus") startFocus();
-      else if (lastMode === "narrate") startFlow({ resumeNarration: true, targetMode: "narrate" });
-      else startFlow();
       return;
     }
 
@@ -602,10 +637,6 @@ export function useReaderMode({
     }
 
     if (readingMode === "narrate") {
-      if (isBrowsedAway && isNarratingRef.current) {
-        handleReturnToReading();
-        return;
-      }
       if (isNarratingRef.current) {
         modeInstance.pauseMode();
         setFlowPlaying(false);
@@ -621,7 +652,7 @@ export function useReaderMode({
       }
       startFlow({ resumeNarration: true, targetMode: "narrate" });
     }
-  }, [captureCurrentAnchor, clearNarrateTruthSync, handleReturnToReading, isBrowsedAway, modeInstance, narration, readingMode, setFlowPlaying, setFocusPlaying, setIsNarrating, settings.lastReadingMode, startFlow, startFocus, updateSettings, flowPlaying]);
+  }, [captureCurrentAnchor, clearNarrateTruthSync, modeInstance, narration, readingMode, setFlowPlaying, setFocusPlaying, setIsNarrating, startFlow, startFocus, updateSettings, flowPlaying]);
 
   const handleExitReader = useCallback(() => {
     if (readingMode !== "page") {

@@ -233,3 +233,50 @@ describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
     expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
   });
 });
+
+describe("ReaderBottomBar — Page Play disabled", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it("disables Play in Page mode", async () => {
+    const onTogglePlay = vi.fn();
+
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="page" onTogglePlay={onTogglePlay} />);
+    });
+
+    const playButton = container.querySelector(".rbb-play-btn") as HTMLButtonElement;
+    expect(playButton).toBeTruthy();
+    expect(playButton.disabled).toBe(true);
+    expect(playButton.getAttribute("aria-disabled")).toBe("true");
+
+    playButton.click();
+    expect(onTogglePlay).not.toHaveBeenCalled();
+  });
+
+  it("keeps Play enabled for Focus, Flow, and Narrate", async () => {
+    const onTogglePlay = vi.fn();
+
+    for (const mode of ["focus", "flow", "narrate"] as const) {
+      await act(async () => {
+        root.render(<ReaderBottomBar {...baseProps} readingMode={mode} onTogglePlay={onTogglePlay} />);
+      });
+
+      const playButton = container.querySelector(".rbb-play-btn") as HTMLButtonElement;
+      expect(playButton.disabled).toBe(false);
+    }
+  });
+});

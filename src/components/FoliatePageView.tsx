@@ -35,6 +35,7 @@ import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
   clearChunkReadingVisualStateFromRoots,
+  resolveChunkReadingFollowWordIndex,
   scrollChunkReadingVisualStateToTopOfRoots,
   shouldSuppressNarrateFlowCursor,
   resolveFoliateWordHighlightClass,
@@ -242,6 +243,12 @@ interface FoliatePageViewProps {
   isReading?: boolean;
   /** Callback to scroll foliate to where the current highlight is */
   onJumpToHighlight?: () => void;
+  /** Whether to show the jump-back button (user has browsed away from persistent anchor) */
+  showJumpBackToAnchor?: boolean;
+  /** Callback when the user clicks the jump-back button */
+  onJumpBackToAnchor?: () => void;
+  /** Callback when user actively browses away from the persistent reading position */
+  onUserBrowseAway?: () => void;
   /** Current reading mode — "page", "flow", or "focus" */
   readingMode?: string;
   /** Whether Flow mode is actively playing */
@@ -270,10 +277,14 @@ interface FoliatePageViewProps {
   flowCursorRef?: React.MutableRefObject<HTMLDivElement | null>;
   /** Reader-driven render revision marker for invalidation/rebuild hooks. */
   foliateRenderVersion?: number;
+  /** Returns the canonical (extractor) word strings for a section when available.
+   *  Used by content-align wrapping so click index === TTS index (SRL-067). */
+  getCanonicalSectionWords?: (sectionIndex: number) => string[] | undefined;
 }
 
 export interface FoliateHighlightOptions {
   allowMotion?: boolean;
+  forceMotion?: boolean;
 }
 
 export interface FoliateViewAPI {
@@ -334,6 +345,8 @@ export interface FoliateViewAPI {
   applyChunkReadingVisualState: (state: ChunkReadingVisualState | null) => void;
   /** CHUNK-SYNC-2: Clear chunk/active-word visual state across rendered Foliate roots. */
   clearChunkReadingVisualState: () => void;
+  /** Clear the user browsing flag and reset the scroll displacement baseline. */
+  clearUserBrowsing: () => void;
 }
 
 export default function FoliatePageView({
@@ -349,6 +362,9 @@ export default function FoliatePageView({
   viewApiRef,
   isReading,
   onJumpToHighlight,
+  showJumpBackToAnchor,
+  onJumpBackToAnchor,
+  onUserBrowseAway,
   readingMode,
   flowPlaying,
   highlightedWordIndex,
@@ -363,6 +379,7 @@ export default function FoliatePageView({
   flowCursorRef,
   getAudioProgress,
   foliateRenderVersion = 0,
+  getCanonicalSectionWords,
 }: FoliatePageViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
@@ -385,6 +402,8 @@ export default function FoliatePageView({
   onFlowWordAdvanceRef.current = onFlowWordAdvance;
   const onWordClickRef = useRef(onWordClick);
   onWordClickRef.current = onWordClick;
+  const onUserBrowseAwayRef = useRef(onUserBrowseAway);
+  onUserBrowseAwayRef.current = onUserBrowseAway;
   const onLoadRef = useRef(onLoad);
   onLoadRef.current = onLoad;
   const onWordsReextractedRef = useRef(onWordsReextracted);
@@ -393,6 +412,8 @@ export default function FoliatePageView({
   getAudioProgressRef.current = getAudioProgress;
   const bookWordSectionsRef = useRef(bookWordSections);
   bookWordSectionsRef.current = bookWordSections;
+  const getCanonicalSectionWordsRef = useRef(getCanonicalSectionWords);
+  getCanonicalSectionWordsRef.current = getCanonicalSectionWords;
   const highlightedWordIndexRef = useRef<number>(highlightedWordIndex ?? -1);
   highlightedWordIndexRef.current = highlightedWordIndex ?? -1;
   const narrationWordIndexRef = useRef<number | null>(narrationWordIndex ?? null);
@@ -604,6 +625,17 @@ export default function FoliatePageView({
     wordPositionIndexRef.current.invalidate();
   }, []);
 
+  const markUserBrowsingAway = useCallback(() => {
+    const mode = readingModeRef.current;
+    if (mode === "page" || mode === "focus" || mode === "flow" || mode === "narrate") {
+      userBrowsingRef.current = true;
+      onUserBrowseAwayRef.current?.();
+      if (import.meta.env.DEV) {
+        console.debug("[foliate] user browsing away (mode:", mode, ")");
+      }
+    }
+  }, []);
+
   const clearSoftHighlight = useCallback(() => {
     const view = viewRef.current;
     if (!view?.renderer) return;
@@ -642,6 +674,7 @@ export default function FoliatePageView({
     wordIndex: number,
     styleHint?: "flow" | "narrate",
     allowMotion = true,
+    forceMotion = false,
   ): boolean => {
     const view = viewRef.current;
     if (!view?.renderer || !viewApiRef?.current) return false;
@@ -674,7 +707,7 @@ export default function FoliatePageView({
       });
     }
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && !state.visible) {
+    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
       try {
         const range = state.doc.createRange();
         range.selectNodeContents(state.span);
@@ -685,13 +718,12 @@ export default function FoliatePageView({
     }
 
     // Auto-clear browsed-away flag when the highlighted word becomes visible again,
-    // BUT only in page/focus modes where visibility detection is real. In flow/narrate
-    // modes, the Foliate iframe reports ALL words as visible (see narrate scroll-follow
-    // comment at line ~1673), so this auto-clear would fire on every word advance and
-    // immediately cancel any user scroll-away. Flow/narrate rely on returnToNarration()
-    // (recenter button) to clear the flag instead.
+    // BUT only in page mode where paginated visibility detection is meaningful.
+    // Focus/flow/narrate use the scrolled Foliate surface where the iframe reports
+    // ALL words as visible, so auto-clear would fire on every advance and immediately
+    // cancel any user scroll-away. Those modes rely on explicit jump-back to clear.
     const mode = readingModeRef.current;
-    if (userBrowsingRef.current && state.visible && mode !== "flow" && mode !== "narrate") {
+    if (userBrowsingRef.current && state.visible && mode === "page") {
       userBrowsingRef.current = false;
     }
 
@@ -832,11 +864,17 @@ export default function FoliatePageView({
         && scrollKey
         && scrollKey !== lastChunkTopScrollKeyRef.current
         && !userBrowsingRef.current
-        && scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), chunkReadingVisualState, {
+      ) {
+        const scrolled = scrollChunkReadingVisualStateToTopOfRoots(getRenderedWordRoots(), chunkReadingVisualState, {
           scrollContainer: resolveFoliateScrollContainer(),
           topOffsetPx: getFlowFollowOffsetPx(),
-        })
-      ) {
+        });
+        if (!scrolled && readingMode === "flow") {
+          const followIdx = resolveChunkReadingFollowWordIndex(chunkReadingVisualState);
+          if (followIdx != null) {
+            applyVisualHighlightByIndex(followIdx, "flow", true);
+          }
+        }
         lastChunkTopScrollKeyRef.current = scrollKey;
       }
       if (shouldSuppressNarrateFlowCursor(readingMode, chunkReadingVisualState)) {
@@ -939,8 +977,9 @@ export default function FoliatePageView({
               const existingWithoutSection = foliateWordsRef.current.filter(w => w.sectionIndex !== index);
               const existingEnd = existingWithoutSection.length;
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
+              const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
-              await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -969,7 +1008,8 @@ export default function FoliatePageView({
               const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections);
               if (sectionStart >= 0) {
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
-                await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+                const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
               }
             }
           }
@@ -986,11 +1026,12 @@ export default function FoliatePageView({
             const resolvedToken = resolveRenderedToken(doc.body, target);
             if (!resolvedToken) return;
 
-            doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
-              el.classList.remove("page-word--highlighted")
-            );
+            const clickHighlightClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+            doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
+              el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
+            });
             getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
-              el.classList.add("page-word--highlighted")
+              el.classList.add(clickHighlightClass)
             );
             centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
@@ -1042,11 +1083,12 @@ export default function FoliatePageView({
               const match = contents.find((c: any) => c.doc === doc);
               if (match) {
                 if (resolvedToken) {
-                  doc.querySelectorAll(".page-word--highlighted").forEach((el: Element) =>
-                    el.classList.remove("page-word--highlighted")
-                  );
+                  const selHighlightClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+                  doc.querySelectorAll(".page-word--highlighted, .page-word--flow-cursor, .page-word--narrate-cursor").forEach((el: Element) => {
+                    el.classList.remove("page-word--highlighted", "page-word--flow-cursor", "page-word--narrate-cursor");
+                  });
                   getResolvedTokenHighlightSpans(doc, resolvedToken).forEach((el: Element) =>
-                    el.classList.add("page-word--highlighted")
+                    el.classList.add(selHighlightClass)
                   );
                   centerResolvedTokenInReadingWindowRef.current(doc, resolvedToken);
 
@@ -1192,7 +1234,7 @@ export default function FoliatePageView({
               // back as resume anchors or saved progress. See handlePauseToPage() in useReaderMode.ts
               // and resumeAnchorRef usage — both correctly read getCurrentWord() which returns
               // only this first highlighted word.
-              return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true);
+              return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false);
             },
             clearHighlight: () => {
               // Clear all highlights in foliate iframes
@@ -1360,8 +1402,8 @@ export default function FoliatePageView({
               // the same unified path that live narration uses.
               const state = viewApiRef!.current!.resolveWordState(currentIdx);
               if (state.found && state.span) {
-                // Apply narration highlight class
-                state.span.classList.add("page-word--highlighted");
+                const returnClass = resolveFoliateWordHighlightClass(readingModeRef.current);
+                state.span.classList.add(returnClass);
                 // Scroll to the word if it's off the visible page
                 if (!state.visible && state.doc) {
                   try {
@@ -1416,6 +1458,10 @@ export default function FoliatePageView({
             // SELECTION-1: Passive soft-selected highlight (page-mode anchor indicator)
             applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
             clearSoftHighlight: () => clearSoftHighlight(),
+            clearUserBrowsing: () => {
+              userBrowsingRef.current = false;
+              lastScrollFollowPosRef.current = null;
+            },
           };
         }
 
@@ -1468,7 +1514,8 @@ export default function FoliatePageView({
         if (sectionStart < 0) continue;
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
-        await wrapWordsInSpans(doc, index, sectionStart, sectionWords);
+        const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);
@@ -1755,7 +1802,7 @@ export default function FoliatePageView({
       const displacement = Math.abs(currentPos - lastScrollFollowPosRef.current);
       const viewportHeight = containerRef.current?.clientHeight ?? 400;
       if (displacement > viewportHeight * 0.3) {
-        userBrowsingRef.current = true;
+        markUserBrowsingAway();
         if (import.meta.env.DEV) console.debug("[foliate] displacement detection — user browsed away, displacement:", displacement, "threshold:", viewportHeight * 0.3);
         return;
       }
@@ -1848,7 +1895,7 @@ export default function FoliatePageView({
         const mode = readingModeRef.current;
         if ((mode === "flow" || mode === "narrate") &&
             (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp")) {
-          userBrowsingRef.current = true;
+          markUserBrowsingAway();
           // Navigate the Foliate renderer so the user sees different content.
           // The iframe's native handler won't see this window-level event.
           if (e.key === "ArrowRight" || e.key === "PageDown") {
@@ -1862,12 +1909,11 @@ export default function FoliatePageView({
 
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
-        // During active flow reading, flag that user is browsing away — don't yank back
-        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
+        markUserBrowsingAway();
         view.renderer.next();
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
-        if (readingModeRef.current === "flow" || readingModeRef.current === "narrate") userBrowsingRef.current = true;
+        markUserBrowsingAway();
         view.renderer.prev();
       }
     };
@@ -1884,20 +1930,22 @@ export default function FoliatePageView({
     if (!flowMode) return;
 
     const handleWheel = () => {
-      const mode = readingModeRef.current;
-      if (mode === "flow" || mode === "narrate") {
-        userBrowsingRef.current = true;
-        if (import.meta.env.DEV) console.debug("[foliate] wheel → userBrowsingRef=true (mode:", mode, ")");
-      }
+      markUserBrowsingAway();
     };
 
     window.addEventListener("wheel", handleWheel, { passive: true, capture: true });
     return () => window.removeEventListener("wheel", handleWheel, { capture: true });
-  }, [flowMode]);
+  }, [flowMode, markUserBrowsingAway]);
 
   // Expose navigation methods via ref
-  const goNext = useCallback(() => viewRef.current?.renderer?.next(), []);
-  const goPrev = useCallback(() => viewRef.current?.renderer?.prev(), []);
+  const goNext = useCallback(() => {
+    markUserBrowsingAway();
+    viewRef.current?.renderer?.next();
+  }, [markUserBrowsingAway]);
+  const goPrev = useCallback(() => {
+    markUserBrowsingAway();
+    viewRef.current?.renderer?.prev();
+  }, [markUserBrowsingAway]);
   const goTo = useCallback((target: string | number) => viewRef.current?.goTo(target), []);
   const goToFraction = useCallback((frac: number) => viewRef.current?.goToFraction(frac), []);
 
@@ -1922,15 +1970,15 @@ export default function FoliatePageView({
           >&#x203A;</button>
         </>
       )}
-      {/* Jump to reading position button — shown when reading mode is active */}
-      {isReading && onJumpToHighlight && (
+      {/* Jump back to persistent last-read word — shown when user has browsed away */}
+      {showJumpBackToAnchor && onJumpBackToAnchor && (
         <button
           className="recenter-reading-box-btn"
-          onClick={onJumpToHighlight}
-          aria-label="Recenter reading box on current sentence"
-          title="Recenter reading box on current sentence"
+          onClick={onJumpBackToAnchor}
+          aria-label="Jump back to persistent last-read word"
+          title="Jump back to persistent last-read word"
         >
-          ↩ Recenter box
+          Jump back
         </button>
       )}
       {loading && <div className="foliate-loading">Loading book...</div>}

@@ -309,6 +309,7 @@
   transition: opacity var(--transition-normal), transform var(--transition-fast);
   box-shadow: var(--shadow-sm);
   -webkit-app-region: no-drag;
+  white-space: nowrap;
 }
 .recenter-reading-box-btn:hover {
   opacity: 1;
@@ -472,14 +473,21 @@
   background: var(--color-border, #444);
 }
 
+.rbb-mode-btn:focus {
+  outline: none;
+}
+.rbb-mode-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 .rbb-mode-btn--active {
   background: var(--accent);
   border-color: var(--accent);
   color: #fff;
 }
 .rbb-mode-btn--last {
-  background: var(--accent-faded, rgba(196,168,130,0.2));
-  border-color: var(--accent);
+  background: transparent;
+  border-color: var(--border, rgba(196,168,130,0.3));
   color: var(--text);
 }
 
@@ -567,6 +575,13 @@
 .rbb-play-btn--active {
   background: var(--accent);
   color: #fff;
+}
+
+.rbb-play-btn--disabled,
+.rbb-play-btn--disabled:hover {
+  cursor: not-allowed;
+  opacity: 0.45;
+  filter: grayscale(1);
 }
 
 .rbb-tts-btn {

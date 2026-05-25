@@ -371,3 +371,164 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Any sprint changing shared constants, cache/version constants, timing constants, or broad behavioral gates should run the full suite before closeout or explicitly record why it cannot.
 **Applies to:** Runtime constants, narration timing, normalizer/cache identity, reader-mode gates, and CI gating.
 **Status:** Observation
+
+### SRL-050 — Foliate recovery actions need renderer-level movement, not only shared reader state (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A persistent anchor is not user-visible unless the active Foliate surface is explicitly navigated to it.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 needed `jumpFoliateToWordAnchor` because Page jump-back could show and clear the button without moving the Foliate viewport.
+**Recommendation:** Any Foliate-visible action like jump-back, mode start, or recenter must call a surface API that can highlight, scroll, and section-recover the target word.
+**Applies to:** Foliate Page/Focus/Flow/Narrate surfaces, jump-back, mode-start anchoring, section recovery.
+**Status:** Observation
+
+### SRL-051 — Render-path getters must be side-effect free (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A function called like a getter becomes dangerous when it logs or records diagnostics on every render.
+**Evidence:** `getEffectiveWords` spammed the console and diagnostics during Focus startup until the effective word source was stabilized.
+**Recommendation:** Split source resolution into pure memoized values for render and explicit one-shot diagnostics for source transitions.
+**Applies to:** React render paths, word-source selection, diagnostics, performance-sensitive reader hooks.
+**Status:** Observation
+
+### SRL-052 — Mode playing state must follow runtime start, not precede it (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** UI "playing" state should not flip before the mode runtime has actually started.
+**Evidence:** Focus could render a blank active overlay when `focusPlaying=true` preceded delayed `startMode("focus", ...)`.
+**Recommendation:** For Focus/Flow/Narrate, resolve anchor and start the runtime before publishing active playback state, or expose a distinct "starting" state.
+**Applies to:** Reader mode start flows, async Foliate readiness, overlay rendering, Play/Space handlers.
+**Status:** Observation
+
+### SRL-053 — Manual screen QA is mandatory for Foliate reader-mode runtime changes (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Automated tests are necessary but not sufficient for reader-mode runtime changes that move the Foliate surface.
+**Evidence:** READER-PERSISTENT-ANCHOR Step 2 reported 2794 passing tests and clean TypeScript, but the live 18-scenario manual QA gate found 10 failures, including Page jump-back, Focus blank overlay, Flow non-follow, Narrate wrong start, and hard-click retarget failures.
+**Recommendation:** Any sprint touching Foliate surface movement, mode start, jump-back, playback visual follow, or hard-selection anchoring should require screen-interaction manual QA before merge or roadmap advancement.
+**Applies to:** Page/Focus/Flow/Narrate runtime changes, Foliate surface bridge, jump-back, active playback follow, mode handoff.
+**Status:** Observation
+
+### SRL-054 — Specs must distinguish hard-selected anchor from last-read/progress anchor (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** A "current word" contract is ambiguous unless it names the difference between hard selection, live playback cursor, durable progress, and browse-away visible position.
+**Evidence:** Manual QA showed hard clicks moved the visible highlight box, but playback resumed from a prior "persistent last-read word" or section start. Narrate's Jump back tooltip also exposed the implementation mismatch by targeting "persistent last-read word" rather than the hard-selected playback anchor.
+**Recommendation:** Future reader-anchor specs should define separate owners and precedence for hard-selected anchor, last-read progress, live playback cursor, and temporary browse-away position, then test Play, Space, Jump back, active retarget, and reopen against that precedence.
+**Applies to:** Reader anchor service, mode start, progress persistence, CFI restore, active retarget, cross-mode handoff.
+**Status:** Observation
+
+### SRL-055 — Shared Foliate surfaces need live UI gates, not only structural/unit tests (READER-PERSISTENT-ANCHOR Step 2, 2026-05-22)
+**Verdict:** Structural gates can confirm the right helpers exist while the live renderer still fails to move, render, or follow.
+**Evidence:** Step 2 added Foliate jump-back helpers, Flow follow fixes, Focus startup changes, and targeted tests, yet manual QA found Page jump-back hiding without returning, Focus rendering a blank overlay, Flow cursor advancing outside the reading window, and Flow browse-away failing to pause or show Jump back.
+**Recommendation:** Add at least one live UI gate, manual or automated, for each shared Foliate surface behavior that depends on real layout: Page jump-back motion, Focus first-word render, Flow cursor follow, Narrate exact start, and cross-mode hard-click retarget.
+**Applies to:** FoliatePageView, reader mode adapters, FlowScrollEngine integration, Focus overlay, Narrate cursor sync, persistent-anchor repairs.
+**Status:** Observation
+
+### SRL-056 — Hard-selection anchors need cause-aware clearing (READER-PERSISTENT-ANCHOR Step 3, 2026-05-22)
+**Verdict:** A hard-selected anchor must not be cleared by generic progress or visual-ref writes before mode start consumes it.
+**Evidence:** `explicitSelectionAnchorRef` was cleared by `writeRefs` calls with non-hard-selection causes, including jump-back from `syncVisualToPersistentWord`, which caused Narrate and Flow starts to ignore the newly selected word.
+**Recommendation:** Anchor state mutation APIs should use explicit causes and only clear hard-selection anchors on lifecycle events that truly invalidate them, such as book-open or explicit replacement.
+**Applies to:** Reader persistent anchors, mode start, jump-back, active retargeting, resume/progress writes, cross-mode handoff.
+**Status:** Observation
+
+### SRL-057 — Same-section and cross-section Foliate movement are separate acceptance cases (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** A Jump Back or anchor recovery path that works across chapter or section boundaries does not prove same-section movement works.
+**Evidence:** Step 3 Page Jump Back returned correctly when the target anchor was in another section, but dismissed without moving when the anchor was in the same chapter.
+**Recommendation:** Any Foliate anchor navigation helper must test both same-section and cross-section return paths before being accepted.
+**Applies to:** Page Jump Back, reopen restore, section recovery, mode-switch recentering, persistent-anchor navigation.
+**Status:** Observation
+
+### SRL-058 — Each reading mode needs its own active-render QA gate (READER-PERSISTENT-ANCHOR Step 3 QA, 2026-05-22)
+**Verdict:** Shared anchor plumbing can pass while a specific mode's playback renderer remains broken.
+**Evidence:** Step 3 fixed Flow playback and Narrate exact start, but Focus still rendered a blank active overlay and did not expose paused Jump Back.
+**Recommendation:** Manual QA and dispatch specs must verify active render output per mode, not infer mode health from shared anchor or surface state.
+**Applies to:** Focus, Flow, Narrate, Page-mode restore, adapter extraction.
+**Status:** Observation
+
+### SRL-059 — CSS-column word-position indexes need live rect validation before same-section movement decisions (READER-PERSISTENT-ANCHOR Step 3.1, 2026-05-22)
+**Verdict:** Cached word-position rects can go stale after Foliate page turns in CSS-column paginated mode.
+**Evidence:** Step 3.1 found that `FoliatePageView`'s word position index stores `getBoundingClientRect()` snapshots; same-section Jump Back could trust stale `visible` state and dismiss without moving.
+**Recommendation:** Same-section Foliate navigation should either force motion for recovery actions or validate target rects live before deciding the word is already visible.
+**Applies to:** Page Jump Back, reopen restore, same-section anchor recovery, mode-switch recentering, Foliate word-position indexes.
+**Status:** Observation
+
+### SRL-060 — Narrate sync gates must verify heard audio, not only visual cursor position (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Narrate can visually start at the right word while the spoken audio lags behind or skips at chunk boundaries.
+**Evidence:** Step 3.1 manual QA showed S12/S13 failing after the cursor started at the hard-clicked anchor but then outran the heard audio; at chunk boundaries the audio skipped ahead to the cursor location.
+**Recommendation:** Future Narrate specs and manual QA gates should explicitly verify cursor lead/lag against heard audio and include chunk-boundary transition checks, not only visual start position.
+**Applies to:** Narrate playback, audio scheduler changes, cursor sync, chunk-boundary handoff, TTS progress sources.
+**Status:** Observation
+
+### SRL-061 — Cross-surface cursor visuals need one declared owner per mode (READER-PERSISTENT-ANCHOR Step 3.1 QA, 2026-05-22)
+**Verdict:** Flow cursor regressions can appear when multiple surfaces render cursor affordances for the same active word.
+**Evidence:** Step 3.1 manual QA found S8 failing because both the parent-document `.flow-shrink-cursor` overlay and the iframe `.page-word--flow-cursor` underline rendered at once.
+**Recommendation:** Mode specs should declare the single visual cursor owner for each mode and include an acceptance check that duplicate cursor affordances are suppressed.
+**Applies to:** Flow cursor rendering, Foliate iframe highlights, parent overlay cursors, reader mode adapter isolation.
+**Status:** Observation
+
+### SRL-062 — Narrate timing repairs should be sized as investigation-heavy (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** Narrate cursor fixes can require high-effort root-cause tracing even when the final patch is small.
+**Evidence:** Step 3.2's final Narrate change was a one-line cursor-lag constant update, but the work required tracing audio scheduler progress, word boundaries, output latency, tempo stretch, and chunk-boundary behavior.
+**Recommendation:** Future Narrate timing dispatches should pre-flag investigation effort separately from implementation effort so expectations match the real diagnostic burden.
+**Applies to:** Narrate timing, audio scheduler work, TTS cursor sync, chunk-boundary repairs, manual audio QA.
+**Status:** Observation
+
+### SRL-063 — Fixed cursor-lag constants are provisional when audio output latency is hardware-dependent (READER-PERSISTENT-ANCHOR Step 3.2, 2026-05-22)
+**Verdict:** A fixed trusted cursor lag can be a useful repair lever, but repeated tuning signals the need for a measured or adaptive model.
+**Evidence:** `TTS_TRUSTED_CURSOR_LAG_MS` has moved `120→220→350→450ms` as real Electron/Chromium/WASAPI output latency exceeded timestamp-derived expectations.
+**Recommendation:** Plan a future hardening sprint for adaptive lag calibration or measured output delay rather than continuing to hand-tune a fixed cursor-lag constant.
+**Applies to:** Narrate cursor sync, audio scheduler calibration, hardware-dependent playback latency, TTS UX polish.
+**Status:** Observation
+
+### SRL-064 — Narrate exact-start and continuous sync are separate acceptance gates (READER-PERSISTENT-ANCHOR Step 3.2 QA, 2026-05-22)
+**Verdict:** Narrate can improve chunk-boundary continuity while still failing exact selected-word audio start.
+**Evidence:** Step 3.2 manual QA showed S8 fixed and chunk-boundary skip-ahead improved, but selecting "At" in "At this point" started audio from "Cusco" in the prior sentence.
+**Recommendation:** Future Narrate sync specs should separately test selected-word audio start, cursor/audio lead-lag during playback, and chunk-boundary transition behavior.
+**Applies to:** Narrate playback start, audio scheduler chunk mapping, cursor sync, hard-click retargeting, manual audio QA.
+**Status:** Observation
+
+### SRL-065 — Active retarget paths must have a single resync owner (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Active playback retargeting becomes race-prone when more than one path can stop and restart the audio pipeline for the same click.
+**Evidence:** Step 3.3 found that `onWordClick` could trigger `narration.resyncToCursor` twice during active Narrate: once from `commitSharedWordAnchor` and again from `retargetActiveModeToWord`, causing two rapid pipeline stop/start cycles per click.
+**Recommendation:** For active Focus, Flow, and Narrate retargeting, assign one resync owner per click path and make secondary anchor updates explicitly skip runtime resync.
+**Applies to:** Active word-click retargeting, Narrate resync, audio pipeline restarts, Flow/Focus adapter ownership.
+**Status:** Observation
+
+### SRL-066 — Downstream chunk dispatch must use resolved plan boundaries, not raw targets (READER-PERSISTENT-ANCHOR Step 3.3, 2026-05-22)
+**Verdict:** Chunk-planning refinements can invalidate downstream assumptions that raw target sizes equal resolved chunk boundaries.
+**Evidence:** Step 3.3 sentence-boundary snapping extended cold-start chunk 0 beyond the raw `firstSize` target, exposing a parallel ramp overlap because chunk 1 started from raw `firstSize` instead of `openingRampPlan[0].endIdx`.
+**Recommendation:** Any sprint that changes chunk sizing, snapping, ramping, or natural-boundary logic should audit all downstream dispatch math and require consumers to use resolved plan boundaries.
+**Applies to:** TTS chunk planning, Kokoro pipeline ramping, sentence-boundary snapping, parallel chunk dispatch.
+**Status:** Observation
+
+### SRL-067 — Visual and audio pipelines must not share raw word indexes unless they share tokenization (READER-PERSISTENT-ANCHOR Step 3.3 QA, 2026-05-22)
+**Verdict:** A numeric word index is not a stable cross-subsystem contract when Foliate/click resolution and TTS chunking tokenize text differently.
+**Evidence:** Step 3.3 DevTools diagnostics showed `globalWordIndex: 3370` meant `Medicare` to `onWordClick`, but the same `startIdx=3370` meant `Many` to `speakNextChunkKokoro` and `produceChunk`; the TTS chunk also rendered `sixty-five` as `sixty five`, indicating tokenization drift.
+**Recommendation:** Narrate exact-start work should use one canonical word/token index source across click resolution, highlighting, and TTS chunking, or explicitly translate indexes at subsystem boundaries before audio scheduling.
+**Applies to:** Narrate exact-start, TTS chunking, Foliate word indexes, click retargeting, cursor/audio sync, tokenizer normalization.
+**Status:** Observation
+
+### SRL-068 — Prefer canonical content alignment over tokenizer unification across renderer/source boundaries (READER-PERSISTENT-ANCHOR Step 3.4, 2026-05-23)
+**Verdict:** When the renderer and source extractor see the same book through different DOM/XHTML views, making one canonical index source and aligning rendered content to it is safer than trying to force tokenizer parity.
+**Evidence:** Step 3.4 repaired the click/TTS index mismatch by stamping Foliate DOM spans from canonical extractor words in `wrapWordsInSpans`, instead of trying to make renderer `segmentWordSpans` and main-process `epub-word-extractor` tokenize identically across stitching, punctuation-gap, footnote, and block-selection differences.
+**Recommendation:** For reader surfaces that bridge rendered DOM and source extraction, choose one canonical word/index source, align content to it, and make unmatched content warn/recover instead of silently drifting by position.
+**Applies to:** Foliate word wrapping, TTS word indexes, rendered/source text alignment, Narrate exact-start, click retargeting, adapter extraction.
+**Status:** Observation
+
+### SRL-069 — Prefetched audio boundaries must be source-owned before driving heard-audio cursors (READER-PERSISTENT-ANCHOR Step 3.5, 2026-05-24)
+**Verdict:** A flat boundary timeline can advance visual cursor state beyond the currently audible source when chunks are prefetched.
+**Evidence:** NARRATE-CURSOR-SYNC-4 fixed S13 by clamping `tick()` and `getAudioProgress()` to the active source window, so prefetched future boundaries cannot drive Narrate cursor progress before their source starts playing.
+**Recommendation:** Any TTS cursor driven by prefetched chunk boundaries must gate emitted progress by the currently-playing source, not just by `audioCtx.currentTime` minus lag.
+**Applies to:** `audioScheduler`, Narrate cursor sync, chunk prefetch, streaming TTS, source handoff.
+**Status:** Observation
+
+### SRL-070 — Self-referential telemetry cannot gate a sync fix; verify with audio-independent ground truth (READER-PERSISTENT-ANCHOR Step 3.5/3.6 QA, 2026-05-24)
+**Verdict:** The boundary-drift metric (~9ms) measured cursor-vs-schedule, not cursor-vs-heard-audio, so it reported "tight" while the cursor actually led the audio — masking S13 across four repair rounds (3.2–3.5).
+**Evidence:** In The Raven, every chunk logged `WORD-NATIVE` timing with ~9ms boundary drift, yet Evan's ear confirmed the cursor led and narration omitted content at re-entry. Every scheduler-derived number is computed from the same predicted timeline, so none can detect a schedule-vs-audio offset. Step 3.6 added the first non-self-referential instrument (`ctx.currentTime − chunkStartTime`).
+**Recommendation:** PROMOTED TO STANDING RULE — Narrate/sync QA gates require an audio-independent ground truth (Evan's ear, or a non-self-referential instrument such as schedule-vs-wallclock drift); scheduler-derived metrics (boundary drift, scroll-follow, handoff index) are NOT sync evidence. Recorded in `docs/governance/LESSONS_LEARNED.md`.
+**Applies to:** Narrate cursor/audio sync gates, TTS QA, any open-loop-vs-closed-loop verification.
+**Status:** Promoted to standing rule (second occurrence with SRL-060).
+
+### SRL-071 — Cowork pre-dispatch root-cause investigation shrinks investigation-heavy repairs to read-and-run sprints (READER-PERSISTENT-ANCHOR Step 3.6, 2026-05-24)
+**Verdict:** Pinning the exact seam before dispatch turned a Narrate-timing repair (which SRL-062 sized as investigation-heavy) into a small, clean implementation sprint.
+**Evidence:** Step 3.6 dispatched a single core change (`nextGenWordIndexRef`) plus tests with file:line targets and reset conditions; CLI landed it green on the first pass (2,821 tests, tsc clean) at M effort with no investigation tasks.
+**Recommendation:** For investigation-heavy subsystem repairs, have Cowork complete live root-cause tracing and identify the exact seam (refs, file:line, reset conditions) before authoring the dispatch; the CLI sprint then sizes as a normal read-and-run implementation.
+**Applies to:** Narrate/TTS timing repairs, tangled-subsystem bug fixes, the investigate-then-dispatch workflow.
+**Status:** Observation (refines SRL-062).
+
+### SRL-072 — Don't iterate fixes on "ahead-of-heard" references; audible continuity needs a real heard-position signal (READER-PERSISTENT-ANCHOR Step 3.6 QA, 2026-05-24)
+**Verdict:** Six pre-isolation rounds (3.1–3.6) each partially worked then skipped because every reference the code could seed playback from — `cursorWordIndex`, `lastConfirmedAudioWordRef`, and finally `nextGenWordIndexRef` (produced-end) — is AHEAD of what the listener has actually heard. Step 3.6 made generation contiguous yet the audio still dropped a line, proving the content-omission (Bug 2) and the cursor-lead (Bug 1) are one defect that cannot be fixed without a "what was actually spoken" signal.
+**Evidence:** Step 3.6 console showed `produceChunk 0→…→1111` (contiguous generation) and `scheduleChunk drift ≈ −227s` (whole book prefetched); Evan did not hear "This it is and nothing more." — playback continued from the ahead-of-heard frontier. Each prior fix swapped one ahead-of-heard ref for another.
+**Recommendation:** When an audio/playback sync defect recurs across multiple targeted fixes, stop substituting predicted/generation references and first establish the real playback-position signal (closed-loop). Prefer doing the closed-loop rework once — ideally after the owning module is isolated — over repeated open-loop patches that each add scheduler risk. Tie acceptance to an audio-independent ground truth (ear or a non-self-referential instrument), per SRL-070.
+**Applies to:** TTS cursor/audio sync, streaming playback continuation, any open-loop "predict then display/seed" subsystem; pre- vs post-isolation sequencing of high-risk fixes.
+**Status:** Observation (third in the Narrate-sync arc with SRL-060 and SRL-070; promotion candidate — "audio sync fixes require a real heard-position signal, not predicted references").

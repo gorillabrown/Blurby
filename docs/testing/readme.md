@@ -7,6 +7,7 @@ records, and machine-readable eval baselines/quality gates.
 | Category | Files |
 |----------|-------|
 | Checklists | `TTS_ADVERSARIAL_REVIEW_CHECKLIST.md`, `TTS_EVAL_RELEASE_CHECKLIST.md`, `TTS_ITERATIVE_AUDIT_TRACE_CHECKLIST.md`, `TTS_LIVE_BUG_SWEEP_CHECKLIST.md`, `tts-browser-test-checklist.md`, `tts-electron-test-checklist.md`, `tts-manual-test-checklist.md`, `chrome-clickthrough-checklist.md` |
+| Templates | `reader-persistent-anchor-manual-qa-template.md` |
 | Runbooks / protocols | `TTS_EVAL_MATRIX_RUNBOOK.md`, `perf-manual.md`, `chrome-test-runner-protocol.md`, `auto-update-e2e.md` |
 | Policies / decisions | `TTS_EVAL_BASELINE_POLICY.md`, `MOSS_DECISION_LOG.md`, `QWEN_STREAMING_DECISION.md`, `KOKORO_RETIREMENT_SCORECARD.md` |
 | Setup / feasibility | `MOSS_RUNTIME_SETUP.md`, `MOSS_RUNTIME_SHAPE_COMPARISON.md`, `MOSS_FLAGSHIP_FEASIBILITY.md`, `QWEN_RUNTIME_SETUP.md` |

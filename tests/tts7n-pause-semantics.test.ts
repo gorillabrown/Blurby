@@ -90,10 +90,10 @@ describe("TTS-7N: chunk boundary snapping to sentences (BUG-136)", () => {
     expect(snapped).toBe(27); // Forward to "done." (index 26 + 1)
   });
 
-  it("returns original when chunk is too short to snap", () => {
-    // Chunk of 15 words (≤20) — skip snapping
+  it("extends small chunk forward to the next sentence boundary", () => {
+    // Chunk of 15 words (≤20) — extends forward to "done." at index 19
     const snapped = snapToSentenceBoundary(words, 0, 15);
-    expect(snapped).toBe(15); // Too short to snap
+    expect(snapped).toBe(20); // Snaps forward to end after "done."
   });
 
   it("does not exceed word array bounds", () => {

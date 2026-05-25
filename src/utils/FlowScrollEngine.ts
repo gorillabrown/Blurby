@@ -56,6 +56,7 @@ export interface FlowScrollEngineCallbacks {
   onLineChange?: (lineIndex: number, lineInfo: LineInfo) => void;
   onProgressUpdate?: (progress: FlowProgress) => void;
   onChunkChange?: (chunk: ReadingChunk) => void;
+  onUserBrowseAway?: () => void;
 }
 
 export interface FlowRenderedWordRootDescriptor {
@@ -843,13 +844,8 @@ export class FlowScrollEngine {
         this.cursor.style.transition = "none";
         this.cursor.style.width = currentWidth;
       }
+      this.callbacks.onUserBrowseAway?.();
     }
-    if (this.scrollResumeTimer) clearTimeout(this.scrollResumeTimer);
-    this.scrollResumeTimer = setTimeout(() => {
-      this.manualScrollPaused = false;
-      this.scrollResumeTimer = null;
-      if (this.running && !this.paused) this.animateLine();
-    }, FLOW_SCROLL_RESUME_DELAY_MS);
   };
 
   private clearTimers(): void {

@@ -25,7 +25,7 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   });
 
   it("imperative highlight API keeps motion enabled only by default", () => {
-    expect(src).toContain('return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true);');
+    expect(src).toContain('return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false);');
   });
 
   it("renders the shrinking Flow cursor only in real Flow mode, not Narrate's shared scroll surface", () => {
@@ -41,9 +41,6 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
   it("exposes a lower-right recenter box control for chunk visual modes", () => {
     expect(src).toContain("recenterChunkReadingBox: () => boolean;");
     expect(src).toContain('className="recenter-reading-box-btn"');
-    expect(src).toContain('aria-label="Recenter reading box on current sentence"');
-    expect(src).toContain("↩ Recenter box");
-    expect(readerSrc).toContain("isReading={isBrowsedAway && isFlowSurfaceMode}");
     expect(pageReaderCss).toContain(".recenter-reading-box-btn");
     expect(pageReaderCss).toContain("position: absolute;");
     expect(pageReaderCss).toContain("z-index: 450;");
@@ -69,5 +66,50 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
     expect(src).toContain("candidate.scrollHeight > candidate.clientHeight + 1");
     expect(src).toContain("scrollCandidates");
     expect(src).toContain("foliateView as HTMLElement");
+  });
+
+  it("shows jump-back based on browse-away state rather than active reading only", () => {
+    expect(src).toContain("showJumpBackToAnchor");
+    expect(src).toContain("onJumpBackToAnchor");
+    expect(src).toContain("Jump back");
+    expect(src).not.toContain("{isReading && onJumpToHighlight && (");
+  });
+
+  it("marks user browsing in Page, Focus, Flow, and Narrate surfaces", () => {
+    expect(src).toContain('mode === "page"');
+    expect(src).toContain('mode === "focus"');
+    expect(src).toContain('mode === "flow"');
+    expect(src).toContain('mode === "narrate"');
+    expect(src).toContain("onUserBrowseAwayRef.current?.()");
+  });
+
+  it("documents Focus paused versus active surface ownership", () => {
+    expect(readerSrc).toContain('const showFocusOverlay = readingMode === "focus" && focusPlaying');
+    expect(readerSrc).toContain('readingMode === "focus" || readingMode === "flow" || readingMode === "narrate"');
+  });
+
+  it("imports and calls jumpFoliateToWordAnchor for jump-back", () => {
+    expect(readerSrc).toContain("jumpFoliateToWordAnchor");
+    expect(readerSrc).toContain("handleJumpBackToPersistentWord");
+    expect(readerSrc).toContain("persistentWordIndexRef.current");
+  });
+
+  it("routes Foliate displacement detection through markUserBrowsingAway", () => {
+    expect(src).toContain("markUserBrowsingAway()");
+    expect(src).not.toMatch(/displacement.*userBrowsingRef\.current\s*=\s*true/);
+  });
+
+  it("routes keyboard browse-away through markUserBrowsingAway", () => {
+    const keyboardSection = src.slice(src.indexOf("ArrowRight"));
+    expect(keyboardSection).toContain("markUserBrowsingAway()");
+  });
+
+  it("passes showJumpBackToAnchor={isBrowsedAway} to FoliatePageView", () => {
+    expect(readerSrc).toContain("showJumpBackToAnchor={isBrowsedAway}");
+  });
+
+  it("uses mode-aware highlight class for click, selection, and return-to-narration paths", () => {
+    expect(src).toContain("resolveFoliateWordHighlightClass(readingModeRef.current)");
+    expect(src).not.toMatch(/classList\.add\("page-word--highlighted"\)/);
   });
 });
