@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-25 — Roadmap review: archive-forward migration (REPAIR + READER-ISO-1A + READER-ISO-1B full specs moved to `docs/planning/.Archive/ROADMAP_2026-05-25.md`) and eager-spec buffer replenished to 5 full specs (1C, 1D, 1E, GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1); net roadmap 415→342 lines. SRL-070/073/074 promoted to Standing Rules. **READER-ISO-1C is the next dispatch.**
-**Current state**: v1.75.1 stable baseline plus committed Phase 0, governance sweep, roadmap queue recovery, broad-suite drift triage, persistent-anchor repairs, READER-ISO-1A, and READER-ISO-1B. The reader persistent-anchor hotfix merged at `25b6a26`; Step 3.6 manual QA proved Narrate content omission and cursor lead are one closed-loop heard-position problem, now deferred to post-isolation `NARRATE-CLOSED-LOOP-CURSOR`. READER-ISO-1A landed typed mode adapter contracts and a seven-tier current-word anchor service without runtime behavior changes; READER-ISO-1B extracted mode select/start/pause/stop routing into `useReaderModeOrchestrator` while keeping closure-heavy implementation refs in `useReaderMode`. S9 Flow lazy-follow remains intentionally deferred as high-risk. Kokoro is the sole active local/cacheable model engine; Web Speech remains a platform fallback. MOSS-Nano and Pocket TTS are dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-26 — READER-ISO-1C complete (FocusModeAdapter + passive surface command types). **READER-ISO-1D is the next dispatch.**
+**Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C. READER-ISO-1C added `FocusModeAdapter` (first concrete adapter implementing the 1A contract) and passive `SurfaceCommand` types. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN — depth 7, eager-spec buffer at target (5 full specs: 1C, 1D, 1E, GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR [flagged buffer gap, specced at 1E close-out] + UX-POLISH-1). **Next dispatch: READER-ISO-1C** — Focus Adapter + Passive Surface Contract Start.
-**Last sprint**: READER-ISO-1B (2026-05-25) — extracted mode routing into `useReaderModeOrchestrator`, slimmed `useReaderMode`, preserved behavior, and merged to `main` at `1f4a75a`.
+**Queue**: GREEN — depth 6 (4 full specs: 1D, 1E, GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR, UX-POLISH-1). **Next dispatch: READER-ISO-1D** — Flow Adapter + Section Handoff Restart Ownership.
+**Last sprint**: READER-ISO-1C (2026-05-26) — added `FocusModeAdapter` implementing the 1A adapter contract, passive `SurfaceCommand` types, and 27 adapter tests. Merged to `main` at `634bac2`.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -48,6 +48,7 @@
 | READER-PERSISTENT-ANCHOR-STEP3-REPAIR | 2026-05-24 | Repaired persistent-anchor UX (S1/S4/S8/S12 exact-start/S18); S5 partial, S9 deferred; S13 Narrate sync proven a unified post-isolation closed-loop problem; merged at `25b6a26` | `CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md` |
 | READER-ISO-1A | 2026-05-24 | Added typed reader-mode adapter contracts and current-word anchor service with 73 tests and no runtime behavior change | `CloseOut.READER-ISO-1A.2026-05-24.md` |
 | READER-ISO-1B | 2026-05-25 | Extracted mode routing into `useReaderModeOrchestrator` while preserving current reader behavior | `CloseOut.READER-ISO-1B.2026-05-25.md` |
+| READER-ISO-1C | 2026-05-26 | FocusModeAdapter + passive surface command types with 27 adapter tests | — |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -109,32 +110,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Adapter Isolation
 
-#### READER-ISO-1C — Focus Adapter + Passive Surface Contract Start *(position 1 — full spec)*
-
-- **What:** Move Focus lifecycle behind the new adapter boundary and begin typing passive Foliate surface commands without moving Flow or Narrate ownership yet.
-- **Why:** Focus is the lowest-risk adapter migration and proves that the adapter contract can own lifecycle and anchor updates without disturbing Flow or Narrate.
-- **Prerequisites:** READER-ISO-1B complete.
-- **Done when:**
-  1. Focus has a `FocusModeAdapter` or equivalent adapter.
-  2. Focus starts from the exact current anchor, including word `0`.
-  3. Focus updates the shared anchor only while Focus is active.
-  4. Focus pause/resume stays in Focus and does not mutate Flow/Narrate runtime state.
-  5. Passive surface command types exist for highlight/scroll requests used by Focus or shared code.
-  6. Flow and Narrate focused regression tests still pass.
-  7. `npx tsc --noEmit` and `git diff --check` pass.
-- **Effort:** M. Bounded adapter migration with meaningful integration checks.
-- **Roster:** codex-parent or single worker.
-- **Source:** Isolation spec Phase 3 and Phase 6 setup; SRL-046/SRL-047.
-
-##### Implementation detail
-
-- **Edit sites:** `src/reader/modes/FocusModeAdapter.ts` (new), `src/hooks/useReadingModeInstance.ts`, `src/modes/FocusMode.ts` only if needed, passive surface type file, `tests/focusModeAdapter.test.ts`, `tests/useReaderMode.test.ts`.
-- **Tests:** Focus exact anchor start, word `0`, mode-advance ownership, pause/resume, Flow/Narrate state untouched.
-- **Constants:** Existing Focus WPM behavior must remain unchanged.
-- **Branch:** `sprint/reader-iso-1c-focus-adapter` from clean `main`.
-- **Commit hygiene:** Focus adapter only. Do not migrate Flow or Narrate in this sprint.
-
-#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 2 — full spec)*
+#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 1 — full spec)*
 
 - **What:** Move Flow lifecycle, `FlowScrollEngine` ownership, section-handoff restart, browse-away pause, and visual-follow commands behind a Flow adapter.
 - **Why:** Flow has repeatedly regressed Narrate and shared Foliate behavior because its scroll engine, restart logic, and visual cursor live in shared component paths. After Step 3 repair, Flow ownership must be isolated without changing Narrate truth-sync.
@@ -162,7 +138,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 ---
 
-#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(position 3 — full spec)*
+#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(position 2 — full spec)*
 
 - **What:** Move Narrate lifecycle and audio/TTS truth-sync ownership behind a typed `NarrateModeAdapter`, completing the four-mode adapter boundary started in 1A–1D. Narrate owns `useNarration.startCursorDriven`, installs/clears its own truth-sync, publishes chunk/word visual state from trusted audio timing, starts at the exact current/selected word (incl. word `0`), and pauses/stops without ever starting FlowScrollEngine or falling back to Flow.
 - **Why:** Narrate is hook-owned today but the ownership is implicit — no first-class adapter boundary, so orchestration behavior leaks. Isolating Narrate is the prerequisite for `NARRATE-CLOSED-LOOP-CURSOR`: scheduler surgery on the heard-position loop is only safe once the adapter owns truth-sync (Evan, 2026-05-24). This is the last adapter slice; after it, every mode owns its own clock and cursor.

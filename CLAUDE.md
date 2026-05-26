@@ -342,7 +342,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN depth 10, 1 open bug)
+## Current System State (v1.75.1 — queue GREEN depth 6, 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -354,11 +354,11 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** GREEN depth 10 (5 full specs, 5 stubs) in `docs/governance/sprint-queue.xlsx`. Next: BASELINE-SYNC-1 → TEST-GREEN-1 → READER-ISO-1A, with Reader Runtime Solidification ahead of CI gating and UX polish.
+- **Queue:** GREEN depth 6 (4 full specs, 2 stubs) in `docs/governance/sprint-queue.xlsx`. Next: READER-ISO-1D → READER-ISO-1E, with Reader Runtime Solidification ahead of CI gating and UX polish.
 - **Open bugs:** 1 — BUG-154 (parked, likely not a bug, needs live verification).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
-- **Most recent sprint:** GOVERNANCE-SWEEP after READER-MODE-ISOLATION-1 Phase 0 — doc hygiene, source-of-truth recovery, and reader-mode preflight stabilization.
-- 2,668 tests across 194 test files
+- **Most recent sprint:** READER-ISO-1C — FocusModeAdapter + passive surface command types (2026-05-26).
+- 2,921 tests across 208 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
