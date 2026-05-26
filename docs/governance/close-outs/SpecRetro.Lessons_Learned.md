@@ -539,3 +539,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Adapter and anchor-service specs that mutate active owner state should include explicit transition tests proving cleanup happens when ownership changes, plus no-op tests proving same-owner selection does not clear valid state.
 **Applies to:** Reader mode adapters, current-word anchor services, active runtime ownership, stale-mode cleanup, future orchestrator extraction.
 **Status:** Observation.
+
+### SRL-074 — Orchestrators should consume building blocks, not closure-owned internals (READER-ISO-1B, 2026-05-25)
+**Verdict:** A clean orchestrator boundary should route public lifecycle actions while closure-heavy implementation functions remain in the owning hook or module until their adapter owns the relevant refs.
+**Evidence:** READER-ISO-1B could not cleanly extract `handleStopTts` because it depends on internal refs such as `narrationCursorRafRef` and `narrateTruthRafRef`; keeping it in `useReaderMode` and exporting it as a building block preserved encapsulation.
+**Recommendation:** Future adapter extraction specs should classify functions as routeable shell actions versus implementation-owned building blocks before moving code. Do not force ref-heavy teardown/truth-sync functions across a boundary just to make the extraction look complete.
+**Applies to:** Reader mode orchestrator, Focus/Flow/Narrate adapter extraction, lifecycle routing, stop/teardown paths, truth-sync ownership.
+**Status:** Observation.
