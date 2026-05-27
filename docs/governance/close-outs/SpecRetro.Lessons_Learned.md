@@ -546,3 +546,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future adapter extraction specs should classify functions as routeable shell actions versus implementation-owned building blocks before moving code. Do not force ref-heavy teardown/truth-sync functions across a boundary just to make the extraction look complete.
 **Applies to:** Reader mode orchestrator, Focus/Flow/Narrate adapter extraction, lifecycle routing, stop/teardown paths, truth-sync ownership.
 **Status:** Observation.
+
+### SRL-075 — Concrete adapters can be proven as pure classes before React wiring (READER-ISO-1C, 2026-05-26)
+**Verdict:** Adapter contracts are easier to validate when the first concrete adapter is implemented and tested as a standalone class before routing live React hooks through it.
+**Evidence:** READER-ISO-1C added `FocusModeAdapter` wrapping `FocusMode` with lifecycle ownership, anchor-gated `onWordAdvance`, clock reporting, and SRL-073 transition/no-op coverage without needing `renderHook` or runtime wiring.
+**Recommendation:** Future adapter migrations should first prove adapter lifecycle, ownership, and contract behavior in pure-class tests, then perform orchestrator/hook wiring as a separate step.
+**Applies to:** Focus, Flow, Narrate adapters; reader-mode lifecycle ownership; passive surface command migration; future hook wiring.
+**Status:** Observation.
