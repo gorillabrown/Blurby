@@ -4,7 +4,7 @@ name: Simonides (sonnet/Memory)
 
 # Memory Guide
 
-**Scope:** Shared memory system for all agents (zeus, aristotle, reviewers, hippocrates, herodotus)
+**Scope:** Shared memory system for all agents (zeus, aristotle, reviewers, hippocrates, marcusaurelius)
 
 **Purpose:** Enable continuity across agent dispatches, preserve discoveries, and avoid re-investigation of solved problems.
 
@@ -46,7 +46,7 @@ feedback:
     agent: "zeus"
     task: "Coordinate sprint calibration run"
     outcome: "SUCCESS"
-    learning: "Parallelizing hippocrates with herodotus saved 30 min"
+    learning: "Parallelizing hippocrates with marcusaurelius saved 30 min"
     next_time: "Always parallel test + docs when independent"
 
   - dispatch_id: "PERF-3-investigation"
@@ -452,7 +452,7 @@ completed_agent: implementation
 [FINDING COMPLETE: See LL-147, Sprint 12 results, session 79 merge commit]
 ```
 
-### Scenario 4: Herodotus Updates Memory
+### Scenario 4: MarcusAurelius Updates Memory
 
 ```
 DOC-KEEPER AGENT (Session 79):
@@ -494,7 +494,7 @@ QUERY 2: "Show solutions to API latency > 500ms"
   src/middleware/cache.ts."
 
 QUERY 3: "Show feedback on hippocrates efficiency"
--> Returns feedback log: "Parallelizing hippocrates with herodotus saves 30 min.
+-> Returns feedback log: "Parallelizing hippocrates with marcusaurelius saves 30 min.
   Always parallel when independent. See Sprint 11 dispatch."
 
 QUERY 4: "Show all LL entries related to middleware"

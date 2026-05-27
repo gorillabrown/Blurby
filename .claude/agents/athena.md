@@ -43,7 +43,7 @@ The opus doer handles implementation tasks that span multiple subsystems, requir
 - Investigate unknown bugs from scratch (→ aristotle)
 - Run tests (→ hippocrates)
 - Review code (→ plato / solon)
-- Update governing documents (→ herodotus)
+- Update governing documents (→ marcusaurelius)
 - Execute fully prescribed changes with no judgment (→ hermes)
 - Work within a single module that doesn't touch boundaries (→ hercules)
 

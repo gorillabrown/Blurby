@@ -1,6 +1,6 @@
 # ROADMAP Companion — Architecture Decisions, Type-Flow Matrix, and Sprint Detail
 
-> This file is the companion to ROADMAP.md. It contains architecture decisions, the cross-sprint type-flow matrix, dissolved sprint rationale, and grounding evidence + implementation detail for each active sprint. ROADMAP.md contains the structural dispatch fields.
+> This file is the companion to ROADMAP.md. It contains the cross-sprint type-flow matrix and dissolved-sprint rationale that ROADMAP.md references for architecture context, plus historical grounding evidence + implementation detail for completed sprints. ROADMAP.md contains the structural dispatch fields for active sprints; canonical architecture decisions now live in `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` (post-TTS-ARCH-DOC-1). New full specs go in ROADMAP.md, not here.
 
 ---
 

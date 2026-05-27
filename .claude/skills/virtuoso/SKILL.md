@@ -236,7 +236,8 @@ codex-parent — owns plan, scope, integration, verification, close-out [opus]
   ├── aristotle-worker — cross-system implementation, architectural  [opus]
   └── specialist workers — bounded job descriptions
         ├── Hippocrates — test execution                          [haiku]
-        ├── MarcusAurelius — spec compliance, chronicles, docs    [sonnet]
+        ├── Solon — spec compliance                                [sonnet]
+        ├── MarcusAurelius — documentation, governance updates    [sonnet]
         ├── Plato — code quality review                           [sonnet]
         └── [Project specialists as available]
 ```
@@ -278,7 +279,8 @@ Doers:
 
 Specialists:
 - hippocrates [haiku] — runs test suites, reports pass/fail
-- marcusaurelius [sonnet] — spec compliance, documentation, governance updates
+- solon [sonnet] — spec compliance
+- marcusaurelius [sonnet] — documentation, governance updates
 - plato [sonnet] — code quality review
 ```
 
@@ -299,7 +301,7 @@ immediately?
 **1. Specialist match?**
 Does a specialist label match this task exactly?
 - Running tests → **hippocrates**
-- Verifying spec compliance → **marcusaurelius**
+- Verifying spec compliance → **solon**
 - Reviewing code quality → **plato**
 - Updating governing docs → **marcusaurelius**
 - Diagnosing unknown bug → **aristotle**
@@ -615,7 +617,7 @@ Before skipping narration, skipping a reprint, or taking a shortcut, check this 
 | "I'll just skip the role label; this one's obvious" | The role label tells the human what kind of work is happening. Keep the label, even for small tasks. |
 | "This task needs my full attention, so I'll ignore the checklist" | Serious tasks need more structure, not less. Keep the plan visible while doing the hard part. |
 | "This step failed, but I can quietly work around it" | Mark it blocked or revise the plan explicitly. Silent workarounds create false confidence. |
-| "There's no doer role defined, so I'll invent a new process" | Use the generic role labels: hermes, hercules, aristotle, hippocrates, marcusaurelius, plato. |
+| "There's no doer role defined, so I'll invent a new process" | Use the generic role labels: hermes, hercules, aristotle, hippocrates, solon, marcusaurelius, plato. |
 | "I need to preload everything before I can start" | Read enough context to act safely, then proceed. Planning should reduce drift, not become the work. |
 | "I'm running low on tool budget, I'll stop tracking the plan" | The plan becomes more important under pressure. Trim scope only by explicitly updating the task list. |
 | "I need to keep a second copy of the plan for tracking" | One plan, one location. The reprinted plan IS the tracking mechanism. A second plan drifts from the first and confuses both you and the human. |

@@ -48,7 +48,7 @@ CLI (orchestrate only — zero implementation)
   ├── Hippocrates  — executes tests, reports facts
   ├── Solon — verifies spec match
   ├── Plato — verifies code quality and architecture
-  ├── Herodotus   — maintains documentation
+  ├── MarcusAurelius   — maintains documentation
   └── [Project specialists as available]
 ```
 
@@ -81,7 +81,7 @@ Specialists handle specific bounded roles. They take priority over doers when th
 | **Hippocrates (haiku/Tester)** | haiku | After code changes; verify no regression | Pass/fail counts, categorized failures |
 | **Solon (sonnet/Spec Compliance)** | sonnet | After tests pass; verify spec match | APPROVED / WITH_CONCERNS / REJECTED |
 | **Plato (sonnet/Quality)** | sonnet | After spec passes; architecture check | READY / MINOR_FIXES / MAJOR_REVISION |
-| **Herodotus (sonnet/Chronicler)** | sonnet | After all reviews pass; update governing docs | Updated doc snapshots with timestamps |
+| **MarcusAurelius (sonnet/Chronicler)** | sonnet | After all reviews pass; update governing docs | Updated doc snapshots with timestamps |
 | **Aristotle (opus/Investigator)** | opus | Root cause unknown; deep trace needed | Root-cause analysis + fix spec |
 
 Projects may define additional specialists. CLI MUST scan `.claude/agents/` at the start of
@@ -101,7 +101,7 @@ For every task in the plan, walk this tree top-to-bottom. Take the FIRST match.
 | Running tests | **Hippocrates** (tester) | doer (any tier) |
 | Verifying implementation matches spec | **Solon** (spec compliance) | doer or cli |
 | Reviewing code quality / architecture | **Plato** (quality) | doer or cli |
-| Updating governing docs (CLAUDE.md, LL, Roadmap) | **Herodotus** (chronicler) | doer or cli |
+| Updating governing docs (CLAUDE.md, LL, Roadmap) | **MarcusAurelius** (chronicler) | doer or cli |
 | Diagnosing an unknown bug / tracing root cause | **Aristotle** (investigator) | doer or cli |
 | A project-specific specialist exists and the task matches its description | **that specialist** (use exact registered name) | doer or cli |
 
@@ -192,7 +192,7 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
      Hippocrates → Hippocrates (haiku/Tester)
      Solon     → Solon (sonnet/Spec Compliance)
      Plato     → Plato (sonnet/Quality)
-     Herodotus → Herodotus (sonnet/Chronicler)
+     MarcusAurelius → MarcusAurelius (sonnet/Chronicler)
      Aristotle → Aristotle (opus/Investigator)
      [+ any project-specific agents discovered]
    Every Agent() call in phases 3-7 MUST use the full registered name from
@@ -242,7 +242,7 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
       Await: READY / MINOR_FIXES / MAJOR_REVISION
 
 6. DOCUMENT phase (mandatory — never skip)
-   a. DISPATCH: "Herodotus (sonnet/Chronicler)"
+   a. DISPATCH: "MarcusAurelius (sonnet/Chronicler)"
       Input: Changed files + sprint spec + discoveries
       Await: All docs updated
 
@@ -261,14 +261,14 @@ Every dispatch follows this sequence. No exceptions. CLI executes this as the or
 
 **Parallel (independent):**
 - Code changes in different subsystems (different doer dispatches)
-- Quality review concurrent with Herodotus (if spec-compliance already passed)
+- Quality review concurrent with MarcusAurelius (if spec-compliance already passed)
 - Multiple Aristotle instances for independent bugs
 
 **Sequential (data flow — strict order):**
 1. All code changes → Hippocrates (tester)
 2. Tests PASS → Solon (spec compliance)
 3. Spec compliance PASS → Plato (quality)
-4. All reviews PASS → Herodotus (chronicler)
+4. All reviews PASS → MarcusAurelius (chronicler)
 5. Docs updated → git operations
 6. Git complete → session summary
 
@@ -426,7 +426,7 @@ CLI exists to COORDINATE, not to IMPLEMENT. If you find yourself:
 - Reading source code to understand a function → WRONG (you don't need to read source to delegate — tell the sub-agent what to do and where)
 - Editing source code to change a function → WRONG (spawn a doer agent)
 - Running tests to check status → WRONG (spawn Hippocrates)
-- Writing documentation → WRONG (spawn Herodotus)
+- Writing documentation → WRONG (spawn MarcusAurelius)
 - Deciding which agent handles which task → fine (that's your job)
 - Writing the code yourself because "it's faster" → WRONG (always delegate)
 
