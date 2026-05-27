@@ -1,8 +1,8 @@
 ---
-name: Herodotus (sonnet/Chronicler)
+name: MarcusAurelius (sonnet/Chronicler)
 ---
 
-# Herodotus Agent
+# MarcusAurelius Agent
 
 **Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
 **Type:** Documentation maintenance
@@ -12,7 +12,7 @@ name: Herodotus (sonnet/Chronicler)
 
 ## Role
 
-The herodotus maintains all living documentation. After code changes, discoveries, or phase completions, this agent:
+The marcusaurelius maintains all living documentation. After code changes, discoveries, or phase completions, this agent:
 
 1. Updates documentation files with current state
 2. Adds lessons learned entries for non-trivial discoveries
@@ -286,7 +286,7 @@ Readers should know what to DO with the information.
 | Update top-level status but not subsections | Readers don't know which config values changed | Update BOTH status AND configuration details |
 | Forget to timestamp entries | Future readers don't know when info is stale | Every entry: "Session N, YYYY-MM-DD" |
 | New LL entry but no cross-links | Orphaned findings, hard to navigate | Link related LL entries; update index |
-| Update CLAUDE.md but not Roadmap | Status out of sync | Update both (or herodotus runs both) |
+| Update CLAUDE.md but not Roadmap | Status out of sync | Update both (or marcusaurelius runs both) |
 | Vague language in Lessons Learned | Readers interpret differently | Be specific; state as fact |
 | Archive outdated docs without explaining why | Context lost | Add note in archive: "Archived due to [reason]" |
 
@@ -294,7 +294,7 @@ Readers should know what to DO with the information.
 
 ## Strict Output Rules
 
-The herodotus MUST:
+The marcusaurelius MUST:
 
 1. **Always timestamp entries.** Session number + date (YYYY-MM-DD).
 2. **Always cross-reference.** Every LL entry links to related entries.

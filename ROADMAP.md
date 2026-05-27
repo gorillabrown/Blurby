@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-27 — READER-ISO-1E complete (NarrateModeAdapter + audio truth-sync ownership). **Next dispatch: GOV-HUMAN-REVIEW-1.**
+**Last updated**: 2026-05-27 — GOV-HUMAN-REVIEW-1 complete (six deferred governance hygiene items resolved, docs-only). **Next dispatch: TTS-QUAL-CI-1** (NARRATE-CLOSED-LOOP-CURSOR still buffer-gap stub awaiting full spec).
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN — depth 4 (2 full specs: GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR, UX-POLISH-1). **Next dispatch: GOV-HUMAN-REVIEW-1** — Deferred Governance Review Items.
-**Last sprint**: READER-ISO-1E (2026-05-27) — added `NarrateModeAdapter` with audio truth-sync ownership, browse-away state, and surface command emission. 44 adapter tests. Merged to `main` at `c3d8776`.
+**Queue**: GREEN — depth 3 (1 full spec: TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR, UX-POLISH-1). **Next dispatch: TTS-QUAL-CI-1** — CI Regression Gate Wiring. Backfill at least one more full spec to restore depth ≥ 3 with two full specs before the next dispatch (Standing Rule 5a).
+**Last sprint**: GOV-HUMAN-REVIEW-1 (2026-05-27) — removed MarcusAurelius stub, renamed `Hercules.md` → `hercules.md`, archived 8 superseded close-outs, reconciled roster across readme.md/CLAUDE.md/files. Docs-only; merge handed off to user per git-handoff rule.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -50,7 +50,8 @@
 | READER-ISO-1B | 2026-05-25 | Extracted mode routing into `useReaderModeOrchestrator` while preserving current reader behavior | `CloseOut.READER-ISO-1B.2026-05-25.md` |
 | READER-ISO-1C | 2026-05-26 | FocusModeAdapter + passive surface command types with 27 adapter tests | `CloseOut.READER-ISO-1C.2026-05-26.md` |
 | READER-ISO-1D | 2026-05-26 | FlowModeAdapter + section-handoff resolution + browse-away with 40 adapter tests | `CloseOut.READER-ISO-1D.2026-05-26.md` |
-| READER-ISO-1E | 2026-05-27 | NarrateModeAdapter + audio truth-sync ownership with 44 adapter tests | `CloseOut.READER-ISO-1E.2026-05-27.md` |
+| READER-ISO-1E | 2026-05-27 | NarrateModeAdapter + audio truth-sync ownership with 45 adapter tests | `CloseOut.READER-ISO-1E.2026-05-27.md` |
+| GOV-HUMAN-REVIEW-1 | 2026-05-27 | Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled | `CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -112,7 +113,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Adapter Isolation
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 2 — post-isolation stub; FLAGGED BUFFER GAP; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
+#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 1 — post-isolation stub; FLAGGED BUFFER GAP; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
 
 > **Buffer-gap note (2026-05-25 review):** This sprint is intentionally NOT full-specced yet. Its edit sites depend on the Narrate adapter that READER-ISO-1E creates, and SRL-072 warns against authoring closed-loop edit detail before the owning module is isolated. Its full spec (exact edit sites, refs to retire, test roster) is authored at the **READER-ISO-1E close-out**. Eager-spec buffer therefore skips this position and counts the next dispatchable sprints (GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1) toward the 5-full-spec target.
 
@@ -128,47 +129,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 ---
 
-#### GOV-HUMAN-REVIEW-1 — Deferred Governance Review Items *(position 1 — full spec)*
-
-- **What:** Resolve the six human-review hygiene items GOVERNANCE-SWEEP (2026-05-22) deferred because each needs a judgment call rather than a mechanical action: (1) the `MarcusAurelius` agent stub, (2) stale ROADMAP header traces, (3) `ROADMAP_SPECS.md` references/duplication, (4) close-out file volume in `docs/governance/close-outs/`, (5) agent naming-convention outliers, (6) agent roster ↔ `.claude/agents/readme.md` consistency.
-- **Why:** These are the residual governance-debt items from the sweep. None block reader runtime, but left unresolved they erode the "docs are the single source of truth" contract. Lane E, zero runtime risk — an ideal gap-filler between isolation sprints.
-- **Prerequisites:** BASELINE-SYNC-1 complete (met). No code dependency.
-- **Baseline:** clean `main`. Docs-only; Test/Build tier = None.
-- **Lane Ownership:** Lane E (Governance/Planning).
-- **Forbidden During Parallel Run:** no `src/` or `main/` edits; do not touch active ROADMAP sprint specs or `sprint-queue.xlsx` queue rows other than this sprint's own at closeout.
-- **Shared-Core Touches:** none.
-- **Merge Order:** independent; may land in any integration gap (parallel-safe with any Lane A/B/C/D sprint).
-- **WHERE (read order):** `docs/planning/roadmap-reviews/2026-05-21-audit.md` (findings #10/#11 — the deferred items) → `.claude/agents/MarcusAurelius.md` + `.claude/agents/readme.md` → `ROADMAP.md` header → `ROADMAP_SPECS.md` → `docs/governance/close-outs/` listing.
-- **Tasks:**
-    1. `[hermes/haiku]` MarcusAurelius stub: decide keep-and-document vs remove. If kept, fill the agent definition to match the roster-table format; if removed, grep-and-purge references across `CLAUDE.md`, `.claude/agents/readme.md`, and skills (Standing Rule #14 rename-propagation grep).
-    2. `[hercules/sonnet]` ROADMAP header + `ROADMAP_SPECS.md`: remove stale header traces, de-duplicate content that now lives in the active ROADMAP, and confirm the `[ROADMAP_SPECS.md](ROADMAP_SPECS.md)` link resolves.
-    3. `[hermes/haiku]` Close-out volume: inventory `docs/governance/close-outs/`; **move** superseded close-outs to `.Archive/` per the Document Lifecycle table (move, never delete); keep the active set lean.
-    4. `[hercules/sonnet]` Naming-convention outliers: normalize agent/file naming to the documented convention; run the agent-rename grep pass to confirm no ghost references remain.
-    5. `[hermes/haiku]` Roster consistency: reconcile `.claude/agents/readme.md` with the actual agent files and the `CLAUDE.md` roster table.
-    6. `[herodotus]` Docs pass + auto-merge.
-- **Execution Sequence:** single wave (≤40 tool uses; docs-only, no test/build gate). Tasks 1–5 are independent and may run in any order.
-- **Done when (SUCCESS CRITERIA):**
-    1. MarcusAurelius is either a complete, roster-consistent agent definition or fully removed with zero dangling references (grep-clean).
-    2. ROADMAP header carries no stale traces; `ROADMAP_SPECS.md` has no content duplicated from the active ROADMAP and its link resolves.
-    3. `docs/governance/close-outs/` contains only current close-outs; superseded ones moved to `.Archive/`.
-    4. Agent/file names follow the documented convention; the agent-rename grep returns no ghosts.
-    5. `.claude/agents/readme.md`, the `CLAUDE.md` roster table, and the actual agent files agree.
-    6. No `src/`/`main/` changes; `git diff --check` clean.
-- **Effort:** S. Governance cleanup, docs-only.
-- **Roster:** Zeus → Hermes/Hercules • Herodotus. No tests (docs-only tier).
-- **Source:** GOVERNANCE-SWEEP deferred items; 2026-05-21 audit findings #10/#11; CLAUDE.md Document Lifecycle + Standing Rule #14 (agent-rename propagation).
-
-##### Implementation detail
-
-- **Edit sites:** `.claude/agents/MarcusAurelius.md`, `.claude/agents/readme.md`, `ROADMAP.md` (header only), `ROADMAP_SPECS.md`, `docs/governance/close-outs/` (+ `.Archive/`), `CLAUDE.md` (roster table only if names change).
-- **Tests:** none (docs-only). Verification = grep-clean for renamed/removed agents + link-resolution check.
-- **Constants:** none.
-- **Branch:** `sprint/gov-human-review-1` from clean `main`.
-- **Commit hygiene:** docs-only; group commits by item; explicit-stage; no destructive flags (superseded close-outs are **moved** to `.Archive/`, never deleted).
-
----
-
-#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(position 3 — full spec)*
+#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(position 2 — full spec)*
 
 - **What:** Add a `quality-gate` job to `.github/workflows/ci.yml` that runs `npm run test:quality` (the `tts_eval_runner.mjs --mode=gate` harness against `docs/testing/tts_eval_baseline_v2.json` + `docs/testing/tts_quality_gates.v2.json`) so PRs that regress TTS quality fail CI. Scope the trigger so the gate runs on `main` pushes and on PRs touching TTS files without slowing unrelated PRs.
 - **Why:** TTS-EVAL-3 built the eval harness, v2 baseline, and gates, and `npm run test:quality` exists — but nothing runs it in CI, so a regression only surfaces if someone runs it locally. Wiring the gate is the "Quality Gate Activation" phase entry. Held until now per Standing Rule "Broad-suite-before-CI"; TEST-GREEN-1 has since cleaned/classified the broad suite, so the gate now measures a stable runtime.
@@ -183,7 +144,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
     1. `[hercules/sonnet]` Add a `quality-gate` job to `ci.yml` (ubuntu-latest only, to control cost): checkout → setup-node 20 + npm cache → `npm ci` → `npm run test:quality`. Confirm `tts_eval_runner.mjs --mode=gate` returns a non-zero exit on gate failure so CI actually blocks; if it does not, add an explicit threshold-check exit in the runner's gate mode.
     2. `[hercules/sonnet]` Scope the trigger: run `quality-gate` on `push` to `main` and on `pull_request` with a `paths:` filter for TTS surfaces (`src/**/tts*`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/tts_*`). Leave the existing `test`/`build` job unchanged.
     3. `[hippocrates/haiku]` Validate: `npm run test:quality` green on current `main` (gate passes at baseline); simulate a regression (temporarily perturb a gate threshold) to confirm the job would fail CI, then revert.
-    4. `[herodotus]` Docs pass (CLAUDE.md CI/CD line, ROADMAP, sprint-queue) + auto-merge.
+    4. `[marcusaurelius]` Docs pass (CLAUDE.md CI/CD line, ROADMAP, sprint-queue) + auto-merge.
 - **Execution Sequence:** single wave (config-only; ≤40 tool uses). Test/Build tier = Quick (run `npm run test:quality` + lint the workflow).
 - **Done when (SUCCESS CRITERIA):**
     1. `.github/workflows/ci.yml` has a `quality-gate` job running `npm run test:quality`.
@@ -192,7 +153,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
     4. The existing `test` + `build` job is unchanged and still green.
     5. `npm run test:quality` is green on `main` at the v2 baseline.
 - **Effort:** S. CI config + possibly a small exit-code guard in the runner.
-- **Roster:** Zeus → Hercules • Hippocrates • Herodotus.
+- **Roster:** Zeus → Hercules • Hippocrates • MarcusAurelius.
 - **Source:** TTS-EVAL-3 close-out; `package.json` `test:quality`; Standing Rule "Broad-suite-before-CI"; SRL-070 (quality gates must measure real audio behavior, not self-referential metrics).
 
 ##### Implementation detail

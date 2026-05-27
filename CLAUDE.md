@@ -28,7 +28,7 @@ You are the **architect and reviewer**. You do NOT write or change code unless t
 1. **Brainstorm and design** — Collaborate with the user on features, architecture, UX, and priorities.
 2. **Plan work for Claude Code** — Write fully articulated implementation specs with step-by-step directions, agent assignments, and acceptance criteria. Place these in `ROADMAP.md`.
 3. **Review results** — After Claude Code agents run, verify every change against spec. Identify drift, gaps, regressions.
-4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct Herodotus to do it).
+4. **Maintain documentation** — Keep CLAUDE.md, ROADMAP.md, and LESSONS_LEARNED.md current (or direct MarcusAurelius to do it).
 5. **Interpret test results** — Analyze test output, decide next steps for failures.
 6. **Triage findings** — Review AGENT_FINDINGS.md, group issues, set priorities.
 
@@ -114,7 +114,7 @@ Agent `.md` files in `.claude/agents/` define the scope, output contract, and st
 | File | Agent | Model | Purpose |
 |------|-------|-------|---------|
 | `hermes.md` | Hermes | haiku | Mechanical execution — prescribed diffs, config edits, version bumps, git ops |
-| `Hercules.md` | Hercules | sonnet | Single-domain implementation — bounded judgment within one module |
+| `hercules.md` | Hercules | sonnet | Single-domain implementation — bounded judgment within one module |
 | `athena.md` | Athena | opus | Cross-system implementation — architectural judgment, multi-module changes |
 
 **Specialist agents** (verification & support — take priority over doers when task matches):
@@ -124,7 +124,7 @@ Agent `.md` files in `.claude/agents/` define the scope, output contract, and st
 | `hippocrates.md` | Hippocrates | haiku | Test execution — run suites, categorize failures, report pass/fail |
 | `solon.md` | Solon | sonnet | Spec compliance — verify implementation matches every SUCCESS CRITERIA item |
 | `plato.md` | Plato | sonnet | Code quality — architecture compliance, known-trap detection |
-| `herodotus.md` | Herodotus | sonnet | Documentation — update all governing docs after every sprint |
+| `marcusaurelius.md` | MarcusAurelius | sonnet | Documentation — update all governing docs after every sprint |
 | `aristotle.md` | Aristotle | opus | Root-cause diagnosis — read-only trace, produces fix specs |
 | `simonides.md` | Simonides | sonnet | Memory guide — shared memory system, findings queue, cross-agent continuity |
 
@@ -164,7 +164,7 @@ The dispatch's Task table tells Zeus:
 | `Hippocrates` | Test execution and build verification | `tests/`, `package.json` scripts |
 | `Solon` | Verify every SUCCESS CRITERIA item from the dispatch is met | Read-only, cross-references dispatch spec |
 | `Plato` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
-| `Herodotus` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
+| `MarcusAurelius` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
 | `Aristotle` | Root-cause analysis when investigation is needed | Read-only diagnosis + fix spec |
 | `Simonides` | Cross-agent memory, findings queue, continuity | `.claude/agents/memory/` |
 
@@ -187,9 +187,9 @@ Before committing, verify ALL of these:
 - [ ] Spec-compliance self-review passed (code matches dispatch spec line-by-line)
 - [ ] Quality self-review passed (architecture rules, known traps, code clarity)
 
-#### Mandatory Herodotus Pass (After Every Sprint)
+#### Mandatory MarcusAurelius Pass (After Every Sprint)
 
-After EVERY sprint completion — hotfixes included, no exceptions — run the Herodotus pass:
+After EVERY sprint completion — hotfixes included, no exceptions — run the MarcusAurelius pass:
 
 1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
 2. **sprint-queue.xlsx** — In `docs/governance/sprint-queue.xlsx`, mark the completed sprint complete, clear its active `Seq`, renumber queued rows, and verify queue depth ≥ 3.
@@ -198,7 +198,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the H
 5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
 6. **TECHNICAL_REFERENCE.md** — Update if architecture changed.
 
-**Herodotus efficiency rule:** Zeus SHOULD pre-compose exact old_string/new_string edit diffs for doc updates and include them in the Herodotus dispatch. This lets Herodotus apply edits directly without re-reading each file to discover what changed. When provided, pre-composed diffs cut Herodotus tool calls by ~50%. When not feasible (e.g., complex multi-section updates), Herodotus falls back to standard read-then-edit.
+**MarcusAurelius efficiency rule:** Zeus SHOULD pre-compose exact old_string/new_string edit diffs for doc updates and include them in the MarcusAurelius dispatch. This lets MarcusAurelius apply edits directly without re-reading each file to discover what changed. When provided, pre-composed diffs cut MarcusAurelius tool calls by ~50%. When not feasible (e.g., complex multi-section updates), MarcusAurelius falls back to standard read-then-edit.
 
 ### Standing Rules
 
@@ -258,7 +258,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 ### Other References
 
 - **Project Constitution**: `docs/planning/Blurby_Project_Constitution.md`
-- **Agent Definitions**: `.claude/agents/` (Zeus, Hermes, Hercules, Athena, Aristotle, Hippocrates, Solon, Plato, Herodotus, Simonides)
+- **Agent Definitions**: `.claude/agents/` (Zeus, Hermes, Hercules, Athena, Aristotle, Hippocrates, Solon, Plato, MarcusAurelius, Simonides)
 - **Roadmap Archive**: `docs/planning/.Archive/ROADMAP_legacy.md` (completed sprint full specs — reference only)
 - **Development Sync SOP**: `docs/governance/DEVELOPMENT_SYNC.md` (local-first git workflow)
 

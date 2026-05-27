@@ -1116,7 +1116,7 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 
 **Context:** STAB-1A had 5 implementation tasks + tests + docs + git = 10 total tasks. Zeus hit the 40-tool ceiling twice, requiring 3 separate dispatches (~121 total tool calls). The runtime ceiling hits waste context and cause mid-task interruptions. The wave pattern was already documented but treated as a fallback — sprints were dispatched as single units and split only when the ceiling was hit during execution.
 
-**Guardrail (PR-091):** Any sprint with 5+ implementation tasks (not counting tests, verification, docs, git) MUST be pre-split into waves at dispatch time. Standard split: Wave A = all implementation tasks + test writing + npm test/build. Wave B = spec compliance (Solon) + docs (Herodotus) + git (Hermes). This is a planning-time decision, not a runtime recovery. The dispatch prompt should explicitly name the wave.
+**Guardrail (PR-091):** Any sprint with 5+ implementation tasks (not counting tests, verification, docs, git) MUST be pre-split into waves at dispatch time. Standard split: Wave A = all implementation tasks + test writing + npm test/build. Wave B = spec compliance (Solon) + docs (MarcusAurelius) + git (Hermes). This is a planning-time decision, not a runtime recovery. The dispatch prompt should explicitly name the wave.
 
 **Pattern — tool budget estimation:** Implementation tasks average 8-12 tool calls each (read files + edit + verify). Tests average 10-15 (read existing patterns + write + run). Docs average 10-15 (read 6 files + edit 4-6). Git averages 5. A 5-task sprint therefore needs ~70-100 tool calls — well above the 40-tool single-dispatch budget.
 
