@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-26 — READER-ISO-1C complete (FocusModeAdapter + passive surface command types). **READER-ISO-1D is the next dispatch.**
-**Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C. READER-ISO-1C added `FocusModeAdapter` (first concrete adapter implementing the 1A contract) and passive `SurfaceCommand` types. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
+**Last updated**: 2026-05-26 — READER-ISO-1D complete (FlowModeAdapter + section-handoff resolution + browse-away). **READER-ISO-1E is the next dispatch.**
+**Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D. READER-ISO-1D added `FlowModeAdapter` (second concrete adapter implementing the 1A contract) with section-handoff resolution, browse-away state tracking, and surface command emission. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates.
-**Queue**: GREEN — depth 6 (4 full specs: 1D, 1E, GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR, UX-POLISH-1). **Next dispatch: READER-ISO-1D** — Flow Adapter + Section Handoff Restart Ownership.
-**Last sprint**: READER-ISO-1C (2026-05-26) — added `FocusModeAdapter` implementing the 1A adapter contract, passive `SurfaceCommand` types, and 27 adapter tests. Merged to `main` at `634bac2`.
+**Queue**: GREEN — depth 5 (3 full specs: 1E, GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1; 2 stubs: NARRATE-CLOSED-LOOP-CURSOR, UX-POLISH-1). **Next dispatch: READER-ISO-1E** — Narrate Adapter + Audio Truth-Sync Ownership.
+**Last sprint**: READER-ISO-1D (2026-05-26) — added `FlowModeAdapter` with section-handoff resolution, browse-away state, and surface command emission. 40 adapter tests. Merged to `main` at `00d62ca`.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -49,6 +49,7 @@
 | READER-ISO-1A | 2026-05-24 | Added typed reader-mode adapter contracts and current-word anchor service with 73 tests and no runtime behavior change | `CloseOut.READER-ISO-1A.2026-05-24.md` |
 | READER-ISO-1B | 2026-05-25 | Extracted mode routing into `useReaderModeOrchestrator` while preserving current reader behavior | `CloseOut.READER-ISO-1B.2026-05-25.md` |
 | READER-ISO-1C | 2026-05-26 | FocusModeAdapter + passive surface command types with 27 adapter tests | `CloseOut.READER-ISO-1C.2026-05-26.md` |
+| READER-ISO-1D | 2026-05-26 | FlowModeAdapter + section-handoff resolution + browse-away with 40 adapter tests | `CloseOut.READER-ISO-1D.2026-05-26.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -110,35 +111,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Adapter Isolation
 
-#### READER-ISO-1D — Flow Adapter + Section Handoff Restart Ownership *(position 1 — full spec)*
-
-- **What:** Move Flow lifecycle, `FlowScrollEngine` ownership, section-handoff restart, browse-away pause, and visual-follow commands behind a Flow adapter.
-- **Why:** Flow has repeatedly regressed Narrate and shared Foliate behavior because its scroll engine, restart logic, and visual cursor live in shared component paths. After Step 3 repair, Flow ownership must be isolated without changing Narrate truth-sync.
-- **Prerequisites:** READER-ISO-1C complete; READER-PERSISTENT-ANCHOR-STEP3-REPAIR closed by explicit disposition; Flow manual QA scenarios 6-10 have passing baseline evidence except S9 lazy-follow, which is deferred.
-- **Done when:**
-  1. `FlowModeAdapter` or equivalent owns Flow select/start/pause/stop, FlowScrollEngine construction, restart, teardown, and browse-away pause behavior.
-  2. Flow start uses the shared current-word anchor and preserves exact word `0`.
-  3. Flow section-handoff restart lives inside Flow adapter ownership and does not call or mutate Narrate runtime state.
-  4. Flow visual commands are typed as surface requests and use the single underline cursor path.
-  5. Manual browse-away pauses Flow, shows Jump back, and does not persist browse-away as progress.
-  6. Narrate exact-start, Narrate browse-away, and Narrate audio truth-sync regression tests still pass.
-  7. `npm test -- tests/flowModeAdapter.test.ts tests/useReaderMode.test.ts tests/foliate-bridge.test.ts` or equivalent focused suite passes.
-  8. `npx tsc --noEmit` and `git diff --check` pass.
-- **Effort:** L. Cross-cutting runtime migration with high shared-surface regression risk.
-- **Roster:** codex-parent with explorer assistance for current FlowScrollEngine call graph before edits if available.
-- **Source:** Isolation spec Phase 4; SRL-046; SRL-047; SRL-053; SRL-055; Step 3 manual QA pass.
-
-##### Implementation detail
-
-- **Edit sites:** new `src/reader/modes/FlowModeAdapter.ts`, `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`, `src/utils/FlowScrollEngine.ts`, shared surface command types, `tests/flowModeAdapter.test.ts`, `tests/useReaderMode.test.ts`, `tests/foliate-bridge.test.ts`.
-- **Tests:** Flow adapter lifecycle, exact anchor start including word `0`, section handoff restart after `onComplete`, browse-away pause, jump-back visibility, single underline cursor, and Narrate non-interference.
-- **Constants:** Preserve existing Flow WPM and line-window settings. Do not tune pacing in this sprint unless a failing test proves the adapter migration changed behavior.
-- **Branch:** `sprint/reader-iso-1d-flow-adapter` from clean `main` after prior isolation sprints land.
-- **Commit hygiene:** Flow adapter only. Do not migrate Narrate or add new Flow UX features.
-
----
-
-#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(position 2 — full spec)*
+#### READER-ISO-1E — Narrate Adapter + Audio Truth-Sync Ownership *(position 1 — full spec)*
 
 - **What:** Move Narrate lifecycle and audio/TTS truth-sync ownership behind a typed `NarrateModeAdapter`, completing the four-mode adapter boundary started in 1A–1D. Narrate owns `useNarration.startCursorDriven`, installs/clears its own truth-sync, publishes chunk/word visual state from trusted audio timing, starts at the exact current/selected word (incl. word `0`), and pauses/stops without ever starting FlowScrollEngine or falling back to Flow.
 - **Why:** Narrate is hook-owned today but the ownership is implicit — no first-class adapter boundary, so orchestration behavior leaks. Isolating Narrate is the prerequisite for `NARRATE-CLOSED-LOOP-CURSOR`: scheduler surgery on the heard-position loop is only safe once the adapter owns truth-sync (Evan, 2026-05-24). This is the last adapter slice; after it, every mode owns its own clock and cursor.
@@ -186,7 +159,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 ---
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 4 — post-isolation stub; FLAGGED BUFFER GAP; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
+#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 3 — post-isolation stub; FLAGGED BUFFER GAP; unifies Bug 1 + Bug 2 from Steps 3.5/3.6)*
 
 > **Buffer-gap note (2026-05-25 review):** This sprint is intentionally NOT full-specced yet. Its edit sites depend on the Narrate adapter that READER-ISO-1E creates, and SRL-072 warns against authoring closed-loop edit detail before the owning module is isolated. Its full spec (exact edit sites, refs to retire, test roster) is authored at the **READER-ISO-1E close-out**. Eager-spec buffer therefore skips this position and counts the next dispatchable sprints (GOV-HUMAN-REVIEW-1, TTS-QUAL-CI-1) toward the 5-full-spec target.
 
@@ -202,7 +175,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 ---
 
-#### GOV-HUMAN-REVIEW-1 — Deferred Governance Review Items *(position 5 — full spec)*
+#### GOV-HUMAN-REVIEW-1 — Deferred Governance Review Items *(position 4 — full spec)*
 
 - **What:** Resolve the six human-review hygiene items GOVERNANCE-SWEEP (2026-05-22) deferred because each needs a judgment call rather than a mechanical action: (1) the `MarcusAurelius` agent stub, (2) stale ROADMAP header traces, (3) `ROADMAP_SPECS.md` references/duplication, (4) close-out file volume in `docs/governance/close-outs/`, (5) agent naming-convention outliers, (6) agent roster ↔ `.claude/agents/readme.md` consistency.
 - **Why:** These are the residual governance-debt items from the sweep. None block reader runtime, but left unresolved they erode the "docs are the single source of truth" contract. Lane E, zero runtime risk — an ideal gap-filler between isolation sprints.
@@ -242,7 +215,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 ---
 
-#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(position 6 — full spec)*
+#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(position 5 — full spec)*
 
 - **What:** Add a `quality-gate` job to `.github/workflows/ci.yml` that runs `npm run test:quality` (the `tts_eval_runner.mjs --mode=gate` harness against `docs/testing/tts_eval_baseline_v2.json` + `docs/testing/tts_quality_gates.v2.json`) so PRs that regress TTS quality fail CI. Scope the trigger so the gate runs on `main` pushes and on PRs touching TTS files without slowing unrelated PRs.
 - **Why:** TTS-EVAL-3 built the eval harness, v2 baseline, and gates, and `npm run test:quality` exists — but nothing runs it in CI, so a regression only surfaces if someone runs it locally. Wiring the gate is the "Quality Gate Activation" phase entry. Held until now per Standing Rule "Broad-suite-before-CI"; TEST-GREEN-1 has since cleaned/classified the broad suite, so the gate now measures a stable runtime.
