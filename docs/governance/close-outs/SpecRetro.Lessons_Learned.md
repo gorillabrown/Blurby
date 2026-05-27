@@ -553,3 +553,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future adapter migrations should first prove adapter lifecycle, ownership, and contract behavior in pure-class tests, then perform orchestrator/hook wiring as a separate step.
 **Applies to:** Focus, Flow, Narrate adapters; reader-mode lifecycle ownership; passive surface command migration; future hook wiring.
 **Status:** Observation.
+
+### SRL-076 — Adapters can own pure decisions before owning DOM execution lifecycle (READER-ISO-1D, 2026-05-26)
+**Verdict:** Adapter extraction can safely advance by moving pure decision logic first while leaving ref-heavy DOM execution in the existing hook until a later wiring sprint.
+**Evidence:** READER-ISO-1D added `FlowModeAdapter.resolveCompletion()` as pure data logic for section-handoff decisions, plus browse-away state and surface command emission, while keeping `FlowScrollEngine` DOM lifecycle in `useFlowScrollSync` per SRL-074.
+**Recommendation:** Future adapter migrations should separate pure decision ownership from execution ownership: extract and test decision services first, then wire hooks and DOM/ref lifecycles in a later sprint with transition coverage.
+**Applies to:** Flow/Narrate adapter extraction, section handoff, browse-away handling, DOM-coupled runtime migration, reader-mode lifecycle ownership.
+**Status:** Observation.
