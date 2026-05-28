@@ -342,7 +342,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN depth 4, 1 open bug)
+## Current System State (v1.75.1 — queue GREEN depth 6 [5 full specs + 1 stub], 3 open bugs)
 
 ### Codebase (branch: `main`)
 
@@ -354,8 +354,8 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** GREEN depth 4 (2 full specs, 2 stubs) in `docs/governance/sprint-queue.xlsx`. Next: GOV-HUMAN-REVIEW-1, with governance cleanup ahead of CI gating and UX polish.
-- **Open bugs:** 1 — BUG-154 (parked, likely not a bug, needs live verification).
+- **Queue:** GREEN depth 6 (5 full specs at positions 1-5: TTS-QUAL-CI-1, EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR; 1 stub at position 6: UX-POLISH-1) in `docs/governance/sprint-queue.xlsx`. Next: TTS-QUAL-CI-1 — CI regression gate wiring. EXT-PAIR-1 + SINGLE-INSTANCE-LOCK-1 + THEME-SYNC-1 are hotfix sprints (BUG-183, F1, BUG-182). NARRATE-CLOSED-LOOP-CURSOR is the sole shared-core sprint and must run alone.
+- **Open bugs:** 3 — BUG-154 (parked, likely not a bug, needs live verification), BUG-182 (Settings panel doesn't track light↔dark theme toggle; reported 2026-05-28), BUG-183 (Chrome extension auth handshake fails; reported 2026-05-28).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
 - **Most recent sprint:** READER-ISO-1E — NarrateModeAdapter + audio truth-sync ownership (2026-05-27).
 - 3,005 tests across 210 test files

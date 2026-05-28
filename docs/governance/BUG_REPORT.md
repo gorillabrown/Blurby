@@ -2,11 +2,43 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-05-20
+**Last updated:** 2026-05-28
 
 ---
 
 ## Incomplete
+
+### BUG-183 — Chrome extension cannot pair with Blurby desktop (auth handshake timeout)
+**Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
+**Severity:** MEDIUM (Chrome extension surface is unusable; not core reader)
+**Status:** OPEN
+**Location:** `main/ws-server.js` (auth handshake), `src/components/settings/ConnectorsSettings.tsx`, Chrome extension source (separate repo / tree)
+**Description:** Pairing the Chrome extension with the Blurby desktop fails end-to-end. Blurby shows the "Chrome Extension wants to connect — Enter code: 340780" banner; the extension popup displays the same 6-digit input field and a "Pair" button but reports "Not connected to Blurby desktop" / "Not running." Submitting the code from the extension does not complete the handshake. Terminal shows `[ws-server] Auth timeout — disconnecting unauthenticated client` repeating continuously (20+ entries observed during a single observation window) — the extension is attempting to connect on a tight retry loop, each attempt failing auth.
+**Evidence:** Three observations in one session (2026-05-28): (a) extension popup "Not connected" state, (b) Blurby's request banner remaining un-acted-upon, (c) terminal log flooding with auth timeouts. Repro on freshly-rebuilt v1.75.1 source.
+**Root cause hypothesis (unverified):** Three plausible causes:
+- (a) WS-server auth timeout window is too short for the extension's current handshake protocol;
+- (b) The Chrome extension's stored build is on an older auth protocol than the current desktop expects (extension-side stale build, analogous to the BUG-176/178/179/180/181 desktop-side pattern);
+- (c) The extension's "Pair" button submits the code through a path the desktop doesn't accept (UI-vs-IPC mismatch in `ConnectorsSettings.tsx`).
+**Fix path (CLI-spec-ready after investigation):**
+1. (Aristotle, read-only) Trace one full handshake attempt: extension's `connect()` → desktop's `ws-server.js` accept → auth message exchange → timeout. Identify which side breaks. Log the actual auth payload the extension sends vs. what the server expects.
+2. Decide between extension-rebuild fix (if stale-protocol root cause) vs. desktop-side handshake widening (if timeout too tight) vs. UI-side reroute (if the Pair button is broken).
+3. Regression test: a unit fixture for the desktop's accept-or-reject auth path; a manual smoke pass for the extension's Pair flow.
+**Severity rationale:** The reader works without the extension. But the entire connector surface is dead until this is fixed; if users rely on the extension as their import path they're blocked.
+
+### BUG-182 — Settings panel does not track theme switch (light↔dark)
+**Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
+**Severity:** MEDIUM (visual; degrades Settings usability on theme toggle)
+**Status:** OPEN
+**Location:** `src/components/settings/` (Settings panel container + sub-pages), CSS theming pipeline
+**Description:** When toggling between light and dark theme while the Settings panel is open, the Settings panel does not fully repaint to match the new theme. Some widgets retain old-theme colors while the panel container adopts the new theme, producing a mixed light/dark state. Reported by Evan during freshly-rebuilt v1.75.1 verification pass, with screenshot evidence in conversation.
+**Suspected root cause (unverified):** Two plausible causes worth investigating together:
+- (a) The Settings sub-pages don't subscribe to the same theme CSS-variable channel as the rest of the renderer (settings sub-tree has its own bundled chunk per Vite output: `dist/assets/settings-CsUXP4a3.js`, `dist/assets/settings-5MT7dmX9.css`);
+- (b) The build warning `Circular chunk: settings -> tts -> settings. Please adjust the manual chunk logic for these chunks.` from `npm run build` (observed 2026-05-28) suggests a circular import path between Settings and TTS modules. Circular chunks can cause module initialization order issues that break theme-context subscription on first paint after theme toggle.
+**Fix path (CLI-spec-ready after investigation):**
+1. (Aristotle, read-only) Toggle theme with DevTools Computed-Styles panel open on a Settings sub-widget; confirm whether `--text`, `--bg`, etc. propagate to the widget on toggle, or if the widget reads from a different (stale) source.
+2. Resolve the `settings -> tts -> settings` circular chunk in `vite.config.ts` manual chunks (or wherever the chunk config lives). Likely fix: move the shared boundary code into a separate `shared` chunk.
+3. Verify theme toggle propagates cleanly to all Settings sub-pages after the chunk fix.
+**Severity rationale:** Doesn't block reading, but Settings is a frequently-used surface and the mixed-theme state looks broken.
 
 ### BUG-176 - Flow mode drops to Page mode at EPUB section/chapter boundary
 **Reported:** 2026-05-20
@@ -62,11 +94,11 @@
 ### BUG-181 - Production build crashes on book open (stale tokenizeWithMeta guard)
 **Reported:** 2026-05-20
 **Severity:** CRIT (installed app cannot open any book)
-**Status:** RESOLVED in source — production build needs rebuild
+**Status:** RESOLVED — confirmed 2026-05-28 after `npm run build` (v1.75.1); Meditations opens cleanly from Reading Now, reader renders text and bottom bar. Same crash was re-observed on 2026-05-27 in a stale-build live-QA pass (sweep captured the `r.split is not a function` stack at `App-m6JliGkQ.js:2:3439` as "F2"); rebuild eliminated it. No additional code change required.
 **Location:** `src/utils/text.ts` line 138 (`tokenizeWithMeta`)
 **Description:** The installed production build (`AppData/Local/Programs/blurby/resources/app.asar/dist/`) crashes with `Uncaught TypeError: r.split is not a function` when opening any book. White screen with no reader content rendered. Stack trace: `Nn` (minified `tokenizeWithMeta`) → `useMemo` → React render tree.
 **Root cause:** The production build was compiled from an older version of `text.ts` that had `if (!r)` as the guard (catches null/undefined/empty-string but not non-string types like numbers or objects). The current source code at line 138 has the correct guard: `if (typeof text !== "string" || !text)`. The build is simply stale.
-**Fix:** Rebuild the app with `npm run build` and restart. The source code already has the correct type guard. No code change needed.
+**Fix:** Rebuild the app with `npm run build` and restart. The source code already has the correct type guard. No code change needed. **(Applied 2026-05-28; verified.)**
 
 ### BUG-175 - Manual Recenter Box needs measurable chunk-start alignment
 **Reported:** 2026-05-18
