@@ -2,7 +2,7 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-04-05
+**Last archived:** 2026-05-28
 
 ---
 
@@ -4600,3 +4600,19 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 18. Startup-to-window time measurably improved (target: window visible < 500ms after app.whenReady)
 
 **Depends on:** None — investigation gate cleared by Cowork analysis.
+
+---
+
+## TTS-QUAL-CI-1 — CI Regression Gate Wiring *(completed 2026-05-28)*
+
+- **What:** Add a `quality-gate` job to `.github/workflows/ci.yml` that runs `npm run test:quality` (the `tts_eval_runner.mjs --mode=gate` harness against `docs/testing/tts_eval_baseline_v2.json` + `docs/testing/tts_quality_gates.v2.json`) so PRs that regress TTS quality fail CI. Scope the trigger so the gate runs on `main` pushes and on PRs touching TTS files without slowing unrelated PRs.
+- **Why:** TTS-EVAL-3 built the eval harness, v2 baseline, and gates, and `npm run test:quality` exists — but nothing runs it in CI, so a regression only surfaces if someone runs it locally. Wiring the gate is the "Quality Gate Activation" phase entry.
+- **Lane Ownership:** Lane D (Platform — workflow file) + Lane E (Governance — thresholds). No renderer/runtime code.
+- **Shared-Core Touches:** none.
+- **Deliverables:**
+    1. `quality-gate` job in `.github/workflows/ci.yml` (ubuntu-only, `dorny/paths-filter@v3` for TTS path scoping)
+    2. `scripts/recalc.py` — Python + openpyxl governance tooling (~30 LOC, `--dry-run` flag)
+    3. LOE dropdown extended with `XS` in `docs/governance/sprint-queue.xlsx`
+    4. `SINGLE-INSTANCE-LOCK-1` Catalog row updated to `LOE = XS`
+- **Effort:** S
+- **Roster:** Zeus → Hercules • Hermes • Hippocrates • MarcusAurelius

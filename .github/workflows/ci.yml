@@ -22,3 +22,27 @@ jobs:
       - run: npm audit --audit-level=high
       - run: npm test
       - run: npm run build
+
+  quality-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            tts:
+              - 'src/**/tts*'
+              - 'src/utils/audioScheduler.ts'
+              - 'src/hooks/useNarration.ts'
+              - 'scripts/tts_eval_runner.mjs'
+              - 'docs/testing/tts_*'
+      - uses: actions/setup-node@v4
+        if: steps.filter.outputs.tts == 'true' || github.event_name == 'push'
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+        if: steps.filter.outputs.tts == 'true' || github.event_name == 'push'
+      - run: npm run test:quality
+        if: steps.filter.outputs.tts == 'true' || github.event_name == 'push'
