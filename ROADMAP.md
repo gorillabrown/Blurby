@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-28 — full Phase D buffer replenishment. 5 full specs queued (TTS-QUAL-CI-1, EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + UX-POLISH-1 stub at position 6. Two new hotfix sprints (EXT-PAIR-1 for BUG-183, THEME-SYNC-1 for BUG-182) integrated into the conveyor belt. NARRATE-CLOSED-LOOP-CURSOR promoted from stub to full spec with file:line edit-site detail after READER-ISO-1E (2026-05-27) unblocked it. SRL-079 added (rebuild verification gate). **Next dispatch: TTS-QUAL-CI-1**.
+**Last updated**: 2026-05-28 — TTS-QUAL-CI-1 completed (CI quality gate wired, recalc.py added, LOE dropdown extended). 4 full specs queued (EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + UX-POLISH-1 stub at position 5. **Next dispatch: EXT-PAIR-1**.
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1), (2) closed-loop cursor lands (NARRATE-CLOSED-LOOP-CURSOR), (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1, THEME-SYNC-1, SINGLE-INSTANCE-LOCK-1), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: GREEN — depth 6 (5 full specs at positions 1-5; 1 stub at position 6). **Conveyor belt order: TTS-QUAL-CI-1 → EXT-PAIR-1 → SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1**. Parallel-safe pairs: positions 1+3 (CI config + main-process), positions 2+4 (ws-server + Settings UI). Position 5 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
-**Last sprint**: GOV-HUMAN-REVIEW-1 (2026-05-27) — removed MarcusAurelius stub, renamed `Hercules.md` → `hercules.md`, archived 8 superseded close-outs, reconciled roster across readme.md/CLAUDE.md/files. Docs-only; merge handed off to user per git-handoff rule.
+**Queue**: GREEN — depth 5 (4 full specs at positions 1-4; 1 stub at position 5). **Conveyor belt order: EXT-PAIR-1 → SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1**. Parallel-safe pairs: positions 1+3 (ws-server + Settings UI). Position 4 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
+**Last sprint**: TTS-QUAL-CI-1 (2026-05-28) — CI regression gate wiring + recalc.py governance tooling + LOE dropdown extension.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -52,6 +52,7 @@
 | READER-ISO-1D | 2026-05-26 | FlowModeAdapter + section-handoff resolution + browse-away with 40 adapter tests | `CloseOut.READER-ISO-1D.2026-05-26.md` |
 | READER-ISO-1E | 2026-05-27 | NarrateModeAdapter + audio truth-sync ownership with 45 adapter tests | `CloseOut.READER-ISO-1E.2026-05-27.md` |
 | GOV-HUMAN-REVIEW-1 | 2026-05-27 | Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled | `CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md` |
+| TTS-QUAL-CI-1 | 2026-05-28 | CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS | `CloseOut.TTS-QUAL-CI-1.2026-05-28.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -114,49 +115,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Active Conveyor Belt
 
-The eager-spec buffer of 5 dispatchable sprints (positions 1–5 are full specs; position 6 is stub). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. TTS-QUAL-CI-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 5 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. Two new hotfix sprints (EXT-PAIR-1, THEME-SYNC-1) cover the 2026-05-28 discovery-pass bugs BUG-183 and BUG-182.
-
----
-
-#### TTS-QUAL-CI-1 — CI Regression Gate Wiring *(position 1 — full spec)*
-
-- **What:** Add a `quality-gate` job to `.github/workflows/ci.yml` that runs `npm run test:quality` (the `tts_eval_runner.mjs --mode=gate` harness against `docs/testing/tts_eval_baseline_v2.json` + `docs/testing/tts_quality_gates.v2.json`) so PRs that regress TTS quality fail CI. Scope the trigger so the gate runs on `main` pushes and on PRs touching TTS files without slowing unrelated PRs.
-- **Why:** TTS-EVAL-3 built the eval harness, v2 baseline, and gates, and `npm run test:quality` exists — but nothing runs it in CI, so a regression only surfaces if someone runs it locally. Wiring the gate is the "Quality Gate Activation" phase entry. Held until now per Standing Rule "Broad-suite-before-CI"; TEST-GREEN-1 has since cleaned/classified the broad suite, so the gate now measures a stable runtime.
-- **Prerequisites:** TEST-GREEN-1 complete (broad suite clean/classified — met) and TTS-EVAL-3 complete (harness + baseline + gates exist — met). Recommended after the reader-runtime isolation core so the gate measures stable behavior, but no hard code dependency on the adapters.
-- **Baseline:** clean `main`. CI-config + scripts only; no runtime code.
-- **Lane Ownership:** Lane D (Platform — workflow file) + Lane E (Governance — thresholds). No renderer/runtime code.
-- **Forbidden During Parallel Run:** no `src/` runtime edits; do not change TTS engine code — only CI config and, if strictly needed, the gate runner's exit-code plumbing.
-- **Shared-Core Touches:** none.
-- **Merge Order:** independent; safest after the isolation core but may land any time deps are met.
-- **WHERE (read order):** `.github/workflows/ci.yml` (current `test` job) → `package.json` (`test:quality`, line 22) → `scripts/tts_eval_runner.mjs` (`--mode=gate` exit-code behavior) → `docs/testing/tts_eval_baseline_v2.json` + `docs/testing/tts_quality_gates.v2.json` → `docs/governance/close-outs/CloseOut.TTS-EVAL-3.2026-05-18.md`.
-- **Tasks:**
-    1. `[hercules/sonnet]` Add a `quality-gate` job to `ci.yml` (ubuntu-latest only, to control cost): checkout → setup-node 20 + npm cache → `npm ci` → `npm run test:quality`. Confirm `tts_eval_runner.mjs --mode=gate` returns a non-zero exit on gate failure so CI actually blocks; if it does not, add an explicit threshold-check exit in the runner's gate mode.
-    2. `[hercules/sonnet]` Scope the trigger: run `quality-gate` on `push` to `main` and on `pull_request` with a `paths:` filter for TTS surfaces (`src/**/tts*`, `src/utils/audioScheduler.ts`, `src/hooks/useNarration.ts`, `scripts/tts_eval_runner.mjs`, `docs/testing/tts_*`). Leave the existing `test`/`build` job unchanged.
-    3. `[hippocrates/haiku]` Validate: `npm run test:quality` green on current `main` (gate passes at baseline); simulate a regression (temporarily perturb a gate threshold) to confirm the job would fail CI, then revert.
-    4. `[hermes/haiku — governance tooling fold-in]` Create `scripts/recalc.py` (Python + openpyxl) — opens an `.xlsx` file, marks every formula cell as needing recalc (`cell.value` rewrite or `wb.calc_mode = 'auto'` equivalent for the openpyxl model), and saves. Usage: `python scripts/recalc.py docs/governance/sprint-queue.xlsx`. Rationale: the /roadmap-review and /roadmap-status skills both prescribe running a recalc script after Catalog edits to refresh the Dashboard tab's formula-driven KPIs (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag). Blurby was missing this script — discovered during the 2026-05-28 xlsx Catalog mirror operation when openpyxl edits left Dashboard cells with stale cached values until Excel reopened the file. Keep the script tiny (~30 LOC); add a `--dry-run` flag that reports which cells would be touched without saving.
-    5. `[hermes/haiku — governance tooling fold-in]` Extend the Catalog tab's LOE column data-validation dropdown to include `XS` alongside the existing `S / M / L / XL`. Update `SINGLE-INSTANCE-LOCK-1` Catalog row (currently `LOE = S` as a conservative under-the-dropdown-limit) to `LOE = XS` — its ROADMAP spec calls XS (~5–10 LOC) and the Catalog should match. Also update Blurby's LOE-points mapping wherever it lives (likely the skill's frontmatter or Dashboard formula constants); standard mapping suggests `XS = 0.5 pts` if formulas use weighted sums. If the points mapping is hardcoded in Dashboard formulas, leave a note in `docs/governance/sprint-queue.xlsx` Dashboard notes and flag a tiny follow-up for the formula touch.
-    6. `[marcusaurelius]` Docs pass: update CLAUDE.md (CI/CD line — add `npm run test:quality` as the active quality gate; add scripts/recalc.py to the tooling notes), ROADMAP (move TTS-QUAL-CI-1's full spec to dated archive on closeout), sprint-queue.xlsx Catalog (mark Completed, populate Date Completed + Close-Out File, clear Seq) → **then run `python scripts/recalc.py docs/governance/sprint-queue.xlsx`** to refresh Dashboard formulas now that the script exists. Auto-merge per planning contract.
-- **Execution Sequence:** single wave (config + small script + dropdown extension; well under 40 tool uses). Test/Build tier = Quick (run `npm run test:quality` + lint the workflow + smoke-run `scripts/recalc.py --dry-run` against the Catalog).
-- **Done when (SUCCESS CRITERIA):**
-    1. `.github/workflows/ci.yml` has a `quality-gate` job running `npm run test:quality`.
-    2. The job blocks the PR on gate failure (verified by a temporary threshold perturbation that turns CI red, then reverted).
-    3. The gate runs on `main` pushes and on PRs touching TTS files; unrelated PRs are unaffected.
-    4. The existing `test` + `build` job is unchanged and still green.
-    5. `npm run test:quality` is green on `main` at the v2 baseline.
-    6. `scripts/recalc.py` exists, takes an xlsx path argument, has a `--dry-run` mode, and refreshes Dashboard formula values when run against `docs/governance/sprint-queue.xlsx` (verified by opening the file in Excel post-script and confirming KPI cells show current values).
-    7. `sprint-queue.xlsx` Catalog LOE dropdown accepts `XS` as a valid value; `SINGLE-INSTANCE-LOCK-1` row updated to `LOE = XS`.
-    8. As a final closeout step, `python scripts/recalc.py docs/governance/sprint-queue.xlsx` is invoked so the Dashboard KPIs reflect post-mirror state (5 full specs queued, Buffer Healthy, etc.) without requiring a manual Excel-open trip.
-- **Effort:** S. Core CI config + 30-LOC Python script + dropdown extension. Scope expanded marginally on 2026-05-28 to absorb queue-mirror tooling debt surfaced during /next-pointer.
-- **Roster:** Zeus → Hercules • Hermes • Hippocrates • MarcusAurelius.
-- **Source:** TTS-EVAL-3 close-out; `package.json` `test:quality`; Standing Rule "Broad-suite-before-CI"; SRL-070 (quality gates must measure real audio behavior, not self-referential metrics); 2026-05-28 xlsx Catalog mirror operation (surfaced both the missing recalc script and the missing XS dropdown value).
-
-##### Implementation detail
-
-- **Edit sites:** `.github/workflows/ci.yml` (new `quality-gate` job); possibly `scripts/tts_eval_runner.mjs` (exit-code guard in `--mode=gate`); `scripts/recalc.py` (NEW); `docs/governance/sprint-queue.xlsx` Catalog tab data validation rule on LOE column + row update for `SINGLE-INSTANCE-LOCK-1`; `CLAUDE.md` (CI/CD line + tooling notes); `ROADMAP.md` / `sprint-queue.xlsx` at closeout.
-- **Tests:** `npm run test:quality` green at baseline; regression simulation turns the job red. `scripts/recalc.py --dry-run docs/governance/sprint-queue.xlsx` reports cells without modifying them; subsequent live run produces non-stale Dashboard KPIs.
-- **Constants:** Quality-gate thresholds live in `docs/testing/tts_quality_gates.v2.json` — do NOT retune in this sprint; only wire the runner. LOE-points mapping (per the /roadmap-review and /roadmap-status skills): `S = 1`, `M = 3`, `L = 8`, `XL = 20`; recommended `XS = 0.5` for consistency.
-- **Branch:** `sprint/tts-qual-ci-1` from clean `main`.
-- **Commit hygiene:** Three logical commits acceptable: (a) CI config + runner exit-code plumbing, (b) scripts/recalc.py + LOE dropdown extension + SINGLE-INSTANCE-LOCK-1 row update, (c) MarcusAurelius docs pass. Explicit-stage; no destructive flags.
+The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs; position 5 is stub). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. EXT-PAIR-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 4 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. TTS-QUAL-CI-1 completed 2026-05-28 (CI quality gate wired). Two hotfix sprints (EXT-PAIR-1, THEME-SYNC-1) cover the 2026-05-28 discovery-pass bugs BUG-183 and BUG-182.
 
 ---
 
