@@ -452,11 +452,14 @@ describe("NarrateModeAdapter", () => {
 
   // ── Browse-away ─────────────────────────────────────────────────
   describe("browse-away", () => {
-    it("notifyBrowseAway pauses playback and sets browsed-away flag", () => {
+    it("notifyBrowseAway keeps audio playing and sets browsed-away flag", () => {
       adapter.start(makeRequest());
       adapter.notifyBrowseAway();
+      const snap = adapter.getSnapshot();
       expect(adapter.browsedAway).toBe(true);
-      expect(adapter.getSnapshot().playing).toBe(false);
+      expect(snap.playing).toBe(true);
+      expect(snap.clockOwner).toBe("audio-truth");
+      expect(bridge.pause).not.toHaveBeenCalled();
     });
 
     it("notifyBrowseAway fires the onBrowseAway callback", () => {
@@ -479,13 +482,20 @@ describe("NarrateModeAdapter", () => {
       expect(adapter.browsedAway).toBe(false);
     });
 
-    it("resume after browse-away clears the flag", () => {
+    it("stop after browse-away clears the flag", () => {
       adapter.start(makeRequest());
       adapter.notifyBrowseAway();
       expect(adapter.browsedAway).toBe(true);
-      adapter.resume();
+      adapter.stop("user-stop");
       expect(adapter.browsedAway).toBe(false);
-      expect(adapter.getSnapshot().playing).toBe(true);
+    });
+
+    it("destroy after browse-away clears the flag", () => {
+      adapter.start(makeRequest());
+      adapter.notifyBrowseAway();
+      expect(adapter.browsedAway).toBe(true);
+      adapter.destroy();
+      expect(adapter.browsedAway).toBe(false);
     });
   });
 

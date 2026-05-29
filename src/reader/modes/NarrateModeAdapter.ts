@@ -166,7 +166,6 @@ export class NarrateModeAdapter implements ReaderModeAdapter {
   notifyBrowseAway(): void {
     if (this._playing) {
       this._browsedAway = true;
-      this.pause();
       this.config.onBrowseAway?.();
     }
   }
