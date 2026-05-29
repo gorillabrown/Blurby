@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-28 — TTS-QUAL-CI-1 completed (CI quality gate wired, recalc.py added, LOE dropdown extended). 4 full specs queued (EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + UX-POLISH-1 stub at position 5. **Next dispatch: EXT-PAIR-1**.
+**Last updated**: 2026-05-28 — TTS-QUAL-CI-1 completed (CI quality gate wired, recalc.py added, LOE dropdown extended); phase close-out persisted SRL-079/080/081 to lessons file and added HYG-XLSX-DASHBOARD-RESTORE follow-up stub at position 6. 4 full specs queued (EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1 at 5, HYG-XLSX-DASHBOARD-RESTORE at 6). **Next dispatch: EXT-PAIR-1**.
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1), (2) closed-loop cursor lands (NARRATE-CLOSED-LOOP-CURSOR), (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1, THEME-SYNC-1, SINGLE-INSTANCE-LOCK-1), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: GREEN — depth 5 (4 full specs at positions 1-4; 1 stub at position 5). **Conveyor belt order: EXT-PAIR-1 → SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1**. Parallel-safe pairs: positions 1+3 (ws-server + Settings UI). Position 4 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
+**Queue**: GREEN — depth 6 (4 full specs at positions 1-4; 2 stubs at positions 5-6). **Conveyor belt order: EXT-PAIR-1 → SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Parallel-safe pairs: positions 1+3 (ws-server + Settings UI). Position 4 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
 **Last sprint**: TTS-QUAL-CI-1 (2026-05-28) — CI regression gate wiring + recalc.py governance tooling + LOE dropdown extension.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
@@ -324,9 +324,15 @@ The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs;
 
 ---
 
-#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 6 — stub)*
+#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 5 — stub)*
 
 Library card 3-line format, "New" dot auto-clear, Ctrl+K command palette entries, and Space bar starts the last-used reading mode after reader runtime controls are stable. Will be full-specced at next /roadmap-review when buffer needs replenishment after the position-1 sprint completes. Notes: 3-line format = title / author / progress%-and-time-left; "New" dot is the unread indicator on freshly-imported docs; command palette entries should include the existing import paths (Folder, URL, Drop), the mode switches (Focus/Flow/Narrate), and a recent-docs jump. Coordinate with Hotkey Map (existing Settings panel section) to avoid hotkey collisions.
+
+---
+
+#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 6 — stub)*
+
+Per SRL-080 + Evan's 2026-05-28 disposition. Three tasks: (a) manually rebuild the Dashboard tab's formula-driven KPIs in Excel (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag) per the /roadmap-review skill's "Sprint queue spreadsheet structure" reference; (b) extend `scripts/recalc.py` with a guardrail — refuse to operate on cells whose worksheet name matches `Dashboard`, with `--allow-dashboard` as an explicit opt-out; (c) document the convention in `CLAUDE.md` (or a new `docs/governance/SPREADSHEET_CONVENTIONS.md`) — openpyxl edits the Catalog tab only; Excel computes Dashboard from Catalog. LOE: XS. Lane E (governance tooling). No code surface, no shared-core touches. Parallel-safe with every other queued sprint. Will be full-specced when the queue head reaches it (likely after one of the hotfix sprints ships).
 
 ---
 
