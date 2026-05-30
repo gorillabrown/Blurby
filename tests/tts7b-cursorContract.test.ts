@@ -13,8 +13,10 @@ describe("cursor-source clamp — Step 3.5 structural contract", () => {
 
   it("getAudioProgress clamps returned wordIndex to the playing source", () => {
     const src = read("src/utils/audioScheduler.ts");
-    // Verify the clamp exists in getAudioProgress
-    expect(src).toContain("const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime)");
+    // Verify the clamp exists in getAudioProgress. NARRATE-CLOSED-LOOP-CURSOR:
+    // the clamp now uses the lag-compensated clock (now) so the reported wordIndex
+    // matches the AUDIBLE segment, not merely the started segment.
+    expect(src).toContain("const maxPlayingWord = getPlayingSourceMaxWordIndex(now)");
     expect(src).toContain("clamped ? maxPlayingWord : current.wordIndex");
   });
 });
@@ -49,16 +51,17 @@ describe("cursor contract after narration-mode removal", () => {
 });
 
 describe("content-contiguous synthesis — Step 3.6 structural contract", () => {
-  it("speakNextChunkKokoro reads from nextGenWordIndexRef, not lastConfirmedAudioWordRef", () => {
+  it("speakNextChunkKokoro seeds from the heard floor with produced-end fallback, never the cursor lead", () => {
     const src = read("src/hooks/useNarration.ts");
-    expect(src).toContain("const startIdx = nextGenWordIndexRef.current");
-    // The old pattern that would skip words by following the cursor lead must not appear
-    // in the speakNextChunkKokoro body. The ref is still used elsewhere (cursor updates),
-    // but generation must anchor to nextGenWordIndexRef.
+    // NARRATE-CLOSED-LOOP-CURSOR supersedes the Step 3.6 produced-end-only seed:
+    // re-entry now prefers the real HEARD floor (getHeardFloorWordIndex) and uses the
+    // produced-end ref only as the not-yet-audible fallback. The cursor-lead pattern
+    // (const startIdx = lastConfirmedAudioWordRef.current) must still never seed generation.
     const speakNextIdx = src.indexOf("const speakNextChunkKokoro");
     expect(speakNextIdx).toBeGreaterThan(-1);
-    const speakNextBody = src.slice(speakNextIdx, speakNextIdx + 500);
-    expect(speakNextBody).toContain("nextGenWordIndexRef.current");
+    const speakNextBody = src.slice(speakNextIdx, speakNextIdx + 1400);
+    expect(speakNextBody).toContain("getHeardFloorWordIndex");
+    expect(speakNextBody).toContain("heardFloor ?? nextGenWordIndexRef.current");
     expect(speakNextBody).not.toContain("const startIdx = lastConfirmedAudioWordRef.current");
   });
 

@@ -235,6 +235,16 @@ export interface AudioScheduler {
    * IMPORTANT: The returned wordIndex is the canonical audio cursor — not the visual band.
    */
   getAudioProgress: () => AudioProgressReport | null;
+  /**
+   * NARRATE-CLOSED-LOOP-CURSOR: Heard-position floor (segment start of the
+   * lag-compensated audible segment). Re-entry seed floor — null pre-audio.
+   */
+  getHeardFloorWordIndex: () => number | null;
+  /**
+   * NARRATE-CLOSED-LOOP-CURSOR: Heard-position ceiling (segment end of the
+   * lag-compensated audible segment). Visual cursor upper bound — null pre-audio.
+   */
+  getHeardCeilingWordIndex: () => number | null;
 }
 
 // ── Implementation ───────────────────────────────────────────────────────────
@@ -529,6 +539,22 @@ export function createAudioScheduler(): AudioScheduler {
     return playingSource.boundaries[playingSource.boundaries.length - 1].wordIndex;
   }
 
+  // NARRATE-CLOSED-LOOP-CURSOR: First word index of the source currently being
+  // heard — a conservative LOWER bound on heard position (segment START, not END).
+  // Re-entry seeds floor on this so continuations never skip past audible words.
+  // Pair with getPlayingSourceMaxWordIndex (the cursor ceiling). At most one
+  // segment of overlap (re-reading a word or two) — never an omission.
+  function getPlayingSourceMinWordIndex(now: number): number | null {
+    let playingSource: ActiveSource | null = null;
+    for (const s of activeSources) {
+      if (s.startTime <= now) {
+        playingSource = s;
+      }
+    }
+    if (!playingSource || playingSource.boundaries.length === 0) return null;
+    return playingSource.boundaries[0].wordIndex;
+  }
+
   function startWordTimer(): void {
     // NARR-FIX-4: Keep a single live timer loop. Restarting on every chunk
     // causes jitter/drift and "word timer started" spam under rapid chunking.
@@ -577,7 +603,12 @@ export function createAudioScheduler(): AudioScheduler {
 
       // Step 3.5: Clamp cursor to the currently-playing source so it
       // cannot outrun heard audio or skip ahead at chunk-load.
-      const maxPlayingWord = getPlayingSourceMaxWordIndex(now);
+      // NARRATE-CLOSED-LOOP-CURSOR: clamp to the LAG-COMPENSATED audible segment
+      // (now - trustedLag) rather than the raw-clock started segment, so the
+      // cursor cannot lead into a segment that has begun but is not yet audible.
+      // Safe: for trusted timing the fired boundary's source always qualifies at
+      // (now - trustedLag), so this never clips a boundary the comparator allowed.
+      const maxPlayingWord = getPlayingSourceMaxWordIndex(now - trustedLagSec);
 
       // Advance past ALL boundaries we've crossed in this tick.
       let advancedAny = false;
@@ -979,7 +1010,10 @@ export function createAudioScheduler(): AudioScheduler {
 
     // Step 3.5: Belt-and-suspenders clamp — even if tick() hasn't run yet
     // this frame, never report a wordIndex past the currently-playing source.
-    const maxPlayingWord = getPlayingSourceMaxWordIndex(audioCtx.currentTime);
+    // NARRATE-CLOSED-LOOP-CURSOR: use the same lag-compensated clock as the
+    // boundary crossing above (now = currentTime - lagSec) so the progress clamp
+    // matches the audible segment, not the started segment.
+    const maxPlayingWord = getPlayingSourceMaxWordIndex(now);
     const clamped = maxPlayingWord != null && current.wordIndex > maxPlayingWord;
 
     return {
@@ -991,6 +1025,33 @@ export function createAudioScheduler(): AudioScheduler {
       silenceGapMs: clamped ? null : silenceGapMs,
       isInSilenceGap: clamped ? false : isInSilenceGap,
     };
+  }
+
+  /**
+   * NARRATE-CLOSED-LOOP-CURSOR: Heard-position FLOOR — first word of the
+   * lag-compensated audible segment. Conservative lower bound on what has been
+   * heard; re-entry seeds floor on this so continuations never omit audible
+   * words. Returns null when nothing is audible yet (pre-first-audio).
+   */
+  function getHeardFloorWordIndex(): number | null {
+    if (!audioCtx) return null;
+    // Not clamped to 0: a negative lag-compensated clock correctly means "nothing
+    // audible yet" (first ~lag ms after a source starts), so the oracle returns null.
+    const heardNow = audioCtx.currentTime - TTS_TRUSTED_CURSOR_LAG_MS / 1000;
+    return getPlayingSourceMinWordIndex(heardNow);
+  }
+
+  /**
+   * NARRATE-CLOSED-LOOP-CURSOR: Heard-position CEILING — last word of the
+   * lag-compensated audible segment. Upper bound the visual cursor must not
+   * exceed. Returns null when nothing is audible yet.
+   */
+  function getHeardCeilingWordIndex(): number | null {
+    if (!audioCtx) return null;
+    // Not clamped to 0: a negative lag-compensated clock correctly means "nothing
+    // audible yet" (first ~lag ms after a source starts), so the oracle returns null.
+    const heardNow = audioCtx.currentTime - TTS_TRUSTED_CURSOR_LAG_MS / 1000;
+    return getPlayingSourceMaxWordIndex(heardNow);
   }
 
   return {
@@ -1006,5 +1067,7 @@ export function createAudioScheduler(): AudioScheduler {
     markPipelineDone,
     getContext,
     getAudioProgress,
+    getHeardFloorWordIndex,
+    getHeardCeilingWordIndex,
   };
 }

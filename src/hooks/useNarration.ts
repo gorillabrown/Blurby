@@ -1191,7 +1191,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // Step 3.6: Read from produced-content truth, NOT the boundary-driven
     // lastConfirmedAudioWordRef (which carries the cursor's lead and causes
     // content omission at re-entry).
-    const startIdx = nextGenWordIndexRef.current;
+    // NARRATE-CLOSED-LOOP-CURSOR: when the scheduler is still playing (e.g. a
+    // mid-playback rate/voice continuation), prefer the real HEARD floor over the
+    // prefetched produced-end so the next chunk cannot start hundreds of words
+    // ahead of audible playback (the ~227s-drift omission). The ?? fallback keeps
+    // every stop-then-reseed path (fresh start, seek, handoff) seeding from the
+    // freshly-set produced-end ref, so user-intent jumps remain exact.
+    // Optional-chained (cf. getAudioProgress?.() below) so a not-yet-initialized
+    // or test-double scheduler simply falls back to the produced-end ref.
+    const heardFloor = kokoroStrategy.getScheduler()?.getHeardFloorWordIndex?.();
+    const startIdx = heardFloor ?? nextGenWordIndexRef.current;
     if (import.meta.env.DEV) {
       const startWord = words[startIdx] ?? "??";
       const prevWord = startIdx > 0 ? words[startIdx - 1] ?? "??" : "(start)";
@@ -1935,6 +1944,10 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     if (handoffPendingRef.current) {
+      // NARRATE-CLOSED-LOOP-CURSOR: capture the heard floor BEFORE stopping the
+      // scheduler so a handoff resume seeds no higher than what was audible
+      // (pure continuation, not user intent — backward-jump-proof via max()).
+      const handoffHeardFloor = kokoroStrategy.getScheduler()?.getHeardFloorWordIndex?.();
       webStrategy.stop();
       kokoroStrategy.stop();
       qwenStrategy.stop();
@@ -1943,8 +1956,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearNanoOwnership();
       clearPocketOwnership();
       clearPendingRateResponseTrace();
-      lastConfirmedAudioWordRef.current = s.cursorWordIndex;
-      nextGenWordIndexRef.current = s.cursorWordIndex;
+      const handoffSeed = Math.max(handoffHeardFloor ?? 0, s.cursorWordIndex);
+      lastConfirmedAudioWordRef.current = handoffSeed;
+      nextGenWordIndexRef.current = handoffSeed;
       dispatch({ type: "RESUME" });
       stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       emitEvalTrace({
