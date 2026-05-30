@@ -542,6 +542,19 @@ const ipcContext = {
   getProjectRoot: () => __dirname,
 };
 
+// ── Single-instance lock ──────────────────────────────────────────────────
+const gotTheLock = app.requestSingleInstanceLock();
+if (!gotTheLock) {
+  app.quit();
+} else {
+
+app.on("second-instance", () => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) mainWindow.restore();
+    mainWindow.focus();
+  }
+});
+
 // ── App lifecycle ──────────────────────────────────────────────────────────
 app.whenReady().then(async () => {
   await ensureDataDir();
@@ -702,6 +715,8 @@ app.on("will-quit", async () => {
     console.log("[cloud] Quit sync failed:", err.message);
   }
 });
+
+} // end single-instance else block
 
 // Export pure functions for testing
 if (typeof module !== "undefined") {
