@@ -595,3 +595,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** When small hygiene items surface during sprint planning, prefer fold-in over spin-off if (a) the work touches an overlapping surface or roster (here: same Lane D + Lane E, same Hermes + MarcusAurelius), (b) it's < ~20% of the host sprint's LOE, and (c) it can reuse the host's dispatch wave. Document the fold-in explicitly in the spec (don't slip it in silently) — the audit trail in TTS-QUAL-CI-1's "Effort note flagged the marginal scope expansion on 2026-05-28 with traceable rationale" sentence is the model.
 **Applies to:** Sprint scoping; governance tooling; small hygiene work; spec amendments; queue-management overhead reduction.
 **Status:** Observation. "What worked" lesson. Promotion candidate if the pattern recurs in a second sprint without scope creep.
+
+### SRL-082 — Electron/CommonJS tests should prefer direct seams over brittle module-cache mocks (EXT-PAIR-1, 2026-05-29)
+**Verdict:** Electron-facing CommonJS modules are hard to isolate reliably with broad `vi.mock("electron", ...)` assumptions once another test has already cached a `require("electron")` path.
+**Evidence:** EXT-PAIR-1's WebSocket auth tests needed reliable access to connection/message handlers and safe behavior when `safeStorage` was unavailable. Rather than leaning on a fragile Electron mock that may not intercept cached CommonJS imports consistently, the sprint added direct test exports for `handleConnection`/`handleMessage` state seams and made production `safeStorage` access defensive with optional chaining.
+**Recommendation:** For Electron CommonJS modules, expose narrow test seams for state-machine logic and guard runtime-dependent Electron APIs defensively. Use global Electron mocks only as a last resort, and do not rely on them as the sole proof for module-cache-sensitive behavior.
+**Applies to:** Electron main-process tests, CommonJS modules, WebSocket server tests, runtime-dependent Electron APIs such as `safeStorage`.
+**Status:** Observation. Promotion candidate if another Electron/CJS test seam hits the same module-cache fragility.

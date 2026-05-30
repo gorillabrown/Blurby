@@ -42,6 +42,7 @@ Full diagnosis: `docs/governance/close-outs/Aristotle.EXT-PAIR-1.2026-05-29.md`
 - `npm test` green: 3,014 tests pass (8 new)
 - Fake-timer tests verify timeout behavior at exact boundaries
 - Manual smoke test deferred to Evan post-merge (SUCCESS CRITERIA #1)
+- Follow-up caveat: BUG-183 remains smoke-pending until the rebuilt desktop app and Chrome extension complete the first-time pairing flow end-to-end.
 
 ## Files Changed
 
