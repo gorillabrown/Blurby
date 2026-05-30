@@ -19,16 +19,10 @@
 ### BUG-182 — Settings panel does not track theme switch (light↔dark)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
 **Severity:** MEDIUM (visual; degrades Settings usability on theme toggle)
-**Status:** OPEN
-**Location:** `src/components/settings/` (Settings panel container + sub-pages), CSS theming pipeline
-**Description:** When toggling between light and dark theme while the Settings panel is open, the Settings panel does not fully repaint to match the new theme. Some widgets retain old-theme colors while the panel container adopts the new theme, producing a mixed light/dark state. Reported by Evan during freshly-rebuilt v1.75.1 verification pass, with screenshot evidence in conversation.
-**Suspected root cause (unverified):** Two plausible causes worth investigating together:
-- (a) The Settings sub-pages don't subscribe to the same theme CSS-variable channel as the rest of the renderer (settings sub-tree has its own bundled chunk per Vite output: `dist/assets/settings-CsUXP4a3.js`, `dist/assets/settings-5MT7dmX9.css`);
-- (b) The build warning `Circular chunk: settings -> tts -> settings. Please adjust the manual chunk logic for these chunks.` from `npm run build` (observed 2026-05-28) suggests a circular import path between Settings and TTS modules. Circular chunks can cause module initialization order issues that break theme-context subscription on first paint after theme toggle.
-**Fix path (CLI-spec-ready after investigation):**
-1. (Aristotle, read-only) Toggle theme with DevTools Computed-Styles panel open on a Settings sub-widget; confirm whether `--text`, `--bg`, etc. propagate to the widget on toggle, or if the widget reads from a different (stale) source.
-2. Resolve the `settings -> tts -> settings` circular chunk in `vite.config.ts` manual chunks (or wherever the chunk config lives). Likely fix: move the shared boundary code into a separate `shared` chunk.
-3. Verify theme toggle propagates cleanly to all Settings sub-pages after the chunk fix.
+**Status:** RESOLVED (2026-05-29, THEME-SYNC-1 sprint — circular chunk `settings -> tts -> settings` eliminated by moving 5 shared TTS-adjacent modules to TTS chunk in `vite.config.js`; code audit found no inline color styles or stale theme subscriptions in Settings components; awaits rebuild + smoke test to confirm BUG-182 is closed)
+**Location:** `vite.config.js` (manual chunk logic), `src/components/settings/` (Settings panel container + sub-pages)
+**Root cause:** The Vite build's `manualChunks` function created a circular dependency between the `settings` and `tts` chunks. Five utility modules (`kokoroStatus`, `qwenStatus`, `kokoroRatePlan`, `ttsProviderRegistry`, `tempoStretch`) were shared between settings UI and TTS runtime code. Rollup assigned them to the settings chunk, causing TTS-chunk modules (e.g., `useNarration.ts`) to import from the settings chunk while settings-chunk modules imported from TTS — a bidirectional dependency. This can cause nondeterministic module initialization order.
+**Resolution evidence:** `npm run build` emits NO circular chunk warning after fix; `npm test` green (3,014 tests); full investigation at `docs/studies/investigations/THEME-SYNC-1-investigation.md`.
 **Severity rationale:** Doesn't block reading, but Settings is a frequently-used surface and the mixed-theme state looks broken.
 
 ### BUG-176 - Flow mode drops to Page mode at EPUB section/chapter boundary

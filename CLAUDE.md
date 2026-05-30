@@ -342,7 +342,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN depth 4 [2 full specs + 2 stubs], 2 open bugs)
+## Current System State (v1.75.1 — queue YELLOW depth 3 [1 full spec + 2 stubs], 1 open bug)
 
 ### Codebase (branch: `main`)
 
@@ -354,10 +354,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** GREEN depth 4 (2 full specs at positions 1-2: THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR; 2 stubs at positions 3-4: UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE) in `docs/governance/sprint-queue.xlsx`. Next: THEME-SYNC-1 — Settings theme propagation + Vite circular chunk repair. THEME-SYNC-1 is a hotfix sprint (BUG-182). NARRATE-CLOSED-LOOP-CURSOR is the sole shared-core sprint and must run alone.
-- **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-182 (Settings panel doesn't track light-dark theme toggle; reported 2026-05-28).
+- **Queue:** YELLOW depth 3 (1 full spec at position 1: NARRATE-CLOSED-LOOP-CURSOR; 2 stubs at positions 2-3: UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE) in `docs/governance/sprint-queue.xlsx`. Next: NARRATE-CLOSED-LOOP-CURSOR — real-audio-position as single source of truth. NARRATE-CLOSED-LOOP-CURSOR is the sole shared-core sprint and must run alone.
+- **Open bugs:** 1 — BUG-154 (parked, likely not a bug, needs live verification). BUG-182 RESOLVED (circular chunk fix in THEME-SYNC-1, pending smoke test).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
-- **Most recent sprint:** SINGLE-INSTANCE-LOCK-1 — Electron single-instance lock (2026-05-29).
+- **Most recent sprint:** THEME-SYNC-1 — Vite circular chunk fix + theme investigation (2026-05-29).
 - 3,014 tests across 211 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). Quality gate: `npm run test:quality` runs in CI (`quality-gate` job, ubuntu-only, paths-filtered for TTS surfaces)
 - Governance tooling: `scripts/recalc.py` refreshes xlsx formula caches after openpyxl edits (`python scripts/recalc.py [--dry-run] <path>`)
