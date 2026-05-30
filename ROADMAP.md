@@ -55,7 +55,7 @@
 | TTS-QUAL-CI-1 | 2026-05-28 | CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS | `CloseOut.TTS-QUAL-CI-1.2026-05-28.md` |
 | EXT-PAIR-1 | 2026-05-29 | Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` (5 min) replaces 5s initial auth window, structured WS logging, 8 new tests, BUG-183 closed | `CloseOut.EXT-PAIR-1.2026-05-29.md` |
 | SINGLE-INSTANCE-LOCK-1 | 2026-05-29 | Electron single-instance lock — `app.requestSingleInstanceLock()` + `second-instance` focus handler prevents duplicate windows | `CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md` |
-| THEME-SYNC-1 | 2026-05-29 | Vite circular chunk fix — 5 shared TTS modules moved to TTS chunk, eliminated `settings -> tts -> settings` cycle; BUG-182 pending live smoke | `CloseOut.THEME-SYNC-1.2026-05-29.md` |
+| THEME-SYNC-1 | 2026-05-29 | Vite circular chunk fix — 5 shared TTS modules moved to TTS chunk, eliminated `settings -> tts -> settings` cycle; BUG-182 confirmed fixed by live smoke on v1.75.1 dev build | `CloseOut.THEME-SYNC-1.2026-05-29.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -118,7 +118,7 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Active Conveyor Belt
 
-The eager-spec buffer of 1 dispatchable sprint (position 1 is full spec; positions 2-3 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. NARRATE-CLOSED-LOOP-CURSOR is the next dispatch — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. All 2026-05-28 discovery bugs closed: EXT-PAIR-1 (BUG-183), SINGLE-INSTANCE-LOCK-1 (F1), THEME-SYNC-1 (circular chunk for BUG-182, pending smoke).
+The eager-spec buffer of 1 dispatchable sprint (position 1 is full spec; positions 2-3 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. NARRATE-CLOSED-LOOP-CURSOR is the next dispatch — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. All 2026-05-28 discovery bugs closed: EXT-PAIR-1 (BUG-183), SINGLE-INSTANCE-LOCK-1 (F1), THEME-SYNC-1 (circular chunk and theme smoke for BUG-182).
 
 ---
 

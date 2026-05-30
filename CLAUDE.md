@@ -355,7 +355,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
 - **Queue:** YELLOW depth 3 (1 full spec at position 1: NARRATE-CLOSED-LOOP-CURSOR; 2 stubs at positions 2-3: UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE) in `docs/governance/sprint-queue.xlsx`. Next: NARRATE-CLOSED-LOOP-CURSOR — real-audio-position as single source of truth. NARRATE-CLOSED-LOOP-CURSOR is the sole shared-core sprint and must run alone.
-- **Open bugs:** 1 — BUG-154 (parked, likely not a bug, needs live verification). BUG-182 RESOLVED (circular chunk fix in THEME-SYNC-1, pending smoke test).
+- **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
 - **Most recent sprint:** THEME-SYNC-1 — Vite circular chunk fix + theme investigation (2026-05-29).
 - 3,014 tests across 211 test files

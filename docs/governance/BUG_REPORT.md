@@ -8,6 +8,16 @@
 
 ## Incomplete
 
+### BUG-184 — E-Ink Display Mode toggle strips Settings panel background (transparent overlay)
+**Reported:** 2026-05-29 (THEME-SYNC-1 smoke test retest on v1.75.1)
+**Severity:** MEDIUM (visual; Settings panel becomes transparent when einkMode is ON)
+**Status:** OPEN
+**Location:** `src/styles/themes.css` line 145 (`[data-eink="true"] *:hover { background-color: inherit; }`)
+**Description:** When the E-Ink Display Mode toggle (at the top of Settings → Theme sub-page) is ON, the Settings panel (`.menu-flap`) becomes transparent — library content (covers, tabs, reading stats) bleeds through. Toggling einkMode OFF immediately restores opacity. Reproduced deterministically on v1.75.1 dev build.
+**Root cause:** `themes.css:145` has `[data-eink="true"] *:hover { background-color: inherit; }` — a nuclear wildcard hover rule that overrides `.menu-flap`'s `background: var(--bg-raised)` when the cursor is over the panel. The `inherit` value pulls from the parent element's background, which is transparent (the app container behind the fixed-position flap).
+**Fix path:** XS — either scope the hover rule to exclude `.menu-flap` (e.g., `[data-eink="true"] *:not(.menu-flap):hover`), or add `[data-eink="true"] .menu-flap { background: var(--bg-raised); }` after line 151. Reader surfaces work correctly with einkMode ON — the bug is Settings panel only.
+**Severity rationale:** einkMode is an opt-in power feature (toggle OFF by default), so impact is narrow. But the transparency makes Settings completely unusable when enabled.
+
 ### BUG-183 — Chrome extension cannot pair with Blurby desktop (auth handshake timeout)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
 **Severity:** MEDIUM (Chrome extension surface is unusable; not core reader)
@@ -19,7 +29,7 @@
 ### BUG-182 — Settings panel does not track theme switch (light↔dark)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
 **Severity:** MEDIUM (visual; degrades Settings usability on theme toggle)
-**Status:** RESOLVED (2026-05-29, THEME-SYNC-1 sprint — circular chunk `settings -> tts -> settings` eliminated by moving 5 shared TTS-adjacent modules to TTS chunk in `vite.config.js`; code audit found no inline color styles or stale theme subscriptions in Settings components; awaits rebuild + smoke test to confirm BUG-182 is closed)
+**Status:** RESOLVED (2026-05-29, THEME-SYNC-1 sprint — circular chunk `settings -> tts -> settings` eliminated by moving 5 shared TTS-adjacent modules to TTS chunk in `vite.config.js`; confirmed fixed by live smoke on v1.75.1 dev build: all 5 themes × 9 sub-pages repaint cleanly with einkMode OFF)
 **Location:** `vite.config.js` (manual chunk logic), `src/components/settings/` (Settings panel container + sub-pages)
 **Root cause:** The Vite build's `manualChunks` function created a circular dependency between the `settings` and `tts` chunks. Five utility modules (`kokoroStatus`, `qwenStatus`, `kokoroRatePlan`, `ttsProviderRegistry`, `tempoStretch`) were shared between settings UI and TTS runtime code. Rollup assigned them to the settings chunk, causing TTS-chunk modules (e.g., `useNarration.ts`) to import from the settings chunk while settings-chunk modules imported from TTS — a bidirectional dependency. This can cause nondeterministic module initialization order.
 **Resolution evidence:** `npm run build` emits NO circular chunk warning after fix; `npm test` green (3,014 tests); full investigation at `docs/studies/investigations/THEME-SYNC-1-investigation.md`.

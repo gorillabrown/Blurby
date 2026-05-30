@@ -609,3 +609,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** Future main-process lifecycle additions should go inside the primary-instance `else` branch unless they are intentionally needed before the lock check. Treat pre-lock handlers as exceptional and document the reason inline.
 **Applies to:** Electron main-process lifecycle, single-instance lock, `BrowserWindow` creation/focus, app activation handlers.
 **Status:** Observation.
+
+### SRL-084 — Vite circular-chunk diagnosis requires build-API instrumentation, not grep-based import tracing (THEME-SYNC-1, 2026-05-29)
+**Verdict:** Grep-based import tracing is insufficient for diagnosing Vite/Rollup circular chunk warnings — it misses edges created by Rollup's automatic module placement.
+**Evidence:** THEME-SYNC-1's initial agent-based grep found only 1 of 2 cycle edges in `settings↔tts`. The `tempoStretch` edge was visible in source imports, but the `kokoroStatus`/`qwenStatus` edge was invisible — Rollup assigned those modules to the settings chunk because their only importers were settings-panel hooks, then `useNarration.ts` (TTS chunk) imported them, creating the reverse edge. Three iterative build-test cycles were needed. The programmatic build API (`chunk.imports` + `chunk.modules` from `vite.build()` with `write: false`) revealed all edges in one pass.
+**Recommendation:** For any sprint diagnosing a Vite/Rollup circular chunk warning, start with the programmatic build API to dump chunk membership and inter-chunk imports. Reserve grep for confirming specific edges after the chunk map is known.
+**Applies to:** Vite build config, `manualChunks`, Rollup chunk diagnostics.
+**Status:** Observation.
+
+### SRL-085 — Smoke tests must verify build version before issuing verdicts (THEME-SYNC-1, 2026-05-29)
+**Verdict:** A smoke test verdict is only valid when the binary under test contains the fix being verified.
+**Evidence:** The first THEME-SYNC-1 smoke ran against an old installed Blurby.exe (v1.1.2) instead of the post-fix dev build (v1.75.1). The RED verdict was moot — the circular chunk fix wasn't in the binary being tested. A retest on `npm run dev` (v1.75.1) produced the correct GREEN verdict. The version label check was buried at TS2 instead of being a blocking TS0 gate.
+**Recommendation:** Every smoke checklist should include a TS0 step: verify the displayed version label matches the expected commit/version before any functional assertions. If the version doesn't match, stop and rebuild — don't issue a verdict on the wrong binary.
+**Applies to:** All sprints with manual smoke gates, especially source-fix-only sprints where the running binary may be stale.
+**Status:** Observation. Candidate for promotion to standing rule if a future smoke test repeats the stale-binary pattern.
