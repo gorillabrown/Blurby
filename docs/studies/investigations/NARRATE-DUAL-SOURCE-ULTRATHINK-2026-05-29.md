@@ -293,6 +293,34 @@ An adversarial review of the dispatch package surfaced the following corrections
 
 ---
 
+## Second revision — post-checkout-to-main re-verification (2026-05-29, after roadmap-review commit 4444276 landed)
+
+When the roadmap-review pass was performed, the working git branch was unverified — it turned out to be `sprint/narrate-closed-loop-cursor` (the dissolved branch itself). The grep verifications done in response to the adversarial review (above) were therefore against the dissolved branch's source, not against main. After the git-handoff moved the roadmap-review commit to main (`4444276`) and a follow-up re-verification grep was run against `main`'s `useNarration.ts` and `audioScheduler.ts`, the following additional corrections emerged:
+
+| Claim | Dissolved-branch state | Main state (verified 2026-05-29 post commit `4444276`) |
+|---|---|---|
+| `getHeardFloorWordIndex` exists | Yes, defined at `audioScheduler.ts:1036`; consumed at `useNarration.ts:1202` (re-entry seed) and `:1950` (handoff-resume seed) | **DOES NOT EXIST.** Only `getPlayingSourceMaxWordIndex` (underlying primitive) at `audioScheduler.ts:521`. The dissolved branch introduced both the wrapper AND its 2 consumers; supersede pulled both. |
+| Handoff-pending resume branch seeds from | `max(handoffHeardFloor, cursor)` via the `getHeardFloorWordIndex` consumer | `s.cursorWordIndex` directly (lines 1946-1947 on main) — the heardFloor capture was the dissolved branch's contribution and is gone |
+| `WORD_ADVANCE` dispatch sites | 6 at lines 463, 972, 1073, 1158, **1255, 1314** | 6 at lines 463, 972, 1073, 1158, **1246, 1305** (~9 lines higher) |
+| `applyRateChange` 6 reseed branches | lines 1759, 1802, 1821, 1839, 1853, 1869 | lines **1750, 1793, 1812, 1830, 1844, 1860** (~9 lines higher) |
+| `applyRateChange` function definition | line 1722 | line 1713 |
+| `pause()` definition | line 1877 | line 1868 |
+| `resume()` definition | line 1905 | line 1896 |
+| `resume()` cursor-mismatch branch | line 1910 | line 1901 |
+| `resume()` handoff-pending branch | line 1946 | line 1937 |
+| `resume()` bare-resume branch | line 1976 | line 1962 |
+| `kokoroStrategy.resume()` engine call inside bare-resume | line 1983 | line 1969 |
+| `speakNextChunkKokoro` definition | line 1187 | line 1187 (unchanged — same file region untouched by dissolved branch) |
+| `resyncToCursor` definition | line 1617 | line 1617 (unchanged) |
+| `speakNextChunk` dispatcher | line 1332 | line 1323 |
+| Top-of-file refs (`lastConfirmedAudioWordRef`, `nextGenWordIndexRef`, `kokoroBoundaryGateRef`, `nextKokoroExactStartRef`, `handoffPendingRef`) | lines 187, 188, 191, 199, 201 | identical (declarations at top of file) |
+
+**Material structural consequence:** the SK-N1 DIAG-1 spec required amendment to include re-introducing the `getHeardFloorWordIndex` oracle as a clean addition on main BEFORE instrumentation (Step 2a in the amended Task 2). The oracle is ~20 lines wrapping `getPlayingSourceMaxWordIndex` with null-handling; effort stays XS. The dissolved branch's *consumers* of the oracle are NOT carried over — those belong to SK-N2 through SK-N5 with the priority chain. The supersede decision is preserved: the half-step (oracle + naive consumers) is gone; the full unification (oracle + priority chain) lands across the 5 sprints.
+
+**Process consequence — recorded as SRL-087 in `SpecRetro.Lessons_Learned.md`:** the wrong-branch grep happened because the roadmap-review pass started without verifying current branch state. SRL-086 (verify quantitative claims by grep) was insufficient on its own; the grep itself can target the wrong codebase if environment state is unverified. SRL-087 broadens to "verify environment state — branch, cwd, build — before any consequential edit." Together SRL-086 + SRL-087 form siblings of an umbrella principle ("do not act on accumulated context as if it were verified state"); both are promotion candidates for a single Standing Rule. The pattern repeated within ~1 hour across two different verification axes, which is strong evidence the principle deserves Standing-Rule promotion.
+
+---
+
 ## References
 
 - Live-QA records: `docs/studies/live-qa/2026-05-27_discovery_sweep.md`, `docs/studies/live-qa/2026-05-29_theme_sync_smoke.md`, `docs/studies/live-qa/2026-05-29_theme_sync_retest.md`. 2026-05-29 NARRATE-CLOSED-LOOP-CURSOR gate verdict captured inline in dispatch thread (A1 PASS, A4 FAIL, A2 PARTIAL).
