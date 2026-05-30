@@ -45,6 +45,8 @@ const SHORT_CODE_TTL_MS = 5 * 60 * 1000;
 const WS_MAX_RETRY_COUNT = 10;
 /** Auth timeout — disconnect clients that don't authenticate within this window (ms) */
 const WS_AUTH_TIMEOUT_MS = 5000;
+/** Pairing timeout — generous window for first-time human-driven code entry (ms, matches SHORT_CODE_TTL_MS) */
+const WS_PAIRING_TIMEOUT_MS = 5 * 60 * 1000;
 /** IPC channel: server notifies renderer of unauthenticated client connection */
 const WS_CONNECTION_ATTEMPT_CHANNEL = "ws-connection-attempt";
 /** IPC channel: server notifies renderer of successful pairing or auth */
@@ -205,6 +207,7 @@ module.exports = {
   SHORT_CODE_TTL_MS,
   WS_MAX_RETRY_COUNT,
   WS_AUTH_TIMEOUT_MS,
+  WS_PAIRING_TIMEOUT_MS,
   WS_CONNECTION_ATTEMPT_CHANNEL,
   WS_PAIRING_SUCCESS_CHANNEL,
   // File Parsers

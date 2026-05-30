@@ -4,7 +4,7 @@
 const http = require("http");
 const crypto = require("crypto");
 const { safeStorage } = require("electron");
-const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS, WS_CONNECTION_ATTEMPT_CHANNEL, WS_PAIRING_SUCCESS_CHANNEL } = require("./constants");
+const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS, WS_PAIRING_TIMEOUT_MS, WS_CONNECTION_ATTEMPT_CHANNEL, WS_PAIRING_SUCCESS_CHANNEL } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
 
 // ── Constants ────────────────────────────────────────────────────────────────
@@ -150,14 +150,18 @@ function handleConnection(socket, request) {
     mw.webContents.send(WS_CONNECTION_ATTEMPT_CHANNEL, { timestamp: Date.now() });
   }
 
-  // Auth timeout — disconnect if client doesn't authenticate within WS_AUTH_TIMEOUT_MS
+  client.connectedAt = Date.now();
+
+  // Auth timeout — generous window for first-time pairing (human types 6-digit code);
+  // post-paired clients send auth immediately on connect, so the wider window is benign.
   client.authTimer = setTimeout(() => {
     if (!client.authenticated) {
-      console.log("[ws-server] Auth timeout — disconnecting unauthenticated client");
+      const elapsedMs = Date.now() - client.connectedAt;
+      console.log(`[ws-server] Auth timeout — disconnecting unauthenticated client (remote=${remoteAddr}, elapsed=${elapsedMs}ms, buffered=${client.buffer.length}b)`);
       client.socket.destroy();
       _clients.delete(client);
     }
-  }, WS_AUTH_TIMEOUT_MS);
+  }, WS_PAIRING_TIMEOUT_MS);
 
   socket.on("data", (data) => {
     client.buffer = Buffer.concat([client.buffer, data]);
@@ -231,7 +235,7 @@ async function handleMessage(client, text) {
     if (msg.code && String(msg.code) === current.code) {
       // Valid code — generate long-lived token
       _pairingToken = generatePairingToken();
-      if (_ctx && safeStorage.isEncryptionAvailable()) {
+      if (_ctx && safeStorage?.isEncryptionAvailable?.()) {
         try {
           const encrypted = safeStorage.encryptString(_pairingToken).toString("base64");
           const settings = _ctx.getSettings();
@@ -241,6 +245,8 @@ async function handleMessage(client, text) {
       }
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
+      const pairElapsed = Date.now() - (client.connectedAt || Date.now());
+      console.log(`[ws-server] Pair OK (elapsed=${pairElapsed}ms)`);
       sendJson(client.socket, { type: "pair-ok", token: _pairingToken });
       // Push event: notify renderer of successful pairing
       const mw = _ctx?.getMainWindow?.();
@@ -262,6 +268,8 @@ async function handleMessage(client, text) {
     if (msg.token === _pairingToken) {
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
+      const authElapsed = Date.now() - (client.connectedAt || Date.now());
+      console.log(`[ws-server] Auth OK (elapsed=${authElapsed}ms)`);
       sendJson(client.socket, { type: "auth-ok" });
       // Push event: notify renderer of successful auth
       const mw2 = _ctx?.getMainWindow?.();
@@ -566,4 +574,8 @@ module.exports = {
   generatePairingToken,
   generateShortCode,
   getShortCode,
+  handleConnection,
+  handleMessage,
+  _testSetState(ctx, token) { _ctx = ctx; _pairingToken = token; _clients.clear(); },
+  _testGetClients() { return _clients; },
 };

@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-28 — TTS-QUAL-CI-1 completed (CI quality gate wired, recalc.py added, LOE dropdown extended); phase close-out persisted SRL-079/080/081 to lessons file and added HYG-XLSX-DASHBOARD-RESTORE follow-up stub at position 6. 4 full specs queued (EXT-PAIR-1, SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1 at 5, HYG-XLSX-DASHBOARD-RESTORE at 6). **Next dispatch: EXT-PAIR-1**.
+**Last updated**: 2026-05-29 — EXT-PAIR-1 completed (Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` added, structured WS logging, 8 new tests). 3 full specs queued (SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1 at 4, HYG-XLSX-DASHBOARD-RESTORE at 5). **Next dispatch: SINGLE-INSTANCE-LOCK-1**.
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1), (2) closed-loop cursor lands (NARRATE-CLOSED-LOOP-CURSOR), (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1, THEME-SYNC-1, SINGLE-INSTANCE-LOCK-1), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: GREEN — depth 6 (4 full specs at positions 1-4; 2 stubs at positions 5-6). **Conveyor belt order: EXT-PAIR-1 → SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Parallel-safe pairs: positions 1+3 (ws-server + Settings UI). Position 4 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
-**Last sprint**: TTS-QUAL-CI-1 (2026-05-28) — CI regression gate wiring + recalc.py governance tooling + LOE dropdown extension.
+**Queue**: GREEN — depth 5 (3 full specs at positions 1-3; 2 stubs at positions 4-5). **Conveyor belt order: SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Parallel-safe pairs: positions 1+2 (main.js + Settings UI). Position 3 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
+**Last sprint**: EXT-PAIR-1 (2026-05-29) — Chrome extension pairing auth timeout repair.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -53,6 +53,7 @@
 | READER-ISO-1E | 2026-05-27 | NarrateModeAdapter + audio truth-sync ownership with 45 adapter tests | `CloseOut.READER-ISO-1E.2026-05-27.md` |
 | GOV-HUMAN-REVIEW-1 | 2026-05-27 | Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled | `CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md` |
 | TTS-QUAL-CI-1 | 2026-05-28 | CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS | `CloseOut.TTS-QUAL-CI-1.2026-05-28.md` |
+| EXT-PAIR-1 | 2026-05-29 | Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` (5 min) replaces 5s initial auth window, structured WS logging, 8 new tests, BUG-183 closed | `CloseOut.EXT-PAIR-1.2026-05-29.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -115,58 +116,11 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Active Conveyor Belt
 
-The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs; position 5 is stub). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. EXT-PAIR-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 4 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. TTS-QUAL-CI-1 completed 2026-05-28 (CI quality gate wired). Two hotfix sprints (EXT-PAIR-1, THEME-SYNC-1) cover the 2026-05-28 discovery-pass bugs BUG-183 and BUG-182.
+The eager-spec buffer of 3 dispatchable sprints (positions 1–3 are full specs; positions 4-5 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. SINGLE-INSTANCE-LOCK-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 3 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. EXT-PAIR-1 completed 2026-05-29 (BUG-183 closed). One remaining hotfix sprint (THEME-SYNC-1) covers the 2026-05-28 discovery-pass bug BUG-182.
 
 ---
 
-#### EXT-PAIR-1 — Chrome Extension Pairing Auth Timeout Repair *(position 2 — full spec)*
-
-- **What:** Repair the Chrome extension pairing flow so a user-driven pair (open popup → enter 6-digit code → click Pair) reliably completes without the desktop side disconnecting on auth timeout. The current 5-second `WS_AUTH_TIMEOUT_MS` is shorter than a human paste-and-click and is being applied uniformly to BOTH the pre-paired pairing path AND the post-paired auth path. The extension's auto-reconnect loop floods the terminal with `Auth timeout` errors. Split the timer into two windows: a generous pairing window (matching `SHORT_CODE_TTL_MS = 5 min`) for the first-time pair, and the existing tighter window (5s) for stored-token re-auth. Preserve DoS protection on the post-paired path.
-- **Why:** BUG-183 — Evan reported on 2026-05-28 that the extension cannot pair: Blurby displays the request banner with code 340780, the extension popup shows the same code input + "Pair" button, but submitting the code never completes the handshake. Terminal floods with `[ws-server] Auth timeout — disconnecting unauthenticated client` (20+ entries in a single observation window) — the extension is in an auto-reconnect loop where each new connection completes the WebSocket handshake but fails to send a valid `{type: "pair", code: ...}` message within `WS_AUTH_TIMEOUT_MS = 5000` (`main/constants.js:47`). The 5s window is sized for an automated re-auth using a stored token, NOT for a human entering a code through the extension popup. Without a wider window for first-time pairing, the entire connector surface is dead.
-- **Prerequisites:** None. Independent of all active sprints. Parallel-safe (Lane D — main-process only).
-- **Baseline:** clean `main` at v1.75.1 or later.
-- **Lane Ownership:** Lane D (Platform / Main process — `main/ws-server.js`, `main/constants.js`).
-- **Forbidden During Parallel Run:** no `src/` renderer edits, no IPC contract changes, no `Settings*` component touches.
-- **Shared-Core Touches:** none.
-- **Merge Order:** independent; safe to land any time.
-- **WHERE (read order):**
-  1. `main/ws-server.js` — `handleConnection()` (lines 105-177) for the auth timer init at line 154; `handleMessage()` (lines 219-294) for pair-vs-auth message handling, with the pair path at line 229-254 and the auth path at line 257-275.
-  2. `main/constants.js` line 47 (`WS_AUTH_TIMEOUT_MS = 5000`) and line 43 (`SHORT_CODE_TTL_MS = 5 * 60 * 1000`).
-  3. The Chrome extension's popup code if separately tracked (search for `EXT-*` close-outs first; `CloseOut.HOTFIX-14.*.md` for the BUG-155–158 connection-history precedent).
-  4. `src/components/settings/ConnectorsSettings.tsx` for the renderer-side pairing UI.
-- **Tasks:**
-  1. `[aristotle/opus]` (read-only diagnosis, ~10 min) Instrument `handleConnection` with a temporary console log capturing every byte received from the client before the auth timer fires. Capture ONE full handshake attempt from a user-driven Pair click. Verify hypothesis A (timeout too short for user paste-and-click) vs. B (extension never sends pair message at all) vs. C (extension sends pair with wrong field shape). Output: `docs/governance/close-outs/Aristotle.EXT-PAIR-1.{date}.md` documenting the captured exchange.
-  2. `[hercules/sonnet, electron-scope]` Per Aristotle's finding:
-     - If hypothesis A (timeout): Add a NEW constant `WS_PAIRING_TIMEOUT_MS = 5 * 60 * 1000` in `main/constants.js`. In `main/ws-server.js` `handleConnection` line 154, initialize the auth timer at `WS_PAIRING_TIMEOUT_MS` for the pre-paired window. In `handleMessage` (after the first valid pair-or-auth message lands and `client.authenticated = true`), the timer is already cleared (lines 243 + 264) — so the wider initial window only applies until the first message arrives. For ALREADY-paired clients sending `{type: "auth", ...}` immediately, the tighter 5s window is functionally preserved (auth-or-die in 5s STILL fires if they don't send anything; but since they send immediately, no behavioral change).
-     - Alternative if hypothesis A fix feels too permissive: keep `WS_AUTH_TIMEOUT_MS = 5000` for the IDLE post-connect window, but RESET the timer to `WS_PAIRING_TIMEOUT_MS` after the first valid (but unauthenticated) pair-attempt message — e.g., on receipt of `{type: "pair", code: "<invalid>"}`, give the user another window to retry. Aristotle's memo decides between these two approaches.
-     - If hypothesis B/C (extension protocol bug): fix the extension's popup `Pair` button handler to send `{type: "pair", code: "<6 digits>"}` correctly. Document the protocol in `docs/governance/CONNECTORS.md` (create if absent — short doc, just the pair/auth message shapes).
-  3. `[hercules/sonnet, electron-scope]` Replace the silent `console.log("[ws-server] Auth timeout — disconnecting unauthenticated client")` with a structured log that includes `client.remoteAddr`, elapsed-ms since connect, and `client.buffer.length` so future debugging shows whether anything was received. Also add an info-level log on successful pair-ok and auth-ok (currently silent).
-  4. `[hippocrates/haiku]` Add `tests/wsServerAuth.test.js` with the WS server's state machine driven via mock sockets. Assert: (a) connect then send valid pair within `WS_PAIRING_TIMEOUT_MS` → succeeds; (b) connect then nothing within `WS_PAIRING_TIMEOUT_MS` → socket destroyed; (c) connect then send valid auth (post-paired path) within `WS_AUTH_TIMEOUT_MS` → succeeds; (d) connect then send invalid pair code → server replies `pair-failed` and connection remains until pairing timeout. Run `npm test` — must remain green.
-  5. `[manual smoke test]` After merge + dev launch: open extension popup, enter the displayed 6-digit code, click Pair. Confirm handshake succeeds within 30s. Reopen extension within `SHORT_CODE_TTL_MS` (5 min) to confirm stored-token re-auth path still uses the tighter 5s window (extension auto-auths cleanly without retyping). Confirm terminal does NOT flood with `Auth timeout` lines after fix.
-  6. `[marcusaurelius/sonnet]` Docs pass: close BUG-183 in `BUG_REPORT.md`, update CLAUDE.md open-bugs line, ROADMAP Completed Work Summary, `sprint-queue.xlsx` Catalog (mark Completed, populate close-out reference, recalc). Auto-merge.
-- **Execution Sequence:** Wave A: Aristotle diagnosis. Wave B: Hercules implementation (tasks 2 + 3) + Hippocrates tests + manual smoke + MarcusAurelius docs. Aristotle gates Wave B.
-- **Done when (SUCCESS CRITERIA):**
-  1. User-driven Pair click in the extension popup successfully completes handshake within 30s of WebSocket connection (verified by manual smoke).
-  2. Terminal no longer floods with `Auth timeout` while the extension popup is open and the user is in the process of pairing.
-  3. The post-paired auth path retains the tight 5s window — verified by Hippocrates fixture (c).
-  4. `npm test` green including new `wsServerAuth.test.js`; `npm run build` green; `npm run typecheck` green.
-  5. BUG-183 closed in `BUG_REPORT.md` with resolution evidence.
-- **Effort:** S–M. Investigation gate (Aristotle) then small-to-medium fix.
-- **Roster:** Zeus → Aristotle • Hercules • Hippocrates • MarcusAurelius.
-- **Source:** BUG-183 (filed 2026-05-28); `main/ws-server.js:154-160`; `main/constants.js:47`; terminal observation flood (20+ Auth timeout entries within seconds of 2026-05-28 dev launch).
-
-##### Implementation detail
-
-- **Edit sites:** `main/ws-server.js` lines 154-160 (auth timer init in `handleConnection`); `handleMessage` lines 219-294 if Aristotle finds the alt-approach (reset timer on first pair attempt) wins. `main/constants.js` after line 47 (add `WS_PAIRING_TIMEOUT_MS`). `tests/wsServerAuth.test.js` (new). Potentially the Chrome extension popup handler if Aristotle confirms hypothesis B/C.
-- **Tests:** `tests/wsServerAuth.test.js` (new — 4 fixtures per Task 4). Existing `npm test` (3,005 tests) must remain green.
-- **Constants:** Add `WS_PAIRING_TIMEOUT_MS = 5 * 60 * 1000` (5 minutes, matches `SHORT_CODE_TTL_MS`). Keep `WS_AUTH_TIMEOUT_MS = 5000` for the post-paired auth path.
-- **Branch:** `sprint/ext-pair-1` from clean `main`. May split into wave-a (Aristotle) and wave-b (implementation) if combined exceeds 40 tool uses.
-- **Commit hygiene:** Explicit-stage. Aristotle's diagnosis memo is its own commit; implementation is another. No destructive flags.
-- **Cal cadence:** N/A (no TTS quality impact).
-
----
-
-#### SINGLE-INSTANCE-LOCK-1 — Electron Main-Process Single-Instance Gate *(position 3 — full spec)*
+#### SINGLE-INSTANCE-LOCK-1 — Electron Main-Process Single-Instance Gate *(position 1 — full spec)*
 
 - **What:** Add `app.requestSingleInstanceLock()` + the standard `second-instance` event handler to Blurby's Electron main process bootstrap so that a second launcher invocation focuses the existing window instead of spawning a duplicate `BrowserWindow`.
 - **Why:** Confirmed reproducer 2026-05-28 — Evan launched Blurby twice from the Start menu and two independent windows opened. Previously documented in the 2026-05-27 live-QA discovery sweep as "F1" (MEDIUM, ~5 LOC fix). On v1.75.1 the main process does not implement a single-instance lock, so each launcher invocation spawns a new window with its own state. During the 2026-05-27 sweep three concurrent windows accumulated from rapid `open_application` calls and the third spawned blank (no associated state), which is alarming UX even if rare. The fix is the canonical Electron pattern and costs ~5 lines.
@@ -209,7 +163,7 @@ The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs;
 
 ---
 
-#### THEME-SYNC-1 — Settings Theme Propagation + Vite Circular Chunk Repair *(position 4 — full spec)*
+#### THEME-SYNC-1 — Settings Theme Propagation + Vite Circular Chunk Repair *(position 2 — full spec)*
 
 - **What:** Resolve BUG-182 (Settings panel does not fully repaint on light↔dark theme toggle) by (a) breaking the `settings -> tts -> settings` circular chunk identified by `npm run build` 2026-05-28, and (b) auditing theme-context subscription across Settings sub-pages to confirm clean propagation after the chunk fix. The circular chunk is the leading hypothesis for the theme bug — circular imports across Vite chunks produce nondeterministic module-init order, which can leave context providers (theme included) wired to stale subscriptions on first paint after a toggle.
 - **Why:** BUG-182 (filed 2026-05-28) — Evan reported the Settings panel shows mixed light/dark widgets after theme toggle, with screenshot evidence in conversation. Concurrent observation: `npm run build` 2026-05-28 emitted `Circular chunk: settings -> tts -> settings. Please adjust the manual chunk logic for these chunks.` Both findings touch the Settings × TTS overlap. Bundling the fix because (1) the circular chunk is a plausible root cause of the theme repaint bug, and (2) the chunk warning is real hygiene debt that should be cleared either way. Settings is a frequently-visited surface; visual inconsistency degrades trust.
@@ -255,7 +209,7 @@ The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs;
 
 ---
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 5 — full spec; promoted from stub 2026-05-28 after READER-ISO-1E shipped)*
+#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 3 — full spec; promoted from stub 2026-05-28 after READER-ISO-1E shipped)*
 
 - **What:** Make the currently-playing audio source's real word position (via `audioScheduler.getPlayingSourceMaxWordIndex(now)` at `src/utils/audioScheduler.ts:521`) the SINGLE source of truth for (a) the visual cursor's advance and (b) every chunk re-entry / continuation seeding decision in Narrate mode. Retire the ahead-of-heard refs (`lastConfirmedAudioWordRef` at `useNarration.ts:187`, `nextGenWordIndexRef` at `useNarration.ts:188`) as seed sources where the closed loop makes them redundant. Retire the accumulating-error lag-escalation constants (120→220→350→450 ms ladder, ceiling clamp). Bound the prefetch window so the schedule cannot run hundreds of seconds ahead of audible playback (DEV log captured ~227s drift). Closes the unified Bug 1 (visual cursor lead) + Bug 2 (content omission at re-entry) defect that Step 3.6 proved are one root cause.
 - **Why:** The persistent-anchor repair lane (Steps 3.1–3.6) closed in late May with this single residual defect: the system has no signal for what has actually been spoken. Every cursor advance and every re-entry seed derives from either the predicted boundary schedule (`audioScheduler.ts` tick at `audioCtx.currentTime − lag`, line ~949) or from the produced-end of generation (`nextGenWordIndexRef`), both of which are "ahead-of-heard" — the whole book is prefetched. The 450ms lag and Step 3.5 source-clamp cap the lead but don't remove the structural ahead-of-heardness, so (1) the cursor advances ahead of audio audibly in The Raven and prose, and (2) at section handoffs / stalls / resumes, playback continues from a position ahead of what Evan actually heard, dropping words (Step 3.6: Evan did not hear "This it is and nothing more."). SRL-070 explicitly forbids closing this gate on self-referential telemetry (boundary-drift, schedule-vs-wallclock); only Evan's ear closes it. SRL-072 forbids iterating on the ahead-of-heard refs themselves; the loop must be closed at the cursor and re-entry seed level. This sprint was deliberately deferred until READER-ISO-1E (`NarrateModeAdapter` + audio truth-sync ownership, shipped 2026-05-27) created a clean adapter boundary so the scheduler surgery doesn't simultaneously cross a refactoring boundary.
@@ -324,13 +278,13 @@ The eager-spec buffer of 4 dispatchable sprints (positions 1–4 are full specs;
 
 ---
 
-#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 5 — stub)*
+#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 4 — stub)*
 
 Library card 3-line format, "New" dot auto-clear, Ctrl+K command palette entries, and Space bar starts the last-used reading mode after reader runtime controls are stable. Will be full-specced at next /roadmap-review when buffer needs replenishment after the position-1 sprint completes. Notes: 3-line format = title / author / progress%-and-time-left; "New" dot is the unread indicator on freshly-imported docs; command palette entries should include the existing import paths (Folder, URL, Drop), the mode switches (Focus/Flow/Narrate), and a recent-docs jump. Coordinate with Hotkey Map (existing Settings panel section) to avoid hotkey collisions.
 
 ---
 
-#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 6 — stub)*
+#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 5 — stub)*
 
 Per SRL-080 + Evan's 2026-05-28 disposition. Three tasks: (a) manually rebuild the Dashboard tab's formula-driven KPIs in Excel (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag) per the /roadmap-review skill's "Sprint queue spreadsheet structure" reference; (b) extend `scripts/recalc.py` with a guardrail — refuse to operate on cells whose worksheet name matches `Dashboard`, with `--allow-dashboard` as an explicit opt-out; (c) document the convention in `CLAUDE.md` (or a new `docs/governance/SPREADSHEET_CONVENTIONS.md`) — openpyxl edits the Catalog tab only; Excel computes Dashboard from Catalog. LOE: XS. Lane E (governance tooling). No code surface, no shared-core touches. Parallel-safe with every other queued sprint. Will be full-specced when the queue head reaches it (likely after one of the hotfix sprints ships).
 
@@ -361,11 +315,11 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-05-28
+last_review: 2026-05-29
 finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md
 sprint_queue_doc: docs/governance/sprint-queue.xlsx
 buffer_target: 5
-buffer_actual_full_specs: 5
-buffer_actual_stubs: 1
+buffer_actual_full_specs: 3
+buffer_actual_stubs: 2
 -->

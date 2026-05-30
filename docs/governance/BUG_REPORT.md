@@ -2,7 +2,7 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-05-28
+**Last updated:** 2026-05-29
 
 ---
 
@@ -11,19 +11,10 @@
 ### BUG-183 — Chrome extension cannot pair with Blurby desktop (auth handshake timeout)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
 **Severity:** MEDIUM (Chrome extension surface is unusable; not core reader)
-**Status:** OPEN
-**Location:** `main/ws-server.js` (auth handshake), `src/components/settings/ConnectorsSettings.tsx`, Chrome extension source (separate repo / tree)
-**Description:** Pairing the Chrome extension with the Blurby desktop fails end-to-end. Blurby shows the "Chrome Extension wants to connect — Enter code: 340780" banner; the extension popup displays the same 6-digit input field and a "Pair" button but reports "Not connected to Blurby desktop" / "Not running." Submitting the code from the extension does not complete the handshake. Terminal shows `[ws-server] Auth timeout — disconnecting unauthenticated client` repeating continuously (20+ entries observed during a single observation window) — the extension is attempting to connect on a tight retry loop, each attempt failing auth.
-**Evidence:** Three observations in one session (2026-05-28): (a) extension popup "Not connected" state, (b) Blurby's request banner remaining un-acted-upon, (c) terminal log flooding with auth timeouts. Repro on freshly-rebuilt v1.75.1 source.
-**Root cause hypothesis (unverified):** Three plausible causes:
-- (a) WS-server auth timeout window is too short for the extension's current handshake protocol;
-- (b) The Chrome extension's stored build is on an older auth protocol than the current desktop expects (extension-side stale build, analogous to the BUG-176/178/179/180/181 desktop-side pattern);
-- (c) The extension's "Pair" button submits the code through a path the desktop doesn't accept (UI-vs-IPC mismatch in `ConnectorsSettings.tsx`).
-**Fix path (CLI-spec-ready after investigation):**
-1. (Aristotle, read-only) Trace one full handshake attempt: extension's `connect()` → desktop's `ws-server.js` accept → auth message exchange → timeout. Identify which side breaks. Log the actual auth payload the extension sends vs. what the server expects.
-2. Decide between extension-rebuild fix (if stale-protocol root cause) vs. desktop-side handshake widening (if timeout too tight) vs. UI-side reroute (if the Pair button is broken).
-3. Regression test: a unit fixture for the desktop's accept-or-reject auth path; a manual smoke pass for the extension's Pair flow.
-**Severity rationale:** The reader works without the extension. But the entire connector surface is dead until this is fixed; if users rely on the extension as their import path they're blocked.
+**Status:** RESOLVED (2026-05-29, EXT-PAIR-1 sprint — root cause: `WS_AUTH_TIMEOUT_MS = 5000` too short for human code entry; fix: added `WS_PAIRING_TIMEOUT_MS = 300000` (5 min) as initial auth window, matching `SHORT_CODE_TTL_MS`; verified by 8 new unit tests in `tests/wsServerAuth.test.js`; awaits manual smoke test post-rebuild)
+**Location:** `main/ws-server.js` (auth handshake), `main/constants.js`
+**Root cause:** Hypothesis A confirmed — the 5s `WS_AUTH_TIMEOUT_MS` window was designed for the post-paired auto-auth path (extension sends stored token immediately on connect), but was applied uniformly to ALL connections including first-time pairing. First-time pair connections send no message on open (service-worker.js:45-48 only sends auth if a stored token exists), so the server killed them after 5s. The extension's auto-reconnect loop (1s → 2s → 4s backoff) created the terminal flood.
+**Resolution evidence:** `Aristotle.EXT-PAIR-1.2026-05-29.md` (diagnosis); `tests/wsServerAuth.test.js` fixtures (a)-(d) all pass; `npm test` green (3,014 tests).
 
 ### BUG-182 — Settings panel does not track theme switch (light↔dark)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)
