@@ -27,6 +27,7 @@ import {
 import type { TtsCacheIdentity, TtsCacheIdentityV2, TtsCacheWriteTimingMetadata } from "../../types/ttsCache";
 import type { TtsProviderWordBoundaryCallback } from "../../types/ttsProvider";
 import { filterSpokenWords, isPunctuationOnlyWord } from "../../utils/spokenWordFilter";
+import { logDualSourceTransition } from "../../utils/dualSourceDiag";
 
 const api = window.electronAPI;
 
@@ -93,6 +94,13 @@ export interface KokoroStrategy extends TtsStrategy {
   getPreflightStatus: () => KokoroPreflightStatus | null;
   /** TTS-7Q: Continuous audio-progress report for smooth visual overlay. */
   getAudioProgress: () => AudioProgressReport | null;
+  /**
+   * NARRATE-DUAL-SOURCE-DIAG-1 (Wave B): Oracle passthrough.
+   * Returns the max word index of the currently-playing audio source (the "heard floor").
+   * Delegates to audioScheduler.getHeardFloorWordIndex().
+   * DIAGNOSTIC ONLY — no production consumers are wired in this sprint.
+   */
+  getHeardFloorWordIndex: () => number | null;
 }
 
 type WordTimestamp = { word: string; startTime: number; endTime: number };
@@ -554,6 +562,13 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
     },
 
     resume() {
+      // NARRATE-DUAL-SOURCE-DIAG-1 (Wave B): Instrument bare-resume path inside the engine.
+      // Branch (c) in useNarration does not reseed any refs — so if A4 fires here,
+      // the cause lives inside this resume path (scheduler state, AudioContext, pipeline).
+      logDualSourceTransition("resume:bare:kokoro-engine", () => ({
+        source: "kokoroStrategy.resume",
+        heardFloor: scheduler.getHeardFloorWordIndex(),
+      }));
       pipeline.resume(); // TTS-7B: Flush buffered chunks first
       scheduler.resume();
     },
@@ -593,6 +608,10 @@ export function createKokoroStrategy(deps: KokoroStrategyDeps): KokoroStrategy {
 
     getAudioProgress() {
       return scheduler.getAudioProgress();
+    },
+
+    getHeardFloorWordIndex() {
+      return scheduler.getHeardFloorWordIndex();
     },
   };
 }

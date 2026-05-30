@@ -1,0 +1,54 @@
+NARRATE-DUAL-SOURCE-DIAG-1 — Live-QA Gate Replay Logs
+Branch: sprint/narrate-dual-source-diag-1 (Wave B instrumented build)
+Date: 2026-05-29
+Fixtures: The Raven (A1/A4), Why Nations Fail (optional cross-check)
+Flag: localStorage.BLURBY_DUAL_SOURCE_DIAG = '1'
+
+INSTRUCTIONS
+  1. Launch:  npm run electron:dev
+  2. DevTools: Ctrl+Shift+I -> Console tab
+  3. Enable:  localStorage.setItem('BLURBY_DUAL_SOURCE_DIAG','1')  then reload (Ctrl+R)
+  4. Filter the console to show:  [DUAL-SOURCE-DIAG]   (also keep [TTS-7M] visible)
+  5. Run each gate item below; paste the relevant console lines under it.
+  6. Record Evan's by-ear verdict (PASS / FAIL / PARTIAL) for each.
+
+================================================================================
+A1 — HARD-CLICK EXACT START (regression check)
+  Action: click a known word mid-text to start narration at that exact word.
+  Expected: audio begins on the clicked word.
+  Evan verdict: ____________
+  --- console ([DUAL-SOURCE-DIAG] + [TTS-7M]) ---
+
+
+================================================================================
+A4 — PAUSE -> WAIT 3s -> PLAY  (run THREE times in a row — the gate-blocking failure)
+  Action: play; pause mid-stanza on a known word (e.g. "darkness"/"Lenore");
+          wait 3s; press play. Note the resume word vs the pause word.
+  PASS criterion: 3-of-3 resumptions within +/-2 words of pause position.
+  Watch specifically for: resumeAnchor:set value, resumeAnchor:active-skip pinned at 0,
+  and whether a resumeAnchor:consumed event EVER fires on resume (its ABSENCE is the
+  reader-layer-root-cause smoking gun). Also note resume:cursor-mismatch / :handoff-pending
+  / :bare path IDs and the seed value each carries.
+
+  --- A4 cycle 1 ---  pause word: ______  resume word: ______  verdict: ______
+
+
+  --- A4 cycle 2 ---  pause word: ______  resume word: ______  verdict: ______
+
+
+  --- A4 cycle 3 ---  pause word: ______  resume word: ______  verdict: ______
+
+
+================================================================================
+A5 — RATE CHANGE WHILE PLAYING  (gate-blocking)
+  Action: play; change WPM 175 -> 250; listen for skip/jump.
+  PASS criterion: position holds (no skip) per Evan's ear.
+  Watch for: applyRateChange:kokoro-bucket seed value vs heardFloor.
+  Evan verdict: ____________
+  --- console ([DUAL-SOURCE-DIAG] + [TTS-7M]) ---
+
+
+================================================================================
+NOTES / ANOMALIES (anything Evan heard or saw that the gate items don't cover):
+
+

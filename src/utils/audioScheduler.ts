@@ -12,6 +12,7 @@ import type { KokoroPlaybackSegmentMetadata } from "../types/narration";
 import type { TtsProviderTimingTruth } from "../types/ttsProvider";
 import { createTimingMetadataRecord, type TimingMetadataRecord } from "./timingMetadataStore";
 import { isPunctuationOnlyWord } from "./spokenWordFilter";
+import { logDualSourceTransition } from "./dualSourceDiag";
 
 // NARR-FIX-3: getOutputTimestamp() was tried (NARR-FIX-2) but reports only
 // ~57ms on Windows. The real Electron/WASAPI pipeline latency is ~350ms.
@@ -235,6 +236,16 @@ export interface AudioScheduler {
    * IMPORTANT: The returned wordIndex is the canonical audio cursor — not the visual band.
    */
   getAudioProgress: () => AudioProgressReport | null;
+  /**
+   * NARRATE-DUAL-SOURCE-DIAG-1 (Wave B): Oracle — returns the max word index of the
+   * currently-playing audio source (i.e., the highest word that has been *heard*).
+   * Wraps getPlayingSourceMaxWordIndex(audioCtx.currentTime).
+   * Returns null when no source is active or no boundaries are known.
+   *
+   * DIAGNOSTIC ONLY — no production consumers are wired in this sprint.
+   * Remove in Wave C after the investigation is complete.
+   */
+  getHeardFloorWordIndex: () => number | null;
 }
 
 // ── Implementation ───────────────────────────────────────────────────────────
@@ -993,6 +1004,26 @@ export function createAudioScheduler(): AudioScheduler {
     };
   }
 
+  /**
+   * NARRATE-DUAL-SOURCE-DIAG-1 (Wave B): Oracle wrapper.
+   * Returns the max word index of the currently-playing audio source
+   * (the "heard floor" — the last word that has been confirmed playing).
+   * Wraps the closure-private getPlayingSourceMaxWordIndex() so the
+   * narration hook can call it for diagnostic logging without touching
+   * any production decision path.
+   *
+   * DIAGNOSTIC ONLY — no production consumers are wired in this sprint.
+   */
+  function getHeardFloorWordIndex(): number | null {
+    if (!audioCtx) return null;
+    const result = getPlayingSourceMaxWordIndex(audioCtx.currentTime);
+    logDualSourceTransition("getPlayingSourceMaxWordIndex:query", () => ({
+      playingSourceMax: result,
+      heardFloor: result,
+    }));
+    return result;
+  }
+
   return {
     warmUp,
     scheduleChunk,
@@ -1006,5 +1037,6 @@ export function createAudioScheduler(): AudioScheduler {
     markPipelineDone,
     getContext,
     getAudioProgress,
+    getHeardFloorWordIndex,
   };
 }

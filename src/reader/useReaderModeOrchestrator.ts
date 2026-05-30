@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useReaderMode, type UseReaderModeParams } from "../hooks/useReaderMode";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 import type { ReaderMode } from "../types";
 
 function toCompatibilityMode(mode: ReaderMode): "page" | "focus" | "flow" {
@@ -126,6 +127,11 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
         setHighlightedWordIndex(pageStart);
         highlightedWordIndexRef.current = pageStart;
         resumeAnchorRef.current = pageStart;
+        // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (useReaderModeOrchestrator — pause-to-page)
+        logDualSourceTransition("resumeAnchor:set", () => ({
+          resumeAnchor: pageStart,
+          source: "useReaderModeOrchestrator:handlePauseToPage",
+        }));
       }
       setIsBrowsedAway(false);
     }

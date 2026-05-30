@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { TTS_WPM_CAP, FOLIATE_SECTION_LOAD_WAIT_MS, FOCUS_MODE_START_DELAY_MS } from "../constants";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 import { resolveFoliateStartWord, resolveModeStartWordIndex } from "../utils/startWordIndex";
 import type { BlurbySettings, ReaderMode } from "../types";
 import type { PauseReason } from "../types/narration";
@@ -244,6 +245,11 @@ export function useReaderMode({
       explicitSelectionAnchorRef.current = null;
     }
     resumeAnchorRef.current = startAnchor;
+    // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (useReaderMode — mode-change)
+    logDualSourceTransition("resumeAnchor:set", () => ({
+      resumeAnchor: startAnchor,
+      source: "useReaderMode:mode-change",
+    }));
 
     return startAnchor;
   }, [explicitSelectionAnchorRef, persistentWordIndexRef, resumeAnchorRef, softWordIndexRef]);
