@@ -2,7 +2,7 @@
 
 **Purpose:** Full specs for all completed sprints, extracted from `ROADMAP.md` to keep the roadmap forward-looking. Reference only — do not modify.
 
-**Last archived:** 2026-05-28
+**Last archived:** 2026-05-29
 
 ---
 
@@ -4616,3 +4616,22 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
     4. `SINGLE-INSTANCE-LOCK-1` Catalog row updated to `LOE = XS`
 - **Effort:** S
 - **Roster:** Zeus → Hercules • Hermes • Hippocrates • MarcusAurelius
+
+## EXT-PAIR-1 — Chrome Extension Pairing Auth Timeout Repair *(completed 2026-05-29)*
+
+- **What:** Repair the Chrome extension pairing flow — the 5s `WS_AUTH_TIMEOUT_MS` was too short for human code entry, causing the extension's auto-reconnect loop to flood terminal with auth timeouts.
+- **Why:** BUG-183 — extension popup shows pairing UI but the WebSocket connection was killed by the server before the user could type the 6-digit code and click Pair.
+- **Root cause:** Hypothesis A confirmed (code-reading trace in `Aristotle.EXT-PAIR-1.2026-05-29.md`). Extension service-worker sends no message on first-time-pair connect; server applies 5s auth timeout uniformly.
+- **Lane Ownership:** Lane D (Platform — `main/ws-server.js`, `main/constants.js`). No renderer/runtime code.
+- **Shared-Core Touches:** none.
+- **Deliverables:**
+    1. `WS_PAIRING_TIMEOUT_MS = 5 * 60 * 1000` added to `main/constants.js` (matches `SHORT_CODE_TTL_MS`)
+    2. `handleConnection` auth timer changed from `WS_AUTH_TIMEOUT_MS` to `WS_PAIRING_TIMEOUT_MS`
+    3. Structured logging: auth timeout includes `remote`, `elapsed`, `buffered`; pair-ok and auth-ok log elapsed time
+    4. `safeStorage` usage made defensive with optional chaining
+    5. `handleConnection` and `handleMessage` exported for testing with `_testSetState`/`_testGetClients` helpers
+    6. `tests/wsServerAuth.test.js` — 8 tests covering auth timeout state machine (4 spec fixtures + 4 extra)
+    7. Aristotle diagnosis memo: `docs/governance/close-outs/Aristotle.EXT-PAIR-1.2026-05-29.md`
+    8. BUG-183 closed in BUG_REPORT.md
+- **Effort:** XS-S
+- **Roster:** Zeus → Aristotle (diagnosis) • Hercules (implementation) • Hippocrates (tests) • MarcusAurelius (docs)
