@@ -602,3 +602,10 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** For Electron CommonJS modules, expose narrow test seams for state-machine logic and guard runtime-dependent Electron APIs defensively. Use global Electron mocks only as a last resort, and do not rely on them as the sole proof for module-cache-sensitive behavior.
 **Applies to:** Electron main-process tests, CommonJS modules, WebSocket server tests, runtime-dependent Electron APIs such as `safeStorage`.
 **Status:** Observation. Promotion candidate if another Electron/CJS test seam hits the same module-cache fragility.
+
+### SRL-083 — Electron lifecycle handlers belong inside the single-instance owner branch (SINGLE-INSTANCE-LOCK-1, 2026-05-29)
+**Verdict:** Once an Electron app adopts `app.requestSingleInstanceLock()`, lifecycle handlers that create, restore, focus, or tear down windows should be registered only by the primary lock owner.
+**Evidence:** SINGLE-INSTANCE-LOCK-1 wrapped `whenReady`, `window-all-closed`, `will-quit`, and `activate` behavior inside the lock-owner branch. The second process exits after failing the lock and never registers duplicate lifecycle handlers.
+**Recommendation:** Future main-process lifecycle additions should go inside the primary-instance `else` branch unless they are intentionally needed before the lock check. Treat pre-lock handlers as exceptional and document the reason inline.
+**Applies to:** Electron main-process lifecycle, single-instance lock, `BrowserWindow` creation/focus, app activation handlers.
+**Status:** Observation.

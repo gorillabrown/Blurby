@@ -24,7 +24,7 @@ No single-instance lock was implemented. Each `main.js` invocation independently
 
 - `npm test` green: 3,014 tests pass (0 new — behavior verified by manual smoke)
 - `npm run build` green (pre-existing `Circular chunk` warning is BUG-182, not from this sprint)
-- Manual smoke test deferred to Evan post-merge (SUCCESS CRITERIA #5)
+- Manual smoke test PASS (Evan confirmed post-merge): launch once, launch again from Start menu, only one window remains and the existing window focuses/restores.
 
 ## Files Changed
 
