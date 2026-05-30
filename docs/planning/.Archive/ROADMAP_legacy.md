@@ -4650,3 +4650,20 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
     3. All lifecycle handlers (`whenReady`, `window-all-closed`, `will-quit`) wrapped in the `else` block
 - **Effort:** XS
 - **Roster:** Zeus → Hermes (implementation) • Hippocrates (test/build) • MarcusAurelius (docs)
+
+---
+
+## THEME-SYNC-1 — Settings Theme Propagation + Vite Circular Chunk Repair *(completed 2026-05-29)*
+
+- **What:** Resolved the Vite build's `Circular chunk: settings -> tts -> settings` warning by tracing the bidirectional chunk dependency and moving 5 shared TTS-adjacent modules to the TTS chunk explicitly.
+- **Why:** BUG-182 — Settings panel showed mixed light/dark widgets after theme toggle. The circular chunk was the leading hypothesis for nondeterministic module-init order causing theme context issues.
+- **Root cause:** Five utility modules (`kokoroStatus`, `qwenStatus`, `kokoroRatePlan`, `ttsProviderRegistry`, `tempoStretch`) were imported by both TTS-chunk and settings-chunk files. Rollup assigned them to the settings chunk, creating tts→settings edges that formed the cycle.
+- **Lane Ownership:** Lane C (UI) + Lane B/E (build config — `vite.config.js`). No runtime/main-process code.
+- **Shared-Core Touches:** none.
+- **Deliverables:**
+    1. `vite.config.js` — added `kokoroStatus`, `qwenStatus`, `kokoroRatePlan`, `ttsProviderRegistry`, and `audio/` to the TTS chunk matcher
+    2. Investigation memo: `docs/studies/investigations/THEME-SYNC-1-investigation.md`
+    3. BUG-182 marked RESOLVED (pending smoke test) in BUG_REPORT.md
+- **SettingsContext hypothesis: DISPROVED.** SettingsContext plays no role in the cycle.
+- **Effort:** S (spec'd S, executed as S — investigation was heavier than the 1-line fix)
+- **Roster:** Zeus → Aristotle (diagnosis via agent) • Hermes (chunk fix) • Hippocrates (test/build) • MarcusAurelius (docs)

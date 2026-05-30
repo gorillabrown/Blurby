@@ -25,7 +25,9 @@ export default defineConfig({
           }
 
           // TTS chunk — Kokoro strategy, narration hooks, audio utilities
-          // Grouped because these are loaded only when narration is active
+          // Grouped because these are loaded only when narration is active.
+          // kokoroRatePlan, ttsProviderRegistry, and audio/ are listed explicitly
+          // to prevent a circular chunk (settings imports them too via ttsPreview/TTSSettings).
           if (
             id.includes("src/hooks/narration/") ||
             id.includes("src/hooks/useNarration") ||
@@ -36,6 +38,11 @@ export default defineConfig({
             id.includes("src/utils/narrationContinuity") ||
             id.includes("src/utils/narrationPortability") ||
             id.includes("src/utils/audioPlayer") ||
+            id.includes("src/utils/audio/") ||
+            id.includes("src/utils/kokoroRatePlan") ||
+            id.includes("src/utils/ttsProviderRegistry") ||
+            id.includes("src/utils/kokoroStatus") ||
+            id.includes("src/utils/qwenStatus") ||
             id.includes("src/utils/pauseDetection") ||
             id.includes("src/utils/pronunciationOverrides") ||
             id.includes("src/utils/voiceSelection") ||
