@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-29 — THEME-SYNC-1 completed (Vite circular chunk fix + theme investigation). 1 full spec queued (NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE). **Next dispatch: NARRATE-CLOSED-LOOP-CURSOR**.
-**Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
-**Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1), (2) closed-loop cursor lands (NARRATE-CLOSED-LOOP-CURSOR), (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1, THEME-SYNC-1, SINGLE-INSTANCE-LOCK-1), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: YELLOW — depth 3 (1 full spec at position 1; 2 stubs at positions 2-3). **Conveyor belt order: NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Position 1 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
-**Last sprint**: THEME-SYNC-1 (2026-05-29) — Vite circular chunk fix + theme investigation.
+**Last updated**: 2026-05-29 — NARRATE-CLOSED-LOOP-CURSOR dissolved (live-QA A4 FAIL proved half-step insufficient); ULTRATHINK + Evan's two-cursor framing produced 5-sprint unification sequence. 5 full specs queued (NARRATE-DUAL-SOURCE-DIAG-1 → INTENT-CURSOR-1 → PAUSE-RESUME-UNIFY-1 → APPLYRATECHANGE-COLLAPSE-1 → SUBSCRIBER-CURSOR-1) + 2 stubs (UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE). **Next dispatch: NARRATE-DUAL-SOURCE-DIAG-1** (1-day investigation that validates the dual-source diagnosis before the 4 implementation sprints commit).
+**Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine — Kokoro-only is now an explicit design constraint (the unification deletes dormant-engine reseed code rather than preserving it). MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
+**Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1, ✓ shipped), (2) **narration dual-source unification complete (NARRATE-DUAL-SOURCE-DIAG-1 through NARRATE-SUBSCRIBER-CURSOR-1)**, (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1 ✓, THEME-SYNC-1 ✓, SINGLE-INSTANCE-LOCK-1 ✓), (4) UX polish lands (UX-POLISH-1 + downstream).
+**Queue**: GREEN — depth 7 (5 full specs at positions 1-5; 2 stubs at positions 6-7). Buffer at target (5 full specs). **Conveyor belt order: NARRATE-DUAL-SOURCE-DIAG-1 → NARRATE-INTENT-CURSOR-1 → NARRATE-PAUSE-RESUME-UNIFY-1 → NARRATE-APPLYRATECHANGE-COLLAPSE-1 → NARRATE-SUBSCRIBER-CURSOR-1 → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Positions 1-5 all touch the shared-core freeze set and MUST run sequentially (no parallel dispatch in this window). Position 6+ can resume parallel scheduling.
+**Last sprint**: THEME-SYNC-1 (2026-05-29) — Vite circular chunk fix + theme investigation. NARRATE-CLOSED-LOOP-CURSOR dispatched same day; gate failed; dissolved by Evan after ULTRATHINK 2026-05-29 — see Disposition of Superseded Branches.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -61,6 +61,7 @@
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
 - `TTS-CANARY-1` — Sidecar engines dormant, canary probes unnecessary (2026-05-15)
 - `TTS-REGISTRY-DISPATCH-1` — Single active engine, registry dispatch unnecessary (2026-05-15)
+- `NARRATE-CLOSED-LOOP-CURSOR` — Half-step approach: introduced `getHeardPositionWordIndex()` oracle at `audioScheduler.ts:521,1036` but consumed it in only ONE call site (Kokoro re-entry seed). 2026-05-29 live-QA gate showed A4 FAIL ("play→pause→play restarts from book beginning") despite the oracle landing. ULTRATHINK 2026-05-29 (`docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md`) identified dual-source race (`cursorWordIndex` ⟷ `lastConfirmedAudioWordRef`) as root cause; Evan's two-cursor framing (subscriber + intent with explicit authority lifecycle) is the right destination. Superseded by `NARRATE-DUAL-SOURCE-DIAG-1` → `NARRATE-INTENT-CURSOR-1` → `NARRATE-PAUSE-RESUME-UNIFY-1` → `NARRATE-APPLYRATECHANGE-COLLAPSE-1` → `NARRATE-SUBSCRIBER-CURSOR-1`. Branch preserved at `sprint/narrate-closed-loop-cursor` commit `0f1b2c8` for reference.
 
 ---
 
@@ -116,88 +117,286 @@ Deviation protocol: a skeleton may override a standing rule only by naming the r
 
 Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred. Full specs archived to `docs/planning/.Archive/ROADMAP_2026-05-25.md`. The residual S13 Narrate cursor/content sync moved to post-isolation `NARRATE-CLOSED-LOOP-CURSOR`.
 
-#### Stage 2 — Active Conveyor Belt
+#### Stage 2 — Active Conveyor Belt — Narration Dual-Source Unification
 
-The eager-spec buffer of 1 dispatchable sprint (position 1 is full spec; positions 2-3 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. NARRATE-CLOSED-LOOP-CURSOR is the next dispatch — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. All 2026-05-28 discovery bugs closed: EXT-PAIR-1 (BUG-183), SINGLE-INSTANCE-LOCK-1 (F1), THEME-SYNC-1 (circular chunk and theme smoke for BUG-182).
+Eager-spec buffer of 5 full specs at positions 1-5 (the unification sequence) + 2 stubs at positions 6-7. The 5 unification sprints supersede the dissolved `NARRATE-CLOSED-LOOP-CURSOR` and **MUST run sequentially** — every sprint in positions 1-5 touches the shared-core freeze set (`src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`). No parallel dispatch in this window.
+
+Sequencing rationale (dependency-first → risk-first → eat-the-frog):
+- **Position 1 (DIAG-1)** is the diagnostic gate. 1 day. Validates the dual-source diagnosis before committing 4 implementation sprints. If the diagnostic REFUTES the diagnosis, positions 2-5 get respec'd against the actual root cause.
+- **Position 2 (INTENT-CURSOR-1)** introduces the intent half of the two-cursor model. Smallest implementation risk; sets up the lifecycle (SET → ACTIVE → CONSUMED → CLEARED) that later sprints depend on.
+- **Position 3 (PAUSE-RESUME-UNIFY-1)** fixes A4 directly via `resumeTargetRef` capture-at-pause. Live-QA verifiable in isolation.
+- **Position 4 (APPLYRATECHANGE-COLLAPSE-1)** collapses the 14 reseed paths into one helper. Deletes dormant-engine code per Kokoro-only constraint.
+- **Position 5 (SUBSCRIBER-CURSOR-1)** is the last and heaviest — retires `WORD_ADVANCE` reducer dispatch for word position, demotes cursor to closure ref subscription. Highest blast radius; ships last so any regression is localized.
+
+Deep architectural rationale: `docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md` (read this before dispatching DIAG-1).
+
+All 2026-05-28 discovery bugs closed: EXT-PAIR-1 (BUG-183), SINGLE-INSTANCE-LOCK-1 (F1), THEME-SYNC-1 (circular chunk and theme smoke for BUG-182).
 
 ---
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 1 — full spec; promoted from stub 2026-05-28 after READER-ISO-1E shipped)*
+#### NARRATE-DUAL-SOURCE-DIAG-1 — Validate dual-source diagnosis via instrumented gate replay *(position 1 — full spec)*
 
-- **What:** Make the currently-playing audio source's real word position (via `audioScheduler.getPlayingSourceMaxWordIndex(now)` at `src/utils/audioScheduler.ts:521`) the SINGLE source of truth for (a) the visual cursor's advance and (b) every chunk re-entry / continuation seeding decision in Narrate mode. Retire the ahead-of-heard refs (`lastConfirmedAudioWordRef` at `useNarration.ts:187`, `nextGenWordIndexRef` at `useNarration.ts:188`) as seed sources where the closed loop makes them redundant. Retire the accumulating-error lag-escalation constants (120→220→350→450 ms ladder, ceiling clamp). Bound the prefetch window so the schedule cannot run hundreds of seconds ahead of audible playback (DEV log captured ~227s drift). Closes the unified Bug 1 (visual cursor lead) + Bug 2 (content omission at re-entry) defect that Step 3.6 proved are one root cause.
-- **Why:** The persistent-anchor repair lane (Steps 3.1–3.6) closed in late May with this single residual defect: the system has no signal for what has actually been spoken. Every cursor advance and every re-entry seed derives from either the predicted boundary schedule (`audioScheduler.ts` tick at `audioCtx.currentTime − lag`, line ~949) or from the produced-end of generation (`nextGenWordIndexRef`), both of which are "ahead-of-heard" — the whole book is prefetched. The 450ms lag and Step 3.5 source-clamp cap the lead but don't remove the structural ahead-of-heardness, so (1) the cursor advances ahead of audio audibly in The Raven and prose, and (2) at section handoffs / stalls / resumes, playback continues from a position ahead of what Evan actually heard, dropping words (Step 3.6: Evan did not hear "This it is and nothing more."). SRL-070 explicitly forbids closing this gate on self-referential telemetry (boundary-drift, schedule-vs-wallclock); only Evan's ear closes it. SRL-072 forbids iterating on the ahead-of-heard refs themselves; the loop must be closed at the cursor and re-entry seed level. This sprint was deliberately deferred until READER-ISO-1E (`NarrateModeAdapter` + audio truth-sync ownership, shipped 2026-05-27) created a clean adapter boundary so the scheduler surgery doesn't simultaneously cross a refactoring boundary.
-- **Prerequisites:** READER-ISO-1E complete (met, 2026-05-27, `CloseOut.READER-ISO-1E.2026-05-27.md`). The Narrate adapter owns truth-sync lifecycle; this sprint reuses that ownership to drive heard-position into the cursor and seeds. Recommend dispatching after at least one of TTS-QUAL-CI-1 / EXT-PAIR-1 / SINGLE-INSTANCE-LOCK-1 / THEME-SYNC-1 has merged so the CI quality gate (if TTS-QUAL-CI-1 lands first) enforces no regression on Kokoro quality.
-- **Baseline:** clean `main` at v1.75.1 + READER-ISO-1A/B/C/D/E.
-- **Lane Ownership:** Lane A (Runtime Core: narration/scheduler state machine; cursor/audio-truth synchronization).
-- **Forbidden During Parallel Run:** This sprint touches the **shared-core freeze set** (`src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`, indirectly `src/components/ReaderContainer.tsx`). NO other code-changing sprint runs in parallel. Only Lane E governance work may run alongside.
-- **Shared-Core Touches:** `src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`. Both explicit and substantial.
-- **Merge Order:** This sprint is the SOLE shared-core sprint in its dispatch window. No integration window required because it stands alone.
+- **What:** One-day investigation sprint. Add structured logging to every audio-decision read in `useNarration.ts` (pause, resume, applyRateChange, speakNextChunkKokoro, resyncToCursor paths) that captures, at each transition, all six candidate position-state refs (`cursorWordIndex`, `lastConfirmedAudioWordRef.current`, `nextGenWordIndexRef.current`, `audioScheduler.getHeardPositionWordIndex()`, `audioScheduler.getHeardFloorWordIndex()`, `nextKokoroExactStartRef.current`) plus a path identifier. Re-run the prior NARRATE-CLOSED-LOOP-CURSOR live-QA gate (A1 / A4 / A5 minimum) against the instrumented build. Produce `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md` identifying — with precise per-path log evidence — which code paths read which source on each failing gate item, and confirming, partially confirming, or refuting the dual-source diagnosis from the 2026-05-29 ULTRATHINK. No production code changes ship; the logging is gated by `localStorage.BLURBY_DUAL_SOURCE_DIAG === '1'` (off in production) and the helper retains call-site discipline for future re-use.
+- **Why:** The ULTRATHINK (`docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md`) **hypothesizes** (pending this sprint's empirical validation) a dual-source race between `cursorWordIndex` (React-batched) and `lastConfirmedAudioWordRef` (closure-ref, audio-clock-aligned) as the structural root of A4 / A5 / A2-lead. The 2026-05-29 adversarial review surfaced two procedural gaps this Why-block now explicitly carries forward: (1) **A4 was observed on the dissolved branch `sprint/narrate-closed-loop-cursor` commit `0f1b2c8`, NOT on clean main v1.75.1** — the failing branch modified the resume paths (see comment at `useNarration.ts:1947` "NARRATE-CLOSED-LOOP-CURSOR: capture the heard floor BEFORE stopping the scheduler"), so A4 may be a branch-specific regression that doesn't reproduce on the baseline this sprint runs against; (2) **the existing `getHeardFloorWordIndex` oracle is consumed in 2 sites on main, not 1** (line 1202 inside `speakNextChunkKokoro` for re-entry seed AND line 1950 inside `resume`'s handoff-pending branch for handoff-resume seed) — so the unification primitive is partially deployed, not "introduced but unused." The proposed fix in positions 2-5 is structural across 4 implementation sprints. Before committing those, we need empirical confirmation that (a) the diagnosis matches an observable bug on main, and (b) the bug fires through a code path that the proposed fix actually addresses. Cost of this validation: 1 day. Cost of skipping: 4 sprints possibly committed to fix a phantom or fix the wrong mechanism. Per SRL-070, the gate is Evan's ear; per SRL-072, no iteration on the ahead-of-heard refs without first verifying their role.
+- **Prerequisites:** NARRATE-CLOSED-LOOP-CURSOR dissolved (branch preserved at `sprint/narrate-closed-loop-cursor` commit `0f1b2c8`). Live-QA fixtures (The Raven, Why Nations Fail) available in library at v1.75.1. The Raven cover at library position ~Not-Started row 1; Why Nations Fail in Reading Now.
+- **Baseline:** clean `main` at v1.75.1 (post-THEME-SYNC-1). NOT the dissolved branch.
+- **Lane Ownership:** Lane A (Runtime Core: narration state machine, scheduler read paths) — instrumentation only.
+- **Forbidden During Parallel Run:** This sprint touches the **shared-core freeze set** (`src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`) for log-only changes. Technically non-semantic, but: NO other code-changing sprint in the freeze set may run in parallel.
+- **Shared-Core Touches:** `src/hooks/useNarration.ts`, `src/utils/audioScheduler.ts`. Log-only.
+- **Merge Order:** FIRST in the unification sequence. Runs alone for its ~1-day window. Positions 2-5 sequence after this one's verdict.
 - **WHERE (read order):**
-  1. `src/utils/audioScheduler.ts` — `getPlayingSourceMaxWordIndex` at line 521 (already exists; THIS is the heard-position oracle the sprint hangs on); the lag-compensated tick path at line 949 (`const now = Math.max(0, audioCtx.currentTime - lagSec)`); the prefetch/generation surface around lines 791-807 (consumed boundaries); the source-clamp at line 982.
-  2. `src/hooks/useNarration.ts` — `lastConfirmedAudioWordRef` declared at line 187, `nextGenWordIndexRef` at line 188; writes scattered across lines 461, 631, 1072, 1086, 1157, 1165, 1244, 1304, 1483-1484, 1542-1543, 1601-1602, 1635, 1671, 1697, 1931 (full list to be enumerated in Aristotle's memo); seed READS at line 1194 (`startIdx = nextGenWordIndexRef.current` inside `speakNextChunkKokoro` at line 1187) and line 1287 (`startIdx = lastConfirmedAudioWordRef.current`); `resyncToCursor` at line 1617 (currently writes both refs based on cursorWordIndex; needs to honor heard-position as floor).
-  3. `src/hooks/narration/kokoroStrategy.ts` — Kokoro chunk pipeline (consumer of the seeds above; verify no implicit ahead-of-heard caching beyond useNarration's refs).
-  4. `src/types/narration.ts` — type contracts for chunk/boundary/word state; will need an addition for the public oracle method.
-  5. `src/constants.ts` — `TTS_CURSOR_TRUTH_SYNC_INTERVAL`, lag constants (120/220/350/450 if still present), `TTS_MAX_RATE`.
-  6. `docs/governance/close-outs/.Archive/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md` for the schedule-vs-wallclock drift log and calibration data.
-  7. `docs/governance/close-outs/SpecRetro.Lessons_Learned.md` — SRL-060 (heard-audio gate), SRL-068, SRL-069 (prefetched boundaries must be source-owned), SRL-070 (no self-referential telemetry as gate evidence), SRL-072 (no iteration on ahead-of-heard refs), SRL-073 (transition/cleanup tests), SRL-074 (ref-heavy teardown stays in owning hook).
+  1. `docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md` — the deep architectural analysis this sprint validates. Read in full before authoring any instrumentation.
+  2. `docs/studies/live-qa/2026-05-27_discovery_sweep.md`, `docs/studies/live-qa/2026-05-29_theme_sync_smoke.md`, `docs/studies/live-qa/2026-05-29_theme_sync_retest.md` — live-QA discipline context.
+  3. `src/hooks/useNarration.ts` — enumerate every line that READS or WRITES position-state refs (`cursorWordIndex` reads via destructured state, `lastConfirmedAudioWordRef` at line 187, `nextGenWordIndexRef` at line 188, `nextKokoroExactStartRef` at line 199). Aristotle's enumeration table gates Hercules's instrumentation pass.
+  4. `src/utils/audioScheduler.ts:521` (`getPlayingSourceMaxWordIndex`), `audioScheduler.ts:1036-1055` (`getHeardFloorWordIndex` / `getHeardCeilingWordIndex`) — the existing oracles.
+  5. `src/hooks/narration/kokoroStrategy.ts` — strategy/scheduler handoff confirmation.
+  6. `docs/governance/SpecRetro.Lessons_Learned.md` — SRL-070, SRL-072.
 - **Tasks:**
-  1. `[aristotle/opus]` (read-only diagnosis + design memo, ~30 min) Produce `docs/studies/investigations/NARRATE-CLOSED-LOOP-design.md` covering: (a) the exact seed-read points to retarget with file:line; (b) which lag constants become redundant after the loop closes vs. which remain as a soft-cap fallback (likely retain only 120ms baseline); (c) the prefetch-window bound semantics — e.g., "scheduler refuses to schedule a new chunk if its target word > getHeardPositionWordIndex() + PREFETCH_WINDOW_WORDS"; recommended value of PREFETCH_WINDOW_WORDS derived from Step 3.6 drift log (expect ~200-400 words at default WPM); (d) the cursor-update cadence (per-tick continues, but cursor word is set to `max(currentCursor, heardPosition)` — monotonic, never retracts, never exceeds heard); (e) the `resyncToCursor` reseed semantics (seed from `max(heardPosition, cursorTargetWordIndex)` — heard-as-floor, never reseed below what's already audible; honor forward user-jumps); (f) which writes of `lastConfirmedAudioWordRef` and `nextGenWordIndexRef` remain necessary as bookkeeping vs. which can be deleted entirely. Output gates Wave B.
-  2. `[athena/opus, renderer-scope]` (heavy implementation per memo)
-     - Add `audioScheduler.getHeardPositionWordIndex()` as the public reader-mode-facing oracle wrapping `getPlayingSourceMaxWordIndex(audioCtx.currentTime)` with appropriate null-handling for the not-yet-playing case.
-     - Add types in `src/types/narration.ts` for the oracle's return value.
-     - In `useNarration.ts`, replace seed reads at line 1194 (`speakNextChunkKokoro`) and line 1287 with `audioScheduler.getHeardPositionWordIndex() ?? lastConfirmedAudioWordRef.current` (heard preferred; existing ref as fallback during the very-first-chunk pre-audio window).
-     - In `resyncToCursor` (line 1617), seed `nextGenWordIndexRef` from `Math.max(heardPosition ?? 0, cursorTargetWordIndex)` — never reseed below what's already been heard; forward user jumps still honored.
-     - Add cursor-from-heard logic in the existing per-tick update path: cursor word advances to `getHeardPositionWordIndex()`, but never RETRACTS (monotonic forward). Invariant: `cursorWordIndex <= heardPosition <= producedEndOfGeneration`.
-     - In `audioScheduler.ts` chunk-dispatch path (around lines 791-807), refuse to schedule a new chunk if its target word > `getHeardPositionWordIndex() + PREFETCH_WINDOW_WORDS`. Add to `src/constants.ts`.
-     - Retire (delete or comment-rationalize) the lag-escalation constants 220→350→450 ms if Aristotle confirms they're redundant. Retain the 120 ms baseline lag as a soft buffer.
-  3. `[hippocrates/haiku]` Run `npm test` (must stay green). Add regression tests:
-     - `tests/narrateClosedLoopCursor.test.ts` — assert cursor never advances ahead of heard position when both are populated; assert `resyncToCursor` never seeds `nextGenWordIndexRef` below current heard; assert prefetch window bound clamps a too-eager chunk schedule.
-     - `tests/audioSchedulerHeardOracle.test.ts` — assert `getHeardPositionWordIndex()` matches `getPlayingSourceMaxWordIndex(audioCtx.currentTime)` across all source-state transitions; assert null return when no source is playing.
-  4. `[plato/sonnet]` Architecture review (parallel with Live-QA per SRL-012): verify SRL-070 (no self-referential telemetry as gate evidence), SRL-072 (no iteration on ahead-of-heard refs), SRL-073 (transition/cleanup tests for adapter state changes), SRL-074 (ref-heavy teardown stays in owning hook), and the closed-loop invariant `cursorWordIndex ≤ heardPosition ≤ producedEndOfGeneration` is enforced wherever the involved variables co-update.
-  5. `[live-qa, Evan]` Live audio QA — THIS IS THE GATE. Per SRL-070, Evan's ear is the ONLY acceptable gate; scheduler-derived metrics (boundary-drift, schedule-vs-wallclock) are NOT sync evidence. Two fixtures:
-     - **The Raven** (poem; explicit prior failure surface): play through several "Nevermore" handoffs; confirm NO content omission, cursor tracks heard word with no audible lead, hard-click starts exactly at the clicked word.
-     - **Prose fixture** (Meditations or Why Nations Fail): play through one chapter including at least one section boundary; confirm same invariants.
-     - Operator (Cowork) drives via computer-use MCP; Evan provides ground-truth ear + visual sync verdict.
-  6. `[marcusaurelius/sonnet]` Docs pass: ROADMAP Completed Work Summary (one-line entry, archive full spec to dated archive file), CLAUDE.md current-state update (note closed-loop cursor landed), sprint-queue.xlsx Catalog (mark Completed, populate close-out reference, recalc Dashboard), append SRL-080+ to LESSONS_LEARNED.md capturing lessons from closing the loop, update `docs/governance/TECHNICAL_REFERENCE.md` if scheduler architecture changed materially. Auto-merge.
+  1. `[aristotle/opus]` (read-only enumeration + memo, ~45 min) Produce `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1-prep.md` enumerating every `useNarration.ts` line that READS any position-state ref AND every line that WRITES one. Output table: `{file:line, function, action (read|write), ref name, value flows to}`. The Hercules instrumentation in Task 2 hangs on this table.
+  2. `[hercules/sonnet, renderer-scope]` (instrumentation, ~25-30 tool uses) Add helper `logDualSourceTransition(pathId: string, refs: DualSourceRefs): void` at top of `useNarration.ts`; helper no-ops when `localStorage.getItem('BLURBY_DUAL_SOURCE_DIAG') !== '1'`. Insert calls at every site from Aristotle's table — minimum: entry to `pause()` (~line 1877), **`resume()` requires THREE separate path IDs — the function has three structurally distinct branches that may fail through different mechanisms: (a) `resume:cursor-mismatch` at the cursor-mismatch branch (~line 1910, when caller-provided `currentWordIndex !== s.cursorWordIndex` — stops strategies, calls `speakNextChunkRef.current()`), (b) `resume:handoff-pending` at the handoff-pending branch (~line 1946, when `handoffPendingRef.current === true` — captures heardFloor, stops strategies, reseeds from `max(handoffHeardFloor, cursor)`, calls `speakNextChunkRef.current()`), and (c) `resume:bare` at the bare-resume branch (~line 1976, the default pause-point-resume path which calls `kokoroStrategy.resume()` DIRECTLY without going through `speakNextChunkKokoro` — un-suspends AudioContext and re-snaps the cursor)**. Each branch logs all six candidate refs with its distinct path ID — critical because A4 may fire through any of the three with different root causes, and conflated instrumentation would force DIAG-1 to return PARTIAL. Plus: entry to each branch of `applyRateChange()` (lines 1722-1871 — **6 per-engine/debounce branches** at lines 1759 (Kokoro bucket change), 1802 (Qwen), 1821 (Pocket), 1839 (Nano), 1853 (Web no-debounce), 1869 (Web debounced) — NOT 14; the prior "14" figure was an over-count propagated from a dispatch summary; verified by grep 2026-05-29). Entry to `speakNextChunkKokoro()` (~line 1187), entry to `resyncToCursor()` (~line 1617), inside `onWordAdvance` callback registration. Each call logs all six candidate refs + distinct path identifier. Also wrap **both** `audioScheduler.getHeardFloorWordIndex()` consumers (the re-entry seed at line 1202 inside `speakNextChunkKokoro` AND the handoff-resume seed at line 1950 inside `resume`'s handoff-pending branch) with a logging shim when flag set.
+  3. `[hippocrates/haiku]` `npm test` (must stay green; logging is no-op when flag off). `npm run build`. Confirm bundle size delta <1 KB. Add `tests/dualSourceDiagFlag.test.ts` asserting the flag-gating no-ops correctly when unset.
+  4. `[live-qa, Evan + Cowork]` Live-QA gate replay against the instrumented build with `localStorage.BLURBY_DUAL_SOURCE_DIAG = '1'`. Specifically: **A1** (hard-click exact start — regression check), **A4** (pause → wait 3s → resume, THREE TIMES IN A ROW — the gate-blocking failure from 2026-05-29), **A5** (play, change WPM 175→250, listen for skip — also gate-blocking). Cowork drives via computer-use MCP; Evan verdicts; logs captured to `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1-logs.txt`.
+  5. `[aristotle/opus]` (read-only analysis, ~30 min) Read the captured logs. Cross-reference each FAIL with the immediately-prior log entry. Produce `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md` answering: (a) did A4 FAIL correlate with a code path reading `cursorWordIndex` or `nextGenWordIndexRef` when `getHeardFloorWordIndex()` would have had the right answer? (b) same question for A5. (c) verdict: CONFIRMED, PARTIAL, or REFUTED? (d) if CONFIRMED → positions 2-5 dispatch as spec'd; (e) if PARTIAL → which of positions 2-5 dispatch unchanged, which need adjustment; (f) if REFUTED → what does the log actually show is the root cause, and what spec should replace positions 2-5?
+  6. `[hercules/sonnet]` Disable diagnostic logging in production paths (gating at the helper itself; calls retained for future re-use). Confirm bundle parity. Re-run `npm run build`.
+  7. `[marcusaurelius/sonnet]` Docs: update ROADMAP Completed Work Summary, sprint-queue.xlsx Catalog (mark Completed), append SRL-080+ to LESSONS_LEARNED.md if a generalizable insight emerges (likely candidate: "instrumented gate replay as cheap validation before multi-sprint refactor"). Auto-merge.
 - **Execution Sequence:**
-  - Wave A — Aristotle design memo. ~30 min budget; gates Wave B.
-  - Wave B — Athena implementation + Hippocrates tests. ~30-40 tool uses; near the per-wave ceiling — Zeus must pre-split into Wave B1 (audioScheduler oracle + types + chunk-dispatch bound) and Wave B2 (useNarration seed retargeting + cursor-from-heard + resyncToCursor) if the memo expands scope.
-  - Wave C — Plato + Live-QA + MarcusAurelius docs. Plato and Live-QA run in parallel per SRL-012 (both read-only); MarcusAurelius blocks on both passing.
+  - Wave A — Aristotle enumeration memo. ~10-15 tool uses; gates Wave B.
+  - Wave B — Hercules instrumentation + Hippocrates verification. ~20-25 tool uses.
+  - Wave C — Live-QA replay (synchronous with Evan), Aristotle analysis report, Hercules disable, MarcusAurelius docs. ~25-30 tool uses.
 - **Done when (SUCCESS CRITERIA):**
-  1. Live-QA fixture pass: on The Raven AND on prose, NO content omitted at any handoff (section, stall, resume, hard-click); cursor tracks heard word with no accumulating lead; hard-click starts exactly at the clicked word. Evan's ear verdict: PASS.
-  2. Implementation invariant verified by tests: `cursorWordIndex ≤ getHeardPositionWordIndex() ≤ nextGenWordIndexRef` holds across all transitions.
-  3. Prefetch window bound observable in scheduler: scheduler refuses to schedule a chunk with target > heard + PREFETCH_WINDOW_WORDS.
-  4. `npm test` green (3,005+ tests; new closed-loop tests added); `npm run build` green; `npm run typecheck` green.
-  5. Aristotle's design memo persisted at `docs/studies/investigations/NARRATE-CLOSED-LOOP-design.md`.
-  6. No code path in `useNarration.ts` writes `lastConfirmedAudioWordRef` or `nextGenWordIndexRef` from cursor-state-only sources (writes must come from audio-source-truth or from explicit user-intent jumps).
-  7. SRL-070 honored: gate is Evan's ear, not any scheduler-derived metric.
-  8. `npm run test:quality` (Kokoro v2 baseline) shows no quality regression. If TTS-QUAL-CI-1 has merged, this is enforced automatically; otherwise run manually before merge.
-- **Effort:** L. Heaviest sprint in the buffer. ~1-2 sessions if Aristotle's memo is clean; longer if architecture surprises emerge during Athena's implementation pass.
-- **Roster:** Zeus → Aristotle • Athena • Hippocrates • Plato • Live-QA (Evan) • MarcusAurelius.
-- **Source:** Persistent-anchor repair Steps 3.5/3.6 (Bug 1 + Bug 2 — the residual S13 Narrate cursor/content sync defect after SELECTION-1, NARR-PAUSE-1, NARR-SPOKEN-1, NARR-CURSOR-2); SRL-060, SRL-068, SRL-069, SRL-070, SRL-072, SRL-073, SRL-074; `CloseOut.READER-ISO-1E.2026-05-27.md` (NarrateModeAdapter owns truth-sync lifecycle).
+  1. `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md` exists with explicit per-path log evidence linking each failing gate item to a specific source-of-truth read.
+  2. Diagnosis verdict explicit: CONFIRMED → SK-N2-N5 dispatch in sequence; PARTIAL → some dispatch, others get respec'd; REFUTED → new spec replaces N2-N5.
+  3. `npm test` green; `npm run build` green; `npm run typecheck` green; bundle size delta <1 KB.
+  4. Diagnostic logging cleanly disabled in production builds (no console noise unless flag set).
+  5. Live-QA captured logs persisted at `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1-logs.txt`.
+  6. Branch `sprint/narrate-dual-source-diag-1` auto-merges (investigation sprint, no architectural risk).
+- **Effort:** **XS** (~1 day; ~80-90 tool uses across waves).
+- **Roster:** Zeus → Aristotle • Hercules • Hippocrates • Live-QA (Evan + Cowork) • MarcusAurelius.
+- **Source:** 2026-05-29 ULTRATHINK (`docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md`); 2026-05-29 live-QA gate against the dissolved NARRATE-CLOSED-LOOP-CURSOR (A4 FAIL, A2 PARTIAL); `CloseOut.READER-ISO-1E.2026-05-27.md`; SRL-070, SRL-072.
 
 ##### Implementation detail
-
-- **Edit sites:**
-  - `src/utils/audioScheduler.ts` — new `getHeardPositionWordIndex()` method wrapping `getPlayingSourceMaxWordIndex` (line 521); prefetch-window bound in chunk-dispatch (around lines 791-807); review tick lag at line 949 (likely retain 120ms baseline only).
-  - `src/hooks/useNarration.ts` — seed read at line 1194 (`speakNextChunkKokoro`) and line 1287; `resyncToCursor` (line 1617-1697); cursor-update path (existing per-tick; Aristotle's memo lists exact lines).
-  - `src/types/narration.ts` — type addition for the new public oracle.
-  - `src/constants.ts` — add `PREFETCH_WINDOW_WORDS` (Aristotle's recommended value); delete or comment 220/350/450 lag escalation if Aristotle confirms redundant; retain 120 baseline.
-- **Tests:** `tests/narrateClosedLoopCursor.test.ts` (new), `tests/audioSchedulerHeardOracle.test.ts` (new). Existing `tests/audioScheduler.test.ts`, `tests/useNarration.test.tsx`, narration suite must remain green.
-- **Constants:** `PREFETCH_WINDOW_WORDS` (Aristotle's memo specifies; expect ~200-400 words). Retire 220/350/450 lag escalations. Retain 120ms baseline.
-- **Branch:** `sprint/narrate-closed-loop-cursor` from clean `main`. Pre-split waves: `sprint/narrate-closed-loop-cursor-wave-a` (Aristotle memo, may merge to main early as docs-only), `sprint/narrate-closed-loop-cursor-wave-b1` (audioScheduler side), `sprint/narrate-closed-loop-cursor-wave-b2` (useNarration side).
-- **Commit hygiene:** Explicit-stage. Aristotle's memo is its own commit. Implementation may be 1-2 commits depending on the wave split.
-- **Cal cadence:** Full-cal post-merge. Run `npm run test:quality` (Kokoro v2 baseline) before AND after to confirm no quality regression. If TTS-QUAL-CI-1 has merged by this sprint's dispatch, the CI gate enforces this automatically on PR.
+- **Edit sites:** `src/hooks/useNarration.ts` — helper at top of file; insertion points at pause() (~1877), resume() (~1905), applyRateChange() (~1722-1871, 14 branches), speakNextChunkKokoro() (~1187), resyncToCursor() (~1617), onWordAdvance callback registration. `src/utils/audioScheduler.ts:1036` — logging shim around getHeardFloorWordIndex when flag set.
+- **Tests:** `tests/dualSourceDiagFlag.test.ts` (new) asserts no-op when flag unset. Existing narration suite (1,575+ tests across narration.* + useNarration.* + audioScheduler.*) must stay green.
+- **Constants:** `BLURBY_DUAL_SOURCE_DIAG` localStorage key. No other constants.
+- **Branch:** `sprint/narrate-dual-source-diag-1` from clean `main`. Single wave structure; no pre-split required (~80-90 tool uses is below the 120 ceiling for a 3-wave sprint).
+- **Commit hygiene:** Explicit-stage. Aristotle's memo committed separately. Wave B and Wave C may share one commit. Auto-merge per default closeout.
+- **Cal cadence:** Not applicable — investigation sprint; no behavior change to calibrate.
 
 ---
 
-#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 2 — stub)*
+#### NARRATE-INTENT-CURSOR-1 — Introduce intent cursor with explicit SET → CONSUMED → CLEARED lifecycle *(position 2 — full spec)*
 
-Library card 3-line format, "New" dot auto-clear, Ctrl+K command palette entries, and Space bar starts the last-used reading mode after reader runtime controls are stable. Will be full-specced at next /roadmap-review when buffer needs replenishment after the position-1 sprint completes. Notes: 3-line format = title / author / progress%-and-time-left; "New" dot is the unread indicator on freshly-imported docs; command palette entries should include the existing import paths (Folder, URL, Drop), the mode switches (Focus/Flow/Narrate), and a recent-docs jump. Coordinate with Hotkey Map (existing Settings panel section) to avoid hotkey collisions.
+- **What:** Introduce `intentCursorRef: React.MutableRefObject<number | null>` as the user-intent half of Evan's two-cursor model. Single-writer contract: only user-action handlers (click-to-narrate via `commitSharedWordAnchor`, scroll-and-select, keyboard nav) write to it. Lifecycle: SET (user action) → ACTIVE (pipeline detects, re-aligns) → CONSUMED (first chunk's first onWordAdvance reaches the intent value) → CLEARED (back to null; subscriber resumes following). Visual highlight respects intent priority when set. Retire `nextKokoroExactStartRef` (`useNarration.ts:199`) by routing all its existing reads through the intent cursor's priority slot in `getNextChunkSeed()`. `resyncToCursor()` becomes a thin wrapper that sets intent and triggers `restartGeneration('click')` if currently playing.
+- **Why:** The 2026-05-29 ULTRATHINK identified `nextKokoroExactStartRef` as the "secret cursor" — a separate authority that exists because the visible `cursorWordIndex` couldn't be trusted for audio scheduling due to React batching. The intent cursor consolidates this with explicit lifecycle semantics, eliminating the "two-step write" race (cursor + secret cursor diverging mid-batch) seen in Stage 6/7 of the lifecycle enumeration. This sprint is the SMALLEST implementation risk in positions 2-5 — it touches click-to-narrate paths only, doesn't move the pause/resume or rate-change machinery yet. Ships first to establish the lifecycle pattern that positions 3-5 depend on. Validates the "single-writer per ref" discipline before scaling it.
+- **Prerequisites:** `NARRATE-DUAL-SOURCE-DIAG-1` complete with verdict CONFIRMED or PARTIAL-confirming-click-to-narrate-path. If DIAG-1 REFUTES, this sprint gets respec'd.
+- **Baseline:** clean `main` at v1.75.1 + NARRATE-DUAL-SOURCE-DIAG-1 merged.
+- **Lane Ownership:** Lane A (Runtime Core).
+- **Forbidden During Parallel Run:** Shared-core freeze set sprint. NO parallel code-changing sprints.
+- **Shared-Core Touches:** `src/hooks/useNarration.ts`, `src/components/ReaderContainer.tsx` (click handler routing).
+- **Merge Order:** SECOND in the unification sequence. Positions 3-5 sequence after.
+- **WHERE (read order):**
+  1. `docs/studies/investigations/NARRATE-DUAL-SOURCE-DIAG-1.md` (this sprint's verdict prerequisite).
+  2. ULTRATHINK two-cursor pseudocode section.
+  3. `src/hooks/useNarration.ts:199` (`nextKokoroExactStartRef`); `useNarration.ts:1617-1710` (`resyncToCursor`); the click-handler entry at `commitSharedWordAnchor`.
+  4. `src/components/ReaderContainer.tsx:546` (`resolveClickedGlobalWordIndex`); the dispatch site that calls `commitSharedWordAnchor`.
+  5. `src/hooks/narration/kokoroStrategy.ts` — confirm boundary gate logic that consumes `nextKokoroExactStartRef` (Aristotle's memo will list).
+- **Tasks:**
+  1. `[aristotle/opus]` (read-only design memo, ~30 min) Produce `docs/studies/investigations/NARRATE-INTENT-CURSOR-design.md` covering: (a) the intent-cursor lifecycle state machine (SET / ACTIVE / CONSUMED / CLEARED); (b) every existing `nextKokoroExactStartRef` read and write site with file:line; (c) the mapping of each existing site to either the new intent ref or its retirement; (d) the `getNextChunkSeed()` priority chain definition (`intent ?? resumeTarget ?? subscriber ?? 0`); (e) the consume-on-first-advance rule with edge cases (intent set while no narration active; intent set then immediately superseded by another click; intent set during stop-and-reseed window from rate change).
+  2. `[hercules/sonnet, renderer-scope]` Implement intent cursor per memo: add `intentCursorRef`; route `commitSharedWordAnchor` and `resyncToCursor` to write intent; add `getNextChunkSeed()` helper; modify `speakNextChunkKokoro()` to read seed from `getNextChunkSeed()` (preserving heard-floor fallback path); add consume-on-first-advance logic in onWordAdvance; delete `nextKokoroExactStartRef` and its remaining direct read sites.
+  3. `[hippocrates/haiku]` Run `npm test`. Add regression tests: `tests/narrateIntentCursor.test.ts` — assert lifecycle (SET → ACTIVE → CONSUMED → CLEARED); assert priority chain (intent supersedes resumeTarget supersedes subscriber); assert consume-on-first-advance fires when wordIdx === intent and only then; assert intent set during stop-and-reseed window survives the window.
+  4. `[plato/sonnet]` Architecture review (parallel with Live-QA per SRL-012): verify single-writer discipline on intentCursorRef (only user-action sites write); verify SRL-073 (transition tests for state changes); verify the consume logic doesn't fire spuriously on retry/late-tick.
+  5. `[live-qa, Evan + Cowork]` Live audio QA — fixture: The Raven. Run **A1** (hard-click exact start) and **A6** (click-to-narrate end-to-end). PASS criteria: audio begins on the clicked word per Evan's ear; intent cursor visually highlights the clicked word immediately; first onWordAdvance of the new chunk consumes intent. Operator drives; Evan verdicts.
+  6. `[marcusaurelius/sonnet]` Docs: ROADMAP Completed Work Summary; CLAUDE.md current-state update (note intent cursor lifecycle landed); sprint-queue.xlsx Catalog (mark Completed); append SRL entry on single-writer-per-ref discipline if new. Auto-merge.
+- **Execution Sequence:**
+  - Wave A — Aristotle design memo. ~10-15 tool uses; gates Wave B.
+  - Wave B — Hercules implementation + Hippocrates tests. ~25-30 tool uses.
+  - Wave C — Plato + Live-QA + MarcusAurelius. Plato/Live-QA parallel per SRL-012. ~25-30 tool uses.
+- **Done when (SUCCESS CRITERIA):**
+  1. Live-QA A1 PASS on The Raven (hard-click lands on clicked word per Evan's ear).
+  2. `nextKokoroExactStartRef` deleted from `useNarration.ts`; no remaining references to it grep-clean.
+  3. `intentCursorRef` exists with documented single-writer contract (user-action handlers only).
+  4. `getNextChunkSeed()` helper exists and is the sole seed-read for `speakNextChunkKokoro()`.
+  5. Consume-on-first-advance logic verified by unit test (`tests/narrateIntentCursor.test.ts`).
+  6. `npm test` green; `npm run build` green; `npm run typecheck` green.
+  7. SRL-070 honored: gate is Evan's ear.
+  8. `npm run test:quality` (Kokoro v2) shows no regression (enforced by CI gate per TTS-QUAL-CI-1).
+- **Effort:** **S** (~1 session).
+- **Roster:** Zeus → Aristotle • Hercules • Hippocrates • Plato • Live-QA (Evan + Cowork) • MarcusAurelius.
+- **Source:** 2026-05-29 ULTRATHINK two-cursor model; DIAG-1 verdict; SRL-065 (single resync owner); SRL-073 (transition tests).
+
+##### Implementation detail
+- **Edit sites:** `src/hooks/useNarration.ts` — declare `intentCursorRef` (new); add `getNextChunkSeed()` (new); modify `speakNextChunkKokoro` seed read (~line 1187); modify `resyncToCursor` (~line 1617-1710) to write intent only; modify `onWordAdvance` callback to consume intent; DELETE `nextKokoroExactStartRef` (line 199) and its direct read sites. `src/components/ReaderContainer.tsx:546` — verify click handler routes through `commitSharedWordAnchor` (no change expected but verify).
+- **Tests:** `tests/narrateIntentCursor.test.ts` (new). Existing `tests/useNarration.test.tsx`, `tests/narration/*.test.ts` must stay green.
+- **Constants:** None added; `TTS_TRUSTED_CURSOR_LAG_MS` and `NARRATION_CURSOR_LAG_MS` unchanged.
+- **Branch:** `sprint/narrate-intent-cursor-1` from clean `main` + DIAG-1 merged.
+- **Commit hygiene:** Explicit-stage. Aristotle's memo committed separately. Wave B and Wave C may share one commit.
+- **Cal cadence:** Quick-cal post-merge. Run `npm run test:quality` (Kokoro v2) before AND after — CI gate auto-enforces.
 
 ---
 
-#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 3 — stub)*
+#### NARRATE-PAUSE-RESUME-UNIFY-1 — Fix A4 via resumeTargetRef capture-at-pause + unified resume seed *(position 3 — full spec)*
+
+- **What:** Introduce `resumeTargetRef: React.MutableRefObject<number | null>` as the single resume-truth ref. On `pause()`, capture `audioScheduler.getHeardFloorWordIndex()` into `resumeTargetRef.current` BEFORE `kokoroStrategy.pause()` clears scheduler sources. On `resume()`, the seed comes from `getNextChunkSeed()` (defined in INTENT-CURSOR-1) which evaluates `intent ?? resumeTarget ?? subscriber ?? 0`. Clear `resumeTargetRef` after consumption by `resume()`. This eliminates the A4 failure mode (play→pause→play restarting at book start) by removing the "heard-floor returns null after pause cleared sources" fallback-chain explosion that causes the current seed to bottom out at 0. The fix is mechanical given the priority chain that INTENT-CURSOR-1 establishes.
+- **Why:** A4 (play→pause→play resets to book beginning) was the gate-blocking failure that ended NARRATE-CLOSED-LOOP-CURSOR. Evan's verbatim verdict: *"play - pause - play resets anchor."* Per the ULTRATHINK lifecycle enumeration Stage 4/5, root cause is: `pause()` doesn't capture an explicit resume target; `resume()` reads from `cursorWordIndex` (stale, possibly mid-`WORD_ADVANCE` batch) or `heardFloor` (returns null after pause cleared scheduler closure state) or the seed-chain falls through to `nextGenWordIndexRef ?? 0`. Capturing heardFloor at pause-time (before clearance) and consuming it at resume-time fixes this directly. The fix is small but the architectural payoff is large: it proves the two-cursor priority chain works on the actual failing case.
+- **Prerequisites:** `NARRATE-INTENT-CURSOR-1` complete (provides `getNextChunkSeed()` helper). DIAG-1 verdict CONFIRMED or PARTIAL-confirming-pause-resume-path.
+- **Baseline:** clean `main` + DIAG-1 + INTENT-CURSOR-1 merged.
+- **Lane Ownership:** Lane A.
+- **Forbidden During Parallel Run:** Shared-core freeze set sprint. NO parallel code-changing sprints.
+- **Shared-Core Touches:** `src/hooks/useNarration.ts` only (pause/resume entry points).
+- **Merge Order:** THIRD in the unification sequence.
+- **WHERE (read order):**
+  1. ULTRATHINK Stage 4 + Stage 5 lifecycle entries.
+  2. DIAG-1 logs for A4 — specifically the path identifier(s) that fire on the pause-to-restart-at-zero transition.
+  3. `src/hooks/useNarration.ts` — `pause()` (~line 1877), `resume()` (~line 1905), surrounding state-machine entries.
+  4. `src/hooks/narration/kokoroStrategy.ts` — `kokoroStrategy.pause()` to confirm where scheduler sources get cleared.
+  5. `src/utils/audioScheduler.ts:1036` — `getHeardFloorWordIndex` for the capture-before-clear invariant.
+- **Tasks:**
+  1. `[aristotle/opus]` (read-only design memo, ~20 min) Produce `docs/studies/investigations/NARRATE-PAUSE-RESUME-UNIFY-design.md` covering: (a) exact ordering of operations in `pause()` — confirm `getHeardFloorWordIndex()` returns a valid value BEFORE `kokoroStrategy.pause()` is called; (b) edge cases — pause while no narration active (resumeTargetRef stays null), pause during stop-and-reseed window from rate change, pause after intent cursor set but before consumed; (c) the `resume()` consume rule: clear `resumeTargetRef` after `getNextChunkSeed()` reads it.
+  2. `[hercules/sonnet, renderer-scope]` Implement per memo: add `resumeTargetRef`; modify `pause()` to capture heardFloor before strategy pause; modify `resume()` to call `restartGeneration('resume')` (helper introduced in this sprint as a single-line wrapper around `getNextChunkSeed()` + `speakNextChunkKokoro()`); clear resumeTargetRef post-consume.
+  3. `[hippocrates/haiku]` `npm test`. Add `tests/narratePauseResumeUnify.test.ts`: assert pause captures heardFloor; assert resume seed reads from priority chain in correct order; assert resumeTargetRef cleared after consume; assert no-narration-active pause is a no-op; assert intent supersedes resumeTarget if both set.
+  4. `[plato/sonnet]` Architecture review parallel with Live-QA per SRL-012: verify capture-before-clear ordering; verify resumeTargetRef has single-writer (pause() only); verify consume-on-resume clears the ref (no leak to next session).
+  5. `[live-qa, Evan + Cowork]` THE A4 GATE — fixture: The Raven OR Why Nations Fail. Sequence: (a) play; (b) pause mid-stanza on a known word (e.g., "darkness" or "Lenore"); (c) wait 3 s; (d) press play; (e) verdict: did audio resume from (or within 1-2 words of) the pause word, OR did it restart from book beginning? Repeat 3 times for stress. PASS criterion: 3-of-3 resumptions within ±2 words of pause position, per Evan's ear. SRL-070: Evan's ear is the gate.
+  6. `[marcusaurelius/sonnet]` Docs pass. Auto-merge.
+- **Execution Sequence:**
+  - Wave A — Aristotle memo. ~10 tool uses.
+  - Wave B — Hercules implementation + Hippocrates tests. ~20-25 tool uses.
+  - Wave C — Plato + Live-QA + MarcusAurelius. Plato/Live-QA parallel. ~25-30 tool uses.
+- **Done when (SUCCESS CRITERIA):**
+  1. **A4 PASS** in live-QA: 3-of-3 pause/resume cycles preserve position per Evan's ear (no restart-at-book-beginning).
+  2. `resumeTargetRef` declared and used as documented; single-writer (pause); single-consumer (resume).
+  3. `pause()` captures heardFloor BEFORE strategy pause (verifiable from code order; verifiable from a unit test that asserts the captured value matches the pre-pause heardFloor).
+  4. `restartGeneration('resume')` helper exists (will be reused/extended in APPLYRATECHANGE-COLLAPSE-1).
+  5. `npm test` green; `npm run build` green; `npm run typecheck` green.
+  6. SRL-070 honored.
+  7. `npm run test:quality` (Kokoro v2) shows no regression.
+- **Effort:** **S** (~1 session).
+- **Roster:** Zeus → Aristotle • Hercules • Hippocrates • Plato • Live-QA (Evan + Cowork) • MarcusAurelius.
+- **Source:** 2026-05-29 ULTRATHINK Stage 4/5; live-QA 2026-05-29 verdict 4 (A4 FAIL verbatim: "play - pause - play resets anchor"); DIAG-1 logs.
+
+##### Implementation detail
+- **Edit sites:** `src/hooks/useNarration.ts` — declare `resumeTargetRef`; modify `pause()` (~line 1877) to capture heardFloor before strategy.pause(); modify `resume()` (~line 1905) to use `restartGeneration('resume')`; add `restartGeneration(reason)` helper (used here, expanded in APPLYRATECHANGE-COLLAPSE-1).
+- **Tests:** `tests/narratePauseResumeUnify.test.ts` (new). Existing narration suite must stay green.
+- **Constants:** None added.
+- **Branch:** `sprint/narrate-pause-resume-unify-1` from `main` + DIAG-1 + INTENT-CURSOR-1.
+- **Commit hygiene:** Explicit-stage. Single commit feasible after memo.
+- **Cal cadence:** Quick-cal post-merge. CI gate enforces TTS-QUAL-CI-1 quality.
+
+---
+
+#### NARRATE-APPLYRATECHANGE-COLLAPSE-1 — Collapse 14 reseed paths into one helper + delete dormant-engine code *(position 4 — full spec)*
+
+- **What:** Collapse the **6 per-engine/debounce `speakNextChunk` reseed branches** in `applyRateChange()` (`useNarration.ts:1722-1871`) into a single `restartGeneration(reason: 'rate-change' | 'voice-change' | 'click' | 'resume')` helper. Helper body: `kokoroStrategy.stop(); const seed = getNextChunkSeed(); speakNextChunkKokoro({ startIdx: seed, reason });`. Per the explicit Kokoro-only design constraint (CLAUDE.md current-state notes), delete the non-Kokoro engine reseed paths entirely — Web speech, Qwen, Pocket, Nano are dormant/disabled/retired and their reseed code in `applyRateChange` is dead. Also folds `applyVoiceChange` (Stage 10) into the same helper with a `'voice-change'` reason. This sprint addresses A5 (rate-change skip) at its root and pays down the maintenance burden codex-parent flagged. **Count correction (2026-05-29 adversarial review):** the prior "14 paths" figure was an over-count propagated from codex-parent's dispatch summary ("~14 speakNextChunk call sites I noted but didn't fully trace"); grep-verified count is 6 direct calls at lines 1759, 1802, 1821, 1839, 1853, 1869 — one per engine branch with the Web engine having both a no-debounce and a debounced variant. A 7th Kokoro branch (same-bucket-segmented at lines 1763-1785) does NOT call speakNextChunk; it calls `kokoroStrategy.refreshBufferedTempo()` and stays out of scope for this collapse.
+- **Why:** The 14-path duplication is the largest single accidental-complexity surface in the narration code. Each engine + each debounce variant copy-pasted the stop-and-reseed pattern; over time they drifted (some seed from `cursorWordIndex`, some from `heardFloor`, some from `nextGenWordIndexRef`). A5 (rate-change skip per live-QA gate) almost certainly originates from one of the drifted variants. The Kokoro-only design constraint makes this cleanup safe: dormant engines won't be revived without an explicit reseed-path re-architecture, so deleting their applyRateChange branches doesn't lock anything out. The collapse also forces every rate-change to use the priority chain established in INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1, closing the last large coupling between cursor-state and audio-scheduling decisions.
+- **Prerequisites:** `NARRATE-INTENT-CURSOR-1` complete (`getNextChunkSeed()` helper). `NARRATE-PAUSE-RESUME-UNIFY-1` complete (`restartGeneration('resume')` helper to extend). DIAG-1 verdict confirming A5 maps to multi-path reseed.
+- **Baseline:** clean `main` + DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 merged.
+- **Lane Ownership:** Lane A.
+- **Forbidden During Parallel Run:** Shared-core freeze set sprint. NO parallel code-changing sprints.
+- **Shared-Core Touches:** `src/hooks/useNarration.ts` (heavy: `applyRateChange` + `applyVoiceChange` + 14 reseed branches).
+- **Merge Order:** FOURTH in the unification sequence.
+- **WHERE (read order):**
+  1. ULTRATHINK Stage 8/9/10 lifecycle entries.
+  2. DIAG-1 logs for A5 — which of the 14 branches fires on the rate-change failure path.
+  3. `src/hooks/useNarration.ts:1722-1871` — `applyRateChange` in full; map each branch to its engine + debounce variant.
+  4. `src/hooks/useNarration.ts` — `applyVoiceChange` (line TBD by Aristotle); confirm it has similar multi-path structure.
+  5. `src/hooks/narration/kokoroStrategy.ts` — `stop()` behavior, including whether it clears scheduler sources synchronously (affects whether heardFloor returns null mid-restart).
+  6. `src/hooks/narration/{webStrategy,qwenStrategy,pocketStrategy,nanoStrategy}.ts` (if present) — confirm they're truly dormant (no active usage) before deleting their reseed branches.
+- **Tasks:**
+  1. `[aristotle/opus]` (read-only design memo, ~45 min) Produce `docs/studies/investigations/NARRATE-APPLYRATECHANGE-COLLAPSE-design.md` covering: (a) full enumeration of the **6 reseed branches** with their seed-source per branch (lines 1759, 1802, 1821, 1839, 1853, 1869 per the 2026-05-29 grep-verified count); also re-confirm the 7th Kokoro same-bucket-segmented branch at lines 1763-1785 truly does not need restart (calls `refreshBufferedTempo` instead); (b) confirmation each non-Kokoro strategy is dormant (no active dispatch); (c) `restartGeneration(reason)` final signature and body; (d) `applyVoiceChange` mapping to same helper; (e) the stop-and-reseed race-window mitigation (drain late onWordAdvance into transient holding ref during stop; commit only when new chunk's first advance fires — per ULTRATHINK Stage 7 fix); (f) which existing tests for `applyRateChange` need updating to assert the new single-path behavior.
+  2. `[athena/opus, renderer-scope]` (cross-system implementation; touches reducer + strategy boundaries) Implement collapse: extend `restartGeneration(reason)` to handle `'rate-change'` and `'voice-change'` reasons; rewrite `applyRateChange` body to: (1) update WPM state, (2) if speaking, call `restartGeneration('rate-change')`; (3) if paused, just stash new rate (Stage 9 behavior); rewrite `applyVoiceChange` similarly. Delete non-Kokoro branches (Web, Qwen, Pocket, Nano reseed paths). Add stop-and-reseed race-window mitigation per Aristotle's design (transient holding ref).
+  3. `[hippocrates/haiku]` `npm test`. Existing applyRateChange tests need updating to reflect single-path behavior. Add `tests/narrateApplyRateChangeCollapse.test.ts`: assert one call site invokes `restartGeneration('rate-change')`; assert paused-state rate change is a no-op for restartGeneration; assert race-window mitigation drops late onWordAdvance from old chunk.
+  4. `[plato/sonnet]` Architecture review (parallel with Live-QA): verify `restartGeneration` is the SOLE entry point for stop-and-reseed; grep for stray `kokoroStrategy.stop() ... speakNextChunkKokoro` patterns and confirm zero remain outside the helper; verify deletion of non-Kokoro branches doesn't break any other code path (referenced strategies' types still exist as type-level placeholders).
+  5. `[live-qa, Evan + Cowork]` THE A5 GATE — fixture: Why Nations Fail (or Meditations if F2 is also fixed). Sequence: (a) play; (b) change WPM 175 → 250 via arrow keys; (c) verdict: did narration continue from where it was (1-2 word re-read acceptable) OR did it skip ahead? Also test voice change with same protocol. PASS criterion: 3-of-3 rate changes preserve position; voice change preserves position; per Evan's ear. SRL-070.
+  6. `[marcusaurelius/sonnet]` Docs pass. Auto-merge.
+- **Execution Sequence:**
+  - Wave A — Aristotle memo. ~15-20 tool uses (heavier enumeration); gates Wave B.
+  - Wave B1 — Athena implementation. ~25-30 tool uses.
+  - Wave B2 — Hippocrates tests + test updates. ~20-25 tool uses.
+  - Wave C — Plato + Live-QA + MarcusAurelius. Plato/Live-QA parallel. ~25-30 tool uses.
+- **Done when (SUCCESS CRITERIA):**
+  1. **A5 PASS** in live-QA: 3-of-3 rate changes preserve position per Evan's ear (no skip).
+  2. Voice change PASS in live-QA (same protocol, voice swap).
+  3. `applyRateChange` has exactly ONE call to `restartGeneration` (grep-verifiable).
+  4. Non-Kokoro reseed branches deleted from `applyRateChange` and `applyVoiceChange`.
+  5. `restartGeneration(reason)` handles all four reasons (`'rate-change' | 'voice-change' | 'click' | 'resume'`).
+  6. Stop-and-reseed race-window mitigation in place; verified by unit test.
+  7. `npm test` green; `npm run build` green; `npm run typecheck` green.
+  8. SRL-070 honored.
+  9. `npm run test:quality` (Kokoro v2) shows no regression.
+- **Effort:** **M** (~1-2 sessions; the cross-engine deletion is the heavy part).
+- **Roster:** Zeus → Aristotle • Athena • Hippocrates • Plato • Live-QA (Evan + Cowork) • MarcusAurelius.
+- **Source:** 2026-05-29 ULTRATHINK Stage 8/9/10; codex-parent's effort-mismatch note flagging ~14 unfully-traced speakNextChunk sites; live-QA 2026-05-29 A5 PARTIAL (rate-change skip improved but not eliminated); Kokoro-only design constraint (CLAUDE.md).
+
+##### Implementation detail
+- **Edit sites:** `src/hooks/useNarration.ts:1722-1871` — full `applyRateChange` rewrite to single restartGeneration call; `applyVoiceChange` similar rewrite; `restartGeneration(reason)` helper extension; stop-and-reseed race-window mitigation in onWordAdvance gate.
+- **Tests:** `tests/narrateApplyRateChangeCollapse.test.ts` (new); existing `tests/applyRateChange*.test.ts` updated (specific test names enumerated in Aristotle's memo).
+- **Constants:** None added; dormant-engine constants (if any specific to their reseed paths) deleted alongside the branches.
+- **Branch:** `sprint/narrate-applyratechange-collapse-1` from `main` + prior 3 unification sprints.
+- **Commit hygiene:** Explicit-stage. Wave B1 (implementation) and Wave B2 (test updates) may share one commit. Deletion of non-Kokoro branches in same commit as collapse (semantic atomicity).
+- **Cal cadence:** Full-cal post-merge. Run `npm run test:quality` (Kokoro v2) before AND after. CI gate enforces.
+
+---
+
+#### NARRATE-SUBSCRIBER-CURSOR-1 — Retire WORD_ADVANCE reducer action; visual highlight via direct callback *(position 5 — full spec)*
+
+- **What:** Complete the cursor demotion. Rename `lastConfirmedAudioWordRef` → `subscriberCursorRef` (single-writer = audio scheduler onWordAdvance callback). Remove the `WORD_ADVANCE` reducer action that currently dispatches into React state for word position — that dispatch is the source of A2 (cursor lead due to React batching trailing audio clock). Visual highlight subscribes to `subscriberCursorRef` updates via a direct callback path (bypass React reducer batching for word-position updates). `cursorWordIndex` is removed from React reducer state — `status`, `wpm`, `voice`, and other session-level metadata stay. Scroll-follow (`FlowScrollEngine.followWord`) continues to read the same value but now via the subscriber ref instead of the reducer slice. This is the largest blast-radius sprint of the five; ships LAST so any regressions are localized and the prior 4 sprints have established a stable foundation.
+- **Why:** A2 (cursor lead, "minor skip-ahead, much tighter than before" per Evan's verdict) was substantially improved by NARRATE-CLOSED-LOOP-CURSOR's heard-floor introduction but is fundamentally constrained by the React batching layer between scheduler callback and visual highlight. As long as `WORD_ADVANCE → reducer → render` is in the visual-highlight path, the cursor will always be 16-50ms behind the audio clock, papered over by lag compensation. Removing React from this path is the only way to actually eliminate the lead, not just compensate for it. Per ULTRATHINK technical-dimensional analysis: *"any architecture that uses React state (`cursorWordIndex`) as the seed for audio scheduling will always race the audio clock and lose."* By position 5 in the sequence, audio scheduling no longer reads from React state at all (positions 2-4 retired that). This sprint completes the symmetry by removing React state from the visual-highlight write path too.
+- **Prerequisites:** All of DIAG-1, INTENT-CURSOR-1, PAUSE-RESUME-UNIFY-1, APPLYRATECHANGE-COLLAPSE-1 merged. The priority chain (`intent ?? resumeTarget ?? subscriber`) is the only seed path; no audio decision still reads from `cursorWordIndex`. Aristotle memo from DIAG-1 confirms zero remaining `cursorWordIndex` reads in scheduling code.
+- **Baseline:** clean `main` + prior 4 unification sprints merged.
+- **Lane Ownership:** Lane A (Runtime Core) + Lane C (UI surface: visual highlight rewire).
+- **Forbidden During Parallel Run:** Shared-core freeze set sprint. NO parallel code-changing sprints. Largest blast radius in the sequence.
+- **Shared-Core Touches:** `src/hooks/useNarration.ts` (reducer state shape), `src/components/ReaderContainer.tsx` (visual highlight subscription path), `src/types.ts` (NarrationState type), `src/hooks/useFlowScrollSync.ts` (scroll-follow consumer — read-site change only).
+- **Merge Order:** FIFTH and LAST in the unification sequence.
+- **WHERE (read order):**
+  1. ULTRATHINK technical-dimensional analysis (§4.2) + Stage 2 lifecycle entry.
+  2. `src/hooks/useNarration.ts` — reducer definition; every `WORD_ADVANCE` dispatch (~lines 463, 972, 1073, 1159, 1313 per Explore agent enumeration); `cursorWordIndex` slice readers; `lastConfirmedAudioWordRef` (line 187) — to be renamed.
+  3. `src/components/ReaderContainer.tsx` — `applyNarrationActiveWord` callback; visual highlight setter wiring; current consumer of `cursorWordIndex` slice for highlight.
+  4. `src/hooks/useFlowScrollSync.ts:486+` — `FlowScrollEngine.followWord(narration.cursorWordIndex)` — consumer must be re-wired to subscriber ref.
+  5. `src/types.ts` (and `src/types/narration.ts`) — `NarrationState` type; remove `cursorWordIndex` field; `subscriberCursorRef` typing.
+  6. SRL-067 (visual and audio pipelines must not share raw word indexes unless they share tokenization) — this sprint MAKES that explicit.
+- **Tasks:**
+  1. `[aristotle/opus]` (read-only design memo, ~60 min — heaviest of the five) Produce `docs/studies/investigations/NARRATE-SUBSCRIBER-CURSOR-design.md` covering: (a) every `WORD_ADVANCE` dispatch site with file:line (**grep-verified count is 6 on main 2026-05-29: lines 463, 972, 1073, 1158, 1255, 1314**; re-enumerate from source in case any landed between this spec and dispatch); (b) every `cursorWordIndex` read site outside `useNarration.ts` (especially ReaderContainer, useFlowScrollSync, any test fixtures); (c) the rename mapping `lastConfirmedAudioWordRef` → `subscriberCursorRef`; (d) the visual-highlight callback architecture — how does ReaderContainer subscribe to subscriberCursorRef updates without React state? Options: (i) imperative DOM mutation via `data-highlighted-word` attribute toggling; (ii) a thin local React state in ReaderContainer that's set via `useEffect` synced to the ref via a poll/listener; (iii) ref forwarding pattern with subscription callback. Recommend (i) per ULTRATHINK technical finding that React batching is the original sin — direct DOM mutation is the only path that won't re-introduce the lag; **HOWEVER, if recommending (i), Aristotle's memo MUST explicitly address the React-reconciliation hazard: imperative DOM mutations on attributes React thinks it owns can be reset when React re-renders the containing tree (triggered by mode switches, settings changes, navigation, or any unrelated React state update). Specify which DOM nodes/attributes are safe to mutate imperatively (typically: nodes/attrs that React doesn't read back as state — `data-*` attributes outside React's reconciliation surface, or refs to elements whose className is React-controlled but whose `dataset` is not), and which would conflict. If conflict is unavoidable for the chosen approach, fall back to option (ii) or (iii); the lag from a single useState write is materially smaller than from the WORD_ADVANCE reducer + render cycle, so even (ii) is a win.** Aristotle owns this decision and its risk enumeration. (e) the FlowScrollEngine.followWord rewire — same subscription pattern; (f) regression risk enumeration; (g) staged rollout plan if memo identifies a high-risk consumer.
+  2. `[athena/opus, renderer-scope + cross-system]` Implement per memo. Athena because this touches reducer + render path + scroll-follow. Rename `lastConfirmedAudioWordRef` → `subscriberCursorRef`; remove `cursorWordIndex` from reducer state; remove `WORD_ADVANCE` action; wire visual highlight via direct DOM mutation (recommended approach per Aristotle memo); update FlowScrollEngine.followWord consumer; ensure `getNextChunkSeed()` (from INTENT-CURSOR-1) now reads subscriberCursorRef in its fallback slot.
+  3. `[hippocrates/haiku]` `npm test`. Existing tests that reference `cursorWordIndex` slice need updating to read subscriber ref instead. Add `tests/narrateSubscriberCursor.test.ts`: assert WORD_ADVANCE action removed (any dispatch attempt is a type error); assert visual highlight updates within one frame of subscriber ref update (faster than React batch); assert FlowScrollEngine.followWord receives updates correctly.
+  4. `[plato/sonnet]` Architecture review (parallel with Live-QA): verify ZERO remaining `WORD_ADVANCE` dispatches grep-clean; verify ZERO React state holds word position; verify single-writer discipline on subscriberCursorRef (only onWordAdvance writes); verify SRL-067 newly satisfied (visual pipeline = subscriber ref subscribers; audio pipeline = priority chain consumers; they're independent).
+  5. `[live-qa, Evan + Cowork]` THE A2 GATE + REGRESSION SUITE — fixture: The Raven AND prose. Run **A2** (cursor tracks heard word — listen for growing or jumpy lead); **A1, A4, A5, A6** as regression checks (must still PASS); **B6 prose tracking** (no accumulating lead in prose). PASS criteria: A2 cursor stays locked to heard word with no perceptible lead OR a tiny constant offset (the bar from codex-parent's spec); A1/A4/A5/A6/B6 unchanged from prior sprints.
+  6. `[marcusaurelius/sonnet]` Docs pass: ROADMAP completed, CLAUDE.md update with NARRATION ARCHITECTURE COMPLETE section noting the dual-source unification finish, sprint-queue.xlsx, LESSONS_LEARNED SRL entry on "removing React from realtime callback paths," TECHNICAL_REFERENCE.md update for the new two-cursor model. Auto-merge.
+- **Execution Sequence:**
+  - Wave A — Aristotle memo (heaviest in the five; ~60 min budget). Gates Wave B.
+  - Wave B1 — Athena implementation: rename, reducer slice removal, WORD_ADVANCE removal. ~30-35 tool uses.
+  - Wave B2 — Athena: visual highlight direct-DOM rewire, FlowScrollEngine.followWord rewire. ~20-25 tool uses.
+  - Wave B3 — Hippocrates test updates + new tests. ~25-30 tool uses.
+  - Wave C — Plato + Live-QA + MarcusAurelius. Plato/Live-QA parallel per SRL-012. ~25-30 tool uses.
+- **Done when (SUCCESS CRITERIA):**
+  1. **A2 PASS** in live-QA: cursor tracks heard word with no perceptible growing/jumpy lead on both The Raven AND prose, per Evan's ear+eye.
+  2. **Regression PASS** on A1, A4, A5, A6, B6 — no regression from prior unification sprints.
+  3. `WORD_ADVANCE` reducer action removed; `cursorWordIndex` removed from `NarrationState`; grep-verifiable zero references.
+  4. `subscriberCursorRef` renamed from `lastConfirmedAudioWordRef`; single-writer (onWordAdvance only); single-purpose documented in code comment.
+  5. Visual highlight updates within one frame of subscriber ref write (no React batching latency); verified by performance test or measured by Aristotle's memo's chosen instrumentation.
+  6. FlowScrollEngine.followWord consumer continues to function (scroll-follow regression check passes per SRL-058 active-render QA gate).
+  7. SRL-067 newly satisfied: visual pipeline and audio pipeline read independent sources.
+  8. `npm test` green; `npm run build` green; `npm run typecheck` green.
+  9. `npm run test:quality` (Kokoro v2) shows no regression.
+- **Effort:** **M** (~2 sessions; the rename + WORD_ADVANCE removal + visual highlight rewire is the heaviest single-sprint change in the unification sequence; ships last so regressions are localized).
+- **Roster:** Zeus → Aristotle • Athena • Hippocrates • Plato • Live-QA (Evan + Cowork) • MarcusAurelius.
+- **Source:** 2026-05-29 ULTRATHINK §4.2 (React batching as original sin) + Stage 2 lifecycle; live-QA 2026-05-29 A2 PARTIAL (lead reduced but not eliminated); SRL-067; SRL-058.
+
+##### Implementation detail
+- **Edit sites:** `src/hooks/useNarration.ts` — remove `cursorWordIndex` from reducer state; remove `WORD_ADVANCE` action; rename `lastConfirmedAudioWordRef` → `subscriberCursorRef` (line 187); update `getNextChunkSeed()` (from INTENT-CURSOR-1) to read subscriberCursorRef in its fallback slot; remove every `dispatch({type: WORD_ADVANCE, ...})` call (**6 sites grep-verified 2026-05-29: lines 463, 972, 1073, 1158, 1255, 1314** — supersedes the earlier 5-site enumeration that propagated stale Explore-agent numbering). `src/components/ReaderContainer.tsx` — rewire `applyNarrationActiveWord` to subscribe to subscriberCursorRef via direct callback (architecture choice in Aristotle's memo; see React-reconciliation hazard requirement above); remove `cursorWordIndex` slice consumer. `src/hooks/useFlowScrollSync.ts:486+` — rewire `FlowScrollEngine.followWord` consumer. `src/types.ts` / `src/types/narration.ts` — remove `cursorWordIndex` from NarrationState.
+- **Tests:** `tests/narrateSubscriberCursor.test.ts` (new). Existing tests referencing `cursorWordIndex` slice need updating (Aristotle's memo enumerates).
+- **Constants:** `TTS_TRUSTED_CURSOR_LAG_MS` and `NARRATION_CURSOR_LAG_MS` — review if still needed after subscriber direct-callback path lands; lag may be consumable purely inside `getHeardFloorWordIndex()` now. Aristotle's memo decides.
+- **Branch:** `sprint/narrate-subscriber-cursor-1` from `main` + prior 4. Pre-split waves required given the per-wave 40-tool-use ceiling: Wave A (memo, may auto-merge as docs-only); Wave B1 (rename + reducer surgery); Wave B2 (visual highlight + FlowScrollEngine rewire); Wave B3 (tests); Wave C (Plato + Live-QA + MarcusAurelius).
+- **Commit hygiene:** Explicit-stage. Aristotle memo separate commit. Wave B1+B2 may be one commit (semantic atomicity of the rename + state removal). Wave B3 separate commit (tests). Wave C MarcusAurelius separate.
+- **Cal cadence:** Full-cal post-merge. Run `npm run test:quality` (Kokoro v2) before AND after — CI gate enforces TTS-QUAL-CI-1. Manual smoke against The Raven AND prose is part of live-QA, not separate cal.
+
+---
+
+#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 6 — stub)*
+
+Library card 3-line format, "New" dot auto-clear, Ctrl+K command palette entries, and Space bar starts the last-used reading mode after reader runtime controls are stable. Will be full-specced at next /roadmap-review when buffer needs replenishment after the unification sequence (positions 1-5) completes. Notes: 3-line format = title / author / progress%-and-time-left; "New" dot is the unread indicator on freshly-imported docs; command palette entries should include the existing import paths (Folder, URL, Drop), the mode switches (Focus/Flow/Narrate), and a recent-docs jump. Coordinate with Hotkey Map (existing Settings panel section) to avoid hotkey collisions.
+
+---
+
+#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 7 — stub)*
 
 Per SRL-080 + Evan's 2026-05-28 disposition. Three tasks: (a) manually rebuild the Dashboard tab's formula-driven KPIs in Excel (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag) per the /roadmap-review skill's "Sprint queue spreadsheet structure" reference; (b) extend `scripts/recalc.py` with a guardrail — refuse to operate on cells whose worksheet name matches `Dashboard`, with `--allow-dashboard` as an explicit opt-out; (c) document the convention in `CLAUDE.md` (or a new `docs/governance/SPREADSHEET_CONVENTIONS.md`) — openpyxl edits the Catalog tab only; Excel computes Dashboard from Catalog. LOE: XS. Lane E (governance tooling). No code surface, no shared-core touches. Parallel-safe with every other queued sprint. Will be full-specced when the queue head reaches it (likely after one of the hotfix sprints ships).
 
@@ -233,6 +432,7 @@ finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md
 sprint_queue_doc: docs/governance/sprint-queue.xlsx
 buffer_target: 5
-buffer_actual_full_specs: 1
+buffer_actual_full_specs: 5
 buffer_actual_stubs: 2
+ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->
