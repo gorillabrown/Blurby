@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-29 — EXT-PAIR-1 completed (Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` added, structured WS logging, 8 new tests). 3 full specs queued (SINGLE-INSTANCE-LOCK-1, THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1 at 4, HYG-XLSX-DASHBOARD-RESTORE at 5). **Next dispatch: SINGLE-INSTANCE-LOCK-1**.
+**Last updated**: 2026-05-29 — SINGLE-INSTANCE-LOCK-1 completed (Electron single-instance lock). 2 full specs queued (THEME-SYNC-1, NARRATE-CLOSED-LOOP-CURSOR) + 2 stubs (UX-POLISH-1 at 3, HYG-XLSX-DASHBOARD-RESTORE at 4). **Next dispatch: THEME-SYNC-1**.
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine; MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1), (2) closed-loop cursor lands (NARRATE-CLOSED-LOOP-CURSOR), (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1, THEME-SYNC-1, SINGLE-INSTANCE-LOCK-1), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: GREEN — depth 5 (3 full specs at positions 1-3; 2 stubs at positions 4-5). **Conveyor belt order: SINGLE-INSTANCE-LOCK-1 → THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Parallel-safe pairs: positions 1+2 (main.js + Settings UI). Position 3 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
-**Last sprint**: EXT-PAIR-1 (2026-05-29) — Chrome extension pairing auth timeout repair.
+**Queue**: GREEN — depth 4 (2 full specs at positions 1-2; 2 stubs at positions 3-4). **Conveyor belt order: THEME-SYNC-1 → NARRATE-CLOSED-LOOP-CURSOR → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. Position 2 (NARRATE-CLOSED-LOOP-CURSOR) is the sole shared-core sprint and runs alone.
+**Last sprint**: SINGLE-INSTANCE-LOCK-1 (2026-05-29) — Electron single-instance lock.
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -54,6 +54,7 @@
 | GOV-HUMAN-REVIEW-1 | 2026-05-27 | Deferred governance hygiene: MarcusAurelius stub removed, Hercules.md renamed, 8 close-outs archived, rosters reconciled | `CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md` |
 | TTS-QUAL-CI-1 | 2026-05-28 | CI regression gate wired (`quality-gate` job), `scripts/recalc.py` governance tooling added, LOE dropdown extended with XS | `CloseOut.TTS-QUAL-CI-1.2026-05-28.md` |
 | EXT-PAIR-1 | 2026-05-29 | Chrome extension pairing auth timeout repair — `WS_PAIRING_TIMEOUT_MS` (5 min) replaces 5s initial auth window, structured WS logging, 8 new tests, BUG-183 closed | `CloseOut.EXT-PAIR-1.2026-05-29.md` |
+| SINGLE-INSTANCE-LOCK-1 | 2026-05-29 | Electron single-instance lock — `app.requestSingleInstanceLock()` + `second-instance` focus handler prevents duplicate windows | `CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md` |
 
 **Dissolved sprints:**
 - `TEST-HARNESS-1` — Nano probes irrelevant after Kokoro-only pivot (2026-05-15)
@@ -116,54 +117,11 @@ Persistent-anchor repair lane (Steps 3.1–3.6) closed by explicit disposition; 
 
 #### Stage 2 — Active Conveyor Belt
 
-The eager-spec buffer of 3 dispatchable sprints (positions 1–3 are full specs; positions 4-5 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. SINGLE-INSTANCE-LOCK-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 3 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. EXT-PAIR-1 completed 2026-05-29 (BUG-183 closed). One remaining hotfix sprint (THEME-SYNC-1) covers the 2026-05-28 discovery-pass bug BUG-182.
+The eager-spec buffer of 2 dispatchable sprints (positions 1–2 are full specs; positions 3-4 are stubs). Conveyor order applies dependency-first → risk-first → eat-the-frog tiebreakers. THEME-SYNC-1 is the next dispatch (per the planning contract). NARRATE-CLOSED-LOOP-CURSOR sits at position 2 — it's the heaviest sprint but is now unblocked since READER-ISO-1E shipped 2026-05-27. SINGLE-INSTANCE-LOCK-1 completed 2026-05-29 (F1 fixed). One remaining hotfix sprint (THEME-SYNC-1) covers the 2026-05-28 discovery-pass bug BUG-182.
 
 ---
 
-#### SINGLE-INSTANCE-LOCK-1 — Electron Main-Process Single-Instance Gate *(position 1 — full spec)*
-
-- **What:** Add `app.requestSingleInstanceLock()` + the standard `second-instance` event handler to Blurby's Electron main process bootstrap so that a second launcher invocation focuses the existing window instead of spawning a duplicate `BrowserWindow`.
-- **Why:** Confirmed reproducer 2026-05-28 — Evan launched Blurby twice from the Start menu and two independent windows opened. Previously documented in the 2026-05-27 live-QA discovery sweep as "F1" (MEDIUM, ~5 LOC fix). On v1.75.1 the main process does not implement a single-instance lock, so each launcher invocation spawns a new window with its own state. During the 2026-05-27 sweep three concurrent windows accumulated from rapid `open_application` calls and the third spawned blank (no associated state), which is alarming UX even if rare. The fix is the canonical Electron pattern and costs ~5 lines.
-- **Prerequisites:** None. Independent of all active sprints. Parallel-safe with everything in the Active section (Lane D — main-process only; zero renderer/runtime touches).
-- **Baseline:** clean `main` at or after TTS-QUAL-CI-1 close-out (or any sprint that doesn't itself touch `main.js`).
-- **Lane Ownership:** Lane D (Platform / Main process). Touches only `main/main.js` (or equivalent main-process entry point).
-- **Forbidden During Parallel Run:** no `src/` renderer edits; no preload edits; no IPC contract changes; no settings touches.
-- **Shared-Core Touches:** none.
-- **Merge Order:** independent; safe to land any time after the current dispatched sprint completes.
-- **WHERE (read order):**
-  1. `main/main.js` — locate `app.whenReady()` and BrowserWindow creation (`createWindow()` or equivalent).
-  2. `main.js` (repo root, if present) — top-level entry referenced by `package.json` line 6 (`"main": "main.js"`).
-  3. Existing close-outs touching `main/` for style precedent (e.g., `CloseOut.NARR-MEDIA-1.2026-05-17.md`).
-  4. Electron docs: `app.requestSingleInstanceLock()`, `second-instance` event.
-- **Tasks:**
-  1. `[hermes/haiku]` In the main-process entry point, BEFORE `app.whenReady()`, call `const gotTheLock = app.requestSingleInstanceLock()`. If `!gotTheLock`, call `app.quit()` and `return`. This is the standard Electron pattern.
-  2. `[hermes/haiku]` Add an `app.on('second-instance', (event, argv, workingDirectory) => { ... })` handler that: (a) restores the existing main window if minimized via `mainWindow.restore()`, (b) brings it to the foreground via `mainWindow.focus()`. If a deeplink/file-path was passed in `argv`, hand it to the existing file-open handler (mirroring whatever path Blurby uses today for first-launch file args).
-  3. `[hippocrates/haiku]` Run `npm test` + `npm run build`. Both must remain green. No test failures and no new test required at this layer — single-instance behavior is verified by manual smoke (see below).
-  4. `[marcusaurelius/sonnet]` Update CLAUDE.md (current state line if the sprint changes any system-state claim — likely no change), update ROADMAP.md Completed Work Summary table, update `sprint-queue.xlsx` Catalog (mark Completed, populate Date Completed + Close-Out File, clear Seq, dashboard recalc).
-  5. `[manual smoke test]` After merge + reinstall (or `npm run dev`): launch Blurby once → confirm window visible. Launch Blurby again from Start menu while the first instance is running → confirm only one window remains and the existing window is focused/brought to front. No duplicate spawn.
-- **Execution Sequence:** Single wave; ~5 tool uses; well under the 40 ceiling. No wave split needed.
-- **Done when (SUCCESS CRITERIA):**
-  1. `main.js` / `main/main.js` calls `app.requestSingleInstanceLock()` before any window creation.
-  2. When the lock cannot be acquired, the second instance calls `app.quit()` and exits cleanly without spawning a window.
-  3. The first instance's `second-instance` handler focuses the existing window (restoring from minimize if needed).
-  4. `npm test` green, `npm run build` green, no regression in existing main-process behavior (file-open path, deep links, OS media controls from NARR-MEDIA-1 all still work).
-  5. Manual smoke (per Task 5) passes.
-- **Effort:** XS. ~5–10 LOC, single file, well-known Electron pattern.
-- **Roster:** Zeus → Hermes • Hippocrates • MarcusAurelius.
-- **Source:** 2026-05-27 live-QA discovery sweep (F1); 2026-05-28 reproducer confirmation by Evan ("Two windows opened successfully"); Electron `app.requestSingleInstanceLock` documentation.
-
-##### Implementation detail
-
-- **Edit sites:** `main/main.js` (or `main.js` at repo root — confirm location during execution from `package.json` `"main"` field). Single function-call insertion before `app.whenReady()` plus one `app.on('second-instance', ...)` handler. No other files touched.
-- **Tests:** None added (behavior verified by manual smoke). Existing `npm test` (3,005 tests) must remain green; build must succeed.
-- **Constants:** None. The fix is pure boilerplate.
-- **Branch:** `sprint/single-instance-lock-1` from clean `main`.
-- **Commit hygiene:** Explicit-stage `main/main.js` (or `main.js`) only. No destructive flags. One commit.
-- **Cal cadence:** N/A (no TTS quality impact).
-
----
-
-#### THEME-SYNC-1 — Settings Theme Propagation + Vite Circular Chunk Repair *(position 2 — full spec)*
+#### THEME-SYNC-1 — Settings Theme Propagation + Vite Circular Chunk Repair *(position 1 — full spec)*
 
 - **What:** Resolve BUG-182 (Settings panel does not fully repaint on light↔dark theme toggle) by (a) breaking the `settings -> tts -> settings` circular chunk identified by `npm run build` 2026-05-28, and (b) auditing theme-context subscription across Settings sub-pages to confirm clean propagation after the chunk fix. The circular chunk is the leading hypothesis for the theme bug — circular imports across Vite chunks produce nondeterministic module-init order, which can leave context providers (theme included) wired to stale subscriptions on first paint after a toggle.
 - **Why:** BUG-182 (filed 2026-05-28) — Evan reported the Settings panel shows mixed light/dark widgets after theme toggle, with screenshot evidence in conversation. Concurrent observation: `npm run build` 2026-05-28 emitted `Circular chunk: settings -> tts -> settings. Please adjust the manual chunk logic for these chunks.` Both findings touch the Settings × TTS overlap. Bundling the fix because (1) the circular chunk is a plausible root cause of the theme repaint bug, and (2) the chunk warning is real hygiene debt that should be cleared either way. Settings is a frequently-visited surface; visual inconsistency degrades trust.
@@ -209,7 +167,7 @@ The eager-spec buffer of 3 dispatchable sprints (positions 1–3 are full specs;
 
 ---
 
-#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 3 — full spec; promoted from stub 2026-05-28 after READER-ISO-1E shipped)*
+#### NARRATE-CLOSED-LOOP-CURSOR — Real-Audio-Position as Single Source of Truth *(position 2 — full spec; promoted from stub 2026-05-28 after READER-ISO-1E shipped)*
 
 - **What:** Make the currently-playing audio source's real word position (via `audioScheduler.getPlayingSourceMaxWordIndex(now)` at `src/utils/audioScheduler.ts:521`) the SINGLE source of truth for (a) the visual cursor's advance and (b) every chunk re-entry / continuation seeding decision in Narrate mode. Retire the ahead-of-heard refs (`lastConfirmedAudioWordRef` at `useNarration.ts:187`, `nextGenWordIndexRef` at `useNarration.ts:188`) as seed sources where the closed loop makes them redundant. Retire the accumulating-error lag-escalation constants (120→220→350→450 ms ladder, ceiling clamp). Bound the prefetch window so the schedule cannot run hundreds of seconds ahead of audible playback (DEV log captured ~227s drift). Closes the unified Bug 1 (visual cursor lead) + Bug 2 (content omission at re-entry) defect that Step 3.6 proved are one root cause.
 - **Why:** The persistent-anchor repair lane (Steps 3.1–3.6) closed in late May with this single residual defect: the system has no signal for what has actually been spoken. Every cursor advance and every re-entry seed derives from either the predicted boundary schedule (`audioScheduler.ts` tick at `audioCtx.currentTime − lag`, line ~949) or from the produced-end of generation (`nextGenWordIndexRef`), both of which are "ahead-of-heard" — the whole book is prefetched. The 450ms lag and Step 3.5 source-clamp cap the lead but don't remove the structural ahead-of-heardness, so (1) the cursor advances ahead of audio audibly in The Raven and prose, and (2) at section handoffs / stalls / resumes, playback continues from a position ahead of what Evan actually heard, dropping words (Step 3.6: Evan did not hear "This it is and nothing more."). SRL-070 explicitly forbids closing this gate on self-referential telemetry (boundary-drift, schedule-vs-wallclock); only Evan's ear closes it. SRL-072 forbids iterating on the ahead-of-heard refs themselves; the loop must be closed at the cursor and re-entry seed level. This sprint was deliberately deferred until READER-ISO-1E (`NarrateModeAdapter` + audio truth-sync ownership, shipped 2026-05-27) created a clean adapter boundary so the scheduler surgery doesn't simultaneously cross a refactoring boundary.
@@ -278,13 +236,13 @@ The eager-spec buffer of 3 dispatchable sprints (positions 1–3 are full specs;
 
 ---
 
-#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 4 — stub)*
+#### UX-POLISH-1 — Library Cards + Command Palette + Space-Bar Mode *(position 3 — stub)*
 
 Library card 3-line format, "New" dot auto-clear, Ctrl+K command palette entries, and Space bar starts the last-used reading mode after reader runtime controls are stable. Will be full-specced at next /roadmap-review when buffer needs replenishment after the position-1 sprint completes. Notes: 3-line format = title / author / progress%-and-time-left; "New" dot is the unread indicator on freshly-imported docs; command palette entries should include the existing import paths (Folder, URL, Drop), the mode switches (Focus/Flow/Narrate), and a recent-docs jump. Coordinate with Hotkey Map (existing Settings panel section) to avoid hotkey collisions.
 
 ---
 
-#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 5 — stub)*
+#### HYG-XLSX-DASHBOARD-RESTORE — Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine *(position 4 — stub)*
 
 Per SRL-080 + Evan's 2026-05-28 disposition. Three tasks: (a) manually rebuild the Dashboard tab's formula-driven KPIs in Excel (B12 category counts, B20 sprints-remaining, B24 % complete by LOE, B29 full-specs-queued, B32 buffer-health flag) per the /roadmap-review skill's "Sprint queue spreadsheet structure" reference; (b) extend `scripts/recalc.py` with a guardrail — refuse to operate on cells whose worksheet name matches `Dashboard`, with `--allow-dashboard` as an explicit opt-out; (c) document the convention in `CLAUDE.md` (or a new `docs/governance/SPREADSHEET_CONVENTIONS.md`) — openpyxl edits the Catalog tab only; Excel computes Dashboard from Catalog. LOE: XS. Lane E (governance tooling). No code surface, no shared-core touches. Parallel-safe with every other queued sprint. Will be full-specced when the queue head reaches it (likely after one of the hotfix sprints ships).
 
@@ -320,6 +278,6 @@ finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md
 sprint_queue_doc: docs/governance/sprint-queue.xlsx
 buffer_target: 5
-buffer_actual_full_specs: 3
+buffer_actual_full_specs: 2
 buffer_actual_stubs: 2
 -->

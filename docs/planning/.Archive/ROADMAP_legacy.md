@@ -4635,3 +4635,18 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
     8. BUG-183 closed in BUG_REPORT.md
 - **Effort:** XS-S
 - **Roster:** Zeus → Aristotle (diagnosis) • Hercules (implementation) • Hippocrates (tests) • MarcusAurelius (docs)
+
+---
+
+## SINGLE-INSTANCE-LOCK-1 — Electron Main-Process Single-Instance Gate *(completed 2026-05-29)*
+
+- **What:** Added `app.requestSingleInstanceLock()` + `second-instance` focus handler to prevent duplicate Blurby windows when launched multiple times.
+- **Why:** F1 from 2026-05-27 live-QA discovery sweep — launching Blurby twice from Start menu spawned two independent windows. Canonical Electron pattern, ~10 LOC.
+- **Lane Ownership:** Lane D (Platform — `main.js` root entry point). No renderer/runtime code.
+- **Shared-Core Touches:** none.
+- **Deliverables:**
+    1. `app.requestSingleInstanceLock()` gate before `app.whenReady()` — second instance calls `app.quit()`
+    2. `app.on("second-instance")` handler restores minimized window and focuses it
+    3. All lifecycle handlers (`whenReady`, `window-all-closed`, `will-quit`) wrapped in the `else` block
+- **Effort:** XS
+- **Roster:** Zeus → Hermes (implementation) • Hippocrates (test/build) • MarcusAurelius (docs)
