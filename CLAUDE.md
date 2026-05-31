@@ -342,7 +342,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue YELLOW depth 3 [1 full spec + 2 stubs], 1 open bug)
+## Current System State (v1.75.1 — queue GREEN depth 6, 2 open bugs)
 
 ### Codebase (branch: `main`)
 
@@ -354,11 +354,11 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** YELLOW depth 3 (1 full spec at position 1: NARRATE-CLOSED-LOOP-CURSOR; 2 stubs at positions 2-3: UX-POLISH-1, HYG-XLSX-DASHBOARD-RESTORE) in `docs/governance/sprint-queue.xlsx`. Next: NARRATE-CLOSED-LOOP-CURSOR — real-audio-position as single source of truth. NARRATE-CLOSED-LOOP-CURSOR is the sole shared-core sprint and must run alone.
+- **Queue:** GREEN depth 6 (DIAG-1 + INTENT-CURSOR-1 done; 3 full specs queued: PAUSE-RESUME-UNIFY-1 Seq1, A5-RATE-RESEED-1 Seq2, APPLYRATECHANGE-COLLAPSE-1 Seq3; 1 gated: SUBSCRIBER-CURSOR-1 Seq4; 2 stubs: UX-POLISH-1 Seq5, HYG-XLSX-DASHBOARD-RESTORE Seq6). Next: NARRATE-PAUSE-RESUME-UNIFY-1 — cold-start resume seed must prefer heardFloor/resumeTarget over stale anchor (completes A4 fix). All narration unification sprints are shared-core and must run sequentially.
 - **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
-- **Most recent sprint:** THEME-SYNC-1 — Vite circular chunk fix + theme investigation (2026-05-29).
-- 3,014 tests across 211 test files
+- **Most recent sprint:** NARRATE-INTENT-CURSOR-1 — resume-anchor consume lifecycle (PARTIAL: A1 PASS, A4 FAIL 0-of-3 — reactive not preventive; PAUSE-RESUME-UNIFY-1 completes). Prior: NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30), THEME-SYNC-1 (2026-05-29).
+- 3,044 tests across 213 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). Quality gate: `npm run test:quality` runs in CI (`quality-gate` job, ubuntu-only, paths-filtered for TTS surfaces)
 - Governance tooling: `scripts/recalc.py` refreshes xlsx formula caches after openpyxl edits (`python scripts/recalc.py [--dry-run] <path>`)
 - Performance baseline: 21 automated benchmarks via `npm run perf`
