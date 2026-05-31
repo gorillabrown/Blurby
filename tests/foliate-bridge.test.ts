@@ -24,13 +24,6 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
     expect(src).toContain('applyVisualHighlightByIndex(narrationWordIndex, "narrate", false);');
   });
 
-  it("routes Narrate view-follow from the live anchor instead of the ahead-running cursor", () => {
-    expect(readerSrc).toContain("narrationWordIndex={narration.speaking ? highlightedWordIndex : undefined}");
-    expect(readerSrc).toContain("narrationWordIndex={narration.speaking ? highlightedWordIndex : null}");
-    expect(readerSrc).not.toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
-    expect(readerSrc).not.toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}");
-  });
-
   it("imperative highlight API keeps motion enabled only by default", () => {
     expect(src).toContain('return applyVisualHighlightByIndex(wordIndex, styleHint, options?.allowMotion ?? true, options?.forceMotion ?? false);');
   });

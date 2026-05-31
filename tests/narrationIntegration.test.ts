@@ -13,14 +13,13 @@ describe("flow narration integration (NARR-LAYER-1B)", () => {
     expect(src).not.toContain("(readingMode === \"page\" && settings.isNarrating === true)");
   });
 
-  it("ReaderContainer passes the live anchor into FoliatePageView while narration is active", () => {
+  it("ReaderContainer passes spoken-word truth into FoliatePageView while narration is active", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("readingMode={readingMode}");
     expect(src).toContain("flowMode={isScrolledSurfaceMode}");
     expect(src).toContain('readingMode === "focus" || readingMode === "flow" || readingMode === "narrate"');
     expect(src).toContain("isNarrating={isNarrating && narration.speaking && !narration.warming}");
-    expect(src).toContain("narrationWordIndex={narration.speaking ? highlightedWordIndex : undefined}");
-    expect(src).not.toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
+    expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
     expect(src).toContain("narrationPauseReason={narration.pauseReason}");
     expect(src).toContain("getAudioProgress={narration.speaking ? narration.getAudioProgress : null}");
   });
