@@ -258,6 +258,28 @@ describe("startup parallelization — window before auth/sync", () => {
     expect(authCompleted).toBe(true);
   });
 
+  it("keeps Kokoro warm-up in a delayed background startup scheduler", () => {
+    const src = fs.readFileSync(
+      path.resolve(__dirname, "../main.js"),
+      "utf-8"
+    );
+
+    expect(src).toContain("function scheduleBackgroundStartupTasks");
+    expect(src).toContain("STARTUP_BACKGROUND_DELAY_MS");
+    expect(src).toContain("mainWindow.once(\"show\", runKokoroWarmup)");
+    expect(src).toMatch(/setTimeout\(\(\)\s*=>\s*\{[\s\S]*ttsEngine\.downloadModel/);
+  });
+
+  it("does not run immediate Kokoro model download in the startup critical section", () => {
+    const src = fs.readFileSync(
+      path.resolve(__dirname, "../main.js"),
+      "utf-8"
+    );
+
+    expect(src).not.toContain("Auto-download Kokoro TTS model if not already present");
+    expect(src).not.toMatch(/\/\/ ── Phase 4: Deferred work[\s\S]*const ttsEngine = require\("\.\/main\/tts-engine"\);[\s\S]*ttsEngine\.downloadModel/);
+  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────

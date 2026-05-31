@@ -42,6 +42,7 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
     pageNavRef,
     resumeAnchorRef,
     setHighlightedWordIndex,
+    commitPersistentWordIndex,
     updateSettings,
     settings,
     syncVisualToPersistentWord,
@@ -212,22 +213,66 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
     }
 
     if (readingMode === "narrate") {
-      if (isNarratingRef.current) {
-        modeInstance.pauseMode();
+      const narrationSpeaking = narration.speaking === true || narration.status === "speaking" || narration.status === "holding";
+      const narrationPaused = isNarratingRef.current && !narrationSpeaking;
+
+      if (isNarratingRef.current && narrationSpeaking) {
+        const anchor = narration.cursorWordIndex;
+        const clampedAnchor = commitPersistentWordIndex(anchor, "mode-advance", {
+          persist: false,
+          publishState: true,
+          navigate: false,
+          syncVisual: true,
+        });
+        resumeAnchorRef.current = clampedAnchor;
+        logDualSourceTransition("resumeAnchor:set", () => ({
+          resumeAnchor: clampedAnchor,
+          source: "useReaderModeOrchestrator:handleTogglePlay:narrate-pause",
+        }));
+        highlightedWordIndexRef.current = clampedAnchor;
+        setHighlightedWordIndex(clampedAnchor);
         setFlowPlaying(false);
-        narration.stop("mode-switch");
-        clearNarrateTruthSync();
-        setIsNarrating(false);
+        narration.pause("user-stop");
+        setIsNarrating(true);
         updateSettings({
           readingMode: "narrate",
           lastReadingMode: "narrate",
-          isNarrating: false,
+          isNarrating: true,
         });
         return;
       }
+
+      if (narrationPaused) {
+        narration.resume();
+        setIsNarrating(true);
+        updateSettings({
+          readingMode: "narrate",
+          lastReadingMode: "narrate",
+          isNarrating: true,
+        });
+        return;
+      }
+
       startFlow({ resumeNarration: true, targetMode: "narrate" });
     }
-  }, [captureCurrentAnchor, clearNarrateTruthSync, flowPlaying, isNarratingRef, modeInstance, narration, readingMode, setFlowPlaying, setFocusPlaying, setIsNarrating, startFlow, startFocus, updateSettings]);
+  }, [
+    captureCurrentAnchor,
+    commitPersistentWordIndex,
+    flowPlaying,
+    highlightedWordIndexRef,
+    isNarratingRef,
+    modeInstance,
+    narration,
+    readingMode,
+    resumeAnchorRef,
+    setFlowPlaying,
+    setFocusPlaying,
+    setHighlightedWordIndex,
+    setIsNarrating,
+    startFlow,
+    startFocus,
+    updateSettings,
+  ]);
 
   const handleCycleMode = useCallback(() => {
     const current = settings.lastReadingMode || "flow";

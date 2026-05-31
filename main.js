@@ -440,6 +440,58 @@ function startWatcherFn() {
   });
 }
 
+function scheduleBackgroundStartupTasks(startupContext = {}) {
+  const STARTUP_BACKGROUND_DELAY_MS = 3000;
+  const CACHE_CLEANUP_DELAY_MS = 5000;
+  const mainWindow = startupContext.mainWindow;
+
+  const runKokoroWarmup = () => {
+    setTimeout(() => {
+      try {
+        const ttsEngine = require("./main/tts-engine");
+        if (ttsEngine.isModelReady()) return;
+
+        ttsEngine.downloadModel((progress) => {
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send("tts-kokoro-download-progress", progress);
+          }
+        }).then(() => {
+          console.log("[kokoro] Background warm-up complete");
+        }).catch((err) => {
+          console.log("[kokoro] Background warm-up failed (will retry on demand):", err.message);
+        });
+      } catch (err) {
+        console.log("[kokoro] Background warm-up scheduling failed:", err.message);
+      }
+    }, STARTUP_BACKGROUND_DELAY_MS);
+  };
+
+  const runCacheCleanup = () => {
+    try {
+      const ttsCache = require("./main/tts-cache");
+      if (typeof ttsCache.scheduleCleanupOrphans === "function") {
+        ttsCache.scheduleCleanupOrphans(CACHE_CLEANUP_DELAY_MS);
+      }
+    } catch (err) {
+      console.log("[tts-cache] Deferred cleanup scheduling failed:", err.message);
+    }
+  };
+
+  const runBackgroundTasks = () => {
+    runKokoroWarmup();
+    runCacheCleanup();
+  };
+
+  if (mainWindow && !mainWindow.isDestroyed()) {
+    if (mainWindow.isVisible()) {
+      runBackgroundTasks();
+    } else {
+      mainWindow.once("show", runKokoroWarmup);
+      mainWindow.once("show", runCacheCleanup);
+    }
+  }
+}
+
 // ── Reading statistics ─────────────────────────────────────────────────────────
 function recordReadingSession(docTitle, wordsRead, durationMs, wpm) {
   const today = new Date().toISOString().slice(0, 10);
@@ -589,6 +641,7 @@ app.whenReady().then(async () => {
   });
   updateWindowTheme(mainWindow, settings);
   if (!isDev) setupAutoUpdater(mainWindow);
+  scheduleBackgroundStartupTasks({ mainWindow, settings });
 
   // ── Phase 3: Auth + sync init in parallel (window already visible) ───────
   await Promise.all([
@@ -634,22 +687,6 @@ app.whenReady().then(async () => {
         console.error("Failed to load sample document:", e.message);
       }
     });
-  }
-
-  // Auto-download Kokoro TTS model if not already present (non-blocking)
-  {
-    const ttsEngine = require("./main/tts-engine");
-    if (!ttsEngine.isModelReady()) {
-      ttsEngine.downloadModel((progress) => {
-        if (mainWindow && !mainWindow.isDestroyed()) {
-          mainWindow.webContents.send("tts-kokoro-download-progress", progress);
-        }
-      }).then(() => {
-        console.log("[kokoro] Model auto-download complete");
-      }).catch((err) => {
-        console.log("[kokoro] Auto-download failed (will retry on demand):", err.message);
-      });
-    }
   }
 
   // Listen for OS theme changes

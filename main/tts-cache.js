@@ -31,7 +31,14 @@ async function init(userDataPath) {
   cacheRoot = path.join(userDataPath, TTS_CACHE_SUBDIR);
   await fs.mkdir(cacheRoot, { recursive: true });
   await loadManifest();
-  await cleanupOrphans();
+}
+
+function scheduleCleanupOrphans(delayMs = 5000) {
+  return setTimeout(() => {
+    cleanupOrphans().catch((err) => {
+      console.error("[tts-cache] Deferred cleanup error:", err.message);
+    });
+  }, delayMs);
 }
 
 // ── Manifest ─────────────────────────────────────────────────────────────────
@@ -672,6 +679,7 @@ async function cleanupStructuredOrphans() {
 
 module.exports = {
   init,
+  scheduleCleanupOrphans,
   writeChunk,
   readChunk,
   hasChunk,

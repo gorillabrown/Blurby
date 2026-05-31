@@ -18,7 +18,11 @@ export interface UseReaderModeParams {
   };
   narration: {
     cursorWordIndex: number;
+    speaking?: boolean;
+    status?: string;
     startCursorDriven: (words: string[], startWordIndex: number, wpm: number, onWordAdvance: (wordIndex: number) => void) => "started" | "warming" | "error";
+    pause: (reason?: PauseReason) => void;
+    resume: (currentWordIndex?: number) => void;
     stop: (reason?: PauseReason) => void;
     setOnTruthSync?: (cb: ((wordIndex: number) => void) | null) => void;
     setPageEndWord: (idx: number | null) => void;
@@ -115,6 +119,7 @@ export function useReaderMode({
   explicitSelectionAnchorRef,
   softWordIndexRef,
   persistentWordIndexRef,
+  commitPersistentWordIndex,
   onNarrateTruthSync,
 }: UseReaderModeParams): UseReaderModeReturn {
   const readingModeRef = useRef<ReaderMode>(readingMode);
@@ -170,20 +175,26 @@ export function useReaderMode({
         const latestWord = narrateTruthPendingWordRef.current;
         narrateTruthPendingWordRef.current = null;
         if (latestWord == null) return;
-        highlightedWordIndexRef.current = latestWord;
-        setHighlightedWordIndex(latestWord);
-        onNarrateTruthSync?.(latestWord);
-        const found = foliateApiRef.current?.highlightWordByIndex(latestWord, "narrate", { allowMotion: false });
+        const liveAnchor = commitPersistentWordIndex(latestWord, "mode-advance", {
+          persist: false,
+          publishState: true,
+          navigate: false,
+          syncVisual: false,
+        });
+        highlightedWordIndexRef.current = liveAnchor;
+        setHighlightedWordIndex(liveAnchor);
+        onNarrateTruthSync?.(liveAnchor);
+        const found = foliateApiRef.current?.highlightWordByIndex(liveAnchor, "narrate", { allowMotion: false });
         if (!found) {
-          modeInstance.pendingResumeRef.current = { wordIndex: latestWord, mode: "narrate" };
-          const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(latestWord);
+          modeInstance.pendingResumeRef.current = { wordIndex: liveAnchor, mode: "narrate" };
+          const sectionIdx = foliateApiRef.current?.getSectionForWordIndex?.(liveAnchor);
           if (sectionIdx != null) {
             Promise.resolve(foliateApiRef.current?.goToSection?.(sectionIdx)).catch(() => {});
           }
         }
       });
     });
-  }, [clearNarrateTruthSync, foliateApiRef, modeInstance.pendingResumeRef, narration, onNarrateTruthSync, useFoliate]);
+  }, [clearNarrateTruthSync, commitPersistentWordIndex, foliateApiRef, modeInstance.pendingResumeRef, narration, onNarrateTruthSync, useFoliate]);
 
   const stopAllModes = useCallback(() => {
     if (narrationCursorRafRef.current != null) {
@@ -235,8 +246,8 @@ export function useReaderMode({
     const explicitAnchor = explicitSelectionAnchorRef?.current ?? null;
     const startAnchor = resolveModeStartWordIndex(
       explicitAnchor,
-      persistentWordIndexRef.current,
       resumeAnchorRef.current,
+      persistentWordIndexRef.current,
       highlightedWordIndexRef.current,
       softWordIndexRef.current,
     );

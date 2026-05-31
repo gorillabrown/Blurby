@@ -16,6 +16,7 @@ function createNarration(overrides: Record<string, unknown> = {}): any {
   return {
     cursorWordIndex: 0,
     status: "idle",
+    speaking: false,
     startCursorDriven: vi.fn(() => "started"),
     pause: vi.fn(),
     resume: vi.fn(),
@@ -667,6 +668,7 @@ describe("useReaderMode four-mode foundation", () => {
     foliateApiCurrent?: Record<string, unknown>;
     getEffectiveWords?: () => string[];
     bookWordsTotalWords?: number;
+    persistentWordIndex?: number;
     evalTrace?: any;
   }) {
     const modeInstance = {
@@ -704,6 +706,7 @@ describe("useReaderMode four-mode foundation", () => {
     };
 
     const updateSettings = vi.fn();
+    const commitPersistentWordIndex = vi.fn((_w: number) => _w);
     const pendingNarrationResumeRef = { current: options?.pendingNarrationResume ?? false };
     const resumeAnchorRef = { current: options?.resumeAnchor ?? null };
     const explicitSelectionAnchorRef = { current: options?.explicitSelectionAnchor ?? null };
@@ -770,8 +773,14 @@ describe("useReaderMode four-mode foundation", () => {
         explicitSelectionAnchorRef,
         softWordIndexRef: { current: options?.softWordIndex ?? 0 },
         evalTrace: options?.evalTrace ?? null,
-        persistentWordIndexRef: { current: options?.resumeAnchor ?? options?.explicitSelectionAnchor ?? options?.initialHighlightedWordIndex ?? 0 },
-        commitPersistentWordIndex: vi.fn((_w: number) => _w),
+        persistentWordIndexRef: {
+          current: options?.persistentWordIndex
+            ?? options?.resumeAnchor
+            ?? options?.explicitSelectionAnchor
+            ?? options?.initialHighlightedWordIndex
+            ?? 0,
+        },
+        commitPersistentWordIndex,
         syncVisualToPersistentWord: vi.fn(() => options?.resumeAnchor ?? options?.explicitSelectionAnchor ?? options?.initialHighlightedWordIndex ?? 0),
         queuePostModeAnchorSync: vi.fn(),
       });
@@ -795,6 +804,7 @@ describe("useReaderMode four-mode foundation", () => {
       pendingNarrationResumeRef,
       resumeAnchorRef,
       explicitSelectionAnchorRef,
+      commitPersistentWordIndex,
     };
   }
 
@@ -860,6 +870,35 @@ describe("useReaderMode four-mode foundation", () => {
     );
     expect(harness.resumeAnchorRef.current).toBe(2);
     expect(harness.explicitSelectionAnchorRef.current).toBeNull();
+  });
+
+  it("starts narrate from a captured resume anchor before a stale persistent click anchor", async () => {
+    const words = Array.from({ length: 20 }, (_, i) => `word-${i}`);
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialHighlightedWordIndex: 2,
+      persistentWordIndex: 2,
+      resumeAnchor: 8,
+      softWordIndex: 2,
+      bookWordsTotalWords: 20,
+      getEffectiveWords: () => words,
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.startCursorDriven).toHaveBeenCalledWith(
+      words,
+      8,
+      180,
+      expect.any(Function),
+    );
   });
 
   it("preserves narrate startup options across delayed Foliate word extraction", async () => {
@@ -1052,11 +1091,12 @@ describe("useReaderMode four-mode foundation", () => {
     expect(harness.modeInstance.stopMode).not.toHaveBeenCalled();
   });
 
-  it("stopping active narrate keeps the reader in narrate mode but deactivates narration", async () => {
+  it("pausing active narrate keeps one narration session instead of stopping for a cold restart", async () => {
     const harness = await renderReaderModeHarness({
       initialReadingMode: "narrate",
       initialIsNarrating: true,
       initialFlowPlaying: true,
+      narrationOverrides: { cursorWordIndex: 7, status: "speaking", speaking: true },
       settings: {
         lastReadingMode: "narrate",
         readingMode: "narrate",
@@ -1081,15 +1121,51 @@ describe("useReaderMode four-mode foundation", () => {
     });
 
     expect(harness.observed.readingMode).toBe("narrate");
-    expect(harness.observed.isNarrating).toBe(false);
+    expect(harness.observed.isNarrating).toBe(true);
     expect(harness.observed.flowPlaying).toBe(false);
-    expect(harness.modeInstance.pauseMode).toHaveBeenCalled();
-    expect(harness.narration.stop).toHaveBeenCalled();
-    expect(harness.narration.setOnTruthSync).toHaveBeenCalledWith(null);
+    expect(harness.narration.pause).toHaveBeenCalledWith("user-stop");
+    expect(harness.narration.stop).not.toHaveBeenCalled();
+    expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
+    expect(harness.resumeAnchorRef.current).toBe(7);
+    expect(harness.commitPersistentWordIndex).toHaveBeenCalledWith(7, "mode-advance", {
+      persist: false,
+      publishState: true,
+      navigate: false,
+      syncVisual: true,
+    });
     expect(harness.updateSettings).toHaveBeenCalledWith({
       readingMode: "narrate",
       lastReadingMode: "narrate",
-      isNarrating: false,
+      isNarrating: true,
+    });
+  });
+
+  it("resumes paused narrate through useNarration.resume instead of cold-starting again", async () => {
+    const harness = await renderReaderModeHarness({
+      initialReadingMode: "narrate",
+      initialIsNarrating: true,
+      initialFlowPlaying: false,
+      resumeAnchor: 7,
+      narrationOverrides: { cursorWordIndex: 7, status: "paused", speaking: false },
+      settings: {
+        lastReadingMode: "narrate",
+        readingMode: "narrate",
+        isNarrating: true,
+      },
+    });
+
+    await act(async () => {
+      harness.snapshot()?.handleTogglePlay();
+      await flushPromises();
+    });
+
+    expect(harness.narration.resume).toHaveBeenCalledWith();
+    expect(harness.narration.startCursorDriven).not.toHaveBeenCalled();
+    expect(harness.narration.stop).not.toHaveBeenCalled();
+    expect(harness.updateSettings).toHaveBeenCalledWith({
+      readingMode: "narrate",
+      lastReadingMode: "narrate",
+      isNarrating: true,
     });
   });
 
@@ -1168,6 +1244,12 @@ describe("useReaderMode four-mode foundation", () => {
     });
 
     expect(harness.observed.highlightedWordIndex).toBe(2);
+    expect(harness.commitPersistentWordIndex).toHaveBeenCalledWith(2, "mode-advance", {
+      persist: false,
+      publishState: true,
+      navigate: false,
+      syncVisual: false,
+    });
     expect(harness.foliateApiRef.current.highlightWordByIndex).toHaveBeenCalledWith(2, "narrate", { allowMotion: false });
     expect(harness.modeInstance.pendingResumeRef.current).toBeNull();
   });
