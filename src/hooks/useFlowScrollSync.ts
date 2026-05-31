@@ -201,7 +201,7 @@ export function useFlowScrollSync({
 
   const syncEngineToCurrentWord = (engine: FlowScrollEngine) => {
     if (isNarratingRef.current) {
-      engine.followWord(narration.cursorWordIndex);
+      engine.followWord(highlightedWordIndexRef.current);
       return;
     }
     engine.jumpToWord(highlightedWordIndexRef.current);
@@ -500,7 +500,7 @@ export function useFlowScrollSync({
 
     if (!engine) return;
     engine.setFollowerMode(true);
-    engine.followWord(narration.cursorWordIndex);
+    engine.followWord(highlightedWordIndexRef.current);
 
     ownsSectionEndCallbackRef.current = true;
     narration.setOnSectionEnd(() => {

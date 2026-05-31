@@ -1490,7 +1490,7 @@ export default function ReaderContainer({
       flowPlaying={flowPlaying}
       highlightedWordIndex={highlightedWordIndex}
       wpm={effectiveWpm}
-      narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}
+      narrationWordIndex={narration.speaking ? highlightedWordIndex : undefined}
       narrationPauseReason={narration.pauseReason}
       getAudioProgress={narration.speaking ? narration.getAudioProgress : null}
       bookWordSections={bookWordMeta?.sections}
@@ -1677,7 +1677,7 @@ export default function ReaderContainer({
           }}
           ttsEngine={settings.ttsEngine || "kokoro"}
           foliateFraction={useFoliate ? foliateFraction : undefined}
-          narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
+          narrationWordIndex={narration.speaking ? highlightedWordIndex : null}
           flowZoneLines={settings.flowZoneLines}
           onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
         />

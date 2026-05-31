@@ -120,6 +120,59 @@ describe("TTS-CONT-1 readiness-driven continuity", () => {
     vi.useRealTimers();
   });
 
+  it("follows the live highlighted anchor during flow narration instead of the ahead-running cursor", async () => {
+    const narration = createNarrationBridge({ cursorWordIndex: 80 });
+
+    function Harness() {
+      useFlowScrollSync({
+        readingMode: "flow",
+        isNarrating: true,
+        effectiveWpm: 180,
+        settings: { flowZonePosition: "center" } as any,
+        useFoliate: true,
+        activeDoc: { id: "doc-1", title: "Current", wordCount: 100 } as any,
+        library: [{ id: "doc-1", title: "Current", position: 0, wordCount: 100, created: 1, source: "manual" }],
+        startFlowRef: { current: vi.fn() },
+        flowPlaying: true,
+        setFlowPlaying: vi.fn(),
+        setIsNarrating: vi.fn(),
+        setFlowProgress: vi.fn(),
+        setCrossBookTransition: vi.fn(),
+        pendingFlowResumeRef: { current: false },
+        pendingNarrationResumeRef: { current: false },
+        setHighlightedWordIndex: vi.fn(),
+        setReadingMode: vi.fn(),
+        highlightedWordIndexRef: { current: 12 },
+        highlightedWordIndex: 12,
+        narration,
+        foliateApiRef: {
+          current: {
+            waitForSectionReady: vi.fn(() => Promise.resolve()),
+          },
+        } as any,
+        flowScrollContainerRef: { current: document.createElement("div") },
+        flowScrollCursorRef: { current: document.createElement("div") },
+        wordsRef: { current: Array.from({ length: 100 }, (_, i) => `w${i}`) },
+        bookWordMeta: { sections: [], totalWords: 100 },
+        paragraphBreaks: new Set<number>(),
+        isEink: false,
+        focusTextSize: 100,
+        finishReadingWithoutExitRef: { current: vi.fn() },
+        onOpenDocByIdRef: { current: vi.fn() },
+      });
+      return null;
+    }
+
+    root = createRoot(container);
+    await act(async () => {
+      root?.render(React.createElement(Harness));
+      await flushPromises();
+    });
+
+    expect(fakeEngineInstances[0].followWord).toHaveBeenCalledWith(12);
+    expect(fakeEngineInstances[0].followWord).not.toHaveBeenCalledWith(80);
+  });
+
   it("waits for the foliate readiness signal before restarting same-book flow narration", async () => {
     const currentCallback = { value: null as null | (() => void) };
     const readiness = createDeferred<void>();

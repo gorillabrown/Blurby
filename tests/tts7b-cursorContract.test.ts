@@ -41,10 +41,11 @@ describe("cursor contract after narration-mode removal", () => {
     expect(src).toContain("const isNarrationSelected = readingMode === \"narrate\" || isNarrating;");
   });
 
-  it("ReaderContainer drives narration cursor from spoken-word truth while narration is active", () => {
+  it("ReaderContainer keeps Foliate view-follow on the live anchor while narration is active", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
-    expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
+    expect(src).toContain("narrationWordIndex={narration.speaking ? highlightedWordIndex : undefined}");
+    expect(src).not.toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
   });
 });
 
