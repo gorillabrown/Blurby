@@ -91,3 +91,32 @@ export function shouldPersistRelocateProgress({
 }): boolean {
   return hasEngaged && !hasResumeAnchor && !userBrowsing;
 }
+
+/**
+ * NARRATE-INTENT-CURSOR-1 (the A4 fix) — resume-anchor CONSUME predicate.
+ *
+ * A hard-click resume anchor is a ONE-SHOT intent: it pins the exact start word,
+ * then must be consumed (nulled) once playback advances past it, so a stale anchor
+ * cannot re-seed every later pause→resume / mode re-entry (the "gravity well").
+ *
+ * Returns true exactly when the live audio word index has advanced STRICTLY past a
+ * non-null anchor:
+ *   - `resumeAnchor == null`  → false (idempotent / one-shot; already consumed).
+ *   - `advancedWordIndex > resumeAnchor` → true (consume now).
+ *   - otherwise → false.
+ *
+ * Strict `>` (never `>=`) is load-bearing for A1: the clicked word IS the intended
+ * first spoken word, so consume must NOT fire while audio is still on the anchor
+ * word — only once it moves to the next word. Using `>=` would null the anchor
+ * before the click is honored and break click-to-narrate exact start.
+ */
+export function shouldConsumeResumeAnchorOnAdvance({
+  resumeAnchor,
+  advancedWordIndex,
+}: {
+  resumeAnchor: number | null | undefined;
+  advancedWordIndex: number;
+}): boolean {
+  if (resumeAnchor == null) return false;
+  return advancedWordIndex > resumeAnchor;
+}

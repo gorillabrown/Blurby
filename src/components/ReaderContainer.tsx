@@ -11,6 +11,7 @@ import { jumpFoliateToWordAnchor } from "../utils/foliateAnchorNavigation";
 import {
   resolveBookOpenInitialCfi,
   shouldClearBrowseAwayOnAnchorEvent,
+  shouldConsumeResumeAnchorOnAdvance,
   shouldPersistRelocateProgress,
   shouldWriteRelocateCfi,
 } from "../utils/persistentReadingAnchor";
@@ -440,6 +441,20 @@ export default function ReaderContainer({
   }, [naturalReadingChunks, narration, setChunkReadingVisualState]);
 
   const applyNarrationActiveWord = useCallback((wordIndex: number) => {
+    // NARRATE-INTENT-CURSOR-1 (A4 fix) — CONSUME: the resume anchor is a one-shot
+    // intent. Once the live spoken word advances STRICTLY past it, null it so it
+    // cannot re-seed later pause→resume / mode re-entry, and so onRelocate's
+    // `!hasResumeAnchor` gate re-enables progress-save (the gravity-well break).
+    // Placed before the empty-chunks early return so consume fires regardless of
+    // chunk-visual state.
+    if (shouldConsumeResumeAnchorOnAdvance({ resumeAnchor: resumeAnchorRef.current, advancedWordIndex: wordIndex })) {
+      resumeAnchorRef.current = null;
+      logDualSourceTransition("resumeAnchor:consumed", () => ({
+        resumeAnchor: null,
+        approxWordIdx: wordIndex,
+        source: "ReaderContainer:applyNarrationActiveWord:advance-past",
+      }));
+    }
     explicitSelectionAnchorRef.current = null;
     if (naturalReadingChunks.length === 0) {
       setChunkReadingVisualState(null);
@@ -688,6 +703,18 @@ export default function ReaderContainer({
     jumpToWord,
     foliateApiRef,
     onWordAdvance: (idx: number) => {
+      // NARRATE-INTENT-CURSOR-1 (A4 fix) — CONSUME (mirror): the focus/flow per-word
+      // path is the non-truth-sync route. Apply the same one-shot consume so the
+      // anchor is robustly nulled across all modes once playback advances strictly
+      // past it. Placed first so it fires regardless of the rest of the handler.
+      if (shouldConsumeResumeAnchorOnAdvance({ resumeAnchor: resumeAnchorRef.current, advancedWordIndex: idx })) {
+        resumeAnchorRef.current = null;
+        logDualSourceTransition("resumeAnchor:consumed", () => ({
+          resumeAnchor: null,
+          approxWordIdx: idx,
+          source: "ReaderContainer:onWordAdvance:advance-past",
+        }));
+      }
       explicitSelectionAnchorRef.current = null;
       highlightedWordIndexRef.current = idx;
       commitPersistentWordIndex(idx, "mode-advance", {
@@ -1350,6 +1377,11 @@ export default function ReaderContainer({
               word,
             );
           }
+          // NARRATE-INTENT-CURSOR-1 (A4 fix) — CLEAR-on-fresh-start (option c):
+          // null any surviving stale anchor immediately BEFORE the fresh click SET
+          // re-arms it on the very next line. A click always writes a clean one-shot
+          // anchor; the SET below remains authoritative for this click-driven start (A1).
+          resumeAnchorRef.current = null;
           resumeAnchorRef.current = resolvedClickWordIndex;
           // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (ReaderContainer — click-to-narrate)
           logDualSourceTransition("resumeAnchor:set", () => ({
