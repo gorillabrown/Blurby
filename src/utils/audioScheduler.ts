@@ -14,6 +14,15 @@ import { createTimingMetadataRecord, type TimingMetadataRecord } from "./timingM
 import { isPunctuationOnlyWord } from "./spokenWordFilter";
 import { logDualSourceTransition } from "./dualSourceDiag";
 
+// ── NARRATE-CURSOR-TRACKING-DIAG-1: Guarded diagnostic channel ─────────────
+// Keep false in production. Flip to true only for local tracing sessions.
+// When false: schedDiag() is a no-op — zero allocation, zero cost.
+const DIAG = false;
+/** Emit a [SCHED-DIAG] console.debug event. Zero cost when DIAG=false. */
+function schedDiag(event: string, payload: () => Record<string, unknown>): void {
+  if (DIAG) console.debug("[SCHED-DIAG]", performance.now(), event, payload());
+}
+
 // NARR-FIX-3: getOutputTimestamp() was tried (NARR-FIX-2) but reports only
 // ~57ms on Windows. The real Electron/WASAPI pipeline latency is ~350ms.
 // Reverted to constant-lag approach with TTS_TRUSTED_CURSOR_LAG_MS = 350.
@@ -351,6 +360,27 @@ export function createAudioScheduler(): AudioScheduler {
     const { shouldEmit, endIdx, lastConfirmedWordIdx, metadata } = getParentBoundaryInfo(s.chunk);
     s.boundaryFired = true;
 
+    // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: chunk-end diag event
+    schedDiag("chunk-end", () => {
+      const _now = audioCtx?.currentTime ?? 0;
+      const _activeWord = audioCtx ? getPlayingSourceMaxWordIndex(_now) : null;
+      return {
+        t: performance.now(),
+        schedulerActiveWord: _activeWord,
+        schedulerChunkBoundary: {
+          chunkStartIdx: s.chunk.startIdx,
+          chunkEndIdx: s.chunk.startIdx + s.chunk.words.length,
+          lastConfirmedWordIdx,
+          endIdx,
+          shouldEmit,
+        },
+        heardFloor: null,      // not accessible in this layer
+        resumeTarget: null,    // not accessible in this layer
+        subscriberCursor: null,// not accessible in this layer
+        nextGenWordIndex: null, // not accessible in this layer
+      };
+    });
+
     if (!callbacks || !shouldEmit) return;
 
     if (metadata) {
@@ -662,6 +692,23 @@ export function createAudioScheduler(): AudioScheduler {
       if (scheduled.startNotified || now < scheduled.startTime) continue;
       scheduled.startNotified = true;
       callbacks.onSegmentStart?.(scheduled.chunk.startIdx);
+      // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: chunk-start diag event
+      schedDiag("chunk-start", () => {
+        const _activeWord = audioCtx ? getPlayingSourceMaxWordIndex(now) : null;
+        return {
+          t: performance.now(),
+          schedulerActiveWord: _activeWord,
+          schedulerChunkBoundary: {
+            chunkStartIdx: scheduled.chunk.startIdx,
+            chunkEndIdx: scheduled.chunk.startIdx + scheduled.chunk.words.length,
+            wordCount: scheduled.chunk.words.length,
+          },
+          heardFloor: null,      // not accessible in this layer
+          resumeTarget: null,    // not accessible in this layer
+          subscriberCursor: null,// not accessible in this layer
+          nextGenWordIndex: null, // not accessible in this layer
+        };
+      });
     }
   }
 
