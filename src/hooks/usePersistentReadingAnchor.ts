@@ -67,12 +67,14 @@ export function usePersistentReadingAnchor({
     persistentWordIndexRef.current = wordIndex;
     highlightedWordIndexRef.current = wordIndex;
     softWordIndexRef.current = wordIndex;
-    resumeAnchorRef.current = wordIndex;
-    // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (usePersistentReadingAnchor)
-    logDualSourceTransition("resumeAnchor:set", () => ({
-      resumeAnchor: wordIndex,
-      source: `usePersistentReadingAnchor:writeRefs:${cause}`,
-    }));
+    if (cause !== "mode-advance") {
+      resumeAnchorRef.current = wordIndex;
+      // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (usePersistentReadingAnchor)
+      logDualSourceTransition("resumeAnchor:set", () => ({
+        resumeAnchor: wordIndex,
+        source: `usePersistentReadingAnchor:writeRefs:${cause}`,
+      }));
+    }
     if (cause === "hard-selection" || cause === "explicit-navigation") {
       explicitSelectionAnchorRef.current = wordIndex;
     } else if (cause === "book-open") {

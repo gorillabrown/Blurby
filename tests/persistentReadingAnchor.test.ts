@@ -184,7 +184,7 @@ describe("usePersistentReadingAnchor", () => {
     expect(onUpdateProgress).toHaveBeenCalledWith("book-1", 22);
   });
 
-  it("mode advancement updates the in-memory anchor without forcing immediate persistence", () => {
+  it("mode advancement updates the in-memory anchor without forcing immediate persistence or rearming resume intent", () => {
     const highlightedRef = { current: 5 };
     const softRef = { current: 5 as number | null };
     const explicitRef = { current: null as number | null };
@@ -203,6 +203,8 @@ describe("usePersistentReadingAnchor", () => {
       onUpdateProgress,
     }));
 
+    resumeRef.current = null;
+
     act(() => {
       result.current.commitPersistentWordIndex(6, "mode-advance", {
         persist: false,
@@ -214,7 +216,7 @@ describe("usePersistentReadingAnchor", () => {
     expect(result.current.persistentWordIndexRef.current).toBe(6);
     expect(result.current.persistentWordIndex).toBe(5);
     expect(explicitRef.current).toBeNull();
-    expect(resumeRef.current).toBe(6);
+    expect(resumeRef.current).toBeNull();
     expect(onUpdateProgress).not.toHaveBeenCalled();
   });
 });

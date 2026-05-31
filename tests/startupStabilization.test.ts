@@ -141,6 +141,29 @@ describe("BUG-163: TTS preload IPC", () => {
     expect(readerSrc).toContain("}, [activeDoc.id, initReader]);");
     expect(readerSrc).not.toContain("}, [activeDoc.id, initReader, settings.readingMode, settings.ttsEngine]);");
   });
+
+  it("LibraryContainer does not start Kokoro preload on app/library mount", () => {
+    const librarySrc = fs.readFileSync(
+      path.resolve(__dirname, "../src/components/LibraryContainer.tsx"),
+      "utf-8"
+    );
+    expect(librarySrc).not.toContain("Pre-load Kokoro model at app startup");
+    expect(librarySrc).not.toContain("api.kokoroPreload().catch");
+  });
+
+  it("tts-cache init defers orphan cleanup to an explicit scheduler", () => {
+    const cacheSrc = fs.readFileSync(
+      path.resolve(__dirname, "../main/tts-cache.js"),
+      "utf-8"
+    );
+    const initStart = cacheSrc.indexOf("async function init(");
+    const initEnd = cacheSrc.indexOf("// ── Manifest", initStart);
+    const initBody = cacheSrc.slice(initStart, initEnd);
+
+    expect(cacheSrc).toContain("function scheduleCleanupOrphans");
+    expect(cacheSrc).toContain("scheduleCleanupOrphans");
+    expect(initBody).not.toContain("await cleanupOrphans();");
+  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
