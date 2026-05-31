@@ -200,6 +200,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const nextKokoroExactStartRef = useRef<number | null>(null);
   /** Handoff marker — set when the next chunk chain must start fresh from a new global anchor. */
   const handoffPendingRef = useRef(false);
+  /** NARRATE-PAUSE-RESUME-UNIFY-1: Captured heardFloor at pause time — consumed once on resume.
+   *  Single-writer: pause(). Single-reader: resume() priority chain. Lifecycle: SET on pause → consumed on resume → null. */
+  const resumeTargetRef = useRef<number | null>(null);
   const kokoroVoiceRef = useRef("af_bella");
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
@@ -2098,6 +2101,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       engine: s.engine,
       status: s.status,
     }));
+    // NARRATE-PAUSE-RESUME-UNIFY-1: Capture heardFloor BEFORE strategy pause freezes AudioContext.
+    // This is the definitive "where audio was" at pause time — consumed by resume()'s priority chain.
+    if (s.engine === "kokoro") {
+      resumeTargetRef.current = kokoroStrategy.getHeardFloorWordIndex();
+      logDualSourceTransition("pause:resumeTarget-captured", () => ({
+        resumeTarget: resumeTargetRef.current,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        cursorWordIndex: s.cursorWordIndex,
+      }));
+    }
     clearPendingRateResponseTrace();
     if (pocketActiveRef.current && pocketStrategyRef.current) {
       pocketStrategyRef.current.pause();
@@ -2126,13 +2139,23 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const resume = useCallback((currentWordIndex?: number) => {
     const s = stateRef.current;
 
+    // NARRATE-PAUSE-RESUME-UNIFY-1: Unified resume seed priority chain.
+    // Priority: intent (explicit click during pause) > resumeTarget (heardFloor at pause) > lastConfirmed > stateRef cursor.
+    // This prevents the stale persistent anchor from overriding the true audio position.
+    const unifiedSeed = nextKokoroExactStartRef.current
+      ?? resumeTargetRef.current
+      ?? lastConfirmedAudioWordRef.current
+      ?? s.cursorWordIndex;
+    resumeTargetRef.current = null; // consume (one-shot)
+
     // TTS-7B: If caller provides a cursor position that differs from where
     // we paused, the user moved the cursor during pause — resync instead of bare resume.
     if (currentWordIndex != null && currentWordIndex !== s.cursorWordIndex) {
-      // NARRATE-DUAL-SOURCE-DIAG-1: resume:cursor-mismatch — entry (pre-reseed snapshot)
+      // NARRATE-PAUSE-RESUME-UNIFY-1: Use unified seed (not raw currentWordIndex) to prevent stale-anchor reseed.
       logDualSourceTransition("resume:cursor-mismatch", () => ({
         cursorWordIndex: s.cursorWordIndex,
         currentWordIndex,
+        unifiedSeed,
         lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
         nextGenWordIndexRef: nextGenWordIndexRef.current,
         nextKokoroExactStartRef: nextKokoroExactStartRef.current,
@@ -2140,7 +2163,7 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         engine: s.engine,
         status: s.status,
       }));
-      // Stop current strategies, resync to new position
+      // Stop current strategies, resync to unified seed position
       webStrategy.stop();
       kokoroStrategy.stop();
       qwenStrategy.stop();
@@ -2151,29 +2174,28 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       handoffPendingRef.current = false;
       clearPendingRateResponseTrace();
       const newSpeed = s.speed;
-      dispatch({ type: "START_CURSOR_DRIVEN", startIdx: currentWordIndex, speed: newSpeed });
+      dispatch({ type: "START_CURSOR_DRIVEN", startIdx: unifiedSeed, speed: newSpeed });
       stateRef.current = {
         ...stateRef.current,
         status: "speaking",
         pauseReason: null,
-        cursorWordIndex: currentWordIndex,
+        cursorWordIndex: unifiedSeed,
         speed: newSpeed,
-        chunkStart: currentWordIndex,
+        chunkStart: unifiedSeed,
         chunkWords: [],
       };
-      recordDiagEvent("resume", `resync cursor=${currentWordIndex} (was ${s.cursorWordIndex})`);
+      recordDiagEvent("resume", `resync cursor=${unifiedSeed} (external=${currentWordIndex}, was ${s.cursorWordIndex})`);
       captureDiagSnapshot();
       emitEvalTrace({
         kind: "lifecycle",
         state: "resume",
-        wordIndex: currentWordIndex,
+        wordIndex: unifiedSeed,
         mode: getEvalTraceMode(),
       });
-      lastConfirmedAudioWordRef.current = currentWordIndex;
-      nextGenWordIndexRef.current = currentWordIndex;
-      // NARRATE-DUAL-SOURCE-DIAG-1: resume:cursor-mismatch:reseed — post-reseed snapshot
+      lastConfirmedAudioWordRef.current = unifiedSeed;
+      nextGenWordIndexRef.current = unifiedSeed;
       logDualSourceTransition("resume:cursor-mismatch:reseed", () => ({
-        cursorWordIndex: currentWordIndex,
+        cursorWordIndex: unifiedSeed,
         lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
         nextGenWordIndexRef: nextGenWordIndexRef.current,
         nextKokoroExactStartRef: nextKokoroExactStartRef.current,
@@ -2184,9 +2206,9 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     if (handoffPendingRef.current) {
-      // NARRATE-DUAL-SOURCE-DIAG-1: resume:handoff-pending — entry (pre-reseed snapshot)
       logDualSourceTransition("resume:handoff-pending", () => ({
         cursorWordIndex: s.cursorWordIndex,
+        unifiedSeed,
         lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
         nextGenWordIndexRef: nextGenWordIndexRef.current,
         nextKokoroExactStartRef: nextKokoroExactStartRef.current,
@@ -2203,11 +2225,12 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearNanoOwnership();
       clearPocketOwnership();
       clearPendingRateResponseTrace();
-      lastConfirmedAudioWordRef.current = s.cursorWordIndex;
-      nextGenWordIndexRef.current = s.cursorWordIndex;
-      // NARRATE-DUAL-SOURCE-DIAG-1: resume:handoff-pending:reseed — post-reseed snapshot
+      // NARRATE-PAUSE-RESUME-UNIFY-1: Use unified seed instead of bare s.cursorWordIndex
+      lastConfirmedAudioWordRef.current = unifiedSeed;
+      nextGenWordIndexRef.current = unifiedSeed;
       logDualSourceTransition("resume:handoff-pending:reseed", () => ({
         cursorWordIndex: s.cursorWordIndex,
+        unifiedSeed,
         lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
         nextGenWordIndexRef: nextGenWordIndexRef.current,
         nextKokoroExactStartRef: nextKokoroExactStartRef.current,
@@ -2218,19 +2241,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       emitEvalTrace({
         kind: "lifecycle",
         state: "resume",
-        wordIndex: s.cursorWordIndex,
+        wordIndex: unifiedSeed,
         mode: getEvalTraceMode(),
       });
-      recordDiagEvent("resume", `handoff cursor=${s.cursorWordIndex}`);
+      recordDiagEvent("resume", `handoff cursor=${unifiedSeed}`);
       captureDiagSnapshot();
       speakNextChunkRef.current();
       return;
     }
 
-    // Bare resume from pause point
-    // NARRATE-DUAL-SOURCE-DIAG-1: resume:bare — no ref reseed happens; engine-delegated
+    // Bare resume from pause point — AudioContext un-suspend, no reseed needed.
+    // NARRATE-PAUSE-RESUME-UNIFY-1: unifiedSeed logged but not applied (bare-resume preserves buffered audio).
     logDualSourceTransition("resume:bare", () => ({
       cursorWordIndex: s.cursorWordIndex,
+      unifiedSeed,
       lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
       nextGenWordIndexRef: nextGenWordIndexRef.current,
       nextKokoroExactStartRef: nextKokoroExactStartRef.current,
