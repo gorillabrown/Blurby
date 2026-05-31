@@ -55,6 +55,19 @@ import {
 } from "../utils/mediaSessionBridge";
 import { logDualSourceTransition } from "../utils/dualSourceDiag";
 
+// ── NARRATE-CURSOR-TRACKING-DIAG-1: Guarded diagnostic channel ─────────────
+// Keep false in production. Flip to true only for local tracing sessions.
+// When false: diag() is a no-op and the lead/lag buffer is never allocated.
+const DIAG = false;
+/** Max entries kept in the lead/lag sample buffer (sliding window, DIAG=true only).
+ *  Recent samples are what matter for lead/lag characterization; older entries are pruned
+ *  from the front. Has no effect when DIAG=false (buffer is never allocated). */
+const MAX_LEADLAG_SAMPLES = 5000;
+/** Emit a [NARR-DIAG] console.debug event. Zero cost when DIAG=false. */
+function diag(event: string, payload: () => Record<string, unknown>): void {
+  if (DIAG) console.debug("[NARR-DIAG]", performance.now(), event, payload());
+}
+
 export interface FootnoteCue {
   afterWordIdx: number;
   text: string;
@@ -203,6 +216,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   /** NARRATE-PAUSE-RESUME-UNIFY-1: Captured heardFloor at pause time — consumed once on resume.
    *  Single-writer: pause(). Single-reader: resume() priority chain. Lifecycle: SET on pause → consumed on resume → null. */
   const resumeTargetRef = useRef<number | null>(null);
+
+  // ── NARRATE-CURSOR-TRACKING-DIAG-1: Lead/lag accumulator ─────────────────
+  // Buffer is allocated lazily only when DIAG=true; when DIAG=false this ref
+  // holds null and nothing is ever pushed — zero cost in production.
+  type LeadLagSample = {
+    t: number;                    // performance.now() at sample time
+    reference: number | null;     // schedulerActiveWord (heardFloor) — the "truth"
+    wordIndex: number | null;
+    heardFloor: number | null;
+    resumeTarget: number | null;
+    subscriberCursor: number | null; // always null — not accessible in this layer
+    nextGenWordIndex: number | null;
+  };
+  const leadLagBufferRef = useRef<LeadLagSample[] | null>(DIAG ? [] : null);
+
   const kokoroVoiceRef = useRef("af_bella");
   const rateDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rhythmPausesRef = useRef<RhythmPauses | null>(null);
@@ -436,6 +464,82 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
   }, []);
 
+  // ── NARRATE-CURSOR-TRACKING-DIAG-1: Lead/lag helpers ─────────────────────
+
+  /** Push one lead/lag sample. No-op (and zero allocation) when DIAG=false. */
+  const pushLeadLagSample = (
+    t: number,
+    reference: number | null,
+    wordIndex: number | null,
+    heardFloor: number | null,
+    resumeTarget: number | null,
+    nextGenWordIndex: number | null,
+  ): void => {
+    if (!DIAG) return;
+    const buf = leadLagBufferRef.current;
+    if (!buf) return;
+    buf.push({
+      t,
+      reference,
+      wordIndex,
+      heardFloor,
+      resumeTarget,
+      subscriberCursor: null, // not accessible in this layer
+      nextGenWordIndex,
+    });
+    // Sliding-window cap: prune oldest entries so the buffer never grows unbounded.
+    if (buf.length > MAX_LEADLAG_SAMPLES) buf.splice(0, buf.length - MAX_LEADLAG_SAMPLES);
+  };
+
+  /** Emit the lead/lag summary diag event. Clears buffer when clearAfter=true. No-op when DIAG=false. */
+  const emitLeadLagSummary = (trigger: "pause" | "stop", clearAfter: boolean): void => {
+    if (!DIAG) return;
+    const buf = leadLagBufferRef.current;
+    if (!buf || buf.length === 0) return;
+
+    // For each signal, compute min/median/max offset vs reference (schedulerActiveWord).
+    // Positive offset means signal leads reference (ahead of heard audio).
+    // Negative offset means signal lags reference (behind heard audio).
+    type SignalKey = "wordIndex" | "heardFloor" | "resumeTarget" | "subscriberCursor" | "nextGenWordIndex";
+    const signals: SignalKey[] = ["wordIndex", "heardFloor", "resumeTarget", "subscriberCursor", "nextGenWordIndex"];
+    const summary: Record<string, { min: number; median: number; max: number; n: number } | "no-data"> = {};
+
+    for (const sig of signals) {
+      const offsets: number[] = [];
+      for (const s of buf) {
+        if (s.reference == null || s[sig] == null) continue;
+        offsets.push((s[sig] as number) - s.reference);
+      }
+      if (offsets.length === 0) {
+        summary[sig] = "no-data";
+        continue;
+      }
+      offsets.sort((a, b) => a - b);
+      const mid = Math.floor(offsets.length / 2);
+      const median = offsets.length % 2 === 1
+        ? offsets[mid]
+        : (offsets[mid - 1] + offsets[mid]) / 2;
+      summary[sig] = {
+        min: offsets[0],
+        median,
+        max: offsets[offsets.length - 1],
+        n: offsets.length,
+      };
+    }
+
+    console.debug("[NARR-DIAG]", performance.now(), "signal-leadlag-summary", {
+      trigger,
+      sampleCount: buf.length,
+      summary,
+    });
+
+    if (clearAfter) {
+      buf.length = 0;
+    }
+  };
+
+  // ── End NARRATE-CURSOR-TRACKING-DIAG-1 helpers ───────────────────────────
+
   /** TTS-7A: Capture a diagnostics snapshot of current narration state */
   const captureDiagSnapshot = useCallback(() => {
     const s = stateRef.current;
@@ -479,6 +583,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       nextGenWordIndexRef: nextGenWordIndexRef.current,
       nextKokoroExactStartRef: nextKokoroExactStartRef.current,
     }));
+    // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag (syncNarrationCursor path)
+    diag("word-advance", () => {
+      const _t = performance.now();
+      // No heardFloor available here — kokoroStrategy not in scope of this callback
+      pushLeadLagSample(_t, null, wordIndex, null, resumeTargetRef.current, nextGenWordIndexRef.current);
+      return {
+        t: _t,
+        wordIndex,
+        heardFloor: null, // kokoroStrategy not in scope of syncNarrationCursor
+        resumeTarget: resumeTargetRef.current,
+        subscriberCursor: null,
+        nextGenWordIndex: nextGenWordIndexRef.current,
+        engine: "sync-cursor",
+      };
+    });
     dispatch({ type: "WORD_ADVANCE", wordIndex });
     stateRef.current = {
       ...stateRef.current,
@@ -1005,6 +1124,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           nextKokoroExactStartRef: nextKokoroExactStartRef.current,
           word: allWordsRef.current[globalIdx] ?? null,
         }));
+        // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag
+        diag("word-advance", () => {
+          const _t = performance.now();
+          pushLeadLagSample(_t, null, globalIdx, null, resumeTargetRef.current, nextGenWordIndexRef.current);
+          return {
+            t: _t,
+            wordIndex: globalIdx,
+            heardFloor: null, // web engine has no scheduler heard floor
+            resumeTarget: resumeTargetRef.current,
+            subscriberCursor: null,
+            nextGenWordIndex: nextGenWordIndexRef.current,
+            engine: "web",
+          };
+        });
         dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
       },
@@ -1122,6 +1255,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           nextKokoroExactStartRef: nextKokoroExactStartRef.current,
           word: allWordsRef.current[wordIndex] ?? null,
         }));
+        // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag
+        diag("word-advance", () => {
+          const _t = performance.now();
+          pushLeadLagSample(_t, null, wordIndex, null, resumeTargetRef.current, nextGenWordIndexRef.current);
+          return {
+            t: _t,
+            wordIndex,
+            heardFloor: null, // nano engine has no scheduler heard floor
+            resumeTarget: resumeTargetRef.current,
+            subscriberCursor: null,
+            nextGenWordIndex: nextGenWordIndexRef.current,
+            engine: "nano",
+          };
+        });
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -1224,6 +1371,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           nextKokoroExactStartRef: nextKokoroExactStartRef.current,
           word: allWordsRef.current[wordIndex] ?? null,
         }));
+        // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag
+        diag("word-advance", () => {
+          const _t = performance.now();
+          pushLeadLagSample(_t, null, wordIndex, null, resumeTargetRef.current, nextGenWordIndexRef.current);
+          return {
+            t: _t,
+            wordIndex,
+            heardFloor: null, // pocket engine has no scheduler heard floor
+            resumeTarget: resumeTargetRef.current,
+            subscriberCursor: null,
+            nextGenWordIndex: nextGenWordIndexRef.current,
+            engine: "pocket",
+          };
+        });
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -1336,6 +1497,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           word: allWordsRef.current[wordIndex] ?? null,
           heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
         }));
+        // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag
+        diag("word-advance", () => {
+          const _heardFloor = kokoroStrategy.getHeardFloorWordIndex();
+          const _t = performance.now();
+          pushLeadLagSample(_t, _heardFloor, wordIndex, _heardFloor, resumeTargetRef.current, nextGenWordIndexRef.current);
+          return {
+            t: _t,
+            wordIndex,
+            heardFloor: _heardFloor,
+            resumeTarget: resumeTargetRef.current,
+            subscriberCursor: null,
+            nextGenWordIndex: nextGenWordIndexRef.current,
+            engine: "kokoro",
+          };
+        });
         // TTS-7R (BUG-145c): Update canonical audio position on every scheduler
         // boundary crossing. This must happen before the dispatch so stateRef reads
         // are always behind or equal to the confirmed audio word.
@@ -1415,6 +1591,20 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           nextKokoroExactStartRef: nextKokoroExactStartRef.current,
           word: allWordsRef.current[wordIndex] ?? null,
         }));
+        // NARRATE-CURSOR-TRACKING-DIAG-1 Task 2: extended word-advance diag
+        diag("word-advance", () => {
+          const _t = performance.now();
+          pushLeadLagSample(_t, null, wordIndex, null, resumeTargetRef.current, nextGenWordIndexRef.current);
+          return {
+            t: _t,
+            wordIndex,
+            heardFloor: null, // qwen engine has no scheduler heard floor
+            resumeTarget: resumeTargetRef.current,
+            subscriberCursor: null,
+            nextGenWordIndex: nextGenWordIndexRef.current,
+            engine: "qwen",
+          };
+        });
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -2134,6 +2324,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7A: Diagnostics
     recordDiagEvent("pause", `cursor=${s.cursorWordIndex}`);
     captureDiagSnapshot();
+    // NARRATE-CURSOR-TRACKING-DIAG-1 Task 3: emit lead/lag summary on pause (keep buffer for stop)
+    emitLeadLagSummary("pause", false);
   }, [webStrategy, kokoroStrategy, qwenStrategy, captureDiagSnapshot, emitEvalTrace, getEvalTraceMode, clearPendingRateResponseTrace]);
 
   const resume = useCallback((currentWordIndex?: number) => {
@@ -2301,6 +2493,8 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       wordIndex: stateRef.current.cursorWordIndex,
       mode: getEvalTraceMode(),
     });
+    // NARRATE-CURSOR-TRACKING-DIAG-1 Task 3: emit lead/lag summary on stop, then clear buffer
+    emitLeadLagSummary("stop", true);
     clearPendingRateResponseTrace();
     webStrategy.stop();
     kokoroStrategy.stop();
