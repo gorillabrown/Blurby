@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, MutableRefObject, SetStateAction } from "react";
 import { clampPersistentWordIndex } from "../utils/persistentReadingAnchor";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 
 type PersistentAnchorCause =
   | "book-open"
@@ -67,6 +68,11 @@ export function usePersistentReadingAnchor({
     highlightedWordIndexRef.current = wordIndex;
     softWordIndexRef.current = wordIndex;
     resumeAnchorRef.current = wordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (usePersistentReadingAnchor)
+    logDualSourceTransition("resumeAnchor:set", () => ({
+      resumeAnchor: wordIndex,
+      source: `usePersistentReadingAnchor:writeRefs:${cause}`,
+    }));
     if (cause === "hard-selection" || cause === "explicit-navigation") {
       explicitSelectionAnchorRef.current = wordIndex;
     } else if (cause === "book-open") {

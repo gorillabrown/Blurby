@@ -47,6 +47,7 @@ import { createWindowEvalTraceSink } from "../utils/ttsEvalTrace";
 import { stepKokoroUiSpeed } from "../utils/kokoroRatePlan";
 import { useReadingGoals } from "../hooks/useReadingGoals";
 import { calculateHighWaterPagesReadDelta } from "../utils/readingGoals";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 
 const api = window.electronAPI;
 
@@ -1258,6 +1259,15 @@ export default function ReaderContainer({
           } else if (import.meta.env.DEV && hasResumeAnchor) {
             console.debug("[TTS-7M] onRelocate: resume anchor active at", resumeAnchorRef.current, "— skipping approx", approxWordIdx);
           }
+          // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:active-skip (onRelocate) — emit whenever anchor suppresses approx write
+          if (hasResumeAnchor) {
+            logDualSourceTransition("resumeAnchor:active-skip", () => ({
+              resumeAnchor: resumeAnchorRef.current,
+              approxWordIdx,
+              mode,
+              source: "ReaderContainer:onRelocate",
+            }));
+          }
           // SELECTION-1: Update soft selection on page turn in page mode.
           // Soft selection = first visible word, auto-updates every page turn.
           // Only when: page mode, no resume anchor, no explicit user selection.
@@ -1341,6 +1351,11 @@ export default function ReaderContainer({
             );
           }
           resumeAnchorRef.current = resolvedClickWordIndex;
+          // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (ReaderContainer — click-to-narrate)
+          logDualSourceTransition("resumeAnchor:set", () => ({
+            resumeAnchor: resolvedClickWordIndex,
+            source: "ReaderContainer:onWordClick:click-to-narrate",
+          }));
           explicitSelectionAnchorRef.current = resolvedClickWordIndex;
           const anchoredWordIndex = commitSharedWordAnchor(resolvedClickWordIndex, "hard-selection", cfi, { skipNarrationResync: true });
           retargetActiveModeToWord(anchoredWordIndex);
@@ -1351,6 +1366,12 @@ export default function ReaderContainer({
           return;
         }
         resumeAnchorRef.current = null; // TTS-7M: explicit selection with no index clears stale anchors
+        // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:consumed — the ONLY explicit clear-to-null
+        // Absence of this event in an A4 trace is the smoking gun for the resume-anchor hypothesis.
+        logDualSourceTransition("resumeAnchor:consumed", () => ({
+          resumeAnchor: null,
+          source: "ReaderContainer:onWordClick:no-resolved-index",
+        }));
         // Preserve the current anchor rather than resetting to zero when exact
         // mapping is temporarily unavailable on a freshly loaded section.
         const preservedAnchor = highlightedWordIndexRef.current;
@@ -1381,6 +1402,11 @@ export default function ReaderContainer({
               if (import.meta.env.DEV) {
                 console.debug("[TTS-7M] onLoad: resume anchor active at", resumeAnchorRef.current, "— skipping restore");
               }
+              // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:active-skip (onLoad)
+              logDualSourceTransition("resumeAnchor:active-skip", () => ({
+                resumeAnchor: resumeAnchorRef.current,
+                source: "ReaderContainer:onLoad",
+              }));
               return;
             }
             // TTS-7J (BUG-130): If user already explicitly selected a word (click),

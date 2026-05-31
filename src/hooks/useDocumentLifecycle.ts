@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { RSVP_PROGRESS_SAVE_INTERVAL_MS, RSVP_PROGRESS_SAVE_WORD_DELTA } from "../constants";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 
 const api = window.electronAPI;
 
@@ -163,6 +164,11 @@ export function useDocumentLifecycle({
     initReader(restoredWordIndex);
     setHighlightedWordIndex(restoredWordIndex);
     resumeAnchorRef.current = restoredWordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (useDocumentLifecycle — doc restore)
+    logDualSourceTransition("resumeAnchor:set", () => ({
+      resumeAnchor: restoredWordIndex,
+      source: "useDocumentLifecycle:doc-restore",
+    }));
     userExplicitSelectionRef.current = false; // TTS-7J: Reset on doc change
     hasShownRestoreToastRef.current = false; // BUG-148: Reset toast gate on doc change
     sessionStartRef.current = Date.now();

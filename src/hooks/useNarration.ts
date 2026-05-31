@@ -53,6 +53,7 @@ import {
   syncMediaSession,
   type MediaSessionBookMetadata,
 } from "../utils/mediaSessionBridge";
+import { logDualSourceTransition } from "../utils/dualSourceDiag";
 
 export interface FootnoteCue {
   afterWordIdx: number;
@@ -460,6 +461,21 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (options.syncConfirmedAudioAnchor) {
       lastConfirmedAudioWordRef.current = wordIndex;
     }
+    // NARRATE-DUAL-SOURCE-DIAG-1: syncNarrationCursor:write (cursor seeds / handoffs)
+    logDualSourceTransition("syncNarrationCursor:write", () => ({
+      cursorWordIndex: wordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx: wordIndex,
+    }));
+    // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:syncCursor (word advance — WORD_ADVANCE dispatch via syncNarrationCursor)
+    logDualSourceTransition("wordAdvance:syncCursor", () => ({
+      cursorWordIndex: wordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+    }));
     dispatch({ type: "WORD_ADVANCE", wordIndex });
     stateRef.current = {
       ...stateRef.current,
@@ -938,6 +954,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (!window.speechSynthesis || s.status === "idle") return;
     const words = allWordsRef.current;
     const startIdx = s.cursorWordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkWeb:seed
+    logDualSourceTransition("speakNextChunkWeb:seed", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+      word: words[startIdx] ?? null,
+    }));
     if (startIdx >= words.length) {
       if (onSectionEndRef.current) {
         onSectionEndRef.current();
@@ -969,6 +994,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           });
         }
         emitEvalTrace({ kind: "word", source: "audio", wordIndex: globalIdx });
+        // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:web
+        logDualSourceTransition("wordAdvance:web", () => ({
+          cursorWordIndex: stateRef.current.cursorWordIndex,
+          lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          word: allWordsRef.current[globalIdx] ?? null,
+        }));
         dispatch({ type: "WORD_ADVANCE", wordIndex: globalIdx });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(globalIdx);
       },
@@ -993,6 +1026,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (!strategy || s.status === "idle") return;
     const words = allWordsRef.current;
     const startIdx = s.cursorWordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkNano:seed
+    logDualSourceTransition("speakNextChunkNano:seed", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+      word: words[startIdx] ?? null,
+    }));
     if (startIdx >= words.length) {
       clearNanoOwnership();
       if (onSectionEndRef.current) {
@@ -1069,6 +1111,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           });
         }
         emitEvalTrace({ kind: "word", source: "audio", wordIndex });
+        // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:nano
+        logDualSourceTransition("wordAdvance:nano", () => ({
+          cursorWordIndex: stateRef.current.cursorWordIndex,
+          lastConfirmedAudioWordRef: wordIndex,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          word: allWordsRef.current[wordIndex] ?? null,
+        }));
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -1116,6 +1166,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (!strategy || s.status === "idle") return;
     const words = allWordsRef.current;
     const startIdx = s.cursorWordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkPocket:seed
+    logDualSourceTransition("speakNextChunkPocket:seed", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+      word: words[startIdx] ?? null,
+    }));
     if (startIdx >= words.length) {
       clearPocketOwnership();
       if (onSectionEndRef.current) {
@@ -1154,6 +1213,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           });
         }
         emitEvalTrace({ kind: "word", source: "audio", wordIndex });
+        // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:pocket
+        logDualSourceTransition("wordAdvance:pocket", () => ({
+          cursorWordIndex: stateRef.current.cursorWordIndex,
+          lastConfirmedAudioWordRef: wordIndex,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          word: allWordsRef.current[wordIndex] ?? null,
+        }));
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -1192,6 +1259,18 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // lastConfirmedAudioWordRef (which carries the cursor's lead and causes
     // content omission at re-entry).
     const startIdx = nextGenWordIndexRef.current;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkKokoro:seed — THE primary Kokoro audio-decision read
+    logDualSourceTransition("speakNextChunkKokoro:seed", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+      heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+      word: words[startIdx] ?? null,
+      engine: s.engine,
+      status: s.status,
+    }));
     if (import.meta.env.DEV) {
       const startWord = words[startIdx] ?? "??";
       const prevWord = startIdx > 0 ? words[startIdx - 1] ?? "??" : "(start)";
@@ -1202,6 +1281,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const callbackGeneration = kokoroPlaybackGenerationRef.current + 1;
     kokoroPlaybackGenerationRef.current = callbackGeneration;
     const requireExactFirstBoundary = nextKokoroExactStartRef.current === startIdx;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkKokoro:exact-start-gate
+    logDualSourceTransition("speakNextChunkKokoro:exact-start-gate", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+      requireExactFirstBoundary,
+    }));
     nextKokoroExactStartRef.current = null;
     kokoroBoundaryGateRef.current = {
       generationId: callbackGeneration,
@@ -1238,6 +1324,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           });
         }
         emitEvalTrace({ kind: "word", source: "audio", wordIndex });
+        // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:kokoro
+        logDualSourceTransition("wordAdvance:kokoro", () => ({
+          cursorWordIndex: stateRef.current.cursorWordIndex,
+          lastConfirmedAudioWordRef: wordIndex,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          word: allWordsRef.current[wordIndex] ?? null,
+          heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+        }));
         // TTS-7R (BUG-145c): Update canonical audio position on every scheduler
         // boundary crossing. This must happen before the dispatch so stateRef reads
         // are always behind or equal to the confirmed audio word.
@@ -1285,6 +1380,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     if (s.status === "idle") return;
     const words = allWordsRef.current;
     const startIdx = lastConfirmedAudioWordRef.current;
+    // NARRATE-DUAL-SOURCE-DIAG-1: speakNextChunkQwen:seed
+    logDualSourceTransition("speakNextChunkQwen:seed", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx,
+    }));
     if (startIdx >= words.length) {
       if (onSectionEndRef.current) {
         onSectionEndRef.current();
@@ -1301,6 +1404,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       s.speed,
       (wordIndex) => {
         emitEvalTrace({ kind: "word", source: "audio", wordIndex });
+        // NARRATE-DUAL-SOURCE-DIAG-1: wordAdvance:qwen
+        logDualSourceTransition("wordAdvance:qwen", () => ({
+          cursorWordIndex: stateRef.current.cursorWordIndex,
+          lastConfirmedAudioWordRef: wordIndex,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          word: allWordsRef.current[wordIndex] ?? null,
+        }));
         lastConfirmedAudioWordRef.current = wordIndex;
         dispatch({ type: "WORD_ADVANCE", wordIndex });
         if (onWordAdvanceRef.current) onWordAdvanceRef.current(wordIndex);
@@ -1482,6 +1593,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         };
         lastConfirmedAudioWordRef.current = startWordIndex;
         nextGenWordIndexRef.current = startWordIndex;
+        // NARRATE-DUAL-SOURCE-DIAG-1: startCursorDriven:qwen-warming-seed
+        logDualSourceTransition("startCursorDriven:qwen-warming-seed", () => ({
+          cursorWordIndex: startWordIndex,
+          lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          startIdx: startWordIndex,
+        }));
         if (api?.qwenPreload) {
           api.qwenPreload().then((result) => {
             if (!result?.error) return;
@@ -1541,6 +1660,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       // auto-start effect reads lastConfirmedAudioWordRef via speakNextChunkKokoro.
       lastConfirmedAudioWordRef.current = startWordIndex;
       nextGenWordIndexRef.current = startWordIndex;
+      // NARRATE-DUAL-SOURCE-DIAG-1: startCursorDriven:kokoro-warming-seed
+      logDualSourceTransition("startCursorDriven:kokoro-warming-seed", () => ({
+        cursorWordIndex: startWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        startIdx: startWordIndex,
+      }));
       // Trigger prewarm if available
       if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
       return "warming";
@@ -1600,6 +1727,15 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // reads from the correct starting word rather than whatever the ref held before.
     lastConfirmedAudioWordRef.current = startWordIndex;
     nextGenWordIndexRef.current = startWordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: startCursorDriven:speaking-seed
+    logDualSourceTransition("startCursorDriven:speaking-seed", () => ({
+      cursorWordIndex: startWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx: startWordIndex,
+      engine: stateRef.current.engine,
+    }));
     lastCursorStartRef.current = {
       startWordIndex,
       wordsLength: words.length,
@@ -1617,6 +1753,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const resyncToCursor = useCallback((wordIndex: number, wpm: number, pauseReason: PauseReason | null = null) => {
     const s = stateRef.current;
     if (s.status === "idle") return;
+    // NARRATE-DUAL-SOURCE-DIAG-1: resyncToCursor:entry
+    logDualSourceTransition("resyncToCursor:entry", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx: wordIndex,
+      heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+      engine: s.engine,
+      status: s.status,
+    }));
     if (pauseReason && s.status === "speaking") {
       dispatch({ type: "PAUSE", reason: pauseReason });
       stateRef.current = { ...stateRef.current, status: "paused", pauseReason };
@@ -1633,6 +1780,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const newSpeed = normalizeNarrationRate(stateRef.current.speed, stateRef.current.engine);
     nextKokoroExactStartRef.current = wordIndex;
     nextGenWordIndexRef.current = wordIndex;
+    // NARRATE-DUAL-SOURCE-DIAG-1: resyncToCursor:seed
+    logDualSourceTransition("resyncToCursor:seed", () => ({
+      cursorWordIndex: wordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      startIdx: wordIndex,
+    }));
     syncNarrationCursor(wordIndex, { syncConfirmedAudioAnchor: true });
     if (pauseReason && stateRef.current.status === "paused" && stateRef.current.pauseReason === pauseReason) {
       dispatch({ type: "RESUME" });
@@ -1669,6 +1824,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     const s = syncNarrationCursor(globalStartIdx, { syncConfirmedAudioAnchor: isHandoff });
     if (isHandoff) {
       nextGenWordIndexRef.current = globalStartIdx;
+      // NARRATE-DUAL-SOURCE-DIAG-1: updateWords:handoff-seed
+      logDualSourceTransition("updateWords:handoff-seed", () => ({
+        cursorWordIndex: globalStartIdx,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      }));
     }
     if (s.status === "idle") return;
     if (!isHandoff) {
@@ -1695,6 +1857,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         if (current.status !== "speaking") return;
         if (current.cursorWordIndex !== globalStartIdx) return;
         if (lastConfirmedAudioWordRef.current !== globalStartIdx) return;
+        // NARRATE-DUAL-SOURCE-DIAG-1: updateWords:handoff-restart (microtask guard passed)
+        logDualSourceTransition("updateWords:handoff-restart", () => ({
+          cursorWordIndex: current.cursorWordIndex,
+          lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        }));
         speakNextChunkRef.current();
       });
     }
@@ -1737,6 +1906,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       }
 
       if (restartKokoroGeneration) {
+        // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:kokoro-bucket
+        logDualSourceTransition("applyRateChange:kokoro-bucket", () => ({
+          cursorWordIndex: updated.cursorWordIndex,
+          lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+          nextGenWordIndexRef: nextGenWordIndexRef.current,
+          nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+          heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+        }));
         clearPendingRateResponseTrace();
         if (canAutoPause) {
           dispatch({ type: "PAUSE", reason: "rate-change" });
@@ -1751,6 +1928,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
         return;
       }
 
+      // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:kokoro-same-bucket-tempo (no restart)
+      logDualSourceTransition("applyRateChange:kokoro-same-bucket-tempo", () => ({
+        cursorWordIndex: updated.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+      }));
       if (import.meta.env.DEV) {
         const ratePlan = resolveKokoroRatePlan(nextRate);
         console.debug(
@@ -1777,6 +1962,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     if (updated.engine === "qwen") {
+      // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:qwen
+      logDualSourceTransition("applyRateChange:qwen", () => ({
+        cursorWordIndex: updated.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      }));
       if (rateDebounceRef.current) {
         clearTimeout(rateDebounceRef.current);
         rateDebounceRef.current = null;
@@ -1799,6 +1991,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       return;
     }
     if (pocketActiveRef.current && pocketStrategyRef.current) {
+      // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:pocket
+      logDualSourceTransition("applyRateChange:pocket", () => ({
+        cursorWordIndex: stateRef.current.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      }));
       if (canAutoPause) {
         dispatch({ type: "PAUSE", reason: "rate-change" });
         stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
@@ -1813,6 +2012,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       return;
     }
     if (nanoActiveRef.current && nanoStrategyRef.current) {
+      // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:nano
+      logDualSourceTransition("applyRateChange:nano", () => ({
+        cursorWordIndex: stateRef.current.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      }));
       if (rateDebounceRef.current) {
         clearTimeout(rateDebounceRef.current);
         rateDebounceRef.current = null;
@@ -1832,6 +2038,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     if (!options.debounceWeb) {
+      // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:web-nodebounce
+      logDualSourceTransition("applyRateChange:web-nodebounce", () => ({
+        cursorWordIndex: stateRef.current.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      }));
       if (canAutoPause) {
         dispatch({ type: "PAUSE", reason: "rate-change" });
         stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
@@ -1850,6 +2063,13 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       stateRef.current = { ...stateRef.current, status: "paused", pauseReason: "rate-change" };
     }
     if (rateDebounceRef.current) clearTimeout(rateDebounceRef.current);
+    // NARRATE-DUAL-SOURCE-DIAG-1: applyRateChange:web-debounced
+    logDualSourceTransition("applyRateChange:web-debounced", () => ({
+      cursorWordIndex: stateRef.current.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+    }));
     rateDebounceRef.current = setTimeout(() => {
       rateDebounceRef.current = null;
       webStrategy.stop();
@@ -1868,6 +2088,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
   const pause = useCallback((reason: PauseReason = "user-stop") => {
     const s = stateRef.current;
     if (s.status !== "speaking") return;
+    // NARRATE-DUAL-SOURCE-DIAG-1: pause:entry — snapshot all refs at pause
+    logDualSourceTransition("pause:entry", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+      engine: s.engine,
+      status: s.status,
+    }));
     clearPendingRateResponseTrace();
     if (pocketActiveRef.current && pocketStrategyRef.current) {
       pocketStrategyRef.current.pause();
@@ -1899,6 +2129,17 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     // TTS-7B: If caller provides a cursor position that differs from where
     // we paused, the user moved the cursor during pause — resync instead of bare resume.
     if (currentWordIndex != null && currentWordIndex !== s.cursorWordIndex) {
+      // NARRATE-DUAL-SOURCE-DIAG-1: resume:cursor-mismatch — entry (pre-reseed snapshot)
+      logDualSourceTransition("resume:cursor-mismatch", () => ({
+        cursorWordIndex: s.cursorWordIndex,
+        currentWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+        engine: s.engine,
+        status: s.status,
+      }));
       // Stop current strategies, resync to new position
       webStrategy.stop();
       kokoroStrategy.stop();
@@ -1930,11 +2171,30 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       });
       lastConfirmedAudioWordRef.current = currentWordIndex;
       nextGenWordIndexRef.current = currentWordIndex;
+      // NARRATE-DUAL-SOURCE-DIAG-1: resume:cursor-mismatch:reseed — post-reseed snapshot
+      logDualSourceTransition("resume:cursor-mismatch:reseed", () => ({
+        cursorWordIndex: currentWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        engine: s.engine,
+      }));
       speakNextChunkRef.current();
       return;
     }
 
     if (handoffPendingRef.current) {
+      // NARRATE-DUAL-SOURCE-DIAG-1: resume:handoff-pending — entry (pre-reseed snapshot)
+      logDualSourceTransition("resume:handoff-pending", () => ({
+        cursorWordIndex: s.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        handoffPendingRef: handoffPendingRef.current,
+        heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+        engine: s.engine,
+        status: s.status,
+      }));
       webStrategy.stop();
       kokoroStrategy.stop();
       qwenStrategy.stop();
@@ -1945,6 +2205,14 @@ export default function useNarration(options: UseNarrationOptions = {}) {
       clearPendingRateResponseTrace();
       lastConfirmedAudioWordRef.current = s.cursorWordIndex;
       nextGenWordIndexRef.current = s.cursorWordIndex;
+      // NARRATE-DUAL-SOURCE-DIAG-1: resume:handoff-pending:reseed — post-reseed snapshot
+      logDualSourceTransition("resume:handoff-pending:reseed", () => ({
+        cursorWordIndex: s.cursorWordIndex,
+        lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+        nextGenWordIndexRef: nextGenWordIndexRef.current,
+        nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+        engine: s.engine,
+      }));
       dispatch({ type: "RESUME" });
       stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
       emitEvalTrace({
@@ -1960,6 +2228,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
     }
 
     // Bare resume from pause point
+    // NARRATE-DUAL-SOURCE-DIAG-1: resume:bare — no ref reseed happens; engine-delegated
+    logDualSourceTransition("resume:bare", () => ({
+      cursorWordIndex: s.cursorWordIndex,
+      lastConfirmedAudioWordRef: lastConfirmedAudioWordRef.current,
+      nextGenWordIndexRef: nextGenWordIndexRef.current,
+      nextKokoroExactStartRef: nextKokoroExactStartRef.current,
+      heardFloor: kokoroStrategy.getHeardFloorWordIndex(),
+      engine: s.engine,
+      status: s.status,
+    }));
     clearPendingRateResponseTrace();
     if (pocketActiveRef.current && pocketStrategyRef.current) {
       pocketStrategyRef.current.resume();
