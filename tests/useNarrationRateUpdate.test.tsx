@@ -36,6 +36,7 @@ const kokoroStrategyMock = vi.hoisted(() => {
       acknowledgeChunk: vi.fn(),
     })),
     getAudioProgress: vi.fn(() => kokoroStrategyDriver.getAudioProgress()),
+    getHeardFloorWordIndex: vi.fn(() => null),
   };
   return strategy;
 });
