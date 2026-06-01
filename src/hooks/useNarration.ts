@@ -2117,6 +2117,16 @@ export default function useNarration(options: UseNarrationOptions = {}) {
           dispatch({ type: "RESUME" });
           stateRef.current = { ...stateRef.current, status: "speaking", pauseReason: null };
         }
+        // A5 / NARRATE-A5-RATE-RESEED-1: Reseed the pre-fetch head from the
+        // heard position before restarting. Without this, speakNextChunkKokoro
+        // reads nextGenWordIndexRef (the pre-fetch frontier, which may be
+        // thousands of words ahead) and skips the narration forward. Prefer
+        // heardFloor (the playing-source boundary at now), fall back to
+        // lastConfirmedAudioWordRef, then the visible cursor.
+        nextGenWordIndexRef.current =
+          kokoroStrategy.getHeardFloorWordIndex() ??
+          lastConfirmedAudioWordRef.current ??
+          updated.cursorWordIndex;
         speakNextChunk();
         return;
       }
