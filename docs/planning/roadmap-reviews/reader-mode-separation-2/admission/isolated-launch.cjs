@@ -111,12 +111,14 @@ app.on("browser-window-created", (_event, win) => {
     const identity = { runId, profile, pid: process.pid, paths: assertIsolation(), sourceManifestSha256: manifest.sourceManifestSha256 };
     try {
       // Read-only test identity; does not modify application state or production files.
-      await win.webContents.executeJavaScript(`Object.defineProperty(window, '__BLURBY_G0_ADMISSION__', { value: Object.freeze(${JSON.stringify(identity)}), configurable: false })`);
+      const identityReadbackJson = await win.webContents.executeJavaScript(`(() => { Object.defineProperty(window, '__BLURBY_G0_ADMISSION__', { value: Object.freeze(${JSON.stringify(identity)}), configurable: false }); return JSON.stringify(window.__BLURBY_G0_ADMISSION__); })()`);
+      if (identityReadbackJson !== JSON.stringify(identity)) throw new Error("Renderer identity readback mismatch");
+      manifest.rendererIdentityReadback = JSON.parse(identityReadbackJson);
       manifest.rendererIdentityInstalledAt = new Date().toISOString();
       manifest.windowBounds = win.getBounds();
       manifest.contentBounds = win.getContentBounds();
       saveManifest();
-      event("renderer-ready", { url: win.webContents.getURL(), contentBounds: manifest.contentBounds });
+      event("renderer-ready", { url: win.webContents.getURL(), contentBounds: manifest.contentBounds, identityReadback: manifest.rendererIdentityReadback });
     } catch (error) { event("identity-error", { message: error.message }); }
   });
 });
