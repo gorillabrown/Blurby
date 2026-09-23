@@ -95,5 +95,46 @@
     "narrate": "0.80x–2.00x; 0.05x increments",
     "syncDefect": "Owner confirmed live Narrate cursor lead/reload jump and directed keeping its repair for follow-on sync work.",
     "status": "Requires scoped dispatch amendment before production edits"
-  }
+  },
+  "admissionContinuationAttempts": [
+    {
+      "runId": "blurby-reader-mode-separation-2-a1-20260923214002764",
+      "slice": "A1",
+      "launchedAtUtc": "2026-09-23T21:40:03.752Z",
+      "launchedHead": "8ea751a51d92962004dd3e6b3835fce746c85cc1",
+      "status": "FAILED — G0 BLOCKED",
+      "evidence": "admission/isolation.json",
+      "summary": "Profile paths and actual session storage were isolated; renderer identity serialization failed, then a live EPIPE main-process dialog blocked operation. Parent stopped the owned process. Known live library/settings/sync-queue hashes are unchanged. Failed profile and evidence retained. Closed stdout remains a hypothesis.",
+      "actionBudget": "A1 ceiling reached/exceeded: parent verified at least 21 underlying invocations including 2 prelaunch guards and 19 since launch, before worker actions. Remaining authorized budget is zero.",
+      "plannedRetry": "No automatic retry. Owner approval required for the proposed fresh recovery slice, at most 8 parent tool calls including preview restart; see admission/isolation.json proposedRecovery.",
+      "actionBudgetAudit": {
+        "limit": 20,
+        "consumedLowerBound": 21,
+        "countBasis": "Parent audit since compaction: at least 21 underlying exec/Windows invocations, including 2 prelaunch guards and 19 since launch, before worker actions. Earlier uncounted actions can only increase this total.",
+        "disposition": "CEILING REACHED/EXCEEDED — stop A1; no automatic retry. This is separate from the earlier 40-action Wave A stop.",
+        "remaining": 0,
+        "observer": "parent session"
+      },
+      "proposedRecovery": {
+        "status": "PROPOSED — REQUIRES OWNER APPROVAL OF A FRESH BOUNDED RECOVERY SLICE",
+        "checkpoint": "30b722917cbcbabeb75faabc839160f0e4ac7f83",
+        "maximumParentToolCalls": 8,
+        "countIncludes": "Restarting preview, fresh-profile launch, observation, close/flush, and final verification; keep an explicit action ledger.",
+        "steps": [
+          "Restart the baseline preview.",
+          "Use a new dedicated test profile and the exact unchanged archived baseline build. Launch with Start-Process -WindowStyle Hidden, fresh persistent stdout/stderr redirects, and Wait-Process lifecycle ownership.",
+          "Capture one 10-second live observation using the checkpointed serializable identity expression.",
+          "Close the owned runtime, flush, and verify the three known live-profile hashes; stop the preview and verify no owned runtime remains.",
+          "Require zero unresolved isolation/write errors and preserve exact identity, screenshot and logs; any failure stops immediately."
+        ],
+        "constraints": [
+          "No application source edits.",
+          "Do not reuse or delete the failed profile.",
+          "No A2/Flow work until recovery admission passes.",
+          "No G0 pass implied by a successful recovery launch.",
+          "No retry until the owner authorizes the cap extension."
+        ]
+      }
+    }
+  ]
 }
