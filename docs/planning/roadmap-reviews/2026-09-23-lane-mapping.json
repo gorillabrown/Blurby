@@ -1,0 +1,522 @@
+{
+  "authorization": "Owner requested separation into product lanes on 2026-09-23; two additional categories classify content and supporting maintenance without admitting new work.",
+  "lanes": [
+    "UX polish",
+    "TTS / Narration Engine",
+    "Reader Engine",
+    "Chrome Extension",
+    "Library & Content",
+    "Platform & Maintenance"
+  ],
+  "provenance": {
+    "provider": "monday.com connector",
+    "source": "monday:board/18432450217",
+    "takenAt": "2026-09-23T18:58:56Z"
+  },
+  "items": [
+    {
+      "id": "UX-POLISH-1",
+      "itemId": "13118847895",
+      "title": "Space-bar resumes last-used reading mode",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "UX polish",
+      "revision": "2026-09-23T18:35:57Z",
+      "status": "Queued"
+    },
+    {
+      "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "itemId": "13118840646",
+      "title": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:35:58Z",
+      "status": "Queued"
+    },
+    {
+      "id": "NARRATE-HEARD-CURSOR-1",
+      "itemId": "13118863178",
+      "title": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:35:57Z",
+      "status": "Queued"
+    },
+    {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "itemId": "13118808496",
+      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:35:57Z",
+      "status": "Blocked"
+    },
+    {
+      "id": "KOKORO-EXPORT-1",
+      "itemId": "13118856529",
+      "title": "Long-Form Audio Export",
+      "oldLane": "",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Blocked"
+    },
+    {
+      "id": "TTS-DIAG-1",
+      "itemId": "13118840645",
+      "title": "Narration Diagnostics Bundle",
+      "oldLane": "Sync & Diagnostics",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:29Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-CACHE-TIMING-1",
+      "itemId": "13118832408",
+      "title": "Cache Identity & Timing Sidecars",
+      "oldLane": "Foundation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-INTEGRATE-1",
+      "itemId": "13118863177",
+      "title": "Integrate Sync & Diagnostics",
+      "oldLane": "Consolidation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "KOKORO-DEEPEN-1",
+      "itemId": "13118791925",
+      "title": "Kokoro Readiness & Preflight",
+      "oldLane": "Deepening",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "KOKORO-DEEPEN-3",
+      "itemId": "13118841616",
+      "title": "Voice Mixing Feasibility",
+      "oldLane": "Deepening",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "ENGINE-DORMANCY-1",
+      "itemId": "13118818984",
+      "title": "Disable MOSS-Nano & Pocket TTS",
+      "oldLane": "Consolidation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-CACHE-HARDEN-1",
+      "itemId": "13118833358",
+      "title": "Cache/Pipeline Hardening",
+      "oldLane": "Consolidation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-SYNC-1",
+      "itemId": "13118856198",
+      "title": "Highlight Sync Controller",
+      "oldLane": "Sync & Diagnostics",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-REGISTRY-1",
+      "itemId": "13118808495",
+      "title": "Provider Capability Registry",
+      "oldLane": "Foundation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-EVENT-SYNC-1",
+      "itemId": "13118819556",
+      "title": "Event-Driven Word Sync",
+      "oldLane": "Stage 2: Event-Driven Sync",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "KOKORO-DEEPEN-2",
+      "itemId": "13118840647",
+      "title": "Natural Chunk Highlight",
+      "oldLane": "Deepening",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-RENDER-MAP-1",
+      "itemId": "13118819999",
+      "title": "Word Position Index",
+      "oldLane": "Stage 2: Word Position Index",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-PIPELINE-1",
+      "itemId": "13118841422",
+      "title": "Pipeline Integration Tests",
+      "oldLane": "Stage 3: Pipeline Truth",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NORMALIZER-ENRICH-1",
+      "itemId": "13118833144",
+      "title": "Normalizer Gap Fill",
+      "oldLane": "Stage 2: Normalizer Enrichment",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:31Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-NORMALIZE-1",
+      "itemId": "13118863192",
+      "title": "Segment Normalizer",
+      "oldLane": "Foundation",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:31Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARR-SPOKEN-1",
+      "itemId": "13118863341",
+      "title": "Spoken/Display Word Separation",
+      "oldLane": "1a",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-ISO-1E",
+      "itemId": "13118832563",
+      "title": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "oldLane": "2",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARR-CURSOR-2",
+      "itemId": "13118833585",
+      "title": "Silence-Aware Cursor Hold",
+      "oldLane": "1a",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "itemId": "13118842117",
+      "title": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "oldLane": "1",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-ISO-1C",
+      "itemId": "13118847249",
+      "title": "Focus Adapter + Passive Surface Contract Start",
+      "oldLane": "2",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "BASELINE-SYNC-1",
+      "itemId": "13118832411",
+      "title": "Commit Phase 0 + Governance Sweep Baseline",
+      "oldLane": "0",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-ISO-1B",
+      "itemId": "13118847250",
+      "title": "Orchestrator Shell + Mode Selection Semantics",
+      "oldLane": "2",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-PARITY-1",
+      "itemId": "13118840970",
+      "title": "Cache/Progress/Resume Parity Hardening",
+      "oldLane": "1a",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TEST-GREEN-1",
+      "itemId": "13118856777",
+      "title": "Broad Suite Failure Triage",
+      "oldLane": "1",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARR-MEDIA-1",
+      "itemId": "13118862674",
+      "title": "MediaSession Integration",
+      "oldLane": "1a",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARR-PAUSE-1",
+      "itemId": "13118864160",
+      "title": "Named-Pause State Machine",
+      "oldLane": "1a",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-ISO-1A",
+      "itemId": "13118886594",
+      "title": "Adapter Contracts + Current Word Anchor Service",
+      "oldLane": "2",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-EVAL-3",
+      "itemId": "13118840971",
+      "title": "Quality Evaluation + CI Gate",
+      "oldLane": "1b",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-ARCH-DOC-1",
+      "itemId": "13118862481",
+      "title": "Architecture Decisions Doc",
+      "oldLane": "Stage 4: Governance",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:43Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-ISO-1D",
+      "itemId": "13118841621",
+      "title": "Flow Adapter + Section Handoff Restart Ownership",
+      "oldLane": "2",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:29:44Z",
+      "status": "Completed"
+    },
+    {
+      "id": "GOV-HUMAN-REVIEW-1",
+      "itemId": "13118840660",
+      "title": "Deferred Governance Review Items",
+      "oldLane": "Governance",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:44Z",
+      "status": "Completed"
+    },
+    {
+      "id": "TTS-QUAL-CI-1",
+      "itemId": "13118827986",
+      "title": "CI Regression Gate Wiring",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:44Z",
+      "status": "Completed"
+    },
+    {
+      "id": "THEME-SYNC-1",
+      "itemId": "13118841260",
+      "title": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "oldLane": "Completed",
+      "lane": "UX polish",
+      "revision": "2026-09-23T18:29:44Z",
+      "status": "Completed"
+    },
+    {
+      "id": "SINGLE-INSTANCE-LOCK-1",
+      "itemId": "13118832662",
+      "title": "Electron Main-Process Single-Instance Gate",
+      "oldLane": "Completed",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:44Z",
+      "status": "Completed"
+    },
+    {
+      "id": "EXT-PAIR-1",
+      "itemId": "13118818711",
+      "title": "Chrome Extension Pairing Auth Timeout Repair",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "Chrome Extension",
+      "revision": "2026-09-23T18:29:45Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "itemId": "13118810192",
+      "title": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARRATE-A5-RATE-RESEED-1",
+      "itemId": "13118825485",
+      "title": "Rate-Change Reseed from Heard Position",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "itemId": "13118810126",
+      "title": "Narrate Cursor Tracking Diagnostic",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARRATE-INTENT-CURSOR-1",
+      "itemId": "13118801914",
+      "title": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "itemId": "13118811955",
+      "title": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "oldLane": "Narration Dual-Source Unification",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Completed"
+    },
+    {
+      "id": "SK-HYG-2",
+      "itemId": "13119055963",
+      "title": "Directory reorganization (historical reconciliation)",
+      "oldLane": "",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:45:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "FLOW-ZONE-AUTO",
+      "itemId": "13119055220",
+      "title": "Descending auto-advancing reading zone",
+      "oldLane": "",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:45:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "READER-MODE-ISOLATION-1-PHASE-0",
+      "itemId": "13119034606",
+      "title": "Reader mode isolation — Phase 0 stabilization",
+      "oldLane": "",
+      "lane": "Reader Engine",
+      "revision": "2026-09-23T18:45:30Z",
+      "status": "Completed"
+    },
+    {
+      "id": "GOVERNANCE-SWEEP",
+      "itemId": "13119074046",
+      "title": "Governance document and queue hygiene",
+      "oldLane": "",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:45:31Z",
+      "status": "Completed"
+    },
+    {
+      "id": "NARR-PAUSE-STATE-1",
+      "itemId": "13118837533",
+      "title": "Named Pause State Machine",
+      "oldLane": "Post-Architecture Polish",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Dissolved"
+    },
+    {
+      "id": "HYG-XLSX-DASHBOARD-RESTORE",
+      "itemId": "13118825193",
+      "title": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Superseded"
+    },
+    {
+      "id": "TTS-REGISTRY-DISPATCH-1",
+      "itemId": "13118811322",
+      "title": "Registry-Driven Dispatch",
+      "oldLane": "",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Dissolved"
+    },
+    {
+      "id": "NARRATE-CLOSED-LOOP-CURSOR",
+      "itemId": "13118797794",
+      "title": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "oldLane": "Active Conveyor Belt",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:46Z",
+      "status": "Dissolved"
+    },
+    {
+      "id": "TTS-CANARY-1",
+      "itemId": "13118811197",
+      "title": "Engine Readiness Probes",
+      "oldLane": "",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:47Z",
+      "status": "Dissolved"
+    },
+    {
+      "id": "TEST-HARNESS-1",
+      "itemId": "13118842583",
+      "title": "Test Harness Stability",
+      "oldLane": "",
+      "lane": "Platform & Maintenance",
+      "revision": "2026-09-23T18:29:47Z",
+      "status": "Dissolved"
+    },
+    {
+      "id": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "itemId": "13118811133",
+      "title": "MediaSession Controls",
+      "oldLane": "Post-Architecture Polish",
+      "lane": "TTS / Narration Engine",
+      "revision": "2026-09-23T18:29:47Z",
+      "status": "Dissolved"
+    }
+  ]
+}

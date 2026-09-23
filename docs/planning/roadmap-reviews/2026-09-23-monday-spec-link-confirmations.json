@@ -1,0 +1,62 @@
+[
+  {
+    "succeeded": true,
+    "operation": "store-spec-link",
+    "itemId": "UX-POLISH-1",
+    "idempotencyKey": "store-spec-link:UX-POLISH-1:[('spec_link', 'ROADMAP.md#ux-polish-1')]",
+    "actualRevision": "2026-09-23T18:35:57Z",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-UX-POLISH-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:38:41Z",
+      "readback": {
+        "spec_link": "ROADMAP.md#ux-polish-1"
+      }
+    },
+    "providerItemId": "13118847895"
+  },
+  {
+    "succeeded": true,
+    "operation": "store-spec-link",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "idempotencyKey": "store-spec-link:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('spec_link', 'ROADMAP.md#narrate-applyratechange-collapse-1')]",
+    "actualRevision": "2026-09-23T18:35:58Z",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:38:41Z",
+      "readback": {
+        "spec_link": "ROADMAP.md#narrate-applyratechange-collapse-1"
+      }
+    },
+    "providerItemId": "13118840646"
+  },
+  {
+    "succeeded": true,
+    "operation": "store-spec-link",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "idempotencyKey": "store-spec-link:NARRATE-HEARD-CURSOR-1:[('spec_link', 'ROADMAP.md#narrate-heard-cursor-1')]",
+    "actualRevision": "2026-09-23T18:35:57Z",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-HEARD-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:38:41Z",
+      "readback": {
+        "spec_link": "ROADMAP.md#narrate-heard-cursor-1"
+      }
+    },
+    "providerItemId": "13118863178"
+  },
+  {
+    "succeeded": true,
+    "operation": "store-spec-link",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "idempotencyKey": "store-spec-link:NARRATE-SUBSCRIBER-CURSOR-1:[('spec_link', 'ROADMAP.md#narrate-subscriber-cursor-1')]",
+    "actualRevision": "2026-09-23T18:35:57Z",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-SUBSCRIBER-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:38:41Z",
+      "readback": {
+        "spec_link": "ROADMAP.md#narrate-subscriber-cursor-1"
+      }
+    },
+    "providerItemId": "13118808496"
+  }
+]

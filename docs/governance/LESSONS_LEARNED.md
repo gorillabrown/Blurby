@@ -1696,3 +1696,19 @@ speakChunk() {
 **Applied to:** NARRATE-SUBSCRIBER-CURSOR-1 amended to publish a lag-compensated heard cursor (not `schedulerActiveWord`/`heardFloor`/`nextGenWordIndex`) and to re-trace the `subscriberCursor` channel after wiring (it was `no-data`). Feeds NARRATE-A5-RATE-RESEED-1 and NARRATE-APPLYRATECHANGE-COLLAPSE-1 (frontier-reseed skip).
 
 **Related:** `docs/studies/investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md` (signal map + ranked accuracy + authority verdict), `src/hooks/useNarration.ts` (`DIAG`/`diag()`, word-advance payload), `src/utils/audioScheduler.ts` (`DIAG`/`schedDiag()`, `getPlayingSourceMaxWordIndex`), LL-126, SRL-070.
+
+---
+
+### 2026-09-23 roadmap review — source corrections and mode-isolation application
+
+This is an append-only review annotation, not a newly numbered standing rule. Registered policy.standingRules.ids is empty; existing LL/SRL labels remain source references.
+
+- **LL-108 / LL-120 / LL-121 / LL-125:** preserve zero and the distinction between explicit selection, resume intent, playback and browse position. The owner now requires independent Page/Focus/Flow/Narrate runtimes, not further shared mode-aware behavior. Copy the existing policy into the respective owners and cross only a versioned value contract. Narrate-to-Flow runtime aliasing is removed by READER-MODE-SEPARATION-2.
+- **LL-109:** an old asynchronous result must be rejected after await as well as cancelled on stop. The new specification guards both the local runtime and persistence/render/audio ports with document and session identity.
+- **LL-112:** mirrored implementation shapes and independent evidence precede future shared abstractions. This review applies that principle to reading modes; it does not reactivate dormant TTS engines.
+- **LL-124 / LL-126 / LL-127:** retain the audio-independent evidence requirement. The LL-127 prose value of approximately 350 ms for the trusted constant is historical: current main @ cd384b78cd5325e96429fe867c8b080ce1b39bb8 has TTS_TRUSTED_CURSOR_LAG_MS=450 and NARRATION_CURSOR_LAG_MS=350 (src/constants.ts:119 and :113, checked 2026-09-23). Scheduler paths already apply compensation. This annotation does not certify heard-audio alignment or select another delay.
+- **SRL-074 / 075 / 076 / 077** in the registered close-outs directory describe successful adapter scaffolding while ref-heavy runtime/DOM owners remained in shared hooks. Their closure remains valid historical evidence; complete runtime separation is a new, explicitly approved stage.
+- **Identifier collision:** SpecRetro.Lessons_Learned.md uses SRL-090 for structured-file schema and row-identity verification (two entries). The former ROADMAP compensation-first rule reused that identifier for a different June 1 decision. ROADMAP now names the compensation rule descriptively and cites its decision provenance; no new ID was invented and no pre-existing SpecRetro content was rewritten.
+- **Perceptual rewrite gate:** the later HEARD probe still gates optional subscriber/reducer surgery. It does not delay the owner's separately mandated mode separation. Preserve the A5 position result and carry the 1.4x audio-overlap finding as an unresolved measured baseline, not a proven general cause.
+
+Sources: [current inline specification](../../ROADMAP.md#reader-mode-separation-2), [review checklist](../planning/roadmap-reviews/2026-09-23-lessons-applied.md), [source verification](../planning/roadmap-reviews/2026-09-23-source-evidence.json). Detailed old specs remain archived and blocked; they are not current implementation instructions.

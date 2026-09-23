@@ -1,0 +1,2199 @@
+{
+  "source": "monday:board/18432450217",
+  "provider": "monday.com connector",
+  "observedAt": "2026-09-23T18:38:41Z",
+  "columns": {
+    "title": "name",
+    "status": "status",
+    "id": "text_mm7f7e7n",
+    "sequence": "numeric_mm7fsex9",
+    "written_status": "color_mm7fspz9",
+    "prerequisites": "long_text_mm7fgw3w",
+    "effort": "text_mm7ftzsz",
+    "lane": "text_mm7fhjb6",
+    "group": "text_mm7ftkmm",
+    "spec_link": "long_text_mm7f66fk",
+    "branch": "text_mm7fs69e",
+    "started": "date_mm7f6dw",
+    "completed": "date_mm7fw9mx",
+    "evidence": "long_text_mm7fyyfy",
+    "description": "long_text_mm7fv3sg",
+    "notes": "long_text_mm7fncbd"
+  },
+  "board": {
+    "id": "18432450217",
+    "name": "Blurby",
+    "description": null,
+    "state": "active",
+    "board_kind": "public",
+    "permissions": "everyone",
+    "url": "https://estrattbrown.monday.com/boards/18432450217",
+    "updated_at": "2026-09-23T18:35:58Z",
+    "hierarchy_type": "classic",
+    "item_terminology": "project",
+    "items_count": 57,
+    "items_limit": 10000,
+    "creator": {
+      "id": "111740603",
+      "name": "Evan Brown",
+      "email": "estrattbrown@gmail.com"
+    },
+    "workspace": {
+      "id": "16748869",
+      "name": "Active Projects",
+      "kind": "open",
+      "description": null
+    },
+    "board_folder_id": null,
+    "columns": [
+      {
+        "id": "name",
+        "title": "Name",
+        "description": null,
+        "type": "name",
+        "settings": {},
+        "revision": "3fabb8054eff6f4885e39fe03a1583d4"
+      },
+      {
+        "id": "person",
+        "title": "Person",
+        "description": null,
+        "type": "people",
+        "settings": {},
+        "revision": "3fabb8054eff6f4885e39fe03a1583d4"
+      },
+      {
+        "id": "status",
+        "title": "Status",
+        "description": null,
+        "type": "status",
+        "settings": {
+          "labels": [
+            {
+              "id": 0,
+              "color": 0,
+              "label": "Working on it",
+              "index": 0,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#fdab3d"
+            },
+            {
+              "id": 1,
+              "color": 1,
+              "label": "Done",
+              "index": 2,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#00c875"
+            },
+            {
+              "id": 2,
+              "color": 2,
+              "label": "Stuck",
+              "index": 1,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#df2f4a"
+            },
+            {
+              "id": 3,
+              "color": 3,
+              "label": "Completed",
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#007eb5"
+            },
+            {
+              "id": 4,
+              "color": 4,
+              "label": "Blocked",
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#9d50dd"
+            },
+            {
+              "id": 6,
+              "color": 6,
+              "label": "Queued",
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#037f4c"
+            },
+            {
+              "id": 7,
+              "color": 7,
+              "label": "Dissolved",
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#579bfc"
+            },
+            {
+              "id": 8,
+              "color": 8,
+              "label": "Superseded",
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#cab641"
+            }
+          ]
+        },
+        "revision": "c3e142542d592d4dbc18c5a05fbc2502"
+      },
+      {
+        "id": "date4",
+        "title": "Date",
+        "description": null,
+        "type": "date",
+        "settings": {},
+        "revision": "3fabb8054eff6f4885e39fe03a1583d4"
+      },
+      {
+        "id": "text_mm7f7e7n",
+        "title": "Sprint Code",
+        "description": "Blurby work register: id. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "text",
+        "settings": {},
+        "revision": "780e352daacecfa9f175eaa585867526"
+      },
+      {
+        "id": "numeric_mm7fsex9",
+        "title": "Seq",
+        "description": "Blurby work register: sequence. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "numbers",
+        "settings": {},
+        "revision": "f4843b127e41930fee3ff4f2de5902d2"
+      },
+      {
+        "id": "color_mm7fspz9",
+        "title": "Spec State",
+        "description": "Blurby work register: written_status. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "status",
+        "settings": {
+          "labels": [
+            {
+              "id": 0,
+              "color": 0,
+              "label": "Working on it",
+              "index": 0,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#fdab3d"
+            },
+            {
+              "id": 1,
+              "color": 1,
+              "label": "Done",
+              "index": 1,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#00c875"
+            },
+            {
+              "id": 2,
+              "color": 2,
+              "label": "Stuck",
+              "index": 2,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#df2f4a"
+            },
+            {
+              "id": 3,
+              "color": 3,
+              "label": "Full Spec",
+              "index": 3,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#007eb5"
+            },
+            {
+              "id": 4,
+              "color": 4,
+              "label": "Stub",
+              "index": 4,
+              "is_done": false,
+              "is_deactivated": false,
+              "hex": "#9d50dd"
+            }
+          ]
+        },
+        "revision": "5dabb246d3c307b6f91902a29dcd8924"
+      },
+      {
+        "id": "long_text_mm7fgw3w",
+        "title": "Prerequisites",
+        "description": "Blurby work register: prerequisites. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "long_text",
+        "settings": {},
+        "revision": "ef52d6ee7cc66ed14bd334da74832724"
+      },
+      {
+        "id": "text_mm7ftzsz",
+        "title": "Effort",
+        "description": "Blurby work register: effort. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "text",
+        "settings": {},
+        "revision": "6e80bfd3b7bfb60733b9d730a0159532"
+      },
+      {
+        "id": "text_mm7fhjb6",
+        "title": "Lane",
+        "description": "Blurby work register: lane. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "text",
+        "settings": {},
+        "revision": "79026b833e2b7d27e3ed319076843d6e"
+      },
+      {
+        "id": "text_mm7ftkmm",
+        "title": "Phase",
+        "description": "Blurby work register: group. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "text",
+        "settings": {},
+        "revision": "fce9418b5d901a488d84f183e74cf9db"
+      },
+      {
+        "id": "long_text_mm7f66fk",
+        "title": "Spec Reference",
+        "description": "Blurby work register: spec_link. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "long_text",
+        "settings": {},
+        "revision": "f71a3efc9ef3eb93b8a2a802cd8ab7a2"
+      },
+      {
+        "id": "text_mm7fs69e",
+        "title": "Branch",
+        "description": "Blurby work register: branch. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "text",
+        "settings": {},
+        "revision": "91d360deae99cb5ff87d5a144b88e21d"
+      },
+      {
+        "id": "date_mm7f6dw",
+        "title": "Started",
+        "description": "Blurby work register: started. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "date",
+        "settings": {},
+        "revision": "ef0dac6707f61ce212744d3f29f31681"
+      },
+      {
+        "id": "date_mm7fw9mx",
+        "title": "Completed",
+        "description": "Blurby work register: completed. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "date",
+        "settings": {},
+        "revision": "98da98f2f86d9dccd9ae57dc210f9861"
+      },
+      {
+        "id": "long_text_mm7fyyfy",
+        "title": "Evidence",
+        "description": "Blurby work register: evidence. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "long_text",
+        "settings": {},
+        "revision": "9024cc7e66b2dee06d7b18af1f6d27fb"
+      },
+      {
+        "id": "long_text_mm7fv3sg",
+        "title": "Description",
+        "description": "Blurby work register: description. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "long_text",
+        "settings": {},
+        "revision": "6dee830a8c79f006206ed08e2735e00f"
+      },
+      {
+        "id": "long_text_mm7fncbd",
+        "title": "Notes",
+        "description": "Blurby work register: notes. Imported source details remain traceable to the 2026-09-23 migration record.",
+        "type": "long_text",
+        "settings": {},
+        "revision": "e5ec32dc1f4cb5ec4ee101fd274a7e0c"
+      }
+    ],
+    "groups": [
+      {
+        "id": "group_mm7femyn",
+        "title": "Active conveyor"
+      },
+      {
+        "id": "group_mm7fb4db",
+        "title": "Blocked / deferred"
+      },
+      {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      },
+      {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      },
+      {
+        "id": "topics",
+        "title": "Group Title"
+      },
+      {
+        "id": "group_title",
+        "title": "Group Title"
+      }
+    ],
+    "owners": [
+      {
+        "id": "111740603",
+        "name": "Evan Brown"
+      }
+    ],
+    "team_owners": [],
+    "tags": [],
+    "top_group": {
+      "id": "group_mm7femyn"
+    },
+    "views": [
+      {
+        "id": "282544830",
+        "name": "Conveyor",
+        "type": "TableBoardView",
+        "settings": {
+          "columns": {
+            "column_properties": [
+              {
+                "column_id": "person",
+                "visible": false
+              },
+              {
+                "column_id": "date4",
+                "visible": false
+              }
+            ],
+            "floating_columns_count": 2,
+            "column_order": [
+              "name",
+              "text_mm7f7e7n",
+              "numeric_mm7fsex9",
+              "status",
+              "color_mm7fspz9",
+              "text_mm7ftzsz",
+              "long_text_mm7fgw3w",
+              "long_text_mm7f66fk",
+              "text_mm7fhjb6",
+              "text_mm7ftkmm",
+              "text_mm7fs69e",
+              "date_mm7f6dw",
+              "date_mm7fw9mx",
+              "long_text_mm7fyyfy",
+              "long_text_mm7fv3sg",
+              "long_text_mm7fncbd"
+            ]
+          }
+        },
+        "filter": {
+          "operator": "AND",
+          "groups": [
+            {
+              "operator": "AND",
+              "rules": [
+                {
+                  "column_id": "numeric_mm7fsex9",
+                  "compare_value": [
+                    0
+                  ],
+                  "compare_attribute": "",
+                  "operator": "greater_than"
+                }
+              ]
+            }
+          ]
+        },
+        "sort": [
+          {
+            "column_id": "numeric_mm7fsex9",
+            "direction": "ASC"
+          }
+        ]
+      },
+      {
+        "id": "282544843",
+        "name": "Work register",
+        "type": "TableBoardView",
+        "settings": {
+          "columns": {
+            "column_properties": [
+              {
+                "column_id": "person",
+                "visible": false
+              },
+              {
+                "column_id": "date4",
+                "visible": false
+              }
+            ],
+            "floating_columns_count": 2,
+            "column_order": [
+              "name",
+              "text_mm7f7e7n",
+              "numeric_mm7fsex9",
+              "status",
+              "color_mm7fspz9",
+              "text_mm7ftzsz",
+              "long_text_mm7fgw3w",
+              "long_text_mm7f66fk",
+              "text_mm7fhjb6",
+              "text_mm7ftkmm",
+              "text_mm7fs69e",
+              "date_mm7f6dw",
+              "date_mm7fw9mx",
+              "long_text_mm7fyyfy",
+              "long_text_mm7fv3sg",
+              "long_text_mm7fncbd"
+            ]
+          }
+        },
+        "filter": {
+          "operator": "AND",
+          "groups": [
+            {
+              "operator": "AND",
+              "rules": [
+                {
+                  "column_id": "text_mm7f7e7n",
+                  "compare_value": [],
+                  "compare_attribute": "",
+                  "operator": "is_not_empty"
+                }
+              ]
+            }
+          ]
+        },
+        "sort": [
+          {
+            "column_id": "numeric_mm7fsex9",
+            "direction": "ASC"
+          }
+        ]
+      }
+    ]
+  },
+  "items": [
+    {
+      "id": "13118847895",
+      "name": "Space-bar resumes last-used reading mode",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:35:57Z",
+      "column_values": {
+        "person": null,
+        "status": "Queued",
+        "date4": null,
+        "text_mm7f7e7n": "UX-POLISH-1",
+        "numeric_mm7fsex9": "4",
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "Reader runtime stable",
+        "text_mm7ftzsz": "XS",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "ROADMAP.md#ux-polish-1",
+        "text_mm7fs69e": "sprint/ux-polish-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
+        "long_text_mm7fncbd": "Deferred until reader-mode runtime controls stop churning."
+      },
+      "group": {
+        "id": "group_mm7femyn",
+        "title": "Active conveyor"
+      }
+    },
+    {
+      "id": "13118840646",
+      "name": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840646",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:35:58Z",
+      "column_values": {
+        "person": null,
+        "status": "Queued",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+        "numeric_mm7fsex9": "2",
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-PAUSE-RESUME-UNIFY-1 (restartGeneration helper to extend)",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "ROADMAP.md#narrate-applyratechange-collapse-1",
+        "text_mm7fs69e": "sprint/narrate-applyratechange-collapse-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Collapse 14 speakNextChunk paths in applyRateChange (lines 1722-1871) into single restartGeneration(reason) helper; delete Web/Qwen/Pocket/Nano reseed branches per Kokoro-only design constraint; fold applyVoiceChange into same helper. Fixes A5 (rate-change skip).",
+        "long_text_mm7fncbd": "Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers)."
+      },
+      "group": {
+        "id": "group_mm7femyn",
+        "title": "Active conveyor"
+      }
+    },
+    {
+      "id": "13118863178",
+      "name": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863178",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:35:57Z",
+      "column_values": {
+        "person": null,
+        "status": "Queued",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-HEARD-CURSOR-1",
+        "numeric_mm7fsex9": "1",
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-CURSOR-TRACKING-DIAG-1 (verdict); NARRATE-PAUSE-RESUME-UNIFY-1",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "ROADMAP.md#narrate-heard-cursor-1",
+        "text_mm7fs69e": "sprint/narrate-heard-cursor-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Route both the visible highlight and FlowScrollEngine.followWord through ONE lag-compensated heard cursor (getAudioProgress / heard-floor clamp); extract tunable TTS_VISUAL_CURSOR_LAG_MS; tune by ear. No reducer/WORD_ADVANCE change. Live-QA verdict gates SUBSCRIBER-CURSOR-1.",
+        "long_text_mm7fncbd": "2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation."
+      },
+      "group": {
+        "id": "group_mm7femyn",
+        "title": "Active conveyor"
+      }
+    },
+    {
+      "id": "13118808496",
+      "name": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808496",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:35:57Z",
+      "column_values": {
+        "person": null,
+        "status": "Blocked",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-SUBSCRIBER-CURSOR-1",
+        "numeric_mm7fsex9": "3",
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-CURSOR-TRACKING-DIAG-1; NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "ROADMAP.md#narrate-subscriber-cursor-1",
+        "text_mm7fs69e": "sprint/narrate-subscriber-cursor-1",
+        "date_mm7f6dw": "2026-05-31",
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "If NARRATE-CURSOR-TRACKING-DIAG-1 confirms the subscriber/direct-callback model, rename lastConfirmedAudioWordRef -> subscriberCursorRef, remove cursorWordIndex from React reducer state, remove WORD_ADVANCE action, and wire visual/view follow via the verdict-approved live target.",
+        "long_text_mm7fncbd": "GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1."
+      },
+      "group": {
+        "id": "group_mm7fb4db",
+        "title": "Blocked / deferred"
+      }
+    },
+    {
+      "id": "13118856529",
+      "name": "Long-Form Audio Export",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856529",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Blocked",
+        "date4": null,
+        "text_mm7f7e7n": "KOKORO-EXPORT-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-ARCH-DOC-1",
+        "text_mm7ftzsz": "8",
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Long-form audio export from Kokoro",
+        "long_text_mm7fncbd": "Deferred to post-TTS-Architecture phase. Worktree preserved at .worktrees/kokoro-export-1 (37 tests pass)."
+      },
+      "group": {
+        "id": "group_mm7fb4db",
+        "title": "Blocked / deferred"
+      }
+    },
+    {
+      "id": "13118840645",
+      "name": "Narration Diagnostics Bundle",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840645",
+      "created_at": "2026-09-23T18:29:29Z",
+      "updated_at": "2026-09-23T18:29:29Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-DIAG-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-SYNC-1",
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Sync & Diagnostics",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/Close-Outs/CloseOut.TTS-DIAG-1.2026-05-15.md",
+        "text_mm7fs69e": "sprint/tts-diag-1-diagnostics-bundle",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-15",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Provider-neutral diagnostics bundle",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118832408",
+      "name": "Cache Identity & Timing Sidecars",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832408",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-CACHE-TIMING-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Foundation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-13",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Schema-versioned v2 cache identities and atomic timing sidecars",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118863177",
+      "name": "Integrate Sync & Diagnostics",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863177",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-INTEGRATE-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "ENGINE-DORMANCY-1",
+        "text_mm7ftzsz": "2",
+        "text_mm7fhjb6": "Consolidation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Merge sync and diagnostics branches to main",
+        "long_text_mm7fncbd": "Dispatch-ready; dormancy gate complete."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118791925",
+      "name": "Kokoro Readiness & Preflight",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118791925",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "KOKORO-DEEPEN-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Deepening",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-11",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Kokoro readiness and preflight checks",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118841616",
+      "name": "Voice Mixing Feasibility",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841616",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "KOKORO-DEEPEN-3",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": "Deepening",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-11",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Voice mixing feasibility study",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118818984",
+      "name": "Disable MOSS-Nano & Pocket TTS",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818984",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "ENGINE-DORMANCY-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "None",
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": "Consolidation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-16",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Disable dormant sidecar engines",
+        "long_text_mm7fncbd": "Dormant at settings/IPC; code preserved; Nano probes opt-in."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118833358",
+      "name": "Cache/Pipeline Hardening",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833358",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-CACHE-HARDEN-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-INTEGRATE-1",
+        "text_mm7ftzsz": "2",
+        "text_mm7fhjb6": "Consolidation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Cache-hit timing parity, type harmonization, IPC validation",
+        "long_text_mm7fncbd": "Findings-driven: impl review A8 + lit review §4.6"
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118856198",
+      "name": "Highlight Sync Controller",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856198",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-SYNC-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-CACHE-TIMING-1",
+        "text_mm7ftzsz": "8",
+        "text_mm7fhjb6": "Sync & Diagnostics",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/Close-Outs/CloseOut.TTS-SYNC-1.2026-05-15.md",
+        "text_mm7fs69e": "sprint/tts-sync-1-highlight-controller",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-15",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Centralized narration highlight sync policy",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118808495",
+      "name": "Provider Capability Registry",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808495",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-REGISTRY-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Foundation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-12",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Provider capability truth in ttsProviderRegistry",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118819556",
+      "name": "Event-Driven Word Sync",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819556",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-EVENT-SYNC-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-CACHE-HARDEN-1 (completed 2026-05-16)",
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Stage 2: Event-Driven Sync",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+        "text_mm7fs69e": "sprint/tts-event-sync-1-word-boundary-sync",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-16",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Event-driven word sync from research",
+        "long_text_mm7fncbd": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2"
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118840647",
+      "name": "Natural Chunk Highlight",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840647",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "KOKORO-DEEPEN-2",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Deepening",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-11",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Natural chunk highlighting for Kokoro TTS",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118819999",
+      "name": "Word Position Index",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819999",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-RENDER-MAP-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NORMALIZER-ENRICH-1",
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Stage 2: Word Position Index",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+        "text_mm7fs69e": "sprint/tts-render-map-1-word-position-index",
+        "date_mm7f6dw": "2026-05-17",
+        "date_mm7fw9mx": "2026-05-17",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Sioyek-inspired word position index",
+        "long_text_mm7fncbd": "Research: sioyek. Landed 2eabf36, merged 8545895."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118841422",
+      "name": "Pipeline Integration Tests",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841422",
+      "created_at": "2026-09-23T18:29:30Z",
+      "updated_at": "2026-09-23T18:29:30Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-PIPELINE-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-RENDER-MAP-1",
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": "Stage 3: Pipeline Truth",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+        "text_mm7fs69e": "sprint/tts-pipeline-1-integration-test",
+        "date_mm7f6dw": "2026-05-17",
+        "date_mm7fw9mx": "2026-05-17",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "End-to-end pipeline integration tests",
+        "long_text_mm7fncbd": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118833144",
+      "name": "Normalizer Gap Fill",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833144",
+      "created_at": "2026-09-23T18:29:31Z",
+      "updated_at": "2026-09-23T18:29:31Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NORMALIZER-ENRICH-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-EVENT-SYNC-1",
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Stage 2: Normalizer Enrichment",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+        "text_mm7fs69e": "sprint/normalizer-enrich-1-kokoro-text-normalization",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-17",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Fill normalizer gaps from abogen research",
+        "long_text_mm7fncbd": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118863192",
+      "name": "Segment Normalizer",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863192",
+      "created_at": "2026-09-23T18:29:31Z",
+      "updated_at": "2026-09-23T18:29:31Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-NORMALIZE-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": "Foundation",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "ROADMAP_ARCHIVE_2026-05-14.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-13",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "English-first spoken-text normalization",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118863341",
+      "name": "Spoken/Display Word Separation",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863341",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARR-SPOKEN-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-PARITY-1",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "1a",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+        "text_mm7fs69e": "sprint/narr-spoken-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-18",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Filter punctuation-only tokens from phoneme alignment input",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118832563",
+      "name": "Narrate Adapter + Audio Truth-Sync Ownership",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832563",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-ISO-1E",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-ISO-1D",
+        "text_mm7ftzsz": "L",
+        "text_mm7fhjb6": "2",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-27",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Move Narrate lifecycle behind audio truth-sync owned adapter",
+        "long_text_mm7fncbd": "Narrate starts at exact selected/current word and never follows Flow engine."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118833585",
+      "name": "Silence-Aware Cursor Hold",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833585",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARR-CURSOR-2",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARR-PAUSE-1; TTS-PARITY-1; NARR-SPOKEN-1",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "1a",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.NARR-CURSOR-2.2026-05-18.md",
+        "text_mm7fs69e": "sprint/narr-cursor-2-silence-hold",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-18",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Freeze cursor during inter-word silence using real endTime timestamps",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118842117",
+      "name": "Persistent Anchor Step 3.6 Content-Contiguous Synthesis (NARRATE-CURSOR-SYNC-5, Bug 2)",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842117",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "Step 3.5 manual QA: S13 split -> Bug2 content omission (this); Bug1 visual lead deferred post-ISO",
+        "text_mm7ftzsz": "L",
+        "text_mm7fhjb6": "1",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP3.6.2026-05-24.md",
+        "text_mm7fs69e": "hotfix/reader-persistent-anchor",
+        "date_mm7f6dw": "2026-05-24",
+        "date_mm7fw9mx": "2026-05-24",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Fix content omission: seed automatic chunk continuation from produced-end (nextGenWordIndexRef), not lastConfirmedAudioWordRef (cursor twin); hard-click still re-anchors. Add schedule-vs-wallclock log. Gate: no words omitted by ear in The Raven. See ROADMAP Step 3.6.",
+        "long_text_mm7fncbd": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118847249",
+      "name": "Focus Adapter + Passive Surface Contract Start",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847249",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-ISO-1C",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-ISO-1B",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "2",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md",
+        "text_mm7fs69e": "sprint/reader-iso-1c-focus-adapter",
+        "date_mm7f6dw": "2026-05-26",
+        "date_mm7fw9mx": "2026-05-26",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Move Focus behind adapter and begin passive surface command typing",
+        "long_text_mm7fncbd": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118832411",
+      "name": "Commit Phase 0 + Governance Sweep Baseline",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832411",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "BASELINE-SYNC-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-MODE-ISOLATION-1 Phase 0; GOVERNANCE-SWEEP",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "0",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+        "text_mm7fs69e": "main/current dirty baseline sync",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-22",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Review, stage, verify, and commit Phase 0 plus governance sweep baseline",
+        "long_text_mm7fncbd": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118847250",
+      "name": "Orchestrator Shell + Mode Selection Semantics",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847250",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-ISO-1B",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-ISO-1A",
+        "text_mm7ftzsz": "L",
+        "text_mm7fhjb6": "2",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md",
+        "text_mm7fs69e": "sprint/reader-iso-1b-orchestrator-shell",
+        "date_mm7f6dw": "2026-05-25",
+        "date_mm7fw9mx": "2026-05-25",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Extract mode orchestrator shell while preserving exact-start and no-auto-start semantics",
+        "long_text_mm7fncbd": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118840970",
+      "name": "Cache/Progress/Resume Parity Hardening",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840970",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-PARITY-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARR-PAUSE-1",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "1a",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.TTS-PARITY-1.2026-05-18.md",
+        "text_mm7fs69e": "sprint/tts-parity-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-18",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Fix cache silence parity, trusted progress lag, resume backpressure",
+        "long_text_mm7fncbd": "OutsideAudit.9 hardening gate. Three defects, three tests."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118856777",
+      "name": "Broad Suite Failure Triage",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856777",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TEST-GREEN-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "BASELINE-SYNC-1",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "1",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.TEST-GREEN-1.2026-05-22.md",
+        "text_mm7fs69e": "sprint/test-green-1-broad-suite-triage",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-22",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Reproduce and classify broad-suite failures before CI gating",
+        "long_text_mm7fncbd": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118862674",
+      "name": "MediaSession Integration",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862674",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARR-MEDIA-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "None",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "1a",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.NARR-MEDIA-1.2026-05-17.md",
+        "text_mm7fs69e": "sprint/narr-media-1-mediasession",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-17",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "OS media controls via Electron MediaSession API",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118864160",
+      "name": "Named-Pause State Machine",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118864160",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARR-PAUSE-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "None",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "1a",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.NARR-PAUSE-1.2026-05-18.md",
+        "text_mm7fs69e": "sprint/narr-pause-1-named-pause",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-18",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "PauseReason discriminant for smarter resume behavior",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118886594",
+      "name": "Adapter Contracts + Current Word Anchor Service",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118886594",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-ISO-1A",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR; TEST-GREEN-1",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "2",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md",
+        "text_mm7fs69e": "sprint/reader-iso-1a-adapter-anchor-contracts",
+        "date_mm7f6dw": "2026-05-24",
+        "date_mm7fw9mx": "2026-05-24",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Add adapter contracts and tested shared current-word anchor service",
+        "long_text_mm7fncbd": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118840971",
+      "name": "Quality Evaluation + CI Gate",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840971",
+      "created_at": "2026-09-23T18:29:43Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-EVAL-3",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "None",
+        "text_mm7ftzsz": "M",
+        "text_mm7fhjb6": "1b",
+        "text_mm7ftkmm": "TTS Quality + Reading Exp v2",
+        "long_text_mm7f66fk": "CloseOut.TTS-EVAL-3.2026-05-18.md",
+        "text_mm7fs69e": "sprint/tts-eval-3-quality-ci-gate",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-18",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Extend eval harness with quality scoring dimensions and CI gate config",
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118862481",
+      "name": "Architecture Decisions Doc",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862481",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:43Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-ARCH-DOC-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "All above",
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": "Stage 4: Governance",
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+        "text_mm7fs69e": "sprint/tts-arch-doc-1-architecture-decisions",
+        "date_mm7f6dw": "2026-05-17",
+        "date_mm7fw9mx": "2026-05-17",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Architecture decision records for TTS",
+        "long_text_mm7fncbd": "Architecture decision record. Landed 66a73b1, merged 65629bc."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118841621",
+      "name": "Flow Adapter + Section Handoff Restart Ownership",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841621",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:44Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "READER-ISO-1D",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-ISO-1C; persistent-anchor repair lane closed by explicit disposition; Flow S9 lazy-follow deferred",
+        "text_mm7ftzsz": "L",
+        "text_mm7fhjb6": "2",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md",
+        "text_mm7fs69e": "sprint/reader-iso-1d-flow-adapter",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-26",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Move Flow lifecycle and FlowScrollEngine ownership behind Flow adapter",
+        "long_text_mm7fncbd": "Flow owns section-handoff restart; no Narrate truth-sync changes."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118840660",
+      "name": "Deferred Governance Review Items",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840660",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:44Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "GOV-HUMAN-REVIEW-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "BASELINE-SYNC-1",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Governance",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-27",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Resolve deferred governance-sweep human-review items",
+        "long_text_mm7fncbd": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118827986",
+      "name": "CI Regression Gate Wiring",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118827986",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:44Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-QUAL-CI-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TEST-GREEN-1; TTS-EVAL-3",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+        "text_mm7fs69e": "sprint/tts-qual-ci-1",
+        "date_mm7f6dw": "2026-05-28",
+        "date_mm7fw9mx": "2026-05-28",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Wire TTS quality gates into CI after suite health and reader runtime are stable",
+        "long_text_mm7fncbd": "Deferred until broad-suite health is clean or formally classified."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118841260",
+      "name": "Settings Theme Propagation + Vite Circular Chunk Repair",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841260",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:44Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "THEME-SYNC-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Completed",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.THEME-SYNC-1.2026-05-29.md",
+        "text_mm7fs69e": "sprint/theme-sync-1",
+        "date_mm7f6dw": "2026-05-29",
+        "date_mm7fw9mx": "2026-05-29",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Resolve settings↔tts circular chunk warning and audit theme-context subscription across Settings sub-pages. Closes BUG-182.",
+        "long_text_mm7fncbd": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118832662",
+      "name": "Electron Main-Process Single-Instance Gate",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832662",
+      "created_at": "2026-09-23T18:29:44Z",
+      "updated_at": "2026-09-23T18:29:44Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "SINGLE-INSTANCE-LOCK-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "XS",
+        "text_mm7fhjb6": "Completed",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+        "text_mm7fs69e": "sprint/single-instance-lock-1",
+        "date_mm7f6dw": "2026-05-29",
+        "date_mm7fw9mx": "2026-05-29",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Add app.requestSingleInstanceLock() + second-instance handler to focus existing window instead of spawning duplicate BrowserWindow. ~5 LOC. Closes F1 from discovery sweep.",
+        "long_text_mm7fncbd": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only)."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118818711",
+      "name": "Chrome Extension Pairing Auth Timeout Repair",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818711",
+      "created_at": "2026-09-23T18:29:45Z",
+      "updated_at": "2026-09-23T18:29:45Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "EXT-PAIR-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "XS",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.EXT-PAIR-1.2026-05-29.md",
+        "text_mm7fs69e": "sprint/ext-pair-1",
+        "date_mm7f6dw": "2026-05-29",
+        "date_mm7fw9mx": "2026-05-29",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Split WS_AUTH_TIMEOUT_MS into a generous pairing window (5 min) for first-time human pair and the existing tight 5s window for stored-token re-auth. Closes BUG-183.",
+        "long_text_mm7fncbd": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118810192",
+      "name": "Fix A4 via resumeTargetRef Capture-at-Pause + Unified Resume Seed",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810192",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-PAUSE-RESUME-UNIFY-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+        "text_mm7fs69e": "sprint/narrate-pause-resume-unify-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-31",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Introduce resumeTargetRef; pause() captures heardFloor BEFORE strategy clears scheduler sources; resume() reads from priority chain intent ?? resumeTarget ?? subscriber. Fixes A4 (play->pause->play resets to book start).",
+        "long_text_mm7fncbd": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118825485",
+      "name": "Rate-Change Reseed from Heard Position",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825485",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-A5-RATE-RESEED-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-DUAL-SOURCE-DIAG-1",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md",
+        "text_mm7fs69e": "sprint/narrate-a5-rate-reseed-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-31",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Reseed applyRateChange Kokoro bucket-change from heardFloor, not nextGenWordIndexRef (A5 fix)",
+        "long_text_mm7fncbd": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118810126",
+      "name": "Narrate Cursor Tracking Diagnostic",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810126",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-CURSOR-TRACKING-DIAG-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-PAUSE-RESUME-UNIFY-1; revert fcea6a8",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+        "text_mm7fs69e": "sprint/narrate-cursor-tracking-diag-1",
+        "date_mm7f6dw": "2026-05-31",
+        "date_mm7fw9mx": "2026-05-31",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Instrument cursor, heard-floor, anchor, Foliate, and Flow follow signals to prove which source should drive visible cursor and view-follow before another fix.",
+        "long_text_mm7fncbd": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118801914",
+      "name": "Intent Cursor with SET to ACTIVE to CONSUMED to CLEARED Lifecycle",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118801914",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-INTENT-CURSOR-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)",
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+        "text_mm7fs69e": "sprint/narrate-intent-cursor-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-31",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Introduce intentCursorRef as user-intent half of Evan's two-cursor model; retire nextKokoroExactStartRef (the secret cursor); resyncToCursor becomes thin wrapper that sets intent + triggers restartGeneration if playing",
+        "long_text_mm7fncbd": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118811955",
+      "name": "Validate Dual-Source Diagnosis via Instrumented Gate Replay",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811955",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Completed",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-DUAL-SOURCE-DIAG-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARRATE-CLOSED-LOOP-CURSOR dissolved",
+        "text_mm7ftzsz": "XS",
+        "text_mm7fhjb6": "Narration Dual-Source Unification",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md",
+        "text_mm7fs69e": "sprint/narrate-dual-source-diag-1",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-30",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "1-day investigation: instrument every audio-decision read in useNarration.ts, re-run live-QA A1/A4/A5, produce verdict report confirming/refuting dual-source diagnosis from 2026-05-29 ULTRATHINK",
+        "long_text_mm7fncbd": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed."
+      },
+      "group": {
+        "id": "group_mm7fjhwd",
+        "title": "Completed history"
+      }
+    },
+    {
+      "id": "13118837533",
+      "name": "Named Pause State Machine",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118837533",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "NARR-PAUSE-STATE-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "NARR-MEDIA-1",
+        "text_mm7ftzsz": "2",
+        "text_mm7fhjb6": "Post-Architecture Polish",
+        "text_mm7ftkmm": "Narration UX",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Reason-aware pause and resume state transitions",
+        "long_text_mm7fncbd": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)"
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118825193",
+      "name": "Restore sprint-queue.xlsx Dashboard formulas + openpyxl quarantine",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825193",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Superseded",
+        "date4": null,
+        "text_mm7f7e7n": "HYG-XLSX-DASHBOARD-RESTORE",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "S",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": "sprint/hyg-xlsx-dashboard-restore",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-09-23",
+        "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
+        "long_text_mm7fv3sg": "Restore Dashboard KPIs as live Excel formulas + normalize Catalog vocab/LOE + recalc.py Dashboard guardrail + SPREADSHEET_CONVENTIONS.md. Dashboard confirmed inert (0 formula cells).",
+        "long_text_mm7fncbd": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented."
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118811322",
+      "name": "Registry-Driven Dispatch",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811322",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-REGISTRY-DISPATCH-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Stub",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "3",
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Registry-driven engine dispatch",
+        "long_text_mm7fncbd": "Dissolved 2026-05-15 — single active engine"
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118797794",
+      "name": "Narrate Closed-Loop Cursor + Content Continuity (real audio position as single truth)",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118797794",
+      "created_at": "2026-09-23T18:29:46Z",
+      "updated_at": "2026-09-23T18:29:46Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "NARRATE-CLOSED-LOOP-CURSOR",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "READER-ISO-1E (Narrate adapter) complete",
+        "text_mm7ftzsz": "L",
+        "text_mm7fhjb6": "Active Conveyor Belt",
+        "text_mm7ftkmm": "Reader Runtime Solidification",
+        "long_text_mm7f66fk": "See Disposition of Superseded Branches in ROADMAP.md; branch preserved at sprint/narrate-closed-loop-cursor commit 0f1b2c8",
+        "text_mm7fs69e": "sprint/narrate-closed-loop-cursor",
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": "2026-05-29",
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Make currently-playing audio source's real word position the SINGLE source of truth for cursor + re-entry seeding; retire ahead-of-heard refs; bound prefetch window.",
+        "long_text_mm7fncbd": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification"
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118811197",
+      "name": "Engine Readiness Probes",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811197",
+      "created_at": "2026-09-23T18:29:47Z",
+      "updated_at": "2026-09-23T18:29:47Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "TTS-CANARY-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Stub",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Engine readiness probe system",
+        "long_text_mm7fncbd": "Dissolved 2026-05-15 — sidecar engines dormant"
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118842583",
+      "name": "Test Harness Stability",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842583",
+      "created_at": "2026-09-23T18:29:47Z",
+      "updated_at": "2026-09-23T18:29:47Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "TEST-HARNESS-1",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Stub",
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": "2",
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": "TTS Architecture",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "Test harness stability work",
+        "long_text_mm7fncbd": "Dissolved 2026-05-15 — Nano probes irrelevant"
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118811133",
+      "name": "MediaSession Controls",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811133",
+      "created_at": "2026-09-23T18:29:47Z",
+      "updated_at": "2026-09-23T18:29:47Z",
+      "column_values": {
+        "person": null,
+        "status": "Dissolved",
+        "date4": null,
+        "text_mm7f7e7n": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": "Full Spec",
+        "long_text_mm7fgw3w": "TTS-ARCH-DOC-1",
+        "text_mm7ftzsz": "1",
+        "text_mm7fhjb6": "Post-Architecture Polish",
+        "text_mm7ftkmm": "Narration UX",
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": "OS media transport controls for active narration",
+        "long_text_mm7fncbd": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work."
+      },
+      "group": {
+        "id": "group_mm7fp5qw",
+        "title": "Retired history"
+      }
+    },
+    {
+      "id": "13118770563",
+      "name": "Item 1",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118770563",
+      "created_at": "2026-09-23T18:24:15Z",
+      "updated_at": "2026-09-23T18:24:15Z",
+      "column_values": {
+        "person": null,
+        "status": "Working on it",
+        "date4": "2025-09-17",
+        "text_mm7f7e7n": null,
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": null,
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": null,
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": null,
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": null,
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "topics",
+        "title": "Group Title"
+      }
+    },
+    {
+      "id": "13118770564",
+      "name": "Item 2",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118770564",
+      "created_at": "2026-09-23T18:24:15Z",
+      "updated_at": "2026-09-23T18:24:15Z",
+      "column_values": {
+        "person": null,
+        "status": "Done",
+        "date4": "2025-09-17",
+        "text_mm7f7e7n": null,
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": null,
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": null,
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": null,
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": null,
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "topics",
+        "title": "Group Title"
+      }
+    },
+    {
+      "id": "13118770566",
+      "name": "Item 3",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118770566",
+      "created_at": "2026-09-23T18:24:15Z",
+      "updated_at": "2026-09-23T18:24:15Z",
+      "column_values": {
+        "person": null,
+        "status": {
+          "index": 5,
+          "post_id": null,
+          "changed_at": "2019-03-01T17:25:02.248Z"
+        },
+        "date4": "2025-09-15",
+        "text_mm7f7e7n": null,
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": null,
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": null,
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": null,
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": null,
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "topics",
+        "title": "Group Title"
+      }
+    },
+    {
+      "id": "13118770567",
+      "name": "Item 4",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118770567",
+      "created_at": "2026-09-23T18:24:15Z",
+      "updated_at": "2026-09-23T18:24:15Z",
+      "column_values": {
+        "person": null,
+        "status": null,
+        "date4": "2025-09-17",
+        "text_mm7f7e7n": null,
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": null,
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": null,
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": null,
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": null,
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_title",
+        "title": "Group Title"
+      }
+    },
+    {
+      "id": "13118770568",
+      "name": "Item 5",
+      "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118770568",
+      "created_at": "2026-09-23T18:24:15Z",
+      "updated_at": "2026-09-23T18:24:15Z",
+      "column_values": {
+        "person": null,
+        "status": null,
+        "date4": "2025-09-15",
+        "text_mm7f7e7n": null,
+        "numeric_mm7fsex9": null,
+        "color_mm7fspz9": null,
+        "long_text_mm7fgw3w": null,
+        "text_mm7ftzsz": null,
+        "text_mm7fhjb6": null,
+        "text_mm7ftkmm": null,
+        "long_text_mm7f66fk": null,
+        "text_mm7fs69e": null,
+        "date_mm7f6dw": null,
+        "date_mm7fw9mx": null,
+        "long_text_mm7fyyfy": null,
+        "long_text_mm7fv3sg": null,
+        "long_text_mm7fncbd": null
+      },
+      "group": {
+        "id": "group_title",
+        "title": "Group Title"
+      }
+    }
+  ],
+  "pagination": {
+    "has_more": false,
+    "nextCursor": null,
+    "count": 57
+  },
+  "specLinkVerification": {
+    "plans": 4,
+    "mismatches": []
+  }
+}

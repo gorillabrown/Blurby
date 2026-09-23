@@ -8,12 +8,12 @@
 3. After completion of codebase work by Claude Code, tag each completed item with inline `✅ COMPLETED` markers in ROADMAP.md.
 4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
-5a. **Queue depth below 3 is a stop signal.** If `docs/governance/sprint-queue.xlsx` has fewer than three queued sprints in the Catalog tab, pause implementation work and switch to brainstorming/spec development until the queue is back to at least three.
+5a. **Queue depth below 3 is a stop signal.** If the registered monday.com work register has fewer than three queued sprints, pause implementation and backfill specifications before the next dispatch. Blocked items do not count as queued.
 5b. **Successful CLI sprints auto-merge by default.** When a sprint passes verification, spec compliance, quality review, and docs closeout, the default CLI closeout path is: stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push. A sprint spec must explicitly say otherwise to skip auto-merge.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
-8. **Always print CLI-formatted sprint dispatches.** When dispatching work to Claude Code CLI, produce a compact, ready-to-paste prompt. Dispatches are POINTERS not PAYLOADS — reference `docs/governance/sprint-queue.xlsx` (which points to ROADMAP.md for the full spec), don't duplicate it. Format: sprint ID, branch, baseline state, queue row, and ROADMAP spec pointer.
+8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the monday.com item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
 
@@ -43,24 +43,32 @@ This repo uses a strict two-layer planning system:
    - Tasks
    - Execution Sequence
    - SUCCESS CRITERIA
-2. **`docs/governance/sprint-queue.xlsx` is the authoritative sprint queue.** The Catalog tab holds abbreviated FIFO dispatch pointers that point Claude Code CLI to the full spec in `ROADMAP.md`; the Dashboard tab summarizes queue health. This workbook is the only sprint queue source of truth.
+2. **[Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) is the authoritative work register.** Sprint Code is stable identity, Seq is FIFO order, and Status is live state. ROADMAP.md holds full specifications. Virtuoso/workspace-layout.json declares the connector and column map; local timestamped snapshots are caches, never independent authority.
 3. **Cowork's primary job is plan quality.** Pressure-test scope, sequencing, edge cases, cache/UX implications, spec clarity, and documentation drift so Claude Code can execute with minimal ambiguity.
 4. **Execution is selective.** Cowork only performs direct coding or file edits when:
    - the user explicitly asks for implementation, or
    - the work is especially delicate/complex and the user wants Cowork to handle it directly.
-5. **Default output for implementation planning work:** update the full `ROADMAP.md` spec first, then update the matching `docs/governance/sprint-queue.xlsx` Catalog pointer second.
-6. **Minimum queue depth is mandatory.** `docs/governance/sprint-queue.xlsx` must always keep at least three queued sprints in the Catalog tab so we can see what is immediately next and what follows after that. If the queue drops below three, stop building and backfill the roadmap/workbook queue before resuming execution work.
+5. **Default output for implementation planning work:** update ROADMAP.md, then the matching monday.com item through mutation-plan → connector → mutation-confirm. Refresh and read back the board snapshot.
+6. **Minimum queue depth is mandatory.** Keep at least three queued monday.com items with full ROADMAP.md specs; below three, pause implementation and backfill.
 7. **Parallel sprinting requires lane ownership + shared-core freeze.** We only run code-changing sprints in parallel when each sprint declares an owned lane and avoids the shared-core freeze set unless explicitly scheduled for an integration window.
 
-#### Parallel Sprint Policy (Lane Ownership)
+#### Product lanes (roadmap and Monday)
 
-When proposing parallel execution, classify each sprint into one or more lanes:
+The Monday Lane field uses the six product domains declared in registry policy.roadmap.lanes: UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
+
+#### Owner priority: isolate reading modes first
+
+READER-MODE-SEPARATION-2 must complete before narration fixes or mode-dependent UX work. Page, Focus, Flow, and Narrate each own independent state, lifecycle, callbacks/timers, rendering/scroll/highlight controllers, and tests. Use mirrored module layouts and matching public contracts; intentional duplication is allowed. No sibling-runtime imports or shared mutable mode store. A thin router performs explicit value-snapshot handoffs and rejects stale-owner callbacks. Consolidation is a later decision after isolation is proven. The existing adapters are groundwork, not proof that runtime separation is complete. See ROADMAP.md and its linked mode-separation plan.
+
+#### Parallel Sprint Policy (Execution Surface Ownership)
+
+When proposing parallel execution, classify each sprint into one or more of the legacy A-E execution surfaces below. These are file-ownership fences, distinct from the product domains in Monday's Lane field:
 
 - **Lane A: Runtime Core** — narration/flow state machine and synchronization behavior
 - **Lane B: Evaluation Harness** — fixtures, trace schema, runners, scoring artifacts
 - **Lane C: UI Surfaces** — controls, settings UI, display-only reader chrome
 - **Lane D: Platform/Main Process** — `main/`, preload, IPC contracts, auth/cloud/import
-- **Lane E: Governance/Planning** — roadmap, `sprint-queue.xlsx`, close-out/reporting docs
+- **Lane E: Governance/Planning** — roadmap, monday.com work register, close-out/reporting docs
 
 #### Shared-Core Freeze Set
 
@@ -192,7 +200,7 @@ Before committing, verify ALL of these:
 After EVERY sprint completion — hotfixes included, no exceptions — run the MarcusAurelius pass:
 
 1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
-2. **sprint-queue.xlsx** — In `docs/governance/sprint-queue.xlsx`, mark the completed sprint complete, clear its active `Seq`, renumber queued rows, and verify queue depth ≥ 3.
+2. **monday.com work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
 3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
 4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
 5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
@@ -204,7 +212,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the M
 
 - **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
 - **Do not clean away local work.** Never run destructive cleanup flows like `git reset --hard`, `git clean`, or equivalent workspace-wiping actions unless the user explicitly requests that exact outcome for this repo.
-- **Branch-per-sprint.** One branch per sprint dispatch (`sprint/<N>-<name>`). Never commit directly to main. After a successful sprint, merge to `main` with `--no-ff` and push unless the sprint spec explicitly says not to. Delete branch after merge.
+- **Branch-per-sprint.** Use the named branch in an isolated checkout; current task convention uses `eb/`. Never commit directly to main. Resolve registry policy.git before mutation: current policy permits exact-path local commits, with networkOperations=ask. Merge, push, and branch deletion are not automatic close-out steps.
 - **Local-first development.** Working directory at `C:\Users\estra\Projects\Blurby`. Push to GitHub after every sprint. Pull before every session. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 - **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.
@@ -253,7 +261,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 | 4 | **Lessons Learned** | `docs/governance/LESSONS_LEARNED.md` | Engineering discoveries, persistent rules, anti-patterns |
 | 5 | **Ideas** | `docs/governance/IDEAS.md` | Unroadmapped concepts — reviewed at phase pauses |
 | 6 | **CLAUDE.md** | `CLAUDE.md` | Agent operational config — rules, agents, workflow |
-| 7 | **Sprint Queue Workbook** | `docs/governance/sprint-queue.xlsx` | Authoritative upcoming sprint dispatch queue (Catalog FIFO pointers to ROADMAP specs; Dashboard queue health) |
+| 7 | **Work register** | [Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) | Live item status and FIFO order; specifications remain in ROADMAP.md |
 
 ### Other References
 
@@ -270,8 +278,8 @@ Every session starts with awareness of these 7 documents. They are the single so
 
 When a sprint **completes**:
 
-1. **sprint-queue.xlsx** — Mark the sprint complete in the Catalog tab, clear its active `Seq`, and update queue depth.
-2. **sprint-queue.xlsx** — Renumber the remaining queued rows so the next dispatch is `Seq = 1`; keep the Dashboard accurate.
+1. **monday.com work register** — Record completion, date and evidence through the provider/connector flow, then refresh the snapshot.
+2. **monday.com work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
 3. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
 4. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
 5. **ROADMAP.md** — Update Execution Order diagram.
@@ -283,7 +291,7 @@ When a sprint **completes**:
 | Content | File | Rule |
 |---------|------|------|
 | Forward-looking sprint specs (full CLI Evergreen) | `ROADMAP.md` | Only upcoming work. Archive on completion. |
-| Sprint dispatch queue (summary pointers) | `docs/governance/sprint-queue.xlsx` | Catalog FIFO table → ROADMAP for full spec; Dashboard shows health. ≥3 queued entries. |
+| Sprint dispatch queue (summary pointers) | [Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) | Sprint Code + Seq + Status → ROADMAP spec; at least 3 queued entries |
 | Completed sprint specs | `docs/planning/.Archive/ROADMAP_legacy.md` | Append-only. Reference, don't modify. |
 | Completed Cowork plans/specs | `docs/planning/{plans,specs}/.Archive/` | Move on completion. |
 | Completed governance sprint files | `docs/planning/.Archive/` | Move on completion. |
@@ -312,7 +320,7 @@ When a sprint **completes**:
 2. Read `docs/governance/LESSONS_LEARNED.md` (if session may change codebase)
 3. Read `ROADMAP.md` (full active sprint specs)
 4. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
-5. Read `docs/governance/sprint-queue.xlsx` (Catalog FIFO dispatch pointers and Dashboard queue health)
+5. Read the registered monday.com provider; refresh its connector snapshot and check timestamp, Seq, Status, prerequisites and spec references.
 
 ### Bug Report Triage Workflow
 
@@ -321,7 +329,7 @@ When `docs/governance/bug-reports/` contains unprocessed `.json` + `.png` files:
 1. **Read** all JSON reports and view all screenshots.
 2. **Group** reports by root cause or feature area — deduplicate related reports.
 3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
-4. **Group into hotfix sprints** — batch related bugs into HOTFIX-NN entries in ROADMAP.md. Add matching rows to `docs/governance/sprint-queue.xlsx`.
+4. **Group into hotfix sprints** — write HOTFIX-NN specifications in ROADMAP.md and register the matching monday.com items through create-item mutation-plan/confirm.
 5. **Archive** processed reports: move all `.json` + `.png` files to `docs/governance/bug-reports/.Archive/`.
 6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
 
@@ -342,7 +350,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN depth 6, 2 open bugs)
+## Current System State (v1.75.1 — restart audit 2026-09-23)
 
 ### Codebase (branch: `main`)
 
@@ -354,13 +362,13 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** GREEN depth 6 (DIAG-1 + INTENT-CURSOR-1 done; 3 full specs queued: PAUSE-RESUME-UNIFY-1 Seq1, A5-RATE-RESEED-1 Seq2, APPLYRATECHANGE-COLLAPSE-1 Seq3; 1 gated: SUBSCRIBER-CURSOR-1 Seq4; 2 stubs: UX-POLISH-1 Seq5, HYG-XLSX-DASHBOARD-RESTORE Seq6). Next: NARRATE-PAUSE-RESUME-UNIFY-1 — cold-start resume seed must prefer heardFloor/resumeTarget over stale anchor (completes A4 fix). All narration unification sprints are shared-core and must run sequentially.
+- **Queue:** monday.com board 18432450217: READER-MODE-SEPARATION-2 is Seq 1 (Queued, Full Spec). HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE, SUBSCRIBER-CURSOR, and UX-POLISH follow at Seq 2-5, all Blocked pending mode separation and re-specification. SUBSCRIBER also retains its probe-verdict gate. KOKORO-EXPORT remains deferred; XLSX dashboard restoration is superseded. The head specification passes U1–U8; clean execution checkout, baseline tests/build and live gates are still required.
 - **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
-- **Most recent sprint:** NARRATE-INTENT-CURSOR-1 — resume-anchor consume lifecycle (PARTIAL: A1 PASS, A4 FAIL 0-of-3 — reactive not preventive; PAUSE-RESUME-UNIFY-1 completes). Prior: NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30), THEME-SYNC-1 (2026-05-29).
-- 3,044 tests across 213 test files
+- **Most recent implementation:** NARRATE-A5-RATE-RESEED-1 (c6bbf54, merged 145c385 on 2026-06-01). Historical position QA passed; the 1.4x overlap residual remains with COLLAPSE-1. Diagnostic 07439ee and pause/resume db2d1bc are merged. Local HEAD cd384b7 (2026-07-03) is the July planning-review merge; no later implementation commits were found.
+- Historical diagnostic close-out reports 3,096 passing / 133 skipped tests. Tests have not been rerun during this documentation-only restart audit.
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). Quality gate: `npm run test:quality` runs in CI (`quality-gate` job, ubuntu-only, paths-filtered for TTS surfaces)
-- Governance tooling: `scripts/recalc.py` refreshes xlsx formula caches after openpyxl edits (`python scripts/recalc.py [--dry-run] <path>`)
+- Governance tooling: Virtuoso connector-backed register, timestamped snapshots, and durable mutation recovery. The XLSX and scripts/recalc.py are historical tools; the live queue no longer depends on Excel.
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 
 ### Tech Stack

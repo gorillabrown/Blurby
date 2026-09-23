@@ -1,0 +1,46 @@
+[
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "fields": {
+      "written_status": "Stub"
+    },
+    "expectedRevision": "2026-09-23T19:04:57Z",
+    "idempotencyKey": "set-status:NARRATE-HEARD-CURSOR-1:[('written_status', 'Stub')]",
+    "recoveryId": "20260923T190656Z-external-set-status-NARRATE-HEARD-CURSOR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "fields": {
+      "written_status": "Stub"
+    },
+    "expectedRevision": "2026-09-23T19:04:57Z",
+    "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('written_status', 'Stub')]",
+    "recoveryId": "20260923T190656Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "fields": {
+      "written_status": "Stub"
+    },
+    "expectedRevision": "2026-09-23T19:04:57Z",
+    "idempotencyKey": "set-status:NARRATE-SUBSCRIBER-CURSOR-1:[('written_status', 'Stub')]",
+    "recoveryId": "20260923T190656Z-external-set-status-NARRATE-SUBSCRIBER-CURSOR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "UX-POLISH-1",
+    "fields": {
+      "written_status": "Stub"
+    },
+    "expectedRevision": "2026-09-23T19:04:57Z",
+    "idempotencyKey": "set-status:UX-POLISH-1:[('written_status', 'Stub')]",
+    "recoveryId": "20260923T190656Z-external-set-status-UX-POLISH-1"
+  }
+]

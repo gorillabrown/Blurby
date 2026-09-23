@@ -1,0 +1,68 @@
+[
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-MODE-SEPARATION-2",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-MODE-SEPARATION-2",
+    "actualRevision": "2026-09-23T19:04:56Z",
+    "recoveryId": "20260923T190438Z-external-create-item-READER-MODE-SEPARATION-2",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:05:52Z",
+      "ownerDirectedModeIsolation": true
+    },
+    "providerItemId": "13119306772",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-HEARD-CURSOR-1:[('notes', '2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation.\\n\\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.'), ('prerequisites', ['READER-MODE-SEPARATION-2', 'NARRATE-CURSOR-TRACKING-DIAG-1', 'NARRATE-PAUSE-RESUME-UNIFY-1']), ('sequence', 2), ('status', 'Blocked')]",
+    "actualRevision": "2026-09-23T19:04:57Z",
+    "recoveryId": "20260923T190438Z-external-set-status-NARRATE-HEARD-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:05:52Z",
+      "ownerDirectedModeIsolation": true
+    },
+    "providerItemId": "13118863178"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('notes', 'Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers).\\n\\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.'), ('prerequisites', ['READER-MODE-SEPARATION-2', 'NARRATE-PAUSE-RESUME-UNIFY-1', 'NARRATE-A5-RATE-RESEED-1']), ('sequence', 3), ('status', 'Blocked')]",
+    "actualRevision": "2026-09-23T19:04:57Z",
+    "recoveryId": "20260923T190438Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:05:52Z",
+      "ownerDirectedModeIsolation": true
+    },
+    "providerItemId": "13118840646"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "idempotencyKey": "set-status:NARRATE-SUBSCRIBER-CURSOR-1:[('notes', 'GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1.\\n\\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.'), ('prerequisites', ['READER-MODE-SEPARATION-2', 'NARRATE-HEARD-CURSOR-1', 'NARRATE-APPLYRATECHANGE-COLLAPSE-1', 'NARRATE-CURSOR-TRACKING-DIAG-1']), ('sequence', 4), ('status', 'Blocked')]",
+    "actualRevision": "2026-09-23T19:04:57Z",
+    "recoveryId": "20260923T190438Z-external-set-status-NARRATE-SUBSCRIBER-CURSOR-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:05:52Z",
+      "ownerDirectedModeIsolation": true
+    },
+    "providerItemId": "13118808496"
+  },
+  {
+    "succeeded": true,
+    "operation": "set-status",
+    "itemId": "UX-POLISH-1",
+    "idempotencyKey": "set-status:UX-POLISH-1:[('notes', 'Deferred until reader-mode runtime controls stop churning.\\n\\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.'), ('prerequisites', ['READER-MODE-SEPARATION-2']), ('sequence', 5), ('status', 'Blocked')]",
+    "actualRevision": "2026-09-23T19:04:57Z",
+    "recoveryId": "20260923T190438Z-external-set-status-UX-POLISH-1",
+    "detail": {
+      "verifiedAt": "2026-09-23T19:05:52Z",
+      "ownerDirectedModeIsolation": true
+    },
+    "providerItemId": "13118847895"
+  }
+]

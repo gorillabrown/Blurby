@@ -1,0 +1,230 @@
+[
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "SK-HYG-2",
+    "fields": {
+      "status": "Completed",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "",
+      "lane": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "description": "Directory reorganization (historical reconciliation)",
+      "id": "SK-HYG-2",
+      "title": "Directory reorganization (historical reconciliation)",
+      "completed": "2026-05-16",
+      "evidence": "docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry and close-out Outcome PASS; not new delivery."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:SK-HYG-2",
+    "recoveryId": "20260923T184520Z-external-create-item-SK-HYG-2",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:38:41Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "status": "Completed",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "long_text_mm7fv3sg": "Directory reorganization (historical reconciliation)",
+      "text_mm7f7e7n": "SK-HYG-2",
+      "name": "Directory reorganization (historical reconciliation)",
+      "date_mm7fw9mx": "2026-05-16",
+      "long_text_mm7fyyfy": "docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md",
+      "long_text_mm7fncbd": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry and close-out Outcome PASS; not new delivery."
+    },
+    "defaultsApplied": {
+      "written_status": "Stub"
+    },
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'SK-HYG-2' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "FLOW-ZONE-AUTO",
+    "fields": {
+      "status": "Completed",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "",
+      "lane": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "description": "Descending auto-advancing reading zone",
+      "id": "FLOW-ZONE-AUTO",
+      "title": "Descending auto-advancing reading zone",
+      "completed": "2026-05-19",
+      "evidence": "git:abbca5c; git:5c46aee",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry. Merge abbca5c ancestry verified against cd384b78; 5c46aee records the close-out and LL-119. No separate CloseOut file is asserted."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:FLOW-ZONE-AUTO",
+    "recoveryId": "20260923T184520Z-external-create-item-FLOW-ZONE-AUTO",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:38:41Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "status": "Completed",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "long_text_mm7fv3sg": "Descending auto-advancing reading zone",
+      "text_mm7f7e7n": "FLOW-ZONE-AUTO",
+      "name": "Descending auto-advancing reading zone",
+      "date_mm7fw9mx": "2026-05-19",
+      "long_text_mm7fyyfy": "git:abbca5c; git:5c46aee",
+      "long_text_mm7fncbd": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry. Merge abbca5c ancestry verified against cd384b78; 5c46aee records the close-out and LL-119. No separate CloseOut file is asserted."
+    },
+    "defaultsApplied": {
+      "written_status": "Stub"
+    },
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'FLOW-ZONE-AUTO' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+    "fields": {
+      "status": "Completed",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "",
+      "lane": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "description": "Reader mode isolation \u2014 Phase 0 stabilization",
+      "id": "READER-MODE-ISOLATION-1-PHASE-0",
+      "title": "Reader mode isolation \u2014 Phase 0 stabilization",
+      "completed": "2026-05-21",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Canonical Sprint Code from close-out frontmatter; roadmap display alias was READER-MODE-ISOLATION-1 Phase 0. Commit 563072e verified on HEAD. Close-out preserves unrelated broad-suite failures; not a claim of current test health."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-MODE-ISOLATION-1-PHASE-0",
+    "recoveryId": "20260923T184520Z-external-create-item-READER-MODE-ISOLATION-1-PHASE-0",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:38:41Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "status": "Completed",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "long_text_mm7fv3sg": "Reader mode isolation \u2014 Phase 0 stabilization",
+      "text_mm7f7e7n": "READER-MODE-ISOLATION-1-PHASE-0",
+      "name": "Reader mode isolation \u2014 Phase 0 stabilization",
+      "date_mm7fw9mx": "2026-05-21",
+      "long_text_mm7fyyfy": "docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md",
+      "long_text_mm7fncbd": "Owner approved historical register reconciliation on 2026-09-23. Canonical Sprint Code from close-out frontmatter; roadmap display alias was READER-MODE-ISOLATION-1 Phase 0. Commit 563072e verified on HEAD. Close-out preserves unrelated broad-suite failures; not a claim of current test health."
+    },
+    "defaultsApplied": {
+      "written_status": "Stub"
+    },
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'READER-MODE-ISOLATION-1-PHASE-0' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "GOVERNANCE-SWEEP",
+    "fields": {
+      "status": "Completed",
+      "written_status": "Stub",
+      "prerequisites": [],
+      "effort": "",
+      "lane": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "description": "Governance document and queue hygiene",
+      "id": "GOVERNANCE-SWEEP",
+      "title": "Governance document and queue hygiene",
+      "completed": "2026-05-22",
+      "evidence": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md; git:dbc3a63",
+      "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry; BASELINE-SYNC close-out records dbc3a63. Historical administrative work, not new delivery."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:GOVERNANCE-SWEEP",
+    "recoveryId": "20260923T184520Z-external-create-item-GOVERNANCE-SWEEP",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-23T18:38:41Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "status": "Completed",
+      "color_mm7fspz9": "Stub",
+      "long_text_mm7fgw3w": "",
+      "text_mm7ftzsz": "",
+      "text_mm7fhjb6": "",
+      "text_mm7ftkmm": "",
+      "long_text_mm7f66fk": "",
+      "text_mm7fs69e": "",
+      "date_mm7f6dw": "",
+      "long_text_mm7fv3sg": "Governance document and queue hygiene",
+      "text_mm7f7e7n": "GOVERNANCE-SWEEP",
+      "name": "Governance document and queue hygiene",
+      "date_mm7fw9mx": "2026-05-22",
+      "long_text_mm7fyyfy": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md; git:dbc3a63",
+      "long_text_mm7fncbd": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry; BASELINE-SYNC close-out records dbc3a63. Historical administrative work, not new delivery."
+    },
+    "defaultsApplied": {
+      "written_status": "Stub"
+    },
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'GOVERNANCE-SWEEP' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  }
+]

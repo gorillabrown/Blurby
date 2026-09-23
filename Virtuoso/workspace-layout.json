@@ -1,0 +1,323 @@
+{
+  "layout": "plugin-only",
+  "documentationRoot": "docs",
+  "_note": "Repointed 2026-07-02 (via /virtuoso:roadmap-review) at Blurby-native governance docs. Virtuoso skills operate on the live root ROADMAP.md + docs/governance/ system, not the Project Documentation/ scaffold. The Project Documentation/ and Virtuoso/{Roadmap.md,sprint-queue.xlsx,SpecRetro.Lessons_Learned.md,WORKFLOW_REFERENCE.md} files are unused scaffolding retained per no-wipe policy.",
+  "schemaVersion": 2,
+  "pluginCompatibility": ">=1.4.0 <2.0.0",
+  "adopted": false,
+  "roles": {
+    "governance": {
+      "path": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Governance documents (directory)"
+    },
+    "operational": {
+      "path": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Operational documents (directory)"
+    },
+    "temp": {
+      "path": "docs/planning",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Temp (directory)"
+    },
+    "outsideAudits": {
+      "path": "docs/studies/audit",
+      "provider": "directory",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "owner": "3rd-party-audit",
+      "allowedWriters": [
+        "3rd-party-audit"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Outside audits (directory)"
+    },
+    "reference": {
+      "path": "docs/governance",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "allowedWriters": [],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Reference (directory)"
+    },
+    "roadmap": {
+      "path": "ROADMAP.md",
+      "provider": "markdown",
+      "authority": "live",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-pointer",
+        "mid-dispatch-decision",
+        "pointer-closeout"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Roadmap / specification store"
+    },
+    "lessons": {
+      "path": "docs/governance/LESSONS_LEARNED.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "append-only",
+      "owner": "pointer-closeout",
+      "allowedWriters": [
+        "pointer-closeout",
+        "roadmap-review",
+        "mid-dispatch-decision"
+      ],
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Lessons / retrospective"
+    },
+    "workflowReference": {
+      "path": "docs/governance/TECHNICAL_REFERENCE.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "validation": "markdown",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Workflow reference"
+    },
+    "closeOuts": {
+      "path": "docs/governance/close-outs",
+      "provider": "directory",
+      "authority": "evidence",
+      "mutability": "append-only",
+      "owner": "pointer-closeout",
+      "allowedWriters": [
+        "pointer-closeout"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Close-outs (directory)"
+    },
+    "issues": {
+      "path": "docs/governance/bug-reports",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "mid-dispatch-decision",
+      "allowedWriters": [
+        "mid-dispatch-decision",
+        "next-pointer",
+        "pointer-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Issues (directory)"
+    },
+    "roadmapReviews": {
+      "path": "docs/planning/roadmap-reviews",
+      "provider": "directory",
+      "authority": "report",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "roadmap-status"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "generated",
+      "label": "Roadmap reviews"
+    },
+    "workRegister": {
+      "external": "monday:board/18432450217",
+      "provider": "connector",
+      "authority": "live",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-pointer",
+        "mid-dispatch-decision",
+        "pointer-closeout"
+      ],
+      "validation": "external",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Blurby monday.com live work register"
+    },
+    "terminalLedger": {
+      "path": "docs/governance/terminal-ledger.jsonl",
+      "provider": "jsonl",
+      "authority": "terminal",
+      "mutability": "append-only",
+      "owner": "pointer-closeout",
+      "allowedWriters": [
+        "pointer-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Verified completion ledger"
+    },
+    "x-legacyWorkRegister": {
+      "path": "docs/governance/sprint-queue.xlsx",
+      "provider": "xlsx",
+      "authority": "evidence",
+      "mutability": "read-only",
+      "allowedWriters": [],
+      "validation": "xlsx",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Retired XLSX migration source"
+    },
+    "snapshot": {
+      "path": "Virtuoso/work-register.snapshot.json",
+      "provider": "snapshot",
+      "authority": "mirror",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "next-pointer",
+        "mid-dispatch-decision",
+        "pointer-closeout"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "generated",
+      "generatedFrom": "workRegister",
+      "label": "Timestamped monday.com connector snapshot"
+    },
+    "x-migrationSource": {
+      "path": "docs/planning/roadmap-reviews/2026-09-23-migration-source.json",
+      "provider": "json",
+      "authority": "evidence",
+      "mutability": "read-only",
+      "validation": "exists",
+      "classification": "historical",
+      "origin": "generated",
+      "label": "Preserved XLSX provider snapshot"
+    },
+    "x-agentInstructions": {
+      "path": "CLAUDE.md",
+      "provider": "markdown",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Project agent instructions"
+    }
+  },
+  "policy": {
+    "terminalLedger": {
+      "format": "jsonl",
+      "correctionWriters": [
+        "pointer-closeout",
+        "roadmap-review"
+      ]
+    },
+    "workRegister": {
+      "snapshot": "snapshot",
+      "fieldMappings": {
+        "title": "name",
+        "status": "status",
+        "id": "text_mm7f7e7n",
+        "sequence": "numeric_mm7fsex9",
+        "written_status": "color_mm7fspz9",
+        "prerequisites": "long_text_mm7fgw3w",
+        "effort": "text_mm7ftzsz",
+        "lane": "text_mm7fhjb6",
+        "group": "text_mm7ftkmm",
+        "spec_link": "long_text_mm7f66fk",
+        "branch": "text_mm7fs69e",
+        "started": "date_mm7f6dw",
+        "completed": "date_mm7fw9mx",
+        "evidence": "long_text_mm7fyyfy",
+        "description": "long_text_mm7fv3sg",
+        "notes": "long_text_mm7fncbd"
+      },
+      "statusMappings": {
+        "queued": [
+          "Queued"
+        ],
+        "in-flight": [
+          "In Flight"
+        ],
+        "blocked": [
+          "Blocked"
+        ],
+        "completed": [
+          "Completed",
+          "Complete"
+        ],
+        "dissolved": [
+          "Dissolved"
+        ],
+        "superseded": [
+          "Superseded"
+        ],
+        "written": {
+          "full-spec": [
+            "Full Spec"
+          ],
+          "stub": [
+            "Stub"
+          ]
+        }
+      }
+    },
+    "roadmap": {
+      "lanes": [
+        "UX polish",
+        "TTS / Narration Engine",
+        "Reader Engine",
+        "Chrome Extension",
+        "Library & Content",
+        "Platform & Maintenance"
+      ]
+    }
+  },
+  "x-legacy-v1": {
+    "paths": {
+      "scripts": "scripts"
+    }
+  },
+  "x-monday": {
+    "boardId": "18432450217",
+    "boardUrl": "https://estrattbrown.monday.com/boards/18432450217",
+    "itemIdentityColumn": "text_mm7f7e7n",
+    "placeholderPolicy": "Rows without Sprint Code are excluded from the work register.",
+    "migrationDate": "2026-09-23",
+    "legacyIdMap": {
+      "LEGACY-NARR-MEDIA-1-DISSOLVED": "NARR-MEDIA-1 (legacy dissolved variant)"
+    }
+  }
+}

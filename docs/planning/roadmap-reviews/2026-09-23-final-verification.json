@@ -1,0 +1,64 @@
+{
+  "verifiedAt": "2026-09-23T19:35:43.569177+00:00",
+  "sourceCommit": "cd384b78cd5325e96429fe867c8b080ce1b39bb8",
+  "registerProvenance": {
+    "provider": "connector+snapshot",
+    "source": "monday:board/18432450217",
+    "takenAt": "2026-09-23T19:33:07Z",
+    "fields": [
+      "title",
+      "status",
+      "id",
+      "sequence",
+      "written_status",
+      "prerequisites",
+      "effort",
+      "lane",
+      "group",
+      "spec_link",
+      "branch",
+      "started",
+      "completed",
+      "evidence",
+      "description",
+      "notes"
+    ],
+    "stale": false
+  },
+  "registerRecords": 57,
+  "sequenced": 5,
+  "specificationReady": 1,
+  "bufferTarget": 5,
+  "blockedStubs": 4,
+  "allPrerequisitesResolve": true,
+  "sourceAndExistingTestHashesUnchanged": 84,
+  "sourceImplementationChanged": false,
+  "applicationTestsRun": false,
+  "applicationBuildRun": false,
+  "liveQaRun": false,
+  "lessonsOriginalBytesRetained": true,
+  "unrelatedRetrospectiveEndHash": "59d297067738f6f38b6a4de9fc821a39f29b0d7b508e730d162f824bc67b68e3",
+  "legacyWorkbookUnchangedSha256": "67544fae2259b2e762a3aebe4f04ff5b113733127994b55a432308e0569c7990",
+  "localLinksVerified": 39,
+  "roadmapLineCount": 380,
+  "cockpitDrift": 0,
+  "providerRecovery": {
+    "outstanding": []
+  },
+  "laneCounts": {
+    "UX polish": 2,
+    "TTS / Narration Engine": 36,
+    "Reader Engine": 10,
+    "Chrome Extension": 1,
+    "Library & Content": 0,
+    "Platform & Maintenance": 8
+  },
+  "diffCheckExitCode": 0,
+  "readbackNote": "Head: 13 fields. Historical normalization: 28 fields across 14 terminal rows; original wording retained; no status or sequence change. Blank long-text objects and leading whitespace normalization documented in final connector receipt.",
+  "finalPreflight": {
+    "status": "ready",
+    "mode": "check",
+    "writes": 0,
+    "findings": []
+  }
+}
