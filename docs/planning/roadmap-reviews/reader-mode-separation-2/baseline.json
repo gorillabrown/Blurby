@@ -1,0 +1,99 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "gate": "G0",
+  "admission": "BLOCKED",
+  "recordedAtUtc": "2026-09-23T21:13:04Z",
+  "worktree": "C:/Users/estra/Projects/Blurby/.worktrees/reader-mode-separation-2",
+  "branch": "eb/reader-mode-separation-2",
+  "head": "1e5485c66e547392e7752240df71700267e8ede7",
+  "sourceBaseline": "cd384b78cd5325e96429fe867c8b080ce1b39bb8",
+  "sourceTree": "0c7900751cce7ce9adb09132da18c3ff73de9b9b",
+  "testsTree": "5550e9d211c9abe0d8a8edfac861fc4cd2fa1777",
+  "packageVersion": "1.75.1",
+  "nodeVersion": "v24.14.0",
+  "npmVersion": "11.9.0",
+  "packageLockSha256": "76e4a4362442497cdff8137187cd6852fcccf57ea388011feca16c527f05a3e0",
+  "dependencyInstall": {
+    "command": "npm ci --offline",
+    "exitCode": 0,
+    "installedPackages": 743,
+    "postinstall": "patch-package and patch-onnxruntime succeeded"
+  },
+  "automatedChecks": {
+    "typecheck": {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    "test": {
+      "command": "npm test",
+      "exitCode": 0,
+      "testFilesPassed": 210,
+      "testFilesSkipped": 1,
+      "testsPassed": 3058,
+      "testsSkipped": 133,
+      "failedTestNames": [],
+      "log": "C:/Users/estra/AppData/Local/Temp/blurby-reader-mode-separation-2-g0-test.log"
+    },
+    "build": {
+      "command": "npm run build",
+      "exitCode": 0
+    }
+  },
+  "buildArtifactsSha256": {
+    "dist/assets/App-BTmErlj_.js": "7ce1254c81b2f5e9d6c1f862869cd31284eda41d0146663ed5f70ba8b6de03e5",
+    "dist/assets/index-B9TsfAM6.css": "c9ecd1073370c888330ffaeb43096e3fff77b444cbc8584b7d572ee9e603e884",
+    "dist/assets/index-CrV8QIYG.js": "8a8a9f11a19783a06b7ada4909df598888dfbf818f78450cf211defdc666a914"
+  },
+  "candidateDocuments": {
+    "epub": {
+      "path": "resources/sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+      "liveLibraryId": "sample-meditations or duplicate imported copy; both verified byte-identical by SHA-256"
+    },
+    "nonEpub": "NOT SELECTED"
+  },
+  "liveObservation": {
+    "status": "PARTIAL — G0 BLOCKED",
+    "screen": "Vite was started before Electron. Live 1000x720 Blurby Electron UI opened. Page static two-column EPUB navigation observed; Focus RSVP word advanced while playing and stopped on pause; Flow highlighted text and followed/browsed while playing; Narrate selected/playing state, visible cursor and chapter movement observed. Screenshots captured for Page, Focus and Flow. UI control was intermittent due concurrent input/window resizing; no complete canonical-index matrix. The owner later reported that Flow blinked and did not stabilize in the live session. A read-only capture showed Flow selected with content rendered but did not establish the blink mechanism. The dev Electron log showed ENOENT renames for library.json.tmp and sync-queue.json.tmp; no causal link to Flow is proven.",
+    "heardAudio": "LIVE OBSERVATION ROUTE VERIFIED: the owner confirmed hearing Narrate in this session and reported the visible cursor ahead of spoken narration, with reload jumping speech forward to catch it. No simultaneous exact-word/timing pair was supplied. WASAPI Realtek USB2.0 Headphones loopback recorded RMS 0.0/peak 0.0 for 5 seconds paused and RMS 0.0721/peak 0.9475 for 10 seconds during Narrate playing at 48 kHz. This is output evidence but does not itself identify spoken words. The earlier 16-kHz capture was silent and invalid.",
+    "fourModeMatrix": "PARTIAL on EPUB; non-EPUB and exact canonical indices not captured",
+    "epubObservedModes": [
+      "Page",
+      "Focus",
+      "Flow",
+      "Narrate"
+    ],
+    "viewport": "1000x720 restored Electron window; window intermittently maximized to 1920x1022",
+    "engineVoiceDeviceRate": "Kokoro; voice not yet confirmed; WASAPI Headphones (Realtek USB2.0 Audio); Narrate UI 1.2x",
+    "screenEvidence": [
+      "baseline-page-epub.jpg",
+      "baseline-focus-active-epub.jpg",
+      "baseline-flow-active-epub.jpg"
+    ],
+    "audioEvidence": [
+      "baseline-paused-loopback.wav",
+      "baseline-narrate-loopback-48k.wav",
+      "baseline-narrate-reference-16k.wav"
+    ]
+  },
+  "knownBaselineDefects": [
+    "Live owner observation in this session: Narrate cursor runs ahead of heard speech; reload jumps spoken narration ahead to catch the cursor. Exact word/timing offsets not measured.",
+    "Historical 1.4x rate-change audio overlap; not retested in this session",
+    "Page Space no-op remains specified baseline behavior"
+  ],
+  "workspaceEffects": {
+    "gitIndex": "empty",
+    "testGeneratedTrackedFile": "tests/perf-baseline-results.json changed by npm test; unstaged and excluded from implementation scope",
+    "productionExtractionStarted": false,
+    "mondayStatusChanged": false,
+    "userDataWriteErrors": "Dev Electron logged ENOENT rename failures for library.json.tmp and sync-queue.json.tmp. Dev Electron and Vite were stopped. Both JSON files existed and parsed successfully afterward; no .tmp file remained at inspection. No file repair or deletion performed."
+  },
+  "nextAction": "Wave A G0 blocked: classify the live Flow blink and collect a stable independent non-EPUB/exact-position four-mode baseline in an isolated app-data session. Screen and human heard-audio routes are established. Wave A reached its 40-action ceiling; re-slice before resuming. Amend scope for the owner-requested speed slider (Page manual, Focus/Flow 250 WPM at 1.00x with 100–1200 WPM bounds and 0.05x steps, Narrate 0.8–2.0x in 0.05x steps). Cursor sync repair remains follow-on work.",
+  "ownerScopeChangeRequested": {
+    "speedControl": "Click displayed speed to open slider; Page has no speed",
+    "focusFlow": "1.00x = fixed 250 WPM; retain 100–1200 WPM limits; 0.05x increments",
+    "narrate": "0.80x–2.00x; 0.05x increments",
+    "syncDefect": "Owner confirmed live Narrate cursor lead/reload jump and directed keeping its repair for follow-on sync work.",
+    "status": "Requires scoped dispatch amendment before production edits"
+  }
+}
