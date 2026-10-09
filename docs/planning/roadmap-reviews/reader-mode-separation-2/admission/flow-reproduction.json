@@ -1,0 +1,348 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "slice": "A2 (Flow reproduction and classification)",
+  "outcome": "PASS",
+  "recordedAtUtc": "2026-10-09T04:53:22.981Z",
+  "runId": "blurby-reader-mode-separation-2-a1-a220261009045010165",
+  "b0": "C:ProjectsBlurby-artifacts\rms2-baseline-build",
+  "runHead": "5f0608b6ef8be190d5a29ef4ddf8f58f8ee3c58c",
+  "parentToolCalls": {
+    "budget": 20,
+    "usedAtRecording": 9,
+    "ledger": [
+      "1 driver run: capture list passed as one string by pwsh -File (harness bug; capture exit 1, no app evidence)",
+      "2 driver fix (split capture list)",
+      "3 driver run: epub:flow + text:flow",
+      "4 analyzer authored (analyze-capture.mjs)",
+      "5 analysis + electron logs",
+      "6 DOM totals + on-screen text",
+      "7 frame-size blink scan + re-import gate search",
+      "8 re-import gate condition",
+      "9 retention + this record"
+    ],
+    "plannedRemaining": [
+      "10 checkpoint commit + push"
+    ]
+  },
+  "window": {
+    "visibility": "{\"visibilityState\":\"visible\",\"hidden\":false,\"hasFocus\":true,\"inner\":[1102,802]}",
+    "note": "Start-Process -WindowStyle Hidden does not hide the BrowserWindow; document visible and focused, so rAF/timers are not background-throttled"
+  },
+  "document": {
+    "id": "g0-public-epub",
+    "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+    "canonicalStart": 0,
+    "source": "resources/sample-meditations.epub"
+  },
+  "sequence": "Page -> paused Flow -> Play -> Pause (capture.mjs scenario=flow)",
+  "observations": {
+    "page": {
+      "phase": "page-paused",
+      "samples": 12,
+      "observedMs": 5244,
+      "selectedModes": [
+        "Page mode"
+      ],
+      "playControl": [
+        "Play"
+      ],
+      "surfaces": [
+        "top-document",
+        "top-document+foliate.renderer.getContents"
+      ],
+      "visibleWords": {
+        "min": 0,
+        "max": 0,
+        "zeroSamples": 12
+      },
+      "domWords": {
+        "min": 0,
+        "max": 0
+      },
+      "activeWordCount": {
+        "min": 0,
+        "max": 0
+      },
+      "activeFirstIndex": {
+        "first": null,
+        "last": null,
+        "changes": 0,
+        "sequence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "firstVisibleIndex": {
+        "first": null,
+        "last": null
+      },
+      "focusText": [],
+      "progressText": [
+        "0%",
+        "0%"
+      ]
+    },
+    "flowPaused": {
+      "phase": "flow-paused",
+      "samples": 11,
+      "observedMs": 5122,
+      "selectedModes": [
+        "Flow mode"
+      ],
+      "playControl": [
+        "Play"
+      ],
+      "surfaces": [
+        "top-document+foliate.renderer.getContents"
+      ],
+      "visibleWords": {
+        "min": 0,
+        "max": 187,
+        "zeroSamples": 1
+      },
+      "domWords": {
+        "min": 0,
+        "max": 187
+      },
+      "activeWordCount": {
+        "min": 0,
+        "max": 0
+      },
+      "activeFirstIndex": {
+        "first": null,
+        "last": null,
+        "changes": 0,
+        "sequence": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "firstVisibleIndex": {
+        "first": null,
+        "last": 0
+      },
+      "focusText": [],
+      "progressText": [
+        "0%",
+        "0%"
+      ]
+    },
+    "flowPlaying": {
+      "phase": "flow-playing",
+      "samples": 18,
+      "observedMs": 8346,
+      "selectedModes": [
+        "Flow mode"
+      ],
+      "playControl": [
+        "Pause"
+      ],
+      "surfaces": [
+        "top-document+foliate.renderer.getContents"
+      ],
+      "visibleWords": {
+        "min": 187,
+        "max": 187,
+        "zeroSamples": 0
+      },
+      "domWords": {
+        "min": 187,
+        "max": 187
+      },
+      "activeWordCount": {
+        "min": 1,
+        "max": 1
+      },
+      "activeFirstIndex": {
+        "first": 0,
+        "last": 34,
+        "changes": 16,
+        "sequence": [
+          0,
+          2,
+          4,
+          6,
+          9,
+          11,
+          13,
+          15,
+          17,
+          19,
+          21,
+          23,
+          25,
+          27,
+          30,
+          32,
+          34,
+          34
+        ]
+      },
+      "firstVisibleIndex": {
+        "first": 0,
+        "last": 0
+      },
+      "focusText": [],
+      "progressText": [
+        "0%",
+        "0%"
+      ]
+    },
+    "flowAfterPause": {
+      "phase": "flow-after-pause",
+      "samples": 12,
+      "observedMs": 5250,
+      "selectedModes": [
+        "Flow mode"
+      ],
+      "playControl": [
+        "Play"
+      ],
+      "surfaces": [
+        "top-document+foliate.renderer.getContents"
+      ],
+      "visibleWords": {
+        "min": 187,
+        "max": 187,
+        "zeroSamples": 0
+      },
+      "domWords": {
+        "min": 187,
+        "max": 187
+      },
+      "activeWordCount": {
+        "min": 1,
+        "max": 1
+      },
+      "activeFirstIndex": {
+        "first": 34,
+        "last": 34,
+        "changes": 0,
+        "sequence": [
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34,
+          34
+        ]
+      },
+      "firstVisibleIndex": {
+        "first": 0,
+        "last": 0
+      },
+      "focusText": [],
+      "progressText": [
+        "0%",
+        "0%"
+      ]
+    }
+  },
+  "exitCriteria": {
+    "eachStateObservedAtLeast5s": true,
+    "pausedRetainsContentAndPosition": true,
+    "activeRetainsSurfaceWhilePositionAdvances": true,
+    "rendererConsoleErrors": 0
+  },
+  "blink": {
+    "domSampling": "500 ms; zero samples with zero visible words in Flow paused-after-first-sample, playing, or after-pause",
+    "screencast": "Play phase 49 frames, 34-36 KB each; paused Flow 30-36 KB; after Pause 35 KB constant. The only small frames (11-15 KB) are the library->reader 'Loading book...' transition before Page renders",
+    "classification": "NOT REPRODUCED on B0 in an isolated profile. The 2026-09-23 report stands as unexplained (conditions then: live profile, Vite dev server instead of a build preview, concurrent desktop input). No repair proposed or admitted."
+  },
+  "positionNote": "After Pause at DOM word 34, persisted library position for g0-public-epub read 0 at capture finalization (settings.readingMode=flow). Recorded as observed baseline persistence timing; no defect claimed.",
+  "nonEpubFinding": {
+    "fixture": "g0-public-text",
+    "observed": "B0 shows 'This document needs to be re-imported to be read in the current version of Blurby. Return to Library' in every phase; zero word spans",
+    "source": "src/components/ReaderContainer.tsx non-EPUB error fallback: 'Non-EPUB error fallback (all docs should be EPUB since EPUB-2B)'",
+    "classification": "Fixture design gap, not a Flow defect: the legacy inline-content record (no filepath/convertedEpubPath) is unreadable on B0. Every readable document renders through foliate; non-EPUB sources are converted to EPUB at import.",
+    "a3Action": "A3's non-EPUB rows use a non-EPUB source imported through the app's own conversion path (convertedEpubPath), seeded by the test-only launcher."
+  },
+  "processErrors": {
+    "shutdownExitCode": -1073740791,
+    "shutdownExitHex": "0xC0000409",
+    "flushBeforeExit": "profile settings.json and sync-queue.json written at close (will-quit ran)",
+    "classification": "OBS-A2-2: abnormal exit status after the quit flush; shutdown-only; not an isolation or write-path error. A1-R exited 0.",
+    "kokoro": "OBS-A1R-1 recurred: two workers (kokoro, kokoro-marathon) each downloaded the model into the fresh profile ('Unable to determine content-length' twice) and both loads failed with system error 13. Likely concurrent-download sharing violation on a fresh profile; matters for A3 Narrate rows."
+  },
+  "liveProfile": {
+    "before": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "after": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "unchanged": true
+  },
+  "leftoverProcesses": [],
+  "analyzer": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/analyze-capture.mjs",
+  "retainedArtifacts": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-manifest.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-main-events.ndjson",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-result.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-electron.out.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-electron.err.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-a2-epub-flow-capture.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-a2-epub-flow-dom.ndjson",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-001-initial.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-002-page-paused-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-013-page-paused-end.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-014-flow-paused-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-024-flow-paused-end.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-025-flow-playing-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-042-flow-playing-end.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-043-flow-after-pause-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-epub-flow-054-flow-after-pause-end.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-a2-text-flow-capture.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a2-20261009045010165-a2-text-flow-dom.ndjson",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-text-flow-002-page-paused-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-text-flow-041-flow-playing-end.png"
+  ],
+  "heardAudio": "NOT APPLICABLE (Flow) / NOT OBSERVED"
+}

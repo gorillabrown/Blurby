@@ -1,0 +1,38 @@
+
+[G0 isolation before main] {"profile":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165","paths":{"userData":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\userData","sessionData":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\sessionData","logs":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\logs","crashDumps":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\crashDumps"},"head":"5f0608b6ef8be190d5a29ef4ddf8f58f8ee3c58c","pin":"1e5485c66e547392e7752240df71700267e8ede7","sourceManifestSha256":"a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291"}
+[G0 ready isolation verified] {"paths":{"userData":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\userData","sessionData":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\sessionData","logs":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\logs","crashDumps":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\crashDumps"},"storagePath":"C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\sessionData"}
+[ws-server] Listening on ws://127.0.0.1:48924/blurby
+[kokoro] Background warm-up failed (will retry on demand): Load model from C:\Users\estra\AppData\Local\Temp\blurby-reader-mode-separation-2-a1-a220261009045010165\userData\models\onnx-community\Kokoro-82M-v1.0-ONNX\onnx\model_q4.onnx failed:system error number 13
+┌─────────────┬────────────┬──────────┬──────────┬────────┬───────────────┬──────────────┐
+│ (index)     │ name       │ language │ gender   │ traits │ targetQuality │ overallGrade │
+├─────────────┼────────────┼──────────┼──────────┼────────┼───────────────┼──────────────┤
+│ af_heart    │ 'Heart'    │ 'en-us'  │ 'Female' │ '❤️'    │ 'A'           │ 'A'          │
+│ af_alloy    │ 'Alloy'    │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C'          │
+│ af_aoede    │ 'Aoede'    │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C+'         │
+│ af_bella    │ 'Bella'    │ 'en-us'  │ 'Female' │ '🔥'   │ 'A'           │ 'A-'         │
+│ af_jessica  │ 'Jessica'  │ 'en-us'  │ 'Female' │        │ 'C'           │ 'D'          │
+│ af_kore     │ 'Kore'     │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C+'         │
+│ af_nicole   │ 'Nicole'   │ 'en-us'  │ 'Female' │ '🎧'   │ 'B'           │ 'B-'         │
+│ af_nova     │ 'Nova'     │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C'          │
+│ af_river    │ 'River'    │ 'en-us'  │ 'Female' │        │ 'C'           │ 'D'          │
+│ af_sarah    │ 'Sarah'    │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C+'         │
+│ af_sky      │ 'Sky'      │ 'en-us'  │ 'Female' │        │ 'B'           │ 'C-'         │
+│ am_adam     │ 'Adam'     │ 'en-us'  │ 'Male'   │        │ 'D'           │ 'F+'         │
+│ am_echo     │ 'Echo'     │ 'en-us'  │ 'Male'   │        │ 'C'           │ 'D'          │
+│ am_eric     │ 'Eric'     │ 'en-us'  │ 'Male'   │        │ 'C'           │ 'D'          │
+│ am_fenrir   │ 'Fenrir'   │ 'en-us'  │ 'Male'   │        │ 'B'           │ 'C+'         │
+│ am_liam     │ 'Liam'     │ 'en-us'  │ 'Male'   │        │ 'C'           │ 'D'          │
+│ am_michael  │ 'Michael'  │ 'en-us'  │ 'Male'   │        │ 'B'           │ 'C+'         │
+│ am_onyx     │ 'Onyx'     │ 'en-us'  │ 'Male'   │        │ 'C'           │ 'D'          │
+│ am_puck     │ 'Puck'     │ 'en-us'  │ 'Male'   │        │ 'B'           │ 'C+'         │
+│ am_santa    │ 'Santa'    │ 'en-us'  │ 'Male'   │        │ 'C'           │ 'D-'         │
+│ bf_emma     │ 'Emma'     │ 'en-gb'  │ 'Female' │ '🚺'   │ 'B'           │ 'B-'         │
+│ bf_isabella │ 'Isabella' │ 'en-gb'  │ 'Female' │        │ 'B'           │ 'C'          │
+│ bm_george   │ 'George'   │ 'en-gb'  │ 'Male'   │        │ 'B'           │ 'C'          │
+│ bm_lewis    │ 'Lewis'    │ 'en-gb'  │ 'Male'   │        │ 'C'           │ 'D+'         │
+│ bf_alice    │ 'Alice'    │ 'en-gb'  │ 'Female' │ '🚺'   │ 'C'           │ 'D'          │
+│ bf_lily     │ 'Lily'     │ 'en-gb'  │ 'Female' │ '🚺'   │ 'C'           │ 'D'          │
+│ bm_daniel   │ 'Daniel'   │ 'en-gb'  │ 'Male'   │ '🚹'   │ 'C'           │ 'D'          │
+│ bm_fable    │ 'Fable'    │ 'en-gb'  │ 'Male'   │ '🚹'   │ 'B'           │ 'C'          │
+└─────────────┴────────────┴──────────┴──────────┴────────┴───────────────┴──────────────┘
+[ws-server] Stopped
