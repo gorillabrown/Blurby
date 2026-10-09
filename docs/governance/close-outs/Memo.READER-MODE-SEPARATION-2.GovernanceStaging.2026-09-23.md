@@ -11,6 +11,7 @@ This memo records governance change intent for later application by the register
 | 1 | 2026-09-23 | Wave A reached its 40-action admission ceiling with incomplete G0 evidence | Type 1b — Advance (Planner-Originated) | Resolved decision: owner approved prospective A1/A2/A3 re-slicing with 20/20/35-action limits; G0 execution remains incomplete and blocked |
 | 2 | 2026-09-23 | Owner requested speed dialogs beyond the original P1 scope | Type 3 — Pivot Advance | Resolved decision: admit the specified speed dialogs after structural parity, with separate verification; cursor synchronization remains follow-on work |
 | 3 | 2026-10-09 | Wave A census and G4 fixtures contradicted the spec in seven bounded places (Q-A..Q-G) before the first Wave B edit | Type 1b — Advance (Planner-Originated), Q-A as Type 2 narrowing | Resolved under the owner's standing overnight authorization: rules supplied for dead views, the standalone reader window, runtime code in narration types, shared constants/diagnostics/cache, per-mode ownership, cross-owner G4 comparison, and baseline anomalies; no gate loosened |
+| 4 | 2026-10-09 | A known full-suite flake (Qwen streaming test timer leak) can make the final suite gate exit 1 with zero failed tests | Type 1b — Advance (Planner-Originated), pre-registered decision table | Resolved: the gate stays exit-0; a recurrence triggers one scoped test-hygiene fix to the Qwen test only, never a retry-until-green |
 
 ## Target: ROADMAP.md
 
@@ -100,6 +101,24 @@ Content:
     - if unclassifiable after two attempts, record an issue and route it.
   - Preserved as baseline (G4 fixtures enforce): Flow resume = cold restart from the anchor; a warming Narrate start → the next press resumes; Narrate→Page issues `audio.stop` twice (idempotent stop/destroy may reproduce it).
 **Follow-up items:** Owner may later decide to rewire the standalone reader window (new item, not this epic). Provisional lesson staged below (number assigned at fold-in).
+
+### Fold-in 5 — Mid-Dispatch Amendment (KF-1 decision table for the suite gate)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (KF-1 pre-registered decision table)
+**Pause point:** In the B0 rebuild, 1 of 3 full `npm test` runs exited 1 with 0 failed tests. The cause was a load-dependent unhandled rejection: "Qwen streaming stream … timed out after 500 ms without stream_finished", reason `stream-timeout`, raised in `main/qwen-streaming-engine.js` and attributed to `tests/qwenStreaming.test.js`. The test is clean in isolation (3 of 3).
+**Decision:** Type 1b — pre-registered decision table. G5/D6 still require exit 0.
+**Rationale:** A known flake must never be absorbed by re-running until green (a matching count is not a pass), and it must not silently block the epic.
+**Decision table (applies at every G5/D6 run, after D1 only):**
+- `npm test` exit 0 → that row passes.
+- Exit 1, failed-test set empty, and every unhandled error matches the KF-1 identity above → the row is NOT passed. Apply one scoped test-hygiene fix: add exactly `tests/qwenStreaming.test.js` to `paths.json`, and make that test await or clear its pending stream-timeout before completing. No assertion is removed, no skip is added, and no `main/` file changes. Commit, then re-run the full gate fresh.
+- The fix would require editing `main/qwen-streaming-engine.js` (out of scope; owned by no lane here) → BLOCKER(USER).
+- Any other failure → normal handling (two focused corrections, then an issue).
+**Scope change:** `tests/qwenStreaming.test.js` is admissible only under the second row.
+**Follow-up items:** None.
 
 ## Target: docs/governance/LESSONS_LEARNED.md
 

@@ -1,0 +1,41 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-09T05:55:08.462Z",
+  "identities": {
+    "B0": {
+      "status": "recorded",
+      "what": "rebuilt G0 baseline of 1e5485c66e547392e7752240df71700267e8ede7 (source tree d2392ee39b74e38f8fda5af3f93029f1f0162718)",
+      "archive": "C:ProjectsBlurby-artifacts\rms2-baseline-build",
+      "manifest": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/baseline-build-rebuild.json",
+      "reHashCommand": "node -e (hash every file under the archive and compare with baseline-build-rebuild.json files[]) — the launcher admission/isolated-launch.cjs performs this exact-set check on every launch"
+    },
+    "I": {
+      "status": "recorded",
+      "commit": "92dda255bfad4395600a4371f0406f0f55c92899",
+      "what": "session-1 --no-ff merge of origin/main aafbb1c9 into the run branch"
+    },
+    "structuralCandidate": {
+      "status": "pending",
+      "commit": null,
+      "what": "S: first commit where G1-G6 pass before the speed dialog",
+      "evidence": {}
+    },
+    "candidate": {
+      "status": "pending",
+      "commit": null,
+      "what": "F: final candidate after the speed dialog; D2-D8 run on F",
+      "evidence": {}
+    }
+  },
+  "g0": {
+    "admission": "BLOCKED (owner half pending: BLOCKER B1)",
+    "evidence": [
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/baseline.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/isolation.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/flow-reproduction.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/g0-matrix.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-observations.json"
+    ]
+  }
+}

@@ -99,6 +99,27 @@ F5 done.md present here:              no
   - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
   - **Answer:** _(write "done" here after filling the observations file)_
 
+## Front disposition — every front, with its status and the clause that gates it (S1)
+
+| # | Front | Status | Gate / authority |
+|---|---|---|---|
+| F1 | G0 automated half (A1-R, A2, A3 matrix) | DONE | `isolation.json`, `flow-reproduction.json`, `g0-matrix.json` |
+| F2 | G0 owner half (heard audio + residual live checks) | BLOCKED — B1 | Owner gate (charter Escalation: owner gates; SRL-070) |
+| F3 | `baseline.json` → `admission: PASS` (D1) | BLOCKED — B1 | D1 requires the owner observation and the observer named |
+| F4 | Wave A census, ownership, dependencies | DONE | 63b10115 |
+| F5 | G4 behavior fixtures | DONE | c61bca67 (re-verified 5/5) |
+| F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
+| F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
+| F8 | OBS-A3-2 classification (read-only) | see Decision log #12 | read-only; no write |
+| F9 | Monday Queued → In Flight | BLOCKED — B1 | Charter grant: transition "once D1 passes" |
+| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | BLOCKED — B1 | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
+| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | BLOCKED — B1 | Amendment item 4: start of Wave B; no `src/` before D1 |
+| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | BLOCKED — B1 | Waves serial after G0 (charter Constraints; SRL-089) |
+| F13 | `scripts/check_reader_mode_evidence.mjs` (G6 validator) | BLOCKED — B1 | Wave E deliverable. `scripts/` is a pinned production input of the G0 harness: a new file there makes the launcher refuse ("Untracked production inputs present") while G0 is open |
+| F14 | Speed dialog (→ F) | BLOCKED — B1 | Only after S (amendment 2026-09-23 speed dialog) |
+| F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — B1 | Need F; finalization follows verified.md |
+| F16 | Lessons and governance fold-ins | STAGED | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
+
 ## Scope questions Q-A..Q-G — RESOLVED 2026-10-09 (Decision log #10; staging fold-in 3; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`). Wave B instruction:
 
 ```
@@ -135,6 +156,7 @@ Original questions (for reference):
 | 8 | S1 | A2 PASS on the EPUB; the legacy inline text fixture is a fixture gap, not a Flow defect | B0 renders every readable doc through foliate ("all docs should be EPUB since EPUB-2B"); inline record → re-import notice | Amendment 2026-09-23 A2 criteria |
 | 9 | S1 | A3's non-EPUB rows use a non-EPUB source converted through the app's import path; the launcher seeds the installed Kokoro model into the fresh profile | The only readable non-EPUB route on B0; avoids the fresh-profile concurrent-download race (OBS-A1R-1 recurred in A2) | Grant: test-only harness under `E/` |
 | 10 | S1 | Q-A..Q-G resolved: Type 1b (Q-A Type 2 narrowing) — see the block above | Census and G4 fixtures contradicted the spec; rules enforce isolation/parity intent, loosen no gate, touch nothing outside the existing-site table | Owner standing authorization + /virtuoso:mid-dispatch-decision; staging fold-in 3 |
+| 11 | S1 | KF-1 pre-registered decision table: G5/D6 stay exit-0; recurrence → one scoped hygiene fix to `tests/qwenStreaming.test.js` only (after D1); a `main/` need → BLOCKER(USER) | A flake must not pass by retry nor block silently | Owner standing authorization; staging fold-in 5 |
 
 ## Evidence
 

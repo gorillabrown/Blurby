@@ -1,0 +1,68 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "schemaVersion": 1,
+  "status": "planned — new-side symbols are bound in Wave B; observable outcomes may not weaken",
+  "authority": "ROADMAP.md#reader-mode-separation-2 §Exact test migration and commands; staging fold-in 3 (Q-F)",
+  "authorizedSubstitutions": [
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "page-mode play is a no-op — mode and playback state are unchanged",
+      "old": "expect(harness.observed.readingMode).toBe(\"page\"); expect(harness.narration.startCursorDriven).not.toHaveBeenCalled()",
+      "new": "same values via the router snapshot (mode page, playing false) and the Narrate audio-port start spy not called; no saved-mode shortcut"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting flow from page mode updates the selected mode without auto-playing it",
+      "old": "expect(harness.modeInstance.startMode).not.toHaveBeenCalled()",
+      "new": "Flow runtime start spy not called; mode flow, playing false, persisted lastReadingMode flow retained"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting focus from page mode does not auto-start focus playback",
+      "old": "expect(harness.modeInstance.startMode).not.toHaveBeenCalled()",
+      "new": "Focus runtime start spy not called; mode focus, playing false retained"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting narrate from page mode sets narrate paused without auto-starting TTS",
+      "old": "expect(harness.narration.startCursorDriven).not.toHaveBeenCalled()",
+      "new": "Narrate audio-port start spy not called; selected narrate, playing false retained"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "resumes paused narrate through useNarration.resume instead of cold-starting again",
+      "old": "expect(harness.narration.resume).toHaveBeenCalledWith(); startCursorDriven/stop not called",
+      "new": "identical assertions on the Narrate audio-port spy (resume once; start/stop not called)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "preserves narrate startup options across delayed Foliate word extraction",
+      "old": "startCursorDriven([\"alpha\",\"beta\",\"gamma\"], 2, 180, expect.any(Function)); flowPlaying=false",
+      "new": "same audio arguments on the Narrate audio-port start spy; selected narrate; Flow runtime receives zero start calls"
+    }
+  ],
+  "g4ComparisonRule": {
+    "source": "staging fold-in 3 (Q-F)",
+    "steps": [
+      "recompute cross-owner set: every audio.* effect in a step whose mode before and mode after are both not narrate",
+      "assert stored crossOwner:true flags equal the recomputed set",
+      "drop exactly that set from the baseline",
+      "assert the candidate emits zero effects matching the same rule",
+      "compare the remainder byte-for-byte after timestamp and session-id normalization"
+    ],
+    "droppedEffectCounts": {
+      "page": 6,
+      "focus": 30,
+      "flow": 35,
+      "narrate": 0
+    },
+    "fixtures": [
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/narrate.baseline.json"
+    ],
+    "channelMapping": "see channelMapping in each fixture file (old collaborator -> port channel)"
+  },
+  "otherChangedAssertions": []
+}
