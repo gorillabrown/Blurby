@@ -98,6 +98,19 @@ F5 done.md present here:              no
   - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-checklist.md` (about 20 minutes, headphones). Fill `g0-owner-observations.json` (11 items: H1–H8 heard audio on the EPUB and the converted non-EPUB, V1–V3 visual).
   - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
   - **Answer:** _(write "done" here after filling the observations file)_
+  - **Blocks every open front.** Open fronts, all blocked on B1:
+    - F2 owner half of G0;
+    - F3 `admission: PASS` / D1;
+    - F9 Monday In Flight;
+    - F10 G1/G2/G3 test files;
+    - F11 contract/port types and broker;
+    - F12 Waves B–E (and S);
+    - F13 G6 evidence validator;
+    - F14 speed dialog (F);
+    - F15 D2–D9 verification and finalization F1–F5;
+    - F17 supporting loopback audio capture (charter A6). It is supporting evidence only and cannot substitute for the owner observation (SRL-070), and it is best taken during the owner session.
+  - Fronts F1, F4–F8 and F16 are complete or staged, not open.
+  - No other unblocked work exists: pre-G0 writes are limited to census, evidence, fixtures and harness under `E/`, and all of those are done.
 
 ## Front disposition — every front, with its status and the clause that gates it (S1)
 
@@ -119,6 +132,7 @@ F5 done.md present here:              no
 | F14 | Speed dialog (→ F) | BLOCKED — B1 | Only after S (amendment 2026-09-23 speed dialog) |
 | F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — B1 | Need F; finalization follows verified.md |
 | F16 | Lessons and governance fold-ins | STAGED | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
+| F17 | Supporting loopback audio capture (charter A6) | BLOCKED — B1 | Supporting only; heard audio is an owner gate (SRL-070); take it during the owner session |
 
 ## Scope questions Q-A..Q-G — RESOLVED 2026-10-09 (Decision log #10; staging fold-in 3; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`). Wave B instruction:
 
