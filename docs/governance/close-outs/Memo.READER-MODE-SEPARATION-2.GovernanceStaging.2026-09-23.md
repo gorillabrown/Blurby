@@ -10,6 +10,7 @@ This memo records governance change intent for later application by the register
 |---|---|---|---|---|
 | 1 | 2026-09-23 | Wave A reached its 40-action admission ceiling with incomplete G0 evidence | Type 1b — Advance (Planner-Originated) | Resolved decision: owner approved prospective A1/A2/A3 re-slicing with 20/20/35-action limits; G0 execution remains incomplete and blocked |
 | 2 | 2026-09-23 | Owner requested speed dialogs beyond the original P1 scope | Type 3 — Pivot Advance | Resolved decision: admit the specified speed dialogs after structural parity, with separate verification; cursor synchronization remains follow-on work |
+| 3 | 2026-10-09 | Wave A census and G4 fixtures contradicted the spec in seven bounded places (Q-A..Q-G) before the first Wave B edit | Type 1b — Advance (Planner-Originated), Q-A as Type 2 narrowing | Resolved under the owner's standing overnight authorization: rules supplied for dead views, the standalone reader window, runtime code in narration types, shared constants/diagnostics/cache, per-mode ownership, cross-owner G4 comparison, and baseline anomalies; no gate loosened |
 
 ## Target: ROADMAP.md
 
@@ -53,6 +54,64 @@ Acceptance checklist:
 6. Verify keyboard-operable slider/dialog interaction and a visible current value. Record live observations and behavioral assertions for the approved speed differences separately from extraction parity.
 
 Narrate cursor lead, heard-word synchronization, reload catch-up and rate-overlap repair remain follow-on sync work, as the owner expressly directed. This amendment does not authorize those repairs, a storage-format migration, or new shortcuts.
+
+### Fold-in 3 — Mid-Dispatch Amendment (pre-Wave-B scope rules, Q-A..Q-G)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (pre-Wave-B scope rules)
+**Pause point:** The Wave A census (`dependencies.json`, `ownership.json`, `census/`; 63b10115) and the G4 fixtures (`fixtures/*.baseline.json`; c61bca67) contradicted the spec in seven places before any `src/` edit. Issue: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`.
+**Decision:** Type 1b — Advance (Planner-Originated); Q-A is a Type 2 narrowing. Decided under the owner's standing overnight authorization.
+**Rationale:** Each rule enforces the spec's stated isolation and parity intent more precisely; none loosens a gate, and the one new comparison rule is recomputed from data.
+**Scope change:**
+- **Q-A:**
+  - Do not copy the dead non-EPUB views (`PageReaderView`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `PausedTextView`, `FlowCursorController`). The mirrored per-mode layout drops `TextView.tsx` in all four modes, leaving 8 files each.
+  - The shell keeps the existing non-EPUB re-import fallback, since that is the production non-EPUB behavior.
+  - Wave E removes the dead view imports from `ReaderContainer.tsx` and proves via G1 that no production graph reaches the dead views. A dead file is deleted only if no retained test imports it; otherwise it stays unreachable, with evidence.
+  - G0/G6 non-EPUB rows use converted imports.
+- **Q-B:**
+  - `src/App.tsx` (the live standalone reader window: Library "open in new window" → `open-reader-window` → `#reader/<id>`) stays untouched and outside the four-mode system.
+  - Modes copy what they need from `useReader.ts` / `ReaderView.tsx` into their own directories. The originals remain solely as the standalone window's private engine, and no mode may import them (G1).
+  - Wave E records App.tsx as their sole remaining consumer, with census evidence. Rewiring the standalone window is out of scope; it has no recorded baseline.
+- **Q-C:**
+  - `src/types/narration.ts` runtime exports (`narrationReducer`, `findSectionForWord`) remain TTS infrastructure behind Narrate's audio port, used by `useNarration.ts`, which is not edited.
+  - Mode-behavior consumers, such as `useFoliateSync`'s section lookup, get private copies under `src/reader/modes/<mode>/helpers/`.
+  - The ownership manifest classes narration.ts as infrastructure-port (TTS).
+- **Q-D:**
+  - `src/constants.ts` is allowed-shared as immutable configuration. Mode-specific values are copied into owner-local defaults with identical values, as the spec already requires; G1 asserts no mode writes it.
+  - Diagnostics (`narrateDiagnostics.ts`, `dualSourceDiag.ts`) are reachable from modes only through a write-only diagnostics infrastructure port on the broker, which carries the captured session tuple and is owner-checked. TTS infrastructure may keep its direct use.
+  - The `useNarrationCaching.ts` module-level extraction cache moves behind the document port, as immutable document/content preparation.
+- **Q-E:** The ownership-manifest owner value `per-mode` is legal only with an exact `privateCopiesFor` list. G1 asserts each listed copy exists in exactly that mode's directory and nowhere shared.
+- **Q-F:** G4 comparison rule.
+  - (1) Recompute the cross-owner set mechanically: any `audio.*` effect in a step whose mode before and mode after are both not `narrate`.
+  - (2) Assert that the stored `crossOwner: true` flags equal the recomputed set (instrument check).
+  - (3) Drop exactly that set from the baseline.
+  - (4) Assert that the candidate emits zero effects matching the same rule.
+  - (5) Compare the remainder byte-for-byte after the spec's timestamp and session-id normalization.
+  - No other effect may be dropped. Record the rule and the dropped list in `test-migration.json`. Fixture files are never edited.
+- **Q-G:** Baseline anomalies.
+  - Non-Narrate audio effects (OBS-A3-3 same-Page `audio.stop` and similar) are removed under Q-F.
+  - OBS-A3-1 (Narrate(paused)→Page highlight on word 0 while the persisted anchor is 7) is governed by G3's handoff rule: destination = source canonical word, copy-only. The expected post-separation value is 7, and G6 lists the row as a removed cross-owner effect, citing the baseline persisted anchor 7.
+  - OBS-A3-2 (Focus pacing→Page readback 209) is classified during Wave B, read-only, against Focus's own canonical position:
+    - if Page shows a value other than Focus's snapshot, G3 governs and the change is a removed cross-owner effect;
+    - if 209 is Focus's true canonical position, preserve it as baseline;
+    - if unclassifiable after two attempts, record an issue and route it.
+  - Preserved as baseline (G4 fixtures enforce): Flow resume = cold restart from the anchor; a warming Narrate start → the next press resumes; Narrate→Page issues `audio.stop` twice (idempotent stop/destroy may reproduce it).
+**Follow-up items:** Owner may later decide to rewire the standalone reader window (new item, not this epic). Provisional lesson staged below (number assigned at fold-in).
+
+## Target: docs/governance/LESSONS_LEARNED.md
+
+### Fold-in 4 — Provisional lesson (number assigned at fold-in; worktree numbers are placeholders)
+Section: end of catalog
+Action: Append row
+Content:
+### LL-<next> — Mode-separation specs must be cut from an import-graph census, not a file inventory (READER-MODE-SEPARATION-2, 2026-10-09)
+- **Applies to:** spec authoring, refactors, reader modes
+- **Discovery:** A Full Spec written from a source inventory listed dead views as copy targets, a runtime-bearing file as "type-only", missed a live second entry point (App.tsx standalone window), and required byte-for-byte parity with behavior that included the very cross-owner effects the separation removes. All surfaced only at Wave A via a TypeScript-resolver import graph and a production-path trace recorder.
+- **Rule:** Before declaring copy/move targets or parity gates, run an import-graph census from the real entry points (all of them) and tag the effects the change is meant to remove; write the parity gate as "baseline minus mechanically recomputed removed-effect set, removed set asserted absent".
+- **Related:** LL-118 (trace imports bottom-up), LL-128 (verify targets before create).
 
 ## Target: close-out memo §Mid-Dispatch Decisions
 

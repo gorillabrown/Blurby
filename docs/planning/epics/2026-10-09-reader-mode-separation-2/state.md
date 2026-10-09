@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P2 — Wave A / G0 admission (P1 exit gate passed S1: I, B0, guards, A1-R PASS)
-next_action:  owner runs g0-owner-checklist.md (BLOCKER B1); meanwhile settle Q-A..Q-F via /mid-dispatch-decision
+next_action:  owner runs g0-owner-checklist.md (BLOCKER B1); then baseline.json admission PASS → Monday In Flight → Wave B per the Q-A..Q-G block
 blockers:     B1 (owner gate: G0 heard audio + residual live checks)
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half done; owner half pending) | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
@@ -52,7 +52,7 @@ dod:          D1 unmet (automated half done; owner half pending) | D2 unmet | D3
 5. [x] A1-R PASS 7/8 (`admission/isolation.json`, 5f0608b6); A2 PASS 10/20 (`admission/flow-reproduction.json`, 2529a921)
 6. [x] Census integrated (63b10115); G4 fixtures recorded and independently re-verified 5/5 (c61bca67)
 7. [x] A3 automated matrix 28/35 (`admission/g0-matrix.json`, 277967b3)
-8. [ ] Settle Q-A..Q-F (below) via /mid-dispatch-decision so Wave B is dispatch-ready the moment D1 passes
+8. [x] Q-A..Q-G settled (Decision log #10)
 9. [ ] After B1 is answered: set `baseline.json` → `admission: PASS` (with B0 fresh-run figures and owner observer), then Monday Queued → In Flight (handshake), then Wave B
 
 ## Finalization — stages (launch.md); mark each with date + evidence
@@ -99,7 +99,18 @@ F5 done.md present here:              no
   - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
   - **Answer:** _(write "done" here after filling the observations file)_
 
-## Pending scope questions — census findings (decide via /mid-dispatch-decision before the first Wave B edit)
+## Scope questions Q-A..Q-G — RESOLVED 2026-10-09 (Decision log #10; staging fold-in 3; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`). Wave B instruction:
+
+```
+Wave B (after D1): apply Q-A..Q-G per staging fold-in 3 — mirrored layout without TextView.tsx; App.tsx untouched
+(useReader/ReaderView originals kept only for it; no mode imports them); narration.ts runtime = TTS infra, copy
+findSectionForWord per mode; constants.ts shared-immutable; diagnostics via write-only broker port; extraction cache
+behind document port; per-mode owner needs privateCopiesFor; G4 compares baseline minus the recomputed cross-owner
+set (audio.* with neither mode before nor after = narrate), stored flags must equal recomputed, candidate emits zero;
+OBS-A3-1 governed by G3 (expect 7); classify OBS-A3-2 read-only against Focus's own snapshot (2 attempts, then issue).
+```
+
+Original questions (for reference):
 
 - Q-A. Non-EPUB views (`PageReaderView`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `PausedTextView`, `FlowCursorController`) are dead in production (not rendered; tree-shaken). Copying them into each mode's `TextView.tsx` copies dead code. Options: retire them in Wave E, or copy them as the spec says.
 - Q-B. `src/App.tsx` runs a standalone reader window with its own `useReader` / `ReaderView` / `useReaderKeys`. App.tsx is not an edit site, so Wave E cannot prove the legacy Focus entry points are absent without amending scope.
@@ -123,6 +134,7 @@ F5 done.md present here:              no
 | 7 | S1 | A1-R PASS with OBS-A1R-1 (Kokoro warm-up load error 13) classified as neither isolation nor write-path | Path inside the profile; downloaded model byte-identical to the installed one (SHA-256 `04cf570c…`); live profile unchanged | Amendment 2026-10-08 A1 criteria, evaluated mechanically |
 | 8 | S1 | A2 PASS on the EPUB; the legacy inline text fixture is a fixture gap, not a Flow defect | B0 renders every readable doc through foliate ("all docs should be EPUB since EPUB-2B"); inline record → re-import notice | Amendment 2026-09-23 A2 criteria |
 | 9 | S1 | A3's non-EPUB rows use a non-EPUB source converted through the app's import path; the launcher seeds the installed Kokoro model into the fresh profile | The only readable non-EPUB route on B0; avoids the fresh-profile concurrent-download race (OBS-A1R-1 recurred in A2) | Grant: test-only harness under `E/` |
+| 10 | S1 | Q-A..Q-G resolved: Type 1b (Q-A Type 2 narrowing) — see the block above | Census and G4 fixtures contradicted the spec; rules enforce isolation/parity intent, loosen no gate, touch nothing outside the existing-site table | Owner standing authorization + /virtuoso:mid-dispatch-decision; staging fold-in 3 |
 
 ## Evidence
 

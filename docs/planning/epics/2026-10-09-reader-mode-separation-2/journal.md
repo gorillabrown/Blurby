@@ -77,6 +77,23 @@
 - **Gate/DoD movement:** D1's automated half is complete; its owner half is pending (B1).
 - **Git:** eb/reader-mode-separation-2 @ c61bca67 + this checkpoint; uncommitted: tests/perf-baseline-results.json (noise).
 - **Next:** settle Q-A..Q-G; then stop cleanly, with every front blocked on B1 (no `src/` before D1).
+
+## S1d — 2026-10-09 ~01:10 (host) — scope decisions; clean stop on B1
+
+- **Did:**
+  - Rendered `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md` (Q-A..Q-G) and ran /virtuoso:mid-dispatch-decision under the owner's standing overnight authorization. Outcome: Type 1b, with Q-A as a Type 2 narrowing.
+  - Staged the amendment as staging-memo fold-in 3 (registry row 3) and a provisional lesson as fold-in 4. Recorded the Decision block in the issue.
+  - `baseline.json` now carries the B0 fresh automated G0 figures and G0 progress; admission stays BLOCKED.
+- **Learned:** App.tsx's standalone reader window is live (LibraryView "open in new window" → `open-reader-window` → `#reader/<id>`), so it was kept outside the four-mode system rather than rewired.
+- **Decisions:** #10.
+- **Gate/DoD movement:** none (D1 waits on B1).
+- **Git:** eb/reader-mode-separation-2 @ this checkpoint (pushed); uncommitted: tests/perf-baseline-results.json (noise only).
+- **Stop:** every front is now blocked on B1. Pre-G0 rules forbid `src/` edits, and Wave B–E, the speed dialog, Monday In Flight and finalization all sit behind D1. Clean stop.
+- **Resume:** once the owner writes "done" in B1, the next session:
+  1. reads `g0-owner-observations.json`;
+  2. sets `baseline.json` → `admission: PASS` with the observer, if all items are filled and no `new-problem` contradicts the matrix (otherwise route a mid-dispatch decision);
+  3. runs the Monday Queued → In Flight handshake;
+  4. starts Wave B (P3) per the state.md Q-A..Q-G block.
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

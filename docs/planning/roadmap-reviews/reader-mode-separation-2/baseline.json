@@ -79,7 +79,9 @@
   "knownBaselineDefects": [
     "Live owner observation in this session: Narrate cursor runs ahead of heard speech; reload jumps spoken narration ahead to catch the cursor. Exact word/timing offsets not measured.",
     "Historical 1.4x rate-change audio overlap; not retested in this session",
-    "Page Space no-op remains specified baseline behavior"
+    "Page Space no-op remains specified baseline behavior",
+    "KD-CURSOR-LEAD: Narrate cursor ahead of heard speech (owner, 2026-09-23)",
+    "KD-RATE-1.4-OVERLAP: historical 1.4x rate-change audio overlap"
   ],
   "workspaceEffects": {
     "gitIndex": "empty",
@@ -88,7 +90,7 @@
     "mondayStatusChanged": false,
     "userDataWriteErrors": "Dev Electron logged ENOENT rename failures for library.json.tmp and sync-queue.json.tmp. Dev Electron and Vite were stopped. Both JSON files existed and parsed successfully afterward; no .tmp file remained at inspection. No file repair or deletion performed."
   },
-  "nextAction": "Wave A G0 blocked: classify the live Flow blink and collect a stable independent non-EPUB/exact-position four-mode baseline in an isolated app-data session. Screen and human heard-audio routes are established. Wave A reached its 40-action ceiling; re-slice before resuming. Amend scope for the owner-requested speed slider (Page manual, Focus/Flow 250 WPM at 1.00x with 100–1200 WPM bounds and 0.05x steps, Narrate 0.8–2.0x in 0.05x steps). Cursor sync repair remains follow-on work.",
+  "nextAction": "Owner completes g0-owner-checklist.md. Then set admission PASS with the observer named, transition Monday Queued -> In Flight, and start Wave B per staging fold-in 3 (Q-A..Q-G).",
   "ownerScopeChangeRequested": {
     "speedControl": "Click displayed speed to open slider; Page has no speed",
     "focusFlow": "1.00x = fixed 250 WPM; retain 100–1200 WPM limits; 0.05x increments",
@@ -136,5 +138,44 @@
         ]
       }
     }
-  ]
+  ],
+  "b0": {
+    "identity": "B0 (2026-10-09 rebuild policy)",
+    "manifest": "admission/baseline-build-rebuild.json",
+    "archive": "C:ProjectsBlurby-artifacts\rms2-baseline-build",
+    "byteIdenticalToOriginal": "21/21",
+    "freshAutomatedG0": {
+      "typecheck": 0,
+      "build": 0,
+      "test": {
+        "runs": [
+          {
+            "exit": 1,
+            "cause": "KF-1 unhandled rejection in tests/qwenStreaming.test.js; 0 failed tests"
+          },
+          {
+            "exit": 0
+          },
+          {
+            "exit": 0
+          }
+        ],
+        "testFilesPassed": 210,
+        "testFilesSkipped": 1,
+        "testsPassed": 3058,
+        "testsSkipped": 133,
+        "failedTestNames": []
+      },
+      "skippedBoundForD6": 133
+    }
+  },
+  "g0Progress": {
+    "a1r": "PASS — admission/isolation.json",
+    "a2": "PASS — admission/flow-reproduction.json",
+    "a3AutomatedHalf": "RECORDED — admission/g0-matrix.json (EPUB + converted non-EPUB; 24 transitions + 4 same-mode per fixture)",
+    "census": "dependencies.json, ownership.json (census/ --check)",
+    "g4Fixtures": "fixtures/*.baseline.json",
+    "ownerHalf": "PENDING — g0-owner-checklist.md → g0-owner-observations.json (BLOCKER B1)",
+    "nonEpubFixture": "converted imports (g0-converted-chapters, g0-converted-text); legacy inline record is unreadable on B0"
+  }
 }
