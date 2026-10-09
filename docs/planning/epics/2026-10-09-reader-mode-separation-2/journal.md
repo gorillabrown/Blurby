@@ -144,6 +144,29 @@
 - **Git:** eb/reader-mode-separation-2 @ e005d5eb + gate record; uncommitted: perf noise, plus the E1–E3 worker's files in flight.
 - **Next:** verify and commit E1–E3 (cutover, OC-5 migrations), then E4–E7, then E8 (OS-1 G6) → S.
 
+## S1h — 2026-10-09 (host) — Wave E: cutover, fixes, deletions, G1 completion
+
+- **Did:**
+  - Wave E code, in commit order:
+    - E6 validator (197377ba).
+    - E1–E3 cutover and migrations (3dd4b504).
+    - Late full-book words fix (0b199425).
+    - E4: seven legacy files deleted (8e245345).
+    - E5 G1 completion (98cdbfe2).
+    - Cutover review fixes (0e7cb3a9).
+  - Full suite: 221 files, 3268 passed, 133 skipped; build 0.
+  - The recorder now verifies on the genuine B0 tree (5/5 on src 0c790075).
+- **Learned:**
+  - After E1, the B0 launcher refuses W: W's src differs from the pin. G6 needs B0-checkout and candidate launchers.
+  - E2's import relocations removed the last test readers of seven legacy files, so the §D.6 rule allowed deleting them.
+  - Rewriting hooks into classes (DD-2) means the census's verbatim anchors cannot prove private copies exist. An explicit private-copy map is needed (Decision #22).
+  - Two transient Windows `EPERM` rename failures in `tests/sync-queue.test.js`, during heavy concurrent runs; clean reruns exit 0. Watch at G5.
+  - Both workers stopped once on the account usage limit. They were resumed with their partial work intact.
+- **Decisions:** #18–#23.
+- **Gate/DoD movement:** none recorded yet (S pending: G1 Q-E map, G5 gate, G6 owner session).
+- **Git:** eb/reader-mode-separation-2 @ 6a891c3d; uncommitted: perf noise, plus the in-flight G6 harness (`live/`, paths.json) and Q-E map (boundary-policy.json, ownership test).
+- **Next:** commit the Q-E map, then the harness and its B0/candidate dry runs, then the E7 G5 gate → S-candidate, then the speed amendment (brief in scratchpad) → F, then the OS-1 checklist.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
