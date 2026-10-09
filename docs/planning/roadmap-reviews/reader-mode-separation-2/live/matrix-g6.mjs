@@ -386,7 +386,23 @@ async function probe(m, row) {
   const mapped = mapFocus(log, row.anchor ?? 0);
   return { index: mapped.find((x) => x.index != null)?.index ?? null, method: "first Focus display text mapped onto the captured word-span sequence", mapped: mapped.slice(0, 12) };
 }
-const step = async (row, label) => { const s = await state(); row.steps.push({ label, ...s }); return s; };
+// Environment probe (Decision #26): a hidden or occluded window makes Chromium stop animation frames and throttle
+// timers, which silently breaks audio word events, pacing and input. Every step records visibility and a 200 ms
+// frame count; a case with any throttled step is "invalid" (re-run it), never pass or fail.
+function frameProbe(ms) {
+  return new Promise((resolve) => {
+    let frames = 0; const t0 = performance.now(); let done = false;
+    const finish = () => { if (!done) { done = true; resolve({ frames, visibility: document.visibilityState, elapsedMs: Math.round(performance.now() - t0) }); } };
+    const tick = () => { frames++; if (performance.now() - t0 < ms) requestAnimationFrame(tick); else finish(); };
+    requestAnimationFrame(tick); setTimeout(finish, ms + 300);
+  });
+}
+const PROBE_MS = 200, MIN_FRAMES = 3;
+const step = async (row, label) => {
+  const s = await state(); const env = await c.ev(frameProbe, PROBE_MS);
+  if (env.visibility !== "visible" || env.frames < MIN_FRAMES) (row.throttledSteps ??= []).push({ label, ...env });
+  row.steps.push({ label, ...s, env }); return s;
+};
 // Playing cursors can be intermittent (B0 Narrate drops page-word--active-word between chunks): sample n states
 // 300 ms apart and keep the one with the most visible cursors; every sampled count is kept in row.cursorSamples.
 async function sampledMeasure(row, label, n = 6) {
@@ -412,13 +428,14 @@ async function caseRun(category, dest, fn) {
   const id = `${fixture}-${category}`;
   const row = { id, category, fixture, docId, documentKind, target, startedAt: now(), steps: [], checks: {}, expected: null, actual: null, methods: {} };
   try { await fn(row); row.status = "recorded"; } catch (e) { row.status = "error"; row.error = e.message; }
+  try { const env = await c.ev(frameProbe, PROBE_MS); row.endEnv = env; if (env.visibility !== "visible" || env.frames < MIN_FRAMES) (row.throttledSteps ??= []).push({ label: "case-end", ...env }); } catch (e) { row.endEnvError = e.message; }
   try { row.screenshot = await shot(category); } catch (e) { row.screenshotError = e.message; }
   await pause().catch(() => {});
   if (row.status === "recorded" && !row.stale && row.measure) await closeWindow(row, dest, row.measure).catch((e) => { row.staleError = e.message; });
   row.finishedAt = now();
   const s = row.measure;
   const ok = row.status === "recorded" && Number.isInteger(row.expected) && row.expected === row.actual && row.stale?.count === 0 && Object.values(row.checks).every((v) => v === true);
-  row.result = ok ? "pass" : "fail";
+  row.result = row.throttledSteps?.length ? "invalid" : ok ? "pass" : "fail";
   rows.push(row);
   await fs.appendFile(path.join(out, "rows.ndjson"), JSON.stringify(row) + "\n");
   cases.push({
@@ -432,6 +449,7 @@ async function caseRun(category, dest, fn) {
     checks: row.checks,
     measurement: { target, expectedRule: row.methods.expected ?? null, actualMethod: row.methods.actual ?? null, ownerMethod: HOW.owner, playbackMethod: HOW.playback, visibleCursorMethod: HOW.visibleCursorCount, staleBreakdown: row.stale ? { trace: row.stale.trace.length, console: row.stale.console.length, dom: row.stale.dom.length } : null },
     ...(row.error ? { notes: `harness error: ${row.error}` } : {}),
+    ...(row.throttledSteps ? { invalidReason: "page throttled (hidden/occluded): re-run required", throttledSteps: row.throttledSteps } : {}),
     screenshot: row.screenshot ? `captures/${run}/${row.screenshot}` : null,
     evidenceRef: `captures/${run}/rows.ndjson#${id}`,
   });

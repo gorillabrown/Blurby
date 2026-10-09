@@ -611,5 +611,46 @@
       },
       "build": 0
     }
+  },
+  "structuralCandidate": {
+    "commit": "d0c58af4",
+    "status": "G1-G5 PASS; G6 automated half recorded; G6 heard audio pending OS-1 (owner)",
+    "recordedAtUtc": "2026-10-09T16:34:06.505Z",
+    "g5": {
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 224,
+        "testFilesSkipped": 1,
+        "testsPassed": 3290,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "note": "KF-2 (sync-queue EPERM) occurred once on 15626073 and was recorded (Decision #25); this run clean"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerifyOnB0": "5/5 on src 0c790075",
+      "g1to4AndAudio": "17 files, 146/146 (readerModeBoundaries, readerModeOwnership, readerModeIsolation, tests/readerModes/, narrateA5RateReseed, narratePauseResumeUnify, narrateIntentCursor)"
+    },
+    "g6": {
+      "candidateBuild": "C:/Projects/Blurby-artifacts/rms2-candidate-d0c58af41fa1/ (candidate-build.json)",
+      "candidateRun": "%TEMP%/blurby-reader-mode-separation-2-g6-fixthreea20261009161402515 (epub 26/27, chapters 26/27; only narrate-book-transition fails, baseline-equal per Decision #24)",
+      "b0Run": "%TEMP%/blurby-reader-mode-separation-2-g6-bzeros20261009153628767 (same harness revision)",
+      "setAside": [
+        {
+          "run": "blurby-reader-mode-separation-2-g6-cands20261009154935565",
+          "reason": "chapters half ran while Chromium throttled the hidden window (frames stopped, timers ~1 s, CDP input unacknowledged); not reproducible in a matched rerun (fixthreea); evidence kept, not used. Decision #26"
+        },
+        {
+          "run": "blurby-reader-mode-separation-2-g6-candc20261009150228347",
+          "reason": "same throttling pattern (self-recovered mid-run); built from 15626073, superseded"
+        }
+      ],
+      "remaining": [
+        "heardAudio for every audio case (OS-1)",
+        "owner confirmation of baselineEqualDeviations",
+        "removedCrossOwnerEffects list (narrate->page lands on the handed-over word; Narrate no longer shows Flow progress text)"
+      ]
+    }
   }
 }
