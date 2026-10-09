@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P4 — Wave C (Flow). Wave B gate PASS 5a34f6e1
-next_action:  Wave C (Flow): C1 Flow tree → C2 isolation pairs (page/focus/flow) → C3 throwing audio → C4 gate (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
+next_action:  Wave C (Flow): C1 Flow tree → C2 isolation pairs (page/focus/flow) → C3 throwing audio → C4 gate
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
