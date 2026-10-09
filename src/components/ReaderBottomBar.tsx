@@ -1,8 +1,9 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { MIN_WPM, MAX_WPM, FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM, TTS_RATE_CONFIRMING_MS, TTS_RATE_SET_DISPLAY_MS } from "../constants";
-import { KOKORO_UI_SPEEDS, normalizeKokoroUiSpeed } from "../utils/kokoroRatePlan";
-import type { BlurbyDoc, ReaderMode, TtsEngine } from "../types";
+import { FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM } from "../constants";
+import type { BlurbyDoc, ReaderMode } from "../types";
+import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
+import ReaderSpeedDialog, { formatSpeedMultiplier, formatSpeedValueText } from "./ReaderSpeedDialog";
 import ProgressBar from "./ProgressBar";
 import { triggerCoachHint } from "./HotkeyCoach";
 
@@ -24,7 +25,6 @@ interface ReaderBottomBarProps {
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number; depth?: number }>;
-  onSetWpm: (wpm: number) => void;
   onAdjustFocusTextSize: (delta: number) => void;
   onEnterPage?: () => void;
   onEnterFocus: () => void;
@@ -38,8 +38,10 @@ interface ReaderBottomBarProps {
   chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
   lastReadingMode?: "focus" | "flow" | "narrate";
   ttsRate?: number;
-  onSetTtsRate?: (rate: number) => void;
-  ttsEngine?: TtsEngine;
+  /** The active mode's speed (snapshot.speed): null in Page, which shows no speed control. */
+  speed?: ReaderModeSpeed | null;
+  /** Routed to the active runtime only (router handleSetSpeed). */
+  onSetSpeed?: (speed: ReaderModeSpeed) => void;
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
   /** When narration is active, the narration cursor word index — used to track current chapter.
@@ -71,7 +73,6 @@ export default function ReaderBottomBar({
   playing,
   isEink,
   chapters,
-  onSetWpm,
   onAdjustFocusTextSize,
   onEnterPage,
   onEnterFocus,
@@ -85,8 +86,8 @@ export default function ReaderBottomBar({
   chapterListRef,
   lastReadingMode = "flow",
   ttsRate = 1.0,
-  onSetTtsRate,
-  ttsEngine = "web",
+  speed = null,
+  onSetSpeed,
   foliateFraction,
   narrationWordIndex = null,
   flowZoneLines,
@@ -97,23 +98,17 @@ export default function ReaderBottomBar({
   const surfaceMode = readingMode === "narrate" ? "flow" : readingMode;
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
-  const [rateStatus, setRateStatus] = useState<"idle" | "confirming" | "set">("idle");
-  const rateStatusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const chapterGroupRef = useRef<HTMLDivElement | null>(null);
-
-  // Show CONFIRMED → SET sequence when TTS rate changes
-  const handleSetTtsRate = useCallback((newRate: number) => {
-    if (onSetTtsRate) onSetTtsRate(newRate);
-    setRateStatus("confirming");
-    if (rateStatusTimerRef.current) clearTimeout(rateStatusTimerRef.current);
-    rateStatusTimerRef.current = setTimeout(() => {
-      setRateStatus("set");
-      rateStatusTimerRef.current = setTimeout(() => {
-        setRateStatus("idle");
-        rateStatusTimerRef.current = null;
-      }, TTS_RATE_SET_DISPLAY_MS);
-    }, TTS_RATE_CONFIRMING_MS);
-  }, [onSetTtsRate]);
+  // Speed dialog open state is shell UI only; opening or closing changes no mode state.
+  const [speedDialogOpen, setSpeedDialogOpen] = useState(false);
+  const speedTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const closeSpeedDialog = useCallback(() => {
+    setSpeedDialogOpen(false);
+    speedTriggerRef.current?.focus();
+  }, []);
+  const speedMode = readingMode === "page" ? null : readingMode;
+  // A mode switch closes the dialog (it always opens on the mode the user clicked in).
+  useEffect(() => { setSpeedDialogOpen(false); }, [speedMode]);
 
   // Expose toggle to parent via ref (for C hotkey)
   useEffect(() => {
@@ -134,7 +129,8 @@ export default function ReaderBottomBar({
 
   // Time remaining — use TTS-derived WPM when narration is selected
   const isNarrationSelected = readingMode === "narrate" || isNarrating;
-  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : wpm;
+  // Focus/Flow time estimates use the active mode's own WPM (OC-6); Page keeps the legacy wpm.
+  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : speed?.kind === "wpm" ? speed.wpm : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
   const docWordsRemaining = foliateFraction != null && activeDoc.wordCount > 0
@@ -235,11 +231,6 @@ export default function ReaderBottomBar({
   // Bar always fully visible — all modes need access to controls
   const opacity = 1;
 
-  // WPM slider
-  const handleWpmSlider = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    onSetWpm(parseInt(e.target.value, 10));
-  }, [onSetWpm]);
-
   return (
     <div
       className="reader-bottom-bar"
@@ -257,67 +248,35 @@ export default function ReaderBottomBar({
 
       {/* Row 2: Controls */}
       <div className="reader-bottom-bar-controls">
-        {/* WPM or TTS Rate — show TTS rate when narration is selected (active or paused) */}
-        {isNarrationSelected && onSetTtsRate ? (
+        {/* Speed: the current value opens the speed dialog (Focus, Flow, Narrate). Page shows none. */}
+        {speed !== null && speedMode !== null && (
           <div className="rbb-wpm-group">
-            <span
-              className="rbb-wpm-label"
-              aria-label={ttsEngine === "kokoro" ? "Kokoro rate" : ttsEngine === "qwen" ? "Narration rate" : "Speech rate"}
+            <button
+              ref={speedTriggerRef}
+              type="button"
+              className="rbb-speed-trigger"
+              aria-haspopup="dialog"
+              aria-expanded={speedDialogOpen}
+              aria-label={`Speed ${formatSpeedValueText(speed)}`}
+              onClick={() => setSpeedDialogOpen(true)}
+              onKeyDown={(e) => {
+                // Enter/Space open the dialog and never reach the reader shortcuts (Space = play).
+                if (e.key !== "Enter" && e.key !== " ") return;
+                e.preventDefault();
+                e.stopPropagation();
+                setSpeedDialogOpen(true);
+              }}
             >
-              {ttsRate.toFixed(1)}x
-            </span>
-            {ttsEngine === "kokoro" ? (
-              <div className="rbb-rate-buttons" role="radiogroup" aria-label="Kokoro narration speed">
-                {KOKORO_UI_SPEEDS.map((speed) => (
-                  <button
-                    key={speed}
-                    onClick={() => handleSetTtsRate(speed)}
-                    className={`rbb-bucket-btn${normalizeKokoroUiSpeed(ttsRate) === speed ? " active" : ""}`}
-                    aria-checked={normalizeKokoroUiSpeed(ttsRate) === speed}
-                    role="radio"
-                    aria-label={`${speed.toFixed(1)}x speed`}
-                  >{speed.toFixed(1)}x</button>
-                ))}
-              </div>
-            ) : (
-              <input
-                type="range"
-                className="rbb-wpm-slider"
-                min={0.5}
-                max={2.0}
-                step={0.1}
-                value={ttsRate}
-                onChange={(e) => handleSetTtsRate(Number(e.target.value))}
-                aria-label="Speech rate"
-                aria-valuemin={0.5}
-                aria-valuemax={2.0}
-                aria-valuenow={ttsRate}
-                aria-valuetext={`${ttsRate.toFixed(1)}x speed`}
+              {formatSpeedMultiplier(speed)}
+            </button>
+            {speedDialogOpen && (
+              <ReaderSpeedDialog
+                mode={speedMode}
+                speed={speed}
+                onChange={(next) => onSetSpeed?.(next)}
+                onClose={closeSpeedDialog}
               />
             )}
-            {rateStatus !== "idle" && (
-              <span className={`rbb-rate-status ${rateStatus === "set" ? "rbb-rate-status--set" : ""}`} role="status" aria-live="polite">
-                {rateStatus === "confirming" ? "CONFIRMED" : "SET"}
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="rbb-wpm-group">
-            <span className="rbb-wpm-label">{wpm} wpm</span>
-            <input
-              type="range"
-              className="rbb-wpm-slider"
-              min={MIN_WPM}
-              max={MAX_WPM}
-              step={25}
-              value={wpm}
-              onChange={handleWpmSlider}
-              aria-label="Words per minute"
-              aria-valuemin={MIN_WPM}
-              aria-valuemax={MAX_WPM}
-              aria-valuenow={wpm}
-              aria-valuetext={`${wpm} words per minute`}
-            />
           </div>
         )}
 

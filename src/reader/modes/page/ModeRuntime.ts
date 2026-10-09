@@ -116,24 +116,15 @@ export class PageMode implements ReadingMode {
   }
 }
 
-// Owner-local copy of the Kokoro UI speed step (src/utils/kokoroRatePlan.ts, same values; Q-D).
-// ponytail: duplicated 1.0–1.5 domain; the speed amendment (OC-7/OC-8) must update this copy too.
-const KOKORO_UI_SPEEDS = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] as const;
-
-function normalizeKokoroUiSpeed(speed: number): number {
-  if (!Number.isFinite(speed)) return KOKORO_UI_SPEEDS[0];
-  const clamped = Math.max(KOKORO_UI_RATE_MIN, Math.min(KOKORO_UI_RATE_MAX, speed));
-  const stepped = Math.round(clamped / KOKORO_UI_RATE_STEP) * KOKORO_UI_RATE_STEP;
-  const normalized = Number(stepped.toFixed(1));
-  const match = KOKORO_UI_SPEEDS.find((uiSpeed) => uiSpeed === normalized);
-  return match ?? KOKORO_UI_SPEEDS[0];
-}
-
+// Owner-local copy of the Kokoro UI speed step (src/utils/kokoroRatePlan.ts, same domain; Q-D).
+// OC-7/OC-8: 0.80–2.00 in 0.05 steps, read from the shared constants; integer hundredths, no rounding drift.
 function stepKokoroUiSpeed(current: number, delta: number): number {
-  const normalized = normalizeKokoroUiSpeed(current);
-  const idx = KOKORO_UI_SPEEDS.indexOf(normalized as (typeof KOKORO_UI_SPEEDS)[number]);
-  const nextIdx = Math.max(0, Math.min(KOKORO_UI_SPEEDS.length - 1, idx + (delta > 0 ? 1 : -1)));
-  return KOKORO_UI_SPEEDS[nextIdx];
+  const min = Math.round(KOKORO_UI_RATE_MIN * 100);
+  const step = Math.round(KOKORO_UI_RATE_STEP * 100);
+  const last = Math.round((KOKORO_UI_RATE_MAX * 100 - min) / step);
+  const clampIndex = (i: number) => Math.max(0, Math.min(last, i));
+  const idx = clampIndex(Math.round(((Number.isFinite(current) ? current : 1.0) * 100 - min) / step));
+  return (min + step * clampIndex(idx + (delta > 0 ? 1 : -1))) / 100;
 }
 
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
@@ -381,7 +372,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   }
 
-  /** Legacy adjustSpeed, page branch (keyboard up/down). */
+  /** Legacy adjustSpeed, page branch (keyboard up/down): adjusts the speed of lastReadingMode (OC-8). */
   adjustSpeed(delta: number): void {
     if (!this.alive) return;
     const settings = this.settingsSnapshot.settings;
@@ -397,9 +388,11 @@ export class PageModeRuntime implements ReaderModeRuntime {
       this.ports.settings.update({ ttsRate: newRate });
       return;
     }
-    // useReader.adjustWpm
-    this.wpm = Math.max(MIN_WPM, Math.min(MAX_WPM, this.wpm + delta));
-    this.ports.settings.setWpm(this.wpm);
+    // OC-6/OC-8: the selected mode's own key (focusWpm or flowWpm; absent → the legacy wpm), never the shared wpm.
+    const focus = settings.lastReadingMode === "focus";
+    const current = (focus ? settings.focusWpm : settings.flowWpm) ?? this.wpm;
+    const next = Math.max(MIN_WPM, Math.min(MAX_WPM, current + delta));
+    this.ports.settings.update(focus ? { focusWpm: next } : { flowWpm: next });
   }
 
   handleCommand(command: ReaderModeCommand): void {

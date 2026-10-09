@@ -20,6 +20,7 @@ import {
   EINK_LINES_PER_PAGE,
   FLOW_ZONE_LINES_DEFAULT,
   FOLIATE_SECTION_LOAD_WAIT_MS,
+  DEFAULT_EINK_WPM_CEILING,
   MAX_WPM,
   MIN_WPM,
   PUNCTUATION_PAUSE_MS,
@@ -481,6 +482,16 @@ function createChunkSourceWords(params: {
   });
 }
 
+/** OC-6: Flow's own WPM key; absent → the legacy shared wpm (no migration). */
+function ownFlowWpm(s: ReaderSettingsSnapshot): number {
+  return s.settings.flowWpm ?? s.wpm;
+}
+
+/** The shell's e-ink ceiling (legacy effectiveWpm), applied to this mode's own WPM. */
+function capEinkWpm(wpm: number, s: ReaderSettingsSnapshot): number {
+  return s.isEink ? Math.min(wpm, s.settings.einkWpmCeiling || DEFAULT_EINK_WPM_CEILING) : wpm;
+}
+
 export class FlowModeRuntime implements ReaderModeRuntime {
   readonly mode = "flow" as const;
   readonly contractVersion = READER_MODE_RUNTIME_CONTRACT_VERSION;
@@ -529,7 +540,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.arrivalCursorPending = input.handoff.source != null;
     this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
-    this.wpm = this.settingsSnapshot.wpm;
+    this.wpm = ownFlowWpm(this.settingsSnapshot);
     const handoff = createReaderModeHandoff(input.handoff);
     this.state = new FlowModeState(handoff);
     this.initialCfi = resolveBookOpenInitialCfi({ persistentWordIndex: handoff.canonicalWordIndex, cfi: handoff.cfi });
@@ -770,15 +781,32 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (!this.alive) return;
     // The word timer keeps the WPM it started with (legacy: buildConfig is captured per instance and
     // modeInstance.setSpeed has no production caller); the line pacer follows (useFlowScrollSync effect 3).
-    const previousEffectiveWpm = this.settingsSnapshot.effectiveWpm;
+    // OC-6: both sides read Flow's own key (flowWpm ?? wpm) under the e-ink ceiling.
+    const previousEffectiveWpm = capEinkWpm(ownFlowWpm(this.settingsSnapshot), this.settingsSnapshot);
     this.settingsSnapshot = own(next) as ReaderSettingsSnapshot;
-    this.wpm = this.settingsSnapshot.wpm;
-    if (this.settingsSnapshot.effectiveWpm !== previousEffectiveWpm) this.scrollEngine?.setWpm(this.settingsSnapshot.effectiveWpm);
+    this.wpm = ownFlowWpm(this.settingsSnapshot);
+    if (this.getEffectiveWpm() !== previousEffectiveWpm) this.scrollEngine?.setWpm(this.getEffectiveWpm());
     this.state.notify();
   }
 
-  /** Speed dialog: arrives with the speed amendment (design §E, step S4). */
-  setSpeed(_speed: ReaderModeSpeed): void { /* not yet wired */ }
+  /** Flow's effective pace: its own WPM under the e-ink ceiling. */
+  getEffectiveWpm(): number {
+    return capEinkWpm(this.wpm, this.settingsSnapshot);
+  }
+
+  /**
+   * Speed dialog (design §E, step S4): store the exact WPM in Flow's own key (OC-6) and pace a running
+   * word timer and line pacer with it. An out-of-range WPM is rejected, never clamped or rounded.
+   */
+  setSpeed(speed: ReaderModeSpeed): void {
+    if (!this.alive || speed.kind !== "wpm") return;
+    if (!(speed.wpm >= MIN_WPM && speed.wpm <= MAX_WPM)) return;
+    this.wpm = speed.wpm;
+    this.ports.settings.update({ flowWpm: speed.wpm });
+    this.engine?.setSpeed(this.getEffectiveWpm());
+    this.scrollEngine?.setWpm(this.getEffectiveWpm());
+    this.state.notify();
+  }
 
   // ── User intents ──────────────────────────────────────────────────────────
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths) + retargetActiveModeToWord. */
@@ -844,11 +872,11 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   }
 
-  /** Legacy adjustSpeed, non-narration branch (useReader.adjustWpm). */
+  /** Legacy adjustSpeed, non-narration branch (useReader.adjustWpm), on Flow's own key (OC-6). */
   adjustSpeed(delta: number): void {
     if (!this.alive) return;
     this.wpm = Math.max(MIN_WPM, Math.min(MAX_WPM, this.wpm + delta));
-    this.ports.settings.setWpm(this.wpm);
+    this.ports.settings.update({ flowWpm: this.wpm });
     this.state.notify();
   }
 
@@ -1050,7 +1078,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       container,
       cursor,
       this.state.highlightedWordIndex,
-      this.settingsSnapshot.effectiveWpm,
+      this.getEffectiveWpm(),
       numberArrayToSet(this.document.paragraphBreaks),
       this.settingsSnapshot.isEink,
       settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT,
@@ -1095,7 +1123,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     const settings = this.settingsSnapshot.settings;
     const config: ModeConfig = {
       words,
-      wpm: this.settingsSnapshot.effectiveWpm,
+      wpm: this.getEffectiveWpm(),
       callbacks: {
         onWordAdvance: (idx: number) => this.onEngineWordAdvance(idx),
         onPageTurn: () => { /* Handled by foliate */ },

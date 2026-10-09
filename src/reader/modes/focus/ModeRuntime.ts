@@ -16,6 +16,7 @@ import type { ReadingMode, ModeConfig, ModeState } from "../../../modes/ModeInte
 import {
   FOCUS_MODE_START_DELAY_MS,
   FOLIATE_SECTION_LOAD_WAIT_MS,
+  DEFAULT_EINK_WPM_CEILING,
   MAX_WPM,
   MIN_WPM,
   PUNCTUATION_PAUSE_MS,
@@ -351,6 +352,16 @@ function own<T>(value: T) {
   return Object.isFrozen(value) ? value : freezeValue(value);
 }
 
+/** OC-6: Focus's own WPM key; absent → the legacy shared wpm (no migration). */
+function ownFocusWpm(s: ReaderSettingsSnapshot): number {
+  return s.settings.focusWpm ?? s.wpm;
+}
+
+/** The shell's e-ink ceiling (legacy effectiveWpm), applied to this mode's own WPM. */
+function capEinkWpm(wpm: number, s: ReaderSettingsSnapshot): number {
+  return s.isEink ? Math.min(wpm, s.settings.einkWpmCeiling || DEFAULT_EINK_WPM_CEILING) : wpm;
+}
+
 export class FocusModeRuntime implements ReaderModeRuntime {
   readonly mode = "focus" as const;
   readonly contractVersion = READER_MODE_RUNTIME_CONTRACT_VERSION;
@@ -395,7 +406,7 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     this.arrivalCursorPending = input.handoff.source != null;
     this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
-    this.wpm = this.settingsSnapshot.wpm;
+    this.wpm = ownFocusWpm(this.settingsSnapshot);
     const handoff = createReaderModeHandoff(input.handoff);
     this.state = new FocusModeState(handoff);
     this.initialCfi = resolveBookOpenInitialCfi({ persistentWordIndex: handoff.canonicalWordIndex, cfi: handoff.cfi });
@@ -641,12 +652,27 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     // The running engine keeps the WPM it started with (legacy: buildConfig is captured per instance
     // and modeInstance.setSpeed has no production caller).
     this.settingsSnapshot = own(next) as ReaderSettingsSnapshot;
-    this.wpm = this.settingsSnapshot.wpm;
+    this.wpm = ownFocusWpm(this.settingsSnapshot);
     this.state.notify();
   }
 
-  /** Speed dialog: arrives with the speed amendment (design §E, step S4). */
-  setSpeed(_speed: ReaderModeSpeed): void { /* not yet wired */ }
+  /** Focus's effective pace: its own WPM under the e-ink ceiling (the RSVP overlay's gauge reads it too). */
+  getEffectiveWpm(): number {
+    return capEinkWpm(this.wpm, this.settingsSnapshot);
+  }
+
+  /**
+   * Speed dialog (design §E, step S4): store the exact WPM in Focus's own key (OC-6) and pace a running
+   * engine with it. An out-of-range WPM is rejected, never clamped or rounded.
+   */
+  setSpeed(speed: ReaderModeSpeed): void {
+    if (!this.alive || speed.kind !== "wpm") return;
+    if (!(speed.wpm >= MIN_WPM && speed.wpm <= MAX_WPM)) return;
+    this.wpm = speed.wpm;
+    this.ports.settings.update({ focusWpm: speed.wpm });
+    this.engine?.setSpeed(this.getEffectiveWpm());
+    this.state.notify();
+  }
 
   // ── User intents ──────────────────────────────────────────────────────────
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths) + retargetActiveModeToWord. */
@@ -709,11 +735,11 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   }
 
-  /** Legacy adjustSpeed, non-narration branch (useReader.adjustWpm). */
+  /** Legacy adjustSpeed, non-narration branch (useReader.adjustWpm), on Focus's own key (OC-6). */
   adjustSpeed(delta: number): void {
     if (!this.alive) return;
     this.wpm = Math.max(MIN_WPM, Math.min(MAX_WPM, this.wpm + delta));
-    this.ports.settings.setWpm(this.wpm);
+    this.ports.settings.update({ focusWpm: this.wpm });
     this.state.notify();
   }
 
@@ -890,7 +916,7 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     const settings = this.settingsSnapshot.settings;
     const config: ModeConfig = {
       words,
-      wpm: this.settingsSnapshot.effectiveWpm,
+      wpm: this.getEffectiveWpm(),
       callbacks: {
         onWordAdvance: (idx: number) => this.onEngineWordAdvance(idx),
         onPageTurn: () => { /* Handled by foliate */ },

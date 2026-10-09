@@ -92,4 +92,25 @@ describe("reader mode controls - Flow playback separation", () => {
     expect(props.onTogglePlay).toHaveBeenCalledTimes(1);
     expect(container.querySelector('button[aria-label="Flow mode"]')?.getAttribute("aria-pressed")).toBe("true");
   });
+
+  it("Page renders no speed control: no WPM slider, no WPM label, no speed trigger (speed amendment item 1)", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="page" speed={null} />);
+    });
+
+    expect(container.querySelector(".rbb-wpm-slider")).toBeNull();
+    expect(container.querySelector(".rbb-wpm-label")).toBeNull();
+    expect(container.querySelector('input[aria-label="Words per minute"]')).toBeNull();
+    expect(container.querySelector(".rbb-speed-trigger")).toBeNull();
+  });
+
+  it("Flow shows its speed as a dialog trigger instead of the WPM slider (speed amendment item 2)", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="flow" speed={{ kind: "wpm", wpm: 250 }} onSetSpeed={vi.fn()} />);
+    });
+
+    expect(container.querySelector(".rbb-wpm-slider")).toBeNull();
+    expect(container.querySelector(".rbb-speed-trigger")?.textContent).toBe("1.00x");
+    expect(container.querySelector(".rbb-speed-trigger")?.getAttribute("aria-haspopup")).toBe("dialog");
+  });
 });

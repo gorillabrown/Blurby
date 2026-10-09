@@ -6,24 +6,20 @@ import { KOKORO_UI_SPEEDS, stepKokoroUiSpeed } from "../src/utils/kokoroRatePlan
 // ── Keyboard Stepping Behavior ──────────────────────────────────────────────
 
 describe("narration keyboard stepping", () => {
-  it("Kokoro step-up walks the full 1.0-1.5 UI ladder", () => {
-    let rate = 1.0;
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.1);
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.2);
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.3);
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.4);
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.5);
-    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(1.5); // clamp
+  it("Kokoro step-up walks the full 0.80-2.00 UI ladder in 0.05 steps", () => {
+    let rate = 0.8;
+    const walked = [rate];
+    for (let i = 0; i < 24; i++) { rate = stepKokoroUiSpeed(rate, 1); walked.push(rate); }
+    expect(walked).toEqual(KOKORO_UI_SPEEDS);
+    rate = stepKokoroUiSpeed(rate, 1); expect(rate).toBe(2.0); // clamp
   });
 
-  it("Kokoro step-down walks the full 1.5-1.0 UI ladder", () => {
-    let rate = 1.5;
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.4);
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.3);
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.2);
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.1);
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.0);
-    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(1.0); // clamp
+  it("Kokoro step-down walks the full 2.00-0.80 UI ladder in 0.05 steps", () => {
+    let rate = 2.0;
+    const walked = [rate];
+    for (let i = 0; i < 24; i++) { rate = stepKokoroUiSpeed(rate, -1); walked.push(rate); }
+    expect(walked).toEqual([...KOKORO_UI_SPEEDS].reverse());
+    rate = stepKokoroUiSpeed(rate, -1); expect(rate).toBe(0.8); // clamp
   });
 
   it("Web Speech uses 0.1 increment steps", () => {
@@ -46,8 +42,11 @@ describe("narration keyboard stepping", () => {
 // ── Control Surface Semantics ───────────────────────────────────────────────
 
 describe("control surface consistency", () => {
-  it("Kokoro UI exposes the six sprint-contract speeds", () => {
-    expect(KOKORO_UI_SPEEDS).toEqual([1.0, 1.1, 1.2, 1.3, 1.4, 1.5]);
+  it("Kokoro UI exposes the 25 OC-7 speeds (0.80-2.00 in 0.05 steps)", () => {
+    expect(KOKORO_UI_SPEEDS).toHaveLength(25);
+    expect(KOKORO_UI_SPEEDS[0]).toBe(0.8);
+    expect(KOKORO_UI_SPEEDS[5]).toBe(1.05);
+    expect(KOKORO_UI_SPEEDS[24]).toBe(2.0);
   });
 
   it("Kokoro bucket resolver maps any rate to one of three values", () => {
@@ -58,13 +57,16 @@ describe("control surface consistency", () => {
   });
 
   it("UI speeds still resolve onto the fixed generation buckets", () => {
-    expect(KOKORO_UI_SPEEDS.map((speed) => resolveKokoroBucket(speed))).toEqual([1.0, 1.2, 1.2, 1.2, 1.5, 1.5]);
+    expect(KOKORO_UI_SPEEDS.map((speed) => resolveKokoroBucket(speed))).toEqual([
+      1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.2, 1.2, 1.2, 1.2, 1.2, 1.5, 1.5,
+      1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5, 1.5,
+    ]);
   });
 
-  it("rate display format is consistent (1 decimal place)", () => {
+  it("rate display format is consistent (2 decimal places)", () => {
     for (const speed of KOKORO_UI_SPEEDS) {
-      const display = speed.toFixed(1);
-      expect(display).toMatch(/^\d\.\d$/);
+      const display = speed.toFixed(2);
+      expect(display).toMatch(/^\d\.\d\d$/);
     }
   });
 });
