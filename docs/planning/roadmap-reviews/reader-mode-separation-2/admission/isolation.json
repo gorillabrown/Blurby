@@ -1,145 +1,350 @@
 {
   "sprintCode": "READER-MODE-SEPARATION-2",
-  "slice": "A1",
-  "status": "FAILED — G0 BLOCKED",
-  "recordedAtUtc": "2026-09-23T21:46:17.507609+00:00",
-  "runId": "blurby-reader-mode-separation-2-a1-20260923214002764",
-  "launchedAtUtc": "2026-09-23T21:40:03.752Z",
-  "launchedHead": "8ea751a51d92962004dd3e6b3835fce746c85cc1",
-  "pinnedGovernanceCommit": "1e5485c66e547392e7752240df71700267e8ede7",
-  "sourceManifestSha256": "a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291",
-  "buildManifestSha256": "e7e8f6c91476cbdf4908c35f9bba8e17347f06b0dd6570a14720e949e5930421",
-  "productionMatchesPinAtLaunch": true,
-  "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764",
-  "profileDisposition": "Preserved; no cleanup",
-  "resolvedPaths": {
-    "userData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\userData",
-    "sessionData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\sessionData",
-    "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\logs",
-    "crashDumps": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\crashDumps"
-  },
-  "actualSessionStoragePath": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\sessionData",
-  "pathObservation": "Launcher recorded all configured paths and actual Electron session storage inside the dedicated profile; this is partial isolation evidence, not completed A1 admission.",
-  "readyIsolationVerifiedAt": "2026-09-23T21:40:04.050Z",
-  "failures": [
-    {
-      "kind": "renderer identity capture",
-      "evidence": "main-events.ndjson at 2026-09-23T21:40:10.248Z",
-      "observed": "An object could not be cloned.",
-      "explanation": "Parent inspection reports the executeJavaScript expression returned window, an unserializable identity result."
-    },
-    {
-      "kind": "main-process error dialog",
-      "observed": "Error: EPIPE: broken pipe, write",
-      "stackIncludes": "ReadableWorkerStdio.ondata; node:internal/worker",
-      "evidence": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png"
-    },
-    {
-      "kind": "recovery obstruction",
-      "observed": "Parent reported debugger close attempts timing out and a recurring error dialog at console.error in main/tts-engine.js:17.",
-      "evidenceType": "Parent live-session report; not a separately retained log"
-    }
-  ],
-  "launchObservation": {
-    "observer": "parent session",
-    "guiCommandExitCode": 0,
-    "guiCommandElapsedSeconds": 0.17,
-    "interpretation": "Command completion was not application-health evidence; a subsequent live error dialog blocked admission."
-  },
-  "hypotheses": [
-    {
-      "claim": "The GUI process outlived the command stdout/stderr pipes, and later worker/log output hit a closed pipe.",
-      "status": "UNPROVEN; compare a bounded launch with persistent redirected output before attributing cause."
-    }
-  ],
-  "stopObservation": {
-    "observer": "parent session",
-    "ownedPid": 39680,
-    "action": "Stopped exact owned PID 39680 after debugger close attempts timed out",
-    "result": "Parent verified no remaining children belonging to this profile",
-    "gracefulCloseVerified": false,
-    "previewSession": 67679,
-    "previewDisposition": "Parent stopped the owned Vite preview with Ctrl-C at the stop boundary; no runtime is required while awaiting the owner decision."
-  },
-  "liveProfileChecks": [
-    {
-      "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\library.json",
-      "beforeSha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6",
-      "afterSha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6",
-      "unchanged": true,
-      "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
-      "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
-    },
-    {
-      "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\settings.json",
-      "beforeSha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f",
-      "afterSha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f",
-      "unchanged": true,
-      "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
-      "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
-    },
-    {
-      "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\sync-queue.json",
-      "beforeSha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1",
-      "afterSha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1",
-      "unchanged": true,
-      "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
-      "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
-    }
-  ],
-  "liveProfileCheckScope": "Only these three named live-profile files were hashed; this does not claim all host files were unchanged.",
-  "artifacts": [
-    {
-      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\isolation.json",
-      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-manifest.json",
-      "sha256": "78b1946b38d3e55846532861f970d6bd3840b42632a4a3b747f124504aa14575",
-      "bytes": 61521
-    },
-    {
-      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\main-events.ndjson",
-      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-main-events.ndjson",
-      "sha256": "efb7ea350cd7556f6781a5074d2401a0d95b68aea6087d6d0c81773686bda7c8",
-      "bytes": 634
-    },
-    {
-      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\codex-clipboard-f0211d69-5fdf-4965-9c48-f50f579a71c2.png",
-      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png",
-      "sha256": "f893c9c7837208ecf261a8e42e53fb4bf5d6e48b309b0d78746b3c111d544c65",
-      "bytes": 97781
-    }
-  ],
-  "actionBudget": {
-    "limit": 20,
-    "consumedLowerBound": 21,
-    "countBasis": "Parent audit since compaction: at least 21 underlying exec/Windows invocations, including 2 prelaunch guards and 19 since launch, before worker actions. Earlier uncounted actions can only increase this total.",
-    "disposition": "CEILING REACHED/EXCEEDED — stop A1; no automatic retry. This is separate from the earlier 40-action Wave A stop.",
-    "remaining": 0,
-    "observer": "parent session"
-  },
-  "plannedRetry": {
-    "status": "SUPERSEDED — NO AUTOMATIC RETRY; A1 CAP EXHAUSTED",
-    "see": "proposedRecovery"
-  },
-  "successorDisposition": "A2, A3 and production extraction remain blocked by incomplete A1/G0.",
-  "proposedRecovery": {
-    "status": "PROPOSED — REQUIRES OWNER APPROVAL OF A FRESH BOUNDED RECOVERY SLICE",
-    "checkpoint": "30b722917cbcbabeb75faabc839160f0e4ac7f83",
-    "maximumParentToolCalls": 8,
-    "countIncludes": "Restarting preview, fresh-profile launch, observation, close/flush, and final verification; keep an explicit action ledger.",
-    "steps": [
-      "Restart the baseline preview.",
-      "Use a new dedicated test profile and the exact unchanged archived baseline build. Launch with Start-Process -WindowStyle Hidden, fresh persistent stdout/stderr redirects, and Wait-Process lifecycle ownership.",
-      "Capture one 10-second live observation using the checkpointed serializable identity expression.",
-      "Close the owned runtime, flush, and verify the three known live-profile hashes; stop the preview and verify no owned runtime remains.",
-      "Require zero unresolved isolation/write errors and preserve exact identity, screenshot and logs; any failure stops immediately."
+  "slice": "A1-R (ROADMAP amendment 2026-10-08 item 1)",
+  "outcome": "PASS",
+  "recordedAtUtc": "2026-10-09T04:48:01.038Z",
+  "runId": "blurby-reader-mode-separation-2-a1-r20261009044534424",
+  "parentToolCalls": {
+    "budget": 8,
+    "usedAtRecording": 6,
+    "ledger": [
+      "1 driver run (preview restart, Hidden launch with redirects, 10 s observe capture, close, preview stop, live hashes)",
+      "2 log/event/capture inspection",
+      "3 model-file inspection",
+      "4 model content hash + live re-hash",
+      "5 retention script failed to compile (no effect)",
+      "6 retain artifacts + this record"
     ],
-    "constraints": [
-      "No application source edits.",
-      "Do not reuse or delete the failed profile.",
-      "No A2/Flow work until recovery admission passes.",
-      "No G0 pass implied by a successful recovery launch.",
-      "No retry until the owner authorizes the cap extension."
+    "plannedRemaining": [
+      "7 checkpoint commit + push"
     ]
   },
-  "checkpointAfterFailure": "30b722917cbcbabeb75faabc839160f0e4ac7f83"
+  "identities": {
+    "runHead": "a1a28a0658bcfddb85e8d2e23d9a7172ec65aaba",
+    "pinnedSource": "1e5485c66e547392e7752240df71700267e8ede7",
+    "productionMatchesPin": true,
+    "productionFileCount": 267,
+    "sourceManifestSha256": "a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291",
+    "b0Archive": "C:\\Projects\\Blurby-artifacts\\rms2-baseline-build",
+    "b0BuildManifestSha256": "e7e8f6c91476cbdf4908c35f9bba8e17347f06b0dd6570a14720e949e5930421",
+    "servedAssetsMatchedB0": "21/21",
+    "fixtures": [
+      {
+        "id": "g0-public-epub",
+        "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+        "wordCount": 80479,
+        "kind": "native-epub"
+      },
+      {
+        "id": "g0-public-text",
+        "sha256": "4a3ff25a3017e3510e8235670382ceb8420e5bf4fe2cc2c9cb72f988cfd2c0c3",
+        "wordCount": 339,
+        "kind": "legacy-inline-content-non-epub"
+      }
+    ]
+  },
+  "process": {
+    "electronPid": 9400,
+    "runtime": {
+      "electron": "41.1.0",
+      "chrome": "146.0.7680.166",
+      "node": "24.14.0"
+    },
+    "launch": "Start-Process -WindowStyle Hidden; stdout/stderr redirected to fresh files; lifecycle owned by the driver",
+    "exitCode": 0,
+    "close": "CDP Browser.close -> window-all-closed -> app.quit -> will-quit flush (profile library.json written 04:45:48.93Z, after capture end 04:45:48.74Z); no leftover processes",
+    "driverGracefulFlagNote": "The driver reported graceful=false because Wait-Process ran after the PID had already exited cleanly (exit 0): an instrument false negative"
+  },
+  "viewport": {
+    "requestedContent": {
+      "width": 1100,
+      "height": 800
+    },
+    "contentBounds": {
+      "x": 498,
+      "y": 295,
+      "width": 1101,
+      "height": 801
+    },
+    "windowBounds": {
+      "x": 498,
+      "y": 295,
+      "width": 1102,
+      "height": 801
+    }
+  },
+  "isolation": {
+    "resolvedPaths": {
+      "userData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\userData",
+      "sessionData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\sessionData",
+      "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\logs",
+      "crashDumps": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\crashDumps"
+    },
+    "sessionStoragePath": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\sessionData",
+    "readyIsolationVerifiedAt": "2026-10-09T04:45:36.963Z",
+    "rendererIdentityInstalledAt": "2026-10-09T04:45:37.325Z",
+    "profileWrites": [
+      {
+        "file": "library.json",
+        "bytes": 2808,
+        "modifiedUtc": "2026-10-09T04:45:48.9295693Z"
+      },
+      {
+        "file": "settings.json",
+        "bytes": 377,
+        "modifiedUtc": "2026-10-09T04:45:38.2664698Z"
+      },
+      {
+        "file": "sync-queue.json",
+        "bytes": 125,
+        "modifiedUtc": "2026-10-09T04:45:38.2664698Z"
+      },
+      {
+        "file": "sync-state.json",
+        "bytes": 164,
+        "modifiedUtc": "2026-10-09T04:45:37.1859723Z"
+      }
+    ]
+  },
+  "liveProfile": {
+    "before": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "after": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "unchanged": true,
+    "recheckedAfterInspection": "same three SHA-256 values (call 4)"
+  },
+  "errors": {
+    "epipe": "none",
+    "isolation": "none",
+    "writePath": "none",
+    "observations": [
+      {
+        "id": "OBS-A1R-1",
+        "what": "Kokoro background warm-up: Load model from <profile>/userData/models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model_q4.onnx failed: system error number 13 (app logs: will retry on demand)",
+        "classification": "Not an isolation or write-path error: the path is inside the test profile, and the downloaded file is byte-identical to the installed model (SHA-256 04cf570cf9c4153694f76347ed4b9a48c1b59ff1de0999e6605d123966b197c7, 305215966 bytes). A load attempt raced the freshly written file.",
+        "followUp": "A2/A3 Narrate scenarios must record a successful on-demand model load; a recurrence is recorded against the harness route, not admitted silently."
+      }
+    ]
+  },
+  "heardAudio": "NOT OBSERVED (A1-R makes no audio claim)",
+  "g0": "NOT PASSED: a successful A1-R does not pass G0",
+  "retainedArtifacts": [
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-manifest.json",
+      "sha256": "591179d866376c28540bcbd89a013726834a944b604d7e3961e6b049ac0857ae",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\isolation.json"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-main-events.ndjson",
+      "sha256": "0c17d5c88a440c1514bad4213094caf545fbfcb81031187a5402c823f07c8f65",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\main-events.ndjson"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-capture.json",
+      "sha256": "a742492f14e932acd73e697b29a817cb8f0527aec2f6cd6c1d84713f6d334b50",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\captures\\a1r-observe\\capture.json"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-electron.out.log",
+      "sha256": "5eb1b43492abb9c2c504bf49b8d10ab08e58f209703a23a55ff73878dfcae68a",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424-logs\\electron.out.log"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-electron.err.log",
+      "sha256": "79f5c05e8134cdc6820c475c05c24871eb1fb3eb3bbe46d0738c9a837d1ee82e",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424-logs\\electron.err.log"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-result.json",
+      "sha256": "3aecaf5a116e420b2568a098ef8b9e18e0eb455563ee4207d84cf1efc7d45845",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424-logs\\a1r-result.json"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-001-initial.png",
+      "sha256": "fd2c63dd1302b36f245d03c5090f76cbb0e4a4838a02c0d5663a13e6fb2b347e",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\captures\\a1r-observe\\001-initial.png"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-002-observation-only-start.png",
+      "sha256": "fd2c63dd1302b36f245d03c5090f76cbb0e4a4838a02c0d5663a13e6fb2b347e",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\captures\\a1r-observe\\002-observation-only-start.png"
+    },
+    {
+      "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-023-observation-only-end.png",
+      "sha256": "fd2c63dd1302b36f245d03c5090f76cbb0e4a4838a02c0d5663a13e6fb2b347e",
+      "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424\\captures\\a1r-observe\\023-observation-only-end.png"
+    }
+  ],
+  "priorAttempts": [
+    {
+      "sprintCode": "READER-MODE-SEPARATION-2",
+      "slice": "A1",
+      "status": "FAILED — G0 BLOCKED",
+      "recordedAtUtc": "2026-09-23T21:46:17.507609+00:00",
+      "runId": "blurby-reader-mode-separation-2-a1-20260923214002764",
+      "launchedAtUtc": "2026-09-23T21:40:03.752Z",
+      "launchedHead": "8ea751a51d92962004dd3e6b3835fce746c85cc1",
+      "pinnedGovernanceCommit": "1e5485c66e547392e7752240df71700267e8ede7",
+      "sourceManifestSha256": "a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291",
+      "buildManifestSha256": "e7e8f6c91476cbdf4908c35f9bba8e17347f06b0dd6570a14720e949e5930421",
+      "productionMatchesPinAtLaunch": true,
+      "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764",
+      "profileDisposition": "Preserved; no cleanup",
+      "resolvedPaths": {
+        "userData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\userData",
+        "sessionData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\sessionData",
+        "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\logs",
+        "crashDumps": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\crashDumps"
+      },
+      "actualSessionStoragePath": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\sessionData",
+      "pathObservation": "Launcher recorded all configured paths and actual Electron session storage inside the dedicated profile; this is partial isolation evidence, not completed A1 admission.",
+      "readyIsolationVerifiedAt": "2026-09-23T21:40:04.050Z",
+      "failures": [
+        {
+          "kind": "renderer identity capture",
+          "evidence": "main-events.ndjson at 2026-09-23T21:40:10.248Z",
+          "observed": "An object could not be cloned.",
+          "explanation": "Parent inspection reports the executeJavaScript expression returned window, an unserializable identity result."
+        },
+        {
+          "kind": "main-process error dialog",
+          "observed": "Error: EPIPE: broken pipe, write",
+          "stackIncludes": "ReadableWorkerStdio.ondata; node:internal/worker",
+          "evidence": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png"
+        },
+        {
+          "kind": "recovery obstruction",
+          "observed": "Parent reported debugger close attempts timing out and a recurring error dialog at console.error in main/tts-engine.js:17.",
+          "evidenceType": "Parent live-session report; not a separately retained log"
+        }
+      ],
+      "launchObservation": {
+        "observer": "parent session",
+        "guiCommandExitCode": 0,
+        "guiCommandElapsedSeconds": 0.17,
+        "interpretation": "Command completion was not application-health evidence; a subsequent live error dialog blocked admission."
+      },
+      "hypotheses": [
+        {
+          "claim": "The GUI process outlived the command stdout/stderr pipes, and later worker/log output hit a closed pipe.",
+          "status": "UNPROVEN; compare a bounded launch with persistent redirected output before attributing cause."
+        }
+      ],
+      "stopObservation": {
+        "observer": "parent session",
+        "ownedPid": 39680,
+        "action": "Stopped exact owned PID 39680 after debugger close attempts timed out",
+        "result": "Parent verified no remaining children belonging to this profile",
+        "gracefulCloseVerified": false,
+        "previewSession": 67679,
+        "previewDisposition": "Parent stopped the owned Vite preview with Ctrl-C at the stop boundary; no runtime is required while awaiting the owner decision."
+      },
+      "liveProfileChecks": [
+        {
+          "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\library.json",
+          "beforeSha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6",
+          "afterSha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6",
+          "unchanged": true,
+          "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
+          "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
+        },
+        {
+          "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\settings.json",
+          "beforeSha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f",
+          "afterSha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f",
+          "unchanged": true,
+          "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
+          "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
+        },
+        {
+          "path": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\blurby-data\\sync-queue.json",
+          "beforeSha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1",
+          "afterSha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1",
+          "unchanged": true,
+          "beforeProvenance": "Parent observer prelaunch hash supplied to failure-evidence worker",
+          "afterProvenance": "Failure-evidence worker reread after parent stopped the owned run"
+        }
+      ],
+      "liveProfileCheckScope": "Only these three named live-profile files were hashed; this does not claim all host files were unchanged.",
+      "artifacts": [
+        {
+          "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\isolation.json",
+          "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-manifest.json",
+          "sha256": "78b1946b38d3e55846532861f970d6bd3840b42632a4a3b747f124504aa14575",
+          "bytes": 61521
+        },
+        {
+          "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-20260923214002764\\main-events.ndjson",
+          "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-main-events.ndjson",
+          "sha256": "efb7ea350cd7556f6781a5074d2401a0d95b68aea6087d6d0c81773686bda7c8",
+          "bytes": 634
+        },
+        {
+          "source": "C:\\Users\\estra\\AppData\\Local\\Temp\\codex-clipboard-f0211d69-5fdf-4965-9c48-f50f579a71c2.png",
+          "path": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png",
+          "sha256": "f893c9c7837208ecf261a8e42e53fb4bf5d6e48b309b0d78746b3c111d544c65",
+          "bytes": 97781
+        }
+      ],
+      "actionBudget": {
+        "limit": 20,
+        "consumedLowerBound": 21,
+        "countBasis": "Parent audit since compaction: at least 21 underlying exec/Windows invocations, including 2 prelaunch guards and 19 since launch, before worker actions. Earlier uncounted actions can only increase this total.",
+        "disposition": "CEILING REACHED/EXCEEDED — stop A1; no automatic retry. This is separate from the earlier 40-action Wave A stop.",
+        "remaining": 0,
+        "observer": "parent session"
+      },
+      "plannedRetry": {
+        "status": "SUPERSEDED — NO AUTOMATIC RETRY; A1 CAP EXHAUSTED",
+        "see": "proposedRecovery"
+      },
+      "successorDisposition": "A2, A3 and production extraction remain blocked by incomplete A1/G0.",
+      "proposedRecovery": {
+        "status": "PROPOSED — REQUIRES OWNER APPROVAL OF A FRESH BOUNDED RECOVERY SLICE",
+        "checkpoint": "30b722917cbcbabeb75faabc839160f0e4ac7f83",
+        "maximumParentToolCalls": 8,
+        "countIncludes": "Restarting preview, fresh-profile launch, observation, close/flush, and final verification; keep an explicit action ledger.",
+        "steps": [
+          "Restart the baseline preview.",
+          "Use a new dedicated test profile and the exact unchanged archived baseline build. Launch with Start-Process -WindowStyle Hidden, fresh persistent stdout/stderr redirects, and Wait-Process lifecycle ownership.",
+          "Capture one 10-second live observation using the checkpointed serializable identity expression.",
+          "Close the owned runtime, flush, and verify the three known live-profile hashes; stop the preview and verify no owned runtime remains.",
+          "Require zero unresolved isolation/write errors and preserve exact identity, screenshot and logs; any failure stops immediately."
+        ],
+        "constraints": [
+          "No application source edits.",
+          "Do not reuse or delete the failed profile.",
+          "No A2/Flow work until recovery admission passes.",
+          "No G0 pass implied by a successful recovery launch.",
+          "No retry until the owner authorizes the cap extension."
+        ]
+      },
+      "checkpointAfterFailure": "30b722917cbcbabeb75faabc839160f0e4ac7f83"
+    }
+  ]
 }

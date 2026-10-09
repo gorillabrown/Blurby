@@ -150,7 +150,16 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/baseline-build-rebuild.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-run.ps1",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-manual-checklist.md",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/live-baseline-manual.json"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live-baseline-manual.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-manifest.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-main-events.ndjson",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-capture.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-electron.out.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-electron.err.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-20261009044534424-result.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-001-initial.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-002-observation-only-start.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1r-20261009044534424-023-observation-only-end.png"
   ],
   "epicPacketPaths": [
     "docs/planning/epics/2026-10-09-reader-mode-separation-2/charter.md",
