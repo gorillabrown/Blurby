@@ -63,6 +63,7 @@ Waves follow `ROADMAP.md` § READER-MODE-SEPARATION-2 → *Waves and verificatio
 | S1 | A2 PASS (Flow reproduction/classification) | `admission/flow-reproduction.json` (2529a921) |
 | S1 | A3 automated half recorded; G0 owner half pending (B1) | `admission/g0-matrix.json` (277967b3); census 63b10115; G4 fixtures c61bca67 |
 | S1 | **Wave B gate B9 PASS** on 5a34f6e1: typecheck/test/build 0; 217/3089/133 skipped (= B0); recorder 5/5; G4 page+focus byte-identical after Q-F; OBS-A3-2 fixed (mutation-proven) | `verification.json → waveGates[0]` |
+| S1 | **Wave C gate C4 PASS** on 9fa253b0: 219/3106/133 skipped; recorder 5/5; G4 flow byte-identical after Q-F (35) + OC-1 (3); Flow with throwing audio: 0 audio calls; G3 6 pairs | `verification.json → waveGates[1]` |
 
 ## Current-phase worklist
 

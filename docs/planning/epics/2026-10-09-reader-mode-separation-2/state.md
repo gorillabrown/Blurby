@@ -36,8 +36,8 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P4 — Wave C (Flow). Wave B gate PASS 5a34f6e1
-next_action:  Wave C (Flow): C1 Flow tree → C2 isolation pairs (page/focus/flow) → C3 throwing audio → C4 gate
+phase:        P5 — Wave D (Narrate). Gates PASS: B9 5a34f6e1, C4 9fa253b0
+next_action:  Wave D (Narrate): D1 Narrate tree (4 named tests) → D2 all 12 G3 pairs + 4 same-mode → D3 router module registry → D4 gate
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
