@@ -103,6 +103,60 @@ function checkPerModeCopies(resources: readonly PerModeResource[], modeTexts: Re
   return { missing, inShared };
 }
 
+// Q-E presence half: the explicit private-copy map (boundary-policy.json privateCopyMap), one entry per
+// (per-mode census resource, privateCopiesFor mode) pair.
+const COPY_REASONS = ["dead-OC-9", "dead-design-B5", "cross-owner-removed-Q-F", "not-used-by-mode"] as const;
+interface PrivateCopyEntry {
+  readonly resourceId: string;
+  readonly occurrence?: number;
+  readonly mode: string;
+  readonly copy?: { readonly file: string; readonly anchor: string };
+  readonly notCopied?: { readonly reason: string; readonly cite: string };
+}
+/** Census resources can share an id (two ResizeObservers in one function): the ordinal among equal ids disambiguates. */
+const pairKey = (id: string, occurrence: number, mode: string) => `${id}#${occurrence} | ${mode}`;
+
+function expectedCopyPairs(resources: readonly PerModeResource[]): string[] {
+  const seen = new Map<string, number>();
+  const keys: string[] = [];
+  for (const r of resources) {
+    const id = resourceId(r as unknown as Resource);
+    const occurrence = seen.get(id) ?? 0;
+    seen.set(id, occurrence + 1);
+    for (const mode of r.privateCopiesFor) keys.push(pairKey(id, occurrence, mode));
+  }
+  return keys;
+}
+
+/** Pure check shared by the real map and the negative control: coverage, copy presence and notCopied validity. */
+function checkPrivateCopyMap(expected: readonly string[], map: readonly PrivateCopyEntry[], readText: (file: string) => string | null) {
+  const problems: string[] = [];
+  const have = new Map<string, number>();
+  for (const e of map) {
+    const key = pairKey(e.resourceId, e.occurrence ?? 0, e.mode);
+    have.set(key, (have.get(key) ?? 0) + 1);
+    if (!!e.copy === !!e.notCopied) problems.push(`${key}: exactly one of copy / notCopied is required`);
+    if (e.copy) {
+      if (!e.copy.file.startsWith(`${policy.modesDirectory}/${e.mode}/`)) problems.push(`${key}: copy file ${e.copy.file} is not inside ${policy.modesDirectory}/${e.mode}/`);
+      const text = readText(e.copy.file);
+      const anchor = e.copy.anchor;
+      if (anchor === "" || anchor !== anchor.trim() || anchor.includes("\n")) problems.push(`${key}: anchor must be one non-empty trimmed line`);
+      else if (text === null || !norm(text).split("\n").some((line) => line.trim() === anchor)) problems.push(`${key}: anchor not found in ${e.copy.file} :: ${anchor}`);
+    }
+    if (e.notCopied) {
+      if (!(COPY_REASONS as readonly string[]).includes(e.notCopied.reason)) problems.push(`${key}: bad notCopied reason ${e.notCopied.reason}`);
+      if (e.notCopied.cite.trim().length === 0) problems.push(`${key}: notCopied cite is empty`);
+    }
+  }
+  for (const key of expected) if (!have.has(key)) problems.push(`${key}: missing from privateCopyMap`);
+  const want = new Set(expected);
+  for (const [key, n] of have) {
+    if (!want.has(key)) problems.push(`${key}: extra entry (not a per-mode resource / privateCopiesFor mode)`);
+    if (n > 1) problems.push(`${key}: duplicate entry (${n})`);
+  }
+  return problems;
+}
+
 /** Dynamic identity: every non-frozen object reachable from `root` (own props incl. non-enumerable, Map/Set entries, arrays). */
 function mutableIdentities(root: unknown): Set<object> {
   const found = new Set<object>();
@@ -226,13 +280,62 @@ describe("reader mode ownership (G1)", () => {
     const sharedTexts = Object.fromEntries([...policy.sharedValueFiles, ...policy.infrastructureFiles].map((f) => [f, fs.readFileSync(f, "utf8")]));
     const { missing, inShared } = checkPerModeCopies(perMode, modeTexts, sharedTexts);
     const pairs = perMode.reduce((n, r) => n + r.privateCopiesFor.length, 0);
-    console.info(`[G1 Q-E] per-mode resources examined: ${perMode.length}; (resource, mode) pairs: ${pairs}; anchors missing from a mode copy: ${missing.length}; anchors in shared files: ${inShared.length}`);
+    console.info(`[G1 Q-E] per-mode resources examined: ${perMode.length}; (resource, mode) pairs: ${pairs}; census anchors not verbatim in a mode copy: ${missing.length} (informational, the copies were rewritten: presence is asserted through privateCopyMap); anchors in shared files: ${inShared.length}`);
     expect(perMode.length).toBeGreaterThan(0);
     expect(pairs).toBeGreaterThan(0);
     expect(inShared).toEqual([]);
-    // STOP (E5 report): the per-mode presence half (`missing` is empty) is deliberately not asserted. Many census
-    // anchors do not appear verbatim in the mode copies (the copies were rewritten into ModeState / ModeRuntime /
-    // useModeBindings rather than text-copied); asserting it needs a looser matcher, which the brief forbids.
+  });
+
+  it("every (per-mode resource, mode) pair has an explicit private copy in that mode or a justified notCopied (Q-E, presence half)", () => {
+    const perMode = (ownership.resources as readonly (PerModeResource & { readonly proposedOwner: string })[]).filter((r) => r.proposedOwner === "per-mode");
+    const map = (policy as unknown as { privateCopyMap: readonly PrivateCopyEntry[] }).privateCopyMap;
+    const expected = expectedCopyPairs(perMode);
+    const problems = checkPrivateCopyMap(expected, map, (file) => (fs.existsSync(file) ? fs.readFileSync(file, "utf8") : null));
+    expect(expected.length).toBeGreaterThan(0);
+    expect(map.length).toBe(expected.length);
+    expect(problems).toEqual([]);
+
+    // No copy anchor appears in any shared value / infrastructure file.
+    const shared = [...policy.sharedValueFiles, ...policy.infrastructureFiles].map((f) => [f, norm(fs.readFileSync(f, "utf8"))] as const);
+    const leaked = map.flatMap((e) => (e.copy ? shared.filter(([, text]) => text.includes(e.copy!.anchor)).map(([f]) => `${e.resourceId} | ${e.mode}: anchor in shared file ${f} :: ${e.copy!.anchor}`) : []));
+    expect(leaked).toEqual([]);
+
+    const copied = map.filter((e) => e.copy);
+    const notCopied = map.filter((e) => e.notCopied);
+    const byReason: Record<string, number> = {};
+    for (const e of notCopied) byReason[e.notCopied!.reason] = (byReason[e.notCopied!.reason] ?? 0) + 1;
+    const byMode: Record<string, { copied: number; notCopied: number }> = {};
+    for (const e of map) {
+      byMode[e.mode] ??= { copied: 0, notCopied: 0 };
+      byMode[e.mode][e.copy ? "copied" : "notCopied"] += 1;
+    }
+    console.info(`[G1 Q-E] privateCopyMap: ${map.length} pairs; copied ${copied.length}; notCopied ${notCopied.length} by reason ${JSON.stringify(byReason)}; by mode ${JSON.stringify(byMode)}`);
+    expect(copied.length + notCopied.length).toBe(expected.length);
+    expect(copied.length).toBeGreaterThan(0);
+  });
+
+  it("detects a missing pair, an absent anchor, a wrong-mode file, a bad reason, an extra and a duplicate entry (negative control, Q-E presence)", () => {
+    const dir = (m: string) => `${policy.modesDirectory}/${m}`;
+    const texts: Record<string, string> = { [`${dir("page")}/A.ts`]: "x\r\n  const aRef = useRef(0);\r\ny", [`${dir("focus")}/A.ts`]: "const bRef = useRef(0);" };
+    const read = (f: string) => texts[f] ?? null;
+    const expected = ["r#0 | page", "r#0 | focus", "r#0 | flow"];
+    const good: PrivateCopyEntry = { resourceId: "r", mode: "page", copy: { file: `${dir("page")}/A.ts`, anchor: "const aRef = useRef(0);" } };
+    expect(checkPrivateCopyMap(expected, [good, { resourceId: "r", mode: "focus", notCopied: { reason: "not-used-by-mode", cite: "B0 condition" } }, { resourceId: "r", mode: "flow", notCopied: { reason: "dead-OC-9", cite: "x" } }], read)).toEqual([]);
+    expect(checkPrivateCopyMap(expected, [good], read)).toEqual(["r#0 | focus: missing from privateCopyMap", "r#0 | flow: missing from privateCopyMap"]);
+    expect(checkPrivateCopyMap(["r#0 | focus"], [{ resourceId: "r", mode: "focus", copy: { file: `${dir("focus")}/A.ts`, anchor: "const aRef = useRef(0);" } }], read)).toEqual([
+      `r#0 | focus: anchor not found in ${dir("focus")}/A.ts :: const aRef = useRef(0);`,
+    ]);
+    expect(checkPrivateCopyMap(["r#0 | focus"], [{ resourceId: "r", mode: "focus", copy: { file: `${dir("page")}/A.ts`, anchor: "const aRef = useRef(0);" } }], read)).toEqual([
+      `r#0 | focus: copy file ${dir("page")}/A.ts is not inside ${dir("focus")}/`,
+    ]);
+    expect(checkPrivateCopyMap(["r#0 | focus"], [{ resourceId: "r", mode: "focus", notCopied: { reason: "because", cite: " " } }], read)).toEqual([
+      "r#0 | focus: bad notCopied reason because",
+      "r#0 | focus: notCopied cite is empty",
+    ]);
+    expect(checkPrivateCopyMap(["r#0 | page"], [good, good, { resourceId: "other", mode: "page", notCopied: { reason: "not-used-by-mode", cite: "c" } }], read)).toEqual([
+      "r#0 | page: duplicate entry (2)",
+      "other#0 | page: extra entry (not a per-mode resource / privateCopiesFor mode)",
+    ]);
   });
 
   it("detects a missing private copy and a private resource leaked into a shared file (negative control, Q-E)", () => {
