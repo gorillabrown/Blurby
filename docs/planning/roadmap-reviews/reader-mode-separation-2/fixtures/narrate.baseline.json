@@ -1,0 +1,3702 @@
+{
+  "schemaVersion": 1,
+  "mode": "narrate",
+  "sourceCommit": "63b10115e513e13e141b71927f9cdc02b5245235",
+  "sourceSrcTree": "0c7900751cce7ce9adb09132da18c3ff73de9b9b",
+  "recordedFrom": "production path: useReaderModeOrchestrator + useReadingModeInstance",
+  "recorder": "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx",
+  "comparison": "Fixture file text (line endings normalized to LF) must equal the freshly recorded serialization byte-for-byte. provenanceFields are copied from the committed fixture before comparison. strippedFields is empty: the current path emits no wall-clock values or session identifiers (fake timers start at 0; Date is faked).",
+  "provenanceFields": [
+    "sourceCommit",
+    "sourceSrcTree"
+  ],
+  "strippedFields": [],
+  "channelMapping": [
+    {
+      "from": "narration.startCursorDriven(words, startWordIndex, wpm, onWordAdvance)",
+      "channel": "audio.start",
+      "args": "(words, wordIndex, rate=wpm); callback omitted"
+    },
+    {
+      "from": "narration.pause(reason)",
+      "channel": "audio.pause",
+      "args": "(reason)"
+    },
+    {
+      "from": "narration.resume(...args)",
+      "channel": "audio.resume",
+      "args": "as called (production passes none)"
+    },
+    {
+      "from": "narration.stop(reason)",
+      "channel": "audio.stop",
+      "args": "(reason)"
+    },
+    {
+      "from": "narration.setOnTruthSync(cb|null)",
+      "channel": "audio.setOnTruthSync",
+      "args": "('<fn>' | null)"
+    },
+    {
+      "from": "narration.setPageEndWord(idx|null)",
+      "channel": "audio.setPageEndWord",
+      "args": "(idx|null)"
+    },
+    {
+      "from": "narration.resyncToCursor(idx, wpm) [ReaderContainer retargetActiveModeToWord]",
+      "channel": "audio.resync",
+      "args": "(wordIndex, rate)"
+    },
+    {
+      "from": "foliateApi.highlightWordByIndex(idx, kind, opts)",
+      "channel": "surface.highlight",
+      "args": "(wordIndex, kind, opts)"
+    },
+    {
+      "from": "foliateApi.next()",
+      "channel": "surface.next",
+      "args": "()"
+    },
+    {
+      "from": "foliateApi.goToSection(sectionIdx)",
+      "channel": "surface.goToSection",
+      "args": "(sectionIdx)"
+    },
+    {
+      "from": "foliateApi.clearSoftHighlight()",
+      "channel": "surface.clearSoftHighlight",
+      "args": "()"
+    },
+    {
+      "from": "foliateApi.clearUserBrowsing()",
+      "channel": "surface.clearUserBrowsing",
+      "args": "()"
+    },
+    {
+      "from": "extractFoliateWords() [ReaderContainer:651]",
+      "channel": "content.extractWords",
+      "args": "()"
+    },
+    {
+      "from": "commitPersistentWordIndex(idx, cause, options) [real usePersistentReadingAnchor, recorded at call]",
+      "channel": "persistence.commitWordIndex",
+      "args": "(wordIndex, cause, options)"
+    },
+    {
+      "from": "syncVisualToPersistentWord(options) [real hook, recorded at call]",
+      "channel": "persistence.syncVisual",
+      "args": "(options)"
+    },
+    {
+      "from": "window.electronAPI.updateDocProgress(docId, idx, cfi)",
+      "channel": "persistence.updateDocProgress",
+      "args": "(docId, wordIndex, cfi)"
+    },
+    {
+      "from": "onUpdateProgress(docId, idx)",
+      "channel": "persistence.updateProgress",
+      "args": "(docId, wordIndex)"
+    },
+    {
+      "from": "updateSettings(patch)",
+      "channel": "settings.update",
+      "args": "(patch)"
+    },
+    {
+      "from": "setWpm(value|updater)",
+      "channel": "settings.setWpm",
+      "args": "(resolved value)"
+    },
+    {
+      "from": "reader.jumpToWord(idx) [useReader, also passed to persistence hook + mode instance]",
+      "channel": "focusView.jumpToWord",
+      "args": "(wordIndex)"
+    },
+    {
+      "from": "reader.togglePlay()",
+      "channel": "focusView.togglePlay",
+      "args": "()"
+    },
+    {
+      "from": "onNarrateTruthSync(idx) [ReaderContainer applyNarrationActiveWord]",
+      "channel": "narrateView.applyActiveWord",
+      "args": "(wordIndex)"
+    },
+    {
+      "from": "pageNavRef.current.returnToHighlight()",
+      "channel": "pageNav.returnToHighlight",
+      "args": "()"
+    },
+    {
+      "from": "flowScrollEngineRef.current.* (useFlowScrollSync / FlowScrollEngine)",
+      "channel": "scroll.*",
+      "args": "NOT MOUNTED — see limitations; zero scroll effects in this baseline"
+    }
+  ],
+  "queriesNotRecorded": [
+    "foliateApi.getWords / findFirstVisibleWordIndex (fake → 0) / getSectionForWordIndex (fake → 0) / getParagraphBreaks (fake → {8,17})",
+    "pageNavRef.current.getCurrentPageStart (fake → 0)",
+    "getEffectiveWords()",
+    "reads of narration.cursorWordIndex / speaking / status"
+  ],
+  "fakeSemantics": {
+    "audio": "start→ returns the script's next startResult (last repeats); sets cursorWordIndex=wordIndex and status speaking|warming|error. pause→status paused. resume→status speaking. stop→status idle and drops the word callback. resync→cursorWordIndex=wordIndex. Commands audioWordAdvance(i)/audioTruthSync(i) set cursorWordIndex=i and invoke the callback last registered via start/setOnTruthSync (if any).",
+    "surface": "Foliate API fake. highlightWordByIndex returns true iff wordIndex < loaded word count. Words are loaded at open unless the script declares delayed extraction; command surfaceLoadsWords loads them.",
+    "settings": "Initial {...DEFAULT_SETTINGS, readingMode:'page', lastReadingMode:'flow', isNarrating:false}; settings.update merges the patch into rendered settings.",
+    "document": "activeDoc {id:'fixture-doc', position:startWord, wordCount:25, cfi:null}; 25 words; paragraph breaks [8,17]; wpm=effectiveWpm=300; useFoliate=true; bookWordsTotalWords=25."
+  },
+  "observationFields": {
+    "readingMode": "router mode state",
+    "focusPlaying": "Focus playing flag",
+    "flowPlaying": "Flow playing flag",
+    "isNarrating": "Narrate active-session flag",
+    "isBrowsedAway": "browse-away flag",
+    "highlightedWordIndex": "rendered highlight/selection",
+    "publishedWordIndex": "published persistent anchor (state)",
+    "canonicalWordIndex": "canonical anchor (persistence ref)",
+    "persistedSettings": "settings readingMode/lastReadingMode/isNarrating after all settings.update patches",
+    "audio": "fake audio port status/cursor (narrate truth source)"
+  },
+  "limitations": [
+    "ReaderContainer cannot mount headlessly (FoliatePageView, Electron IPC, TTS). Its glue that feeds the orchestrator is reproduced in the harness with citations: onWordAdvance/onComplete (ReaderContainer.tsx:705-755), queuePostModeAnchorSync + double-RAF post-mode anchor effect (766-770, 883-901), retargetActiveModeToWord (865-881), foliate onWordClick resolved-index path used for hardSelect (1356-1399), extractFoliateWords (651-664), state/ref declarations (178-200).",
+    "Only the Foliate (useFoliate=true) surface is recorded. ReaderContainer renders non-EPUB documents only as an error fallback (ReaderContainer.tsx:1605, 'all docs should be EPUB since EPUB-2B'), so useFoliate=false branches (FlowCursorController delegation) are not reachable in production rendering. Non-EPUB fixtures are covered by the live G0/G6 matrix, not here.",
+    "useFlowScrollSync / FlowScrollEngine / FlowCursorController are not mounted (they need real layout); scroll.* has zero recorded effects and flowScrollEngineRef is null in retargetActiveModeToWord.",
+    "useNarration (Kokoro, audioScheduler) is replaced by the declared fake audio port; heard-audio timing, cursor lag (NARRATION_CURSOR_LAG_MS) and the known cursor-lead / 1.4x overlap defects are NOT represented. Audio progress is driven only by explicit audioWordAdvance/audioTruthSync commands.",
+    "useReader (Focus display), ReaderView onWordUpdate DOM fast-path and the TTS background cacher (backgroundCacherRef.updateCursorPosition) are not modeled; reader.playing is always false.",
+    "useDocumentLifecycle is not mounted: no saved-mode restore on open (document always opens in page mode), no session stats, no lifecycle RAF cleanup. useFoliateSync browse-away detection is not mounted; isBrowsedAway only changes through the router/glue.",
+    "evalTrace is disabled (null); markPageActivity / userExplicitSelectionRef / activeDoc.cfi mutation on click are omitted (no collaborator effects in this path).",
+    "Foliate section misses (highlightWordByIndex=false → surface.next/goToSection pause-on-miss) are not exercised except through delayed extraction.",
+    "Cross-owner effects are present in this baseline (e.g. Focus/Flow/Page commands call audio.stop/setOnTruthSync/setPageEndWord via stopAllModes and createInstance). They are tagged crossOwner:true; the roadmap requires they become zero after separation (G6), which conflicts with a pure byte-for-byte G4 comparison unless crossOwner-tagged effects are excluded and asserted absent."
+  ],
+  "scripts": [
+    {
+      "name": "narrate-core-start-7",
+      "startWord": 7,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 7,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                7,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "audioWordAdvance",
+          "args": {
+            "wordIndex": 8
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 8
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 4,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 8
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 5,
+          "command": "audioTruthSync",
+          "args": {
+            "wordIndex": 9
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 9
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 9,
+            "publishedWordIndex": 9,
+            "canonicalWordIndex": 9,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 9
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                9,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "narrateView.applyActiveWord",
+              "args": [
+                9
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                9,
+                "narrate",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "command": "hardSelect",
+          "args": {
+            "wordIndex": 17
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 17
+            }
+          },
+          "effects": [
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "hard-selection",
+                {
+                  "cfi": null,
+                  "persist": true,
+                  "publishState": true,
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                17
+              ]
+            },
+            {
+              "channel": "persistence.updateDocProgress",
+              "args": [
+                "fixture-doc",
+                17,
+                "<undefined>"
+              ]
+            },
+            {
+              "channel": "persistence.updateProgress",
+              "args": [
+                "fixture-doc",
+                17
+              ]
+            },
+            {
+              "channel": "audio.resync",
+              "args": [
+                17,
+                300
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 17
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": true
+                }
+              ]
+            },
+            {
+              "channel": "audio.pause",
+              "args": [
+                "user-stop"
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 17
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 10,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 17
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.resume",
+              "args": []
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 11,
+          "command": "audioTruthSync",
+          "args": {
+            "wordIndex": 18
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 18
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 12,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 18,
+            "publishedWordIndex": 18,
+            "canonicalWordIndex": 18,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 18
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                18,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "narrateView.applyActiveWord",
+              "args": [
+                18
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                18,
+                "narrate",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 13,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 18,
+            "publishedWordIndex": 18,
+            "canonicalWordIndex": 18,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 18
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 14,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 18,
+            "publishedWordIndex": 18,
+            "canonicalWordIndex": 18,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 18
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "isNarrating": false
+                }
+              ]
+            },
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 15,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        },
+        {
+          "step": 16,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-core-start-0",
+      "startWord": 0,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 0,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                0,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "audioWordAdvance",
+          "args": {
+            "wordIndex": 1
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 1
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 4,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 1
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 5,
+          "command": "audioTruthSync",
+          "args": {
+            "wordIndex": 2
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 2
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 2
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                2,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "narrateView.applyActiveWord",
+              "args": [
+                2
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                2,
+                "narrate",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "command": "hardSelect",
+          "args": {
+            "wordIndex": 10
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 10
+            }
+          },
+          "effects": [
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "hard-selection",
+                {
+                  "cfi": null,
+                  "persist": true,
+                  "publishState": true,
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                10
+              ]
+            },
+            {
+              "channel": "persistence.updateDocProgress",
+              "args": [
+                "fixture-doc",
+                10,
+                "<undefined>"
+              ]
+            },
+            {
+              "channel": "persistence.updateProgress",
+              "args": [
+                "fixture-doc",
+                10
+              ]
+            },
+            {
+              "channel": "audio.resync",
+              "args": [
+                10,
+                300
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 10
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": true
+                }
+              ]
+            },
+            {
+              "channel": "audio.pause",
+              "args": [
+                "user-stop"
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 10
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 10,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 10
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.resume",
+              "args": []
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 11,
+          "command": "audioTruthSync",
+          "args": {
+            "wordIndex": 11
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 11
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 12,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 11,
+            "publishedWordIndex": 11,
+            "canonicalWordIndex": 11,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 11
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                11,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "narrateView.applyActiveWord",
+              "args": [
+                11
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                11,
+                "narrate",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 13,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 11,
+            "publishedWordIndex": 11,
+            "canonicalWordIndex": 11,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 11
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 14,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 11,
+            "publishedWordIndex": 11,
+            "canonicalWordIndex": 11,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 11
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "isNarrating": false
+                }
+              ]
+            },
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 15,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        },
+        {
+          "step": 16,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-delayed-extraction-start-0",
+      "startWord": 0,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 0,
+            "surfaceLoaded": false
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "surface.next",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "surfaceLoadsWords",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 4,
+          "command": "advanceTime",
+          "args": {
+            "ms": 500
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                0,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-delayed-extraction-start-2",
+      "startWord": 2,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 2,
+            "surfaceLoaded": false
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "surface.next",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "surfaceLoadsWords",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 4,
+          "command": "advanceTime",
+          "args": {
+            "ms": 500
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 2
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                2
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                2
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                2,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "command": "advanceTime",
+          "args": {
+            "ms": 16
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 2,
+            "publishedWordIndex": 2,
+            "canonicalWordIndex": 2,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 2
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-pause-resume-reuses-session-start-7",
+      "startWord": 7,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 7,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                7,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                7,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": true
+                }
+              ]
+            },
+            {
+              "channel": "audio.pause",
+              "args": [
+                "user-stop"
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.resume",
+              "args": []
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "paused",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                7,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": true,
+                  "navigate": false,
+                  "syncVisual": true
+                }
+              ]
+            },
+            {
+              "channel": "audio.pause",
+              "args": [
+                "user-stop"
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.resume",
+              "args": []
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-start-failure-warming-start-7",
+      "startWord": 7,
+      "audioStartResults": [
+        "warming"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 7,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "warming",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                7,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "warming",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": true,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": true
+            },
+            "audio": {
+              "status": "speaking",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.resume",
+              "args": []
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "isNarrating": false
+                }
+              ]
+            },
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "narrate-start-failure-error-start-7",
+      "startWord": 7,
+      "audioStartResults": [
+        "error"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 7,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "narrate"
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "error",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                7,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "error",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "narrate",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "narrate",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "error",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                "<fn>"
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate"
+                }
+              ]
+            },
+            {
+              "channel": "audio.start",
+              "args": [
+                [
+                  "The",
+                  "quick",
+                  "brown",
+                  "fox,",
+                  "having",
+                  "crossed",
+                  "the",
+                  "river,",
+                  "rested.",
+                  "Then",
+                  "it",
+                  "ran",
+                  "again;",
+                  "the",
+                  "hounds",
+                  "followed",
+                  "close",
+                  "behind.",
+                  "Finally,",
+                  "night",
+                  "fell",
+                  "over",
+                  "3",
+                  "quiet",
+                  "hills."
+                ],
+                7,
+                300
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "narrate",
+                  "lastReadingMode": "narrate",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 5,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "narrate",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 7
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 6,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    }
+  ]
+}
