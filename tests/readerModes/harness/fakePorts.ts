@@ -56,6 +56,7 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
   const registered: Record<string, ((...args: never[]) => unknown) | null> = {};
   const pendingBookWords: Array<(value: ReaderBookWordsValue | null) => void> = [];
   const pendingBookBytes: Array<(value: ArrayBuffer) => void> = [];
+  const audio = { status: "idle", speaking: false, warming: false, cursorWordIndex: 0 };
 
   const rec = (method: string) => (...args: unknown[]) => {
     if (!READS.has(method)) (method.startsWith("diagnostics.") ? diagnostics : effects).push({ method, args });
@@ -81,15 +82,26 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
       ensureBookWords: () => { rec("document.ensureBookWords")(); return new Promise((resolve) => pendingBookWords.push(resolve)); },
       subscribe: (listener) => { register("document.subscribe", "document")(listener); return rec("document.unsubscribe"); },
     },
+    // Audio with the fixtures' fakeSemantics: start sets the cursor and status, pause/resume toggle the
+    // status, resync moves the cursor, stop goes idle and drops the word callback.
     audio: {
-      readState: () => ({ status: "idle", speaking: false, warming: false, kokoroLoading: false, cursorWordIndex: 0, pauseReason: null, rate: 1 }),
-      start: (...args) => { register("audio.start", "onWord")(...args); return options.audioStartResult ?? "started"; },
-      pause: rec("audio.pause"),
-      resume: rec("audio.resume"),
-      stop: rec("audio.stop"),
+      readState: () => ({ status: audio.status as never, speaking: audio.speaking, warming: audio.warming, kokoroLoading: false, cursorWordIndex: audio.cursorWordIndex, pauseReason: null, rate: 1 }),
+      start: (...args) => {
+        register("audio.start", "onWord")(...args);
+        const result = options.audioStartResult ?? "started";
+        Object.assign(audio, { cursorWordIndex: args[1], status: result === "started" ? "speaking" : result, speaking: result === "started", warming: result === "warming" });
+        return result;
+      },
+      pause: (...args) => { rec("audio.pause")(...args); Object.assign(audio, { status: "paused", speaking: false }); },
+      resume: (...args: unknown[]) => { rec("audio.resume")(...args); Object.assign(audio, { status: "speaking", speaking: true, warming: false }); },
+      stop: (...args) => {
+        rec("audio.stop")(...args);
+        Object.assign(audio, { status: "idle", speaking: false, warming: false });
+        registered.onWord = null;
+      },
       setOnTruthSync: register("audio.setOnTruthSync", "truthSync"),
       setPageEndWord: rec("audio.setPageEndWord"),
-      resync: rec("audio.resync"),
+      resync: (...args) => { rec("audio.resync")(...args); audio.cursorWordIndex = args[0]; },
       setOnChunkBoundary: register("audio.setOnChunkBoundary", "chunkBoundary"),
       setOnSegmentStart: register("audio.setOnSegmentStart", "segmentStart"),
       setOnSectionEnd: register("audio.setOnSectionEnd", "sectionEnd"),
@@ -116,6 +128,8 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
     effects,
     diagnostics,
     registered,
+    /** The fake audio state (cursor and status), as readState reports it. */
+    audio,
     resolveBookWords: (value: ReaderBookWordsValue | null) => pendingBookWords.splice(0).forEach((resolve) => resolve(value)),
     resolveBookBytes: (value: ArrayBuffer) => pendingBookBytes.splice(0).forEach((resolve) => resolve(value)),
   };

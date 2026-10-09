@@ -35,7 +35,11 @@ import {
 import { createReaderPorts, type ReaderPortBroker, type ReaderPortInfrastructure } from "../../../src/reader/ports/createReaderPorts";
 import type { ReaderAudioStartResult } from "../../../src/reader/ports/ReaderPorts";
 import type { ReaderModeId, ReaderModeModule } from "../../../src/reader/modes/ReaderModeAdapter";
-import { createReaderModeRouter, type ReaderModeRouter } from "../../../src/reader/useReaderModeOrchestrator";
+// Type-only: the router module statically registers every mode tree (READER_MODE_MODULES, step D3), and
+// the behavior tests' vi.mock factories import this harness while those trees load. A static import here
+// would close that cycle (the factory awaits this module, which awaits the mocked tree), so the router
+// is loaded lazily inside replayScript.
+import type { ReaderModeRouter } from "../../../src/reader/useReaderModeOrchestrator";
 
 export const FIXTURE_DIR = "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures";
 
@@ -103,6 +107,14 @@ let currentEnv: ReplayEnv | null = null;
 
 function record(channel: string, args: unknown[]): void {
   currentEnv?.effects.push({ channel, args: args.map(toJson) });
+}
+
+/**
+ * Records a channel from a seam a behavior test spies on itself (design §D.4: `narrateView.applyActiveWord`
+ * is the Narrate runtime's applyNarrationActiveWord, spied on its prototype). No-op outside a replay.
+ */
+export function recordSeam(channel: string, args: unknown[]): void {
+  record(channel, args);
 }
 
 /**
@@ -293,6 +305,7 @@ async function replayScript(
   const env: ReplayEnv = { mode, effects: [], loaded: open.args.surfaceLoaded === false ? [] : [...WORDS] };
   let routerRef: ReaderModeRouter | null = null;
   const fake = createReplayInfrastructure(script, document, () => routerRef);
+  const { createReaderModeRouter } = await import("../../../src/reader/useReaderModeOrchestrator");
   const broker = createReaderPorts(options.infra ? options.infra(fake.infra) : fake.infra);
   const router = createReaderModeRouter({
     modules, broker: options.broker ? options.broker(broker) : broker, getDocument: () => document, getSettings: fake.getSettings,

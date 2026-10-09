@@ -16,13 +16,15 @@ import {
   type ReaderModeModule,
   type ReaderModeRuntime,
 } from "../src/reader/modes/ReaderModeAdapter";
-import { createReaderModeRouter } from "../src/reader/useReaderModeOrchestrator";
+import { READER_MODE_MODULES, createReaderModeRouter } from "../src/reader/useReaderModeOrchestrator";
 import { createFakeDocument, createFakeInfrastructure, type FakeInfrastructure } from "./readerModes/harness/fakePorts";
 import type { ReaderSessionKey } from "../src/reader/document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../src/reader/ports/ReaderPorts";
 import { pageMode } from "../src/reader/modes/page/index";
 import { focusMode } from "../src/reader/modes/focus/index";
 import { flowMode } from "../src/reader/modes/flow/index";
+import { narrateMode } from "../src/reader/modes/narrate/index";
+import { buildImportGraph } from "../docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs";
 
 const flushMicrotasks = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
@@ -431,9 +433,9 @@ describe("reader mode router core", () => {
 });
 
 // ── G3 over the real mode modules (design §D.3) ──────────────────────────────
-// The generators run over every mode whose module is registered here; Wave D adds narrate to this map
-// and the generated names extend without renaming.
-const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode };
+// The generators run over every mode whose module is registered here (all four since Wave D); the
+// generated names extend without renaming.
+const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode, narrate: narrateMode };
 const PRESENT_MODES = (["page", "focus", "flow", "narrate"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
 const ORDERED_PAIRS = PRESENT_MODES.flatMap((from) => PRESENT_MODES.filter((to) => to !== from).map((to) => [from, to] as const));
 const PLAYABLE = new Set<ReaderModeId>(["focus", "flow", "narrate"]);
@@ -513,6 +515,7 @@ function invokeCapturedWork(
   ports: ReaderPorts,
   key: ReaderSessionKey,
   router: ReturnType<typeof createReaderModeRouter>,
+  options: { readonly ports: boolean } = { ports: true },
 ): void {
   const view = runtime as unknown as Record<string, unknown>;
   const call = (name: string, ...args: unknown[]) => {
@@ -527,6 +530,13 @@ function invokeCapturedWork(
   call("onTocReady", [{ label: "c1" }], 1);
   call("recordDiagnostic", "late", "work");
   call("readBookBytes");
+  // Narrate's binding-driven work (section end, HOTFIX-6 extraction, audio bridge, the render poll).
+  call("syncSectionEnd");
+  call("releaseSectionEnd");
+  call("ensureFullBookWords");
+  call("configureAudio", { bookId: "late" });
+  call("syncAudioRate");
+  call("readNarrationWordIndex");
   runtime.select(3);
   runtime.start({ cause: "programmatic" });
   runtime.resume();
@@ -535,7 +545,9 @@ function invokeCapturedWork(
   runtime.navigateTo(5);
   runtime.jumpBack();
   runtime.adjustSpeed(25);
-  // The ports themselves (completion, cross-book, persistence, settings, diagnostics, audio).
+  // The ports themselves (completion, cross-book, persistence, settings, diagnostics, audio). Skipped
+  // when the key is still current (a runtime stopped in place): then only the runtime layer is under test.
+  if (!options.ports) return;
   ports.shell.requestCompletionToPage();
   ports.shell.requestCrossBook({ finishedWordIndex: 5 });
   ports.persistence.updateProgress(key.documentId, 5);
@@ -549,11 +561,50 @@ function invokeCapturedWork(
   router.requestCompletionToPage(key);
 }
 
-/** Fire every callback infrastructure still holds (audio onWord/truth sync/section end, subscriptions). */
-function fireRegisteredCallbacks(fake: FakeInfrastructure): void {
-  for (const cb of Object.values(fake.registered)) {
+/** Fire every callback in a registration set (audio onWord/truth sync/chunk/segment/section end, subscriptions). */
+function fireCallbacks(registered: FakeInfrastructure["registered"]): void {
+  for (const cb of Object.values(registered)) {
     if (typeof cb === "function") (cb as (...a: unknown[]) => unknown)(1);
   }
+}
+
+/** Fire every callback infrastructure still holds. */
+function fireRegisteredCallbacks(fake: FakeInfrastructure): void {
+  fireCallbacks(fake.registered);
+}
+
+/** Infrastructure slots that currently hold a callback. */
+const heldSlots = (fake: FakeInfrastructure) =>
+  Object.entries(fake.registered).filter(([, cb]) => cb != null).map(([slot]) => slot).sort();
+
+/** The slots a selected (not started) Narrate session holds: its chunk publishers (legacy narrate effect). */
+const NARRATE_SELECTED_SLOTS = ["chunkBoundary", "segmentStart"];
+
+/**
+ * A mounted Narrate view stand-in (ready; `words` loaded), so start installs the truth sync, as on a
+ * Foliate surface. With no words, start takes the legacy empty-words retry (next() + delayed timer).
+ */
+function stubNarrateView(runtime: ReaderModeRuntime, words: readonly string[]): void {
+  const loaded = words.map((word) => ({ word, range: null, sectionIndex: 0 }));
+  (runtime as unknown as { viewApiRef: { current: unknown } }).viewApiRef.current = {
+    getWords: () => loaded,
+    getParagraphBreaks: () => new Set<number>(),
+    highlightWordByIndex: () => true,
+    next: () => {},
+    goToSection: () => Promise.resolve(),
+    waitForSectionReady: () => Promise.resolve(0),
+    getSectionForWordIndex: () => 0,
+    findFirstVisibleWordIndex: () => 0,
+    isUserBrowsing: () => false,
+    clearSoftHighlight: () => {},
+    clearUserBrowsing: () => {},
+  };
+}
+
+/** A complete full-book extraction (so an unguarded HOTFIX-6 continuation would make port calls). */
+function bookWordsValue(document: { tokenWords: readonly string[] }) {
+  const words = [...document.tokenWords];
+  return { words, sections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: words.length, wordCount: words.length }], totalWords: words.length, footnoteCues: [] } as never;
 }
 
 describe("reader mode isolation (G3)", () => {
@@ -564,7 +615,7 @@ describe("reader mode isolation (G3)", () => {
   });
 
   it("covers every ordered pair of the present modes", () => {
-    expect(PRESENT_MODES).toEqual(["page", "focus", "flow"]);
+    expect(PRESENT_MODES).toEqual(["page", "focus", "flow", "narrate"]);
     expect(ORDERED_PAIRS).toHaveLength(PRESENT_MODES.length * (PRESENT_MODES.length - 1));
   });
 
@@ -614,7 +665,18 @@ describe("reader mode isolation (G3)", () => {
         expect(continued, label).toEqual([]);
         // Other modes untouched: the switch created only the destination, and no callback is held.
         expect(runtimes.slice(createdBefore).map((r) => r.mode), label).toEqual([to]);
-        expect(Object.values(fake.registered).filter((cb) => cb != null), label).toEqual([]);
+        // No callback held for the old owner or any other mode; a Narrate destination holds only its own
+        // chunk publishers (the old session's onWord/truth sync/section end were released in teardown).
+        expect(heldSlots(fake), label).toEqual(to === "narrate" ? NARRATE_SELECTED_SLOTS : []);
+        if (from === "narrate" && to === "page") {
+          // OBS-A3-1 (legacy showed highlight 0): Page receives Narrate's canonical word, and the audio
+          // cursor of the session Narrate actually started (here the same word).
+          expect(active.runtime.getSnapshot(), label).toMatchObject({
+            canonicalWordIndex: scenario.position,
+            publishedWordIndex: scenario.position,
+            highlightedWordIndex: scenario.position,
+          });
+        }
         router.destroy();
       }
     });
@@ -652,41 +714,108 @@ describe("reader mode isolation (G3)", () => {
     });
   }
 
+  it("Narrate that never started hands Page its own word, not the stale audio cursor (OBS-A3-1)", async () => {
+    const { fake, router, enter } = isolationSetup(7);
+    enter("narrate");
+    await flushAll();
+    expect(fake.audio.cursorWordIndex).toBe(0); // the legacy captureCurrentAnchor read this stale cursor
+    router.pauseToPage();
+    expect(router.getActive()!.mode).toBe("page");
+    expect(router.getActive()!.runtime.getSnapshot()).toMatchObject({ canonicalWordIndex: 7, highlightedWordIndex: 7 });
+    router.destroy();
+  });
+
   it("rejected mode work cannot escape through a port", async () => {
-    for (const mode of PRESENT_MODES) {
-      for (const exit of ["switch", "openDocument", "remount"] as const) {
-        const label = `${mode} after ${exit}`;
-        const { fake, broker, router, document, enter, callsFor, portsFor } = isolationSetup(7);
-        enter(mode);
-        if (PLAYABLE.has(mode)) router.togglePlay();
-        const old = router.getActive()!;
-        (old.runtime as { onSurfaceLoad?: () => void }).onSurfaceLoad?.(); // a pending delayed-load timer
-        const oldPorts = portsFor(old.key);
-        const continued: string[] = [];
-        void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
-
-        if (exit === "switch") enter(PRESENT_MODES.find((m) => m !== mode)!);
-        else router.openDocument(document);
-        if (exit === "remount") enter(mode); // a new session of the same mode
-        await flushAll();
-
-        const live = router.getActive()!;
-        const liveSnapshot = live.runtime.getSnapshot();
-        const acceptedBefore = { ...broker.stats.accepted };
-        const effectsBefore = fake.effects.length;
-        fake.resolveBookWords(null);
-        fireRegisteredCallbacks(fake);
-        invokeCapturedWork(old.runtime, oldPorts, old.key, router);
-        await flushAll();
-
-        expect(broker.stats.accepted, label).toEqual(acceptedBefore);
-        expect(fake.effects.length, label).toBe(effectsBefore);
-        expect(callsFor(old.key).attempted, label).toBeGreaterThan(0); // the old work really tried
-        expect(continued, label).toEqual([]);
-        expect(router.getActive()!.key, label).toBe(live.key);
-        expect(live.runtime.getSnapshot(), label).toEqual(liveSnapshot);
-        router.destroy();
+    // Narrate runs twice more: started on a (stub) Foliate surface, so onWord, truth sync, chunk
+    // boundary, segment start and section end are all registered and a truth frame is pending; and a
+    // delayed-extraction start whose retry timer is pending. Narrate also exits by "stop" in place (the
+    // key stays current, so only the runtime's own token can drop its work).
+    const cases = PRESENT_MODES.flatMap((mode) => {
+      const starts = mode === "narrate" ? ["started", "delayed-extraction"] as const : ["default"] as const;
+      const exits = mode === "narrate"
+        ? ["stop", "switch", "openDocument", "remount"] as const
+        : ["switch", "openDocument", "remount"] as const;
+      return starts.flatMap((start) => exits.map((exit) => ({ mode, start, exit })));
+    });
+    for (const { mode, start, exit } of cases) {
+      const label = `${mode}${start === "default" ? "" : ` (${start})`} after ${exit}`;
+      const { fake, broker, router, document, enter, callsFor, portsFor } = isolationSetup(7);
+      enter(mode);
+      const old = router.getActive()!;
+      if (mode === "narrate") stubNarrateView(old.runtime, start === "delayed-extraction" ? [] : document.tokenWords);
+      if (PLAYABLE.has(mode)) router.togglePlay();
+      (old.runtime as { onSurfaceLoad?: () => void }).onSurfaceLoad?.(); // a pending delayed-load timer
+      if (mode === "narrate") {
+        const narrate = old.runtime as unknown as { syncSectionEnd: () => void; ensureFullBookWords: () => void };
+        narrate.syncSectionEnd(); // the section-end fallback (binding-driven in production)
+        narrate.ensureFullBookWords(); // a pending HOTFIX-6 extraction (only while narrating)
+        if (start === "started") {
+          expect(heldSlots(fake), label).toEqual(["chunkBoundary", "onWord", "sectionEnd", "segmentStart", "truthSync"]);
+          (fake.registered.truthSync as (i: number) => void)(9); // a pending truth frame
+        } else {
+          expect(heldSlots(fake), label).toEqual(["chunkBoundary", "sectionEnd", "segmentStart"]);
+          expect(old.runtime.getSnapshot().narrating, label).toBe(false); // waiting on the retry timer
+        }
       }
+      // The old owner's captured infrastructure callbacks, as registered before it lost the session.
+      const captured = { ...fake.registered };
+      const oldPorts = portsFor(old.key);
+      const continued: string[] = [];
+      if (exit !== "stop") void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
+
+      if (exit === "stop") old.runtime.stop("user-stop");
+      else if (exit === "switch") enter(PRESENT_MODES.find((m) => m !== mode)!);
+      else router.openDocument(document);
+      if (exit === "remount") enter(mode); // a new session of the same mode
+      await flushAll();
+
+      const live = router.getActive()!;
+      const liveSnapshot = live.runtime.getSnapshot();
+      const acceptedBefore = { ...broker.stats.accepted };
+      const effectsBefore = fake.effects.length;
+      const oldSnapshot = old.runtime.getSnapshot();
+      fake.resolveBookWords(bookWordsValue(document));
+      fireCallbacks(captured);
+      invokeCapturedWork(old.runtime, oldPorts, old.key, router, { ports: exit !== "stop" });
+      await flushAll();
+
+      expect(broker.stats.accepted, label).toEqual(acceptedBefore);
+      expect(fake.effects.length, label).toBe(effectsBefore);
+      expect(callsFor(old.key).attempted, label).toBeGreaterThan(0); // the old work really tried
+      expect(continued, label).toEqual([]);
+      expect(router.getActive()!.key, label).toBe(live.key);
+      expect(live.runtime.getSnapshot(), label).toEqual(liveSnapshot);
+      expect(old.runtime.getSnapshot(), label).toEqual(oldSnapshot);
+      router.destroy();
     }
+  });
+});
+
+// ── Router module registry (design §C step D3) ────────────────────────────────
+
+describe("reader mode router registry (D3)", () => {
+  it("registers the four modes and reaches each only through its index.ts", () => {
+    expect(Object.keys(READER_MODE_MODULES)).toEqual(["page", "focus", "flow", "narrate"]);
+    expect(READER_MODE_MODULES.page).toBe(pageMode);
+    expect(READER_MODE_MODULES.focus).toBe(focusMode);
+    expect(READER_MODE_MODULES.flow).toBe(flowMode);
+    expect(READER_MODE_MODULES.narrate).toBe(narrateMode);
+    for (const [mode, module] of Object.entries(READER_MODE_MODULES)) expect(module.id).toBe(mode);
+
+    const ROUTER = "src/reader/useReaderModeOrchestrator.ts";
+    const graph = buildImportGraph({ roots: [ROUTER] }) as unknown as {
+      modules: readonly { path: string; edges: readonly { to: string; typeOnly: boolean }[] }[];
+    };
+    const modeDir = (file: string) => /^src\/reader\/modes\/([^/]+)\//.exec(file)?.[1] ?? null;
+    const routerEdges = graph.modules.find((m) => m.path === ROUTER)!.edges;
+    expect(routerEdges.filter((e) => modeDir(e.to)).map((e) => e.to).sort()).toEqual(
+      ["flow", "focus", "narrate", "page"].map((m) => `src/reader/modes/${m}/index.ts`),
+    );
+    // Graph-wide: every edge entering a mode directory from outside it lands on that mode's index.ts.
+    const crossings = graph.modules.flatMap((m) => m.edges
+      .filter((e) => modeDir(e.to) && modeDir(e.to) !== modeDir(m.path))
+      .map((e) => `${m.path} -> ${e.to}`));
+    expect(crossings.length).toBeGreaterThanOrEqual(4);
+    expect(crossings.filter((c) => !c.endsWith("/index.ts"))).toEqual([]);
   });
 });

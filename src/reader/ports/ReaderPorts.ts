@@ -66,6 +66,10 @@ export type ReaderAudioConfig = Readonly<Partial<{
   pronunciationOverrides: readonly Readonly<PronunciationOverride>[];
   bookPronunciationOverrides: readonly Readonly<PronunciationOverride>[];
   mediaSessionBook: Readonly<MediaSessionBookMetadata> | null;
+  /** useNarrationSync effect 1a: the cover the shell resolves (getCoverImage) into the MediaSession art. */
+  mediaSessionCoverPath: string | null;
+  /** useNarrationSync effect 5: settings.ttsVoiceName; the engine-specific voice pick stays in TTS infrastructure. */
+  voiceName: string;
 }>>;
 
 export interface ReaderAudioPort {

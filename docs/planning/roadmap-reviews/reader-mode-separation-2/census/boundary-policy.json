@@ -390,12 +390,6 @@
         "shouldStitchWithoutWhitespace"
       ]
     },
-    "src/components/ProgressBar.tsx": {
-      "category": "passive UI",
-      "exports": [
-        "default"
-      ]
-    },
     "src/components/WpmGauge.tsx": {
       "category": "passive UI",
       "exports": [
@@ -412,18 +406,6 @@
       "category": "passive UI",
       "exports": [
         "default"
-      ]
-    },
-    "src/components/ErrorBoundary.tsx": {
-      "category": "passive UI",
-      "exports": [
-        "default"
-      ]
-    },
-    "src/hooks/useFocusTrap.ts": {
-      "category": "passive UI",
-      "exports": [
-        "useFocusTrap"
       ]
     },
     "src/assets/blurby-icon.png": {
@@ -475,6 +457,10 @@
     },
     {
       "file": "src/reader/modes/flow/helpers/foliateHelpers.ts",
+      "symbol": "BLOCK_TAGS"
+    },
+    {
+      "file": "src/reader/modes/narrate/helpers/foliateHelpers.ts",
       "symbol": "BLOCK_TAGS"
     },
     {

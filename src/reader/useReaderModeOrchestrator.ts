@@ -23,6 +23,10 @@ import type {
   ReaderModeStopReason,
 } from "./modes/ReaderModeAdapter";
 import type { ReaderPortBroker } from "./ports/createReaderPorts";
+import { pageMode } from "./modes/page/index";
+import { focusMode } from "./modes/focus/index";
+import { flowMode } from "./modes/flow/index";
+import { narrateMode } from "./modes/narrate/index";
 
 function toCompatibilityMode(mode: ReaderMode): "page" | "focus" | "flow" {
   return mode === "narrate" ? "flow" : mode;
@@ -331,6 +335,9 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
 // Built beside the legacy hook above (DD-1); the hook becomes a wrapper around this core at E1.
 // A transition hands off copied values only: export → invalidate → teardown(stop, destroy) →
 // issue → create → publish → select. The incoming runtime never holds a reference to the outgoing one.
+
+/** The router's module registry (Wave D, step D3): each mode is reached only through its index.ts. */
+export const READER_MODE_MODULES = { page: pageMode, focus: focusMode, flow: flowMode, narrate: narrateMode };
 
 export interface ReaderModeRouterOptions {
   readonly modules: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>>;
