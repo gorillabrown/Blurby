@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { FlowModeAdapter, type FlowModeAdapterConfig, type FlowSectionMeta } from "../src/reader/modes/FlowModeAdapter";
+import { FlowModeAdapter, type FlowModeAdapterConfig, type FlowSectionMeta } from "../src/reader/modes/flow/ModeRuntime";
 import type { ReaderModeStartRequest } from "../src/reader/modes/ReaderModeAdapter";
 import type { SurfaceCommand } from "../src/reader/surface/SurfaceCommand";
 

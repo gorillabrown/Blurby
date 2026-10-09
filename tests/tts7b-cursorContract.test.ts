@@ -42,9 +42,11 @@ describe("cursor contract after narration-mode removal", () => {
   });
 
   it("ReaderContainer drives narration cursor from spoken-word truth while narration is active", () => {
-    const src = read("src/components/ReaderContainer.tsx");
-    expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
-    expect(src).toContain("narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}");
+    // READER-MODE-SEPARATION-2 OC-5b: Narrate is the only narrating session (Flow never narrates), and its
+    // binding hands its view the spoken word read from the audio port while it speaks.
+    expect(read("src/reader/modes/flow/ModeRuntime.ts")).toContain("narrating: false,");
+    expect(read("src/reader/modes/narrate/useModeBindings.ts")).toContain("narrationWordIndex: runtime.readNarrationWordIndex(),");
+    expect(read("src/reader/modes/narrate/ModeRuntime.ts")).toContain("return audio.speaking ? audio.cursorWordIndex : undefined;");
   });
 });
 

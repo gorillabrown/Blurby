@@ -206,7 +206,10 @@
     "tests/narrationIntegration.test.ts",
     "tests/readerModes/harness/fakePorts.ts",
     "tests/readerModes/harness/contractAssertions.ts",
-    "tests/readerModes/harness/fixtureReplay.tsx"
+    "tests/readerModes/harness/fixtureReplay.tsx",
+    "tests/wordAnchor.test.ts",
+    "tests/tts7b-cursorContract.test.ts",
+    "tests/narrLayer1bConsolidation.test.ts"
   ],
   "verificationScriptPaths": [
     "scripts/check_reader_mode_evidence.mjs"
@@ -398,7 +401,8 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/narrate.baseline.json",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/verify-on-b0.mjs"
   ],
   "fixtureRenames": [
     {

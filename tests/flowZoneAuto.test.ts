@@ -12,7 +12,7 @@
  * callback (the engine's report of the zone's current top fraction).
  */
 import { describe, it, expect, vi, beforeEach, afterEach, type Mock } from "vitest";
-import { FlowScrollEngine, type FlowScrollEngineCallbacks } from "../src/utils/FlowScrollEngine";
+import { FlowScrollEngine, type FlowScrollEngineCallbacks } from "../src/reader/modes/flow/helpers/FlowScrollEngine";
 import {
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_RESET_THRESHOLD,

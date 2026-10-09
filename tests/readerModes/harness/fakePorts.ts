@@ -116,7 +116,6 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
     shell: {
       reportRelocate: rec("shell.reportRelocate"),
       reportToc: rec("shell.reportToc"),
-      reportFlowProgress: rec("shell.reportFlowProgress"),
       reportEinkContentChange: rec("shell.reportEinkContentChange"),
       requestCompletionToPage: rec("shell.requestCompletionToPage"),
       requestCrossBook: rec("shell.requestCrossBook"),

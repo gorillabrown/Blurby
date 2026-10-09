@@ -64,5 +64,482 @@
     ],
     "channelMapping": "see channelMapping in each fixture file (old collaborator -> port channel)"
   },
-  "otherChangedAssertions": []
+  "otherChangedAssertions": [
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "starts foliate narration only after extraction finishes when the first launch begins on an empty slice",
+      "old": "snapshot.startFlow(); extractFoliateWords x1; foliateApiRef.next x1; modeInstance.startMode not called; after FOLIATE_SECTION_LOAD_WAIT_MS extractFoliateWords x3 and modeInstance.startMode(\"flow\", 0, [alpha,beta,gamma], new Set())",
+      "new": "router.select(\"flow\") + router.togglePlay() (legacy startFlow); the Flow runtime's surface.extractWords x1; its view next x1; FlowMode.prototype.start not called; after FOLIATE_SECTION_LOAD_WAIT_MS extractWords x3 and the started engine is [\"flow\", 0, [alpha,beta,gamma], new Set()]",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "raises flowPlaying when starting foliate flow so the flow engine can boot",
+      "old": "observedFlowPlaying true; modeInstance.startMode(\"flow\", 0, [alpha,beta,gamma], new Set())",
+      "new": "router snapshot {readingMode: flow, playing: true}; started engine [\"flow\", 0, [alpha,beta,gamma], new Set()]",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "narrate playback ignores the parallel per-word callback when truth-sync is installed",
+      "old": "entry via toggleNarrationInFlow; startCursorDriven onWordAdvance(2); readingMode narrate; highlightedWordIndex 1; foliate highlightWordByIndex and isWordInDom not called",
+      "new": "entry via the Narrate runtime's togglePlay (owning runtime, anchors at 1); audio-port start onWord(2); runtime.mode narrate; snapshot highlightedWordIndex 1; its view highlightWordByIndex and isWordInDom not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "re-enters narrate from page when narrate is the persisted last mode",
+      "old": "handleTogglePlay in page; readingMode page; modeInstance.startMode, startCursorDriven, updateSettings not called",
+      "new": "router.togglePlay() in Page; router snapshot readingMode page; FlowMode/FocusMode engine start, audio-port start and settings.update not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "treats word index 0 as a valid explicit flow anchor instead of letting softWordIndex override it",
+      "old": "harness refs (soft 2, highlighted 0, persistent 0); startFlow(); reader.jumpToWord(0); modeInstance.startMode(\"flow\", 0, [alpha,beta,gamma], new Set())",
+      "new": "Flow runtime from a seeded handoff (canonical 0, highlighted 0, soft 2); togglePlay(); jumpDisplayToWord(0) (OC-3 alias); started engine [\"flow\", 0, [alpha,beta,gamma], new Set()]",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "clears the resume anchor after consuming it for a flow start",
+      "old": "resumeAnchor 2, highlighted 1, soft 0; startFlow(); reader.jumpToWord(2); resumeAnchorRef.current 2",
+      "new": "Flow runtime seeded (canonical 2, resume 2, highlighted 1, soft 0); togglePlay(); jumpDisplayToWord(2); exportHandoff(\"persistent\").resumeAnchor 2",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "starts narrate from an explicit selection even when an older resume anchor is still active",
+      "old": "startCursorDriven([alpha,beta,gamma], 2, 180, fn); resumeAnchorRef 2; explicitSelectionAnchorRef null",
+      "new": "Narrate runtime seeded (resume 0, explicit 2, highlighted 2, soft 2); audio-port start([alpha,beta,gamma], 2, 180, fn); exportHandoff resumeAnchor 2, explicitSelectionAnchor null",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "starts narrate from a captured resume anchor before a stale persistent click anchor",
+      "old": "startCursorDriven(words20, 8, 180, fn)",
+      "new": "Narrate runtime seeded (canonical 2, resume 8); audio-port start(words20, 8, 180, fn)",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "pausing active focus keeps the reader in focus mode",
+      "old": "modeRef mocked as a playing focus instance; handleTogglePlay; readingMode focus; modeInstance.pauseMode called; stopMode not called",
+      "new": "router: select focus, togglePlay, engine started after FOCUS_MODE_START_DELAY_MS; togglePlay; router readingMode focus; FocusMode.prototype.pause called; FocusMode.prototype.stop not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "pausing active narrate keeps one narration session instead of stopping for a cold restart",
+      "old": "narration speaking at cursor 7; handleTogglePlay; readingMode narrate; isNarrating true; flowPlaying false; narration.pause(\"user-stop\"); stop/startCursorDriven not called; resumeAnchorRef 7; commitPersistentWordIndex(7, \"mode-advance\", {persist:false, publishState:true, navigate:false, syncVisual:true}); updateSettings({narrate, narrate, isNarrating:true})",
+      "new": "router: select narrate, start, audio cursor 7; togglePlay; router {readingMode narrate, narrating true}; Flow runtime start not called; audio-port pause(\"user-stop\"); stop/start not called; exportHandoff resumeAnchor 7; the narrate anchor copy's commitPersistentWordIndex(7, \"mode-advance\", {same options}); settings.update({narrate, narrate, isNarrating:true})",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "starts narrate normally when narrate mode is not actively narrating",
+      "old": "handleTogglePlay; readingMode narrate; startCursorDriven called; updateSettings({narrate, narrate, isNarrating:true})",
+      "new": "router: select narrate, togglePlay; router readingMode narrate; audio-port start called; settings.update({narrate, narrate, isNarrating:true})",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "records mode-switch anchor preservation when selecting another mode",
+      "old": "evalTrace via the legacy hook params; handleSelectMode(\"flow\"); events contain the handoff transition",
+      "new": "evalTrace via the useReaderModeOrchestrator wrapper (router opened on the document); handleSelectMode(\"flow\"); events contain the identical transition object",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "routes trusted narrate word sync into the chunk visual active-word owner",
+      "old": "entry via toggleNarrationInFlow; truth sync(2); onNarrateTruthSync(2); foliate highlightWordByIndex(2, \"narrate\", {allowMotion:false})",
+      "new": "entry via router select narrate + togglePlay; the audio-port truth-sync callback(2); NarrateModeRuntime.prototype.applyNarrationActiveWord(2) (design §D.4 narrateView.applyActiveWord seam); its view highlightWordByIndex(2, \"narrate\", {allowMotion:false})",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "queues a narrate pending resume when spoken-word truth lands outside the current DOM slice",
+      "old": "entry via toggleNarrationInFlow; truth sync(7); pendingResumeRef {wordIndex:7, mode:\"narrate\"}; highlightedWordIndex 7; highlightWordByIndex(7, \"narrate\", {allowMotion:false}); goToSection(3)",
+      "new": "entry via router select narrate + togglePlay; truth sync(7); router highlightedWordIndex 7; highlightWordByIndex(7, \"narrate\", {allowMotion:false}); goToSection(3); the queued narrate resume is observed behaviourally: the next onWordsReextracted re-highlights word 7",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "treats word index 0 as a valid explicit narrate anchor",
+      "old": "startCursorDriven([alpha,beta,gamma], 0, 180, fn); explicitSelectionAnchorRef null",
+      "new": "Narrate runtime seeded (explicit 0, soft 5); audio-port start([alpha,beta,gamma], 0, 180, fn); exportHandoff explicitSelectionAnchor null",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "preserves narrate options across delayed extraction with word 0 anchor",
+      "old": "startCursorDriven not called, then after timers readingMode narrate, flowPlaying false, startCursorDriven([alpha,beta,gamma], 0, 180, fn)",
+      "new": "audio-port start not called, then after timers runtime narrate and selected, Flow runtime start not called, audio-port start([alpha,beta,gamma], 0, 180, fn) (same treatment as authorized substitution 6)",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting a mode clears isBrowsedAway via stopAllModes",
+      "old": "setIsBrowsedAway(false) on handleSelectMode(\"narrate\") from browsed-away flow",
+      "new": "router: Flow browsed away (snapshot isBrowsedAway true); select(\"narrate\"); router snapshot {readingMode narrate, isBrowsedAway false}",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "Focus Play starts at the persistent word anchor, not word 0",
+      "old": "modeInstance.startMode(\"focus\", 3322, any Array, any Object); reader.jumpToWord(3322) (bookWordsTotalWords 10000 with a 3-word slice)",
+      "new": "Focus runtime seeded (canonical/highlighted 3322) over a 10000-word document (bookWords); started engine [\"focus\", 3322, any Array, any Object]; jumpDisplayToWord(3322) (OC-3 alias)",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "Focus start after hard-click uses persistent anchor, not stale state",
+      "old": "modeInstance.startMode(\"focus\", 3322, any Array, any Object)",
+      "new": "Focus runtime seeded (explicit 3322, highlighted 0) over a 10000-word document; started engine [\"focus\", 3322, any Array, any Object]",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting focus does not start playback and uses the persistent anchor",
+      "old": "syncVisualToPersistentWord({navigate:false}); queuePostModeAnchorSync(64, \"focus\"); modeInstance.startMode and startCursorDriven not called",
+      "new": "router.select(\"focus\") with the canonical anchor 64; the focus anchor copy's syncVisualToPersistentWord({navigate:false}) returns 64; after the double RAF its syncVisualToPersistentWord({navigate:true}) returns 64 (the queued post-mode anchor sync); FocusMode/FlowMode engine start and audio-port start not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting flow does not start playback and uses the persistent anchor",
+      "old": "syncVisualToPersistentWord({navigate:false}); queuePostModeAnchorSync(64, \"flow\"); modeInstance.startMode and startCursorDriven not called",
+      "new": "router.select(\"flow\") with the canonical anchor 64; the flow anchor copy's syncVisualToPersistentWord({navigate:false}) returns 64; after the double RAF its syncVisualToPersistentWord({navigate:true}) returns 64 (the queued post-mode anchor sync); FocusMode/FlowMode engine start and audio-port start not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "selecting narrate does not start playback and uses the persistent anchor",
+      "old": "syncVisualToPersistentWord({navigate:false}); queuePostModeAnchorSync(64, \"narrate\"); modeInstance.startMode and startCursorDriven not called",
+      "new": "router.select(\"narrate\") with the canonical anchor 64; the narrate anchor copy's syncVisualToPersistentWord({navigate:false}) returns 64; after the double RAF its syncVisualToPersistentWord({navigate:true}) returns 64 (the queued post-mode anchor sync); FocusMode/FlowMode engine start and audio-port start not called",
+      "rule": "D.5 harness migration (router core + fake ports; assert through the owning runtime)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "promotes active flow narration into the real narrate mode contract",
+      "old": "useReaderModeOrchestrator(...).toggleNarrationInFlow()",
+      "new": "useReaderMode(...).toggleNarrationInFlow() on the retained legacy hook (dead code under test); assertions unchanged",
+      "rule": "OC-4"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "demotes active narrate mode back to flow when flow narration is toggled off",
+      "old": "useReaderModeOrchestrator(...).toggleNarrationInFlow()",
+      "new": "useReaderMode(...).toggleNarrationInFlow() on the retained legacy hook (dead code under test); assertions unchanged",
+      "rule": "OC-4"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "installs a narrate truth-sync callback when flow narration is promoted into narrate mode",
+      "old": "useReaderModeOrchestrator(...).toggleNarrationInFlow()",
+      "new": "useReaderMode(...).toggleNarrationInFlow() on the retained legacy hook (dead code under test); assertions unchanged",
+      "rule": "OC-4"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "name": "clears the narrate truth-sync callback when flow narration is toggled back off",
+      "old": "useReaderModeOrchestrator(...).toggleNarrationInFlow()",
+      "new": "useReaderMode(...).toggleNarrationInFlow() on the retained legacy hook (dead code under test); assertions unchanged",
+      "rule": "OC-4"
+    },
+    {
+      "test": "tests/foliate-bridge.test.ts",
+      "name": "documents Focus paused versus active surface ownership",
+      "old": "src/components/ReaderContainer.tsx contains 'const showFocusOverlay = readingMode === \"focus\" && focusPlaying'",
+      "new": "src/reader/modes/focus/ModeView.tsx contains '{useFoliate && playing && (' and '<div className=\"rm-focus-overlay\">'; src/reader/modes/focus/useModeBindings.ts contains 'playing: snapshot.playing,'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/foliate-bridge.test.ts",
+      "name": "imports and calls jumpFoliateToWordAnchor for jump-back",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/surface.ts",
+      "fragment": "jumpFoliateToWordAnchor",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/foliate-bridge.test.ts",
+      "name": "imports and calls jumpFoliateToWordAnchor for jump-back",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts",
+      "fragment": "handleJumpBackToPersistentWord",
+      "rule": "OC-5a",
+      "note": "matches each runtime's jumpBack doc comment; a supplementary code-level assertion was added: each ModeRuntime.ts contains 'const anchor = this.state.canonicalWordIndex;' and 'if (this.document.useFoliate) void this.surface.jumpToWordAnchor(anchor);'"
+    },
+    {
+      "test": "tests/foliate-bridge.test.ts",
+      "name": "imports and calls jumpFoliateToWordAnchor for jump-back",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/helpers/usePersistentReadingAnchor.ts",
+      "fragment": "persistentWordIndexRef.current",
+      "rule": "OC-5a",
+      "note": "matches the doc comment on the copy's canonicalWordIndex field; see the supplementary code-level assertion above"
+    },
+    {
+      "test": "tests/foliate-bridge.test.ts",
+      "name": "passes showJumpBackToAnchor={isBrowsedAway} to FoliatePageView",
+      "old": "src/components/ReaderContainer.tsx contains 'showJumpBackToAnchor={isBrowsedAway}'",
+      "new": "src/reader/modes/{page,focus,flow,narrate}/useModeBindings.ts each contain 'showJumpBackToAnchor: snapshot.isBrowsedAway,'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer treats narrate as the architectural narration-selected mode",
+      "old": "src/components/ReaderContainer.tsx contains '(readingMode === \"flow\" && isNarrating)'",
+      "new": "src/reader/modes/flow/ModeRuntime.ts contains 'narrating: false,' (Flow never narrates; the flow+narrating hybrid is Narrate, LL-125) and src/reader/modes/narrate/ModeRuntime.ts contains 'this.ports.settings.update({ ttsRate: newRate });' and 'this.ports.audio.adjustRate(newRate);' (Narrate's up/down adjust the TTS rate)",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer treats narrate as the architectural narration-selected mode",
+      "old": "src/components/ReaderContainer.tsx contains '(readingMode === \"page\" && settings.lastReadingMode === \"narrate\")'",
+      "new": "src/reader/modes/page/ModeRuntime.ts contains 'if (settings.lastReadingMode === \"narrate\") {' (Page adjustSpeed adjusts the TTS rate when Narrate is the last mode; OC-8)",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer passes spoken-word truth into FoliatePageView while narration is active",
+      "old": "src/components/ReaderContainer.tsx contains 'flowMode={isScrolledSurfaceMode}'",
+      "new": "src/reader/modes/{focus,flow,narrate}/FoliateView.tsx each contain 'view.renderer.setAttribute(\"flow\", \"scrolled\");' and src/reader/modes/page/FoliateView.tsx contains 'view.renderer.setAttribute(\"flow\", \"paginated\");'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer passes spoken-word truth into FoliatePageView while narration is active",
+      "old": "src/components/ReaderContainer.tsx contains 'narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}'",
+      "new": "src/reader/modes/narrate/useModeBindings.ts contains 'narrationWordIndex: runtime.readNarrationWordIndex(),' and src/reader/modes/narrate/ModeRuntime.ts contains 'return audio.speaking ? audio.cursorWordIndex : undefined;'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer treats narrate as a flow-surface mode during Foliate onLoad",
+      "old": "src/components/ReaderContainer.tsx contains 'const isScrolledSurfaceMode = mode === \"focus\" || mode === \"flow\" || mode === \"narrate\";' and 'if (!isScrolledSurfaceMode) {'",
+      "new": "the page ModeRuntime onSurfaceLoad body contains 'this.surface.extractWords();'; the focus, flow and narrate ModeRuntime onSurfaceLoad bodies contain 'this.state.renderVersion += 1;' and not 'extractWords'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer blocks passive relocate downgrades during narrate",
+      "old": "src/components/ReaderContainer.tsx contains 'if (mode !== \"flow\" && mode !== \"narrate\" && !hasResumeAnchor) {'",
+      "new": "behavioural: Flow and Narrate runtimes (no resume anchor, highlight 7) keep highlightedWordIndex 7 after onRelocate({fraction: 0.8}); Page (positive control) moves to floor(0.8 x 25) = 20",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrLayer1bConsolidation.test.ts",
+      "name": "ReaderContainer treats narrate as the narration-selected source of truth",
+      "old": "src/components/ReaderContainer.tsx contains '(readingMode === \"flow\" && isNarrating)'",
+      "new": "src/reader/modes/flow/ModeRuntime.ts contains 'narrating: false,'; src/reader/modes/narrate/ModeRuntime.ts contains 'this.ports.settings.update({ ttsRate: newRate });' and 'this.ports.audio.adjustRate(newRate);'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/narrLayer1bConsolidation.test.ts",
+      "name": "ReaderContainer treats narrate as the narration-selected source of truth",
+      "old": "src/components/ReaderContainer.tsx contains '(readingMode === \"page\" && settings.lastReadingMode === \"narrate\")'",
+      "new": "src/reader/modes/page/ModeRuntime.ts contains 'if (settings.lastReadingMode === \"narrate\") {'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/tts7b-cursorContract.test.ts",
+      "name": "ReaderContainer drives narration cursor from spoken-word truth while narration is active",
+      "old": "src/components/ReaderContainer.tsx contains '(readingMode === \"flow\" && isNarrating)'",
+      "new": "src/reader/modes/flow/ModeRuntime.ts contains 'narrating: false,' (Narrate is the only narrating session)",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/tts7b-cursorContract.test.ts",
+      "name": "ReaderContainer drives narration cursor from spoken-word truth while narration is active",
+      "old": "src/components/ReaderContainer.tsx contains 'narrationWordIndex={narration.speaking ? narration.cursorWordIndex : undefined}'",
+      "new": "src/reader/modes/narrate/useModeBindings.ts contains 'narrationWordIndex: runtime.readNarrationWordIndex(),' and src/reader/modes/narrate/ModeRuntime.ts contains 'return audio.speaking ? audio.cursorWordIndex : undefined;'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks must update the persistent anchor before any mode start",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts",
+      "fragment": "usePersistentReadingAnchor",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks must update the persistent anchor before any mode start",
+      "old": "src/components/ReaderContainer.tsx contains 'commitSharedWordAnchor(resolvedClickWordIndex, \"hard-selection\"'",
+      "new": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts each contain 'this.commitShared(resolved, \"hard-selection\", input.cfi)'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks must update the persistent anchor before any mode start",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/helpers/usePersistentReadingAnchor.ts",
+      "fragment": "persistentWordIndexRef",
+      "rule": "OC-5a",
+      "note": "matches the copy's doc comment; supplementary code-level assertion added: each copy contains 'state.canonicalWordIndex = wordIndex;'"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that mode advancement writes the persistent anchor without immediate disk writes",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{focus,flow}/ModeRuntime.ts",
+      "fragment": "commitPersistentWordIndex(idx, \"mode-advance\"",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that mode advancement writes the persistent anchor without immediate disk writes",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{focus,flow}/ModeRuntime.ts",
+      "fragment": "persist: false",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that mode advancement writes the persistent anchor without immediate disk writes",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{focus,flow}/ModeRuntime.ts",
+      "fragment": "publishState: false",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that mode advancement writes the persistent anchor without immediate disk writes",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{focus,flow}/ModeRuntime.ts",
+      "fragment": "navigate: false",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks clear browse-away and hide the jump-back affordance",
+      "old": "src/components/ReaderContainer.tsx contains 'foliateApiRef.current?.clearUserBrowsing?.()'",
+      "new": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts each contain 'this.surface.clearUserBrowsing();'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks clear browse-away and hide the jump-back affordance",
+      "old": "src/components/ReaderContainer.tsx contains 'setIsBrowsedAway(false)'",
+      "new": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts each contain 's.isBrowsedAway = false;'",
+      "rule": "OC-5b"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that hard clicks clear browse-away and hide the jump-back affordance",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts",
+      "fragment": "shouldClearBrowseAwayOnAnchorEvent({ type: \"hard-selection\"",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that stale CFI cannot override persistent word on Foliate startup",
+      "oldPath": "src/components/ReaderContainer.tsx",
+      "newPath": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts",
+      "fragment": "resolveBookOpenInitialCfi",
+      "rule": "OC-5a"
+    },
+    {
+      "test": "tests/wordAnchor.test.ts",
+      "name": "documents that stale CFI cannot override persistent word on Foliate startup",
+      "old": "src/components/ReaderContainer.tsx contains 'initialCfi={initialFoliateCfi}'",
+      "new": "src/reader/modes/{page,focus,flow,narrate}/ModeRuntime.ts each contain 'this.initialCfi = resolveBookOpenInitialCfi({ persistentWordIndex: handoff.canonicalWordIndex, cfi: handoff.cfi });' and src/reader/modes/{page,focus,flow,narrate}/useModeBindings.ts each contain 'initialCfi: runtime.initialCfi,'",
+      "rule": "OC-5b",
+      "note": "the negative assertion (not 'initialCfi={activeDoc.cfi || null}') still reads src/components/ReaderContainer.tsx and holds"
+    },
+    {
+      "test": "tests/narrationIntegration.test.ts",
+      "name": "ReaderContainer passes spoken-word truth into FoliatePageView while narration is active",
+      "old": "src/components/ReaderContainer.tsx contains 'narrationPauseReason={narration.pauseReason}' and 'getAudioProgress={narration.speaking ? narration.getAudioProgress : null}'",
+      "new": "tests/narrationIntegration.test.ts: retained src/components/FoliatePageView.tsx contains the overlay-cursor gate 'if (flowMode || readingMode !== \"flow\" || !flowPlaying) {'; no src/reader/modes/{page,focus,flow,narrate}/{ModeRuntime.ts,useModeBindings.ts,ModeView.tsx,FoliateView.tsx} consumes getAudioProgress or narrationPauseReason",
+      "rule": "OC-5b (dead path; design §B.5 item 4; Decision #18)",
+      "why": "Both props fed only the legacy FoliatePageView overlay cursor effect, unreachable because flowMode is true whenever readingMode is flow; design §B.5 item 4 drops that cursor (and silenceAwareCursor) from every copy. No new owner receives the pause reason or audio progress, so no equivalent assertion exists at a new owner."
+    }
+  ],
+  "importRelocations": [
+    {
+      "test": "tests/focusModeAdapter.test.ts",
+      "oldPath": "src/reader/modes/FocusModeAdapter",
+      "newPath": "src/reader/modes/focus/ModeRuntime"
+    },
+    {
+      "test": "tests/flowModeAdapter.test.ts",
+      "oldPath": "src/reader/modes/FlowModeAdapter",
+      "newPath": "src/reader/modes/flow/ModeRuntime"
+    },
+    {
+      "test": "tests/modes.test.ts",
+      "oldPath": "src/modes/PageMode",
+      "newPath": "src/reader/modes/page/ModeRuntime"
+    },
+    {
+      "test": "tests/modes.test.ts",
+      "oldPath": "src/modes/FocusMode",
+      "newPath": "src/reader/modes/focus/ModeRuntime"
+    },
+    {
+      "test": "tests/modes.test.ts",
+      "oldPath": "src/modes/FlowMode",
+      "newPath": "src/reader/modes/flow/ModeRuntime"
+    },
+    {
+      "test": "tests/flowTimerCursor.test.ts",
+      "oldPath": "src/utils/FlowScrollEngine",
+      "newPath": "src/reader/modes/flow/helpers/FlowScrollEngine"
+    },
+    {
+      "test": "tests/flowZoneAuto.test.ts",
+      "oldPath": "src/utils/FlowScrollEngine",
+      "newPath": "src/reader/modes/flow/helpers/FlowScrollEngine"
+    },
+    {
+      "test": "tests/flow-scroll-engine.test.js",
+      "oldPath": "src/utils/FlowScrollEngine.ts",
+      "newPath": "src/reader/modes/flow/helpers/FlowScrollEngine.ts"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "oldPath": "src/reader/useReaderModeOrchestrator (legacy useReaderModeOrchestrator hook body, removed at E1)",
+      "newPath": "src/reader/useReaderModeOrchestrator (createReaderModeRouter, READER_MODE_MODULES, useReaderModeOrchestrator wrapper) + src/reader/modes/{focus,flow,narrate}/ModeRuntime (engine and runtime classes for spies)"
+    },
+    {
+      "test": "tests/useReaderMode.test.ts",
+      "oldPath": "src/reader/useReaderModeOrchestrator (toggleNarrationInFlow passthrough)",
+      "newPath": "src/hooks/useReaderMode (retained legacy hook; OC-4 cases only)"
+    }
+  ],
+  "channelAliases": {
+    "focusView.jumpToWord": "<mode>.jumpDisplayToWord"
+  },
+  "channelAliasesAuthority": "staging fold-in 7 (OC-3): re-attribution only; nothing is dropped. tests/useReaderMode.test.ts applies the same alias (legacy reader.jumpToWord spy -> the owning runtime's jumpDisplayToWord).",
+  "addedAssertions": [
+    {
+      "test": "tests/persistentReadingAnchor.test.ts",
+      "what": "the three usePersistentReadingAnchor cases parameterized over src/reader/modes/{page,focus,flow,narrate}/helpers/usePersistentReadingAnchor.ts (design §D.5)"
+    },
+    {
+      "test": "tests/foliateWordHighlight.test.ts",
+      "what": "the same cases run against each src/reader/modes/<mode>/helpers/foliateWordHighlight.ts copy (design §D.5)"
+    },
+    {
+      "test": "tests/foliateChunkHighlight.test.ts",
+      "what": "the same cases run against each mode's helpers/foliateWordHighlight.ts + helpers/foliateStyles.ts copy (design §D.5)"
+    },
+    {
+      "test": "tests/foliateAnchorNavigation.test.ts",
+      "what": "the same cases run against each src/reader/modes/<mode>/helpers/foliateAnchorNavigation.ts copy (design §D.5)"
+    },
+    {
+      "test": "tests/useReadingModeInstance.test.ts",
+      "what": "parallel assertion at the new owner: Flow runtime pause-on-miss (src/reader/modes/flow/ModeRuntime.ts) (design §D.5)"
+    },
+    {
+      "test": "tests/documentLifecycleModeRestore.test.ts",
+      "what": "parallel assertion at the new owner: router openDocument mounts Page from the initial handoff (src/reader/useReaderModeOrchestrator.ts) (design §D.5)"
+    }
+  ]
 }

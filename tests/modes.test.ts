@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
-import { FocusMode } from "../src/modes/FocusMode";
-import { FlowMode } from "../src/modes/FlowMode";
-import { PageMode } from "../src/modes/PageMode";
+import { FocusMode } from "../src/reader/modes/focus/ModeRuntime";
+import { FlowMode } from "../src/reader/modes/flow/ModeRuntime";
+import { PageMode } from "../src/reader/modes/page/ModeRuntime";
 import type { ModeConfig } from "../src/modes/ModeInterface";
 
 function makeConfig(overrides: Partial<ModeConfig> = {}): ModeConfig {

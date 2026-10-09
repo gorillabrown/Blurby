@@ -12,6 +12,12 @@ import {
 } from "../src/utils/persistentReadingAnchor";
 import { renderHook, act } from "@testing-library/react";
 import { usePersistentReadingAnchor } from "../src/hooks/usePersistentReadingAnchor";
+import * as pageAnchorCopy from "../src/reader/modes/page/helpers/usePersistentReadingAnchor";
+import * as focusAnchorCopy from "../src/reader/modes/focus/helpers/usePersistentReadingAnchor";
+import * as flowAnchorCopy from "../src/reader/modes/flow/helpers/usePersistentReadingAnchor";
+import * as narrateAnchorCopy from "../src/reader/modes/narrate/helpers/usePersistentReadingAnchor";
+import type { PersistentReadingAnchorState } from "../src/reader/modes/page/helpers/usePersistentReadingAnchor";
+import { createInitialHandoff, createReaderDocumentSnapshot } from "../src/reader/document/ReaderDocumentSnapshot";
 
 describe("persistentReadingAnchor", () => {
   it("preserves word 0 as a valid persistent anchor", () => {
@@ -230,5 +236,112 @@ describe("persistent anchor click retargeting matrix", () => {
 
     anchor = reducePersistentWordAnchor(anchor, { type: "hard-selection", wordIndex: 90 }, 100);
     expect(anchor).toBe(90);
+  });
+});
+
+// READER-MODE-SEPARATION-2 (design §D.5): the same usePersistentReadingAnchor cases, parameterized over each
+// mode's private copy (src/reader/modes/<mode>/helpers/usePersistentReadingAnchor.ts). Each copy is a non-hook
+// over its mode's own state; the legacy book-open effect is createInitialHandoff.
+describe.each([
+  ["page", pageAnchorCopy],
+  ["focus", focusAnchorCopy],
+  ["flow", flowAnchorCopy],
+  ["narrate", narrateAnchorCopy],
+] as const)("%s helpers/usePersistentReadingAnchor copy", (_mode, copy) => {
+  function anchorState(overrides: Partial<PersistentReadingAnchorState> = {}): PersistentReadingAnchorState {
+    return {
+      canonicalWordIndex: 5,
+      publishedWordIndex: 5,
+      highlightedWordIndex: 5,
+      publishedHighlightedWordIndex: 5,
+      softWordIndex: 5,
+      explicitSelectionAnchor: null,
+      resumeAnchor: null,
+      cfi: null,
+      ...overrides,
+    };
+  }
+  function anchorDeps() {
+    return {
+      documentId: "book-1",
+      totalWordCount: () => 100,
+      jumpDisplayToWord: vi.fn(),
+      persistence: {
+        updateDocProgress: vi.fn(),
+        updateProgress: vi.fn(),
+        recordCfi: vi.fn(),
+        markEngaged: vi.fn(),
+        markPageActivity: vi.fn(),
+        scheduleRelocateSave: vi.fn(),
+      },
+      diagnostics: { record: vi.fn(), transition: vi.fn(), trace: vi.fn() },
+    };
+  }
+
+  it("seeds from the active document position and preserves word 0", () => {
+    const handoff = createInitialHandoff(createReaderDocumentSnapshot({
+      documentId: "book-1",
+      documentGeneration: 1,
+      title: "Book",
+      author: null,
+      coverPath: null,
+      filepath: null,
+      useFoliate: false,
+      wordCount: 100,
+      position: 0,
+      cfi: null,
+      tokenWords: [],
+      paragraphBreaks: [],
+      bookWords: null,
+      pronunciationOverrides: [],
+    }), 100);
+    const state = anchorState({ ...handoff, highlightedWordIndex: 99, publishedHighlightedWordIndex: 99 });
+    const anchor = copy.createPersistentReadingAnchor(state, anchorDeps());
+
+    expect(state.canonicalWordIndex).toBe(0);
+    expect(state.publishedWordIndex).toBe(0);
+    expect(anchor.syncVisualToPersistentWord({ navigate: false })).toBe(0);
+    expect(state.highlightedWordIndex).toBe(0);
+  });
+
+  it("hard selection persists immediately and synchronizes visual refs", () => {
+    const state = anchorState({ cfi: "old-cfi" });
+    const deps = anchorDeps();
+    const anchor = copy.createPersistentReadingAnchor(state, deps);
+
+    anchor.commitPersistentWordIndex(22, "hard-selection", {
+      cfi: "new-cfi",
+      persist: true,
+      navigate: true,
+    });
+
+    expect(state.canonicalWordIndex).toBe(22);
+    expect(state.highlightedWordIndex).toBe(22);
+    expect(state.softWordIndex).toBe(22);
+    expect(state.explicitSelectionAnchor).toBe(22);
+    expect(state.resumeAnchor).toBe(22);
+    expect(state.publishedHighlightedWordIndex).toBe(22);
+    expect(deps.jumpDisplayToWord).toHaveBeenCalledWith(22);
+    expect(deps.persistence.updateDocProgress).toHaveBeenCalledWith("book-1", 22, "new-cfi");
+    expect(deps.persistence.updateProgress).toHaveBeenCalledWith("book-1", 22);
+  });
+
+  it("mode advancement updates the in-memory anchor without forcing immediate persistence or rearming resume intent", () => {
+    const state = anchorState();
+    const deps = anchorDeps();
+    const anchor = copy.createPersistentReadingAnchor(state, deps);
+
+    state.resumeAnchor = null;
+    anchor.commitPersistentWordIndex(6, "mode-advance", {
+      persist: false,
+      navigate: false,
+      publishState: false,
+    });
+
+    expect(state.canonicalWordIndex).toBe(6);
+    expect(state.publishedWordIndex).toBe(5);
+    expect(state.explicitSelectionAnchor).toBeNull();
+    expect(state.resumeAnchor).toBeNull();
+    expect(deps.persistence.updateProgress).not.toHaveBeenCalled();
   });
 });

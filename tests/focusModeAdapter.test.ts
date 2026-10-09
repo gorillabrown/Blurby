@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { FocusModeAdapter, type FocusModeAdapterConfig } from "../src/reader/modes/FocusModeAdapter";
+import { FocusModeAdapter, type FocusModeAdapterConfig } from "../src/reader/modes/focus/ModeRuntime";
 import type { ReaderModeStartRequest } from "../src/reader/modes/ReaderModeAdapter";
 
 function makeConfig(overrides?: Partial<FocusModeAdapterConfig>): FocusModeAdapterConfig {

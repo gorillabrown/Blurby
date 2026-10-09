@@ -251,7 +251,7 @@ function createReplayInfrastructure(script: Script, document: ReaderDocumentSnap
     },
     diagnostics: { record: noop, transition: noop, trace: noop },
     shell: {
-      reportRelocate: noop, reportToc: noop, reportFlowProgress: noop, reportEinkContentChange: noop,
+      reportRelocate: noop, reportToc: noop, reportEinkContentChange: noop,
       requestCompletionToPage: () => {
         const router = getRouter();
         const active = router?.getActive();

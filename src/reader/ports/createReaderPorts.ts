@@ -72,7 +72,7 @@ const PORT_METHODS = {
     "resolveHighlightSync", "getAudioProgress", "updateCacheCursor", "configure",
   ],
   diagnostics: ["record", "transition", "trace"],
-  shell: ["reportRelocate", "reportToc", "reportFlowProgress", "reportEinkContentChange", "requestCompletionToPage", "requestCrossBook"],
+  shell: ["reportRelocate", "reportToc", "reportEinkContentChange", "requestCompletionToPage", "requestCrossBook"],
 } as const satisfies { readonly [G in keyof ReaderPorts]: readonly (keyof ReaderPorts[G])[] };
 
 /** Index of the callback argument a method registers into infrastructure. */

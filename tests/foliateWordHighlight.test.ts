@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { resolveFoliateWordHighlightClass, shouldSuppressNarrateFlowCursor } from "../src/utils/foliateWordHighlight";
+import * as legacyWordHighlight from "../src/utils/foliateWordHighlight";
+import * as pageWordHighlight from "../src/reader/modes/page/helpers/foliateWordHighlight";
+import * as focusWordHighlight from "../src/reader/modes/focus/helpers/foliateWordHighlight";
+import * as flowWordHighlight from "../src/reader/modes/flow/helpers/foliateWordHighlight";
+import * as narrateWordHighlight from "../src/reader/modes/narrate/helpers/foliateWordHighlight";
 import type { ChunkReadingVisualState } from "../src/types/chunkReading";
 
+// READER-MODE-SEPARATION-2 (design §D.5): the same cases also run against each mode's private copy
+// (src/reader/modes/<mode>/helpers/), next to the retained legacy util.
+function wordHighlightCases({ resolveFoliateWordHighlightClass, shouldSuppressNarrateFlowCursor }: typeof legacyWordHighlight) {
 describe("Foliate word highlight style resolution", () => {
   it("keeps Flow and Narrate cursor styles separate on the shared EPUB canvas", () => {
     expect(resolveFoliateWordHighlightClass("flow")).toBe("page-word--flow-cursor");
@@ -45,4 +52,16 @@ describe("Narrate flow cursor suppression", () => {
       shouldSuppressNarrateFlowCursor("narrate", null),
     ).toBe(false);
   });
+});
+}
+
+wordHighlightCases(legacyWordHighlight);
+
+describe.each([
+  ["page", pageWordHighlight],
+  ["focus", focusWordHighlight],
+  ["flow", flowWordHighlight],
+  ["narrate", narrateWordHighlight],
+] as const)("%s mode helper copy", (_mode, wordHighlight) => {
+  wordHighlightCases(wordHighlight);
 });

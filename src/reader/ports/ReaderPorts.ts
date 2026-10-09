@@ -13,7 +13,6 @@ import type { AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audi
 import type { HighlightSyncDecision, HighlightSyncResolveInput } from "../../utils/highlightSyncController";
 import type { PauseConfig } from "../../utils/pauseDetection";
 import type { MediaSessionBookMetadata } from "../../utils/mediaSessionBridge";
-import type { ReaderModeRuntimeSnapshotV1 } from "../modes/ReaderModeAdapter";
 import type { DeepReadonly, ReaderBookWordsValue, ReaderDocumentSnapshot, ReaderSettingsSnapshot } from "../document/ReaderDocumentSnapshot";
 
 export interface ReaderSettingsPort {
@@ -109,7 +108,6 @@ export interface ReaderShellEventsPort {
   /** fraction + e-ink page turn */
   reportRelocate(value: { readonly cfi: string; readonly fraction: number }): void;
   reportToc(toc: DeepReadonly<unknown[]>, sectionCount: number): void;
-  reportFlowProgress(progress: ReaderModeRuntimeSnapshotV1["flowProgress"]): void;
   reportEinkContentChange(estimate?: number): void;
   /** Focus/Flow end-of-words (legacy onComplete). */
   requestCompletionToPage(): void;

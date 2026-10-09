@@ -1,7 +1,6 @@
-import { useCallback } from "react";
-import { useReaderMode, type UseReaderModeParams } from "../hooks/useReaderMode";
-import { logDualSourceTransition } from "../utils/dualSourceDiag";
-import type { ReaderMode } from "../types";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
+import type { BlurbySettings, ReaderMode } from "../types";
+import type { TtsEvalTraceSink } from "../types/eval";
 import {
   createInitialHandoff,
   createReaderModeHandoff,
@@ -22,76 +21,72 @@ import type {
   ReaderModeSpeed,
   ReaderModeStopReason,
 } from "./modes/ReaderModeAdapter";
-import type { ReaderPortBroker } from "./ports/createReaderPorts";
+import { createReaderPorts, type ReaderPortBroker, type ReaderPortInfrastructure } from "./ports/createReaderPorts";
 import { pageMode } from "./modes/page/index";
 import { focusMode } from "./modes/focus/index";
 import { flowMode } from "./modes/flow/index";
 import { narrateMode } from "./modes/narrate/index";
 
-function toCompatibilityMode(mode: ReaderMode): "page" | "focus" | "flow" {
-  return mode === "narrate" ? "flow" : mode;
+// ── React wrapper (READER-MODE-SEPARATION-2, step E1) ────────────────────────
+// A thin binding over createReaderModeRouter + READER_MODE_MODULES (design §A.6). It owns one broker and
+// one router per mount and keeps the handler names the shell passes to ReaderBottomBar and useReaderKeys.
+// It holds no mode state: every intent is forwarded to the router, which forwards to the active runtime.
+
+export interface UseReaderModeOrchestratorParams {
+  /** Shell-owned infrastructure the broker forwards accepted port calls to (a stable object). */
+  readonly infrastructure: ReaderPortInfrastructure;
+  /** The current document snapshot (read at each mount). */
+  readonly getDocument: () => ReaderDocumentSnapshot;
+  /** The current settings snapshot (read at each mount). */
+  readonly getSettings: () => ReaderSettingsSnapshot;
+  /** settings.lastReadingMode (mode cycling is a shell settings write, not a mode effect). */
+  readonly lastReadingMode: ReaderMode | undefined;
+  readonly updateSettings: (patch: Partial<BlurbySettings>) => void;
+  readonly evalTrace?: TtsEvalTraceSink | null;
+  /** Defaults to READER_MODE_MODULES. */
+  readonly modules?: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>>;
 }
 
-export type UseReaderModeOrchestratorParams = UseReaderModeParams;
-
 export interface UseReaderModeOrchestratorReturn {
-  stopAllModes: () => void;
-  startFocus: () => void;
-  startFlow: (options?: { resumeNarration?: boolean; targetMode?: "flow" | "narrate" }) => void;
-  toggleNarrationInFlow: () => void;
+  readonly router: ReaderModeRouter;
+  /** null until a document is open. */
+  readonly snapshot: ReaderToolbarSnapshot | null;
+  readonly active: ReaderActiveMode | null;
   handleTogglePlay: () => void;
   handleSelectMode: (mode: "focus" | "flow" | "narrate") => void;
   handlePauseToPage: () => void;
   handleEnterFocus: () => void;
   handleEnterFlow: () => void;
-  handleStopTts: () => void;
-  handleReturnToReading: () => void;
+  handleEnterNarrate: () => void;
+  /** N key: flow → narrate, narrate → flow (explicit router transitions). */
+  handleToggleNarration: () => void;
+  handleExitToPage: () => void;
+  handleHardSelect: (input: ReaderHardSelectInput) => void;
+  handleNavigateTo: (wordIndex: number) => void;
+  handleJumpBack: () => void;
+  adjustSpeed: (delta: number) => void;
+  handleCommand: (command: ReaderModeCommand) => void;
+  handleSetSpeed: (speed: ReaderModeSpeed) => void;
   handleCycleMode: () => void;
   handleCycleAndStart: () => void;
-  preCapWpmRef: React.MutableRefObject<number | null>;
 }
 
 export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParams): UseReaderModeOrchestratorReturn {
-  const {
-    modeInstance,
-    narration,
-    readingMode,
-    setReadingMode,
-    flowPlaying,
-    setFocusPlaying,
-    setFlowPlaying,
-    isBrowsedAway,
-    setIsBrowsedAway,
-    setIsNarrating,
-    pendingNarrationResumeRef,
-    pageNavRef,
-    resumeAnchorRef,
-    setHighlightedWordIndex,
-    commitPersistentWordIndex,
-    updateSettings,
-    settings,
-    syncVisualToPersistentWord,
-    queuePostModeAnchorSync,
-    evalTrace,
-  } = params;
+  const { infrastructure, getDocument, getSettings, lastReadingMode, updateSettings, evalTrace, modules } = params;
 
-  const mode = useReaderMode(params);
-  const {
-    stopAllModes,
-    startFocus,
-    startFlow,
-    toggleNarrationInFlow,
-    captureCurrentAnchor,
-    clearNarrateTruthSync,
-    handleStopTts,
-    handleReturnToReading,
-    isNarratingRef,
-    highlightedWordIndexRef,
-    readingModeRef,
-    preCapWpmRef,
-  } = mode;
+  // One broker and one router per mount. The router reads the document and settings through the getters
+  // at each mount, so it is created once (StrictMode may build a second, side-effect-free copy).
+  const [router] = useState(() => createReaderModeRouter({
+    modules: modules ?? READER_MODE_MODULES,
+    broker: createReaderPorts(infrastructure),
+    getDocument: () => getDocument(),
+    getSettings: () => getSettings(),
+  }));
+  // Unmount: broker.closeAll(), then runtime.destroy(). The shell reopens its document on remount.
+  useEffect(() => () => router.destroy(), [router]);
 
-  const compatibilityMode = toCompatibilityMode(readingMode);
+  const snapshot = useSyncExternalStore(router.subscribe, router.getSnapshot);
+  const active = router.getActive();
 
   const getNextSelectableMode = useCallback((current: ReaderMode): "focus" | "flow" | "narrate" => {
     if (current === "focus") return "flow";
@@ -100,22 +95,9 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
   }, []);
 
   const handleSelectMode = useCallback((target: "focus" | "flow" | "narrate") => {
-    const fromMode = readingModeRef.current;
-    if (fromMode === target) return;
-    pendingNarrationResumeRef.current = false;
-    stopAllModes();
-    setFocusPlaying(false);
-    setFlowPlaying(false);
-    setIsNarrating(false);
-    const anchor = syncVisualToPersistentWord({ navigate: false });
-    queuePostModeAnchorSync(anchor, target);
-    setIsBrowsedAway(false);
-    setReadingMode(target);
-    updateSettings({
-      readingMode: target,
-      lastReadingMode: target,
-      isNarrating: false,
-    });
+    const fromMode = router.getActive()?.mode;
+    if (!fromMode || fromMode === target) return;
+    router.select(target);
     if (evalTrace?.enabled) {
       evalTrace.record({
         kind: "transition",
@@ -126,54 +108,25 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
         latencyMs: 0,
       });
     }
-  }, [
-    evalTrace,
-    pendingNarrationResumeRef,
-    readingModeRef,
-    setFlowPlaying,
-    setFocusPlaying,
-    setIsBrowsedAway,
-    setIsNarrating,
-    setReadingMode,
-    stopAllModes,
-    syncVisualToPersistentWord,
-    queuePostModeAnchorSync,
-    updateSettings,
-  ]);
+  }, [evalTrace, router]);
 
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
   const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
+  const handleEnterNarrate = useCallback(() => handleSelectMode("narrate"), [handleSelectMode]);
+
+  const handleToggleNarration = useCallback(() => {
+    const mode = router.getActive()?.mode;
+    if (mode === "flow") {
+      handleSelectMode("narrate");
+    } else if (mode === "narrate") {
+      handleSelectMode("flow");
+    }
+  }, [handleSelectMode, router]);
 
   const handlePauseToPage = useCallback(() => {
-    const fromMode = readingModeRef.current;
-    captureCurrentAnchor();
-    if (isBrowsedAway && compatibilityMode === "flow" && isNarratingRef.current) {
-      const pageStart = pageNavRef.current.getCurrentPageStart?.();
-      if (pageStart != null) {
-        setHighlightedWordIndex(pageStart);
-        highlightedWordIndexRef.current = pageStart;
-        resumeAnchorRef.current = pageStart;
-        // NARRATE-DUAL-SOURCE-DIAG-1: resumeAnchor:set (useReaderModeOrchestrator — pause-to-page)
-        logDualSourceTransition("resumeAnchor:set", () => ({
-          resumeAnchor: pageStart,
-          source: "useReaderModeOrchestrator:handlePauseToPage",
-        }));
-      }
-      setIsBrowsedAway(false);
-    }
-    if (compatibilityMode === "flow" && isNarratingRef.current) {
-      pendingNarrationResumeRef.current = true;
-    }
-    if (isNarratingRef.current) {
-      narration.stop("mode-switch");
-      clearNarrateTruthSync();
-      setIsNarrating(false);
-      updateSettings({ isNarrating: false });
-    }
-    stopAllModes();
-    setReadingMode("page");
-    updateSettings({ readingMode: "page" });
-    if (evalTrace?.enabled && fromMode !== "page") {
+    const fromMode = router.getActive()?.mode;
+    router.pauseToPage();
+    if (evalTrace?.enabled && fromMode && fromMode !== "page") {
       evalTrace.record({
         kind: "transition",
         transition: "handoff",
@@ -183,156 +136,55 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
         latencyMs: 0,
       });
     }
-  }, [
-    captureCurrentAnchor,
-    clearNarrateTruthSync,
-    compatibilityMode,
-    evalTrace,
-    highlightedWordIndexRef,
-    isBrowsedAway,
-    isNarratingRef,
-    narration,
-    pageNavRef,
-    pendingNarrationResumeRef,
-    readingModeRef,
-    resumeAnchorRef,
-    setHighlightedWordIndex,
-    setIsBrowsedAway,
-    setIsNarrating,
-    setReadingMode,
-    stopAllModes,
-    updateSettings,
-  ]);
+  }, [evalTrace, router]);
 
-  const handleTogglePlay = useCallback(() => {
-    if (readingMode === "page") {
-      return;
-    }
-
-    if (readingMode === "focus") {
-      const focusInstance = modeInstance.modeRef.current;
-      const isFocusPlaying = focusInstance?.type === "focus" && focusInstance.getState().isPlaying;
-      if (isFocusPlaying) {
-        captureCurrentAnchor();
-        modeInstance.pauseMode();
-        setFocusPlaying(false);
-        return;
-      }
-      if (focusInstance?.type === "focus") {
-        setFocusPlaying(true);
-        modeInstance.resumeMode();
-        return;
-      }
-      startFocus();
-      return;
-    }
-
-    if (readingMode === "flow") {
-      if (flowPlaying) {
-        modeInstance.pauseMode();
-        setFlowPlaying(false);
-        return;
-      }
-      startFlow();
-      return;
-    }
-
-    if (readingMode === "narrate") {
-      const narrationSpeaking = narration.speaking === true || narration.status === "speaking" || narration.status === "holding";
-      const narrationPaused = isNarratingRef.current && !narrationSpeaking;
-
-      if (isNarratingRef.current && narrationSpeaking) {
-        const anchor = narration.cursorWordIndex;
-        const clampedAnchor = commitPersistentWordIndex(anchor, "mode-advance", {
-          persist: false,
-          publishState: true,
-          navigate: false,
-          syncVisual: true,
-        });
-        resumeAnchorRef.current = clampedAnchor;
-        logDualSourceTransition("resumeAnchor:set", () => ({
-          resumeAnchor: clampedAnchor,
-          source: "useReaderModeOrchestrator:handleTogglePlay:narrate-pause",
-        }));
-        highlightedWordIndexRef.current = clampedAnchor;
-        setHighlightedWordIndex(clampedAnchor);
-        setFlowPlaying(false);
-        narration.pause("user-stop");
-        setIsNarrating(true);
-        updateSettings({
-          readingMode: "narrate",
-          lastReadingMode: "narrate",
-          isNarrating: true,
-        });
-        return;
-      }
-
-      if (narrationPaused) {
-        narration.resume();
-        setIsNarrating(true);
-        updateSettings({
-          readingMode: "narrate",
-          lastReadingMode: "narrate",
-          isNarrating: true,
-        });
-        return;
-      }
-
-      startFlow({ resumeNarration: true, targetMode: "narrate" });
-    }
-  }, [
-    captureCurrentAnchor,
-    commitPersistentWordIndex,
-    flowPlaying,
-    highlightedWordIndexRef,
-    isNarratingRef,
-    modeInstance,
-    narration,
-    readingMode,
-    resumeAnchorRef,
-    setFlowPlaying,
-    setFocusPlaying,
-    setHighlightedWordIndex,
-    setIsNarrating,
-    startFlow,
-    startFocus,
-    updateSettings,
-  ]);
+  const handleTogglePlay = useCallback(() => router.togglePlay(), [router]);
+  const handleExitToPage = useCallback(() => router.exitToPage(), [router]);
+  const handleHardSelect = useCallback((input: ReaderHardSelectInput) => router.hardSelect(input), [router]);
+  const handleNavigateTo = useCallback((wordIndex: number) => router.navigateTo(wordIndex), [router]);
+  const handleJumpBack = useCallback(() => router.jumpBack(), [router]);
+  const adjustSpeed = useCallback((delta: number) => router.adjustSpeed(delta), [router]);
+  const handleCommand = useCallback((command: ReaderModeCommand) => router.command(command), [router]);
+  const handleSetSpeed = useCallback((speed: ReaderModeSpeed) => router.setSpeed(speed), [router]);
 
   const handleCycleMode = useCallback(() => {
-    const current = settings.lastReadingMode || "flow";
+    const current = lastReadingMode || "flow";
     const next = getNextSelectableMode(current);
     updateSettings({ lastReadingMode: next });
-  }, [getNextSelectableMode, settings.lastReadingMode, updateSettings]);
+  }, [getNextSelectableMode, lastReadingMode, updateSettings]);
 
   const handleCycleAndStart = useCallback(() => {
-    const current = readingModeRef.current === "page"
-      ? (settings.lastReadingMode || "flow")
-      : readingModeRef.current;
+    const mode = router.getActive()?.mode ?? "page";
+    const current = mode === "page" ? (lastReadingMode || "flow") : mode;
     const next = getNextSelectableMode(current);
     handleSelectMode(next);
-  }, [getNextSelectableMode, handleSelectMode, readingModeRef, settings.lastReadingMode]);
+  }, [getNextSelectableMode, handleSelectMode, lastReadingMode, router]);
 
   return {
-    stopAllModes,
-    startFocus,
-    startFlow,
-    toggleNarrationInFlow,
+    router,
+    snapshot,
+    active,
     handleTogglePlay,
     handleSelectMode,
     handlePauseToPage,
     handleEnterFocus,
     handleEnterFlow,
-    handleStopTts,
-    handleReturnToReading,
+    handleEnterNarrate,
+    handleToggleNarration,
+    handleExitToPage,
+    handleHardSelect,
+    handleNavigateTo,
+    handleJumpBack,
+    adjustSpeed,
+    handleCommand,
+    handleSetSpeed,
     handleCycleMode,
     handleCycleAndStart,
-    preCapWpmRef,
   };
 }
 
 // ── Thin router core (READER-MODE-SEPARATION-2, Wave B) ──────────────────────
-// Built beside the legacy hook above (DD-1); the hook becomes a wrapper around this core at E1.
+// Built beside the legacy hook in Waves B–D (DD-1); since E1 the hook above is a thin wrapper around it.
 // A transition hands off copied values only: export → invalidate → teardown(stop, destroy) →
 // issue → create → publish → select. The incoming runtime never holds a reference to the outgoing one.
 
