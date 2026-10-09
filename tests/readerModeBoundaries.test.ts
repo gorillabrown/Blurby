@@ -83,13 +83,14 @@ describe("reader mode boundaries (G1)", () => {
     expect(result.examinedEdges).toBeGreaterThan(0);
     expect(result.violations, `type-only edges (never failing): ${result.typeOnlyEdges.join("; ")}`).toEqual([]);
 
-    if (modeRoots.length === 0) {
-      // No mode tree yet: allowance coverage is recorded as unreachable, never as clean.
-      const unreachable = Object.keys(policy.allowedShared).filter((p) => !result.hits.has(p));
-      expect(unreachable.length).toBeGreaterThan(0);
-    } else {
-      const modeHits = checkBoundaries(graph, modeRoots, policy).hits;
-      expect(Object.keys(policy.allowedShared).filter((p) => !modeHits.has(p)), "allowances never exercised by a mode").toEqual([]);
+    const modeHits = checkBoundaries(graph, modeRoots, policy).hits;
+    const unexercised = Object.keys(policy.allowedShared).filter((p) => !modeHits.has(p));
+    // Partial set of mode trees (Waves B–D): allowances a later mode will use are reported as
+    // unreachable, never as clean. Full coverage is enforced once every mode tree exists (D2 on F).
+    if (modeRoots.length === policy.modes.length) {
+      expect(unexercised, "allowances never exercised by a mode").toEqual([]);
+    } else if (unexercised.length > 0) {
+      console.info(`[G1] unreachable until all mode trees exist: ${unexercised.join(", ")}`);
     }
   });
 

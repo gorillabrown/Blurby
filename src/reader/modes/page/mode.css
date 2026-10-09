@@ -1,0 +1,98 @@
+/* Page mode outer-DOM styles (READER-MODE-SEPARATION-2 design §B.6, DD-6).
+   Copied verbatim from src/styles/page-reader.css (.foliate-page-view, .foliate-host, .page-nav-btn*,
+   .foliate-loading, .recenter-reading-box-btn), renamed with the rm-page- prefix and anchored under
+   .rm-page-root. The legacy inline overflow:hidden (paginated) is a rule here. Classes inside EPUB
+   section documents are styled by this mode's helpers/foliateStyles.ts and are not renamed. */
+
+.rm-page-root {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* Base layout for the Foliate page view container */
+.rm-page-root .rm-page-view {
+  flex: 1;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.rm-page-root .rm-page-host {
+  z-index: 0;
+}
+
+/* Translucent page navigation side buttons */
+.rm-page-root .rm-page-nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 80px;
+  background: rgba(128, 128, 128, 0.08);
+  border: none;
+  color: var(--text-dimmer, #888);
+  font-size: 28px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  z-index: 5;
+  -webkit-app-region: no-drag;
+}
+.rm-page-root .rm-page-nav-btn:hover {
+  background: rgba(128, 128, 128, 0.18);
+  color: var(--text-dim);
+}
+.rm-page-root .rm-page-nav-btn--left { left: 8px; z-index: 10; }
+.rm-page-root .rm-page-nav-btn--right { right: 8px; z-index: 10; }
+
+/* STAB-1A (BUG-162a): Loading indicator shown while EPUB word-wrapping runs */
+.rm-page-root .rm-page-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  color: var(--text-secondary, #888);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  z-index: 200;
+  animation: rm-page-loading-pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes rm-page-loading-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.rm-page-root .rm-page-recenter-btn {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.92;
+  z-index: 450;
+  pointer-events: auto;
+  transition: opacity var(--transition-normal), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  -webkit-app-region: no-drag;
+  white-space: nowrap;
+}
+.rm-page-root .rm-page-recenter-btn:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}

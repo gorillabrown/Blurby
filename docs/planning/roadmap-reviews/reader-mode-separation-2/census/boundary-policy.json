@@ -453,7 +453,12 @@
       "enclosing": "ReaderPortAccessError>constructor"
     }
   ],
-  "allowedModuleSingletons": [],
+  "allowedModuleSingletons": [
+    {
+      "file": "src/reader/modes/page/helpers/foliateHelpers.ts",
+      "symbol": "BLOCK_TAGS"
+    }
+  ],
   "legacy": [
     "src/components/ReaderContainer.tsx",
     "src/hooks/useReaderMode.ts",
