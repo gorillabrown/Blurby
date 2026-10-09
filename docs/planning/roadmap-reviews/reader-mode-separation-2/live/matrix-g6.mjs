@@ -661,7 +661,9 @@ async function narrateSection(row) {
   const t0 = await traceLen(); await play();
   const st = await waitTrace(t0, (e) => e.kind === "lifecycle" && e.state === "start" && e.wordIndex != null, 30000);
   const hit = await waitTrace(t0, (e) => e.kind === "word" && e.source === "audio" && e.wordIndex > b.max, 45000);
-  row.measure = await sampledMeasure(row, "after-boundary");
+  // The narrate chunk-boundary mark (e.g. 5560 on the EPUB) comes and goes ~45 s in on B0 and the candidate;
+  // 6 samples straddled it, so sample ~8 s past the boundary (max is the measurement, on both targets).
+  row.measure = await sampledMeasure(row, "after-boundary", 24);
   const ev = await traceSince(t0);
   row.lastAudio = lastAudioWord(ev);
   row.section = { start: st?.wordIndex ?? null, sectionTransitionEvents: ev.filter((e) => e.kind === "transition" && e.transition === "section").length, chapters: [before.chapter, row.measure.chapter], audioWordsAcross: ev.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).filter((w) => w >= b.max - 2).slice(0, 8) };
