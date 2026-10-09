@@ -1,0 +1,37 @@
+{
+  "reason": "Owner-mandated mode separation changes the implementation boundaries. Preserve prior specs in an archive and carry blocked scope stubs until rebased.",
+  "updates": [
+    {
+      "id": "NARRATE-HEARD-CURSOR-1",
+      "itemId": "13118863178",
+      "revision": "2026-09-23T19:04:57Z",
+      "fields": {
+        "written_status": "Stub"
+      }
+    },
+    {
+      "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "itemId": "13118840646",
+      "revision": "2026-09-23T19:04:57Z",
+      "fields": {
+        "written_status": "Stub"
+      }
+    },
+    {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "itemId": "13118808496",
+      "revision": "2026-09-23T19:04:57Z",
+      "fields": {
+        "written_status": "Stub"
+      }
+    },
+    {
+      "id": "UX-POLISH-1",
+      "itemId": "13118847895",
+      "revision": "2026-09-23T19:04:57Z",
+      "fields": {
+        "written_status": "Stub"
+      }
+    }
+  ]
+}

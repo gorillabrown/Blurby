@@ -1696,3 +1696,923 @@ speakChunk() {
 **Applied to:** NARRATE-SUBSCRIBER-CURSOR-1 amended to publish a lag-compensated heard cursor (not `schedulerActiveWord`/`heardFloor`/`nextGenWordIndex`) and to re-trace the `subscriberCursor` channel after wiring (it was `no-data`). Feeds NARRATE-A5-RATE-RESEED-1 and NARRATE-APPLYRATECHANGE-COLLAPSE-1 (frontier-reseed skip).
 
 **Related:** `docs/studies/investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md` (signal map + ranked accuracy + authority verdict), `src/hooks/useNarration.ts` (`DIAG`/`diag()`, word-advance payload), `src/utils/audioScheduler.ts` (`DIAG`/`schedDiag()`, `getPlayingSourceMaxWordIndex`), LL-126, SRL-070.
+
+---
+
+### 2026-09-23 roadmap review — source corrections and mode-isolation application
+
+This is an append-only review annotation, not a newly numbered standing rule. Registered policy.standingRules.ids is empty; existing LL/SRL labels remain source references.
+
+- **LL-108 / LL-120 / LL-121 / LL-125:** preserve zero and the distinction between explicit selection, resume intent, playback and browse position. The owner now requires independent Page/Focus/Flow/Narrate runtimes, not further shared mode-aware behavior. Copy the existing policy into the respective owners and cross only a versioned value contract. Narrate-to-Flow runtime aliasing is removed by READER-MODE-SEPARATION-2.
+- **LL-109:** an old asynchronous result must be rejected after await as well as cancelled on stop. The new specification guards both the local runtime and persistence/render/audio ports with document and session identity.
+- **LL-112:** mirrored implementation shapes and independent evidence precede future shared abstractions. This review applies that principle to reading modes; it does not reactivate dormant TTS engines.
+- **LL-124 / LL-126 / LL-127:** retain the audio-independent evidence requirement. The LL-127 prose value of approximately 350 ms for the trusted constant is historical: current main @ cd384b78cd5325e96429fe867c8b080ce1b39bb8 has TTS_TRUSTED_CURSOR_LAG_MS=450 and NARRATION_CURSOR_LAG_MS=350 (src/constants.ts:119 and :113, checked 2026-09-23). Scheduler paths already apply compensation. This annotation does not certify heard-audio alignment or select another delay.
+- **SRL-074 / 075 / 076 / 077** in the registered close-outs directory describe successful adapter scaffolding while ref-heavy runtime/DOM owners remained in shared hooks. Their closure remains valid historical evidence; complete runtime separation is a new, explicitly approved stage.
+- **Identifier collision:** SpecRetro.Lessons_Learned.md uses SRL-090 for structured-file schema and row-identity verification (two entries). The former ROADMAP compensation-first rule reused that identifier for a different June 1 decision. ROADMAP now names the compensation rule descriptively and cites its decision provenance; no new ID was invented and no pre-existing SpecRetro content was rewritten.
+- **Perceptual rewrite gate:** the later HEARD probe still gates optional subscriber/reducer surgery. It does not delay the owner's separately mandated mode separation. Preserve the A5 position result and carry the 1.4x audio-overlap finding as an unresolved measured baseline, not a proven general cause.
+
+Sources: [current inline specification](../../ROADMAP.md#reader-mode-separation-2), [review checklist](../planning/roadmap-reviews/2026-09-23-lessons-applied.md), [source verification](../planning/roadmap-reviews/2026-09-23-source-evidence.json). Detailed old specs remain archived and blocked; they are not current implementation instructions.
+
+## Canonical lesson index — parser-readable (appended 2026-10-09)
+
+Each entry below restates an earlier LL entry in this file in id-first form so the Virtuoso lessons parser can read it. The original entry at the cited line stays authoritative for detail; where they differ, the original wins. One renumber: the line-1125 entry, originally headed LL-092 (a same-day duplicate of the PERF-1 lesson), is indexed as LL-128 (owner ruling 2026-10-09).
+
+### LL-001 — OneDrive Mount Read Failures in Cowork VM (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** No longer applicable.
+**Evidence:** Cowork's Linux VM cannot read files from OneDrive-synced folders when files are "cloud-only" (not downloaded locally).
+**Recommendation:** No longer applicable. Working directory moved to `C:\Users\estra\Projects\Blurby` (local, not cloud-synced) per LL-063. Cowork accesses files via the mounted local directory.
+**Applies to:** infrastructure, file access
+**Status:** Superseded -> LL-063
+**Source:** LESSONS_LEARNED.md line 22, original heading "[2026-03-21] LL-001: OneDrive Mount Read Failures in Cowork VM"
+
+### LL-002 — PR #1 Is Massive — 102 Commits, 80 Files (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** Each sprint should produce a mergeable PR.
+**Evidence:** The entire development history from initial skeleton to full-featured app lives in a single PR (#1) with 102 commits.
+**Recommendation:** Each sprint should produce a mergeable PR. Branch naming: `sprint/[N]-[short-name]`.
+**Applies to:** process, git hygiene
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 36, original heading "[2026-03-21] LL-002: PR #1 Is Massive — 102 Commits, 80 Files"
+
+### LL-003 — main.js Is 93KB and Growing (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** The Performance Sprint should include modularizing main.js into focused modules (e.g., `main/ipc-handlers.js`, `main/file-parsers.js`, `main/migrations.js`, `main/window-manager.js`).
+**Evidence:** The Electron main process file (main.js) handles everything: IPC, file I/O, folder watching, data persistence, URL extraction, PDF export, format parsing, migrations, window management.
+**Recommendation:** The Performance Sprint should include modularizing main.js into focused modules (e.g., `main/ipc-handlers.js`, `main/file-parsers.js`, `main/migrations.js`, `main/window-manager.js`). Each module exports handlers that main.js registers.
+**Applies to:** architecture, maintainability
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 50, original heading "[2026-03-21] LL-003: main.js Is 93KB and Growing"
+
+### LL-004 — GitHub Repo is Private — No CI/CD (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** Distribution Sprint should add a basic CI workflow: `npm test` + `npm run build` on every push/PR to main.
+**Evidence:** The repo (`gorillabrown/Blurby`) has no GitHub Actions, no automated test runs on PR, no build verification.
+**Recommendation:** Distribution Sprint should add a basic CI workflow: `npm test` + `npm run build` on every push/PR to main.
+**Applies to:** infrastructure, quality
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 62, original heading "[2026-03-21] LL-004: GitHub Repo is Private — No CI/CD"
+
+### LL-005 — Workflow Reversal — Local-First, Git to Sync (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** `C:\Users\estra\Projects\Blurby` is the source of truth on each machine.
+**Evidence:** Previously, Claude Code worked in its own context and pushed directly to GitHub.
+**Recommendation:** `C:\Users\estra\Projects\Blurby` is the source of truth on each machine. GitHub is the sync hub. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
+**Applies to:** infrastructure, workflow
+**Status:** Superseded -> LL-063
+**Source:** LESSONS_LEARNED.md line 74, original heading "[2026-03-21] LL-005: Workflow Reversal — Local-First, Git to Sync"
+
+### LL-006 — Atomic JSON Writes Prevent Data Corruption (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** Never use direct `writeFile()` for persistent data.
+**Evidence:** Direct `writeFile()` calls risk partial writes on disk full or power loss, leaving JSON files corrupted with no recovery path.
+**Recommendation:** Never use direct `writeFile()` for persistent data. Always write to a `.tmp` file first, then rename. This applies to library.json, settings.json, history.json, and any future data files.
+**Applies to:** data integrity, file I/O
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 88, original heading "[2026-03-21] LL-006: Atomic JSON Writes Prevent Data Corruption"
+
+### LL-007 — Content Security Policy in Electron (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** CSP is enforced at the session level via `onHeadersReceived`.
+**Evidence:** Without CSP, URL-fetched content processed by Readability could execute arbitrary scripts in the app's context.
+**Recommendation:** CSP is enforced at the session level via `onHeadersReceived`. Any new BrowserWindow or webview must use the same session or have its own CSP. Never disable CSP for debugging and forget to re-enable it.
+**Applies to:** security, Electron
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 102, original heading "[2026-03-21] LL-007: Content Security Policy in Electron"
+
+### LL-008 — React Context vs Prop Drilling — When to Switch (LESSONS-BACKFILL, 2026-03-21)
+
+**Verdict:** Use context for cross-cutting concerns (settings, toasts, theme).
+**Evidence:** Sprint 11 refactored App.tsx from 548 lines to 115 by extracting ReaderContainer and LibraryContainer, and replacing 18+ prop chains with SettingsContext and ToastContext.
+**Recommendation:** Use context for cross-cutting concerns (settings, toasts, theme). Use props for parent-child data that the child directly consumes. Never put frequently-changing values (word index, playback state) in context — that defeats memoization.
+**Applies to:** React architecture, renderer
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 114, original heading "[2026-03-21] LL-008: React Context vs Prop Drilling — When to Switch"
+
+### LL-009 — Corrupted main.js Masked by Syntax Error Position (LESSONS-BACKFILL, 2026-03-22)
+
+**Verdict:** Add `node -c main.js` as a syntax check step before packaging.
+**Evidence:** When packaging the app for the first time via electron-builder (Sprint 18A), the installed .exe crashed on launch with `SyntaxError: Missing catch or finally after try` at main.js:944.
+**Recommendation:** Add `node -c main.js` as a syntax check step before packaging. Consider adding it to the CI pipeline. Always run the packaged build (not just dev mode) before releasing.
+**Applies to:** main process, distribution, code quality
+**Status:** Retired — resolved
+**Source:** LESSONS_LEARNED.md line 164, original heading "[2026-03-22] LL-009: Corrupted main.js Masked by Syntax Error Position"
+
+### LL-010 — React Word Spans Need Explicit Whitespace (LESSONS-BACKFILL, 2026-03-22)
+
+**Verdict:** When rendering tokenized words as individual spans/elements, always include a whitespace text node or CSS spacing.
+**Evidence:** PageReaderView rendered each word as a separate `<span>` element.
+**Recommendation:** When rendering tokenized words as individual spans/elements, always include a whitespace text node or CSS spacing. This applies to PageReaderView, FlowText, and any future per-word rendering.
+**Applies to:** renderer, text rendering
+**Status:** Retired — resolved
+**Source:** LESSONS_LEARNED.md line 184, original heading "[2026-03-22] LL-010: React Word Spans Need Explicit Whitespace"
+
+### LL-011 — Pagination Off-by-One Causes Word Duplication (LESSONS-BACKFILL, 2026-03-22)
+
+**Verdict:** When implementing pagination with start/end ranges, verify that boundary words are not counted in both the current and next page.
+**Evidence:** The pagination algorithm set `pageStart = i` when breaking to a new page, but the word at index `i` was already included as the `end` of the previous page.
+**Recommendation:** When implementing pagination with start/end ranges, verify that boundary words are not counted in both the current and next page. Write a test with known word counts and verify page word counts sum to the total.
+**Applies to:** renderer, PageReaderView
+**Status:** Retired — resolved
+**Source:** LESSONS_LEARNED.md line 198, original heading "[2026-03-22] LL-011: Pagination Off-by-One Causes Word Duplication"
+
+### LL-012 — Keyboard Mode Gate Must Be Per-Mode, Not Universal (LESSONS-BACKFILL, 2026-03-22)
+
+**Verdict:** When adding a new reader mode, audit EVERY key handler for mode-specific behavior.
+**Evidence:** The keyboard shortcut handler had a `if (s.readerMode !== "speed") return;` gate that blocked Space, arrow keys, and Escape from working in non-Focus modes.
+**Recommendation:** When adding a new reader mode, audit EVERY key handler for mode-specific behavior. Create a keyboard behavior matrix (key × mode → action) and verify each cell is implemented.
+**Applies to:** renderer, keyboard shortcuts
+**Status:** Retired — resolved
+**Source:** LESSONS_LEARNED.md line 212, original heading "[2026-03-22] LL-012: Keyboard Mode Gate Must Be Per-Mode, Not Universal"
+
+### LL-013 — Flow Mode Belongs in Page View, Not a Separate Component (LESSONS-BACKFILL, 2026-03-22)
+
+**Verdict:** When a "mode" is described as running "within" or "from" a parent view, implement it as behavior within that view, not as a separate component.
+**Evidence:** The original spec described Flow mode as a "scrollable view with word-level highlight." The initial implementation used ScrollReaderView as a completely separate view for Flow mode, which was jarring — the user lost their paginated reading context when entering Flow.
+**Recommendation:** When a "mode" is described as running "within" or "from" a parent view, implement it as behavior within that view, not as a separate component. Ask the user to clarify before building separate views.
+**Applies to:** architecture, reader
+**Status:** Superseded -> LL-067
+**Source:** LESSONS_LEARNED.md line 228, original heading "[2026-03-22] LL-013: Flow Mode Belongs in Page View, Not a Separate Component"
+
+### LL-014 — React Effects Cannot Drive Imperative DOM Animation (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-17: Never use React useEffect to drive imperative DOM animations that need continuous state (position, timers).
+**Evidence:** Sprint 24 attempted to build a flow reading cursor (a bar sliding across text lines at WPM speed) using React useEffect + refs + CSS transitions.
+**Recommendation:** PR-17: Never use React useEffect to drive imperative DOM animations that need continuous state (position, timers). Extract into a plain class and let React only trigger start/stop.
+**Applies to:** rendering, animation, flow cursor
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 251, original heading "[2026-03-24] LL-014: React Effects Cannot Drive Imperative DOM Animation"
+
+### LL-015 — Forced Reflow for CSS Transition Sequencing (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-18: Use forced reflow (read offsetWidth/offsetHeight) between transition:none and new transition, not requestAnimationFrame.
+**Evidence:** When setting `transition: none` followed by a new `transition: Xms linear` on the same element, the browser may batch both changes and skip the "instant" positioning.
+**Recommendation:** PR-18: Use forced reflow (read offsetWidth/offsetHeight) between transition:none and new transition, not requestAnimationFrame.
+**Applies to:** animation, CSS
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 270, original heading "[2026-03-24] LL-015: Forced Reflow for CSS Transition Sequencing"
+
+### LL-016 — React State Batching Breaks Pause/Resume Flows (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-19: Use refs (not state) to pass values between effect cleanup and the next effect run — React batching delays state propagation.
+**Evidence:** When an effect cleanup sets state (e.g., saving a stop position) and a new effect run immediately reads that state, React's batching means the new value hasn't propagated yet.
+**Recommendation:** PR-19: Use refs (not state) to pass values between effect cleanup and the next effect run — React batching delays state propagation.
+**Applies to:** renderer, React state, effects
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 312, original heading "[2026-03-24] LL-016: React State Batching Breaks Pause/Resume Flows"
+
+### LL-017 — Closures in Imperative Controllers Capture Stale React State (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-20: When passing state-reading callbacks to imperative code, always read from a ref, never close over state directly.
+**Evidence:** When passing callbacks like `getCurrentPageIdx: () => currentPage` to an imperative class, the closure captures the render-time value of `currentPage`.
+**Recommendation:** PR-20: When passing state-reading callbacks to imperative code, always read from a ref, never close over state directly.
+**Applies to:** renderer, imperative code, closures
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 326, original heading "[2026-03-24] LL-017: Closures in Imperative Controllers Capture Stale React State"
+
+### LL-018 — Flow Mode Must Stay Paginated, Not Infinite-Scroll (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-21: Flow cursor must operate on paginated word sets — never render the full document to DOM for animation purposes.
+**Evidence:** An early approach rendered all words when flow was playing (`flowPlaying ? 0 : page.start`), making the DOM enormous.
+**Recommendation:** PR-21: Flow cursor must operate on paginated word sets — never render the full document to DOM for animation purposes.
+**Applies to:** reader, flow mode, performance
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 340, original heading "[2026-03-24] LL-018: Flow Mode Must Stay Paginated, Not Infinite-Scroll"
+
+### LL-019 — Pagination Estimation — Count the First Line (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-22: Start pagination height tracking at `lineHeight`, not 0 — the first line occupies space immediately.
+**Evidence:** When tracking `usedHeight` in pixels for pagination, starting at 0 means the first line is never counted toward the height budget.
+**Recommendation:** PR-22: Start pagination height tracking at `lineHeight`, not 0 — the first line occupies space immediately.
+**Applies to:** renderer, pagination
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 354, original heading "[2026-03-24] LL-019: Pagination Estimation — Count the First Line"
+
+### LL-020 — Paragraph Margin Is Not Equal to lineHeight (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-23: Paragraph break height in pagination must match CSS margin (1em = fontSize), not lineHeight.
+**Evidence:** Paragraph breaks in pagination were adding a full `lineHeight` (fontSize x 1.8) to the height budget, but CSS `margin-bottom: 1em` only adds `fontSize`.
+**Recommendation:** PR-23: Paragraph break height in pagination must match CSS margin (1em = fontSize), not lineHeight.
+**Applies to:** renderer, pagination, CSS
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 368, original heading "[2026-03-24] LL-020: Paragraph Margin Is Not Equal to lineHeight"
+
+### LL-021 — TTS Chunk Size Dramatically Affects Speech Quality (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-24: TTS chunks should be ~40 words with sentence-boundary splitting — small chunks cause unacceptable choppiness.
+**Evidence:** `SpeechSynthesisUtterance` has per-utterance startup overhead.
+**Recommendation:** PR-24: TTS chunks should be ~40 words with sentence-boundary splitting — small chunks cause unacceptable choppiness.
+**Applies to:** TTS, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 382, original heading "[2026-03-24] LL-021: TTS Chunk Size Dramatically Affects Speech Quality"
+
+### LL-022 — TTS and Flow Cursor Are Independent Systems That Conflict (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-25: TTS and flow cursor cannot both drive word position — when TTS is active, it owns highlighting; cursor controller must be disabled.
+**Evidence:** When both TTS and the flow cursor run simultaneously, TTS advances `highlightedWordIndex` via `onboundary` events (triggering page turns), while the cursor controller independently slides through its own line map on potentially a different page.
+**Recommendation:** PR-25: TTS and flow cursor cannot both drive word position — when TTS is active, it owns highlighting; cursor controller must be disabled.
+**Applies to:** reader, TTS, flow cursor
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 396, original heading "[2026-03-24] LL-022: TTS and Flow Cursor Are Independent Systems That Conflict"
+
+### LL-023 — TTS Settings Were Disconnected From Narration Engine (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-26: Any settings that control a runtime engine must have explicit sync bridges — settings state and engine state are separate systems.
+**Evidence:** The settings panel wrote `ttsVoiceName` and `ttsRate` to settings state, but `useNarration()` maintained its own independent voice and rate values.
+**Recommendation:** PR-26: Any settings that control a runtime engine must have explicit sync bridges — settings state and engine state are separate systems.
+**Applies to:** settings, TTS, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 410, original heading "[2026-03-24] LL-023: TTS Settings Were Disconnected From Narration Engine"
+
+### LL-024 — `-webkit-app-region: drag` on Body Inherits Into Grid Gaps (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-27: Grid containers need explicit `-webkit-app-region: no-drag` to prevent gap areas from inheriting drag behavior.
+**Evidence:** Setting `-webkit-app-region: drag` on the body element makes the whole window draggable, but grid gaps between cards inherit this property.
+**Recommendation:** PR-27: Grid containers need explicit `-webkit-app-region: no-drag` to prevent gap areas from inheriting drag behavior.
+**Applies to:** CSS, Electron, window management
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 424, original heading "[2026-03-24] LL-024: `-webkit-app-region: drag` on Body Inherits Into Grid Gaps"
+
+### LL-025 — DOM Elements Created by Imperative Code Get Orphaned by React (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-28: Imperative controllers must never create DOM elements in React-managed containers — render in JSX, pass ref, controller styles only.
+**Evidence:** When an imperative controller creates a DOM element (e.g., a cursor div) and appends it to a React-managed container, React reconciliation can destroy the element on re-render because React doesn't know about it.
+**Recommendation:** PR-28: Imperative controllers must never create DOM elements in React-managed containers — render in JSX, pass ref, controller styles only.
+**Applies to:** renderer, imperative code, React reconciliation
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 438, original heading "[2026-03-24] LL-025: DOM Elements Created by Imperative Code Get Orphaned by React"
+
+### LL-026 — Never Put `-webkit-app-region: drag` on `body` (LESSONS-BACKFILL, 2026-03-24)
+
+**Verdict:** PR-29: Never apply `-webkit-app-region: drag` to `body` or any high-level container.
+**Evidence:** Applying `-webkit-app-region: drag` to the `body` element makes the entire window a drag region.
+**Recommendation:** PR-29: Never apply `-webkit-app-region: drag` to `body` or any high-level container. Apply it only to the specific title bar element. The `no-drag` countermeasure on interactive elements is insufficient because intermediate elements with padding still inherit drag and absorb clicks.
+**Applies to:** CSS, Electron, window management
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 452, original heading "[2026-03-24] LL-026: Never Put `-webkit-app-region: drag` on `body`"
+
+### LL-027 — Foliate EPUB DOM Is Not Your DOM — Use Overlays (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-30: Never inject DOM elements into foliate's rendered content.
+**Evidence:** Three independent bugs (Flow cursor invisible, Focus mode offset, narration highlight stuck) all had the same root cause: trying to manipulate or query DOM elements inside foliate's rendering context.
+**Recommendation:** PR-30: Never inject DOM elements into foliate's rendered content. Use positioned overlay divs above the foliate container. All visual feedback for EPUBs uses the overlay pattern: extract Range → `getBoundingClientRect()` → position overlay div via `translate3d()`.
+**Applies to:** EPUB rendering, foliate-js, React integration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 470, original heading "[2026-03-26] LL-027: Foliate EPUB DOM Is Not Your DOM — Use Overlays"
+
+### LL-028 — Word Tokenization Must Be Unified Across All Paths (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-31: All word-counting and word-splitting code must use the same tokenization function.
+**Evidence:** Word click position mapping in EPUBs was broken because two code paths counted words differently.
+**Recommendation:** PR-31: All word-counting and word-splitting code must use the same tokenization function. If two paths produce `(sectionIndex, wordOffset)` tuples, they must agree on what a "word" is. Prefer `Intl.Segmenter` over regex splitting for Unicode correctness.
+**Applies to:** Text processing, EPUB word extraction, click handling
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 484, original heading "[2026-03-26] LL-028: Word Tokenization Must Be Unified Across All Paths"
+
+### LL-029 — Stale Ranges Are Silent Killers — Guard Every Access (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-32: Always guard Range access with `range.startContainer.isConnected` before any DOM operation.
+**Evidence:** Foliate unloads DOM nodes when navigating between sections.
+**Recommendation:** PR-32: Always guard Range access with `range.startContainer.isConnected` before any DOM operation. Treat Ranges as ephemeral cache — the word strings are the source of truth, Ranges are just a rendering convenience that must be re-extracted on section changes.
+**Applies to:** DOM, EPUB, Range API
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 498, original heading "[2026-03-26] LL-029: Stale Ranges Are Silent Killers — Guard Every Access"
+
+### LL-030 — Engagement Gating Prevents Ghost Progress (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-33: Always gate progress persistence behind explicit user engagement.
+**Evidence:** Opening an EPUB triggers foliate's `onRelocate` event immediately, even before the user has done anything.
+**Recommendation:** PR-33: Always gate progress persistence behind explicit user engagement. Never save progress from automatic navigation events (initial load, auto-page-turn from modes, auto-scroll). The engagement ref must reset per document to prevent carry-over from previous books.
+**Applies to:** State management, progress tracking, EPUB
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 510, original heading "[2026-03-26] LL-030: Engagement Gating Prevents Ghost Progress"
+
+### LL-031 — Generation ID Pattern for Stale Async Results (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-34: For async operations where input parameters can change mid-flight (rate, position, config), use a generation ID guard.
+**Evidence:** Kokoro TTS generates audio via IPC calls that take 500ms-2s.
+**Recommendation:** PR-34: For async operations where input parameters can change mid-flight (rate, position, config), use a generation ID guard. Increment a counter when parameters change; capture before the async call; compare after completion; discard stale results. Cheaper than abort mechanisms and works universally.
+**Applies to:** TTS, async IPC, state management
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 524, original heading "[2026-03-26] LL-031: Generation ID Pattern for Stale Async Results"
+
+### LL-032 — Foliate Shadow DOM Blocks querySelectorAll (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-35: Never query foliate's internal iframes via `querySelectorAll("iframe")`.
+**Evidence:** After injecting `<span data-word-index>` into foliate's EPUB sections, attempts to find those spans via `document.querySelector(".foliate-page-view").querySelectorAll("iframe")` returned 0 results.
+**Recommendation:** PR-35: Never query foliate's internal iframes via `querySelectorAll("iframe")`. Always use `view.renderer.getContents()` which provides direct `{ doc, index }` pairs. This applies to ALL DOM operations that need to reach inside EPUB section documents — word highlighting, click handling, span injection, style injection.
+**Applies to:** DOM, foliate-js, Electron, shadow DOM
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 536, original heading "[2026-03-26] LL-032: Foliate Shadow DOM Blocks querySelectorAll"
+
+### LL-033 — adjustRate Before startCursorDriven, Never After (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-36: Any call that increments `generationIdRef` (adjustRate, updateWpm) must happen BEFORE `startCursorDriven` or `speakNextChunk`, never after.
+**Evidence:** Kokoro narration silently failed — audio generated successfully but was discarded.
+**Recommendation:** PR-36: Any call that increments `generationIdRef` (adjustRate, updateWpm) must happen BEFORE `startCursorDriven` or `speakNextChunk`, never after. The generation ID must be stable during the entire IPC round-trip.
+**Applies to:** TTS, Kokoro, async IPC, state management
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 550, original heading "[2026-03-26] LL-033: adjustRate Before startCursorDriven, Never After"
+
+### LL-034 — TTS Chunks Must Be One Sentence for Natural Pauses (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-37: Kokoro TTS chunks must end at sentence boundaries.
+**Evidence:** Rhythm pauses (sentence: 800ms, paragraph: 1500ms, clause: 500ms) only fire BETWEEN Kokoro audio chunks, not within them.
+**Recommendation:** PR-37: Kokoro TTS chunks must end at sentence boundaries. Pause values from constants.ts (TTS_PAUSE_COMMA_MS=250, TTS_PAUSE_SENTENCE_MS=400, TTS_PAUSE_PARAGRAPH_MS=750). The `hasPreBuffer` guard is critical — if next chunk isn't ready, generation time IS the pause. If pre-buffer IS ready, add the delay. Never add rhythm pauses AND generation wait — "double pause" anti-pattern. Also: `Intl.Segment…
+**Applies to:** TTS, Kokoro, audio UX
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 562, original heading "[2026-03-26] LL-034: TTS Chunks Must Be One Sentence for Natural Pauses"
+
+### LL-035 — EPUB Page Auto-Advance During Narration — SOLVED (LESSONS-BACKFILL, 2026-03-26)
+
+**Verdict:** PR-38: When integrating imperative libraries (foliate-js) with React: ALL callback props that read React state must use refs, not closure values Never rebuild DOM state (word arrays, attributes) during active modes Guard useEffects against React Strict Mode double-invocation with ref checks Use the library's own scroll/navigation APIs instead of manual coordinate math Fix ALL root causes before re-attempting the feature — stacked bugs create deceptive symptoms
+**Evidence:** During Kokoro TTS narration on EPUBs, the page needs to auto-advance when the narrated word moves past visible content.
+**Recommendation:** PR-38: When integrating imperative libraries (foliate-js) with React: ALL callback props that read React state must use refs, not closure values Never rebuild DOM state (word arrays, attributes) during active modes Guard useEffects against React Strict Mode double-invocation with ref checks Use the library's own scroll/navigation APIs instead of manual coordinate math Fix ALL root causes before r…
+**Applies to:** foliate-js, CSS columns, TTS narration, page navigation, React Strict Mode
+**Status:** Retired — resolved
+**Source:** LESSONS_LEARNED.md line 583, original heading "[2026-03-26] LL-035: EPUB Page Auto-Advance During Narration — SOLVED"
+
+### LL-063 — Never Develop in a Cloud-Synced Folder (NAR-2, 2026-03-31)
+
+**Verdict:** PR-106: **Working directory must be local, not cloud-synced.** Standard path: `C:\Users\estra\Projects\Blurby`.
+**Evidence:** On 2026-03-30, 53 commits (NAR-2 through AUDIT-FIX-1E, representing ~2 days of sprint work) were permanently lost.
+**Recommendation:** PR-106: **Working directory must be local, not cloud-synced.** Standard path: `C:\Users\estra\Projects\Blurby`. Never in OneDrive, Google Drive, or any synced folder. PR-107: **`git push origin main` is mandatory after every sprint.** Part of the doc-keeper pass. Sprint is not complete until push succeeds. Zero tolerance for unpushed commits. PR-108: **`git pull origin main` is mandatory at sessi…
+**Applies to:** workflow, infrastructure, git, disaster recovery
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 634, original heading "[2026-03-31] LL-063: Never Develop in a Cloud-Synced Folder"
+
+### LL-065 — MOBI Files Contain Usable HTML — Don't Strip It (EPUB-2A, 2026-04-01)
+
+**Verdict:** When adding format converters, always check what structure the source format natively provides before applying text-only extraction.
+**Evidence:** During EPUB-2A, discovered that MOBI text records contain actual HTML (`<h1>`, `<b>`, `<i>`, `<ul>`, `<ol>`, `<blockquote>`) — not just plain text.
+**Recommendation:** When adding format converters, always check what structure the source format natively provides before applying text-only extraction. Stripping HTML should be a last resort, not the default.
+**Applies to:** format conversion, EPUB pipeline
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 652, original heading "[2026-04-01] LL-065: MOBI Files Contain Usable HTML — Don't Strip It"
+
+### LL-066 — Silent `.catch(() => {})` Is a Systemic Anti-Pattern (AUDIT-FIX-1A, 2026-04-01)
+
+**Verdict:** PR-112: Grep for `.catch(() => {})`, `.catch(() => { })`, `.catch(()=>{})`, and bare `catch { }` before every sprint.
+**Evidence:** Both internal and 3rd-party audits independently flagged this pattern.
+**Recommendation:** PR-112: Grep for `.catch(() => {})`, `.catch(() => { })`, `.catch(()=>{})`, and bare `catch { }` before every sprint. Zero tolerance in new code. PR-113: Remaining instances in cloud storage cleanup are explicitly acceptable (file may already be gone). Document the rationale inline when a bare catch is intentional.
+**Applies to:** error handling, data integrity
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 664, original heading "[2026-04-01] LL-066: Silent `.catch(() => {})` Is a Systemic Anti-Pattern"
+
+### LL-067 — Infinite Scroll Is Fundamentally Incompatible with Pagination (FLOW-3A, 2026-04-01)
+
+**Verdict:** PR-114: When a mode requires fundamentally different layout (scroll vs paginated), give it its own rendering path.
+**Evidence:** FLOW-3A reverses LL-013 ("Flow Mode Belongs in Page View").
+**Recommendation:** PR-114: When a mode requires fundamentally different layout (scroll vs paginated), give it its own rendering path. Don't force one layout paradigm into another. PR-115: LL-013's guardrail ("sub-modes render within parent view") still applies to modes that share layout (e.g., Focus within Page). Only override when the layout model is incompatible.
+**Applies to:** architecture, reader, flow mode
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 678, original heading "[2026-04-01] LL-067: Infinite Scroll Is Fundamentally Incompatible with Pagination"
+
+### LL-068 — Agent File Reconstruction Causes Silent Truncation (FLOW-3B, 2026-04-01)
+
+**Verdict:** PR-116: After EVERY agent run that modifies files, run `npm run build` before committing.
+**Evidence:** FLOW-3B discovered that the second blurby-lead agent (ff96d26) silently truncated three files: `FoliatePageView.tsx` (1012→934 lines, missing entire JSX return block), `useKeyboardShortcuts.ts` (642→610 lines, missing `useSmartImport` export), and `LESSONS_LEARNED.md` (686→670 lines, cut mid-sentence).
+**Recommendation:** PR-116: After EVERY agent run that modifies files, run `npm run build` before committing. Tests alone are insufficient — they don't catch missing exports or truncated JSX. PR-117: After any file write by an agent, verify file integrity with `git diff --stat` — any unexpected size DECREASE is a truncation signal. Check those files explicitly. PR-118: Never reconstruct a file by concatenating line…
+**Applies to:** process, agent safety, file integrity
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 694, original heading "[2026-04-01] LL-068: Agent File Reconstruction Causes Silent Truncation"
+
+### LL-069 — Normalize `load-doc-content` Results at the Renderer Boundary (LESSONS-BACKFILL, 2026-04-04)
+
+**Verdict:** PR-119: Any IPC handler that returns a union of payload shapes must have a single renderer-side normalization function.
+**Evidence:** Opening a book in `npm run dev` could produce a blank screen immediately after the library-to-reader transition.
+**Recommendation:** PR-119: Any IPC handler that returns a union of payload shapes must have a single renderer-side normalization function. Do not spread ad hoc shape checks across multiple components. PR-120: Reader entry points (`LibraryContainer`, standalone reader windows, future deep-link readers) must validate/normalize load results before assigning `activeDoc`. PR-121: Text utilities that may receive runtime-…
+**Applies to:** renderer, IPC contracts, reader startup
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 711, original heading "[2026-04-04] LL-069: Normalize `load-doc-content` Results at the Renderer Boundary"
+
+### LL-070 — Single Ownership for Section Navigation During Narration (TTS-7I, 2026-04-04)
+
+**Verdict:** PR-123: During narration, exactly ONE path may call `goToSection()`.
+**Evidence:** TTS-7I added exact miss-recovery (`goToSection()` from `useReadingModeInstance`) to handle narration words not yet in the DOM.
+**Recommendation:** PR-123: During narration, exactly ONE path may call `goToSection()`. If a new section-navigation mechanism is added, disable or remove the old one. Never allow two independent section-sync owners. PR-124: When accumulating EPUB section words into a shared array, always deduplicate by `sectionIndex`. Filter-then-append, not blind append. Log total word count before and after to detect unexpected g…
+**Applies to:** renderer, foliate bridge, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 734, original heading "[2026-04-04] LL-070: Single Ownership for Section Navigation During Narration"
+
+### LL-071 — EPUB Modes Must Use Global Word Source, Not DOM Viewport (TTS-7J, 2026-04-05)
+
+**Verdict:** PR-125: For EPUB modes, the Foliate DOM-loaded words are a VIEWPORT, not the source of truth.
+**Evidence:** TTS-7J fixed section-sync ownership and word-source dedupe, but narration still started from tiny DOM-slice word counts (14, 674, 293) instead of the full-book extraction (69160 words).
+**Recommendation:** PR-125: For EPUB modes, the Foliate DOM-loaded words are a VIEWPORT, not the source of truth. Once `bookWordsRef.current.complete` is true, all word-array consumers (mode startup, cursor tracking, chunk scheduling) must use the global array. DOM words are only for rendering/highlighting/navigation. PR-126: Any function that validates word indices must accept a global word count parameter when the…
+**Applies to:** renderer, foliate bridge, narration, EPUB modes
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 752, original heading "[2026-04-05] LL-071: EPUB Modes Must Use Global Word Source, Not DOM Viewport"
+
+### LL-072 — All User Selection Paths Must Preserve Exact Word Identity (TTS-7K, 2026-04-05)
+
+**Verdict:** PR-128: Every user selection path (click, double-click, drag-select, keyboard-select) must resolve to an exact `data-word-index` when available.
+**Evidence:** TTS-7K fixed the global word-source and click-to-play, but text selection (double-click/drag) still lost the exact word identity.
+**Recommendation:** PR-128: Every user selection path (click, double-click, drag-select, keyboard-select) must resolve to an exact `data-word-index` when available. Never fall back to text-based word matching as the normal path — that discards occurrence identity. PR-129: When adding a new selection mechanism, verify it sends the same payload shape as click: `(cfi, word, sectionIndex, wordOffsetInSection, globalWord…
+**Applies to:** renderer, foliate bridge, selection mapping
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 769, original heading "[2026-04-05] LL-072: All User Selection Paths Must Preserve Exact Word Identity"
+
+### LL-073 — Resume Anchor Must Be Persistent, Not Time-Limited (TTS-7L, 2026-04-05)
+
+**Verdict:** PR-130: Resume-anchor ownership must be explicit and persistent.
+**Evidence:** After TTS-7L fixed exact selection mapping, pause→play and close→reopen still jumped to the first visible word.
+**Recommendation:** PR-130: Resume-anchor ownership must be explicit and persistent. Never use time-limited suppression for state that must survive until the next user action. The anchor is cleared ONLY by: mode start (consumed) or explicit user selection (replaced). PR-131: Passive page events (`onLoad`, `onRelocate`, first-visible) are VISUAL-ONLY when an authoritative anchor exists. They may update DOM highlights…
+**Applies to:** renderer, reader state, narration, progress tracking
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 785, original heading "[2026-04-05] LL-073: Resume Anchor Must Be Persistent, Not Time-Limited"
+
+### LL-074 — UI Controls Must Materially Affect the Engine Path They Claim to Control (LESSONS-BACKFILL, 2026-04-05)
+
+**Verdict:** PR-132: Every UI control must have a traceable code path to a behavioral effect in the engine it claims to control.
+**Evidence:** TTS settings showed 5 pause sliders (comma, clause, sentence, paragraph, dialogue threshold) that implied deep control over Kokoro narration prosody.
+**Recommendation:** PR-132: Every UI control must have a traceable code path to a behavioral effect in the engine it claims to control. If a setting is stored but never read by the active engine, it is a placebo — either wire it or remove/relabel it. PR-133: When adding a new TTS engine, audit ALL existing TTS settings against the new engine's code path. Settings that worked for the old engine are not automatically…
+**Applies to:** TTS settings, Kokoro narration, UI truthfulness
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 801, original heading "[2026-04-05] LL-074: UI Controls Must Materially Affect the Engine Path They Claim to Control"
+
+### LL-075 — A Silky Narration Cursor Requires Canonical Audio Progress, Not More Visual Easing (TTS-7O, 2026-04-05)
+
+**Verdict:** PR-134: Narration has two different cursor concepts: the canonical audio cursor and the visual band.
+**Evidence:** After `TTS-7O`, a long series of live cursor fixes improved narration substantially: the 3-word band moves, the old left-right twitch is largely gone, pause leaves a visible anchor, and replay resumes from that anchor instead of the first page.
+**Recommendation:** PR-134: Narration has two different cursor concepts: the canonical audio cursor and the visual band. Start, pause, resume, save, reopen, and chunk carry-over must read/write the canonical audio cursor only. The visual band must never become the anchor. PR-135: Once the cursor is “stable but stepped,” stop iterating with CSS-only or renderer-only smoothing. Open a dedicated architecture sprint for…
+**Applies to:** renderer, narration, audio scheduling, cursor UX
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 818, original heading "[2026-04-05] LL-075: A Silky Narration Cursor Requires Canonical Audio Progress, Not More Visual Easing"
+
+### LL-076 — Rolling Planner Must Own All Chunk-Boundary Decisions (TTS-7O, 2026-04-05)
+
+**Verdict:** PR-137: The rolling planner must be the single source of truth for where a chunk may legally end.
+**Evidence:** TTS-7O added audible silence injection and sentence-boundary snapping, but each concern (chunk splitting, silence sizing, resume targeting, dialogue detection) still made decisions independently in the moment.
+**Recommendation:** PR-137: The rolling planner must be the single source of truth for where a chunk may legally end. Code that selects chunk boundaries and code that computes silence for those boundaries must both read from the same plan — never recompute boundary classification independently. PR-138: Planner scope is local and cheap — only the active forward window (~400 words), not the full book. If a planner sco…
+**Applies to:** TTS, narration, generationPipeline, narrationPlanner
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 837, original heading "[2026-04-05] LL-076: Rolling Planner Must Own All Chunk-Boundary Decisions"
+
+### LL-077 — RAF Glide Loop Must Read From a Single Canonical Progress Source (TTS-7Q, 2026-04-05)
+
+**Verdict:** PR-139: The RAF glide loop in `FoliatePageView.tsx` must read cursor position exclusively from `getAudioProgress()`.
+**Evidence:** TTS-7Q introduced a RAF-based glide loop in `FoliatePageView.tsx` that drives the 3-word narration band from `getAudioProgress()` rather than DOM target chasing.
+**Recommendation:** PR-139: The RAF glide loop in `FoliatePageView.tsx` must read cursor position exclusively from `getAudioProgress()`. It must not read from any React state, ref, or DOM element that is also used as a resume anchor or handoff carry-over value. PR-140: `onChunkHandoff` must fire on every chunk transition so the scheduler's `AudioProgressReport` reflects the new chunk before the next animation frame.…
+**Applies to:** renderer, narration, audioScheduler, FoliatePageView, cursor UX
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 855, original heading "[2026-04-05] LL-077: RAF Glide Loop Must Read From a Single Canonical Progress Source"
+
+### LL-078 — A Visually Calm Narration Cursor Beats a Theoretically Precise One (TTS-7Q, 2026-04-05)
+
+**Verdict:** PR-142: The visual narration band is a readability aid, not an exact alignment instrument.
+**Evidence:** After `TTS-7Q`, the architecture was largely correct: canonical audio progress came from `audioScheduler.ts`, pause/replay anchors were preserved, and chunk handoffs no longer allowed the visual band to become the resume authority.
+**Recommendation:** PR-142: The visual narration band is a readability aid, not an exact alignment instrument. Prefer calm motion over hyper-precise box chasing. PR-143: Do not spend additional render-frame work to reacquire tiny per-word geometry changes unless the user can clearly perceive a benefit. If the correction is subtle but the jitter is noticeable, the correction is not worth it. PR-144: When the visual f…
+**Applies to:** renderer, cursor UX, FoliatePageView, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 874, original heading "[2026-04-05] LL-078: A Visually Calm Narration Cursor Beats a Theoretically Precise One"
+
+### LL-079 — Separate the Canonical Cursor Ref from Reducer State to Break Visual Contamination (TTS-7R, 2026-04-05)
+
+**Verdict:** PR-145: `lastConfirmedAudioWordRef` must be written ONLY by audio scheduler confirmed boundary events.
+**Evidence:** `TTS-7R` identified a cursor-contamination loop that persisted through TTS-7Q: the visual advance callback dispatched `WORD_ADVANCE` to the narration reducer, which updated `cursorWordIndex`.
+**Recommendation:** PR-145: `lastConfirmedAudioWordRef` must be written ONLY by audio scheduler confirmed boundary events. No visual advance callback, truth-sync, or reducer dispatch should update it. PR-146: `speakNextChunkKokoro` (and any future chunk-generation entry point) must read chunk start from `lastConfirmedAudioWordRef`, never from `cursorWordIndex` or any field that the visual follower can write. PR-147:…
+**Applies to:** renderer, narration, useNarration, cursor ownership
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 893, original heading "[2026-04-05] LL-079: Separate the Canonical Cursor Ref from Reducer State to Break Visual Contamination"
+
+### LL-080 — Global Keyboard Guard Must Check Input Target, Not Modal State (HOTFIX-12, 2026-04-05)
+
+**Verdict:** The global keyboard handler in `useKeyboardShortcuts.ts` must always have an early-return guard that checks `e.target` for `<textarea>`, `<input>`, or `contenteditable` before processing any shortcut.
+**Evidence:** `HOTFIX-12` found that the global `window` keydown handler in `useKeyboardShortcuts.ts` was stealing Ctrl+Left/Right from the bug reporter textarea, and would do the same to any future modal or inline input.
+**Recommendation:** The global keyboard handler in `useKeyboardShortcuts.ts` must always have an early-return guard that checks `e.target` for `<textarea>`, `<input>`, or `contenteditable` before processing any shortcut. Never gate this check on modal-specific state — that approach doesn't scale and will regress as new modals are added.
+**Applies to:** renderer, keyboard, useKeyboardShortcuts, accessibility
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 912, original heading "[2026-04-05] LL-080: Global Keyboard Guard Must Check Input Target, Not Modal State"
+
+### LL-081 — Full-Book Words and DOM-Slice Words Are Two Different Data Sources — Never Mix Indices (LESSONS-BACKFILL, 2026-04-06)
+
+**Verdict:** Any component that uses `wordIndex` (the global reading position) MUST receive words from the same source that `getEffectiveWords()` returns.
+**Evidence:** BUG-152 (focus mode blank screen) and BUG-151 (page-tall narration band) both stem from the same architectural pattern: the app has two word sources that use different index spaces, and components that mix them produce silent failures.
+**Recommendation:** Any component that uses `wordIndex` (the global reading position) MUST receive words from the same source that `getEffectiveWords()` returns. When `bookWordsRef.current?.complete`, the word source is the full-book array — not the DOM-slice `foliateWordStrings`. Grep for `words={foliateWordStrings}` and verify each consumer is index-compatible. When adding new word-consuming components, always che…
+**Applies to:** renderer, narration, focus mode, FoliatePageView, ReaderContainer, data integrity
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 928, original heading "[2026-04-06] LL-081: Full-Book Words and DOM-Slice Words Are Two Different Data Sources — Never Mix Indices"
+
+### LL-082 — Fallback Values Must Be Capped to Prevent Proportional Blowup (LESSONS-BACKFILL, 2026-04-06)
+
+**Verdict:** const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, MAX_FALLBACK_HEIGHT); // ← CAPPED
+**Evidence:** BUG-151's page-tall narration band was caused by an uncapped fallback in the band height calculation.
+**Recommendation:** const fixedHeight = narrationBandLineHeightRef.current > 0 ? narrationBandLineHeightRef.current : Math.min(currentWindow.height, MAX_FALLBACK_HEIGHT); // ← CAPPED
+**Applies to:** renderer, narration, CSS, visual safety
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 952, original heading "[2026-04-06] LL-082: Fallback Values Must Be Capped to Prevent Proportional Blowup"
+
+### LL-083 — Soft Selection Uses Refs + Direct Shadow DOM Mutation, Not State (SELECTION-1, 2026-04-06)
+
+**Verdict:** Never use `useState` for visual-only word indicators in FoliatePageView or ReaderContainer.
+**Evidence:** SELECTION-1 added a passive "soft selection" indicator — a `.page-word--soft-selected` CSS class on the first visible word on every page turn.
+**Recommendation:** Never use `useState` for visual-only word indicators in FoliatePageView or ReaderContainer. Use refs + shadow DOM class manipulation. This is the same pattern used for narration band position, highlighted word overlay, and flow cursor. Mixing state-driven and ref-driven visual indicators on the same DOM element causes flicker and ordering bugs.
+**Applies to:** renderer, page mode, word selection, FoliatePageView
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 976, original heading "[2026-04-06] LL-083: Soft Selection Uses Refs + Direct Shadow DOM Mutation, Not State"
+
+### LL-084 — Electron fetch() Is Rejected by WAF-Protected Sites — Always Provide fetchWithBrowser Fallback (HOTFIX-14, 2026-04-06)
+
+**Verdict:** The no-login branch of URL extraction (`misc.js` — the `else` branch after the `hasLogin` check) must always include `fetchWithBrowser` as a fallback when the primary Node `fetch()` returns a 4xx status.
+**Evidence:** BUG-155 — HOTFIX-14.
+**Recommendation:** The no-login branch of URL extraction (`misc.js` — the `else` branch after the `hasLogin` check) must always include `fetchWithBrowser` as a fallback when the primary Node `fetch()` returns a 4xx status. Never assume Node fetch is sufficient for all sites. The pattern: try Node fetch → if status 4xx → retry with `fetchWithBrowser` hidden window → surface error only if both fail.
+**Applies to:** main process, URL extraction, url-extractor.js, misc.js
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1003, original heading "[2026-04-06] LL-084: Electron fetch() Is Rejected by WAF-Protected Sites — Always Provide fetchWithBrowser Fallback"
+
+### LL-085 — Derive Layout Values Per-Tick — Never Store Width in Animation Ref Structs (NARR-CURSOR-1, 2026-04-06)
+
+**Verdict:** Never store derived layout values (width, height, offset) in animation ref structs when the source invariant (`colRight`, `lineHeight`) is available at render time.
+**Evidence:** NARR-CURSOR-1 — Collapsing narration cursor.
+**Recommendation:** Never store derived layout values (width, height, offset) in animation ref structs when the source invariant (`colRight`, `lineHeight`) is available at render time. Compute fresh each tick. This applies to any RAF loop in `FoliatePageView.tsx` or similar DOM-driven animation.
+**Applies to:** renderer, FoliatePageView.tsx, narration overlay, animation loops
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1017, original heading "[2026-04-06] LL-085: Derive Layout Values Per-Tick — Never Store Width in Animation Ref Structs"
+
+### LL-086 — In Foliate, Always Measure Geometry from `foundDoc` — Not `contents[0]` (NARR-CURSOR-1, 2026-04-06)
+
+**Verdict:** In any Foliate geometry measurement — whether for narration overlay, cursor positioning, or scroll anchoring — always derive the measurement document from `foundDoc` (the doc containing the target word).
+**Evidence:** NARR-CURSOR-1 — Collapsing narration cursor.
+**Recommendation:** In any Foliate geometry measurement — whether for narration overlay, cursor positioning, or scroll anchoring — always derive the measurement document from `foundDoc` (the doc containing the target word). Never use `contents[0]` or any cached singleton document reference. This applies to `FoliatePageView.tsx` and any future Foliate integration code.
+**Applies to:** renderer, FoliatePageView.tsx, Foliate multi-document architecture
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1033, original heading "[2026-04-06] LL-086: In Foliate, Always Measure Geometry from `foundDoc` — Not `contents[0]`"
+
+### LL-087 — Module-Scope Constants Must Be Declared Before Use — TDZ Is Silent in Test Environments (LESSONS-BACKFILL, 2026-04-06)
+
+**Verdict:** When adding constants to `src/utils/constants.ts` or any module that exports a composite object (e.g., `DEFAULT_SETTINGS`), place new primitive constants above the first composite that will reference them.
+**Evidence:** FLOW-INF-A — Reading Zone & Visual Pacing.
+**Recommendation:** When adding constants to `src/utils/constants.ts` or any module that exports a composite object (e.g., `DEFAULT_SETTINGS`), place new primitive constants above the first composite that will reference them. Run `npm test` after adding constants — a TDZ error will surface immediately as a module initialization failure in any test that imports the affected module.
+**Applies to:** renderer, constants.ts, test setup, TypeScript module scope
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1049, original heading "[2026-04-06] LL-087: Module-Scope Constants Must Be Declared Before Use — TDZ Is Silent in Test Environments"
+
+### LL-088 — Parallel Doer Agents Can Produce Duplicate Exports — Verify Unique Identifiers Before Dispatch (LESSONS-BACKFILL, 2026-04-06)
+
+**Verdict:** For any sprint with parallel doer tasks that write to the same file: (1) diff the export names in each task's spec — flag any overlap before dispatch, (2) assign each new export to exactly one task, (3) if a second task needs the export, it reads it as an existing value rather than redeclaring it.
+**Evidence:** FLOW-INF-B — Timer Cursor & Pacing Feedback.
+**Recommendation:** For any sprint with parallel doer tasks that write to the same file: (1) diff the export names in each task's spec — flag any overlap before dispatch, (2) assign each new export to exactly one task, (3) if a second task needs the export, it reads it as an existing value rather than redeclaring it. Zeus must enforce this at plan time, not at merge time.
+**Applies to:** renderer, constants.ts, multi-agent sprints, parallel task execution
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1065, original heading "[2026-04-06] LL-088: Parallel Doer Agents Can Produce Duplicate Exports — Verify Unique Identifiers Before Dispatch"
+
+### LL-089 — patch-package Fork Maintenance Pattern for Node Dependencies (LESSONS-BACKFILL, 2026-04-07)
+
+**Verdict:** When updating kokoro-js (or any patch-package-managed dependency), the patch must be regenerated and both CJS/ESM parity verified.
+**Evidence:** NARR-TIMING required forking kokoro-js to surface the duration tensor that the library discards.
+**Recommendation:** When updating kokoro-js (or any patch-package-managed dependency), the patch must be regenerated and both CJS/ESM parity verified. The fork includes 4-layer runtime validation that detects semantic changes — if upstream changes duration tensor behavior, the validation fails closed and the heuristic fallback activates. But structural changes (renamed methods, changed class hierarchy) will cause pa…
+**Applies to:** TTS, dependencies, fork maintenance
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1081, original heading "[2026-04-07] LL-089: patch-package Fork Maintenance Pattern for Node Dependencies"
+
+### LL-090 — Verify Bug Reports Against Current Codebase Before Filing (STAB-1A, 2026-04-07)
+
+**Verdict:** Before filing a bug or including a fix task in a sprint spec, verify the current state of the code at the exact location.
+**Evidence:** STAB-1A included BUG-163 (TTS cold-start latency — model loads on play, not on book open).
+**Recommendation:** Before filing a bug or including a fix task in a sprint spec, verify the current state of the code at the exact location. Read the actual source file — don't rely on descriptions of behavior that may be outdated. For IPC wiring specifically: trace the full chain (renderer call → preload.js → IPC handler → main process function) to confirm whether it's actually wired or truly missing.
+**Applies to:** bug triage, investigation gate, sprint planning
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1097, original heading "[2026-04-07] LL-090: Verify Bug Reports Against Current Codebase Before Filing"
+
+### LL-091 — Pre-Split Sprints With 5+ Implementation Tasks Into Waves (STAB-1A, 2026-04-07)
+
+**Verdict:** Any sprint with 5+ implementation tasks (not counting tests, verification, docs, git) MUST be pre-split into waves at dispatch time.
+**Evidence:** STAB-1A had 5 implementation tasks + tests + docs + git = 10 total tasks.
+**Recommendation:** Any sprint with 5+ implementation tasks (not counting tests, verification, docs, git) MUST be pre-split into waves at dispatch time. Standard split: Wave A = all implementation tasks + test writing + npm test/build. Wave B = spec compliance (Solon) + docs (MarcusAurelius) + git (Hermes). This is a planning-time decision, not a runtime recovery. The dispatch prompt should explicitly name the wave.
+**Applies to:** dispatch sizing, agent orchestration, tool budget
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1111, original heading "[2026-04-07] LL-091: Pre-Split Sprints With 5+ Implementation Tasks Into Waves"
+
+### LL-128 — Sprint Specs Must Verify Target File Existence Before "Create" Tasks (REFACTOR-1A, 2026-04-07)
+
+**Verdict:** Every "Create [file]" task in a sprint spec must include a pre-check: does the file already exist?
+**Evidence:** REFACTOR-1A Task 7 said "Create `main/constants.js`" but the file already existed (created in PERF-1 sprint).
+**Recommendation:** Every "Create [file]" task in a sprint spec must include a pre-check: does the file already exist? If it might, the task description must say "Create or extend" and include instructions to read the existing file first. The investigation phase should grep for the filename to confirm whether it's new or existing.
+**Applies to:** sprint planning, spec quality, investigation gate
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1125, original heading "[2026-04-07] LL-092: Sprint Specs Must Verify Target File Existence Before "Create" Tasks" — originally headed LL-092 (duplicate id; renumbered in index 2026-10-09)
+
+### LL-093 — Effect Extraction Reduces useEffect Count but Not Total Line Count (REFACTOR-1A, 2026-04-07)
+
+**Verdict:** When estimating post-refactoring line counts, account for: (a) the code that stays (callbacks, JSX, types, imports), (b) the new code added (hook imports, hook calls, prop destructuring), and (c) the code that moves (only the useEffect bodies + their local variables).
+**Evidence:** REFACTOR-1A spec targeted ReaderContainer.tsx < 700 lines (from 1,623) by extracting 33 useEffects into custom hooks.
+**Recommendation:** When estimating post-refactoring line counts, account for: (a) the code that stays (callbacks, JSX, types, imports), (b) the new code added (hook imports, hook calls, prop destructuring), and (c) the code that moves (only the useEffect bodies + their local variables). A realistic formula: `remaining = total - (effect_lines × 0.85)` where the 0.85 factor accounts for shared state/refs that stay in…
+**Applies to:** refactoring, sprint planning, success criteria
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1139, original heading "[2026-04-07] LL-093: Effect Extraction Reduces useEffect Count but Not Total Line Count"
+
+### LL-092 — Performance Remediation Patterns for Electron + React (PERF-1, 2026-04-07)
+
+**Verdict:** Before adding any new cache (Map), persistence handler, or useEffect with >3 deps, check: (a) Does the cache need eviction?
+**Evidence:** PERF-1 audited 44+ sprints of accumulated performance debt across main process startup, renderer re-render churn, and data-layer I/O.
+**Recommendation:** Before adding any new cache (Map), persistence handler, or useEffect with >3 deps, check: (a) Does the cache need eviction? (b) Is the save handler debounced? (c) Can the effect deps be reduced with refs? Answer these before writing the code, not after.
+**Applies to:** performance, startup, renderer, data layer, build
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1153, original heading "[2026-04-07] LL-092: Performance Remediation Patterns for Electron + React"
+
+### LL-094 — Component Decomposition Removes ~30–40% of Lines, Not 60% (REFACTOR-1B, 2026-04-07)
+
+**Verdict:** When setting post-refactoring line count targets for component decomposition, use 60% of original as the floor, not the aspirational minimum.
+**Evidence:** REFACTOR-1B targeted TTSSettings.tsx < 350 lines (from 874) and had an implicit goal of FoliatePageView < 700 lines (from 1,947).
+**Recommendation:** When setting post-refactoring line count targets for component decomposition, use 60% of original as the floor, not the aspirational minimum. For a 874-line file, a realistic target after splitting 3 sub-components is ~525 lines (60%), not <350 (40%). If the goal is true size reduction, plan for additional passes (dead code removal, logic consolidation) after the structural extraction. Do not tre…
+**Applies to:** refactoring, sprint planning, success criteria
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1181, original heading "[2026-04-07] LL-094: Component Decomposition Removes ~30–40% of Lines, Not 60%"
+
+### LL-095 — Centralize URL Scheme Validation and Force Refresh on 401 (TEST-COV-1, 2026-04-16)
+
+**Verdict:** Use one shared `validateHttpHttpsUrl()`-style helper for every user-supplied URL before domain parsing or network access.
+**Evidence:** TEST-COV-1 hardened the main-process URL entry points and the cloud retry path at the same time.
+**Recommendation:** Use one shared `validateHttpHttpsUrl()`-style helper for every user-supplied URL before domain parsing or network access. On 401 retry paths, call the explicit refresh form (`forceRefresh: true` or equivalent) before retrying once. Never assume a cached-token lookup will refresh itself after an auth rejection.
+**Applies to:** main process, security, auth, cloud sync, URL handling
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1197, original heading "[2026-04-16] LL-095: Centralize URL Scheme Validation and Force Refresh on 401"
+
+### LL-096 — Evaluation Tracing Must Be Explicitly Opt-In and Sink-Driven (TTS-EVAL-1, 2026-04-16)
+
+**Verdict:** Evaluation instrumentation should be sink-driven (`record(event)`) and off unless an explicit harness flag enables it.
+**Evidence:** TTS-EVAL-1 introduced durable trace capture for narration/flow quality analysis.
+**Recommendation:** Evaluation instrumentation should be sink-driven (`record(event)`) and off unless an explicit harness flag enables it. Runtime hooks can emit lifecycle/word/flow/transition events only through that sink; no inline console logging or always-on tracing in production paths.
+**Applies to:** renderer, narration, flow sync, tooling, observability
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1211, original heading "[2026-04-16] LL-096: Evaluation Tracing Must Be Explicitly Opt-In and Sink-Driven"
+
+### LL-097 — Evaluation Artifact Names Must Be Deterministic for Cross-Branch Diffs (TTS-EVAL-2, 2026-04-16)
+
+**Verdict:** Harness artifact names should be deterministic from run metadata (`run-id`, `scenario id`, `iteration`) and written atomically.
+**Evidence:** In TTS-EVAL-2, timestamp-based artifact names made matrix/soak comparisons noisy and hard to diff across branches.
+**Recommendation:** Harness artifact names should be deterministic from run metadata (`run-id`, `scenario id`, `iteration`) and written atomically. Use checkpoints for long runs and treat interruption as a first-class state so partial runs remain reviewable.
+**Applies to:** tooling, evaluation harness, release workflow
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1225, original heading "[2026-04-16] LL-097: Evaluation Artifact Names Must Be Deterministic for Cross-Branch Diffs"
+
+### LL-098 — Quality Gates Must Fail Fast but Still Persist Review Artifacts (TTS-EVAL-3, 2026-04-16)
+
+**Verdict:** Any release gate command must follow this order: compute aggregate → evaluate gates → write structured + human-readable reports atomically → return exit code (`0` pass, non-zero fail).
+**Evidence:** TTS-EVAL-3 introduced enforceable pass/fail quality gates on matrix aggregates.
+**Recommendation:** Any release gate command must follow this order: compute aggregate → evaluate gates → write structured + human-readable reports atomically → return exit code (`0` pass, non-zero fail). Never short-circuit before artifacts are written; failed runs must remain reviewable.
+**Applies to:** tooling, release quality, evaluation governance
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1239, original heading "[2026-04-16] LL-098: Quality Gates Must Fail Fast but Still Persist Review Artifacts"
+
+### LL-099 — Kokoro Readiness Must Come from an Authoritative Status Snapshot (TTS-HARDEN-1, 2026-04-16)
+
+**Verdict:** Readiness, loading, retryability, and terminal reason must come from one normalized status snapshot (`status`, `detail`, `reason`, `ready`, `loading`, `recoverable`).
+**Evidence:** TTS-HARDEN-1 started as an engine bootstrap/recovery fix, but the real failure mode was contract drift between layers.
+**Recommendation:** Readiness, loading, retryability, and terminal reason must come from one normalized status snapshot (`status`, `detail`, `reason`, `ready`, `loading`, `recoverable`). Progress events are supplemental only; they must never flip readiness on their own. Legacy error channels may fill missing detail, but they must not overwrite an already-structured terminal snapshot. When worker retries or shutdowns…
+**Applies to:** TTS, Kokoro, renderer truth, worker lifecycle
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1253, original heading "[2026-04-16] LL-099: Kokoro Readiness Must Come from an Authoritative Status Snapshot"
+
+### LL-100 — Fallback Ownership Cleanup Must Key Off React-Visible Extraction State (TTS-HARDEN-2, 2026-04-17)
+
+**Verdict:** When an async milestone must add, remove, or re-scope a registered callback (`setOnSectionEnd`, listener wiring, ownership guards), the milestone must be reflected in React-visible state or an effect dependency that actually re-runs lifecycle cleanup.
+**Evidence:** TTS-HARDEN-2 exposed a subtle ownership bug in the fallback section-end path.
+**Recommendation:** When an async milestone must add, remove, or re-scope a registered callback (`setOnSectionEnd`, listener wiring, ownership guards), the milestone must be reflected in React-visible state or an effect dependency that actually re-runs lifecycle cleanup. Mutable refs are fine for hot-path reads inside the callback, but refs alone are not sufficient to retire or replace callback ownership after extra…
+**Applies to:** TTS, foliate fallback, React lifecycle, callback ownership
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1267, original heading "[2026-04-17] LL-100: Fallback Ownership Cleanup Must Key Off React-Visible Extraction State"
+
+### LL-101 — Exact-Speed UX Can Sit Above Fixed Kokoro Generation Buckets (TTS-RATE-1, 2026-04-17)
+
+**Verdict:** Treat the selected UI speed and the generation bucket as separate truths.
+**Evidence:** TTS-RATE-1 needed to improve Kokoro speed control without reintroducing chipmunking or restart churn.
+**Recommendation:** Treat the selected UI speed and the generation bucket as separate truths. The UI, preview, and persisted selection must stay aligned to the exact chosen speed, while the runtime resolves the nearest generation bucket and applies a pitch-preserving pre-playback tempo stage to close the gap. If the user changes speed within the same bucket, retime buffered audio and boundary timing live; do not res…
+**Applies to:** TTS, Kokoro, audio scheduling, release verification
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1281, original heading "[2026-04-17] LL-101: Exact-Speed UX Can Sit Above Fixed Kokoro Generation Buckets"
+
+### LL-102 — Contiguous Styled Fragments Must Collapse to One Logical Word (EPUB-TOKEN-1, 2026-04-17)
+
+**Verdict:** Treat no-whitespace contiguous fragments as one logical token at extraction time.
+**Evidence:** EPUB drop caps and inline emphasis can split one lexical word across multiple DOM nodes without any intervening whitespace.
+**Recommendation:** Treat no-whitespace contiguous fragments as one logical token at extraction time. Preserve one stable token id and global word index across node boundaries, emit token-part metadata for rendering, and collapse click/selection/narration starts back to the stitched token's shared index before any consumer reads it. Only real whitespace should create a new word identity.
+**Applies to:** EPUB extraction, renderer, selection mapping, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1297, original heading "[2026-04-17] LL-102: Contiguous Styled Fragments Must Collapse to One Logical Word"
+
+### LL-103 — Startup Cache Warmup Must Share the Live Opening-Ramp Contract (TTS-START-1, 2026-04-17)
+
+**Verdict:** Treat startup chunk shape as a shared contract, not two heuristics.
+**Evidence:** Cached starts felt different from uncached starts because background entry coverage jumped straight to cruise-sized chunks while live playback still ramped through `13 -> 26 -> 52 -> 104 -> 148`.
+**Recommendation:** Treat startup chunk shape as a shared contract, not two heuristics. Live generation and cache warmup must consume the same opening-ramp planner from the real start index, and cache replay helpers must accept full-word context plus explicit `startIdx` so exact nonzero-start reconstruction is self-defending.
+**Applies to:** TTS, cache warmup, startup latency, evaluation
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1311, original heading "[2026-04-17] LL-103: Startup Cache Warmup Must Share the Live Opening-Ramp Contract"
+
+### LL-104 — Flow-Surface Mode Guards Must Treat `narrate` and `flow` as the Same Foliate Load Surface (READER-4M-1, 2026-04-18)
+
+**Verdict:** Once `narrate` is promoted into the shared mode contract, any Foliate or Flow lifecycle guard that distinguishes “flow-surface” vs “page/focus” behavior must branch on the surface semantics, not on the legacy literal `mode === "flow"` check.
+**Evidence:** READER-4M-1 restored `narrate` to the shared `ReaderMode` / persisted mode contracts and moved the architecture toward a truthful four-mode model.
+**Recommendation:** Once `narrate` is promoted into the shared mode contract, any Foliate or Flow lifecycle guard that distinguishes “flow-surface” vs “page/focus” behavior must branch on the surface semantics, not on the legacy literal `mode === "flow"` check. Use an explicit helper/boolean such as `isFlowSurfaceMode = mode === "flow" || mode === "narrate"` at the boundary, and keep old three-mode compatibility onl…
+**Applies to:** reader modes, Foliate load lifecycle, compatibility boundaries
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1327, original heading "[2026-04-18] LL-104: Flow-Surface Mode Guards Must Treat `narrate` and `flow` as the Same Foliate Load Surface"
+
+### LL-105 — Universal Mode Shortcuts Must Bypass Surface-Gated Keyboard Blocks (READER-4M-2, 2026-04-20)
+
+**Verdict:** Shortcuts that apply universally across all modes must live in the unconditional section of the keyboard handler, before any `if (isPage)` or `if (isFlow)` gates.
+**Evidence:** READER-4M-2 remapped `N` to "enter Narrate paused from any mode." The keyboard handler in `useKeyboardShortcuts.ts` has per-surface gates (`if (isPage)`, `if (isFlow)`) that control which shortcuts fire.
+**Recommendation:** Shortcuts that apply universally across all modes must live in the unconditional section of the keyboard handler, before any `if (isPage)` or `if (isFlow)` gates. The `isFlow` variable is `keyboardSurface === "flow"`, which is `true` for both "flow" and "narrate" modes — so it's not a reliable gate for "all modes."
+**Applies to:** reader modes, keyboard shortcuts, narrate
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1343, original heading "[2026-04-20] LL-105: Universal Mode Shortcuts Must Bypass Surface-Gated Keyboard Blocks"
+
+### LL-106 — Binary-Framed IPC Protocols Require a Three-Way Contract Between Main, Preload, and Types (QWEN-STREAM-1, 2026-04-20)
+
+**Verdict:** When adding a new `ipcRenderer.on` / `webContents.send` channel, verify the contract at all three layers before merging: (1) how many positional args does `webContents.send` emit?
+**Evidence:** QWEN-STREAM-1 introduced a binary-framed PCM streaming protocol over `webContents.send("tts-qwen-stream-audio", streamId, chunk)`.
+**Recommendation:** When adding a new `ipcRenderer.on` / `webContents.send` channel, verify the contract at all three layers before merging: (1) how many positional args does `webContents.send` emit? (2) does the preload wrapper forward all of them (minus `_event`)? (3) does the TS declaration on `ElectronAPI` match what the renderer callback actually receives? Write this as a three-line check in the PR description.
+**Applies to:** Platform/Main Process, IPC, preload bridge, TypeScript types
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1357, original heading "[2026-04-20] LL-106: Binary-Framed IPC Protocols Require a Three-Way Contract Between Main, Preload, and Types"
+
+### LL-107 — Stdin Command Protocol Must Use Consistent Key Name Across Language Boundary (QWEN-STREAM-1, 2026-04-20)
+
+**Verdict:** When writing a cross-language IPC protocol, define the canonical field names in one place (a comment block or a small schema file) and reference it in both language implementations.
+**Evidence:** QWEN-STREAM-1's JS engine manager sent commands as `{ id, command: "..." }` while the Python sidecar read `msg.get("cmd")`.
+**Recommendation:** When writing a cross-language IPC protocol, define the canonical field names in one place (a comment block or a small schema file) and reference it in both language implementations. For stdin/stdout sidecar protocols: always smoke-test the round-trip with a real subprocess before merging, even if mocked unit tests pass.
+**Applies to:** Platform/Main Process, Python sidecar, IPC
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1371, original heading "[2026-04-20] LL-107: Stdin Command Protocol Must Use Consistent Key Name Across Language Boundary"
+
+### LL-108 — Canonical Reader Anchors Must Be Mode-Aware, Preserve Zero, and Keep Spoken Truth Separate From Visual Drift (READER-4M-3, 2026-04-20)
+
+**Verdict:** Resolve anchors through one explicit mode-aware helper.
+**Evidence:** READER-4M-3 unified save/resume/mode switching around one canonical global word anchor.
+**Recommendation:** Resolve anchors through one explicit mode-aware helper. `page` and `flow` may use the visible highlight anchor, `focus` must prefer the active focus cursor, and `narrate` must prefer the authoritative narration cursor. `0` is a valid explicit anchor and must never fall through to soft selection. Progress save, finish-reading, backtrack checks, and shared-surface section jumps should all consume t…
+**Applies to:** reader modes, progress persistence, Foliate shared surface, narration truth
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1385, original heading "[2026-04-20] LL-108: Canonical Reader Anchors Must Be Mode-Aware, Preserve Zero, and Keep Spoken Truth Separate From Visual Drift"
+
+### LL-109 — Streaming Strategy Must Guard async IIFE Against stop() Race (QWEN-STREAM-2, 2026-04-20)
+
+**Verdict:** When a TTS strategy's `speakChunk()` uses an async IIFE (to call async IPC from a void interface method), guard by checking a "stopped" sentinel boolean at the top of the async IIFE, immediately after the await, before assigning any listeners or side-effecting state.
+**Evidence:** QWEN-STREAM-2's `qwenStreamingStrategy.ts` implements `speakChunk()` as a `void` interface method that needs to call an async IPC.
+**Recommendation:** When a TTS strategy's `speakChunk()` uses an async IIFE (to call async IPC from a void interface method), guard by checking a "stopped" sentinel boolean at the top of the async IIFE, immediately after the await, before assigning any listeners or side-effecting state. This is distinct from double-stop protection (handled by optional-chain guards on the unsubscribe handle itself). The sentinel must…
+**Applies to:** TTS strategy, streaming, async IPC
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1401, original heading "[2026-04-20] LL-109: Streaming Strategy Must Guard async IIFE Against stop() Race"
+
+### LL-110 — Stream-Finished Flush Wire Is Mandatory for Streaming TTS Strategies (QWEN-STREAM-2, 2026-04-20)
+
+**Verdict:** Any TTS strategy using a StreamAccumulator MUST wire a "stream finished" signal from the main process to the renderer and call acc.flush() on receipt.
+**Evidence:** QWEN-STREAM-2 built the StreamAccumulator + streaming strategy but omitted the mechanism to call acc.flush() when the sidecar finishes generating audio.
+**Recommendation:** Any TTS strategy using a StreamAccumulator MUST wire a "stream finished" signal from the main process to the renderer and call acc.flush() on receipt. The signal must be engine-specific and stream-ID-guarded.
+**Applies to:** TTS strategy, streaming, IPC, narration pipeline
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1428, original heading "[2026-04-20] LL-110: Stream-Finished Flush Wire Is Mandatory for Streaming TTS Strategies"
+
+### LL-111 — Eval Runner Manifest Must Gate Streaming Scenarios from Non-Streaming Paths (QWEN-STREAM-4, 2026-04-21)
+
+**Verdict:** Any call to `executeMatrix()` (or any matrix-mode eval path) MUST pre-filter streaming scenarios before passing the scenario list.
+**Evidence:** QWEN-STREAM-4 discovered that streaming scenarios in the eval manifest use inline `text` instead of `fixtureId`.
+**Recommendation:** Any call to `executeMatrix()` (or any matrix-mode eval path) MUST pre-filter streaming scenarios before passing the scenario list. Streaming scenarios are identifiable by `engine === "qwen-streaming"` or by the absence of a `fixtureId` field.
+**Applies to:** TTS eval runner, scenario manifest, streaming
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1444, original heading "[2026-04-21] LL-111: Eval Runner Manifest Must Gate Streaming Scenarios from Non-Streaming Paths"
+
+### LL-112 — Opt-In TTS Engines Need Isolated Surfaces Until a Shared Contract Proves Itself (POCKET-TTS-1, 2026-05-04)
+
+**Verdict:** When adding a new opt-in TTS engine, isolate the sidecar, engine wrapper, IPC/preload channels, renderer strategy, and settings status component first.
+**Evidence:** POCKET-TTS-1 added Pocket TTS after Kokoro and MOSS-Nano with strict guardrails: no comparative gate, no MOSS-Nano productization changes, no Kokoro default change, no Qwen reactivation, and no public v2.0 voice-cloning UX.
+**Recommendation:** When adding a new opt-in TTS engine, isolate the sidecar, engine wrapper, IPC/preload channels, renderer strategy, and settings status component first. Only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary. Product-posture regressions must be tested alongside feature tests: default engine, recommended opt-in labels, d…
+**Applies to:** TTS, sidecars, IPC, settings UX, product governance
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1460, original heading "[2026-05-04] LL-112: Opt-In TTS Engines Need Isolated Surfaces Until a Shared Contract Proves Itself"
+
+### LL-113 — Test Discovery Must Ignore Scratch External Source Trees (TTS-REGISTRY-1, 2026-05-12)
+
+**Verdict:** Scratch and external-source mirrors belong under `.tmp/`, and `.tmp/**` must be excluded from test discovery.
+**Evidence:** During TTS-REGISTRY-1 closeout, plain `npm test` failed before reaching project tests because Vitest discovered copied external review sources under `.tmp/tts-review-sources-20260511/readest-main/`.
+**Recommendation:** Scratch and external-source mirrors belong under `.tmp/`, and `.tmp/**` must be excluded from test discovery. Do not place third-party audit sources, cloned candidates, or large review mirrors in paths that Vitest can walk as project tests. If a sprint needs fixture copies from outside the repo, promote only the minimal fixture files into a named `tests/fixtures/` folder.
+**Applies to:** Tests, repository hygiene, external audits
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1474, original heading "[2026-05-12] LL-113: Test Discovery Must Ignore Scratch External Source Trees"
+
+### LL-114 — Spoken Normalization Must Not Become Display Truth (TTS-NORMALIZE-1, 2026-05-13)
+
+**Verdict:** Treat normalized text as engine input only.
+**Evidence:** TTS-NORMALIZE-1 made Kokoro consume normalized spoken text (`src/utils/segmentNormalizer.ts`) while the narration scheduler and display/highlight layers still consume original chunk words.
+**Recommendation:** Treat normalized text as engine input only. Do not replace scheduler/display word arrays, Foliate word anchors, or highlight mapping with normalized text. When normalization changes spoken text, cache identity must include normalizer version and source/normalized hashes so changed rules miss lazily rather than triggering a destructive global cache wipe.
+**Applies to:** TTS, segment normalization, cache identity, highlight mapping
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1488, original heading "[2026-05-13] LL-114: Spoken Normalization Must Not Become Display Truth"
+
+### LL-115 — Cache Identity Must Be Data, Not a Path (TTS-CACHE-TIMING-1, 2026-05-13)
+
+**Verdict:** TTS cache identity must be structured data first and path material second.
+**Evidence:** TTS-CACHE-TIMING-1 replaced slash-composed Kokoro cache identity strings with schema-versioned v2 identity objects.
+**Recommendation:** TTS cache identity must be structured data first and path material second. Keep all semantic fields in the manifest identity, derive disk directories from safe hashes, and invalidate by schema/normalizer/content fields through lazy misses rather than destructive global cleanup. Timing sidecars must be written atomically and may only return word timestamps when the timing classification is trusted.
+**Applies to:** TTS, disk cache, timing metadata, storage migration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1502, original heading "[2026-05-13] LL-115: Cache Identity Must Be Data, Not a Path"
+
+### LL-116 — Audit Packaging Must Include Complete Canonical Files (LESSONS-BACKFILL, 2026-05-15)
+
+**Verdict:** When assembling audit packages, verify that every file claimed as "full spec" in the orientation document is actually complete in the delivered zip.
+**Evidence:** OutsideAudit.1 (2026-05-15) — the full TTS Architecture roadmap audit.
+**Recommendation:** When assembling audit packages, verify that every file claimed as "full spec" in the orientation document is actually complete in the delivered zip. For files >50KB: either split across batches with continuation markers, or use the GitHub repo / single-directory ingestion path. This is a governance discipline issue, not a technical one — the file was complete on disk; the packaging step failed to…
+**Applies to:** governance, audit process, documentation
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1514, original heading "[2026-05-15] LL-116: Audit Packaging Must Include Complete Canonical Files"
+
+### LL-117 — Directory Reorgs Need a Forbidden-Scope Reference Decision Up Front (SK-HYG-2, 2026-05-16)
+
+**Verdict:** Any future directory-reorganization sprint must decide before dispatch whether references in tests, scripts, IDE metadata, and binary packages are in scope.
+**Evidence:** SK-HYG-2 reorganized documentation paths without runtime/test/script edits.
+**Recommendation:** Any future directory-reorganization sprint must decide before dispatch whether references in tests, scripts, IDE metadata, and binary packages are in scope. If they are out of scope, the success criteria must explicitly exempt them and define a follow-up. If they are in scope, include those file families in the allowed edit surface and verification plan.
+**Applies to:** governance, repository hygiene, verification
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1528, original heading "[2026-05-16] LL-117: Directory Reorgs Need a Forbidden-Scope Reference Decision Up Front"
+
+### LL-118 — Audit Packages Must Trace Imports Bottom-Up, Not Just Features Top-Down (LESSONS-BACKFILL, 2026-05-17)
+
+**Verdict:** Before finalizing any audit package, run an import-trace pass: for every included `.ts`/`.js` source file, verify that its direct imports (excluding node_modules) are also included in the package.
+**Evidence:** OutsideAudit.9 (2026-05-17) scored 7/10 partly because `wordPositionIndex.ts` and `main/constants.js` were omitted from the audit package.
+**Recommendation:** Before finalizing any audit package, run an import-trace pass: for every included `.ts`/`.js` source file, verify that its direct imports (excluding node_modules) are also included in the package. Missing imports are packaging errors that cost free audit points. This takes ~5 minutes and should be a checklist item in the 3rd-party-audit skill's Step 1.
+**Applies to:** governance, audit process, TTS pipeline
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1542, original heading "[2026-05-17] LL-118: Audit Packages Must Trace Imports Bottom-Up, Not Just Features Top-Down"
+
+### LL-119 — Non-Memoized Hook Return Objects Create Unstable Function Identities That Cause Render Loops (NARR-MEDIA-1, 2026-05-19)
+
+**Verdict:** When adding a function to a hook's return object that will be consumed by a `useEffect` dependency array, wrap it in `useCallback`.
+**Evidence:** `useNarration` returns a plain object literal (`return { ... }`) with inline function definitions.
+**Recommendation:** When adding a function to a hook's return object that will be consumed by a `useEffect` dependency array, wrap it in `useCallback`. If the hook returns a non-memoized object literal (like `useNarration`), every function inside it is unstable unless individually memoized. Prefer `useCallback` over `useMemo` for function-shaped values.
+**Applies to:** React hooks, performance, narration
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1556, original heading "[2026-05-19] LL-119: Non-Memoized Hook Return Objects Create Unstable Function Identities That Cause Render Loops"
+
+### LL-120 — Shared Foliate Surfaces Need Explicit Visual Ownership per Mode (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** On shared surfaces, every mode gets explicit visual ownership contracts: separate cursor classes, separate visual-state gates, and mode-specific highlight policy.
+**Evidence:** Flow and Narrate run on the same Foliate-rendered surface.
+**Recommendation:** On shared surfaces, every mode gets explicit visual ownership contracts: separate cursor classes, separate visual-state gates, and mode-specific highlight policy. Do not treat "shared surface" as "shared style classes."
+**Applies to:** reader modes, shared surface, visual sync
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1574, original heading "[2026-05-21] LL-120: Shared Foliate Surfaces Need Explicit Visual Ownership per Mode"
+
+### LL-121 — Compatibility Mode Aliases Are Hazardous in Runtime Hooks (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** Use true runtime mode (`readingMode`) for behavior hooks.
+**Evidence:** A compatibility mapping (`narrate -> flow`) in runtime hooks masked mode boundaries and created accidental coupling.
+**Recommendation:** Use true runtime mode (`readingMode`) for behavior hooks. Restrict compatibility aliases to intentionally narrow integration points (legacy UI state, migration layers), never control loops.
+**Applies to:** reader modes, hook contracts, regressions
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1590, original heading "[2026-05-21] LL-121: Compatibility Mode Aliases Are Hazardous in Runtime Hooks"
+
+### LL-122 — "No Mid-Sentence Breaks" Must Be Enforced in Chunk Planner, Not UI Settings (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** Sentence-end policy must live in chunk planning logic.
+**Evidence:** Prosody quality degraded when planner fallback paths still split on comma/soft-max/hard-max boundaries mid-sentence.
+**Recommendation:** Sentence-end policy must live in chunk planning logic. If no sentence boundary exists inside the target window, extend search (within safety limits) before falling back; never silently reintroduce comma-first or soft-max split heuristics for narration mode.
+**Applies to:** prosody, chunk planning, narration pipeline
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1606, original heading "[2026-05-21] LL-122: "No Mid-Sentence Breaks" Must Be Enforced in Chunk Planner, Not UI Settings"
+
+### LL-123 — Prosody Normalization Rules Must Respect Semantic Domains (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** Normalization transforms must be domain-aware and ordered deliberately.
+**Evidence:** Adding vernacular year reading improved narration ("1989" -> "nineteen eighty nine"), but applying year-like expansion uniformly produced domain errors in currency (`$1,250` read as "twelve fifty").
+**Recommendation:** Normalization transforms must be domain-aware and ordered deliberately. Year-style cardinal behavior should not leak into currency expansion. Every new transform needs a negative test for adjacent semantic domains.
+**Applies to:** TTS normalization, text semantics, cache identity
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1622, original heading "[2026-05-21] LL-123: Prosody Normalization Rules Must Respect Semantic Domains"
+
+### LL-124 — Audio/Visual Sync Calibration Must Use End-to-End Output Reality, Not API Partials (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** Treat sync lag as an end-to-end calibration problem.
+**Evidence:** `getOutputTimestamp().contextTime` underreported practical output delay on Windows/Electron relative to what users actually hear.
+**Recommendation:** Treat sync lag as an end-to-end calibration problem. Instrument boundary drift and validate against audible output over long passages before trusting low-level timing APIs as complete truth.
+**Applies to:** narration timing, scheduler, audio output latency
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1638, original heading "[2026-05-21] LL-124: Audio/Visual Sync Calibration Must Use End-to-End Output Reality, Not API Partials"
+
+### LL-125 — Narrate Must Stay Audio-Owned Even When Flow Shares Its Surface (LESSONS-BACKFILL, 2026-05-21)
+
+**Verdict:** Treat "shared Foliate surface" and "shared runtime owner" as different concepts.
+**Evidence:** SRL-047 correctly made Foliate Flow a single-pacer mode, but the shared `startFlow(...)` helper also carried Narrate startup options.
+**Recommendation:** Treat "shared Foliate surface" and "shared runtime owner" as different concepts. Flow may own `FlowScrollEngine`; Narrate must remain owned by TTS/audio truth-sync. Any retry, section handoff, mode switch, or delayed extraction path must preserve Narrate intent and exact selected-word startup.
+**Applies to:** reader modes, narration ownership, Foliate surface
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1654, original heading "[2026-05-21] LL-125: Narrate Must Stay Audio-Owned Even When Flow Shares Its Surface"
+
+### LL-126 — Narrate Synthesis Continuity Must Use Produced-Content Truth, Not the Cursor Twin (TTS-7R, 2026-05-24)
+
+**Verdict:** There are FOUR distinct quantities and only ONE may seed audible playback continuation: (i) the **visual cursor** (`cursorWordIndex`, boundary-driven, ahead-of-heard); (ii) `lastConfirmedAudioWordRef` (a boundary-driven twin, ahead-of-heard); (iii) `nextGenWordIndexRef` (**produced-end**, ahead-of-heard because the book is prefetched); (iv) the **real playing-source heard position** (derivable from `getPlayingSourceMaxWordIndex` / the active source whose `startTime ≤ now < endTime`).
+**Evidence:** At Narrate chunk re-entry (section handoff, stall, pause/resume), `speakNextChunkKokoro` seeded the next chunk from `lastConfirmedAudioWordRef`.
+**Recommendation:** There are FOUR distinct quantities and only ONE may seed audible playback continuation: (i) the **visual cursor** (`cursorWordIndex`, boundary-driven, ahead-of-heard); (ii) `lastConfirmedAudioWordRef` (a boundary-driven twin, ahead-of-heard); (iii) `nextGenWordIndexRef` (**produced-end**, ahead-of-heard because the book is prefetched); (iv) the **real playing-source heard position** (derivable fr…
+**Applies to:** narration, audio scheduler, cursor sync
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1670, original heading "[2026-05-24] LL-126: Narrate Synthesis Continuity Must Use Produced-Content Truth, Not the Cursor Twin"
+
+### LL-127 — No Instrumented Cursor Signal Sits On the Heard Word — `heardFloor` Is a Mislabeled Twin of `schedulerActiveWord` (NARRATE-CURSOR-TRACKING-DIAG-1, 2026-05-31)
+
+**Verdict:** `heardFloor`, despite its name, is **NOT** a lower bound of heard audio — in this build it reads identically to `schedulerActiveWord` and leads the ear exactly as much.
+**Evidence:** NARRATE-CURSOR-TRACKING-DIAG-1 ran a live-QA trace (Meditations, `DIAG=true` in `useNarration.ts` + `audioScheduler.ts`, n=191 and n=716 `signal-leadlag-summary` samples, each paired with Evan's ear per SRL-070).
+**Recommendation:** `heardFloor`, despite its name, is **NOT** a lower bound of heard audio — in this build it reads identically to `schedulerActiveWord` and leads the ear exactly as much. Do not use `heardFloor` (or `schedulerActiveWord`) as heard-audio ground truth or as a cursor/seed authority. The only signal close to the heard word is `wordIndex`, and it must be **lag-compensated** by the output-pipeline latenc…
+**Applies to:** narration, cursor sync, diagnostics
+**Status:** Observation
+**Source:** LESSONS_LEARNED.md line 1686, original heading "[2026-05-31] LL-127: No Instrumented Cursor Signal Sits On the Heard Word — `heardFloor` Is a Mislabeled Twin of `schedulerActiveWord`"

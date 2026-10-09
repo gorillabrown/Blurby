@@ -1,0 +1,730 @@
+[
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "KOKORO-DEEPEN-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118791925",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "KOKORO-DEEPEN-2",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-2",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-2",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840647",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "KOKORO-DEEPEN-3",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-DEEPEN-3",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-DEEPEN-3",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118841616",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-REGISTRY-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-REGISTRY-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-REGISTRY-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118808495",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-NORMALIZE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-NORMALIZE-1",
+    "actualRevision": "2026-09-23T18:29:31Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-NORMALIZE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118863192",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-CACHE-TIMING-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CACHE-TIMING-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CACHE-TIMING-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118832408",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-SYNC-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-SYNC-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-SYNC-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118856198",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-DIAG-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-DIAG-1",
+    "actualRevision": "2026-09-23T18:29:29Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-DIAG-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840645",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "ENGINE-DORMANCY-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:ENGINE-DORMANCY-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-ENGINE-DORMANCY-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118818984",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-INTEGRATE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-INTEGRATE-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-INTEGRATE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118863177",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-CACHE-HARDEN-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CACHE-HARDEN-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CACHE-HARDEN-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118833358",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-EVENT-SYNC-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-EVENT-SYNC-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-EVENT-SYNC-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118819556",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NORMALIZER-ENRICH-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NORMALIZER-ENRICH-1",
+    "actualRevision": "2026-09-23T18:29:31Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NORMALIZER-ENRICH-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118833144",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-RENDER-MAP-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-RENDER-MAP-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-RENDER-MAP-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118819999",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-PIPELINE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-PIPELINE-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-PIPELINE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118841422",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-ARCH-DOC-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-ARCH-DOC-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-ARCH-DOC-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118862481",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TEST-HARNESS-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TEST-HARNESS-1",
+    "actualRevision": "2026-09-23T18:29:47Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TEST-HARNESS-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118842583",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-CANARY-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-CANARY-1",
+    "actualRevision": "2026-09-23T18:29:47Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-CANARY-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118811197",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-REGISTRY-DISPATCH-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-REGISTRY-DISPATCH-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-REGISTRY-DISPATCH-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118811322",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "KOKORO-EXPORT-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:KOKORO-EXPORT-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-KOKORO-EXPORT-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118856529",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "idempotencyKey": "create-item:monday:board/18432450217:LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "actualRevision": "2026-09-23T18:29:47Z",
+    "recoveryId": "20260923T182909Z-external-create-item-LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118811133",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARR-PAUSE-STATE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-PAUSE-STATE-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-PAUSE-STATE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118837533",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARR-MEDIA-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-MEDIA-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-MEDIA-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118862674",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARR-PAUSE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-PAUSE-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-PAUSE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118864160",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-PARITY-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-PARITY-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-PARITY-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840970",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARR-CURSOR-2",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-CURSOR-2",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-CURSOR-2",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118833585",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-EVAL-3",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-EVAL-3",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-EVAL-3",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840971",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARR-SPOKEN-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARR-SPOKEN-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARR-SPOKEN-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118863341",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "BASELINE-SYNC-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:BASELINE-SYNC-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-BASELINE-SYNC-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118832411",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TEST-GREEN-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TEST-GREEN-1",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TEST-GREEN-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118856777",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118842117",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-ISO-1A",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1A",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1A",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118886594",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-ISO-1B",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1B",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1B",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118847250",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-ISO-1C",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1C",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1C",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118847249",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-ISO-1D",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1D",
+    "actualRevision": "2026-09-23T18:29:44Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1D",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118841621",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-ISO-1E",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-ISO-1E",
+    "actualRevision": "2026-09-23T18:29:43Z",
+    "recoveryId": "20260923T182909Z-external-create-item-READER-ISO-1E",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118832563",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "GOV-HUMAN-REVIEW-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:GOV-HUMAN-REVIEW-1",
+    "actualRevision": "2026-09-23T18:29:44Z",
+    "recoveryId": "20260923T182909Z-external-create-item-GOV-HUMAN-REVIEW-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840660",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-QUAL-CI-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-QUAL-CI-1",
+    "actualRevision": "2026-09-23T18:29:44Z",
+    "recoveryId": "20260923T182909Z-external-create-item-TTS-QUAL-CI-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118827986",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "UX-POLISH-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:UX-POLISH-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-UX-POLISH-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118847895",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-CLOSED-LOOP-CURSOR",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-CLOSED-LOOP-CURSOR",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118797794",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "EXT-PAIR-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:EXT-PAIR-1",
+    "actualRevision": "2026-09-23T18:29:45Z",
+    "recoveryId": "20260923T182909Z-external-create-item-EXT-PAIR-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118818711",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "SINGLE-INSTANCE-LOCK-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:SINGLE-INSTANCE-LOCK-1",
+    "actualRevision": "2026-09-23T18:29:44Z",
+    "recoveryId": "20260923T182909Z-external-create-item-SINGLE-INSTANCE-LOCK-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118832662",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "THEME-SYNC-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:THEME-SYNC-1",
+    "actualRevision": "2026-09-23T18:29:44Z",
+    "recoveryId": "20260923T182909Z-external-create-item-THEME-SYNC-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118841260",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+    "idempotencyKey": "create-item:monday:board/18432450217:HYG-XLSX-DASHBOARD-RESTORE",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-HYG-XLSX-DASHBOARD-RESTORE",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118825193",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-DUAL-SOURCE-DIAG-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-DUAL-SOURCE-DIAG-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118811955",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-INTENT-CURSOR-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-INTENT-CURSOR-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-INTENT-CURSOR-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118801914",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-PAUSE-RESUME-UNIFY-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-PAUSE-RESUME-UNIFY-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118810192",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118840646",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-SUBSCRIBER-CURSOR-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-SUBSCRIBER-CURSOR-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118808496",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-A5-RATE-RESEED-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-A5-RATE-RESEED-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-A5-RATE-RESEED-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118825485",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-CURSOR-TRACKING-DIAG-1",
+    "actualRevision": "2026-09-23T18:29:46Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-CURSOR-TRACKING-DIAG-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118810126",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-HEARD-CURSOR-1",
+    "actualRevision": "2026-09-23T18:29:30Z",
+    "recoveryId": "20260923T182909Z-external-create-item-NARRATE-HEARD-CURSOR-1",
+    "detail": {
+      "verification": "All 16 imported fields read back and matched the approved migration transformation.",
+      "readback": "C:\\Users\\estra\\Projects\\Blurby\\docs\\planning\\roadmap-reviews\\2026-09-23-monday-live-read.json"
+    },
+    "providerItemId": "13118863178",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "succeeded": true,
+  "operation": "set-status",
+  "itemId": "READER-MODE-SEPARATION-2",
+  "idempotencyKey": "set-status:READER-MODE-SEPARATION-2:[('branch', 'eb/reader-mode-separation-2'), ('description', 'Owner-mandated step 1: independent Page, Focus, Flow and Narrate state, lifecycle, timers, callbacks, DOM/rendering and styles. Matching private module layouts and public contracts permit a later consolidation decision. Approved waves: A baseline/contracts; B Page + Focus; C Flow; D Narrate; E remove shared behavior and prove isolation. Acceptance covers import boundaries, private resource ownership, 12 cross-mode transitions, four same-mode cases, stale-session rejection, preserved per-mode behavior and live audio/UI evidence.'), ('effort', 'XL'), ('evidence', 'docs/planning/roadmap-reviews/2026-09-23-readiness.md; docs/planning/roadmap-reviews/2026-09-23-source-evidence.json'), ('group', 'Reader Runtime Solidification'), ('lane', 'Reader Engine'), ('notes', 'Owner set mode isolation first and approved Phase C on 2026-09-23. Phase D: U1\u2013U8 PASS for the specification; no project extensions. Full inline spec has exact paths, test assertions, gates, two-correction ceiling and per-wave rollback. Execution requires a clean isolated checkout and fresh baseline tests/build; no code, tests or live QA have run in this review. Existing ISO-1 adapters remain completed historical groundwork. No TTS tuning, feature additions or deduplication. Four downstream items remain Blocked/Stub until separation closes and their edit sites are re-specified.'), ('prerequisites', 'READER-ISO-1A; READER-ISO-1B; READER-ISO-1C; READER-ISO-1D; READER-ISO-1E'), ('sequence', 1), ('spec_link', 'ROADMAP.md#reader-mode-separation-2'), ('status', 'Queued'), ('title', 'Separate Page, Focus, Flow, and Narrate runtimes'), ('written_status', 'Full Spec')]",
+  "actualRevision": "2026-09-23T19:28:01Z",
+  "recoveryId": "20260923T192749Z-external-set-status-READER-MODE-SEPARATION-2",
+  "detail": {
+    "verifiedAt": "2026-09-23T19:28:22Z",
+    "verifiedFields": [
+      "title",
+      "sequence",
+      "status",
+      "written_status",
+      "prerequisites",
+      "effort",
+      "lane",
+      "group",
+      "spec_link",
+      "branch",
+      "description",
+      "evidence",
+      "notes"
+    ],
+    "otherRowsUnchanged": 61
+  },
+  "providerItemId": "13119306772"
+}

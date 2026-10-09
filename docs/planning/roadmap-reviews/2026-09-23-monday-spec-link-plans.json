@@ -1,0 +1,46 @@
+[
+  {
+    "operation": "store-spec-link",
+    "register": "monday:board/18432450217",
+    "itemId": "UX-POLISH-1",
+    "fields": {
+      "spec_link": "ROADMAP.md#ux-polish-1"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "store-spec-link:UX-POLISH-1:[('spec_link', 'ROADMAP.md#ux-polish-1')]",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-UX-POLISH-1"
+  },
+  {
+    "operation": "store-spec-link",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "fields": {
+      "spec_link": "ROADMAP.md#narrate-applyratechange-collapse-1"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "store-spec-link:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('spec_link', 'ROADMAP.md#narrate-applyratechange-collapse-1')]",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-APPLYRATECHANGE-COLLAPSE-1"
+  },
+  {
+    "operation": "store-spec-link",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "fields": {
+      "spec_link": "ROADMAP.md#narrate-heard-cursor-1"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "store-spec-link:NARRATE-HEARD-CURSOR-1:[('spec_link', 'ROADMAP.md#narrate-heard-cursor-1')]",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-HEARD-CURSOR-1"
+  },
+  {
+    "operation": "store-spec-link",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "fields": {
+      "spec_link": "ROADMAP.md#narrate-subscriber-cursor-1"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "store-spec-link:NARRATE-SUBSCRIBER-CURSOR-1:[('spec_link', 'ROADMAP.md#narrate-subscriber-cursor-1')]",
+    "recoveryId": "20260923T183558Z-external-store-spec-link-NARRATE-SUBSCRIBER-CURSOR-1"
+  }
+]

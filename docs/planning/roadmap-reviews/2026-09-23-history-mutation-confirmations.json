@@ -1,0 +1,58 @@
+[
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "SK-HYG-2",
+    "idempotencyKey": "create-item:monday:board/18432450217:SK-HYG-2",
+    "actualRevision": "2026-09-23T18:45:30Z",
+    "recoveryId": "20260923T184520Z-external-create-item-SK-HYG-2",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:45:55Z",
+      "historicalReconciliationApproved": true
+    },
+    "providerItemId": "13119055963",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "FLOW-ZONE-AUTO",
+    "idempotencyKey": "create-item:monday:board/18432450217:FLOW-ZONE-AUTO",
+    "actualRevision": "2026-09-23T18:45:30Z",
+    "recoveryId": "20260923T184520Z-external-create-item-FLOW-ZONE-AUTO",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:45:55Z",
+      "historicalReconciliationApproved": true
+    },
+    "providerItemId": "13119055220",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-MODE-ISOLATION-1-PHASE-0",
+    "actualRevision": "2026-09-23T18:45:30Z",
+    "recoveryId": "20260923T184520Z-external-create-item-READER-MODE-ISOLATION-1-PHASE-0",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:45:55Z",
+      "historicalReconciliationApproved": true
+    },
+    "providerItemId": "13119034606",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "GOVERNANCE-SWEEP",
+    "idempotencyKey": "create-item:monday:board/18432450217:GOVERNANCE-SWEEP",
+    "actualRevision": "2026-09-23T18:45:31Z",
+    "recoveryId": "20260923T184520Z-external-create-item-GOVERNANCE-SWEEP",
+    "detail": {
+      "verifiedAt": "2026-09-23T18:45:55Z",
+      "historicalReconciliationApproved": true
+    },
+    "providerItemId": "13119074046",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  }
+]

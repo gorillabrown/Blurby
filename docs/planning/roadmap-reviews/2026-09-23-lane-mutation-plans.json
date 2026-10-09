@@ -1,0 +1,618 @@
+[
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "UX-POLISH-1",
+    "fields": {
+      "lane": "UX polish"
+    },
+    "expectedRevision": "2026-09-23T18:35:57Z",
+    "idempotencyKey": "set-status:UX-POLISH-1:[('lane', 'UX polish')]",
+    "recoveryId": "20260923T190010Z-external-set-status-UX-POLISH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:35:58Z",
+    "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-HEARD-CURSOR-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:35:57Z",
+    "idempotencyKey": "set-status:NARRATE-HEARD-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-HEARD-CURSOR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-SUBSCRIBER-CURSOR-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:35:57Z",
+    "idempotencyKey": "set-status:NARRATE-SUBSCRIBER-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARRATE-SUBSCRIBER-CURSOR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-EXPORT-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:KOKORO-EXPORT-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-EXPORT-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-DIAG-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:29Z",
+    "idempotencyKey": "set-status:TTS-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-DIAG-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CACHE-TIMING-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-CACHE-TIMING-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-CACHE-TIMING-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-INTEGRATE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-INTEGRATE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-INTEGRATE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-3",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-3:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-3"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "ENGINE-DORMANCY-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:ENGINE-DORMANCY-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-ENGINE-DORMANCY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CACHE-HARDEN-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-CACHE-HARDEN-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-CACHE-HARDEN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-SYNC-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-SYNC-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-SYNC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-REGISTRY-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-REGISTRY-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-REGISTRY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-EVENT-SYNC-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-EVENT-SYNC-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-EVENT-SYNC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "KOKORO-DEEPEN-2",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:KOKORO-DEEPEN-2:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-KOKORO-DEEPEN-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-RENDER-MAP-1",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-RENDER-MAP-1:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-RENDER-MAP-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-PIPELINE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:30Z",
+    "idempotencyKey": "set-status:TTS-PIPELINE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-PIPELINE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NORMALIZER-ENRICH-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:31Z",
+    "idempotencyKey": "set-status:NORMALIZER-ENRICH-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NORMALIZER-ENRICH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-NORMALIZE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:31Z",
+    "idempotencyKey": "set-status:TTS-NORMALIZE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-NORMALIZE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-SPOKEN-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:NARR-SPOKEN-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-SPOKEN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1E",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:READER-ISO-1E:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1E"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-CURSOR-2",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:NARR-CURSOR-2:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-CURSOR-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:READER-PERSISTENT-ANCHOR-STEP3-REPAIR:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-PERSISTENT-ANCHOR-STEP3-REPAIR"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1C",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:READER-ISO-1C:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1C"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "BASELINE-SYNC-1",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:BASELINE-SYNC-1:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190010Z-external-set-status-BASELINE-SYNC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1B",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:READER-ISO-1B:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-READER-ISO-1B"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-PARITY-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:TTS-PARITY-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TTS-PARITY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TEST-GREEN-1",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:TEST-GREEN-1:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190010Z-external-set-status-TEST-GREEN-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-MEDIA-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:NARR-MEDIA-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-MEDIA-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-PAUSE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:NARR-PAUSE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190010Z-external-set-status-NARR-PAUSE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1A",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:READER-ISO-1A:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-ISO-1A"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-EVAL-3",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:TTS-EVAL-3:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-EVAL-3"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-ARCH-DOC-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:43Z",
+    "idempotencyKey": "set-status:TTS-ARCH-DOC-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-ARCH-DOC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-ISO-1D",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:44Z",
+    "idempotencyKey": "set-status:READER-ISO-1D:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-ISO-1D"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "GOV-HUMAN-REVIEW-1",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:44Z",
+    "idempotencyKey": "set-status:GOV-HUMAN-REVIEW-1:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-GOV-HUMAN-REVIEW-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-QUAL-CI-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:44Z",
+    "idempotencyKey": "set-status:TTS-QUAL-CI-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-QUAL-CI-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "THEME-SYNC-1",
+    "fields": {
+      "lane": "UX polish"
+    },
+    "expectedRevision": "2026-09-23T18:29:44Z",
+    "idempotencyKey": "set-status:THEME-SYNC-1:[('lane', 'UX polish')]",
+    "recoveryId": "20260923T190011Z-external-set-status-THEME-SYNC-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "SINGLE-INSTANCE-LOCK-1",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:44Z",
+    "idempotencyKey": "set-status:SINGLE-INSTANCE-LOCK-1:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-SINGLE-INSTANCE-LOCK-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "EXT-PAIR-1",
+    "fields": {
+      "lane": "Chrome Extension"
+    },
+    "expectedRevision": "2026-09-23T18:29:45Z",
+    "idempotencyKey": "set-status:EXT-PAIR-1:[('lane', 'Chrome Extension')]",
+    "recoveryId": "20260923T190011Z-external-set-status-EXT-PAIR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-PAUSE-RESUME-UNIFY-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-PAUSE-RESUME-UNIFY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-A5-RATE-RESEED-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-A5-RATE-RESEED-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-A5-RATE-RESEED-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-CURSOR-TRACKING-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-CURSOR-TRACKING-DIAG-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-INTENT-CURSOR-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-INTENT-CURSOR-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-INTENT-CURSOR-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-DUAL-SOURCE-DIAG-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-DUAL-SOURCE-DIAG-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "SK-HYG-2",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:45:30Z",
+    "idempotencyKey": "set-status:SK-HYG-2:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-SK-HYG-2"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "FLOW-ZONE-AUTO",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:45:30Z",
+    "idempotencyKey": "set-status:FLOW-ZONE-AUTO:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-FLOW-ZONE-AUTO"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+    "fields": {
+      "lane": "Reader Engine"
+    },
+    "expectedRevision": "2026-09-23T18:45:30Z",
+    "idempotencyKey": "set-status:READER-MODE-ISOLATION-1-PHASE-0:[('lane', 'Reader Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-READER-MODE-ISOLATION-1-PHASE-0"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "GOVERNANCE-SWEEP",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:45:31Z",
+    "idempotencyKey": "set-status:GOVERNANCE-SWEEP:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-GOVERNANCE-SWEEP"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARR-PAUSE-STATE-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARR-PAUSE-STATE-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARR-PAUSE-STATE-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:HYG-XLSX-DASHBOARD-RESTORE:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-HYG-XLSX-DASHBOARD-RESTORE"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-REGISTRY-DISPATCH-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:TTS-REGISTRY-DISPATCH-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-REGISTRY-DISPATCH-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:46Z",
+    "idempotencyKey": "set-status:NARRATE-CLOSED-LOOP-CURSOR:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-NARRATE-CLOSED-LOOP-CURSOR"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-CANARY-1",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:47Z",
+    "idempotencyKey": "set-status:TTS-CANARY-1:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TTS-CANARY-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "TEST-HARNESS-1",
+    "fields": {
+      "lane": "Platform & Maintenance"
+    },
+    "expectedRevision": "2026-09-23T18:29:47Z",
+    "idempotencyKey": "set-status:TEST-HARNESS-1:[('lane', 'Platform & Maintenance')]",
+    "recoveryId": "20260923T190011Z-external-set-status-TEST-HARNESS-1"
+  },
+  {
+    "operation": "set-status",
+    "register": "monday:board/18432450217",
+    "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+    "fields": {
+      "lane": "TTS / Narration Engine"
+    },
+    "expectedRevision": "2026-09-23T18:29:47Z",
+    "idempotencyKey": "set-status:LEGACY-NARR-MEDIA-1-DISSOLVED:[('lane', 'TTS / Narration Engine')]",
+    "recoveryId": "20260923T190011Z-external-set-status-LEGACY-NARR-MEDIA-1-DISSOLVED"
+  }
+]
