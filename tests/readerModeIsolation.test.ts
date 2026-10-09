@@ -368,15 +368,17 @@ describe("reader mode router core", () => {
     expect(made.at(-1)!.subscriptions).toBe(1);
   });
 
-  it("openDocument starts a new generation and closes the old session without a release window", () => {
+  // Decision #23: closing on openDocument uses the same invalidate → teardown order as a transition, so the
+  // outgoing session's release calls (Narrate's audio.stop) reach infrastructure instead of leaving audio running.
+  it("openDocument starts a new generation and releases the old session inside a teardown window", () => {
     const { log, made, fake, broker, router, document } = routerSetup();
     router.select("narrate");
     const narrateKey = router.getActive()!.key;
     log.length = 0;
     router.openDocument({ ...document, position: 0 });
-    expect(log).toEqual(["destroy:narrate", "issue:page", "create:page:silent", "select:page:0"]);
+    expect(log).toEqual(["invalidate:narrate", "teardown:narrate", "stop:narrate:user-stop:undefined", "destroy:narrate", "issue:page", "create:page:silent", "select:page:0"]);
     expect(broker.isCurrent(narrateKey)).toBe(false);
-    expect(fake.effects).toEqual([]);
+    expect(fake.effects.map((c) => c.method)).toEqual(["audio.stop"]);
     expect(router.getActive()!.key).toEqual({ documentId: "doc-1", documentGeneration: 2, mode: "page", session: 3 });
     expect(made.at(-1)!.input.handoff.canonicalWordIndex).toBe(0);
   });

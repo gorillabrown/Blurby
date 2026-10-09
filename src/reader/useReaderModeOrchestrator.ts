@@ -319,9 +319,21 @@ export function createReaderModeRouter(options: ReaderModeRouterOptions): Reader
     mount(target, getDocument(), handoff, arrival);
   }
 
-  function closeAll(): void {
+  function closeAll(release: boolean): void {
+    // openDocument (the shell stays mounted): same order as a transition, so the outgoing session's release
+    // calls (Narrate's audio.stop) reach infrastructure instead of leaving the old book's audio running
+    // (Decision #23). destroy (unmount): no release window; B0 recorded none and useNarration's own unmount
+    // cleanup stops audio.
+    const out = detach();
+    if (out && release) {
+      broker.invalidate(out.key);
+      broker.teardown(out.key, () => {
+        out.runtime.stop("user-stop");
+        out.runtime.destroy();
+      });
+    }
     broker.closeAll();
-    detach()?.runtime.destroy();
+    if (out && !release) out.runtime.destroy();
   }
 
   return {
@@ -332,7 +344,7 @@ export function createReaderModeRouter(options: ReaderModeRouterOptions): Reader
       return () => { listeners.delete(listener); };
     },
     openDocument(doc) {
-      closeAll();
+      closeAll(true);
       broker.openDocument(doc.documentId);
       const total = doc.bookWords?.totalWords || doc.wordCount || doc.tokenWords.length;
       mount("page", doc, createInitialHandoff(doc, total), "silent");
@@ -374,7 +386,7 @@ export function createReaderModeRouter(options: ReaderModeRouterOptions): Reader
     },
     destroy() {
       if (!active) return;
-      closeAll();
+      closeAll(false);
       refresh();
     },
   };

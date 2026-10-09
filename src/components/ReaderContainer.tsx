@@ -351,7 +351,12 @@ export default function ReaderContainer({
         const doc = liveDocRef.current.activeDoc;
         const key = `${doc.id}#${documentGenerationRef.current}`;
         if (bookBytesRef.current?.key !== key) {
-          bookBytesRef.current = { key, promise: api.readFileBuffer(doc.filepath!) };
+          // A failed read is not cached: the next view mount retries (B0 read once per view load).
+          const promise = api.readFileBuffer(doc.filepath!).catch((error: unknown) => {
+            if (bookBytesRef.current?.promise === promise) bookBytesRef.current = null;
+            throw error;
+          });
+          bookBytesRef.current = { key, promise };
         }
         return bookBytesRef.current.promise;
       },
@@ -576,7 +581,6 @@ export default function ReaderContainer({
       // useFlowScrollSync effect 2 (Flow part): auto-resume Flow in the next book of the queue.
       pendingFlowResumeRef.current = false;
       router.resumeFlowAfterBookOpen();
-      setCrossBookTransition(null);
     }
   }, [activeDoc.id, getDocument, router]);
 
@@ -651,6 +655,14 @@ export default function ReaderContainer({
       if (crossBookTransition) clearTimeout(crossBookTransition.timeoutId);
     };
   }, [crossBookTransition]);
+
+  // useFlowScrollSync effect 2: the "Up next" overlay stays until Flow is actually running in the next book.
+  const flowRunning = readingMode === "flow" && (toolbar?.playing ?? false);
+  useEffect(() => {
+    if (!crossBookTransition || !flowRunning || activeDoc.id !== crossBookTransition.nextDocId) return;
+    clearTimeout(crossBookTransition.timeoutId);
+    setCrossBookTransition(null);
+  }, [activeDoc.id, crossBookTransition, flowRunning]);
 
   // Chapter charOffset sync (useFoliateSync effect 2): once full-book words arrive, re-map each
   // chapter's charOffset to its global word index so chapter navigation uses real positions.
