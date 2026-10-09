@@ -317,6 +317,19 @@
           }
         }
       }
+    },
+    "git": {
+      "policy": "push",
+      "separationOfDuties": false,
+      "independentReviewer": false,
+      "networkOperations": "allow",
+      "defaultBranch": "main",
+      "remote": "origin",
+      "requireRemote": true,
+      "branchNameTemplate": "eb/{item-id}",
+      "branchCleanup": "maintenance",
+      "staleLock": "report",
+      "worktreeAware": true
     }
   },
   "x-legacy-v1": {

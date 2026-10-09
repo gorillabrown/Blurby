@@ -212,7 +212,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the M
 
 - **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
 - **Do not clean away local work.** Never run destructive cleanup flows like `git reset --hard`, `git clean`, or equivalent workspace-wiping actions unless the user explicitly requests that exact outcome for this repo.
-- **Branch-per-sprint.** Use the named branch in an isolated checkout; current task convention uses `eb/`. Never commit directly to main. Resolve registry policy.git before mutation: current policy permits exact-path local commits, with networkOperations=ask. Merge, push, and branch deletion are not automatic close-out steps.
+- **Branch-per-sprint.** Use the named branch in an isolated checkout; current task convention uses `eb/`. Never commit directly to main. Resolve registry policy.git before mutation: policy=push, networkOperations=allow. Per Rule 5b, a sprint that passes verification, spec compliance, quality review and docs close-out is committed on its branch, merged to `main` with `--no-ff`, and pushed, unless its spec says otherwise. Branch deletion and worktree pruning stay maintenance, never automatic.
 - **Local-first development.** Working directory at `C:\Users\estra\Projects\Blurby`. Push to GitHub after every sprint. Pull before every session. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 - **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.

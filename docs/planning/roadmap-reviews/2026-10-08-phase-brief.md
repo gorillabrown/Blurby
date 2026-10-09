@@ -34,7 +34,7 @@ Get the reading-mode separation moving again: recover admission, falling back to
 
 | Item | Specification | Prerequisite | Repository | External register | Execution environment |
 |---|---|---|---|---|---|
-| CLOUD-RETRY-SHARED-1 | PASS (U1–U4, U6, U7). U9 substantive PASS; mechanical **waived** | PASS (none) | PASS: branch and base named, exact-path staging. Note: `policy.git` unregistered | PASS: Queued; snapshot fresh 2026-10-09 | PASS: Node/Vitest; no network or hardware needs |
+| CLOUD-RETRY-SHARED-1 | PASS (U1–U4, U6, U7). U9 substantive PASS; mechanical **waived** | PASS (none) | PASS: branch and base named, exact-path staging. policy.git = push (Rule 5b, registered 2026-10-09) | PASS: Queued; snapshot fresh 2026-10-09 | PASS: Node/Vitest; no network or hardware needs |
 | TTS-SIDECAR-SHARED-1 | PASS. U9 as above | PASS (none) | PASS | PASS | PASS on Windows only with no-`pid` fakes (encoded) |
 | CLEANUP-LEGACY-PARSERS-1 | PASS. U9 as above | PASS (none) | PASS. Rebase if the governance landing changes `CLAUDE.md` first | PASS | PASS (`npm run build` required) |
 | READER-MODE-SEPARATION-2 (epic) | Charter gate, not the dispatch rubric. Spec U1–U8 passed 2026-09-23; amendments folded in | PASS (ISO-1A–1E Completed) | **Attention:** pinned base and evidence live on `eb/reader-mode-separation-2`; governance not yet landed on `main` | PASS | **Gap:** automated live capture unproven. The manual fallback is defined |
