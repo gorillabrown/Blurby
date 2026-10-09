@@ -108,7 +108,11 @@ function findBoundaryEnd(
     if (!regex.test(words[i].word)) continue;
     const candidateEnd = i + 1;
     if (first == null) first = candidateEnd;
-    if (candidateEnd >= start + targetMinWords && candidateEnd <= targetHardLimit) {
+    // Candidates only grow: past the target limit none can qualify, so the scan's answer is `first`.
+    // (Scanning on to the segment end returned the same value in O(segment) per chunk: ~0.3–1 s on an
+    // 80k-word EPUB with no paragraph breaks, one segment.)
+    if (candidateEnd > targetHardLimit) return first;
+    if (candidateEnd >= start + targetMinWords) {
       return candidateEnd;
     }
   }

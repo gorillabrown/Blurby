@@ -115,6 +115,27 @@ function sectionIndexForGlobalWord(
   return section?.sectionIndex;
 }
 
+/**
+ * sectionIndexForGlobalWord for ascending word indices (one natural-chunk source pass). When the sections are
+ * sorted and disjoint the containing section is the only match, so a forward cursor returns what the legacy
+ * scan's find() returns; otherwise the legacy scan runs. (80k words x 18 sections: the scan was most of a
+ * full-book chunk build once buildNaturalChunks stopped rescanning.)
+ */
+function createSectionLookup(
+  sections: readonly Readonly<SectionBoundary>[] | undefined,
+): (globalWordIndex: number) => number | undefined {
+  if (!sections?.length) return () => undefined;
+  const ordered = sections.every((section, i) => section.startWordIdx <= section.endWordIdx
+    && (i === 0 || sections[i - 1].endWordIdx <= section.startWordIdx));
+  if (!ordered) return (globalWordIndex) => sectionIndexForGlobalWord(sections, globalWordIndex);
+  let k = 0;
+  return (globalWordIndex) => {
+    while (k < sections.length && sections[k].endWordIdx <= globalWordIndex) k++;
+    const section = sections[k];
+    return section && globalWordIndex >= section.startWordIdx ? section.sectionIndex : undefined;
+  };
+}
+
 /** Legacy ReaderContainer createChunkSourceWords. */
 function createChunkSourceWords(params: {
   words: readonly string[];
@@ -124,13 +145,14 @@ function createChunkSourceWords(params: {
 }): ChunkSourceWord[] {
   const { words, foliateWords = [], paragraphBreaks = new Set<number>(), sections } = params;
   const canUseFoliateMetadata = foliateWords.length === words.length;
+  const sectionAt = createSectionLookup(sections);
 
   return words.map((word, index) => {
     const foliateWord = canUseFoliateMetadata ? foliateWords[index] : undefined;
     return {
       word,
       globalWordIndex: index,
-      sectionIndex: foliateWord?.sectionIndex ?? sectionIndexForGlobalWord(sections, index),
+      sectionIndex: foliateWord?.sectionIndex ?? sectionAt(index),
       tokenId: foliateWord?.tokenId,
       blockId: foliateWord?.blockId,
       blockTag: foliateWord?.blockTag,
@@ -172,7 +194,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   private cursorRaf: number | null = null;
   /** Bumped to cancel an in-flight HOTFIX-6 extraction (legacy effect cleanup `cancelled = true`). */
   private extractionToken = 0;
-  /** Legacy naturalReadingChunks memo, keyed by the render version and the word source. */
+  /** Legacy naturalReadingChunks memo: keyed by the word source, and by the render version only without full-book words. */
   private chunkCache: { readonly renderVersion: number; readonly bookWords: ReaderBookWordsValue | null; readonly chunks: ReadingChunk[] } | null = null;
   private readonly timers = new Set<ReturnType<typeof setTimeout>>();
   /** Speed dialog settle: pending until the dialog's rate has been quiet for NARRATE_SPEED_SETTLE_MS. */
@@ -272,6 +294,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (!this.bookWords && next.bookWords && !this.state.narrating) {
       this.bookWords = next.bookWords;
       this.chunkCache = null;
+      this.warmReadingChunks();
     }
     this.state.notify();
   };
@@ -301,6 +324,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       // The ReaderContainer effect that installs the chunk publishers while readingMode === "narrate".
       this.ports.audio.setOnChunkBoundary(this.onChunkBoundary);
       this.ports.audio.setOnSegmentStart(this.onSegmentStart);
+      this.warmReadingChunks();
     }
     s.notify();
   }
@@ -363,6 +387,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.ports.settings.update({ readingMode: "narrate", lastReadingMode: "narrate" });
     s.currentWordIndex = startWord;
     s.startAttempted = true;
+    // A Play before the warm-up timer ran: the full-book chunks still exist before audio starts (as on B0).
+    if (this.bookWords) this.readingChunks();
     const narrationStart = this.ports.audio.start(effectiveWords, startWord, this.settingsSnapshot.effectiveWpm, (idx) => {
       this.syncFoliateNarrationCursor(idx);
     });
@@ -883,6 +909,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
           this.ports.audio.updateWords(result.words, currentSection.startWordIdx + currentLocalIdx);
         }
         this.syncSectionEnd();
+        this.warmReadingChunks();
         this.state.notify();
       }, 0);
     }, () => { /* extraction failed: narration keeps the loaded words */ });
@@ -1040,11 +1067,17 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       .catch(() => {});
   };
 
-  /** Legacy naturalReadingChunks (memo over the effective words and the render version). */
+  /**
+   * Legacy naturalReadingChunks: B0's memo chain (effectiveWords [foliateRenderVersion] → chunkSourceWords →
+   * buildNaturalChunks) recomputed on a render bump only while the loaded foliate slice was the source;
+   * once full-book words existed effectiveWords returned that same array, so the chunks were built once
+   * (G6 parity: rebuilding them per render bump took ~0.75–1.1 s inside audio callbacks).
+   */
   private readingChunks(): ReadingChunk[] {
     const renderVersion = this.state.renderVersion;
-    if (this.chunkCache?.renderVersion === renderVersion && this.chunkCache.bookWords === this.bookWords) {
-      return this.chunkCache.chunks;
+    const cache = this.chunkCache;
+    if (cache && cache.bookWords === this.bookWords && (this.bookWords || cache.renderVersion === renderVersion)) {
+      return cache.chunks;
     }
     const foliateWords = (this.document.useFoliate && !this.bookWords ? this.surface.getFoliateWords() : null) ?? [];
     const chunks = buildNaturalChunks(createChunkSourceWords({
@@ -1055,6 +1088,15 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }));
     this.chunkCache = { renderVersion, bookWords: this.bookWords, chunks };
     return chunks;
+  }
+
+  /**
+   * B0 built that memo during the render after full-book words arrived, before any playback: build it then
+   * (this session's own timer), not lazily inside the first audio callback.
+   */
+  private warmReadingChunks(): void {
+    if (!this.bookWords || this.chunkCache?.bookWords === this.bookWords) return;
+    this.setTimer(() => { this.readingChunks(); }, 0);
   }
 
   /** Legacy consumeModeStartAnchor. */

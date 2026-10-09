@@ -596,7 +596,9 @@ export function createAudioScheduler(): AudioScheduler {
     }
 
     function tick(): void {
-      if (stopped || !callbacks || !audioCtx) return;
+      // The frame that ran this tick is spent: a loop that ends must leave the handle null, or the
+      // restart guards (here and in scheduleChunk) treat the timer as live forever after an underrun.
+      if (stopped || !callbacks || !audioCtx) { wordRafHandle = null; return; }
       const now = audioCtx.currentTime;
 
       // Don't process boundaries until audio has actually started playing
@@ -670,6 +672,8 @@ export function createAudioScheduler(): AudioScheduler {
       // AudioContext.currentTime remain the single source of truth.
       if (nextWordBoundaryIdx < currentWordBoundaries.length || hasPendingBoundaryDelivery()) {
         wordRafHandle = requestAnimationFrame(tick);
+      } else {
+        wordRafHandle = null;
       }
     }
 

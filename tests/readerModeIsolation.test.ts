@@ -877,5 +877,7 @@ describe("reader mode router registry (D3)", () => {
       .map((e) => `${m.path} -> ${e.to}`));
     expect(crossings.length).toBeGreaterThanOrEqual(4);
     expect(crossings.filter((c) => !c.endsWith("/index.ts"))).toEqual([]);
-  });
+    // The TypeScript-resolver graph build takes ~3 s alone and 13.6 s under full-suite load (F′ gate, 2026-10-09);
+    // the default 10 s timeout measured the machine, not the router. No assertion changes.
+  }, 60_000);
 });
