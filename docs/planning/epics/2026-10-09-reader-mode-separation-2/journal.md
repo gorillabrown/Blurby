@@ -54,6 +54,29 @@
 - **Gate/DoD movement:** P1 exit gate passed. D1 is still unmet (A3, census, heard audio).
 - **Git:** eb/reader-mode-separation-2 @ 2529a921; uncommitted: tests/perf-baseline-results.json (noise), census outputs (worker in progress).
 - **Next:** integrate the census, then A3 per Decision 9.
+
+## S1c — 2026-10-09 ~00:55 (host) — census, A3, G4 fixtures, owner gate
+
+- **Did:**
+  - Census integrated (63b10115): `--check` reproduces both manifests, and a drifted-manifest negative control exits 1.
+  - A3 automated matrix used 28/35 calls (277967b3): 24 transitions and 4 same-mode cases per fixture, on the EPUB and on the converted two-chapter text fixture. Every destination is entered paused, with 1 visible cursor and 0 stale old-owner effects. Narrate starts exactly at 7 and at 0; first audio arrives in 499–596 ms. Pause/resume gives 1 resume and 0 cold starts. Rate went 1.0→1.4→1.0. Narrate crossed the natural chapter boundary on the text fixture.
+  - Harness changes along the way:
+    - The launcher seeds the installed Kokoro model, which resolves OBS-A1R-1 for automation.
+    - Fixtures are now converted imports.
+    - Anchors are set in paused Flow, because Page renders no word spans on the EPUB cover.
+  - The G4 recorder was built by a worker and independently re-verified 5/5 (c61bca67).
+  - Owner gate B1 raised with `g0-owner-checklist.md` and `g0-owner-observations.json`.
+- **Learned:**
+  - A bare `electron.exe <script>` launch defaults userData to `%APPDATA%\Electron`; the installed app's data is under `%APPDATA%\blurby`.
+  - Meditations opens on its image-only cover in Page.
+  - Flow starts at the start of the anchor's line.
+  - Baseline anomalies OBS-A3-1..7 are recorded in `g0-matrix.json`.
+  - Synthetic wheel input does not browse away in Flow, and Next-chapter during Narrate does not change the chapter.
+  - The census found spec contradictions (Q-A..Q-E). The G4 recorder found the cross-owner comparison conflict (Q-F).
+- **Decisions:** none new; Q-A..Q-G are queued for /mid-dispatch-decision.
+- **Gate/DoD movement:** D1's automated half is complete; its owner half is pending (B1).
+- **Git:** eb/reader-mode-separation-2 @ c61bca67 + this checkpoint; uncommitted: tests/perf-baseline-results.json (noise).
+- **Next:** settle Q-A..Q-G; then stop cleanly, with every front blocked on B1 (no `src/` before D1).
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

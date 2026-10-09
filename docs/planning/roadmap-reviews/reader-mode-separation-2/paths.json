@@ -137,7 +137,8 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/baseline-narrate-reference-16k.wav",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/baseline-narrate-loopback.wav",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-checklist.md",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/live-baseline-manual.json"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live-baseline-manual.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-observations.json"
   ],
   "admissionPaths": [
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/baseline-build.json",

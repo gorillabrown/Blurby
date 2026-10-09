@@ -61,6 +61,7 @@ Waves follow `ROADMAP.md` § READER-MODE-SEPARATION-2 → *Waves and verificatio
 |------|------|----------|
 | S1 | P1 exit: I recorded and pushed; B0 rebuilt and validated; guards accept W; A1-R PASS | `92dda255`; `admission/baseline-build-rebuild.json`; `admission/isolation.json` (5f0608b6) |
 | S1 | A2 PASS (Flow reproduction/classification) | `admission/flow-reproduction.json` (2529a921) |
+| S1 | A3 automated half recorded; G0 owner half pending (B1) | `admission/g0-matrix.json` (277967b3); census 63b10115; G4 fixtures c61bca67 |
 
 ## Current-phase worklist
 

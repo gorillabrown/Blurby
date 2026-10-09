@@ -1,6 +1,6 @@
 ---
 epic: reader-mode-separation-2
-last_updated: 2026-10-08 23:55 (host clock)
+last_updated: 2026-10-09 00:55 (host clock)
 updated_by: session 1
 ---
 
@@ -37,10 +37,10 @@ updated_by: session 1
 
 ```
 phase:        P2 — Wave A / G0 admission (P1 exit gate passed S1: I, B0, guards, A1-R PASS)
-next_action:  integrate census (background worker) → design + run A3 (≤ 35 calls); heard audio → owner gate
-blockers:     none yet (heard-audio owner gate expected at A3)
+next_action:  owner runs g0-owner-checklist.md (BLOCKER B1); meanwhile settle Q-A..Q-F via /mid-dispatch-decision
+blockers:     B1 (owner gate: G0 heard audio + residual live checks)
 session:      1 of ~14 budgeted
-dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
+dod:          D1 unmet (automated half done; owner half pending) | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
 ```
 
 ## Next actions — max 5, near horizon only
@@ -50,8 +50,10 @@ dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | 
 3. [x] B0 rebuilt and validated → `admission/baseline-build-rebuild.json` (byte-identical to the original 21 files)
 4. [x] Harness guards (A7) → W path + exact-set B0 check; dry check with negative controls; lessons re-read
 5. [x] A1-R PASS 7/8 (`admission/isolation.json`, 5f0608b6); A2 PASS 10/20 (`admission/flow-reproduction.json`, 2529a921)
-6. [ ] Integrate the Wave A census (`dependencies.json`, `ownership.json`, `census/`): review, register paths, commit
-7. [ ] A3 (≤ 35): fix the non-EPUB fixture (converted import), seed the Kokoro model into the test profile (OBS-A1R-1), build the matrix runner, run EPUB + non-EPUB matrix; heard audio → BLOCKER(USER) checklist
+6. [x] Census integrated (63b10115); G4 fixtures recorded and independently re-verified 5/5 (c61bca67)
+7. [x] A3 automated matrix 28/35 (`admission/g0-matrix.json`, 277967b3)
+8. [ ] Settle Q-A..Q-F (below) via /mid-dispatch-decision so Wave B is dispatch-ready the moment D1 passes
+9. [ ] After B1 is answered: set `baseline.json` → `admission: PASS` (with B0 fresh-run figures and owner observer), then Monday Queued → In Flight (handshake), then Wave B
 
 ## Finalization — stages (launch.md); mark each with date + evidence
 
@@ -92,7 +94,21 @@ F5 done.md present here:              no
 
 ## Blockers
 
-- (none)
+- **B1 — BLOCKER(USER), owner gate (G0 heard audio + residual live checks).** Unblocks D1, and so every Wave B–E front.
+  - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-checklist.md` (about 20 minutes, headphones). Fill `g0-owner-observations.json` (11 items: H1–H8 heard audio on the EPUB and the converted non-EPUB, V1–V3 visual).
+  - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
+  - **Answer:** _(write "done" here after filling the observations file)_
+
+## Pending scope questions — census findings (decide via /mid-dispatch-decision before the first Wave B edit)
+
+- Q-A. Non-EPUB views (`PageReaderView`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `PausedTextView`, `FlowCursorController`) are dead in production (not rendered; tree-shaken). Copying them into each mode's `TextView.tsx` copies dead code. Options: retire them in Wave E, or copy them as the spec says.
+- Q-B. `src/App.tsx` runs a standalone reader window with its own `useReader` / `ReaderView` / `useReaderKeys`. App.tsx is not an edit site, so Wave E cannot prove the legacy Focus entry points are absent without amending scope.
+- Q-C. `src/types/narration.ts` exports runtime code (`narrationReducer`, `findSectionForWord`), not only types.
+- Q-D. The allowed-shared categories have no slot for `src/constants.ts` or the diagnostics modules (`narrateDiagnostics.ts` holds process-global mutable state). `useNarrationCaching.ts` holds a module-level extraction cache that feeds all modes; the census places it in the document port.
+- Q-E. The census added owner value `per-mode` (with `privateCopiesFor`) for resources in code that every mode copies.
+- Q-F. G4 byte-for-byte vs G6 "cross-owner effects must be zero": the G4 fixtures tag today's cross-owner audio calls (`crossOwner: true`; Flow 35, Focus 30, Page 6, Narrate 0). G4 needs an approved rule: drop the tagged effects, assert that none remain, compare the rest.
+- Q-G. Baseline observations that later gates must treat explicitly: OBS-A3-1 (Narrate→Page highlight on word 0 while the persisted anchor is 7), OBS-A3-2 (Focus→Page readback 209), OBS-A3-3 (same-Page emits `audio.stop`), Flow resume = cold restart (fixture), warming start → next press resumes (fixture), Narrate→Page stops audio twice (fixture). Preserve them as baseline, or class them as cross-owner effects to remove?
+- Source: `dependencies.json`, `ownership.json` (`census/`, 63b10115). Key couplings: shared `highlightedWordIndex` / anchors; one `FoliatePageView` for all modes; `createInstance` clears Narrate's truth subscription; Narrate starts through `startFlow`.
 
 ## Decision log — append; never silently re-litigate
 
@@ -110,6 +126,7 @@ F5 done.md present here:              no
 
 ## Evidence
 
+- A3: `admission/g0-matrix.json` (24 transitions + 4 same-mode cases per fixture; 0 stale effects; Narrate exact start; gaps → owner checklist). G4 fixtures: `fixtures/*.baseline.json` (verified 5/5, S1)
 - B0: `admission/baseline-build-rebuild.json` (21/21 identical; typecheck/build 0; tests 0 on 2 of 3 runs, KF-1 on run 1)
 - A1-R: `admission/isolation.json` (PASS, 7/8). A2: `admission/flow-reproduction.json` (PASS, 10/20)
 - Text-file SHA-256 values in those records are over the as-written (CRLF) bytes; git stores LF. Use `git hash-object` / blob ids for canonical comparison

@@ -1,0 +1,24 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "gate": "G0 (owner half: heard audio and residual live checks)",
+  "build": "B0 — C:\\Projects\\Blurby-artifacts\\rms2-baseline-build (see admission/baseline-build-rebuild.json)",
+  "observer": "",
+  "audioDevice": "",
+  "voice": "",
+  "date": "",
+  "liveProfileUnchanged": "",
+  "items": [
+    { "id": "H1", "book": "G0 Bundled Meditations", "check": "Narrate starts at the first word; cursor vs voice", "observed": "", "result": "" },
+    { "id": "H2", "book": "G0 Bundled Meditations", "check": "Narrate starts at the 8th word", "observed": "", "result": "" },
+    { "id": "H3", "book": "G0 Bundled Meditations", "check": "Pause/resume continues without restart", "observed": "", "result": "" },
+    { "id": "H4", "book": "G0 Bundled Meditations", "check": "Rate 1.0 -> 1.4 -> 1.0: overlap, missing words, pauses", "observed": "", "result": "" },
+    { "id": "H5", "book": "G0 Bundled Meditations", "check": "Section change during Narrate", "observed": "", "result": "" },
+    { "id": "H6", "book": "G0 Converted Two Chapters", "check": "H1-H4 repeated on the non-EPUB", "observed": "", "result": "" },
+    { "id": "H7", "book": "G0 Converted Two Chapters", "check": "Chapter One -> Two during Narrate", "observed": "", "result": "" },
+    { "id": "H8", "book": "G0 Converted Two Chapters", "check": "End of book during Narrate", "observed": "", "result": "" },
+    { "id": "V1", "book": "any", "check": "Flow scroll-away pauses and Return to reading restores", "observed": "", "result": "" },
+    { "id": "V2", "book": "any", "check": "Narrate -> Page: which word is highlighted", "observed": "", "result": "" },
+    { "id": "V3", "book": "G0 Bundled Meditations", "check": "Next-chapter arrow during Narrate", "observed": "", "result": "" }
+  ],
+  "resultValues": ["as-expected", "known-defect:KD-CURSOR-LEAD", "known-defect:KD-RATE-1.4-OVERLAP", "new-problem"]
+}
