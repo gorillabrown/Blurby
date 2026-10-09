@@ -260,6 +260,27 @@
 - **Git:** eb/reader-mode-separation-2 @ F (this commit); uncommitted afterwards by rule (Decision #27): live runs, live-qa.json, observation files, Evidence paste.
 - **Next:** F automated live pair (after the harness worker finishes) → OS-1 → live-qa.json + validator → F1–F5.
 
+## S1k — 2026-10-09 (host) — F′ fixes and automated G6 complete; waiting on OS-1
+
+- **Did:**
+  - F c282950f live runs exposed four issues:
+    - the speed pile-up (fixed by the settle);
+    - dropped dialog keys (fixed by the selected-index ref);
+    - harness speed-capture contamination (now its own launch);
+    - the EPUB section stall.
+  - The section stall's root cause: a shared-scheduler underrun bug on B0 too, plus a candidate chunk-rebuild regression. Both fixed in F′ 9a171504 (Decision #28).
+  - F′ gate: typecheck 0, 3342 / 133, build 0, recorder 5/5, 318 paths registered.
+  - F′ live: every G6 case passes or is baseline-equal on EPUB and non-EPUB, with 0 stale effects. The speed dialog passes live (89/89/25, keyboard). Dry validator: only R6 ×26 and R7.
+- **Learned:**
+  - A 250 ms settle changes the harness's correct measurement point.
+  - Rapid slider keys need a selected-index ref.
+  - Every per-mode cache keyed on render version re-pays the work B0 did once per document.
+  - A shared timer whose handle outlives its loop silently stops all word events after an underrun.
+- **Decisions:** #28.
+- **Gate/DoD movement:** D2–D6 and D8 values are green on F (automated). D1, D7 and the D8 observation wait on OS-1. F1 reruns everything fresh.
+- **Git:** eb/reader-mode-separation-2 @ 9a171504 (F). Uncommitted by rule: state.md, journal.md.
+- **Next:** the owner runs `os1-owner-checklist.md` and writes 'done' in the OS-1 BLOCKER → executor assembles live-qa.json, validator, F1–F5.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

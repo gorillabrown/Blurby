@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P8 — owner gate (OS-1). Waves B–E done (B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb, S d0c58af4); speed amendment done (966e3261)
-next_action:  F′ = the commit carrying Decision #28 fixes (scheduler underrun, Narrate/Flow chunk cache, chunk-builder scan, D3 timeout, harness measures). From here no commits until F1's V (Decision #27). Next: F′ automated live runs (G6 pair + speed capture) → OS-1 BLOCKER(USER) → live-qa.json + validator --require-speed → F1–F5
+next_action:  F″ = the commit after 9a171504 carrying the D6 hygiene (Decision #29); automated G6 re-run on F″, then OS-1 BLOCKER(USER) → live-qa.json + validator → F1–F5
 blockers:     OS-1 BLOCKER(USER) — owner listening session (os1-owner-checklist.md); gates D1, D7, D8 and F1–F5 only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
@@ -105,6 +105,9 @@ F5 done.md present here:              no
   - **Why owner:** heard-audio claims need a human observation (SRL-070, LL-124/126/127). The validator rejects any audio case without `heardAudio.observer = "owner"` (R6), and the speed row requires `liveObservation.observer = "owner"` (R7).
   - **Do not commit before answering:** HEAD must stay at F until F1 (Decision #27). Fill the two observation files in place.
   - **Answer:** _(write "done" here after filling both observation files)_
+  - **F automated evidence (uncommitted until V, Decision #27).** Runs are in %TEMP%: candidate `blurby-reader-mode-separation-2-g6-fpfinal20261009191701838` (EPUB + chapters), speed capture `…-g6-fpspeed20261009193142424`, B0 `…-g6-bpfinal20261009193304088`; candidate archive `C:\Projects\Blurby-artifacts\rms2-candidate-9a171504…`. Reassemble with `node E/live/assemble-live-qa.mjs --candidate-cases=<fpfinal>/captures/fpfinal-epub/g6-cases.json,<fpfinal>/captures/fpfinal-chapters/g6-cases.json,<fpspeed>/captures/fpspeed-epub/g6-cases.json --b0-cases=<bpfinal>/captures/bpfinal-epub/g6-cases.json,<bpfinal>/captures/bpfinal-chapters/g6-cases.json --out=<scratch>`, then add heardAudio, liveObservation and removedCrossOwnerEffects before writing `E/live-qa.json`.
+    - removedCrossOwnerEffects: (1) Narrate→Page lands on the handed-over word (B0 OBS-A3-1 landed on 0); (2) Narrate's bottom bar no longer shows Flow's leftover progress text (Decision #23).
+    - Deliberate improvement over B0, listed separately: the word timer restarts after an audio underrun (Decision #28a).
   - **After "done", the executor:**
     1. sets `baseline.json → admission: PASS` (D1);
     2. assembles `live-qa.json` from the F automated runs, adding your heardAudio, liveObservation and confirmations;
@@ -116,22 +119,22 @@ F5 done.md present here:              no
 | # | Front | Status | Gate / authority |
 |---|---|---|---|
 | F1 | G0 automated half (A1-R, A2, A3 matrix) | DONE | `isolation.json`, `flow-reproduction.json`, `g0-matrix.json` |
-| F2 | G0 owner half (heard audio + residual live checks) | BLOCKED — B1 | Owner gate (charter Escalation: owner gates; SRL-070) |
-| F3 | `baseline.json` → `admission: PASS` (D1) | BLOCKED — B1 | D1 requires the owner observation and the observer named |
+| F2 | G0 owner half (heard audio + residual live checks) | BLOCKED — OS-1 (BLOCKER(USER)) | Owner gate (charter Escalation: owner gates; SRL-070) |
+| F3 | `baseline.json` → `admission: PASS` (D1) | BLOCKED — OS-1 (BLOCKER(USER)) | D1 requires the owner observation and the observer named |
 | F4 | Wave A census, ownership, dependencies | DONE | 63b10115 |
 | F5 | G4 behavior fixtures | DONE | c61bca67 (re-verified 5/5) |
 | F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
 | F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
 | F8 | OBS-A3-2 classification (read-only) | DONE — cross-owner (b), Decision #12 | read-only diagnosis, S1 |
 | F9 | Monday Queued → In Flight | DONE — In Flight 2026-10-09 (handshake: plan → connector → confirm; readback status "In Flight", Seq 1, Started 2026-10-09; label "In Flight" created to match registry statusMappings) | Charter grant: transition "once D1 passes" |
-| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | OPEN (Decision #13) | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
-| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | OPEN (Decision #13) | Amendment item 4: start of Wave B; no `src/` before D1 |
-| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | OPEN (Decision #13) | Waves serial after G0 (charter Constraints; SRL-089) |
+| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | DONE — G1 16/16, G2×4, G3 (S d0c58af4, F 9a171504) | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
+| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | DONE — ports, broker, router (Waves B–E) | Amendment item 4: start of Wave B; no `src/` before D1 |
+| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | DONE — B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb, S d0c58af4 (verification.json → structuralCandidate) | Waves serial after G0 (charter Constraints; SRL-089) |
 | F13 | `scripts/check_reader_mode_evidence.mjs` (G6 validator) | DONE (E6) — validator committed; `--self-test` 11/11 controls; pre-G6 run exits 1 (no `live-qa.json`) | Launcher risk moot: since Wave B, `admission/isolated-launch.cjs` already refuses W (W's `src/` differs from the B0 pin). OS-1's B0 half must launch with root `C:\Projects\Blurby-artifacts\rms2-b0-checkout` (HEAD = `1e5485c6`), and G6 needs a candidate launcher. Both are harness items before E8 |
-| F14 | Speed dialog (→ F) | OPEN (Decision #13) | Only after S (amendment 2026-09-23 speed dialog) |
-| F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — B1 | Need F; finalization follows verified.md |
-| F16 | Lessons and governance fold-ins | STAGED | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
-| F17 | Supporting loopback audio capture (charter A6) | BLOCKED — B1 | Supporting only; heard audio is an owner gate (SRL-070); take it during the owner session |
+| F14 | Speed dialog (→ F) | DONE — F 9a171504 (966e3261 + c282950f + 9a171504; automated G6 and speed capture pass) | Only after S (amendment 2026-09-23 speed dialog) |
+| F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — OS-1 (BLOCKER(USER)); everything automated is ready | Need F; finalization follows verified.md |
+| F16 | Lessons and governance fold-ins | STAGED — fold-ins 3–8 (decisions through #28) | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
+| F17 | Supporting loopback audio capture (charter A6) | BLOCKED — OS-1 (BLOCKER(USER)); supporting only | Supporting only; heard audio is an owner gate (SRL-070); take it during the owner session |
 
 ## Scope questions Q-A..Q-G — RESOLVED 2026-10-09 (Decision log #10; staging fold-in 3; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`). Wave B instruction:
 
@@ -200,6 +203,10 @@ Original questions (for reference):
 (c) The chapters book-end visible cursor is nondeterministic on B0 (5/9), from a post-end clear race. The harness now measures it while the last word plays (max of samples until Play returns), identically on both targets; post-end samples are kept as evidence.
 (d) The harness rate case measures at the settle moment (`NARRATE_SPEED_SETTLE_MS` after the last key).
 All of this lands as F′ (Decision #27 then applies to F′). | Parity is judged on behaviour the owner can hear or see. A latent shared bug that turns a G6 case into chance cannot yield mechanical evidence, and the chunk rebuild is a regression the owner would hear as a slow start | Owner standing authorization; Type 1b |
+| 29 | S1 | Pre-F1 dry run on F′ (9a171504): D2 16/16, D3 14/14, D4 38/38, D5 11/11 (fixtures unchanged since first added), D6 typecheck 0 / npm test 3342 passed, 133 skipped / build 0 / 318 paths registered, D9 B0 re-hash 21/21. But `git diff --check I F` exited 2:
+(a) a trailing space in `design/waves-b-e-design.md:688`: fixed;
+(b) a blank line at the end of `admission/fixture-chapters.txt`: a hash-pinned admission input (g0-matrix.json, the a3/a3g manifests; the G6 launcher refuses other bytes), so its bytes cannot change. A directory-scoped `admission/.gitattributes` sets `fixture-chapters.txt -whitespace`. That is git's own way to declare recorded data, it covers this one file only, and every other path stays checked.
+Both land as F″ (production inputs unchanged). The automated G6 runs and speed capture are re-run on F″, and Decision #27 then applies to F″. | D6 must exit 0 on F, and a pinned evidence input cannot be rewritten | Owner standing authorization; Type 1b |
 
 - A3: `admission/g0-matrix.json` (24 transitions + 4 same-mode cases per fixture; 0 stale effects; Narrate exact start; gaps → owner checklist). G4 fixtures: `fixtures/*.baseline.json` (verified 5/5, S1)
 - B0: `admission/baseline-build-rebuild.json` (21/21 identical; typecheck/build 0; tests 0 on 2 of 3 runs, KF-1 on run 1)

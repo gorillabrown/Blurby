@@ -1,0 +1,3 @@
+# Hash-pinned admission fixture (g0-matrix.json, a3/a3g manifests; the G6 launcher refuses other bytes).
+# Its trailing blank line is recorded input, not a whitespace error (Decision #29).
+fixture-chapters.txt -whitespace

@@ -497,5 +497,9 @@
     "tests/readerModes/flowChunkCache.test.ts",
     "src/utils/naturalChunks.ts",
     "tests/naturalChunksBoundaryScan.test.ts"
+  ],
+  "d6HygienePaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/.gitattributes",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/design/waves-b-e-design.md"
   ]
 }

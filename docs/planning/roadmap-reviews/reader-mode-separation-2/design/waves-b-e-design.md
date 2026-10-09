@@ -685,7 +685,7 @@ Leak checks:
   - exactly one runtime with `selected === true`
   - zero accepted broker calls whose key is the old one, after `teardown` returns
   - the other two modes have no runtime and no infrastructure-side registrations (no callbacks held)
-  
+
   Repeat at word 0 and after `openDocument` (new generation).
 - **Same-mode test.** Session number, anchors and infrastructure callback registrations are unchanged. Page alone emits `settings.update({readingMode:"page"})` once (§A.6).
 - **"rejected mode work cannot escape through a port".** Invoke captured callbacks (`onWord`, truth sync, section end, completion, delayed-extraction timer, `ensureBookWords` resolution) after `stop`, `destroy`, `openDocument` and remount. `broker.stats.accepted` is unchanged.
