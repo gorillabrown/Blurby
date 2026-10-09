@@ -109,6 +109,23 @@
 - **Git:** eb/reader-mode-separation-2 @ this checkpoint (pushed); uncommitted: tests/perf-baseline-results.json (noise).
 - **Stop:** every front in the table is DONE, STAGED, or BLOCKED on B1, each with its gating clause. Clean stop per charter.
 
+## S1f — 2026-10-09 ~02:30 (host) — owner direction: advance; Wave B begins
+
+- **Did:**
+  - The owner directed: "You make decisions … advance with recommendations. Iterate until the entire epic is complete." Applied in five steps:
+    1. /virtuoso:mid-dispatch-decision Type 3: owner gate re-sequenced to OS-1 before F1. Decision #13; fold-in 6.
+    2. Monday Queued → In Flight via the handshake as actor mid-dispatch-decision. Read back status "In Flight", Seq 1, Started 2026-10-09; created the "In Flight" label to match the registry's statusMappings.
+    3. Base measured on W `d42cae8f`: typecheck/test/build all 0, 211/3063/133. The extra file and five tests were the G4 recorder, now renamed out of default discovery (0c3b4026).
+    4. A worker produced the Waves B–E design (`design/waves-b-e-design.md`, 955 lines). It was reviewed and accepted, and OC-1..OC-9 were ruled (Decision #14; fold-in 7).
+    5. Wave B steps B1–B5 dispatched to a worker.
+- **Learned:**
+  - The work register is writable only by roadmap-review, next-pointer, mid-dispatch-decision and pointer-closeout.
+  - Narrate 0.80–2.00x needs a Kokoro UI-domain change (OC-7, authorized). Fractional WPM (112.5) is already representable end to end.
+  - The default vitest discovery picks up `*.test.*` files under `docs/`.
+- **Decisions:** #13, #14.
+- **Git:** eb/reader-mode-separation-2 @ 3ee10afe + this entry; uncommitted: perf noise, plus the B1–B5 worker's files in flight.
+- **Next:** verify and commit B1–B5, then B6 Page, B7 Focus, B8, and the B9 gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
