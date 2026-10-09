@@ -301,10 +301,18 @@
   ],
   "fixturePaths": [
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/vitest.config.mjs",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/narrate.baseline.json"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/narrate.baseline.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx"
+  ],
+  "fixtureRenames": [
+    {
+      "from": "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx",
+      "to": "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx",
+      "why": "keep the B0-path recorder out of default npm test discovery; provenance literal inside unchanged"
+    }
   ]
 }

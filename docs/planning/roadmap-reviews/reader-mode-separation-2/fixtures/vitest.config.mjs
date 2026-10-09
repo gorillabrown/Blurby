@@ -16,7 +16,7 @@ export default defineConfig({
   test: {
     root,
     environment: "jsdom",
-    include: ["docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/**/*.test.tsx"],
+    include: ["docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"],
     setupFiles: ["./tests/setup.js"],
     testTimeout: 30000,
   },
