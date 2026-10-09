@@ -51,7 +51,7 @@ dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | 
 | Remote | `origin`; default `main` (`refs/remotes/origin/main`); run branch **not yet on origin** | `git ls-remote`, 2026-10-09 |
 | Network | fetch + push run branch granted; merge/push `main` only after `done.md` | owner, 2026-10-09 |
 | Branch created | yes (2026-09-23); session 1 repairs, merges `main`, and pushes it | scaffold |
-| `policy.git` | `push`, networkOperations `allow`, branchNameTemplate `eb/{item-id}`. Registered on `eb/roadmap-review-2026-10-08` @ `bf928e13`; reaches `main` with GOV Step 5 | docs worktree registry read, 2026-10-09 |
+| `policy.git` | `push`, networkOperations `allow`, branchNameTemplate `eb/{item-id}`. On `main` since 56c97e44 (pushed); `epics` role registered at fdfb658a | docs worktree registry read, 2026-10-09 |
 | Lessons | `policy.lessons.idPrefix` = `LL`; canonical index appended (`6c8c747f`); `lessons --open` = 92 live / 8 closed; former duplicate LL-092 (REFACTOR-1B) is indexed as **LL-128** | Issue.GOV-HYGIENE-2026-10-09 execution record, 2026-10-09 |
 | Toolchain | node v24.14.0, npm 11.9.0; `gh` logged in (account gorillabrown) | commands, 2026-10-09 |
 | G0 automated baseline (pinned base) | typecheck/test/build exit 0; 210 files / 3,058 passed / 133 skipped | `baseline.json`, 2026-09-23 (re-run in P1) |
@@ -61,6 +61,7 @@ dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | 
 | Test document | Meditations EPUB SHA-256 `8be2ab1e…6c2beb` = `resources/sample-meditations.epub` | Issue `-2`, 2026-09-23 |
 | Renderer start order | unpackaged Electron needs Vite running first, or the window is blank | Issue `-2` |
 | A1 failure facts | `executeJavaScript` returned `window` (not cloneable; fixed in test-only `30b72291`); EPIPE at `main/tts-engine.js:17` `console.error` when stdout/stderr pipe closed (hypothesis) | Issue `-2` |
+| Git gotcha | The repo root has a directory `main/` (Electron main process), so a bare `main` in git is ambiguous. Always write `refs/heads/main` / `refs/remotes/origin/main` | GOV-EPICS report + `git ls-files`, 2026-10-09 |
 | Monday item | 13119306772, Queued, Seq 1 | connector readback, 2026-10-09T03:39Z |
 
 ## Blockers
