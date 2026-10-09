@@ -10,7 +10,10 @@
     "A runtime edge from a root's closure may land only in the root's own mode directory, an allowedShared path (imported names must be listed in exports) or an allowedExternal package. Never another mode directory, never a legacy path.",
     "Type-only edges are reported and never fail by themselves.",
     "Exact paths and exact export names only; no directory or export wildcards. Once mode roots exist, every allowedShared path must be hit by at least one edge from a mode root.",
-    "sharedValueFiles hold zero mutable resources. infrastructureFiles hold exactly infrastructureResources. Mode directories hold no module-let or module-mutable-literal, and module-singleton only when listed in allowedModuleSingletons."
+    "sharedValueFiles hold zero mutable resources. infrastructureFiles hold exactly infrastructureResources. Mode directories hold no module-let or module-mutable-literal, and module-singleton only when listed in allowedModuleSingletons.",
+    "E5 (G1 post-cutover). shellInfrastructure: the runtime closure of src/components/ReaderContainer.tsx intersected with `legacy` must equal exactly these paths (equality, not subset); every other legacy file reached is a violation (Decision #20).",
+    "E5. appStandaloneWindow: not in ReaderContainer's runtime closure; reachable from src/main.tsx only through src/App.tsx. deadViews: unreachable from src/main.tsx by any runtime edge (absent files count as unreachable).",
+    "E5 ownership scope: every src/reader/** file plus shellFiles. shellFiles hold owner `shell` (hooks/refs/timers allowed; module-let and module-mutable-literal forbidden). legacyRetainedFiles under src/reader/** are excluded explicitly, each with a reason."
   ],
   "modesDirectory": "src/reader/modes",
   "modes": [
@@ -521,5 +524,63 @@
     "src/utils/audioScheduler.ts",
     "src/utils/narrateDiagnostics.ts",
     "src/utils/dualSourceDiag.ts"
+  ],
+  "shellInfrastructure": {
+    "src/components/ReaderContainer.tsx": "the shell itself (A.1)",
+    "src/components/ReaderBottomBar.tsx": "toolbar (A.7)",
+    "src/hooks/useKeyboardShortcuts.ts": "keys: useReaderKeys (A.7)",
+    "src/hooks/useNarration.ts": "TTS infrastructure (A.7, DD-3/DD-7)",
+    "src/hooks/narration/kokoroStrategy.ts": "TTS strategy used by useNarration",
+    "src/hooks/narration/mossNanoStrategy.ts": "TTS strategy used by useNarration",
+    "src/hooks/narration/pocketTtsStrategy.ts": "TTS strategy used by useNarration",
+    "src/hooks/narration/qwenStrategy.ts": "TTS strategy used by useNarration",
+    "src/hooks/narration/qwenStreamingStrategy.ts": "TTS strategy used by useNarration",
+    "src/hooks/narration/webSpeechStrategy.ts": "TTS strategy used by useNarration",
+    "src/utils/audioScheduler.ts": "TTS audio scheduling used by useNarration",
+    "src/types/narration.ts": "TTS types used by useNarration",
+    "src/utils/dualSourceDiag.ts": "TTS diagnostics used by useNarration",
+    "src/utils/narrateDiagnostics.ts": "TTS diagnostics recorder imported by ReaderContainer, useNarration and kokoroStrategy"
+  },
+  "appStandaloneWindow": [
+    "src/hooks/useReader.ts",
+    "src/components/ReaderView.tsx",
+    "src/components/PausedTextView.tsx"
+  ],
+  "deadViews": [
+    "src/components/ScrollReaderView.tsx",
+    "src/components/PageReaderView.tsx",
+    "src/components/FlowText.tsx",
+    "src/components/VirtualScrollText.tsx",
+    "src/utils/FlowCursorController.ts",
+    "src/components/FoliatePageView.tsx",
+    "src/hooks/useReadingModeInstance.ts",
+    "src/hooks/usePersistentReadingAnchor.ts",
+    "src/hooks/useFoliateSync.ts",
+    "src/hooks/useNarrationSync.ts",
+    "src/hooks/useNarrationCaching.ts",
+    "src/hooks/useFlowScrollSync.ts",
+    "src/hooks/useDocumentLifecycle.ts",
+    "src/hooks/useReaderMode.ts",
+    "src/reader/modes/FocusModeAdapter.ts",
+    "src/reader/modes/FlowModeAdapter.ts",
+    "src/reader/modes/NarrateModeAdapter.ts",
+    "src/modes/PageMode.ts",
+    "src/modes/FocusMode.ts",
+    "src/modes/FlowMode.ts",
+    "src/modes/index.ts"
+  ],
+  "shellFiles": [
+    "src/components/ReaderContainer.tsx",
+    "src/reader/useReaderModeOrchestrator.ts"
+  ],
+  "legacyRetainedFiles": [
+    {
+      "file": "src/reader/anchors/useCurrentWordAnchor.ts",
+      "reason": "listed in legacy; unreachable from src/main.tsx; retained for legacy tests (tests/currentWordAnchor.test.ts); no current runtime owns it"
+    },
+    {
+      "file": "src/reader/modes/NarrateModeAdapter.ts",
+      "reason": "listed in legacy; unreachable from src/main.tsx; retained for legacy tests (E4 deleted the Focus and Flow adapters); the live Narrate runtime is src/reader/modes/narrate/"
+    }
   ]
 }
