@@ -116,7 +116,8 @@
     "tests/foliateWordHighlight.test.ts",
     "tests/foliateChunkHighlight.test.ts",
     "tests/foliateAnchorNavigation.test.ts",
-    "tests/narrationIntegration.test.ts"
+    "tests/narrationIntegration.test.ts",
+    "tests/readerModes/harness/fakePorts.ts"
   ],
   "verificationScriptPaths": [
     "scripts/check_reader_mode_evidence.mjs"
@@ -298,7 +299,8 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/census/mode-copy-policy.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/census/resource-census.mjs",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/ownership-rules.json"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/ownership-rules.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json"
   ],
   "fixturePaths": [
     "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/vitest.config.mjs",

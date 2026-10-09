@@ -2,6 +2,26 @@ import { useCallback } from "react";
 import { useReaderMode, type UseReaderModeParams } from "../hooks/useReaderMode";
 import { logDualSourceTransition } from "../utils/dualSourceDiag";
 import type { ReaderMode } from "../types";
+import {
+  createInitialHandoff,
+  createReaderModeHandoff,
+  type ReaderDocumentSnapshot,
+  type ReaderModeHandoff,
+  type ReaderSessionKey,
+  type ReaderSettingsSnapshot,
+} from "./document/ReaderDocumentSnapshot";
+import type {
+  ReaderHardSelectInput,
+  ReaderModeArrival,
+  ReaderModeCommand,
+  ReaderModeId,
+  ReaderModeModule,
+  ReaderModeRuntime,
+  ReaderModeRuntimeSnapshotV1,
+  ReaderModeSpeed,
+  ReaderModeStopReason,
+} from "./modes/ReaderModeAdapter";
+import type { ReaderPortBroker } from "./ports/createReaderPorts";
 
 function toCompatibilityMode(mode: ReaderMode): "page" | "focus" | "flow" {
   return mode === "narrate" ? "flow" : mode;
@@ -303,5 +323,188 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
     handleCycleMode,
     handleCycleAndStart,
     preCapWpmRef,
+  };
+}
+
+// ── Thin router core (READER-MODE-SEPARATION-2, Wave B) ──────────────────────
+// Built beside the legacy hook above (DD-1); the hook becomes a wrapper around this core at E1.
+// A transition hands off copied values only: export → invalidate → teardown(stop, destroy) →
+// issue → create → publish → select. The incoming runtime never holds a reference to the outgoing one.
+
+export interface ReaderModeRouterOptions {
+  readonly modules: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>>;
+  readonly broker: ReaderPortBroker;
+  readonly getDocument: () => ReaderDocumentSnapshot;
+  readonly getSettings: () => ReaderSettingsSnapshot;
+}
+
+export interface ReaderActiveMode {
+  readonly mode: ReaderModeId;
+  readonly runtime: ReaderModeRuntime;
+  readonly key: ReaderSessionKey;
+}
+
+export interface ReaderToolbarSnapshot {
+  readonly readingMode: ReaderModeId;
+  readonly playing: boolean;
+  readonly narrating: boolean;
+  /** Legacy canonicalWordAnchor = persistentWordIndex state. */
+  readonly currentWordIndex: number;
+  readonly highlightedWordIndex: number;
+  readonly isBrowsedAway: boolean;
+  readonly speed: ReaderModeSpeed | null;
+  readonly flowProgress: ReaderModeRuntimeSnapshotV1["flowProgress"];
+}
+
+export interface ReaderModeRouter {
+  /** null until a document is open. */
+  getActive(): ReaderActiveMode | null;
+  /** Same object between notifications; null until a document is open. */
+  getSnapshot(): ReaderToolbarSnapshot | null;
+  subscribe(listener: () => void): () => void;
+  /** New generation → Page, arrival "silent", initial handoff. */
+  openDocument(doc: ReaderDocumentSnapshot): void;
+  /** Legacy handleSelectMode; selecting the active mode is a no-op. */
+  select(target: "focus" | "flow" | "narrate"): void;
+  /** Legacy handlePauseToPage. */
+  pauseToPage(): void;
+  /** Legacy handleExitReader, non-page branch. */
+  exitToPage(): void;
+  /** Legacy onComplete (Focus/Flow end of words): queued, dropped if the key is no longer current. */
+  requestCompletionToPage(key: ReaderSessionKey): void;
+  togglePlay(): void;
+  hardSelect(input: ReaderHardSelectInput): void;
+  navigateTo(wordIndex: number): void;
+  jumpBack(): void;
+  adjustSpeed(delta: number): void;
+  setSpeed(speed: ReaderModeSpeed): void;
+  command(command: ReaderModeCommand): void;
+  /** Forwarded to the active runtime only. */
+  applySettings(settings: ReaderSettingsSnapshot): void;
+  /** broker.closeAll(), then runtime.destroy(). Idempotent. */
+  destroy(): void;
+}
+
+export function createReaderModeRouter(options: ReaderModeRouterOptions): ReaderModeRouter {
+  const { modules, broker, getDocument, getSettings } = options;
+  let active: ReaderActiveMode | null = null;
+  let snapshot: ReaderToolbarSnapshot | null = null;
+  let unsubscribeRuntime: (() => void) | null = null;
+  const listeners = new Set<() => void>();
+
+  function refresh(): void {
+    const s = active?.runtime.getSnapshot();
+    snapshot = active && s
+      ? Object.freeze({
+        readingMode: active.mode,
+        playing: s.playing,
+        narrating: s.narrating,
+        currentWordIndex: s.publishedWordIndex,
+        highlightedWordIndex: s.highlightedWordIndex,
+        isBrowsedAway: s.isBrowsedAway,
+        speed: s.speed,
+        flowProgress: s.flowProgress,
+      })
+      : null;
+    for (const listener of [...listeners]) listener();
+  }
+
+  function detach(): ReaderActiveMode | null {
+    const out = active;
+    unsubscribeRuntime?.();
+    unsubscribeRuntime = null;
+    active = null;
+    return out;
+  }
+
+  function moduleFor(mode: ReaderModeId): ReaderModeModule {
+    const module = modules[mode];
+    if (!module) throw new Error(`createReaderModeRouter: no module registered for "${mode}"`);
+    return module;
+  }
+
+  function mount(mode: ReaderModeId, document: ReaderDocumentSnapshot, handoff: ReaderModeHandoff, arrival: ReaderModeArrival): void {
+    const module = moduleFor(mode);
+    const { key, ports } = broker.issue(mode);
+    const runtime = module.createRuntime({ key, ports, document, settings: getSettings(), handoff, arrival });
+    active = { mode, runtime, key };
+    unsubscribeRuntime = runtime.subscribe(refresh);
+    refresh();
+    runtime.select(handoff.canonicalWordIndex);
+  }
+
+  function transition(
+    target: ReaderModeId,
+    arrival: ReaderModeArrival,
+    capture: "persistent" | "capture-current",
+    stopReason: ReaderModeStopReason,
+    adjust: (handoff: ReaderModeHandoff) => ReaderModeHandoff = (handoff) => handoff,
+  ): void {
+    const out = active;
+    if (!out) return;
+    moduleFor(target);
+    const handoff = createReaderModeHandoff(adjust({ ...out.runtime.exportHandoff(capture), source: out.key }));
+    broker.invalidate(out.key);
+    broker.teardown(out.key, () => {
+      out.runtime.stop(stopReason, { destination: target });
+      out.runtime.destroy();
+    });
+    detach();
+    mount(target, getDocument(), handoff, arrival);
+  }
+
+  function closeAll(): void {
+    broker.closeAll();
+    detach()?.runtime.destroy();
+  }
+
+  return {
+    getActive: () => active,
+    getSnapshot: () => snapshot,
+    subscribe(listener) {
+      listeners.add(listener);
+      return () => { listeners.delete(listener); };
+    },
+    openDocument(doc) {
+      closeAll();
+      broker.openDocument(doc.documentId);
+      const total = doc.bookWords?.totalWords || doc.wordCount || doc.tokenWords.length;
+      mount("page", doc, createInitialHandoff(doc, total), "silent");
+    },
+    select(target) {
+      if (!active || active.mode === target) return;
+      transition(target, "select", "persistent", "mode-switch");
+    },
+    pauseToPage() {
+      if (!active) return;
+      if (active.mode === "page") {
+        active.runtime.select(active.runtime.getSnapshot().canonicalWordIndex);
+        return;
+      }
+      transition("page", "pause-to-page", "capture-current", "mode-switch");
+    },
+    exitToPage() {
+      if (!active || active.mode === "page") return;
+      transition("page", "silent", "persistent", "user-stop", (h) => ({ ...h, highlightedWordIndex: h.publishedWordIndex }));
+    },
+    requestCompletionToPage(key) {
+      queueMicrotask(() => {
+        if (!active || active.mode === "page" || !broker.isCurrent(key)) return;
+        transition("page", "silent", "capture-current", "user-stop");
+      });
+    },
+    togglePlay: () => active?.runtime.togglePlay(),
+    hardSelect: (input) => active?.runtime.hardSelect(input),
+    navigateTo: (wordIndex) => active?.runtime.navigateTo(wordIndex),
+    jumpBack: () => active?.runtime.jumpBack(),
+    adjustSpeed: (delta) => active?.runtime.adjustSpeed(delta),
+    setSpeed: (speed) => active?.runtime.setSpeed(speed),
+    command: (command) => active?.runtime.handleCommand(command),
+    applySettings: (settings) => active?.runtime.applySettings(settings),
+    destroy() {
+      if (!active) return;
+      closeAll();
+      refresh();
+    },
   };
 }

@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 // READER-MODE-SEPARATION-2 Wave A census: mutable-resource ownership.
 // Test-only harness. Mechanically extracts every mutable resource from the census scope with the
 // installed TypeScript AST, joins it with the hand-authored judgments in ownership-rules.json,
@@ -6,6 +5,7 @@
 // Usage: node docs/planning/roadmap-reviews/reader-mode-separation-2/census/resource-census.mjs [--check]
 //   --check : do not write; exit 1 if regenerated output differs from ownership.json or any
 //             resource is unclassified / any rule is unused (the G1 ownership test can reuse this).
+// Library: `import { extractResources } from "./resource-census.mjs"` (no side effects; the CLI runs only when executed).
 //
 // Resource identity = (file, kind, symbol, enclosing, anchor[, anchorOccurrence]). Anchor is a verbatim
 // fragment of the file: the first line of the resource's statement, widened to the whole statement when
@@ -14,7 +14,7 @@ import { createRequire } from "node:module";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const EVIDENCE = path.resolve(HERE, "..");
@@ -35,7 +35,7 @@ const missing = scope.filter((f) => !fs.existsSync(abs(f)));
 const TIMER_FNS = new Set(["setTimeout", "setInterval", "requestAnimationFrame", "requestIdleCallback", "queueMicrotask"]);
 const OBSERVERS = new Set(["ResizeObserver", "MutationObserver", "IntersectionObserver", "AbortController", "AudioContext", "Worker", "BroadcastChannel"]);
 
-function extract(fileRel) {
+export function extractResources(fileRel) {
   const text = fs.readFileSync(abs(fileRel), "utf8");
   const sf = ts.createSourceFile(fileRel, text, ts.ScriptTarget.Latest, true, fileRel.endsWith("x") ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
   const out = [];
@@ -151,97 +151,105 @@ function extract(fileRel) {
   return out;
 }
 
-const resources = scope.filter((f) => fs.existsSync(abs(f))).flatMap(extract);
-resources.sort((a, b) => [a.file, a.enclosing, a.kind, a.symbol, a.anchor].join("\u0000").localeCompare([b.file, b.enclosing, b.kind, b.symbol, b.anchor].join("\u0000")) || (a.anchorOccurrence ?? 0) - (b.anchorOccurrence ?? 0));
+function buildOwnership() {
+  const resources = scope.filter((f) => fs.existsSync(abs(f))).flatMap(extractResources);
+  resources.sort((a, b) => [a.file, a.enclosing, a.kind, a.symbol, a.anchor].join("\u0000").localeCompare([b.file, b.enclosing, b.kind, b.symbol, b.anchor].join("\u0000")) || (a.anchorOccurrence ?? 0) - (b.anchorOccurrence ?? 0));
 
-// ---- Join with judgments ----
-// Rule precedence: override (file + symbol, optional kind/enclosing/anchorIncludes) > enclosing rule > file default.
-const used = new Set();
-const matchOverride = (r) => {
-  let best = null, bestScore = -1;
-  RULES.overrides.forEach((o, i) => {
-    if (o.file !== r.file) return;
-    if (o.symbol !== undefined && o.symbol !== r.symbol) return;
-    if (o.symbolPrefix !== undefined && !r.symbol.startsWith(o.symbolPrefix)) return;
-    if (o.kind !== undefined && o.kind !== r.kind) return;
-    if (o.enclosing !== undefined && o.enclosing !== r.enclosing) return;
-    if (o.enclosingPrefix !== undefined && !r.enclosing.startsWith(o.enclosingPrefix)) return;
-    if (o.anchorIncludes !== undefined && !r.anchor.includes(o.anchorIncludes)) return;
-    const score = (o.symbol !== undefined ? 8 : 0) + (o.symbolPrefix !== undefined ? 4 : 0) + (o.anchorIncludes !== undefined ? 4 : 0) + (o.enclosing !== undefined ? 2 : 0) + (o.enclosingPrefix !== undefined ? 1 : 0) + (o.kind !== undefined ? 1 : 0);
-    if (score > bestScore) { best = [i, o]; bestScore = score; }
+  // ---- Join with judgments ----
+  // Rule precedence: override (file + symbol, optional kind/enclosing/anchorIncludes) > enclosing rule > file default.
+  const used = new Set();
+  const matchOverride = (r) => {
+    let best = null, bestScore = -1;
+    RULES.overrides.forEach((o, i) => {
+      if (o.file !== r.file) return;
+      if (o.symbol !== undefined && o.symbol !== r.symbol) return;
+      if (o.symbolPrefix !== undefined && !r.symbol.startsWith(o.symbolPrefix)) return;
+      if (o.kind !== undefined && o.kind !== r.kind) return;
+      if (o.enclosing !== undefined && o.enclosing !== r.enclosing) return;
+      if (o.enclosingPrefix !== undefined && !r.enclosing.startsWith(o.enclosingPrefix)) return;
+      if (o.anchorIncludes !== undefined && !r.anchor.includes(o.anchorIncludes)) return;
+      const score = (o.symbol !== undefined ? 8 : 0) + (o.symbolPrefix !== undefined ? 4 : 0) + (o.anchorIncludes !== undefined ? 4 : 0) + (o.enclosing !== undefined ? 2 : 0) + (o.enclosingPrefix !== undefined ? 1 : 0) + (o.kind !== undefined ? 1 : 0);
+      if (score > bestScore) { best = [i, o]; bestScore = score; }
+    });
+    return best;
+  };
+  const unclassified = [];
+  const entries = resources.map((r) => {
+    const ov = matchOverride(r);
+    let j = null;
+    if (ov) { used.add(`o${ov[0]}`); j = ov[1]; }
+    else if (RULES.fileDefaults[r.file]) { used.add(`f:${r.file}`); j = RULES.fileDefaults[r.file]; }
+    if (!j) { unclassified.push(r); return { ...r, currentUsers: [], proposedOwner: "UNCLASSIFIED", rationale: "no rule" }; }
+    const e = { ...r, currentUsers: [...j.currentUsers].sort((a, b) => MODES.indexOf(a) - MODES.indexOf(b)), proposedOwner: j.proposedOwner, ...(j.privateCopiesFor ? { privateCopiesFor: [...j.privateCopiesFor].sort((a, b) => MODES.indexOf(a) - MODES.indexOf(b)) } : {}), rationale: j.rationale };
+    const conf = j.confidence ?? r.confidence;
+    if (conf) { e.confidence = conf; e.reason = j.confidence ? j.reason : r.reason; }
+    return e;
   });
-  return best;
-};
-const unclassified = [];
-const entries = resources.map((r) => {
-  const ov = matchOverride(r);
-  let j = null;
-  if (ov) { used.add(`o${ov[0]}`); j = ov[1]; }
-  else if (RULES.fileDefaults[r.file]) { used.add(`f:${r.file}`); j = RULES.fileDefaults[r.file]; }
-  if (!j) { unclassified.push(r); return { ...r, currentUsers: [], proposedOwner: "UNCLASSIFIED", rationale: "no rule" }; }
-  const e = { ...r, currentUsers: [...j.currentUsers].sort((a, b) => MODES.indexOf(a) - MODES.indexOf(b)), proposedOwner: j.proposedOwner, ...(j.privateCopiesFor ? { privateCopiesFor: [...j.privateCopiesFor].sort((a, b) => MODES.indexOf(a) - MODES.indexOf(b)) } : {}), rationale: j.rationale };
-  const conf = j.confidence ?? r.confidence;
-  if (conf) { e.confidence = conf; e.reason = j.confidence ? j.reason : r.reason; }
-  return e;
-});
-const badValues = entries.filter((e) => e.proposedOwner !== "UNCLASSIFIED" && (!OWNERS.includes(e.proposedOwner) || e.currentUsers.some((u) => !MODES.includes(u)) || ((e.proposedOwner === "per-mode") !== Boolean(e.privateCopiesFor?.length)) || (e.privateCopiesFor ?? []).some((m) => !PRIVATE_MODES.includes(m))));
-const unusedRules = [
-  ...RULES.overrides.map((o, i) => (used.has(`o${i}`) ? null : { override: o })).filter(Boolean),
-  ...Object.keys(RULES.fileDefaults).filter((f) => !used.has(`f:${f}`) && scope.includes(f) && resources.some((r) => r.file === f)).map((f) => ({ fileDefaultNeverApplied: f })),
-];
+  const badValues = entries.filter((e) => e.proposedOwner !== "UNCLASSIFIED" && (!OWNERS.includes(e.proposedOwner) || e.currentUsers.some((u) => !MODES.includes(u)) || ((e.proposedOwner === "per-mode") !== Boolean(e.privateCopiesFor?.length)) || (e.privateCopiesFor ?? []).some((m) => !PRIVATE_MODES.includes(m))));
+  const unusedRules = [
+    ...RULES.overrides.map((o, i) => (used.has(`o${i}`) ? null : { override: o })).filter(Boolean),
+    ...Object.keys(RULES.fileDefaults).filter((f) => !used.has(`f:${f}`) && scope.includes(f) && resources.some((r) => r.file === f)).map((f) => ({ fileDefaultNeverApplied: f })),
+  ];
 
-const count = (key) => entries.reduce((m, e) => ((m[e[key]] = (m[e[key]] ?? 0) + 1), m), {});
-const perFile = {};
-for (const e of entries) {
-  const p = (perFile[e.file] ??= { total: 0, byKind: {}, byProposedOwner: {} });
-  p.total++; p.byKind[e.kind] = (p.byKind[e.kind] ?? 0) + 1; p.byProposedOwner[e.proposedOwner] = (p.byProposedOwner[e.proposedOwner] ?? 0) + 1;
+  const count = (key) => entries.reduce((m, e) => ((m[e[key]] = (m[e[key]] ?? 0) + 1), m), {});
+  const perFile = {};
+  for (const e of entries) {
+    const p = (perFile[e.file] ??= { total: 0, byKind: {}, byProposedOwner: {} });
+    p.total++; p.byKind[e.kind] = (p.byKind[e.kind] ?? 0) + 1; p.byProposedOwner[e.proposedOwner] = (p.byProposedOwner[e.proposedOwner] ?? 0) + 1;
+  }
+  const modeUsers = (e) => e.currentUsers.filter((u) => u !== "shell");
+  const sharedMutableToday = entries.filter((e) => modeUsers(e).length > 1).map((e) => ({ file: e.file, kind: e.kind, symbol: e.symbol, enclosing: e.enclosing, anchor: e.anchor, ...(e.anchorOccurrence ? { anchorOccurrence: e.anchorOccurrence } : {}), currentUsers: e.currentUsers, proposedOwner: e.proposedOwner }));
+
+  let sourceCommit = "unknown";
+  try { sourceCommit = execSync("git rev-parse HEAD", { cwd: ROOT }).toString().trim(); } catch {}
+  const out = {
+    generatedBy: "docs/planning/roadmap-reviews/reader-mode-separation-2/census/resource-census.mjs",
+    rulesSource: "docs/planning/roadmap-reviews/reader-mode-separation-2/census/ownership-rules.json",
+    typescriptVersion: ts.version,
+    sourceCommit,
+    semantics: {
+      kinds: "useRef | useState | useReducer | setTimeout | setInterval | requestAnimationFrame | requestIdleCallback | queueMicrotask | addEventListener | ipc-subscription (window.electronAPI/api .onX) | subscription (.subscribe/.addListener) | observer (new ResizeObserver/MutationObserver/IntersectionObserver/AbortController/AudioContext/Worker/BroadcastChannel) | engine-instance (new *Engine/*Controller/*Mode/*Adapter/*Scheduler/*Cacher/*Player/*Index/*Pipeline) | hook-instance (call of a project-owned use* hook: the callee instantiates its own refs/timers per call site) | class-field (non-function instance/static field or constructor parameter property) | module-let | module-singleton | module-mutable-literal",
+      symbol: "Variable/field the resource is stored in; timers use the handle target (e.g. rafRef.current) or (unassigned); listeners use target:event.",
+      currentUsers: "Modes whose runtime path reads or writes the resource today (shell = document shell/toolbar/library chrome, mode-independent).",
+      proposedOwner: "page|focus|flow|narrate = that mode alone owns it; shell = router/document shell; infrastructure-port = narrow settings/persistence/document/audio/diagnostics port behind the broker; per-mode = the resource lives in code every listed mode copies (privateCopiesFor), so each mode instance owns an independent copy and no instance is shared.",
+      sharedMutableToday: "Resources whose currentUsers contain more than one of page/focus/flow/narrate — the separation targets.",
+    },
+    scope,
+    excludedFromScope: RULES.scope.excluded,
+    missingScopeFiles: missing,
+    counts: {
+      resources: entries.length,
+      byProposedOwner: count("proposedOwner"),
+      byKind: count("kind"),
+      sharedMutableToday: sharedMutableToday.length,
+      unclassified: unclassified.length,
+      lowConfidence: entries.filter((e) => e.confidence === "low").length,
+    },
+    perFile,
+    unusedRules,
+    invalidValues: badValues.map((e) => ({ file: e.file, symbol: e.symbol, proposedOwner: e.proposedOwner, currentUsers: e.currentUsers })),
+    sharedMutableToday,
+    resources: entries,
+  };
+  return { out, unclassified, badValues, unusedRules };
 }
-const modeUsers = (e) => e.currentUsers.filter((u) => u !== "shell");
-const sharedMutableToday = entries.filter((e) => modeUsers(e).length > 1).map((e) => ({ file: e.file, kind: e.kind, symbol: e.symbol, enclosing: e.enclosing, anchor: e.anchor, ...(e.anchorOccurrence ? { anchorOccurrence: e.anchorOccurrence } : {}), currentUsers: e.currentUsers, proposedOwner: e.proposedOwner }));
 
-let sourceCommit = "unknown";
-try { sourceCommit = execSync("git rev-parse HEAD", { cwd: ROOT }).toString().trim(); } catch {}
-const out = {
-  generatedBy: "docs/planning/roadmap-reviews/reader-mode-separation-2/census/resource-census.mjs",
-  rulesSource: "docs/planning/roadmap-reviews/reader-mode-separation-2/census/ownership-rules.json",
-  typescriptVersion: ts.version,
-  sourceCommit,
-  semantics: {
-    kinds: "useRef | useState | useReducer | setTimeout | setInterval | requestAnimationFrame | requestIdleCallback | queueMicrotask | addEventListener | ipc-subscription (window.electronAPI/api .onX) | subscription (.subscribe/.addListener) | observer (new ResizeObserver/MutationObserver/IntersectionObserver/AbortController/AudioContext/Worker/BroadcastChannel) | engine-instance (new *Engine/*Controller/*Mode/*Adapter/*Scheduler/*Cacher/*Player/*Index/*Pipeline) | hook-instance (call of a project-owned use* hook: the callee instantiates its own refs/timers per call site) | class-field (non-function instance/static field or constructor parameter property) | module-let | module-singleton | module-mutable-literal",
-    symbol: "Variable/field the resource is stored in; timers use the handle target (e.g. rafRef.current) or (unassigned); listeners use target:event.",
-    currentUsers: "Modes whose runtime path reads or writes the resource today (shell = document shell/toolbar/library chrome, mode-independent).",
-    proposedOwner: "page|focus|flow|narrate = that mode alone owns it; shell = router/document shell; infrastructure-port = narrow settings/persistence/document/audio/diagnostics port behind the broker; per-mode = the resource lives in code every listed mode copies (privateCopiesFor), so each mode instance owns an independent copy and no instance is shared.",
-    sharedMutableToday: "Resources whose currentUsers contain more than one of page/focus/flow/narrate — the separation targets.",
-  },
-  scope,
-  excludedFromScope: RULES.scope.excluded,
-  missingScopeFiles: missing,
-  counts: {
-    resources: entries.length,
-    byProposedOwner: count("proposedOwner"),
-    byKind: count("kind"),
-    sharedMutableToday: sharedMutableToday.length,
-    unclassified: unclassified.length,
-    lowConfidence: entries.filter((e) => e.confidence === "low").length,
-  },
-  perFile,
-  unusedRules,
-  invalidValues: badValues.map((e) => ({ file: e.file, symbol: e.symbol, proposedOwner: e.proposedOwner, currentUsers: e.currentUsers })),
-  sharedMutableToday,
-  resources: entries,
-};
-const textOut = JSON.stringify(out, null, 2) + "\n";
-const target = path.join(EVIDENCE, "ownership.json");
-if (process.argv.includes("--check")) {
-  const prev = fs.existsSync(target) ? fs.readFileSync(target, "utf8") : "";
-  const strip = (s) => s.replace(/"sourceCommit": "[^"]*"/, "");
-  const problems = [];
-  if (strip(prev) !== strip(textOut)) problems.push("ownership.json is stale");
-  if (unclassified.length) problems.push(`${unclassified.length} unclassified`);
-  if (badValues.length) problems.push(`${badValues.length} invalid owner/user values`);
-  if (problems.length) { console.error(problems.join("; ")); process.exit(1); }
-  console.log("ownership.json up to date; all resources classified");
-} else {
-  fs.writeFileSync(target, textOut);
-  console.log(JSON.stringify(out.counts), "unusedRules:", unusedRules.length, "invalid:", badValues.length);
+const isMain = Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+if (isMain) {
+  const { out, unclassified, badValues, unusedRules } = buildOwnership();
+  const textOut = JSON.stringify(out, null, 2) + "\n";
+  const target = path.join(EVIDENCE, "ownership.json");
+  if (process.argv.includes("--check")) {
+    const prev = fs.existsSync(target) ? fs.readFileSync(target, "utf8") : "";
+    const strip = (s) => s.replace(/"sourceCommit": "[^"]*"/, "");
+    const problems = [];
+    if (strip(prev) !== strip(textOut)) problems.push("ownership.json is stale");
+    if (unclassified.length) problems.push(`${unclassified.length} unclassified`);
+    if (badValues.length) problems.push(`${badValues.length} invalid owner/user values`);
+    if (problems.length) { console.error(problems.join("; ")); process.exit(1); }
+    console.log("ownership.json up to date; all resources classified");
+  } else {
+    fs.writeFileSync(target, textOut);
+    console.log(JSON.stringify(out.counts), "unusedRules:", unusedRules.length, "invalid:", badValues.length);
+  }
 }
