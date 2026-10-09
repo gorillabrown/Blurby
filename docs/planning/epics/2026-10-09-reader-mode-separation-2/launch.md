@@ -11,7 +11,7 @@
 | Runtime can act unattended | permission mode covers npm, electron, git push, monday connector | **Assumption A5.** Owner confirms the mode before walking away. This scaffold session's auto mode blocked one registry policy write |
 | Repository detected | remote `origin`, default `main`, worktrees listed, dirty primary tree reported | PASS. Primary checkout dirty (unrelated; never touched by this run). `policy.git` pending GOV-HYGIENE → charter A1 |
 | Network operations settled | fetch and push | **Granted:** fetch; push `eb/reader-mode-separation-2` at checkpoints. Merge/push `main` only after `done.md` |
-| Launch-blocking questions answered | below | Q1 open (hard blocker) |
+| Launch-blocking questions answered | below | Q1 answered (GOV merged 56c97e44; epics registered 48452ba9 / fdfb658a). Q2 open (default: A5) |
 
 Readiness, as five findings:
 
@@ -19,14 +19,14 @@ Readiness, as five findings:
 |---|---|---|
 | Specification | PASS | Spec U1–U8 passed 2026-09-23; amendments folded in 2026-10-08; every DoD row has a command or procedure |
 | Prerequisites | PASS | READER-ISO-1A to 1E Completed in the register |
-| Repository | GAP → Q1 | Spec not on `main` until GOV-HYGIENE; worktree relink is a P1 step |
+| Repository | PASS | Spec and `policy.git` on `main` (56c97e44, fdfb658a); worktree relink is a P1 step |
 | External register | PASS | Snapshot fresh 2026-10-09T03:40Z; provider supports `write-status` and `record-completion` |
 | Execution environment | GAP → A5, A6 | Unattended permission mode unconfirmed; owner needed at audio/live gates by design |
 
 ### Launch-blocking questions — answers recorded here
 
 - **Q1 (hard blocker).** Has the GOV-HYGIENE-2026-10-09 CLI block run, including its epic addendum (registers `epics`, commits this packet), so that `main` carries the 2026-10-08 spec and `policy.git` = push?
-  **Answer:** Yes — GOV-HYGIENE merged to main at 56c97e44; epics registered at <this commit, filled after STEP 4>.
+  **Answer:** Yes — GOV-HYGIENE merged to main at 56c97e44; epics registered at 48452ba9 (merged to main as fdfb658a).
 - **Q2 (default: charter A5).** Is the session's permission mode set so npm, electron, git push and the monday connector run without approval prompts?
   **Answer:** _(pending. Unanswered: proceed; a stall shows up as a journal gap.)_
 
@@ -65,15 +65,15 @@ Read-only git runs lock-free: GIT_OPTIONAL_LOCKS=0 git --no-optional-locks ...
 The primary checkout C:\Projects\Blurby is dirty with unrelated work: never stage, restore, or clean anything there.
 
 First session (state.md Working set says "session 1 repairs, merges main, and pushes"):
-  git -C C:\Projects\Blurby log main --oneline --grep "roadmap-review 2026-10-08"   # must hit; else BLOCKER(USER) (charter A1), stop
+  git -C C:\Projects\Blurby log refs/heads/main --oneline --grep "roadmap-review 2026-10-08"   # must hit; else BLOCKER(USER) (charter A1), stop
   git -C C:\Projects\Blurby worktree repair C:\Projects\Blurby\.worktrees\reader-mode-separation-2
   cd C:\Projects\Blurby\.worktrees\reader-mode-separation-2
   git branch --show-current         # must print eb/reader-mode-separation-2
   git log -1 --format=%H            # must be 74883154… ; else journal the difference
   git status --porcelain            # journal EVERY path; preserve all (charter A4)
   git fetch origin --prune
-  git rev-parse main origin/main    # must print the same SHA twice (GOV-HYGIENE pushed main); else BLOCKER(USER)
-  git merge --no-ff main -m "READER-MODE-SEPARATION-2-S1: bring 2026-10-08 spec and governance from main"
+  git rev-parse refs/heads/main refs/remotes/origin/main    # must print the same SHA twice (GOV-HYGIENE pushed main); else BLOCKER(USER)
+  git merge --no-ff refs/heads/main -m "READER-MODE-SEPARATION-2-S1: bring 2026-10-08 spec and governance from main"
                                     # conflict -> STOP, BLOCKER(USER); never resolve by discarding a side
   git show HEAD:ROADMAP.md | Select-String "Mid-Dispatch Amendment — 2026-10-08"   # must hit
   git push -u origin eb/reader-mode-separation-2
@@ -88,7 +88,7 @@ Every later session (verify; never recreate the branch):
   git rev-list --left-right --count eb/reader-mode-separation-2...origin/eb/reader-mode-separation-2
                                     # both sides > 0 -> divergence: STOP, BLOCKER(USER); never rebase.
                                     # Behind only: git merge --ff-only origin/eb/reader-mode-separation-2
-  git rev-list --count <session-1 merge SHA from state.md>..origin/main
+  git rev-list --count <session-1 merge SHA from state.md>..refs/remotes/origin/main
                                     # main moved: journal it and keep working; never merge or rebase to catch up
 Every checkpoint:
   git add -- <exact paths>          # only paths in docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json
