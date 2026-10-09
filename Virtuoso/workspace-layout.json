@@ -330,6 +330,9 @@
       "branchCleanup": "maintenance",
       "staleLock": "report",
       "worktreeAware": true
+    },
+    "lessons": {
+      "idPrefix": "LL"
     }
   },
   "x-legacy-v1": {

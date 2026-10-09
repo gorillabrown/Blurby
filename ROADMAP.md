@@ -333,7 +333,6 @@ Commands after the named new tests exist:
 **Rule reconciliation:** SRL-074 allowed ref-heavy code to stay in its owning hook during adapter scaffolding; this stage now moves the refs together with that implementation. The compensation-first rule applies to the later perceptual sync diagnosis, not the separately owner-mandated structural separation. No extension checks are declared in registry policy. No design decision is deferred by this specification; baseline execution and live observations are explicit gates, not assumed results.
 
 ##### Lessons applied
-- **U9 mechanical-check waiver** as for the cleanup specs (owner-approved 2026-10-08). As an epic, this item's gate is its charter, not the dispatch rubric.
 - The full deduplicated checklist the 2026-09-23 review applied to this specification is in [2026-09-23-lessons-applied.md](docs/planning/roadmap-reviews/2026-09-23-lessons-applied.md#deduplicated-checklist). Live lessons applied there by id: LL-108 (exact-zero anchors), LL-109 (stale-async rejection behind G3's session tuple), LL-112 (mirror first, no shared behavior base), LL-120/121/125 (complete local ownership; Narrate stays audio-owned), LL-124/126/127 (heard-audio grounding in G6; no added lag tuning).
 - Re-read on 2026-10-08: no lesson recorded after 2026-09-23 (there are no close-outs since). The A1 failure taught no recorded lesson yet. Its candidate, *GUI-automation admission of an Electron app is brittle; prefer an owner-observed checklist when the owner is already the required observer*, is applied here as the 2026-10-08 manual-fallback amendment and should be recorded by this item's close-out if it holds.
 
@@ -448,7 +447,6 @@ Five additions requested on 2026-09-23, appended after the current five-item seq
 6. `git diff --name-only main` lists exactly the four staged paths.
 
 ##### Lessons applied
-- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
 - **LL-095** — the force-refresh-on-401 guardrail is now enforced in one place. *Done when* 4 asserts each provider still passes the explicit `forceRefresh: true` form, and new test 4 asserts exactly one refresh call per 401.
 - **LL-031** — read; does not apply (no async generation or stale-result handling here).
 - **LL-088** — read; does not apply within this item (single implementer, no parallel writers to one file). Cross-item: no other released cleanup edits these files.
@@ -519,7 +517,6 @@ Run `npm test -- tests/pythonSidecarAdapter.test.js tests/mossNanoEngine.test.js
 7. `git diff --name-only main` lists exactly the four paths across the two commits.
 
 ##### Lessons applied
-- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
 - **LL-112** — "only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary." The two paths exist and were diffed (identical apart from label, env var and one argument). This review found the boundary under-tested, so Task 1, a characterization suite passing against unmodified code, is a separate prerequisite commit (*Done when* 1–2). Product posture (dormant engines, disabled IPC) is pinned by *Done when* 3.
 - **LL-088** — the shared module and the two provider files are written by one implementer in one task, and TTS-ENGINE-SHARED-1 is serialized after this item, so no parallel writers touch these files.
 - **LL-031** — read; correlation here is by caller-supplied request ID, and test 9 covers isolation. No generation-ID change is introduced.
@@ -580,7 +577,6 @@ Run `npm test -- tests/pythonSidecarAdapter.test.js tests/mossNanoEngine.test.js
 6. `git diff --name-only main` lists exactly the three staged paths.
 
 ##### Lessons applied
-- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
 - No live lesson bears on this deletion. Read LL-001–LL-127 by title; the parser- and dead-code-adjacent entries (LL-028 tokenization, LL-093 refactor line counts) do not apply to deleting an unreferenced module.
 - Standing rule 36 (SRL-086/087, verify state at the moment of consequence) shaped the mandatory re-census before deletion and the grep-located `CLAUDE.md` row instead of a fixed line number.
 

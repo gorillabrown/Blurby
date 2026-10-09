@@ -368,7 +368,6 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
   - TTS-ENGINE-SHARED-1 (8) waits on the sidecar item.
   - HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE, SUBSCRIBER-CURSOR, UX-POLISH (2–5) and CLEANUP-MODE-BARREL-1 (10) stay Blocked on mode separation.
   - KOKORO-EXPORT is deferred.
-  - U9's mechanical lessons check is waived until `LESSONS_LEARNED.md` uses a parseable id-first heading format.
 - **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
 - **Most recent implementation:** NARRATE-A5-RATE-RESEED-1 (c6bbf54, merged 145c385 on 2026-06-01). Historical position QA passed; the 1.4x overlap residual remains with COLLAPSE-1. Diagnostic 07439ee and pause/resume db2d1bc are merged. Local HEAD cd384b7 (2026-07-03) is the July planning-review merge; no later implementation commits were found.

@@ -38,3 +38,5 @@ Lessons read and judged not to apply to the new specifications: LL-031 (no gener
 ## Close-outs since the last review that recorded no lesson
 
 None. No close-outs were written after 2026-09-23.
+
+**2026-10-09:** waiver expired — policy.lessons.idPrefix=LL and the canonical index appended; lessons --check passes for all four specs. learning.live-count = 92 (kpis --json).
