@@ -26,7 +26,10 @@ interface OwnershipPolicy {
 const resourceId = (r: Resource) => `${r.file} ${r.kind} ${r.symbol} @${r.enclosing}`;
 // Owner-map identity also carries the verbatim anchor: one function can hold two distinct
 // resources with the same symbol (e.g. two ResizeObservers both named `observer`).
-const ownerKey = (r: Resource) => `${resourceId(r)} :: ${(r as Resource & { anchor?: string }).anchor ?? ""}`;
+const ownerKey = (r: Resource) => {
+  const x = r as Resource & { anchor?: string; anchorOccurrence?: number };
+  return `${resourceId(r)} :: ${x.anchor ?? ""} #${x.anchorOccurrence ?? 0}`; // census identity: anchor + occurrence
+};
 
 /** Pure check shared by the real census and the negative control. */
 function checkOwnership(resources: readonly Resource[], rules: OwnershipPolicy) {

@@ -1,6 +1,8 @@
+// @vitest-environment jsdom
 // READER-MODE-SEPARATION-2 G3 — routing and concurrency.
-// Wave B: broker and router-core cases. The named G3 handoff/same-mode/escape tests arrive with the mode trees.
-import { describe, expect, it } from "vitest";
+// Broker and router-core cases (Wave B), then the named G3 cases over the real mode modules present
+// (design §D.3; jsdom because the real modules load their views).
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   READER_PORT_RELEASE_CALLS,
   ReaderPortAccessError,
@@ -16,6 +18,11 @@ import {
 } from "../src/reader/modes/ReaderModeAdapter";
 import { createReaderModeRouter } from "../src/reader/useReaderModeOrchestrator";
 import { createFakeDocument, createFakeInfrastructure, type FakeInfrastructure } from "./readerModes/harness/fakePorts";
+import type { ReaderSessionKey } from "../src/reader/document/ReaderDocumentSnapshot";
+import type { ReaderPorts } from "../src/reader/ports/ReaderPorts";
+import { pageMode } from "../src/reader/modes/page/index";
+import { focusMode } from "../src/reader/modes/focus/index";
+import { flowMode } from "../src/reader/modes/flow/index";
 
 const flushMicrotasks = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
@@ -420,5 +427,266 @@ describe("reader mode router core", () => {
     expect(log).toEqual(["destroy:focus"]);
     expect(router.getActive()).toBeNull();
     expect(router.getSnapshot()).toBeNull();
+  });
+});
+
+// ── G3 over the real mode modules (design §D.3) ──────────────────────────────
+// The generators run over every mode whose module is registered here; Wave D adds narrate to this map
+// and the generated names extend without renaming.
+const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode };
+const PRESENT_MODES = (["page", "focus", "flow", "narrate"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
+const ORDERED_PAIRS = PRESENT_MODES.flatMap((from) => PRESENT_MODES.filter((to) => to !== from).map((to) => [from, to] as const));
+const PLAYABLE = new Set<ReaderModeId>(["focus", "flow", "narrate"]);
+
+const keyId = (key: ReaderSessionKey) => JSON.stringify([key.documentId, key.documentGeneration, key.mode, key.session]);
+const acceptedTotal = (broker: ReaderPortBroker) => Object.values(broker.stats.accepted).reduce((sum, n) => sum + n, 0);
+
+interface Issued { readonly mode: ReaderModeId; readonly key: ReaderSessionKey; readonly ports: ReaderPorts }
+
+/**
+ * Real modules + fake infrastructure behind the real broker. Each issued port is wrapped so every call is
+ * attributed to its key: `attempted` counts calls the session made, `accepted` counts those the broker let
+ * through to infrastructure.
+ */
+function isolationSetup(position = 7) {
+  const fake = createFakeInfrastructure({ document: createFakeDocument({ position }) });
+  const broker = createReaderPorts(fake.infra);
+  const calls = new Map<string, { attempted: number; accepted: number }>();
+  const issued: Issued[] = [];
+  const runtimes: { mode: ReaderModeId; runtime: ReaderModeRuntime }[] = [];
+  // The issued groups are frozen, so the proxy wraps an empty target and forwards to the group.
+  const wrapGroup = (id: string, group: object) => new Proxy({}, {
+    get: (_target, prop) => (...args: unknown[]) => {
+      const rec = calls.get(id)!;
+      rec.attempted += 1;
+      const before = acceptedTotal(broker);
+      try {
+        return (group as Record<string | symbol, (...a: unknown[]) => unknown>)[prop](...args);
+      } finally {
+        if (acceptedTotal(broker) > before) rec.accepted += 1;
+      }
+    },
+  });
+  const counting: ReaderPortBroker = {
+    ...broker,
+    stats: broker.stats,
+    issue: (mode) => {
+      const { key, ports } = broker.issue(mode);
+      const id = keyId(key);
+      calls.set(id, { attempted: 0, accepted: 0 });
+      const wrapped = Object.freeze(Object.fromEntries(
+        (Object.keys(ports) as (keyof ReaderPorts)[]).map((group) => [group, wrapGroup(id, ports[group])]),
+      )) as unknown as ReaderPorts;
+      issued.push({ mode, key, ports: wrapped });
+      return Object.freeze({ key, ports: wrapped });
+    },
+  };
+  const modules = Object.fromEntries(Object.entries(REAL_MODULES).map(([mode, module]) => [mode, {
+    ...module!,
+    createRuntime: (input: ReaderModeCreateInput) => {
+      const runtime = module!.createRuntime(input);
+      runtimes.push({ mode: mode as ReaderModeId, runtime });
+      return runtime;
+    },
+  }]));
+  const document = fake.infra.document.snapshot();
+  const router = createReaderModeRouter({ modules, broker: counting, getDocument: () => document, getSettings: () => fake.infra.settings.read() });
+  router.openDocument(document);
+  const enter = (mode: ReaderModeId) => (mode === "page" ? router.pauseToPage() : router.select(mode));
+  const callsFor = (key: ReaderSessionKey) => ({ ...calls.get(keyId(key))! });
+  const portsFor = (key: ReaderSessionKey) => issued.find((i) => keyId(i.key) === keyId(key))!.ports;
+  return { fake, broker, router, document, runtimes, enter, callsFor, portsFor };
+}
+
+/** Flush every fake timer, RAF and microtask the sessions left behind. */
+async function flushAll(): Promise<void> {
+  for (let i = 0; i < 3; i++) {
+    vi.advanceTimersByTime(60_000);
+    await Promise.resolve();
+    await Promise.resolve();
+  }
+}
+
+/** The work an old owner can still reach after it lost the session: its view callbacks and its ports. */
+function invokeCapturedWork(
+  runtime: ReaderModeRuntime,
+  ports: ReaderPorts,
+  key: ReaderSessionKey,
+  router: ReturnType<typeof createReaderModeRouter>,
+): void {
+  const view = runtime as unknown as Record<string, unknown>;
+  const call = (name: string, ...args: unknown[]) => {
+    if (typeof view[name] === "function") (view[name] as (...a: unknown[]) => unknown)(...args);
+  };
+  call("onRelocate", { cfi: "epubcfi(/6/2!/4/2)", fraction: 0.5 });
+  call("onSurfaceLoad");
+  call("onWordsReextracted");
+  call("onUserBrowseAway");
+  call("pollBrowsing");
+  call("onWordClick", "epubcfi(/6/2!/4/2)", "w3", 0, 3, 3);
+  call("onTocReady", [{ label: "c1" }], 1);
+  call("recordDiagnostic", "late", "work");
+  call("readBookBytes");
+  runtime.select(3);
+  runtime.start({ cause: "programmatic" });
+  runtime.resume();
+  runtime.togglePlay();
+  runtime.hardSelect({ cfi: null, word: "w4", globalWordIndex: 4 });
+  runtime.navigateTo(5);
+  runtime.jumpBack();
+  runtime.adjustSpeed(25);
+  // The ports themselves (completion, cross-book, persistence, settings, diagnostics, audio).
+  ports.shell.requestCompletionToPage();
+  ports.shell.requestCrossBook({ finishedWordIndex: 5 });
+  ports.persistence.updateProgress(key.documentId, 5);
+  ports.settings.update({ readingMode: key.mode });
+  ports.diagnostics.record("late", "work");
+  try {
+    ports.audio.stop("mode-switch");
+  } catch (error) {
+    if (!(error instanceof ReaderPortAccessError)) throw error;
+  }
+  router.requestCompletionToPage(key);
+}
+
+/** Fire every callback infrastructure still holds (audio onWord/truth sync/section end, subscriptions). */
+function fireRegisteredCallbacks(fake: FakeInfrastructure): void {
+  for (const cb of Object.values(fake.registered)) {
+    if (typeof cb === "function") (cb as (...a: unknown[]) => unknown)(1);
+  }
+}
+
+describe("reader mode isolation (G3)", () => {
+  beforeEach(() => { vi.useFakeTimers({ now: 0 }); });
+  afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
+  });
+
+  it("covers every ordered pair of the present modes", () => {
+    expect(PRESENT_MODES).toEqual(["page", "focus", "flow"]);
+    expect(ORDERED_PAIRS).toHaveLength(PRESENT_MODES.length * (PRESENT_MODES.length - 1));
+  });
+
+  for (const [from, to] of ORDERED_PAIRS) {
+    it(`handoff ${from} to ${to} preserves position and rejects the old owner`, async () => {
+      for (const scenario of [{ position: 7, reopen: false }, { position: 0, reopen: false }, { position: 7, reopen: true }]) {
+        const label = `${from}→${to} at ${scenario.position}${scenario.reopen ? " after openDocument" : ""}`;
+        const { fake, broker, router, document, runtimes, enter, callsFor, portsFor } = isolationSetup(scenario.position);
+        if (scenario.reopen) {
+          const firstKey = router.getActive()!.key;
+          router.openDocument(document);
+          expect(router.getActive()!.key.documentGeneration, label).toBe(2);
+          expect(broker.isCurrent(firstKey), label).toBe(false);
+        }
+        enter(from);
+        if (PLAYABLE.has(from)) router.togglePlay();
+        const old = router.getActive()!;
+        expect(old.mode, label).toBe(from);
+        if (PLAYABLE.has(from)) expect(old.runtime.getSnapshot().playing, label).toBe(true);
+
+        // Capture the old owner's pending work: a load timer, its live timers/RAFs and two port promises.
+        (old.runtime as { onSurfaceLoad?: () => void }).onSurfaceLoad?.();
+        expect(vi.getTimerCount(), label).toBeGreaterThan(0);
+        const oldPorts = portsFor(old.key);
+        const continued: string[] = [];
+        void oldPorts.document.readBookBytes().then(() => continued.push("readBookBytes"));
+        void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
+        const createdBefore = runtimes.length;
+
+        enter(to);
+        const teardownCalls = callsFor(old.key);
+        await flushAll();
+        // The old owner left no live work behind: nothing it scheduled made a port call after teardown.
+        expect(callsFor(old.key), label).toEqual(teardownCalls);
+        fake.resolveBookBytes(new ArrayBuffer(1));
+        fake.resolveBookWords(null);
+        fireRegisteredCallbacks(fake);
+        invokeCapturedWork(old.runtime, oldPorts, old.key, router);
+        await flushAll();
+
+        const active = router.getActive()!;
+        expect(active.mode, label).toBe(to);
+        expect(active.runtime.getSnapshot().canonicalWordIndex, label).toBe(scenario.position);
+        expect(runtimes.filter((r) => r.runtime.getSnapshot().selected).map((r) => r.mode), label).toEqual([to]);
+        expect(broker.isCurrent(old.key), label).toBe(false);
+        expect(callsFor(old.key).accepted - teardownCalls.accepted, label).toBe(0);
+        expect(continued, label).toEqual([]);
+        // Other modes untouched: the switch created only the destination, and no callback is held.
+        expect(runtimes.slice(createdBefore).map((r) => r.mode), label).toEqual([to]);
+        expect(Object.values(fake.registered).filter((cb) => cb != null), label).toEqual([]);
+        router.destroy();
+      }
+    });
+  }
+
+  for (const mode of PRESENT_MODES) {
+    it(`selecting ${mode} twice is a no-op`, async () => {
+      const { fake, router, runtimes, enter } = isolationSetup(7);
+      enter(mode); // first selection (Page is already selected by the document open)
+      await flushAll();
+      const before = router.getActive()!;
+      const snapshot = before.runtime.getSnapshot();
+      const registered = { ...fake.registered };
+      const effects = fake.effects.length;
+      const created = runtimes.length;
+
+      enter(mode);
+      await flushAll();
+      const after = router.getActive()!;
+      expect(after.key).toBe(before.key);
+      expect(after.runtime).toBe(before.runtime);
+      expect(runtimes).toHaveLength(created);
+      expect(after.runtime.getSnapshot()).toMatchObject({
+        selected: true,
+        canonicalWordIndex: snapshot.canonicalWordIndex,
+        publishedWordIndex: snapshot.publishedWordIndex,
+        highlightedWordIndex: snapshot.highlightedWordIndex,
+        playing: snapshot.playing,
+      });
+      expect(fake.registered).toEqual(registered);
+      // Page alone re-emits its readingMode write (legacy handlePauseToPage in Page, page fixture step 5).
+      expect(fake.effects.slice(effects)).toEqual(mode === "page"
+        ? [{ method: "settings.update", args: [{ readingMode: "page" }] }]
+        : []);
+    });
+  }
+
+  it("rejected mode work cannot escape through a port", async () => {
+    for (const mode of PRESENT_MODES) {
+      for (const exit of ["switch", "openDocument", "remount"] as const) {
+        const label = `${mode} after ${exit}`;
+        const { fake, broker, router, document, enter, callsFor, portsFor } = isolationSetup(7);
+        enter(mode);
+        if (PLAYABLE.has(mode)) router.togglePlay();
+        const old = router.getActive()!;
+        (old.runtime as { onSurfaceLoad?: () => void }).onSurfaceLoad?.(); // a pending delayed-load timer
+        const oldPorts = portsFor(old.key);
+        const continued: string[] = [];
+        void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
+
+        if (exit === "switch") enter(PRESENT_MODES.find((m) => m !== mode)!);
+        else router.openDocument(document);
+        if (exit === "remount") enter(mode); // a new session of the same mode
+        await flushAll();
+
+        const live = router.getActive()!;
+        const liveSnapshot = live.runtime.getSnapshot();
+        const acceptedBefore = { ...broker.stats.accepted };
+        const effectsBefore = fake.effects.length;
+        fake.resolveBookWords(null);
+        fireRegisteredCallbacks(fake);
+        invokeCapturedWork(old.runtime, oldPorts, old.key, router);
+        await flushAll();
+
+        expect(broker.stats.accepted, label).toEqual(acceptedBefore);
+        expect(fake.effects.length, label).toBe(effectsBefore);
+        expect(callsFor(old.key).attempted, label).toBeGreaterThan(0); // the old work really tried
+        expect(continued, label).toEqual([]);
+        expect(router.getActive()!.key, label).toBe(live.key);
+        expect(live.runtime.getSnapshot(), label).toEqual(liveSnapshot);
+        router.destroy();
+      }
+    }
   });
 });

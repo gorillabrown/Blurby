@@ -382,6 +382,12 @@ export interface ReaderModeRouter {
   command(command: ReaderModeCommand): void;
   /** Forwarded to the active runtime only. */
   applySettings(settings: ReaderSettingsSnapshot): void;
+  /**
+   * Cross-book auto-resume (legacy useFlowScrollSync effect 2, Flow part): once the next book has
+   * opened in Page, enter Flow without the select arrival effects (legacy startFlow from Page) and
+   * start it. No-op unless Page is active.
+   */
+  resumeFlowAfterBookOpen(): void;
   /** broker.closeAll(), then runtime.destroy(). Idempotent. */
   destroy(): void;
 }
@@ -502,6 +508,11 @@ export function createReaderModeRouter(options: ReaderModeRouterOptions): Reader
     setSpeed: (speed) => active?.runtime.setSpeed(speed),
     command: (command) => active?.runtime.handleCommand(command),
     applySettings: (settings) => active?.runtime.applySettings(settings),
+    resumeFlowAfterBookOpen() {
+      if (!active || active.mode !== "page") return;
+      transition("flow", "silent", "persistent", "mode-switch");
+      active?.runtime.start({ cause: "resume-after-book" });
+    },
     destroy() {
       if (!active) return;
       closeAll();

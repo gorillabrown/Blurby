@@ -32,7 +32,7 @@ import {
   type ReaderDocumentSnapshot,
   type ReaderSettingsSnapshot,
 } from "../../../src/reader/document/ReaderDocumentSnapshot";
-import { createReaderPorts, type ReaderPortInfrastructure } from "../../../src/reader/ports/createReaderPorts";
+import { createReaderPorts, type ReaderPortBroker, type ReaderPortInfrastructure } from "../../../src/reader/ports/createReaderPorts";
 import type { ReaderAudioStartResult } from "../../../src/reader/ports/ReaderPorts";
 import type { ReaderModeId, ReaderModeModule } from "../../../src/reader/modes/ReaderModeAdapter";
 import { createReaderModeRouter, type ReaderModeRouter } from "../../../src/reader/useReaderModeOrchestrator";
@@ -269,7 +269,20 @@ function ActiveModeView({ router, modules }: { router: ReaderModeRouter; modules
 
 const flushPromises = () => Promise.resolve().then(() => Promise.resolve());
 
-async function replayScript(mode: ReaderModeId, script: Script, modules: Partial<Record<ReaderModeId, ReaderModeModule>>): Promise<Script> {
+/** Optional replay instrumentation (e.g. a throwing audio infrastructure, a counting broker). */
+export interface ReplayOptions {
+  /** Replaces the fake infrastructure the real broker forwards to (recording fakes stay the observers). */
+  readonly infra?: (infra: ReaderPortInfrastructure) => ReaderPortInfrastructure;
+  /** Wraps the real broker the router uses. */
+  readonly broker?: (broker: ReaderPortBroker) => ReaderPortBroker;
+}
+
+async function replayScript(
+  mode: ReaderModeId,
+  script: Script,
+  modules: Partial<Record<ReaderModeId, ReaderModeModule>>,
+  options: ReplayOptions,
+): Promise<Script> {
   const open = script.commands[0];
   if (open?.command !== "openDocument") throw new Error(`${script.name}: first command must be openDocument`);
   const document = createReaderDocumentSnapshot({
@@ -280,8 +293,9 @@ async function replayScript(mode: ReaderModeId, script: Script, modules: Partial
   const env: ReplayEnv = { mode, effects: [], loaded: open.args.surfaceLoaded === false ? [] : [...WORDS] };
   let routerRef: ReaderModeRouter | null = null;
   const fake = createReplayInfrastructure(script, document, () => routerRef);
+  const broker = createReaderPorts(options.infra ? options.infra(fake.infra) : fake.infra);
   const router = createReaderModeRouter({
-    modules, broker: createReaderPorts(fake.infra), getDocument: () => document, getSettings: fake.getSettings,
+    modules, broker: options.broker ? options.broker(broker) : broker, getDocument: () => document, getSettings: fake.getSettings,
   });
   routerRef = router;
   const observe = (): Observation => {
@@ -451,10 +465,11 @@ export async function replayFixture(
   mode: ReaderModeId,
   modules: Partial<Record<ReaderModeId, ReaderModeModule>>,
   baselineText: string = readFixtureText(mode),
+  options: ReplayOptions = {},
 ): Promise<ReplayResult> {
   const baseline = JSON.parse(baselineText) as Fixture;
   if (baseline.mode !== mode) throw new Error(`fixture is for ${baseline.mode}, not ${mode}`);
   const candidate: Script[] = [];
-  for (const script of baseline.scripts) candidate.push(await replayScript(mode, script, modules));
+  for (const script of baseline.scripts) candidate.push(await replayScript(mode, script, modules, options));
   return { ...compareReplay(baselineText, candidate), candidateScripts: candidate };
 }
