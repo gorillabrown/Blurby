@@ -11,7 +11,7 @@ const actionDeadline = startedAtMs + 55000;
 const finalDeadline = startedAtMs + 60000;
 let finalizing = false;
 const remainingMs = () => (finalizing ? finalDeadline : actionDeadline) - Date.now();
-const expectedRoot = "C:/Users/estra/Projects/Blurby/.worktrees/reader-mode-separation-2";
+const expectedRoot = "C:/Projects/Blurby/.worktrees/reader-mode-separation-2";
 const samePath = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 if (!samePath(process.cwd(), expectedRoot)) throw new Error("Refusing unexpected working directory");
 const arg = (name, fallback) => process.argv.find((v) => v.startsWith(`--${name}=`))?.slice(name.length + 3) ?? fallback;

@@ -146,7 +146,20 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/flow-reproduction.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-manifest.json",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1-20260923214002764-main-events.ndjson",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a1-20260923214002764-epipe.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/baseline-build-rebuild.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-run.ps1",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-manual-checklist.md",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live-baseline-manual.json"
+  ],
+  "epicPacketPaths": [
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/charter.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/plan.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/state.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/journal.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/launch.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/verified.md",
+    "docs/planning/epics/2026-10-09-reader-mode-separation-2/done.md"
   ],
   "governancePaths": [
     "docs/governance/close-outs/Memo.READER-MODE-SEPARATION-2.GovernanceStaging.2026-09-23.md",

@@ -1,0 +1,207 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "identity": "B0",
+  "purpose": "G0 baseline rebuilt under the 2026-10-09 rebuild policy (ROADMAP Mid-Dispatch Amendment 2026-10-09, item 2). Immutable once recorded.",
+  "rebuiltAtUtc": "2026-10-09T04:44:12.246Z",
+  "sourceCommit": "1e5485c66e547392e7752240df71700267e8ede7",
+  "sourceTree": "d2392ee39b74e38f8fda5af3f93029f1f0162718",
+  "srcTree": "0c7900751cce7ce9adb09132da18c3ff73de9b9b",
+  "checkout": {
+    "path": "C:ProjectsBlurby-artifacts\rms2-b0-checkout",
+    "kind": "git worktree add --detach 1e5485c6 (clean: git status --porcelain empty before install)",
+    "retained": true
+  },
+  "archivePath": "C:ProjectsBlurby-artifacts\rms2-baseline-build",
+  "inputs": {
+    "packageLockSha256": "76e4a4362442497cdff8137187cd6852fcccf57ea388011feca16c527f05a3e0",
+    "matchesOriginalPackageLock": true,
+    "productionInputsMatchPin": "checkout is the pinned commit itself; HEAD, tree and src tree verified"
+  },
+  "toolchain": {
+    "node": "v24.14.0",
+    "npm": "11.9.0",
+    "vitest": "4.1.2",
+    "install": "npm ci --offline",
+    "installExit": 0,
+    "installedPackages": 743,
+    "postinstall": "patch-package && node scripts/patch-onnxruntime.js (exit 0)"
+  },
+  "validation": {
+    "typecheck": {
+      "command": "npm run typecheck",
+      "exitCode": 0
+    },
+    "build": {
+      "command": "npm run build",
+      "exitCode": 0,
+      "distFileCount": 21
+    },
+    "test": {
+      "command": "npm test",
+      "runs": [
+        {
+          "run": 1,
+          "exitCode": 1,
+          "testFilesPassed": 210,
+          "testFilesSkipped": 1,
+          "testsPassed": 3058,
+          "testsSkipped": 133,
+          "failedTestNames": [],
+          "unhandledErrors": [
+            "Unhandled Rejection: Error: Qwen streaming stream <id> timed out after 500 ms without stream_finished (reason stream-timeout) at main/qwen-streaming-engine.js makeRuntimeError via Timeout._onTimeout; attributed by Vitest to tests/qwenStreaming.test.js"
+          ],
+          "log": "C:ProjectsBlurby-artifacts\b0-test.log",
+          "logSha256": "8ea217c3d151cf854388b459308c09f2a1ad8df9f89acae1fc41424a3f501b6b"
+        },
+        {
+          "run": 2,
+          "exitCode": 0,
+          "testFilesPassed": 210,
+          "testFilesSkipped": 1,
+          "testsPassed": 3058,
+          "testsSkipped": 133,
+          "failedTestNames": [],
+          "unhandledErrors": [],
+          "log": "C:ProjectsBlurby-artifacts\b0-test-run2.log",
+          "logSha256": "b1d2d8416e814747f1cb386e9380188b07834253e9c94be4917957d7d250b653"
+        },
+        {
+          "run": 3,
+          "exitCode": 0,
+          "testFilesPassed": 210,
+          "testFilesSkipped": 1,
+          "testsPassed": 3058,
+          "testsSkipped": 133,
+          "failedTestNames": [],
+          "unhandledErrors": [],
+          "log": "C:ProjectsBlurby-artifacts\b0-test-run3.log",
+          "logSha256": "18f4fdaff4563d372653943064e932851728d752e9fe3735ca7d6f929fddae68"
+        }
+      ],
+      "isolatedQwenFileRuns": "npx vitest run tests/qwenStreaming.test.js x3: 18/18 passed, exit 0 each",
+      "classification": "KF-1 known flake: load-dependent 500 ms stream-timeout timer in the retired Qwen engine fires after its test completes. Not a source/input identity difference and not reader-mode behavior. Fresh full-suite runs 2 and 3 exit 0.",
+      "skippedCountForD6": 133
+    },
+    "verdict": "PASS"
+  },
+  "originalManifest": "admission/baseline-build.json (unchanged)",
+  "comparisonToOriginal": {
+    "fileCount": {
+      "original": 21,
+      "rebuild": 21
+    },
+    "identical": 21,
+    "mismatches": [],
+    "onlyInRebuild": [],
+    "onlyInOriginal": [],
+    "note": "Byte-identical rebuild of the 2026-09-23 archive."
+  },
+  "liveMatrix": "Pending: G0 live matrix runs against this archive (A1-R/A2/A3 or the manual route).",
+  "files": [
+    {
+      "path": "assets/App-BTmErlj_.js",
+      "bytes": 280854,
+      "sha256": "7ce1254c81b2f5e9d6c1f862869cd31284eda41d0146663ed5f70ba8b6de03e5"
+    },
+    {
+      "path": "assets/blurby-icon-ejRjiByq.png",
+      "bytes": 1404452,
+      "sha256": "143e2bbffcb60a38202eac6a5728df5bf299bf7f6b3c35cc8222a2d7b28df74b"
+    },
+    {
+      "path": "assets/comic-book-DIQGts9b.js",
+      "bytes": 1469,
+      "sha256": "41809c14e3e98a83afb97dfdc8ad62d8bb48489aff1672a886492dc05007814c"
+    },
+    {
+      "path": "assets/epub-W2Ac9Tsh.js",
+      "bytes": 25586,
+      "sha256": "560780e61485665730823d34c44fe2c50f1d52ea6cca28c616c42424a517a609"
+    },
+    {
+      "path": "assets/fb2-DoA4UCCO.js",
+      "bytes": 7179,
+      "sha256": "ce2144e4b46af9646f603d0c37b9541b70f17027079914e81d4e81d03ad64514"
+    },
+    {
+      "path": "assets/fflate-CtUkkcu7.js",
+      "bytes": 3769,
+      "sha256": "165df8eee6bd8c60cefdc67e51acb57335ba0e01762b2698b73c8972027c7991"
+    },
+    {
+      "path": "assets/fixed-layout-E39NmGzb.js",
+      "bytes": 12774,
+      "sha256": "f2a0740856add8790b71cd27ecdb232a38deb8a73fef7d0c58643668ee5ec2de"
+    },
+    {
+      "path": "assets/index-B9TsfAM6.css",
+      "bytes": 97188,
+      "sha256": "c9ecd1073370c888330ffaeb43096e3fff77b444cbc8584b7d572ee9e603e884"
+    },
+    {
+      "path": "assets/index-CrV8QIYG.js",
+      "bytes": 1700,
+      "sha256": "8a8a9f11a19783a06b7ada4909df598888dfbf818f78450cf211defdc666a914"
+    },
+    {
+      "path": "assets/mobi-CUP3Mkj_.js",
+      "bytes": 24834,
+      "sha256": "32cf44c14ffcc6fbcfe952e2cebef827ff9d3d27d6f99ac2bdb29b2b1530232c"
+    },
+    {
+      "path": "assets/paginator-sOM65Gn3.js",
+      "bytes": 25655,
+      "sha256": "6e6e68b0aa176fabc771b0b276ba3eeab2b39046afeea8ed1801b315d7174b0c"
+    },
+    {
+      "path": "assets/search-DFtD2c8n.js",
+      "bytes": 2431,
+      "sha256": "a78583928bb6657a128d72570edab7f7f0f4991cb785279ea94b1a480956616c"
+    },
+    {
+      "path": "assets/settings-5MT7dmX9.css",
+      "bytes": 7802,
+      "sha256": "2589f52592a8cd13711cb14c1c1847d7883ba84652967f4ea9b4e53dc8c0bd9b"
+    },
+    {
+      "path": "assets/settings-D3a3Dr4N.js",
+      "bytes": 92900,
+      "sha256": "ee7dd769c9f56de2ee04bbcfc8e2bcc16fdf8ca0af41fc65c9e079ed3c089133"
+    },
+    {
+      "path": "assets/tts-CKatckqv.js",
+      "bytes": 140520,
+      "sha256": "8702df691412aba0fda648e178cf5ec56dabe5f3a2495919da44a4ecd7d7d64c"
+    },
+    {
+      "path": "assets/tts-HaHKBHMJ.js",
+      "bytes": 6133,
+      "sha256": "e7d8c833106888015672ecd5991e3c73795da55f932d9503c3ce34c4bb79ca04"
+    },
+    {
+      "path": "assets/vendor-DXnWpCqd.js",
+      "bytes": 193850,
+      "sha256": "3058905d71c0b5c6c60a017837d013d3fb501313807b386e62e2afe31970294a"
+    },
+    {
+      "path": "assets/view-Cy1j7h-j.js",
+      "bytes": 27999,
+      "sha256": "dfcd710de49e578a151e4ab535d9a3cf9b6f3d5defa44a75bc4ec6470ca1a87e"
+    },
+    {
+      "path": "assets/zip-Y2spjjw9.js",
+      "bytes": 55544,
+      "sha256": "9654156c7b0b3da6c06520ef276652e9f3d5a17bccf5c6594a214f91fce12afe"
+    },
+    {
+      "path": "index.html",
+      "bytes": 704,
+      "sha256": "39bf62137562da7a6fe66692057b46859f620868e1ae604155b00d5e37ada514"
+    },
+    {
+      "path": "resources/sample-meditations.epub",
+      "bytes": 279837,
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb"
+    }
+  ]
+}

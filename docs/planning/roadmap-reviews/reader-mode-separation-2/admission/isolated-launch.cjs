@@ -3,7 +3,7 @@
 // electron.exe <this file> --profile=<fresh TEMP/blurby-reader-mode-separation-2-a1-...> --cdp-port=9335 --build-dir=<preserved dist archive>
 // Vite preview must already serve the independent preserved build on localhost:5173.
 const path = require("node:path");
-const EXPECTED_ROOT = "C:/Users/estra/Projects/Blurby/.worktrees/reader-mode-separation-2";
+const EXPECTED_ROOT = "C:/Projects/Blurby/.worktrees/reader-mode-separation-2";
 const samePath = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 if (!samePath(process.cwd(), EXPECTED_ROOT)) throw new Error("Refusing unexpected working directory");
 const fs = require("node:fs");
@@ -40,10 +40,13 @@ function collectBuild(directory) {
 collectBuild(buildDir);
 buildFiles.sort((a, b) => a.path.localeCompare(b.path));
 if (!buildFiles.some((entry) => entry.path === "index.html")) throw new Error("Build archive lacks index.html");
-const priorBaseline = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "baseline.json"), "utf8"));
-for (const [relativePath, expectedSha] of Object.entries(priorBaseline.buildArtifactsSha256)) {
-  const entry = buildFiles.find((item) => item.path === relativePath.replace(/^dist\//, ""));
-  if (!entry || entry.sha256 !== expectedSha) throw new Error(`Preserved baseline build hash mismatch: ${relativePath}`);
+// B0 (2026-10-09 rebuild policy): the served build must equal the rebuild manifest exactly.
+const b0 = JSON.parse(fs.readFileSync(path.join(__dirname, "baseline-build-rebuild.json"), "utf8"));
+if (b0.sourceCommit !== "1e5485c66e547392e7752240df71700267e8ede7") throw new Error("B0 manifest names an unexpected source commit");
+if (buildFiles.length !== b0.files.length) throw new Error(`B0 file count mismatch: ${buildFiles.length} vs ${b0.files.length}`);
+for (const expected of b0.files) {
+  const entry = buildFiles.find((item) => item.path === expected.path);
+  if (!entry || entry.sha256 !== expected.sha256) throw new Error(`B0 build hash mismatch: ${expected.path}`);
 }
 const git = (...args) => execFileSync("git", args, { cwd: ROOT, encoding: "utf8", windowsHide: true }).trim();
 const head = git("rev-parse", "HEAD");
