@@ -6,7 +6,7 @@
 // jsdom cannot host foliate). Focus's RSVP overlay renders for real while Focus plays.
 import { describe, expect, it, vi } from "vitest";
 import { compareReplay, readFixtureText, replayFixture } from "./harness/fixtureReplay";
-import { createFakeInfrastructure } from "./harness/fakePorts";
+import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { createReaderModeRouter } from "../../src/reader/useReaderModeOrchestrator";
 import { pageMode } from "../../src/reader/modes/page/index";
@@ -78,6 +78,60 @@ describe("focus mode behavior (G4)", () => {
     const unflagged = JSON.parse(committed);
     delete unflagged.scripts[0].commands[1].effects[0].crossOwner;
     expect(compareReplay(JSON.stringify(unflagged, null, 2) + "\n", result.candidateScripts).errors).not.toEqual([]);
+  });
+
+  // B8 (decision #12, OBS-A3-2): on B0 a Focus → Page switch re-paginated foliate and the passive relocate
+  // wrote floor(fraction × wordCount) over the Page highlight once Focus had consumed the resume anchor.
+  // After separation, Page receives Focus's word as a copied value and its first relocate cannot overwrite it.
+  it("Focus to Page keeps Focus's word against a layout relocate (OBS-A3-2)", () => {
+    vi.useFakeTimers({ now: 0 });
+    try {
+      // Tokenized document path: the recording surface reports no loaded foliate words outside a replay,
+      // so an EPUB start would (correctly) wait for the first section and never pace.
+      const fake = createFakeInfrastructure({ document: createFakeDocument({ useFoliate: false, filepath: null }) });
+      const document = fake.infra.document.snapshot();
+      const make = () => createReaderModeRouter({
+        modules: { page: pageMode, focus: focusMode },
+        broker: createReaderPorts(fake.infra),
+        getDocument: () => document,
+        getSettings: () => fake.infra.settings.read(),
+      });
+      type PageRelocate = { onRelocate: (d: { cfi: string; fraction: number }) => void };
+      const relocate = (router: ReturnType<typeof make>, fraction: number) =>
+        (router.getActive()!.runtime as unknown as PageRelocate).onRelocate({ cfi: "epubcfi(/6/2!/4/2)", fraction });
+      const approx = Math.floor(0.125 * document.wordCount); // what B0 wrote
+
+      // Negative control: Focus selected but never advanced.
+      const quiet = make();
+      quiet.openDocument(document);
+      quiet.hardSelect({ cfi: null, word: "w", globalWordIndex: 7 });
+      quiet.select("focus");
+      quiet.pauseToPage();
+      relocate(quiet, 0.125);
+      expect(quiet.getActive()!.mode).toBe("page");
+      expect(quiet.getActive()!.runtime.getSnapshot().highlightedWordIndex).toBe(7);
+      quiet.destroy();
+
+      // The B0 failure path: Focus paces past its anchor, pauses, hands to Page, then foliate relocates.
+      const paced = make();
+      paced.openDocument(document);
+      paced.hardSelect({ cfi: null, word: "w", globalWordIndex: 7 });
+      paced.select("focus");
+      paced.togglePlay();
+      vi.advanceTimersByTime(1_000); // short of the 25-word fixture's end (no completion hand-off)
+      paced.togglePlay();
+      const focusWord = paced.getActive()!.runtime.exportHandoff("capture-current").highlightedWordIndex;
+      expect(focusWord).toBeGreaterThan(7); // Focus really advanced
+      expect(approx).not.toBe(focusWord);   // the relocate estimate would be a visible change
+      paced.pauseToPage();
+      expect(paced.getActive()!.runtime.getSnapshot().highlightedWordIndex).toBe(focusWord);
+      relocate(paced, 0.125);
+      expect(paced.getActive()!.runtime.getSnapshot().highlightedWordIndex).toBe(focusWord);
+      paced.destroy();
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
   });
 
   it("hands its engagement to Page (legacy hasEngagedRef persists across mode switches)", () => {
