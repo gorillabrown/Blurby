@@ -1,0 +1,72 @@
+[
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "CLEANUP-LEGACY-PARSERS-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLEANUP-LEGACY-PARSERS-1",
+    "actualRevision": "2026-09-24T04:51:53Z",
+    "recoveryId": "20260924T045133Z-external-create-item-CLEANUP-LEGACY-PARSERS-1",
+    "detail": {
+      "readback": "all submitted fields match; all 62 existing board rows unchanged",
+      "observedAt": "2026-09-24T04:51:59Z"
+    },
+    "providerItemId": "13122896722",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-SIDECAR-SHARED-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-SIDECAR-SHARED-1",
+    "actualRevision": "2026-09-24T04:51:53Z",
+    "recoveryId": "20260924T045133Z-external-create-item-TTS-SIDECAR-SHARED-1",
+    "detail": {
+      "readback": "all submitted fields match; all 62 existing board rows unchanged",
+      "observedAt": "2026-09-24T04:51:59Z"
+    },
+    "providerItemId": "13122892116",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "TTS-ENGINE-SHARED-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-ENGINE-SHARED-1",
+    "actualRevision": "2026-09-24T04:51:53Z",
+    "recoveryId": "20260924T045133Z-external-create-item-TTS-ENGINE-SHARED-1",
+    "detail": {
+      "readback": "all submitted fields match; all 62 existing board rows unchanged",
+      "observedAt": "2026-09-24T04:51:59Z"
+    },
+    "providerItemId": "13122908614",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "CLOUD-RETRY-SHARED-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLOUD-RETRY-SHARED-1",
+    "actualRevision": "2026-09-24T04:51:53Z",
+    "recoveryId": "20260924T045133Z-external-create-item-CLOUD-RETRY-SHARED-1",
+    "detail": {
+      "readback": "all submitted fields match; all 62 existing board rows unchanged",
+      "observedAt": "2026-09-24T04:51:59Z"
+    },
+    "providerItemId": "13122896723",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  },
+  {
+    "succeeded": true,
+    "operation": "create-item",
+    "itemId": "CLEANUP-MODE-BARREL-1",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLEANUP-MODE-BARREL-1",
+    "actualRevision": "2026-09-24T04:51:53Z",
+    "recoveryId": "20260924T045133Z-external-create-item-CLEANUP-MODE-BARREL-1",
+    "detail": {
+      "readback": "all submitted fields match; all 62 existing board rows unchanged",
+      "observedAt": "2026-09-24T04:51:59Z"
+    },
+    "providerItemId": "13122892318",
+    "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+  }
+]

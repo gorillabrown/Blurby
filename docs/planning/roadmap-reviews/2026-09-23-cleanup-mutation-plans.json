@@ -1,0 +1,270 @@
+[
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "CLEANUP-LEGACY-PARSERS-1",
+    "fields": {
+      "id": "CLEANUP-LEGACY-PARSERS-1",
+      "title": "Remove the unused legacy parser module",
+      "lane": "Library & Content",
+      "sequence": 6,
+      "prerequisites": [
+        "READER-MODE-SEPARATION-2"
+      ],
+      "description": "Delete main/legacy-parsers.js after a fresh production/test/build reference census confirms no consumers. Preserve active main/file-parsers.js behavior and parser dependencies used elsewhere.",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "",
+      "group": "Codebase Simplification",
+      "spec_link": "ROADMAP.md#cleanup-legacy-parsers-1",
+      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nObserved: legacy module is 398 lines; production parsing consumers include main/epub-converter.js, main/ipc/library.js and main/ipc/misc.js via file-parsers. Before deletion check dynamic requires, packaging entries and scripts, not only static imports. Re-run parser/converter regressions and build. No dependency removals inferred from deleting this file.\nVerification to specify: Reference census; tests/epub-fidelity.test.js and tests/epub-converter.test.js; full build. Existing parsing/format behavior remains unchanged.",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLEANUP-LEGACY-PARSERS-1",
+    "recoveryId": "20260924T045133Z-external-create-item-CLEANUP-LEGACY-PARSERS-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-24T04:50:17Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "CLEANUP-LEGACY-PARSERS-1",
+      "name": "Remove the unused legacy parser module",
+      "text_mm7fhjb6": "Library & Content",
+      "numeric_mm7fsex9": 6,
+      "long_text_mm7fgw3w": "READER-MODE-SEPARATION-2",
+      "long_text_mm7fv3sg": "Delete main/legacy-parsers.js after a fresh production/test/build reference census confirms no consumers. Preserve active main/file-parsers.js behavior and parser dependencies used elsewhere.",
+      "status": "Blocked",
+      "color_mm7fspz9": "Stub",
+      "text_mm7ftzsz": "",
+      "text_mm7ftkmm": "Codebase Simplification",
+      "long_text_mm7f66fk": "ROADMAP.md#cleanup-legacy-parsers-1",
+      "long_text_mm7fncbd": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nObserved: legacy module is 398 lines; production parsing consumers include main/epub-converter.js, main/ipc/library.js and main/ipc/misc.js via file-parsers. Before deletion check dynamic requires, packaging entries and scripts, not only static imports. Re-run parser/converter regressions and build. No dependency removals inferred from deleting this file.\nVerification to specify: Reference census; tests/epub-fidelity.test.js and tests/epub-converter.test.js; full build. Existing parsing/format behavior remains unchanged.",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'CLEANUP-LEGACY-PARSERS-1' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-SIDECAR-SHARED-1",
+    "fields": {
+      "id": "TTS-SIDECAR-SHARED-1",
+      "title": "Share MOSS and Pocket sidecar process and request handling",
+      "lane": "TTS / Narration Engine",
+      "sequence": 7,
+      "prerequisites": [
+        "READER-MODE-SEPARATION-2"
+      ],
+      "description": "Extract duplicated process startup, JSON-lines message handling, request correlation, timeout, cancellation and shutdown from main/moss-nano-sidecar.js and main/pocket-tts-sidecar.js into one shared implementation parameterized by provider settings.",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "",
+      "group": "Codebase Simplification",
+      "spec_link": "ROADMAP.md#tts-sidecar-shared-1",
+      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nKeep exported adapter factories compatible and provider entry points thin. Preserve distinct Python/script/model paths, arguments, environment, readiness/failure payloads and timeout values. Each adapter owns a separate child process, pending map, request IDs and timers. Sharing implementation must not share mutable runtime state. Both providers remain dormant; no engine activation or reading-mode behavior changes.\nVerification to specify: tests/mossNanoEngine.test.js and tests/pocketTtsEngine.test.js plus two simultaneous provider instances, interleaved responses, timeout, cancel, spawn/exit failure and shutdown isolation. Specify exact new helper/test targets at dispatch.",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-SIDECAR-SHARED-1",
+    "recoveryId": "20260924T045133Z-external-create-item-TTS-SIDECAR-SHARED-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-24T04:50:17Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-SIDECAR-SHARED-1",
+      "name": "Share MOSS and Pocket sidecar process and request handling",
+      "text_mm7fhjb6": "TTS / Narration Engine",
+      "numeric_mm7fsex9": 7,
+      "long_text_mm7fgw3w": "READER-MODE-SEPARATION-2",
+      "long_text_mm7fv3sg": "Extract duplicated process startup, JSON-lines message handling, request correlation, timeout, cancellation and shutdown from main/moss-nano-sidecar.js and main/pocket-tts-sidecar.js into one shared implementation parameterized by provider settings.",
+      "status": "Blocked",
+      "color_mm7fspz9": "Stub",
+      "text_mm7ftzsz": "",
+      "text_mm7ftkmm": "Codebase Simplification",
+      "long_text_mm7f66fk": "ROADMAP.md#tts-sidecar-shared-1",
+      "long_text_mm7fncbd": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nKeep exported adapter factories compatible and provider entry points thin. Preserve distinct Python/script/model paths, arguments, environment, readiness/failure payloads and timeout values. Each adapter owns a separate child process, pending map, request IDs and timers. Sharing implementation must not share mutable runtime state. Both providers remain dormant; no engine activation or reading-mode behavior changes.\nVerification to specify: tests/mossNanoEngine.test.js and tests/pocketTtsEngine.test.js plus two simultaneous provider instances, interleaved responses, timeout, cancel, spawn/exit failure and shutdown isolation. Specify exact new helper/test targets at dispatch.",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-SIDECAR-SHARED-1' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "TTS-ENGINE-SHARED-1",
+    "fields": {
+      "id": "TTS-ENGINE-SHARED-1",
+      "title": "Share MOSS and Pocket engine lifecycle and request handling",
+      "lane": "TTS / Narration Engine",
+      "sequence": 8,
+      "prerequisites": [
+        "READER-MODE-SEPARATION-2",
+        "TTS-SIDECAR-SHARED-1"
+      ],
+      "description": "Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "",
+      "group": "Codebase Simplification",
+      "spec_link": "ROADMAP.md#tts-engine-shared-1",
+      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nBuild on the verified sidecar extraction to avoid overlapping changes to the same contract. Preserve exports, provider-specific payload validation/status metadata/configuration/defaults/cancellation behavior and independent provider singleton/instance state. Preserve disabled IPC and Kokoro-only defaults; no provider activation or reading-mode refactor.\nVerification to specify: tests/mossNanoEngine.test.js, tests/pocketTtsEngine.test.js, tests/mossNanoIpc.test.js and tests/pocketTtsIpc.test.js. Cover simultaneous providers, start/restart/cancel/error/late-response behavior and unchanged dormant IPC.",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:TTS-ENGINE-SHARED-1",
+    "recoveryId": "20260924T045133Z-external-create-item-TTS-ENGINE-SHARED-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-24T04:50:17Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "TTS-ENGINE-SHARED-1",
+      "name": "Share MOSS and Pocket engine lifecycle and request handling",
+      "text_mm7fhjb6": "TTS / Narration Engine",
+      "numeric_mm7fsex9": 8,
+      "long_text_mm7fgw3w": "READER-MODE-SEPARATION-2, TTS-SIDECAR-SHARED-1",
+      "long_text_mm7fv3sg": "Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.",
+      "status": "Blocked",
+      "color_mm7fspz9": "Stub",
+      "text_mm7ftzsz": "",
+      "text_mm7ftkmm": "Codebase Simplification",
+      "long_text_mm7f66fk": "ROADMAP.md#tts-engine-shared-1",
+      "long_text_mm7fncbd": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nBuild on the verified sidecar extraction to avoid overlapping changes to the same contract. Preserve exports, provider-specific payload validation/status metadata/configuration/defaults/cancellation behavior and independent provider singleton/instance state. Preserve disabled IPC and Kokoro-only defaults; no provider activation or reading-mode refactor.\nVerification to specify: tests/mossNanoEngine.test.js, tests/pocketTtsEngine.test.js, tests/mossNanoIpc.test.js and tests/pocketTtsIpc.test.js. Cover simultaneous providers, start/restart/cancel/error/late-response behavior and unchanged dormant IPC.",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'TTS-ENGINE-SHARED-1' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": [
+      "prerequisite 'TTS-SIDECAR-SHARED-1' is not in the register snapshot taken 2026-09-24T04:50:17Z"
+    ]
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "CLOUD-RETRY-SHARED-1",
+    "fields": {
+      "id": "CLOUD-RETRY-SHARED-1",
+      "title": "Share cloud retry handling with provider token refresh",
+      "lane": "Platform & Maintenance",
+      "sequence": 9,
+      "prerequisites": [
+        "READER-MODE-SEPARATION-2"
+      ],
+      "description": "Replace duplicated withRetry loops in main/cloud-google.js and main/cloud-onedrive.js with a shared helper that receives the provider token-refresh function.",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "",
+      "group": "Codebase Simplification",
+      "spec_link": "ROADMAP.md#cloud-retry-shared-1",
+      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nPreserve current 429/503/504 capped exponential backoff and attempt count; 401 calls the correct force-refresh provider and retries only when attempt is zero. Keep original-error behavior on refresh failure and fail-fast behavior for other errors. Keep Google/Microsoft credentials separate, and leave provider HTTP/upload/conditional-write semantics unchanged.\nVerification to specify: tests/cloudGoogle.test.js and tests/cloudOnedrive.test.js plus a shared-helper matrix for retryable statuses, 401 first/later attempt, refresh failure, exhausted attempts and non-retryable errors, using deterministic timers.",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLOUD-RETRY-SHARED-1",
+    "recoveryId": "20260924T045133Z-external-create-item-CLOUD-RETRY-SHARED-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-24T04:50:17Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "CLOUD-RETRY-SHARED-1",
+      "name": "Share cloud retry handling with provider token refresh",
+      "text_mm7fhjb6": "Platform & Maintenance",
+      "numeric_mm7fsex9": 9,
+      "long_text_mm7fgw3w": "READER-MODE-SEPARATION-2",
+      "long_text_mm7fv3sg": "Replace duplicated withRetry loops in main/cloud-google.js and main/cloud-onedrive.js with a shared helper that receives the provider token-refresh function.",
+      "status": "Blocked",
+      "color_mm7fspz9": "Stub",
+      "text_mm7ftzsz": "",
+      "text_mm7ftkmm": "Codebase Simplification",
+      "long_text_mm7f66fk": "ROADMAP.md#cloud-retry-shared-1",
+      "long_text_mm7fncbd": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nPreserve current 429/503/504 capped exponential backoff and attempt count; 401 calls the correct force-refresh provider and retries only when attempt is zero. Keep original-error behavior on refresh failure and fail-fast behavior for other errors. Keep Google/Microsoft credentials separate, and leave provider HTTP/upload/conditional-write semantics unchanged.\nVerification to specify: tests/cloudGoogle.test.js and tests/cloudOnedrive.test.js plus a shared-helper matrix for retryable statuses, 401 first/later attempt, refresh failure, exhausted attempts and non-retryable errors, using deterministic timers.",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'CLOUD-RETRY-SHARED-1' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  },
+  {
+    "operation": "create-item",
+    "register": "monday:board/18432450217",
+    "itemId": "CLEANUP-MODE-BARREL-1",
+    "fields": {
+      "id": "CLEANUP-MODE-BARREL-1",
+      "title": "Remove the unused mode barrel and update structural tests",
+      "lane": "Reader Engine",
+      "sequence": 10,
+      "prerequisites": [
+        "READER-MODE-SEPARATION-2"
+      ],
+      "description": "Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "",
+      "group": "Codebase Simplification",
+      "spec_link": "ROADMAP.md#cleanup-mode-barrel-1",
+      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nProduction searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.\nVerification to specify: The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.",
+      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "create-item:monday:board/18432450217:CLEANUP-MODE-BARREL-1",
+    "recoveryId": "20260924T045133Z-external-create-item-CLEANUP-MODE-BARREL-1",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-09-24T04:50:17Z",
+    "idField": "text_mm7f7e7n",
+    "projectFields": {
+      "text_mm7f7e7n": "CLEANUP-MODE-BARREL-1",
+      "name": "Remove the unused mode barrel and update structural tests",
+      "text_mm7fhjb6": "Reader Engine",
+      "numeric_mm7fsex9": 10,
+      "long_text_mm7fgw3w": "READER-MODE-SEPARATION-2",
+      "long_text_mm7fv3sg": "Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.",
+      "status": "Blocked",
+      "color_mm7fspz9": "Stub",
+      "text_mm7ftzsz": "",
+      "text_mm7ftkmm": "Codebase Simplification",
+      "long_text_mm7f66fk": "ROADMAP.md#cleanup-mode-barrel-1",
+      "long_text_mm7fncbd": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nProduction searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.\nVerification to specify: The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.",
+      "long_text_mm7fyyfy": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md"
+    },
+    "defaultsApplied": {},
+    "preconditions": [
+      "no item whose 'text_mm7f7e7n' equals 'CLEANUP-MODE-BARREL-1' exists in monday:board/18432450217 \u2014 search before creating; the host's own duplicate handling is not relied on"
+    ],
+    "postconditions": [
+      "read the created item back and pass its provider identifier and revision to mutation-confirm (--provider-id, --actual-revision)",
+      "refresh the canonical snapshot so the new item is readable through the provider",
+      "verify `recovery` reports nothing outstanding"
+    ],
+    "warnings": []
+  }
+]
