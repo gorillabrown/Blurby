@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-09-23 — Full ceremony reviewed through Phase D after owner approval of Phase C. Six product lanes; mode separation is step 1. Monday has 57 records. One full specification and four blocked stubs; application code remains at the June implementation baseline.
+**Last updated**: 2026-10-08. The roadmap review folded in the 2026-09-23 admission and speed-dialog amendments plus a 2026-10-08 A1-recovery/manual-G0 decision. It marked mode separation `Path: epic` and set its deadline in policy. Three main-process cleanups were released from the separation prerequisite and specified for parallel dispatch. See [2026-10-08 plan](docs/planning/roadmap-reviews/2026-10-08-plan.md). Earlier: 2026-09-23 full ceremony, 2026-09-24 cleanup addendum.
 **Current state**: v1.75.1 baseline with READER-ISO-1A/1B/1C/1D/1E contracts, routing shell, and three concrete adapters (Focus, Flow, Narrate). Complete Page/Focus/Flow/Narrate runtime separation is unfinished and is now the first delivery gate. Kokoro is the sole active engine; other engine work remains deferred.
-**Finish line**: TTS Quality Confidence + Reading Experience v2, with an owner-mandated entry gate: independent Page, Focus, Flow, and Narrate runtimes with mirrored contracts and proven isolation. Then validate narration sync, clean rate changes, discovery-bug acceptance evidence, and the remaining UX shortcut.
-**Queue**: READER-MODE-SEPARATION-2 (Seq 1, Queued, Full Spec) → NARRATE-HEARD-CURSOR-1 (2, Blocked) → NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3, Blocked) → NARRATE-SUBSCRIBER-CURSOR-1 (4, Blocked and verdict-gated) → UX-POLISH-1 (5, Blocked). All four downstream items wait for mode separation and re-specification. KOKORO-EXPORT-1 remains deferred without a sequence. One specification passes U1–U8; execution starts with a clean worktree and baseline gates, which have not been run.
+**Finish line**: TTS Quality Confidence + Reading Experience v2, with an owner-mandated entry gate: independent Page, Focus, Flow, and Narrate runtimes with mirrored contracts and proven isolation. Then validate narration sync, clean rate changes, discovery-bug acceptance evidence, and the remaining UX shortcut. **Dated target:** on 2026-10-08 the owner dated the entry gate (READER-MODE-SEPARATION-2 complete). The date lives only in `policy.roadmap.deadlines.mode-separation`; the rest of the finish line is undated.
+**Queue**: READER-MODE-SEPARATION-2 (Seq 1, Queued, Full Spec, **Path: epic**) runs alongside three dispatch-ready main-process cleanups: CLOUD-RETRY-SHARED-1 (6), TTS-SIDECAR-SHARED-1 (7) and CLEANUP-LEGACY-PARSERS-1 (9). Blocked behind separation: NARRATE-HEARD-CURSOR-1 (2), NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3), NARRATE-SUBSCRIBER-CURSOR-1 (4, verdict-gated), UX-POLISH-1 (5) and CLEANUP-MODE-BARREL-1 (10). TTS-ENGINE-SHARED-1 (8) waits on the sidecar item. KOKORO-EXPORT-1 is deferred and unsequenced.
 **Last sprint**: NARRATE-A5-RATE-RESEED-1 (position fix PASS 3-of-3 live-QA 2026-05-31; merged `145c385`, reconciled to Completed 2026-07-02). Prior: NARRATE-CURSOR-TRACKING-DIAG-1 (completed 2026-05-31, live-QA cursor-tracking trace; hypothesis refuted, authority verdict written, NARRATE-SUBSCRIBER-CURSOR-1 amended). Prior: reverted failed view-follow hotfix at `ff70793` (2026-05-31), NARRATE-PAUSE-RESUME-UNIFY-1 + anchor-correctness hotfix (A4 resume anchor working), NARRATE-INTENT-CURSOR-1 (PARTIAL, 2026-05-31), NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -20,11 +20,11 @@ The owner requested product lanes on 2026-09-23. Each Monday record has one prim
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
 | UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), blocked on mode separation; BUG-184 Settings transparency is an open, unqueued candidate |
-| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | HEARD-CURSOR probe, APPLYRATECHANGE-COLLAPSE, conditional SUBSCRIBER-CURSOR, all held behind mode separation; KOKORO-EXPORT deferred |
-| Reader Engine | Page/Focus/Flow/Narrate mode lifecycle, EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 is step 1; isolate Page/Focus/Flow/Narrate before downstream fixes; S9 Flow lazy-follow remains deferred |
+| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | HEARD-CURSOR probe, APPLYRATECHANGE-COLLAPSE, conditional SUBSCRIBER-CURSOR, all held behind mode separation; KOKORO-EXPORT deferred; sidecar/engine deduplication stubs at positions 7–8 |
+| Reader Engine | Page/Focus/Flow/Narrate mode lifecycle, EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 is step 1; isolate Page/Focus/Flow/Narrate before downstream fixes; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 10 |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
-| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; no current register item |
-| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions |
+| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6 |
+| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9 |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
 
@@ -164,7 +164,9 @@ The owner directed complete mode separation on 2026-09-23 because changes in one
 
 #### READER-MODE-SEPARATION-2 — Separate Page, Focus, Flow, and Narrate runtimes *(position 1 — Full Spec)*
 
-- **Specification state:** Full Spec; U1–U8 passed in the 2026-09-23 review. Execution gates remain unrun.
+- **Specification state:** Full Spec; U1–U8 passed in the 2026-09-23 review. Execution gates remain unrun. Admission stopped twice on 2026-09-23 (Wave A 40-action ceiling; A1 EPIPE); see the Mid-Dispatch Amendments below.
+- **Path:** epic. Five serial gated waves, three admission slices, a manual-G0 fallback and a deferred speed-slider task make this multi-session by construction. Every stop so far needed a fresh dispatch to resume. `/next-pointer` routes it to `/epic`, which charters it with one completion condition: G0–G6 pass on one candidate and the speed-dialog amendment is verified against the final candidate. Owner-approved at the 2026-10-08 review.
+- **Deadline:** `policy.roadmap.deadlines.mode-separation` in `Virtuoso/workspace-layout.json` (set 2026-10-08; scope: this item). Read the date from the policy, not from copies.
 - **What:** Page, Focus, Flow, and Narrate run independently, with private behavior/state/rendering and matching public contracts; changing one implementation cannot change another through shared reader behavior.
 - **Why / user problem:** The owner reports repeated cross-mode regressions. The existing three concrete adapters leave runtime ownership in shared hooks and views; Narrate still routes through Flow. Sources: [owner charter](docs/planning/roadmap-reviews/2026-09-23-mode-separation.md#what-the-previous-isolation-actually-achieved), [ISO-1B findings](docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md#findings), [ISO-1D interpretation](docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md#interpretation), [ISO-1E findings](docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md#findings).
 - **Primary lane:** Reader Engine. Narrate consumes a narrow TTS port; it owns its reading surface independently of Flow.
@@ -181,6 +183,25 @@ The owner directed complete mode separation on 2026-09-23 because changes in one
 User stories: a Page reader can select/navigate without starting playback; a Focus reader can change pacing without changing Flow/Narrate; a Flow reader can browse and return without audio services; a Narrate listener can pause/resume and change sections without executing Flow's runtime. A maintainer can edit one mode and prove that the other three retain their baseline.
 
 Leading measures: zero disallowed dependency edges, zero unowned mutable resources, zero inactive-owner writes, 12/12 directed transitions and 4/4 same-mode cases passing. Lagging measure: zero new regressions in the recorded four-mode acceptance matrix at close-out. No historical defect is counted as repaired merely because extraction finishes.
+
+##### Mid-Dispatch Amendment — 2026-09-23 (speed dialog; folded in 2026-10-08)
+
+*Decision: Type 3 — Pivot Advance, owner-approved. Source: `docs/governance/close-outs/Memo.READER-MODE-SEPARATION-2.GovernanceStaging.2026-09-23.md` fold-in 2 (on `eb/reader-mode-separation-2`).*
+
+The owner approves this explicit exception to P1's additional-feature exclusion. Page is purely manual and exposes no speed control. In Focus, Flow and Narrate, clicking the current displayed speed opens a dialog containing a slider. The displayed and selectable value is a multiplier with 0.05x increments. Focus and Flow use a fixed 250 WPM reference for 1.00x, preserving their 100–1200 WPM bounds as 0.40x–4.80x; the resulting 12.5 WPM increments are retained without integer rounding. Narrate permits 0.80x–2.00x. If an existing interface cannot represent a fractional WPM value, record that exact incompatibility and obtain a scoped decision before changing the representation or rounding policy.
+
+Implement this feature only after the structural separation candidate has demonstrated G0–G6 parity. Preserve that candidate and its evidence independently. Then declare exact implementation/test paths and a bounded serial task for the slider amendment; verify it separately and re-run the affected regression, live-mode and final-candidate gates. The original four-mode baseline remains the structural comparison. The speed feature cannot be used to explain away a parity failure. The parent remains incomplete until both structural separation and this amendment are verified against the final candidate.
+
+Acceptance checklist:
+
+1. Page has neither a displayed speed action nor automatic playback; existing Page Space no-op remains intact.
+2. For each of Focus, Flow and Narrate, clicking its displayed speed opens the slider dialog; slider changes update the selected mode's display and effective rate.
+3. Focus/Flow enumerate exactly 89 selectable values from 0.40x through 4.80x inclusive. Every value maps to `multiplier * 250` WPM, including 0.45x = 112.5 WPM, 1.00x = 250 WPM and 4.80x = 1200 WPM. No out-of-range or silently rounded selection.
+4. Narrate enumerates exactly 25 selectable values from 0.80x through 2.00x inclusive in 0.05x steps; verify endpoints and an intermediate 1.05x value through its audio rate port and the live UI.
+5. Changing one mode's speed does not mutate another mode's settings or private state; opening/closing the dialog does not change position or start paused playback. Preserve each mode's existing play/pause semantics.
+6. Verify keyboard-operable slider/dialog interaction and a visible current value. Record live observations and behavioral assertions for the approved speed differences separately from extraction parity.
+
+Narrate cursor lead, heard-word synchronization, reload catch-up and rate-overlap repair remain follow-on sync work, as the owner expressly directed. This amendment does not authorize those repairs, a storage-format migration, or new shortcuts.
 
 **Excluded:** new shortcuts (Page Space remains a no-op in this stage), TTS latency tuning, rate-overlap repair, reducer/subscriber cleanup, dormant engines, extension work, content-format expansion, deduplication, and changes to document/settings storage formats. Keep known cursor-lead and 1.4x overlap defects recorded for the blocked successors.
 
@@ -228,6 +249,32 @@ Wave A's dependency census records every transitive project helper used by these
 | E | Remove obsolete shared behavioral bodies/legacy routing, finish boundary coverage and final evidence | G0–G6 on the same candidate; no surviving shared runtime path; parent eligible for close-out |
 
 At most 40 tool-use actions per implementation wave; if a wave reaches that ceiling without its gate, save evidence and stop that wave for re-slicing. Do not launch a dependent wave or concurrently edit the shared shell.
+
+##### Mid-Dispatch Amendment — 2026-09-23 (Wave A admission re-slice; folded in 2026-10-08)
+
+*Decision: Type 1b — Advance (Planner-Originated), owner-approved. Source: staging memo fold-in 1 and `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2.2026-09-23-2.md` (both on `eb/reader-mode-separation-2`).*
+
+The previous admission attempt reached its 40-action ceiling and stopped with partial live evidence; retain that record and the existing G0 requirements. Execute the following independently bounded deliverables serially, recording their own action totals and evidence. These are a prospective re-slicing of unfinished admission, not a reset of the prior attempt or a waiver of its stop. A ceiling or failed exit criterion stops that slice; preserve its evidence and route the unresolved decision before dependent work.
+
+| Slice | Owner / task | Maximum tool-use actions | Mechanical exit criterion |
+|---|---|---:|---|
+| A1 | Implementation agent: establish the isolated baseline profile and test-only launch/capture route | 20 | Record pinned source/build/document identity, fixed viewport, launched process identity, resolved app-data/storage paths and successful application writes within the dedicated test profile. Verify the known live-profile files retain their before/after hashes after flush and close. Retain launch/error output; zero unresolved isolation or write-path errors. No application source edit. |
+| A2 | Implementation agent and reviewer: reproduce and classify Flow using the A1 route | 20 | On a hash-identified document at a recorded canonical position, capture Page → paused Flow → Play → Pause with timestamped screenshots and renderer/main-process error output. Observe each selected state for at least 5 seconds; paused states must retain content and position, and active Flow must retain the reading surface while its position advances. Record blink/content-loss and error observations explicitly. If the surface fails to stabilize, stop with a concrete reproduction and narrowly scoped proposed repair; do not infer that earlier file-write errors caused it or admit a production fix through this slice. |
+| A3 | Implementation agent and reviewer: complete the independent G0 matrix | 35 | Record every original G0 live scenario on both EPUB and a non-EPUB fixture, including exact canonical positions, mode/play state, selection, scroll/effect traces, transitions and the required independent heard-audio observation. Record document/build hashes, viewport, engine/voice/device/rate and observer. Complete dependency and ownership census with exact paths. All original G0 requirements must be satisfied; retain explicit known sync/1.4x defect identifiers. Missing or failed evidence keeps G0 blocked. |
+
+Serial dependency: A1 → A2 → A3 → complete Wave A/G0 → B → C → D → E. The remainder of Wave A must also fit a declared bounded task plan before execution. Retain SRL-053 live verification and SRL-089 dependency serialization. No production extraction may begin before the complete original G0 admission gate passes. Refresh Monday and prerequisites at admission; only after G0 passes may the parent perform the governed in-flight transition. The test-only surface under `docs/planning/roadmap-reviews/reader-mode-separation-2/admission/` is limited initially to `isolated-launch.cjs`, `capture.mjs`, `fixture.txt`, `isolation.json`, `flow-reproduction.json` and `baseline-build.json`; record each retained output as an exact file in `paths.json`. Application source changes are excluded from A1–A3.
+
+##### Mid-Dispatch Amendment — 2026-10-08 (A1 recovery with manual fallback)
+
+*Decision: owner-approved at the 2026-10-08 roadmap review, Phase A checkpoint. Resolves the pending "Proposed recovery" in Issue `-2`.*
+
+A1's first run failed (`An object could not be cloned.` during renderer identity capture; uncaught `EPIPE` in `ReadableWorkerStdio.ondata`) and reached at least 21 actions against its 20-action cap. That stop stands. The test-only correction is checkpoint `30b72291` (serializable identity result); application source is unchanged at the pinned base.
+
+1. **A1-R (recovery), at most 8 parent tool calls including preview restart:** restart preview; use a fresh isolated profile (do not delete or reuse the failed one) and the exact unchanged archived baseline build; launch with `Start-Process -WindowStyle Hidden`, fresh persistent stdout/stderr redirects and `Wait-Process` lifecycle ownership; make one 10-second observation capture; close/flush the owned runtime, stop preview, verify the three live-profile SHA-256 values. Pass = zero unresolved isolation/write errors, retained screenshot/identity/output artifacts, and all A1 exit criteria above. A successful launch alone does not pass G0.
+2. **If A1-R passes:** continue A2 then A3 under the limits above.
+3. **If A1-R fails, or A2/A3 later stop on harness/automation failure rather than on an application finding: stop automating live capture.** Do not open another harness-repair slice. G0's live matrix switches to **owner-observed manual capture**: the planner writes `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-manual-checklist.md` listing every G0 live scenario (EPUB and non-EPUB; Page/Focus/Flow/Narrate; the 12 transitions and 4 same-mode cases), each with fields for expected/actual canonical index, mode/play state, visible cursor count, screenshot filename and heard-audio note. The owner runs it against the archived baseline build and records results in `live-baseline-manual.json`. The automated typecheck/test/build baseline in `baseline.json` remains the automated half of G0. The owner is already the required heard-audio observer (SRL-070), so this moves the capture to the observer; it does not lower any G0 requirement.
+4. The same manual route is the fallback for G6 if the automated route is still unavailable at Wave E.
+
 
 **G0 — baseline/admission:** in the dedicated clean worktree run `git status --porcelain`, `git rev-parse HEAD`, `npm run typecheck`, `npm test`, `npm run build` before extraction. Record exit codes, suite counts, failed test names and source/build hashes in new `docs/planning/roadmap-reviews/reader-mode-separation-2/baseline.json`; capture the live matrix below. Any broad-suite/type/build failure blocks production edits until classified with its original evidence; no blanket waiver. The known live sync/1.4x defects are retained baseline exceptions, not suite failures being silently waived. Use a separate baseline build; do not compare the candidate to itself.
 
@@ -285,6 +332,11 @@ Commands after the named new tests exist:
 
 **Rule reconciliation:** SRL-074 allowed ref-heavy code to stay in its owning hook during adapter scaffolding; this stage now moves the refs together with that implementation. The compensation-first rule applies to the later perceptual sync diagnosis, not the separately owner-mandated structural separation. No extension checks are declared in registry policy. No design decision is deferred by this specification; baseline execution and live observations are explicit gates, not assumed results.
 
+##### Lessons applied
+- **U9 mechanical-check waiver** as for the cleanup specs (owner-approved 2026-10-08). As an epic, this item's gate is its charter, not the dispatch rubric.
+- The full deduplicated checklist the 2026-09-23 review applied to this specification is in [2026-09-23-lessons-applied.md](docs/planning/roadmap-reviews/2026-09-23-lessons-applied.md#deduplicated-checklist). Live lessons applied there by id: LL-108 (exact-zero anchors), LL-109 (stale-async rejection behind G3's session tuple), LL-112 (mirror first, no shared behavior base), LL-120/121/125 (complete local ownership; Narrate stays audio-owned), LL-124/126/127 (heard-audio grounding in G6; no added lag tuning).
+- Re-read on 2026-10-08: no lesson recorded after 2026-09-23 (there are no close-outs since). The A1 failure taught no recorded lesson yet. Its candidate, *GUI-automation admission of an Electron app is brittle; prefer an owner-observed checklist when the owner is already the required observer*, is applied here as the 2026-10-08 manual-fallback amendment and should be recorded by this item's close-out if it holds.
+
 
 
 #### Stage 3 — Narration reliability and UX (held behind separation)
@@ -330,6 +382,219 @@ The four prior detailed specs are preserved in [the pre-isolation spec archive](
 
 ---
 
+#### Stage 4 — Codebase simplification (owner-requested backlog)
+
+Five additions requested on 2026-09-23, appended after the current five-item sequence. **2026-10-08 review:** the owner released the three main-process items from the mode-separation prerequisite. CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1 are now dispatch-ready and may run in parallel with the mode-separation epic: each owns execution surface D only and touches no `src/` or shared-core file. TTS-ENGINE-SHARED-1 waits only on the sidecar item. CLEANUP-MODE-BARREL-1 stays behind mode separation because its file is in separation's edit-site table. Shared infrastructure may reuse implementation, but provider instances retain private mutable state and reading modes remain isolated. Aggregate saving of approximately 650 lines is the owner's unverified estimate, not an acceptance quota; dependency-count delta is expected to be zero. No application files are changed by this planning update.
+
+<a id="cloud-retry-shared-1"></a>
+
+#### CLOUD-RETRY-SHARED-1 — Share cloud retry handling with provider token refresh *(position 6 — Full Spec, dispatch-ready)*
+
+- **What:** One `withRetry` implementation in new `main/cloud-retry.js` replaces the two behaviorally identical copies in `main/cloud-google.js` and `main/cloud-onedrive.js`. Each provider keeps a thin local `withRetry` wrapper that passes its own refresh function and constants, so every call site is unchanged.
+- **Why:** The two loops differ only in the provider string passed to `getAccessToken` (investigation 2026-10-08 against main @ `cd384b78`). A future retry fix would otherwise have to be made twice, and LL-095's force-refresh rule would have to be enforced twice.
+- **Out of scope:** Changing retry behavior in any way, including the existing quirks listed under *Behavior to preserve*. Out of scope too: wrapping the currently unwrapped calls (`getFileId`, `getFileGeneration`, `writeFileConditional`, session POSTs, `folderExists`, `getFileEtag`), adding jitter or logging, and touching `main/auth.js`, `main/cloud-storage.js`, `main/sync-engine.js`, or any `src/` file.
+- **Prerequisites:** none. Released from READER-MODE-SEPARATION-2 by the owner on 2026-10-08: it edits only main-process cloud files, which are not in separation's edit-site table or the shared-core freeze set.
+- **Effort:** S (one new module, two wrapper rewrites, one new test file).
+- **Lane:** Platform & Maintenance. Execution surface D.
+- **Owners:** implementation agent writes; reviewer checks spec compliance and the preserved-behavior list; repository operator stages exact paths.
+- **Source:** [2026-10-08 plan](docs/planning/roadmap-reviews/2026-10-08-plan.md#c3-item-changes); [cleanup addendum](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md); LL-095.
+
+**Behavior to preserve exactly** (both copies today; main @ `cd384b78`, `main/cloud-google.js:15-38`, `main/cloud-onedrive.js:15-41`):
+
+1. `retries` total attempts, defaulting to the provider's `MAX_RETRIES = CLOUD_MAX_RETRIES` (`main/constants.js:97`, value 5). No call site passes `retries`.
+2. Status is read from `err.status || err.statusCode`. On 429/503/504: sleep `Math.min(RETRY_BASE_DELAY_MS * 2 ** attempt, RETRY_MAX_DELAY_MS)` (constants lines 99 and 101: 1000 and 60000), then continue. No jitter. **It also sleeps after the final failed attempt**, then throws `lastError`.
+3. On 401: call the provider refresh (`getAccessToken("google"|"microsoft", { forceRefresh: true })`, `main/auth.js:376-392`) exactly once. Swallow any refresh error. If `attempt === 0`, retry immediately without sleeping; otherwise rethrow the original error.
+4. Any other status, or no status, rethrows immediately with no refresh and no sleep.
+5. Returns `fn()`'s value. No logging.
+6. Google `moveFile` (`cloud-google.js:454`) nests retries around functions that retry themselves. That stays as it is.
+
+##### Implementation detail
+- **Edit sites:**
+  - New `main/cloud-retry.js` (CommonJS, header comment "CommonJS only — Electron main process" like its neighbors). It exports `withRetry(fn, { retries, baseDelayMs, maxDelayMs, refresh })` implementing items 1–5, with `refresh` an async function. **It requires nothing**, so it holds no constants and no module state. It must call the global `setTimeout` at call time (`await new Promise((r) => setTimeout(r, delay))`), not `timers/promises` or a captured reference. `tests/cloudGoogle.test.js:48-51` spies on `globalThis.setTimeout`.
+  - `main/cloud-google.js:13-38`: replace the body with `const { withRetry: sharedWithRetry } = require("./cloud-retry");` (beside the other requires, lines 4–6) and a wrapper `function withRetry(fn, retries = MAX_RETRIES) { return sharedWithRetry(fn, { retries, baseDelayMs: RETRY_BASE_DELAY_MS, maxDelayMs: RETRY_MAX_DELAY_MS, refresh: () => getAccessToken("google", { forceRefresh: true }) }); }`. Keep the section header comment and LL-095's force-refresh comment.
+  - `main/cloud-onedrive.js:13-41`: the same, with `"microsoft"`.
+  - Leave the seven Google and eight OneDrive call sites unedited. They call the local `withRetry`.
+- **Why constants stay in the providers:** `tests/cloudGoogle.test.js` stubs `./constants` through `Module._load` (retries 5, base 1, max 8), and `tests/cloudOnedrive.test.js` uses `require.cache` (retries 3, base 1, max 4). A helper that read constants itself could keep the first test's values in Node's require cache across `vi.resetModules()`. The provider-owned wrapper keeps each test's stub on the path.
+- **Tests:**
+  - Unchanged and must pass unmodified: `tests/cloudGoogle.test.js` — "retries 429 responses and eventually returns the file buffer" (line 114), the 503 (130) and 504 (145) variants, "refreshes the Google token after a 401 and retries once" (160; asserts `getAccessTokenMock.mock.calls[2]` is `["google",{forceRefresh:true}]`, 4 calls, no `setTimeout`), "throws immediately on a non-retryable 4xx response" (176), "stops after the configured max retry count on persistent 503 failures" (188; 5 calls, delays `[1,2,4,8,8]`). `tests/cloudOnedrive.test.js` — `it.each([429, 503, 504])("retries readFile on %i")` (73), "refreshes the Microsoft token after a 401 and retries readFile" (97; `calls[1]` is `["microsoft",{forceRefresh:true}]`, 3 calls).
+  - New `tests/cloudRetry.test.js`, `describe("cloud-retry withRetry")`. It requires `../main/cloud-retry.js` directly and spies on `globalThis.setTimeout` to run immediately and record delays, as `cloudGoogle.test.js:48-51` does. Options `{ retries: 5, baseDelayMs: 1, maxDelayMs: 8, refresh }`.
+    1. **"retries 429, 503 and 504 and returns the eventual value":** `it.each` status; fn rejects once with `{status}`, then resolves `"ok"`. Result is `"ok"`, fn is called 2 times, delays `[1]`, refresh is not called.
+    2. **"reads the status from statusCode":** reject `{statusCode: 503}` once, then resolve. Delays `[1]`.
+    3. **"sleeps after the final attempt and throws the last error":** always reject `{status: 503}`. Rejects with the 5th error object, fn is called 5 times, delays `[1,2,4,8,8]`.
+    4. **"a first-attempt 401 refreshes once and retries without delay":** reject `{status: 401}`, then resolve. Refresh is called 1 time, delays `[]`, result resolved.
+    5. **"a later 401 refreshes and then rethrows":** reject 429, then 401. Rejects with the 401 error, refresh is called 1 time, fn is called 2 times, delays `[1]`.
+    6. **"a refresh failure is swallowed":** refresh rejects; fn rejects 401, then resolves. Result resolved, refresh is called 1 time.
+    7. **"non-retryable errors rethrow at once":** `it.each` `[{status: 400}, new Error("network")]`. Rejects with that error, fn is called 1 time, refresh is not called, delays `[]`.
+- **Constants:** `CLOUD_MAX_RETRIES=5`, `RETRY_BASE_DELAY_MS=1000`, `RETRY_MAX_DELAY_MS=60000` in `main/constants.js:97,99,101` (exported 234–236). Unchanged. The 429/503/504 literals move into `main/cloud-retry.js`.
+- **Branch:** `eb/cloud-retry-shared-1` from `main`, in its own worktree (`git worktree add .worktrees/cloud-retry-shared-1 -b eb/cloud-retry-shared-1 main`). It may run while the mode-separation epic runs.
+- **Staging plan:** exactly `main/cloud-retry.js`, `main/cloud-google.js`, `main/cloud-onedrive.js`, `tests/cloudRetry.test.js`. `npm test` regenerates `tests/perf-baseline-results.json`; never stage it. Before committing, `git diff --cached --name-only` must equal those four paths. Commit locally. Merge to `main` and push only on the owner's go-ahead (the registry declares no `policy.git`; documented intent is network operations = ask).
+- **Failure handling:**
+  - If either existing cloud test file fails after the change, the wrapper diverged from items 1–5. Diff the helper against the original loop and fix the helper. Never edit the existing tests.
+  - If the Google suite sees stale constants, a module is reading constants at load time. Move the read into the provider wrapper.
+  - Retry ceiling: two focused correction attempts, then stop and route to `/mid-dispatch-decision`.
+  - Rollback: before commit, discard the four authored files by reviewed patch; after commit, `git revert <commit>` on the branch. Never reset or clean.
+- **Lane ownership (parallel run):**
+  - Lane D only.
+  - **Forbidden:** `src/**`, `preload.js`, the shared-core freeze set, `main/auth.js`, `main/cloud-storage.js`, `main/sync-engine.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of the other cleanups (disjoint files). Rebase on `main` before merge.
+
+##### Done when
+1. `npm test -- tests/cloudRetry.test.js tests/cloudGoogle.test.js tests/cloudOnedrive.test.js` exits 0, with the 7 new tests present and passing.
+2. `git diff main -- tests/cloudGoogle.test.js tests/cloudOnedrive.test.js` is empty.
+3. `grep -c "status === 429" main/cloud-google.js main/cloud-onedrive.js` reports 0 for each file, and `grep -c "status === 429" main/cloud-retry.js` reports 1.
+4. `grep -n "forceRefresh: true" main/cloud-google.js main/cloud-onedrive.js` shows exactly one hit per file, inside the wrapper, with provider `"google"` and `"microsoft"` respectively.
+5. `npm test` exits 0, with no new skipped tests.
+6. `git diff --name-only main` lists exactly the four staged paths.
+
+##### Lessons applied
+- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
+- **LL-095** — the force-refresh-on-401 guardrail is now enforced in one place. *Done when* 4 asserts each provider still passes the explicit `forceRefresh: true` form, and new test 4 asserts exactly one refresh call per 401.
+- **LL-031** — read; does not apply (no async generation or stale-result handling here).
+- **LL-088** — read; does not apply within this item (single implementer, no parallel writers to one file). Cross-item: no other released cleanup edits these files.
+- Standing rules 1 (type/test gate) and 35/36 (verify state at the moment of consequence): the edit-site lines above are cited against main @ `cd384b78`, verified 2026-10-08. Re-grep `withRetry` before editing.
+
+<a id="tts-sidecar-shared-1"></a>
+
+#### TTS-SIDECAR-SHARED-1 — Share MOSS and Pocket sidecar process and request handling *(position 7 — Full Spec, dispatch-ready)*
+
+- **What:** New `main/python-sidecar-adapter.js` holds the one Python JSON-lines sidecar adapter. `main/moss-nano-sidecar.js` (408 lines) and `main/pocket-tts-sidecar.js` (402 lines) become thin provider configurations that keep their exact export surface.
+- **Why:** Investigation on 2026-10-08 against main @ `cd384b78` normalized the provider names and diffed the two files. They are the same code except for three things: (a) the provider label inside detail strings ("MOSS Nano" / "Pocket TTS"); (b) the Python env var at line 218 (`MOSS_NANO_PYTHON` / `POCKET_TTS_PYTHON`); (c) `spawnArgs` (lines 124–132). Moss pushes `--tokenizer-dir` between `--model-dir` and `--output-dir`; Pocket pushes `--reference-wav` after `--output-dir`. Everything else is identical: helpers, payload shapes, the ten reason codes, timeouts, correlation, cancel, shutdown and restart.
+- **Out of scope:** Activating either engine, or changing IPC (`main/ipc/tts.js:212-250` dormant stubs stay). Also out: `main/moss-nano-engine.js` and `main/pocket-tts-engine.js` (that is TTS-ENGINE-SHARED-1), `main/sidecar-paths.js`, the Python scripts, packaging, Kokoro, and any `src/` file. Behavior changes are out, including the unused `reject` in `createDeferred` and the ignored `maxInFlight`/`restartBackoffMs` config keys.
+- **Prerequisites:** none. Released from READER-MODE-SEPARATION-2 by the owner on 2026-10-08. Main-process only; both providers are dormant, and no production code requires either engine.
+- **Effort:** M (characterization suite first, then extraction).
+- **Lane:** TTS / Narration Engine. Execution surface D.
+- **Owners:** implementation agent; reviewer confirms the characterization suite passed **before** and **after** extraction unchanged; repository operator stages exact paths.
+- **Source:** [2026-10-08 plan](docs/planning/roadmap-reviews/2026-10-08-plan.md#c3-item-changes); LL-112; [cleanup addendum](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+
+##### Implementation detail — two serial tasks, two commits
+**Task 1: characterize current behavior (no production edit).** Create `tests/pythonSidecarAdapter.test.js`. It drives the **current public factories**, `createMossNanoSidecarAdapter` and `createPocketTtsSidecarAdapter`, through `describe.each([{ name: "MOSS Nano", factory, envVar: "MOSS_NANO_PYTHON" }, { name: "Pocket TTS", factory, envVar: "POCKET_TTS_PYTHON" }])`. Inject `spawn` via `options.spawn`, using a fake child modelled on `tests/pocketTtsEngine.test.js:106-148` (EventEmitter `stdout`/`stderr`, `stdin {write, end, destroy}`, `kill` emitting `exit(0, null)`).
+
+**The fake must have no `pid`.** With a pid, `terminateChild` runs a real `spawnSync("taskkill", ["/PID", pid, "/T", "/F"])` on Windows. Use `vi.useFakeTimers()` for timeout tests and set `commandTimeoutMs` / `synthesizeTimeoutMs` in the start config. Each test asserts the value the current code produces at the cited lines. If current code contradicts a statement below, the test encodes current behavior and the discrepancy goes in the close-out; never "fix" it here. Tests, per provider unless marked:
+1. **"buffers a JSON line split across stdout chunks"**: emit the first half of a ready message, then the rest plus `\n`. `start()` resolves with `ready === true` after the second chunk, not the first.
+2. **"invalid JSON on stdout reports sidecar-protocol-error"**: emit `not-json\n`. `status().reason === "sidecar-protocol-error"`, and `status().detail` contains the provider name.
+3. **"stderr output is kept in the status detail, capped at 500 characters"**: before ready, emit 600 characters of stderr. `status().detail.length <= 500`, and it ends with the last 100 characters emitted (lines 238–243 Moss / 238–241 Pocket).
+4. **"startup times out with sidecar-start-timeout"**: start with `commandTimeoutMs: 50`, emit nothing, advance 50 ms. `start()` resolves or rejects (whichever current code does) carrying `reason === "sidecar-start-timeout"`.
+5. **"a request times out with sidecar-timeout"**: after ready, `request("synthesize", { requestId: "r1", ... })` with `synthesizeTimeoutMs: 50`, then advance 50 ms. The result carries `reason === "sidecar-timeout"`.
+6. **"a spawn error reports sidecar-spawn-failed or the error code"**: the fake emits `error` with `Object.assign(new Error("x"), { code: "ENOENT" })`. Status reason is `"ENOENT"`. Without a `code`, reason is `"sidecar-spawn-failed"`.
+7. **"an unexpected exit fails pending requests with sidecar-exited"**: one pending request, then the child emits `exit(1, null)`. That request settles with `reason === "sidecar-exited"`.
+8. **"cancel settles the request and reports cancelled"**: after ready, start request r1, call `cancel({ requestId: "r1" })`, and the fake replies with a `cancelled` message. The cancel result has `cancelled === true` and `requestId === "r1"`.
+9. **(once, both providers) "two adapters never share state"**: create one MOSS and one Pocket adapter plus a second MOSS adapter, all on separate fake children. Send request `r1` on each. Answering `r1` on one child settles only that adapter's request, and `status()` of the others is unchanged.
+10. **(MOSS only) "passes --tokenizer-dir between --model-dir and --output-dir"**: in the spawn args, the index of `--tokenizer-dir` equals the index of `--model-dir` + 2, and the index of `--output-dir` equals the index of `--tokenizer-dir` + 2. Pocket's `--reference-wav` order is already covered by `tests/pocketTtsEngine.test.js:295`.
+11. **"uses its own Python env var"**: set `process.env[envVar] = "py-test"` (restore in `afterEach`) and start without `pythonExe`. `spawn.mock.calls[0][0] === "py-test"`.
+
+Run `npm test -- tests/pythonSidecarAdapter.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js`. It must exit 0 against **unmodified** production code. Commit Task 1 alone.
+
+**Task 2: extract.**
+- New `main/python-sidecar-adapter.js` ("use strict", CommonJS). It exports `createPythonSidecarAdapter(provider, options = {})`, where `provider = { label, pythonEnvVar, defaultBridgePath, buildSpawnArgs(config, bridgePath) }` and `options = { spawn, bridgePath, cwd }` as today. Move in, verbatim apart from label interpolation:
+  - helpers `createDeferred`, `unavailableStatus`, `readyStatus`, `failureResponse` (lines 9–58);
+  - the factory body (65–401 Moss), with every "MOSS Nano" in strings replaced by `${provider.label}`, and line 218's env var with `process.env[provider.pythonEnvVar]`;
+  - `spawnArgs` replaced by `provider.buildSpawnArgs(config, bridgePath)`.
+
+  All mutable state stays inside the factory closure (`child`, `buffer`, `lastConfig`, `lastStatus`, `startDeferred`, `startTimer`, `shuttingDown`, `nextControlId`, `pending`). Nothing mutable goes at module level. Keep the returned object's methods as they are, including `restart` calling `this.shutdown()` / `this.start()`. Use Moss's commented `catch` style.
+- `main/moss-nano-sidecar.js` becomes: the requires, `DEFAULT_BRIDGE_PATH` (line 7), a `buildSpawnArgs` copied from its lines 124–132 (keeping exact order), `createMossNanoSidecarAdapter(options = {}) { return createPythonSidecarAdapter({ label: "MOSS Nano", pythonEnvVar: "MOSS_NANO_PYTHON", defaultBridgePath: DEFAULT_BRIDGE_PATH, buildSpawnArgs }, options); }`, and the unchanged `module.exports` (lines 405–408, including the `resolveMossNanoBridgePath` re-export).
+- `main/pocket-tts-sidecar.js`: the same, with its lines 124–132 args, "Pocket TTS", `POCKET_TTS_PYTHON`, exports 399–402.
+- **Tests:** after Task 2, without editing any test, these must pass: `tests/pythonSidecarAdapter.test.js` (all of Task 1); `tests/mossNanoEngine.test.js` adapter block from line 591 (packaged bridge path 592, spawn and ready 601, synthesize ownership 646, synthetic audio rejected 703 / allowed in mock 743, control messages 781, bridge truth 830); `tests/pocketTtsEngine.test.js` (166, 295, 316, 350); `tests/mossNanoIpc.test.js`; `tests/pocketTtsIpc.test.js`; `tests/packageReleaseTruth.test.js`.
+- **Constants:** the inline fallbacks of 5000 ms (command) and 120000 ms (synthesize) at lines 80 and 84 move verbatim into the shared module. Default configs in `main/sidecar-paths.js:60-95` are untouched. There is nothing in `main/constants.js` to change.
+- **Branch:** `eb/tts-sidecar-shared-1` from `main`, in its own worktree (`.worktrees/tts-sidecar-shared-1`).
+- **Staging plan:** Task 1 commit stages exactly `tests/pythonSidecarAdapter.test.js`. Task 2 commit stages exactly `main/python-sidecar-adapter.js`, `main/moss-nano-sidecar.js`, `main/pocket-tts-sidecar.js`. Check `git diff --cached --name-only` before each commit. Never stage `tests/perf-baseline-results.json`. Commit locally; merge or push only on the owner's go-ahead.
+- **Failure handling:**
+  - If a Task 1 test cannot be made to pass against current code, the statement above is wrong. Encode current behavior, note the discrepancy, and continue. Never edit production code in Task 1.
+  - If any Task 1 or existing test fails after Task 2, the extraction changed behavior. Diff the shared body against the original Moss file (`git diff <task1-commit> -- main/moss-nano-sidecar.js`) and fix the shared module. Never edit a test to pass.
+  - Retry ceiling: two focused correction attempts on Task 2, then stop and route to `/mid-dispatch-decision`, keeping the Task 1 commit.
+  - Rollback: `git revert <task2-commit>`. The characterization suite stays as permanent coverage. Never reset or clean.
+- **Lane ownership (parallel run):**
+  - Lane D only.
+  - **Forbidden:** `main/moss-nano-engine.js`, `main/pocket-tts-engine.js`, `main/ipc/**`, `main/sidecar-paths.js`, `scripts/*.py`, `src/**`, the shared-core freeze set.
+  - **Shared-core touches:** none.
+  - **Merge order:** must merge before TTS-ENGINE-SHARED-1 starts (SRL-089). Independent of cloud and legacy-parser items.
+
+##### Done when
+1. On the Task 1 commit, `npm test -- tests/pythonSidecarAdapter.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js` exits 0, and `git diff main --stat -- main/` is empty.
+2. On the Task 2 commit, the same command exits 0, and `git diff <task1-commit> -- tests/` is empty.
+3. `npm test -- tests/mossNanoIpc.test.js tests/pocketTtsIpc.test.js tests/packageReleaseTruth.test.js` exits 0.
+4. `grep -c "function writeCommand\|function handleStdout\|function settlePending" main/moss-nano-sidecar.js main/pocket-tts-sidecar.js` reports 0 for each file, and the same grep on `main/python-sidecar-adapter.js` reports 3.
+5. `node -e "const m=require('./main/moss-nano-sidecar');const p=require('./main/pocket-tts-sidecar');process.exit(typeof m.createMossNanoSidecarAdapter==='function'&&typeof m.resolveMossNanoBridgePath==='function'&&typeof p.createPocketTtsSidecarAdapter==='function'&&typeof p.resolvePocketTtsBridgePath==='function'?0:1)"` exits 0.
+6. `npm test` exits 0, with no new skips.
+7. `git diff --name-only main` lists exactly the four paths across the two commits.
+
+##### Lessons applied
+- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
+- **LL-112** — "only extract shared abstractions after two real engine paths prove identical behavior and regression tests define the shared boundary." The two paths exist and were diffed (identical apart from label, env var and one argument). This review found the boundary under-tested, so Task 1, a characterization suite passing against unmodified code, is a separate prerequisite commit (*Done when* 1–2). Product posture (dormant engines, disabled IPC) is pinned by *Done when* 3.
+- **LL-088** — the shared module and the two provider files are written by one implementer in one task, and TTS-ENGINE-SHARED-1 is serialized after this item, so no parallel writers touch these files.
+- **LL-031** — read; correlation here is by caller-supplied request ID, and test 9 covers isolation. No generation-ID change is introduced.
+- Standing rule 37 (SRL-089) — Task 2 depends on Task 1's output, so the tasks run serially, not in parallel.
+
+<a id="tts-engine-shared-1"></a>
+
+#### TTS-ENGINE-SHARED-1 — Share MOSS and Pocket engine lifecycle and request handling *(position 8 — blocked stub)*
+
+- **Lane:** TTS / Narration Engine.
+- **Prerequisites:** TTS-SIDECAR-SHARED-1 (the READER-MODE-SEPARATION-2 prerequisite was released 2026-10-08). **Buffer gap:** specify after the sidecar item merges. The engine files were only partly read in the 2026-10-08 investigation, which found that both carry their own `createDeferred`, `structuredFailure` and `normalizeStatus` (Moss 50–69, Pocket 47–66) and singleton engines (`moss-nano-engine.js:317`, `pocket-tts-engine.js:294`). Like the sidecar item, this needs a characterization-first plan under LL-112.
+- **Scope:** Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.
+- **Constraints / evidence:** Build on the verified sidecar extraction to avoid overlapping changes to the same contract. Preserve exports, provider-specific payload validation/status metadata/configuration/defaults/cancellation behavior and independent provider singleton/instance state. Preserve disabled IPC and Kokoro-only defaults; no provider activation or reading-mode refactor.
+- **Verification to specify:** tests/mossNanoEngine.test.js, tests/pocketTtsEngine.test.js, tests/mossNanoIpc.test.js and tests/pocketTtsIpc.test.js. Cover simultaneous providers, start/restart/cancel/error/late-response behavior and unchanged dormant IPC.
+- **Spec state:** Stub; exact implementation/helper/test design, effort, rollback and U1–U9 review remain for dispatch specification. [Cleanup review](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+
+<a id="cleanup-legacy-parsers-1"></a>
+
+#### CLEANUP-LEGACY-PARSERS-1 — Remove the unused legacy parser module *(position 9 — Full Spec, dispatch-ready)*
+
+- **What:** Delete `main/legacy-parsers.js` (398 lines, `@deprecated` at lines 3 and 166; sole export `extractContent` at line 398), and correct the two governing-doc lines that still name it.
+- **Why:** It is dead code. Census against main @ `cd384b78` (2026-10-08) found **0 production consumers and 0 test consumers**: no static, dynamic, concatenated or `path.join` require, and no reference in `package.json`, `vite.config.js`, `scripts/` or `.github/workflows/ci.yml`. The live `extractContent` is `main/file-parsers.js:333` (exported line 840), a superset of the legacy copy. Its only callers are `main.js:16` and `main/ipc/library.js:8`, both importing from file-parsers. `TECHNICAL_REFERENCE.md` wrongly says the file is "retained only for word count extraction".
+- **Out of scope:** Any change to `main/file-parsers.js` or to parsing behavior. Out of scope too: removing npm dependencies (none becomes unused: `cheerio`, `adm-zip` and `pdf-parse` are all still required by `epub-converter.js`, `epub-word-extractor.js` and `file-parsers.js`), editing historical audit, plan or archive documents and zips, and adding `extractContent` coverage (a separate, pre-existing gap).
+- **Prerequisites:** none. Released from READER-MODE-SEPARATION-2 by the owner on 2026-10-08 (not in separation's edit sites or the freeze set).
+- **Effort:** XS.
+- **Lane:** Library & Content. Execution surface D.
+- **Owners:** implementation agent; reviewer re-runs the census; repository operator stages exact paths.
+- **Source:** [2026-10-08 plan](docs/planning/roadmap-reviews/2026-10-08-plan.md#c3-item-changes); [cleanup addendum](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+
+##### Implementation detail
+- **Edit sites:**
+  1. Delete `main/legacy-parsers.js` with `git rm main/legacy-parsers.js`.
+  2. `CLAUDE.md`, the `format-scope` row of the agent scope-label table (find it with `grep -n "legacy-parsers" CLAUDE.md`; line 158 at `cd384b78`). Remove `` `main/legacy-parsers.js`, `` so the cell reads `` `main/epub-converter.js`, `main/file-parsers.js`, `main/epub-word-extractor.js` ``. That adds the live parser module in its place.
+  3. `docs/governance/TECHNICAL_REFERENCE.md:662`: replace the clause "— `legacy-parsers.js` is retained only for word count extraction during import" with "— plain-text extraction during import uses `extractContent()` in `main/file-parsers.js`".
+- **Re-census before deleting** (the code may have moved since 2026-10-08). Run `git grep -n -e "legacy-parsers" -e "legacyParsers" -- . ":!docs" ":!*.md" ":!*.zip"`. It must return only `main/legacy-parsers.js`'s own lines. Any other hit stops the item (see failure handling).
+- **Tests:** there is no new test, because the deletion removes code no test reaches. Regression runs: `tests/epub-fidelity.test.js`, `tests/epub-converter.test.js`, `tests/epub-2b-pipeline.test.js`, `tests/epubWordExtractor.test.js`, then the full suite.
+- **Constants:** the six constants the legacy file imported (`PDF_PARSE_TIMEOUT_MS`, `MIN_PRINTABLE_RATIO`, `MIN_TEXT_LENGTH`, `MAX_MOBI_TEXT_BYTES`, `EPUB_HEADING_MAX_LENGTH`, `EPUB_CHAPTER_CACHE_MAX`) are all still used by `main/file-parsers.js`. Do not remove any.
+- **Packaging:** `package.json` `build.files` includes `"main/**/*"`, a wildcard, so nothing needs editing.
+- **Branch:** `eb/cleanup-legacy-parsers-1` from `main`, in its own worktree (`.worktrees/cleanup-legacy-parsers-1`). Note that `CLAUDE.md` is also uncommitted on `main` and will be updated by the governance landing. If that landing merges first, rebase onto it and re-find the row by grep.
+- **Staging plan:** exactly `main/legacy-parsers.js` (deletion), `CLAUDE.md`, `docs/governance/TECHNICAL_REFERENCE.md`. `git diff --cached --name-only` must equal those three. Never stage `tests/perf-baseline-results.json`. Commit locally; merge or push only on the owner's go-ahead.
+- **Failure handling:**
+  - If the re-census finds any non-doc reference, stop. Do not delete. Record the hit in a local issue and route to `/mid-dispatch-decision`.
+  - If any regression test fails, restore the file (`git restore --staged --worktree main/legacy-parsers.js` before commit, or `git revert` after) and route the failure. The census said nothing depends on it, so a failure means the census missed something.
+  - Retry ceiling: one attempt; a deletion has nothing to retry.
+  - Rollback: `git revert <commit>`; never reset or clean.
+- **Lane ownership (parallel run):**
+  - Lane D only.
+  - **Forbidden:** `main/file-parsers.js`, `main/epub-converter.js`, `src/**`, the shared-core freeze set.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent. `CLAUDE.md` overlaps only with the governance landing, and that lands first.
+
+##### Done when
+1. `test ! -e main/legacy-parsers.js` succeeds.
+2. `git grep -n "legacy-parsers" -- CLAUDE.md docs/governance/TECHNICAL_REFERENCE.md main tests scripts package.json vite.config.js` returns nothing (exit 1).
+3. `npm test -- tests/epub-fidelity.test.js tests/epub-converter.test.js tests/epub-2b-pipeline.test.js tests/epubWordExtractor.test.js` exits 0.
+4. `npm test` exits 0, with no new skips.
+5. `npm run build` exits 0.
+6. `git diff --name-only main` lists exactly the three staged paths.
+
+##### Lessons applied
+- **U9 mechanical-check waiver (owner-approved 2026-10-08):** `lessons --check` cannot pass for any Blurby specification. `LESSONS_LEARNED.md` headings are `### [date] LL-NNN: title`, while the parser needs the id first and the registry prefix is `SRL`. The substantive check below was done by reading the file directly. The waiver expires when the lessons-format governance task lands; then re-run `lessons --check ROADMAP.md --item <ID>`.
+- No live lesson bears on this deletion. Read LL-001–LL-127 by title; the parser- and dead-code-adjacent entries (LL-028 tokenization, LL-093 refactor line counts) do not apply to deleting an unreferenced module.
+- Standing rule 36 (SRL-086/087, verify state at the moment of consequence) shaped the mandatory re-census before deletion and the grep-located `CLAUDE.md` row instead of a fixed line number.
+
+<a id="cleanup-mode-barrel-1"></a>
+
+#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and update structural tests *(position 10 — blocked stub)*
+
+- **Lane:** Reader Engine.
+- **Prerequisites:** READER-MODE-SEPARATION-2.
+- **Scope:** Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.
+- **Constraints / evidence:** Production searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.
+- **Verification to specify:** The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.
+- **Spec state:** Stub; exact implementation/helper/test design, effort, rollback and U1–U9 review remain for dispatch specification. [Cleanup review](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+
 #### KOKORO-EXPORT-1 — Long-form audio export *(unsequenced — blocked/deferred)*
 
 - **Lane:** TTS / Narration Engine.
@@ -369,14 +634,14 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-09-23
+last_review: 2026-10-08
 review_status: complete-with-recorded-buffer-and-governance-gaps
 finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md
 work_register: monday:board/18432450217
 buffer_target: 5
-buffer_actual_full_specs: 1
-buffer_dispatch_readiness: 1-rubric-ready-specification; execution-baseline-pending
-buffer_actual_stubs: 4
+buffer_actual_full_specs: 4
+buffer_dispatch_readiness: 3 dispatch-ready cleanups + 1 epic (excluded from buffer)
+buffer_actual_stubs: 6
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->

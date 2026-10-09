@@ -302,7 +302,21 @@
         "Chrome Extension",
         "Library & Content",
         "Platform & Maintenance"
-      ]
+      ],
+      "deadlines": {
+        "mode-separation": {
+          "date": "2026-11-30",
+          "owner": "project owner (roadmap review 2026-10-08)",
+          "label": "Reading-mode separation complete",
+          "finishLine": "Stage 2 — Reading-mode separation (owner-mandated step 1)",
+          "scope": {
+            "field": "id",
+            "values": [
+              "READER-MODE-SEPARATION-2"
+            ]
+          }
+        }
+      }
     }
   },
   "x-legacy-v1": {
