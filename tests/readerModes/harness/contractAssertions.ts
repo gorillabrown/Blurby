@@ -181,6 +181,8 @@ export function assertNoLeak(module: ReaderModeModule): void {
     expect(() => { (before as { currentWordIndex: number }).currentWordIndex = 99; }).toThrow();
     expect(runtime.getSnapshot()).toEqual(before);
     expect(Object.isFrozen(handoffBefore)).toBe(true);
+    // Every runtime exports its engagement (input.engaged || its own), never leaves it to the router default.
+    expect(typeof handoffBefore.engaged).toBe("boolean");
 
     // Repeated reads: equal values, fresh objects, zero port calls.
     const callsBefore = calls.length;

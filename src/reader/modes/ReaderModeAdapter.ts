@@ -17,7 +17,13 @@
  */
 
 import type { ComponentType } from "react";
-import type { ReaderDocumentSnapshot, ReaderModeHandoff, ReaderSessionKey, ReaderSettingsSnapshot } from "../document/ReaderDocumentSnapshot";
+import type {
+  ReaderDocumentSnapshot,
+  ReaderModeHandoff,
+  ReaderModeHandoffInput,
+  ReaderSessionKey,
+  ReaderSettingsSnapshot,
+} from "../document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../ports/ReaderPorts";
 
 export type ReaderModeId = "page" | "focus" | "flow" | "narrate";
@@ -192,8 +198,11 @@ export interface ReaderModeRuntime {
   /** Replaces this runtime's private settings copy only. */
   applySettings(next: ReaderSettingsSnapshot): void;
   handleCommand(command: ReaderModeCommand): void;
-  /** Pure value export. */
-  exportHandoff(capture: "persistent" | "capture-current"): ReaderModeHandoff;
+  /**
+   * Pure value export. Every runtime exports `engaged = input.engaged || <own engagement>`; the
+   * router normalizes through createReaderModeHandoff (an absent `engaged` becomes false).
+   */
+  exportHandoff(capture: "persistent" | "capture-current"): ReaderModeHandoffInput;
   subscribe(listener: () => void): () => void;
 }
 

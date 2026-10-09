@@ -24,6 +24,9 @@ interface OwnershipPolicy {
 }
 
 const resourceId = (r: Resource) => `${r.file} ${r.kind} ${r.symbol} @${r.enclosing}`;
+// Owner-map identity also carries the verbatim anchor: one function can hold two distinct
+// resources with the same symbol (e.g. two ResizeObservers both named `observer`).
+const ownerKey = (r: Resource) => `${resourceId(r)} :: ${(r as Resource & { anchor?: string }).anchor ?? ""}`;
 
 /** Pure check shared by the real census and the negative control. */
 function checkOwnership(resources: readonly Resource[], rules: OwnershipPolicy) {
@@ -32,7 +35,7 @@ function checkOwnership(resources: readonly Resource[], rules: OwnershipPolicy) 
   for (const r of resources) {
     const modeDir = r.file.startsWith(`${rules.modesDirectory}/`) ? r.file.slice(rules.modesDirectory.length + 1).split("/") : [];
     if (modeDir.length > 1) {
-      owners.set(resourceId(r), modeDir[0]);
+      owners.set(ownerKey(r), modeDir[0]);
       if (r.kind === "module-let" || r.kind === "module-mutable-literal") violations.push(`${resourceId(r)}: module-level mutable state in a mode directory`);
       if (r.kind === "module-singleton" && !rules.allowedModuleSingletons.some((s) => s.file === r.file && s.symbol === r.symbol)) {
         violations.push(`${resourceId(r)}: undeclared module singleton in a mode directory`);
@@ -40,7 +43,7 @@ function checkOwnership(resources: readonly Resource[], rules: OwnershipPolicy) 
     } else if (rules.sharedValueFiles.includes(r.file)) {
       violations.push(`${resourceId(r)}: shared value files hold no mutable resources`);
     } else if (rules.infrastructureFiles.includes(r.file)) {
-      owners.set(resourceId(r), "infrastructure");
+      owners.set(ownerKey(r), "infrastructure");
       if (r.kind.startsWith("module-")) violations.push(`${resourceId(r)}: module-level state in infrastructure`);
       if (!rules.infrastructureResources.some((d) => resourceId(d) === resourceId(r))) violations.push(`${resourceId(r)}: undeclared infrastructure resource`);
     } else {
@@ -99,7 +102,7 @@ describe("reader mode ownership (G1)", () => {
     const synthetic: Resource[] = [
       { file: "src/reader/document/ReaderDocumentSnapshot.ts", kind: "useRef", symbol: "anchorRef", enclosing: "useAnchor" },
       { file: "src/reader/modes/page/ModeState.ts", kind: "module-let", symbol: "current", enclosing: "<module>" },
-      { file: "src/reader/modes/focus/helpers/foliateHelpers.ts", kind: "module-singleton", symbol: "BLOCK_TAGS", enclosing: "<module>" },
+      { file: "src/reader/modes/focus/helpers/synthetic.ts", kind: "module-singleton", symbol: "SYNTHETIC_UNDECLARED", enclosing: "<module>" },
       { file: "src/reader/ports/createReaderPorts.ts", kind: "setTimeout", symbol: "(unassigned)", enclosing: "createReaderPorts" },
       { file: "src/hooks/useReaderMode.ts", kind: "useRef", symbol: "modeRef", enclosing: "useReaderMode" },
     ];
@@ -107,7 +110,7 @@ describe("reader mode ownership (G1)", () => {
     expect(violations).toEqual([
       "src/reader/document/ReaderDocumentSnapshot.ts useRef anchorRef @useAnchor: shared value files hold no mutable resources",
       "src/reader/modes/page/ModeState.ts module-let current @<module>: module-level mutable state in a mode directory",
-      "src/reader/modes/focus/helpers/foliateHelpers.ts module-singleton BLOCK_TAGS @<module>: undeclared module singleton in a mode directory",
+      "src/reader/modes/focus/helpers/synthetic.ts module-singleton SYNTHETIC_UNDECLARED @<module>: undeclared module singleton in a mode directory",
       "src/reader/ports/createReaderPorts.ts setTimeout (unassigned) @createReaderPorts: undeclared infrastructure resource",
       "src/hooks/useReaderMode.ts useRef modeRef @useReaderMode: outside the G1 ownership scope",
       "src/reader/ports/createReaderPorts.ts class-field method @ReaderPortAccessError>constructor: declared infrastructure resource not found",

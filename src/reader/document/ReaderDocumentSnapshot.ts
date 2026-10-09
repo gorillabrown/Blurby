@@ -74,7 +74,18 @@ export interface ReaderModeHandoff {
   readonly resumeAnchor: number | null;
   readonly explicitSelectionAnchor: number | null;
   readonly cfi: string | null;
+  /**
+   * Legacy useProgressTracker hasEngagedRef: once the reader engages, it stays engaged for the whole
+   * document across mode switches. Each runtime exports `input.engaged || <own engagement>`.
+   */
+  readonly engaged: boolean;
 }
+
+/**
+ * What a runtime may export. `engaged` is optional here only so runtimes written against the
+ * pre-`engaged` contract still type-check; createReaderModeHandoff normalizes absent to false.
+ */
+export type ReaderModeHandoffInput = Omit<ReaderModeHandoff, "engaged"> & { readonly engaged?: boolean };
 
 function copyPlain(value: unknown, path: string): unknown {
   if (value === null || typeof value !== "object") {
@@ -120,14 +131,17 @@ function assertIndex(name: string, value: number | null, nullable: boolean): voi
   }
 }
 
-export function createReaderModeHandoff(input: ReaderModeHandoff): ReaderModeHandoff {
+export function createReaderModeHandoff(input: ReaderModeHandoffInput): ReaderModeHandoff {
   assertIndex("canonicalWordIndex", input.canonicalWordIndex, false);
   assertIndex("publishedWordIndex", input.publishedWordIndex, false);
   assertIndex("highlightedWordIndex", input.highlightedWordIndex, false);
   assertIndex("softWordIndex", input.softWordIndex, false);
   assertIndex("resumeAnchor", input.resumeAnchor, true);
   assertIndex("explicitSelectionAnchor", input.explicitSelectionAnchor, true);
-  return freezeValue(input);
+  if (input.engaged !== undefined && typeof input.engaged !== "boolean") {
+    throw new TypeError(`ReaderModeHandoff.engaged must be a boolean; got ${String(input.engaged)}`);
+  }
+  return freezeValue({ ...input, engaged: input.engaged ?? false });
 }
 
 /**
@@ -148,6 +162,7 @@ export function createInitialHandoff(doc: ReaderDocumentSnapshot, totalWordCount
     resumeAnchor: index,
     explicitSelectionAnchor: null,
     cfi: doc.cfi || null,
+    engaged: false,
   });
 }
 

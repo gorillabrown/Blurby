@@ -7,6 +7,7 @@ import {
   createReaderModeHandoff,
   type ReaderDocumentSnapshot,
   type ReaderModeHandoff,
+  type ReaderModeHandoffInput,
   type ReaderSessionKey,
   type ReaderSettingsSnapshot,
 } from "./document/ReaderDocumentSnapshot";
@@ -438,7 +439,7 @@ export function createReaderModeRouter(options: ReaderModeRouterOptions): Reader
     arrival: ReaderModeArrival,
     capture: "persistent" | "capture-current",
     stopReason: ReaderModeStopReason,
-    adjust: (handoff: ReaderModeHandoff) => ReaderModeHandoff = (handoff) => handoff,
+    adjust: (handoff: ReaderModeHandoffInput) => ReaderModeHandoffInput = (handoff) => handoff,
   ): void {
     const out = active;
     if (!out) return;

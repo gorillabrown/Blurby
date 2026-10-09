@@ -60,6 +60,7 @@
         "ReaderBookWordsValue",
         "ReaderDocumentSnapshot",
         "ReaderModeHandoff",
+        "ReaderModeHandoffInput",
         "ReaderSessionKey",
         "ReaderSettingsSnapshot",
         "createInitialHandoff",
@@ -424,6 +425,12 @@
       "exports": [
         "useFocusTrap"
       ]
+    },
+    "src/assets/blurby-icon.png": {
+      "category": "read-only passive asset (passive UI)",
+      "exports": [
+        "default"
+      ]
     }
   },
   "allowedExternal": [
@@ -457,6 +464,14 @@
     {
       "file": "src/reader/modes/page/helpers/foliateHelpers.ts",
       "symbol": "BLOCK_TAGS"
+    },
+    {
+      "file": "src/reader/modes/focus/helpers/foliateHelpers.ts",
+      "symbol": "BLOCK_TAGS"
+    },
+    {
+      "file": "src/reader/modes/focus/helpers/pauseDetection.ts",
+      "symbol": "KNOWN_ABBREVIATIONS"
     }
   ],
   "legacy": [

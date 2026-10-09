@@ -273,6 +273,8 @@ export class PageModeRuntime implements ReaderModeRuntime {
       resumeAnchor: s.resumeAnchor,
       explicitSelectionAnchor: s.explicitSelectionAnchor,
       cfi: s.cfi,
+      // input.engaged || this session's engagement: hasEngaged is seeded from the handoff.
+      engaged: s.hasEngaged,
     });
   }
 

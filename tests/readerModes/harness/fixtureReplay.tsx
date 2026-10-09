@@ -14,10 +14,12 @@
 //
 // Seams (each behavior test declares them with vi.mock, pointing at the factories exported here):
 //   src/reader/modes/<m>/surface             → recordingSurfaceModule("create<M>Surface")
-//   src/reader/modes/<m>/helpers/usePersistentReadingAnchor → recordingAnchorModule(actual)
+//   src/reader/modes/<m>/helpers/usePersistentReadingAnchor → recordingAnchorModule(actual, "<m>")
 //   src/reader/modes/<m>/FoliateView        → stubFoliateViewModule() (jsdom cannot host foliate)
 // Fake infrastructure (audio, persistence, settings) sits behind the real broker, so only accepted
-// port calls are recorded. Unrecorded port methods go to non-recording fakes.
+// port calls are recorded. Unrecorded port methods go to non-recording fakes. The shell's
+// requestCompletionToPage is wired to the router as the E1 shell wires it: an accepted call comes from
+// the active session, so the router queues completion for the active key.
 import React, { act, useSyncExternalStore } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { readFileSync } from "node:fs";
@@ -138,26 +140,31 @@ export function recordingSurfaceModule(factoryName: string): Record<string, unkn
   return { [factoryName]: () => createRecordingSurface() };
 }
 
+interface AnchorDeps { jumpDisplayToWord: (i: number) => void }
 interface AnchorModule {
-  createPersistentReadingAnchor: (state: unknown, deps: { jumpDisplayToWord: (i: number) => void }) => {
+  createPersistentReadingAnchor: (state: unknown, deps: AnchorDeps) => {
     commitPersistentWordIndex: (i: number, cause: string, options?: unknown) => number;
     syncVisualToPersistentWord: (options?: unknown) => number;
   };
 }
 
-/** Wraps the mode's real createPersistentReadingAnchor; records arguments at call, like the recorder. */
-export function recordingAnchorModule(actual: unknown): Record<string, unknown> {
+/**
+ * Wraps the mode's real createPersistentReadingAnchor; records arguments at call, like the recorder.
+ * The `jumpDisplayToWord` dependency is wrapped in place on the deps object the mode passed, so a mode
+ * that also calls it directly (legacy reader.jumpToWord call sites) records through the same seam.
+ * `mode` names the owning mode directory for the OC-3 alias (default: the fixture's mode).
+ */
+export function recordingAnchorModule(actual: unknown, mode?: ReaderModeId): Record<string, unknown> {
   const real = actual as AnchorModule;
   return {
     ...(actual as Record<string, unknown>),
-    createPersistentReadingAnchor: (state: unknown, deps: { jumpDisplayToWord: (i: number) => void }) => {
-      const anchor = real.createPersistentReadingAnchor(state, {
-        ...deps,
-        jumpDisplayToWord: (i: number) => {
-          if (currentEnv) record(CHANNEL_ALIASES["focusView.jumpToWord"](currentEnv.mode), [i]);
-          deps.jumpDisplayToWord(i);
-        },
-      });
+    createPersistentReadingAnchor: (state: unknown, deps: AnchorDeps) => {
+      const display = deps.jumpDisplayToWord;
+      deps.jumpDisplayToWord = (i: number) => {
+        if (currentEnv) record(CHANNEL_ALIASES["focusView.jumpToWord"](mode ?? currentEnv.mode), [i]);
+        display(i);
+      };
+      const anchor = real.createPersistentReadingAnchor(state, deps);
       return {
         commitPersistentWordIndex: (i: number, cause: string, options?: unknown) => {
           record("persistence.commitWordIndex", [i, cause, options]);
@@ -178,7 +185,7 @@ export function stubFoliateViewModule(): Record<string, unknown> {
 }
 
 // ── Fake infrastructure with the fixture's fakeSemantics ──────────────────────
-function createReplayInfrastructure(script: Script, document: ReaderDocumentSnapshot) {
+function createReplayInfrastructure(script: Script, document: ReaderDocumentSnapshot, getRouter: () => ReaderModeRouter | null) {
   const startResults = [...script.audioStartResults];
   const audio = { status: "idle", speaking: false, warming: false, cursorWordIndex: 0 };
   let wordCb: ((i: number) => void) | null = null;
@@ -233,7 +240,12 @@ function createReplayInfrastructure(script: Script, document: ReaderDocumentSnap
     diagnostics: { record: noop, transition: noop, trace: noop },
     shell: {
       reportRelocate: noop, reportToc: noop, reportFlowProgress: noop, reportEinkContentChange: noop,
-      requestCompletionToPage: noop, requestCrossBook: noop,
+      requestCompletionToPage: () => {
+        const router = getRouter();
+        const active = router?.getActive();
+        if (router && active) router.requestCompletionToPage(active.key);
+      },
+      requestCrossBook: noop,
     },
   };
   return {
@@ -266,10 +278,12 @@ async function replayScript(mode: ReaderModeId, script: Script, modules: Partial
     tokenWords: WORDS, paragraphBreaks: PARAGRAPH_BREAKS, bookWords: null, pronunciationOverrides: [],
   });
   const env: ReplayEnv = { mode, effects: [], loaded: open.args.surfaceLoaded === false ? [] : [...WORDS] };
-  const fake = createReplayInfrastructure(script, document);
+  let routerRef: ReaderModeRouter | null = null;
+  const fake = createReplayInfrastructure(script, document, () => routerRef);
   const router = createReaderModeRouter({
     modules, broker: createReaderPorts(fake.infra), getDocument: () => document, getSettings: fake.getSettings,
   });
+  routerRef = router;
   const observe = (): Observation => {
     const active = router.getActive()!;
     const s = active.runtime.getSnapshot();
@@ -390,9 +404,9 @@ export function compareReplay(baselineText: string, candidateInput: readonly Scr
     }
   }
 
-  // Q-F (4) on the candidate; OC-3 alias back to the baseline channel name.
-  const mode = baseline.mode;
-  const aliases = new Map(Object.entries(CHANNEL_ALIASES).map(([from, to]) => [to(mode), from]));
+  // Q-F (4) on the candidate; OC-3 alias back to the baseline channel name (any mode's display seam).
+  const modes: readonly ReaderModeId[] = ["page", "focus", "flow", "narrate"];
+  const aliases = new Map(modes.flatMap((m) => Object.entries(CHANNEL_ALIASES).map(([from, to]) => [to(m), from] as const)));
   const candidate = candidateScripts.map((script) => {
     for (const id of crossOwnerSet(script)) errors.push(`Q-F candidate emitted a cross-owner effect: ${id}`);
     return {

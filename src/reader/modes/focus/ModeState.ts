@@ -1,9 +1,12 @@
-// Page mode state (READER-MODE-SEPARATION-2 design §B.0). Every field is Page's own copy of a legacy
+// Focus mode state (READER-MODE-SEPARATION-2 design §B.0). Every field is Focus's own copy of a legacy
 // ref/state, built only from the frozen handoff. No module-level state.
 import type { ReaderModeHandoff } from "../../document/ReaderDocumentSnapshot";
 import type { PersistentReadingAnchorState } from "./helpers/usePersistentReadingAnchor";
 
-export class PageModeState implements PersistentReadingAnchorState {
+/** Legacy useReader WordUpdateCallback: the RSVP overlay's direct DOM update (bypasses React). */
+export type FocusWordUpdateCallback = (word: string, index: number) => void;
+
+export class FocusModeState implements PersistentReadingAnchorState {
   canonicalWordIndex: number;
   publishedWordIndex: number;
   highlightedWordIndex: number;
@@ -14,16 +17,26 @@ export class PageModeState implements PersistentReadingAnchorState {
   cfi: string | null;
   /** Legacy userExplicitSelectionRef (TTS-7J / SELECTION-1). */
   userExplicitSelection = false;
-  /**
-   * Page's copy of useProgressTracker hasEngagedRef (the shell is told through persistence.markEngaged).
-   * Seeded from the handoff: the legacy ref persists for the whole document across mode switches.
-   */
-  hasEngaged: boolean;
+  /** Focus's copy of useProgressTracker hasEngagedRef, seeded from the handoff (persists per document). */
+  engaged: boolean;
   isBrowsedAway = false;
   /** Legacy foliateRenderVersion. */
   renderVersion = 0;
   selected = false;
   currentWordIndex: number;
+  /** Legacy focusPlaying. */
+  playing = false;
+  /** Legacy pendingFocusStartRef: the token of the queued FOCUS_MODE_START_DELAY_MS start. */
+  pendingStartToken: symbol | null = null;
+  /** Design §F.2: a start that waits for this mode's view to load its first section. */
+  pendingStartOnLoad = false;
+  /** Legacy useFoliateSync effect 3 refs (currentNarrationSectionRef starts at -1). */
+  currentSection = -1;
+  lastGoToSectionTime = 0;
+  /** Legacy useReader.wordIndex: the RSVP display index (OC-9: the RAF tick is not copied). */
+  displayWordIndex: number;
+  /** Legacy useReader.onWordUpdateRef, registered by the overlay. */
+  onWordUpdate: FocusWordUpdateCallback | null = null;
   /** Bumped on every notify; the React binding subscribes to it. */
   version = 0;
   private readonly listeners = new Set<() => void>();
@@ -35,12 +48,11 @@ export class PageModeState implements PersistentReadingAnchorState {
     this.publishedHighlightedWordIndex = handoff.highlightedWordIndex;
     this.softWordIndex = handoff.softWordIndex;
     this.explicitSelectionAnchor = handoff.explicitSelectionAnchor;
-    // OBS-A3-2 (decision #12): arriving from another mode, seed the resume anchor so the fresh view's
-    // first relocate cannot overwrite the handed-off highlight with floor(fraction × wordCount).
-    this.resumeAnchor = handoff.resumeAnchor ?? (handoff.source !== null ? handoff.highlightedWordIndex : null);
+    this.resumeAnchor = handoff.resumeAnchor;
     this.cfi = handoff.cfi;
-    this.hasEngaged = handoff.engaged;
+    this.engaged = handoff.engaged;
     this.currentWordIndex = handoff.canonicalWordIndex;
+    this.displayWordIndex = handoff.canonicalWordIndex;
   }
 
   subscribe(listener: () => void): () => void {
