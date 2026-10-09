@@ -577,7 +577,7 @@ Run `npm test -- tests/pythonSidecarAdapter.test.js tests/mossNanoEngine.test.js
 6. `git diff --name-only main` lists exactly the three staged paths.
 
 ##### Lessons applied
-- No live lesson bears on this deletion. Read LL-001–LL-127 by title; the parser- and dead-code-adjacent entries (LL-028 tokenization, LL-093 refactor line counts) do not apply to deleting an unreferenced module.
+- No live lesson bears on this deletion. Read every live lesson by title; the parser- and dead-code-adjacent entries (LL-028 tokenization, LL-093 refactor line counts) do not apply to deleting an unreferenced module.
 - Standing rule 36 (SRL-086/087, verify state at the moment of consequence) shaped the mandatory re-census before deletion and the grep-located `CLAUDE.md` row instead of a fixed line number.
 
 <a id="cleanup-mode-barrel-1"></a>
