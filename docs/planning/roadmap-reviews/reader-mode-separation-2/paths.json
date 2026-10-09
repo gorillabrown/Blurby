@@ -181,7 +181,9 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-text-flow-002-page-paused-start.png",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a2-20261009045010165-a2-text-flow-041-flow-playing-end.png",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/live-run.ps1",
-    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/analyze-capture.mjs"
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/analyze-capture.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/fixture-chapters.txt",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/matrix.mjs"
   ],
   "epicPacketPaths": [
     "docs/planning/epics/2026-10-09-reader-mode-separation-2/charter.md",
@@ -198,5 +200,11 @@
   ],
   "excludedExistingDirt": [
     "tests/perf-baseline-results.json"
+  ],
+  "censusPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/mode-copy-policy.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/resource-census.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/ownership-rules.json"
   ]
 }

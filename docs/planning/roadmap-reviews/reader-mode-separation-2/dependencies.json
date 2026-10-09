@@ -1,0 +1,6572 @@
+{
+  "generatedBy": "docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs",
+  "typescriptVersion": "5.9.3",
+  "sourceCommit": "60e1d35374774892e3b9bad3055fd87e20f9ec72",
+  "edgeSemantics": "runtimeImports: at least one non-type, non-elided import/re-export/dynamic import()/side-effect/css @import edge. typeOnlyImports: only `import type`/`export type`/type-only specifiers/import(\"x\").T type nodes, or value-syntax imports whose every binding resolves to a type-only symbol or is never referenced in a value position (elidedValueSyntax: tsc/esbuild drop these at emit because tsconfig sets neither verbatimModuleSyntax nor preserveValueImports). Project-owned = resolved inside the repo, outside node_modules.",
+  "roots": [
+    "src/components/ReaderContainer.tsx",
+    "src/hooks/useReaderMode.ts",
+    "src/hooks/useReadingModeInstance.ts",
+    "src/hooks/useDocumentLifecycle.ts",
+    "src/hooks/usePersistentReadingAnchor.ts",
+    "src/reader/anchors/useCurrentWordAnchor.ts",
+    "src/utils/startWordIndex.ts",
+    "src/utils/persistentReadingAnchor.ts",
+    "src/modes/PageMode.ts",
+    "src/modes/FocusMode.ts",
+    "src/modes/FlowMode.ts",
+    "src/modes/ModeInterface.ts",
+    "src/modes/index.ts",
+    "src/reader/modes/FocusModeAdapter.ts",
+    "src/reader/modes/FlowModeAdapter.ts",
+    "src/reader/modes/NarrateModeAdapter.ts",
+    "src/hooks/useReader.ts",
+    "src/components/ReaderView.tsx",
+    "src/hooks/useFlowScrollSync.ts",
+    "src/utils/FlowScrollEngine.ts",
+    "src/utils/FlowCursorController.ts",
+    "src/components/FlowText.tsx",
+    "src/hooks/useFoliateSync.ts",
+    "src/hooks/useNarrationSync.ts",
+    "src/hooks/useNarrationCaching.ts",
+    "src/components/FoliatePageView.tsx",
+    "src/components/PageReaderView.tsx",
+    "src/components/ScrollReaderView.tsx",
+    "src/components/VirtualScrollText.tsx",
+    "src/components/PausedTextView.tsx",
+    "src/utils/foliateStyles.ts",
+    "src/utils/foliateWordHighlight.ts",
+    "src/utils/foliateAnchorNavigation.ts",
+    "src/utils/wordPositionIndex.ts",
+    "src/utils/chunkReadingVisualState.ts",
+    "src/utils/silenceAwareCursor.ts",
+    "src/utils/foliateHelpers.ts",
+    "src/utils/foliateWordWrapping.ts",
+    "src/utils/foliateLayout.ts",
+    "src/utils/foliateWordOffsets.ts",
+    "src/reader/surface/SurfaceCommand.ts",
+    "src/types.ts",
+    "src/types/chunkReading.ts",
+    "src/types/narration.ts",
+    "src/hooks/useKeyboardShortcuts.ts",
+    "src/components/ReaderBottomBar.tsx",
+    "src/constants.ts",
+    "src/styles/reader.css",
+    "src/styles/page-reader.css",
+    "src/styles/flow.css",
+    "src/styles/base.css",
+    "src/styles/index.css",
+    "src/styles/themes.css",
+    "src/reader/useReaderModeOrchestrator.ts"
+  ],
+  "missingRoots": [],
+  "counts": {
+    "modules": 151,
+    "runtimeEdges": 260,
+    "typeOnlyEdges": 151,
+    "runtimeReachable": 147,
+    "liveInProductionFromEntry": 132,
+    "transitiveHelpersOutsideExistingSites": 93,
+    "typeOnlyReachableOutsideExistingSites": 4,
+    "externalPackages": 3
+  },
+  "modules": [
+    {
+      "path": "src/assets/blurby-icon.png",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/BacktrackPrompt.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/DefinitionPopup.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/PageReaderView.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/EinkRefreshOverlay.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/ErrorBoundary.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/FlowText.tsx",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/FoliatePageView.tsx",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/foliateHelpers.ts",
+        "src/utils/foliateLayout.ts",
+        "src/utils/foliateStyles.ts",
+        "src/utils/foliateWordHighlight.ts",
+        "src/utils/foliateWordOffsets.ts",
+        "src/utils/foliateWordWrapping.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/silenceAwareCursor.ts",
+        "src/utils/wordPositionIndex.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/chunkReading.ts",
+        "src/types/narration.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useFoliateSync.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/hooks/useReadingModeInstance.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/FlowScrollEngine.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateHelpers.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateHelpers.ts",
+          "kind": "re-export",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/foliateLayout.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateStyles.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateWordHighlight.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateWordOffsets.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateWordWrapping.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrateDiagnostics.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/silenceAwareCursor.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/wordPositionIndex.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/HighlightMenu.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/PageReaderView.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/HotkeyCoach.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/MenuFlap.tsx",
+        "src/components/ReaderBottomBar.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/MenuFlap.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/HotkeyCoach.tsx",
+        "src/components/ReadingQueue.tsx",
+        "src/components/SettingsMenu.tsx"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/HotkeyCoach.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ReadingQueue.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/SettingsMenu.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/NotePopover.tsx",
+      "existingSite": false,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/hooks/useFocusTrap.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/PageReaderView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/hooks/useFocusTrap.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/PageReaderView.tsx",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/DefinitionPopup.tsx",
+        "src/components/HighlightMenu.tsx",
+        "src/components/NotePopover.tsx",
+        "src/constants.ts",
+        "src/utils/FlowCursorController.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/DefinitionPopup.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/HighlightMenu.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/NotePopover.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/FlowCursorController.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/PausedTextView.tsx",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/ProgressBar.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/ReaderBottomBar.tsx",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/HotkeyCoach.tsx",
+        "src/components/ProgressBar.tsx",
+        "src/constants.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/HotkeyCoach.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ProgressBar.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/ReaderContainer.tsx",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/BacktrackPrompt.tsx",
+        "src/components/EinkRefreshOverlay.tsx",
+        "src/components/ErrorBoundary.tsx",
+        "src/components/FoliatePageView.tsx",
+        "src/components/MenuFlap.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ReturnToReadingPill.tsx",
+        "src/constants.ts",
+        "src/contexts/SettingsContext.tsx",
+        "src/contexts/ToastContext.tsx",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useEinkController.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useFoliateSync.ts",
+        "src/hooks/useKeyboardShortcuts.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/usePersistentReadingAnchor.ts",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useReader.ts",
+        "src/hooks/useReadingGoals.ts",
+        "src/hooks/useReadingModeInstance.ts",
+        "src/reader/useReaderModeOrchestrator.ts",
+        "src/utils/chunkReadingVisualState.ts",
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/foliateAnchorNavigation.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/naturalChunks.ts",
+        "src/utils/persistentReadingAnchor.ts",
+        "src/utils/readingGoals.ts",
+        "src/utils/startWordIndex.ts",
+        "src/utils/text.ts",
+        "src/utils/ttsEvalTrace.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/PageReaderView.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/types.ts",
+        "src/types/chunkReading.ts",
+        "src/types/narration.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/foliateHelpers.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/components/BacktrackPrompt.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/EinkRefreshOverlay.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ErrorBoundary.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/FoliatePageView.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/FoliatePageView.tsx",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/components/MenuFlap.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/PageReaderView.tsx",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/components/ReaderBottomBar.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ReaderView.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ReturnToReadingPill.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ScrollReaderView.tsx",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/contexts/SettingsContext.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/contexts/ToastContext.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useDocumentLifecycle.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useEinkController.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useFlowScrollSync.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useFoliateSync.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useKeyboardShortcuts.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useNarration.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useNarrationCaching.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useNarrationSync.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/usePersistentReadingAnchor.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useProgressTracker.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useReader.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useReadingGoals.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useReadingModeInstance.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/reader/useReaderModeOrchestrator.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/chunkReadingVisualState.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/FlowScrollEngine.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/foliateAnchorNavigation.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateHelpers.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrateDiagnostics.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/naturalChunks.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/persistentReadingAnchor.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/readingGoals.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/startWordIndex.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/ttsEvalTrace.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/ReaderView.tsx",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/assets/blurby-icon.png",
+        "src/components/DefinitionPopup.tsx",
+        "src/components/HighlightMenu.tsx",
+        "src/components/PausedTextView.tsx",
+        "src/components/WpmGauge.tsx",
+        "src/constants.ts",
+        "src/utils/einkErgonomics.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/ProgressBar.tsx",
+        "src/hooks/useReader.ts",
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/assets/blurby-icon.png",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/DefinitionPopup.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/HighlightMenu.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/PausedTextView.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ProgressBar.tsx",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/components/WpmGauge.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useReader.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/einkErgonomics.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/ReadingQueue.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/queue.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/MenuFlap.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/queue.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/ReturnToReadingPill.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/ScrollReaderView.tsx",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/DefinitionPopup.tsx",
+        "src/components/FlowText.tsx",
+        "src/components/HighlightMenu.tsx",
+        "src/components/VirtualScrollText.tsx",
+        "src/constants.ts",
+        "src/utils/rhythm.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/ProgressBar.tsx",
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/DefinitionPopup.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/FlowText.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/HighlightMenu.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/ProgressBar.tsx",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/components/VirtualScrollText.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/rhythm.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/SettingsMenu.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/settings/CloudSyncSettings.tsx",
+        "src/components/settings/ConnectorsSettings.tsx",
+        "src/components/settings/HelpSettings.tsx",
+        "src/components/settings/HotkeyMapSettings.tsx",
+        "src/components/settings/LayoutSettings.tsx",
+        "src/components/settings/LibraryLayoutSettings.tsx",
+        "src/components/settings/ReadingGoalsSettings.tsx",
+        "src/components/settings/SpeedReadingSettings.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/ThemeSettings.tsx"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/MenuFlap.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/settings/CloudSyncSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/ConnectorsSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/HelpSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/HotkeyMapSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/LayoutSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/LibraryLayoutSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/ReadingGoalsSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/SpeedReadingSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/ThemeSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/TTSSettings.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/ThemeProvider.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/ThemeSettings.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/VirtualScrollText.tsx",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/WpmGauge.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/CacheSizeDisplay.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/CloudSyncSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/ConnectorsSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/HelpSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/HotkeyMapSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/KokoroStatusSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/LayoutSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/LibraryLayoutSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/contexts/ToastContext.tsx"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/contexts/ToastContext.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/MossNanoStatusSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/NarrationDataSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/narrationPortability.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/narrationPortability.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/PauseSettingsSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/PocketTtsStatusSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/PronunciationOverridesEditor.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/pronunciationOverrides.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pronunciationOverrides.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/QwenRuntimeSetupSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/QwenStatusSection.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/components/settings/ReadingGoalsSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/hooks/useReadingGoals.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/hooks/useReadingGoals.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/SpeedReadingSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/TTSSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/settings/CacheSizeDisplay.tsx",
+        "src/components/settings/KokoroStatusSection.tsx",
+        "src/components/settings/MossNanoStatusSection.tsx",
+        "src/components/settings/NarrationDataSection.tsx",
+        "src/components/settings/PauseSettingsSection.tsx",
+        "src/components/settings/PocketTtsStatusSection.tsx",
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/components/settings/QwenRuntimeSetupSection.tsx",
+        "src/components/settings/QwenStatusSection.tsx",
+        "src/components/settings/TtsEngineSelector.tsx",
+        "src/components/settings/qwenStatusPresentation.ts",
+        "src/components/settings/ttsPreview.ts",
+        "src/components/settings/useKokoroSettingsStatus.ts",
+        "src/components/settings/useMossNanoSettingsStatus.ts",
+        "src/components/settings/usePocketTtsSettingsStatus.ts",
+        "src/constants.ts",
+        "src/hooks/useQwenPrototypeStatus.ts",
+        "src/styles/tts-settings.css",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/ttsProviderRegistry.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/settings/CacheSizeDisplay.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/KokoroStatusSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/MossNanoStatusSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/NarrationDataSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/PauseSettingsSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/PocketTtsStatusSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/PronunciationOverridesEditor.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/QwenRuntimeSetupSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/qwenStatusPresentation.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/QwenStatusSection.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/TtsEngineSelector.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/ttsPreview.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/useKokoroSettingsStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/useMossNanoSettingsStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/components/settings/usePocketTtsSettingsStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useQwenPrototypeStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/tts-settings.css",
+          "kind": "side-effect",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/ttsProviderRegistry.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/ThemeSettings.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/components/ThemeProvider.tsx"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/SettingsMenu.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/ThemeProvider.tsx",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/TtsEngineSelector.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/ttsProviderRegistry.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/ttsProviderRegistry.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/qwenStatusPresentation.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/ttsPreview.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/audio/tempoStretch.ts",
+        "src/utils/audioPlayer.ts",
+        "src/utils/kokoroRatePlan.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audio/tempoStretch.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioPlayer.ts",
+          "kind": "dynamic-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioPlayer.ts",
+          "kind": "dynamic-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioPlayer.ts",
+          "kind": "dynamic-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioPlayer.ts",
+          "kind": "dynamic-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/useKokoroSettingsStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/kokoroStatus.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/kokoroStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/useMossNanoSettingsStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/components/settings/usePocketTtsSettingsStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/constants.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/EinkRefreshOverlay.tsx",
+        "src/components/FoliatePageView.tsx",
+        "src/components/HotkeyCoach.tsx",
+        "src/components/PageReaderView.tsx",
+        "src/components/PausedTextView.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/components/WpmGauge.tsx",
+        "src/components/settings/PauseSettingsSection.tsx",
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/contexts/SettingsContext.tsx",
+        "src/contexts/ToastContext.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useEinkController.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useFoliateSync.ts",
+        "src/hooks/useKeyboardShortcuts.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useReader.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/audio/segmentKokoroChunk.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/backgroundCacher.ts",
+        "src/utils/foliateLayout.ts",
+        "src/utils/foliateStyles.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/narrationPlanner.ts",
+        "src/utils/narrationPortability.ts",
+        "src/utils/pauseDetection.ts",
+        "src/utils/readingGoals.ts",
+        "src/utils/segmentNormalizer.ts",
+        "src/utils/silenceAwareCursor.ts",
+        "src/utils/streamAccumulator.ts",
+        "src/utils/text.ts",
+        "src/utils/ttsCacheIdentity.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/contexts/SettingsContext.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/contexts/ToastContext.tsx",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/components/settings/LibraryLayoutSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/kokoroStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audio/segmentKokoroChunk.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/narratePerf.ts",
+        "src/utils/segmentNormalizer.ts",
+        "src/utils/spokenWordFilter.ts",
+        "src/utils/ttsCache.ts",
+        "src/utils/ttsCacheIdentity.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts",
+        "src/types/ttsCache.ts",
+        "src/types/ttsProvider.ts",
+        "src/utils/pauseDetection.ts",
+        "src/utils/timingMetadataStore.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audio/segmentKokoroChunk.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/generationPipeline.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/generationPipeline.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrateDiagnostics.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narratePerf.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/segmentNormalizer.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/spokenWordFilter.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/timingMetadataStore.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/ttsCacheIdentity.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/mossNanoStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/audioScheduler.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/pocketTtsStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/audioScheduler.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/qwenStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/pronunciationOverrides.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts",
+        "src/utils/pauseDetection.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/generationPipeline.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/generationPipeline.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pronunciationOverrides.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/qwenStreamingStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/streamAccumulator.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts",
+        "src/utils/pauseDetection.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/streamAccumulator.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/streamAccumulator.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/narration/webSpeechStrategy.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useDocumentLifecycle.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/dualSourceDiag.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useEinkController.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/einkErgonomics.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/einkErgonomics.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useFlowScrollSync.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/chunkReadingVisualState.ts",
+        "src/utils/queue.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/chunkReading.ts",
+        "src/types/eval.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/eval.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/chunkReadingVisualState.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/FlowScrollEngine.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/queue.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useFocusTrap.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/NotePopover.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/hooks/useFoliateSync.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/types/narration.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/components/FoliatePageView.tsx",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useKeyboardShortcuts.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useNarration.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/mossNanoStrategy.ts",
+        "src/hooks/narration/pocketTtsStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/narration/webSpeechStrategy.ts",
+        "src/types/narration.ts",
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/highlightSyncController.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/kokoroStatus.ts",
+        "src/utils/mediaSessionBridge.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/pauseDetection.ts",
+        "src/utils/pronunciationOverrides.ts",
+        "src/utils/qwenStatus.ts",
+        "src/utils/timingMetadataStore.ts",
+        "src/utils/voiceSelection.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/eval.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/kokoroStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/mossNanoStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/pocketTtsStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/qwenStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/qwenStreamingStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/narration/webSpeechStrategy.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/eval.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/highlightSyncController.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/mediaSessionBridge.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrateDiagnostics.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/pronunciationOverrides.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/qwenStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/timingMetadataStore.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/timingMetadataStore.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/voiceSelection.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useNarrationCaching.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/backgroundCacher.ts",
+        "src/utils/foliateWordWrapping.ts",
+        "src/utils/kokoroRatePlan.ts",
+        "src/utils/pronunciationOverrides.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts",
+        "src/utils/narrateDiagnostics.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/backgroundCacher.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/foliateWordWrapping.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrateDiagnostics.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/pronunciationOverrides.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useNarrationSync.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/usePersistentReadingAnchor.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/persistentReadingAnchor.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/persistentReadingAnchor.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useProgressTracker.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/readingGoals.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/readingGoals.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useQwenPrototypeStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/qwenStatus.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/qwenStatus.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useReader.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/rhythm.ts",
+        "src/utils/text.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true,
+          "elidedValueSyntax": true
+        },
+        {
+          "to": "src/utils/rhythm.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/text.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useReaderMode.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/startWordIndex.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/FoliatePageView.tsx",
+        "src/hooks/useReadingModeInstance.ts",
+        "src/types.ts",
+        "src/types/eval.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/reader/useReaderModeOrchestrator.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/components/FoliatePageView.tsx",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/hooks/useReadingModeInstance.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/eval.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/startWordIndex.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useReadingGoals.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/readingGoals.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/components/settings/ReadingGoalsSettings.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/readingGoals.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/hooks/useReadingModeInstance.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts",
+        "src/modes/PageMode.ts"
+      ],
+      "typeOnlyImports": [
+        "src/components/FoliatePageView.tsx",
+        "src/modes/ModeInterface.ts",
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useReaderMode.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/components/FoliatePageView.tsx",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/modes/FlowMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/FocusMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/modes/PageMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/modes/FlowMode.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/rhythm.ts"
+      ],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useReadingModeInstance.ts",
+        "src/modes/index.ts",
+        "src/reader/modes/FlowModeAdapter.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/rhythm.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/modes/FocusMode.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/rhythm.ts"
+      ],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useReadingModeInstance.ts",
+        "src/modes/index.ts",
+        "src/reader/modes/FocusModeAdapter.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/rhythm.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/modes/ModeInterface.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/useReadingModeInstance.ts",
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts",
+        "src/modes/PageMode.ts",
+        "src/modes/index.ts",
+        "src/reader/modes/FlowModeAdapter.ts",
+        "src/reader/modes/FocusModeAdapter.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/modes/PageMode.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useReadingModeInstance.ts",
+        "src/modes/index.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/modes/index.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts",
+        "src/modes/PageMode.ts"
+      ],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/modes/FlowMode.ts",
+          "kind": "re-export",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/FocusMode.ts",
+          "kind": "re-export",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "re-export",
+          "typeOnly": true
+        },
+        {
+          "to": "src/modes/PageMode.ts",
+          "kind": "re-export",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/reader/anchors/useCurrentWordAnchor.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/reader/modes/ReaderModeAdapter.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/reader/modes/ReaderModeAdapter.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/reader/modes/FlowModeAdapter.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/modes/FlowMode.ts"
+      ],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts",
+        "src/reader/modes/ReaderModeAdapter.ts",
+        "src/reader/surface/SurfaceCommand.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/modes/FlowMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/reader/modes/ReaderModeAdapter.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/reader/surface/SurfaceCommand.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/reader/modes/FocusModeAdapter.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/modes/FocusMode.ts"
+      ],
+      "typeOnlyImports": [
+        "src/modes/ModeInterface.ts",
+        "src/reader/modes/ReaderModeAdapter.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/modes/FocusMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/modes/ModeInterface.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/reader/modes/ReaderModeAdapter.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/reader/modes/NarrateModeAdapter.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/reader/modes/ReaderModeAdapter.ts",
+        "src/reader/surface/SurfaceCommand.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/reader/modes/ReaderModeAdapter.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/reader/surface/SurfaceCommand.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/reader/modes/ReaderModeAdapter.ts",
+      "existingSite": false,
+      "liveInProduction": false,
+      "reachableAtRuntime": false,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/reader/anchors/useCurrentWordAnchor.ts",
+        "src/reader/modes/FlowModeAdapter.ts",
+        "src/reader/modes/FocusModeAdapter.ts",
+        "src/reader/modes/NarrateModeAdapter.ts",
+        "src/reader/surface/SurfaceCommand.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/reader/surface/SurfaceCommand.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/reader/modes/ReaderModeAdapter.ts"
+      ],
+      "importedBy": [
+        "src/reader/modes/FlowModeAdapter.ts",
+        "src/reader/modes/NarrateModeAdapter.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/reader/modes/ReaderModeAdapter.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/reader/useReaderModeOrchestrator.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/hooks/useReaderMode.ts",
+        "src/utils/dualSourceDiag.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/hooks/useReaderMode.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/styles/base.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/flow.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/index.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/styles/base.css",
+        "src/styles/flow.css",
+        "src/styles/keyboard.css",
+        "src/styles/library.css",
+        "src/styles/onboarding.css",
+        "src/styles/page-reader.css",
+        "src/styles/reader.css",
+        "src/styles/themes.css",
+        "src/styles/tts-settings.css"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [],
+      "edges": [
+        {
+          "to": "src/styles/base.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/flow.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/keyboard.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/library.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/onboarding.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/page-reader.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/reader.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/themes.css",
+          "kind": "css-import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/styles/tts-settings.css",
+          "kind": "css-import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/styles/keyboard.css",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/library.css",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/onboarding.css",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/page-reader.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/reader.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/themes.css",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/styles/tts-settings.css",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx",
+        "src/styles/index.css"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/types.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/qwenStreaming.ts",
+        "src/types/ttsCache.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/MenuFlap.tsx",
+        "src/components/PageReaderView.tsx",
+        "src/components/PausedTextView.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ReadingQueue.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/components/SettingsMenu.tsx",
+        "src/components/settings/CloudSyncSettings.tsx",
+        "src/components/settings/KokoroStatusSection.tsx",
+        "src/components/settings/LayoutSettings.tsx",
+        "src/components/settings/LibraryLayoutSettings.tsx",
+        "src/components/settings/NarrationDataSection.tsx",
+        "src/components/settings/PauseSettingsSection.tsx",
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/components/settings/QwenRuntimeSetupSection.tsx",
+        "src/components/settings/ReadingGoalsSettings.tsx",
+        "src/components/settings/SpeedReadingSettings.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/ThemeSettings.tsx",
+        "src/components/settings/TtsEngineSelector.tsx",
+        "src/components/settings/qwenStatusPresentation.ts",
+        "src/components/settings/ttsPreview.ts",
+        "src/components/settings/useKokoroSettingsStatus.ts",
+        "src/components/settings/useMossNanoSettingsStatus.ts",
+        "src/components/settings/usePocketTtsSettingsStatus.ts",
+        "src/constants.ts",
+        "src/contexts/SettingsContext.tsx",
+        "src/contexts/ToastContext.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/mossNanoStrategy.ts",
+        "src/hooks/narration/pocketTtsStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useEinkController.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useKeyboardShortcuts.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useQwenPrototypeStatus.ts",
+        "src/hooks/useReader.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/hooks/useReadingGoals.ts",
+        "src/hooks/useReadingModeInstance.ts",
+        "src/reader/useReaderModeOrchestrator.ts",
+        "src/types/narration.ts",
+        "src/types/ttsCache.ts",
+        "src/types/ttsProvider.ts",
+        "src/utils/backgroundCacher.ts",
+        "src/utils/foliateStyles.ts",
+        "src/utils/kokoroStatus.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/narrationPortability.ts",
+        "src/utils/pronunciationOverrides.ts",
+        "src/utils/qwenStatus.ts",
+        "src/utils/readingGoals.ts",
+        "src/utils/rhythm.ts",
+        "src/utils/segmentNormalizer.ts",
+        "src/utils/timingMetadataStore.ts",
+        "src/utils/ttsCacheIdentity.ts",
+        "src/utils/ttsProviderRegistry.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/qwenStreaming.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/types/chunkReading.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/types/narration.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/chunkReadingVisualState.ts",
+        "src/utils/foliateWordHighlight.ts",
+        "src/utils/highlightSyncController.ts",
+        "src/utils/naturalChunks.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/types/eval.ts",
+      "existingSite": false,
+      "liveInProduction": false,
+      "reachableAtRuntime": false,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/utils/ttsEvalTrace.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/types/narration.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/chunkReading.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/mossNanoStrategy.ts",
+        "src/hooks/narration/pocketTtsStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/narration/webSpeechStrategy.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useFoliateSync.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/reader/modes/NarrateModeAdapter.ts",
+        "src/types/ttsProvider.ts",
+        "src/utils/audio/segmentKokoroChunk.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/foliateWordOffsets.ts",
+        "src/utils/mediaSessionBridge.ts",
+        "src/utils/silenceAwareCursor.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/types/qwenStreaming.ts",
+      "existingSite": false,
+      "liveInProduction": false,
+      "reachableAtRuntime": false,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/types.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/types/ttsCache.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/ttsProvider.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/types.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/timingMetadataStore.ts",
+        "src/utils/ttsCache.ts",
+        "src/utils/ttsCacheIdentity.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/types/ttsProvider.ts",
+      "existingSite": false,
+      "liveInProduction": false,
+      "reachableAtRuntime": false,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/types/ttsCache.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/timingMetadataStore.ts",
+        "src/utils/ttsCacheIdentity.ts",
+        "src/utils/ttsProviderRegistry.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/FlowCursorController.ts",
+      "existingSite": true,
+      "liveInProduction": false,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/PageReaderView.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/FlowScrollEngine.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/chunkReading.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/utils/foliateWordHighlight.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/audio/segmentKokoroChunk.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/kokoroRatePlan.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/audio/tempoStretch.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/utils/kokoroRatePlan.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/ttsPreview.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/audioPlayer.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/settings/ttsPreview.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/audioScheduler.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audio/tempoStretch.ts",
+        "src/utils/dualSourceDiag.ts",
+        "src/utils/spokenWordFilter.ts",
+        "src/utils/timingMetadataStore.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/narration.ts",
+        "src/types/ttsProvider.ts",
+        "src/utils/kokoroRatePlan.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/mossNanoStrategy.ts",
+        "src/hooks/narration/pocketTtsStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/utils/audio/segmentKokoroChunk.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/silenceAwareCursor.ts",
+        "src/utils/streamAccumulator.ts",
+        "src/utils/ttsCache.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audio/tempoStretch.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/dualSourceDiag.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/kokoroRatePlan.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/spokenWordFilter.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/timingMetadataStore.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/backgroundCacher.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/ttsCache.ts",
+        "src/utils/ttsCacheIdentity.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarrationCaching.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/generationPipeline.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/ttsCacheIdentity.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/chunkReadingVisualState.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/chunkReading.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useFlowScrollSync.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/dualSourceDiag.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/usePersistentReadingAnchor.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/reader/useReaderModeOrchestrator.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/einkErgonomics.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderView.tsx",
+        "src/hooks/useEinkController.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/foliateAnchorNavigation.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/foliateHelpers.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/segmentWords.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/utils/foliateWordWrapping.ts",
+        "src/utils/wordPositionIndex.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/utils/segmentWords.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/foliateLayout.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/foliateStyles.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/foliateWordHighlight.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/chunkReading.ts",
+        "src/utils/FlowScrollEngine.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/FlowScrollEngine.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/foliateWordOffsets.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/foliateWordWrapping.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/foliateHelpers.ts",
+        "src/utils/segmentWords.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/hooks/useNarrationCaching.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/utils/foliateHelpers.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/segmentWords.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/generationPipeline.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/narrationPlanner.ts",
+        "src/utils/pauseDetection.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/ttsCache.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/utils/backgroundCacher.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/narrationPlanner.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/narrationPlanner.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import-type-node",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/highlightSyncController.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/chunkReading.ts",
+        "src/utils/timingMetadataStore.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/timingMetadataStore.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/kokoroRatePlan.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/ttsPreview.ts",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/utils/audio/segmentKokoroChunk.ts",
+        "src/utils/audio/tempoStretch.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/kokoroStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/useKokoroSettingsStatus.ts",
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/mediaSessionBridge.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/pauseDetection.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/narration.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/narrateDiagnostics.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/ttsProviderRegistry.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/ttsProvider.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/ttsProviderRegistry.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/narratePerf.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/narrationPlanner.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/pauseDetection.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/utils/generationPipeline.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/narrationPortability.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/NarrationDataSection.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/naturalChunks.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/chunkReading.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types/chunkReading.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/pauseDetection.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/utils/generationPipeline.ts",
+        "src/utils/mediaSessionBridge.ts",
+        "src/utils/narrationPlanner.ts",
+        "src/utils/rhythm.ts",
+        "src/utils/streamAccumulator.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/persistentReadingAnchor.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/usePersistentReadingAnchor.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/pronunciationOverrides.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/utils/segmentNormalizer.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/queue.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReadingQueue.tsx",
+        "src/hooks/useFlowScrollSync.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/qwenStatus.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/hooks/useNarration.ts",
+        "src/hooks/useQwenPrototypeStatus.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/readingGoals.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useReadingGoals.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/rhythm.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/pauseDetection.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/components/ScrollReaderView.tsx",
+        "src/hooks/useReader.ts",
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/segmentNormalizer.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/pronunciationOverrides.ts",
+        "src/utils/segmentWords.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/utils/ttsCacheIdentity.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pronunciationOverrides.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/segmentWords.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/segmentWords.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/utils/foliateHelpers.ts",
+        "src/utils/foliateWordWrapping.ts",
+        "src/utils/segmentNormalizer.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/silenceAwareCursor.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types/narration.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/narration.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/spokenWordFilter.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/startWordIndex.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useReaderMode.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/streamAccumulator.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/audioScheduler.ts"
+      ],
+      "typeOnlyImports": [
+        "src/utils/pauseDetection.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/qwenStreamingStrategy.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/pauseDetection.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/text.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/PageReaderView.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ReadingQueue.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/hooks/useReader.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "re-export",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/timingMetadataStore.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/types/ttsCache.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/ttsProvider.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/useNarration.ts",
+        "src/utils/audioScheduler.ts",
+        "src/utils/highlightSyncController.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/ttsCache.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/types/ttsCache.ts"
+      ],
+      "typeOnlyImports": [
+        "src/utils/audioScheduler.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/utils/backgroundCacher.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/utils/audioScheduler.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/ttsCacheIdentity.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/constants.ts",
+        "src/utils/segmentNormalizer.ts"
+      ],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/ttsCache.ts",
+        "src/types/ttsProvider.ts"
+      ],
+      "importedBy": [
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/utils/backgroundCacher.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/constants.ts",
+          "kind": "import",
+          "typeOnly": false
+        },
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsCache.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/utils/segmentNormalizer.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    },
+    {
+      "path": "src/utils/ttsEvalTrace.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types/eval.ts"
+      ],
+      "importedBy": [
+        "src/components/ReaderContainer.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/types/eval.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/ttsProviderRegistry.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [
+        "src/types.ts",
+        "src/types/ttsProvider.ts"
+      ],
+      "importedBy": [
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/TtsEngineSelector.tsx",
+        "src/utils/narrateDiagnostics.ts"
+      ],
+      "edges": [
+        {
+          "to": "src/types.ts",
+          "kind": "import",
+          "typeOnly": true
+        },
+        {
+          "to": "src/types/ttsProvider.ts",
+          "kind": "import",
+          "typeOnly": true
+        }
+      ]
+    },
+    {
+      "path": "src/utils/voiceSelection.ts",
+      "existingSite": false,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/hooks/useNarration.ts"
+      ],
+      "edges": []
+    },
+    {
+      "path": "src/utils/wordPositionIndex.ts",
+      "existingSite": true,
+      "liveInProduction": true,
+      "reachableAtRuntime": true,
+      "runtimeImports": [
+        "src/utils/foliateHelpers.ts"
+      ],
+      "typeOnlyImports": [],
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ],
+      "edges": [
+        {
+          "to": "src/utils/foliateHelpers.ts",
+          "kind": "import",
+          "typeOnly": false
+        }
+      ]
+    }
+  ],
+  "externalPackages": [
+    {
+      "name": "foliate-js",
+      "importedBy": [
+        "src/components/FoliatePageView.tsx"
+      ]
+    },
+    {
+      "name": "react",
+      "importedBy": [
+        "src/components/BacktrackPrompt.tsx",
+        "src/components/DefinitionPopup.tsx",
+        "src/components/EinkRefreshOverlay.tsx",
+        "src/components/ErrorBoundary.tsx",
+        "src/components/FlowText.tsx",
+        "src/components/FoliatePageView.tsx",
+        "src/components/HighlightMenu.tsx",
+        "src/components/HotkeyCoach.tsx",
+        "src/components/MenuFlap.tsx",
+        "src/components/NotePopover.tsx",
+        "src/components/PageReaderView.tsx",
+        "src/components/PausedTextView.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ReadingQueue.tsx",
+        "src/components/ReturnToReadingPill.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/components/ThemeProvider.tsx",
+        "src/components/VirtualScrollText.tsx",
+        "src/components/settings/CacheSizeDisplay.tsx",
+        "src/components/settings/CloudSyncSettings.tsx",
+        "src/components/settings/ConnectorsSettings.tsx",
+        "src/components/settings/HelpSettings.tsx",
+        "src/components/settings/LibraryLayoutSettings.tsx",
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/components/settings/ReadingGoalsSettings.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/ThemeSettings.tsx",
+        "src/components/settings/useKokoroSettingsStatus.ts",
+        "src/components/settings/useMossNanoSettingsStatus.ts",
+        "src/components/settings/usePocketTtsSettingsStatus.ts",
+        "src/contexts/SettingsContext.tsx",
+        "src/contexts/ToastContext.tsx",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useEinkController.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useFocusTrap.ts",
+        "src/hooks/useFoliateSync.ts",
+        "src/hooks/useKeyboardShortcuts.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/usePersistentReadingAnchor.ts",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useQwenPrototypeStatus.ts",
+        "src/hooks/useReader.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/hooks/useReadingGoals.ts",
+        "src/hooks/useReadingModeInstance.ts",
+        "src/reader/useReaderModeOrchestrator.ts"
+      ]
+    },
+    {
+      "name": "react-dom",
+      "importedBy": [
+        "src/components/MenuFlap.tsx"
+      ]
+    }
+  ],
+  "unresolved": [],
+  "productionEntry": "src/main.tsx",
+  "existingSitesNotReachableFromProductionEntry": [
+    {
+      "path": "src/reader/anchors/useCurrentWordAnchor.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/modes/ModeInterface.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/hooks/useReadingModeInstance.ts",
+        "src/modes/FlowMode.ts",
+        "src/modes/FocusMode.ts",
+        "src/modes/PageMode.ts",
+        "src/modes/index.ts",
+        "src/reader/modes/FlowModeAdapter.ts",
+        "src/reader/modes/FocusModeAdapter.ts"
+      ]
+    },
+    {
+      "path": "src/modes/index.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/reader/modes/FocusModeAdapter.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/reader/modes/FlowModeAdapter.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/reader/modes/NarrateModeAdapter.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/utils/FlowCursorController.ts",
+      "runtimeImportersInSrc": [
+        "src/components/PageReaderView.tsx"
+      ],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/components/FlowText.tsx",
+      "runtimeImportersInSrc": [
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/components/PageReaderView.tsx",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/components/ReaderContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/components/ScrollReaderView.tsx",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/components/ReaderContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/components/VirtualScrollText.tsx",
+      "runtimeImportersInSrc": [
+        "src/components/ScrollReaderView.tsx"
+      ],
+      "typeOnlyImportersInSrc": []
+    },
+    {
+      "path": "src/reader/surface/SurfaceCommand.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/reader/modes/FlowModeAdapter.ts",
+        "src/reader/modes/NarrateModeAdapter.ts"
+      ]
+    },
+    {
+      "path": "src/types.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/App.tsx",
+        "src/components/CloudSyncIndicator.tsx",
+        "src/components/CommandPalette.tsx",
+        "src/components/DocCard.tsx",
+        "src/components/DocGridCard.tsx",
+        "src/components/FoliatePageView.tsx",
+        "src/components/GoalProgressWidget.tsx",
+        "src/components/LibraryContainer.tsx",
+        "src/components/LibraryView.tsx",
+        "src/components/MenuFlap.tsx",
+        "src/components/PageReaderView.tsx",
+        "src/components/PausedTextView.tsx",
+        "src/components/ReaderBottomBar.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/components/ReaderView.tsx",
+        "src/components/ReadingQueue.tsx",
+        "src/components/ScrollReaderView.tsx",
+        "src/components/SettingsMenu.tsx",
+        "src/components/StatsPanel.tsx",
+        "src/components/settings/CloudSyncSettings.tsx",
+        "src/components/settings/KokoroStatusSection.tsx",
+        "src/components/settings/LayoutSettings.tsx",
+        "src/components/settings/LibraryLayoutSettings.tsx",
+        "src/components/settings/NarrationDataSection.tsx",
+        "src/components/settings/PauseSettingsSection.tsx",
+        "src/components/settings/PronunciationOverridesEditor.tsx",
+        "src/components/settings/QwenRuntimeSetupSection.tsx",
+        "src/components/settings/ReadingGoalsSettings.tsx",
+        "src/components/settings/SpeedReadingSettings.tsx",
+        "src/components/settings/TTSSettings.tsx",
+        "src/components/settings/TextSizeSettings.tsx",
+        "src/components/settings/ThemeSettings.tsx",
+        "src/components/settings/TtsEngineSelector.tsx",
+        "src/components/settings/qwenStatusPresentation.ts",
+        "src/components/settings/ttsPreview.ts",
+        "src/components/settings/useKokoroSettingsStatus.ts",
+        "src/components/settings/useMossNanoSettingsStatus.ts",
+        "src/components/settings/usePocketTtsSettingsStatus.ts",
+        "src/constants.ts",
+        "src/contexts/SettingsContext.tsx",
+        "src/contexts/ToastContext.tsx",
+        "src/hooks/narration/kokoroStrategy.ts",
+        "src/hooks/narration/mossNanoStrategy.ts",
+        "src/hooks/narration/pocketTtsStrategy.ts",
+        "src/hooks/narration/qwenStrategy.ts",
+        "src/hooks/narration/qwenStreamingStrategy.ts",
+        "src/hooks/useDocumentLifecycle.ts",
+        "src/hooks/useEinkController.ts",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/hooks/useKeyboardShortcuts.ts",
+        "src/hooks/useLibrary.ts",
+        "src/hooks/useNarration.ts",
+        "src/hooks/useNarrationCaching.ts",
+        "src/hooks/useNarrationSync.ts",
+        "src/hooks/useProgressTracker.ts",
+        "src/hooks/useQwenPrototypeStatus.ts",
+        "src/hooks/useReader.ts",
+        "src/hooks/useReaderMode.ts",
+        "src/hooks/useReadingGoals.ts",
+        "src/hooks/useReadingModeInstance.ts",
+        "src/reader/useReaderModeOrchestrator.ts",
+        "src/test-harness/electron-api-stub.ts",
+        "src/test-harness/mock-kokoro.ts",
+        "src/types/narration.ts",
+        "src/types/ttsCache.ts",
+        "src/types/ttsProvider.ts",
+        "src/utils/backgroundCacher.ts",
+        "src/utils/foliateStyles.ts",
+        "src/utils/kokoroStatus.ts",
+        "src/utils/loadDocResult.ts",
+        "src/utils/narrateDiagnostics.ts",
+        "src/utils/narrationContinuity.ts",
+        "src/utils/narrationPortability.ts",
+        "src/utils/pronunciationOverrides.ts",
+        "src/utils/qwenStatus.ts",
+        "src/utils/readingGoals.ts",
+        "src/utils/rhythm.ts",
+        "src/utils/segmentNormalizer.ts",
+        "src/utils/timingMetadataStore.ts",
+        "src/utils/ttsCacheIdentity.ts",
+        "src/utils/ttsProviderRegistry.ts"
+      ]
+    },
+    {
+      "path": "src/types/chunkReading.ts",
+      "runtimeImportersInSrc": [],
+      "typeOnlyImportersInSrc": [
+        "src/components/FoliatePageView.tsx",
+        "src/components/ReaderContainer.tsx",
+        "src/hooks/useFlowScrollSync.ts",
+        "src/types/narration.ts",
+        "src/utils/FlowScrollEngine.ts",
+        "src/utils/chunkReadingVisualState.ts",
+        "src/utils/foliateWordHighlight.ts",
+        "src/utils/highlightSyncController.ts",
+        "src/utils/naturalChunks.ts"
+      ]
+    }
+  ],
+  "importersOutsideGraph": [
+    {
+      "path": "src/assets/blurby-icon.png",
+      "importers": [
+        "src/components/LibraryView.tsx"
+      ]
+    },
+    {
+      "path": "src/components/ErrorBoundary.tsx",
+      "importers": [
+        "src/App.tsx",
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/components/HotkeyCoach.tsx",
+      "importers": [
+        "src/App.tsx",
+        "src/components/DocCard.tsx",
+        "src/components/DocGridCard.tsx",
+        "src/components/LibraryView.tsx"
+      ]
+    },
+    {
+      "path": "src/components/MenuFlap.tsx",
+      "importers": [
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/components/ReaderContainer.tsx",
+      "importers": [
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/components/ReaderView.tsx",
+      "importers": [
+        "src/App.tsx"
+      ]
+    },
+    {
+      "path": "src/components/ThemeProvider.tsx",
+      "importers": [
+        "src/App.tsx",
+        "src/components/LibraryView.tsx"
+      ]
+    },
+    {
+      "path": "src/constants.ts",
+      "importers": [
+        "src/App.tsx",
+        "src/components/GoToIndicator.tsx",
+        "src/components/ImportConfirmDialog.tsx",
+        "src/components/LibraryContainer.tsx",
+        "src/components/LibraryView.tsx",
+        "src/components/QuickSettingsPopover.tsx",
+        "src/components/StatsPanel.tsx",
+        "src/hooks/useLibrary.ts",
+        "src/utils/narrationContinuity.ts"
+      ]
+    },
+    {
+      "path": "src/contexts/SettingsContext.tsx",
+      "importers": [
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/contexts/ToastContext.tsx",
+      "importers": [
+        "src/components/BugReportModal.tsx",
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/hooks/useFocusTrap.ts",
+      "importers": [
+        "src/components/CommandPalette.tsx",
+        "src/components/HighlightsOverlay.tsx",
+        "src/components/MetadataWizard.tsx",
+        "src/components/OnboardingOverlay.tsx",
+        "src/components/QuickSettingsPopover.tsx",
+        "src/components/ShortcutsOverlay.tsx",
+        "src/components/SnoozePickerOverlay.tsx",
+        "src/components/TagPickerOverlay.tsx"
+      ]
+    },
+    {
+      "path": "src/hooks/useKeyboardShortcuts.ts",
+      "importers": [
+        "src/App.tsx",
+        "src/components/LibraryContainer.tsx"
+      ]
+    },
+    {
+      "path": "src/hooks/useReader.ts",
+      "importers": [
+        "src/App.tsx"
+      ]
+    },
+    {
+      "path": "src/styles/index.css",
+      "importers": [
+        "src/main.tsx"
+      ]
+    },
+    {
+      "path": "src/types.ts",
+      "importers": [
+        "src/App.tsx",
+        "src/components/CloudSyncIndicator.tsx",
+        "src/components/CommandPalette.tsx",
+        "src/components/DocCard.tsx",
+        "src/components/DocGridCard.tsx",
+        "src/components/GoalProgressWidget.tsx",
+        "src/components/LibraryContainer.tsx",
+        "src/components/LibraryView.tsx",
+        "src/components/StatsPanel.tsx",
+        "src/components/settings/TextSizeSettings.tsx",
+        "src/hooks/useLibrary.ts",
+        "src/test-harness/electron-api-stub.ts",
+        "src/test-harness/mock-kokoro.ts",
+        "src/utils/loadDocResult.ts",
+        "src/utils/narrationContinuity.ts"
+      ]
+    },
+    {
+      "path": "src/utils/narrateDiagnostics.ts",
+      "importers": [
+        "src/components/LibraryContainer.tsx",
+        "src/utils/bugReportState.ts"
+      ]
+    },
+    {
+      "path": "src/utils/queue.ts",
+      "importers": [
+        "src/components/DocCard.tsx"
+      ]
+    },
+    {
+      "path": "src/utils/readingGoals.ts",
+      "importers": [
+        "src/components/GoalProgressWidget.tsx"
+      ]
+    },
+    {
+      "path": "src/utils/text.ts",
+      "importers": [
+        "src/App.tsx",
+        "src/components/DocCard.tsx",
+        "src/components/DocGridCard.tsx",
+        "src/components/LibraryView.tsx"
+      ]
+    }
+  ],
+  "transitiveHelpersOutsideExistingSites": [
+    "src/assets/blurby-icon.png",
+    "src/components/BacktrackPrompt.tsx",
+    "src/components/DefinitionPopup.tsx",
+    "src/components/EinkRefreshOverlay.tsx",
+    "src/components/ErrorBoundary.tsx",
+    "src/components/HighlightMenu.tsx",
+    "src/components/HotkeyCoach.tsx",
+    "src/components/MenuFlap.tsx",
+    "src/components/NotePopover.tsx",
+    "src/components/ProgressBar.tsx",
+    "src/components/ReadingQueue.tsx",
+    "src/components/ReturnToReadingPill.tsx",
+    "src/components/SettingsMenu.tsx",
+    "src/components/ThemeProvider.tsx",
+    "src/components/WpmGauge.tsx",
+    "src/components/settings/CacheSizeDisplay.tsx",
+    "src/components/settings/CloudSyncSettings.tsx",
+    "src/components/settings/ConnectorsSettings.tsx",
+    "src/components/settings/HelpSettings.tsx",
+    "src/components/settings/HotkeyMapSettings.tsx",
+    "src/components/settings/KokoroStatusSection.tsx",
+    "src/components/settings/LayoutSettings.tsx",
+    "src/components/settings/LibraryLayoutSettings.tsx",
+    "src/components/settings/MossNanoStatusSection.tsx",
+    "src/components/settings/NarrationDataSection.tsx",
+    "src/components/settings/PauseSettingsSection.tsx",
+    "src/components/settings/PocketTtsStatusSection.tsx",
+    "src/components/settings/PronunciationOverridesEditor.tsx",
+    "src/components/settings/QwenRuntimeSetupSection.tsx",
+    "src/components/settings/QwenStatusSection.tsx",
+    "src/components/settings/ReadingGoalsSettings.tsx",
+    "src/components/settings/SpeedReadingSettings.tsx",
+    "src/components/settings/TTSSettings.tsx",
+    "src/components/settings/ThemeSettings.tsx",
+    "src/components/settings/TtsEngineSelector.tsx",
+    "src/components/settings/qwenStatusPresentation.ts",
+    "src/components/settings/ttsPreview.ts",
+    "src/components/settings/useKokoroSettingsStatus.ts",
+    "src/components/settings/useMossNanoSettingsStatus.ts",
+    "src/components/settings/usePocketTtsSettingsStatus.ts",
+    "src/contexts/SettingsContext.tsx",
+    "src/contexts/ToastContext.tsx",
+    "src/hooks/narration/kokoroStrategy.ts",
+    "src/hooks/narration/mossNanoStrategy.ts",
+    "src/hooks/narration/pocketTtsStrategy.ts",
+    "src/hooks/narration/qwenStrategy.ts",
+    "src/hooks/narration/qwenStreamingStrategy.ts",
+    "src/hooks/narration/webSpeechStrategy.ts",
+    "src/hooks/useEinkController.ts",
+    "src/hooks/useFocusTrap.ts",
+    "src/hooks/useNarration.ts",
+    "src/hooks/useProgressTracker.ts",
+    "src/hooks/useQwenPrototypeStatus.ts",
+    "src/hooks/useReadingGoals.ts",
+    "src/styles/keyboard.css",
+    "src/styles/library.css",
+    "src/styles/onboarding.css",
+    "src/styles/tts-settings.css",
+    "src/types/ttsCache.ts",
+    "src/utils/audio/segmentKokoroChunk.ts",
+    "src/utils/audio/tempoStretch.ts",
+    "src/utils/audioPlayer.ts",
+    "src/utils/audioScheduler.ts",
+    "src/utils/backgroundCacher.ts",
+    "src/utils/dualSourceDiag.ts",
+    "src/utils/einkErgonomics.ts",
+    "src/utils/generationPipeline.ts",
+    "src/utils/highlightSyncController.ts",
+    "src/utils/kokoroRatePlan.ts",
+    "src/utils/kokoroStatus.ts",
+    "src/utils/mediaSessionBridge.ts",
+    "src/utils/narrateDiagnostics.ts",
+    "src/utils/narratePerf.ts",
+    "src/utils/narrationPlanner.ts",
+    "src/utils/narrationPortability.ts",
+    "src/utils/naturalChunks.ts",
+    "src/utils/pauseDetection.ts",
+    "src/utils/pronunciationOverrides.ts",
+    "src/utils/queue.ts",
+    "src/utils/qwenStatus.ts",
+    "src/utils/readingGoals.ts",
+    "src/utils/rhythm.ts",
+    "src/utils/segmentNormalizer.ts",
+    "src/utils/segmentWords.ts",
+    "src/utils/spokenWordFilter.ts",
+    "src/utils/streamAccumulator.ts",
+    "src/utils/text.ts",
+    "src/utils/timingMetadataStore.ts",
+    "src/utils/ttsCache.ts",
+    "src/utils/ttsCacheIdentity.ts",
+    "src/utils/ttsEvalTrace.ts",
+    "src/utils/ttsProviderRegistry.ts",
+    "src/utils/voiceSelection.ts"
+  ],
+  "typeOnlyReachableOutsideExistingSites": [
+    "src/reader/modes/ReaderModeAdapter.ts",
+    "src/types/eval.ts",
+    "src/types/qwenStreaming.ts",
+    "src/types/ttsProvider.ts"
+  ],
+  "proposedModeCopies": {
+    "policySource": "docs/planning/roadmap-reviews/reader-mode-separation-2/census/mode-copy-policy.json",
+    "method": "For each mode, walk runtime edges from its policy entrypoints, stopping at allowed-shared, shell-only and Narrate TTS-port modules; keep a helper only if modeHelperUsers lists the mode (or it is unlisted). Destination = src/reader/modes/<mode>/helpers/<basename> (spec item 2). Planned layout files (ModeRuntime.ts, FoliateView.tsx, ...) absorb existing-site bodies per the edit-site table; helper copies are listed here regardless so every touched source has an exact destination.",
+    "policyGaps": [],
+    "destinationCollisions": {},
+    "page": [
+      {
+        "source": "src/hooks/usePersistentReadingAnchor.ts",
+        "destination": "src/reader/modes/page/helpers/usePersistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Spec item: mode-specific anchor policy may land in ModeState.ts instead; listed as a helper copy so every touched source has an exact destination."
+      },
+      {
+        "source": "src/utils/foliateAnchorNavigation.ts",
+        "destination": "src/reader/modes/page/helpers/foliateAnchorNavigation.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateHelpers.ts",
+        "destination": "src/reader/modes/page/helpers/foliateHelpers.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Contains module-level BLOCK_TAGS (new Set, never mutated); each copy owns its own."
+      },
+      {
+        "source": "src/utils/foliateLayout.ts",
+        "destination": "src/reader/modes/page/helpers/foliateLayout.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateStyles.ts",
+        "destination": "src/reader/modes/page/helpers/foliateStyles.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordHighlight.ts",
+        "destination": "src/reader/modes/page/helpers/foliateWordHighlight.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordOffsets.ts",
+        "destination": "src/reader/modes/page/helpers/foliateWordOffsets.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordWrapping.ts",
+        "destination": "src/reader/modes/page/helpers/foliateWordWrapping.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/persistentReadingAnchor.ts",
+        "destination": "src/reader/modes/page/helpers/persistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/startWordIndex.ts",
+        "destination": "src/reader/modes/page/helpers/startWordIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/wordPositionIndex.ts",
+        "destination": "src/reader/modes/page/helpers/wordPositionIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Class instance is created once per FoliatePageView today (shared by all modes); each mode's FoliateView must construct its own."
+      }
+    ],
+    "focus": [
+      {
+        "source": "src/hooks/usePersistentReadingAnchor.ts",
+        "destination": "src/reader/modes/focus/helpers/usePersistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Spec item: mode-specific anchor policy may land in ModeState.ts instead; listed as a helper copy so every touched source has an exact destination."
+      },
+      {
+        "source": "src/utils/einkErgonomics.ts",
+        "destination": "src/reader/modes/focus/helpers/einkErgonomics.ts",
+        "sourceIsExistingSite": false,
+        "liveInProduction": true,
+        "note": "Focus display (buildEinkFocusPhrase); the shell keeps nextEinkGhostingLoad via useEinkController."
+      },
+      {
+        "source": "src/utils/foliateAnchorNavigation.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateAnchorNavigation.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateHelpers.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateHelpers.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Contains module-level BLOCK_TAGS (new Set, never mutated); each copy owns its own."
+      },
+      {
+        "source": "src/utils/foliateLayout.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateLayout.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateStyles.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateStyles.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordHighlight.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateWordHighlight.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordOffsets.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateWordOffsets.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordWrapping.ts",
+        "destination": "src/reader/modes/focus/helpers/foliateWordWrapping.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/pauseDetection.ts",
+        "destination": "src/reader/modes/focus/helpers/pauseDetection.ts",
+        "sourceIsExistingSite": false,
+        "liveInProduction": true,
+        "note": "Pulled in by rhythm.ts copies. The TTS port keeps the original for narration."
+      },
+      {
+        "source": "src/utils/persistentReadingAnchor.ts",
+        "destination": "src/reader/modes/focus/helpers/persistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/rhythm.ts",
+        "destination": "src/reader/modes/focus/helpers/rhythm.ts",
+        "sourceIsExistingSite": false,
+        "liveInProduction": true,
+        "note": "Focus (FocusMode, useReader) and Flow (FlowMode, half-duration pauses) pacing. rhythm imports pauseDetection, which the TTS pipeline also uses; each mode's copy brings its own helpers/pauseDetection.ts."
+      },
+      {
+        "source": "src/utils/startWordIndex.ts",
+        "destination": "src/reader/modes/focus/helpers/startWordIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/wordPositionIndex.ts",
+        "destination": "src/reader/modes/focus/helpers/wordPositionIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Class instance is created once per FoliatePageView today (shared by all modes); each mode's FoliateView must construct its own."
+      }
+    ],
+    "flow": [
+      {
+        "source": "src/hooks/usePersistentReadingAnchor.ts",
+        "destination": "src/reader/modes/flow/helpers/usePersistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Spec item: mode-specific anchor policy may land in ModeState.ts instead; listed as a helper copy so every touched source has an exact destination."
+      },
+      {
+        "source": "src/utils/FlowScrollEngine.ts",
+        "destination": "src/reader/modes/flow/helpers/FlowScrollEngine.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Page/Focus/Narrate FoliateView copies import only the string constant FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY (+ a type) from this module; inline that constant (or move it to the type contract) instead of copying the engine. Narrate today never runs this engine (useFlowScrollSync effect 1 requires readingMode==='flow'); its retargetActiveModeToWord jumpToWord call targets a stopped Flow engine."
+      },
+      {
+        "source": "src/utils/chunkReadingVisualState.ts",
+        "destination": "src/reader/modes/flow/helpers/chunkReadingVisualState.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Flow (publishFlowVisualState, syncLevel wpm) and Narrate (ReaderContainer applyNarration*, syncLevel word/chunk) publish into one shared chunkReadingVisualState today."
+      },
+      {
+        "source": "src/utils/foliateAnchorNavigation.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateAnchorNavigation.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateHelpers.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateHelpers.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Contains module-level BLOCK_TAGS (new Set, never mutated); each copy owns its own."
+      },
+      {
+        "source": "src/utils/foliateLayout.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateLayout.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateStyles.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateStyles.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordHighlight.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateWordHighlight.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordOffsets.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateWordOffsets.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordWrapping.ts",
+        "destination": "src/reader/modes/flow/helpers/foliateWordWrapping.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/pauseDetection.ts",
+        "destination": "src/reader/modes/flow/helpers/pauseDetection.ts",
+        "sourceIsExistingSite": false,
+        "liveInProduction": true,
+        "note": "Pulled in by rhythm.ts copies. The TTS port keeps the original for narration."
+      },
+      {
+        "source": "src/utils/persistentReadingAnchor.ts",
+        "destination": "src/reader/modes/flow/helpers/persistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/rhythm.ts",
+        "destination": "src/reader/modes/flow/helpers/rhythm.ts",
+        "sourceIsExistingSite": false,
+        "liveInProduction": true,
+        "note": "Focus (FocusMode, useReader) and Flow (FlowMode, half-duration pauses) pacing. rhythm imports pauseDetection, which the TTS pipeline also uses; each mode's copy brings its own helpers/pauseDetection.ts."
+      },
+      {
+        "source": "src/utils/startWordIndex.ts",
+        "destination": "src/reader/modes/flow/helpers/startWordIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/wordPositionIndex.ts",
+        "destination": "src/reader/modes/flow/helpers/wordPositionIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Class instance is created once per FoliatePageView today (shared by all modes); each mode's FoliateView must construct its own."
+      }
+    ],
+    "narrate": [
+      {
+        "source": "src/hooks/usePersistentReadingAnchor.ts",
+        "destination": "src/reader/modes/narrate/helpers/usePersistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Spec item: mode-specific anchor policy may land in ModeState.ts instead; listed as a helper copy so every touched source has an exact destination."
+      },
+      {
+        "source": "src/utils/chunkReadingVisualState.ts",
+        "destination": "src/reader/modes/narrate/helpers/chunkReadingVisualState.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Flow (publishFlowVisualState, syncLevel wpm) and Narrate (ReaderContainer applyNarration*, syncLevel word/chunk) publish into one shared chunkReadingVisualState today."
+      },
+      {
+        "source": "src/utils/foliateAnchorNavigation.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateAnchorNavigation.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateHelpers.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateHelpers.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Contains module-level BLOCK_TAGS (new Set, never mutated); each copy owns its own."
+      },
+      {
+        "source": "src/utils/foliateLayout.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateLayout.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateStyles.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateStyles.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordHighlight.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateWordHighlight.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordOffsets.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateWordOffsets.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/foliateWordWrapping.ts",
+        "destination": "src/reader/modes/narrate/helpers/foliateWordWrapping.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/persistentReadingAnchor.ts",
+        "destination": "src/reader/modes/narrate/helpers/persistentReadingAnchor.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/startWordIndex.ts",
+        "destination": "src/reader/modes/narrate/helpers/startWordIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true
+      },
+      {
+        "source": "src/utils/wordPositionIndex.ts",
+        "destination": "src/reader/modes/narrate/helpers/wordPositionIndex.ts",
+        "sourceIsExistingSite": true,
+        "liveInProduction": true,
+        "note": "Class instance is created once per FoliatePageView today (shared by all modes); each mode's FoliateView must construct its own."
+      }
+    ],
+    "layoutAbsorption": {
+      "page": [
+        {
+          "source": "src/components/FoliatePageView.tsx",
+          "destination": "src/reader/modes/page/FoliateView.tsx"
+        },
+        {
+          "source": "src/components/ReaderContainer.tsx",
+          "destination": "src/reader/modes/page/useModeBindings.ts",
+          "note": "(onRelocate soft-selection/progress, onLoad restore, onWordClick page path)"
+        },
+        {
+          "source": "src/hooks/useDocumentLifecycle.ts",
+          "destination": "src/reader/modes/page/ModeState.ts",
+          "note": "(resumeAnchorRef/userExplicitSelectionRef page policy)"
+        },
+        {
+          "source": "src/hooks/useFoliateSync.ts",
+          "destination": "src/reader/modes/page/useModeBindings.ts",
+          "note": "(browse-away polling)"
+        },
+        {
+          "source": "src/hooks/useReadingModeInstance.ts",
+          "destination": "src/reader/modes/page/ModeRuntime.ts",
+          "note": "(page branch of createInstance)"
+        },
+        {
+          "source": "src/modes/PageMode.ts",
+          "destination": "src/reader/modes/page/ModeRuntime.ts"
+        },
+        {
+          "source": "src/styles/page-reader.css",
+          "destination": "src/reader/modes/page/mode.css"
+        },
+        {
+          "source": "src/styles/reader.css",
+          "destination": "src/reader/modes/page/mode.css",
+          "note": "(page selectors only)"
+        }
+      ],
+      "focus": [
+        {
+          "source": "src/components/FoliatePageView.tsx",
+          "destination": "src/reader/modes/focus/FoliateView.tsx",
+          "note": "(scrolled surface under the Focus overlay)"
+        },
+        {
+          "source": "src/components/PausedTextView.tsx",
+          "destination": "src/reader/modes/focus/TextView.tsx"
+        },
+        {
+          "source": "src/components/ReaderView.tsx",
+          "destination": "src/reader/modes/focus/ModeView.tsx"
+        },
+        {
+          "source": "src/hooks/useDocumentLifecycle.ts",
+          "destination": "src/reader/modes/focus/ModeState.ts",
+          "note": "(RSVP throttled progress save, resume refs)"
+        },
+        {
+          "source": "src/hooks/useFoliateSync.ts",
+          "destination": "src/reader/modes/focus/useModeBindings.ts",
+          "note": "(section navigation, browse-away polling)"
+        },
+        {
+          "source": "src/hooks/useReader.ts",
+          "destination": "src/reader/modes/focus/ModeRuntime.ts",
+          "note": "(RSVP display state; its rAF tick is only started by StandaloneReader)"
+        },
+        {
+          "source": "src/hooks/useReaderMode.ts",
+          "destination": "src/reader/modes/focus/useModeBindings.ts",
+          "note": "(startFocus, captureCurrentAnchor focus branch)"
+        },
+        {
+          "source": "src/hooks/useReadingModeInstance.ts",
+          "destination": "src/reader/modes/focus/ModeRuntime.ts",
+          "note": "(focus branch of createInstance)"
+        },
+        {
+          "source": "src/modes/FocusMode.ts",
+          "destination": "src/reader/modes/focus/ModeRuntime.ts"
+        },
+        {
+          "source": "src/reader/modes/FocusModeAdapter.ts",
+          "destination": "src/reader/modes/focus/ModeRuntime.ts"
+        },
+        {
+          "source": "src/styles/reader.css",
+          "destination": "src/reader/modes/focus/mode.css",
+          "note": "(focus/RSVP selectors)"
+        }
+      ],
+      "flow": [
+        {
+          "source": "src/components/FoliatePageView.tsx",
+          "destination": "src/reader/modes/flow/FoliateView.tsx"
+        },
+        {
+          "source": "src/hooks/useDocumentLifecycle.ts",
+          "destination": "src/reader/modes/flow/ModeState.ts",
+          "note": "(resume refs; cross-book timer cleanup)"
+        },
+        {
+          "source": "src/hooks/useFlowScrollSync.ts",
+          "destination": "src/reader/modes/flow/useModeBindings.ts"
+        },
+        {
+          "source": "src/hooks/useFoliateSync.ts",
+          "destination": "src/reader/modes/flow/useModeBindings.ts",
+          "note": "(section navigation, browse-away polling)"
+        },
+        {
+          "source": "src/hooks/useReaderMode.ts",
+          "destination": "src/reader/modes/flow/useModeBindings.ts",
+          "note": "(startFlow targetMode=flow)"
+        },
+        {
+          "source": "src/hooks/useReadingModeInstance.ts",
+          "destination": "src/reader/modes/flow/ModeRuntime.ts",
+          "note": "(flow branch incl. pause-on-miss bridge and pendingResumeRef)"
+        },
+        {
+          "source": "src/modes/FlowMode.ts",
+          "destination": "src/reader/modes/flow/ModeRuntime.ts"
+        },
+        {
+          "source": "src/reader/modes/FlowModeAdapter.ts",
+          "destination": "src/reader/modes/flow/ModeRuntime.ts"
+        },
+        {
+          "source": "src/styles/flow.css",
+          "destination": "src/reader/modes/flow/mode.css"
+        },
+        {
+          "source": "src/styles/page-reader.css",
+          "destination": "src/reader/modes/flow/mode.css",
+          "note": "(foliate flow-surface selectors)"
+        }
+      ],
+      "narrate": [
+        {
+          "source": "src/components/FoliatePageView.tsx",
+          "destination": "src/reader/modes/narrate/FoliateView.tsx",
+          "note": "(narrate scroll-follow, displacement browse-away)"
+        },
+        {
+          "source": "src/components/ReaderContainer.tsx",
+          "destination": "src/reader/modes/narrate/useModeBindings.ts",
+          "note": "(applyNarrationActiveWord/ChunkBoundary/SegmentStart)"
+        },
+        {
+          "source": "src/hooks/useDocumentLifecycle.ts",
+          "destination": "src/reader/modes/narrate/ModeState.ts",
+          "note": "(narrationStateFlushRafRef/narrationStatePendingIdxRef)"
+        },
+        {
+          "source": "src/hooks/useFoliateSync.ts",
+          "destination": "src/reader/modes/narrate/useModeBindings.ts",
+          "note": "(section-end fallback wiring)"
+        },
+        {
+          "source": "src/hooks/useNarrationCaching.ts",
+          "destination": "src/reader/modes/narrate/useModeBindings.ts",
+          "note": "(TTS cache bridge; full-book extraction result crosses as a value)"
+        },
+        {
+          "source": "src/hooks/useNarrationSync.ts",
+          "destination": "src/reader/modes/narrate/useModeBindings.ts",
+          "note": "(TTS settings bridge)"
+        },
+        {
+          "source": "src/hooks/useReaderMode.ts",
+          "destination": "src/reader/modes/narrate/ModeRuntime.ts",
+          "note": "(installNarrateTruthSync, syncFoliateNarrationCursor, startFlow targetMode=narrate)"
+        },
+        {
+          "source": "src/reader/modes/NarrateModeAdapter.ts",
+          "destination": "src/reader/modes/narrate/ModeRuntime.ts"
+        },
+        {
+          "source": "src/styles/page-reader.css",
+          "destination": "src/reader/modes/narrate/mode.css",
+          "note": "(narrate cursor/chunk selectors)"
+        }
+      ]
+    }
+  },
+  "retireNotCopy": [
+    {
+      "path": "src/components/FlowText.tsx",
+      "liveInProduction": false,
+      "justification": "Only importer is ScrollReaderView (dead)."
+    },
+    {
+      "path": "src/components/PageReaderView.tsx",
+      "liveInProduction": false,
+      "justification": "Imported by ReaderContainer but never rendered: the binding is unused, so tsc/esbuild elide the import and the component is absent from the production bundle. ReaderContainer renders only FoliatePageView (+ ReaderView overlay) and shows a re-import error for non-EPUB docs. Spec asks to copy it into each TextView.tsx; recommend retiring instead (scope amendment)."
+    },
+    {
+      "path": "src/components/ScrollReaderView.tsx",
+      "liveInProduction": false,
+      "justification": "Same as PageReaderView: unused import in ReaderContainer, elided, not in the production bundle."
+    },
+    {
+      "path": "src/components/VirtualScrollText.tsx",
+      "liveInProduction": false,
+      "justification": "Only importer is ScrollReaderView (dead)."
+    },
+    {
+      "path": "src/modes/index.ts",
+      "liveInProduction": false,
+      "justification": "Barrel with no importer in src/ (CLEANUP-MODE-BARREL-1 scope)."
+    },
+    {
+      "path": "src/reader/anchors/useCurrentWordAnchor.ts",
+      "liveInProduction": false,
+      "justification": "No importer in src/ (tests only). Not wired into production."
+    },
+    {
+      "path": "src/utils/FlowCursorController.ts",
+      "liveInProduction": false,
+      "justification": "Only importer is PageReaderView (dead). useReadingModeInstance comments still describe it as the non-EPUB Flow driver."
+    }
+  ],
+  "allowedShared": [
+    {
+      "path": "src/assets/blurby-icon.png",
+      "category": "passive UI",
+      "justification": "Static asset."
+    },
+    {
+      "path": "src/components/DefinitionPopup.tsx",
+      "category": "passive UI",
+      "justification": "Presentational popup; fetches definition via IPC, no mode state."
+    },
+    {
+      "path": "src/components/ErrorBoundary.tsx",
+      "category": "passive UI",
+      "justification": "Generic React error boundary; no reader state."
+    },
+    {
+      "path": "src/components/HighlightMenu.tsx",
+      "category": "passive UI",
+      "justification": "Presentational context menu; local open/position state only."
+    },
+    {
+      "path": "src/components/NotePopover.tsx",
+      "category": "passive UI",
+      "justification": "Presentational popover (reached only through dead PageReaderView)."
+    },
+    {
+      "path": "src/components/ProgressBar.tsx",
+      "category": "passive UI",
+      "justification": "Presentational; props only."
+    },
+    {
+      "path": "src/components/WpmGauge.tsx",
+      "category": "passive UI",
+      "justification": "Presentational WPM gauge used by Focus view; props only."
+    },
+    {
+      "path": "src/constants.ts",
+      "category": "read-only tokens",
+      "justification": "Exported primitives/frozen values; no module-level mutation found by the census.",
+      "confidence": "low",
+      "reason": "Constants are not one of the five spec categories (types, immutable document preparation, theme tokens/passive UI, third-party, infrastructure ports). Either amend to allow read-only constants or copy each mode's constants into its directory; do not retune either way."
+    },
+    {
+      "path": "src/hooks/useFocusTrap.ts",
+      "category": "passive UI",
+      "justification": "Accessibility focus trap; DOM-local."
+    },
+    {
+      "path": "src/modes/ModeInterface.ts",
+      "category": "type contract",
+      "justification": "Interface/type declarations only; all edges type-only."
+    },
+    {
+      "path": "src/reader/surface/SurfaceCommand.ts",
+      "category": "type contract",
+      "justification": "Type union only; no runtime importer."
+    },
+    {
+      "path": "src/styles/base.css",
+      "category": "read-only theme tokens",
+      "justification": "Global base styles/tokens.",
+      "confidence": "low",
+      "reason": "Not yet audited selector-by-selector for mode classes; Wave B-D must move any mode selectors out."
+    },
+    {
+      "path": "src/styles/themes.css",
+      "category": "read-only theme tokens",
+      "justification": "Theme custom properties; spec keeps global theme tokens shared."
+    },
+    {
+      "path": "src/types.ts",
+      "category": "type contract",
+      "justification": "Every importer is type-only or elided at emit; no runtime exports reached."
+    },
+    {
+      "path": "src/types/chunkReading.ts",
+      "category": "type contract",
+      "justification": "Pure type declarations; all edges type-only."
+    },
+    {
+      "path": "src/types/narration.ts",
+      "category": "type contract",
+      "justification": "Section boundary/BookWordArray types are document contracts.",
+      "confidence": "low",
+      "reason": "File also exports runtime functions: findSectionForWord/globalToLocal (document section math, runtime-imported by useFoliateSync) and createInitialNarrationState/narrationReducer (TTS state machine used by useNarration). Spec calls it type-only; split the runtime functions out (section math -> document preparation, reducer -> TTS port) before G1 can treat it as a type contract."
+    },
+    {
+      "path": "src/types/ttsCache.ts",
+      "category": "type contract",
+      "justification": "TTS cache record types (reached via TTS port only)."
+    },
+    {
+      "path": "src/utils/dualSourceDiag.ts",
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Gated diagnostic logger; no reader state.",
+      "confidence": "low",
+      "reason": "Diagnostics is not one of the named ports (settings/persistence/document/audio); needs an explicit allowance or per-mode sinks."
+    },
+    {
+      "path": "src/utils/narrateDiagnostics.ts",
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Diagnostic event ring used by FoliatePageView/ReaderContainer/TTS.",
+      "confidence": "low",
+      "reason": "Holds process-global mutable module state (_events, _snapshots) written by every mode's FoliatePageView path; spec forbids module singleton state for modes. Needs an explicit diagnostics-port allowance."
+    },
+    {
+      "path": "src/utils/naturalChunks.ts",
+      "category": "immutable document/content preparation",
+      "justification": "buildNaturalChunks is a pure function of the token array."
+    },
+    {
+      "path": "src/utils/segmentWords.ts",
+      "category": "immutable document/content preparation",
+      "justification": "Pure Intl.Segmenter tokenization used by foliate word extraction."
+    },
+    {
+      "path": "src/utils/text.ts",
+      "category": "immutable document/content preparation",
+      "justification": "tokenizeWithMeta/detectChapters/countWords/focusChar are pure functions over document text; MINOR_WORDS is a never-mutated Set."
+    },
+    {
+      "path": "src/utils/ttsEvalTrace.ts",
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Eval-trace sink factory; created once in ReaderContainer.",
+      "confidence": "low",
+      "reason": "Diagnostics not a named port category."
+    },
+    {
+      "path": "src/utils/ttsProviderRegistry.ts",
+      "category": "infrastructure port (audio)",
+      "justification": "Provider registry snapshot (reached from narrateDiagnostics and settings UI)."
+    }
+  ],
+  "shellOnly": [
+    {
+      "path": "src/components/BacktrackPrompt.tsx",
+      "justification": "Shell prompt (progress tracker)."
+    },
+    {
+      "path": "src/components/EinkRefreshOverlay.tsx",
+      "justification": "Shell overlay."
+    },
+    {
+      "path": "src/components/HotkeyCoach.tsx",
+      "justification": "Hint chrome."
+    },
+    {
+      "path": "src/components/MenuFlap.tsx",
+      "justification": "Library/settings chrome."
+    },
+    {
+      "path": "src/components/ReaderBottomBar.tsx",
+      "justification": "Toolbar consuming immutable snapshots."
+    },
+    {
+      "path": "src/components/ReaderContainer.tsx",
+      "justification": "Document shell + toolbar + router host; mode branches move out (see layoutAbsorption)."
+    },
+    {
+      "path": "src/components/ReadingQueue.tsx",
+      "justification": "Library chrome."
+    },
+    {
+      "path": "src/components/ReturnToReadingPill.tsx",
+      "justification": "Shell pill; visibility derives from active-mode snapshot."
+    },
+    {
+      "path": "src/components/SettingsMenu.tsx",
+      "justification": "Settings chrome."
+    },
+    {
+      "path": "src/components/ThemeProvider.tsx",
+      "justification": "Theme chrome."
+    },
+    {
+      "path": "src/components/settings/CacheSizeDisplay.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/CloudSyncSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/ConnectorsSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/HelpSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/HotkeyMapSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/KokoroStatusSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/LayoutSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/LibraryLayoutSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/MossNanoStatusSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/NarrationDataSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/PauseSettingsSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/PocketTtsStatusSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/PronunciationOverridesEditor.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/QwenRuntimeSetupSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/QwenStatusSection.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/ReadingGoalsSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/SpeedReadingSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/TTSSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/ThemeSettings.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/TtsEngineSelector.tsx",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/qwenStatusPresentation.ts",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/ttsPreview.ts",
+      "justification": "Settings UI voice preview (owns its own audio player)."
+    },
+    {
+      "path": "src/components/settings/useKokoroSettingsStatus.ts",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/useMossNanoSettingsStatus.ts",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/components/settings/usePocketTtsSettingsStatus.ts",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/contexts/SettingsContext.tsx",
+      "justification": "Settings provider (settings infrastructure port source)."
+    },
+    {
+      "path": "src/contexts/ToastContext.tsx",
+      "justification": "Toast provider."
+    },
+    {
+      "path": "src/hooks/useDocumentLifecycle.ts",
+      "justification": "Document load/session statistics stay in the shell; mode refs/timers move out."
+    },
+    {
+      "path": "src/hooks/useEinkController.ts",
+      "justification": "E-ink ghosting/refresh overlay state."
+    },
+    {
+      "path": "src/hooks/useFoliateSync.ts",
+      "justification": "Chapter charOffset sync stays in shell; mode effects split (see layoutAbsorption)."
+    },
+    {
+      "path": "src/hooks/useKeyboardShortcuts.ts",
+      "justification": "Routes reader keys through the router; also hosts library/global hooks."
+    },
+    {
+      "path": "src/hooks/useProgressTracker.ts",
+      "justification": "Document progress/backtrack/goal accounting."
+    },
+    {
+      "path": "src/hooks/useQwenPrototypeStatus.ts",
+      "justification": "Settings UI."
+    },
+    {
+      "path": "src/hooks/useReaderMode.ts",
+      "justification": "Split across focus/flow/narrate runtimes; nothing of it remains shared."
+    },
+    {
+      "path": "src/hooks/useReadingGoals.ts",
+      "justification": "Reading goal persistence."
+    },
+    {
+      "path": "src/hooks/useReadingModeInstance.ts",
+      "justification": "Replaced by mode-local factories."
+    },
+    {
+      "path": "src/reader/useReaderModeOrchestrator.ts",
+      "justification": "Becomes the thin public router (spec item 4)."
+    },
+    {
+      "path": "src/styles/flow.css",
+      "justification": "Flow selectors move to flow/mode.css."
+    },
+    {
+      "path": "src/styles/index.css",
+      "justification": "Global stylesheet entry (@import list)."
+    },
+    {
+      "path": "src/styles/keyboard.css",
+      "justification": "Keyboard overlay styles."
+    },
+    {
+      "path": "src/styles/library.css",
+      "justification": "Library chrome styles."
+    },
+    {
+      "path": "src/styles/onboarding.css",
+      "justification": "Onboarding styles."
+    },
+    {
+      "path": "src/styles/page-reader.css",
+      "justification": "Foliate surface + page/flow/narrate selectors; mode selectors move to each mode.css."
+    },
+    {
+      "path": "src/styles/reader.css",
+      "justification": "Reader chrome + mode selectors; mode selectors move to each mode.css (see layoutAbsorption)."
+    },
+    {
+      "path": "src/styles/tts-settings.css",
+      "justification": "Settings styles."
+    },
+    {
+      "path": "src/utils/narrationPortability.ts",
+      "justification": "Settings UI import/export."
+    },
+    {
+      "path": "src/utils/queue.ts",
+      "justification": "Library queue selection; Flow/Narrate cross-book continuation should raise a value event to the shell instead of opening the next document themselves."
+    },
+    {
+      "path": "src/utils/readingGoals.ts",
+      "justification": "Pure goal math."
+    }
+  ],
+  "narrateTtsPort": [
+    {
+      "path": "src/hooks/narration/kokoroStrategy.ts",
+      "justification": "TTS strategy."
+    },
+    {
+      "path": "src/hooks/narration/mossNanoStrategy.ts",
+      "justification": "TTS strategy (dormant engine)."
+    },
+    {
+      "path": "src/hooks/narration/pocketTtsStrategy.ts",
+      "justification": "TTS strategy (dormant engine)."
+    },
+    {
+      "path": "src/hooks/narration/qwenStrategy.ts",
+      "justification": "TTS strategy (retired engine)."
+    },
+    {
+      "path": "src/hooks/narration/qwenStreamingStrategy.ts",
+      "justification": "TTS strategy (retired engine)."
+    },
+    {
+      "path": "src/hooks/narration/webSpeechStrategy.ts",
+      "justification": "TTS strategy."
+    },
+    {
+      "path": "src/hooks/useNarration.ts",
+      "justification": "TTS implementation behind Narrate's port (spec item 5)."
+    },
+    {
+      "path": "src/utils/audio/segmentKokoroChunk.ts",
+      "justification": "Audio chunking."
+    },
+    {
+      "path": "src/utils/audio/tempoStretch.ts",
+      "justification": "Audio tempo."
+    },
+    {
+      "path": "src/utils/audioPlayer.ts",
+      "justification": "Audio playback."
+    },
+    {
+      "path": "src/utils/audioScheduler.ts",
+      "justification": "Audio scheduler behind the port (spec item 5)."
+    },
+    {
+      "path": "src/utils/backgroundCacher.ts",
+      "justification": "TTS background cache (instantiated by useNarrationCaching)."
+    },
+    {
+      "path": "src/utils/generationPipeline.ts",
+      "justification": "TTS generation pipeline."
+    },
+    {
+      "path": "src/utils/highlightSyncController.ts",
+      "justification": "Narration highlight-sync policy inside useNarration."
+    },
+    {
+      "path": "src/utils/kokoroRatePlan.ts",
+      "justification": "Rate plan; also read by shell speed UI (ReaderBottomBar/ReaderContainer adjustSpeed)."
+    },
+    {
+      "path": "src/utils/kokoroStatus.ts",
+      "justification": "Engine status."
+    },
+    {
+      "path": "src/utils/mediaSessionBridge.ts",
+      "justification": "OS media session bridge for narration."
+    },
+    {
+      "path": "src/utils/narratePerf.ts",
+      "justification": "TTS perf marks."
+    },
+    {
+      "path": "src/utils/narrationPlanner.ts",
+      "justification": "TTS planning."
+    },
+    {
+      "path": "src/utils/pronunciationOverrides.ts",
+      "justification": "TTS pronunciation overrides."
+    },
+    {
+      "path": "src/utils/qwenStatus.ts",
+      "justification": "Engine status (retired)."
+    },
+    {
+      "path": "src/utils/segmentNormalizer.ts",
+      "justification": "TTS text normalization."
+    },
+    {
+      "path": "src/utils/spokenWordFilter.ts",
+      "justification": "TTS spoken-word filter."
+    },
+    {
+      "path": "src/utils/streamAccumulator.ts",
+      "justification": "TTS streaming (retired engine)."
+    },
+    {
+      "path": "src/utils/timingMetadataStore.ts",
+      "justification": "TTS timing truth store."
+    },
+    {
+      "path": "src/utils/ttsCache.ts",
+      "justification": "TTS cache."
+    },
+    {
+      "path": "src/utils/ttsCacheIdentity.ts",
+      "justification": "TTS cache keys."
+    },
+    {
+      "path": "src/utils/voiceSelection.ts",
+      "justification": "TTS voice selection."
+    }
+  ]
+}
