@@ -36,11 +36,11 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P2 — Wave A / G0 admission (P1 exit gate passed S1: I, B0, guards, A1-R PASS)
-next_action:  ALL FRONTS DONE OR BLOCKED ON B1 (see Front disposition). Owner runs g0-owner-checklist.md; then baseline.json admission PASS → Monday In Flight → Wave B per the Q-A..Q-G block
-blockers:     B1 (owner gate: G0 heard audio + residual live checks)
+phase:        P3 — Wave B (contracts/ports, Page, Focus). G0 automated half = Wave B admission (Decision #13)
+next_action:  Monday In Flight handshake; Wave B design (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
+blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
-dod:          D1 unmet (automated half done; owner half pending) | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
+dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
 ```
 
 ## Next actions — max 5, near horizon only
@@ -94,7 +94,7 @@ F5 done.md present here:              no
 
 ## Blockers
 
-- **B1 — BLOCKER(USER), owner gate (G0 heard audio + residual live checks).** Unblocks D1, and so every Wave B–E front.
+- **B1 → OS-1 (re-sequenced, Decision #13).** The owner's B0 listening checklist is taken in the combined owner session OS-1 before F1. It no longer blocks Waves B–E or the speed dialog. Still gates: D1, D7, F1–F5.
   - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-checklist.md` (about 20 minutes, headphones). Fill `g0-owner-observations.json` (11 items: H1–H8 heard audio on the EPUB and the converted non-EPUB, V1–V3 visual).
   - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
   - **Answer:** _(write "done" here after filling the observations file)_
@@ -124,12 +124,12 @@ F5 done.md present here:              no
 | F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
 | F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
 | F8 | OBS-A3-2 classification (read-only) | DONE — cross-owner (b), Decision #12 | read-only diagnosis, S1 |
-| F9 | Monday Queued → In Flight | BLOCKED — B1 | Charter grant: transition "once D1 passes" |
-| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | BLOCKED — B1 | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
-| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | BLOCKED — B1 | Amendment item 4: start of Wave B; no `src/` before D1 |
-| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | BLOCKED — B1 | Waves serial after G0 (charter Constraints; SRL-089) |
-| F13 | `scripts/check_reader_mode_evidence.mjs` (G6 validator) | BLOCKED — B1 | Wave E deliverable. `scripts/` is a pinned production input of the G0 harness: a new file there makes the launcher refuse ("Untracked production inputs present") while G0 is open |
-| F14 | Speed dialog (→ F) | BLOCKED — B1 | Only after S (amendment 2026-09-23 speed dialog) |
+| F9 | Monday Queued → In Flight | OPEN (Decision #13) | Charter grant: transition "once D1 passes" |
+| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | OPEN (Decision #13) | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
+| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | OPEN (Decision #13) | Amendment item 4: start of Wave B; no `src/` before D1 |
+| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | OPEN (Decision #13) | Waves serial after G0 (charter Constraints; SRL-089) |
+| F13 | `scripts/check_reader_mode_evidence.mjs` (G6 validator) | OPEN (Decision #13) | Wave E deliverable. `scripts/` is a pinned production input of the G0 harness: a new file there makes the launcher refuse ("Untracked production inputs present") while G0 is open |
+| F14 | Speed dialog (→ F) | OPEN (Decision #13) | Only after S (amendment 2026-09-23 speed dialog) |
 | F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — B1 | Need F; finalization follows verified.md |
 | F16 | Lessons and governance fold-ins | STAGED | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
 | F17 | Supporting loopback audio capture (charter A6) | BLOCKED — B1 | Supporting only; heard audio is an owner gate (SRL-070); take it during the owner session |
@@ -172,6 +172,7 @@ Original questions (for reference):
 | 10 | S1 | Q-A..Q-G resolved: Type 1b (Q-A Type 2 narrowing) — see the block above | Census and G4 fixtures contradicted the spec; rules enforce isolation/parity intent, loosen no gate, touch nothing outside the existing-site table | Owner standing authorization + /virtuoso:mid-dispatch-decision; staging fold-in 3 |
 | 11 | S1 | KF-1 pre-registered decision table: G5/D6 stay exit-0; recurrence → one scoped hygiene fix to `tests/qwenStreaming.test.js` only (after D1); a `main/` need → BLOCKER(USER) | A flake must not pass by retry nor block silently | Owner standing authorization; staging fold-in 5 |
 | 12 | S1 | OBS-A3-2 = cross-owner overwrite. After Focus→Page re-pagination, `ReaderContainer` `onRelocate` writes `floor(fraction × activeDoc.wordCount)` (209 = ⌊0.125×1676⌋) into the Page highlight, unguarded because Focus's `onWordAdvance` consumed `resumeAnchorRef`. Focus itself stopped at ~27. Per the Q-G table, G3 governs: the post-separation Page highlight = Focus snapshot; G6 lists it as a removed cross-owner effect. OBS-A3-1 is very likely the same mechanism | Read-only trace, confidence 8/10. Discriminating experiment for Wave B/G6: log `detail.fraction`, `approxWordIdx`, `resumeAnchorRef` in `onRelocate`; negative control = Focus paused at 7 keeps 7 | Pre-registered Q-G table (fold-in 3) |
+| 13 | S1 | Owner gate re-sequenced: Waves B–E and the speed dialog start on the G0 automated evidence; the B0 listening checklist joins G6 and the speed-dialog check in one owner session (OS-1) before F1; D1/D7 stay owner-required; Monday → In Flight at Wave B start | B0 is frozen and re-launchable, so the observation is time-independent; owner directed "You make decisions… iterate until the entire epic is complete" | Owner direction 2026-10-09; /mid-dispatch-decision; staging fold-in 6 |
 
 ## Evidence
 

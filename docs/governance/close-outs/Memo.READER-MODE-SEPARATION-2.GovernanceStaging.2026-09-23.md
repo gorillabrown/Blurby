@@ -12,6 +12,7 @@ This memo records governance change intent for later application by the register
 | 2 | 2026-09-23 | Owner requested speed dialogs beyond the original P1 scope | Type 3 — Pivot Advance | Resolved decision: admit the specified speed dialogs after structural parity, with separate verification; cursor synchronization remains follow-on work |
 | 3 | 2026-10-09 | Wave A census and G4 fixtures contradicted the spec in seven bounded places (Q-A..Q-G) before the first Wave B edit | Type 1b — Advance (Planner-Originated), Q-A as Type 2 narrowing | Resolved under the owner's standing overnight authorization: rules supplied for dead views, the standalone reader window, runtime code in narration types, shared constants/diagnostics/cache, per-mode ownership, cross-owner G4 comparison, and baseline anomalies; no gate loosened |
 | 4 | 2026-10-09 | A known full-suite flake (Qwen streaming test timer leak) can make the final suite gate exit 1 with zero failed tests | Type 1b — Advance (Planner-Originated), pre-registered decision table | Resolved: the gate stays exit-0; a recurrence triggers one scoped test-hygiene fix to the Qwen test only, never a retry-until-green |
+| 5 | 2026-10-09 | The owner listening gate on the frozen baseline blocked every remaining front in an unattended run | Type 3 — Pivot Advance (owner-directed) | Resolved: code waves start now on the automated baseline evidence; one combined owner session (baseline listening, new-build listening, speed-dialog check) before final verification; owner-required conditions unchanged |
 
 ## Target: ROADMAP.md
 
@@ -119,6 +120,32 @@ Content:
 - Any other failure → normal handling (two focused corrections, then an issue).
 **Scope change:** `tests/qwenStreaming.test.js` is admissible only under the second row.
 **Follow-up items:** None.
+
+### Fold-in 6 — Mid-Dispatch Amendment (re-sequence the owner listening gate)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (owner gate re-sequenced; owner-directed)
+**Pause point:** Owner gate B1 (G0 heard audio on B0) unanswered. The pre-G0 `src/` freeze (amendment 2026-10-09 item 4) blocked every open front. Issue: `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09-2.md`.
+**Decision:** Type 3 — Pivot Advance, under the owner's direction of 2026-10-09: "You make decisions … advance with recommendations. Iterate until the entire epic is complete."
+**Rationale:** B0 is frozen, byte-identical and re-launchable, so the owner's observation of it is time-independent. All non-audio G0 evidence exists. No DoD row is loosened.
+**Scope change:**
+- Amendment 2026-10-09 item 4's pre-G0 `src/` freeze is lifted for Waves B–E and the speed dialog. Wave B admission evidence = the G0 automated half: `isolation.json` PASS, `flow-reproduction.json` PASS, `g0-matrix.json`, census, G4 fixtures.
+- **D1 stays unmet until the owner half is recorded.** `baseline.json` keeps `admission: BLOCKED (automated half PASS; owner half pending)` until then.
+- **D7 still requires the owner's heard-audio observation on F.**
+- One combined owner session (OS-1) runs before F1:
+  - (i) `g0-owner-checklist.md` on B0;
+  - (ii) the G6 live and heard-audio cases on a fresh build of F;
+  - (iii) the speed-dialog live check.
+- Monday Queued → In Flight runs at the start of Wave B (the work is in flight). It uses the provider handshake, with mutation-plan only to execute (LL-130).
+- F1–F5 cannot start until D1 and D7 pass.
+**Decision table for OS-1 results on B0:**
+- All items as-expected or known-defect → D1 PASS.
+- A `new-problem` in B0 behavior → it is baseline behavior: record it with an identifier; G6 compares equal to it. Code is unaffected.
+- The owner's observation contradicts an automated matrix fact (e.g. no audio heard) → re-base the affected G6 rows on the owner observation; re-verify only evidence.
+**Follow-up items:** OS-1 checklist written at Wave E alongside G6.
 
 ## Target: docs/governance/LESSONS_LEARNED.md
 
