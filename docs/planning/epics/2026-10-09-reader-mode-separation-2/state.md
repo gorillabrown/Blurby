@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P3 — Wave B (contracts/ports, Page, Focus). G0 automated half = Wave B admission (Decision #13)
-next_action:  Monday In Flight handshake; Wave B design (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
+next_action:  Wave B design (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
@@ -90,7 +90,7 @@ F5 done.md present here:              no
 | Test document | Meditations EPUB SHA-256 `8be2ab1e…6c2beb` = `resources/sample-meditations.epub` | Issue `-2`, 2026-09-23 |
 | Renderer start order | Unpackaged Electron needs Vite running first, or the window is blank | Issue `-2` |
 | A1 failure facts | `executeJavaScript` returned `window` (not cloneable; fixed in test-only `30b72291`); EPIPE at `main/tts-engine.js:17` `console.error` when the stdout/stderr pipe closed (hypothesis) | Issue `-2` |
-| Monday item | 13119306772, Queued, Seq 1 | connector readback, 2026-10-09T03:39Z |
+| Monday item | 13119306772, **In Flight**, Seq 1, Started 2026-10-09 | connector readback 2026-10-09T06:52Z; recovery 20261009T060910Z-external-set-status-READER-MODE-SEPARATION-2 confirmed |
 
 ## Blockers
 
@@ -124,7 +124,7 @@ F5 done.md present here:              no
 | F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
 | F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
 | F8 | OBS-A3-2 classification (read-only) | DONE — cross-owner (b), Decision #12 | read-only diagnosis, S1 |
-| F9 | Monday Queued → In Flight | OPEN (Decision #13) | Charter grant: transition "once D1 passes" |
+| F9 | Monday Queued → In Flight | DONE — In Flight 2026-10-09 (handshake: plan → connector → confirm; readback status "In Flight", Seq 1, Started 2026-10-09; label "In Flight" created to match registry statusMappings) | Charter grant: transition "once D1 passes" |
 | F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | OPEN (Decision #13) | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
 | F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | OPEN (Decision #13) | Amendment item 4: start of Wave B; no `src/` before D1 |
 | F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | OPEN (Decision #13) | Waves serial after G0 (charter Constraints; SRL-089) |
