@@ -1,6 +1,6 @@
 ---
 epic: reader-mode-separation-2
-last_updated: 2026-10-09 00:55 (host clock)
+last_updated: 2026-10-09 01:30 (host clock)
 updated_by: session 1
 ---
 
@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P2 — Wave A / G0 admission (P1 exit gate passed S1: I, B0, guards, A1-R PASS)
-next_action:  owner runs g0-owner-checklist.md (BLOCKER B1); then baseline.json admission PASS → Monday In Flight → Wave B per the Q-A..Q-G block
+next_action:  ALL FRONTS DONE OR BLOCKED ON B1 (see Front disposition). Owner runs g0-owner-checklist.md; then baseline.json admission PASS → Monday In Flight → Wave B per the Q-A..Q-G block
 blockers:     B1 (owner gate: G0 heard audio + residual live checks)
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half done; owner half pending) | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
@@ -110,7 +110,7 @@ F5 done.md present here:              no
 | F5 | G4 behavior fixtures | DONE | c61bca67 (re-verified 5/5) |
 | F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
 | F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
-| F8 | OBS-A3-2 classification (read-only) | see Decision log #12 | read-only; no write |
+| F8 | OBS-A3-2 classification (read-only) | DONE — cross-owner (b), Decision #12 | read-only diagnosis, S1 |
 | F9 | Monday Queued → In Flight | BLOCKED — B1 | Charter grant: transition "once D1 passes" |
 | F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | BLOCKED — B1 | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
 | F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | BLOCKED — B1 | Amendment item 4: start of Wave B; no `src/` before D1 |
@@ -157,6 +157,7 @@ Original questions (for reference):
 | 9 | S1 | A3's non-EPUB rows use a non-EPUB source converted through the app's import path; the launcher seeds the installed Kokoro model into the fresh profile | The only readable non-EPUB route on B0; avoids the fresh-profile concurrent-download race (OBS-A1R-1 recurred in A2) | Grant: test-only harness under `E/` |
 | 10 | S1 | Q-A..Q-G resolved: Type 1b (Q-A Type 2 narrowing) — see the block above | Census and G4 fixtures contradicted the spec; rules enforce isolation/parity intent, loosen no gate, touch nothing outside the existing-site table | Owner standing authorization + /virtuoso:mid-dispatch-decision; staging fold-in 3 |
 | 11 | S1 | KF-1 pre-registered decision table: G5/D6 stay exit-0; recurrence → one scoped hygiene fix to `tests/qwenStreaming.test.js` only (after D1); a `main/` need → BLOCKER(USER) | A flake must not pass by retry nor block silently | Owner standing authorization; staging fold-in 5 |
+| 12 | S1 | OBS-A3-2 = cross-owner overwrite. After Focus→Page re-pagination, `ReaderContainer` `onRelocate` writes `floor(fraction × activeDoc.wordCount)` (209 = ⌊0.125×1676⌋) into the Page highlight, unguarded because Focus's `onWordAdvance` consumed `resumeAnchorRef`. Focus itself stopped at ~27. Per the Q-G table, G3 governs: the post-separation Page highlight = Focus snapshot; G6 lists it as a removed cross-owner effect. OBS-A3-1 is very likely the same mechanism | Read-only trace, confidence 8/10. Discriminating experiment for Wave B/G6: log `detail.fraction`, `approxWordIdx`, `resumeAnchorRef` in `onRelocate`; negative control = Focus paused at 7 keeps 7 | Pre-registered Q-G table (fold-in 3) |
 
 ## Evidence
 

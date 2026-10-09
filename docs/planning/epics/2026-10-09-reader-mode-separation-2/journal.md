@@ -94,6 +94,21 @@
   2. sets `baseline.json` → `admission: PASS` with the observer, if all items are filled and no `new-problem` contradicts the matrix (otherwise route a mid-dispatch decision);
   3. runs the Monday Queued → In Flight handshake;
   4. starts Wave B (P3) per the state.md Q-A..Q-G block.
+## S1e — 2026-10-09 ~01:30 (host) — front disposition; remaining unblocked fronts closed
+
+- **Did:**
+  - The stop-hook review found the earlier stop did not disposition every front. Added the Front disposition table F1–F16 to state.md.
+  - Closed the three fronts that were actually unblocked:
+    - `verification.json` (B0 and I recorded; S and F pending);
+    - `test-migration.json` (spec-authorized substitutions plus the Q-F rule);
+    - OBS-A3-2, classified read-only as a cross-owner overwrite (Decision #12).
+  - Pre-registered the KF-1 decision table (Decision #11; staging fold-in 5).
+- **Learned:** the document shell's `onRelocate` fraction estimate overwrites the Page highlight after a mode switch's re-pagination once the resume anchor has been consumed. Likely the same mechanism as OBS-A3-1. Wave B's copy-only handoff removes it.
+- **Decisions:** #11, #12.
+- **Gate/DoD movement:** none.
+- **Git:** eb/reader-mode-separation-2 @ this checkpoint (pushed); uncommitted: tests/perf-baseline-results.json (noise).
+- **Stop:** every front in the table is DONE, STAGED, or BLOCKED on B1, each with its gating clause. Clean stop per charter.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
