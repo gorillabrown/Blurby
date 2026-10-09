@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-07-02 — `/roadmap-review` archive-forward pass: **NARRATE-CURSOR-TRACKING-DIAG-1** and **NARRATE-A5-RATE-RESEED-1** reconciled to Completed (merged `07439ee`/`145c385`; inline specs migrated to `docs/planning/.Archive/ROADMAP_2026-07-02.md`). Active conveyor head unchanged: NARRATE-HEARD-CURSOR-1. Prior (2026-06-01 ULTRATHINK cursor/window decision + probe-first restructuring): NARRATE-CURSOR-TRACKING-DIAG-1 **complete** (live-QA trace on Meditations). Verdict: the "`schedulerActiveWord` best tracks heard audio" hypothesis is **REFUTED** — `schedulerActiveWord` ≡ `heardFloor` (0 offset) and both **lead** the heard voice; `wordIndex` (visible cursor) is the closest signal but still leads and **drifts further ahead** over long playback; `nextGenWordIndex` is the pre-fetch frontier (+900–2351); `resumeTarget`/`subscriberCursor` were `no-data`. A mid-playback WPM change breaks cursor tracking and skips to the frontier. View-follow detaches on manual scroll (does not pull the cursor ahead). **Authority:** visible cursor = `wordIndex`, but it must be **lag-compensated** (~350ms WASAPI) to sit on the heard word. NARRATE-SUBSCRIBER-CURSOR-1 amended accordingly. **Next dispatch: NARRATE-HEARD-CURSOR-1 (NEW, probe-first) — route BOTH the visible highlight AND the reading-window follow (`FlowScrollEngine.followWord`) through ONE lag-compensated heard cursor sourced from the scheduler (`getAudioProgress()` lag-compensated wordIndex / heard-floor clamp), with the visual lag made a tunable constant, and tune by ear in live-QA. This is the cheap, reversible test that resolves the cursor/window desync without touching reducer state or removing `WORD_ADVANCE`. Its live-QA verdict GATES the heavier NARRATE-SUBSCRIBER-CURSOR-1 (WORD_ADVANCE/reducer removal): that surgery dispatches ONLY if a perceptible lead persists after the heard-cursor rewire + lag tuning. (A5 position fix verified PASS by live-QA; the remaining A5 1.4x-bucket overlap routes to APPLYRATECHANGE-COLLAPSE-1.)**
+**Last updated**: 2026-10-09 — roadmap-review idle-period pass: **no commits since 2026-07-03** (last code 2026-06-01). Buffer re-verified (edit sites unchanged); **BUG-184 (filed 2026-05-29, never queued) promoted to HOTFIX-EINK-HOVER-1 at position 6** with a widened root cause (the wildcard e-ink `*:hover` rule strips the background from every hovered container, not just Settings). Stale CLAUDE.md system-state lines corrected. Recommended restart: baseline check → HOTFIX + HYG in parallel → NARRATE-HEARD-CURSOR-1. See `docs/planning/roadmap-reviews/2026-10-09-review.md`. Prior (2026-07-02) — `/roadmap-review` archive-forward pass: **NARRATE-CURSOR-TRACKING-DIAG-1** and **NARRATE-A5-RATE-RESEED-1** reconciled to Completed (merged `07439ee`/`145c385`; inline specs migrated to `docs/planning/.Archive/ROADMAP_2026-07-02.md`). Active conveyor head unchanged: NARRATE-HEARD-CURSOR-1. Prior (2026-06-01 ULTRATHINK cursor/window decision + probe-first restructuring): NARRATE-CURSOR-TRACKING-DIAG-1 **complete** (live-QA trace on Meditations). Verdict: the "`schedulerActiveWord` best tracks heard audio" hypothesis is **REFUTED** — `schedulerActiveWord` ≡ `heardFloor` (0 offset) and both **lead** the heard voice; `wordIndex` (visible cursor) is the closest signal but still leads and **drifts further ahead** over long playback; `nextGenWordIndex` is the pre-fetch frontier (+900–2351); `resumeTarget`/`subscriberCursor` were `no-data`. A mid-playback WPM change breaks cursor tracking and skips to the frontier. View-follow detaches on manual scroll (does not pull the cursor ahead). **Authority:** visible cursor = `wordIndex`, but it must be **lag-compensated** (~350ms WASAPI) to sit on the heard word. NARRATE-SUBSCRIBER-CURSOR-1 amended accordingly. **Next dispatch: NARRATE-HEARD-CURSOR-1 (NEW, probe-first) — route BOTH the visible highlight AND the reading-window follow (`FlowScrollEngine.followWord`) through ONE lag-compensated heard cursor sourced from the scheduler (`getAudioProgress()` lag-compensated wordIndex / heard-floor clamp), with the visual lag made a tunable constant, and tune by ear in live-QA. This is the cheap, reversible test that resolves the cursor/window desync without touching reducer state or removing `WORD_ADVANCE`. Its live-QA verdict GATES the heavier NARRATE-SUBSCRIBER-CURSOR-1 (WORD_ADVANCE/reducer removal): that surgery dispatches ONLY if a perceptible lead persists after the heard-cursor rewire + lag tuning. (A5 position fix verified PASS by live-QA; the remaining A5 1.4x-bucket overlap routes to APPLYRATECHANGE-COLLAPSE-1.)**
 **Current state**: v1.75.1 stable baseline plus READER-ISO-1A/1B/1C/1D/1E. All four mode adapters (Focus, Flow, Narrate) plus the typed contract (1A) and orchestrator shell (1B) are in place. S9 Flow lazy-follow remains intentionally deferred. Kokoro is the sole active engine — Kokoro-only is now an explicit design constraint (the unification deletes dormant-engine reseed code rather than preserving it). MOSS-Nano/Pocket TTS dormant/disabled; Qwen retired/disabled.
 **Finish line**: TTS Quality Confidence + Reading Experience v2 — narration UX polish + quality regression gates. Graduated tiers: (1) CI quality gate active (TTS-QUAL-CI-1, ✓ shipped), (2) **narration dual-source unification complete with a proven cursor/view authority model (NARRATE-DUAL-SOURCE-DIAG-1 through NARRATE-SUBSCRIBER-CURSOR-1, now gated by NARRATE-CURSOR-TRACKING-DIAG-1 evidence)**, (3) all 2026-05-28 discovery bugs closed (EXT-PAIR-1 ✓, THEME-SYNC-1 ✓, SINGLE-INSTANCE-LOCK-1 ✓), (4) UX polish lands (UX-POLISH-1 + downstream).
-**Queue**: depth 5 active — **all 5 now full specs, 0 stubs** (buffer replenished 2026-07-02). **Conveyor belt order: NARRATE-HEARD-CURSOR-1 → NARRATE-APPLYRATECHANGE-COLLAPSE-1 → NARRATE-SUBSCRIBER-CURSOR-1 (gated) → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE**. (NARRATE-A5-RATE-RESEED-1 and NARRATE-CURSOR-TRACKING-DIAG-1 both merged and reconciled to Completed on 2026-07-02; A5's residual 1.4x-bucket overlap is carried into APPLYRATECHANGE-COLLAPSE-1; the DIAG verdict is folded into NARRATE-HEARD-CURSOR-1 + NARRATE-SUBSCRIBER-CURSOR-1.) The **three narration** sprints (positions 1-3) touch the shared-core freeze set and MUST run sequentially. **UX-POLISH-1 (pos 4) and HYG-XLSX-DASHBOARD-RESTORE (pos 5) are Lane C/Lane E, parallel-safe, and dispatchable immediately** — HYG in particular needs no narration live-QA and restores the (confirmed-inert) Dashboard, so it is the recommended momentum-unblock while the narration live-QA is scheduled. **2026-07-02 rescope: UX-POLISH-1 shrank to XS — 3 of its 4 original features (3-line cards, New-dot+auto-clear, Ctrl+K palette) were found already shipped.** Queue depth 5 ≥ 3 ✓.
+**Queue**: depth 6 active — **all 6 full specs, 0 stubs** (HOTFIX-EINK-HOVER-1 added 2026-10-09). **Conveyor belt order: NARRATE-HEARD-CURSOR-1 → NARRATE-APPLYRATECHANGE-COLLAPSE-1 → NARRATE-SUBSCRIBER-CURSOR-1 (gated) → UX-POLISH-1 → HYG-XLSX-DASHBOARD-RESTORE → HOTFIX-EINK-HOVER-1**. Positions 4–6 are parallel-safe (Lanes C/E) and dispatchable now. (NARRATE-A5-RATE-RESEED-1 and NARRATE-CURSOR-TRACKING-DIAG-1 both merged and reconciled to Completed on 2026-07-02; A5's residual 1.4x-bucket overlap is carried into APPLYRATECHANGE-COLLAPSE-1; the DIAG verdict is folded into NARRATE-HEARD-CURSOR-1 + NARRATE-SUBSCRIBER-CURSOR-1.) The **three narration** sprints (positions 1-3) touch the shared-core freeze set and MUST run sequentially. **UX-POLISH-1 (pos 4) and HYG-XLSX-DASHBOARD-RESTORE (pos 5) are Lane C/Lane E, parallel-safe, and dispatchable immediately** — HYG in particular needs no narration live-QA and restores the (confirmed-inert) Dashboard, so it is the recommended momentum-unblock while the narration live-QA is scheduled. **2026-07-02 rescope: UX-POLISH-1 shrank to XS — 3 of its 4 original features (3-line cards, New-dot+auto-clear, Ctrl+K palette) were found already shipped.** Queue depth 5 ≥ 3 ✓.
 **Last sprint**: NARRATE-A5-RATE-RESEED-1 (position fix PASS 3-of-3 live-QA 2026-05-31; merged `145c385`, reconciled to Completed 2026-07-02). Prior: NARRATE-CURSOR-TRACKING-DIAG-1 (completed 2026-05-31, live-QA cursor-tracking trace; hypothesis refuted, authority verdict written, NARRATE-SUBSCRIBER-CURSOR-1 amended). Prior: reverted failed view-follow hotfix at `ff70793` (2026-05-31), NARRATE-PAUSE-RESUME-UNIFY-1 + anchor-correctness hotfix (A4 resume anchor working), NARRATE-INTENT-CURSOR-1 (PARTIAL, 2026-05-31), NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30).
 **Queue source of truth**: `docs/governance/sprint-queue.xlsx` is the authoritative FIFO sprint queue. Keep its Catalog and Dashboard tabs current after every dispatch/closeout.
 
@@ -419,6 +419,63 @@ All 2026-05-28 discovery bugs closed: EXT-PAIR-1 (BUG-183), SINGLE-INSTANCE-LOCK
 
 ---
 
+#### HOTFIX-EINK-HOVER-1 — Scope the e-ink "no hover" rule so it stops stripping panel/dialog backgrounds (BUG-184) *(position 6 — full spec; parallel-safe)*
+
+- **What:** Replace the wildcard e-ink hover neutralizer at `src/styles/themes.css:145-147` (`[data-eink="true"] *:hover { background-color: inherit; }`) with a rule scoped to the elements that actually carry a hover-background rule today, so containers (panels, dialogs, backdrops) keep their own background while hovered.
+- **Why (root cause, traced 2026-10-09 roadmap-review):** CSS `:hover` matches the hovered element **and every ancestor**. With the wildcard, any panel containing the pointer gets `background-color: inherit`, i.e. its parent's background, which is usually transparent. BUG-184 observed this on Settings (`.menu-flap`, whose own `background: var(--bg-raised)` is single-class specificity (0,1,0) and loses to the e-ink rule's (0,2,0)). The same mechanism hits every background-bearing container: command palette (`.command-palette-container` / `-overlay`), `.import-confirm-dialog`, `.bug-report-dialog`, `.metadata-wizard-modal`, `.cloud-merge-dialog`, `.highlight-menu`, `.definition-popup` (their e-ink overrides at L120/L128 sit *before* L145 so the wildcard wins), and all `*-overlay` backdrops. BUG-184's suggested `.menu-flap`-only patch would leave those broken, so this spec fixes the selector instead.
+- **Prerequisites:** None. Independent of every other queued sprint.
+- **Baseline:** clean `main`. Re-grep `themes.css` for the rule's line number at execution (SRL-086/087).
+- **Lane Ownership:** Lane C (CSS-only UI surface).
+- **Forbidden During Parallel Run:** Shared-core freeze set; any `.ts/.tsx` source; any stylesheet other than `src/styles/themes.css`.
+- **Shared-Core Touches:** None.
+- **Merge Order:** Independent; may land before or after anything in the queue. If dispatched alongside HYG-XLSX-DASHBOARD-RESTORE, land either first (disjoint files except ROADMAP/xlsx closeout rows; merge-resolve those by hand).
+- **WHERE (read order):**
+  1. `src/styles/themes.css:140-157` — the wildcard rule and the adjacent `.menu-flap` e-ink rules.
+  2. `tests/einkFoundation.test.ts` — existing CSS-string test pattern to extend.
+- **Tasks:**
+  1. `[hermes/haiku, renderer-scope]` In `src/styles/themes.css`, replace the rule body selector `[data-eink="true"] *:hover` with exactly:
+     ```css
+     /* No hover effects — e-ink devices are often touch-only.
+        Scoped to elements that have a hover background; a wildcard also matches
+        every hovered ancestor and turns panels/dialogs transparent (BUG-184). */
+     [data-eink="true"] :is(
+       button, a, [role="button"],
+       .backtrack-prompt-btn--secondary, .btn-fill, .chapter-label-btn, .chapter-list-item,
+       .cloud-sign-in-google, .cloud-sign-in-microsoft, .cloud-sign-out-btn, .doc-card,
+       .doc-context-menu-danger, .error-boundary__reload, .highlight-menu-btn, .highlights-item,
+       .metadata-wizard-btn-secondary, .onboarding-btn-primary, .page-nav-btn,
+       .page-reader-toast-action, .page-word, .pairing-banner__dismiss, .queue-item,
+       .rbb-font-btn, .rbb-mode-btn, .rbb-play-btn, .reader-resume-btn, .recent-folder-item,
+       .search-result-item, .settings-menu-item, .settings-toggle-btn, .snooze-option,
+       .tag-picker-item, .toast-action
+     ):hover {
+       background-color: inherit;
+     }
+     ```
+     The class list is every base class with a `:hover { background… }` rule in `src/styles/*.css` (grep 2026-10-09: `grep -hn -A3 ':hover' src/styles/*.css | grep -B1 -A2 background`). Specificity is unchanged at (0,2,0) because `:is()` takes its most specific argument, so every listed element behaves exactly as before.
+  2. `[hermes/haiku]` Add to `tests/einkFoundation.test.ts`: (a) `themes.css` no longer contains `[data-eink="true"] *:hover`; (b) it contains `[data-eink="true"] :is(` with `button` and `.doc-card` in the list; (c) the scoped list does not contain `menu-flap`, `dialog`, `overlay`, or `modal`.
+  3. `[hippocrates/haiku]` `npm test` + `npm run build`.
+  4. `[live-qa, Evan]` E-Ink Display Mode ON. Hover inside (a) Settings flap, (b) Ctrl+K command palette, (c) any modal (e.g. bug report): each stays opaque. Hover a library card and a bottom-bar button: still no hover tint (unchanged).
+  5. `[marcusaurelius/sonnet]` Close BUG-184 in `BUG_REPORT.md`; ROADMAP + `sprint-queue.xlsx` closeout. Auto-merge.
+- **Execution Sequence:** Single wave (Tasks 1–3 then 5; Task 4 can run post-merge). ~10–14 tool uses.
+- **Done when (SUCCESS CRITERIA):**
+  1. `grep -n '\[data-eink="true"\] \*:hover' src/styles/themes.css` returns nothing.
+  2. The scoped `:is(...)` rule exists with the exact class list above.
+  3. New `einkFoundation.test.ts` assertions pass; `npm test` + `npm run build` green.
+  4. Live-QA: Settings flap, command palette and one modal stay opaque under hover with E-Ink Display Mode ON; controls show no hover tint.
+  5. BUG-184 marked resolved.
+- **Effort:** **XS** (one CSS rule + three test assertions).
+- **Roster:** Zeus → Hermes • Hippocrates • Live-QA (Evan) • MarcusAurelius.
+- **Source:** BUG-184 (`docs/governance/BUG_REPORT.md`, filed 2026-05-29, never queued); root-cause widening + selector enumeration in `docs/planning/roadmap-reviews/2026-10-09-review.md`.
+
+##### Implementation detail
+- **Edit sites:** `src/styles/themes.css:145-147` (one rule); `tests/einkFoundation.test.ts` (one new `it`).
+- **Branch:** `sprint/hotfix-eink-hover-1` from clean `main`.
+- **Commit hygiene:** Explicit-stage the two files plus closeout docs by name.
+- **Edge cases:** A hover-background class added *after* this sprint won't be neutralized in e-ink mode (a cosmetic tint, not transparency). Acceptable; note it in the CSS comment if a reviewer asks. `:is()` is supported in Electron 41's Chromium. Rollback: revert the single commit.
+
+---
+
 ## Deferred Lanes
 
 - **KOKORO-EXPORT-1** — Long-form audio export (M4B/SRT/ASS). Optional future after Reading Experience v2.
@@ -442,19 +499,19 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 - New active stage established: Reader Runtime Solidification before Quality Gate Activation and UX polish (2026-05-22).
 - SSML as internal format explicitly **rejected** per research consensus — structured text + normalizer trace is cleaner than SSML payload. (2026-05-17)
 
-### Non-Blocking Follow-Ups (from 2026-07-02 roadmap-review)
-- **Lessons-file split (governance debt).** `docs/governance/LESSONS_LEARNED.md` (CLAUDE.md's governing doc #4) tops out at SRL-070, while the newer SRLs the Standing Rules cite (SRL-080/086/087/088/090) live in `docs/governance/close-outs/SpecRetro.Lessons_Learned.md`. Consolidate the two, or repoint CLAUDE.md at the SpecRetro file, in a governance-sweep. Not queued.
+### Non-Blocking Follow-Ups (from 2026-07-02 roadmap-review; all three re-confirmed open 2026-10-09)
+- **Lessons-file split (governance debt).** `docs/governance/LESSONS_LEARNED.md` (CLAUDE.md's governing doc #4) tops out at SRL-070, while the newer SRLs the Standing Rules cite (SRL-080/086/087/088/090; SpecRetro now at SRL-091) live in `docs/governance/close-outs/SpecRetro.Lessons_Learned.md`. Consolidate the two, or repoint CLAUDE.md at the SpecRetro file, in a governance-sweep. Not queued.
 - **Missing A5 close-out.** `NARRATE-A5-RATE-RESEED-1` merged (`145c385`) without a formal `CloseOut.*.md`; interim evidence is `docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md`. Author one via `/pointer-closeout` if a formal record is wanted.
 - **COLLAPSE-1 title vs body.** The position-2 spec title still reads "14 reseed paths"; the body corrects this to 6 (grep-verified). Cosmetic — retitle at next touch.
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-07-02
+last_review: 2026-10-09
 finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md
 sprint_queue_doc: docs/governance/sprint-queue.xlsx
 buffer_target: 5
-buffer_actual_full_specs: 5
+buffer_actual_full_specs: 6
 buffer_actual_stubs: 0
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->

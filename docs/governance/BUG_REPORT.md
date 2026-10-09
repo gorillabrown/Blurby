@@ -11,8 +11,9 @@
 ### BUG-184 — E-Ink Display Mode toggle strips Settings panel background (transparent overlay)
 **Reported:** 2026-05-29 (THEME-SYNC-1 smoke test retest on v1.75.1)
 **Severity:** MEDIUM (visual; Settings panel becomes transparent when einkMode is ON)
-**Status:** OPEN
+**Status:** OPEN — queued as **HOTFIX-EINK-HOVER-1** (ROADMAP position 6, 2026-10-09 roadmap-review)
 **Location:** `src/styles/themes.css` line 145 (`[data-eink="true"] *:hover { background-color: inherit; }`)
+**Root cause widened (2026-10-09):** `:hover` matches the hovered element *and every ancestor*, so the wildcard hits every background-bearing container under the pointer (command palette, modals/dialogs, highlight menu, definition popup, overlay backdrops), not just `.menu-flap`. This was reproduced in headless Chromium. The fix scopes the selector to the elements that carry a hover background instead of patching `.menu-flap` alone. See the ROADMAP spec.
 **Description:** When the E-Ink Display Mode toggle (at the top of Settings → Theme sub-page) is ON, the Settings panel (`.menu-flap`) becomes transparent — library content (covers, tabs, reading stats) bleeds through. Toggling einkMode OFF immediately restores opacity. Reproduced deterministically on v1.75.1 dev build.
 **Root cause:** `themes.css:145` has `[data-eink="true"] *:hover { background-color: inherit; }` — a nuclear wildcard hover rule that overrides `.menu-flap`'s `background: var(--bg-raised)` when the cursor is over the panel. The `inherit` value pulls from the parent element's background, which is transparent (the app container behind the fixed-position flap).
 **Fix path:** XS — either scope the hover rule to exclude `.menu-flap` (e.g., `[data-eink="true"] *:not(.menu-flap):hover`), or add `[data-eink="true"] .menu-flap { background: var(--bg-raised); }` after line 151. Reader surfaces work correctly with einkMode ON — the bug is Settings panel only.

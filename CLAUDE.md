@@ -342,7 +342,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ---
 
-## Current System State (v1.75.1 — queue GREEN depth 6, 2 open bugs)
+## Current System State (v1.75.1 — queue GREEN depth 6, 2 open bugs; idle since 2026-06-01)
 
 ### Codebase (branch: `main`)
 
@@ -354,10 +354,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue:** GREEN depth 6 (DIAG-1 + INTENT-CURSOR-1 done; 3 full specs queued: PAUSE-RESUME-UNIFY-1 Seq1, A5-RATE-RESEED-1 Seq2, APPLYRATECHANGE-COLLAPSE-1 Seq3; 1 gated: SUBSCRIBER-CURSOR-1 Seq4; 2 stubs: UX-POLISH-1 Seq5, HYG-XLSX-DASHBOARD-RESTORE Seq6). Next: NARRATE-PAUSE-RESUME-UNIFY-1 — cold-start resume seed must prefer heardFloor/resumeTarget over stale anchor (completes A4 fix). All narration unification sprints are shared-core and must run sequentially.
-- **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
+- **Queue:** GREEN depth 6, all full specs (roadmap-review 2026-10-09): NARRATE-HEARD-CURSOR-1 Seq1 → NARRATE-APPLYRATECHANGE-COLLAPSE-1 Seq2 → NARRATE-SUBSCRIBER-CURSOR-1 Seq3 (gated on Seq1 live-QA) → UX-POLISH-1 Seq4 → HYG-XLSX-DASHBOARD-RESTORE Seq5 → HOTFIX-EINK-HOVER-1 Seq6. Seq1–3 are shared-core and run sequentially; Seq4–6 are Lane C/E and parallel-safe. Next: NARRATE-HEARD-CURSOR-1 — one lag-compensated heard cursor drives both highlight and window-follow; tune by ear.
+- **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode wildcard hover rule strips panel/dialog backgrounds; queued as HOTFIX-EINK-HOVER-1).
 - **Deferred lanes:** MOSS-Nano (dormant), Pocket TTS (dormant), Qwen Streaming (ITERATE), Android APK, Cloud Sync, RSS/News — all beyond TTS Architecture Complete finish line.
-- **Most recent sprint:** NARRATE-INTENT-CURSOR-1 — resume-anchor consume lifecycle (PARTIAL: A1 PASS, A4 FAIL 0-of-3 — reactive not preventive; PAUSE-RESUME-UNIFY-1 completes). Prior: NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30), THEME-SYNC-1 (2026-05-29).
+- **Most recent sprint:** NARRATE-A5-RATE-RESEED-1 — rate-change reseeds from heard position (PASS 3-of-3, merged `145c385`, 2026-05-31). Prior: NARRATE-CURSOR-TRACKING-DIAG-1, NARRATE-PAUSE-RESUME-UNIFY-1, NARRATE-INTENT-CURSOR-1 (all 2026-05-31).
 - 3,044 tests across 213 test files
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). Quality gate: `npm run test:quality` runs in CI (`quality-gate` job, ubuntu-only, paths-filtered for TTS surfaces)
 - Governance tooling: `scripts/recalc.py` refreshes xlsx formula caches after openpyxl edits (`python scripts/recalc.py [--dry-run] <path>`)
