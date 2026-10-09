@@ -2616,3 +2616,19 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Applies to:** narration, cursor sync, diagnostics
 **Status:** Observation
 **Source:** LESSONS_LEARNED.md line 1686, original heading "[2026-05-31] LL-127: No Instrumented Cursor Signal Sits On the Heard Word — `heardFloor` Is a Mislabeled Twin of `schedulerActiveWord`"
+
+### LL-129 — Bulk transforms of hand-written docs must census label variants before dispatch (GOV-HYGIENE-2026-10-09, 2026-10-09)
+
+**Verdict:** A spec that mechanically rewrites hand-authored governance docs must enumerate the real heading/label forms and id collisions first, with a fallback for each, or the run stops mid-transform.
+**Evidence:** GOV-HYGIENE-2026-10-09 STEP 3b stopped on duplicate LL-092 (lines 1125 and 1153); planner pre-flight then found 7 suffixed verdict labels and LL-082 with none; the run still needed a per-line override, and LL-082's index Verdict came out as a code snippet.
+**Recommendation:** Before dispatching a doc transform, grep a census of every label/heading variant and duplicate id in the target file and write each into the spec with its fallback.
+**Applies to:** Any specification that parses or rewrites hand-written markdown governance documents (lessons, roadmap, close-outs).
+**Status:** Observation
+
+### LL-130 — virtuoso mutation-plan opens a recovery record; it is not a dry run (GOV-HYGIENE-2026-10-09, 2026-10-08)
+
+**Verdict:** Every `virtuoso_registry mutation-plan` call opens a durable recovery record, so calling it only to inspect a plan's shape leaves a pending external mutation.
+**Evidence:** During the 2026-10-08 roadmap review that seeded GOV-HYGIENE-2026-10-09, a shape-inspection call opened recovery 20261009T033249Z-external-set-status-CLOUD-RETRY-SHARED-1, which then had to be confirmed as a no-op with an explanatory detail.
+**Recommendation:** Read plan structure from a prior plan JSON or the provider source; call mutation-plan only for a mutation that will be executed and confirmed in the same session.
+**Applies to:** Any ceremony or specification that writes an external work register through the provider handshake.
+**Status:** Observation
