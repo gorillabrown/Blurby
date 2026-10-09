@@ -152,15 +152,34 @@ async function launch() {
   const sampleContent = await extractContent(epubPath);
   if (typeof sampleContent !== "string" || !sampleContent.trim()) throw new Error("Bundled EPUB extraction failed");
   const now = Date.now();
+  // A3 (S1): B0 renders every readable document through foliate ("all docs should be EPUB since EPUB-2B"),
+  // so non-EPUB sources are seeded as converted imports through the app's own converter.
+  const { convertToEpub } = require(path.join(ROOT, "main", "epub-converter.js"));
+  const converted = [];
+  for (const [id, title, file] of [["g0-converted-text", "G0 Converted Plain Text", "fixture.txt"], ["g0-converted-chapters", "G0 Converted Two Chapters", "fixture-chapters.txt"]]) {
+    const source = path.join(fixtureDir, file);
+    fs.copyFileSync(path.join(__dirname, file), source);
+    const result = await convertToEpub(source, dataDir, id, { title, author: "G0 Fixture" });
+    if (!result.valid) throw new Error(`Fixture conversion invalid: ${file}: ${JSON.stringify(result.errors)}`);
+    converted.push({ id, title, file, source, epubPath: result.epubPath, chapterCount: result.chapterCount, wordCount: countWords(await extractContent(source)) });
+  }
   const docs = [
     { id: "g0-public-epub", title: "G0 Bundled Meditations", filepath: epubPath, ext: ".epub", filename: "sample-meditations.epub", size: fs.statSync(epubPath).size, author: "Marcus Aurelius", wordCount: countWords(sampleContent), source: "file", position: 0, created: now, modified: now, lastReadAt: null },
-    { id: "g0-public-text", title: "G0 Generated Plain Text", content: textContent, wordCount: countWords(textContent), source: "manual", position: 0, created: now, modified: now, revision: 0, lastReadAt: null },
+    ...converted.map((c) => ({ id: c.id, title: c.title, filepath: c.epubPath, convertedEpubPath: c.epubPath, originalFilepath: c.source, ext: ".epub", filename: path.basename(c.epubPath), size: fs.statSync(c.epubPath).size, author: "G0 Fixture", wordCount: c.wordCount, source: "manual", position: 0, created: now, modified: now, coverPath: null, lastReadAt: null, unread: true, tags: [], deleted: false })),
   ];
+  if (arg("seed-kokoro") === "1") {
+    // Test-only: copy the installed model so a fresh profile does not race two concurrent downloads (OBS-A1R-1).
+    const modelRel = path.join("models", "onnx-community", "Kokoro-82M-v1.0-ONNX");
+    // The installed app's models live under appData/blurby (a bare electron.exe launch defaults userData to appData/Electron).
+    const seedFrom = path.join(app.getPath("appData"), "blurby", modelRel);
+    fs.cpSync(seedFrom, path.join(userData, modelRel), { recursive: true, errorOnExist: true });
+    manifest.kokoroSeed = { from: seedFrom, files: fs.readdirSync(path.join(userData, modelRel), { recursive: true }).map(String).sort() };
+  }
   fs.writeFileSync(path.join(dataDir, "library.json"), JSON.stringify({ schemaVersion: 6, docs }, null, 2));
   fs.writeFileSync(path.join(dataDir, "settings.json"), JSON.stringify({ schemaVersion: 12, firstRunCompleted: true, readingMode: "page", lastReadingMode: "flow", wpm: 250, ttsRate: 1, ttsEngine: "kokoro", ttsEnabled: false, sourceFolder: null, recentFolders: [] }, null, 2));
   manifest.fixtures = [
     { id: docs[0].id, path: epubPath, source: "resources/sample-meditations.epub", sha256: sha(fs.readFileSync(epubPath)), wordCount: docs[0].wordCount, countAuthority: "existing main/file-parsers.countWords(extractContent)", initialPosition: 0, kind: "native-epub" },
-    { id: docs[1].id, path: textPath, source: "admission/fixture.txt", sha256: sha(fs.readFileSync(textPath)), wordCount: docs[1].wordCount, initialPosition: 0, kind: "legacy-inline-content-non-epub", note: "No filepath or convertedEpubPath; deliberately exercises the existing inline text path. Importing a TXT file would convert it to EPUB." },
+    ...converted.map((c) => ({ id: c.id, path: c.epubPath, source: `admission/${c.file}`, sourceSha256: sha(fs.readFileSync(c.source)), sha256: sha(fs.readFileSync(c.epubPath)), chapterCount: c.chapterCount, wordCount: c.wordCount, countAuthority: "existing main/file-parsers.countWords(extractContent) on the source text", initialPosition: 0, kind: "converted-import-non-epub-source" })),
   ];
   saveManifest();
   assertIsolation();

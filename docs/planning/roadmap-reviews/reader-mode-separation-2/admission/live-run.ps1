@@ -5,7 +5,8 @@ param(
   [Parameter(Mandatory)] [string]$B0,
   [Parameter(Mandatory)] [string[]]$Captures,
   [Parameter(Mandatory)] [ValidatePattern('^[a-z0-9]+$')] [string]$Label,
-  [int]$CdpPort = 9335
+  [int]$CdpPort = 9335,
+  [string]$Only = ''
 )
 $ErrorActionPreference = 'Stop'
 $W = 'C:\Projects\Blurby\.worktrees\reader-mode-separation-2'
@@ -35,7 +36,7 @@ try {
   Step 'preview' @{ pid = $vite.Id; up = $up }
   if (-not $up) { throw 'Preview did not serve B0 on :5173' }
   $electron = Join-Path $W 'node_modules\electron\dist\electron.exe'
-  $el = Start-Process -FilePath $electron -ArgumentList @("$E/isolated-launch.cjs", "--profile=$profileDir", "--cdp-port=$CdpPort", "--build-dir=$B0") -WorkingDirectory $W -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs\electron.out.log" -RedirectStandardError "$logs\electron.err.log"
+  $el = Start-Process -FilePath $electron -ArgumentList @("$E/isolated-launch.cjs", "--profile=$profileDir", "--cdp-port=$CdpPort", "--build-dir=$B0", "--seed-kokoro=1") -WorkingDirectory $W -WindowStyle Hidden -PassThru -RedirectStandardOutput "$logs\electron.out.log" -RedirectStandardError "$logs\electron.err.log"
   $result.electronPid = $el.Id
   $deadline = (Get-Date).AddSeconds(90); $ready = $false
   while ((Get-Date) -lt $deadline -and -not $el.HasExited) {
@@ -52,7 +53,8 @@ try {
   foreach ($c in ($Captures -join ',').Split(',', [StringSplitOptions]::RemoveEmptyEntries)) {   # pwsh -File passes one string
     $fixture, $scenario = $c.Split(':')
     $run = "$Label-$fixture-$scenario"
-    & node "$E/capture.mjs" "--profile=$profileDir" "--fixture=$fixture" "--scenario=$scenario" "--run=$run" *> "$logs\capture-$run.log"
+    if ($fixture -eq 'matrix') { $extra = @(); if ($Only) { $extra = @("--only=$Only") }; & node "$E/matrix.mjs" "--profile=$profileDir" "--fixture=$scenario" "--run=$run" @extra *> "$logs\capture-$run.log" }
+    else { & node "$E/capture.mjs" "--profile=$profileDir" "--fixture=$fixture" "--scenario=$scenario" "--run=$run" *> "$logs\capture-$run.log" }
     Step 'capture' @{ run = $run; exitCode = $LASTEXITCODE }
   }
 } catch {

@@ -1,0 +1,5661 @@
+{
+  "summary": {
+    "run": "a3m-matrix-epub",
+    "fixture": "epub",
+    "docId": "g0-public-epub",
+    "startedFromManifest": "blurby-reader-mode-separation-2-a1-a3m20261009053032369",
+    "finishedAt": "2026-10-09T05:35:13.403Z",
+    "settings": {
+      "schemaVersion": 12,
+      "firstRunCompleted": true,
+      "readingMode": "narrate",
+      "lastReadingMode": "narrate",
+      "wpm": 250,
+      "ttsRate": 1,
+      "ttsEngine": "kokoro",
+      "ttsEnabled": false,
+      "sourceFolder": null,
+      "recentFolders": [],
+      "_wsPairingToken": "djEwPqM/2Xp4c2q2eeI5IkQ6r42mrvNE+9N+3Jwxi39xLyhhNEF3jnEQ0eRbtQYXdT0RVsPOtr+ZhvBTEKk2",
+      "folderName": "My reading list",
+      "isNarrating": false
+    },
+    "consoleErrors": [
+      {
+        "at": "2026-10-09T05:32:02.655Z",
+        "method": "Runtime.exceptionThrown",
+        "text": "TypeError: Cannot destructure property 'style' of 'r' as it is null.\n    at Z (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:3578)\n    at ee.columnize (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:6154)\n    at ee.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:5260)\n    at It.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:97:2961)\n    at ResizeObserver.<anon"
+      },
+      {
+        "at": "2026-10-09T05:32:53.053Z",
+        "method": "Runtime.exceptionThrown",
+        "text": "TypeError: Cannot destructure property 'style' of 'r' as it is null.\n    at Z (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:3578)\n    at ee.columnize (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:6154)\n    at ee.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:5260)\n    at It.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:97:2961)\n    at ResizeObserver.<anon"
+      }
+    ],
+    "cases": [
+      {
+        "case": "page-navigation-selection",
+        "status": "recorded",
+        "actual": 0
+      },
+      {
+        "case": "focus-pacing-pause-resume",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "flow-follow-browse-return",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 6
+      },
+      {
+        "case": "narrate-start0-pause-resume-rate-section",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "narrate-start7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-page-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-page-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 6
+      },
+      {
+        "case": "t-page-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-focus-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-focus-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 6
+      },
+      {
+        "case": "t-focus-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-flow-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-flow-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-flow-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-narrate-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-narrate-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 6
+      },
+      {
+        "case": "t-page-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-page-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-page-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-flow-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-flow-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-flow-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-narrate-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "same-page",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-focus",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-flow",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-narrate",
+        "status": "recorded",
+        "expected": 7
+      }
+    ]
+  },
+  "rows": [
+    {
+      "case": "page-navigation-selection",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:30:36.578Z",
+      "steps": [
+        {
+          "label": "opened",
+          "at": "2026-10-09T05:30:39.539Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 0
+        },
+        {
+          "label": "next-page",
+          "at": "2026-10-09T05:30:40.455Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 187
+        },
+        {
+          "label": "previous-page",
+          "at": "2026-10-09T05:30:41.369Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 0
+        },
+        {
+          "label": "page-static-2s",
+          "at": "2026-10-09T05:30:43.387Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 0
+        }
+      ],
+      "clickTarget": null,
+      "actual": 0,
+      "pageAutoAdvanced": true,
+      "status": "recorded",
+      "screenshot": "shots/page-navigation-selection.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:30:43.473Z"
+    },
+    {
+      "case": "focus-pacing-pause-resume",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:30:43.476Z",
+      "steps": [
+        {
+          "label": "focus-paused",
+          "at": "2026-10-09T05:30:48.788Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "paused",
+          "at": "2026-10-09T05:30:52.972Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "back-to-page",
+          "at": "2026-10-09T05:30:56.402Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 7,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "displayed": [
+        "eBook",
+        "is",
+        "for",
+        "use",
+        "of",
+        "nayone",
+        "naywhere",
+        "in",
+        "the",
+        "nUited",
+        "tSates",
+        "and",
+        "most",
+        "other",
+        "parts",
+        "of",
+        "the",
+        "world",
+        "at",
+        "no"
+      ],
+      "pausedHeld": true,
+      "actual": null,
+      "note": "actual = Focus pause anchor read back as Page highlight after pacing (expected index is the start word; advancement is expected)",
+      "status": "recorded",
+      "screenshot": "shots/focus-pacing-pause-resume.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "page",
+          "ts": 1791523846330
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "page",
+          "to": "flow",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791523846331
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791523847970
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "flow",
+          "to": "focus",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791523847971
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791523848791
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791523855574
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "focus",
+          "to": "page",
+          "context": "mode-switch-anchor-preserved",
+          "latencyMs": 0,
+          "ts": 1791523855574
+        }
+      ],
+      "finishedAt": "2026-10-09T05:30:56.498Z"
+    },
+    {
+      "case": "flow-follow-browse-return",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:30:56.501Z",
+      "steps": [
+        {
+          "label": "flow-paused",
+          "at": "2026-10-09T05:31:00.609Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-0",
+          "at": "2026-10-09T05:31:01.121Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              9
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-1",
+          "at": "2026-10-09T05:31:01.633Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              11
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-2",
+          "at": "2026-10-09T05:31:02.147Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              13
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-3",
+          "at": "2026-10-09T05:31:02.661Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              15
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-4",
+          "at": "2026-10-09T05:31:03.172Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              17
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-5",
+          "at": "2026-10-09T05:31:03.685Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              19
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-6",
+          "at": "2026-10-09T05:31:04.199Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              21
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "playing-7",
+          "at": "2026-10-09T05:31:04.702Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              23
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-wheel-same-section",
+          "at": "2026-10-09T05:31:06.335Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              30
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 187
+        },
+        {
+          "label": "return-unavailable",
+          "error": "click [aria-label=\"Jump back to persistent last-read word\"]: count 0"
+        },
+        {
+          "label": "returned-same-section",
+          "at": "2026-10-09T05:31:07.553Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              35
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-pagedown-cross-section",
+          "at": "2026-10-09T05:31:12.046Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            2
+          ],
+          "browsedAway": true,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 5293
+        },
+        {
+          "label": "returned-cross-section",
+          "at": "2026-10-09T05:31:13.629Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              42
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "actual": 6,
+      "followLast": 6,
+      "flowWordEvents": 1,
+      "crossSectionReached": true,
+      "status": "recorded",
+      "screenshot": "shots/flow-follow-browse-return.png",
+      "trace": [
+        {
+          "kind": "flow-position",
+          "lineIndex": 2,
+          "totalLines": 34,
+          "wordIndex": 28,
+          "totalWords": 80493,
+          "bookPct": 0.0003478563353335073,
+          "ts": 1791523866118
+        }
+      ],
+      "finishedAt": "2026-10-09T05:31:13.785Z"
+    },
+    {
+      "case": "narrate-start0-pause-resume-rate-section",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:31:13.787Z",
+      "steps": [
+        {
+          "label": "narrate-paused",
+          "at": "2026-10-09T05:31:18.937Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "speaking-0",
+          "at": "2026-10-09T05:31:24.269Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 10,
+          "wordSpans": 187
+        },
+        {
+          "label": "speaking-1",
+          "at": "2026-10-09T05:31:25.486Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              5
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 13,
+          "wordSpans": 187
+        },
+        {
+          "label": "speaking-2",
+          "at": "2026-10-09T05:31:26.746Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              7
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 15,
+          "wordSpans": 187
+        },
+        {
+          "label": "speaking-3",
+          "at": "2026-10-09T05:31:27.850Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              12
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 20,
+          "wordSpans": 187
+        },
+        {
+          "label": "paused",
+          "at": "2026-10-09T05:31:29.428Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              12
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 21,
+          "wordSpans": 187
+        },
+        {
+          "label": "resumed",
+          "at": "2026-10-09T05:31:31.953Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.4-0",
+          "at": "2026-10-09T05:31:33.261Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.4-1",
+          "at": "2026-10-09T05:31:34.346Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.4-2",
+          "at": "2026-10-09T05:31:35.485Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.0-0",
+          "at": "2026-10-09T05:31:36.766Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.0-1",
+          "at": "2026-10-09T05:31:37.818Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "rate-1.0-2",
+          "at": "2026-10-09T05:31:38.898Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-next-chapter-0",
+          "at": "2026-10-09T05:31:39.932Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-next-chapter-1",
+          "at": "2026-10-09T05:31:40.961Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-next-chapter-2",
+          "at": "2026-10-09T05:31:41.982Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-next-chapter-3",
+          "at": "2026-10-09T05:31:43.041Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        },
+        {
+          "label": "after-next-chapter-4",
+          "at": "2026-10-09T05:31:44.045Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "actual": 0,
+      "firstAudio": {
+        "kind": "lifecycle",
+        "state": "first-audio",
+        "wordIndex": 0,
+        "latencyMs": 4192,
+        "ts": 1791523883133
+      },
+      "resume": {
+        "resumeEvents": 1,
+        "startEvents": 0
+      },
+      "sectionTrace": [],
+      "status": "recorded",
+      "screenshot": "shots/narrate-start0-pause-resume-rate-section.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791523883383
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791523883957
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 3,
+          "ts": 1791523884673
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 4,
+          "ts": 1791523885165
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 5,
+          "ts": 1791523885246
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 6,
+          "ts": 1791523886157
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791523886491
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791523886884
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791523887048
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791523887293
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 11,
+          "ts": 1791523887604
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 12,
+          "ts": 1791523887800
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 12,
+          "mode": "narrate",
+          "ts": 1791523887854
+        },
+        {
+          "kind": "lifecycle",
+          "state": "resume",
+          "wordIndex": 12,
+          "mode": "narrate",
+          "ts": 1791523889435
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 13,
+          "ts": 1791523889946
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 14,
+          "ts": 1791523890435
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 15,
+          "ts": 1791523891104
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 16,
+          "ts": 1791523891261
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 17,
+          "ts": 1791523891502
+        }
+      ],
+      "finishedAt": "2026-10-09T05:31:44.143Z"
+    },
+    {
+      "case": "narrate-start7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:31:44.148Z",
+      "steps": [],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 3456
+        },
+        "cursorAfter": [],
+        "activeAfter": [
+          11
+        ]
+      },
+      "actual": 7,
+      "status": "recorded",
+      "screenshot": "shots/narrate-start7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:31:54.445Z"
+    },
+    {
+      "case": "t-page-focus-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:31:54.447Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:31:58.756Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:31:59.588Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:32:01.107Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "eBook"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-focus-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:32:02.409Z"
+    },
+    {
+      "case": "t-page-flow-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:02.411Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:06.538Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:32:07.366Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:32:08.892Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 6,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 6,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-flow-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 6,
+          "ts": 1791523928968
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 34,
+          "wordIndex": 6,
+          "totalWords": 80493,
+          "bookPct": 0.00007454064328575156,
+          "ts": 1791523928968
+        }
+      ],
+      "finishedAt": "2026-10-09T05:32:09.221Z"
+    },
+    {
+      "case": "t-page-narrate-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:09.223Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:13.330Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:32:14.150Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:32:15.685Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 578
+        },
+        "cursorAfter": [],
+        "activeAfter": [
+          12
+        ]
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791523936267
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791523936672
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791523936903
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791523937075
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 11,
+          "ts": 1791523937306
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 12,
+          "ts": 1791523937546
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 12,
+          "mode": "narrate",
+          "ts": 1791523937570
+        }
+      ],
+      "finishedAt": "2026-10-09T05:32:17.735Z"
+    },
+    {
+      "case": "t-focus-page-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:17.738Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:22.208Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:32:23.015Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:32:24.537Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 7,
+        "highlighted": 7,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+          "readingMode": "page",
+          "lastReadingMode": "focus"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "page",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:32:24.639Z"
+    },
+    {
+      "case": "t-focus-flow-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:24.640Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:28.752Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:32:29.562Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:32:31.072Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 6,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 6,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-flow-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791523951075
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 6,
+          "ts": 1791523951131
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 34,
+          "wordIndex": 6,
+          "totalWords": 80493,
+          "bookPct": 0.00007454064328575156,
+          "ts": 1791523951131
+        }
+      ],
+      "finishedAt": "2026-10-09T05:32:31.369Z"
+    },
+    {
+      "case": "t-focus-narrate-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:31.371Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:35.505Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:32:36.315Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:32:37.835Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 576
+        },
+        "cursorAfter": [],
+        "activeAfter": [
+          12
+        ]
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791523958417
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791523958831
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791523959096
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791523959200
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 11,
+          "ts": 1791523959444
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 12,
+          "ts": 1791523959696
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 12,
+          "mode": "narrate",
+          "ts": 1791523959729
+        }
+      ],
+      "finishedAt": "2026-10-09T05:32:39.935Z"
+    },
+    {
+      "case": "t-flow-page-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:39.937Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:44.242Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:32:45.761Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 7,
+        "highlighted": 7,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+          "readingMode": "page",
+          "lastReadingMode": "flow"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "page",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:32:45.858Z"
+    },
+    {
+      "case": "t-flow-focus-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:45.860Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:49.987Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:32:51.505Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "eBook"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-focus-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791523971510
+        }
+      ],
+      "finishedAt": "2026-10-09T05:32:52.801Z"
+    },
+    {
+      "case": "t-flow-narrate-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:32:52.804Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:32:56.926Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:32:58.441Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 589
+        },
+        "cursorAfter": [],
+        "activeAfter": [
+          12
+        ]
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "start",
+          "wordIndex": 7,
+          "mode": "narrate",
+          "ts": 1791523978444
+        },
+        {
+          "kind": "lifecycle",
+          "state": "first-audio",
+          "wordIndex": 7,
+          "latencyMs": 589,
+          "ts": 1791523979033
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791523979033
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791523979418
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791523979620
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791523979824
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 11,
+          "ts": 1791523980050
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 12,
+          "ts": 1791523980302
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 12,
+          "mode": "narrate",
+          "ts": 1791523980417
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:00.639Z"
+    },
+    {
+      "case": "t-narrate-page-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:00.642Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:05.085Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:33:05.890Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:33:07.425Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "page",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:33:07.533Z"
+    },
+    {
+      "case": "t-narrate-focus-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:07.535Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:11.655Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:33:12.461Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:33:13.972Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "eBook"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-focus-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791523993976
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:15.268Z"
+    },
+    {
+      "case": "t-narrate-flow-w7",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:15.270Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:19.384Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:33:20.189Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:33:21.696Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 6,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 6,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-flow-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 6,
+          "ts": 1791524001757
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 34,
+          "wordIndex": 6,
+          "totalWords": 80493,
+          "bookPct": 0.00007454064328575156,
+          "ts": 1791524001757
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:21.994Z"
+    },
+    {
+      "case": "t-page-focus-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:21.997Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:26.114Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:33:26.935Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:33:28.458Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "The"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-focus-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:33:29.735Z"
+    },
+    {
+      "case": "t-page-flow-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:29.736Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:33.858Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:33:34.683Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:33:36.214Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-flow-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524016275
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 34,
+          "wordIndex": 0,
+          "totalWords": 80493,
+          "bookPct": 0,
+          "ts": 1791524016275
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:36.520Z"
+    },
+    {
+      "case": "t-page-narrate-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:36.522Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:40.642Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:33:41.463Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:33:42.989Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 589
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524023583
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524023833
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524024401
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 2,
+          "mode": "narrate",
+          "ts": 1791524024894
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:45.054Z"
+    },
+    {
+      "case": "t-focus-page-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:45.056Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:49.406Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:33:50.213Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:33:51.738Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+          "readingMode": "page",
+          "lastReadingMode": "focus"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "page",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:33:51.838Z"
+    },
+    {
+      "case": "t-focus-flow-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:51.839Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:33:55.955Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:33:56.773Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:33:58.282Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-flow-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524038288
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524038342
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 34,
+          "wordIndex": 0,
+          "totalWords": 80493,
+          "bookPct": 0,
+          "ts": 1791524038343
+        }
+      ],
+      "finishedAt": "2026-10-09T05:33:58.561Z"
+    },
+    {
+      "case": "t-focus-narrate-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:33:58.563Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:02.685Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:34:03.505Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:34:05.025Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 603
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524045633
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524045883
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524046439
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 2,
+          "mode": "narrate",
+          "ts": 1791524046951
+        }
+      ],
+      "finishedAt": "2026-10-09T05:34:07.152Z"
+    },
+    {
+      "case": "t-flow-page-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:07.155Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:11.576Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:34:13.096Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+          "readingMode": "page",
+          "lastReadingMode": "flow"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "page",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:34:13.196Z"
+    },
+    {
+      "case": "t-flow-focus-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:13.199Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:17.335Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:34:18.850Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "The"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-focus-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524058854
+        }
+      ],
+      "finishedAt": "2026-10-09T05:34:20.160Z"
+    },
+    {
+      "case": "t-flow-narrate-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:20.162Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:24.299Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:34:25.815Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 596
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "start",
+          "wordIndex": 0,
+          "mode": "narrate",
+          "ts": 1791524065820
+        },
+        {
+          "kind": "lifecycle",
+          "state": "first-audio",
+          "wordIndex": 0,
+          "latencyMs": 596,
+          "ts": 1791524066416
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524066416
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524066668
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524067235
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 2,
+          "mode": "narrate",
+          "ts": 1791524067731
+        }
+      ],
+      "finishedAt": "2026-10-09T05:34:27.926Z"
+    },
+    {
+      "case": "t-narrate-page-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:27.929Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:32.377Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:34:33.187Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:34:34.707Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        },
+        "softSelected": [],
+        "wordSpans": 187
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "page",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:34:34.789Z"
+    },
+    {
+      "case": "t-narrate-focus-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:34.791Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:38.903Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:34:39.710Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:34:41.221Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "The"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-focus-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524081225
+        }
+      ],
+      "finishedAt": "2026-10-09T05:34:42.516Z"
+    },
+    {
+      "case": "t-narrate-flow-w0",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:42.518Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:34:46.628Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:34:47.437Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:34:48.948Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "The",
+        "full": "The",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/2[pg-header-heading]/2,/1:0,/1:3)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-flow-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524089009
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 34,
+          "wordIndex": 0,
+          "totalWords": 80493,
+          "bookPct": 0,
+          "ts": 1791524089010
+        }
+      ],
+      "finishedAt": "2026-10-09T05:34:49.251Z"
+    },
+    {
+      "case": "same-page",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:49.253Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:34:54.213Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:34:55.435Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "page",
+          "ts": 1791524094217
+        }
+      ],
+      "status": "recorded",
+      "screenshot": "shots/same-page.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:34:55.532Z"
+    },
+    {
+      "case": "same-focus",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:34:55.534Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:35:00.452Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:35:01.668Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-focus.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:35:01.758Z"
+    },
+    {
+      "case": "same-flow",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:35:01.760Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:35:05.870Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:35:07.083Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-flow.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:35:07.178Z"
+    },
+    {
+      "case": "same-narrate",
+      "fixture": "epub",
+      "docId": "g0-public-epub",
+      "startedAt": "2026-10-09T05:35:07.181Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:35:12.096Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:35:13.305Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "BOOKS",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 187
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "eBook",
+        "full": "eBook",
+        "section": 1
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/4!/4/2[pg-header]/4/4,/1:0,/1:5)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-narrate.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524111289
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "flow",
+          "to": "narrate",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791524111289
+        }
+      ],
+      "finishedAt": "2026-10-09T05:35:13.398Z"
+    }
+  ]
+}

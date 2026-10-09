@@ -1,0 +1,5 @@
+
+DevTools listening on ws://127.0.0.1:9335/devtools/browser/b67d8d3b-f185-42dd-8f40-98beccb65aa1
+(electron) 'console-message' arguments are deprecated and will be removed. Please use Event<WebContentsConsoleMessageEventParams> object instead.
+(node:60456) MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 destroyed listeners added to [WebContents]. MaxListeners is 10. Use emitter.setMaxListeners() to increase limit
+(Use `electron --trace-warnings ...` to show where the warning was created)

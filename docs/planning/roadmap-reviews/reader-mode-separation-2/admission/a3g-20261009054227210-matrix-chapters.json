@@ -1,0 +1,1012 @@
+{
+  "summary": {
+    "run": "a3g-matrix-chapters",
+    "fixture": "chapters",
+    "docId": "g0-converted-chapters",
+    "startedFromManifest": "blurby-reader-mode-separation-2-a1-a3g20261009054227210",
+    "finishedAt": "2026-10-09T05:44:33.954Z",
+    "settings": {
+      "schemaVersion": 12,
+      "firstRunCompleted": true,
+      "readingMode": "flow",
+      "lastReadingMode": "flow",
+      "wpm": 250,
+      "ttsRate": 1,
+      "ttsEngine": "kokoro",
+      "ttsEnabled": false,
+      "sourceFolder": null,
+      "recentFolders": [],
+      "_wsPairingToken": "djEwAs/1Jg+le3+k9sllYKFwuDhOFNlKedHZ16luPctrco05lX5R2vohX+7yalAS4/I7DNdTBESonrJk4wWN",
+      "folderName": "My reading list",
+      "isNarrating": false,
+      "readingGoals": []
+    },
+    "consoleErrors": [],
+    "cases": [
+      {
+        "case": "gap-page-select-text-page",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "gap-flow-wheel-margin",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "gap-narrate-section-natural",
+        "status": "recorded",
+        "expected": 827,
+        "actual": 827
+      },
+      {
+        "case": "gap-narrate-next-chapter-paused",
+        "status": "error",
+        "expected": 7,
+        "error": "word 7 not in loaded sections"
+      }
+    ]
+  },
+  "rows": [
+    {
+      "case": "gap-page-select-text-page",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:43:35.796Z",
+      "steps": [
+        {
+          "label": "text-page",
+          "at": "2026-10-09T05:43:40.178Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "single-click",
+          "at": "2026-10-09T05:43:41.201Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        }
+      ],
+      "clickTarget": {
+        "x": -930.5062503814697,
+        "y": 275.1999969482422,
+        "text": "and"
+      },
+      "highlighted": [],
+      "persisted": 0,
+      "actual": null,
+      "expected": 0,
+      "note": "expected = the clicked word's persisted canonical index; actual = Page highlight",
+      "status": "recorded",
+      "screenshot": "shots/gap-page-select-text-page.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:43:41.332Z"
+    },
+    {
+      "case": "gap-flow-wheel-margin",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:43:41.335Z",
+      "steps": [
+        {
+          "label": "playing",
+          "at": "2026-10-09T05:43:47.479Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              15
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-margin-wheel",
+          "at": "2026-10-09T05:43:49.086Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              21
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "return-pill-unavailable",
+          "error": "click .return-to-reading-pill: count 0"
+        },
+        {
+          "label": "returned",
+          "at": "2026-10-09T05:43:50.302Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              26
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "browsedAway": false,
+      "pausedByBrowse": false,
+      "returnedCursor": [
+        26
+      ],
+      "status": "recorded",
+      "screenshot": "shots/gap-flow-wheel-margin.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "page",
+          "ts": 1791524624193
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "page",
+          "to": "flow",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791524624193
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524625459
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 4,
+          "ts": 1791524625516
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 61,
+          "wordIndex": 4,
+          "totalWords": 1676,
+          "bookPct": 0.002386634844868735,
+          "ts": 1791524625517
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 18,
+          "ts": 1791524629133
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 19,
+          "ts": 1791524629304
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 2,
+          "totalLines": 61,
+          "wordIndex": 19,
+          "totalWords": 1676,
+          "bookPct": 0.011336515513126491,
+          "ts": 1791524629304
+        }
+      ],
+      "finishedAt": "2026-10-09T05:43:50.422Z"
+    },
+    {
+      "case": "gap-narrate-section-natural",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:43:50.427Z",
+      "steps": [
+        {
+          "label": "narrate-paused",
+          "at": "2026-10-09T05:43:55.385Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              827
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-0",
+          "at": "2026-10-09T05:44:26.462Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter Two: The River",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 78,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-1",
+          "at": "2026-10-09T05:44:27.649Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [
+              901
+            ],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter Two: The River",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 82,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-2",
+          "at": "2026-10-09T05:44:28.730Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter Two: The River",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 85,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-3",
+          "at": "2026-10-09T05:44:29.805Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter Two: The River",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            1
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 88,
+          "wordSpans": 838
+        }
+      ],
+      "sectionLastWord": 837,
+      "expected": 827,
+      "expectedWord": {
+        "text": "wall",
+        "full": "wall",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 827,
+        "cfi": "epubcfi(/6/2!/4/62/34,/1:0,/1:4)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "actual": 827,
+      "sectionTransition": null,
+      "chapters": [
+        "Chapter One: The Orchard",
+        "Chapter Two: The River"
+      ],
+      "audioWordsAfterLast": [
+        838,
+        839,
+        840,
+        841,
+        842,
+        843,
+        844,
+        845,
+        846,
+        847
+      ],
+      "status": "recorded",
+      "screenshot": "shots/gap-narrate-section-natural.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 828,
+          "ts": 1791524639517
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 829,
+          "ts": 1791524640024
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 830,
+          "ts": 1791524640363
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 831,
+          "ts": 1791524640598
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 832,
+          "ts": 1791524641134
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 833,
+          "ts": 1791524641524
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 834,
+          "ts": 1791524641696
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 835,
+          "ts": 1791524642203
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 836,
+          "ts": 1791524642804
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 837,
+          "ts": 1791524642957
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 838,
+          "ts": 1791524643326
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 839,
+          "ts": 1791524643913
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 840,
+          "ts": 1791524644271
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 841,
+          "ts": 1791524644526
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 842,
+          "ts": 1791524644970
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 843,
+          "ts": 1791524645182
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 844,
+          "ts": 1791524645481
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 845,
+          "ts": 1791524645982
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 846,
+          "ts": 1791524646469
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 847,
+          "ts": 1791524646960
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 848,
+          "ts": 1791524647225
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 849,
+          "ts": 1791524647554
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 850,
+          "ts": 1791524647897
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 851,
+          "ts": 1791524648063
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 852,
+          "ts": 1791524648301
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 853,
+          "ts": 1791524648809
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 854,
+          "ts": 1791524649301
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 855,
+          "ts": 1791524649654
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 856,
+          "ts": 1791524649903
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 857,
+          "ts": 1791524650760
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 858,
+          "ts": 1791524651022
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 859,
+          "ts": 1791524651483
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 860,
+          "ts": 1791524651818
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 861,
+          "ts": 1791524652071
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 862,
+          "ts": 1791524652522
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 863,
+          "ts": 1791524652762
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 864,
+          "ts": 1791524653114
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 865,
+          "ts": 1791524653571
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 866,
+          "ts": 1791524654026
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 867,
+          "ts": 1791524654240
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 868,
+          "ts": 1791524654699
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 869,
+          "ts": 1791524655297
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 870,
+          "ts": 1791524655555
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 871,
+          "ts": 1791524655813
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 872,
+          "ts": 1791524656786
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 873,
+          "ts": 1791524657047
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 874,
+          "ts": 1791524657394
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 875,
+          "ts": 1791524657849
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 876,
+          "ts": 1791524658305
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 877,
+          "ts": 1791524658761
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 878,
+          "ts": 1791524658985
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 879,
+          "ts": 1791524659649
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 880,
+          "ts": 1791524659767
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 881,
+          "ts": 1791524660166
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 882,
+          "ts": 1791524660361
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 883,
+          "ts": 1791524660754
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 884,
+          "ts": 1791524661201
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 885,
+          "ts": 1791524661966
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 886,
+          "ts": 1791524662035
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 887,
+          "ts": 1791524662565
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 888,
+          "ts": 1791524662904
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 889,
+          "ts": 1791524663374
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 890,
+          "ts": 1791524663829
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 891,
+          "ts": 1791524664043
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 892,
+          "ts": 1791524664565
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 893,
+          "ts": 1791524664951
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 894,
+          "ts": 1791524665193
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 895,
+          "ts": 1791524665642
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 896,
+          "ts": 1791524666188
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 897,
+          "ts": 1791524666319
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 898,
+          "ts": 1791524666665
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 899,
+          "ts": 1791524666898
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 900,
+          "ts": 1791524667323
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 901,
+          "ts": 1791524667569
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 902,
+          "ts": 1791524668035
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 903,
+          "ts": 1791524668331
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 904,
+          "ts": 1791524668573
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 905,
+          "ts": 1791524668897
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 906,
+          "ts": 1791524669240
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 907,
+          "ts": 1791524669631
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 908,
+          "ts": 1791524669881
+        }
+      ],
+      "finishedAt": "2026-10-09T05:44:30.029Z"
+    },
+    {
+      "case": "gap-narrate-next-chapter-paused",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:44:30.035Z",
+      "steps": [],
+      "expected": 7,
+      "status": "error",
+      "error": "word 7 not in loaded sections",
+      "screenshot": "shots/gap-narrate-next-chapter-paused.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:44:33.921Z"
+    }
+  ]
+}
