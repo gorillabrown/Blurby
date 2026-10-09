@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P6 — Wave E (cutover). Gates PASS: B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb
-next_action:  Wave E: E1–E3 committed 3dd4b504 → late-words fix (#19) [worker running] → E4 deletions (#21) → E5 boundary completion (#20) → E7 G5 → G6 harness (B0-checkout + candidate launchers) → record S-candidate → speed amendment → F → OS-1
+next_action:  PAUSED 2026-10-09 at ded41a04 (owner asked to pause). E1–E6 + G1 done. G6 harness committed. Resume (journal S1i): fix candidate regression — no visible cursor after a paused mode switch + foliate `docBackground` null errors → final bzeroc/candc G6 dry pair → E7 G5 gate → record S-candidate → speed amendment (scratchpad speed-brief.md; copy in journal S1i) → F → OS-1 checklist
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet

@@ -167,6 +167,70 @@
 - **Git:** eb/reader-mode-separation-2 @ 6a891c3d; uncommitted: perf noise, plus the in-flight G6 harness (`live/`, paths.json) and Q-E map (boundary-policy.json, ownership test).
 - **Next:** commit the Q-E map, then the harness and its B0/candidate dry runs, then the E7 G5 gate → S-candidate, then the speed amendment (brief in scratchpad) → F, then the OS-1 checklist.
 
+## S1i — 2026-10-09 (host) — G1 Q-E map, G6 harness; PAUSED at owner request
+
+- **Did:**
+  - G1 Q-E private-copy map committed (ded41a04); boundaries + ownership 16/16.
+  - G6 harness built (`E/live/`: build-candidate.mjs, isolated-launch-g6.cjs, live-run-g6.ps1, matrix-g6.mjs, assemble-live-qa.mjs, fixtures/ seeded with the exact A3 converted EPUB bytes; `paths.json → g6HarnessPaths`).
+  - 13 launcher/assembler negative controls all refused before creating a profile. Among them: wrong root, existing profile, the A1 profile path, a one-byte-tampered B0 or candidate build, a candidate sha that isn't HEAD, and assembling into `E/live-qa.json`.
+  - Candidate archive `C:\Projects\Blurby-artifacts\rms2-candidate-ded41a04cbf2\` (manifest sha 33207ad6…); `rms2-candidate-8e245345d7ff` is stale.
+  - Complete runs, one harness revision before final:
+    - B0 `%TEMP%\blurby-reader-mode-separation-2-g6-bzero20261009130207222`: epub 24/27, chapters 25/27. Matches g0 on every compared row.
+    - Candidate `…-g6-cand20261009131533632`: epub 10/27, chapters 8/27.
+  - Run `…-g6-bzerob20261009133534003` was INTERRUPTED: the host stopped its shell by mistake. It is not a result. Kept in place.
+  - Live-profile SHA-256 re-verified unchanged after every launch (26481c13…/3e518dda…/342dd888…).
+- **Learned (candidate findings; must be resolved before S is fixed):**
+  1. **No visible cursor after a paused mode switch.** All 12 transitions and 4 same-mode cases have the correct index and stale 0, but `visibleCursorCount` is 0 after 3 s. B0 shows 1. Screenshot-confirmed: B0 highlights word 7 after Flow→Page and the candidate highlights nothing. This is a real G4/G6 regression; root-cause it before the G5 gate.
+  2. Foliate paginator `TypeError: Cannot read properties of null (reading 'docBackground')` at mode switches: 23× on chapters, 5× on epub. Candidate only; likely the teardown of the old FoliateView racing the paginator. Investigate together with item 1.
+  3. OBS-A3-1 (narrate→page lands on 0) is fixed on the candidate: lands on 7.
+  4. Book transition fails on BOTH targets (B0 Narrate stops at book end). The EPUB section transition at 5480 misses on both. These are baseline behaviour, not regressions; rule them through mid-dispatch-decision, citing B0 evidence.
+  5. `epub-converter.js` writes a random `dc:identifier` and zip timestamps, so re-conversion never matches g0's hashes. That is why the fixtures are seeded copies.
+- **Decisions:** none new. Findings 1, 2 and 4 need decisions at resume.
+- **Gate/DoD movement:** none. The harness is committed for review; it is not yet a gate.
+- **Git:** eb/reader-mode-separation-2 @ (this commit); uncommitted: perf noise, Virtuoso/.recovery/.
+- **Next (resume in order):**
+  1. Root-cause and fix candidate findings 1 and 2 (shell/mode FoliateView mount after handoff), with a regression test.
+  2. Re-run the final pair sequentially (port 5173):
+     - `pwsh -File E\live\live-run-g6.ps1 -Target b0 -Label bzeroc -Fixtures epub,chapters`
+     - `build-candidate.mjs` at the new HEAD
+     - `-Target candidate -Candidate <HEAD> -Label candc`
+     - then `assemble-live-qa.mjs --out=<scratch>`
+  3. E7 G5 gate → record the S-candidate.
+  4. Speed amendment. The brief is below because the session scratchpad is not durable.
+  5. OS-1 owner checklist: heardAudio, the book-end ruling, removedCrossOwnerEffects.
+
+<details><summary>Speed-amendment worker brief (verbatim copy of the scratchpad speed-brief.md)</summary>
+
+- **Spec:** ROADMAP § READER-MODE-SEPARATION-2 "Mid-Dispatch Amendment — 2026-09-23 (speed dialog)" items 1–6; design §C rows S1–S5 and §E; staging memo fold-in 7 OC-6/7/8; LL-101.
+- **S1 — declare `speedAmendmentPaths` in paths.json first.**
+  - New: `src/components/ReaderSpeedDialog.tsx`, `tests/readerSpeedDialog.test.tsx`.
+  - Modified:
+    - `ReaderBottomBar.tsx`
+    - `constants.ts`
+    - `reader.css` (`.rbb-speed-*` only)
+    - `kokoroRatePlan.ts`
+    - `src/reader/modes/{focus,flow,narrate}/ModeRuntime.ts` (page only for OC-8)
+    - `useReaderModeOrchestrator.ts`
+    - `ReaderContainer.tsx` (freeze, owned)
+    - `tests/readerModeControls.test.tsx`
+    - `src/types.ts` only for the two optional fields
+    - plus every test that greps the old Kokoro domain.
+- **S2–S4 — values:**
+  - Integer-index math only. Focus/Flow `i∈[0,88]`: label `((40+5i)/100).toFixed(2)+"x"`, WPM `(40+5i)*2.5`. Narrate `j∈[0,24]`: rate `(80+5j)/100`. `SPEED_DIALOG_REFERENCE_WPM = 250`.
+  - Dialog (`ReaderSpeedDialog`): role=dialog, aria-modal, useFocusTrap, range over the index, aria-valuetext; Esc returns focus; open/close changes nothing.
+  - Trigger: `rbb-speed-trigger` button only when `snapshot.speed !== null` (Page: none).
+  - Persistence: Focus `focusWpm ?? wpm`, Flow `flowWpm ?? wpm`, Narrate `ttsRate` applied to its audio port. OC-8: Page ↑/↓ adjusts the key of `lastReadingMode`.
+  - Kokoro UI 0.80–2.00 / 0.05; buckets stay [1.0, 1.2, 1.5]; `useNarration.ts` NOT edited.
+- **Tests:**
+  - 89/89/25 values; 1.05 reaches the fake audio port; keyboard path; no cross-mode key or state change; persisted value equals displayed value.
+  - Every changed assertion goes in `test-migration.json → approvedSpeedDifferences[]`. No skips, no fixture edits.
+- **Done when:**
+  - `npm run typecheck`, the speed and control tests, G1–G4, and the audio invariants 48/48 all pass.
+  - `npm test` 0 (KF-1 known), `npm run build` 0, `git diff --check` clean.
+  - Changed paths ⊆ speedAmendmentPaths ∪ paths.json/test-migration.json.
+
+</details>
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

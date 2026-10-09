@@ -413,5 +413,14 @@
   ],
   "designPaths": [
     "docs/planning/roadmap-reviews/reader-mode-separation-2/design/waves-b-e-design.md"
+  ],
+  "g6HarnessPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/build-candidate.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/isolated-launch-g6.cjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/live-run-g6.ps1",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/matrix-g6.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/assemble-live-qa.mjs",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-text.epub",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-chapters.epub"
   ]
 }
