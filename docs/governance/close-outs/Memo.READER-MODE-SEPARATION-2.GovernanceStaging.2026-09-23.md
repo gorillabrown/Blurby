@@ -201,6 +201,9 @@ Source: packet `state.md` Decision log rows 17–24 (authority: owner standing a
   - EPUB section transition at 5480.
 
   No new known-defect ids.
+- **#25 KF-2:** a `tests/sync-queue.test.js` Windows `EPERM` rename under full-suite load is recorded like KF-1. D6 needs an unedited `npm test` exit 0, with every failing run recorded.
+- **#26 Throttled live runs are invalid:** the G6 harness probes page visibility and frame rate at every step. A hidden or occluded window that Chromium throttles makes the case `invalid` (rerun), never pass or fail.
+- **#27 One F at HEAD:** F is the commit carrying the final code, harness and owner checklist. Nothing is committed after F until F1's V, so the launcher and D9 see HEAD = F. Heard audio is taken on F only (D7); S keeps its automated G6 half.
 
 **Follow-up items:** a later item (lane D) should make `main/sync-queue.js` `saveQueue` retry a transient Windows `EPERM`/`EBUSY` rename (KF-2, Decision #25; the same race affects real users' sync queues). A later item may also give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
 

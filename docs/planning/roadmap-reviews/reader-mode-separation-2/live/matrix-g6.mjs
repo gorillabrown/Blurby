@@ -125,7 +125,8 @@ function readState(DOM) {
     visibleCursorCount: visibleEls.size + shrink + focusVisible,
     focusText: focusEl?.textContent?.trim() ?? null,
     chapter: document.querySelector(".rbb-chapter-name")?.textContent?.trim() ?? null,
-    rate: [...document.querySelectorAll('[role="radio"][aria-checked="true"], .rbb-rate-btn--active')].map((n) => n.getAttribute("aria-label") || n.textContent.trim())[0] ?? null,
+    // Candidate (speed amendment): the speed dialog trigger's aria-label ("Speed 1.40x"); B0: the active rate radio.
+    rate: document.querySelector(".rbb-speed-trigger")?.getAttribute("aria-label") ?? [...document.querySelectorAll('[role="radio"][aria-checked="true"], .rbb-rate-btn--active')].map((n) => n.getAttribute("aria-label") || n.textContent.trim())[0] ?? null,
     sections: docs.map((d) => d.index),
     browsedAway: Boolean(document.querySelector(".return-to-reading-pill")),
     toast: document.querySelector(".kokoro-loading-toast")?.textContent?.trim() ?? null,
@@ -225,6 +226,28 @@ function focusLogAndClock() { return { log: window.__g6FocusLog || [], clock: pe
 function traceSlice(from) { const ev = window.__BLURBY_TTS_EVAL_TRACE__?.getEvents?.() ?? []; return { len: ev.length, events: ev.slice(from) }; }
 function clickOne(s) { const m = [...document.querySelectorAll(s)].filter((n) => n.getBoundingClientRect().width > 0); if (m.length !== 1) return `count ${m.length}`; if (m[0].disabled) return "disabled"; m[0].click(); return "ok"; }
 function viewCentre() { const v = document.querySelector("foliate-view"); if (!v) return null; const r = v.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }
+// Candidate speed dialog (speed amendment): trigger label, dialog/slider state and where keyboard focus is.
+function speedUi() {
+  const t = document.querySelector(".rbb-speed-trigger");
+  const d = document.querySelector('.rbb-speed-dialog[role="dialog"]');
+  const sl = d?.querySelector(".rbb-speed-slider");
+  const ae = document.activeElement;
+  return {
+    trigger: t ? t.getAttribute("aria-label") : null, triggerText: t?.textContent?.trim() ?? null, expanded: t?.getAttribute("aria-expanded") ?? null,
+    dialog: Boolean(d), slider: sl ? { value: Number(sl.value), max: Number(sl.max), valuetext: sl.getAttribute("aria-valuetext") } : null,
+    active: !ae ? null : ae === t ? "trigger" : ae === sl ? "slider" : ae === document.body ? "body" : `${ae.tagName.toLowerCase()}.${ae.className || ""}`,
+    play: document.querySelector(".rbb-play-btn")?.getAttribute("aria-label") ?? null,
+    mode: document.querySelector(".rbb-mode-btn--active")?.getAttribute("aria-label") ?? null,
+  };
+}
+function focusSpeedTrigger() { const t = document.querySelector(".rbb-speed-trigger"); if (!t) return false; t.focus(); return document.activeElement === t; }
+function blurActive() { if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur(); return document.activeElement === document.body; }
+// Any bottom-bar speed control (trigger, slider, legacy WPM slider, Kokoro rate buttons, anything labelled speed/wpm).
+// (Not "rate": the Narrate mode button's label contains it.)
+function bottomBarSpeedControls() {
+  const bar = document.querySelector(".reader-bottom-bar"); if (!bar) return null;
+  return [...bar.querySelectorAll('.rbb-speed-trigger, .rbb-speed-slider, .rbb-wpm-slider, .rbb-rate-buttons, [aria-label*="speed" i], [aria-label*="words per minute" i]')].filter((n) => n.getBoundingClientRect().width > 0).map((n) => n.getAttribute("aria-label") || n.className);
+}
 
 // ---- driver helpers ----
 const state = () => c.ev(readState, DOM);
@@ -267,6 +290,36 @@ async function waitTrace(from, pred, timeoutMs) {
   return null;
 }
 async function key(k, code, vk) { for (const type of ["keyDown", "keyUp"]) await c.send("Input.dispatchKeyEvent", { type, key: k, code, windowsVirtualKeyCode: vk }); }
+const KEYS = { Enter: ["Enter", 13], Escape: ["Escape", 27], ArrowRight: ["ArrowRight", 39], ArrowLeft: ["ArrowLeft", 37], Home: ["Home", 36], End: ["End", 35], " ": ["Space", 32] };
+const press = (k) => key(k, ...KEYS[k]); // real keyboard input (CDP Input.dispatchKeyEvent)
+async function waitUi(pred, timeoutMs = 3000) {
+  const end = Date.now() + timeoutMs; let ui;
+  do { ui = await c.ev(speedUi); if (pred(ui)) return { ok: true, ui }; await sleep(50); } while (Date.now() < end);
+  return { ok: false, ui };
+}
+// Keyboard path into the dialog: focus the trigger, Enter; the dialog opens with focus on its slider.
+async function openSpeedDialog() {
+  const focused = await c.ev(focusSpeedTrigger);
+  await press("Enter");
+  const r = await waitUi((u) => u.dialog && u.active === "slider");
+  return { ok: focused && r.ok, focused, ui: r.ui };
+}
+// Esc closes the dialog and returns focus to the trigger.
+async function closeSpeedDialog() { await press("Escape"); return waitUi((u) => !u.dialog && u.active === "trigger"); }
+// Move the open dialog's slider to `target` the way a user would: Home/End for the ends, else arrows, one press
+// at a time, each waiting until the slider shows its value. (On 966e3261 presses sent back-to-back, before the
+// previous value renders, are dropped: 8 rapid ArrowRight reached +6 in smoke run fsmoke1. Reported, not masked:
+// this harness measures the values, not key-repeat.)
+async function moveSpeedTo(target) {
+  let ui = await c.ev(speedUi); if (!ui.slider) return { ok: false, ui, keys: [] };
+  const from = ui.slider.value;
+  if (target === from) return { ok: true, ui, keys: [] };
+  if (target === 0 || target === ui.slider.max) { await press(target === 0 ? "Home" : "End"); return { ...(await waitUi((u) => u.slider?.value === target)), keys: [target === 0 ? "Home" : "End"] }; }
+  const dir = target > from ? 1 : -1; let ok = true;
+  for (let v = from + dir; ok && v !== target + dir; v += dir) { await press(dir > 0 ? "ArrowRight" : "ArrowLeft"); const w = await waitUi((u) => u.slider?.value === v); ok = w.ok; ui = w.ui; }
+  return { ok, ui, keys: `${dir > 0 ? "ArrowRight" : "ArrowLeft"} x${Math.abs(target - from)}` };
+}
+const rateNum = (label) => { const m = /(\d+(?:\.\d+)?)x/.exec(label ?? ""); return m ? Number(m[1]) : null; };
 async function mouseClick(x, y) {
   await c.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
   await c.send("Input.dispatchMouseEvent", { type: "mousePressed", x, y, button: "left", clickCount: 1 });
@@ -423,6 +476,7 @@ const firstAudioWord = (events) => events.find((e) => e.kind === "word" && e.sou
 
 const rows = [];
 const cases = [];
+let speedDialog = null;
 async function caseRun(category, dest, fn) {
   if (only && !only.split("+").some((p) => category.startsWith(p))) return;
   const id = `${fixture}-${category}`;
@@ -599,30 +653,54 @@ async function narrateRate(row) {
   const t0 = await narrateStartedAt0(row);
   await sleep(200); row.measure = await sampledMeasure(row, "speaking-1.0");
   row.rate = [];
+  // B0: the Kokoro rate buttons. Candidate (speed amendment, no rate buttons): the speed dialog by keyboard,
+  // 8 steps of 0.05 (1.00 -> 1.40 is index 4 -> 12) and back; the re-seed gap is timed from the last key.
+  const legacyButtons = await c.ev(() => Boolean(document.querySelector('[aria-label="1.4x speed"]')));
+  row.rateInput = legacyButtons ? "Kokoro rate button click" : "speed dialog: focus trigger, Enter, Arrow x8, Esc (CDP Input.dispatchKeyEvent)";
   for (const r of ["1.4", "1.0"]) {
-    const tr = await traceLen(); const L = lastAudioWord(await traceSince(t0));
-    await clickSel(`[aria-label="${r}x speed"]`);
-    const clickAt = Date.now();
+    let tr = await traceLen(); let L = lastAudioWord(await traceSince(t0));
+    let clickAt, dialog = null;
+    if (legacyButtons) { await clickSel(`[aria-label="${r}x speed"]`); clickAt = Date.now(); }
+    else {
+      // One press at a time (each waits for its value). The measurement point is the 8th press, the change that
+      // sets 1.40 / 1.00 (B0's click); every step's own trace window is kept in dialog.steps for re-scoring.
+      const open = await openSpeedDialog(); const from = open.ui.slider?.value ?? null; const firstKeyAt = Date.now();
+      const dir = r === "1.4" ? 1 : -1; const steps = []; let ok = open.ok && from != null, ui = open.ui;
+      for (let i = 1; i <= 8 && ok; i++) {
+        tr = await traceLen(); L = lastAudioWord(await traceSince(t0));
+        await press(dir > 0 ? "ArrowRight" : "ArrowLeft");
+        const w = await waitUi((u) => u.slider?.value === from + dir * i); ok = w.ok; ui = w.ui;
+        steps.push({ index: ui.slider?.value ?? null, valuetext: ui.slider?.valuetext ?? null, traceFrom: tr, lastBefore: L, keyAt: Date.now() });
+      }
+      clickAt = Date.now();
+      const closed = await closeSpeedDialog();
+      dialog = { opened: open.ok, fromIndex: from, toIndex: ui.slider?.value ?? null, reachedTarget: ok, valuetext: ui.slider?.valuetext ?? null, closedFocusOnTrigger: closed.ok, keysMs: clickAt - firstKeyAt, steps };
+    }
     // The re-seed's first audio word can take > 2.5 s (seen on B0 and the candidate); wait for it, record the gap.
     const firstWord = await waitTrace(tr, (e) => e.kind === "word" && e.source === "audio", 10000);
     const reseedGapMs = firstWord ? Date.now() - clickAt : null;
     const resp = (await traceSince(tr)).find((e) => e.kind === "transition" && e.transition === "rate-response") ?? null;
     await sleep(2500); await step(row, `speaking-${r}`);
     const after = await traceSince(tr);
-    row.rate.push({ to: r, lastBefore: L, readout: (await state()).rate, response: resp ? { from: resp.from, to: resp.to, latencyMs: resp.latencyMs } : null, firstAfter: firstAudioWord(after), startEvents: after.filter((e) => e.kind === "lifecycle" && e.state === "start").length, reseedGapMs, wordsAfter: after.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8) });
+    if (dialog) for (const [i, st] of dialog.steps.entries()) { // per-step window: [this key, next key) (last: to now)
+      const evs = (await traceSince(st.traceFrom)).slice(0, i + 1 < dialog.steps.length ? dialog.steps[i + 1].traceFrom - st.traceFrom : undefined);
+      const rr = evs.find((e) => e.kind === "transition" && e.transition === "rate-response");
+      Object.assign(st, { firstAfter: firstAudioWord(evs), audioWords: evs.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8), response: rr ? { from: rr.from, to: rr.to, latencyMs: rr.latencyMs } : null, startEvents: evs.filter((e) => e.kind === "lifecycle" && e.state === "start").length });
+    }
+    row.rate.push({ to: r, lastBefore: L, readout: (await state()).rate, response: resp ? { from: resp.from, to: resp.to, latencyMs: resp.latencyMs } : null, firstAfter: firstAudioWord(after), startEvents: after.filter((e) => e.kind === "lifecycle" && e.state === "start").length, reseedGapMs, wordsAfter: after.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8), ...(dialog ? { dialog } : {}) });
   }
   const [up, down] = row.rate;
   // A rate change re-seeds narration at the word being spoken (NARRATE-A5-RATE-RESEED-1); the rate-response
   // trace fires only on the same-bucket live-tempo path, so it is recorded but not required.
-  row.expected = up.lastBefore; row.methods.expected = "the word being spoken at the 1.0->1.4 click (last audio word event before it; the rate re-seed restarts that word)";
-  row.actual = up.firstAfter; row.methods.actual = "first audio word trace event after the 1.0->1.4 click";
-  row.checks.readout14 = /^1\.4x/.test(up.readout ?? "");
+  row.expected = up.lastBefore; row.methods.expected = `the word being spoken at the ${legacyButtons ? "1.0->1.4 click" : "8th ArrowRight (1.35->1.40)"} (last audio word event before it; the rate re-seed restarts that word)`;
+  row.actual = up.firstAfter; row.methods.actual = `first audio word trace event after the ${legacyButtons ? "1.0->1.4 click" : "8th ArrowRight"}`;
+  row.checks.readout14 = rateNum(up.readout) === 1.4; // "1.4x speed" (B0) or "Speed 1.40x" (candidate)
   row.checks.downReseedsAtSpokenWord = down.lastBefore != null && down.firstAfter === down.lastBefore;
   row.checks.noColdRestart = up.startEvents === 0 && down.startEvents === 0;
   row.checks.ownerIsNarrate = owner(row.measure) === "narrate";
   row.checks.cursorVisible = row.measure.visibleCursorCount >= 1;
   const end = await step(row, "end"); row.rateLabelEnd = end.rate;
-  row.checks.rateReadoutBackTo10 = /^1\.0x/.test(end.rate ?? "");
+  row.checks.rateReadoutBackTo10 = rateNum(end.rate) === 1;
 }
 async function transitionCase(row, from, to) {
   await openDoc(); await setAnchor(row, ANCHOR); await step(row, "anchored-in-flow");
@@ -729,6 +807,140 @@ async function narrateBook(row) {
   row.finishedDoc = (await libraryDocs()).find((d) => d.id === docId); row.startDoc = me;
 }
 
+// ---- candidate-only speed dialog capture (speed amendment; validator --require-speed R7) ----
+// Not a G6 case: written as g6-cases.json speedDialog. Every input is real keyboard (CDP Input.dispatchKeyEvent);
+// liveObservation is the owner's and is never written here.
+const SPEED_KEY = { focus: "focusWpm", flow: "flowWpm", narrate: "ttsRate" };
+async function persistedSpeed() { return c.ev(async () => { const s = (await window.electronAPI.getState()).settings; return { wpm: s.wpm ?? null, focusWpm: s.focusWpm ?? null, flowWpm: s.flowWpm ?? null, ttsRate: s.ttsRate ?? null }; }); }
+async function waitPersisted(k, value, timeoutMs = 2000) {
+  const end = Date.now() + timeoutMs; let p;
+  do { p = await persistedSpeed(); if (p[k] === value) return { ok: true, value: p[k] }; await sleep(50); } while (Date.now() < end);
+  return { ok: false, value: p[k] };
+}
+// "0.45x, 112.5 words per minute" -> {multiplier: 0.45, wpm: 112.5}; "1.05x" -> {rate: 1.05}. Number() of the text, no rounding.
+function parseValueText(m, t) {
+  if (m === "narrate") { const x = /^(\d+\.\d{2})x$/.exec(t ?? ""); return { rate: x ? Number(x[1]) : null }; }
+  const x = /^(\d+\.\d{2})x, (\d+(?:\.\d+)?) words per minute$/.exec(t ?? "");
+  return x ? { multiplier: Number(x[1]), wpm: Number(x[2]) } : { multiplier: null, wpm: null };
+}
+const envOk = (env) => env.visibility === "visible" && env.frames >= MIN_FRAMES;
+async function speedSweep(m, ev) {
+  await clickMode(m); const ready = await waitModeReady(m);
+  const k = SPEED_KEY[m]; const t0 = await traceLen();
+  const s0 = await state(); const p0 = await persistedSpeed();
+  ev.env.push({ at: `${m}-start`, ...(await c.ev(frameProbe, PROBE_MS)) });
+  const res = { mode: m, ready, key: k, owner: owner(s0), playBefore: s0.play, originalPersisted: p0[k], legacyWpm: p0.wpm, originalTrigger: (await c.ev(speedUi)).trigger };
+  const open = await openSpeedDialog();
+  res.triggerFocused = open.focused; res.openedByEnter = open.ok; res.originalIndex = open.ui.slider?.value ?? null;
+  const max = open.ui.slider?.max ?? null; res.maxIndex = max;
+  const pOpen = await persistedSpeed();
+  res.openChangedNothing = open.ui.play === s0.play && open.ui.mode === s0.mode && pOpen[k] === p0[k];
+  const home = await (async () => { await press("Home"); return waitUi((u) => u.slider?.value === 0); })();
+  res.homeReachedZero = home.ok;
+  const values = [], perIndex = []; let ui = home.ui, stepsOk = home.ok, exact = true;
+  for (let i = 0; max != null && i <= max; i++) {
+    if (i > 0) { await press("ArrowRight"); const r = await waitUi((u) => u.slider?.value === i); ui = r.ui; stepsOk &&= r.ok; }
+    const vt = ui.slider?.valuetext ?? null; const parsed = parseValueText(m, vt);
+    const displayed = m === "narrate" ? parsed.rate : parsed.wpm;
+    const p = await waitPersisted(k, displayed);
+    const triggerMatches = ui.trigger === `Speed ${vt}`;
+    const ok = ui.slider?.value === i && displayed != null && p.ok && triggerMatches;
+    exact &&= ok;
+    perIndex.push({ index: i, sliderValue: ui.slider?.value ?? null, valuetext: vt, trigger: ui.trigger, persisted: p.value, persistedEqualsDisplayed: p.value === displayed, triggerMatches, play: ui.play });
+    values.push(m === "narrate" ? parsed.rate : { multiplier: parsed.multiplier, wpm: parsed.wpm });
+  }
+  // At End: ArrowRight and End change nothing (slider, text, persisted value).
+  const atEnd = { ui: await c.ev(speedUi), p: await persistedSpeed() };
+  const noop = async (keyName) => { await press(keyName); await sleep(400); const u = await c.ev(speedUi); const p = await persistedSpeed(); return u.slider?.value === max && u.slider?.valuetext === atEnd.ui.slider?.valuetext && u.trigger === atEnd.ui.trigger && p[k] === atEnd.p[k]; };
+  res.arrowRightAtEndNoop = await noop("ArrowRight");
+  res.endAtEndNoop = await noop("End");
+  // Restore: Home, then ArrowRight x originalIndex; the persisted value is the original one again (or, when the
+  // mode's own key was absent, the legacy wpm it fell back to).
+  if (res.originalIndex != null) {
+    await press("Home"); await waitUi((u) => u.slider?.value === 0);
+    const r = await moveSpeedTo(res.originalIndex);
+    const want = p0[k] ?? p0.wpm;
+    const p = await waitPersisted(k, want);
+    res.restored = { ok: r.ok && p.ok && r.ui.trigger === res.originalTrigger, index: r.ui.slider?.value ?? null, persisted: p.value, want, trigger: r.ui.trigger };
+  }
+  const close = await closeSpeedDialog();
+  res.escClosedFocusOnTrigger = close.ok; res.activeAfterEsc = close.ui.active;
+  const s1 = await state();
+  const startsOrWords = (await traceSince(t0)).filter((e) => (e.kind === "lifecycle" && ["start", "resume", "first-audio"].includes(e.state)) || (e.kind === "word" && ["audio", "flow"].includes(e.source)));
+  res.playAfter = s1.play; res.ownerAfter = owner(s1);
+  res.noModeChange = s1.mode === s0.mode && owner(s1) === m && open.ui.mode === s0.mode;
+  res.noPlaybackStart = s1.play === s0.play && open.ui.play === s0.play && perIndex.every((x) => x.play === s0.play) && startsOrWords.length === 0;
+  res.playbackTraceEvents = startsOrWords.length;
+  res.stepsOk = stepsOk; res.persistedEqualsDisplayedAll = exact; res.count = values.length;
+  res.keyboardOperable = res.triggerFocused && res.openedByEnter && res.homeReachedZero && stepsOk && res.arrowRightAtEndNoop && res.endAtEndNoop && Boolean(res.restored?.ok) && res.escClosedFocusOnTrigger;
+  ev.env.push({ at: `${m}-end`, ...(await c.ev(frameProbe, PROBE_MS)) });
+  return { values, perIndex, res };
+}
+// Narrate while speaking: set 0.80, 1.05, 2.00 through the dialog; record the first audio word after each change
+// and its gap (evidence for the owner's listening check, not a replacement for it). Restores the original rate.
+async function narrateSpeaking(ev, max) {
+  const out = { targets: [] };
+  const p0 = await persistedSpeed();
+  const t0 = await traceLen(); await play();
+  const fa = await waitTrace(t0, (e) => e.kind === "lifecycle" && e.state === "first-audio", 40000);
+  out.firstAudioSeen = Boolean(fa); await sleep(1500);
+  for (const [rate, index] of [[0.8, 0], [1.05, 5], [2, max]]) {
+    const tr = await traceLen(); const L = lastAudioWord(await traceSince(t0));
+    const open = await openSpeedDialog(); const from = open.ui.slider?.value ?? null;
+    const mv = await moveSpeedTo(index); const changedAt = Date.now();
+    const close = await closeSpeedDialog();
+    const fw = await waitTrace(tr, (e) => e.kind === "word" && e.source === "audio", 10000);
+    const gap = fw ? Date.now() - changedAt : null;
+    await sleep(2500);
+    const after = await traceSince(tr); const s = await state(); const p = await persistedSpeed();
+    out.targets.push({ rate, index, fromIndex: from, keys: mv.keys, valuetext: mv.ui?.slider?.valuetext ?? null, trigger: s.rate, persisted: p.ttsRate, persistedExact: p.ttsRate === rate,
+      keyboard: open.ok && mv.ok && close.ok, stillPlaying: s.play === "Pause", lastBefore: L, firstAfter: firstAudioWord(after), reseedGapMs: gap,
+      startEvents: after.filter((e) => e.kind === "lifecycle" && e.state === "start").length, wordsAfter: after.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8) });
+    ev.env.push({ at: `narrate-speaking-${rate}`, ...(await c.ev(frameProbe, PROBE_MS)) });
+  }
+  await pause(); await sleep(500);
+  const open = await openSpeedDialog(); const back = Math.round((p0.ttsRate * 100 - 80) / 5);
+  const mv = await moveSpeedTo(back); const close = await closeSpeedDialog(); const p = await waitPersisted("ttsRate", p0.ttsRate);
+  out.restored = { ok: open.ok && mv.ok && close.ok && p.ok, want: p0.ttsRate, persisted: p.value };
+  out.keyboardOperable = out.targets.every((x) => x.keyboard) && out.restored.ok;
+  return out;
+}
+async function speedCapture() {
+  const ev = { env: [], errors: [] }; const sd = { startedAt: now() };
+  try {
+    await openDoc();
+    if ((await state()).mode !== "Page mode") { await clickMode("page"); await waitModeReady("page"); }
+    // Page: no speed control, and Space leaves playback idle.
+    const s0 = await state(); const controls = await c.ev(bottomBarSpeedControls);
+    const blurred = await c.ev(blurActive); const t0 = await traceLen();
+    await press(" "); await sleep(1500);
+    const s1 = await state(); const tev = (await traceSince(t0)).filter((e) => (e.kind === "lifecycle" && ["start", "resume", "first-audio"].includes(e.state)) || (e.kind === "word" && ["audio", "flow"].includes(e.source)));
+    ev.page = { ownerBefore: owner(s0), speedControls: controls, spaceFocusOnBody: blurred, playBefore: s0.play, playAfterSpace: s1.play, modeAfterSpace: s1.mode, ownerAfterSpace: owner(s1), playbackTraceEvents: tev.length, spaceLeavesPlaybackIdle: s1.play !== "Pause" && tev.length === 0 };
+    if (s1.play === "Pause") await pause();
+    sd.page = { hasSpeedAction: !(Array.isArray(controls) && controls.length === 0) };
+    for (const m of ["focus", "flow", "narrate"]) {
+      const r = await speedSweep(m, ev);
+      sd[m] = { values: r.values }; ev[m] = { ...r.res, perIndex: r.perIndex };
+    }
+    ev.narrateSpeaking = await narrateSpeaking(ev, ev.narrate.maxIndex);
+  } catch (e) { ev.errors.push(e.message); }
+  ev.throttled = ev.env.filter((x) => !envOk(x));
+  sd.keyboardOperable = !ev.errors.length && ["focus", "flow", "narrate"].every((m) => ev[m]?.keyboardOperable === true) && ev.narrateSpeaking?.keyboardOperable === true;
+  sd.checks = {
+    persistedEqualsDisplayed: ["focus", "flow", "narrate"].every((m) => ev[m]?.persistedEqualsDisplayedAll === true),
+    noModeChange: ["focus", "flow", "narrate"].every((m) => ev[m]?.noModeChange === true),
+    noPlaybackStart: ["focus", "flow", "narrate"].every((m) => ev[m]?.noPlaybackStart === true),
+    pageSpaceLeavesPlaybackIdle: ev.page?.spaceLeavesPlaybackIdle === true,
+    restored: ["focus", "flow", "narrate"].every((m) => ev[m]?.restored?.ok === true) && ev.narrateSpeaking?.restored?.ok === true,
+  };
+  sd.result = ev.throttled.length ? "invalid" : sd.keyboardOperable && Object.values(sd.checks).every(Boolean) && !sd.page?.hasSpeedAction ? "pass" : "fail";
+  sd.evidence = ev; sd.finishedAt = now();
+  try { sd.screenshot = `captures/${run}/${await shot("speed-dialog")}`; } catch {}
+  await pause().catch(() => {});
+  console.log(`speed-dialog: ${sd.result} counts=${["focus", "flow", "narrate"].map((m) => sd[m]?.values?.length ?? 0).join("/")} keyboardOperable=${sd.keyboardOperable} checks=${JSON.stringify(sd.checks)} errors=${JSON.stringify(ev.errors)}`);
+  return sd;
+}
+
 try {
   const targets = (await (await fetch(`http://127.0.0.1:${manifest.cdpPort}/json/list`)).json()).filter((t) => t.type === "page" && /^http:\/\/localhost:5173/.test(t.url));
   if (targets.length !== 1) throw new Error(`Expected one renderer, found ${targets.length}`);
@@ -749,6 +961,9 @@ try {
   await caseRun("narrate-rate-1.0-1.4-1.0", "narrate", narrateRate);
   for (const from of MODES) for (const to of MODES) if (from !== to) await caseRun(`transition-${from}-${to}`, to, (row) => transitionCase(row, from, to));
   for (const m of MODES) await caseRun(`same-mode-${m}`, m, (row) => sameModeCase(row, m));
+  // Candidate only (B0 has no speed dialog), and only in its own launch (`-Only speed-dialog`): its rate changes
+  // while Narrate speaks must not precede the G6 cases, which then run exactly as on S (parent ruling, F live run).
+  if (target === "candidate" && only && only.split("+").includes("speed-dialog")) speedDialog = await speedCapture();
   // Last: these move the persisted position past the first section / finish the book and open the next one.
   await caseRun("narrate-section-transition", "narrate", narrateSection);
   await caseRun("narrate-book-transition", "narrate", narrateBook);
@@ -765,6 +980,7 @@ try {
     heardAudio: "not recorded by this harness: the eval trace is not audible evidence; heard audio is the owner's observation",
     consoleErrors, runnerErrors: rows.filter((r) => r.id === "runner"),
     cases,
+    speedDialog, // candidate only; not a G6 case (REQUIRED_CATEGORIES unchanged). liveObservation is the owner's.
   };
   await fs.writeFile(path.join(out, "g6-cases.json"), JSON.stringify(doc, null, 2));
   console.log(JSON.stringify({ out, cases: cases.length, pass: cases.filter((x) => x.result === "pass").length, fail: cases.filter((x) => x.result === "fail").length, runnerError: rows.some((r) => r.id === "runner"), consoleErrors: consoleErrors.length }));

@@ -231,6 +231,35 @@
 
 </details>
 
+## S1j — 2026-10-09 (host) — resumed after pause: S fixed, speed dialog built, F prepared
+
+- **Did:**
+  - Candidate regressions found by G6, fixed with red-then-green tests:
+    - 15626073: arrival cursor painted after a paused switch; foliate close deferred one frame (docBackground errors).
+    - d0c58af4: Flow releases its chunk visual state after apply (the stale `active-word`, two cursors).
+  - Harness:
+    - e814b21c: baseline-equal scoring (Decision #24).
+    - c00559da: the rate case waits for the re-seed's first audio word.
+    - d0c58af4: section sampling across the chunk boundary.
+    - 14050199: frame/visibility probe; throttled cases are `invalid` (Decision #26).
+  - S = d0c58af4 recorded in `verification.json → structuralCandidate`.
+    - G5: typecheck 0, 3290/133, build 0, recorder 5/5 on B0, G1–G4 + audio 146/146.
+    - G6 automated: fixthreea (26/27 + 26/27) vs bzeros.
+  - Speed amendment built in a separate detached worktree while live runs used W, then applied: 966e3261.
+    - Gate: typecheck 0, 3328 passed / 133 skipped, build 0, all 310 changed paths since I registered.
+    - 89/89/25 values, OC-6/7/8, 26 approvedSpeedDifferences.
+    - B0 check: ↑/↓ never re-paced a running engine (useReadingModeInstance.ts:97-176), so the candidate keeps that behaviour.
+  - OS-1 checklist and observation template written; the BLOCKER(USER) is recorded.
+- **Learned:**
+  - B0 Narrate mode has no end-of-book handler (useFoliateSync.ts:198, useFlowScrollSync.ts:486). Only Flow crosses books, so the spec's "book transition" for Narrate is not baseline behaviour.
+  - The harness reloads the renderer per case but not the main process. A hidden window can be throttled by Chromium for minutes, and that looks exactly like a broken narration pipeline.
+  - B0 cleared Flow's chunk state only because `useNarration` returns a new object on every render, so a parent effect re-ran every commit. Parity required copying that accident deliberately.
+  - Detached side worktrees with a `node_modules` junction let src work proceed while the launcher requires W clean.
+- **Decisions:** #24–#27.
+- **Gate/DoD movement:** S recorded; F code gated (D2–D6 automated parts green on 966e3261, to be re-run fresh at F1).
+- **Git:** eb/reader-mode-separation-2 @ F (this commit); uncommitted afterwards by rule (Decision #27): live runs, live-qa.json, observation files, Evidence paste.
+- **Next:** F automated live pair (after the harness worker finishes) → OS-1 → live-qa.json + validator → F1–F5.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

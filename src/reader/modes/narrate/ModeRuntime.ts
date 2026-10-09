@@ -29,6 +29,7 @@ import {
   KOKORO_UI_RATE_MAX,
   KOKORO_UI_RATE_MIN,
   KOKORO_UI_RATE_STEP,
+  NARRATE_SPEED_SETTLE_MS,
   TTS_MAX_RATE,
   TTS_MIN_RATE,
   TTS_RATE_STEP,
@@ -174,6 +175,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Legacy naturalReadingChunks memo, keyed by the render version and the word source. */
   private chunkCache: { readonly renderVersion: number; readonly bookWords: ReaderBookWordsValue | null; readonly chunks: ReadingChunk[] } | null = null;
   private readonly timers = new Set<ReturnType<typeof setTimeout>>();
+  /** Speed dialog settle: pending until the dialog's rate has been quiet for NARRATE_SPEED_SETTLE_MS. */
+  private rateSettleTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly rafs = new Set<number>();
   private alive = true;
   private destroyed = false;
@@ -412,6 +415,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.unsubscribeDocument?.(); // a local unsubscribe, not a port call
     this.unsubscribeDocument = null;
     this.clearTimers();
+    this.rateSettleTimer = null;
     this.truthRaf = null;
     this.truthPendingWord = null;
     this.cursorRaf = null;
@@ -475,16 +479,30 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   }
 
   /**
-   * Speed dialog (design §E, step S4): store the exact rate and apply it to this session's audio.
-   * An out-of-domain rate is rejected, never clamped or rounded (the dialog only offers 0.80–2.00).
+   * Speed dialog (design §E, step S4): store the exact rate at once, and apply it to this session's audio
+   * only once it has settled (NARRATE_SPEED_SETTLE_MS after the last change): a slider swept 1.00→1.40 by
+   * keyboard is one re-seed, not eight (live G6 finding). An out-of-domain rate is rejected, never
+   * clamped or rounded (the dialog only offers 0.80–2.00).
    */
   setSpeed(speed: ReaderModeSpeed): void {
     if (!this.alive || speed.kind !== "rate") return;
     if (!(speed.rate >= KOKORO_UI_RATE_MIN && speed.rate <= KOKORO_UI_RATE_MAX)) return;
     this.rate = speed.rate;
     this.ports.settings.update({ ttsRate: speed.rate });
-    this.ports.audio.adjustRate(speed.rate);
+    this.cancelRateSettle();
+    this.rateSettleTimer = this.setTimer(() => {
+      this.rateSettleTimer = null;
+      // A value that came back to the engine's rate needs no re-seed.
+      if (this.rate !== this.ports.audio.readState().rate) this.ports.audio.adjustRate(this.rate);
+    }, NARRATE_SPEED_SETTLE_MS);
     this.state.notify();
+  }
+
+  private cancelRateSettle(): void {
+    if (this.rateSettleTimer == null) return;
+    clearTimeout(this.rateSettleTimer);
+    this.timers.delete(this.rateSettleTimer);
+    this.rateSettleTimer = null;
   }
 
   // ── User intents ──────────────────────────────────────────────────────────
@@ -566,6 +584,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }
     this.rate = newRate;
     this.ports.settings.update({ ttsRate: newRate });
+    this.cancelRateSettle(); // ↑/↓ applies at once; a pending dialog settle is superseded.
     this.ports.audio.adjustRate(newRate);
     this.state.notify();
   }
@@ -879,9 +898,12 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (this.alive) this.ports.audio.configure(config);
   };
 
-  /** useNarrationSync effect 6: apply the stored rate when it differs from the engine's. */
+  /**
+   * useNarrationSync effect 6: apply the stored rate when it differs from the engine's. While a dialog
+   * settle is pending the stored rate runs ahead of the engine on purpose; the settle applies it.
+   */
   syncAudioRate = (): void => {
-    if (!this.alive) return;
+    if (!this.alive || this.rateSettleTimer != null) return;
     const ttsRate = this.settingsSnapshot.settings.ttsRate;
     if (ttsRate && ttsRate !== this.ports.audio.readState().rate) this.ports.audio.adjustRate(ttsRate);
   };
@@ -1131,12 +1153,13 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Legacy reader.jumpToWord wrote Focus's display index; Narrate has no display index (mode-local no-op, OC-3). */
   private jumpDisplayToWord(_wordIndex: number): void { /* mode-local no-op display */ }
 
-  private setTimer(run: () => void, delayMs: number): void {
+  private setTimer(run: () => void, delayMs: number): ReturnType<typeof setTimeout> {
     const timer = setTimeout(() => {
       this.timers.delete(timer);
       if (this.alive) run();
     }, delayMs);
     this.timers.add(timer);
+    return timer;
   }
 
   private requestFrame(run: () => void): number {

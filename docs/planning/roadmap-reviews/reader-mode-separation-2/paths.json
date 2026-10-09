@@ -467,7 +467,8 @@
     "tests/kokoroRatePlan.test.ts",
     "tests/narrationControlsPolish.test.ts",
     "tests/ttsSettingsKokoroTruth.test.tsx",
-    "tests/readerBottomBarControls.test.tsx"
+    "tests/readerBottomBarControls.test.tsx",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json"
   ],
   "speedAmendmentPathNotes": {
     "src/types.ts": "OC-6: BlurbySettings lives only here (no non-freeze settings type file); two optional fields focusWpm/flowWpm, scheduled under this epic freeze ownership",
@@ -478,6 +479,11 @@
     "tests/kokoroRatePlan.test.ts": "OC-7 old-domain assertions (approvedSpeedDifferences)",
     "tests/narrationControlsPolish.test.ts": "OC-7 old-domain assertions (approvedSpeedDifferences)",
     "tests/ttsSettingsKokoroTruth.test.tsx": "OC-7 settings label precision (approvedSpeedDifferences)",
-    "tests/readerBottomBarControls.test.tsx": "Added by coordinator decision (Type 1a, item 2 / OC-7): the Kokoro rate-label assertion becomes the speed-trigger assertion"
-  }
+    "tests/readerBottomBarControls.test.tsx": "Added by coordinator decision (Type 1a, item 2 / OC-7): the Kokoro rate-label assertion becomes the speed-trigger assertion",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json": "Settle (parent Type 1b, live finding): Narrate's runtime imports the new NARRATE_SPEED_SETTLE_MS from src/constants.ts (Constants Separation Rule), so G1 needs it in allowedShared[src/constants.ts].exports. One added name; nothing else changed or removed"
+  },
+  "os1Paths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-checklist.md",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json"
+  ]
 }

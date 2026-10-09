@@ -36,9 +36,9 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P6 — Wave E (cutover). Gates PASS: B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb
-next_action:  PAUSED 2026-10-09 at ded41a04 (owner asked to pause). E1–E6 + G1 done. G6 harness committed. Resume (journal S1i): fix candidate regression — no visible cursor after a paused mode switch + foliate `docBackground` null errors → final bzeroc/candc G6 dry pair → E7 G5 gate → record S-candidate → speed amendment (scratchpad speed-brief.md; copy in journal S1i) → F → OS-1 checklist
-blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
+phase:        P8 — owner gate (OS-1). Waves B–E done (B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb, S d0c58af4); speed amendment done (966e3261)
+next_action:  S = d0c58af4 recorded; F code = 966e3261 (speed dialog), gate PASS (typecheck 0, 3328/133, build 0). Final harness adaptation for the speed dialog running → commit it as F (Decision #27) → F automated live pair → OS-1 (BLOCKER(USER)) → live-qa.json + validator --require-speed → F1–F5
+blockers:     OS-1 BLOCKER(USER) — owner listening session (os1-owner-checklist.md); gates D1, D7, D8 and F1–F5 only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
 ```
@@ -94,23 +94,22 @@ F5 done.md present here:              no
 
 ## Blockers
 
-- **B1 → OS-1 (re-sequenced, Decision #13).** The owner's B0 listening checklist is taken in the combined owner session OS-1 before F1. It no longer blocks Waves B–E or the speed dialog. Still gates: D1, D7, F1–F5.
-  - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-checklist.md` (about 20 minutes, headphones). Fill `g0-owner-observations.json` (11 items: H1–H8 heard audio on the EPUB and the converted non-EPUB, V1–V3 visual).
-  - **Why owner:** heard-audio claims require a human observation (SRL-070, LL-124/126/127). The harness cannot hear, and the synthetic wheel / Next-chapter cases did not reproduce user input.
-  - **Answer:** _(write "done" here after filling the observations file)_
-  - **Blocks every open front.** Open fronts, all blocked on B1:
-    - F2 owner half of G0;
-    - F3 `admission: PASS` / D1;
-    - F9 Monday In Flight;
-    - F10 G1/G2/G3 test files;
-    - F11 contract/port types and broker;
-    - F12 Waves B–E (and S);
-    - F13 G6 evidence validator;
-    - F14 speed dialog (F);
-    - F15 D2–D9 verification and finalization F1–F5;
-    - F17 supporting loopback audio capture (charter A6). It is supporting evidence only and cannot substitute for the owner observation (SRL-070), and it is best taken during the owner session.
-  - Fronts F1, F4–F8 and F16 are complete or staged, not open.
-  - No other unblocked work exists: pre-G0 writes are limited to census, evidence, fixtures and harness under `E/`, and all of those are done.
+- **BLOCKER(USER) OS-1 — owner listening session (Decisions #13, #27).** Gates D1 (G0 owner half), D7 (heard audio on F), D8 (speed live observation) and F1–F5. Nothing else is open: S and F are built and gated, and every automated row is recorded.
+  - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-checklist.md` (about 45 minutes, headphones). It covers:
+    - Part A: the B0 listening via `g0-owner-checklist.md`, recorded in `g0-owner-observations.json`;
+    - Part B: the same checks on F;
+    - Part C: the speed dialog, including Narrate at 0.80/1.05/2.00 by ear;
+    - Part D: three confirmations, including that Narrate stopping at book end is acceptable preserved baseline (Decision #24).
+
+    Parts B–D are recorded in `os1-owner-observations.json`.
+  - **Why owner:** heard-audio claims need a human observation (SRL-070, LL-124/126/127). The validator rejects any audio case without `heardAudio.observer = "owner"` (R6), and the speed row requires `liveObservation.observer = "owner"` (R7).
+  - **Do not commit before answering:** HEAD must stay at F until F1 (Decision #27). Fill the two observation files in place.
+  - **Answer:** _(write "done" here after filling both observation files)_
+  - **After "done", the executor:**
+    1. sets `baseline.json → admission: PASS` (D1);
+    2. assembles `live-qa.json` from the F automated runs, adding your heardAudio, liveObservation and confirmations;
+    3. runs the validator `--require-speed` on F;
+    4. runs F1 (every DoD row fresh), then F2–F5.
 
 ## Front disposition — every front, with its status and the clause that gates it (S1)
 
@@ -194,6 +193,7 @@ Original questions (for reference):
 | 24 | S1 | G6 scoring rule. Per ROADMAP G6, "acceptance is equal to its recorded baseline except the removal of cross-owner effects". So each live-qa case's `expectedCanonicalIndex`, visible cursor count and owner come from the B0 run of the same harness revision, on the same fixture, made in the same session (cited per case as `baselineRef`: run id and case id). `pass` means the candidate equals B0, with stale effects 0. Scenarios B0 itself fails against the ideal are scored this way: Narrate stops at book end (no book transition) on both fixtures, and the EPUB section transition at 5480 jumps the view to section 3 without audio past the boundary. If the candidate reproduces B0 exactly, the case passes as baseline-equal and is listed in `live-qa.json → baselineEqualDeviations` for the owner's OS-1 confirmation. These two were already owner-checklist rows at admission (`g0-matrix.json` notCapturedByAutomation). A candidate result that differs from B0 is a fail, and no known-defect id beyond KD-CURSOR-LEAD / KD-RATE-1.4-OVERLAP is introduced. | The spec defines parity, not an ideal. Inventing new expected values would either fail a parity-preserving candidate or need a new known-defect id the spec forbids. Fixing B0 behaviour is out of scope (later items). | ROADMAP G6 text; Type 1b; owner confirms at OS-1 |
 | 25 | S1 | KF-2 `tests/sync-queue.test.js` Windows `EPERM` on `rename(tmp, queuePath)`, the same treatment as KF-1. Seen 3 times, only in full-suite runs; 5/5 isolated passes on both W and the B0 checkout. `main/sync-queue.js` and its test are unchanged since Sprint 19 and outside this epic. Cause: an immediate rename of a fresh `.tmp` file in the real OS temp folder races a Windows scanner handle. Rule: D6 requires an `npm test` exit 0 on F with no edit, skip or retry wrapper. Every failing run is recorded with its counts next to the passing one, never hidden. A failure in any other test, or a second failing test in the same run, is a real failure. A Windows-safe rename retry in `main/sync-queue.js` is staged as a follow-up item (lane D), not done here. | Code untouched by the epic; isolation proves it is environmental; fixing `main/` is outside scope | Owner standing authorization; Decision #11 precedent; Type 1b |
 | 26 | S1 | Throttled-window runs are invalid, never failures. In two candidate runs the chapters half degraded: no audio word events, Focus timers at about 1 s, CDP input unacknowledged. Diagnosis showed Chromium throttling the hidden harness window: frames stopped, and the state survives `Page.navigate`. A matched full rerun of the same commit (fixthreea) was clean at 26/27 + 26/27, with watchers showing a steady 60 fps, flat memory and handles, and no TTS backlog. Main-process TTS backlog and persisted state are refuted. Rule: the harness records visibility and a 200 ms frame count at every step and at case end. Any throttled sample makes the case `invalid`, which the validator rejects, so it must be rerun. Controls: stopped frames → 0; hidden → flagged. S = d0c58af4 (`verification.json → structuralCandidate`). G6 automated evidence is fixthreea vs bzeros; heard audio is pending OS-1. The cands and candc runs are kept and set aside with their reason. Follow-up (not this epic): the candidate-only ResizeObserver-loop console volume goes through `window.onerror` → `log-error` IPC. | A throttled run measures the OS, not the code; the matched rerun is the discriminating control | Owner standing authorization; Type 1b |
+| 27 | S1 | F and the end of the commit stream. The code is the speed dialog commit 966e3261 on top of S. F is the run-branch commit that adds the final G6 harness, the OS-1 checklist and this blocker (production inputs identical to 966e3261). After F, nothing is committed until F1's V: the F automated live runs, `live-qa.json` assembly, the owner's observation files and the state.md Evidence paste stay uncommitted. That keeps HEAD = F for the launcher's `--candidate == HEAD` rule and for D9. S's heard audio is not taken separately. The charter requires heard audio only on F (D7). The launcher cannot serve S once HEAD moves past it, and S and F differ only in the speed amendment. So S's G6 record is its automated half, preserved in `verification.json → structuralCandidate`. | The launcher, D7 and D9 all key on one F at HEAD; committing evidence before F1 would move HEAD away from the build the owner hears | launch.md F1; charter identities; Type 1b |
 
 - A3: `admission/g0-matrix.json` (24 transitions + 4 same-mode cases per fixture; 0 stale effects; Narrate exact start; gaps → owner checklist). G4 fixtures: `fixtures/*.baseline.json` (verified 5/5, S1)
 - B0: `admission/baseline-build-rebuild.json` (21/21 identical; typecheck/build 0; tests 0 on 2 of 3 runs, KF-1 on run 1)

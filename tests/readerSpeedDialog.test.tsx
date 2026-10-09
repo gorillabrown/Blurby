@@ -15,7 +15,7 @@ import {
   speedIndexOf,
   speedMaxIndex,
 } from "../src/components/ReaderSpeedDialog";
-import { TTS_DEFAULT_ENGINE } from "../src/constants";
+import { NARRATE_SPEED_SETTLE_MS, TTS_DEFAULT_ENGINE } from "../src/constants";
 import type { BlurbySettings } from "../src/types";
 import type { ReaderModeSpeed } from "../src/reader/modes/ReaderModeAdapter";
 import { createReaderSettingsSnapshot, type ReaderSettingsSnapshot } from "../src/reader/document/ReaderDocumentSnapshot";
@@ -142,20 +142,29 @@ describe("runtime setSpeed (acceptance items 2–5)", () => {
   });
 
   it.each([0.8, 1.05, 2.0])("Narrate stores %s and hands exactly that rate to its audio port, without starting playback", (rate) => {
-    const shell = openShell();
-    shell.router.select("narrate");
-    const before = shell.router.getSnapshot()!;
-    const from = shell.fake.effects.length;
-    shell.router.setSpeed({ kind: "rate", rate });
-    expect(shell.fake.effects.slice(from)).toEqual([
-      { method: "settings.update", args: [{ ttsRate: rate }] },
-      { method: "audio.adjustRate", args: [rate] },
-    ]);
-    shell.sync();
-    const after = shell.router.getSnapshot()!;
-    expect(after.speed).toEqual({ kind: "rate", rate });
-    expect(after.playing).toBe(false);
-    expect(after.currentWordIndex).toBe(before.currentWordIndex);
+    vi.useFakeTimers({ now: 0 });
+    try {
+      const shell = openShell();
+      shell.router.select("narrate");
+      const before = shell.router.getSnapshot()!;
+      const from = shell.fake.effects.length;
+      shell.router.setSpeed({ kind: "rate", rate });
+      // Persisted at once; the audio port gets the settled rate after the quiet period (settle).
+      expect(shell.fake.effects.slice(from)).toEqual([{ method: "settings.update", args: [{ ttsRate: rate }] }]);
+      vi.advanceTimersByTime(NARRATE_SPEED_SETTLE_MS);
+      expect(shell.fake.effects.slice(from)).toEqual([
+        { method: "settings.update", args: [{ ttsRate: rate }] },
+        { method: "audio.adjustRate", args: [rate] },
+      ]);
+      shell.sync();
+      const after = shell.router.getSnapshot()!;
+      expect(after.speed).toEqual({ kind: "rate", rate });
+      expect(after.playing).toBe(false);
+      expect(after.currentWordIndex).toBe(before.currentWordIndex);
+    } finally {
+      vi.clearAllTimers();
+      vi.useRealTimers();
+    }
   });
 
   it("a running Focus or Flow clock takes the new speed (effective rate)", () => {
@@ -219,6 +228,63 @@ describe("runtime setSpeed (acceptance items 2–5)", () => {
     expect(shell.fake.effects.slice(from)).toEqual([]);
     expect(shell.router.getSnapshot()).toEqual(before);
     expect(shell.router.getSnapshot()!.playing).toBe(false);
+  });
+});
+
+// Live G6 finding on 966e3261: 8 slider steps reached the audio port as 8 re-seeds (final rate response
+// 9482 ms). Narrate persists every step but applies only the settled value (parent Type 1b).
+describe("Narrate applies one settled rate to audio (settle, live finding)", () => {
+  const adjustCalls = (shell: ReturnType<typeof openShell>, from: number) =>
+    shell.fake.effects.slice(from).filter((c) => c.method === "audio.adjustRate").map((c) => c.args[0]);
+
+  beforeEach(() => { vi.useFakeTimers({ now: 0 }); });
+  afterEach(() => { vi.clearAllTimers(); vi.useRealTimers(); });
+
+  it("8 rapid steps 1.05 → 1.40 persist 8 times and reach the audio port once, as 1.4, after the quiet period", () => {
+    const shell = openShell();
+    shell.router.select("narrate");
+    const from = shell.fake.effects.length;
+    for (let index = 5; index <= 12; index += 1) {
+      shell.router.setSpeed(speedAt("narrate", index));
+      shell.sync();
+      vi.advanceTimersByTime(90); // ~738 ms / 8 in the live run: each step lands inside the previous quiet window
+    }
+    const persisted = speedPatches(shell.patches(from));
+    expect(persisted).toHaveLength(8);
+    expect(persisted.at(-1)).toEqual({ ttsRate: 1.4 });
+    expect(shell.speed()).toEqual({ kind: "rate", rate: 1.4 });
+    expect(adjustCalls(shell, from)).toEqual([]);
+    vi.advanceTimersByTime(NARRATE_SPEED_SETTLE_MS - 90 - 1);
+    expect(adjustCalls(shell, from)).toEqual([]);
+    vi.advanceTimersByTime(1);
+    expect(adjustCalls(shell, from)).toEqual([1.4]);
+    vi.advanceTimersByTime(60_000);
+    expect(adjustCalls(shell, from)).toEqual([1.4]);
+  });
+
+  it.each(["stop", "destroy"] as const)("%s during the quiet window makes no audio call", (end) => {
+    const shell = openShell();
+    shell.router.select("narrate");
+    const from = shell.fake.effects.length;
+    shell.router.setSpeed({ kind: "rate", rate: 1.25 });
+    vi.advanceTimersByTime(NARRATE_SPEED_SETTLE_MS - 1);
+    if (end === "stop") shell.router.select("focus");
+    else shell.router.destroy();
+    vi.advanceTimersByTime(60_000);
+    expect(adjustCalls(shell, from)).toEqual([]);
+  });
+
+  it("returning to the rate already applied before the timer fires makes no audio call", () => {
+    const shell = openShell();
+    shell.router.select("narrate");
+    expect(shell.settings().ttsRate).toBe(1); // the fake audio port reports rate 1
+    const from = shell.fake.effects.length;
+    shell.router.setSpeed({ kind: "rate", rate: 1.05 });
+    vi.advanceTimersByTime(100);
+    shell.router.setSpeed({ kind: "rate", rate: 1 });
+    vi.advanceTimersByTime(60_000);
+    expect(speedPatches(shell.patches(from))).toEqual([{ ttsRate: 1.05 }, { ttsRate: 1 }]);
+    expect(adjustCalls(shell, from)).toEqual([]);
   });
 });
 
@@ -426,6 +492,20 @@ describe("ReaderBottomBar speed trigger and dialog", () => {
     // No dialog key reached the reader shortcuts (Esc would exit the reader, arrows would seek or pace).
     expect(windowKeys).toEqual([]);
     expect(props.onTogglePlay).not.toHaveBeenCalled();
+  });
+
+  it("keys that arrive before a re-render are not lost (held or fast arrows step every press)", async () => {
+    // G6 live finding: 8 quick ArrowRights moved only +6. Both presses land in one act(), so no re-render between.
+    const { onSetSpeed } = await renderBar("narrate", { kind: "rate", rate: 1.0 });
+    await key(trigger()!, "Enter");
+    const s = slider()!;
+    await act(async () => {
+      for (let i = 0; i < 3; i++) s.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowRight", bubbles: true, cancelable: true }));
+    });
+    expect(onSetSpeed.mock.calls.map(([v]) => v)).toEqual([
+      { kind: "rate", rate: 1.05 }, { kind: "rate", rate: 1.1 }, { kind: "rate", rate: 1.15 },
+    ]);
+    expect(trigger()!.textContent).toBe("1.15x");
   });
 
   it("Narrate's slider covers 0.80x–2.00x and reports 1.05x exactly", async () => {

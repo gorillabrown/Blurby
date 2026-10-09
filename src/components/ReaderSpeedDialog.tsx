@@ -79,9 +79,15 @@ export default function ReaderSpeedDialog({ mode, speed, onChange, onClose }: Re
 
   const max = speedMaxIndex(mode);
   const index = speedIndexOf(mode, speed);
+  // The last index selected, ahead of the re-render that carries it back as `speed`: keys that arrive before
+  // that re-render (held or fast arrows) step from here, so no press is lost.
+  const selectedRef = useRef(index);
+  useEffect(() => { selectedRef.current = index; }, [index]);
   const select = (next: number) => {
     const clamped = Math.max(0, Math.min(max, next));
-    if (clamped !== index) onChange(speedAt(mode, clamped));
+    if (clamped === selectedRef.current) return;
+    selectedRef.current = clamped;
+    onChange(speedAt(mode, clamped));
   };
 
   // The dialog is modal: no key reaches the reader shortcuts (Space never toggles play, Esc never exits).
@@ -95,7 +101,7 @@ export default function ReaderSpeedDialog({ mode, speed, onChange, onClose }: Re
     if (e.target !== sliderRef.current) return;
     // Explicit range keys (same as the native ones, so jsdom and every platform agree; no double step).
     const step: Record<string, number> = { ArrowLeft: -1, ArrowDown: -1, ArrowRight: 1, ArrowUp: 1 };
-    if (e.key in step) { e.preventDefault(); select(index + step[e.key]); }
+    if (e.key in step) { e.preventDefault(); select(selectedRef.current + step[e.key]); }
     else if (e.key === "Home") { e.preventDefault(); select(0); }
     else if (e.key === "End") { e.preventDefault(); select(max); }
   };

@@ -4,7 +4,8 @@
 //   node assemble-live-qa.mjs --candidate-cases=<a.json>,<b.json> [--b0-cases=<c.json>,<d.json>] [--out=<path>]
 // Without --out it prints to stdout. It never writes <evidence>/live-qa.json itself. It never adds heardAudio or
 // known-defect rulings (the owner's), and leaves removedCrossOwnerEffects empty for the owner/lead to fill.
-// stderr: the comparison table and a dry validator pass (scripts/check_reader_mode_evidence.mjs validate()).
+// stderr: the comparison table, the speed-dialog summary and a dry validator pass with requireSpeed
+// (scripts/check_reader_mode_evidence.mjs validate()), one line per violation. speedDialog.liveObservation stays absent.
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
@@ -81,6 +82,23 @@ const b0Comparison = b0.length ? [...new Set([...cases.map((c) => c.id), ...b0Ca
   return { id, category: (k ?? b).category, documentKind: (k ?? b).documentKind, b0: bk ?? null, candidate: ck ?? null, differs };
 }) : [];
 
+// Speed dialog (candidate runs only): every candidate run that captured it must agree on the value lists; the
+// summary is keyboardOperable only if every run's was, and page.hasSpeedAction is true if any run saw one.
+// liveObservation is the owner's: never written here. Per-index evidence goes under speedDialogEvidence.
+const speedRuns = cand.filter((x) => x.doc.speedDialog).map((x) => ({ runId: x.doc.runId, fixture: x.doc.fixture, sd: x.doc.speedDialog }));
+let speedDialog, speedDialogEvidence;
+if (speedRuns.length) {
+  const vals = (sd) => JSON.stringify([sd.focus?.values, sd.flow?.values, sd.narrate?.values]);
+  const [s0] = speedRuns;
+  const agree = speedRuns.every((r) => vals(r.sd) === vals(s0.sd));
+  speedDialog = {
+    focus: { values: s0.sd.focus?.values ?? null }, flow: { values: s0.sd.flow?.values ?? null }, narrate: { values: s0.sd.narrate?.values ?? null },
+    page: { hasSpeedAction: speedRuns.some((r) => r.sd.page?.hasSpeedAction !== false) },
+    keyboardOperable: agree && speedRuns.every((r) => r.sd.keyboardOperable === true),
+  };
+  speedDialogEvidence = { valuesAgreeAcrossRuns: agree, runs: speedRuns.map((r) => ({ runId: r.runId, fixture: r.fixture, result: r.sd.result, keyboardOperable: r.sd.keyboardOperable, checks: r.sd.checks, screenshot: r.sd.screenshot ?? null, evidence: r.sd.evidence })) };
+}
+
 const out = {
   candidate,
   build: { dir: buildDir, manifestSha256: cb.buildManifestSha256 },
@@ -88,6 +106,7 @@ const out = {
   cases,
   removedCrossOwnerEffects: [],
   baselineEqualDeviations,
+  ...(speedDialog ? { speedDialog, speedDialogEvidence } : {}),
   provenance: {
     assembledAt: new Date().toISOString(), harness: "docs/planning/roadmap-reviews/reader-mode-separation-2/live/",
     candidateRuns: cand.map((x) => ({ file: x.file, runId: x.doc.runId, fixture: x.doc.fixture })),
@@ -107,6 +126,8 @@ if (b0Comparison.length) {
 }
 const g0Documents = Object.fromEntries(readJson(path.join(E, "admission", "g0-matrix.json")).documents.map((d) => [d.id, d.sha256]));
 const resolved = execFileSync("git", ["rev-parse", `${candidate}^{commit}`], { cwd: W, encoding: "utf8" }).trim();
-const v = validate(out, { resolvedCandidate: resolved, g0Documents, buildManifestSha256: fresh, requireSpeed: false });
+const v = validate(out, { resolvedCandidate: resolved, g0Documents, buildManifestSha256: fresh, requireSpeed: true });
 const byRule = v.reduce((m, x) => ((m[x.slice(0, 2)] = (m[x.slice(0, 2)] ?? 0) + 1), m), {});
-console.error(`dry validator pass: ${v.length} violation(s) ${JSON.stringify(byRule)}${outPath ? ` -> ${outPath}` : ""}`);
+if (speedRuns.length) console.error(`speedDialog: ${speedRuns.map((r) => `${r.runId}/${r.fixture} ${r.sd.result} ${["focus", "flow", "narrate"].map((m) => r.sd[m]?.values?.length ?? 0).join("/")} kb=${r.sd.keyboardOperable} ${JSON.stringify(r.sd.checks)}`).join("; ")}; agree=${speedDialogEvidence.valuesAgreeAcrossRuns}`);
+console.error(`dry validator pass (requireSpeed): ${v.length} violation(s) ${JSON.stringify(byRule)}${outPath ? ` -> ${outPath}` : ""}`);
+for (const x of v) console.error(`  ${x}`);

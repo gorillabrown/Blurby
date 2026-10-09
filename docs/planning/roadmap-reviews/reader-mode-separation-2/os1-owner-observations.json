@@ -1,0 +1,39 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "session": "OS-1 (owner): Parts B-D of os1-owner-checklist.md; Part A is recorded in g0-owner-observations.json",
+  "observer": "",
+  "audioDevice": "",
+  "voice": "",
+  "date": "",
+  "final": {
+    "build": "F — candidate archive C:\\Projects\\Blurby-artifacts\\rms2-candidate-<sha12> (candidate-build.json names the commit)",
+    "commit": "",
+    "liveProfileUnchanged": "",
+    "items": [
+      { "id": "H1", "book": "G0 Bundled Meditations", "check": "Narrate starts at the first word; cursor vs voice", "observed": "", "result": "" },
+      { "id": "H2", "book": "G0 Bundled Meditations", "check": "Narrate starts at the 8th word", "observed": "", "result": "" },
+      { "id": "H3", "book": "G0 Bundled Meditations", "check": "Pause/resume continues without restart", "observed": "", "result": "" },
+      { "id": "H4", "book": "G0 Bundled Meditations", "check": "Rate 1.00x -> 1.40x -> 1.00x via the speed dialog: overlap, missing words, pauses", "observed": "", "result": "" },
+      { "id": "H5", "book": "G0 Bundled Meditations", "check": "Section change during Narrate", "observed": "", "result": "" },
+      { "id": "H6", "book": "G0 Converted Two Chapters", "check": "H1-H4 repeated on the non-EPUB", "observed": "", "result": "" },
+      { "id": "H7", "book": "G0 Converted Two Chapters", "check": "Chapter One -> Two during Narrate", "observed": "", "result": "" },
+      { "id": "H8", "book": "G0 Converted Two Chapters", "check": "End of book during Narrate", "observed": "", "result": "" },
+      { "id": "V1", "book": "any", "check": "Flow scroll-away pauses and Return to reading restores", "observed": "", "result": "" },
+      { "id": "V2", "book": "any", "check": "Narrate (paused) -> Page highlight word", "observed": "", "result": "" },
+      { "id": "V3", "book": "G0 Bundled Meditations", "check": "Next chapter during Narrate", "observed": "", "result": "" }
+    ]
+  },
+  "speed": {
+    "items": [
+      { "id": "S1", "check": "Focus dialog by keyboard: Home 0.40x/100, End 4.80x/1200, 0.45x = 112.5 WPM, Esc returns focus, no playback start, slower pacing", "observed": "", "result": "" },
+      { "id": "S2", "check": "Flow keeps its own speed; 1.20x; each mode keeps its value across switches", "observed": "", "result": "" },
+      { "id": "S3", "check": "Narrate 0.80x, 1.05x, 2.00x by ear: no overlap, missing words or new pauses", "observed": "", "result": "" },
+      { "id": "S4", "check": "Page has no speed control", "observed": "", "result": "" }
+    ]
+  },
+  "confirmations": [
+    { "id": "C1", "check": "Narrate stops at book end (both builds) is acceptable preserved baseline behaviour", "answer": "" },
+    { "id": "C2", "check": "EPUB section change in Narrate (H5): F same as B0", "answer": "" },
+    { "id": "C3", "check": "Removed cross-mode leaks seen as described (Narrate->Page word; no Flow progress text in Narrate)", "answer": "" }
+  ]
+}
