@@ -150,6 +150,16 @@
       "origin": "generated",
       "label": "Roadmap reviews"
     },
+    "epics": {
+      "path": "docs/planning/epics",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "epic",
+      "allowedWriters": [
+        "epic"
+      ]
+    },
     "workRegister": {
       "external": "monday:board/18432450217",
       "provider": "connector",
