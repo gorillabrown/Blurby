@@ -37,5 +37,33 @@
       "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/g0-matrix.json",
       "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-observations.json"
     ]
-  }
+  },
+  "waveGates": [
+    {
+      "gate": "B9 (Wave B)",
+      "commit": "5a34f6e19f787c34fbbf4501f77945fca105a5a0",
+      "ranAtUtc": "2026-10-09T08:38:05.990Z",
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 217,
+        "testFilesSkipped": 1,
+        "testsPassed": 3089,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "kf1": "did not recur"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerify": "5/5",
+      "adapterRouterBaseline": "171/171",
+      "audioInvariants": "48/48",
+      "g4": {
+        "page": "byte-identical after Q-F (6 dropped)",
+        "focus": "byte-identical after Q-F (30 dropped; 0 OC-1)"
+      },
+      "obsA3_2": "fixed at router level; mutation-proven (tests/readerModes/focus.behavior.test.tsx)",
+      "logs": "%TEMP%/rms2-gate-B9-5a34f6e1 (local)"
+    }
+  ]
 }
