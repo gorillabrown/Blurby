@@ -584,10 +584,14 @@ async function narrateRate(row) {
   for (const r of ["1.4", "1.0"]) {
     const tr = await traceLen(); const L = lastAudioWord(await traceSince(t0));
     await clickSel(`[aria-label="${r}x speed"]`);
-    const resp = await waitTrace(tr, (e) => e.kind === "transition" && e.transition === "rate-response", 10000);
+    const clickAt = Date.now();
+    // The re-seed's first audio word can take > 2.5 s (seen on B0 and the candidate); wait for it, record the gap.
+    const firstWord = await waitTrace(tr, (e) => e.kind === "word" && e.source === "audio", 10000);
+    const reseedGapMs = firstWord ? Date.now() - clickAt : null;
+    const resp = (await traceSince(tr)).find((e) => e.kind === "transition" && e.transition === "rate-response") ?? null;
     await sleep(2500); await step(row, `speaking-${r}`);
     const after = await traceSince(tr);
-    row.rate.push({ to: r, lastBefore: L, readout: (await state()).rate, response: resp ? { from: resp.from, to: resp.to, latencyMs: resp.latencyMs } : null, firstAfter: firstAudioWord(after), startEvents: after.filter((e) => e.kind === "lifecycle" && e.state === "start").length, wordsAfter: after.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8) });
+    row.rate.push({ to: r, lastBefore: L, readout: (await state()).rate, response: resp ? { from: resp.from, to: resp.to, latencyMs: resp.latencyMs } : null, firstAfter: firstAudioWord(after), startEvents: after.filter((e) => e.kind === "lifecycle" && e.state === "start").length, reseedGapMs, wordsAfter: after.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).slice(0, 8) });
   }
   const [up, down] = row.rate;
   // A rate change re-seeds narration at the word being spoken (NARRATE-A5-RATE-RESEED-1); the rate-response
