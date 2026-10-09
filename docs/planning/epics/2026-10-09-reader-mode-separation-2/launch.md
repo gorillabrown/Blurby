@@ -4,29 +4,29 @@
 
 | Check | How | Result |
 |-------|-----|--------|
-| Paths in the goal exist (absolute) | `Test-Path` on repo, run worktree, archive, failed A1 profile | PASS for the repo, worktree directory and archive; **worktree git link broken** → charter A3 (P1 step) |
-| Canonical build/test/check commands run | `npm run typecheck`, `npm test`, `npm run build` on pinned base `1e5485c6` | PASS 2026-09-23 (`baseline.json`: 3,058 passed / 133 skipped). Re-run in P1; not re-run at scaffold |
+| Paths in the goal exist (absolute) | `Test-Path` on repo and run worktree | PASS for the repo and worktree directory. **Worktree git link broken** (A3, fixed at bootstrap). **Old baseline archive empty** (A2, B0 rebuilt in P1) |
+| Canonical build/test/check commands run | `npm run typecheck`, `npm test`, `npm run build` on `1e5485c6` | PASS 2026-09-23 (`baseline.json`); re-run on B0 in P1 |
 | Credentials live | `gh auth status` | PASS (account gorillabrown, keyring) |
-| Remotes/services in the DoD reachable | `git remote` → `origin`; monday board 18432450217 via connector | PASS (connector write and readback 2026-10-09T03:39Z) |
-| Runtime can act unattended | permission mode covers npm, electron, git push, monday connector | **Assumption A5.** Owner confirms the mode before walking away. This scaffold session's auto mode blocked one registry policy write |
-| Repository detected | remote `origin`, default `main`, worktrees listed, dirty primary tree reported | PASS. Primary checkout dirty (unrelated; never touched by this run). `policy.git` pending GOV-HYGIENE → charter A1 |
-| Network operations settled | fetch and push | **Granted:** fetch; push `eb/reader-mode-separation-2` at checkpoints. Merge/push `main` only after `done.md` |
-| Launch-blocking questions answered | below | Q1 answered (GOV merged 56c97e44; epics registered 48452ba9 / fdfb658a). Q2 open (default: A5) |
+| Remotes/services in the DoD reachable | `git remote` → `origin`; monday board 18432450217 via connector | PASS |
+| Runtime can act unattended | permission mode covers npm, electron, git push, monday connector | **A5 / Q2**: owner confirms |
+| Repository detected | remote `origin`, default `main` (write `refs/heads/main`: a `main/` directory exists), worktrees listed, primary checkout dirty (never touched) | PASS; `policy.git` = push / allow |
+| Network operations settled | fetch; push run branch at checkpoints; `main` only in finalization F3 | Granted (owner, 2026-10-09) |
+| Launch-blocking questions answered | below | Q1 answered; Q2 open (default A5) |
 
 Readiness, as five findings:
 
 | Finding | Result | Reason |
 |---|---|---|
-| Specification | PASS | Spec U1–U8 passed 2026-09-23; amendments folded in 2026-10-08; every DoD row has a command or procedure |
-| Prerequisites | PASS | READER-ISO-1A to 1E Completed in the register |
-| Repository | PASS | Spec and `policy.git` on `main` (56c97e44, fdfb658a); worktree relink is a P1 step |
-| External register | PASS | Snapshot fresh 2026-10-09T03:40Z; provider supports `write-status` and `record-completion` |
-| Execution environment | GAP → A5, A6 | Unattended permission mode unconfirmed; owner needed at audio/live gates by design |
+| Specification | PASS | Spec U1–U8 (2026-09-23) plus four amendments; adversarial review findings folded in 2026-10-09; every DoD row has a command or procedure |
+| Prerequisites | PASS | READER-ISO-1A to 1E Completed |
+| Repository | PASS | Spec, `policy.git` and packet on `main`; worktree relink and harness guard update are P1 steps |
+| External register | PASS | Snapshot 2026-10-09T03:40Z; provider supports `write-status` and `record-completion` |
+| Execution environment | GAP → A5 | Unattended permission mode unconfirmed; owner needed at audio/live gates by design |
 
 ### Launch-blocking questions — answers recorded here
 
-- **Q1 (hard blocker).** Has the GOV-HYGIENE-2026-10-09 CLI block run, including its epic addendum (registers `epics`, commits this packet), so that `main` carries the 2026-10-08 spec and `policy.git` = push?
-  **Answer:** Yes — GOV-HYGIENE merged to main at 56c97e44; epics registered at 48452ba9 (merged to main as fdfb658a).
+- **Q1 (hard blocker).** Has GOV-HYGIENE run, so `main` carries the spec and `policy.git` = push?
+  **Answer:** Yes. GOV-HYGIENE merged 56c97e44; epics registered 48452ba9 (merged fdfb658a); packet refs fixed fae71ebb; pre-launch amendment on `main` with this file.
 - **Q2 (default: charter A5).** Is the session's permission mode set so npm, electron, git push and the monday connector run without approval prompts?
   **Answer:** _(pending. Unanswered: proceed; a stall shows up as a journal gap.)_
 
@@ -35,95 +35,115 @@ Readiness, as five findings:
 Paste into any session — first or fiftieth; it self-orients either way.
 
 ```
-You are executing the epic at C:\Projects\Blurby\docs\planning\epics\2026-10-09-reader-mode-separation-2.
-You may have no memory of prior sessions and the run may be partially complete.
-Read state.md and follow its RESUME PROTOCOL exactly before doing anything else.
+You are executing the epic READER-MODE-SEPARATION-2. Its authoritative packet is
+C:\Projects\Blurby\.worktrees\reader-mode-separation-2\docs\planning\epics\2026-10-09-reader-mode-separation-2
+(call it PACKET). You may have no memory of prior sessions; the run may be partially complete.
 
-The finish line is charter.md's Definition of Done — every row verified with fresh
-evidence — and nothing else. Keep working until that holds or a charter escalation
-trigger fires. Plan your own path within plan.md's phases; replan phases if reality
-demands it (log it), but never touch charter.md. The specification is ROADMAP.md
-§ READER-MODE-SEPARATION-2 with its three Mid-Dispatch Amendments; the charter does
-not restate it, and the spec governs.
+BOOTSTRAP — only if PACKET\state.md does not exist, or PACKET\journal.md has no S1 entry:
+  Read C:\Projects\Blurby\docs\planning\epics\2026-10-09-reader-mode-separation-2\launch.md
+  (the launch snapshot) and run "GIT WORK → Bootstrap" below. Then continue from PACKET.
+  Never write the launch snapshot.
 
-Do not wait on the user. If an escalation trigger fires (including an owner gate:
-manual G0 checklist, heard audio, G6 live QA, speed-dialog live check), record a
-BLOCKER(USER) in state.md with the exact question or checklist, continue on any
-unblocked front, and stop cleanly only when every front is blocked.
+Then read PACKET\state.md and follow its RESUME PROTOCOL exactly before doing anything else.
+
+The finish line is charter.md's Definition of Done verified on the final candidate,
+then launch.md's finalization stages through done.md — nothing else. Plan your own path
+within plan.md's phases (log replans), but never touch charter.md. The specification is
+ROADMAP.md § READER-MODE-SEPARATION-2 with its four Mid-Dispatch Amendments; the spec governs.
+
+Do not wait on the user. On an escalation trigger (including owner gates: manual G0
+checklist, heard audio, G6 live QA, speed-dialog live check), record a BLOCKER(USER) in
+state.md with the exact question or checklist, continue on any unblocked front, and stop
+cleanly only when every front is blocked.
 
 Keep durable files distilled: conclusions and evidence pointers, never raw logs. Push
 noisy exploration into subagents when your runtime offers them.
 
-Before ending any work burst: update state.md, append a journal.md entry, leave the
-working tree at a checkpoint as GIT WORK below defines it. Disk handoff-ready, always.
+Before ending any work burst: update PACKET\state.md, append a PACKET\journal.md entry,
+and checkpoint per GIT WORK. Disk handoff-ready, always.
 
-GIT WORK — before the first edit of every session. Filled from policy.git at scaffold.
-Repository C:\Projects\Blurby | remote origin | default branch main
-Run branch eb/reader-mode-separation-2 (exists; base 1e5485c6, evidence to 74883154)
-Worktree C:\Projects\Blurby\.worktrees\reader-mode-separation-2 | policy push | network: fetch + push run branch granted; main only after done.md
-Read-only git runs lock-free: GIT_OPTIONAL_LOCKS=0 git --no-optional-locks ...
-The primary checkout C:\Projects\Blurby is dirty with unrelated work: never stage, restore, or clean anything there.
+GIT WORK — policy push, network allowed. Repository C:\Projects\Blurby, remote origin.
+Always write refs in full: refs/heads/main, refs/remotes/origin/main (a main/ directory exists).
+Run worktree W = C:\Projects\Blurby\.worktrees\reader-mode-separation-2, branch eb/reader-mode-separation-2.
+The primary checkout C:\Projects\Blurby is dirty with unrelated work: never stage, restore,
+clean, test or merge there.
 
-First session (state.md Working set says "session 1 repairs, merges main, and pushes"):
-  git -C C:\Projects\Blurby log refs/heads/main --oneline --grep "roadmap-review 2026-10-08"   # must hit; else BLOCKER(USER) (charter A1), stop
-  git -C C:\Projects\Blurby worktree repair C:\Projects\Blurby\.worktrees\reader-mode-separation-2
-  cd C:\Projects\Blurby\.worktrees\reader-mode-separation-2
+Bootstrap (once):
+  git -C C:\Projects\Blurby fetch origin --prune
+  git -C C:\Projects\Blurby show refs/remotes/origin/main:ROADMAP.md | Select-String "Mid-Dispatch Amendment — 2026-10-09"
+                                    # must hit; else BLOCKER(USER) (charter A1), stop
+  git -C C:\Projects\Blurby worktree repair W
+  cd W
   git branch --show-current         # must print eb/reader-mode-separation-2
-  git log -1 --format=%H            # must be 74883154… ; else journal the difference
+  git log -1 --format=%H            # expect 74883154…; journal any difference
   git status --porcelain            # journal EVERY path; preserve all (charter A4)
-  git fetch origin --prune
-  git rev-parse refs/heads/main refs/remotes/origin/main    # must print the same SHA twice (GOV-HYGIENE pushed main); else BLOCKER(USER)
-  git merge --no-ff refs/heads/main -m "READER-MODE-SEPARATION-2-S1: bring 2026-10-08 spec and governance from main"
+  git merge --no-ff refs/remotes/origin/main -m "READER-MODE-SEPARATION-2-S1: integrate main (spec amendments, governance, packet)"
                                     # conflict -> STOP, BLOCKER(USER); never resolve by discarding a side
-  git show HEAD:ROADMAP.md | Select-String "Mid-Dispatch Amendment — 2026-10-08"   # must hit
+  record I = (git rev-parse HEAD) in PACKET\state.md → Working set and Identities
   git push -u origin eb/reader-mode-separation-2
-  record "branch repaired + main merged + pushed, session 1" and the merge SHA in state.md
-Every later session (verify; never recreate the branch):
-  cd C:\Projects\Blurby\.worktrees\reader-mode-separation-2
+Every later session:
+  cd W
   git branch --show-current         # must print eb/reader-mode-separation-2; else STOP, BLOCKER(USER)
-  git log -1 --format=%H            # compare with the Git line of the last journal entry,
-  git status --porcelain            # and with its uncommitted paths. A mismatch: believe
-                                    # the repo, journal the difference, then work
+  git log -1 --format=%H            # compare with the last journal entry's Git line, and
+  git status --porcelain            # its uncommitted paths. Mismatch: believe the repo, journal it
   git fetch origin --prune
-  git rev-list --left-right --count eb/reader-mode-separation-2...origin/eb/reader-mode-separation-2
-                                    # both sides > 0 -> divergence: STOP, BLOCKER(USER); never rebase.
-                                    # Behind only: git merge --ff-only origin/eb/reader-mode-separation-2
-  git rev-list --count <session-1 merge SHA from state.md>..refs/remotes/origin/main
-                                    # main moved: journal it and keep working; never merge or rebase to catch up
-Every checkpoint:
-  git add -- <exact paths>          # only paths in docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json
-                                    # or this packet's files; never `git add .` or `-A`
+  git rev-list --left-right --count refs/heads/eb/reader-mode-separation-2...refs/remotes/origin/eb/reader-mode-separation-2
+                                    # both > 0 -> divergence: STOP, BLOCKER(USER); never rebase.
+                                    # behind only -> git merge --ff-only refs/remotes/origin/eb/reader-mode-separation-2
+  (origin/main moving is normal: journal it, never merge it in before finalization)
+Every checkpoint (not between F1 and F4, see finalization):
+  git add -- <exact paths>          # only E/paths.json entries and PACKET files; never -A or .;
+                                    # never tests/perf-baseline-results.json
   git diff --cached --name-only     # must equal the intended set
   git commit -m "READER-MODE-SEPARATION-2-S<n>: <what this burst did>"
   git push origin eb/reader-mode-separation-2
-  record the Git line in the journal entry: eb/reader-mode-separation-2 @ <sha>; uncommitted: <paths or none>
-Never: merge into or push main before done.md; force-push, rebase, reset --hard, stash,
-clean, or delete a lock file; delete or reuse the failed A1 profile; write the live profile.
+  journal Git line: eb/reader-mode-separation-2 @ <sha>; uncommitted: <paths or none>
+Never: force-push, rebase, reset --hard, stash, clean, delete a lock file; push main outside F3.
 
-Run this session under the virtuoso skill when it is available: this packet is your
-dispatch spec, and your sprint identifier is READER-MODE-SEPARATION-2-S<n>, where n is the
-next session number in journal.md.
+Run this session under the virtuoso skill when available: this packet is your dispatch spec;
+sprint identifier READER-MODE-SEPARATION-2-S<n> (n = next session number in PACKET\journal.md).
 ```
 
 ## Goal line — for `/goal`
 
 ```
-Page, Focus, Flow and Narrate run as independent runtimes with matching contracts, the old shared reader behavior unreachable, every mode's baseline preserved, and the approved speed dialog added — done only when every Definition-of-Done row in C:\Projects\Blurby\docs\planning\epics\2026-10-09-reader-mode-separation-2\charter.md passes with fresh evidence in one session and C:\Projects\Blurby\docs\planning\epics\2026-10-09-reader-mode-separation-2\done.md is written; the only other clean stop is every front blocked on a BLOCKER(USER) recorded in state.md.
+Page, Focus, Flow and Narrate run as independent runtimes with matching contracts, the old shared reader behavior unreachable, every mode's baseline preserved, and the approved speed dialog added — done only when every Definition-of-Done row in C:\Projects\Blurby\.worktrees\reader-mode-separation-2\docs\planning\epics\2026-10-09-reader-mode-separation-2\charter.md passes with fresh evidence on the final candidate and C:\Projects\Blurby\.worktrees\reader-mode-separation-2\docs\planning\epics\2026-10-09-reader-mode-separation-2\done.md exists after publication to origin/main; the only other clean stop is every front blocked on a BLOCKER(USER) recorded in that packet's state.md.
 ```
 
-## Completion protocol — the only way this epic ends as "complete"
+## Completion and finalization — the only way this epic ends as "complete"
 
-1. In one session, on the candidate SHA, re-run **every** charter DoD row fresh; paste full outputs into state.md → Evidence.
-2. Any row fails ⇒ not done: journal it, keep working.
-3. All rows pass ⇒ write `done.md` in this directory: completion date, the DoD table with per-row evidence pointers, caveats and loose ends (known cursor-lead and 1.4x defects handed to their items), recommended follow-ups. Set charter.md frontmatter `status: complete`.
-4. Then, per Rule 5b and the owner's network grant: in the primary checkout, `git merge --no-ff eb/reader-mode-separation-2`. If unrelated dirty files block the merge, STOP and raise a BLOCKER(USER); never clear them. Then run `npm test` on the merge result (exit 0) and `git push origin main`. Record the merge SHA in the final journal entry.
-5. Final journal entry, then stop. **`done.md` existing is the stop signal** for any loop or scheduler driving sessions. Never create it under any other circumstances.
-6. Close the epic through `/pointer-closeout READER-MODE-SEPARATION-2`, with journal.md and done.md as its evidence. It retires the item, records completion on monday, appends the terminal record, and records what the epic taught (including the GUI-automation candidate lesson), or says why it taught nothing.
+Stages are resumable. A session determines where it is from **git reality**, not memory:
+- F1 is done when `verified.md` is on the run branch.
+- F3 is done when `refs/remotes/origin/main` contains `PACKET/done.md`.
+- F4 is done when the run branch contains `done.md`.
+
+**Between F1 and F4, commit nothing to the run branch and edit no tracked packet file**, so F4 can fast-forward. Record progress (attempt k, M, step-5 result, push result) and any blocker in the untracked `PACKET/finalization-log.md`; F4 moves its content into the journal, then deletes it.
+
+- **F1 — Verify and checkpoint.** In one session, on F, re-run **every** charter DoD row fresh and paste full outputs into state.md → Evidence. Any row fails ⇒ not verified: journal it, keep working. All pass ⇒ write `PACKET/verified.md` (date, F, B0, I, S, the DoD table with evidence pointers, caveats). Mark F1 in state.md, then commit and push the run branch as a normal checkpoint. Call that commit **V**. `verified.md` is not a stop signal.
+- **F2 — Integrate in a clean worktree.** With attempt `k` = 1, 2, 3:
+  1. `git -C C:\Projects\Blurby fetch origin --prune`.
+  2. `git -C C:\Projects\Blurby worktree add C:\Projects\Blurby\.worktrees\rms2-integration-k -b eb/rms2-integration-k refs/remotes/origin/main`.
+  3. In that worktree: `git merge --no-ff refs/heads/eb/reader-mode-separation-2 -m "Merge eb/reader-mode-separation-2: separate Page, Focus, Flow and Narrate runtimes (READER-MODE-SEPARATION-2)"`. A conflict → BLOCKER(USER), stop (keep the worktree).
+  4. In the same worktree, finalize the packet copy at `docs/planning/epics/2026-10-09-reader-mode-separation-2/`:
+     - write `done.md`: completion date, F, the merge SHA, DoD evidence pointers (from `verified.md`), the known cursor-lead and 1.4x defects handed to their items, and follow-ups;
+     - set charter.md `status: complete`;
+     - mark F1–F3 in state.md (F3 "published by this commit");
+     - append the final journal entry.
+
+     Commit exactly those four files: `READER-MODE-SEPARATION-2: finalize epic (done.md)`. Call it **M**.
+  5. In the same worktree: `npm ci`, `npm run typecheck`, `npm test`, `npm run build`. All must exit 0; `npm test` may dirty `tests/perf-baseline-results.json` here, so never stage it. Any failure → do not publish. Keep the worktree. Write the BLOCKER(USER), with the failing output pointer and attempt k, to the **untracked** file `PACKET/finalization-log.md`. Never edit tracked packet files between F1 and F4, or F4's fast-forward will refuse. Then stop.
+- **F3 — Publish.** From the integration worktree: `git push origin HEAD:refs/heads/main`. If rejected because `origin/main` moved, start F2 again with k+1. After 3 attempts, write a BLOCKER(USER) to `PACKET/finalization-log.md` and stop. Verify that `git ls-remote origin refs/heads/main` prints M.
+- **F4 — Bring the run branch to M.** In W: `git fetch origin --prune`, `git merge --ff-only refs/remotes/origin/main`, `git push origin eb/reader-mode-separation-2`. If ff-only fails, the run branch moved after V, or a tracked packet file is dirty: write a BLOCKER(USER) to `PACKET/finalization-log.md` and stop. Once F4 succeeds, carry any `finalization-log.md` content into the journal as history, then delete that untracked file.
+- **F5 — Stop.** `PACKET/done.md` now exists. **That is the stop signal** for any loop, scheduler or `/goal`; never create it any other way. Report:
+  - the primary checkout's local `main` lags `origin/main`; the owner fast-forwards it when convenient (`git -C C:\Projects\Blurby merge --ff-only refs/remotes/origin/main`, which may refuse while unrelated dirty files overlap, and that is the owner's call);
+  - the owner runs `/pointer-closeout READER-MODE-SEPARATION-2`, which records the monday completion, the terminal record, and the lessons this epic taught (including the GUI-automation candidate).
+
+**Resuming an interrupted F2/F3.** If `eb/rms2-integration-k` holds M, `refs/remotes/origin/main` is an ancestor of M (`git merge-base --is-ancestor refs/remotes/origin/main M`), and `PACKET/finalization-log.md` records step 5 passing for that M, go straight to F3. Otherwise start the next attempt. Never delete an abandoned integration worktree; cleanup is maintenance.
 
 ## Monitoring — for the user
 
-- **Glance (10 seconds):** state.md → "Where we are": phase, next action, blockers, DoD status.
-- **Catch-up (2 minutes):** last two journal.md entries.
-- **Intervene when:** a BLOCKER(USER) is waiting in state.md (expect them at G0 manual capture, every heard-audio check, G6 live QA and the speed-dialog live check), or the journal shows no movement across two consecutive sessions, or `done.md` exists (review it).
-- **To answer a blocker or launch question:** write your answer inline in its `Answer:` slot (state.md → Blockers, or the launch questions above). For a manual checklist, fill the checklist file itself and note "done" in the Answer slot. The next session adopts it via the resume protocol.
-- **To change course:** amend charter.md yourself (you are the only one who may), then add a journal entry noting the amendment so the next session re-anchors.
+- **Glance (10 seconds):** `PACKET\state.md` → "Where we are", plus the Finalization block.
+- **Catch-up (2 minutes):** the last two `PACKET\journal.md` entries.
+- **Intervene when:** a BLOCKER(USER) is waiting (expect them at G0 manual capture, heard-audio checks, G6 live QA and the speed-dialog check); or the journal shows no movement across two sessions; or `PACKET\done.md` exists (review it, then run `/pointer-closeout`).
+- **To answer:** fill the `Answer:` slot in `PACKET\state.md` → Blockers, or fill the checklist file and note "done" in its slot. The next session adopts it.
+- **To change course:** amend `PACKET\charter.md` yourself, commit it on the run branch, and add a journal entry so the next session re-anchors.
