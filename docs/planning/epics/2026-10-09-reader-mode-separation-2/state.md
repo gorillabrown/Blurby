@@ -36,9 +36,9 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P1 — Bootstrap, rebuild B0, prepare and run A1-R
-next_action:  run A1-R (≤ 8 parent tool calls) via admission/a1r-run.ps1
-blockers:     none
+phase:        P2 — Wave A / G0 admission (P1 exit gate passed S1: I, B0, guards, A1-R PASS)
+next_action:  integrate census (background worker) → design + run A3 (≤ 35 calls); heard audio → owner gate
+blockers:     none yet (heard-audio owner gate expected at A3)
 session:      1 of ~14 budgeted
 dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
 ```
@@ -49,7 +49,9 @@ dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | 
 2. [x] Packet files + `verified.md`/`done.md` registered in `E/paths.json` → `epicPacketPaths`
 3. [x] B0 rebuilt and validated → `admission/baseline-build-rebuild.json` (byte-identical to the original 21 files)
 4. [x] Harness guards (A7) → W path + exact-set B0 check; dry check with negative controls; lessons re-read
-5. [ ] Run A1-R (≤ 8 parent tool calls); then A2 or the manual route; start the Wave A census in parallel
+5. [x] A1-R PASS 7/8 (`admission/isolation.json`, 5f0608b6); A2 PASS 10/20 (`admission/flow-reproduction.json`, 2529a921)
+6. [ ] Integrate the Wave A census (`dependencies.json`, `ownership.json`, `census/`): review, register paths, commit
+7. [ ] A3 (≤ 35): fix the non-EPUB fixture (converted import), seed the Kokoro model into the test profile (OBS-A1R-1), build the matrix runner, run EPUB + non-EPUB matrix; heard audio → BLOCKER(USER) checklist
 
 ## Finalization — stages (launch.md); mark each with date + evidence
 
@@ -102,7 +104,12 @@ F5 done.md present here:              no
 | 4 | S1 | Launch Q2/A5 answered yes | Owner set `/goal` and said "proceed without my approval overnight" | Owner message, S1 |
 | 5 | S1 | B0 validation PASS despite run-1 `npm test` exit 1 | Exit 1 came from KF-1 (0 failed tests); runs 2–3 exit 0 with identical counts; artifacts byte-identical; no identity, input or behavior difference, so the rebuild-policy trigger ("failed validation") is explained, not met | Charter grants (rebuild B0); escalation trigger evaluated |
 | 6 | S1 | A1-R runs as one driver script `admission/a1r-run.ps1` (test-only, registered) | Keeps preview restart, Hidden launch with redirects, capture, graceful close, preview stop and hash checks inside the 8-call budget | Grant: test-only harness under `E/` |
+| 7 | S1 | A1-R PASS with OBS-A1R-1 (Kokoro warm-up load error 13) classified as neither isolation nor write-path | Path inside the profile; downloaded model byte-identical to the installed one (SHA-256 `04cf570c…`); live profile unchanged | Amendment 2026-10-08 A1 criteria, evaluated mechanically |
+| 8 | S1 | A2 PASS on the EPUB; the legacy inline text fixture is a fixture gap, not a Flow defect | B0 renders every readable doc through foliate ("all docs should be EPUB since EPUB-2B"); inline record → re-import notice | Amendment 2026-09-23 A2 criteria |
+| 9 | S1 | A3's non-EPUB rows use a non-EPUB source converted through the app's import path; the launcher seeds the installed Kokoro model into the fresh profile | The only readable non-EPUB route on B0; avoids the fresh-profile concurrent-download race (OBS-A1R-1 recurred in A2) | Grant: test-only harness under `E/` |
 
 ## Evidence
 
-- (none yet)
+- B0: `admission/baseline-build-rebuild.json` (21/21 identical; typecheck/build 0; tests 0 on 2 of 3 runs, KF-1 on run 1)
+- A1-R: `admission/isolation.json` (PASS, 7/8). A2: `admission/flow-reproduction.json` (PASS, 10/20)
+- Text-file SHA-256 values in those records are over the as-written (CRLF) bytes; git stores LF. Use `git hash-object` / blob ids for canonical comparison

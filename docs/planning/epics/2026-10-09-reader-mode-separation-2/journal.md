@@ -32,6 +32,28 @@
 - **Decisions:** state.md Decision log #3 (explicit push refspec), #4 (A5 answered).
 - **Git:** eb/reader-mode-separation-2 @ 92dda255; uncommitted: tests/perf-baseline-results.json (noise), E/baseline-narrate-loopback.wav (to commit at checkpoint).
 - **Next:** register packet paths in `E/paths.json`; rebuild B0; update harness guards; lessons; A1-R.
+
+## S1b — 2026-10-09 ~00:00 (host) — B0, guards, A1-R, A2
+
+- **Did:**
+  - B0 rebuilt in a detached worktree of `1e5485c6` at `C:\Projects\Blurby-artifacts\rms2-b0-checkout`. `npm ci --offline` gave 743 packages. Typecheck 0, build 0. 21 dist files archived at `rms2-baseline-build`, byte-identical to the original manifest. Recorded in `baseline-build-rebuild.json` (Decision 5).
+  - Harness guards moved to W with an exact-set B0 check. Dry check passed; wrong-cwd and tampered-B0 negative controls refused.
+  - A1-R PASS in 7/8 calls (`isolation.json`, 5f0608b6). A2 PASS in 10/20 calls (`flow-reproduction.json`, 2529a921). Committed `analyze-capture.mjs` and `live-run.ps1`.
+  - The background census worker is writing `dependencies.json`, `ownership.json` and `census/`.
+- **Learned:**
+  - KF-1: the Qwen streaming test can leak a 500 ms stream-timeout rejection under full-suite load, so `npm test` exits 1 with 0 failures (1 of 3 runs).
+  - `-WindowStyle Hidden` does not hide the BrowserWindow: it is visible and focused, so rAF is not throttled.
+  - Fresh profiles download the Kokoro model twice concurrently (`kokoro`, `kokoro-marathon`), and the loads fail with error 13 (OBS-A1R-1, recurred).
+  - Shutdown sometimes exits `0xC0000409` after the quit flush (OBS-A2-2).
+  - B0 renders only EPUBs: non-EPUB sources must be converted imports, and the legacy inline record shows a re-import notice.
+  - The September Flow blink does not reproduce on B0 in an isolated profile (DOM and screencast frame sizes).
+  - The persisted position read 0 after a Flow pause at DOM word 34 (timing observation only).
+  - W carries an old project-scoped copy of the virtuoso skill under `.claude/skills`; this run used the plugin skill.
+  - Git normalizes CRLF to LF on the committed text evidence, so recorded SHA-256 values are over the working bytes.
+- **Decisions:** 5–9.
+- **Gate/DoD movement:** P1 exit gate passed. D1 is still unmet (A3, census, heard audio).
+- **Git:** eb/reader-mode-separation-2 @ 2529a921; uncommitted: tests/perf-baseline-results.json (noise), census outputs (worker in progress).
+- **Next:** integrate the census, then A3 per Decision 9.
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
