@@ -428,6 +428,7 @@ async function caseRun(category, dest, fn) {
     visibleCursorCount: s ? s.visibleCursorCount : null,
     staleEffectCount: row.stale ? row.stale.count : null,
     result: row.result,
+    lastAudioWord: row.lastAudio ?? null, // Decision #24: baseline-equal measure where B0 itself misses the ideal
     checks: row.checks,
     measurement: { target, expectedRule: row.methods.expected ?? null, actualMethod: row.methods.actual ?? null, ownerMethod: HOW.owner, playbackMethod: HOW.playback, visibleCursorMethod: HOW.visibleCursorCount, staleBreakdown: row.stale ? { trace: row.stale.trace.length, console: row.stale.console.length, dom: row.stale.dom.length } : null },
     ...(row.error ? { notes: `harness error: ${row.error}` } : {}),
@@ -658,6 +659,7 @@ async function narrateSection(row) {
   const hit = await waitTrace(t0, (e) => e.kind === "word" && e.source === "audio" && e.wordIndex > b.max, 45000);
   row.measure = await sampledMeasure(row, "after-boundary");
   const ev = await traceSince(t0);
+  row.lastAudio = lastAudioWord(ev);
   row.section = { start: st?.wordIndex ?? null, sectionTransitionEvents: ev.filter((e) => e.kind === "transition" && e.transition === "section").length, chapters: [before.chapter, row.measure.chapter], audioWordsAcross: ev.filter((e) => e.kind === "word" && e.source === "audio").map((e) => e.wordIndex).filter((w) => w >= b.max - 2).slice(0, 8) };
   row.expected = b.max + 1; row.methods.expected = "first word of the next section (last word index of the anchor's section + 1)";
   row.actual = hit?.wordIndex ?? null; row.methods.actual = "first audio word trace event beyond the section's last word";
@@ -691,6 +693,7 @@ async function narrateBook(row) {
   let st2 = null; for (let i = 0; i < 60 && !st2; i++) { st2 = await startIdx(); if (!st2) await sleep(500); }
   row.measure = await sampledMeasure(row, "next-book");
   const ev = await traceSince(t0);
+  row.lastAudio = lastAudioWord(ev);
   row.book = { firstStart: st?.wordIndex ?? null, overlay, nextStart: st2?.wordIndex ?? null, bookTransitionEvents: ev.filter((e) => e.kind === "transition" && (e.transition === "book" || e.transition === "handoff")).map((e) => ({ transition: e.transition, context: e.context, latencyMs: e.latencyMs })), flowWordsAfterOverlay: ev.filter((e) => e.kind === "word" && e.source === "flow").length };
   row.expected = next?.position ?? null; row.methods.expected = "the next queued book's persisted position at case start (seeded 0)";
   row.actual = st2?.wordIndex ?? null; row.methods.actual = "second narrate lifecycle start wordIndex (first start in the next book)";

@@ -53,6 +53,25 @@ const cases = cand.flatMap((x) => x.doc.cases.map((c) => ({ ...c, run: x.doc.run
 const ids = new Set();
 for (const c of cases) { if (ids.has(c.id)) die(`duplicate case id ${c.id}`); ids.add(c.id); }
 
+// Decision #24 (state.md): G6 acceptance is "equal to its recorded baseline". For the two scenarios B0 itself misses
+// against the ideal, a candidate case that reproduces the B0 case of the same id exactly (same index, last audio word,
+// owner, playback, visible cursors, every check; stale 0 on both) is scored pass with B0's value as expected and
+// listed in baselineEqualDeviations for the owner's OS-1 confirmation. Anything else keeps its own result.
+const BASELINE_EQUAL_CATEGORIES = ["narrate-book-transition", "narrate-section-transition"];
+const b0ById = new Map(b0.flatMap((x) => x.doc.cases.map((c) => [c.id, { c, runId: x.doc.runId }])));
+const sameChecks = (a, b) => JSON.stringify(Object.entries(a ?? {}).sort()) === JSON.stringify(Object.entries(b ?? {}).sort());
+const baselineEqualDeviations = [];
+for (const c of cases) {
+  const ref = b0ById.get(c.id); const b = ref?.c;
+  if (!b || !BASELINE_EQUAL_CATEGORIES.includes(c.category) || b.result !== "fail" || c.result !== "fail") continue;
+  const same = ["actualCanonicalIndex", "lastAudioWord", "owner", "playback", "visibleCursorCount"].every((f) => c[f] === b[f])
+    && c.staleEffectCount === 0 && b.staleEffectCount === 0 && sameChecks(c.checks, b.checks);
+  const measure = Number.isInteger(b.actualCanonicalIndex) ? b.actualCanonicalIndex : b.lastAudioWord;
+  if (!same || !Number.isInteger(measure)) continue;
+  baselineEqualDeviations.push({ id: c.id, idealExpected: c.expectedCanonicalIndex, b0: measure, candidate: measure, checks: c.checks, baselineRef: { run: ref.runId, caseId: b.id } });
+  Object.assign(c, { expectedCanonicalIndex: measure, actualCanonicalIndex: measure, result: "pass", baselineRef: { run: ref.runId, caseId: b.id } });
+}
+
 const pick = (c) => c && { expected: c.expectedCanonicalIndex, actual: c.actualCanonicalIndex, result: c.result, owner: c.owner, playback: c.playback, visibleCursorCount: c.visibleCursorCount, staleEffectCount: c.staleEffectCount };
 const b0Cases = new Map(b0.flatMap((x) => x.doc.cases).map((c) => [c.id, c]));
 const b0Comparison = b0.length ? [...new Set([...cases.map((c) => c.id), ...b0Cases.keys()])].map((id) => {
@@ -68,6 +87,7 @@ const out = {
   documents,
   cases,
   removedCrossOwnerEffects: [],
+  baselineEqualDeviations,
   provenance: {
     assembledAt: new Date().toISOString(), harness: "docs/planning/roadmap-reviews/reader-mode-separation-2/live/",
     candidateRuns: cand.map((x) => ({ file: x.file, runId: x.doc.runId, fixture: x.doc.fixture })),

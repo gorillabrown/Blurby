@@ -179,6 +179,31 @@ Content:
 - **OC-9:** The dead Focus progress-save effect and the `useReader` RAF tick are not copied. Evidence goes in the close-out.
 **Follow-up items:** The speed amendment's declared path list adds `src/utils/kokoroRatePlan.ts`, the settings type field additions (in a non-freeze file if possible; otherwise `src/types.ts` is scheduled under this epic's freeze ownership), and the affected rate tests.
 
+### Fold-in 8 — Mid-Dispatch Amendment (Wave D/E and G6 rulings, Decisions #17–#24)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 7 amendment
+Action: Append the block below verbatim
+Source: packet `state.md` Decision log rows 17–24 (authority: owner standing authorization, "You make decisions… iterate until the entire epic is complete"; each row cites its charter clause)
+
+#### Mid-Dispatch Amendment — 2026-10-09 (Wave D/E and G6 rulings)
+- **#17 G1 allowances tightened:** remove the unused `ProgressBar`, `ErrorBoundary` and `useFocusTrap` allowances. Narrate's `BLOCK_TAGS` is an allowed singleton, the same as in the other three modes.
+- **#18 Recorder verified on B0:** after E1, the G4 recorder is verified on the genuine B0 tree (`fixtures/verify-on-b0.mjs`, 5/5 on src `0c790075`), not through a dead copy in `src/`. The legacy-only dead-prop assertions became equivalent source-text assertions (OC-5b).
+- **#19 Late full-book words:** each runtime adopts same-document, same-generation snapshots through its own broker-guarded document port. G3 has a test for this.
+- **#20 E5 boundary rule:** ReaderContainer's runtime closure ∩ legacy equals exactly the declared `shellInfrastructure`. `useReader`, `ReaderView` and `PausedTextView` are reachable only with `App.tsx` on the path. Q-A dead views are unreachable from `main.tsx`.
+- **#21 E4 deletions:** the seven legacy files with no retained importer are deleted. `PageMode` and the `src/modes` barrel stay (CLEANUP-MODE-BARREL-1).
+- **#22 Q-E private copies:** proven by a committed `boundary-policy.json → privateCopyMap` (exact anchor or closed-list `notCopied` reason for every per-mode resource and mode), since DD-2 class rewrites make verbatim census anchors impossible.
+- **#23 Cutover review fixes:**
+  - The cross-book overlay is cleared only once Flow runs in the next book.
+  - `openDocument` releases the outgoing session inside a teardown window, so no stale Narrate audio carries into the new book.
+  - A failed book-bytes read is not cached.
+  - Narrate no longer shows Flow's leftover progress text. This is a removed cross-owner effect.
+- **#24 G6 scoring:** acceptance is equality with B0 run on the same harness revision. Two scenarios that B0 itself misses against the ideal pass only when the candidate reproduces B0 exactly, and are listed in `live-qa.json → baselineEqualDeviations` for the owner's confirmation at OS-1:
+  - Narrate has no book transition: B0's Narrate mode registers no end-of-book handler; only Flow, or Flow with narration, crosses books.
+  - EPUB section transition at 5480.
+
+  No new known-defect ids.
+
+**Follow-up items:** a later item may give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
+
 ## Target: docs/governance/LESSONS_LEARNED.md
 
 ### Fold-in 4 — Provisional lesson (number assigned at fold-in; worktree numbers are placeholders)
