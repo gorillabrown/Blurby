@@ -37,7 +37,7 @@ updated_by: session 1
 
 ```
 phase:        P3 — Wave B (contracts/ports, Page, Focus). G0 automated half = Wave B admission (Decision #13)
-next_action:  Wave B design (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
+next_action:  Wave B: B6 Page tree (B1–B5 committed) (worker) → review → implement contracts/ports + G1/G2/G3 scaffolding → Page → Focus
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
@@ -174,6 +174,7 @@ Original questions (for reference):
 | 12 | S1 | OBS-A3-2 = cross-owner overwrite. After Focus→Page re-pagination, `ReaderContainer` `onRelocate` writes `floor(fraction × activeDoc.wordCount)` (209 = ⌊0.125×1676⌋) into the Page highlight, unguarded because Focus's `onWordAdvance` consumed `resumeAnchorRef`. Focus itself stopped at ~27. Per the Q-G table, G3 governs: the post-separation Page highlight = Focus snapshot; G6 lists it as a removed cross-owner effect. OBS-A3-1 is very likely the same mechanism | Read-only trace, confidence 8/10. Discriminating experiment for Wave B/G6: log `detail.fraction`, `approxWordIdx`, `resumeAnchorRef` in `onRelocate`; negative control = Focus paused at 7 keeps 7 | Pre-registered Q-G table (fold-in 3) |
 | 13 | S1 | Owner gate re-sequenced: Waves B–E and the speed dialog start on the G0 automated evidence; the B0 listening checklist joins G6 and the speed-dialog check in one owner session (OS-1) before F1; D1/D7 stay owner-required; Monday → In Flight at Wave B start | B0 is frozen and re-launchable, so the observation is time-independent; owner directed "You make decisions… iterate until the entire epic is complete" | Owner direction 2026-10-09; /mid-dispatch-decision; staging fold-in 6 |
 | 14 | S1 | Waves B–E design accepted (DD-1..DD-7: build beside, cut over at E1; plain-class runtimes; shell TTS infra; legacy unreachable, not deleted). OC-1..OC-9 ruled (fold-in 7): stale-flag observation rule; v1 sibling contract; display-jump alias; dead-path tests on legacy hook; source-text re-point table; additive focusWpm/flowWpm; Kokoro UI 0.80–2.00/0.05 (buckets unchanged); Page ↑/↓ kept; no dead copies | Keeps every DoD row verifiable; removes only cross-owner artifacts | Owner delegation; mid-dispatch protocol; staging fold-in 7 |
+| 15 | S1 | `dependencies.json` / `ownership.json` stay frozen as the Wave A census of B0 (src tree `0c790075`). Their `--check` is meaningful only at that tree and reports stale once `src/` changes, which is expected. G1 calls the census library (`buildImportGraph`, `extractResources`) live on the current tree. Not regenerated | Regenerating would overwrite baseline evidence | Grant: evidence and harness under `E/` |
 
 ## Evidence
 
