@@ -126,6 +126,24 @@
 - **Git:** eb/reader-mode-separation-2 @ 3ee10afe + this entry; uncommitted: perf noise, plus the B1–B5 worker's files in flight.
 - **Next:** verify and commit B1–B5, then B6 Page, B7 Focus, B8, and the B9 gate.
 
+## S1g — 2026-10-09 (host) — Waves B, C, D complete
+
+- **Did:**
+  - Wave B (contracts, ports, broker, router core, Page, Focus, and the B8 OBS-A3-2 fix) passed gate **B9** on 5a34f6e1.
+  - Wave C (Flow) passed gate **C4** on 9fa253b0.
+  - Wave D (Narrate tree, all 12 G3 pairs plus 4 same-mode cases, and the `READER_MODE_MODULES` registry) was committed as e005d5eb and passed gate **D4**: typecheck, test and build all exit 0; 221 files, 3123 passed and 133 skipped; recorder 5/5; G1–G4 65/65; all 7 Narrate G4 scripts byte-identical with 0 dropped effects; audio 48/48.
+  - Independent checks on Wave D:
+    - 11 helpers are verbatim apart from their imports.
+    - Narrate's anchor copy types against its own `FoliateView`, not `FlowScrollEngine`.
+    - All 29 changed paths are in `paths.json`.
+- **Learned:**
+  - Enforcing allowance coverage with four trees exposed three allowances that no mode imports, including a dead `ProgressBar` import in legacy `ReaderView`.
+  - The D3 registry makes the trees reachable from production before E1. This is by design and changes no behaviour.
+- **Decisions:** #17.
+- **Gate/DoD movement:** waveGates[2] D4 PASS.
+- **Git:** eb/reader-mode-separation-2 @ e005d5eb + gate record; uncommitted: perf noise, plus the E1–E3 worker's files in flight.
+- **Next:** verify and commit E1–E3 (cutover, OC-5 migrations), then E4–E7, then E8 (OS-1 G6) → S.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

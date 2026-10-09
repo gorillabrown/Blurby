@@ -101,6 +101,38 @@
         "Flow book end -> shell.requestCrossBook always; E1 shell routes no-queued-book to completion-to-page",
         "shell.reportFlowProgress unused (progress in snapshot) — drop or justify at E5"
       ]
+    },
+    {
+      "gate": "D4 (Wave D)",
+      "commit": "e005d5eb57d0cbc04e9a5db61082f55441b5966d",
+      "ranAtUtc": "2026-10-09T10:12:46.993Z",
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 221,
+        "testFilesSkipped": 1,
+        "testsPassed": 3123,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "kf1": "did not recur"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerify": "5/5",
+      "g1g4": "65/65 (boundaries, ownership, isolation, readerModes/**)",
+      "audioInvariants": "48/48",
+      "g4": {
+        "narrate": "7 scripts byte-identical; 0 dropped effects (= droppedEffectCounts.narrate 0); 0 dropped observations"
+      },
+      "g3": "all 12 ordered pairs at words 7/0/7-after-openDocument + 4 same-mode no-ops + Narrate rejected work (started, delayed extraction; stop/switch/openDocument/remount)",
+      "d3": "READER_MODE_MODULES in the router module per design C Wave D row D3; every import edge into a mode dir lands on its index.ts",
+      "notes": [
+        "G1 allowance coverage now enforced (4 trees): ProgressBar (dead legacy import), ErrorBoundary (shell-only), useFocusTrap (speed dialog, src/components) removed from allowedShared — tightening",
+        "Narrate BLOCK_TAGS added to allowedModuleSingletons (verbatim helper, never mutated; same as page/focus/flow)",
+        "Narrate release calls emitted in stop (G2 zero-calls-after-stop); Narrate->Page trace unchanged",
+        "D3 makes the mode trees statically reachable from production before E1 (rm-* scoped CSS; foliate dynamic) — behaviour-neutral, as designed",
+        "ReaderAudioConfig gains voiceName, mediaSessionCoverPath (additive)"
+      ]
     }
   ]
 }

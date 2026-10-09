@@ -36,8 +36,8 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P5 — Wave D (Narrate). Gates PASS: B9 5a34f6e1, C4 9fa253b0
-next_action:  Wave D (Narrate): D1 Narrate tree (4 named tests) → D2 all 12 G3 pairs + 4 same-mode → D3 router module registry → D4 gate
+phase:        P6 — Wave E (cutover). Gates PASS: B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb
+next_action:  Wave E: E1 shell cutover + E2 migrations (OC-5) + E3 recorder [worker running] → E4 deletions → E5 boundary completion → E6 validator → E7 G5 → E8 G6 (OS-1) → record S
 blockers:     OS-1 (combined owner session: B0 listening + G6 + speed-dialog check) — gates D1, D7 and finalization only
 session:      1 of ~14 budgeted
 dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
@@ -181,6 +181,8 @@ Original questions (for reference):
   - never-mutated constants allowed (`BLOCK_TAGS` ×2, `KNOWN_ABBREVIATIONS`);
   - the ownership owner map is keyed with the verbatim anchor (two distinct same-named ResizeObservers);
   - the handoff carries `engaged` (legacy `hasEngagedRef` persists per document) | Each keeps the check honest without loosening the final gate | Grant: harness/evidence; design §D.2 |
+
+| 17 | S1 | Wave D rulings: (a) G1 allowance coverage, now enforced with four trees, is satisfied by removing three allowances no mode uses: `ProgressBar` (a dead import in legacy `ReaderView`), `ErrorBoundary` (shell only) and `useFocusTrap` (speed dialog in `src/components`). This tightens the policy. (b) Narrate `BLOCK_TAGS` is an allowed singleton, like the other three modes. (c) Narrate emits its release calls in `stop`, as G2 requires zero calls after stop. (d) D3 reachability before E1 is accepted as designed (§C row D3) | Tightening only; behaviour-neutral | Grant: harness/evidence; design §C, §D.2 |
 
 ## Evidence
 
