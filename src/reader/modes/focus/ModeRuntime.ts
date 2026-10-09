@@ -355,7 +355,9 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   readonly mode = "focus" as const;
   readonly contractVersion = READER_MODE_RUNTIME_CONTRACT_VERSION;
   readonly key: ReaderSessionKey;
-  readonly document: ReaderDocumentSnapshot;
+  private documentSnapshot: ReaderDocumentSnapshot;
+  /** Unsubscribes adoptDocument from this session's document port (set on first select, released in stop). */
+  private unsubscribeDocument: (() => void) | null = null;
   /** Populated by this mode's FoliateView while it is mounted. */
   readonly viewApiRef: MutableRefObject<FocusFoliateViewAPI | null> = { current: null };
   /** resolveBookOpenInitialCfi over the handoff (the view's initial location). */
@@ -382,7 +384,7 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     this.key = input.key;
     this.ports = input.ports;
     this.arrival = input.arrival;
-    this.document = own(input.document) as ReaderDocumentSnapshot;
+    this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
     this.wpm = this.settingsSnapshot.wpm;
     const handoff = createReaderModeHandoff(input.handoff);
@@ -402,6 +404,11 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   // ── Store ──────────────────────────────────────────────────────────────────
   subscribe = (listener: () => void): (() => void) => this.state.subscribe(listener);
   getVersion = (): number => this.state.version;
+
+  /** This session's document; replaced by a newer same-document snapshot (Decision #19, adoptDocument). */
+  get document(): ReaderDocumentSnapshot {
+    return this.documentSnapshot;
+  }
 
   get settings(): ReaderSettingsSnapshot {
     return this.settingsSnapshot;
@@ -437,9 +444,25 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     this.state.onWordUpdate = callback;
   };
 
+  /**
+   * Decision #19: adopt a newer snapshot of this session's own document (same id and generation), e.g. the
+   * full-book words that background extraction delivers after open, and re-render this mode's view.
+   */
+  private adoptDocument = (snapshot: ReaderDocumentSnapshot): void => {
+    if (!this.alive) return;
+    if (snapshot.documentId !== this.documentSnapshot.documentId
+      || snapshot.documentGeneration !== this.documentSnapshot.documentGeneration) return;
+    const next = own(snapshot) as ReaderDocumentSnapshot;
+    if (next === this.documentSnapshot) return;
+    this.documentSnapshot = next;
+    this.state.notify();
+  };
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   select(wordIndex: number): void {
     if (!this.alive) return;
+    // Decision #19: full-book words that land after open reach this session (one subscription per session).
+    this.unsubscribeDocument ??= this.ports.document.subscribe(this.adoptDocument);
     const reselect = this.state.selected;
     this.state.selected = true;
     this.state.currentWordIndex = wordIndex;
@@ -555,6 +578,8 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   stop(_reason: ReaderModeStopReason, _context?: { readonly destination: ReaderModeId }): void {
     if (!this.alive) return;
     this.alive = false;
+    this.unsubscribeDocument?.(); // a local unsubscribe, not a port call
+    this.unsubscribeDocument = null;
     this.clearTimers();
     this.state.pendingStartToken = null;
     this.state.pendingStartOnLoad = false;

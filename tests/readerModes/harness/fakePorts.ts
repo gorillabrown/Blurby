@@ -40,7 +40,7 @@ export function createFakeDocument(overrides: Partial<ReaderDocumentSnapshot> = 
 }
 
 export function createFakeInfrastructure(options: { document?: ReaderDocumentSnapshot; audioStartResult?: ReaderAudioStartResult } = {}) {
-  const document = options.document ?? createFakeDocument();
+  let document = options.document ?? createFakeDocument();
   const settings = createReaderSettingsSnapshot({
     settings: { ...DEFAULT_SETTINGS, readingMode: "page", lastReadingMode: "flow", isNarrating: false } as BlurbySettings,
     wpm: 300,
@@ -56,6 +56,8 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
   const registered: Record<string, ((...args: never[]) => unknown) | null> = {};
   const pendingBookWords: Array<(value: ReaderBookWordsValue | null) => void> = [];
   const pendingBookBytes: Array<(value: ArrayBuffer) => void> = [];
+  /** Document-port subscribers currently held by infrastructure (as wrapped by the broker). */
+  const documentListeners = new Set<(snapshot: ReaderDocumentSnapshot) => void>();
   const audio = { status: "idle", speaking: false, warming: false, cursorWordIndex: 0 };
 
   const rec = (method: string) => (...args: unknown[]) => {
@@ -80,7 +82,11 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
       snapshot: () => document,
       readBookBytes: () => { rec("document.readBookBytes")(); return new Promise((resolve) => pendingBookBytes.push(resolve)); },
       ensureBookWords: () => { rec("document.ensureBookWords")(); return new Promise((resolve) => pendingBookWords.push(resolve)); },
-      subscribe: (listener) => { register("document.subscribe", "document")(listener); return rec("document.unsubscribe"); },
+      subscribe: (listener) => {
+        rec("document.subscribe")(listener);
+        documentListeners.add(listener);
+        return () => { rec("document.unsubscribe")(); documentListeners.delete(listener); };
+      },
     },
     // Audio with the fixtures' fakeSemantics: start sets the cursor and status, pause/resume toggle the
     // status, resync moves the cursor, stop goes idle and drops the word callback.
@@ -131,6 +137,12 @@ export function createFakeInfrastructure(options: { document?: ReaderDocumentSna
     audio,
     resolveBookWords: (value: ReaderBookWordsValue | null) => pendingBookWords.splice(0).forEach((resolve) => resolve(value)),
     resolveBookBytes: (value: ArrayBuffer) => pendingBookBytes.splice(0).forEach((resolve) => resolve(value)),
+    documentListeners,
+    /** The shell's broadcast: a new document snapshot (e.g. full-book words arriving) to every subscriber. */
+    publishDocument: (snapshot: ReaderDocumentSnapshot) => {
+      document = snapshot;
+      [...documentListeners].forEach((listener) => listener(snapshot));
+    },
   };
 }
 

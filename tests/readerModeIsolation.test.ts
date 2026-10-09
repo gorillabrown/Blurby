@@ -18,7 +18,7 @@ import {
 } from "../src/reader/modes/ReaderModeAdapter";
 import { READER_MODE_MODULES, createReaderModeRouter } from "../src/reader/useReaderModeOrchestrator";
 import { createFakeDocument, createFakeInfrastructure, type FakeInfrastructure } from "./readerModes/harness/fakePorts";
-import type { ReaderSessionKey } from "../src/reader/document/ReaderDocumentSnapshot";
+import type { ReaderDocumentSnapshot, ReaderSessionKey } from "../src/reader/document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../src/reader/ports/ReaderPorts";
 import { pageMode } from "../src/reader/modes/page/index";
 import { focusMode } from "../src/reader/modes/focus/index";
@@ -787,6 +787,64 @@ describe("reader mode isolation (G3)", () => {
       expect(live.runtime.getSnapshot(), label).toEqual(liveSnapshot);
       expect(old.runtime.getSnapshot(), label).toEqual(oldSnapshot);
       router.destroy();
+    }
+  });
+
+  it("late full-book words reach only the active session", async () => {
+    // Decision #19: the shell broadcasts each new document snapshot (background extraction landing after
+    // open) through the document port; only the current session adopts it, and only for its own document.
+    type DocumentView = { readonly document: ReaderDocumentSnapshot; getCanonicalSectionWords(sectionIndex: number): string[] | undefined };
+    const view = (runtime: ReaderModeRuntime) => runtime as unknown as DocumentView;
+    for (const mode of PRESENT_MODES) {
+      const { fake, broker, router, document, enter } = isolationSetup(7);
+      enter(mode);
+      await flushAll();
+      const active = router.getActive()!;
+      expect(active.mode, mode).toBe(mode);
+      expect(view(active.runtime).getCanonicalSectionWords(0), mode).toBeUndefined();
+      expect(fake.documentListeners.size, mode).toBe(1);
+      let notified = 0;
+      active.runtime.subscribe(() => { notified += 1; });
+
+      // A snapshot of another generation (or another document) is ignored.
+      const late = bookWordsValue(document);
+      fake.publishDocument(createFakeDocument({ documentGeneration: document.documentGeneration + 1, bookWords: late }));
+      fake.publishDocument(createFakeDocument({ documentId: "doc-2", bookWords: late }));
+      expect(notified, mode).toBe(0);
+      expect(view(active.runtime).document, mode).toBe(document);
+      expect(view(active.runtime).getCanonicalSectionWords(0), mode).toBeUndefined();
+
+      // Same document, same generation, now with full-book words: adopted, and the binding is notified.
+      const withWords = createFakeDocument({ bookWords: late });
+      fake.publishDocument(withWords);
+      expect(notified, mode).toBeGreaterThan(0);
+      expect(view(active.runtime).document.bookWords, mode).toEqual(late);
+      expect(view(active.runtime).getCanonicalSectionWords(0), mode).toEqual([...document.tokenWords]);
+
+      // Switch away: the old session released its subscription; a later snapshot reaches only the new one.
+      const captured = [...fake.documentListeners];
+      enter(PRESENT_MODES.find((m) => m !== mode)!);
+      await flushAll();
+      const next = router.getActive()!;
+      expect(fake.documentListeners.size, mode).toBe(1);
+      expect(captured.some((listener) => fake.documentListeners.has(listener)), mode).toBe(false);
+      const oldDocument = view(active.runtime).document;
+      const oldSnapshot = active.runtime.getSnapshot();
+      const notifiedBefore = notified;
+      const rejectedBefore = broker.stats.rejected["document.subscribe:callback"] ?? 0;
+      const upperWords = document.tokenWords.map((w) => w.toUpperCase());
+      const upper = bookWordsValue({ tokenWords: upperWords });
+      const later = createFakeDocument({ bookWords: upper });
+      fake.publishDocument(later);
+      captured.forEach((listener) => listener(later)); // the old session's wrapped callback, invoked anyway
+      expect(broker.stats.rejected["document.subscribe:callback"], mode).toBe(rejectedBefore + captured.length);
+      expect(notified, mode).toBe(notifiedBefore);
+      expect(view(active.runtime).document, mode).toBe(oldDocument);
+      expect(view(active.runtime).getCanonicalSectionWords(0), mode).toEqual([...document.tokenWords]);
+      expect(active.runtime.getSnapshot(), mode).toEqual(oldSnapshot);
+      expect(view(next.runtime).getCanonicalSectionWords(0), mode).toEqual(upperWords);
+      router.destroy();
+      expect(fake.documentListeners.size, mode).toBe(0);
     }
   });
 });

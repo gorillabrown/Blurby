@@ -153,7 +153,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   readonly mode = "narrate" as const;
   readonly contractVersion = READER_MODE_RUNTIME_CONTRACT_VERSION;
   readonly key: ReaderSessionKey;
-  readonly document: ReaderDocumentSnapshot;
+  private documentSnapshot: ReaderDocumentSnapshot;
+  /** Unsubscribes adoptDocument from this session's document port (set on first select, released in stop). */
+  private unsubscribeDocument: (() => void) | null = null;
   /** Populated by this mode's FoliateView while it is mounted. */
   readonly viewApiRef: MutableRefObject<NarrateFoliateViewAPI | null> = { current: null };
   /** resolveBookOpenInitialCfi over the handoff (the view's initial location). */
@@ -189,7 +191,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.key = input.key;
     this.ports = input.ports;
     this.arrival = input.arrival;
-    this.document = own(input.document) as ReaderDocumentSnapshot;
+    this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
     this.rate = this.settingsSnapshot.settings.ttsRate;
     this.bookWords = this.document.bookWords;
@@ -210,6 +212,11 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   // ── Store ──────────────────────────────────────────────────────────────────
   subscribe = (listener: () => void): (() => void) => this.state.subscribe(listener);
   getVersion = (): number => this.state.version;
+
+  /** This session's document; replaced by a newer same-document snapshot (Decision #19, adoptDocument). */
+  get document(): ReaderDocumentSnapshot {
+    return this.documentSnapshot;
+  }
 
   get settings(): ReaderSettingsSnapshot {
     return this.settingsSnapshot;
@@ -246,9 +253,31 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     return this.bookWords?.sections;
   }
 
+  /**
+   * Decision #19: adopt a newer snapshot of this session's own document (same id and generation), e.g. the
+   * full-book words that background extraction delivers after open, and re-render this mode's view.
+   */
+  private adoptDocument = (snapshot: ReaderDocumentSnapshot): void => {
+    if (!this.alive) return;
+    if (snapshot.documentId !== this.documentSnapshot.documentId
+      || snapshot.documentGeneration !== this.documentSnapshot.documentGeneration) return;
+    const next = own(snapshot) as ReaderDocumentSnapshot;
+    if (next === this.documentSnapshot) return;
+    this.documentSnapshot = next;
+    // Keep whichever complete words this session already has. While narrating without them, HOTFIX-6
+    // (ensureFullBookWords) owns the switch to the global array: it also moves the audio (updateWords).
+    if (!this.bookWords && next.bookWords && !this.state.narrating) {
+      this.bookWords = next.bookWords;
+      this.chunkCache = null;
+    }
+    this.state.notify();
+  };
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   select(wordIndex: number): void {
     if (!this.alive) return;
+    // Decision #19: full-book words that land after open reach this session (one subscription per session).
+    this.unsubscribeDocument ??= this.ports.document.subscribe(this.adoptDocument);
     const s = this.state;
     const reselect = s.selected;
     s.selected = true;
@@ -379,6 +408,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }
     this.alive = false;
     this.extractionToken += 1;
+    this.unsubscribeDocument?.(); // a local unsubscribe, not a port call
+    this.unsubscribeDocument = null;
     this.clearTimers();
     this.truthRaf = null;
     this.truthPendingWord = null;
