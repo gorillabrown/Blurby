@@ -134,5 +134,482 @@
         "ReaderAudioConfig gains voiceName, mediaSessionCoverPath (additive)"
       ]
     }
-  ]
+  ],
+  "legacyUnreachable": {
+    "computedAt": "3dd4b504 + 0b199425 (pre-deletion tree)",
+    "rule": "design D.6: unreachable from src/main.tsx (runtime graph incl. dynamic import) AND no retained importer (src) or reader (tests/, recorder) AND not App.tsx engine",
+    "method": "census buildImportGraph from src/main.tsx; test/recorder import-or-path-string scan; src importer grep (Decision #21)",
+    "deleted": [
+      "src/components/PageReaderView.tsx",
+      "src/utils/FlowCursorController.ts",
+      "src/components/ScrollReaderView.tsx",
+      "src/components/FlowText.tsx",
+      "src/components/VirtualScrollText.tsx",
+      "src/reader/modes/FocusModeAdapter.ts",
+      "src/reader/modes/FlowModeAdapter.ts"
+    ],
+    "rows": [
+      {
+        "file": "src/hooks/useReaderMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrationIntegration.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/phase0Stabilization.test.ts",
+          "tests/readerModeBoundaries.test.ts",
+          "tests/readerModeOwnership.test.ts",
+          "tests/useReaderMode.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useReadingModeInstance.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/tts7b-cursorContract.test.ts",
+          "tests/useReadingModeInstance.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useDocumentLifecycle.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/documentLifecycleModeRestore.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/startupStabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/usePersistentReadingAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/persistentReadingAnchor.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/reader/anchors/useCurrentWordAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/currentWordAnchor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/startWordIndex.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/selectionWordIdentity.test.ts",
+          "tests/startWordIndex.test.ts",
+          "tests/tts7j-foliate-section-sync.test.ts",
+          "tests/tts7k-global-word-source.test.ts",
+          "tests/tts7l-exact-selection-mapping.test.ts",
+          "tests/tts7m-resume-anchor.test.ts",
+          "tests/wordAnchor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/persistentReadingAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrateIntentCursor.test.ts",
+          "tests/persistentReadingAnchor.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/PageMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": false,
+        "retainedImporters": [
+          "src/hooks/useReadingModeInstance.ts",
+          "src/modes/index.ts"
+        ]
+      },
+      {
+        "file": "src/modes/FocusMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perf-baseline.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/FlowMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perf-baseline.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/index.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/tts7b-cursorContract.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/reader/modes/FocusModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/reader/modes/FlowModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/reader/modes/NarrateModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrateModeAdapter.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useReader.ts",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/ReaderView.tsx",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useFlowScrollSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/ttsContinuityReadiness.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/FlowScrollEngine.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/einkErgonomics.test.ts",
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/narrationLayer.test.ts",
+          "tests/startupStabilization.test.ts",
+          "tests/ttsContinuityReadiness.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/FlowCursorController.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/PageReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/components/FlowText.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/ScrollReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/hooks/useFoliateSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/readerDecomposition.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useNarrationSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perfAudit.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useNarrationCaching.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/useNarrationCaching.test.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/FoliatePageView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliate-bridge.test.ts",
+          "tests/narrationIntegration.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/phase0Stabilization.test.ts",
+          "tests/tts7b-cursorContract.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/PageReaderView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/components/ScrollReaderView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/components/VirtualScrollText.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/ScrollReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/components/PausedTextView.tsx",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateStyles.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/perfAudit.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordHighlight.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/foliateWordHighlight.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateAnchorNavigation.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateAnchorNavigation.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/wordPositionIndex.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrationPipelineIntegration.test.ts",
+          "tests/wordPositionIndex.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/chunkReadingVisualState.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/chunkReadingVisualState.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/silenceAwareCursor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/silenceAwareCursor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateHelpers.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliateTokenStitching.test.ts",
+          "tests/naturalChunks.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordWrapping.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateContentAlign.test.ts",
+          "tests/foliateDropcapAndChapters.test.ts",
+          "tests/foliateTokenStitching.test.ts",
+          "tests/startupStabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateLayout.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateLayout.test.ts",
+          "tests/phase0Stabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordOffsets.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateWordOffsets.test.ts",
+          "tests/selectionWordIdentity.test.ts",
+          "tests/tts7l-exact-selection-mapping.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      }
+    ],
+    "postDeletionGate": {
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "files": "221 passed | 1 skipped",
+        "tests": "3258 passed | 133 skipped"
+      },
+      "build": 0
+    }
+  }
 }
