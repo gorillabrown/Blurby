@@ -591,9 +591,13 @@ export default function NarrateFoliateView({
       NARRATE_HIGHLIGHT_MODE,
       chunkReadingVisualStateRef.current,
     );
+    // S1 G6: an explicit flow hint is the paused arrival cursor, which B0 showed in Narrate as the flow
+    // cursor its shared surface kept from the previous mode (the runtime is its only "flow" caller).
     const highlightClass = suppressNarrateFlowCursor
       ? null
-      : resolveFoliateWordHighlightClass(NARRATE_HIGHLIGHT_MODE, styleHint);
+      : styleHint === "flow"
+        ? "page-word--flow-cursor"
+        : resolveFoliateWordHighlightClass(NARRATE_HIGHLIGHT_MODE, styleHint);
 
     clearVisualWordClasses(contents);
 
@@ -1174,8 +1178,14 @@ export default function NarrateFoliateView({
       viewApiRef.current = null;
       if (narratePageTurnCooldownTimerRef.current) clearTimeout(narratePageTurnCooldownTimerRef.current);
       if (viewRef.current) {
-        viewRef.current.close?.();
+        // S1 G6: every section load makes foliate's paginator queue a frame callback (setStyles →
+        // requestAnimationFrame → this.#view.docBackground), and its destroy() nulls #view without
+        // cancelling it. B0 never closed its view at a mode switch; this view closes at every switch, so the
+        // close waits one frame. Frame callbacks run in registration order, so each one the paginator queued
+        // before this cleanup still sees a live #view (on the host detached below) before close() runs.
+        const closing = viewRef.current;
         viewRef.current = null;
+        requestAnimationFrame(() => closing.close?.());
       }
       if (foliateHostRef.current) foliateHostRef.current.innerHTML = "";
     };

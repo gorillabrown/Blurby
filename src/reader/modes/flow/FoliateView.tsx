@@ -1160,8 +1160,14 @@ export default function FlowFoliateView({
       viewApiRef.current = null;
       scrollContainerRef.current = null;
       if (viewRef.current) {
-        viewRef.current.close?.();
+        // S1 G6: every section load makes foliate's paginator queue a frame callback (setStyles →
+        // requestAnimationFrame → this.#view.docBackground), and its destroy() nulls #view without
+        // cancelling it. B0 never closed its view at a mode switch; this view closes at every switch, so the
+        // close waits one frame. Frame callbacks run in registration order, so each one the paginator queued
+        // before this cleanup still sees a live #view (on the host detached below) before close() runs.
+        const closing = viewRef.current;
         viewRef.current = null;
+        requestAnimationFrame(() => closing.close?.());
       }
       if (foliateHostRef.current) foliateHostRef.current.innerHTML = "";
     };

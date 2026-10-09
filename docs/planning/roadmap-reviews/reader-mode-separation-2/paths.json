@@ -422,5 +422,19 @@
     "docs/planning/roadmap-reviews/reader-mode-separation-2/live/assemble-live-qa.mjs",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-text.epub",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-chapters.epub"
+  ],
+  "cursorFixPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json",
+    "src/reader/modes/page/ModeRuntime.ts",
+    "src/reader/modes/focus/ModeRuntime.ts",
+    "src/reader/modes/flow/ModeRuntime.ts",
+    "src/reader/modes/narrate/ModeRuntime.ts",
+    "src/reader/modes/page/FoliateView.tsx",
+    "src/reader/modes/focus/FoliateView.tsx",
+    "src/reader/modes/flow/FoliateView.tsx",
+    "src/reader/modes/narrate/FoliateView.tsx",
+    "src/reader/modes/focus/surface.ts",
+    "tests/readerModes/arrivalCursor.test.ts",
+    "tests/readerModes/foliateViewTeardown.test.tsx"
   ]
 }

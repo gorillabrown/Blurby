@@ -167,11 +167,19 @@ export class PageModeRuntime implements ReaderModeRuntime {
   private readonly loadTimers = new Set<ReturnType<typeof setTimeout>>();
   private alive = true;
   private destroyed = false;
+  /**
+   * S1 G6: B0 kept one foliate surface across a mode switch, so its Page highlight effect repainted the
+   * handed-over word on a surface that was already loaded. This session's view is new, and the effect
+   * runs before its book loads, so the handed-over highlight is painted here once a section has loaded.
+   * Set only for a session that came from another mode; book open (source null) paints nothing, as on B0.
+   */
+  private arrivalCursorPending: boolean;
 
   constructor(input: ReaderModeCreateInput) {
     this.key = input.key;
     this.ports = input.ports;
     this.arrival = input.arrival;
+    this.arrivalCursorPending = input.handoff.source != null;
     this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
     this.wpm = this.settingsSnapshot.wpm;
@@ -507,11 +515,15 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** Legacy ReaderContainer onLoad, non-scrolled (page) branch. */
   onSurfaceLoad = (): void => {
     if (!this.alive) return;
+    // The view calls onLoad once the section has stamped its spans; its API may land later, so the
+    // delayed callback below retries.
+    this.paintArrivalCursor();
     const timer = setTimeout(() => {
       this.loadTimers.delete(timer);
       if (!this.alive) return;
       const s = this.state;
       s.renderVersion += 1;
+      this.paintArrivalCursor();
       this.surface.extractWords();
       if (s.resumeAnchor != null) {
         // TTS-7M (BUG-135): an active resume anchor is the authoritative start point.
@@ -553,6 +565,14 @@ export class PageModeRuntime implements ReaderModeRuntime {
     }, PAGE_SURFACE_LOAD_DELAY_MS);
     this.loadTimers.add(timer);
   };
+
+  /** S1 G6: paint the handed-over highlight on this session's view (B0's Page highlight effect, no motion). */
+  private paintArrivalCursor(): void {
+    if (!this.arrivalCursorPending) return;
+    if (this.surface.highlight(this.state.publishedHighlightedWordIndex, undefined, { allowMotion: false })) {
+      this.arrivalCursorPending = false;
+    }
+  }
 
   /** Legacy onWordsReextracted, page part: a new section stamped words → bump the render version. */
   onWordsReextracted = (): void => {

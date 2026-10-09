@@ -186,11 +186,20 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   private readonly rafs = new Set<number>();
   private alive = true;
   private destroyed = false;
+  /**
+   * S1 G6: B0 kept one foliate surface across a mode switch, so the word selected before a paused switch
+   * kept its page-word--flow-cursor class in the destination. This session's view is new and starts
+   * unpainted, so the handed-over word is painted here (B0's flow cursor, no motion) once a section has
+   * loaded. Set for every session that came from another mode; cleared on the first hit or once
+   * playback owns the cursor.
+   */
+  private arrivalCursorPending: boolean;
 
   constructor(input: ReaderModeCreateInput) {
     this.key = input.key;
     this.ports = input.ports;
     this.arrival = input.arrival;
+    this.arrivalCursorPending = input.handoff.source != null;
     this.documentSnapshot = own(input.document) as ReaderDocumentSnapshot;
     this.settingsSnapshot = own(input.settings) as ReaderSettingsSnapshot;
     this.rate = this.settingsSnapshot.settings.ttsRate;
@@ -305,6 +314,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Legacy useReaderMode.startFlow({ resumeNarration: true, targetMode: "narrate" }), exact call order. */
   start(request: ReaderModeStartRequestV1): void {
     if (!this.alive) return;
+    this.arrivalCursorPending = false;
     const s = this.state;
     s.pendingStartOnLoad = false;
     // stopAllModes (Narrate's own part).
@@ -737,7 +747,11 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Legacy ReaderContainer onLoad, scrolled-surface branch: bump the render version after 200 ms. */
   onSurfaceLoad = (): void => {
     if (!this.alive) return;
+    // The view calls onLoad once the section has stamped its spans; its API may land later, so the
+    // delayed callback below retries.
+    this.paintArrivalCursor();
     this.setTimer(() => {
+      this.paintArrivalCursor();
       this.state.renderVersion += 1;
       this.state.notify();
       // Design §F.2: a start that waited for this view now runs.
@@ -747,6 +761,14 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       }
     }, NARRATE_SURFACE_LOAD_DELAY_MS);
   };
+
+  /** S1 G6: paint the handed-over word on this session's view with B0's paused cursor (flow style, no motion). */
+  private paintArrivalCursor(): void {
+    if (!this.arrivalCursorPending || this.state.narrating) return;
+    if (this.surface.highlight(this.state.publishedHighlightedWordIndex, "flow", { allowMotion: false })) {
+      this.arrivalCursorPending = false;
+    }
+  }
 
   /**
    * Legacy onWordsReextracted: bump the render version; then, for a truth-sync section miss, restore

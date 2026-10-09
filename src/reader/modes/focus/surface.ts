@@ -4,7 +4,7 @@
 // content.extractWords …), so the behavior test replaces this module with a recording fake. Every
 // call is a no-op (or a neutral value) while no view is mounted.
 import type { MutableRefObject } from "react";
-import type { FocusFoliateViewAPI } from "./FoliateView";
+import type { FocusFoliateHighlightOptions, FocusFoliateViewAPI } from "./FoliateView";
 import { jumpFoliateToWordAnchor } from "./helpers/foliateAnchorNavigation";
 
 export interface FocusSurface {
@@ -19,6 +19,8 @@ export interface FocusSurface {
   /** Legacy foliateApiRef.current.next() (empty-words retry). */
   next(): void;
   goToSection(sectionIndex: number): void;
+  /** S1 G6: the paused arrival cursor (Focus's only highlight call). */
+  highlight(wordIndex: number, kind?: "flow" | "narrate", options?: FocusFoliateHighlightOptions): boolean;
   findFirstVisibleWordIndex(): number;
   isUserBrowsing(): boolean;
   clearUserBrowsing(): void;
@@ -41,6 +43,7 @@ export function createFocusSurface(viewApiRef: MutableRefObject<FocusFoliateView
     },
     next: () => api()?.next(),
     goToSection: (sectionIndex) => { api()?.goToSection(sectionIndex).catch(() => {}); },
+    highlight: (wordIndex, kind, options) => api()?.highlightWordByIndex(wordIndex, kind, options) ?? false,
     findFirstVisibleWordIndex: () => api()?.findFirstVisibleWordIndex() ?? -1,
     isUserBrowsing: () => api()?.isUserBrowsing() ?? false,
     clearUserBrowsing: () => api()?.clearUserBrowsing(),

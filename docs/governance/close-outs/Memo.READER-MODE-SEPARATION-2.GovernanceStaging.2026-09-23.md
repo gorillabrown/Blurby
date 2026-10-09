@@ -202,7 +202,7 @@ Source: packet `state.md` Decision log rows 17–24 (authority: owner standing a
 
   No new known-defect ids.
 
-**Follow-up items:** a later item may give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
+**Follow-up items:** a later item (lane D) should make `main/sync-queue.js` `saveQueue` retry a transient Windows `EPERM`/`EBUSY` rename (KF-2, Decision #25; the same race affects real users' sync queues). A later item may also give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
 
 ## Target: docs/governance/LESSONS_LEARNED.md
 
