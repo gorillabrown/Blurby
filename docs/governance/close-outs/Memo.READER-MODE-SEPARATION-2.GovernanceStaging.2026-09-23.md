@@ -13,6 +13,7 @@ This memo records governance change intent for later application by the register
 | 3 | 2026-10-09 | Wave A census and G4 fixtures contradicted the spec in seven bounded places (Q-A..Q-G) before the first Wave B edit | Type 1b — Advance (Planner-Originated), Q-A as Type 2 narrowing | Resolved under the owner's standing overnight authorization: rules supplied for dead views, the standalone reader window, runtime code in narration types, shared constants/diagnostics/cache, per-mode ownership, cross-owner G4 comparison, and baseline anomalies; no gate loosened |
 | 4 | 2026-10-09 | A known full-suite flake (Qwen streaming test timer leak) can make the final suite gate exit 1 with zero failed tests | Type 1b — Advance (Planner-Originated), pre-registered decision table | Resolved: the gate stays exit-0; a recurrence triggers one scoped test-hygiene fix to the Qwen test only, never a retry-until-green |
 | 5 | 2026-10-09 | The owner listening gate on the frozen baseline blocked every remaining front in an unattended run | Type 3 — Pivot Advance (owner-directed) | Resolved: code waves start now on the automated baseline evidence; one combined owner session (baseline listening, new-build listening, speed-dialog check) before final verification; owner-required conditions unchanged |
+| 6 | 2026-10-09 | The Waves B–E design left nine contradictions between the spec, the recorded baselines and the speed amendment | Type 1b — Advance (Planner-Originated), owner-delegated | Resolved: all nine ruled (observation rule for stale playing flags; new contract interface; display-jump alias; dead-path tests kept on the legacy hook; source-text re-point table; per-mode speed keys; widened narration speed domain; Page keys kept; dead code not copied) |
 
 ## Target: ROADMAP.md
 
@@ -146,6 +147,37 @@ Content:
 - A `new-problem` in B0 behavior → it is baseline behavior: record it with an identifier; G6 compares equal to it. Code is unaffected.
 - The owner's observation contradicts an automated matrix fact (e.g. no audio heard) → re-base the affected G6 rows on the owner observation; re-verify only evidence.
 **Follow-up items:** OS-1 checklist written at Wave E alongside G6.
+
+### Fold-in 7 — Mid-Dispatch Amendment (design contradictions OC-1..OC-9)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (Waves B–E design rulings)
+**Pause point:** `design/waves-b-e-design.md` §H listed nine contradictions. Issue: `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09-3.md`.
+**Decision:** Type 1b — Advance (Planner-Originated), owner-delegated ("You make decisions … iterate until the entire epic is complete").
+**Rationale:** Each ruling keeps every DoD row mechanically verifiable and removes only cross-owner artifacts. The design's DD-1..DD-7 are accepted as within charter autonomy.
+**Scope change:**
+- **OC-1:** The G4 comparison gains one mechanically recomputed observation rule. In any step whose `modeAfter` ≠ m, observation `<m>Playing` must be `false`. Baseline values that differ form a recomputed dropped-observation list in `test-migration.json`. No other observation may be dropped.
+- **OC-2:** `ReaderModeRuntime` v1 is a sibling interface with the same seven actions and no `Set` or words in the start request. Legacy types are retained.
+- **OC-3:** `channelAliases`: `"focusView.jumpToWord"` → `"<mode> jumpDisplayToWord"`. Re-attribution only; nothing is dropped.
+- **OC-4:** The `toggleNarrationInFlow` cases in `tests/useReaderMode.test.ts` keep importing the retained legacy `src/hooks/useReaderMode.ts`, labelled as dead code under test. No production path is retained for them.
+- **OC-5:** Decision table at E1, for each failing source-text assertion on `ReaderContainer.tsx`:
+  - (a) the fragment exists verbatim in a new owner file → re-point the read path (authorized), recorded in `test-migration.json`;
+  - (b) the fragment was removed by design → add the equivalent assertion at the new owner, recorded old→new; if the intent cannot be preserved → issue and route;
+  - expected text is never weakened.
+- **OC-6:** Additive optional settings keys `focusWpm` and `flowWpm` (number; fall back to legacy `wpm` when absent). No migration and no `schemaVersion` bump; legacy `wpm` is retained for the App.tsx window. Focus/Flow read and write only their own key from the speed dialog and ↑/↓. This lets speed acceptance item 5 (and D8) verify.
+- **OC-7:** Authorized: the Kokoro UI speed domain widens to 0.80–2.00 in 0.05 steps.
+  - Change `KOKORO_UI_RATE_MIN`/`KOKORO_UI_RATE_MAX`/`KOKORO_UI_RATE_STEP`, and `KOKORO_UI_SPEEDS` if derived, in `src/constants.ts`, plus `normalizeKokoroUiSpeed`/`stepKokoroUiSpeed` in `src/utils/kokoroRatePlan.ts`.
+  - `KOKORO_RATE_BUCKETS` stay [1.0, 1.2, 1.5]; the existing pitch-preserving tempo stage covers the gap (LL-101): tempo 0.8 on bucket 1.0 up to 1.333 on bucket 1.5.
+  - `useNarration.ts` is not edited.
+  - Tests asserting the old domain are updated as declared speed-amendment differences, each listed old→new.
+  - The owner's listening check at 0.80/1.05/2.00 (item 4) joins OS-1.
+  - Non-Kokoro engines are dormant and keep their clamp.
+- **OC-8:** Page ↑/↓ is kept. "No speed control" means no displayed control. The keys adjust the speed key of `lastReadingMode` (focusWpm, flowWpm or ttsRate).
+- **OC-9:** The dead Focus progress-save effect and the `useReader` RAF tick are not copied. Evidence goes in the close-out.
+**Follow-up items:** The speed amendment's declared path list adds `src/utils/kokoroRatePlan.ts`, the settings type field additions (in a non-freeze file if possible; otherwise `src/types.ts` is scheduled under this epic's freeze ownership), and the affected rate tests.
 
 ## Target: docs/governance/LESSONS_LEARNED.md
 
