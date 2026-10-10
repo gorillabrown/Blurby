@@ -312,7 +312,7 @@ describe.each(PROVIDERS)("$name sidecar engine characterization", ({ name, facto
     const snapshot = (await engine.status()).config;
     expect(key in snapshot).toBe(true);
     if (name === "MOSS Nano") {
-      expect(snapshot[key]).toBeUndefined();
+      expect(snapshot[key]).toBeNull();
     } else {
       expect(snapshot[key]).toBeNull();
     }
