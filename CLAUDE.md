@@ -362,10 +362,10 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole active engine; MOSS-Nano and Pocket TTS are dormant/disabled; Qwen is retired/disabled. Desktop v2.0 shipped. KOKORO-EXPORT-1 remains deferred.
-- **Queue (roadmap-review 2026-10-08):** monday.com board 18432450217.
-  - READER-MODE-SEPARATION-2 is Seq 1 (Queued, Full Spec, **Path: epic**; dated in `policy.roadmap.deadlines.mode-separation`). Admission stopped 2026-09-23. The owner approved an 8-call A1 recovery with an owner-observed manual-G0 fallback.
-  - Three main-process cleanups were released from it and are Queued / dispatch-ready for parallel runs (lane D only): CLOUD-RETRY-SHARED-1 (6), TTS-SIDECAR-SHARED-1 (7), CLEANUP-LEGACY-PARSERS-1 (9).
-  - TTS-ENGINE-SHARED-1 (8) waits on the sidecar item.
+- **Queue (updated 2026-10-10):** monday.com board 18432450217.
+  - READER-MODE-SEPARATION-2 is Seq 1 (In Flight since 2026-10-09, Full Spec, **Path: epic**; paused at owner gate OS-1; dated in `policy.roadmap.deadlines.mode-separation`). Admission stopped 2026-09-23. The owner approved an 8-call A1 recovery with an owner-observed manual-G0 fallback.
+  - Completed 2026-10-10 (EPIC-MAIN-PROCESS-CLEANUP, close-out `docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md`): CLOUD-RETRY-SHARED-1 (shared `main/cloud-retry.js`), TTS-SIDECAR-SHARED-1 (shared `main/python-sidecar-adapter.js`), CLEANUP-LEGACY-PARSERS-1 (`main/legacy-parsers.js` deleted). Suite 3,088 passed / 133 skipped.
+  - TTS-ENGINE-SHARED-1 (8): prerequisite met, Queued as a stub; needs specification (LL-112 characterization first, LL-132 async-exit fakes). With no full-spec item queued, Rule 5a calls for a roadmap review.
   - HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE, SUBSCRIBER-CURSOR, UX-POLISH (2–5) and CLEANUP-MODE-BARREL-1 (10) stay Blocked on mode separation.
   - KOKORO-EXPORT is deferred.
 - **Open bugs:** 2 — BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (einkMode ON strips Settings panel background; filed 2026-05-29, XS CSS fix).
