@@ -163,7 +163,7 @@ The dispatch's Task table tells Zeus:
 |-------|-------|-------|
 | `electron-scope` | Main process — IPC handlers, file I/O, data persistence, Electron APIs | `main/`, `main/ipc/`, `preload.js` |
 | `renderer-scope` | React — state, props, hooks, CSS, rendering | `src/components/`, `src/hooks/`, `src/utils/`, `src/types/` |
-| `format-scope` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/legacy-parsers.js`, `main/epub-word-extractor.js` |
+| `format-scope` | File format integration — EPUB, MOBI, PDF, HTML parsing | `main/epub-converter.js`, `main/file-parsers.js`, `main/epub-word-extractor.js` |
 
 **Specialist agents** (spawned by Zeus for verification and support):
 
