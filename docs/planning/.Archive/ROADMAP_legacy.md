@@ -4667,3 +4667,67 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 - **SettingsContext hypothesis: DISPROVED.** SettingsContext plays no role in the cycle.
 - **Effort:** S (spec'd S, executed as S — investigation was heavier than the 1-line fix)
 - **Roster:** Zeus → Aristotle (diagnosis via agent) • Hermes (chunk fix) • Hippocrates (test/build) • MarcusAurelius (docs)
+
+---
+
+<!-- Archived 2026-10-10 by /pointer-closeout TERMINAL-BACKFILL-1; close-out docs/governance/close-outs/CloseOut.TERMINAL-BACKFILL-1.2026-10-10.md -->
+
+#### TERMINAL-BACKFILL-1 — Record the 51 historical terminal items in the ledger *(position 7 — Full Spec)*
+
+- **What:** Append one terminal record for each of the 51 register items that reached a terminal status before the ledger existed (44 completed, 6 dissolved, 1 superseded). The records come from the reviewed manifest `docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json`, in its order, through the plugin's ledger API as `pointer-closeout`. `docs/governance/terminal-ledger.jsonl` goes from 3 to 54 records. No register, roadmap or code change.
+- **Why:** Pace, trailing delivery and effort calibration read only the ledger, which holds 3 of 54 terminal items (audit F1, 2026-10-10). Without the history, every pace verdict rests on one day of completions.
+- **Out of scope:** Re-verifying old evidence; recording lessons; changing any register row (all 51 are already terminal there); correcting or reordering the 3 existing records; adding effort estimates.
+- **Owner-approved exception (roadmap review 2026-10-10, Phase C):** for history only, records cite existing evidence instead of running a full close-out crossing. Evidence is the close-out file where one exists (36 of the 44 completed); otherwise the ROADMAP Completed Work Summary row (8: KOKORO-DEEPEN-1/2/3, TTS-REGISTRY-1, TTS-NORMALIZE-1, FLOW-ZONE-AUTO, GOVERNANCE-SWEEP, NARRATE-A5-RATE-RESEED-1). Dissolved and superseded items cite their ROADMAP disposition note. Five undated dissolutions carry a resolved date and say how it was resolved, in the record's `note`.
+- **Prerequisites:** none.
+- **Done when:**
+    1. `(Get-Content docs/governance/terminal-ledger.jsonl).Count` is 54.
+    2. `git diff --numstat refs/remotes/origin/main -- docs/governance/terminal-ledger.jsonl` reads `51	0`: additions only, so the existing TR-001..TR-003 are byte-identical.
+    3. The verification script (Implementation detail) exits 0. It checks that the set of `itemId`s in the ledger equals the set of terminal items from `virtuoso_registry items --all --json`, with no item recorded twice. It also checks that every appended record's `itemId`, `completed`, `result` and `evidence` equal its manifest row, and that `note` starts with `historical-backfill`.
+    4. Re-running the append script appends 0 records and prints `skip` for all 51.
+    5. `git diff --name-only refs/remotes/origin/main` lists exactly `docs/governance/terminal-ledger.jsonl`.
+- **Effort:** S.
+- **Owners:** implementation agent runs the append; reviewer runs the verification script; repository operator merges.
+- **Lane:** Platform & Maintenance. Execution surface E (governance data only).
+- **Source:** [2026-10-10 audit F1](docs/planning/roadmap-reviews/2026-10-10-audit.md); [plan C.3](docs/planning/roadmap-reviews/2026-10-10-plan.md); the manifest; the first ledger records TR-001..TR-003 (CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md).
+
+##### Implementation detail
+- **Edit sites:** `docs/governance/terminal-ledger.jsonl` (append only). The manifest is read-only input.
+- **Append script** (write it to the session scratchpad, not the repo). In Python, run with `python -I`:
+  - put the plugin root's `scripts/` and the root itself on `sys.path` (`$HOME/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.13.0`, or the newer installed root);
+  - `import virtuoso_registry as vr`, `from tools.governance import providers`, `from tools.governance.providers import ledger as ledger_mod`;
+  - `reg = vr._load(<worktree root>)` and `book = providers.terminal_ledger(reg)`; assert `book.may_append("pointer-closeout")` (the policy default writer);
+  - for each manifest row in order: skip, printing `skip`, if any non-correction record for that `itemId` exists. Otherwise append `ledger_mod.LedgerRecord(record_id=book.next_record_id(), item_id=…, completed=…, result=…, evidence=…, extra={"note": row.note})` with `actor="pointer-closeout"`.
+
+  This is the same call pattern the 2026-10-10 close-out used for TR-001..TR-003 (external registers have no `record-completion` CLI path).
+- **Verification script** (scratchpad): load the ledger JSONL and the manifest, run `virtuoso_registry --root <worktree> items --all --json`, and assert Done-when 3. Exit 0 on pass; on failure, print every mismatch and exit 1.
+- **Tests:** none; this is data. The verification script is the gate.
+- **Constants:** none.
+- **Branch:** `eb/terminal-backfill-1` from `refs/remotes/origin/main`, in a worktree (`git worktree add .worktrees/terminal-backfill-1 -b eb/terminal-backfill-1 refs/remotes/origin/main`). Write branch refs in full (a `main/` directory exists).
+- **Staging plan:** exactly `docs/governance/terminal-ledger.jsonl`. Commit, merge to `main` with `--no-ff` from a clean worktree, and push (Rule 5b, `policy.git` push). Never touch the primary checkout.
+- **Failure handling:**
+  - If `may_append` is false, stop and raise a BLOCKER(USER): the writer policy changed.
+  - If a manifest item is not terminal in the register, stop. Do not append; the register moved since the manifest.
+  - If the manifest count is not 51, or the ledger after appending is not 54, do not commit.
+  - If an append raises, the ledger is append-only and idempotent: fix the cause and re-run; recorded rows skip.
+  - Retry ceiling: two re-runs, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`. Never edit or truncate the ledger by hand.
+- **Lane ownership (parallel run):** surface E only.
+  - **Forbidden:** everything except `docs/governance/terminal-ledger.jsonl`.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of TTS-ENGINE-SHARED-1 and the mode-separation run.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Manifest checked against the live register (51 terminal, none already recorded) | calculable | governance verification | mechanical | low | 10m (one items read + one set comparison) | — | — |
+| 2 | 51 historical records appended through the ledger API | calculable | ledger append | mechanical | low | 10m (51 API appends + idempotent re-run) | — | — |
+| 3 | Ledger verified, committed, merged and pushed | calculable | governance merge | mechanical | low | 15m (verification script + one --no-ff merge, as the 2026-10-10 close-out) | — | — |
+
+**Total:** chain 35m · sum 35m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-129 — census variants before a bulk transform: the manifest resolves every variant ahead of time (8 items without a close-out file, 5 undated dissolutions, TTS-INTEGRATE-1's two close-outs), so the run parses nothing.
+- LL-130 — mutation-plan opens a recovery record: this item writes no register field and calls no `mutation-plan`.
+- LL-133, LL-134 — considered; not applicable (not an epic).
+- Standing rule 36 (SRL-086/087, verify state at the moment of consequence): task 1 re-checks the manifest against the live register before any append.
