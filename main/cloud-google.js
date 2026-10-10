@@ -3,6 +3,7 @@
 
 const { net } = require("electron");
 const { getAccessToken } = require("./auth");
+const { withRetry: sharedWithRetry } = require("./cloud-retry");
 const { GOOGLE_CHUNK_SIZE, CLOUD_MAX_RETRIES, RETRY_BASE_DELAY_MS, RETRY_MAX_DELAY_MS } = require("./constants");
 
 const DRIVE_API = "https://www.googleapis.com/drive/v3";
@@ -12,29 +13,14 @@ const MAX_RETRIES = CLOUD_MAX_RETRIES;
 
 // ── Retry with exponential backoff ───────────────────────────────────────
 
-async function withRetry(fn, retries = MAX_RETRIES) {
-  let lastError;
-  for (let attempt = 0; attempt < retries; attempt++) {
-    try {
-      return await fn();
-    } catch (err) {
-      lastError = err;
-      const status = err.status || err.statusCode;
-      if (status === 429 || status === 503 || status === 504) {
-        const delay = Math.min(RETRY_BASE_DELAY_MS * Math.pow(2, attempt), RETRY_MAX_DELAY_MS);
-        await new Promise((r) => setTimeout(r, delay));
-        continue;
-      }
-      if (status === 401) {
-        try {
-          await getAccessToken("google", { forceRefresh: true });
-        } catch { /* ignore */ }
-        if (attempt === 0) continue;
-      }
-      throw err;
-    }
-  }
-  throw lastError;
+function withRetry(fn, retries = MAX_RETRIES) {
+  return sharedWithRetry(fn, {
+    retries,
+    baseDelayMs: RETRY_BASE_DELAY_MS,
+    maxDelayMs: RETRY_MAX_DELAY_MS,
+    // Force a refresh immediately so the retry does not reuse a cached token (LL-095).
+    refresh: () => getAccessToken("google", { forceRefresh: true }),
+  });
 }
 
 // ── HTTP helpers ─────────────────────────────────────────────────────────
