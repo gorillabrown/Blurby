@@ -1,7 +1,7 @@
 ---
 epic: main-process-cleanup
-last_updated: 2026-10-09 22:00
-updated_by: session 0 (scaffold)
+last_updated: 2026-10-09 23:45
+updated_by: session 1
 ---
 
 # State — single source of current truth
@@ -28,19 +28,20 @@ updated_by: session 0 (scaffold)
 ## Where we are
 
 ```
-phase:        P1 — Bootstrap and baseline
-next_action:  bootstrap per the kickoff prompt (packet worktree + branch), then baseline npm ci / test / build
+phase:        P2 — Cloud retry sharing (C1 verifying; integrate next)
+next_action:  full npm test on eb/cloud-retry-shared-1 @ f3abb524 (C1.5), then C1.6, then integrate (launch.md GIT WORK) → C2
 blockers:     none
-session:      0 of ~3 budgeted
-dod:          C1 unmet | C2 unmet | S1 unmet | S2 unmet | L1 unmet | L2 unmet | DINT unmet
+session:      1 of ~3 budgeted
+dod:          C1 1-4 met (5-6 pending) | C2 unmet | S1 unmet | S2 unmet | L1 unmet | L2 unmet | DINT unmet
 ```
 
 ## Next actions — max 5, near horizon only
 
-1. [ ] Bootstrap (kickoff prompt): packet worktree `eb/epic-main-process-cleanup` from `refs/remotes/origin/main`; push
-2. [ ] Baseline in the packet worktree: `npm ci`, `npm test`, `npm run build`; record exit codes and counts
-3. [ ] Re-read the three specs in ROADMAP.md and `lessons --open`
-4. [ ] P2: Monday In Flight for CLOUD-RETRY-SHARED-1, then branch `eb/cloud-retry-shared-1`
+1. [x] Bootstrap: packet worktree + branch pushed (S1)
+2. [x] Baseline on ef1d233b: npm ci 0; npm test 0 (210 files pass/1 skip; 3058 pass/133 skip); build 0
+3. [x] Specs re-read; conflict check clean
+4. [ ] C1.5/C1.6 on eb/cloud-retry-shared-1 @ f3abb524, then integrate (mpc-integ-cloud-retry-shared-1-1) → C2
+5. [ ] P3: Monday In Flight TTS-SIDECAR-SHARED-1, worktree, Task 1
 
 ## Working set — verified facts this epic relies on
 
@@ -65,7 +66,13 @@ dod:          C1 unmet | C2 unmet | S1 unmet | S2 unmet | L1 unmet | L2 unmet | 
 | # | Date | Decision | Why | Charter authority |
 |---|------|----------|-----|-------------------|
 | 1 | 2026-10-09 | Combine the three ready cleanups; merge each to `main` as it passes (Rule 5b) | Owner, at scaffold | Owner |
+| 2 | 2026-10-09 | Monday In Flight transitions run as actor `mid-dispatch-decision` | workRegister allowedWriters has no epic/virtuoso actor; same precedent as the RMS-2 epic (its journal S1f) | Grant: Monday transition |
+| 3 | 2026-10-09 | Item branches are pushed with an explicit refspec and upstream reset (`worktree add -b … refs/remotes/origin/main` tracks origin/main, so a plain `push -u origin <branch>` fails) | git behavior observed at bootstrap | Grant: create/push branches |
+| 4 | 2026-10-09 | CLEANUP-LEGACY-PARSERS-1 edits CLAUDE.md and TECHNICAL_REFERENCE.md directly, not via a staging memo | the spec names both as edit sites and L1 greps them; specs govern | Charter: specs govern |
+| 5 | 2026-10-09 | Logs kept in `C:\Projects\Blurby-artifacts\epic-main-process-cleanup\` | charter: no evidence in %TEMP% | Constraint |
 
 ## Evidence
 
-- (none yet)
+- **Baseline** (packet worktree @ ef1d233b): npm ci 0; npm test 0 — files 210 pass/1 skip, tests 3058 pass/133 skip, failing set ∅, KF-1 not seen; build 0. Logs: Blurby-artifacts/…/baseline-*.log
+- **Monday** CLOUD-RETRY-SHARED-1 → In Flight (readback: In Flight, Seq 6, branch eb/cloud-retry-shared-1, started 2026-10-09; recovery 20261010T033734Z-… confirmed)
+- **C1** on eb/cloud-retry-shared-1 @ f3abb524 (pushed): (1) targeted npm test exit 0, 29 pass, 7 new defs / 10 cases; (2) diff of both existing cloud tests vs origin/main = 0 bytes; (3) `status === 429` 0/0/1; (4) forceRefresh: true once per provider at line 22 ("google"/"microsoft"). Positive control: backoff-exponent mutation → 7 failed.

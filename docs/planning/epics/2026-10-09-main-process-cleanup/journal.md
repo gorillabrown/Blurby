@@ -10,6 +10,15 @@
 - **Git:** `origin/main` @ `9597240d`; packet branch `eb/epic-main-process-cleanup` not created yet.
 - **Next:** P1 bootstrap.
 
+## S1 — 2026-10-09 23:45 — bootstrap, baseline, cloud item
+
+- **Did:** Bootstrapped the packet worktree and branch (push needed an explicit refspec; Decision #3). Baseline on ef1d233b green. Moved CLOUD-RETRY-SHARED-1 to In Flight (Decision #2). Implemented `main/cloud-retry.js`, the two wrappers and `tests/cloudRetry.test.js`; committed f3abb524 and pushed.
+- **Learned:** baseline is 3058/133 (not the RMS-2 tree's 3342). `worktree add -b X refs/remotes/origin/main` sets upstream to origin/main.
+- **Decisions:** #2–#5.
+- **Gate/DoD movement:** C1 1–4 verified (state → Evidence).
+- **Git:** eb/cloud-retry-shared-1 @ f3abb524 pushed; packet branch @ this checkpoint.
+- **Next:** C1.5–6, integrate cloud (C2), then P3.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
