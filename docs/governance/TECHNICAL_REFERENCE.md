@@ -659,7 +659,7 @@ All format parsing lives in `main/file-parsers.js` (content extraction) and `mai
 
 ### Single Renderer Architecture (EPUB-2B)
 
-All documents render through foliate-js (`FoliatePageView.tsx`). Every format is converted to EPUB on import via `convertToEpub()`. URL-imported articles and Chrome extension articles also produce EPUB (not PDF/TXT). Documents without an EPUB path show a "needs re-import" error. The legacy text rendering fallback has been removed — `legacy-parsers.js` is retained only for word count extraction during import.
+All documents render through foliate-js (`FoliatePageView.tsx`). Every format is converted to EPUB on import via `convertToEpub()`. URL-imported articles and Chrome extension articles also produce EPUB (not PDF/TXT). Documents without an EPUB path show a "needs re-import" error. The legacy text rendering fallback has been removed — plain-text extraction during import uses `extractContent()` in `main/file-parsers.js`.
 
 - All formats (HTML/TXT/MD/DOCX/PDF/MOBI/AZW) → EPUB on import
 - URL articles → `extractArticleFromHtml` → `htmlToEpub` (with metadata in OPF)
