@@ -50,3 +50,8 @@ artifacts/**/*profile*.txt
 
 # Local bug-capture artifacts (raw dumps/screenshots)
 docs/bug-reports/
+/roadmap-board.html
+
+# Virtuoso: machine-local state (repair backups, sweep quarantine, temp)
+/Virtuoso/.backups/
+/Virtuoso/.quarantine/

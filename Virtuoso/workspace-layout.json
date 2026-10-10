@@ -27,7 +27,7 @@
       "label": "Operational documents (directory)"
     },
     "temp": {
-      "path": "docs/planning",
+      "path": ".tmp",
       "provider": "directory",
       "authority": "reference",
       "mutability": "read-write",
@@ -158,7 +158,10 @@
       "owner": "epic",
       "allowedWriters": [
         "epic"
-      ]
+      ],
+      "validation": "exists",
+      "classification": "unknown",
+      "origin": "unknown"
     },
     "workRegister": {
       "external": "monday:board/18432450217",
@@ -244,6 +247,38 @@
       "classification": "active",
       "origin": "authored",
       "label": "Project agent instructions"
+    },
+    "board": {
+      "path": "roadmap-board.html",
+      "provider": "none",
+      "authority": "report",
+      "mutability": "generated",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review",
+        "pointer-closeout",
+        "next-pointer"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "generated",
+      "generatedFrom": "workRegister",
+      "generatedBy": "generate_board",
+      "label": "Roadmap board (generated page)"
+    },
+    "boardComments": {
+      "path": "roadmap-board.comments.json",
+      "provider": "json",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "roadmap-review",
+      "allowedWriters": [
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "active",
+      "origin": "authored",
+      "label": "Roadmap board comments"
     }
   },
   "policy": {

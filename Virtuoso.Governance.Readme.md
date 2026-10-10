@@ -24,12 +24,15 @@ preview) to change them.
 | Reference (directory) | `docs/governance` | directory | reference | read-write | — | present |
 | Governance documents (directory) | `docs/governance` | directory | reference | read-write | — | present |
 | Operational documents (directory) | `docs/governance` | directory | reference | read-write | — | present |
-| Temp (directory) | `docs/planning` | directory | reference | read-write | — | present |
+| Temp (directory) | `.tmp` | directory | reference | read-write | — | registered, not present |
 | Workflow reference | `docs/governance/TECHNICAL_REFERENCE.md` | markdown | reference | read-write | — | present |
+| Epics (directory) | `docs/planning/epics` | directory | reference | read-write | epic | present |
 | Retired XLSX migration source | `docs/governance/sprint-queue.xlsx` | xlsx | evidence | read-only | — | present |
 | Timestamped monday.com connector snapshot | `Virtuoso/work-register.snapshot.json` | snapshot | mirror | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | present |
 | Preserved XLSX provider snapshot | `docs/planning/roadmap-reviews/2026-09-23-migration-source.json` | json | evidence | read-only | — | present |
 | Project agent instructions | `CLAUDE.md` | markdown | reference | read-write | roadmap-review | present |
+| Roadmap board (generated page) | `roadmap-board.html` | none | report | generated | roadmap-review, pointer-closeout, next-pointer | present |
+| Roadmap board comments | `roadmap-board.comments.json` | json | reference | read-write | roadmap-review | registered, not present |
 
 <!-- virtuoso-governance-registry
 # Generated view of Virtuoso/workspace-layout.json — the manifest is the authority.
@@ -44,12 +47,15 @@ outsideAudits: docs/studies/audit
 reference: docs/governance
 governance: docs/governance
 operational: docs/governance
-temp: docs/planning
+temp: .tmp
 workflowReference: docs/governance/TECHNICAL_REFERENCE.md
+epics: docs/planning/epics
 x-legacyWorkRegister: docs/governance/sprint-queue.xlsx
 snapshot: Virtuoso/work-register.snapshot.json
 x-migrationSource: docs/planning/roadmap-reviews/2026-09-23-migration-source.json
 x-agentInstructions: CLAUDE.md
+board: roadmap-board.html
+boardComments: roadmap-board.comments.json
 -->
 <!-- virtuoso:end-generated -->
 

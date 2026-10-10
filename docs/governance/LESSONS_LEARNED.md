@@ -2664,3 +2664,9 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Recommendation:** Size epics by owner-gate count and duration plus executor hours, not by session count. Put owner gates on the plan's critical path explicitly.
 **Applies to:** Epic sizing, deadlines and session budgets in charters and roadmap reviews.
 **Status:** Observation
+
+### LL-024 — status (2026-10-10, 2026-10-10)
+**Status:** Observation — not promoted (roadmap review 2026-10-10): recurred once, but no active or queued work touches this area; revisit if it recurs again
+
+### LL-093 — status (2026-10-10, 2026-10-10)
+**Status:** Observation — not promoted (roadmap review 2026-10-10): recurred once, but no active or queued work touches this area; revisit if it recurs again
