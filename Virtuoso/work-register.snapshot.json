@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-10T23:01:01Z",
+  "takenAt": "2026-10-10T23:16:59Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -320,9 +320,9 @@
     {
       "id": "TTS-ENGINE-SHARED-1",
       "title": "Share MOSS and Pocket engine lifecycle and request handling",
-      "sequence": 6,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -334,15 +334,15 @@
       "spec_link": "ROADMAP.md#tts-engine-shared-1",
       "branch": "eb/tts-engine-shared-1",
       "started": "",
-      "completed": "",
-      "evidence": "docs/planning/roadmap-reviews/2026-10-10-plan.md",
+      "completed": "2026-10-10",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md",
       "description": "Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.",
-      "notes": "Roadmap-review 2026-10-10: Full Spec (U1-U10 pass). Characterization first (LL-112), async-exit fakes (LL-132). Approved behavior change: MOSS status snapshot missing visible key -> null.",
-      "revision": "f535f703f852b1b8230957e3009a1cdc0d7df1ddca7d7e73f29ac502cb2bdaa8",
+      "notes": "Completed 2026-10-10: merge 8cedd0cc (Task 1 2c9bde42, Task 2 1391a6d1); suite 3,113 passed / 0 failed / 133 skipped, skip set identical to base. Register was not moved to In Flight during the run. Ledger TR-056. Close-out docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md (merge 50aa9c9a)",
+      "revision": "1b9cf2249d912719598293f9a129142b68348d7ea0ae16a66561c3b261e370b8",
       "extra": {
         "id": "13122908614",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122908614",
-        "updated_at": "2026-10-10T20:05:48Z",
+        "updated_at": "2026-10-10T23:08:11Z",
         "group": "group_mm7fb4db"
       }
     },
