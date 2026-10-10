@@ -4,7 +4,7 @@ id: EPIC-MAIN-PROCESS-CLEANUP
 items: [CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1, CLEANUP-LEGACY-PARSERS-1]
 origin: roadmap — CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1, CLEANUP-LEGACY-PARSERS-1
 created: 2026-10-09
-status: active
+status: complete   # owner edit at close-out 2026-10-10 (CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md)
 ---
 
 # Epic Charter — Main-process cleanup (cloud retry, sidecar adapter, legacy parsers)

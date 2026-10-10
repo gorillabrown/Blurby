@@ -441,7 +441,7 @@ TTS-CACHE-TIMING-1 hardens disk cache identity and timing persistence. `main/tts
 
 MOSS-Nano is recommended opt-in only. It requires the local Nano sidecar/runtime to be ready, reports narration progress as segment-following rather than word-timed (`wordTimestamps: null`), and uses explicit-only fallback policy: if Nano is selected and blocked, Blurby reports the Nano failure instead of silently falling back to another engine. This posture is based on `docs/testing/moss-nano-13e-productization-memo.md` and 13d's canonical evidence; it does not make Nano default, reactivate Qwen, or open Kokoro retirement.
 
-Pocket TTS (`ttsEngine: "pocket-tts"`) is available opt-in only. It uses an isolated Pocket sidecar/engine path (`scripts/pocket_tts_sidecar.py`, `main/pocket-tts-sidecar.js`, `main/pocket-tts-engine.js`), engine-specific IPC/preload channels (`tts-pocket-*`, `electronAPI.pocket*`), and a renderer strategy at `src/hooks/narration/pocketTtsStrategy.ts`. Pocket follows the same explicit-only fallback posture as Nano: if selected and unavailable, Blurby reports the Pocket failure rather than silently substituting another engine. The sidecar has protocol-level reference-WAV scaffolding, but v2.0 exposes no public voice-cloning UX.
+Pocket TTS (`ttsEngine: "pocket-tts"`) is available opt-in only. It uses an isolated Pocket sidecar/engine path (`scripts/pocket_tts_sidecar.py`, `main/pocket-tts-sidecar.js`, `main/pocket-tts-engine.js`), engine-specific IPC/preload channels (`tts-pocket-*`, `electronAPI.pocket*`), and a renderer strategy at `src/hooks/narration/pocketTtsStrategy.ts`. Pocket follows the same explicit-only fallback posture as Nano: if selected and unavailable, Blurby reports the Pocket failure rather than silently substituting another engine. The sidecar has protocol-level reference-WAV scaffolding, but v2.0 exposes no public voice-cloning UX. MOSS-Nano and Pocket sidecar process handling (spawn, JSON-lines protocol, request correlation, timeouts, cancel, shutdown) is one shared implementation, `main/python-sidecar-adapter.js`; `main/moss-nano-sidecar.js` and `main/pocket-tts-sidecar.js` are thin provider configurations (2026-10-10).
 
 Kokoro (`ttsEngine: "kokoro"`) is an ONNX-based model running locally.
 
@@ -821,7 +821,7 @@ When offline, operations are queued with compaction (multiple edits to the same 
 ### Cloud Storage Providers
 
 - **OneDrive** (`main/cloud-onedrive.js`): App Folder via Microsoft Graph API, chunked uploads for large files
-- **Google Drive** (`main/cloud-google.js`): `appDataFolder` scope, resumable uploads, retry with exponential backoff
+- **Google Drive** (`main/cloud-google.js`): `appDataFolder` scope, resumable uploads, retry with exponential backoff via the shared `withRetry` in `main/cloud-retry.js` (429/503/504 capped backoff; one forced token refresh on a first-attempt 401). OneDrive uses the same helper.
 
 ---
 

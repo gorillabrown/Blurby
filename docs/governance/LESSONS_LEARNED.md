@@ -2632,3 +2632,35 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Recommendation:** Read plan structure from a prior plan JSON or the provider source; call mutation-plan only for a mutation that will be executed and confirmed in the same session.
 **Applies to:** Any ceremony or specification that writes an external work register through the provider handshake.
 **Status:** Observation
+
+### LL-131 — A dead-code census must match references, not identifiers (CLEANUP-LEGACY-PARSERS-1, 2026-10-10)
+
+**Verdict:** A "stop on any hit" census that greps the bare module stem also matches the work item's own identifier inside governance data, so it fires on references that cannot load the module.
+**Evidence:** The re-census `git grep -e legacy-parsers -- . ":!docs" ":!*.md" ":!*.zip"` hit `Virtuoso/work-register.snapshot.json` (3) and `Virtuoso/reports/planning-cockpit.html` (1). Both contain only `CLEANUP-LEGACY-PARSERS-1` and its description, written after the census was specified. The executor proceeded (Decision #7), the owner ratified it, and no require/import/path/build reference existed.
+**Recommendation:** Census patterns match load forms: `require(…<name>)`, `import … from …<name>`, `<name>.js`, packaging/config entries. Exclude governance data directories (`Virtuoso/`) and say so in the spec. Keep a separate, non-blocking doc-reference grep for doc fixes.
+**Applies to:** Any deletion or rename specification whose failure handling stops on a reference census.
+**Status:** Observation
+
+### LL-132 — Child-process test fakes must emit exit asynchronously after kill() (TTS-SIDECAR-SHARED-1, 2026-10-10)
+
+**Verdict:** A fake child whose `kill()` emits `exit` synchronously makes timeout paths report the wrong reason, because the exit handler runs before the timeout's own settle.
+**Evidence:** With the existing fake in `tests/pocketTtsEngine.test.js`, a sidecar start timeout resolved `sidecar-exited` instead of `sidecar-start-timeout` (2 failures, Decision #6). A real ChildProcess exits asynchronously, so production was correct. The new characterization suite's fake emits `exit` on a microtask.
+**Recommendation:** Fakes that model process exit emit `exit`/`close` asynchronously (microtask or `setImmediate`) after `kill()`, and timeout-path tests assert the specific reason code.
+**Applies to:** Tests of child-process adapters and engines (MOSS/Pocket sidecars and engines, TTS-ENGINE-SHARED-1, Kokoro worker wrappers).
+**Status:** Observation
+
+### LL-133 — Epic completion steps that edit charter.md must be carved out of the kickoff's prohibition (EPIC-MAIN-PROCESS-CLEANUP, 2026-10-10)
+
+**Verdict:** A packet whose kickoff says "never touch charter.md" while its completion protocol says "set charter status: complete" leaves the executor a contradiction; it correctly obeyed the stricter rule and left the epic marked active.
+**Evidence:** The run finished all DoD rows and published `done.md`, but `charter.md` stayed `status: active` (done.md caveat 3). The owner flipped it at close-out.
+**Recommendation:** Epic kickoffs say "never edit charter.md, except the frontmatter `status:` line in the completion protocol", or move the status flip to the close-out.
+**Applies to:** Every epic packet (charter, launch kickoff and completion protocol).
+**Status:** Observation
+
+### LL-134 — Session budgets for unattended epics are overestimated (EPIC-MAIN-PROCESS-CLEANUP, 2026-10-10)
+
+**Verdict:** Unattended epics finished their executor work in a fraction of their session budgets; the binding constraint was owner-gate time, not executor sessions.
+**Evidence:** EPIC-MAIN-PROCESS-CLEANUP (S+M+XS) finished in 1 of ~3 budgeted sessions (about 1 hour). READER-MODE-SEPARATION-2 (XL) finished all automated scope in 1 of ~14 sessions, then waited on its owner listening gate.
+**Recommendation:** Size epics by owner-gate count and duration plus executor hours, not by session count. Put owner gates on the plan's critical path explicitly.
+**Applies to:** Epic sizing, deadlines and session budgets in charters and roadmap reviews.
+**Status:** Observation
