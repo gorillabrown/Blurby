@@ -19,6 +19,15 @@
 - **Git:** eb/cloud-retry-shared-1 @ f3abb524 pushed; packet branch @ this checkpoint.
 - **Next:** C1.5–6, integrate cloud (C2), then P3.
 
+## S1b — 2026-10-10 00:15 — cloud and sidecar merged; legacy verified
+
+- **Did:** Integrated CLOUD-RETRY-SHARED-1 (dd3db29c on main). Moved TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1 to In Flight. Sidecar Task 1 (65cb5774) and Task 2 (18f453fa), integrated as 7a462bf7 on main. Legacy deletion and doc fixes 91e48416; L1 verified; integration attempt 1 (b95dbb55) running.
+- **Learned:** the reference fake's synchronous kill→exit makes start-timeout resolve `sidecar-exited` (Decision #6). The spec's census grep now also matches the item's own ID in the register snapshot and cockpit report (Decision #7, flagged for owner).
+- **Decisions:** #6, #7.
+- **Gate/DoD movement:** C1, C2, S1, S2 met; L1 met (state → Evidence).
+- **Git:** main @ 7a462bf7; eb/cleanup-legacy-parsers-1 @ 91e48416 pushed; packet @ this checkpoint.
+- **Next:** push legacy merge (L2), DINT, completion protocol.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

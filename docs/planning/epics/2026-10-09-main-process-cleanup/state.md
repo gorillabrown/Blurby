@@ -1,6 +1,6 @@
 ---
 epic: main-process-cleanup
-last_updated: 2026-10-09 23:45
+last_updated: 2026-10-10 00:10
 updated_by: session 1
 ---
 
@@ -28,20 +28,19 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P2 — Cloud retry sharing (C1 verifying; integrate next)
-next_action:  full npm test on eb/cloud-retry-shared-1 @ f3abb524 (C1.5), then C1.6, then integrate (launch.md GIT WORK) → C2
+phase:        P4 — Legacy parser removal (L1.4/L1.5 running), then integrate → L2, then P5
+next_action:  L1.4 npm test + L1.5 build on eb/cleanup-legacy-parsers-1 @ 91e48416; integrate (mpc-integ-cleanup-legacy-parsers-1-1); DINT
 blockers:     none
 session:      1 of ~3 budgeted
-dod:          C1 1-4 met (5-6 pending) | C2 unmet | S1 unmet | S2 unmet | L1 unmet | L2 unmet | DINT unmet
+dod:          C1 met | C2 met | S1 met | S2 met | L1 1-3,6 met (4-5 pending) | L2 unmet | DINT unmet
 ```
 
 ## Next actions — max 5, near horizon only
 
-1. [x] Bootstrap: packet worktree + branch pushed (S1)
-2. [x] Baseline on ef1d233b: npm ci 0; npm test 0 (210 files pass/1 skip; 3058 pass/133 skip); build 0
-3. [x] Specs re-read; conflict check clean
-4. [ ] C1.5/C1.6 on eb/cloud-retry-shared-1 @ f3abb524, then integrate (mpc-integ-cloud-retry-shared-1-1) → C2
-5. [ ] P3: Monday In Flight TTS-SIDECAR-SHARED-1, worktree, Task 1
+1. [x] P1 baseline; P2 cloud merged (dd3db29c); P3 sidecar merged (7a462bf7)
+2. [ ] L1.4/L1.5 on 91e48416, then integrate legacy → L2
+3. [ ] DINT in a fresh worktree at origin/main (mpc-dint-1)
+4. [ ] done.md, charter status complete, final journal; publish packet to main
 
 ## Working set — verified facts this epic relies on
 
@@ -70,9 +69,15 @@ dod:          C1 1-4 met (5-6 pending) | C2 unmet | S1 unmet | S2 unmet | L1 unm
 | 3 | 2026-10-09 | Item branches are pushed with an explicit refspec and upstream reset (`worktree add -b … refs/remotes/origin/main` tracks origin/main, so a plain `push -u origin <branch>` fails) | git behavior observed at bootstrap | Grant: create/push branches |
 | 4 | 2026-10-09 | CLEANUP-LEGACY-PARSERS-1 edits CLAUDE.md and TECHNICAL_REFERENCE.md directly, not via a staging memo | the spec names both as edit sites and L1 greps them; specs govern | Charter: specs govern |
 | 5 | 2026-10-09 | Logs kept in `C:\Projects\Blurby-artifacts\epic-main-process-cleanup\` | charter: no evidence in %TEMP% | Constraint |
+| 6 | 2026-10-09 | Sidecar Task 1 fake: kill() emits exit on a microtask, not synchronously | a real ChildProcess exits asynchronously; with the sync fake of tests/pocketTtsEngine.test.js the start-timeout resolves `sidecar-exited` (verified: 2 failures), which is a fake artefact, not code behavior. Recorded as a finding | Grant: test helper structure |
+| 7 | 2026-10-09 | Legacy re-census hits in `Virtuoso/work-register.snapshot.json` (3) and `Virtuoso/reports/planning-cockpit.html` (1) classed as doc references; item proceeds | both are Lane E register/report data written after the 2026-10-08 census (01588c90); they match the item's own ID `cleanup-legacy-parsers-1` and its description prose; no require/import/path/build reference exists anywhere outside docs. Owner may overrule: `git revert 91e48416` | Trigger wording "non-doc reference" (flagged for owner) |
 
 ## Evidence
 
 - **Baseline** (packet worktree @ ef1d233b): npm ci 0; npm test 0 — files 210 pass/1 skip, tests 3058 pass/133 skip, failing set ∅, KF-1 not seen; build 0. Logs: Blurby-artifacts/…/baseline-*.log
 - **Monday** CLOUD-RETRY-SHARED-1 → In Flight (readback: In Flight, Seq 6, branch eb/cloud-retry-shared-1, started 2026-10-09; recovery 20261010T033734Z-… confirmed)
 - **C1** on eb/cloud-retry-shared-1 @ f3abb524 (pushed): (1) targeted npm test exit 0, 29 pass, 7 new defs / 10 cases; (2) diff of both existing cloud tests vs origin/main = 0 bytes; (3) `status === 429` 0/0/1; (4) forceRefresh: true once per provider at line 22 ("google"/"microsoft"). Positive control: backoff-exponent mutation → 7 failed.
+- **C2** dd3db29c pushed to main (integ worktree mpc-integ-cloud-retry-shared-1-1, attempt 1): ci/typecheck/test/build 0; 3068 pass/133 skip; `merge-base --is-ancestor f3abb524 refs/remotes/origin/main` exit 0. C1.5: npm test 0, 3068/133 (+10, skips unchanged); C1.6: exactly the 4 paths.
+- **S1** eb/tts-sidecar-shared-1: Task 1 65cb5774 — targeted cmd exit 0 (51 tests; 11 defs / 20 cases), `git diff origin/main --stat -- main/` empty. Task 2 18f453fa — same cmd exit 0, tests/ diff vs 65cb5774 = 0 bytes; IPC/package suites exit 0 (9); helper counts 0/0/3; export check exit 0; npm test 0 (3088/133, +20, skips unchanged); diff = 4 paths. Positive control: hard-wired env var → Pocket env-var test failed.
+- **S2** 7a462bf7 pushed to main (mpc-integ-tts-sidecar-shared-1-1, attempt 1): ci/typecheck/test/build 0, 3088/133; `--is-ancestor 18f453fa` exit 0.
+- **L1** eb/cleanup-legacy-parsers-1 @ 91e48416 (from 7a462bf7): (1) file absent; (2) git grep exit 1 (fired on CLAUDE.md:166 before the edit); (3) parser suites exit 0 (73); (6) exactly 3 paths. Census: Decision #7.
