@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-10T20:06:30Z",
+  "takenAt": "2026-10-10T22:55:46Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -143,6 +143,33 @@
         "id": "13118847895",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
         "updated_at": "2026-09-23T19:06:55Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "TERMINAL-BACKFILL-1",
+      "title": "Record the 51 historical terminal items in the ledger",
+      "sequence": 7,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Governance Measurement",
+      "spec_link": "ROADMAP.md#terminal-backfill-1",
+      "branch": "eb/terminal-backfill-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Append one terminal record for each of the 51 items that reached a terminal status before the ledger existed, from the reviewed manifest docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json, via the plugin ledger API as pointer-closeout. Owner-approved exception: existing evidence, no re-verification.",
+      "notes": "Created by roadmap-review 2026-10-10 (audit F1). Full Spec: U1-U10 pass. Evidence policy owner-approved 2026-10-10.",
+      "revision": "0d06f7424d1fccc319eee8608c8ee89b5a69525e1d5f8852fa752365f5b65954",
+      "extra": {
+        "id": "13256739205",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13256739205",
+        "updated_at": "2026-10-10T20:05:47Z",
         "group": "group_mm7femyn"
       }
     },
@@ -1782,33 +1809,6 @@
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811133",
         "updated_at": "2026-09-23T19:00:28Z",
         "group": "group_mm7fp5qw"
-      }
-    },
-    {
-      "id": "TERMINAL-BACKFILL-1",
-      "title": "Record the 51 historical terminal items in the ledger",
-      "sequence": 7,
-      "status": "queued",
-      "raw_status": "Queued",
-      "written_status": "full-spec",
-      "raw_written_status": "Full Spec",
-      "prerequisites": [],
-      "effort": "S",
-      "lane": "Platform & Maintenance",
-      "group": "Governance Measurement",
-      "spec_link": "ROADMAP.md#terminal-backfill-1",
-      "branch": "eb/terminal-backfill-1",
-      "started": "",
-      "completed": "",
-      "evidence": "",
-      "description": "Append one terminal record for each of the 51 items that reached a terminal status before the ledger existed, from the reviewed manifest docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json, via the plugin ledger API as pointer-closeout. Owner-approved exception: existing evidence, no re-verification.",
-      "notes": "Created by roadmap-review 2026-10-10 (audit F1). Full Spec: U1-U10 pass. Evidence policy owner-approved 2026-10-10.",
-      "revision": "0d06f7424d1fccc319eee8608c8ee89b5a69525e1d5f8852fa752365f5b65954",
-      "extra": {
-        "id": "13256739205",
-        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13256739205",
-        "updated_at": "2026-10-10T20:05:47Z",
-        "group": "group_mm7femyn"
       }
     }
   ],

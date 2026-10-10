@@ -2670,3 +2670,27 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-093 — status (2026-10-10, 2026-10-10)
 **Status:** Observation — not promoted (roadmap review 2026-10-10): recurred once, but no active or queued work touches this area; revisit if it recurs again
+
+### LL-135 — A dispatch prompt must carry its reconciliation recipe or a committed path to it (TERMINAL-BACKFILL-1, 2026-10-10)
+
+**Verdict:** The CLI dispatch said "run the reconciliation recipe from the 2026-10-10 next-pointer", but that recipe existed only in the planner's chat; the executor could not find it and reconstructed equivalent checks by hand.
+**Evidence:** TERMINAL-BACKFILL-1 report, deviation "No saved recipe"; the pointer for both 2026-10-10 dispatches printed the recipe in conversation only.
+**Recommendation:** Paste the filled recipe into the dispatch prompt itself, or commit it next to the spec and cite the path. Never cite a chat message as an input.
+**Applies to:** Every CLI dispatch printed after /next-pointer, and epic kickoff prompts.
+**Status:** Observation
+
+### LL-136 — An exact-path diff fence forbids the timing log unless it names an exemption (TERMINAL-BACKFILL-1, 2026-10-10)
+
+**Verdict:** A Done-when row of the form "git diff --name-only lists exactly X" made the timing log (`closeOuts/Timing.<ITEM>.jsonl`) impossible, so the executor rightly kept none and the run's estimate and actual were lost.
+**Evidence:** TERMINAL-BACKFILL-1 Done-when 5 and the report's "No timing log" deviation; the terminal ledger still has 0 records with both an estimate and an actual, so effort calibration stays not computable.
+**Recommendation:** Specs with exact-path fences exempt `docs/governance/close-outs/Timing.<ITEM-ID>.jsonl` explicitly, or state that the log is kept outside the repository and handed to the close-out.
+**Applies to:** Specifications with exact-path or ledger-only fences, especially governance-data items.
+**Status:** Observation
+
+### LL-137 — Read governance JSON and JSONL as explicit UTF-8 on Windows (TERMINAL-BACKFILL-1, 2026-10-10)
+
+**Verdict:** Correct UTF-8 governance files looked corrupted twice in one dispatch: once through Python's default codepage, once through `git show` redirected by `cmd`. The bytes were fine both times.
+**Evidence:** The executor's encoding note in the TERMINAL-BACKFILL-1 report; the planner's close-out check, where a `cmd` redirect showed `U+FFFD` while the blob held 5 valid `e2 80 94` em dashes and no replacement characters.
+**Recommendation:** Open with `encoding='utf-8'` in Python, `Get-Content -Encoding utf8` in PowerShell, and read git output as bytes; check raw bytes before declaring a file corrupt.
+**Applies to:** Scripts and checks that read the terminal ledger, manifests, register snapshots or close-outs on Windows.
+**Status:** Observation
