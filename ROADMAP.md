@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-10. EPIC-MAIN-PROCESS-CLEANUP closed: cloud retry sharing, sidecar adapter sharing and legacy-parser removal are complete on `main`. READER-MODE-SEPARATION-2 runs as an epic, paused at its owner listening gate (OS-1). Earlier: 2026-10-08 roadmap review ([plan](docs/planning/roadmap-reviews/2026-10-08-plan.md)), 2026-10-09 pre-launch and owner-ruling amendments.
+**Last updated**: 2026-10-10 (roadmap review, plugin 1.13.0). TTS-ENGINE-SHARED-1 is specified (position 6). TERMINAL-BACKFILL-1 is new and specified (position 7). READER-MODE-SEPARATION-2 runs as an epic, paused at owner gate OS-1, and is the deadline's only item. See the [2026-10-10 plan](docs/planning/roadmap-reviews/2026-10-10-plan.md). Earlier the same day: EPIC-MAIN-PROCESS-CLEANUP closed (cloud retry, sidecar adapter, legacy parsers).
 **Current state**: v1.75.1 baseline with READER-ISO-1A/1B/1C/1D/1E contracts, routing shell, and three concrete adapters (Focus, Flow, Narrate). Complete Page/Focus/Flow/Narrate runtime separation is unfinished and is now the first delivery gate. Kokoro is the sole active engine; other engine work remains deferred.
 **Finish line**: TTS Quality Confidence + Reading Experience v2, with an owner-mandated entry gate: independent Page, Focus, Flow, and Narrate runtimes with mirrored contracts and proven isolation. Then validate narration sync, clean rate changes, discovery-bug acceptance evidence, and the remaining UX shortcut. **Dated target:** on 2026-10-08 the owner dated the entry gate (READER-MODE-SEPARATION-2 complete). The date lives only in `policy.roadmap.deadlines.mode-separation`; the rest of the finish line is undated.
-**Queue**: READER-MODE-SEPARATION-2 (Seq 1, In Flight, **Path: epic**; paused at owner gate OS-1). TTS-ENGINE-SHARED-1 (8) is Queued as a stub awaiting specification. Blocked behind separation: NARRATE-HEARD-CURSOR-1 (2), NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3), NARRATE-SUBSCRIBER-CURSOR-1 (4, verdict-gated), UX-POLISH-1 (5), CLEANUP-MODE-BARREL-1 (10). KOKORO-EXPORT-1 is deferred and unsequenced. **No queued item has a full specification: CLAUDE.md Rule 5a stop signal; run a roadmap review.**
+**Queue**: READER-MODE-SEPARATION-2 (Seq 1, In Flight, **Path: epic**; paused at owner gate OS-1) → TTS-ENGINE-SHARED-1 (6, Queued, Full Spec) → TERMINAL-BACKFILL-1 (7, Queued, Full Spec); 6 and 7 are file-disjoint and may run in parallel. Blocked behind separation: NARRATE-HEARD-CURSOR-1 (2), NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3), NARRATE-SUBSCRIBER-CURSOR-1 (4, verdict-gated), UX-POLISH-1 (5), CLEANUP-MODE-BARREL-1 (10). KOKORO-EXPORT-1 is deferred. Two queued full specs is below Rule 5a's floor under the documented bounded exception: all other work waits on mode separation.
 **Last sprint**: NARRATE-A5-RATE-RESEED-1 (position fix PASS 3-of-3 live-QA 2026-05-31; merged `145c385`, reconciled to Completed 2026-07-02). Prior: NARRATE-CURSOR-TRACKING-DIAG-1 (completed 2026-05-31, live-QA cursor-tracking trace; hypothesis refuted, authority verdict written, NARRATE-SUBSCRIBER-CURSOR-1 amended). Prior: reverted failed view-follow hotfix at `ff70793` (2026-05-31), NARRATE-PAUSE-RESUME-UNIFY-1 + anchor-correctness hotfix (A4 resume anchor working), NARRATE-INTENT-CURSOR-1 (PARTIAL, 2026-05-31), NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -409,19 +409,119 @@ The four prior detailed specs are preserved in [the pre-isolation spec archive](
 
 #### Stage 4 — Codebase simplification (owner-requested backlog)
 
-Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1, run together as EPIC-MAIN-PROCESS-CLEANUP and merged to `main` (`dd3db29c`, `7a462bf7`, `b95dbb55`). See the [close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md); the full specifications are preserved at `git show aafed6c4:ROADMAP.md`. <a id="cloud-retry-shared-1"></a><a id="tts-sidecar-shared-1"></a><a id="cleanup-legacy-parsers-1"></a> Remaining: TTS-ENGINE-SHARED-1 (prerequisite met; needs a specification) and CLEANUP-MODE-BARREL-1 (behind mode separation, because its file is in that item's edit-site table).
+Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1, run together as EPIC-MAIN-PROCESS-CLEANUP and merged to `main` (`dd3db29c`, `7a462bf7`, `b95dbb55`). See the [close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md); the full specifications are preserved at `git show aafed6c4:ROADMAP.md`. <a id="cloud-retry-shared-1"></a><a id="tts-sidecar-shared-1"></a><a id="cleanup-legacy-parsers-1"></a> Remaining: TTS-ENGINE-SHARED-1 (Full Spec 2026-10-10, position 6) and CLEANUP-MODE-BARREL-1 (behind mode separation, because its file is in that item's edit-site table).
 
 <a id="tts-engine-shared-1"></a>
 
-#### TTS-ENGINE-SHARED-1 — Share MOSS and Pocket engine lifecycle and request handling *(position 8 — stub; prerequisite met, needs specification)*
+#### TTS-ENGINE-SHARED-1 — Share MOSS and Pocket engine lifecycle and request handling *(position 6 — Full Spec)*
 
-- **Lane:** TTS / Narration Engine.
-- **Prerequisites:** TTS-SIDECAR-SHARED-1 — **Completed 2026-10-10** (merge `7a462bf7`; the shared adapter is `main/python-sidecar-adapter.js`). **Next:** specify at the next roadmap review. Engine files only partly read: both carry their own `createDeferred`, `structuredFailure` and `normalizeStatus` (Moss 50–69, Pocket 47–66) and singleton engines (`moss-nano-engine.js:317`, `pocket-tts-engine.js:294`). Plan characterization first (LL-112), and give test fakes an asynchronous `exit` after `kill()` (LL-132: the existing Pocket fake exits synchronously and misreports timeouts).
-- **Scope:** Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.
-- **Constraints / evidence:** Build on the verified sidecar extraction to avoid overlapping changes to the same contract. Preserve exports, provider-specific payload validation/status metadata/configuration/defaults/cancellation behavior and independent provider singleton/instance state. Preserve disabled IPC and Kokoro-only defaults; no provider activation or reading-mode refactor.
-- **Verification to specify:** tests/mossNanoEngine.test.js, tests/pocketTtsEngine.test.js, tests/mossNanoIpc.test.js and tests/pocketTtsIpc.test.js. Cover simultaneous providers, start/restart/cancel/error/late-response behavior and unchanged dormant IPC.
-- **Spec state:** Stub; exact implementation/helper/test design, effort, rollback and U1–U9 review remain for dispatch specification. [Cleanup review](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+- **What:** New `main/python-sidecar-engine.js` holds the one sidecar-engine implementation. It covers start gating, status normalization, request ownership and settlement, synthesize, cancel, shutdown and restart. `main/moss-nano-engine.js` (331 lines) and `main/pocket-tts-engine.js` (308 lines) become thin provider configurations with their exact export surface, mirroring how TTS-SIDECAR-SHARED-1 produced `main/python-sidecar-adapter.js`.
+- **Why:** An investigation on 2026-10-10 against `main` @ `8d491cab` found about 285 duplicated lines per file (~92 %). The only differences are the label strings (12 per file), one visible config key (MOSS `tokenizerDir` / Pocket `referenceWavPath`, line 13), the request-id prefix (`nano-` / `pocket-`), the provider default config and adapter, and `createConfigSnapshot`'s handling of missing keys.
+- **Approved behavior change (owner, 2026-10-10):** `createConfigSnapshot` unifies on Pocket's `config[key] ?? null`. A visible config key missing from MOSS's `status().config` becomes `null` instead of `undefined`. Nothing else changes.
+- **Out of scope:** activating either engine or changing `main/ipc/tts.js` (it never loads them); the adapter (`main/python-sidecar-adapter.js`), the sidecar files and `main/sidecar-paths.js`; the pre-existing `getShared*({reset:true})` leak, which replaces an engine without shutting the old one down (recorded as a follow-up, not fixed here); the unused `reject` in `createDeferred`; `now()`/`startedAt`, which nothing reads; and any `src/` file.
+- **Prerequisites:** TTS-SIDECAR-SHARED-1, Completed 2026-10-10 (merge `7a462bf7`).
+- **Effort:** M.
+- **Owners:** implementation agent; reviewer confirms the characterization suite passed before and after extraction; repository operator merges.
+- **Lane:** TTS / Narration Engine. Execution surface D.
+- **Source:** [2026-10-10 plan](docs/planning/roadmap-reviews/2026-10-10-plan.md); the engine investigation (2026-10-10, quoted here); [CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md) (Decision #6, LL-132); LL-112.
 
+**Shared behavior to preserve** (both files on `8d491cab`; MOSS line numbers, Pocket in brackets):
+- `ensureStarted` (91–126 [88–121]) deduplicates concurrent starts through `startPromise`. It ignores a start that resolves after a lifecycle change (`startGeneration !== lifecycleGeneration`). A rejected start becomes `reason: error?.reason || "sidecar-start-failed"`, `recoverable: error?.recoverable !== false`; `started = Boolean(result?.ready || result?.ok)`.
+- `status()` (147–160 [140–153]): unstarted means await the start, else return the snapshot with `config: createConfigSnapshot(config)`; started means `normalizeStatus(await sidecarAdapter.status())`.
+- `synthesize()` (162–239 [155–228]):
+  - returns `too-many-in-flight` when `inFlight.size >= config.maxInFlight` (no limit if undefined);
+  - checks ownership after start (`request-not-owned`) and on the result (`stale-sidecar-output` for a requestId or ownerToken mismatch);
+  - maps a not-ready start to `startStatus.reason || "sidecar-not-ready"` and a rejected request to `error.reason || "sidecar-request-failed"`.
+- `cancel()` (241–273 [230–256]):
+  - an unknown id returns `{ok:false, cancelled:false, reason:"request-not-found", requestId, recoverable:true}`;
+  - otherwise it settles locally (`"cancelled"`) and then awaits `sidecarAdapter.cancel({requestId, ownerToken})`, returning `{...result, requestId}`;
+  - an adapter throw gives `structuredFailure(…, "sidecar-cancel-failed", {cancelled:true})`;
+  - a late result is dropped.
+- `shutdown()` and `restart()` (275–306 [258–289]): increment the generation, clear `startPromise`, settle every in-flight request (`"sidecar-shutdown"` / `"sidecar-restarted"`), then call the adapter. `restart` calls `sidecarAdapter.restart(config)` **as a method**, because the adapter's `restart` uses `this`. There is no try/catch in either; an adapter rejection propagates after the generation increment.
+- Module-level, one per provider: `DEFAULT_CONFIG` (computed at require time; it reads env vars `BLURBY_PACKAGED_RESOURCES_PATH` and `BLURBY_TTS_OUTPUT_ROOT`), the visible-key list, the singleton variable and getters (317–324 [294–301]) and the alias `get*Engine`.
+
+##### Implementation detail — two serial tasks, two commits
+
+**Task 1: characterize current behavior (no production edit).** Create `tests/pythonSidecarEngine.test.js`. It drives the **current** factories `createMossNanoEngine` and `createPocketTtsEngine` through `describe.each([{ name: "MOSS Nano", factory, label: "MOSS Nano", key: "tokenizerDir", prefix: "nano-" }, { name: "Pocket TTS", factory, label: "Pocket TTS", key: "referenceWavPath", prefix: "pocket-" }])`.
+
+The tests inject a **fake adapter object** (no child process), modelled on `tests/mossNanoEngine.test.js` 30–136, plus deterministic `createRequestId`/`createOwnerToken`. Where a test needs a child process, use only the async-exit, pid-less fake from `tests/pythonSidecarAdapter.test.js` 20–30 (LL-132). Never reuse the synchronous-exit fakes at `tests/mossNanoEngine.test.js` 182–185 or `tests/pocketTtsEngine.test.js` 120–124; the latter sets `pid = 12345`, which could run a real `taskkill`.
+
+Tests, per provider unless marked:
+1. **"start that is not ready leaves the engine unstarted"**: the adapter start resolves `{ok:false, ready:false, reason:"sidecar-not-ready"}`; `status()` returns `ready:false`, and `synthesize` resolves `reason:"sidecar-not-ready"`.
+2. **"a rejected start maps to sidecar-start-failed"**: start rejects `new Error("x")`; status `reason === "sidecar-start-failed"`, `recoverable === true`. With `{reason:"boom", recoverable:false}`, `reason === "boom"` and `recoverable === false`.
+3. **"concurrent starts share one adapter start"**: two `status()` calls before the start resolves; the adapter `start` is called once.
+4. **"a start that resolves after shutdown is ignored"**: begin the start, call `shutdown()`, then resolve the start; `status()` does not report `ready:true` from the stale start.
+5. **"restart settles in-flight work with sidecar-restarted and drops late output"** (Pocket had no restart test).
+6. **"cancel failure returns sidecar-cancel-failed with cancelled:true"**.
+7. **"output after shutdown is dropped"**: in-flight request, `shutdown()`, then the adapter delivers output; the request resolved `sidecar-shutdown` and the output changes nothing.
+8. **"a rejected request maps to sidecar-request-failed or error.reason"**.
+9. **"normalizeStatus passes runtime, metadata and syntheticAudio through"**.
+10. **"too-many-in-flight with the default maxInFlight of 1"** (MOSS had no such test).
+11. **"request ids use the provider prefix by default"**: with no `createRequestId`, the id starts with `prefix`.
+12. **(once) "two engines never share state"**: a MOSS engine and a Pocket engine plus a second MOSS engine, each with its own fake adapter. Settling a request on one leaves the others' in-flight state and status unchanged.
+13. **"missing visible config key in the status snapshot"**: build the engine with a config lacking `key`; assert `status().config[key]` is `undefined` for MOSS and `null` for Pocket. This is current behavior. Task 2 changes the MOSS expectation (below).
+
+Run `npm test -- tests/pythonSidecarEngine.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js`; it must exit 0 against **unmodified** production code. Commit Task 1 alone. If a statement above contradicts current code, encode current behavior and note it for the close-out. Never edit production code in Task 1.
+
+**Task 2: extract.**
+- **New `main/python-sidecar-engine.js`** ("use strict", CommonJS). It exports `createPythonSidecarEngine(provider, options = {})`:
+  - `provider = { label, visibleConfigKeys, requestIdPrefix, defaultConfig, createDefaultAdapter }`;
+  - `options = { config, sidecarAdapter, createRequestId, createOwnerToken, now }` as today.
+
+  Move in, verbatim apart from label interpolation and the approved snapshot change: `normalizeStatus`, `structuredFailure`, `createDeferred`, `createConfigSnapshot(config, keys)` with `?? null`, and the factory body (MOSS 71–306). Replace every "MOSS Nano" string with `${provider.label}`. Use `` `${provider.requestIdPrefix}${randomUUID()}` ``, `options.sidecarAdapter ?? provider.createDefaultAdapter()`, and `config` defaulting to `provider.defaultConfig`. All mutable state stays inside the factory closure; nothing mutable goes at module level.
+- **`main/moss-nano-engine.js`** becomes:
+  - the requires;
+  - `DEFAULT_CONFIG` (line 8, still computed at require time);
+  - the visible-key list (lines 10–18);
+  - `createMossNanoEngine(options = {}) { return createPythonSidecarEngine({ label: "MOSS Nano", visibleConfigKeys: VISIBLE_CONFIG_KEYS, requestIdPrefix: "nano-", defaultConfig: DEFAULT_CONFIG, createDefaultAdapter: () => createMossNanoSidecarAdapter() }, options); }`;
+  - the unchanged singleton block (317–324) and exports (326–331).
+- **`main/pocket-tts-engine.js`:** the same, with "Pocket TTS", `"pocket-"`, its key list, the singleton (294–301) and exports (303–308).
+- **`docs/governance/TECHNICAL_REFERENCE.md`:** extend the sidecar sentence on the Pocket TTS line (~444) to name `main/python-sidecar-engine.js` as the shared engine.
+- **Tests:**
+  - Task 1 test 13: change the MOSS expectation `expect(snapshot[key]).toBeUndefined()` to `expect(snapshot[key]).toBeNull()`. This is the only approved test edit.
+  - All of Task 1 plus these must pass unchanged: `tests/mossNanoEngine.test.js` (the manager-contract block 216–589, the adapter block 591–828, and bridge truth 830–856); `tests/pocketTtsEngine.test.js`; `tests/mossNanoIpc.test.js`; `tests/pocketTtsIpc.test.js`; `tests/pythonSidecarAdapter.test.js`; `tests/packageReleaseTruth.test.js`.
+  - If an existing assertion fails **only** because a missing MOSS key is now `null` (for example a `toEqual` on the config snapshot), update that one assertion. Quote the old and new forms in the close-out. Any other failure means the extraction changed behavior: fix the code.
+- **Constants:** none move. The defaults stay in `main/sidecar-paths.js:60-94`; the adapter fallbacks (5000 / 120000 ms) stay in the adapter.
+- **Branch:** `eb/tts-engine-shared-1` from `refs/remotes/origin/main`, in its own worktree (`.worktrees/tts-engine-shared-1`). Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - Task 1 commit: exactly `tests/pythonSidecarEngine.test.js`.
+  - Task 2 commit: exactly `main/python-sidecar-engine.js`, `main/moss-nano-engine.js`, `main/pocket-tts-engine.js`, `docs/governance/TECHNICAL_REFERENCE.md`, `tests/pythonSidecarEngine.test.js` (the one MOSS expectation), and any single existing assertion changed under the rule above.
+  - Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push after *Done when* (Rule 5b), from a clean worktree; never the primary checkout.
+- **Failure handling:**
+  - If Task 2 breaks a Task 1 test other than the approved expectation: diff the shared body against `git show <task1>:main/moss-nano-engine.js` and fix the shared module.
+  - If a test reaches a real `taskkill`, or a fake with a pid: stop. That's an LL-132 violation; fix the fake, not the code.
+  - Retry ceiling: two corrections on Task 2, then BLOCKER(USER), keeping the Task 1 commit.
+  - Rollback: `git revert -m 1 <merge>`; never reset or clean.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:** `main/python-sidecar-adapter.js`, `main/*-sidecar.js`, `main/sidecar-paths.js`, `main/ipc/**`, `src/**`, the shared-core freeze set, and `docs/governance/terminal-ledger.jsonl` (TERMINAL-BACKFILL-1).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of TERMINAL-BACKFILL-1 and the mode-separation run.
+
+##### Done when
+1. On the Task 1 commit, `npm test -- tests/pythonSidecarEngine.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js` exits 0, and `git diff --stat refs/remotes/origin/main -- main/` is empty.
+2. On the Task 2 commit, the same command exits 0. `git diff <task1> -- tests/` shows only the approved MOSS `toBeNull` expectation, plus any single existing assertion changed under the stated rule.
+3. `npm test -- tests/mossNanoIpc.test.js tests/pocketTtsIpc.test.js tests/pythonSidecarAdapter.test.js tests/packageReleaseTruth.test.js` exits 0.
+4. `grep -c "function normalizeStatus\|function structuredFailure\|function createDeferred\|function ensureStarted"` reports 0 for each engine file and 4 for `main/python-sidecar-engine.js`.
+5. `node -e "const m=require('./main/moss-nano-engine');const p=require('./main/pocket-tts-engine');const ok=['createMossNanoEngine','createMossNanoDefaultConfig','getSharedMossNanoEngine','getMossNanoEngine'].every(k=>typeof m[k]==='function')&&['createPocketTtsEngine','createPocketTtsDefaultConfig','getSharedPocketTtsEngine','getPocketTtsEngine'].every(k=>typeof p[k]==='function');process.exit(ok?0:1)"` exits 0.
+6. `npm test` exits 0, with no new skips.
+7. `git diff --name-only refs/remotes/origin/main` lists exactly the paths in the staging plan.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Characterization suite passing on the unmodified engines | repeat | characterization suite | bounded | medium | 45m (TTS-SIDECAR-SHARED-1 Task 1 analogue, 2026-10-10) | — | — |
+| 2 | Engines extracted to one shared module with thin provider files | repeat | shared-module extraction | bounded | medium | 45m (TTS-SIDECAR-SHARED-1 Task 2 analogue, 2026-10-10) | — | — |
+| 3 | Regression suites green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (targeted + full `npm test` + one --no-ff merge) | — | — |
+
+**Total:** chain 1h50m · sum 1h50m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-112 — extract shared engine code only after both paths are proven and pinned: Task 1 is a separate characterization commit on unmodified code (*Done when* 1–2).
+- LL-132 — child-process fakes must exit asynchronously: Task 1 bans the synchronous-exit, pid-bearing fakes and uses the adapter suite's async fake; a fake with a pid is a stop condition.
+- LL-088 / standing rule 37 (SRL-089) — Task 1 commits before Task 2; one implementer; disjoint from TERMINAL-BACKFILL-1.
+- LL-130 — if the run moves the Monday item to In Flight, it calls `mutation-plan` only to execute and confirms every plan.
+- LL-131 — considered; this item deletes no module, so no census applies.
 <a id="cleanup-mode-barrel-1"></a>
 
 #### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and update structural tests *(position 10 — blocked stub)*
@@ -442,6 +542,69 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 - **Source:** [deferred archive](docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md); Monday item 13118856529.
 
 
+#### Stage 5 — Governance measurement
+
+<a id="terminal-backfill-1"></a>
+
+#### TERMINAL-BACKFILL-1 — Record the 51 historical terminal items in the ledger *(position 7 — Full Spec)*
+
+- **What:** Append one terminal record for each of the 51 register items that reached a terminal status before the ledger existed (44 completed, 6 dissolved, 1 superseded). The records come from the reviewed manifest `docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json`, in its order, through the plugin's ledger API as `pointer-closeout`. `docs/governance/terminal-ledger.jsonl` goes from 3 to 54 records. No register, roadmap or code change.
+- **Why:** Pace, trailing delivery and effort calibration read only the ledger, which holds 3 of 54 terminal items (audit F1, 2026-10-10). Without the history, every pace verdict rests on one day of completions.
+- **Out of scope:** Re-verifying old evidence; recording lessons; changing any register row (all 51 are already terminal there); correcting or reordering the 3 existing records; adding effort estimates.
+- **Owner-approved exception (roadmap review 2026-10-10, Phase C):** for history only, records cite existing evidence instead of running a full close-out crossing. Evidence is the close-out file where one exists (36 of the 44 completed); otherwise the ROADMAP Completed Work Summary row (8: KOKORO-DEEPEN-1/2/3, TTS-REGISTRY-1, TTS-NORMALIZE-1, FLOW-ZONE-AUTO, GOVERNANCE-SWEEP, NARRATE-A5-RATE-RESEED-1). Dissolved and superseded items cite their ROADMAP disposition note. Five undated dissolutions carry a resolved date and say how it was resolved, in the record's `note`.
+- **Prerequisites:** none.
+- **Done when:**
+    1. `(Get-Content docs/governance/terminal-ledger.jsonl).Count` is 54.
+    2. `git diff --numstat refs/remotes/origin/main -- docs/governance/terminal-ledger.jsonl` reads `51	0`: additions only, so the existing TR-001..TR-003 are byte-identical.
+    3. The verification script (Implementation detail) exits 0. It checks that the set of `itemId`s in the ledger equals the set of terminal items from `virtuoso_registry items --all --json`, with no item recorded twice. It also checks that every appended record's `itemId`, `completed`, `result` and `evidence` equal its manifest row, and that `note` starts with `historical-backfill`.
+    4. Re-running the append script appends 0 records and prints `skip` for all 51.
+    5. `git diff --name-only refs/remotes/origin/main` lists exactly `docs/governance/terminal-ledger.jsonl`.
+- **Effort:** S.
+- **Owners:** implementation agent runs the append; reviewer runs the verification script; repository operator merges.
+- **Lane:** Platform & Maintenance. Execution surface E (governance data only).
+- **Source:** [2026-10-10 audit F1](docs/planning/roadmap-reviews/2026-10-10-audit.md); [plan C.3](docs/planning/roadmap-reviews/2026-10-10-plan.md); the manifest; the first ledger records TR-001..TR-003 (CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md).
+
+##### Implementation detail
+- **Edit sites:** `docs/governance/terminal-ledger.jsonl` (append only). The manifest is read-only input.
+- **Append script** (write it to the session scratchpad, not the repo). In Python, run with `python -I`:
+  - put the plugin root's `scripts/` and the root itself on `sys.path` (`$HOME/.claude/plugins/cache/virtuoso-marketplace/virtuoso/1.13.0`, or the newer installed root);
+  - `import virtuoso_registry as vr`, `from tools.governance import providers`, `from tools.governance.providers import ledger as ledger_mod`;
+  - `reg = vr._load(<worktree root>)` and `book = providers.terminal_ledger(reg)`; assert `book.may_append("pointer-closeout")` (the policy default writer);
+  - for each manifest row in order: skip, printing `skip`, if any non-correction record for that `itemId` exists. Otherwise append `ledger_mod.LedgerRecord(record_id=book.next_record_id(), item_id=…, completed=…, result=…, evidence=…, extra={"note": row.note})` with `actor="pointer-closeout"`.
+
+  This is the same call pattern the 2026-10-10 close-out used for TR-001..TR-003 (external registers have no `record-completion` CLI path).
+- **Verification script** (scratchpad): load the ledger JSONL and the manifest, run `virtuoso_registry --root <worktree> items --all --json`, and assert Done-when 3. Exit 0 on pass; on failure, print every mismatch and exit 1.
+- **Tests:** none; this is data. The verification script is the gate.
+- **Constants:** none.
+- **Branch:** `eb/terminal-backfill-1` from `refs/remotes/origin/main`, in a worktree (`git worktree add .worktrees/terminal-backfill-1 -b eb/terminal-backfill-1 refs/remotes/origin/main`). Write branch refs in full (a `main/` directory exists).
+- **Staging plan:** exactly `docs/governance/terminal-ledger.jsonl`. Commit, merge to `main` with `--no-ff` from a clean worktree, and push (Rule 5b, `policy.git` push). Never touch the primary checkout.
+- **Failure handling:**
+  - If `may_append` is false, stop and raise a BLOCKER(USER): the writer policy changed.
+  - If a manifest item is not terminal in the register, stop. Do not append; the register moved since the manifest.
+  - If the manifest count is not 51, or the ledger after appending is not 54, do not commit.
+  - If an append raises, the ledger is append-only and idempotent: fix the cause and re-run; recorded rows skip.
+  - Retry ceiling: two re-runs, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`. Never edit or truncate the ledger by hand.
+- **Lane ownership (parallel run):** surface E only.
+  - **Forbidden:** everything except `docs/governance/terminal-ledger.jsonl`.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of TTS-ENGINE-SHARED-1 and the mode-separation run.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Manifest checked against the live register (51 terminal, none already recorded) | calculable | governance verification | mechanical | low | 10m (one items read + one set comparison) | — | — |
+| 2 | 51 historical records appended through the ledger API | calculable | ledger append | mechanical | low | 10m (51 API appends + idempotent re-run) | — | — |
+| 3 | Ledger verified, committed, merged and pushed | calculable | governance merge | mechanical | low | 15m (verification script + one --no-ff merge, as the 2026-10-10 close-out) | — | — |
+
+**Total:** chain 35m · sum 35m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-129 — census variants before a bulk transform: the manifest resolves every variant ahead of time (8 items without a close-out file, 5 undated dissolutions, TTS-INTEGRATE-1's two close-outs), so the run parses nothing.
+- LL-130 — mutation-plan opens a recovery record: this item writes no register field and calls no `mutation-plan`.
+- LL-133, LL-134 — considered; not applicable (not an epic).
+- Standing rule 36 (SRL-086/087, verify state at the moment of consequence): task 1 re-checks the manifest against the live register before any append.
 ## Deferred Lanes
 
 - **KOKORO-EXPORT-1** — Long-form audio export (M4B/SRT/ASS). Optional future after Reading Experience v2.

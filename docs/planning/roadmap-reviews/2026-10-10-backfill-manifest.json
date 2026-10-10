@@ -1,0 +1,366 @@
+{
+  "item": "TERMINAL-BACKFILL-1",
+  "created": "2026-10-10",
+  "author": "roadmap-review 2026-10-10",
+  "policy": "Owner-approved exception to the full-crossing rule for history only: record from existing evidence, no re-verification, no lessons. Append-only, idempotent; actor pointer-closeout.",
+  "count": 51,
+  "records": [
+    {
+      "itemId": "KOKORO-DEEPEN-1",
+      "completed": "2026-05-11",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (—)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "KOKORO-DEEPEN-2",
+      "completed": "2026-05-11",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (—)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "KOKORO-DEEPEN-3",
+      "completed": "2026-05-11",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (—)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "TTS-REGISTRY-1",
+      "completed": "2026-05-12",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (`ROADMAP_ARCHIVE_2026-05-14.md`)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "TTS-CACHE-TIMING-1",
+      "completed": "2026-05-13",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-CACHE-TIMING-1.2026-05-14.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-NORMALIZE-1",
+      "completed": "2026-05-13",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (`ROADMAP_ARCHIVE_2026-05-14.md`)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "TEST-HARNESS-1",
+      "completed": "2026-05-15",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date from the ROADMAP dissolution note"
+    },
+    {
+      "itemId": "TTS-CANARY-1",
+      "completed": "2026-05-15",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date from the ROADMAP dissolution note"
+    },
+    {
+      "itemId": "TTS-DIAG-1",
+      "completed": "2026-05-15",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-DIAG-1.2026-05-15.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-REGISTRY-DISPATCH-1",
+      "completed": "2026-05-15",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date from the ROADMAP dissolution note"
+    },
+    {
+      "itemId": "TTS-SYNC-1",
+      "completed": "2026-05-15",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-SYNC-1.2026-05-15.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "ENGINE-DORMANCY-1",
+      "completed": "2026-05-16",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.ENGINE-DORMANCY-1.2026-05-16.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "SK-HYG-2",
+      "completed": "2026-05-16",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-CACHE-HARDEN-1",
+      "completed": "2026-05-16",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-CACHE-HARDEN-1.2026-05-16.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date from ROADMAP summary row"
+    },
+    {
+      "itemId": "TTS-EVENT-SYNC-1",
+      "completed": "2026-05-16",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-EVENT-SYNC-1.2026-05-16.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-INTEGRATE-1",
+      "completed": "2026-05-16",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-INTEGRATE-1.2026-05-16.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date from ROADMAP summary row"
+    },
+    {
+      "itemId": "LEGACY-NARR-MEDIA-1-DISSOLVED",
+      "completed": "2026-05-17",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); inferred from NARR-MEDIA-1 completion (dissolved in its favor); exact terminal date unrecorded"
+    },
+    {
+      "itemId": "NARR-MEDIA-1",
+      "completed": "2026-05-17",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARR-MEDIA-1.2026-05-17.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARR-PAUSE-STATE-1",
+      "completed": "2026-05-17",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); date of the superseding decision; exact terminal date unrecorded"
+    },
+    {
+      "itemId": "NORMALIZER-ENRICH-1",
+      "completed": "2026-05-17",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NORMALIZER-ENRICH-1.2026-05-17.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-ARCH-DOC-1",
+      "completed": "2026-05-17",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-ARCH-DOC-1.2026-05-17.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-PIPELINE-1",
+      "completed": "2026-05-17",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-PIPELINE-1.2026-05-17.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-RENDER-MAP-1",
+      "completed": "2026-05-17",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-RENDER-MAP-1.2026-05-17.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARR-CURSOR-2",
+      "completed": "2026-05-18",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARR-CURSOR-2.2026-05-18.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARR-PAUSE-1",
+      "completed": "2026-05-18",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARR-PAUSE-1.2026-05-18.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARR-SPOKEN-1",
+      "completed": "2026-05-18",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARR-SPOKEN-1.2026-05-18.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-EVAL-3",
+      "completed": "2026-05-18",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-EVAL-3.2026-05-18.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-PARITY-1",
+      "completed": "2026-05-18",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-PARITY-1.2026-05-18.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "FLOW-ZONE-AUTO",
+      "completed": "2026-05-19",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (—)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "READER-MODE-ISOLATION-1-PHASE-0",
+      "completed": "2026-05-21",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "BASELINE-SYNC-1",
+      "completed": "2026-05-22",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "GOVERNANCE-SWEEP",
+      "completed": "2026-05-22",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (—)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "TEST-GREEN-1",
+      "completed": "2026-05-22",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TEST-GREEN-1.2026-05-22.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-ISO-1A",
+      "completed": "2026-05-24",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-ISO-1A.2026-05-24.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-PERSISTENT-ANCHOR-STEP3-REPAIR",
+      "completed": "2026-05-24",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-PERSISTENT-ANCHOR-STEP3-REPAIR.2026-05-22.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-ISO-1B",
+      "completed": "2026-05-25",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-ISO-1C",
+      "completed": "2026-05-26",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-ISO-1C.2026-05-26.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-ISO-1D",
+      "completed": "2026-05-26",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "GOV-HUMAN-REVIEW-1",
+      "completed": "2026-05-27",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.GOV-HUMAN-REVIEW-1.2026-05-27.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "READER-ISO-1E",
+      "completed": "2026-05-27",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "TTS-QUAL-CI-1",
+      "completed": "2026-05-28",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.TTS-QUAL-CI-1.2026-05-28.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "EXT-PAIR-1",
+      "completed": "2026-05-29",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.EXT-PAIR-1.2026-05-29.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARRATE-CLOSED-LOOP-CURSOR",
+      "completed": "2026-05-29",
+      "result": "dissolved",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "SINGLE-INSTANCE-LOCK-1",
+      "completed": "2026-05-29",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.SINGLE-INSTANCE-LOCK-1.2026-05-29.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "THEME-SYNC-1",
+      "completed": "2026-05-29",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.THEME-SYNC-1.2026-05-29.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARRATE-DUAL-SOURCE-DIAG-1",
+      "completed": "2026-05-30",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-DUAL-SOURCE-DIAG-1.2026-05-30.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARRATE-A5-RATE-RESEED-1",
+      "completed": "2026-05-31",
+      "result": "completed",
+      "evidence": "ROADMAP.md Completed Work Summary row (`NARRATE-A5-RATE-RESEED-liveqa-gate-report.md`)",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10); no close-out file"
+    },
+    {
+      "itemId": "NARRATE-CURSOR-TRACKING-DIAG-1",
+      "completed": "2026-05-31",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-CURSOR-TRACKING-DIAG-1.2026-05-31.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARRATE-INTENT-CURSOR-1",
+      "completed": "2026-05-31",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-INTENT-CURSOR-1.2026-05-31.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "NARRATE-PAUSE-RESUME-UNIFY-1",
+      "completed": "2026-05-31",
+      "result": "completed",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-PAUSE-RESUME-UNIFY-1.2026-05-31.md",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    },
+    {
+      "itemId": "HYG-XLSX-DASHBOARD-RESTORE",
+      "completed": "2026-09-23",
+      "result": "superseded",
+      "evidence": "ROADMAP.md dissolved/superseded note; reconciled by roadmap-review 2026-09-23",
+      "note": "historical-backfill (TERMINAL-BACKFILL-1, owner-approved exception 2026-10-10)"
+    }
+  ]
+}
