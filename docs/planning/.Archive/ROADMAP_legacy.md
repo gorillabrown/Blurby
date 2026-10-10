@@ -4731,3 +4731,117 @@ Full spec was in ROADMAP.md Phase 6 section. Archived 2026-04-04.
 - LL-130 — mutation-plan opens a recovery record: this item writes no register field and calls no `mutation-plan`.
 - LL-133, LL-134 — considered; not applicable (not an epic).
 - Standing rule 36 (SRL-086/087, verify state at the moment of consequence): task 1 re-checks the manifest against the live register before any append.
+
+---
+
+<!-- Archived 2026-10-10 by /pointer-closeout TTS-ENGINE-SHARED-1; close-out docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md -->
+
+#### TTS-ENGINE-SHARED-1 — Share MOSS and Pocket engine lifecycle and request handling *(position 6 — Full Spec)*
+
+- **What:** New `main/python-sidecar-engine.js` holds the one sidecar-engine implementation. It covers start gating, status normalization, request ownership and settlement, synthesize, cancel, shutdown and restart. `main/moss-nano-engine.js` (331 lines) and `main/pocket-tts-engine.js` (308 lines) become thin provider configurations with their exact export surface, mirroring how TTS-SIDECAR-SHARED-1 produced `main/python-sidecar-adapter.js`.
+- **Why:** An investigation on 2026-10-10 against `main` @ `8d491cab` found about 285 duplicated lines per file (~92 %). The only differences are the label strings (12 per file), one visible config key (MOSS `tokenizerDir` / Pocket `referenceWavPath`, line 13), the request-id prefix (`nano-` / `pocket-`), the provider default config and adapter, and `createConfigSnapshot`'s handling of missing keys.
+- **Approved behavior change (owner, 2026-10-10):** `createConfigSnapshot` unifies on Pocket's `config[key] ?? null`. A visible config key missing from MOSS's `status().config` becomes `null` instead of `undefined`. Nothing else changes.
+- **Out of scope:** activating either engine or changing `main/ipc/tts.js` (it never loads them); the adapter (`main/python-sidecar-adapter.js`), the sidecar files and `main/sidecar-paths.js`; the pre-existing `getShared*({reset:true})` leak, which replaces an engine without shutting the old one down (recorded as a follow-up, not fixed here); the unused `reject` in `createDeferred`; `now()`/`startedAt`, which nothing reads; and any `src/` file.
+- **Prerequisites:** TTS-SIDECAR-SHARED-1, Completed 2026-10-10 (merge `7a462bf7`).
+- **Effort:** M.
+- **Owners:** implementation agent; reviewer confirms the characterization suite passed before and after extraction; repository operator merges.
+- **Lane:** TTS / Narration Engine. Execution surface D.
+- **Source:** [2026-10-10 plan](docs/planning/roadmap-reviews/2026-10-10-plan.md); the engine investigation (2026-10-10, quoted here); [CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md) (Decision #6, LL-132); LL-112.
+
+**Shared behavior to preserve** (both files on `8d491cab`; MOSS line numbers, Pocket in brackets):
+- `ensureStarted` (91–126 [88–121]) deduplicates concurrent starts through `startPromise`. It ignores a start that resolves after a lifecycle change (`startGeneration !== lifecycleGeneration`). A rejected start becomes `reason: error?.reason || "sidecar-start-failed"`, `recoverable: error?.recoverable !== false`; `started = Boolean(result?.ready || result?.ok)`.
+- `status()` (147–160 [140–153]): unstarted means await the start, else return the snapshot with `config: createConfigSnapshot(config)`; started means `normalizeStatus(await sidecarAdapter.status())`.
+- `synthesize()` (162–239 [155–228]):
+  - returns `too-many-in-flight` when `inFlight.size >= config.maxInFlight` (no limit if undefined);
+  - checks ownership after start (`request-not-owned`) and on the result (`stale-sidecar-output` for a requestId or ownerToken mismatch);
+  - maps a not-ready start to `startStatus.reason || "sidecar-not-ready"` and a rejected request to `error.reason || "sidecar-request-failed"`.
+- `cancel()` (241–273 [230–256]):
+  - an unknown id returns `{ok:false, cancelled:false, reason:"request-not-found", requestId, recoverable:true}`;
+  - otherwise it settles locally (`"cancelled"`) and then awaits `sidecarAdapter.cancel({requestId, ownerToken})`, returning `{...result, requestId}`;
+  - an adapter throw gives `structuredFailure(…, "sidecar-cancel-failed", {cancelled:true})`;
+  - a late result is dropped.
+- `shutdown()` and `restart()` (275–306 [258–289]): increment the generation, clear `startPromise`, settle every in-flight request (`"sidecar-shutdown"` / `"sidecar-restarted"`), then call the adapter. `restart` calls `sidecarAdapter.restart(config)` **as a method**, because the adapter's `restart` uses `this`. There is no try/catch in either; an adapter rejection propagates after the generation increment.
+- Module-level, one per provider: `DEFAULT_CONFIG` (computed at require time; it reads env vars `BLURBY_PACKAGED_RESOURCES_PATH` and `BLURBY_TTS_OUTPUT_ROOT`), the visible-key list, the singleton variable and getters (317–324 [294–301]) and the alias `get*Engine`.
+
+##### Implementation detail — two serial tasks, two commits
+
+**Task 1: characterize current behavior (no production edit).** Create `tests/pythonSidecarEngine.test.js`. It drives the **current** factories `createMossNanoEngine` and `createPocketTtsEngine` through `describe.each([{ name: "MOSS Nano", factory, label: "MOSS Nano", key: "tokenizerDir", prefix: "nano-" }, { name: "Pocket TTS", factory, label: "Pocket TTS", key: "referenceWavPath", prefix: "pocket-" }])`.
+
+The tests inject a **fake adapter object** (no child process), modelled on `tests/mossNanoEngine.test.js` 30–136, plus deterministic `createRequestId`/`createOwnerToken`. Where a test needs a child process, use only the async-exit, pid-less fake from `tests/pythonSidecarAdapter.test.js` 20–30 (LL-132). Never reuse the synchronous-exit fakes at `tests/mossNanoEngine.test.js` 182–185 or `tests/pocketTtsEngine.test.js` 120–124; the latter sets `pid = 12345`, which could run a real `taskkill`.
+
+Tests, per provider unless marked:
+1. **"start that is not ready leaves the engine unstarted"**: the adapter start resolves `{ok:false, ready:false, reason:"sidecar-not-ready"}`; `status()` returns `ready:false`, and `synthesize` resolves `reason:"sidecar-not-ready"`.
+2. **"a rejected start maps to sidecar-start-failed"**: start rejects `new Error("x")`; status `reason === "sidecar-start-failed"`, `recoverable === true`. With `{reason:"boom", recoverable:false}`, `reason === "boom"` and `recoverable === false`.
+3. **"concurrent starts share one adapter start"**: two `status()` calls before the start resolves; the adapter `start` is called once.
+4. **"a start that resolves after shutdown is ignored"**: begin the start, call `shutdown()`, then resolve the start; `status()` does not report `ready:true` from the stale start.
+5. **"restart settles in-flight work with sidecar-restarted and drops late output"** (Pocket had no restart test).
+6. **"cancel failure returns sidecar-cancel-failed with cancelled:true"**.
+7. **"output after shutdown is dropped"**: in-flight request, `shutdown()`, then the adapter delivers output; the request resolved `sidecar-shutdown` and the output changes nothing.
+8. **"a rejected request maps to sidecar-request-failed or error.reason"**.
+9. **"normalizeStatus passes runtime, metadata and syntheticAudio through"**.
+10. **"too-many-in-flight with the default maxInFlight of 1"** (MOSS had no such test).
+11. **"request ids use the provider prefix by default"**: with no `createRequestId`, the id starts with `prefix`.
+12. **(once) "two engines never share state"**: a MOSS engine and a Pocket engine plus a second MOSS engine, each with its own fake adapter. Settling a request on one leaves the others' in-flight state and status unchanged.
+13. **"missing visible config key in the status snapshot"**: build the engine with a config lacking `key`; assert `status().config[key]` is `undefined` for MOSS and `null` for Pocket. This is current behavior. Task 2 changes the MOSS expectation (below).
+
+Run `npm test -- tests/pythonSidecarEngine.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js`; it must exit 0 against **unmodified** production code. Commit Task 1 alone. If a statement above contradicts current code, encode current behavior and note it for the close-out. Never edit production code in Task 1.
+
+**Task 2: extract.**
+- **New `main/python-sidecar-engine.js`** ("use strict", CommonJS). It exports `createPythonSidecarEngine(provider, options = {})`:
+  - `provider = { label, visibleConfigKeys, requestIdPrefix, defaultConfig, createDefaultAdapter }`;
+  - `options = { config, sidecarAdapter, createRequestId, createOwnerToken, now }` as today.
+
+  Move in, verbatim apart from label interpolation and the approved snapshot change: `normalizeStatus`, `structuredFailure`, `createDeferred`, `createConfigSnapshot(config, keys)` with `?? null`, and the factory body (MOSS 71–306). Replace every "MOSS Nano" string with `${provider.label}`. Use `` `${provider.requestIdPrefix}${randomUUID()}` ``, `options.sidecarAdapter ?? provider.createDefaultAdapter()`, and `config` defaulting to `provider.defaultConfig`. All mutable state stays inside the factory closure; nothing mutable goes at module level.
+- **`main/moss-nano-engine.js`** becomes:
+  - the requires;
+  - `DEFAULT_CONFIG` (line 8, still computed at require time);
+  - the visible-key list (lines 10–18);
+  - `createMossNanoEngine(options = {}) { return createPythonSidecarEngine({ label: "MOSS Nano", visibleConfigKeys: VISIBLE_CONFIG_KEYS, requestIdPrefix: "nano-", defaultConfig: DEFAULT_CONFIG, createDefaultAdapter: () => createMossNanoSidecarAdapter() }, options); }`;
+  - the unchanged singleton block (317–324) and exports (326–331).
+- **`main/pocket-tts-engine.js`:** the same, with "Pocket TTS", `"pocket-"`, its key list, the singleton (294–301) and exports (303–308).
+- **`docs/governance/TECHNICAL_REFERENCE.md`:** extend the sidecar sentence on the Pocket TTS line (~444) to name `main/python-sidecar-engine.js` as the shared engine.
+- **Tests:**
+  - Task 1 test 13: change the MOSS expectation `expect(snapshot[key]).toBeUndefined()` to `expect(snapshot[key]).toBeNull()`. This is the only approved test edit.
+  - All of Task 1 plus these must pass unchanged: `tests/mossNanoEngine.test.js` (the manager-contract block 216–589, the adapter block 591–828, and bridge truth 830–856); `tests/pocketTtsEngine.test.js`; `tests/mossNanoIpc.test.js`; `tests/pocketTtsIpc.test.js`; `tests/pythonSidecarAdapter.test.js`; `tests/packageReleaseTruth.test.js`.
+  - If an existing assertion fails **only** because a missing MOSS key is now `null` (for example a `toEqual` on the config snapshot), update that one assertion. Quote the old and new forms in the close-out. Any other failure means the extraction changed behavior: fix the code.
+- **Constants:** none move. The defaults stay in `main/sidecar-paths.js:60-94`; the adapter fallbacks (5000 / 120000 ms) stay in the adapter.
+- **Branch:** `eb/tts-engine-shared-1` from `refs/remotes/origin/main`, in its own worktree (`.worktrees/tts-engine-shared-1`). Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - Task 1 commit: exactly `tests/pythonSidecarEngine.test.js`.
+  - Task 2 commit: exactly `main/python-sidecar-engine.js`, `main/moss-nano-engine.js`, `main/pocket-tts-engine.js`, `docs/governance/TECHNICAL_REFERENCE.md`, `tests/pythonSidecarEngine.test.js` (the one MOSS expectation), and any single existing assertion changed under the rule above.
+  - Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push after *Done when* (Rule 5b), from a clean worktree; never the primary checkout.
+- **Failure handling:**
+  - If Task 2 breaks a Task 1 test other than the approved expectation: diff the shared body against `git show <task1>:main/moss-nano-engine.js` and fix the shared module.
+  - If a test reaches a real `taskkill`, or a fake with a pid: stop. That's an LL-132 violation; fix the fake, not the code.
+  - Retry ceiling: two corrections on Task 2, then BLOCKER(USER), keeping the Task 1 commit.
+  - Rollback: `git revert -m 1 <merge>`; never reset or clean.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:** `main/python-sidecar-adapter.js`, `main/*-sidecar.js`, `main/sidecar-paths.js`, `main/ipc/**`, `src/**`, the shared-core freeze set, and `docs/governance/terminal-ledger.jsonl` (TERMINAL-BACKFILL-1).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of TERMINAL-BACKFILL-1 and the mode-separation run.
+
+##### Done when
+1. On the Task 1 commit, `npm test -- tests/pythonSidecarEngine.test.js tests/mossNanoEngine.test.js tests/pocketTtsEngine.test.js` exits 0, and `git diff --stat refs/remotes/origin/main -- main/` is empty.
+2. On the Task 2 commit, the same command exits 0. `git diff <task1> -- tests/` shows only the approved MOSS `toBeNull` expectation, plus any single existing assertion changed under the stated rule.
+3. `npm test -- tests/mossNanoIpc.test.js tests/pocketTtsIpc.test.js tests/pythonSidecarAdapter.test.js tests/packageReleaseTruth.test.js` exits 0.
+4. `grep -c "function normalizeStatus\|function structuredFailure\|function createDeferred\|function ensureStarted"` reports 0 for each engine file and 4 for `main/python-sidecar-engine.js`.
+5. `node -e "const m=require('./main/moss-nano-engine');const p=require('./main/pocket-tts-engine');const ok=['createMossNanoEngine','createMossNanoDefaultConfig','getSharedMossNanoEngine','getMossNanoEngine'].every(k=>typeof m[k]==='function')&&['createPocketTtsEngine','createPocketTtsDefaultConfig','getSharedPocketTtsEngine','getPocketTtsEngine'].every(k=>typeof p[k]==='function');process.exit(ok?0:1)"` exits 0.
+6. `npm test` exits 0, with no new skips.
+7. `git diff --name-only refs/remotes/origin/main` lists exactly the paths in the staging plan.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Characterization suite passing on the unmodified engines | repeat | characterization suite | bounded | medium | 45m (TTS-SIDECAR-SHARED-1 Task 1 analogue, 2026-10-10) | — | — |
+| 2 | Engines extracted to one shared module with thin provider files | repeat | shared-module extraction | bounded | medium | 45m (TTS-SIDECAR-SHARED-1 Task 2 analogue, 2026-10-10) | — | — |
+| 3 | Regression suites green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (targeted + full `npm test` + one --no-ff merge) | — | — |
+
+**Total:** chain 1h50m · sum 1h50m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-112 — extract shared engine code only after both paths are proven and pinned: Task 1 is a separate characterization commit on unmodified code (*Done when* 1–2).
+- LL-132 — child-process fakes must exit asynchronously: Task 1 bans the synchronous-exit, pid-bearing fakes and uses the adapter suite's async fake; a fake with a pid is a stop condition.
+- LL-088 / standing rule 37 (SRL-089) — Task 1 commits before Task 2; one implementer; disjoint from TERMINAL-BACKFILL-1.
+- LL-130 — if the run moves the Monday item to In Flight, it calls `mutation-plan` only to execute and confirms every plan.
+- LL-131 — considered; this item deletes no module, so no census applies.

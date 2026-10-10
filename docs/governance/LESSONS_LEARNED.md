@@ -2694,3 +2694,17 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Recommendation:** Open with `encoding='utf-8'` in Python, `Get-Content -Encoding utf8` in PowerShell, and read git output as bytes; check raw bytes before declaring a file corrupt.
 **Applies to:** Scripts and checks that read the terminal ledger, manifests, register snapshots or close-outs on Windows.
 **Status:** Observation
+
+### LL-138 — An extraction with an approved behavior change needs a positive control (TTS-ENGINE-SHARED-1, 2026-10-10)
+
+**Verdict:** A characterization suite that stays green through an extraction proves only that it did not see a change, not that it could. When the spec approves one behavior change, that change is a free positive control: it must fail exactly one test before its expectation is flipped.
+**Evidence:** TTS-ENGINE-SHARED-1 committed the 25-test suite alone on unmodified code (`2c9bde42`). With the extraction applied and the expectation not yet flipped, exactly one test failed (the MOSS "missing visible config key" case, "expected null to be undefined"); after the approved `toBeUndefined()` → `toBeNull()` flip, 56/56 passed and the extraction needed 0 correction rounds.
+**Recommendation:** Extraction and consolidation specs with an approved behavior change add a Done-when row: "with the extraction applied and the approved expectation not yet flipped, exactly that test fails, with the expected message." Record the failing test and message in the run report.
+**Applies to:** Shared-module extraction, consolidation and refactor specifications that pin behavior with a characterization suite (engine and adapter consolidation, CLEANUP-MODE-BARREL-1, any post-separation mode consolidation).
+**Status:** Observation
+
+### LL-112 — status (pointer-closeout, 2026-10-10)
+**Status:** Observation — held again (TTS-ENGINE-SHARED-1, 2026-10-10): second application after TTS-SIDECAR-SHARED-1; characterization commit before extraction both times; promotion candidate for the next roadmap review
+
+### LL-136 — status (pointer-closeout, 2026-10-10)
+**Status:** Observation — recurred (TTS-ENGINE-SHARED-1, 2026-10-10): Done-when 7 exact-path fence; no timing log, so no estimate or actual again; promotion candidate for the next roadmap review
