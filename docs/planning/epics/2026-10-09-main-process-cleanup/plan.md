@@ -41,6 +41,11 @@ Serial order and why: the register sequence 6 → 7 → 9. The items are file-di
 
 | Date | Gate | Evidence |
 |------|------|----------|
+| 2026-10-09 | P1 | baseline green on ef1d233b (3058/133) |
+| 2026-10-09 | P2 | C1, C2 — dd3db29c |
+| 2026-10-10 | P3 | S1, S2 — 7a462bf7 |
+| 2026-10-10 | P4 | L1, L2 — b95dbb55 |
+| 2026-10-10 | P5 | DINT on b95dbb55; done.md |
 
 ## Current-phase worklist
 

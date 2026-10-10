@@ -28,6 +28,15 @@
 - **Git:** main @ 7a462bf7; eb/cleanup-legacy-parsers-1 @ 91e48416 pushed; packet @ this checkpoint.
 - **Next:** push legacy merge (L2), DINT, completion protocol.
 
+## S1c — 2026-10-10 00:40 — L2, DINT, completion
+
+- **Did:** Pushed the legacy merge b95dbb55 (L2). Ran DINT in fresh worktree mpc-dint-1 at b95dbb55: all green. Wrote done.md. Left charter.md unedited (Decision #8).
+- **Learned:** the whole epic fit in one session. Every integration landed on attempt 1, with no main movement from other runs.
+- **Decisions:** #8.
+- **Gate/DoD movement:** all rows met (C1 C2 S1 S2 L1 L2 DINT).
+- **Git:** main @ b95dbb55; packet branch @ this checkpoint; publishing the packet next.
+- **Next:** completion step 3 (publish), then stop. Owner: /pointer-closeout EPIC-MAIN-PROCESS-CLEANUP.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

@@ -1,6 +1,6 @@
 ---
 epic: main-process-cleanup
-last_updated: 2026-10-10 00:10
+last_updated: 2026-10-10 00:40
 updated_by: session 1
 ---
 
@@ -28,19 +28,17 @@ updated_by: session 1
 ## Where we are
 
 ```
-phase:        P4 — Legacy parser removal (L1.4/L1.5 running), then integrate → L2, then P5
-next_action:  L1.4 npm test + L1.5 build on eb/cleanup-legacy-parsers-1 @ 91e48416; integrate (mpc-integ-cleanup-legacy-parsers-1-1); DINT
+phase:        P5 — complete (done.md written; publishing packet to main)
+next_action:  if done.md is not on refs/remotes/origin/main, resume launch.md Completion step 3 (publish); else stop. Owner runs /pointer-closeout
 blockers:     none
 session:      1 of ~3 budgeted
-dod:          C1 met | C2 met | S1 met | S2 met | L1 1-3,6 met (4-5 pending) | L2 unmet | DINT unmet
+dod:          C1 met | C2 met | S1 met | S2 met | L1 met | L2 met | DINT met (b95dbb55)
 ```
 
 ## Next actions — max 5, near horizon only
 
-1. [x] P1 baseline; P2 cloud merged (dd3db29c); P3 sidecar merged (7a462bf7)
-2. [ ] L1.4/L1.5 on 91e48416, then integrate legacy → L2
-3. [ ] DINT in a fresh worktree at origin/main (mpc-dint-1)
-4. [ ] done.md, charter status complete, final journal; publish packet to main
+1. [x] All items merged; DINT passed on b95dbb55; done.md written
+2. [ ] Publish the packet to main (launch.md Completion step 3), then stop
 
 ## Working set — verified facts this epic relies on
 
@@ -71,6 +69,7 @@ dod:          C1 met | C2 met | S1 met | S2 met | L1 1-3,6 met (4-5 pending) | L
 | 5 | 2026-10-09 | Logs kept in `C:\Projects\Blurby-artifacts\epic-main-process-cleanup\` | charter: no evidence in %TEMP% | Constraint |
 | 6 | 2026-10-09 | Sidecar Task 1 fake: kill() emits exit on a microtask, not synchronously | a real ChildProcess exits asynchronously; with the sync fake of tests/pocketTtsEngine.test.js the start-timeout resolves `sidecar-exited` (verified: 2 failures), which is a fake artefact, not code behavior. Recorded as a finding | Grant: test helper structure |
 | 7 | 2026-10-09 | Legacy re-census hits in `Virtuoso/work-register.snapshot.json` (3) and `Virtuoso/reports/planning-cockpit.html` (1) classed as doc references; item proceeds | both are Lane E register/report data written after the 2026-10-08 census (01588c90); they match the item's own ID `cleanup-legacy-parsers-1` and its description prose; no require/import/path/build reference exists anywhere outside docs. Owner may overrule: `git revert 91e48416` | Trigger wording "non-doc reference" (flagged for owner) |
+| 8 | 2026-10-10 | charter.md left unedited at completion (launch.md step 2 says set status complete) | the kickoff prompt says never touch charter.md; the user's instruction wins | Kickoff prompt |
 
 ## Evidence
 
@@ -81,3 +80,7 @@ dod:          C1 met | C2 met | S1 met | S2 met | L1 1-3,6 met (4-5 pending) | L
 - **S1** eb/tts-sidecar-shared-1: Task 1 65cb5774 — targeted cmd exit 0 (51 tests; 11 defs / 20 cases), `git diff origin/main --stat -- main/` empty. Task 2 18f453fa — same cmd exit 0, tests/ diff vs 65cb5774 = 0 bytes; IPC/package suites exit 0 (9); helper counts 0/0/3; export check exit 0; npm test 0 (3088/133, +20, skips unchanged); diff = 4 paths. Positive control: hard-wired env var → Pocket env-var test failed.
 - **S2** 7a462bf7 pushed to main (mpc-integ-tts-sidecar-shared-1-1, attempt 1): ci/typecheck/test/build 0, 3088/133; `--is-ancestor 18f453fa` exit 0.
 - **L1** eb/cleanup-legacy-parsers-1 @ 91e48416 (from 7a462bf7): (1) file absent; (2) git grep exit 1 (fired on CLAUDE.md:166 before the edit); (3) parser suites exit 0 (73); (6) exactly 3 paths. Census: Decision #7.
+- **L1.4/L1.5** on 91e48416: npm test 0 (3088/133), build 0.
+- **L2** b95dbb55 pushed to main (mpc-integ-cleanup-legacy-parsers-1-1, attempt 1): ci/typecheck/test/build 0, 3088/133; `--is-ancestor 91e48416` exit 0.
+- **DINT** fresh worktree mpc-dint-1 @ b95dbb55: ci 0, typecheck 0, npm test 0 (212 files/1 skip; 3088/133; failing ∅), build 0; combined targeted command 0 (13 files, 162 tests); ancestors f3abb524/18f453fa/91e48416 → 0/0/0.
+
