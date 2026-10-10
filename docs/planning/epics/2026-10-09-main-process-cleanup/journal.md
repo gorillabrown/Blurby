@@ -10,6 +10,33 @@
 - **Git:** `origin/main` @ `9597240d`; packet branch `eb/epic-main-process-cleanup` not created yet.
 - **Next:** P1 bootstrap.
 
+## S1 — 2026-10-09 23:45 — bootstrap, baseline, cloud item
+
+- **Did:** Bootstrapped the packet worktree and branch (push needed an explicit refspec; Decision #3). Baseline on ef1d233b green. Moved CLOUD-RETRY-SHARED-1 to In Flight (Decision #2). Implemented `main/cloud-retry.js`, the two wrappers and `tests/cloudRetry.test.js`; committed f3abb524 and pushed.
+- **Learned:** baseline is 3058/133 (not the RMS-2 tree's 3342). `worktree add -b X refs/remotes/origin/main` sets upstream to origin/main.
+- **Decisions:** #2–#5.
+- **Gate/DoD movement:** C1 1–4 verified (state → Evidence).
+- **Git:** eb/cloud-retry-shared-1 @ f3abb524 pushed; packet branch @ this checkpoint.
+- **Next:** C1.5–6, integrate cloud (C2), then P3.
+
+## S1b — 2026-10-10 00:15 — cloud and sidecar merged; legacy verified
+
+- **Did:** Integrated CLOUD-RETRY-SHARED-1 (dd3db29c on main). Moved TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1 to In Flight. Sidecar Task 1 (65cb5774) and Task 2 (18f453fa), integrated as 7a462bf7 on main. Legacy deletion and doc fixes 91e48416; L1 verified; integration attempt 1 (b95dbb55) running.
+- **Learned:** the reference fake's synchronous kill→exit makes start-timeout resolve `sidecar-exited` (Decision #6). The spec's census grep now also matches the item's own ID in the register snapshot and cockpit report (Decision #7, flagged for owner).
+- **Decisions:** #6, #7.
+- **Gate/DoD movement:** C1, C2, S1, S2 met; L1 met (state → Evidence).
+- **Git:** main @ 7a462bf7; eb/cleanup-legacy-parsers-1 @ 91e48416 pushed; packet @ this checkpoint.
+- **Next:** push legacy merge (L2), DINT, completion protocol.
+
+## S1c — 2026-10-10 00:40 — L2, DINT, completion
+
+- **Did:** Pushed the legacy merge b95dbb55 (L2). Ran DINT in fresh worktree mpc-dint-1 at b95dbb55: all green. Wrote done.md. Left charter.md unedited (Decision #8).
+- **Learned:** the whole epic fit in one session. Every integration landed on attempt 1, with no main movement from other runs.
+- **Decisions:** #8.
+- **Gate/DoD movement:** all rows met (C1 C2 S1 S2 L1 L2 DINT).
+- **Git:** main @ b95dbb55; packet branch @ this checkpoint; publishing the packet next.
+- **Next:** completion step 3 (publish), then stop. Owner: /pointer-closeout EPIC-MAIN-PROCESS-CLEANUP.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
