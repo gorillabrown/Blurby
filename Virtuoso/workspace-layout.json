@@ -6,6 +6,15 @@
   "pluginCompatibility": ">=1.4.0 <2.0.0",
   "adopted": false,
   "roles": {
+    "holdingBay": {
+      "path": "docs/planning/holding",
+      "provider": "directory",
+      "authority": "reference",
+      "mutability": "read-write",
+      "owner": "write-plan",
+      "allowedWriters": ["storyboard", "write-plan", "virtuoso", "pointer-closeout", "roadmap-review"],
+      "label": "Holding bay (ad hoc storyboards and plans awaiting roadmap review)"
+    },
     "governance": {
       "path": "docs/governance",
       "provider": "directory",
