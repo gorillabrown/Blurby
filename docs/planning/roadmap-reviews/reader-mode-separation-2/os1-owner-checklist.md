@@ -1,5 +1,13 @@
 # OS-1 owner session — listening and live checks (READER-MODE-SEPARATION-2)
 
+> **Amended 2026-10-10 (Decisions #31–#32).** Part A stopped at H6, and narration is being rebuilt. Only four checks
+> remain, all on F and all non-narration: **V1** (Part B, recorded under `final.items`) and **S1, S2, S4** (Part C,
+> recorded under `speed.items`). Everything else is already marked "dropped by owner ruling" in the observation files.
+> Launch F with the Part B command (the archive exists, so skip `build-candidate.mjs`). Leave `scripts/` untouched until
+> you have closed the window: the launcher refuses to start if it is dirty.
+> - **V1:** the bar on F is "works" (there is no B0 baseline).
+> - **S1 step 4:** press Home, then → once, to reach `0.45x`. Do not press ← from End; that takes 87 presses.
+
 This is the one owner session the epic needs before it can be verified and published (Decision #13).
 Automation has already recorded every mode transition, position, cursor count and speed value on both
 the baseline build (B0) and the final build (F). What is left needs your ears and eyes.

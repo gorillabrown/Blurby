@@ -18,7 +18,7 @@
 //             owner, playback, visibleCursorCount,                     // non-empty strings / non-negative integer
 //             staleEffectCount /* must be 0 */, result: "pass"|"known-defect",
 //             knownDefect?: "KD-CURSOR-LEAD"|"KD-RATE-1.4-OVERLAP",    // required iff known-defect
-//             heardAudio?: { observer: "owner", captureRef? }, notes? }],
+//             heardAudio?: { observer: "owner", captureRef?, droppedBy? }, notes? }],
 //   removedCrossOwnerEffects: [...],                      // must be an array (may be empty)
 //   speedDialog?: {                                       // only checked with --require-speed (R7)
 //     focus: { values: [{ multiplier, wpm }] }, flow: { values: [{ multiplier, wpm }] },  // 89: 0.40..4.80 step 0.05, wpm = x*250
@@ -44,6 +44,9 @@ const REQUIRED_CATEGORIES = [
 const KINDS = ["epub", "non-epub"];
 const KNOWN_DEFECTS = ["KD-CURSOR-LEAD", "KD-RATE-1.4-OVERLAP"];
 const isAudio = (c) => c.startsWith("narrate-") || c === "same-mode-narrate" || (c.startsWith("transition-") && c.split("-").includes("narrate"));
+// Owner ruling 2026-10-10 (Decisions #31-#32): Narrate is to be removed and rebuilt, so its listening checks were dropped.
+// An audio case may carry this exact marker instead of an owner observation; it records "dropped", never "heard".
+const AUDIO_DROPPED_BY = "owner-ruling-2026-10-10";
 const BAD_WORD = /\bpending\b|\bfail(s|ed)?\b|not verified/i;
 const range = (n, f) => Array.from({ length: n }, (_, i) => f(i));
 // Rule 7 expected lists, computed from integers (no float drift): 89 Focus/Flow, 25 Narrate.
@@ -103,8 +106,8 @@ export function validate(q, { resolvedCandidate, g0Documents, buildManifestSha25
     if (c.result === "known-defect" ? !KNOWN_DEFECTS.includes(c.knownDefect) : c.knownDefect !== undefined) {
       bad("R5", `knownDefect ${JSON.stringify(c.knownDefect)} invalid for result ${c.result} (allowed only with known-defect: ${KNOWN_DEFECTS.join(", ")})`);
     }
-    if (isAudio(c.category) && !(c.heardAudio?.observer === "owner" || (typeof c.heardAudio?.captureRef === "string" && c.heardAudio.captureRef))) {
-      bad("R6", "audio case lacks heardAudio.observer === \"owner\" or a captureRef");
+    if (isAudio(c.category) && !(c.heardAudio?.observer === "owner" || (typeof c.heardAudio?.captureRef === "string" && c.heardAudio.captureRef) || c.heardAudio?.droppedBy === AUDIO_DROPPED_BY)) {
+      bad("R6", `audio case lacks heardAudio.observer === "owner", a captureRef, or droppedBy === "${AUDIO_DROPPED_BY}"`);
     }
   });
   if (requireSpeed) {
@@ -155,6 +158,8 @@ function selfTest() {
       ["staleEffectCount 1", (q) => { q.cases[0].staleEffectCount = 1; }, /^R4 case .*staleEffectCount/],
       ["unknown knownDefect id", (q) => { Object.assign(q.cases[0], { result: "known-defect", knownDefect: "KD-NOPE" }); }, /^R5 /],
       ["missing heardAudio on narrate case", (q) => { delete q.cases[audioIdx].heardAudio; }, /^R6 /],
+      ["narrate case dropped by the owner ruling passes", (q) => { q.cases[audioIdx].heardAudio = { droppedBy: AUDIO_DROPPED_BY }; }, null],
+      ["narrate case droppedBy another value fails R6", (q) => { q.cases[audioIdx].heardAudio = { droppedBy: "owner-ruling-other" }; }, /^R6 /],
       ["wrong candidate sha", (q) => { q.candidate = "b".repeat(40); }, /^R1 candidate/],
       ["wrong document hash", (q) => { q.documents[Object.keys(q.documents)[0]] = "0".repeat(64); }, /^R2 /],
       ["tampered build file", () => { fs.writeFileSync(path.join(dir, "assets", "app.js"), "tampered"); return good; }, /^R1 build/, { ...base, rehash: true }],

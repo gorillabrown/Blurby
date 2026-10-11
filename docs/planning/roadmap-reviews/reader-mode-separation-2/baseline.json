@@ -1,7 +1,7 @@
 {
   "sprintCode": "READER-MODE-SEPARATION-2",
   "gate": "G0",
-  "admission": "BLOCKED",
+  "admission": "PASS",
   "recordedAtUtc": "2026-09-23T21:13:04Z",
   "worktree": "C:/Users/estra/Projects/Blurby/.worktrees/reader-mode-separation-2",
   "branch": "eb/reader-mode-separation-2",
@@ -175,7 +175,21 @@
     "a3AutomatedHalf": "RECORDED — admission/g0-matrix.json (EPUB + converted non-EPUB; 24 transitions + 4 same-mode per fixture)",
     "census": "dependencies.json, ownership.json (census/ --check)",
     "g4Fixtures": "fixtures/*.baseline.json",
-    "ownerHalf": "PENDING — g0-owner-checklist.md → g0-owner-observations.json (BLOCKER B1)",
+    "ownerHalf": "DONE per Decision #32 (observer Evan; dropped rows listed in admissionRecord)",
     "nonEpubFixture": "converted imports (g0-converted-chapters, g0-converted-text); legacy inline record is unreadable on B0"
+  },
+  "admissionRecord": {
+    "recordedAtUtc": "2026-10-11T03:27:59.967Z",
+    "observer": "Evan (owner)",
+    "authority": "Decisions #13, #31, #32",
+    "ownerHalf": "g0-owner-observations.json: H1-H6 observed on B0; H7, H8, V2, V3 dropped by owner ruling 2026-10-10; V1 has no B0 baseline (F bar: works)",
+    "knownDefects": [
+      "KD-CURSOR-LEAD (H1, H6)",
+      "KD-RATE-1.4-OVERLAP (H6)",
+      "Decision #28a scheduler underrun stall (H5)"
+    ],
+    "newProblems": "H4 1.4x distortion: audio quality only, does not contradict g0-matrix.json",
+    "automatedHalf": "admission/isolation.json PASS, admission/flow-reproduction.json PASS, admission/g0-matrix.json",
+    "rebuild": "admission/baseline-build-rebuild.json 21/21; re-hashed at F1 21/21, 0 mismatches"
   }
 }

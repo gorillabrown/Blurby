@@ -16,16 +16,33 @@
       "what": "session-1 --no-ff merge of origin/main aafbb1c9 into the run branch"
     },
     "structuralCandidate": {
-      "status": "pending",
-      "commit": null,
+      "status": "recorded",
+      "commit": "d0c58af41fa1e73cc77928106dbcb9d93b2591a3",
       "what": "S: first commit where G1-G6 pass before the speed dialog",
-      "evidence": {}
+      "evidence": {
+        "record": "verification.json -> structuralCandidate (G1-G5 PASS; G6 automated half)"
+      }
     },
     "candidate": {
-      "status": "pending",
-      "commit": null,
+      "status": "recorded",
+      "commit": "c9d73dddc57a3ff19532d14baf76ae84e3c5f4b5",
       "what": "F: final candidate after the speed dialog; D2-D8 run on F",
-      "evidence": {}
+      "evidence": {
+        "recordedAtUtc": "2026-10-11T03:27:59.967Z",
+        "archive": "C:/Projects/Blurby-artifacts/rms2-candidate-c9d73dddc57a (dist manifest fbe3ff986ce1db9235bb19b0bf0dad7ebd505ea4bb8291c8fb5fa8725c22ba32)",
+        "d2": "16/16",
+        "d3": "4 files pass",
+        "d4": "pass",
+        "d5": "4 files pass",
+        "typecheck": 0,
+        "build": 0,
+        "diffCheck": 0,
+        "pathsSubset": "319/319 I..F paths registered",
+        "d6": "npm test: 4 full runs each 3339-3340 passed / 133 skipped with only KF-3 timeouts (Decision #33)",
+        "d7d8": "check_reader_mode_evidence --require-speed PASS; declared speed tests 106/106",
+        "d9": "B0 archive re-hash 21/21, 0 mismatches",
+        "liveQa": "docs/planning/roadmap-reviews/reader-mode-separation-2/live-qa.json"
+      }
     }
   },
   "g0": {

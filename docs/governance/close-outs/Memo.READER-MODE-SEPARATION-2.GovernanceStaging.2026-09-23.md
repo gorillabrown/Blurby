@@ -14,6 +14,8 @@ This memo records governance change intent for later application by the register
 | 4 | 2026-10-09 | A known full-suite flake (Qwen streaming test timer leak) can make the final suite gate exit 1 with zero failed tests | Type 1b — Advance (Planner-Originated), pre-registered decision table | Resolved: the gate stays exit-0; a recurrence triggers one scoped test-hygiene fix to the Qwen test only, never a retry-until-green |
 | 5 | 2026-10-09 | The owner listening gate on the frozen baseline blocked every remaining front in an unattended run | Type 3 — Pivot Advance (owner-directed) | Resolved: code waves start now on the automated baseline evidence; one combined owner session (baseline listening, new-build listening, speed-dialog check) before final verification; owner-required conditions unchanged |
 | 6 | 2026-10-09 | The Waves B–E design left nine contradictions between the spec, the recorded baselines and the speed amendment | Type 1b — Advance (Planner-Originated), owner-delegated | Resolved: all nine ruled (observation rule for stale playing flags; new contract interface; display-jump alias; dead-path tests kept on the legacy hook; source-text re-point table; per-mode speed keys; widened narration speed domain; Page keys kept; dead code not copied) |
+| 7 | 2026-10-10 | Owner stopped the listening session after six baseline items and ruled narration be removed and rebuilt from scratch | Type 2 — Advance with Narrowing (owner ruling) | Resolved: the epic lands first. The Narrate listening and Narrate-only visual checks are dropped and recorded as dropped. Every automated Narrate case stays. The heard-audio validator rule accepts an explicit owner-ruling marker. The owner runs four non-narration checks on the final build |
+| 8 | 2026-10-11 | At final verification the full suite failed three tests by timeout in four runs, while the old build's suite also failed timing tests on the same night | Type 1b — Advance (owner ruling) | Resolved: the owner ruled the three named timeouts environmental. They are recorded like the two earlier known flaky tests. Any other failure stays real. Follow-ups: timeout headroom for the new boundary test, and diagnosing the slowdown |
 
 ## Target: ROADMAP.md
 
@@ -207,6 +209,78 @@ Source: packet `state.md` Decision log rows 17–24 (authority: owner standing a
 
 **Follow-up items:** a later item (lane D) should make `main/sync-queue.js` `saveQueue` retry a transient Windows `EPERM`/`EBUSY` rename (KF-2, Decision #25; the same race affects real users' sync queues). A later item may also give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
 
+### Fold-in 9 — Mid-Dispatch Amendment (OS-1 stopped; Narrate to be rebuilt, Decisions #31–#32)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 8 amendment
+Action: Append the block below verbatim
+Source: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-10.md` (Decision block); packet `state.md` Decisions #31–#32. Authority: owner ruling 2026-10-10 in the OS-1 session, with GO relayed by the planning session.
+
+#### Mid-Dispatch Amendment — 2026-10-10 (OS-1 stopped; Narrate to be rebuilt)
+
+**Pause point:** The owner stopped OS-1 after baseline item H6 and ruled that narration be removed and rebuilt from the ground up, disconnected from the other modes, with the TTS engine in scope (Decision #31).
+
+**Decision:** Type 2 — Advance with Narrowing (owner ruling).
+
+**Rationale:** Heard-audio parity for a component scheduled for deletion has no consumer. The separation itself is built and gated by automation, and it is the prerequisite for a rebuild that shares nothing with Page, Focus and Flow.
+
+**Scope change** (the charter allows a row to be loosened only by the user; the owner has done so here):
+
+- **D1 (B0 owner half):**
+  - It is met by H1–H6, observer Evan.
+  - H7, H8, V2 and V3 are dropped by owner ruling.
+  - V1 was not run on B0, so no B0 baseline exists. F's V1 bar is "works", not "matches B0".
+  - `baseline.json` → `admission: PASS` names the observer and lists the dropped rows.
+  - H4's `new-problem` (1.4x distortion) concerns audio quality only and does not contradict the automated matrix.
+- **D7:**
+  - Every automated G6 case remains required, unchanged: positions, transitions, cursor counts, zero stale effects, compared with B0.
+  - Narrate audio cases record `heardAudio: { droppedBy: "owner-ruling-2026-10-10" }`. They are recorded as dropped, never as heard or as passed by listening.
+- **D8:**
+  - The automated speed checks are unchanged: 89 Focus/Flow values, 25 Narrate values, no Page action, keyboard-operable.
+  - The live observation is the owner's S1, S2 and S4 on F. S3 (Narrate by ear) is dropped. R7 is unchanged.
+- **OS-1 on F:**
+  - Only V1 (`final.items`) and S1, S2 and S4 (`speed.items`) remain, and the owner runs them personally.
+  - H1–H8, V2, V3, S3 and C1–C3 are marked "dropped by owner ruling", not "not run".
+  - F17 (the supporting loopback capture) is dropped.
+- **R6 (`scripts/check_reader_mode_evidence.mjs`):**
+  - It also accepts `heardAudio.droppedBy === "owner-ruling-2026-10-10"`. Two self-test controls are added: the marker passes, and any other value fails R6.
+  - This file is evidence tooling: neither `vite build`, the app nor `npm test` consumes it. F's built archive and its automated G6 results are therefore unchanged, and R1 re-hashes the archive at F1.
+  - The G6 harness lists all of `scripts/` among production inputs, so its launcher refuses while the file is dirty. Apply the edit only after the owner's F launch has closed, and commit it with V at F1.
+- **F1–F5:** the mechanics are unchanged. F2 integrates onto the then-current `origin/main` (41ef49de at ruling time).
+
+**Follow-up items:**
+- **Narrate removal:** the first sprint after this epic merges (owner), not on this branch.
+- **The rebuild:** scoped separately (`/storyboard`, 2026-10-10).
+- **For `/roadmap-review`:**
+  - Retire or replace NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1, NARRATE-SUBSCRIBER-CURSOR-1 and KOKORO-EXPORT-1.
+  - UX-POLISH-1 needs a fallback for a saved `narrate` mode.
+  - CLEANUP-MODE-BARREL-1 keeps "no legacy NarrateMode" assertions.
+
+### Fold-in 11 — Mid-Dispatch Amendment (KF-3 full-suite timeouts, Decision #33)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 9 amendment
+Action: Append the block below verbatim
+Source: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-10-2.md` (Decision block); packet `state.md` Decision #33. Authority: owner ruling 2026-10-11, "Rule them environmental and finish the merge."
+
+#### Mid-Dispatch Amendment — 2026-10-11 (KF-3)
+
+**Pause point:** At F1, D6's unedited `npm test` failed four times. Every failure was a 10 s timeout in the same three tests:
+- the two `updateInstallGating` tests, in every run;
+- the G1 boundary graph test, in two runs.
+
+The same night, B0's own suite failed timing tests too, and took 60 s against its recorded 19 s.
+
+**Decision:** Type 1b — Advance (owner ruling).
+
+**Rationale:**
+- Each test passes alone (`updateInstallGating` 5/5 on F and on B0; G1 16/16 in D2).
+- Earlier full runs of this code were green.
+- The base shows the same class of failure.
+
+**Scope change:** KF-3 extends the KF-1/KF-2 rule to exactly those three node IDs. Each may fail only by a timeout in a full-suite run, and must pass alone. Any other failure is real, and every failing run is recorded. This applies to D6 and to F2 step 5.
+
+**Follow-up items:**
+- Give the G1 graph test an explicit timeout: it uses about 6.5 s of its 10 s budget when run alone.
+- Address the `updateInstallGating` timeout (outside this epic).
+- Diagnose the machine-wide test slowdown.
+
 ## Target: docs/governance/LESSONS_LEARNED.md
 
 ### Fold-in 4 — Provisional lesson (number assigned at fold-in; worktree numbers are placeholders)
@@ -218,6 +292,16 @@ Content:
 - **Discovery:** A Full Spec written from a source inventory listed dead views as copy targets, a runtime-bearing file as "type-only", missed a live second entry point (App.tsx standalone window), and required byte-for-byte parity with behavior that included the very cross-owner effects the separation removes. All surfaced only at Wave A via a TypeScript-resolver import graph and a production-path trace recorder.
 - **Rule:** Before declaring copy/move targets or parity gates, run an import-graph census from the real entry points (all of them) and tag the effects the change is meant to remove; write the parity gate as "baseline minus mechanically recomputed removed-effect set, removed set asserted absent".
 - **Related:** LL-118 (trace imports bottom-up), LL-128 (verify targets before create).
+
+### Fold-in 10 — Provisional lesson (number assigned at fold-in)
+Section: end of catalog
+Action: Append row
+Content:
+### LL-<next> — Hear the baseline before automating parity for it (READER-MODE-SEPARATION-2, 2026-10-10)
+- **Applies to:** epics and refactors that preserve user-facing behaviour; owner gates; narration
+- **Discovery:** The epic preserved Narrate exactly, and the owner's first listening of the baseline was moved to the end of the run for throughput (Decision #13). Three later decisions and repeated live runs went into proving Narrate parity. Twenty minutes into that listening, the owner ruled Narrate unfit and ordered it rebuilt, and the Narrate parity evidence lost its consumer.
+- **Rule:** When an item preserves a user-facing behaviour the owner has not recently experienced, take a short owner observation of the baseline, or ask "preserve or replace?", before investing in parity automation for it. An owner gate may move late for throughput only when its verdict cannot change scope.
+- **Related:** SRL-070 (heard audio needs the owner); Decision #13 (owner gate re-sequenced).
 
 ## Target: close-out memo §Mid-Dispatch Decisions
 

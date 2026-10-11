@@ -281,6 +281,40 @@
 - **Git:** eb/reader-mode-separation-2 @ 9a171504 (F). Uncommitted by rule: state.md, journal.md.
 - **Next:** the owner runs `os1-owner-checklist.md` and writes 'done' in the OS-1 BLOCKER → executor assembles live-qa.json, validator, F1–F5.
 
+## S1l — 2026-10-09 21:20
+
+- **Did:**
+  - Pre-F1 dry run on F′ found `git diff --check I F` exit 2 → F″ c9d73ddd (Decision #29). Production code is unchanged from F′.
+  - Rebuilt the candidate archive `rms2-candidate-c9d73dddc57a`. Candidate G6 run fppfinal (EPUB + chapters) and speed capture fppspeed pass.
+  - B0 run bppfinal came back invalid from its 5th case (the window was throttled; Decision #26 probe). A B0 probe (bprobe, EPUB book transition) was clean, then the full B0 rerun bppfinal2 was clean.
+  - Assembled: every case passes or is baseline-equal. Dry validator: R6 ×26 and R7 only. The three live-profile hashes were unchanged after every launch.
+- **Learned:**
+  - A long unattended B0 run can lose the display partway; the frame probe catches it.
+  - B0's book-end cursor can go unmeasured when its last-word audio event is late (the scheduler stall).
+  - MSYS rewrites only the first path of a comma-separated argument; pass Windows paths.
+- **Decisions:** #29, #30.
+- **Gate/DoD movement:** F = F″ c9d73ddd; the automated G6 evidence is on F″. D1, D7 and the D8 observation wait on OS-1.
+- **Git:** eb/reader-mode-separation-2 @ c9d73ddd (F″). Uncommitted by rule: state.md, journal.md.
+- **Next:** the owner runs `os1-owner-checklist.md` and writes 'done' in the OS-1 BLOCKER → assemble live-qa.json (the command in state.md Blockers), validator --require-speed, F1–F5.
+
+## S1m — 2026-10-10 / 2026-10-11 (host) — OS-1 stopped and re-scoped; F1 verified
+
+- **Did:**
+  - Ran OS-1 Part A with the owner. B0 was launched with `live/live-run-g6.ps1 -Target b0 -Owner`, because `admission/owner-launch.ps1` refuses W since Wave B. H1–H6 were observed. The owner then stopped the session and ruled Narrate be removed and rebuilt (#31).
+  - Narrowed the finish line (#32, mid-dispatch Type 2). R6 accepts the owner-ruling marker; self-test 13/13.
+  - The owner ran V1, S1 and S2 on F. S4 is automated proof, owner-accepted.
+  - Wrote `live-qa.json` (validator PASS) and `baseline.json` admission PASS, and recorded the `verification.json` identities.
+  - F1: every row fresh on F. D6 passes only by owner ruling KF-3 (#33), after four full runs whose only failures were three 10 s timeouts.
+- **Learned:**
+  - The G6 harness counts all of `scripts/` as production input, so a validator edit must wait until the last candidate launch closes.
+  - The owner's listening verdict can change scope. See staging fold-in 10: hear the baseline before automating parity.
+  - Tonight B0's own suite ran three times slower than recorded and failed timing tests. Full-suite timing tests are machine-state sensitive.
+  - An owner's "closed" window can still be open (minimized). Check the launcher's `result.json` before treating a run as closed.
+- **Decisions:** #31, #32, #33.
+- **Gate/DoD movement:** D1–D9 PASS (D1/D7/D8 amended by #32; D6 by #33). `verified.md` written. F1 marked.
+- **Git:** eb/reader-mode-separation-2 → V (this checkpoint). Uncommitted: `tests/perf-baseline-results.json` (noise), `Virtuoso/.recovery/` (untracked).
+- **Next:** F2 (integration worktree k=1 onto origin/main), F3 publish, F4 fast-forward, F5 report → the planning session runs /pointer-closeout. After the merge, the Narrate removal sprint (owner) and the narration-rebuild storyboard (on hold, first answer "core done right").
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
