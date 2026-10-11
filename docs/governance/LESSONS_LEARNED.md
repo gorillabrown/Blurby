@@ -2746,3 +2746,6 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-136 — status (pointer-closeout, 2026-10-11)
 **Status:** Observation — recurred a third time (READER-MODE-SEPARATION-2, 2026-10-11). This time the registry refused `virtuoso` the time log in `closeOuts`; it was not an exact-path fence. Promotion candidate for the next roadmap review, together with a registry permission fix.
+
+### LL-136 — status (2026-10-11, 2026-10-11)
+**Status:** Promoted -> ROADMAP standing rule 41

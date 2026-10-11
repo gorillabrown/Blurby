@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-11T03:44:14Z",
+  "takenAt": "2026-10-11T22:59:59Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -58,9 +58,9 @@
     {
       "id": "NARRATE-HEARD-CURSOR-1",
       "title": "Drive Highlight + Reading-Window from One Tunable Lag-Compensated Heard Cursor",
-      "sequence": 2,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "sequence": null,
+      "status": "superseded",
+      "raw_status": "Superseded",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -74,24 +74,24 @@
       "spec_link": "ROADMAP.md#narrate-heard-cursor-1",
       "branch": "sprint/narrate-heard-cursor-1",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-11",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Route both the visible highlight and FlowScrollEngine.followWord through ONE lag-compensated heard cursor (getAudioProgress / heard-floor clamp); extract tunable TTS_VISUAL_CURSOR_LAG_MS; tune by ear. No reducer/WORD_ADVANCE change. Live-QA verdict gates SUBSCRIBER-CURSOR-1.",
-      "notes": "2026-06-01 ULTRATHINK probe-first restructuring (NARRATE-CURSOR-WINDOW-SYNC.md). The cheap reversible test of the cursor/window fix. PASS closes the desync line; PARTIAL dispatches SUBSCRIBER-CURSOR-1; FAIL re-opens investigation.\n\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.",
-      "revision": "af12cc35bb05dfb7efed1a1f16479b08c094b2535b7d93bdfb0aef5f29d5ede1",
+      "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-058.",
+      "revision": "dcd3bbb62b748a3c01019a1ea24e1effc11c63b38ef6b157edfa54f48160346b",
       "extra": {
         "id": "13118863178",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863178",
-        "updated_at": "2026-09-23T19:06:55Z",
+        "updated_at": "2026-10-11T22:58:04Z",
         "group": "group_mm7femyn"
       }
     },
     {
       "id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
       "title": "Collapse 14 Reseed Paths + Delete Dormant-Engine Code (Kokoro-Only)",
-      "sequence": 3,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "sequence": null,
+      "status": "superseded",
+      "raw_status": "Superseded",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -105,28 +105,28 @@
       "spec_link": "ROADMAP.md#narrate-applyratechange-collapse-1",
       "branch": "sprint/narrate-applyratechange-collapse-1",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-11",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Collapse 14 speakNextChunk paths in applyRateChange (lines 1722-1871) into single restartGeneration(reason) helper; delete Web/Qwen/Pocket/Nano reseed branches per Kokoro-only design constraint; fold applyVoiceChange into same helper. Fixes A5 (rate-change skip).",
-      "notes": "Also owns: A5 1.4x-bucket overlap buffer-flush (cancel prior-tempo queued sources on rate-INCREASE; only 1.4x jumbles, 1.2/1.3 clean) + unblocks SUBSCRIBER-CURSOR-1 reducer-removal (remove last cursorWordIndex audio readers).\n\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.",
-      "revision": "9a4bb050df30471eb12d1dbf2ef1acbff9bbaafde356fe5b25155bf776c97aa6",
+      "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-059.",
+      "revision": "50ba5650d9763c4cfbf0ac88e22335e49bdb96f2563731b8d1a9776fa2d5d0fc",
       "extra": {
         "id": "13118840646",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840646",
-        "updated_at": "2026-09-23T19:06:55Z",
+        "updated_at": "2026-10-11T22:58:06Z",
         "group": "group_mm7femyn"
       }
     },
     {
       "id": "UX-POLISH-1",
       "title": "Space-bar resumes last-used reading mode",
-      "sequence": 5,
+      "sequence": 11,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
-        "READER-MODE-SEPARATION-2"
+        "NARRATE-REMOVE-1"
       ],
       "effort": "XS",
       "lane": "UX polish",
@@ -137,12 +137,12 @@
       "completed": "",
       "evidence": "",
       "description": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
-      "notes": "Deferred until reader-mode runtime controls stop churning.\n\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.",
-      "revision": "082bc45dd226602cf2b8b5b4463bb94f499442c11d0a9c195c20d4c297ab01bf",
+      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references.",
+      "revision": "1cd25f3a93606b508d124d58cfe36169394e2af5252cee2437d2332f215371fa",
       "extra": {
         "id": "13118847895",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
-        "updated_at": "2026-09-23T19:06:55Z",
+        "updated_at": "2026-10-11T22:58:39Z",
         "group": "group_mm7femyn"
       }
     },
@@ -228,11 +228,98 @@
       }
     },
     {
-      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
-      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
-      "sequence": 4,
+      "id": "TEST-TIMEOUT-HEADROOM-1",
+      "title": "Give the three slow tests explicit time limits",
+      "sequence": 5,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "XS",
+      "lane": "Platform & Maintenance",
+      "group": "Test Health",
+      "spec_link": "ROADMAP.md#test-timeout-headroom-1",
+      "branch": "eb/test-timeout-headroom-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Explicit 30 s per-test timeouts for the G1 boundary test and the two updateInstallGating tests, which exceed the 10 s default under full-suite load (KF-3). Retires the KF-3 exception; any other failure stays real.",
+      "notes": "Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass.",
+      "revision": "afade3565c3753594967163a0b91d36c9af29075765e2a217509cad899042889",
+      "extra": {
+        "id": "13261060490",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261060490",
+        "updated_at": "2026-10-11T22:59:21Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "NARRATE-REMOVE-1",
+      "title": "Remove Narrate, keeping Kokoro dormant",
+      "sequence": 8,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "TEST-TIMEOUT-HEADROOM-1",
+        "LIBRARY-SETTINGS-FIX-1",
+        "EINK-HOVER-FIX-1"
+      ],
+      "effort": "L",
+      "lane": "Reader Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-remove-1",
+      "branch": "eb/narrate-remove-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Delete the Narrate mode and all narration logic (hooks, strategies, scheduler, TTS settings UI, dormant MOSS/Pocket/Qwen engines, eval harness, CI quality-gate), keeping the Kokoro engine dormant with no renderer or preload path; v13 migration turns a saved narrate mode into flow. 3 waves; touches the shared-core freeze set, so it runs alone.",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass.",
+      "revision": "754f9d8a06626d01dfc90cbf6b5ec7091916b92b2c53db783199c94417c79d14",
+      "extra": {
+        "id": "13261071931",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261071931",
+        "updated_at": "2026-10-11T22:59:22Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "NARRATE-REBUILD-1",
+      "title": "Rebuild Narrate with the cursor attached to the playing word",
+      "sequence": 9,
       "status": "blocked",
       "raw_status": "Blocked",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-REMOVE-1"
+      ],
+      "effort": "XL",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-rebuild-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Path: epic. Phase 0 proves Kokoro (word table exact vs its own audio; start and speed change within 2 s), then a deterministic core: per-chunk exact word table + playback clock, cursor = word at the current playback sample, no estimated timing, no stretching. Finish line: Narration rebuilt.",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (rebuild draft stub). Absorbed by roadmap review 2026-10-11 as Path: epic; /epic charters it when it reaches the head.",
+      "revision": "a4200ce7e01a08e10677e4949d97110775f7d1975bcd1372e70a8e8426bd18c1",
+      "extra": {
+        "id": "13261025969",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261025969",
+        "updated_at": "2026-10-11T22:59:24Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "NARRATE-SUBSCRIBER-CURSOR-1",
+      "title": "Retire WORD_ADVANCE Reducer Action; Visual Highlight via Direct Callback",
+      "sequence": null,
+      "status": "superseded",
+      "raw_status": "Superseded",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -247,15 +334,15 @@
       "spec_link": "ROADMAP.md#narrate-subscriber-cursor-1",
       "branch": "sprint/narrate-subscriber-cursor-1",
       "started": "2026-05-31",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-11",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "If NARRATE-CURSOR-TRACKING-DIAG-1 confirms the subscriber/direct-callback model, rename lastConfirmedAudioWordRef -> subscriberCursorRef, remove cursorWordIndex from React reducer state, remove WORD_ADVANCE action, and wire visual/view follow via the verdict-approved live target.",
-      "notes": "GATED on NARRATE-HEARD-CURSOR-1 live-QA (2026-06-01 restructuring). Heavy WORD_ADVANCE/reducer removal dispatches ONLY if HEARD-CURSOR-1 verdict is PARTIAL (residual React-batching lead). PASS => unnecessary (dissolve/defer). Wave A enumeration folded into HEARD-CURSOR-1.\n\n2026-09-23 owner priority: blocked until READER-MODE-SEPARATION-2 completes. Mode isolation is step 1; rebase this specification against the separated runtimes before admission. Existing evidence/verdict gates still apply.",
-      "revision": "e0e4b5c98d444dd7f916e90c9129097a8fdf12e3c4e6ee68af0118559a2d4461",
+      "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-060.",
+      "revision": "514946af9e654048cfca5b6317d9272240dfb4e29a89d90b64a70154494df378",
       "extra": {
         "id": "13118808496",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808496",
-        "updated_at": "2026-09-23T19:06:55Z",
+        "updated_at": "2026-10-11T22:58:07Z",
         "group": "group_mm7fb4db"
       }
     },
@@ -263,8 +350,8 @@
       "id": "KOKORO-EXPORT-1",
       "title": "Long-Form Audio Export",
       "sequence": null,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "status": "dissolved",
+      "raw_status": "Dissolved",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -276,15 +363,15 @@
       "spec_link": "",
       "branch": "",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-11",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Long-form audio export from Kokoro",
-      "notes": "Deferred to post-TTS-Architecture phase. Worktree preserved at .worktrees/kokoro-export-1 (37 tests pass).",
-      "revision": "c0a74fe56f55eaa233ed55e80a9aabcbf80b08b84a1417ea888749b1097d141f",
+      "notes": "Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061.",
+      "revision": "6ccee81753681135bb7c8d4526ed8ad012681bbd02429d235e76c6cd9a2df777",
       "extra": {
         "id": "13118856529",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856529",
-        "updated_at": "2026-09-23T19:00:25Z",
+        "updated_at": "2026-10-11T22:58:09Z",
         "group": "group_mm7fb4db"
       }
     },
@@ -351,7 +438,7 @@
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
-        "READER-MODE-SEPARATION-2"
+        "NARRATE-REMOVE-1"
       ],
       "effort": "",
       "lane": "Reader Engine",
@@ -362,12 +449,12 @@
       "completed": "",
       "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md",
       "description": "Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.",
-      "notes": "Owner-requested roadmap addition, 2026-09-23. Blocked behind full mode separation; beyond current five-item priority sequence. Planning stub, not dispatch-ready. Approx. 650 net lines saved across all five items is the owner's unverified aggregate estimate; expected dependency-count delta 0. No code changes or provider activation authorized by this planning update.\nProduction searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.\nVerification to specify: The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.",
-      "revision": "60f9a0ec705ffcdad519996efefffb27aceb44593d22173f6a94f1b4f05e14f6",
+      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer.",
+      "revision": "f3f7b58cf619ac07671453204780b3425573b54052bba439812f817235d2457a",
       "extra": {
         "id": "13122892318",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122892318",
-        "updated_at": "2026-09-24T04:51:53Z",
+        "updated_at": "2026-10-11T22:58:40Z",
         "group": "group_mm7fb4db"
       }
     },

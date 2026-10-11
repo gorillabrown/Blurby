@@ -5365,3 +5365,56 @@ Source: this staging memo's two `ROADMAP.md` fold-ins, its Mid-Dispatch Decision
 Destination: final close-out memo → `Mid-Dispatch Decisions`.
 
 Preserve the owner's authorization, prospective A1/A2/A3 action limits, unchanged G0 gate, known sync exclusions, speed ranges/reference/increments, deferred slider sequence and final verification disposition before any eventual inline-spec collapse. Do not describe proposed acceptance checks as completed. No automatic merge, push, cleanup or successor dispatch is authorized.
+
+---
+
+<!-- Archived 2026-10-11 by roadmap review 2026-10-11: NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1 and NARRATE-SUBSCRIBER-CURSOR-1 superseded by NARRATE-REBUILD-1; KOKORO-EXPORT-1 dissolved; UX-POLISH-1 re-stubbed. Stage 3 and the KOKORO-EXPORT-1 entry as they stood at cf17a95d. -->
+
+#### Stage 3 — Narration reliability and UX (held behind separation)
+
+The four prior detailed specs are preserved in [the pre-isolation spec archive](docs/planning/roadmap-reviews/2026-09-23-pre-isolation-specs.md). Their old edit sites and shared-runtime assumptions are historical reference. Re-specify against the separated runtimes before dispatch; none is currently certified ready.
+
+<a id="narrate-heard-cursor-1"></a>
+
+#### NARRATE-HEARD-CURSOR-1 — Prove and repair heard-audio highlight/window sync *(position 2 — blocked stub)*
+
+- **Lane:** TTS / Narration Engine, with Narrate visual-port integration in Reader Engine.
+- **Prerequisites:** READER-MODE-SEPARATION-2; NARRATE-CURSOR-TRACKING-DIAG-1; NARRATE-PAUSE-RESUME-UNIFY-1.
+- **Scope:** Measure the residual on isolated Narrate, then use a bounded reversible probe. Current trusted lag is 450 ms and heuristic lag is 350 ms; verify the complete publication path before adding compensation. No other reading mode may be changed to fix Narrate.
+- **Verdict routing:** PASS closes the symptom and makes the subscriber rewrite a retirement candidate; PARTIAL permits only the demonstrated residual; FAIL returns to investigation. Owner-grounded audio evidence remains required.
+- **Spec:** Rebase from the archived specification after separation.
+
+<a id="narrate-applyratechange-collapse-1"></a>
+
+#### NARRATE-APPLYRATECHANGE-COLLAPSE-1 — Preserve position and eliminate rate-change audio overlap *(position 3 — blocked stub)*
+
+- **Lane:** TTS / Narration Engine.
+- **Prerequisites:** READER-MODE-SEPARATION-2; NARRATE-PAUSE-RESUME-UNIFY-1; NARRATE-A5-RATE-RESEED-1.
+- **Scope:** Reproduce the reported 1.4x residual, preserve the shipped position seed fix, and select the smallest supported correction. Re-enumerate current reseed paths; do not assume the old title's 14 paths or a nonexistent restartGeneration helper.
+- **Spec:** Rebase from the archived specification after separation. Narrate-only behavior must not affect Flow, Focus, or Page.
+
+<a id="narrate-subscriber-cursor-1"></a>
+
+#### NARRATE-SUBSCRIBER-CURSOR-1 — Conditional Narrate cursor publication cleanup *(position 4 — blocked stub)*
+
+- **Lane:** TTS / Narration Engine.
+- **Prerequisites:** READER-MODE-SEPARATION-2; NARRATE-HEARD-CURSOR-1; NARRATE-APPLYRATECHANGE-COLLAPSE-1; NARRATE-CURSOR-TRACKING-DIAG-1.
+- **Scope gate:** Dispatch only for a demonstrated residual after the heard-cursor probe and approved design. A PASS makes this a retirement candidate, not an automatic rewrite. It must not reintroduce shared mode state.
+- **Spec:** Architecture and tests must be re-specified from the retained evidence; no current readiness claim.
+
+<a id="ux-polish-1"></a>
+
+#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 5 — blocked stub)*
+
+- **Lane:** UX polish; calls only the reader router's public mode-entry contract.
+- **Prerequisite:** READER-MODE-SEPARATION-2.
+- **Scope:** Page-mode Space enters the saved mode with Flow fallback. The current page Space route is a no-op, not a hardcoded Focus launch. Preserve input guards, modifiers, and Shift+Space behavior. Three original library/palette features were already shipped.
+- **Spec:** Re-author against the new router after separation; no direct access to another mode's internal state.
+
+#### KOKORO-EXPORT-1 — Long-form audio export *(unsequenced — blocked/deferred)*
+
+- **Lane:** TTS / Narration Engine.
+- **Prerequisite:** TTS-ARCH-DOC-1 (Completed).
+- **Historical specification state:** Full Spec in the register; preserved in the deferred source archive, not certified for current dispatch.
+- **Scope / gate:** Optional M4B/SRT/ASS export after Reading Experience v2. Keep its worktree and historical evidence; no queue position, implementation authorization or new estimate is created by this review.
+- **Source:** [deferred archive](docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md); Monday item 13118856529.
