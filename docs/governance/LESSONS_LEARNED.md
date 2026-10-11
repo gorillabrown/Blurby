@@ -2708,3 +2708,12 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-136 — status (pointer-closeout, 2026-10-10)
 **Status:** Observation — recurred (TTS-ENGINE-SHARED-1, 2026-10-10): Done-when 7 exact-path fence; no timing log, so no estimate or actual again; promotion candidate for the next roadmap review
+
+### LL-112 — status (2026-10-10-2, 2026-10-11)
+**Status:** Promoted -> ROADMAP standing rule 39
+
+### LL-130 — status (2026-10-10-2, 2026-10-11)
+**Status:** Promoted -> ROADMAP standing rule 40
+
+### LL-088 — status (2026-10-10-2, 2026-10-11)
+**Status:** Observation - not promoted (roadmap review 2026-10-10-2): already covered by ROADMAP standing rule 37 (SRL-089); held in 2 close-outs
