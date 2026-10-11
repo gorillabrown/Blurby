@@ -64,8 +64,8 @@ dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unme
 
 ```
 F1 verified.md committed + pushed:   yes — 2026-10-11, V (S1m; this checkpoint)
-F2 integration merge tested:          no   (attempt #: 0)
-F3 published to origin/main:          no
+F2 integration merge tested:          yes — 2026-10-11, attempt 1, merge d96d2f3f onto origin/main 41ef49de; step 5 → finalization-log.md, carried to the journal at F4
+F3 published to origin/main:          published by this commit (M)
 F4 run branch fast-forwarded:         no
 F5 done.md present here:              no
 ```

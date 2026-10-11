@@ -315,6 +315,15 @@
 - **Git:** eb/reader-mode-separation-2 → V (this checkpoint). Uncommitted: `tests/perf-baseline-results.json` (noise), `Virtuoso/.recovery/` (untracked).
 - **Next:** F2 (integration worktree k=1 onto origin/main), F3 publish, F4 fast-forward, F5 report → the planning session runs /pointer-closeout. After the merge, the Narrate removal sprint (owner) and the narration-rebuild storyboard (on hold, first answer "core done right").
 
+## S1m-final — 2026-10-11 (host) — F2 integration and finalization (M)
+
+- **Did:**
+  - F2 attempt 1: created worktree `rms2-integration-1` on `origin/main` 41ef49de and merged `eb/reader-mode-separation-2` (V 6891fbfd) with `--no-ff`. Merge d96d2f3f, no conflicts.
+  - Wrote `done.md`, set the charter to `status: complete`, and marked F1–F3 in `state.md`.
+- **Gate/DoD movement:** F2 merge tested. F2 step 5 (`npm ci`, typecheck, test, build) runs after this commit, under KF-3 (#33) for `npm test`; its result goes to `finalization-log.md`. F3 publishes this commit (M).
+- **Git:** `eb/rms2-integration-1` → M (finalize epic). The run branch is fast-forwarded to M at F4.
+- **Next:** F3 `git push origin HEAD:refs/heads/main`; F4 in W: `merge --ff-only refs/remotes/origin/main`, push; F5 report → `/pointer-closeout READER-MODE-SEPARATION-2` (planning session).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

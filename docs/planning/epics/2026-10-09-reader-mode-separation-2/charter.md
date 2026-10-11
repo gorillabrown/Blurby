@@ -4,7 +4,7 @@ id: READER-MODE-SEPARATION-2
 item: READER-MODE-SEPARATION-2
 origin: roadmap — READER-MODE-SEPARATION-2
 created: 2026-10-09
-status: active
+status: complete
 ---
 
 # Epic Charter — Separate Page, Focus, Flow, and Narrate runtimes
