@@ -324,6 +324,14 @@
 - **Git:** `eb/rms2-integration-1` → M (finalize epic). The run branch is fast-forwarded to M at F4.
 - **Next:** F3 `git push origin HEAD:refs/heads/main`; F4 in W: `merge --ff-only refs/remotes/origin/main`, push; F5 report → `/pointer-closeout READER-MODE-SEPARATION-2` (planning session).
 
+## S1m-F4 — 2026-10-11 — finalization-log carried in (history)
+
+- F2 attempt 1: worktree `C:\Projects\Blurby\.worktrees\rms2-integration-1` on origin/main 41ef49de; merge d96d2f3f (no conflicts); M = ce740582936663181488dcb0d6c7e7ca31b13e59.
+- F2 step 5 on M: `npm ci` exit 0 (39 s); typecheck exit 0; `npm test` exit 0 (Test Files 232 passed, 1 skipped; Tests 3397 passed, 133 skipped; 46.1 s; no KF failures); build exit 0. `tests/perf-baseline-results.json` was dirtied by `npm test` and not staged.
+- F3: `git push origin HEAD:refs/heads/main` → origin/main 41ef49de..ce740582; `ls-remote` = M.
+- F4: run branch fast-forwarded 6891fbfd → ce740582 and pushed (`HEAD:refs/heads/eb/reader-mode-separation-2`; the local ref is stored as `EB/…` on this case-insensitive filesystem, so push by full refspec).
+- F5: `done.md` is present; report sent for `/pointer-closeout`.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
