@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-11T00:28:11Z",
+  "takenAt": "2026-10-11T03:44:14Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -25,9 +25,9 @@
     {
       "id": "READER-MODE-SEPARATION-2",
       "title": "Separate Page, Focus, Flow, and Narrate runtimes",
-      "sequence": 1,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -43,15 +43,15 @@
       "spec_link": "ROADMAP.md#reader-mode-separation-2",
       "branch": "eb/reader-mode-separation-2",
       "started": "2026-10-09",
-      "completed": "",
-      "evidence": "docs/planning/roadmap-reviews/2026-09-23-readiness.md; docs/planning/roadmap-reviews/2026-09-23-source-evidence.json; docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2.2026-09-23.md; docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2.2026-09-23-2.md (branch eb/reader-mode-separation-2); docs/planning/roadmap-reviews/2026-10-08-audit.md",
+      "completed": "2026-10-11",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md",
       "description": "Owner-mandated step 1: independent Page, Focus, Flow and Narrate state, lifecycle, timers, callbacks, DOM/rendering and styles. Matching private module layouts and public contracts permit a later consolidation decision. Approved waves: A baseline/contracts; B Page + Focus; C Flow; D Narrate; E remove shared behavior and prove isolation. Acceptance covers import boundaries, private resource ownership, 12 cross-mode transitions, four same-mode cases, stale-session rejection, preserved per-mode behavior and live audio/UI evidence.",
-      "notes": "Roadmap-review 2026-10-10: epic run paused at owner gate OS-1 since 2026-10-09. Waves B-E and speed dialog done on eb/reader-mode-separation-2 (final candidate c9d73ddd); automated gates pass. Owner rulings 2026-10-09b ratified Decisions #13, #28a, #30. Deadline in policy.roadmap.deadlines.mode-separation.",
-      "revision": "7cc33c298b569e7adb794dbca81f84e7c8d377c3336dcad637ce0c36cbc9fbde",
+      "notes": "Completed 2026-10-11: merge d96d2f3f, packet ce740582; D1-D9 pass (D1/D7/D8 amended by owner ruling #32: Narrate listening checks dropped; D6 under KF-3 #33). Ledger TR-057. Owner ruling #31: Narrate to be removed next sprint and rebuilt. Close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md (merge c991e35c)",
+      "revision": "e0ced92148d7a2648395989350bee22c03dd4911e342c711b45f594c1b7f7318",
       "extra": {
         "id": "13119306772",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119306772",
-        "updated_at": "2026-10-10T20:05:50Z",
+        "updated_at": "2026-10-11T03:43:55Z",
         "group": "group_mm7femyn"
       }
     },
