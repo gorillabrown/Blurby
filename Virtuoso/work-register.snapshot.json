@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-10T23:16:59Z",
+  "takenAt": "2026-10-11T00:28:11Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -170,6 +170,60 @@
         "id": "13256739205",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13256739205",
         "updated_at": "2026-10-10T23:00:27Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "EINK-HOVER-FIX-1",
+      "title": "Stop the e-ink hover rule wiping overlay backgrounds",
+      "sequence": 6,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "XS",
+      "lane": "UX polish",
+      "group": "Parallel Polish",
+      "spec_link": "ROADMAP.md#eink-hover-fix-1",
+      "branch": "eb/eink-hover-fix-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Fixes BUG-184: narrow themes.css:145 [data-eink] *:hover (which matches every hovered ancestor and wipes overlay backgrounds) to interactive leaves inside :where(), keeping specificity (0,2,0). Positive-control regression test first. BUG-184 stays OPEN until rebuild + owner smoke (SRL-079).",
+      "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Full Spec: U1-U10 pass.",
+      "revision": "1a99305c34112b9f507a6df3061c045f11ae14188402ae0320bc531ac3c2e957",
+      "extra": {
+        "id": "13257621189",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13257621189",
+        "updated_at": "2026-10-11T00:27:10Z",
+        "group": "group_mm7femyn"
+      }
+    },
+    {
+      "id": "LIBRARY-SETTINGS-FIX-1",
+      "title": "Fix command-palette settings routing and live New-dot clearing",
+      "sequence": 7,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Parallel Polish",
+      "spec_link": "ROADMAP.md#library-settings-fix-1",
+      "branch": "eb/library-settings-fix-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "(A) Ctrl+K palette: Open Settings / Help / Check for Updates open the reading queue (bare onOpenSettings()), Text Size routes to a removed page, Reading Goals has no entry, three flap titles missing. (B) New dot clears live: seen cards saved after dwell via a small seenBatcher util, flushed on unmount; dwell/flush delays moved to constants. Positive-control tests first.",
+      "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Owner decision 2026-10-10: clear live. Full Spec: U1-U10 pass.",
+      "revision": "9e65919fe5e704018df5972316ff4c0d7cbecb5dcd5e718cb089d962caec3893",
+      "extra": {
+        "id": "13257524973",
+        "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13257524973",
+        "updated_at": "2026-10-11T00:27:38Z",
         "group": "group_mm7femyn"
       }
     },

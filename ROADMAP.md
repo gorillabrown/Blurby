@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-10 (TTS-ENGINE-SHARED-1 close-out: one shared MOSS/Pocket engine; terminal ledger now 56 records). Earlier the same day: TERMINAL-BACKFILL-1 closed, the roadmap review (plugin 1.13.0) specified TTS-ENGINE-SHARED-1 (6) and TERMINAL-BACKFILL-1 (7), and EPIC-MAIN-PROCESS-CLEANUP closed. READER-MODE-SEPARATION-2 runs as an epic, paused at owner gate OS-1, and is the deadline's only item. See the [2026-10-10 plan](docs/planning/roadmap-reviews/2026-10-10-plan.md).
+**Last updated**: 2026-10-10 (second roadmap review: EINK-HOVER-FIX-1 (6) and LIBRARY-SETTINGS-FIX-1 (7) specified as parallel work outside the separation fence; LL-112 and LL-130 promoted to standing rules 39 and 40). Earlier the same day: TERMINAL-BACKFILL-1 and TTS-ENGINE-SHARED-1 completed. READER-MODE-SEPARATION-2 runs as an epic, paused at owner gate OS-1, and is the deadline's only item. See the [second 2026-10-10 plan](docs/planning/roadmap-reviews/2026-10-10-2-plan.md).
 **Current state**: v1.75.1 baseline with READER-ISO-1A/1B/1C/1D/1E contracts, routing shell, and three concrete adapters (Focus, Flow, Narrate). Complete Page/Focus/Flow/Narrate runtime separation is unfinished and is now the first delivery gate. Kokoro is the sole active engine; other engine work remains deferred.
 **Finish line**: TTS Quality Confidence + Reading Experience v2, with an owner-mandated entry gate: independent Page, Focus, Flow, and Narrate runtimes with mirrored contracts and proven isolation. Then validate narration sync, clean rate changes, discovery-bug acceptance evidence, and the remaining UX shortcut. **Dated target:** on 2026-10-08 the owner dated the entry gate (READER-MODE-SEPARATION-2 complete). The date lives only in `policy.roadmap.deadlines.mode-separation`; the rest of the finish line is undated.
-**Queue**: READER-MODE-SEPARATION-2 (Seq 1, In Flight, **Path: epic**; paused at owner gate OS-1). No queued items: TTS-ENGINE-SHARED-1 and TERMINAL-BACKFILL-1 completed 2026-10-10. Blocked behind separation: NARRATE-HEARD-CURSOR-1 (2), NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3), NARRATE-SUBSCRIBER-CURSOR-1 (4, verdict-gated), UX-POLISH-1 (5), CLEANUP-MODE-BARREL-1 (10). KOKORO-EXPORT-1 is deferred. The queue is empty, below Rule 5a's floor. The documented bounded exception (all other work waits on mode separation) was written for two queued items; a roadmap review decides whether to backfill parallel non-mode work.
+**Queue**: READER-MODE-SEPARATION-2 (Seq 1, In Flight, **Path: epic**; paused at owner gate OS-1) → EINK-HOVER-FIX-1 (6, Queued, Full Spec) → LIBRARY-SETTINGS-FIX-1 (7, Queued, Full Spec); 6 and 7 are file-disjoint from each other and from the separation branch, so both may run now. Blocked behind separation: NARRATE-HEARD-CURSOR-1 (2), NARRATE-APPLYRATECHANGE-COLLAPSE-1 (3), NARRATE-SUBSCRIBER-CURSOR-1 (4, verdict-gated), UX-POLISH-1 (5), CLEANUP-MODE-BARREL-1 (10). KOKORO-EXPORT-1 is deferred. Two queued full specs is below Rule 5a's floor under the documented bounded exception: all other work waits on mode separation.
 **Last sprint**: NARRATE-A5-RATE-RESEED-1 (position fix PASS 3-of-3 live-QA 2026-05-31; merged `145c385`, reconciled to Completed 2026-07-02). Prior: NARRATE-CURSOR-TRACKING-DIAG-1 (completed 2026-05-31, live-QA cursor-tracking trace; hypothesis refuted, authority verdict written, NARRATE-SUBSCRIBER-CURSOR-1 amended). Prior: reverted failed view-follow hotfix at `ff70793` (2026-05-31), NARRATE-PAUSE-RESUME-UNIFY-1 + anchor-correctness hotfix (A4 resume anchor working), NARRATE-INTENT-CURSOR-1 (PARTIAL, 2026-05-31), NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -146,6 +146,10 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 37. **SRL-089 — Don't parallel-launch work that depends on an in-flight agent's output.** Worker agents dispatched in parallel onto a shared worktree must declare write-disjoint surfaces. Dependent workers — where worker B's correctness depends on worker A's output — must NEVER be dispatched in parallel onto the same tree; they must be serialized OR each operate in its own git worktree (`git worktree add`). **Why:** Two occurrences in two consecutive sprints — NARRATE-DUAL-SOURCE-DIAG-1 (2026-05-30) and NARRATE-INTENT-CURSOR-1 Task 3 (2026-05-31). Same naive fan-out pattern (parallel workers, shared tree, no isolation, B depends on A); ~90 min wasted compute per occurrence (3 hours total). Both occurrences caught at close-out and required clean redo from a serialized dispatch. Cost asymmetry: serialize/isolate is seconds of dispatch overhead; parallel-mis-dispatch is ~90 min wasted compute per occurrence. The rate of recurrence (two occurrences, two consecutive sprints, same orchestration pattern) is decisive evidence the rule is load-bearing. **How to apply:** Zeus (and any orchestrator) must include a dependency-and-tree-isolation check before parallelizing worker dispatches. The two safe patterns: (a) serialize workers when surfaces overlap or outputs feed each other; (b) `git worktree add` per worker when parallelism is required for latency reasons. Sprint Task tables that mark dependent tasks `parallel-eligible` are spec defects and must be caught at Plan-tier review. (Promoted 2026-05-31 after the 2nd occurrence in NARRATE-INTENT-CURSOR-1, per SRL-012's two-validated-occurrences promotion convention.)
 
 38. **Compensation and measurement before optional perceptual rewrites (2026-06-01 decision).** Before changing cursor/reducer architecture to fix perceived audio lead, trace the current signal chain and use an audio-independent probe to test the residual. Do not assume compensation is missing: current main has trusted lag 450 ms and heuristic lag 350 ms, already consumed by scheduler paths. HEARD still gates conditional SUBSCRIBER work after mode isolation. This rule does not block the owner's distinct 2026-09-23 requirement to separate reading-mode runtimes first. Sources: [June sequencing decision](docs/planning/roadmap-reviews/2026-06-01-plan.md#key-design-decision-encoded), [LL-127](docs/governance/LESSONS_LEARNED.md), [review corrections](docs/planning/roadmap-reviews/2026-09-23-lessons-applied.md). The former SRL-090 label is withdrawn here because the close-out retrospective uses it for structured-file verification.
+
+39. **LL-112 — Characterize before extracting shared code.** A refactor that merges duplicated implementations into one shared module starts with a separate commit of characterization tests on the unmodified code, and the extraction must pass them unchanged (apart from any owner-approved behavior change, which flips exactly one expectation). **Why:** applied and held in TTS-SIDECAR-SHARED-1 and TTS-ENGINE-SHARED-1 (2026-10-10). (Promoted at the second 2026-10-10 roadmap review.)
+
+40. **LL-130 — Plan an external register write only to execute it.** `mutation-plan` opens a durable recovery record, so it is not a dry run. Call it only when the connector write follows immediately, read the item back, then `mutation-confirm` (or `mutation-abandon`). **Why:** applied and held in three close-outs on 2026-10-09/10. (Promoted at the second 2026-10-10 roadmap review.)
 
 **Rule provenance:** Existing numbered rules above retain their historical source labels; registry policy.standingRules.ids declares no additional IDs. Ref ownership in SRL-074 was an intermediate extraction boundary: this approved stage moves the refs together with the owning implementation. User-mandated complete mode separation governs the target architecture.
 
@@ -433,6 +437,202 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 - **Source:** [deferred archive](docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md); Monday item 13118856529.
 
 
+#### Stage 6 — Parallel polish (outside the separation fence)
+
+Added by the second 2026-10-10 roadmap review. The owner asked for work that can run while READER-MODE-SEPARATION-2 waits on owner gate OS-1. Both items are file-disjoint from that branch's diff (331 files, merge base `aafbb1c9`), from each other, and from the shared-core freeze set. See the [plan](docs/planning/roadmap-reviews/2026-10-10-2-plan.md).
+
+<a id="eink-hover-fix-1"></a>
+
+#### EINK-HOVER-FIX-1 — Stop the e-ink hover rule wiping overlay backgrounds *(position 6 — Full Spec)*
+
+- **What:** Narrow the e-ink "no hover effects" rule so it only neutralizes hover on interactive leaf elements. Today it matches every hovered ancestor, so with e-ink mode on, the Settings panel (`.menu-flap`) and other overlays go transparent while the pointer is over them. Fixes BUG-184.
+- **Why:** `src/styles/themes.css:145-147` is `[data-eink="true"] *:hover { background-color: inherit; }`, specificity (0,2,0), and it loads after base, reader and library CSS (`src/styles/index.css:4`). Because `:hover` matches the hovered element and all its ancestors, any panel with its own background takes its parent's (often transparent) background while hovered. The investigation on `main` @ `95aae83e` (2026-10-10) found about 25 affected overlays, each losing to this rule:
+  - `.menu-flap` (library.css:986/992);
+  - `.command-palette-container` (keyboard.css:194);
+  - the shortcuts, highlights, snooze, tag-picker and quick-settings containers (keyboard.css:268–461);
+  - `.note-popover` (page-reader.css:691) and `.hotkey-coach` (page-reader.css:770);
+  - `.delete-confirm` and `.toast` (base.css:205/335);
+  - the import, cloud-merge, search-dropdown, recent-folders and context-menu panels (library.css);
+  - the bug-report and metadata-wizard dialogs (onboarding.css:216/291);
+  - the chapter dropdowns (reader.css:228, page-reader.css:639).
+
+  The e-ink rules for `.highlight-menu` (themes.css:120) and `.definition-popup` (:128) also lose, because they come earlier in the file.
+- **Design decision (planner, 2026-10-10):** keep the rule's intent ("no hover effects — e-ink devices are often touch-only", its only comment, since 36b8361e) but limit it to interactive leaves. Wrap the list in `:where()` so specificity stays exactly (0,2,0) and every existing e-ink override keeps today's precedence. Excluding overlays with `:not()` would need about 25 selectors and still break their descendants. Adding about 25 explicit backgrounds would leave the ancestor bug for any future panel. Both alternatives were rejected.
+- **Accepted residual:** a non-listed hovered row that sets a hover background, and is not a button, link or ARIA button/option/menuitem, regains its hover background in e-ink mode. That is cosmetic, and the owner smoke test below covers what matters. `.doc-card` (role=button) keeps today's behavior.
+- **Out of scope:** any other e-ink rule; the reader surfaces (`src/styles/reader.css` is in the separation branch's diff and must not be touched); BUG-154.
+- **Prerequisites:** none.
+- **Done when:**
+    1. `src/styles/themes.css` no longer contains the string `[data-eink="true"] *:hover`, and contains exactly one hover-neutralizing rule, `[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover`, whose body is `background-color: inherit;`.
+    2. `npm test -- tests/einkFoundation.test.ts` exits 0 and includes the new test `"e-ink hover suppression targets interactive leaves, not ancestors (BUG-184)"` (spec below).
+    3. **Positive control (LL-138):** with Task 1's test added and the CSS not yet changed, that one test fails and every other test in the file passes. Record the failing output in the close-out.
+    4. `npm test` exits 0 with no new skips, and `npm run build` exits 0.
+    5. `docs/governance/BUG_REPORT.md` BUG-184 **Status** reads `RESOLVED in source (EINK-HOVER-FIX-1, <merge sha>) — OPEN until rebuild + owner smoke (SRL-079)`, and **Last updated** is the merge date.
+    6. `git diff --name-only refs/remotes/origin/main` lists exactly `src/styles/themes.css`, `tests/einkFoundation.test.ts`, `docs/governance/BUG_REPORT.md` and, if kept, `docs/governance/close-outs/Timing.EINK-HOVER-FIX-1.jsonl` (LL-136 exemption).
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer confirms the positive control; repository operator merges; **owner** runs the smoke test after rebuild (below).
+- **Lane:** UX polish. Execution surface C.
+- **Source:** [BUG_REPORT.md BUG-184](docs/governance/BUG_REPORT.md); [2026-10-10-2 audit F2](docs/planning/roadmap-reviews/2026-10-10-2-audit.md); the e-ink overlay investigation (2026-10-10, quoted above).
+
+##### Implementation detail
+- **Edit sites:**
+  - `src/styles/themes.css:144-147`. Replace the comment and rule with:
+    ```css
+    /* No hover effects — e-ink devices are often touch-only. Interactive leaves only:
+       `*:hover` also matched every hovered ancestor and wiped overlay backgrounds (BUG-184). */
+    [data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover {
+      background-color: inherit;
+    }
+    ```
+    `.queue-item:hover` (library.css:1060) and `.page-word:hover` (page-reader.css:124) are listed by name because they are not buttons.
+  - `tests/einkFoundation.test.ts`. Add one `it(...)` after the test at line 59–64, inside the existing `describe` (which closes at line 105). It reuses `read` and `extractCssBlock`:
+    ```ts
+    it("e-ink hover suppression targets interactive leaves, not ancestors (BUG-184)", () => {
+      const css = read("src/styles/themes.css");
+      expect(css).not.toContain('[data-eink="true"] *:hover');
+      const sel = '[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover';
+      expect(extractCssBlock(css, sel)).toMatch(/background-color:\s*inherit/);
+    });
+    ```
+  - `docs/governance/BUG_REPORT.md:14`: the Status line per Done-when 5, plus line 5 **Last updated**.
+- **Tests:** the new test above. The existing test "behavioral e-ink CSS disables transitions under data-eink" (line 59) reads the first `[data-eink="true"] *` block (line 41) and is unaffected; it must still pass unchanged.
+- **Constants:** none.
+- **Branch:** `eb/eink-hover-fix-1` from `refs/remotes/origin/main`, in worktree `.worktrees/eink-hover-fix-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** Task 1 commit: exactly `tests/einkFoundation.test.ts`. Task 2 commit: exactly `src/styles/themes.css` and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree and push (Rule 5b).
+- **Failure handling:**
+  - If the positive control shows anything other than exactly the new test failing, stop and report; do not change the CSS until the test is right.
+  - If any other existing test fails after Task 2, the selector broke an assertion. Report the exact test; do not edit other tests.
+  - If `npm run build` fails, report it; it is not expected from a CSS selector change.
+  - Retry ceiling: two corrections, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C only.
+  - **Forbidden:** every file in READER-MODE-SEPARATION-2's diff (notably `src/styles/reader.css`, `src/reader/**`, `src/constants.ts`, `src/types.ts`), the shared-core freeze set, and LIBRARY-SETTINGS-FIX-1's files (`src/components/CommandPalette.tsx`, `MenuFlap.tsx`, `LibraryView.tsx`, `src/utils/seenBatcher.ts`, its tests).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of LIBRARY-SETTINGS-FIX-1 and the separation run.
+- **Owner smoke (after merge and rebuild; closes BUG-184 per SRL-079):** run `npm run build`, start the app, and turn on Settings → Theme → E-Ink Display Mode. Hover inside the Settings panel, then open Ctrl+K and hover the palette list. Both panels stay opaque. Hover a Settings menu item: no hover highlight. If both checks pass, BUG-184's Status becomes `RESOLVED (verified <date>)`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Failing regression test for the ancestor hover wipe | calculable | regression test | mechanical | low | 10m (one text-assertion test plus the positive-control run) | — | — |
+| 2 | Hover rule narrowed to interactive leaves; bug record updated | calculable | css fix | mechanical | low | 10m (one rule replacement plus a status line) | — | — |
+| 3 | Suite and build green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (full `npm test` + `npm run build` + one --no-ff merge) | — | — |
+
+**Total:** chain 40m · sum 40m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-138 — positive control: Done-when 3 requires the new test to fail alone before the CSS changes.
+- LL-136 — the exact-path fence exempts `Timing.EINK-HOVER-FIX-1.jsonl`, so a time log can be kept.
+- LL-135 — the dispatch prompt must carry the filled reconciliation recipe itself.
+- LL-137 — the test reads CSS through the existing `read()` helper (`utf-8`); any ad hoc check script opens files as UTF-8.
+- Standing rule 35 (SRL-079) — BUG-184 stays OPEN until rebuild + owner smoke (Done-when 5, Owner smoke).
+- LL-024 — considered (CSS/Electron window management); not applicable, since nothing here touches window chrome.
+
+<a id="library-settings-fix-1"></a>
+
+#### LIBRARY-SETTINGS-FIX-1 — Fix command-palette settings routing and live "New"-dot clearing *(position 7 — Full Spec)*
+
+- **What:** Two small fixes in the library surface.
+  - **(A) Command palette (Ctrl+K) settings routing:** every entry opens a real settings page, every page has an entry, and every page shows its title.
+  - **(B) The "New" dot on library cards clears live:** a card counts as seen after it has been at least half visible for the dwell time, and that is saved a moment later, so the dot disappears while the card is on screen and survives quitting the app.
+- **Why:**
+  - **(A)** On `main` @ `95aae83e`, `src/components/CommandPalette.tsx` has these defects:
+    - "Open Settings" (line 83), "Settings: Help" (103) and "Check for Updates" (155) call `onOpenSettings()` with no page. `LibraryContainer.tsx:276-279` turns that into `settingsPage = null`, so `MenuFlap.tsx:62` opens the **reading queue**, not settings. Help and "Check for updates" live on the main settings list (`SettingsMenu.tsx:127`, `HelpSettings`).
+    - "Settings: Text Size" (104) routes to `"text-size"`, a page that no longer exists (it was merged into Reading Layout), so it shows an empty sub-page.
+    - "Settings: Layout" (99) doesn't match the page's own name, "Reading Layout".
+    - Reading Goals (`SettingsMenu.tsx:31`) has no entry.
+    - `MenuFlap.tsx:10-20` `TITLES` has no `tts`, `reading-goals` or `cloud-sync`, so those pages show their raw id as the header (line 121).
+  - **(B)** `src/components/LibraryView.tsx:148-220` records seen cards in `seenDocIdsRef` after a hardcoded 1000 ms dwell (line 167). It only saves them (`flushSeenDocs`, 194-199 → `markDocsSeen`, `LibraryContainer.tsx:441-450`, which writes library.json) when the user opens a document, the flap, or goals settings. Staying in the library never clears a dot, and quitting loses the seen ids. The original idea (IDEAS F2, BUG-067) is "dot clears after card scrolls into viewport". The 1000 ms literal also breaks the constants rule.
+- **Owner decision (2026-10-10):** clear live.
+- **Out of scope:** IDEAS I1 (the "[Sample]" prefix was already removed in 5c662a78); the age-based "New" tab (`NEW_LIBRARY_DAYS`); the reader-side palette (`ReaderContainer.tsx` is in the separation branch's diff and the shared-core freeze set); a dedicated Help sub-page; the unused `help` key in `TITLES` (left as is).
+- **Prerequisites:** none.
+- **Done when:**
+    1. `npm test -- tests/commandPaletteRoutes.test.ts tests/seenBatcher.test.ts` exits 0.
+    2. **Positive control (LL-138):** after Task 1's tests are added and before any production edit, `tests/commandPaletteRoutes.test.ts` fails on exactly the defects listed in *Why (A)* (bare `onOpenSettings()` ×3, `"text-size"`, the missing `reading-goals` entry, the three missing titles), and `tests/seenBatcher.test.ts` fails only because `src/utils/seenBatcher.ts` doesn't exist yet. Record the output in the close-out.
+    3. `CommandPalette.tsx` contains no `onOpenSettings()` call without an argument, and no `"text-size"`.
+    4. `src/constants.ts` exports `LIBRARY_SEEN_DWELL_MS = 1000` and `LIBRARY_SEEN_FLUSH_DELAY_MS = 400`, placed directly after `NEW_LIBRARY_DAYS` (line 457). `LibraryView.tsx` contains no literal `1000`.
+    5. `npm test` exits 0 with no new skips, and `npm run build` exits 0.
+    6. `git diff --name-only refs/remotes/origin/main` lists exactly the paths in the staging plan, plus `docs/governance/close-outs/Timing.LIBRARY-SETTINGS-FIX-1.jsonl` if kept (LL-136).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer confirms the positive control; repository operator merges.
+- **Lane:** Library & Content. Execution surface C.
+- **Source:** [IDEAS.md F2, G3](docs/governance/IDEAS.md); [2026-10-10-2 plan](docs/planning/roadmap-reviews/2026-10-10-2-plan.md); the library/settings investigation (2026-10-10, quoted above, spot-checked by the planner on `95aae83e`).
+
+##### Implementation detail
+- **Edit sites (A), `src/components/CommandPalette.tsx`:**
+  - line 83: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - line 99: label `"Settings: Layout"` → `"Settings: Reading Layout"` (route `"layout"` unchanged);
+  - line 103: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - line 104: `onOpenSettings("text-size")` → `onOpenSettings("layout")` (keep the label "Settings: Text Size");
+  - line 155: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - after line 105, add `{ type: "setting", label: "Settings: Reading Goals", sublabel: "Daily, weekly and book goals", onSelect: act(() => onOpenSettings("reading-goals")) },`.
+- **Edit sites (A), `src/components/MenuFlap.tsx:10-20`:** add `tts: "Narration (TTS)"`, `"reading-goals": "Reading Goals"` and `"cloud-sync": "Cloud Sync"` to `TITLES`. These match the `SettingsMenu.tsx:25-38` labels.
+- **Edit sites (B):**
+  - **New `src/utils/seenBatcher.ts`** exports `createSeenBatcher({ dwellMs, flushDelayMs, onFlush })`, which returns `{ enter(id), leave(id), cancelPending(), flush(), dispose() }`:
+    - `enter` starts a dwell timer for an id unless one is already running or the id is already seen;
+    - when the dwell timer fires, the id is added to the seen set and a single flush timer (`flushDelayMs`) is scheduled if none is pending;
+    - `leave` cancels that id's dwell timer;
+    - `cancelPending` cancels all dwell timers but keeps seen ids and the pending flush;
+    - `flush` cancels the flush timer and, if the seen set is non-empty, calls `onFlush([...ids])` once and clears the set;
+    - `dispose` = `cancelPending` + `flush`.
+  - **`src/components/LibraryView.tsx:148-199`:**
+    - Replace `seenDocIdsRef` and `seenTimersRef` with one `useRef` holding a batcher created once, with `dwellMs: LIBRARY_SEEN_DWELL_MS`, `flushDelayMs: LIBRARY_SEEN_FLUSH_DELAY_MS` and `onFlush: (ids) => onMarkDocsSeenRef.current?.(ids)`. `onMarkDocsSeenRef` is a ref updated each render to the latest `onMarkDocsSeen`, so a late flush never uses a stale `library` closure.
+    - The observer effect (still keyed on `filteredLibrary`) calls `batcher.enter(docId)` when intersecting and `batcher.leave(docId)` otherwise. Its cleanup calls `observer.disconnect()` and `batcher.cancelPending()`, never `dispose()`, because a library update re-runs this effect.
+    - A separate mount-only effect returns `() => batcher.dispose()`, which flushes on unmount.
+    - `flushSeenDocs` becomes `() => batcher.flush()`. The three existing navigation call sites (lines 202-220) stay as they are.
+  - **`src/constants.ts`:** after line 457 add `export const LIBRARY_SEEN_DWELL_MS = 1000;` and `export const LIBRARY_SEEN_FLUSH_DELAY_MS = 400;`, each with a one-line comment.
+- **Tests (Task 1, written before any production edit):**
+  - **New `tests/commandPaletteRoutes.test.ts`** (text-read style, as in `tests/einkFoundation.test.ts`, reading files as `utf-8`):
+    - (a) every `onOpenSettings(` call in `CommandPalette.tsx` has a string argument;
+    - (b) every argument is one of the `id:` values in `SettingsMenu.tsx`'s `CATEGORIES`/`SECONDARY_CATEGORIES` or `"settings"`;
+    - (c) every `CATEGORIES`/`SECONDARY_CATEGORIES` id appears as an argument at least once;
+    - (d) every such id is a key in `MenuFlap.tsx` `TITLES`.
+  - **New `tests/seenBatcher.test.ts`** (`vi.useFakeTimers()`):
+    - (1) `enter`, then advancing `dwellMs - 1` calls nothing;
+    - (2) `enter`, then `dwellMs + flushDelayMs` calls `onFlush(["a"])` exactly once;
+    - (3) two ids entered together flush in one call;
+    - (4) `leave` before the dwell completes means no flush;
+    - (5) `cancelPending` after the dwell keeps the id, and `flush()` then delivers it;
+    - (6) `dispose()` with a seen id flushes it immediately;
+    - (7) an id already flushed is not re-flushed on a second `enter`.
+- **Constants:** `LIBRARY_SEEN_DWELL_MS`, `LIBRARY_SEEN_FLUSH_DELAY_MS` (above).
+- **Branch:** `eb/library-settings-fix-1` from `refs/remotes/origin/main`, in worktree `.worktrees/library-settings-fix-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - Task 1 commit: exactly `tests/commandPaletteRoutes.test.ts` and `tests/seenBatcher.test.ts`.
+  - Task 2 commit: exactly `src/components/CommandPalette.tsx`, `src/components/MenuFlap.tsx`, `src/utils/seenBatcher.ts`, `src/components/LibraryView.tsx` and `src/constants.ts`.
+  - Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree and push (Rule 5b).
+- **Failure handling:**
+  - If the positive control fails differently from Done-when 2, fix the tests first; never edit production code in Task 1.
+  - If merging `src/constants.ts` conflicts (it is in the separation branch's diff, but that branch's hunks are at lines 13–30 and 250–270), keep both sides; never drop separation's lines.
+  - If an existing library test fails because seen state is now saved earlier, report the exact test and stop; do not weaken it.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C only.
+  - **Forbidden:** every file in READER-MODE-SEPARATION-2's diff except the two appended lines in `src/constants.ts` (notably `src/reader/**`, `ReaderContainer.tsx`, `src/types.ts`), the shared-core freeze set, `src/components/LibraryContainer.tsx` (not needed: `markDocsSeen` already saves), and EINK-HOVER-FIX-1's files (`src/styles/themes.css`, `tests/einkFoundation.test.ts`, `docs/governance/BUG_REPORT.md`).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of EINK-HOVER-FIX-1. If the separation run merges first, rebase onto `main` before merging.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Route-consistency and seen-batcher tests failing on current code | calculable | regression test | bounded | medium | 25m (two new test files plus the positive-control run) | — | — |
+| 2 | Palette routes, flap titles and live seen-batching implemented | calculable | ui fix | bounded | medium | 35m (six palette edits, three titles, one small util, a LibraryView refactor of ~50 lines) | — | — |
+| 3 | Suite and build green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (full `npm test` + `npm run build` + one --no-ff merge) | — | — |
+
+**Total:** chain 1h20m · sum 1h20m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-138 — positive control: Done-when 2 requires both new tests to fail first, on exactly the listed defects.
+- LL-136 — the exact-path fence exempts `Timing.LIBRARY-SETTINGS-FIX-1.jsonl`.
+- LL-135 — the dispatch prompt must carry the filled reconciliation recipe itself.
+- LL-137 — the route test reads source files as `utf-8`.
+- LL-016 — refs, not state, carry values across effect runs: the batcher lives in a `useRef` created once and survives the observer effect re-running on each library update.
+- LL-017 — imperative callbacks read from refs: the batcher's `onFlush` calls `onMarkDocsSeenRef.current`, never a closed-over `onMarkDocsSeen`, so a late flush never uses a stale library.
+- LL-131 — considered: no module is deleted, so no importer census is needed.
+- Standing rule 37 (SRL-089) — Task 1 commits before Task 2; one implementer; file-disjoint from EINK-HOVER-FIX-1.
+
+
 ## Deferred Lanes
 
 - **KOKORO-EXPORT-1** — Long-form audio export (M4B/SRT/ASS). Optional future after Reading Experience v2.
@@ -463,7 +663,7 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-10-08
+last_review: 2026-10-10-2
 review_status: complete-with-recorded-buffer-and-governance-gaps
 finish_line: "TTS Quality Confidence + Reading Experience v2"
 roadmap_doc: ROADMAP.md

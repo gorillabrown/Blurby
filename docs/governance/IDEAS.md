@@ -81,7 +81,7 @@
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
 | F1 | 3-Line Library Cards | Title, Author, Book Data line (progress %, pages, time). (BUG-050) | Medium | Small |
-| F2 | "New" Dot Auto-Clear | Dot clears after card scrolls into viewport. IntersectionObserver + seenAt. (BUG-067) | Low | Small |
+| F2 | "New" Dot Auto-Clear (live save: LIBRARY-SETTINGS-FIX-1) | Dot clears after card scrolls into viewport. IntersectionObserver + seenAt. (BUG-067) | Low | Small |
 | F3 | Hotkey Coaching in Reader | HotkeyCoach shows shortcut suggestions on mouse clicks. (BUG-038) | Low | Small |
 | F4 | Library Layout Settings Page | Default sort, view mode, card/list size, spacing, columns. (BUG-056/057) | Medium | Medium |
 | F5 | Vocabulary Builder from Defined Words | Collect looked-up words into vocabulary list with definitions, context, spaced repetition. | Medium | Medium |
@@ -95,7 +95,7 @@
 |---|------|-------------|--------|--------|
 | G1 | Combine into "Reading Layout" | Merge Text Size + Layout into single settings page. (BUG-055) | Low | Small |
 | G2 | Library Layout Settings Page | Default sort, view mode, size, spacing. (BUG-056/057) | Medium | Medium |
-| G3 | Settings Pages in Ctrl+K | Add Library Layout and Reading Layout entries to command palette. (BUG-058) | Low | Small |
+| G3 | Settings Pages in Ctrl+K (route fixes: LIBRARY-SETTINGS-FIX-1) | Add Library Layout and Reading Layout entries to command palette. (BUG-058) | Low | Small |
 | G4 | All Individual Settings in Ctrl+K | Every toggle, slider, dropdown searchable in command palette. (BUG-059) | Medium | Medium |
 
 ### Theme H: Reading Experience Tweaks
@@ -122,7 +122,7 @@
 
 | # | Idea | Description | Impact | Effort |
 |---|------|-------------|--------|--------|
-| I1 | Remove "[Sample]" Prefix | Onboarding book should be "Meditations" not "[Sample] Meditations". (BUG-060) | Low | Small |
+| I1 | Remove "[Sample]" Prefix | **Done** (5c662a78, 2026-03-25; confirmed by roadmap review 2026-10-10-2). Onboarding book should be "Meditations" not "[Sample] Meditations". (BUG-060) | Low | Small |
 | I2 | Blurby Icon Replaces Hamburger | Replace hamburger with Blurby brand icon (~24px, theme-aware). (BUG-061) | Low | Small |
 | I3 | Blurby Brand Theme | White bg, Highlight Blue (#CAE4FE) chrome, Accent Red (#E63946). (BUG-062) | Low | Medium |
 | I4 | Window Control Theme Matching | Min/max/close buttons adopt theme background color. (BUG-049) | Low | Small |
