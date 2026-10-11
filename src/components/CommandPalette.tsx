@@ -80,7 +80,7 @@ export default function CommandPalette({
     const act = (fn: () => void) => () => { fn(); onClose(); };
 
     return [
-      { type: "action", label: "Open Settings", sublabel: "Ctrl+,", onSelect: act(() => onOpenSettings()) },
+      { type: "action", label: "Open Settings", sublabel: "Ctrl+,", onSelect: act(() => onOpenSettings("settings")) },
       {
         type: "action",
         label: "Open Reading Notes",
@@ -96,13 +96,14 @@ export default function CommandPalette({
       { type: "action", label: "Import Library", sublabel: "Merge library from JSON file", onSelect: act(() => window.electronAPI.importLibrary()) },
       // Settings pages
       { type: "setting", label: "Settings: Theme", sublabel: "Dark, light, e-ink, system themes", onSelect: act(() => onOpenSettings("theme")) },
-      { type: "setting", label: "Settings: Layout", sublabel: "Page layout and spacing", onSelect: act(() => onOpenSettings("layout")) },
+      { type: "setting", label: "Settings: Reading Layout", sublabel: "Page layout and spacing", onSelect: act(() => onOpenSettings("layout")) },
       { type: "setting", label: "Settings: Speed Reading", sublabel: "WPM, pauses, flow word span", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Settings: Hotkeys", sublabel: "Keyboard shortcut reference", onSelect: act(() => onOpenSettings("hotkeys")) },
       { type: "setting", label: "Settings: Connectors", sublabel: "Site logins and integrations", onSelect: act(() => onOpenSettings("connectors")) },
-      { type: "setting", label: "Settings: Help", sublabel: "Adding content, updates", onSelect: act(() => onOpenSettings()) },
-      { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: act(() => onOpenSettings("text-size")) },
+      { type: "setting", label: "Settings: Help", sublabel: "Adding content, updates", onSelect: act(() => onOpenSettings("settings")) },
+      { type: "setting", label: "Settings: Text Size", sublabel: "Adjust reading text size", onSelect: act(() => onOpenSettings("layout")) },
       { type: "setting", label: "Settings: Cloud Sync", sublabel: "OneDrive / Google Drive sync", onSelect: act(() => onOpenSettings("cloud-sync")) },
+      { type: "setting", label: "Settings: Reading Goals", sublabel: "Daily, weekly and book goals", onSelect: act(() => onOpenSettings("reading-goals")) },
       // Sub-sections within Speed Reading
       { type: "setting", label: "Reading Mode", sublabel: "Switch between Focus and Flow", onSelect: act(() => onOpenSettings("speed-reading")) },
       { type: "setting", label: "Focus Mode Options", sublabel: "Focus marks, reading ruler, focus span", onSelect: act(() => onOpenSettings("speed-reading")) },
@@ -152,7 +153,7 @@ export default function CommandPalette({
       // Connectors
       { type: "setting", label: "Site Login", sublabel: "Add authenticated site for article import", onSelect: act(() => onOpenSettings("connectors")) },
       // Help
-      { type: "setting", label: "Check for Updates", sublabel: "Check if a newer version is available", onSelect: act(() => onOpenSettings()) },
+      { type: "setting", label: "Check for Updates", sublabel: "Check if a newer version is available", onSelect: act(() => onOpenSettings("settings")) },
       {
         type: "shortcut",
         label: "Shortcut: ? — Show keyboard shortcuts",

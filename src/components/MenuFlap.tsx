@@ -17,6 +17,9 @@ const TITLES: Record<string, string> = {
   connectors: "Connectors",
   help: "Help",
   hotkeys: "Hotkey Map",
+  tts: "Narration (TTS)",
+  "reading-goals": "Reading Goals",
+  "cloud-sync": "Cloud Sync",
 };
 
 interface MenuFlapProps {

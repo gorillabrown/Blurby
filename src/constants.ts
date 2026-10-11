@@ -472,6 +472,10 @@ export const IMPORT_PREVIEW_LENGTH = 200;
 // ── Library Filters ────────────────────────────────────────────────────────
 /** Number of days a document is considered "new" in the library view */
 export const NEW_LIBRARY_DAYS = 7;
+/** How long a "new" card must stay at least half visible before it counts as seen (ms) */
+export const LIBRARY_SEEN_DWELL_MS = 1000;
+/** Delay before newly seen cards are batched and saved to the library (ms) */
+export const LIBRARY_SEEN_FLUSH_DELAY_MS = 400;
 
 // ── TTS Rate Display ───────────────────────────────────────────────────────
 /** Delay before transitioning from "confirming" to "set" after TTS rate change (ms) */

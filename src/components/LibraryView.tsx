@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { formatTime, formatDisplayTitle } from "../utils/text";
-import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS, NEW_LIBRARY_DAYS, SEARCH_BLUR_DELAY_MS, FOLIATE_MIN_ENGAGEMENT_POSITION } from "../constants";
+import { MIN_WPM, MAX_WPM, WPM_STEP, EINK_SEARCH_DEBOUNCE_MS, NEW_LIBRARY_DAYS, SEARCH_BLUR_DELAY_MS, FOLIATE_MIN_ENGAGEMENT_POSITION, LIBRARY_SEEN_DWELL_MS, LIBRARY_SEEN_FLUSH_DELAY_MS } from "../constants";
+import { createSeenBatcher, type SeenBatcher } from "../utils/seenBatcher";
 import { BlurbyDoc, BlurbySettings, SyncStatusValue, ToastState } from "../types";
 import { useTheme } from "./ThemeProvider";
 import { triggerCoachHint } from "./HotkeyCoach";
@@ -146,35 +147,29 @@ export default function LibraryView({
   }, [library, tab, typeFilter, searchQuery, debouncedSearchQuery, isEinkDisplay]);
 
   // BUG-067 + READINGS-4A: IntersectionObserver to track "new" cards seen in viewport
-  // Cards must be visible for >=1 second before marking as seen (debounce via setTimeout + Map)
-  const seenDocIdsRef = useRef<Set<string>>(new Set());
-  const seenTimersRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
+  // LIBRARY-SETTINGS-FIX-1: cards seen for LIBRARY_SEEN_DWELL_MS are saved in a batch shortly after,
+  // so dots clear live. The batcher lives in a ref (LL-016) and flushes via the latest callback (LL-017).
+  const onMarkDocsSeenRef = useRef(onMarkDocsSeen);
+  onMarkDocsSeenRef.current = onMarkDocsSeen;
+  const seenBatcherRef = useRef<SeenBatcher | null>(null);
+  if (!seenBatcherRef.current) {
+    seenBatcherRef.current = createSeenBatcher({
+      dwellMs: LIBRARY_SEEN_DWELL_MS,
+      flushDelayMs: LIBRARY_SEEN_FLUSH_DELAY_MS,
+      onFlush: (ids) => onMarkDocsSeenRef.current?.(ids),
+    });
+  }
+  const seenBatcher = seenBatcherRef.current;
   useEffect(() => {
     const scrollContainer = document.querySelector(".library-scroll");
     if (!scrollContainer) return;
-    const timers = seenTimersRef.current;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           const docId = (entry.target as HTMLElement).dataset.docId;
           if (!docId) continue;
-          if (entry.isIntersecting) {
-            // Start 1s timer if not already running
-            if (!timers.has(docId)) {
-              const timer = setTimeout(() => {
-                seenDocIdsRef.current.add(docId);
-                timers.delete(docId);
-              }, 1000);
-              timers.set(docId, timer);
-            }
-          } else {
-            // Card scrolled out of view — cancel timer
-            const existing = timers.get(docId);
-            if (existing) {
-              clearTimeout(existing);
-              timers.delete(docId);
-            }
-          }
+          if (entry.isIntersecting) seenBatcher.enter(docId);
+          else seenBatcher.leave(docId);
         }
       },
       { root: scrollContainer, threshold: 0.5 }
@@ -184,19 +179,16 @@ export default function LibraryView({
     unreadCards.forEach((card) => observer.observe(card));
     return () => {
       observer.disconnect();
-      // Clean up any pending timers
-      for (const timer of timers.values()) clearTimeout(timer);
-      timers.clear();
+      // Not dispose(): a library update re-runs this effect; seen ids and the pending flush survive.
+      seenBatcher.cancelPending();
     };
-  }, [filteredLibrary]);
+  }, [filteredLibrary, seenBatcher]);
+
+  // Flush seen ids on unmount
+  useEffect(() => () => seenBatcher.dispose(), [seenBatcher]);
 
   // Flush seen docs when navigating away from library
-  const flushSeenDocs = useCallback(() => {
-    if (seenDocIdsRef.current.size > 0 && onMarkDocsSeen) {
-      onMarkDocsSeen(Array.from(seenDocIdsRef.current));
-      seenDocIdsRef.current.clear();
-    }
-  }, [onMarkDocsSeen]);
+  const flushSeenDocs = useCallback(() => seenBatcher.flush(), [seenBatcher]);
 
   // Wrap onOpenDoc to flush seen docs before navigating
   const handleOpenDocWithSeen = useCallback((doc: BlurbyDoc, mode?: string) => {
