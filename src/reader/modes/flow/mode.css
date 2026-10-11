@@ -1,0 +1,114 @@
+/* Flow mode outer-DOM styles (READER-MODE-SEPARATION-2 design §B.6, DD-6).
+   Copied verbatim from the global rules whose selectors match the classes Flow's outer DOM uses,
+   renamed with the rm-flow- prefix and anchored under .rm-flow-root:
+   - page-reader.css (.foliate-page-view, .foliate-host, .foliate-loading,
+     .recenter-reading-box-btn); the legacy inline overflow:auto of the scrolled surface is a rule here;
+   - flow.css (.foliate-page-view--flow reading-zone mask, .flow-shrink-cursor).
+   The .foliate-page-view--chunk-visual cursor rule is not copied: that class is applied only for the
+   narrate chunk visual. Keyframes are renamed with the prefix. Classes inside EPUB section documents
+   are styled by this mode's helpers/foliateStyles.ts and are not renamed. */
+
+.rm-flow-root {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* Base layout for the Foliate view container (scrolled surface) */
+.rm-flow-root .rm-flow-view {
+  flex: 1;
+  position: relative;
+  isolation: isolate;
+  overflow: auto;
+}
+
+.rm-flow-root .rm-flow-host {
+  z-index: 0;
+}
+
+/* FLOW-INF-A: Reading zone mask — de-emphasizes content outside active zone */
+.rm-flow-root .rm-flow-view {
+  --flow-zone-top: 20%;
+  --flow-zone-bottom: 45%;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+/* STAB-1A (BUG-162a): Loading indicator shown while EPUB word-wrapping runs */
+.rm-flow-root .rm-flow-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  color: var(--text-secondary, #888);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  z-index: 200;
+  animation: rm-flow-loading-pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes rm-flow-loading-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.rm-flow-root .rm-flow-recenter-btn {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.92;
+  z-index: 450;
+  pointer-events: auto;
+  transition: opacity var(--transition-normal), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  -webkit-app-region: no-drag;
+  white-space: nowrap;
+}
+.rm-flow-root .rm-flow-recenter-btn:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* FLOW-INF-B: Timer bar cursor for flow mode — prominent depleting bar.
+   FLOW-3A uses the per-word .page-word--flow-cursor underline inside the iframe;
+   this overlay is kept in the DOM for FlowScrollEngine positioning but hidden. */
+.rm-flow-root .rm-flow-shrink-cursor {
+  position: absolute;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 2px 0 var(--accent);
+  pointer-events: none;
+  z-index: 10;
+  transition: opacity 100ms ease;
+  display: none; /* shown via JS: cursorRef.current.style.display = "block" */
+  visibility: hidden !important;
+}

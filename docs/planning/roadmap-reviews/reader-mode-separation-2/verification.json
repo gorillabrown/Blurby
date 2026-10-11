@@ -1,0 +1,673 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "schemaVersion": 1,
+  "recordedAtUtc": "2026-10-09T05:55:08.462Z",
+  "identities": {
+    "B0": {
+      "status": "recorded",
+      "what": "rebuilt G0 baseline of 1e5485c66e547392e7752240df71700267e8ede7 (source tree d2392ee39b74e38f8fda5af3f93029f1f0162718)",
+      "archive": "C:ProjectsBlurby-artifacts\rms2-baseline-build",
+      "manifest": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/baseline-build-rebuild.json",
+      "reHashCommand": "node -e (hash every file under the archive and compare with baseline-build-rebuild.json files[]) — the launcher admission/isolated-launch.cjs performs this exact-set check on every launch"
+    },
+    "I": {
+      "status": "recorded",
+      "commit": "92dda255bfad4395600a4371f0406f0f55c92899",
+      "what": "session-1 --no-ff merge of origin/main aafbb1c9 into the run branch"
+    },
+    "structuralCandidate": {
+      "status": "recorded",
+      "commit": "d0c58af41fa1e73cc77928106dbcb9d93b2591a3",
+      "what": "S: first commit where G1-G6 pass before the speed dialog",
+      "evidence": {
+        "record": "verification.json -> structuralCandidate (G1-G5 PASS; G6 automated half)"
+      }
+    },
+    "candidate": {
+      "status": "recorded",
+      "commit": "c9d73dddc57a3ff19532d14baf76ae84e3c5f4b5",
+      "what": "F: final candidate after the speed dialog; D2-D8 run on F",
+      "evidence": {
+        "recordedAtUtc": "2026-10-11T03:27:59.967Z",
+        "archive": "C:/Projects/Blurby-artifacts/rms2-candidate-c9d73dddc57a (dist manifest fbe3ff986ce1db9235bb19b0bf0dad7ebd505ea4bb8291c8fb5fa8725c22ba32)",
+        "d2": "16/16",
+        "d3": "4 files pass",
+        "d4": "pass",
+        "d5": "4 files pass",
+        "typecheck": 0,
+        "build": 0,
+        "diffCheck": 0,
+        "pathsSubset": "319/319 I..F paths registered",
+        "d6": "npm test: 4 full runs each 3339-3340 passed / 133 skipped with only KF-3 timeouts (Decision #33)",
+        "d7d8": "check_reader_mode_evidence --require-speed PASS; declared speed tests 106/106",
+        "d9": "B0 archive re-hash 21/21, 0 mismatches",
+        "liveQa": "docs/planning/roadmap-reviews/reader-mode-separation-2/live-qa.json"
+      }
+    }
+  },
+  "g0": {
+    "admission": "BLOCKED (owner half pending: BLOCKER B1)",
+    "evidence": [
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/baseline.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/isolation.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/flow-reproduction.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/g0-matrix.json",
+      "docs/planning/roadmap-reviews/reader-mode-separation-2/g0-owner-observations.json"
+    ]
+  },
+  "waveGates": [
+    {
+      "gate": "B9 (Wave B)",
+      "commit": "5a34f6e19f787c34fbbf4501f77945fca105a5a0",
+      "ranAtUtc": "2026-10-09T08:38:05.990Z",
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 217,
+        "testFilesSkipped": 1,
+        "testsPassed": 3089,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "kf1": "did not recur"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerify": "5/5",
+      "adapterRouterBaseline": "171/171",
+      "audioInvariants": "48/48",
+      "g4": {
+        "page": "byte-identical after Q-F (6 dropped)",
+        "focus": "byte-identical after Q-F (30 dropped; 0 OC-1)"
+      },
+      "obsA3_2": "fixed at router level; mutation-proven (tests/readerModes/focus.behavior.test.tsx)",
+      "logs": "%TEMP%/rms2-gate-B9-5a34f6e1 (local)"
+    },
+    {
+      "gate": "C4 (Wave C)",
+      "commit": "9fa253b070955953694d8103c31ac0e132e50363",
+      "ranAtUtc": "2026-10-09T09:08:20.309Z",
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 219,
+        "testFilesSkipped": 1,
+        "testsPassed": 3106,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "kf1": "did not recur"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerify": "5/5",
+      "g1g3Flow": "38/38",
+      "audioInvariants": "48/48",
+      "g4": {
+        "flow": "byte-identical after Q-F (35 dropped) + OC-1 (3 observations: flow-core-start-7 steps 7-9)"
+      },
+      "flowThrowingAudio": "0 ReaderPortAccessError; 0 infrastructure audio calls",
+      "g3Pairs": [
+        "page->focus",
+        "page->flow",
+        "focus->page",
+        "focus->flow",
+        "flow->page",
+        "flow->focus"
+      ],
+      "notes": [
+        "user pause clears pending pause-on-miss resume (G2-mandated)",
+        "Flow book end -> shell.requestCrossBook always; E1 shell routes no-queued-book to completion-to-page",
+        "shell.reportFlowProgress unused (progress in snapshot) — drop or justify at E5"
+      ]
+    },
+    {
+      "gate": "D4 (Wave D)",
+      "commit": "e005d5eb57d0cbc04e9a5db61082f55441b5966d",
+      "ranAtUtc": "2026-10-09T10:12:46.993Z",
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 221,
+        "testFilesSkipped": 1,
+        "testsPassed": 3123,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "kf1": "did not recur"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerify": "5/5",
+      "g1g4": "65/65 (boundaries, ownership, isolation, readerModes/**)",
+      "audioInvariants": "48/48",
+      "g4": {
+        "narrate": "7 scripts byte-identical; 0 dropped effects (= droppedEffectCounts.narrate 0); 0 dropped observations"
+      },
+      "g3": "all 12 ordered pairs at words 7/0/7-after-openDocument + 4 same-mode no-ops + Narrate rejected work (started, delayed extraction; stop/switch/openDocument/remount)",
+      "d3": "READER_MODE_MODULES in the router module per design C Wave D row D3; every import edge into a mode dir lands on its index.ts",
+      "notes": [
+        "G1 allowance coverage now enforced (4 trees): ProgressBar (dead legacy import), ErrorBoundary (shell-only), useFocusTrap (speed dialog, src/components) removed from allowedShared — tightening",
+        "Narrate BLOCK_TAGS added to allowedModuleSingletons (verbatim helper, never mutated; same as page/focus/flow)",
+        "Narrate release calls emitted in stop (G2 zero-calls-after-stop); Narrate->Page trace unchanged",
+        "D3 makes the mode trees statically reachable from production before E1 (rm-* scoped CSS; foliate dynamic) — behaviour-neutral, as designed",
+        "ReaderAudioConfig gains voiceName, mediaSessionCoverPath (additive)"
+      ]
+    }
+  ],
+  "legacyUnreachable": {
+    "computedAt": "3dd4b504 + 0b199425 (pre-deletion tree)",
+    "rule": "design D.6: unreachable from src/main.tsx (runtime graph incl. dynamic import) AND no retained importer (src) or reader (tests/, recorder) AND not App.tsx engine",
+    "method": "census buildImportGraph from src/main.tsx; test/recorder import-or-path-string scan; src importer grep (Decision #21)",
+    "deleted": [
+      "src/components/PageReaderView.tsx",
+      "src/utils/FlowCursorController.ts",
+      "src/components/ScrollReaderView.tsx",
+      "src/components/FlowText.tsx",
+      "src/components/VirtualScrollText.tsx",
+      "src/reader/modes/FocusModeAdapter.ts",
+      "src/reader/modes/FlowModeAdapter.ts"
+    ],
+    "rows": [
+      {
+        "file": "src/hooks/useReaderMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrationIntegration.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/phase0Stabilization.test.ts",
+          "tests/readerModeBoundaries.test.ts",
+          "tests/readerModeOwnership.test.ts",
+          "tests/useReaderMode.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useReadingModeInstance.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/tts7b-cursorContract.test.ts",
+          "tests/useReadingModeInstance.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useDocumentLifecycle.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/documentLifecycleModeRestore.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/startupStabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/usePersistentReadingAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/persistentReadingAnchor.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/reader/anchors/useCurrentWordAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/currentWordAnchor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/startWordIndex.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/selectionWordIdentity.test.ts",
+          "tests/startWordIndex.test.ts",
+          "tests/tts7j-foliate-section-sync.test.ts",
+          "tests/tts7k-global-word-source.test.ts",
+          "tests/tts7l-exact-selection-mapping.test.ts",
+          "tests/tts7m-resume-anchor.test.ts",
+          "tests/wordAnchor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/persistentReadingAnchor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrateIntentCursor.test.ts",
+          "tests/persistentReadingAnchor.test.ts",
+          "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.recorder.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/PageMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": false,
+        "retainedImporters": [
+          "src/hooks/useReadingModeInstance.ts",
+          "src/modes/index.ts"
+        ]
+      },
+      {
+        "file": "src/modes/FocusMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perf-baseline.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/FlowMode.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perf-baseline.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/modes/index.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/tts7b-cursorContract.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/reader/modes/FocusModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/reader/modes/FlowModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/reader/modes/NarrateModeAdapter.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrateModeAdapter.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useReader.ts",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/ReaderView.tsx",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useFlowScrollSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/ttsContinuityReadiness.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/FlowScrollEngine.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/einkErgonomics.test.ts",
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/narrationLayer.test.ts",
+          "tests/startupStabilization.test.ts",
+          "tests/ttsContinuityReadiness.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/FlowCursorController.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/PageReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/components/FlowText.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/ScrollReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/hooks/useFoliateSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/readerDecomposition.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useNarrationSync.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/perfAudit.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/hooks/useNarrationCaching.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/useNarrationCaching.test.tsx"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/FoliatePageView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliate-bridge.test.ts",
+          "tests/narrationIntegration.test.ts",
+          "tests/narrLayer1bConsolidation.test.ts",
+          "tests/phase0Stabilization.test.ts",
+          "tests/tts7b-cursorContract.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/components/PageReaderView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/components/ScrollReaderView.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true
+      },
+      {
+        "file": "src/components/VirtualScrollText.tsx",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [],
+        "deletable": true,
+        "deleted": true,
+        "retainedImporters": [
+          "src/components/ScrollReaderView.tsx (deleted together)"
+        ]
+      },
+      {
+        "file": "src/components/PausedTextView.tsx",
+        "reachableFromMain": true,
+        "onlyViaAppTsx": true,
+        "appTsxEngine": true,
+        "testReaders": [],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateStyles.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/perfAudit.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordHighlight.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateChunkHighlight.test.ts",
+          "tests/foliateWordHighlight.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateAnchorNavigation.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateAnchorNavigation.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/wordPositionIndex.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/narrationPipelineIntegration.test.ts",
+          "tests/wordPositionIndex.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/chunkReadingVisualState.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/chunkReadingVisualState.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/silenceAwareCursor.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/silenceAwareCursor.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateHelpers.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/componentStyleCleanup.test.ts",
+          "tests/foliateTokenStitching.test.ts",
+          "tests/naturalChunks.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordWrapping.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateContentAlign.test.ts",
+          "tests/foliateDropcapAndChapters.test.ts",
+          "tests/foliateTokenStitching.test.ts",
+          "tests/startupStabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateLayout.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateLayout.test.ts",
+          "tests/phase0Stabilization.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      },
+      {
+        "file": "src/utils/foliateWordOffsets.ts",
+        "reachableFromMain": false,
+        "onlyViaAppTsx": false,
+        "appTsxEngine": false,
+        "testReaders": [
+          "tests/foliateWordOffsets.test.ts",
+          "tests/selectionWordIdentity.test.ts",
+          "tests/tts7l-exact-selection-mapping.test.ts"
+        ],
+        "deletable": false,
+        "deleted": false
+      }
+    ],
+    "postDeletionGate": {
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "files": "221 passed | 1 skipped",
+        "tests": "3258 passed | 133 skipped"
+      },
+      "build": 0
+    }
+  },
+  "structuralCandidate": {
+    "commit": "d0c58af4",
+    "status": "G1-G5 PASS; G6 automated half recorded; G6 heard audio pending OS-1 (owner)",
+    "recordedAtUtc": "2026-10-09T16:34:06.505Z",
+    "g5": {
+      "typecheck": 0,
+      "test": {
+        "exit": 0,
+        "testFilesPassed": 224,
+        "testFilesSkipped": 1,
+        "testsPassed": 3290,
+        "testsSkipped": 133,
+        "failedTestNames": [],
+        "note": "KF-2 (sync-queue EPERM) occurred once on 15626073 and was recorded (Decision #25); this run clean"
+      },
+      "build": 0,
+      "diffCheck": 0,
+      "recorderVerifyOnB0": "5/5 on src 0c790075",
+      "g1to4AndAudio": "17 files, 146/146 (readerModeBoundaries, readerModeOwnership, readerModeIsolation, tests/readerModes/, narrateA5RateReseed, narratePauseResumeUnify, narrateIntentCursor)"
+    },
+    "g6": {
+      "candidateBuild": "C:/Projects/Blurby-artifacts/rms2-candidate-d0c58af41fa1/ (candidate-build.json)",
+      "candidateRun": "%TEMP%/blurby-reader-mode-separation-2-g6-fixthreea20261009161402515 (epub 26/27, chapters 26/27; only narrate-book-transition fails, baseline-equal per Decision #24)",
+      "b0Run": "%TEMP%/blurby-reader-mode-separation-2-g6-bzeros20261009153628767 (same harness revision)",
+      "setAside": [
+        {
+          "run": "blurby-reader-mode-separation-2-g6-cands20261009154935565",
+          "reason": "chapters half ran while Chromium throttled the hidden window (frames stopped, timers ~1 s, CDP input unacknowledged); not reproducible in a matched rerun (fixthreea); evidence kept, not used. Decision #26"
+        },
+        {
+          "run": "blurby-reader-mode-separation-2-g6-candc20261009150228347",
+          "reason": "same throttling pattern (self-recovered mid-run); built from 15626073, superseded"
+        }
+      ],
+      "remaining": [
+        "heardAudio for every audio case (OS-1)",
+        "owner confirmation of baselineEqualDeviations",
+        "removedCrossOwnerEffects list (narrate->page lands on the handed-over word; Narrate no longer shows Flow progress text)"
+      ]
+    }
+  }
+}

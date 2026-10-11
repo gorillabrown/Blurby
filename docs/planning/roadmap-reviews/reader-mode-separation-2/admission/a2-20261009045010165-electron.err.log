@@ -1,0 +1,18 @@
+
+DevTools listening on ws://127.0.0.1:9335/devtools/browser/cf06103a-3bd4-4c31-b5fd-af36e3a6b982
+(electron) 'console-message' arguments are deprecated and will be removed. Please use Event<WebContentsConsoleMessageEventParams> object instead.
+Unable to determine content-length from response headers. Will expand buffer when needed.
+Unable to determine content-length from response headers. Will expand buffer when needed.
+[kokoro-marathon] Worker load failed: Load model from C:\Users\estra\AppData\Local\Temp\blurby-reader-mode-separation-2-a1-a220261009045010165\userData\models\onnx-community\Kokoro-82M-v1.0-ONNX\onnx\model_q4.onnx failed:system error number 13
+[kokoro] Worker load failed: Load model from C:\Users\estra\AppData\Local\Temp\blurby-reader-mode-separation-2-a1-a220261009045010165\userData\models\onnx-community\Kokoro-82M-v1.0-ONNX\onnx\model_q4.onnx failed:system error number 13
+[kokoro] Stack: Error: Load model from C:\Users\estra\AppData\Local\Temp\blurby-reader-mode-separation-2-a1-a220261009045010165\userData\models\onnx-community\Kokoro-82M-v1.0-ONNX\onnx\model_q4.onnx failed:system error number 13
+    at new OnnxruntimeSessionHandler (C:\Projects\Blurby\.worktrees\reader-mode-separation-2\node_modules\onnxruntime-node\dist\backend.js:50:92)
+    at OnnxruntimeBackend.createInferenceSessionHandler (C:\Projects\Blurby\.worktrees\reader-mode-separation-2\node_modules\onnxruntime-node\dist\backend.js:123:16)
+    at InferenceSession.create (C:\Projects\Blurby\.worktrees\reader-mode-separation-2\node_modules\onnxruntime-common\dist\cjs\inference-session-impl.js:187:39)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async createInferenceSession (file:///C:/Projects/Blurby/.worktrees/reader-mode-separation-2/node_modules/@huggingface/transformers/dist/transformers.node.mjs:3029:21)
+    at async file:///C:/Projects/Blurby/.worktrees/reader-mode-separation-2/node_modules/@huggingface/transformers/dist/transformers.node.mjs:7891:29
+    at async Promise.all (index 0)
+    at async constructSessions (file:///C:/Projects/Blurby/.worktrees/reader-mode-separation-2/node_modules/@huggingface/transformers/dist/transformers.node.mjs:7888:31)
+    at async Promise.all (index 0)
+    at async StyleTextToSpeech2Model.from_pretrained (file:///C:/Projects/Blurby/.worktrees/reader-mode-separation-2/node_modules/@huggingface/transformers/dist/transformers.node.mjs:8819:20)

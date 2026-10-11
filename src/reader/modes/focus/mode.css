@@ -1,0 +1,377 @@
+/* Focus mode outer-DOM styles (READER-MODE-SEPARATION-2 design §B.6, DD-6).
+   Copied verbatim from the global rules whose selectors match the classes Focus's outer DOM uses,
+   renamed with the rm-focus- prefix and anchored under .rm-focus-root (theme ancestors kept):
+   - page-reader.css (.foliate-page-view, .foliate-host, .foliate-loading, .recenter-reading-box-btn);
+     the legacy inline overflow:auto of the scrolled surface is a rule here;
+   - flow.css (.foliate-page-view--flow reading-zone mask: Focus used the scrolled surface);
+   - reader.css (RSVP overlay: .focus-overlay, .reader-container, .reader-top-bar*, .reader-top-left,
+     .reader-esc-btn, .reader-doc-title, .reader-word-*, .reader-guide-*, .focus-mark, .highlight-toast);
+   - library.css (.hamburger-btn, .reader-hamburger-icon, the --mac variants and the narrow-window
+     media rules), base.css (.sr-only), themes.css (e-ink variants).
+   Keyframes are renamed with the prefix. Classes inside EPUB section documents are styled by this
+   mode's helpers/foliateStyles.ts and are not renamed. */
+
+.rm-focus-root {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  flex-direction: column;
+}
+
+/* Base layout for the Foliate view container (scrolled surface) */
+.rm-focus-root .rm-focus-view {
+  flex: 1;
+  position: relative;
+  isolation: isolate;
+  overflow: auto;
+}
+
+.rm-focus-root .rm-focus-host {
+  z-index: 0;
+}
+
+/* FLOW-INF-A: Reading zone mask — de-emphasizes content outside active zone */
+.rm-focus-root .rm-focus-view {
+  --flow-zone-top: 20%;
+  --flow-zone-bottom: 45%;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.35) 0%,
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-top) - 2%),
+    rgba(0, 0, 0, 1) var(--flow-zone-top),
+    rgba(0, 0, 0, 1) var(--flow-zone-bottom),
+    rgba(0, 0, 0, 0.35) calc(var(--flow-zone-bottom) + 2%),
+    rgba(0, 0, 0, 0.35) 100%
+  );
+}
+
+/* STAB-1A (BUG-162a): Loading indicator shown while EPUB word-wrapping runs */
+.rm-focus-root .rm-focus-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  color: var(--text-secondary, #888);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  z-index: 200;
+  animation: rm-focus-loading-pulse 1.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes rm-focus-loading-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.rm-focus-root .rm-focus-recenter-btn {
+  position: absolute;
+  right: 18px;
+  bottom: 18px;
+  padding: 7px 14px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0.92;
+  z-index: 450;
+  pointer-events: auto;
+  transition: opacity var(--transition-normal), transform var(--transition-fast);
+  box-shadow: var(--shadow-sm);
+  -webkit-app-region: no-drag;
+  white-space: nowrap;
+}
+.rm-focus-root .rm-focus-recenter-btn:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* ── RSVP overlay (Focus copy of ReaderView) ── */
+.rm-focus-root .rm-focus-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  z-index: 200;
+}
+.rm-focus-root .rm-focus-container {
+  flex: 1;
+  min-height: 0;
+  background: var(--reader-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono);
+  outline: none;
+  cursor: default;
+  user-select: none;
+  -webkit-app-region: no-drag;
+}
+.rm-focus-root .rm-focus-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 16px 140px 16px 32px; /* Right padding clears Windows title bar buttons */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: opacity 0.5s ease;
+}
+.rm-focus-root .rm-focus-top-bar--playing { opacity: 0.12; }
+.rm-focus-root .rm-focus-top-bar--eink { opacity: 1; }
+.rm-focus-root .rm-focus-top-bar--paused { opacity: 0.55; }
+.rm-focus-root .rm-focus-top-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.rm-focus-root .rm-focus-esc-btn {
+  background: var(--overlay-light);
+  border: 1px solid var(--overlay-medium);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 11px;
+  font-family: var(--mono);
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 1px;
+}
+.rm-focus-root .rm-focus-doc-title {
+  color: var(--text-dimmer);
+  font-size: 13px;
+  max-width: 350px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rm-focus-root .rm-focus-word-area {
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  padding: 0 60px;
+  transform: scale(var(--word-area-scale, 1));
+}
+.rm-focus-root .rm-focus-guide-line {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 40px;
+  background: var(--accent-faded);
+}
+.rm-focus-root .rm-focus-guide-top { top: -60px; }
+.rm-focus-root .rm-focus-guide-bottom { bottom: -60px; }
+.rm-focus-root .rm-focus-word-display {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  min-height: 90px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Focus mode word transition layers */
+.rm-focus-root .rm-focus-word-layer {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  width: 100%;
+  will-change: opacity;
+}
+.rm-focus-root .rm-focus-word-layer--entering {
+  animation: rm-focus-word-enter var(--focus-transition-ms, 30ms) ease-out forwards;
+}
+@keyframes rm-focus-word-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rm-focus-root .rm-focus-word-layer--entering {
+    animation: none;
+  }
+}
+.rm-focus-root .rm-focus-word-before {
+  font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-align: right;
+  min-width: 40%;
+  direction: rtl;
+  unicode-bidi: bidi-override;
+}
+.rm-focus-root .rm-focus-word-focus {
+  font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
+  font-weight: 600;
+  color: var(--accent);
+  text-shadow: 0 0 30px var(--accent-glow);
+  margin: 0 1px;
+}
+.rm-focus-root .rm-focus-word-after {
+  font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
+  font-weight: 300;
+  letter-spacing: 2px;
+  color: var(--text);
+  text-align: left;
+  min-width: 40%;
+}
+.rm-focus-root .rm-focus-word-char {
+  font-size: clamp(38px, 6vw, 72px);
+  font-family: var(--reader-font, var(--mono));
+  font-weight: 300;
+  color: var(--text);
+}
+
+/* Toast notification */
+.rm-focus-root .rm-focus-highlight-toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--badge-on-color);
+  padding: 8px 20px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+  z-index: 400;
+  opacity: 0;
+  animation: rm-focus-toast-fade 1.5s ease-in-out forwards;
+}
+@keyframes rm-focus-toast-fade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── FOCUS MARKS ── */
+.rm-focus-root .rm-focus-guide-line {
+  position: relative;
+}
+.rm-focus-root .rm-focus-mark {
+  position: absolute;
+  left: var(--focus-mark-left, 50%);
+  font-size: 10px;
+  color: var(--accent);
+  transform: translateX(-50%);
+  line-height: 1;
+  pointer-events: none;
+}
+.rm-focus-root .rm-focus-guide-top .rm-focus-mark { bottom: 0; }
+.rm-focus-root .rm-focus-guide-bottom .rm-focus-mark { top: 0; }
+
+/* Hamburger button */
+.rm-focus-root .rm-focus-hamburger-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: color 150ms ease;
+}
+.rm-focus-root .rm-focus-hamburger-btn:hover {
+  color: var(--accent);
+}
+.rm-focus-root .rm-focus-hamburger-icon {
+  border-radius: 8px;
+  display: block;
+}
+.rm-focus-root .rm-focus-container--mac {
+  padding-top: 36px;
+}
+.rm-focus-root .rm-focus-top-bar--mac {
+  padding-top: 36px;
+}
+
+@media (max-width: 600px) {
+  .rm-focus-root .rm-focus-top-bar {
+    padding: 12px 80px 12px 16px;
+  }
+}
+@media (max-width: 400px) {
+  .rm-focus-root .rm-focus-word-area {
+    padding: 0 20px;
+  }
+}
+
+/* ── Accessibility: Screen reader only ── */
+.rm-focus-root .rm-focus-sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+}
+
+/* ── E-ink variants (themes.css) ── */
+[data-eink="true"] .rm-focus-root .rm-focus-container {
+  background: var(--reader-bg);
+}
+[data-eink="true"] .rm-focus-root .rm-focus-word-before,
+[data-eink="true"] .rm-focus-root .rm-focus-word-after {
+  color: var(--text-primary);
+}
+[data-eink="true"] .rm-focus-root .rm-focus-word-focus {
+  color: var(--text-primary);
+  font-weight: 900;
+  text-shadow: none;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+[data-eink="true"] .rm-focus-root .rm-focus-mark {
+  color: var(--text-primary);
+}
+[data-eink="true"] .rm-focus-root .rm-focus-guide-line {
+  border-color: var(--border);
+}
+[data-eink="true"] .rm-focus-root .rm-focus-esc-btn {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  box-shadow: none;
+}
+[data-theme="eink"] .rm-focus-root .rm-focus-highlight-toast {
+  background: #000000;
+  color: #ffffff;
+  border-radius: 4px;
+  opacity: 1;
+}
+[data-eink="true"] .rm-focus-root .rm-focus-eink-toolbar-hidden {
+  display: none !important;
+}
+[data-eink="true"] .rm-focus-root .rm-focus-esc-btn {
+  padding: 12px 16px;
+  font-size: 13px;
+}
+[data-eink="true"] .rm-focus-root .rm-focus-hamburger-btn {
+  padding: 12px;
+}
+[data-eink="true"] .rm-focus-root .rm-focus-highlight-toast {
+  animation: none !important;
+  opacity: 1;
+}

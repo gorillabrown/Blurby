@@ -1,0 +1,243 @@
+{
+  "run": "a2-epub-flow",
+  "startedAt": "2026-10-09T04:50:12.785Z",
+  "fixture": {
+    "id": "g0-public-epub",
+    "path": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\userData\\blurby-data\\admission-fixtures\\sample-meditations.epub",
+    "source": "resources/sample-meditations.epub",
+    "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+    "wordCount": 80479,
+    "countAuthority": "existing main/file-parsers.countWords(extractContent)",
+    "initialPosition": 0,
+    "kind": "native-epub"
+  },
+  "scenario": "flow",
+  "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165",
+  "pid": 10164,
+  "sourceManifestSha256": "a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291",
+  "actions": [
+    {
+      "at": "2026-10-09T04:50:13.040Z",
+      "selector": "[data-doc-id=\"g0-public-epub\"]",
+      "text": "GG0 Bundled MeditationsMarcus Aureliusepub322p · 6.0h0%*",
+      "ariaLabel": "G0 Bundled Meditations by Marcus Aurelius, 80479 words, 5h 22m",
+      "className": "doc-card"
+    },
+    {
+      "at": "2026-10-09T04:50:13.185Z",
+      "selector": "[aria-label=\"Page mode\"]",
+      "text": "Page",
+      "ariaLabel": "Page mode",
+      "className": "rbb-mode-btn rbb-mode-btn--active"
+    },
+    {
+      "at": "2026-10-09T04:50:18.559Z",
+      "selector": "[aria-label=\"Flow mode\"]",
+      "text": "Flow",
+      "ariaLabel": "Flow mode",
+      "className": "rbb-mode-btn  rbb-mode-btn--last"
+    },
+    {
+      "at": "2026-10-09T04:50:23.784Z",
+      "selector": "[aria-label=\"Play\"]",
+      "text": "▶",
+      "ariaLabel": "Play",
+      "className": "rbb-play-btn "
+    },
+    {
+      "at": "2026-10-09T04:50:32.241Z",
+      "selector": "[aria-label=\"Pause\"]",
+      "text": "❚❚",
+      "ariaLabel": "Pause",
+      "className": "rbb-play-btn rbb-play-btn--active"
+    }
+  ],
+  "heardAudio": "NOT OBSERVED by this harness",
+  "canonicalIndexPolicy": "Only raw existing DOM indices, section metadata, trace events, and persisted positions are recorded. No index is inferred from visible word text.",
+  "rendererIdentity": {
+    "runId": "blurby-reader-mode-separation-2-a1-a220261009045010165",
+    "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165",
+    "pid": 10164,
+    "paths": {
+      "userData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\userData",
+      "sessionData": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\sessionData",
+      "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\logs",
+      "crashDumps": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\crashDumps"
+    },
+    "sourceManifestSha256": "a7f070d4e172d8cb32f09d60a498ec81f20fb61e34a5836f95bddb71e56eb291"
+  },
+  "target": {
+    "id": "DE5BA1C2E23B58926304F5723CC722EE",
+    "url": "http://localhost:5173/"
+  },
+  "loadedResourceUrlsAtStart": {
+    "scripts": [
+      "http://localhost:5173/assets/index-CrV8QIYG.js"
+    ],
+    "resources": [
+      "http://localhost:5173/assets/index-CrV8QIYG.js",
+      "http://localhost:5173/assets/vendor-DXnWpCqd.js",
+      "http://localhost:5173/assets/tts-CKatckqv.js",
+      "http://localhost:5173/assets/settings-D3a3Dr4N.js",
+      "http://localhost:5173/assets/settings-5MT7dmX9.css",
+      "http://localhost:5173/assets/index-B9TsfAM6.css",
+      "http://localhost:5173/assets/App-BTmErlj_.js",
+      "http://localhost:5173/assets/blurby-icon-ejRjiByq.png"
+    ],
+    "stylesheetAndPreloadLinks": [
+      "http://localhost:5173/assets/vendor-DXnWpCqd.js",
+      "http://localhost:5173/assets/tts-CKatckqv.js",
+      "http://localhost:5173/assets/settings-D3a3Dr4N.js",
+      "http://localhost:5173/assets/settings-5MT7dmX9.css",
+      "http://localhost:5173/assets/index-B9TsfAM6.css",
+      "http://localhost:5173/assets/App-BTmErlj_.js"
+    ]
+  },
+  "builtAssetVerification": [
+    {
+      "url": "http://localhost:5173/assets/App-BTmErlj_.js",
+      "sha256": "7ce1254c81b2f5e9d6c1f862869cd31284eda41d0146663ed5f70ba8b6de03e5",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/blurby-icon-ejRjiByq.png",
+      "sha256": "143e2bbffcb60a38202eac6a5728df5bf299bf7f6b3c35cc8222a2d7b28df74b",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/comic-book-DIQGts9b.js",
+      "sha256": "41809c14e3e98a83afb97dfdc8ad62d8bb48489aff1672a886492dc05007814c",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/epub-W2Ac9Tsh.js",
+      "sha256": "560780e61485665730823d34c44fe2c50f1d52ea6cca28c616c42424a517a609",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/fb2-DoA4UCCO.js",
+      "sha256": "ce2144e4b46af9646f603d0c37b9541b70f17027079914e81d4e81d03ad64514",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/fflate-CtUkkcu7.js",
+      "sha256": "165df8eee6bd8c60cefdc67e51acb57335ba0e01762b2698b73c8972027c7991",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/fixed-layout-E39NmGzb.js",
+      "sha256": "f2a0740856add8790b71cd27ecdb232a38deb8a73fef7d0c58643668ee5ec2de",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/index-B9TsfAM6.css",
+      "sha256": "c9ecd1073370c888330ffaeb43096e3fff77b444cbc8584b7d572ee9e603e884",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/index-CrV8QIYG.js",
+      "sha256": "8a8a9f11a19783a06b7ada4909df598888dfbf818f78450cf211defdc666a914",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/mobi-CUP3Mkj_.js",
+      "sha256": "32cf44c14ffcc6fbcfe952e2cebef827ff9d3d27d6f99ac2bdb29b2b1530232c",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/paginator-sOM65Gn3.js",
+      "sha256": "6e6e68b0aa176fabc771b0b276ba3eeab2b39046afeea8ed1801b315d7174b0c",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/search-DFtD2c8n.js",
+      "sha256": "a78583928bb6657a128d72570edab7f7f0f4991cb785279ea94b1a480956616c",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/settings-5MT7dmX9.css",
+      "sha256": "2589f52592a8cd13711cb14c1c1847d7883ba84652967f4ea9b4e53dc8c0bd9b",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/settings-D3a3Dr4N.js",
+      "sha256": "ee7dd769c9f56de2ee04bbcfc8e2bcc16fdf8ca0af41fc65c9e079ed3c089133",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/tts-CKatckqv.js",
+      "sha256": "8702df691412aba0fda648e178cf5ec56dabe5f3a2495919da44a4ecd7d7d64c",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/tts-HaHKBHMJ.js",
+      "sha256": "e7d8c833106888015672ecd5991e3c73795da55f932d9503c3ce34c4bb79ca04",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/vendor-DXnWpCqd.js",
+      "sha256": "3058905d71c0b5c6c60a017837d013d3fb501313807b386e62e2afe31970294a",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/view-Cy1j7h-j.js",
+      "sha256": "dfcd710de49e578a151e4ab535d9a3cf9b6f3d5defa44a75bc4ec6470ca1a87e",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/assets/zip-Y2spjjw9.js",
+      "sha256": "9654156c7b0b3da6c06520ef276652e9f3d5a17bccf5c6594a214f91fce12afe",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/index.html",
+      "sha256": "39bf62137562da7a6fe66692057b46859f620868e1ae604155b00d5e37ada514",
+      "matchedArchive": true
+    },
+    {
+      "url": "http://localhost:5173/resources/sample-meditations.epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+      "matchedArchive": true
+    }
+  ],
+  "captureCompleted": true,
+  "persistedAppState": {
+    "settings": {
+      "schemaVersion": 12,
+      "firstRunCompleted": true,
+      "readingMode": "flow",
+      "lastReadingMode": "flow",
+      "wpm": 250,
+      "ttsRate": 1,
+      "ttsEngine": "kokoro",
+      "ttsEnabled": false,
+      "sourceFolder": null,
+      "recentFolders": [],
+      "_wsPairingToken": "djEwHsjsbrqg5D9TaTE4MuyZFdcjAJhqqGPEOy8Po6/VdnLByYWNfQiJUWotfC8rINwNA4a+Y8EeaaUZ26lT",
+      "folderName": "My reading list",
+      "isNarrating": false
+    },
+    "library": [
+      {
+        "id": "g0-public-epub",
+        "title": "G0 Bundled Meditations",
+        "position": 0,
+        "ext": ".epub",
+        "filepath": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165\\userData\\blurby-data\\admission-fixtures\\sample-meditations.epub",
+        "wordCount": 80479
+      },
+      {
+        "id": "g0-public-text",
+        "title": "G0 Generated Plain Text",
+        "position": 0,
+        "wordCount": 339
+      }
+    ]
+  },
+  "finishedAt": "2026-10-09T04:50:37.583Z",
+  "playbackStopped": true,
+  "samples": 54,
+  "screencastFrames": 99,
+  "frameLimitReached": false,
+  "elapsedMs": 24801
+}

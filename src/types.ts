@@ -437,6 +437,10 @@ export type ReaderLastMode = "focus" | "flow" | "narrate";
 export interface BlurbySettings {
   schemaVersion: number;
   wpm: number;
+  /** OC-6: Focus's own WPM (additive, optional; absent → wpm). No migration. */
+  focusWpm?: number;
+  /** OC-6: Flow's own WPM (additive, optional; absent → wpm). No migration. */
+  flowWpm?: number;
   sourceFolder: string | null;
   folderName: string;
   recentFolders: string[];

@@ -1,0 +1,2017 @@
+{
+  "_comment": "Hand-authored judgments joined by resource-census.mjs. Precedence: override (file + symbol/kind/enclosing/anchorIncludes; most specific wins) > fileDefault. Every census resource must match a rule; every rule must match a resource. Values: currentUsers subset of page|focus|flow|narrate|shell; proposedOwner one of page|focus|flow|narrate|shell|infrastructure-port|per-mode (per-mode requires privateCopiesFor).",
+  "scope": {
+    "include": [
+      "src/components/ReaderContainer.tsx",
+      "src/hooks/useReaderMode.ts",
+      "src/hooks/useReadingModeInstance.ts",
+      "src/hooks/useDocumentLifecycle.ts",
+      "src/hooks/usePersistentReadingAnchor.ts",
+      "src/reader/anchors/useCurrentWordAnchor.ts",
+      "src/utils/startWordIndex.ts",
+      "src/utils/persistentReadingAnchor.ts",
+      "src/modes/PageMode.ts",
+      "src/modes/FocusMode.ts",
+      "src/modes/FlowMode.ts",
+      "src/modes/ModeInterface.ts",
+      "src/modes/index.ts",
+      "src/reader/modes/FocusModeAdapter.ts",
+      "src/reader/modes/FlowModeAdapter.ts",
+      "src/reader/modes/NarrateModeAdapter.ts",
+      "src/hooks/useReader.ts",
+      "src/components/ReaderView.tsx",
+      "src/hooks/useFlowScrollSync.ts",
+      "src/utils/FlowScrollEngine.ts",
+      "src/utils/FlowCursorController.ts",
+      "src/components/FlowText.tsx",
+      "src/hooks/useFoliateSync.ts",
+      "src/hooks/useNarrationSync.ts",
+      "src/hooks/useNarrationCaching.ts",
+      "src/components/FoliatePageView.tsx",
+      "src/components/PageReaderView.tsx",
+      "src/components/ScrollReaderView.tsx",
+      "src/components/VirtualScrollText.tsx",
+      "src/components/PausedTextView.tsx",
+      "src/utils/foliateStyles.ts",
+      "src/utils/foliateWordHighlight.ts",
+      "src/utils/foliateAnchorNavigation.ts",
+      "src/utils/wordPositionIndex.ts",
+      "src/utils/chunkReadingVisualState.ts",
+      "src/utils/silenceAwareCursor.ts",
+      "src/utils/foliateHelpers.ts",
+      "src/utils/foliateWordWrapping.ts",
+      "src/utils/foliateLayout.ts",
+      "src/utils/foliateWordOffsets.ts",
+      "src/reader/surface/SurfaceCommand.ts",
+      "src/types.ts",
+      "src/types/chunkReading.ts",
+      "src/types/narration.ts",
+      "src/hooks/useKeyboardShortcuts.ts",
+      "src/components/ReaderBottomBar.tsx",
+      "src/constants.ts",
+      "src/reader/useReaderModeOrchestrator.ts",
+      "src/App.tsx",
+      "src/hooks/useProgressTracker.ts",
+      "src/hooks/useEinkController.ts",
+      "src/utils/narrateDiagnostics.ts"
+    ],
+    "excluded": {
+      "settings UI": "Every src/components/settings/ module is listed by exact path under shellOnly in dependencies.json; none holds reader-mode state.",
+      "src/components/BacktrackPrompt.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/DefinitionPopup.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/EinkRefreshOverlay.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/ErrorBoundary.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/HighlightMenu.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/MenuFlap.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/NotePopover.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/ProgressBar.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/ReturnToReadingPill.tsx": "Passive/shell UI: local presentational state only.",
+      "src/components/WpmGauge.tsx": "Passive/shell UI: local presentational state only.",
+      "src/hooks/narration/kokoroStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/narration/mossNanoStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/narration/pocketTtsStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/narration/qwenStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/narration/qwenStreamingStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/narration/webSpeechStrategy.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/hooks/useNarration.ts": "TTS implementation behind Narrate's audio port (spec item 5); its ~71 refs/timers/IPC subscriptions are port-internal. Its single instance is censused as the hook-instance useNarration() in ReaderContainer.",
+      "src/hooks/useReadingGoals.ts": "Shell-only goal persistence (1 ref: latestGoalsRef).",
+      "src/styles/base.css": "CSS: see above.",
+      "src/styles/flow.css": "CSS: see above.",
+      "src/styles/index.css": "CSS: see above.",
+      "src/styles/page-reader.css": "CSS: see above.",
+      "src/styles/reader.css": "CSS: no runtime mutable resources; mode selectors are tracked by the layoutAbsorption map in dependencies.json.",
+      "src/styles/themes.css": "CSS: see above.",
+      "src/utils/audioScheduler.ts": "TTS port internal (spec item 5).",
+      "src/utils/backgroundCacher.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/utils/highlightSyncController.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/utils/mediaSessionBridge.ts": "TTS port internal (narrateTtsPort in dependencies.json); not reader-mode behavior.",
+      "src/utils/rhythm.ts": "Pure functions; no mutable resources (copied into focus/flow helpers).",
+      "src/utils/text.ts": "Allowed-shared immutable content preparation; its only module value (MINOR_WORDS Set) is never mutated."
+    }
+  },
+  "fileDefaults": {
+    "src/components/ReaderContainer.tsx": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Document shell / toolbar state."
+    },
+    "src/hooks/useReadingModeInstance.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow"
+      ],
+      "rationale": "Central factory bridge replaced by mode-local factories; each mode keeps its own callback refs."
+    },
+    "src/hooks/useDocumentLifecycle.ts": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Document load/session statistics stay in the shell."
+    },
+    "src/hooks/usePersistentReadingAnchor.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "One persistent anchor shared by all modes today; each ModeState owns its anchor and hands off by value; the persistence port accepts active-owner values only."
+    },
+    "src/modes/PageMode.ts": {
+      "currentUsers": [
+        "page"
+      ],
+      "proposedOwner": "page",
+      "rationale": "PageMode instance fields."
+    },
+    "src/modes/FocusMode.ts": {
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "FocusMode pacing timer/state (the active Focus clock in ReaderContainer)."
+    },
+    "src/modes/FlowMode.ts": {
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "FlowMode word timer/state."
+    },
+    "src/reader/modes/FocusModeAdapter.ts": {
+      "currentUsers": [],
+      "proposedOwner": "focus",
+      "rationale": "Adapter class fields; adapter has no production importer (tests only).",
+      "confidence": "low",
+      "reason": "Not wired into production; currentUsers empty by evidence (dependencies.json existingSitesNotReachableFromProductionEntry)."
+    },
+    "src/reader/modes/FlowModeAdapter.ts": {
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Adapter class fields; adapter has no production importer (tests only).",
+      "confidence": "low",
+      "reason": "Not wired into production."
+    },
+    "src/reader/modes/NarrateModeAdapter.ts": {
+      "currentUsers": [],
+      "proposedOwner": "narrate",
+      "rationale": "Adapter class fields; adapter has no production importer (tests only).",
+      "confidence": "low",
+      "reason": "Not wired into production."
+    },
+    "src/hooks/useReader.ts": {
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "RSVP display state/pacing; ReaderContainer and StandaloneReader (App.tsx) each create an instance."
+    },
+    "src/components/ReaderView.tsx": {
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus RSVP view (overlay in ReaderContainer, full view in StandaloneReader)."
+    },
+    "src/components/PausedTextView.tsx": {
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Paused text view rendered by ReaderView only."
+    },
+    "src/hooks/useFlowScrollSync.ts": {
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow engine lifecycle refs."
+    },
+    "src/utils/FlowScrollEngine.ts": {
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "FlowScrollEngine instance state/timers/listeners; engine only runs while readingMode==='flow' && flowPlaying."
+    },
+    "src/utils/FlowCursorController.ts": {
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Non-EPUB flow cursor; only importer PageReaderView is elided from the bundle.",
+      "confidence": "low",
+      "reason": "Dead in production; recommend retire rather than copy."
+    },
+    "src/components/FlowText.tsx": {
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Legacy flow text; only importer ScrollReaderView is dead.",
+      "confidence": "low",
+      "reason": "Dead in production."
+    },
+    "src/components/PageReaderView.tsx": {
+      "currentUsers": [],
+      "proposedOwner": "page",
+      "rationale": "Legacy non-EPUB page view; ReaderContainer imports but never renders it (import elided).",
+      "confidence": "low",
+      "reason": "Dead in production; recommend retire rather than copy into TextView.tsx."
+    },
+    "src/components/ScrollReaderView.tsx": {
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Legacy scroll reader; ReaderContainer imports but never renders it (import elided).",
+      "confidence": "low",
+      "reason": "Dead in production."
+    },
+    "src/components/VirtualScrollText.tsx": {
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Only importer ScrollReaderView is dead.",
+      "confidence": "low",
+      "reason": "Dead in production."
+    },
+    "src/components/FoliatePageView.tsx": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
+    },
+    "src/utils/wordPositionIndex.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Single WordPositionIndex per FoliatePageView today; each mode's FoliateView constructs its own."
+    },
+    "src/utils/foliateAnchorNavigation.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Retry delay inside jumpFoliateToWordAnchor, called from page onLoad restore and every mode's jump-back."
+    },
+    "src/utils/foliateWordWrapping.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Batch-yield timer inside wrapWordsInSpans (section load in every mode; Narrate restamp)."
+    },
+    "src/utils/foliateHelpers.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "BLOCK_TAGS is a never-mutated module Set; each mode's helper copy holds its own."
+    },
+    "src/hooks/useFoliateSync.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Browse-away polling runs in every mode against the shared Foliate view."
+    },
+    "src/hooks/useNarrationSync.ts": {
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "TTS settings bridge refs (voice/rate/engine) feed only the narration hook."
+    },
+    "src/hooks/useNarrationCaching.ts": {
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "TTS cache bridge."
+    },
+    "src/hooks/useKeyboardShortcuts.ts": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Library/global keyboard hooks in the same file; not reader-mode behavior."
+    },
+    "src/components/ReaderBottomBar.tsx": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Toolbar chrome state; consumes snapshots."
+    },
+    "src/reader/useReaderModeOrchestrator.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Router: the useReaderMode() instance it creates is the shared ref bag every mode transition goes through."
+    },
+    "src/App.tsx": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "App-level error listeners."
+    },
+    "src/hooks/useProgressTracker.ts": {
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Document progress/backtrack/goal accounting."
+    },
+    "src/hooks/useEinkController.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "E-ink refresh state; fed by page relocate, Flow progress and Focus view refresh button."
+    },
+    "src/utils/narrateDiagnostics.ts": {
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Process-global diagnostic ring written by FoliatePageView (every mode), ReaderContainer and TTS.",
+      "confidence": "low",
+      "reason": "Diagnostics is not a named port category in spec item 5; module-level mutable state would violate 'no module singleton state' unless explicitly allowed."
+    }
+  },
+  "overrides": [
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "readingMode",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Active-mode identity; becomes the router's selected factory id."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "readingModeRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Mirror of active-mode identity read inside mode callbacks (onRelocate, onLoad, retarget)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "isNarrating",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narration-active flag; also read by Flow paths (useFlowScrollSync effect 6, useFoliateSync, isNarrationSelected for flow)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "isNarratingRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Read by the shared onWordAdvance (Focus/Flow per-word path) to pick RAF-batched vs immediate highlight publishing."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "pendingNarrationResumeRef",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Cross-book/page-pause narration resume intent; becomes a value in Narrate's handoff snapshot."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "highlightedWordIndex",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Single highlighted cursor written by every mode's advance path and read by FoliatePageView, keyboard nav and toolbar."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "highlightedWordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Ref mirror of the shared cursor; written synchronously by clicks, onWordAdvance, persistent-anchor writeRefs."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "softWordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Page soft selection consumed by every mode start via resolveModeStartWordIndex."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "explicitSelectionAnchorRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Hard selection set by clicks in any mode, cleared by every mode's advance path."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "focusPlaying",
+      "currentUsers": [
+        "focus",
+        "shell"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus play state; shell reads it for modePlaying/isActivelyReading."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowPlaying",
+      "currentUsers": [
+        "page",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow play state; also set false by Narrate start and fed to FoliatePageView/useFoliateSync for every mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowProgress",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Written only by FlowScrollEngine; the bottom bar shows the last Flow value whenever Focus/Flow/Narrate is selected."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "chunkReadingVisualState",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "One state written by Flow (publishFlowVisualState) and Narrate (applyNarration*) publishers; rendered by the shared FoliatePageView."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "crossBookTransition",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Cross-book countdown; next-document open is a shell/router document replacement."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "pendingFlowResumeRef",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Resume-after-new-document intent; becomes a router handoff value (resumes Flow or Narrate)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "activeReadingMsRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Session statistic fed by isActivelyReading of every active mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "activeReadingStartRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Session statistic."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateApiRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "One imperative Foliate API handed to every mode hook (orchestrator, flow sync, caching, foliate sync)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateWordsRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "DOM word slice re-extracted by every mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateWordStrings",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Written on every word extraction; value never read (render-trigger only).",
+      "confidence": "low",
+      "reason": "Appears unused apart from setState; may be removable rather than copied."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateRenderVersion",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Surface re-render counter driving Flow line-map rebuilds, word-position index rebuilds and the post-switch anchor effect."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateFractionRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Book fraction from relocate events (any mode); progress authority for the shell."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "foliateFraction",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Toolbar display of book fraction."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "finishReadingWithoutExitRef",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Cross-book completion callback."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "onOpenDocByIdRef",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Cross-book next-document open."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowScrollCursorRef",
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow shrink-cursor element (rendered only when readingMode==='flow')."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowScrollContainerRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "FoliatePageView writes it whenever flowMode (Focus/Flow/Narrate); only Flow's engine consumes it."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "wordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "useReader word index read by onRelocate's resolveCanonicalWordAnchor in every mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "narrationCursorRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narration cursor read by onRelocate's canonical anchor in every mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "bookWordsRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Full-book word array (document preparation) read by every mode; share as immutable value through the document port."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "bookWordsCompleteRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Extraction-complete flag; deprecated consumer in useReadingModeInstance."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "footnoteCuesRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Footnote cues fed only to the narration hook."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "lastGoToSectionTimeRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Section-nav throttle in useFoliateSync effect 3 (runs for focus and compatibility-'flow', which includes Narrate)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "pageNavRef",
+      "currentUsers": [
+        "page",
+        "narrate"
+      ],
+      "proposedOwner": "page",
+      "rationale": "Page navigation handles for keyboard nav and handlePauseToPage.getCurrentPageStart.",
+      "confidence": "low",
+      "reason": "Never assigned after PageReaderView left the render tree: handlePrevPage/handleNextPage and getCurrentPageStart call the initial no-op stubs."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "pendingModeSurfaceAnchorRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Router's post-switch anchor queue."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "pendingModeSurfaceAnchorVersion",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Router's post-switch anchor trigger."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "startFlowRef",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Cross-book resume entry into startFlow (Flow or Narrate target); becomes a router transition."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowNavRef",
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Paused-flow line navigation fallback.",
+      "confidence": "low",
+      "reason": "Never assigned (initial no-op stubs only)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "flowScrollNavRef",
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Flow line/paragraph nav wrappers.",
+      "confidence": "low",
+      "reason": "Declared but never read."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "resyncToCursorRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Stable narration resync used by click-to-retarget while narrating."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "focusTextSize",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Settings value: Focus RSVP size and Foliate font scale for every mode; read through the settings port as a snapshot."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "symbol": "prevUseFoliateRef",
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Document-type change guard."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useSettings()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Settings port source."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useReadingGoals()",
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Goal accounting."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useToast()",
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Toast provider."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useEinkController()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "E-ink controller fed by Page relocate, Flow progress, Focus refresh."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useReader()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus display state, but its wordsRef is the shared active word array for every mode and its jumpToWord is called by every persistent-anchor commit (navigate)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useNarration()",
+      "currentUsers": [
+        "page",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "TTS implementation behind Narrate's audio port; today also driven by Flow (legacy flow+narration), Page speed keys (lastReadingMode==='narrate') and the toolbar rate control."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useDocumentLifecycle()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Returns the shared resume/selection/narration-flush ref bag; split per useDocumentLifecycle overrides."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useNarrationSync()",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "TTS settings bridge; its currentNarrationSectionRef/bookWordMeta are also consumed by Focus/Flow section nav and click resolution."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "usePersistentReadingAnchor()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Single persistent anchor commit path used by every mode."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useProgressTracker()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Progress/backtrack; hasEngagedRef is set by every mode start."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useNarrationCaching()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "TTS cache bridge; also hosts full-book extraction feeding every mode (move extraction to the document port) and its cacher is updated from Focus/Flow onWordAdvance.",
+      "confidence": "low",
+      "reason": "Extraction half belongs to infrastructure-port; split needed."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useFoliateSync()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Browse-away polling, section nav and section-end fallback against the shared view."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useReadingModeInstance()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow"
+      ],
+      "rationale": "Central mode factory; createInstance clears Narrate's truth subscription (narration.setOnTruthSync(null)) and its pendingResumeRef is written by Narrate."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useReaderModeOrchestrator()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Becomes the thin router."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useFlowScrollSync()",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow engine lifecycle; Narrate reaches it via retargetActiveModeToWord (flowScrollEngineRef.jumpToWord) and legacy flow+narration effect 6."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "hook-instance",
+      "symbol": "useReaderKeys()",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Routes keys to router commands."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "requestAnimationFrame",
+      "symbol": "narrationStateFlushRafRef.current",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Shared onWordAdvance batches highlight state while isNarratingRef is true (a FlowMode instance can still be advancing then)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "requestAnimationFrame",
+      "symbol": "firstRaf",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Router post-switch anchor sync (double RAF)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "requestAnimationFrame",
+      "symbol": "secondRaf",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Router post-switch anchor sync (double RAF)."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "requestAnimationFrame",
+      "symbol": "(unassigned)",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "onWordsReextracted pending-resume: resumes the Flow instance or restores Narrate's highlight after a section load; uncancelled and not owner-checked."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "setTimeout",
+      "symbol": "(unassigned)",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "onLoad 200 ms timer: bumps foliateRenderVersion in every mode, runs Page restore otherwise; uncancelled."
+    },
+    {
+      "file": "src/components/ReaderContainer.tsx",
+      "kind": "setTimeout",
+      "symbol": "pageSaveTimerRef.current",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Debounced progress save from onRelocate (gated per mode by shouldPersistRelocateProgress); persistence port, active-owner values only."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "resumeAnchorRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Resume intent set/consumed by every mode (doc restore, click, pause, mode start)."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "userExplicitSelectionRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "page",
+      "rationale": "Written by clicks in any mode; read only by Page relocate/onLoad restore."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "narrationStateFlushRafRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "RAF handle for batched narration highlight flush; created here, scheduled by the shared onWordAdvance."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "narrationStatePendingIdxRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Pending index for the batched narration flush."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "rsvpLastSaveRef",
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus throttled progress save (gated on readingMode==='focus' && useReader.playing).",
+      "confidence": "low",
+      "reason": "useReader.playing is never true inside ReaderContainer (FocusMode is the clock), so this save path appears inert there."
+    },
+    {
+      "file": "src/hooks/useDocumentLifecycle.ts",
+      "symbol": "prewarmTimer",
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Kokoro preload 2 s after open regardless of mode; audio access should be issued only to Narrate's port.",
+      "confidence": "low",
+      "reason": "Placement (shell-triggered port warm-up vs Narrate-owned) is a design choice."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "readingModeRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Second mirror of the active mode id, exported to the orchestrator."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "highlightedWordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Second mirror of the shared highlighted cursor (diverges from ReaderContainer's ref between renders)."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "preCapWpmRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "WPM cap restore for narration.",
+      "confidence": "low",
+      "reason": "Only writer is toggleNarrationInFlow, which ReaderContainer destructures but never calls."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "pendingFocusStartRef",
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus delayed-start token (cleared by stopAllModes from any mode)."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "isNarratingRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Third mirror of isNarrating; read by router pause/toggle logic for every mode."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "narrateTruthPendingWordRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Truth-sync coalescing."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "narrateTruthRafRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Truth-sync RAF handle."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "narrationCursorPendingWordRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Cursor-driven narration coalescing; surface 'flow' when narration is resumed into Flow (cross-book)."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "symbol": "narrationCursorRafRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Cursor-driven narration RAF handle."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "kind": "requestAnimationFrame",
+      "symbol": "narrateTruthRafRef.current",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Truth-sync commit RAF (writes persistent anchor, highlight, pendingResumeRef)."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "kind": "requestAnimationFrame",
+      "symbol": "narrationCursorRafRef.current",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Cursor-driven narration highlight RAF."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "kind": "setTimeout",
+      "enclosing": "useReaderMode>startFocus",
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus start: section-load retry and FOCUS_MODE_START_DELAY_MS start timer (only the latter is token-guarded)."
+    },
+    {
+      "file": "src/hooks/useReaderMode.ts",
+      "kind": "setTimeout",
+      "enclosing": "useReaderMode>startFlow",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "startFlow section-load retry serves both Flow and Narrate (targetMode); uncancelled, re-enters startFlow."
+    },
+    {
+      "file": "src/hooks/useReadingModeInstance.ts",
+      "symbol": "pendingResumeRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Flow pause-on-miss and Narrate truth-sync miss both write this single slot; ReaderContainer onWordsReextracted consumes it."
+    },
+    {
+      "file": "src/hooks/useReadingModeInstance.ts",
+      "kind": "engine-instance",
+      "symbol": "new FlowMode",
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow clock instance."
+    },
+    {
+      "file": "src/hooks/useReadingModeInstance.ts",
+      "kind": "engine-instance",
+      "symbol": "new FocusMode",
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus clock instance."
+    },
+    {
+      "file": "src/hooks/useReadingModeInstance.ts",
+      "kind": "engine-instance",
+      "symbol": "new PageMode",
+      "currentUsers": [
+        "page"
+      ],
+      "proposedOwner": "page",
+      "rationale": "Page instance (startMode is never called with 'page' by useReaderMode).",
+      "confidence": "low",
+      "reason": "No production call path constructs PageMode; the spec's 'missing Page runtime contract' gap."
+    },
+    {
+      "file": "src/hooks/useFlowScrollSync.ts",
+      "symbol": "flowScrollEngineRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Engine handle; ReaderContainer calls jumpToWord on it during Narrate retarget and handleFlowPrev/NextLine."
+    },
+    {
+      "file": "src/hooks/useFlowScrollSync.ts",
+      "symbol": "isNarratingRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Flow's mirror of narration state (follower mode, skip publish); disappears once Narrate no longer runs through Flow."
+    },
+    {
+      "file": "src/hooks/useFlowScrollSync.ts",
+      "symbol": "ownsSectionEndCallbackRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Ownership flag for narration.setOnSectionEnd in legacy flow+narration."
+    },
+    {
+      "file": "src/hooks/useFlowScrollSync.ts",
+      "kind": "engine-instance",
+      "symbol": "new FlowScrollEngine",
+      "currentUsers": [
+        "flow"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Engine created lazily, never destroyed between modes (stop() only)."
+    },
+    {
+      "file": "src/hooks/useFlowScrollSync.ts",
+      "kind": "setTimeout",
+      "symbol": "tid",
+      "currentUsers": [
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Cross-book countdown fallback timers (Flow onComplete and flow+narration section-end)."
+    },
+    {
+      "file": "src/hooks/useFoliateSync.ts",
+      "symbol": "ownsSectionEndCallbackRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Registers narration.setOnSectionEnd fallback whenever book words are incomplete and not flow+narrating, i.e. also while Page/Focus are selected."
+    },
+    {
+      "file": "src/hooks/useNarrationSync.ts",
+      "symbol": "currentNarrationSectionRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Created by the narration bridge but written by useFoliateSync section nav for Focus and compatibility-'flow' (Flow + Narrate)."
+    },
+    {
+      "file": "src/hooks/useNarrationSync.ts",
+      "symbol": "bookWordMeta",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Full-book section metadata (document preparation) used by click resolution, TOC, Flow progress, section nav."
+    },
+    {
+      "file": "src/hooks/useNarrationCaching.ts",
+      "kind": "module-let",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Module-level extraction de-dupe promise shared by every ReaderContainer instance and mode; belongs to the document port."
+    },
+    {
+      "file": "src/hooks/useNarrationCaching.ts",
+      "symbol": "timer",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Background full-book pre-extraction delay (runs in every mode)."
+    },
+    {
+      "file": "src/hooks/useNarrationCaching.ts",
+      "symbol": "backgroundCacherRef",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "TTS background cacher; ReaderContainer's shared onWordAdvance calls updateCursorPosition from Focus/Flow advances."
+    },
+    {
+      "file": "src/hooks/useReader.ts",
+      "symbol": "wordsRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "The active word array for every mode (orchestrator, caching, foliate sync, flow sync all receive reader.wordsRef)."
+    },
+    {
+      "file": "src/hooks/useReader.ts",
+      "symbol": "wordIndex",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Focus display index; jumpToWord is invoked by every persistent-anchor commit and by Flow/Narrate start; read by progress tracker."
+    },
+    {
+      "file": "src/hooks/useReader.ts",
+      "symbol": "wordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Ref mirror written by jumpToWord from every mode."
+    },
+    {
+      "file": "src/hooks/useReader.ts",
+      "symbol": "playing",
+      "currentUsers": [
+        "focus",
+        "shell"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "useReader rAF play state; read by stopAllModes and the RSVP progress-save effect."
+    },
+    {
+      "file": "src/utils/FlowScrollEngine.ts",
+      "symbol": "followerMode",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "flow",
+      "rationale": "Follower mode exists for narration-driven Flow (legacy flow+narration)."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "flowRafRef",
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Legacy overlay cursor RAF handle.",
+      "confidence": "low",
+      "reason": "Effect guarded by `flowMode || readingMode !== \"flow\" || !flowPlaying`; ReaderContainer sets flowMode=true in Flow, so it never runs."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "kind": "requestAnimationFrame",
+      "symbol": "flowRafRef.current",
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Legacy overlay cursor tick.",
+      "confidence": "low",
+      "reason": "Unreachable branch (see flowRafRef)."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "cursorRef",
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Legacy overlay cursor element (always rendered, hidden).",
+      "confidence": "low",
+      "reason": "Only shown by the unreachable legacy tick."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "onFlowWordAdvanceRef",
+      "currentUsers": [],
+      "proposedOwner": "flow",
+      "rationale": "Callback used only by the legacy tick.",
+      "confidence": "low",
+      "reason": "Unreachable branch."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "getAudioProgressRef",
+      "currentUsers": [],
+      "proposedOwner": "narrate",
+      "rationale": "Audio progress getter used only by the legacy tick.",
+      "confidence": "low",
+      "reason": "Unreachable branch; the only coupling of FoliatePageView to audio progress."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "narrationPauseReasonRef",
+      "currentUsers": [],
+      "proposedOwner": "narrate",
+      "rationale": "Pause reason used only by the legacy tick.",
+      "confidence": "low",
+      "reason": "Unreachable branch."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "narrationWordIndexRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narration cursor read by recenterChunkReadingBox/returnToNarration, which every mode's jump-back can call."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "narrateScrollThrottleRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narrate scroll-follow throttle."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "narratePageTurnCooldownRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narrate section-advance cooldown."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "kind": "setTimeout",
+      "anchorIncludes": "narratePageTurnCooldownRef",
+      "currentUsers": [
+        "narrate"
+      ],
+      "proposedOwner": "narrate",
+      "rationale": "Narrate cooldown reset timer (uncancelled on unmount)."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "chunkReadingVisualStateRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Mirror of the shared Flow/Narrate chunk visual state."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "lastChunkTopScrollKeyRef",
+      "currentUsers": [
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Chunk scroll-follow de-dupe key."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "foliateCurrentFractionRef",
+      "currentUsers": [],
+      "proposedOwner": "page",
+      "rationale": "Fraction cache for the disabled narration page-sync.",
+      "confidence": "low",
+      "reason": "Written only by wrappedOnRelocate, which is never passed anywhere."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "symbol": "pageTurnCooldownRef",
+      "currentUsers": [],
+      "proposedOwner": "page",
+      "rationale": "Disabled narration page-sync cooldown.",
+      "confidence": "low",
+      "reason": "Never read or written after declaration."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "kind": "addEventListener",
+      "symbol": "window:wheel",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Window-capture wheel browse-away listener, active whenever flowMode (scrolled surface)."
+    },
+    {
+      "file": "src/components/FoliatePageView.tsx",
+      "kind": "setTimeout",
+      "anchorIncludes": "scrollAfterLayout",
+      "currentUsers": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "proposedOwner": "per-mode",
+      "privateCopiesFor": [
+        "focus",
+        "flow",
+        "narrate"
+      ],
+      "rationale": "Scrolled-surface entry scroll (uncancelled)."
+    },
+    {
+      "file": "src/hooks/useKeyboardShortcuts.ts",
+      "enclosingPrefix": "useReaderKeys",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Reader key handler: one window listener routing to mode-dependent callbacks; becomes router command dispatch."
+    },
+    {
+      "file": "src/components/ReaderBottomBar.tsx",
+      "symbol": "rateStatusTimerRef",
+      "currentUsers": [
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "TTS rate confirmation UI timer."
+    },
+    {
+      "file": "src/components/ReaderBottomBar.tsx",
+      "symbol": "rateStatus",
+      "currentUsers": [
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "TTS rate confirmation UI state."
+    },
+    {
+      "file": "src/components/ReaderBottomBar.tsx",
+      "kind": "setTimeout",
+      "symbol": "rateStatusTimerRef.current",
+      "currentUsers": [
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "TTS rate confirmation timers."
+    },
+    {
+      "file": "src/App.tsx",
+      "enclosing": "StandaloneReader",
+      "currentUsers": [
+        "focus"
+      ],
+      "proposedOwner": "focus",
+      "rationale": "Standalone reader window (#reader/<id>) runs its own Focus instance (useReader + ReaderView + useReaderKeys) outside ReaderContainer; App.tsx is not an edit site.",
+      "confidence": "low",
+      "reason": "Scope gap: Wave E cannot remove legacy Focus entry points from the production graph without editing App.tsx."
+    },
+    {
+      "file": "src/hooks/useProgressTracker.ts",
+      "symbol": "readingModeRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Fourth mirror of the active mode id (goal activity accounting)."
+    },
+    {
+      "file": "src/hooks/useProgressTracker.ts",
+      "symbol": "hasEngagedRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "Engagement gate set by every mode start and Page clicks."
+    },
+    {
+      "file": "src/hooks/useProgressTracker.ts",
+      "symbol": "pageSaveTimerRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Debounced save handle shared with ReaderContainer onRelocate (every mode)."
+    },
+    {
+      "file": "src/hooks/useProgressTracker.ts",
+      "symbol": "furthestPositionRef",
+      "currentUsers": [
+        "page",
+        "focus",
+        "flow",
+        "narrate",
+        "shell"
+      ],
+      "proposedOwner": "shell",
+      "rationale": "High-water mark written from onRelocate in every mode."
+    },
+    {
+      "file": "src/hooks/useProgressTracker.ts",
+      "kind": "setTimeout",
+      "symbol": "pageSaveTimerRef.current",
+      "currentUsers": [
+        "shell"
+      ],
+      "proposedOwner": "infrastructure-port",
+      "rationale": "Non-foliate progress save timer."
+    }
+  ]
+}

@@ -426,7 +426,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
 
       <div className="settings-toggle-row">
         <span className="settings-toggle-label">Speech rate</span>
-        <span className="tts-rate-value">{(settings.ttsRate || 1.0).toFixed(1)}x</span>
+        <span className="tts-rate-value">{(settings.ttsRate || 1.0).toFixed(2)}x</span>
       </div>
       {engine === "kokoro" ? (
         <div className="settings-mode-toggle tts-rate-bucket-toggle">
@@ -436,7 +436,7 @@ export function TTSSettings({ settings, onSettingsChange, bookOverrides, onBookO
               className={`settings-mode-btn${normalizeKokoroUiSpeed(settings.ttsRate || 1.0) === speed ? " active" : ""}`}
               onClick={() => handleTtsChange({ ttsRate: speed })}
             >
-              {speed.toFixed(1)}x
+              {speed.toFixed(2)}x
             </button>
           ))}
         </div>

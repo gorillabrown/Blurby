@@ -1,12 +1,15 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from "vitest";
-import {
-  applyChunkReadingVisualStateToRoots,
-  buildChunkReadingScrollKey,
-  clearChunkReadingVisualStateFromRoots,
-  scrollChunkReadingVisualStateToTopOfRoots,
-} from "../src/utils/foliateWordHighlight";
-import { injectStyles } from "../src/utils/foliateStyles";
+import * as legacyWordHighlight from "../src/utils/foliateWordHighlight";
+import * as legacyStyles from "../src/utils/foliateStyles";
+import * as pageWordHighlight from "../src/reader/modes/page/helpers/foliateWordHighlight";
+import * as pageStyles from "../src/reader/modes/page/helpers/foliateStyles";
+import * as focusWordHighlight from "../src/reader/modes/focus/helpers/foliateWordHighlight";
+import * as focusStyles from "../src/reader/modes/focus/helpers/foliateStyles";
+import * as flowWordHighlight from "../src/reader/modes/flow/helpers/foliateWordHighlight";
+import * as flowStyles from "../src/reader/modes/flow/helpers/foliateStyles";
+import * as narrateWordHighlight from "../src/reader/modes/narrate/helpers/foliateWordHighlight";
+import * as narrateStyles from "../src/reader/modes/narrate/helpers/foliateStyles";
 import type { ChunkReadingVisualState } from "../src/types/chunkReading";
 import type { FlowRenderedWordRootDescriptor } from "../src/utils/FlowScrollEngine";
 import type { BlurbySettings } from "../src/types";
@@ -31,7 +34,20 @@ function state(overrides: Partial<ChunkReadingVisualState> = {}): ChunkReadingVi
   };
 }
 
-describe("Foliate chunk visual state rendering", () => {
+// READER-MODE-SEPARATION-2 (design §D.5): the same cases also run against each mode's private copy
+// (src/reader/modes/<mode>/helpers/), next to the retained legacy util.
+type WordHighlightApi = typeof legacyWordHighlight;
+type StylesApi = typeof legacyStyles;
+
+function chunkVisualStateCases(
+  {
+    applyChunkReadingVisualStateToRoots,
+    buildChunkReadingScrollKey,
+    clearChunkReadingVisualStateFromRoots,
+    scrollChunkReadingVisualStateToTopOfRoots,
+  }: WordHighlightApi,
+  { injectStyles }: StylesApi,
+) {
   it("applies chunk class across multiple rendered word spans", () => {
     const { doc, roots } = makeRoot(`
       <span class="page-word" data-word-index="0">Zero</span>
@@ -471,4 +487,17 @@ describe("Foliate chunk visual state rendering", () => {
     expect(css).toContain("padding-block-start: var(--blurby-flow-leading-inset, 0px) !important");
     expect(css).toContain("padding-block-end: var(--blurby-flow-trailing-inset, 0px) !important");
   });
+}
+
+describe("Foliate chunk visual state rendering", () => {
+  chunkVisualStateCases(legacyWordHighlight, legacyStyles);
+});
+
+describe.each([
+  ["page", pageWordHighlight, pageStyles],
+  ["focus", focusWordHighlight, focusStyles],
+  ["flow", flowWordHighlight, flowStyles],
+  ["narrate", narrateWordHighlight, narrateStyles],
+] as const)("Foliate chunk visual state rendering (%s mode helper copy)", (_mode, wordHighlight, styles) => {
+  chunkVisualStateCases(wordHighlight, styles);
 });

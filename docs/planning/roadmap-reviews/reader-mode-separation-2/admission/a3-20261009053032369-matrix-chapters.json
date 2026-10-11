@@ -1,0 +1,5875 @@
+{
+  "summary": {
+    "run": "a3m-matrix-chapters",
+    "fixture": "chapters",
+    "docId": "g0-converted-chapters",
+    "startedFromManifest": "blurby-reader-mode-separation-2-a1-a3m20261009053032369",
+    "finishedAt": "2026-10-09T05:39:54.588Z",
+    "settings": {
+      "schemaVersion": 12,
+      "firstRunCompleted": true,
+      "readingMode": "narrate",
+      "lastReadingMode": "narrate",
+      "wpm": 250,
+      "ttsRate": 1,
+      "ttsEngine": "kokoro",
+      "ttsEnabled": false,
+      "sourceFolder": null,
+      "recentFolders": [],
+      "_wsPairingToken": "djEwPqM/2Xp4c2q2eeI5IkQ6r42mrvNE+9N+3Jwxi39xLyhhNEF3jnEQ0eRbtQYXdT0RVsPOtr+ZhvBTEKk2",
+      "folderName": "My reading list",
+      "isNarrating": false
+    },
+    "consoleErrors": [],
+    "cases": [
+      {
+        "case": "page-navigation-selection",
+        "status": "recorded",
+        "actual": 12
+      },
+      {
+        "case": "focus-pacing-pause-resume",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 209
+      },
+      {
+        "case": "flow-follow-browse-return",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 4
+      },
+      {
+        "case": "narrate-start0-pause-resume-rate-section",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "narrate-start7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-page-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-page-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 4
+      },
+      {
+        "case": "t-page-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-focus-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-focus-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 4
+      },
+      {
+        "case": "t-focus-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-flow-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-flow-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-flow-narrate-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 7
+      },
+      {
+        "case": "t-narrate-page-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-focus-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": null
+      },
+      {
+        "case": "t-narrate-flow-w7",
+        "status": "recorded",
+        "expected": 7,
+        "actual": 4
+      },
+      {
+        "case": "t-page-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-page-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-page-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-focus-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-flow-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-flow-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-flow-narrate-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-page-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "t-narrate-focus-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": null
+      },
+      {
+        "case": "t-narrate-flow-w0",
+        "status": "recorded",
+        "expected": 0,
+        "actual": 0
+      },
+      {
+        "case": "same-page",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-focus",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-flow",
+        "status": "recorded",
+        "expected": 7
+      },
+      {
+        "case": "same-narrate",
+        "status": "recorded",
+        "expected": 7
+      }
+    ]
+  },
+  "rows": [
+    {
+      "case": "page-navigation-selection",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:35:13.594Z",
+      "steps": [
+        {
+          "label": "opened",
+          "at": "2026-10-09T05:35:16.465Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "next-page",
+          "at": "2026-10-09T05:35:17.387Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "previous-page",
+          "at": "2026-10-09T05:35:18.304Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "single-click",
+          "at": "2026-10-09T05:35:19.221Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              12
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "double-click",
+          "at": "2026-10-09T05:35:20.151Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              12
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        },
+        {
+          "label": "page-static-2s",
+          "at": "2026-10-09T05:35:22.155Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              12
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 0,
+          "wordSpans": 838
+        }
+      ],
+      "clickTarget": {
+        "x": 93.49374961853027,
+        "y": 275.1999969482422,
+        "text": "and"
+      },
+      "afterSingleClick": {
+        "at": "2026-10-09T05:35:19.221Z",
+        "mode": "Page mode",
+        "play": "Play",
+        "playDisabled": true,
+        "cursors": {
+          "page-word--highlighted": [
+            12
+          ],
+          "page-word--soft-selected": [],
+          "page-word--flow-cursor": [],
+          "page-word--narrate-cursor": [],
+          "page-word--active-word": []
+        },
+        "visibleCursorWordElements": 1,
+        "flowShrinkCursors": 0,
+        "focusDisplayVisible": 0,
+        "visibleCursorCount": 1,
+        "focusText": null,
+        "chapter": "Chapter One: The Orchard",
+        "rate": "250 wpm",
+        "wpm": "250 wpm",
+        "sections": [
+          0
+        ],
+        "browsedAway": false,
+        "toast": null,
+        "traceLen": 0,
+        "wordSpans": 838,
+        "persisted": {
+          "position": 12,
+          "cfi": "epubcfi(/6/2!/4/4/18,/1:0,/1:3)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        }
+      },
+      "afterDoubleClick": {
+        "at": "2026-10-09T05:35:20.151Z",
+        "mode": "Page mode",
+        "play": "Play",
+        "playDisabled": true,
+        "cursors": {
+          "page-word--highlighted": [
+            12
+          ],
+          "page-word--soft-selected": [],
+          "page-word--flow-cursor": [],
+          "page-word--narrate-cursor": [],
+          "page-word--active-word": []
+        },
+        "visibleCursorWordElements": 1,
+        "flowShrinkCursors": 0,
+        "focusDisplayVisible": 0,
+        "visibleCursorCount": 1,
+        "focusText": null,
+        "chapter": "Chapter One: The Orchard",
+        "rate": "250 wpm",
+        "wpm": "250 wpm",
+        "sections": [
+          0
+        ],
+        "browsedAway": false,
+        "toast": null,
+        "traceLen": 0,
+        "wordSpans": 838,
+        "persisted": {
+          "position": 12,
+          "cfi": "epubcfi(/6/2!/4/4/18,/1:0,/1:3)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        }
+      },
+      "actual": 12,
+      "pageAutoAdvanced": false,
+      "status": "recorded",
+      "screenshot": "shots/page-navigation-selection.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:35:22.264Z"
+    },
+    {
+      "case": "focus-pacing-pause-resume",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:35:22.267Z",
+      "steps": [
+        {
+          "label": "focus-paused",
+          "at": "2026-10-09T05:35:27.210Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "paused",
+          "at": "2026-10-09T05:35:31.386Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "back-to-page",
+          "at": "2026-10-09T05:35:34.993Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              209
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 7,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "displayed": [
+        "ucrved",
+        "raound",
+        "the",
+        "iwndow",
+        "and",
+        "onbody",
+        "uhrried",
+        "at",
+        "all.",
+        "A",
+        "paper",
+        "alntern",
+        "stood",
+        "ebneath",
+        "the",
+        "lseeping",
+        "town",
+        "ebfore",
+        "the",
+        "next"
+      ],
+      "pausedHeld": true,
+      "actual": 209,
+      "note": "actual = Focus pause anchor read back as Page highlight after pacing (expected index is the start word; advancement is expected)",
+      "status": "recorded",
+      "screenshot": "shots/focus-pacing-pause-resume.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "page",
+          "ts": 1791524125143
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "page",
+          "to": "flow",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791524125143
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524126407
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "flow",
+          "to": "focus",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791524126407
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524127213
+        },
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524134091
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "focus",
+          "to": "page",
+          "context": "mode-switch-anchor-preserved",
+          "latencyMs": 0,
+          "ts": 1791524134091
+        }
+      ],
+      "finishedAt": "2026-10-09T05:35:35.275Z"
+    },
+    {
+      "case": "flow-follow-browse-return",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:35:35.282Z",
+      "steps": [
+        {
+          "label": "flow-paused",
+          "at": "2026-10-09T05:35:39.988Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-0",
+          "at": "2026-10-09T05:35:40.503Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              9
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-1",
+          "at": "2026-10-09T05:35:41.019Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              11
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-2",
+          "at": "2026-10-09T05:35:41.531Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              13
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-3",
+          "at": "2026-10-09T05:35:42.040Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              15
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-4",
+          "at": "2026-10-09T05:35:42.553Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              17
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-5",
+          "at": "2026-10-09T05:35:43.067Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              19
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-6",
+          "at": "2026-10-09T05:35:43.579Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              21
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        },
+        {
+          "label": "playing-7",
+          "at": "2026-10-09T05:35:44.091Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              23
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-wheel-same-section",
+          "at": "2026-10-09T05:35:45.702Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              30
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 2,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 8,
+          "wordSpans": 838
+        },
+        {
+          "label": "return-unavailable",
+          "error": "click [aria-label=\"Jump back to persistent last-read word\"]: count 0"
+        },
+        {
+          "label": "returned-same-section",
+          "at": "2026-10-09T05:35:46.948Z",
+          "mode": "Flow mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              35
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              31
+            ]
+          },
+          "visibleCursorWordElements": 2,
+          "flowShrinkCursors": 1,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 3,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 11,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-pagedown-cross-section",
+          "at": "2026-10-09T05:35:51.887Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            1
+          ],
+          "browsedAway": true,
+          "toast": null,
+          "traceLen": 11,
+          "wordSpans": 838
+        },
+        {
+          "label": "returned-cross-section",
+          "at": "2026-10-09T05:35:53.431Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              40
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 11,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "actual": 4,
+      "followLast": 19,
+      "flowWordEvents": 3,
+      "crossSectionReached": true,
+      "status": "recorded",
+      "screenshot": "shots/flow-follow-browse-return.png",
+      "trace": [
+        {
+          "kind": "flow-position",
+          "lineIndex": 2,
+          "totalLines": 61,
+          "wordIndex": 19,
+          "totalWords": 1676,
+          "bookPct": 0.011336515513126491,
+          "ts": 1791524143826
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 30,
+          "ts": 1791524146721
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 31,
+          "ts": 1791524146943
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 3,
+          "totalLines": 61,
+          "wordIndex": 31,
+          "totalWords": 1676,
+          "bookPct": 0.018496420047732696,
+          "ts": 1791524146943
+        }
+      ],
+      "finishedAt": "2026-10-09T05:35:53.636Z"
+    },
+    {
+      "case": "narrate-start0-pause-resume-rate-section",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:35:53.647Z",
+      "steps": [
+        {
+          "label": "narrate-paused",
+          "at": "2026-10-09T05:35:58.741Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "speaking-0",
+          "at": "2026-10-09T05:36:02.395Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              2
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 11,
+          "wordSpans": 838
+        },
+        {
+          "label": "speaking-1",
+          "at": "2026-10-09T05:36:03.421Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 13,
+          "wordSpans": 838
+        },
+        {
+          "label": "speaking-2",
+          "at": "2026-10-09T05:36:04.463Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              8
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 16,
+          "wordSpans": 838
+        },
+        {
+          "label": "speaking-3",
+          "at": "2026-10-09T05:36:06.041Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 19,
+          "wordSpans": 838
+        },
+        {
+          "label": "paused",
+          "at": "2026-10-09T05:36:07.665Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 20,
+          "wordSpans": 838
+        },
+        {
+          "label": "resumed",
+          "at": "2026-10-09T05:36:10.198Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              17
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.4-0",
+          "at": "2026-10-09T05:36:11.365Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              17
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.4-1",
+          "at": "2026-10-09T05:36:12.457Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              17
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.4-2",
+          "at": "2026-10-09T05:36:13.611Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              17
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.4x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 27,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.0-0",
+          "at": "2026-10-09T05:36:14.681Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              18
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 29,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.0-1",
+          "at": "2026-10-09T05:36:15.696Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              20
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 31,
+          "wordSpans": 838
+        },
+        {
+          "label": "rate-1.0-2",
+          "at": "2026-10-09T05:36:16.763Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              23
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 34,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-next-chapter-0",
+          "at": "2026-10-09T05:36:17.936Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              25
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 36,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-next-chapter-1",
+          "at": "2026-10-09T05:36:19.115Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 0,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 0,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 40,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-next-chapter-2",
+          "at": "2026-10-09T05:36:20.352Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              30
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 41,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-next-chapter-3",
+          "at": "2026-10-09T05:36:21.425Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              30
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 41,
+          "wordSpans": 838
+        },
+        {
+          "label": "after-next-chapter-4",
+          "at": "2026-10-09T05:36:22.823Z",
+          "mode": "Narrate mode",
+          "play": "Pause",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": [
+              30
+            ]
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 41,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "actual": 0,
+      "firstAudio": {
+        "kind": "lifecycle",
+        "state": "first-audio",
+        "wordIndex": 0,
+        "latencyMs": 2489,
+        "ts": 1791524161234
+      },
+      "resume": {
+        "resumeEvents": 1,
+        "startEvents": 0
+      },
+      "sectionTrace": [],
+      "status": "recorded",
+      "screenshot": "shots/narrate-start0-pause-resume-rate-section.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 4,
+          "ts": 1791524162966
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 5,
+          "ts": 1791524163100
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 6,
+          "ts": 1791524163520
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791524163856
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791524164341
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791524164822
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791524165070
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 11,
+          "ts": 1791524165531
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 11,
+          "mode": "narrate",
+          "ts": 1791524166045
+        },
+        {
+          "kind": "lifecycle",
+          "state": "resume",
+          "wordIndex": 11,
+          "mode": "narrate",
+          "ts": 1791524167671
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 12,
+          "ts": 1791524167939
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 13,
+          "ts": 1791524168253
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 14,
+          "ts": 1791524168687
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 15,
+          "ts": 1791524169298
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 16,
+          "ts": 1791524169416
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 17,
+          "ts": 1791524170167
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 17,
+          "ts": 1791524174120
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 18,
+          "ts": 1791524174302
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 19,
+          "ts": 1791524174715
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 20,
+          "ts": 1791524175302
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 21,
+          "ts": 1791524175716
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 22,
+          "ts": 1791524176318
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 23,
+          "ts": 1791524176567
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 24,
+          "ts": 1791524177220
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 25,
+          "ts": 1791524177552
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 26,
+          "ts": 1791524178133
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 27,
+          "ts": 1791524178338
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 28,
+          "ts": 1791524178656
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 29,
+          "ts": 1791524179109
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 30,
+          "ts": 1791524179404
+        }
+      ],
+      "finishedAt": "2026-10-09T05:36:23.136Z"
+    },
+    {
+      "case": "narrate-start7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:36:23.184Z",
+      "steps": [],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 3115
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 7,
+      "status": "recorded",
+      "screenshot": "shots/narrate-start7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:36:33.947Z"
+    },
+    {
+      "case": "t-page-focus-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:36:33.950Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:36:38.614Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:36:39.448Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:36:40.976Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "ucrved"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-focus-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:36:42.286Z"
+    },
+    {
+      "case": "t-page-flow-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:36:42.288Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:36:46.402Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:36:47.241Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:36:48.780Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 4,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 4,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-flow-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 4,
+          "ts": 1791524208841
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 61,
+          "wordIndex": 4,
+          "totalWords": 1676,
+          "bookPct": 0.002386634844868735,
+          "ts": 1791524208841
+        }
+      ],
+      "finishedAt": "2026-10-09T05:36:49.079Z"
+    },
+    {
+      "case": "t-page-narrate-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:36:49.081Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:36:53.193Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:36:54.028Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:36:55.562Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 492
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791524216058
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791524216537
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791524217016
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791524217254
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 10,
+          "mode": "narrate",
+          "ts": 1791524217358
+        }
+      ],
+      "finishedAt": "2026-10-09T05:36:57.631Z"
+    },
+    {
+      "case": "t-focus-page-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:36:57.633Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:02.018Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:37:02.825Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:37:04.358Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 7,
+        "highlighted": 7,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+          "readingMode": "page",
+          "lastReadingMode": "focus"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "page",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:37:04.448Z"
+    },
+    {
+      "case": "t-focus-flow-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:04.451Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:08.560Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:37:09.377Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:37:10.884Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 4,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 4,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-flow-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524230887
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 4,
+          "ts": 1791524230945
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 61,
+          "wordIndex": 4,
+          "totalWords": 1676,
+          "bookPct": 0.002386634844868735,
+          "ts": 1791524230946
+        }
+      ],
+      "finishedAt": "2026-10-09T05:37:11.187Z"
+    },
+    {
+      "case": "t-focus-narrate-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:11.189Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:15.325Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:37:16.132Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:37:17.655Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 518
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791524238177
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791524238634
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791524239117
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791524239359
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 10,
+          "mode": "narrate",
+          "ts": 1791524239438
+        }
+      ],
+      "finishedAt": "2026-10-09T05:37:19.606Z"
+    },
+    {
+      "case": "t-flow-page-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:19.608Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:23.880Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:37:25.420Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 7,
+        "highlighted": 7,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+          "readingMode": "page",
+          "lastReadingMode": "flow"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "page",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:37:25.522Z"
+    },
+    {
+      "case": "t-flow-focus-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:25.524Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:29.650Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:37:31.157Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "ucrved"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-focus-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524251164
+        }
+      ],
+      "finishedAt": "2026-10-09T05:37:32.471Z"
+    },
+    {
+      "case": "t-flow-narrate-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:32.473Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:36.631Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:37:38.144Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 7,
+        "firstAudio": {
+          "latencyMs": 499
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 7,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-narrate-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "start",
+          "wordIndex": 7,
+          "mode": "narrate",
+          "ts": 1791524258152
+        },
+        {
+          "kind": "lifecycle",
+          "state": "first-audio",
+          "wordIndex": 7,
+          "latencyMs": 499,
+          "ts": 1791524258651
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 7,
+          "ts": 1791524258651
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 8,
+          "ts": 1791524259118
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 9,
+          "ts": 1791524259599
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 10,
+          "ts": 1791524259837
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 10,
+          "mode": "narrate",
+          "ts": 1791524260085
+        }
+      ],
+      "finishedAt": "2026-10-09T05:37:40.291Z"
+    },
+    {
+      "case": "t-narrate-page-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:40.294Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:44.562Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:37:45.377Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:37:46.906Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 7,
+          "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "page",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-page-w7.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:37:47.007Z"
+    },
+    {
+      "case": "t-narrate-focus-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:47.009Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:51.122Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:37:51.930Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:37:53.439Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "ucrved"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-focus-w7.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524273443
+        }
+      ],
+      "finishedAt": "2026-10-09T05:37:54.741Z"
+    },
+    {
+      "case": "t-narrate-flow-w7",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:37:54.744Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:37:58.879Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:37:59.687Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:38:01.200Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 4,
+        "cursorAfter": [
+          7
+        ]
+      },
+      "actual": 4,
+      "persistedAfter": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-flow-w7.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 4,
+          "ts": 1791524281261
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 1,
+          "totalLines": 61,
+          "wordIndex": 4,
+          "totalWords": 1676,
+          "bookPct": 0.002386634844868735,
+          "ts": 1791524281261
+        }
+      ],
+      "finishedAt": "2026-10-09T05:38:01.506Z"
+    },
+    {
+      "case": "t-page-focus-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:01.508Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:05.632Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:38:06.470Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:38:07.996Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "hCapter"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-focus-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:38:09.302Z"
+    },
+    {
+      "case": "t-page-flow-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:09.304Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:13.422Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:38:14.264Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:38:15.802Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-flow-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524295867
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 61,
+          "wordIndex": 0,
+          "totalWords": 1676,
+          "bookPct": 0,
+          "ts": 1791524295867
+        }
+      ],
+      "finishedAt": "2026-10-09T05:38:16.110Z"
+    },
+    {
+      "case": "t-page-narrate-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:16.112Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:20.242Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-page",
+          "at": "2026-10-09T05:38:21.083Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:38:22.622Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 513
+        },
+        "cursorAfter": [],
+        "activeAfter": [
+          3
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-page-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524303138
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524303683
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524304040
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 3,
+          "ts": 1791524304266
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 3,
+          "mode": "narrate",
+          "ts": 1791524304530
+        }
+      ],
+      "finishedAt": "2026-10-09T05:38:24.699Z"
+    },
+    {
+      "case": "t-focus-page-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:24.702Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:29.233Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:38:30.086Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:38:31.707Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+          "readingMode": "page",
+          "lastReadingMode": "focus"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "page",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:38:31.806Z"
+    },
+    {
+      "case": "t-focus-flow-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:31.808Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:35.938Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:38:36.757Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:38:38.270Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-flow-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524318276
+        },
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524318333
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 61,
+          "wordIndex": 0,
+          "totalWords": 1676,
+          "bookPct": 0,
+          "ts": 1791524318333
+        }
+      ],
+      "finishedAt": "2026-10-09T05:38:38.589Z"
+    },
+    {
+      "case": "t-focus-narrate-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:38.591Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:42.720Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-focus",
+          "at": "2026-10-09T05:38:43.526Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:38:45.035Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 510
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-focus-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524325551
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524326099
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524326449
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 3,
+          "ts": 1791524326682
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 3,
+          "mode": "narrate",
+          "ts": 1791524327079
+        }
+      ],
+      "finishedAt": "2026-10-09T05:38:47.329Z"
+    },
+    {
+      "case": "t-flow-page-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:47.332Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:51.848Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:38:53.463Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+          "readingMode": "page",
+          "lastReadingMode": "flow"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "page",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:38:53.585Z"
+    },
+    {
+      "case": "t-flow-focus-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:38:53.587Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:38:57.752Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:38:59.271Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "hCapter"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-focus-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524339275
+        }
+      ],
+      "finishedAt": "2026-10-09T05:39:00.608Z"
+    },
+    {
+      "case": "t-flow-narrate-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:00.612Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:39:04.742Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-narrate",
+          "at": "2026-10-09T05:39:06.256Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Narrate mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "narrate-lifecycle-start",
+        "index": 0,
+        "firstAudio": {
+          "latencyMs": 506
+        },
+        "cursorAfter": [],
+        "activeAfter": []
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-flow-narrate-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "start",
+          "wordIndex": 0,
+          "mode": "narrate",
+          "ts": 1791524346260
+        },
+        {
+          "kind": "lifecycle",
+          "state": "first-audio",
+          "wordIndex": 0,
+          "latencyMs": 506,
+          "ts": 1791524346766
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 0,
+          "ts": 1791524346766
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 1,
+          "ts": 1791524347332
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 2,
+          "ts": 1791524347688
+        },
+        {
+          "kind": "word",
+          "source": "audio",
+          "wordIndex": 3,
+          "ts": 1791524347910
+        },
+        {
+          "kind": "lifecycle",
+          "state": "pause",
+          "wordIndex": 3,
+          "mode": "narrate",
+          "ts": 1791524348290
+        }
+      ],
+      "finishedAt": "2026-10-09T05:39:08.555Z"
+    },
+    {
+      "case": "t-narrate-page-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:08.557Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:39:13.195Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:39:14.068Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-page",
+          "at": "2026-10-09T05:39:15.644Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              0
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Page mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "page-highlighted",
+        "index": 0,
+        "highlighted": 0,
+        "persisted": {
+          "position": 0,
+          "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+          "readingMode": "page",
+          "lastReadingMode": "narrate"
+        },
+        "softSelected": [],
+        "wordSpans": 838
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "page",
+        "lastReadingMode": "narrate"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-page-w0.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:39:15.767Z"
+    },
+    {
+      "case": "t-narrate-focus-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:15.771Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:39:19.905Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:39:20.712Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-focus",
+          "at": "2026-10-09T05:39:22.221Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Focus mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+        "index": null,
+        "firstDisplayedText": "hCapter"
+      },
+      "actual": null,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "focus",
+        "lastReadingMode": "focus"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-focus-w0.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "focus",
+          "ts": 1791524362224
+        }
+      ],
+      "finishedAt": "2026-10-09T05:39:23.524Z"
+    },
+    {
+      "case": "t-narrate-flow-w0",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:23.526Z",
+      "steps": [
+        {
+          "label": "anchored-in-flow",
+          "at": "2026-10-09T05:39:27.639Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "from-narrate",
+          "at": "2026-10-09T05:39:28.446Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "to-flow",
+          "at": "2026-10-09T05:39:29.954Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              0
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 6,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 0,
+      "expectedWord": {
+        "text": "Chapter",
+        "full": "Chapter",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "afterSwitch": {
+        "mode": "Flow mode",
+        "play": "Play",
+        "visibleCursorCount": 1
+      },
+      "staleEffects": [],
+      "probe": {
+        "method": "flow-first-word-trace-event",
+        "index": 0,
+        "cursorAfter": [
+          0
+        ]
+      },
+      "actual": 0,
+      "persistedAfter": {
+        "position": 0,
+        "cfi": "epubcfi(/6/2!/4/2/2,/1:0,/1:7)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "status": "recorded",
+      "screenshot": "shots/t-narrate-flow-w0.png",
+      "trace": [
+        {
+          "kind": "word",
+          "source": "flow",
+          "wordIndex": 0,
+          "ts": 1791524370031
+        },
+        {
+          "kind": "flow-position",
+          "lineIndex": 0,
+          "totalLines": 61,
+          "wordIndex": 0,
+          "totalWords": 1676,
+          "bookPct": 0,
+          "ts": 1791524370031
+        }
+      ],
+      "finishedAt": "2026-10-09T05:39:30.292Z"
+    },
+    {
+      "case": "same-page",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:30.294Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:39:35.267Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:39:36.482Z",
+          "mode": "Page mode",
+          "play": "Play",
+          "playDisabled": true,
+          "cursors": {
+            "page-word--highlighted": [
+              7
+            ],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 5,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "page",
+          "ts": 1791524375270
+        }
+      ],
+      "status": "recorded",
+      "screenshot": "shots/same-page.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:39:36.589Z"
+    },
+    {
+      "case": "same-focus",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:36.591Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:39:41.544Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:39:42.761Z",
+          "mode": "Focus mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-focus.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:39:42.866Z"
+    },
+    {
+      "case": "same-flow",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:42.867Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:39:47.020Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:39:48.231Z",
+          "mode": "Flow mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "250 wpm",
+          "wpm": "250 wpm",
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 2,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-flow.png",
+      "trace": [],
+      "finishedAt": "2026-10-09T05:39:48.336Z"
+    },
+    {
+      "case": "same-narrate",
+      "fixture": "chapters",
+      "docId": "g0-converted-chapters",
+      "startedAt": "2026-10-09T05:39:48.340Z",
+      "steps": [
+        {
+          "label": "before",
+          "at": "2026-10-09T05:39:53.274Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        },
+        {
+          "label": "after",
+          "at": "2026-10-09T05:39:54.493Z",
+          "mode": "Narrate mode",
+          "play": "Play",
+          "playDisabled": false,
+          "cursors": {
+            "page-word--highlighted": [],
+            "page-word--soft-selected": [],
+            "page-word--flow-cursor": [
+              7
+            ],
+            "page-word--narrate-cursor": [],
+            "page-word--active-word": []
+          },
+          "visibleCursorWordElements": 1,
+          "flowShrinkCursors": 0,
+          "focusDisplayVisible": 0,
+          "visibleCursorCount": 1,
+          "focusText": null,
+          "chapter": "Chapter One: The Orchard",
+          "rate": "1.0x",
+          "wpm": null,
+          "sections": [
+            0
+          ],
+          "browsedAway": false,
+          "toast": null,
+          "traceLen": 4,
+          "wordSpans": 838
+        }
+      ],
+      "expected": 7,
+      "expectedWord": {
+        "text": "curved",
+        "full": "curved",
+        "section": 0
+      },
+      "anchorPersisted": {
+        "position": 7,
+        "cfi": "epubcfi(/6/2!/4/4/8,/1:0,/1:6)",
+        "readingMode": "flow",
+        "lastReadingMode": "flow"
+      },
+      "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+      "modeUnchanged": true,
+      "cursorsUnchanged": true,
+      "newTraceEvents": [],
+      "status": "recorded",
+      "screenshot": "shots/same-narrate.png",
+      "trace": [
+        {
+          "kind": "lifecycle",
+          "state": "stop",
+          "wordIndex": 0,
+          "mode": "flow",
+          "ts": 1791524392463
+        },
+        {
+          "kind": "transition",
+          "transition": "handoff",
+          "from": "flow",
+          "to": "narrate",
+          "context": "mode-switch-persistent-anchor-paused",
+          "latencyMs": 0,
+          "ts": 1791524392463
+        }
+      ],
+      "finishedAt": "2026-10-09T05:39:54.585Z"
+    }
+  ]
+}

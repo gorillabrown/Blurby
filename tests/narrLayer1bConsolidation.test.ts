@@ -82,8 +82,15 @@ describe("NARR-LAYER-1B consolidation", () => {
   it("ReaderContainer treats narrate as the narration-selected source of truth", () => {
     const src = read("src/components/ReaderContainer.tsx");
     expect(src).toContain("readingMode === \"narrate\"");
-    expect(src).toContain("(readingMode === \"flow\" && isNarrating)");
-    expect(src).toContain("(readingMode === \"page\" && settings.lastReadingMode === \"narrate\")");
+    // READER-MODE-SEPARATION-2 OC-5b: narration-selected speed keys are owned by the runtimes. Flow never
+    // narrates (the flow+narrating hybrid is Narrate); Narrate's ↑/↓ store and apply the TTS rate.
+    const flowRuntime = read("src/reader/modes/flow/ModeRuntime.ts");
+    const narrateRuntime = read("src/reader/modes/narrate/ModeRuntime.ts");
+    expect(flowRuntime).toContain("narrating: false,");
+    expect(narrateRuntime).toContain("this.ports.settings.update({ ttsRate: newRate });");
+    expect(narrateRuntime).toContain("this.ports.audio.adjustRate(newRate);");
+    // OC-5b: Page's ↑/↓ adjust the TTS rate when Narrate is the last reading mode.
+    expect(read("src/reader/modes/page/ModeRuntime.ts")).toContain("if (settings.lastReadingMode === \"narrate\") {");
     expect(src).not.toContain("(readingMode === \"page\" && settings.isNarrating === true)");
   });
 

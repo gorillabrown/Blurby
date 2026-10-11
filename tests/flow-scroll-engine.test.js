@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   FlowScrollEngine,
   FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY,
-} from "../src/utils/FlowScrollEngine.ts";
+} from "../src/reader/modes/flow/helpers/FlowScrollEngine.ts";
 
 // Mock constants
 vi.mock("../src/constants.ts", () => ({

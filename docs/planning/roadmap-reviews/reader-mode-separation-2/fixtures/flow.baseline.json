@@ -1,0 +1,2397 @@
+{
+  "schemaVersion": 1,
+  "mode": "flow",
+  "sourceCommit": "63b10115e513e13e141b71927f9cdc02b5245235",
+  "sourceSrcTree": "0c7900751cce7ce9adb09132da18c3ff73de9b9b",
+  "recordedFrom": "production path: useReaderModeOrchestrator + useReadingModeInstance",
+  "recorder": "docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/record-mode-baselines.test.tsx",
+  "comparison": "Fixture file text (line endings normalized to LF) must equal the freshly recorded serialization byte-for-byte. provenanceFields are copied from the committed fixture before comparison. strippedFields is empty: the current path emits no wall-clock values or session identifiers (fake timers start at 0; Date is faked).",
+  "provenanceFields": [
+    "sourceCommit",
+    "sourceSrcTree"
+  ],
+  "strippedFields": [],
+  "channelMapping": [
+    {
+      "from": "narration.startCursorDriven(words, startWordIndex, wpm, onWordAdvance)",
+      "channel": "audio.start",
+      "args": "(words, wordIndex, rate=wpm); callback omitted"
+    },
+    {
+      "from": "narration.pause(reason)",
+      "channel": "audio.pause",
+      "args": "(reason)"
+    },
+    {
+      "from": "narration.resume(...args)",
+      "channel": "audio.resume",
+      "args": "as called (production passes none)"
+    },
+    {
+      "from": "narration.stop(reason)",
+      "channel": "audio.stop",
+      "args": "(reason)"
+    },
+    {
+      "from": "narration.setOnTruthSync(cb|null)",
+      "channel": "audio.setOnTruthSync",
+      "args": "('<fn>' | null)"
+    },
+    {
+      "from": "narration.setPageEndWord(idx|null)",
+      "channel": "audio.setPageEndWord",
+      "args": "(idx|null)"
+    },
+    {
+      "from": "narration.resyncToCursor(idx, wpm) [ReaderContainer retargetActiveModeToWord]",
+      "channel": "audio.resync",
+      "args": "(wordIndex, rate)"
+    },
+    {
+      "from": "foliateApi.highlightWordByIndex(idx, kind, opts)",
+      "channel": "surface.highlight",
+      "args": "(wordIndex, kind, opts)"
+    },
+    {
+      "from": "foliateApi.next()",
+      "channel": "surface.next",
+      "args": "()"
+    },
+    {
+      "from": "foliateApi.goToSection(sectionIdx)",
+      "channel": "surface.goToSection",
+      "args": "(sectionIdx)"
+    },
+    {
+      "from": "foliateApi.clearSoftHighlight()",
+      "channel": "surface.clearSoftHighlight",
+      "args": "()"
+    },
+    {
+      "from": "foliateApi.clearUserBrowsing()",
+      "channel": "surface.clearUserBrowsing",
+      "args": "()"
+    },
+    {
+      "from": "extractFoliateWords() [ReaderContainer:651]",
+      "channel": "content.extractWords",
+      "args": "()"
+    },
+    {
+      "from": "commitPersistentWordIndex(idx, cause, options) [real usePersistentReadingAnchor, recorded at call]",
+      "channel": "persistence.commitWordIndex",
+      "args": "(wordIndex, cause, options)"
+    },
+    {
+      "from": "syncVisualToPersistentWord(options) [real hook, recorded at call]",
+      "channel": "persistence.syncVisual",
+      "args": "(options)"
+    },
+    {
+      "from": "window.electronAPI.updateDocProgress(docId, idx, cfi)",
+      "channel": "persistence.updateDocProgress",
+      "args": "(docId, wordIndex, cfi)"
+    },
+    {
+      "from": "onUpdateProgress(docId, idx)",
+      "channel": "persistence.updateProgress",
+      "args": "(docId, wordIndex)"
+    },
+    {
+      "from": "updateSettings(patch)",
+      "channel": "settings.update",
+      "args": "(patch)"
+    },
+    {
+      "from": "setWpm(value|updater)",
+      "channel": "settings.setWpm",
+      "args": "(resolved value)"
+    },
+    {
+      "from": "reader.jumpToWord(idx) [useReader, also passed to persistence hook + mode instance]",
+      "channel": "focusView.jumpToWord",
+      "args": "(wordIndex)"
+    },
+    {
+      "from": "reader.togglePlay()",
+      "channel": "focusView.togglePlay",
+      "args": "()"
+    },
+    {
+      "from": "onNarrateTruthSync(idx) [ReaderContainer applyNarrationActiveWord]",
+      "channel": "narrateView.applyActiveWord",
+      "args": "(wordIndex)"
+    },
+    {
+      "from": "pageNavRef.current.returnToHighlight()",
+      "channel": "pageNav.returnToHighlight",
+      "args": "()"
+    },
+    {
+      "from": "flowScrollEngineRef.current.* (useFlowScrollSync / FlowScrollEngine)",
+      "channel": "scroll.*",
+      "args": "NOT MOUNTED — see limitations; zero scroll effects in this baseline"
+    }
+  ],
+  "queriesNotRecorded": [
+    "foliateApi.getWords / findFirstVisibleWordIndex (fake → 0) / getSectionForWordIndex (fake → 0) / getParagraphBreaks (fake → {8,17})",
+    "pageNavRef.current.getCurrentPageStart (fake → 0)",
+    "getEffectiveWords()",
+    "reads of narration.cursorWordIndex / speaking / status"
+  ],
+  "fakeSemantics": {
+    "audio": "start→ returns the script's next startResult (last repeats); sets cursorWordIndex=wordIndex and status speaking|warming|error. pause→status paused. resume→status speaking. stop→status idle and drops the word callback. resync→cursorWordIndex=wordIndex. Commands audioWordAdvance(i)/audioTruthSync(i) set cursorWordIndex=i and invoke the callback last registered via start/setOnTruthSync (if any).",
+    "surface": "Foliate API fake. highlightWordByIndex returns true iff wordIndex < loaded word count. Words are loaded at open unless the script declares delayed extraction; command surfaceLoadsWords loads them.",
+    "settings": "Initial {...DEFAULT_SETTINGS, readingMode:'page', lastReadingMode:'flow', isNarrating:false}; settings.update merges the patch into rendered settings.",
+    "document": "activeDoc {id:'fixture-doc', position:startWord, wordCount:25, cfi:null}; 25 words; paragraph breaks [8,17]; wpm=effectiveWpm=300; useFoliate=true; bookWordsTotalWords=25."
+  },
+  "observationFields": {
+    "readingMode": "router mode state",
+    "focusPlaying": "Focus playing flag",
+    "flowPlaying": "Flow playing flag",
+    "isNarrating": "Narrate active-session flag",
+    "isBrowsedAway": "browse-away flag",
+    "highlightedWordIndex": "rendered highlight/selection",
+    "publishedWordIndex": "published persistent anchor (state)",
+    "canonicalWordIndex": "canonical anchor (persistence ref)",
+    "persistedSettings": "settings readingMode/lastReadingMode/isNarrating after all settings.update patches",
+    "audio": "fake audio port status/cursor (narrate truth source)"
+  },
+  "limitations": [
+    "ReaderContainer cannot mount headlessly (FoliatePageView, Electron IPC, TTS). Its glue that feeds the orchestrator is reproduced in the harness with citations: onWordAdvance/onComplete (ReaderContainer.tsx:705-755), queuePostModeAnchorSync + double-RAF post-mode anchor effect (766-770, 883-901), retargetActiveModeToWord (865-881), foliate onWordClick resolved-index path used for hardSelect (1356-1399), extractFoliateWords (651-664), state/ref declarations (178-200).",
+    "Only the Foliate (useFoliate=true) surface is recorded. ReaderContainer renders non-EPUB documents only as an error fallback (ReaderContainer.tsx:1605, 'all docs should be EPUB since EPUB-2B'), so useFoliate=false branches (FlowCursorController delegation) are not reachable in production rendering. Non-EPUB fixtures are covered by the live G0/G6 matrix, not here.",
+    "useFlowScrollSync / FlowScrollEngine / FlowCursorController are not mounted (they need real layout); scroll.* has zero recorded effects and flowScrollEngineRef is null in retargetActiveModeToWord.",
+    "useNarration (Kokoro, audioScheduler) is replaced by the declared fake audio port; heard-audio timing, cursor lag (NARRATION_CURSOR_LAG_MS) and the known cursor-lead / 1.4x overlap defects are NOT represented. Audio progress is driven only by explicit audioWordAdvance/audioTruthSync commands.",
+    "useReader (Focus display), ReaderView onWordUpdate DOM fast-path and the TTS background cacher (backgroundCacherRef.updateCursorPosition) are not modeled; reader.playing is always false.",
+    "useDocumentLifecycle is not mounted: no saved-mode restore on open (document always opens in page mode), no session stats, no lifecycle RAF cleanup. useFoliateSync browse-away detection is not mounted; isBrowsedAway only changes through the router/glue.",
+    "evalTrace is disabled (null); markPageActivity / userExplicitSelectionRef / activeDoc.cfi mutation on click are omitted (no collaborator effects in this path).",
+    "Foliate section misses (highlightWordByIndex=false → surface.next/goToSection pause-on-miss) are not exercised except through delayed extraction.",
+    "Cross-owner effects are present in this baseline (e.g. Focus/Flow/Page commands call audio.stop/setOnTruthSync/setPageEndWord via stopAllModes and createInstance). They are tagged crossOwner:true; the roadmap requires they become zero after separation (G6), which conflicts with a pure byte-for-byte G4 comparison unless crossOwner-tagged effects are excluded and asserted absent."
+  ],
+  "scripts": [
+    {
+      "name": "flow-core-start-7",
+      "startWord": 7,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 7,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "flow"
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 7,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 7,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                7,
+                "flow",
+                {
+                  "allowMotion": true
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow"
+                }
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                7,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                7,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "advanceTime",
+          "args": {
+            "ms": 4000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                7
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                8,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                8,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                9,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                9,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                10,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                11,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                11,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                12,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                12,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                13,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                13,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                14,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                14,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                15,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                15,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                16,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                16,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                17,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 5,
+          "command": "advanceTime",
+          "args": {
+            "ms": 3000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                17
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                17,
+                "flow",
+                {
+                  "allowMotion": true
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow"
+                }
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                17,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "command": "advanceTime",
+          "args": {
+            "ms": 3000
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 24,
+            "publishedWordIndex": 7,
+            "canonicalWordIndex": 24,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                18,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                18,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                19,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                19,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                20,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                20,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                21,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                21,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                22,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                22,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                23,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                23,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                24,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                24,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "command": "hardSelect",
+          "args": {
+            "wordIndex": 17
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "hard-selection",
+                {
+                  "cfi": null,
+                  "persist": true,
+                  "publishState": true,
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                17
+              ]
+            },
+            {
+              "channel": "persistence.updateDocProgress",
+              "args": [
+                "fixture-doc",
+                17,
+                "<undefined>"
+              ]
+            },
+            {
+              "channel": "persistence.updateProgress",
+              "args": [
+                "fixture-doc",
+                17
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 10,
+          "command": "selectMode",
+          "args": {
+            "mode": "flow"
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 11,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 17,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 12,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        },
+        {
+          "step": 13,
+          "command": "advanceTime",
+          "args": {
+            "ms": 5000
+          },
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    },
+    {
+      "name": "flow-core-start-0",
+      "startWord": 0,
+      "audioStartResults": [
+        "started"
+      ],
+      "commands": [
+        {
+          "step": 0,
+          "command": "openDocument",
+          "args": {
+            "wordCount": 25,
+            "startWord": 0,
+            "surfaceLoaded": true
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 1,
+          "command": "selectMode",
+          "args": {
+            "mode": "flow"
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": false
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow",
+                  "isNarrating": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 2,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 0,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 0,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                0,
+                "flow",
+                {
+                  "allowMotion": true
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow"
+                }
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                0,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                0,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 3,
+          "command": "advanceTime",
+          "args": {
+            "ms": 4000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.syncVisual",
+              "args": [
+                {
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                0
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                1,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                1,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                2,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                2,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                3,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                3,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                4,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                4,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                5,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                5,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                6,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                6,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                7,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                7,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                8,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                8,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                9,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                9,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                10,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 4,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 5,
+          "command": "advanceTime",
+          "args": {
+            "ms": 3000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 6,
+          "command": "togglePlay",
+          "args": {},
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "content.extractWords",
+              "args": []
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                10
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                10,
+                "flow",
+                {
+                  "allowMotion": true
+                }
+              ]
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "flow",
+                  "lastReadingMode": "flow"
+                }
+              ]
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                10,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 7,
+          "command": "advanceTime",
+          "args": {
+            "ms": 3000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 17,
+            "publishedWordIndex": 0,
+            "canonicalWordIndex": 17,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                11,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                11,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                12,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                12,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                13,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                13,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                14,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                14,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                15,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                15,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                16,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                16,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                17,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                17,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 8,
+          "command": "hardSelect",
+          "args": {
+            "wordIndex": 10
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 10,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 10,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "surface.clearSoftHighlight",
+              "args": []
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "hard-selection",
+                {
+                  "cfi": null,
+                  "persist": true,
+                  "publishState": true,
+                  "navigate": true
+                }
+              ]
+            },
+            {
+              "channel": "focusView.jumpToWord",
+              "args": [
+                10
+              ]
+            },
+            {
+              "channel": "persistence.updateDocProgress",
+              "args": [
+                "fixture-doc",
+                10,
+                "<undefined>"
+              ]
+            },
+            {
+              "channel": "persistence.updateProgress",
+              "args": [
+                "fixture-doc",
+                10
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                10,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                10,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.clearUserBrowsing",
+              "args": []
+            }
+          ]
+        },
+        {
+          "step": 9,
+          "command": "advanceTime",
+          "args": {
+            "ms": 1000
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 12,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 12,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                11,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                11,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            },
+            {
+              "channel": "persistence.commitWordIndex",
+              "args": [
+                12,
+                "mode-advance",
+                {
+                  "persist": false,
+                  "publishState": false,
+                  "navigate": false,
+                  "syncVisual": false
+                }
+              ]
+            },
+            {
+              "channel": "surface.highlight",
+              "args": [
+                12,
+                "flow",
+                {
+                  "allowMotion": false
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 10,
+          "command": "selectMode",
+          "args": {
+            "mode": "flow"
+          },
+          "observation": {
+            "readingMode": "flow",
+            "focusPlaying": false,
+            "flowPlaying": true,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 12,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 12,
+            "persistedSettings": {
+              "readingMode": "flow",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": []
+        },
+        {
+          "step": 11,
+          "command": "selectMode",
+          "args": {
+            "mode": "page"
+          },
+          "observation": {
+            "readingMode": "page",
+            "focusPlaying": false,
+            "flowPlaying": false,
+            "isNarrating": false,
+            "isBrowsedAway": false,
+            "highlightedWordIndex": 12,
+            "publishedWordIndex": 10,
+            "canonicalWordIndex": 12,
+            "persistedSettings": {
+              "readingMode": "page",
+              "lastReadingMode": "flow",
+              "isNarrating": false
+            },
+            "audio": {
+              "status": "idle",
+              "cursorWordIndex": 0
+            }
+          },
+          "effects": [
+            {
+              "channel": "audio.stop",
+              "args": [
+                "mode-switch"
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setOnTruthSync",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "audio.setPageEndWord",
+              "args": [
+                null
+              ],
+              "crossOwner": true
+            },
+            {
+              "channel": "settings.update",
+              "args": [
+                {
+                  "readingMode": "page"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "step": 12,
+          "command": "teardown",
+          "args": {},
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        },
+        {
+          "step": 13,
+          "command": "advanceTime",
+          "args": {
+            "ms": 5000
+          },
+          "observation": {
+            "mounted": false
+          },
+          "effects": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,7 +1,7 @@
 ---
 epic: reader-mode-separation-2
-last_updated: 2026-10-09 06:00
-updated_by: session 0 (scaffold, amended pre-launch)
+last_updated: 2026-10-09 01:30 (host clock)
+updated_by: session 1
 ---
 
 # State — single source of current truth
@@ -36,25 +36,34 @@ updated_by: session 0 (scaffold, amended pre-launch)
 ## Where we are
 
 ```
-phase:        P1 — Bootstrap, rebuild B0, prepare and run A1-R
-next_action:  bootstrap per the kickoff prompt (verify main has the 2026-10-09 amendment; repair worktree)
-blockers:     none
-session:      0 of ~14 budgeted
-dod:          D1 unmet | D2 unmet | D3 unmet | D4 unmet | D5 unmet | D6 unmet | D7 unmet | D8 unmet | D9 unmet
+phase:        P8 — owner gate (OS-1). Waves B–E done (B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb, S d0c58af4); speed amendment done (966e3261)
+next_action:  S1m (2026-10-10/11):
+  - OS-1 trimmed check complete: V1, S1 and S2 by the owner; S4 is automated proof, owner-accepted. osonef live profile unchanged.
+  - The owner's Flow band sighting did not reproduce on a 20 s F re-check; it is logged as intermittent.
+  - R6 applied (self-test 13/13). live-qa.json written; validator PASS --require-speed.
+  - F1 rows pass except D6: full npm test red, 4 runs, 3 timeouts.
+  - BLOCKED: Issue.READER-MODE-SEPARATION-2-S1.2026-10-10-2.md. Next: restore the machine and re-run, or an owner KF-3 ruling. Do not commit V before D6 passes. → live-qa.json (Narrate audio droppedBy marker) + validator → baseline.json admission PASS → F1–F5 onto current origin/main. F = F″ c9d73ddd
+blockers:     OS-1 BLOCKER(USER) — owner listening session (os1-owner-checklist.md); gates D1, D7, D8 and F1–F5 only
+session:      1 of ~14 budgeted
+dod:          D1 unmet (automated half PASS; owner half → OS-1) | D2–D9 unmet
 ```
 
 ## Next actions — max 5, near horizon only
 
-1. [ ] Bootstrap (kickoff prompt): charter A1 check, `git worktree repair`, journal every uncommitted path (A4), merge `refs/remotes/origin/main` → record **I**, push the run branch, switch to the authoritative packet
-2. [ ] Register this packet's files and `verified.md` in `E/paths.json`
-3. [ ] Rebuild **B0** under the rebuild policy → `admission/baseline-build-rebuild.json`
-4. [ ] Update the harness guards (A7) to the current worktree and B0; commit as test-only; re-read `lessons --open`
-5. [ ] Run A1-R (≤ 8 parent tool calls)
+1. [x] Bootstrap: I = `92dda255`, pushed (S1)
+2. [x] Packet files + `verified.md`/`done.md` registered in `E/paths.json` → `epicPacketPaths`
+3. [x] B0 rebuilt and validated → `admission/baseline-build-rebuild.json` (byte-identical to the original 21 files)
+4. [x] Harness guards (A7) → W path + exact-set B0 check; dry check with negative controls; lessons re-read
+5. [x] A1-R PASS 7/8 (`admission/isolation.json`, 5f0608b6); A2 PASS 10/20 (`admission/flow-reproduction.json`, 2529a921)
+6. [x] Census integrated (63b10115); G4 fixtures recorded and independently re-verified 5/5 (c61bca67)
+7. [x] A3 automated matrix 28/35 (`admission/g0-matrix.json`, 277967b3)
+8. [x] Q-A..Q-G settled (Decision log #10)
+9. [ ] After B1 is answered: set `baseline.json` → `admission: PASS` (with B0 fresh-run figures and owner observer), then Monday Queued → In Flight (handshake), then Wave B
 
 ## Finalization — stages (launch.md); mark each with date + evidence
 
 ```
-F1 verified.md committed + pushed:   no
+F1 verified.md committed + pushed:   yes — 2026-10-11, V (S1m; this checkpoint)
 F2 integration merge tested:          no   (attempt #: 0)
 F3 published to origin/main:          no
 F4 run branch fast-forwarded:         no
@@ -66,27 +75,99 @@ F5 done.md present here:              no
 | Fact | Value | Verified how / when |
 |------|-------|---------------------|
 | Repository | `C:\Projects\Blurby` (moved from `C:\Users\estra\Projects\Blurby`; CLAUDE.md's "Local-first" line still names the old path) | `git worktree list`, 2026-10-09 |
-| Run worktree | `C:\Projects\Blurby\.worktrees\reader-mode-separation-2`, **link broken** (gitdir → old path); repaired at bootstrap | `git -C … status` fatal, 2026-10-09 |
-| Run branch | `eb/reader-mode-separation-2` @ `74883154`, 4 commits after base `1e5485c6`; no application source changed; not yet on origin | `git rev-list`, `git ls-remote`, 2026-10-09 |
-| Identities | B0, I, S, F per charter: none recorded yet | — |
+| Run worktree | `C:\Projects\Blurby\.worktrees\reader-mode-separation-2`; relinked by `git worktree repair` | S1 |
+| Run branch | `eb/reader-mode-separation-2` on origin (lowercase). Locally the loose ref lives under `.git/refs/heads/EB/` (Windows case), so push with `git push origin HEAD:refs/heads/eb/reader-mode-separation-2` | S1 |
+| **I** | `92dda255bfad4395600a4371f0406f0f55c92899` (merge of origin/main `aafbb1c9`) | S1, pushed |
+| **B0** | `C:\Projects\Blurby-artifacts\rms2-baseline-build\` (21 files, byte-identical to the original manifest); source checkout retained at `C:\Projects\Blurby-artifacts\rms2-b0-checkout` (detached worktree @ `1e5485c6`) | `admission/baseline-build-rebuild.json`, S1 |
+| S, F | not yet | — |
+| Production inputs in W | Equal to `1e5485c6` (src tree `0c790075` at I); Electron main runs from W during G0 | S1 |
+| KF-1 (known flake) | `tests/qwenStreaming.test.js`: load-dependent unhandled rejection (`stream-timeout`, `main/qwen-streaming-engine.js`) after the test ends → `npm test` exit 1 with 0 failed tests. 1 of 3 full B0 runs; 0 of 3 isolated. Watch at D6 | S1 |
+| B0 skipped count (D6 bound) | 133 tests / 1 file | `baseline-build-rebuild.json` |
 | `policy.git` | `push`, networkOperations `allow`, template `eb/{item-id}`; on `main` since 56c97e44 | registry, 2026-10-09 |
 | Git gotcha | The repo root has a directory `main/` (Electron main process), so a bare `main` in git is ambiguous. Always write `refs/heads/main` / `refs/remotes/origin/main` | `git ls-files`, 2026-10-09 |
 | Test noise | `npm test` rewrites tracked `tests/perf-baseline-results.json`; never stage it, and never run the suite in the primary checkout | `tests/perf-baseline.test.ts:385`, 2026-10-09 |
 | Toolchain | node v24.14.0, npm 11.9.0; `gh` logged in (account gorillabrown) | commands, 2026-10-09 |
 | G0 automated baseline (historical) | 2026-09-23 on `1e5485c6`: 210 files / 3,058 passed / 133 skipped. To be re-run on B0 | `baseline.json` |
-| Old baseline archive | `%TEMP%\blurby-separation2-baseline-build-20260923T212830157Z`: **0 of 21 files left** (temp cleanup). The original manifest `admission/baseline-build.json` is preserved, unchanged | `Get-ChildItem`, 2026-10-09 |
-| B0 target location | `C:\Projects\Blurby-artifacts\rms2-baseline-build\` (outside every repo and `%TEMP%`) | owner, 2026-10-09 |
-| Harness guards (stale) | `admission/isolated-launch.cjs:6` and `admission/capture.mjs:14` hardcode `C:/Users/estra/Projects/Blurby/.worktrees/reader-mode-separation-2` | `Select-String`, 2026-10-09 |
+| Old baseline archive | `%TEMP%\blurby-separation2-baseline-build-20260923T212830157Z`: 0 of 21 files left. `admission/baseline-build.json` preserved, unchanged | 2026-10-09 |
+| Harness guards | Updated to `C:/Projects/Blurby/.worktrees/reader-mode-separation-2`; the launcher checks the served build against `baseline-build-rebuild.json` as an exact set; pinned-source checks kept | dry check + negative controls, S1 |
 | Failed A1 profile (preserve) | `C:\Users\estra\AppData\Local\Temp\blurby-reader-mode-separation-2-a1-20260923214002764` | `isolation.json` |
 | Live profile (never write) | `C:\Users\estra\AppData\Roaming\blurby\blurby-data\{library,settings,sync-queue}.json` | `isolation.json` |
 | Test document | Meditations EPUB SHA-256 `8be2ab1e…6c2beb` = `resources/sample-meditations.epub` | Issue `-2`, 2026-09-23 |
 | Renderer start order | Unpackaged Electron needs Vite running first, or the window is blank | Issue `-2` |
 | A1 failure facts | `executeJavaScript` returned `window` (not cloneable; fixed in test-only `30b72291`); EPIPE at `main/tts-engine.js:17` `console.error` when the stdout/stderr pipe closed (hypothesis) | Issue `-2` |
-| Monday item | 13119306772, Queued, Seq 1 | connector readback, 2026-10-09T03:39Z |
+| Monday item | 13119306772, **In Flight**, Seq 1, Started 2026-10-09 | connector readback 2026-10-09T06:52Z; recovery 20261009T060910Z-external-set-status-READER-MODE-SEPARATION-2 confirmed |
 
 ## Blockers
 
-- (none)
+- **BLOCKER(USER) OS-1 — owner listening session (Decisions #13, #27).** Gates D1 (G0 owner half), D7 (heard audio on F), D8 (speed live observation) and F1–F5. Nothing else is open: S and F are built and gated, and every automated row is recorded.
+  - **Exact ask:** run `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-checklist.md` (about 45 minutes, headphones). It covers:
+    - Part A: the B0 listening via `g0-owner-checklist.md`, recorded in `g0-owner-observations.json`;
+    - Part B: the same checks on F;
+    - Part C: the speed dialog, including Narrate at 0.80/1.05/2.00 by ear;
+    - Part D: three confirmations, including that Narrate stopping at book end is acceptable preserved baseline (Decision #24).
+
+    Parts B–D are recorded in `os1-owner-observations.json`.
+  - **Why owner:** heard-audio claims need a human observation (SRL-070, LL-124/126/127). The validator rejects any audio case without `heardAudio.observer = "owner"` (R6), and the speed row requires `liveObservation.observer = "owner"` (R7).
+  - **Do not commit before answering:** HEAD must stay at F until F1 (Decision #27). Fill the two observation files in place.
+  - **Owner rulings (2026-10-09, phase close-out):** these are charter-grade and governing. They are recorded on `main` @ `9597240d` as ROADMAP Mid-Dispatch Amendment 2026-10-09b, which reaches this branch at F2.
+    - Decision #13 is **ratified** (G0 owner half batched into OS-1).
+    - Decision #28a is **accepted**: list it in `live-qa.json` as a deliberate difference from B0, not a cross-owner effect.
+    - Decision #30 is **accepted**.
+    - Hash-verified copies of all five G6 run directories are at `C:\Projects\Blurby-artifacts\rms2-g6-runs\`. If the `%TEMP%` originals are gone at F1, use these paths in the assemble command.
+    - Do not commit this note before F1 (Decision #27); it is part of the uncommitted state.
+  - **Answer:** _(write "done" here after filling both observation files)_ — **STOPPED 2026-10-10 by owner ruling, not done.** Part A ran through H6 on B0 (`g0-owner-observations.json`; live profile unchanged). H7–H8, V1–V3 and Parts B–D were not run. Ruling (Evan): "stop, rip out narration, and rebuild it from the ground up, disconnected from the other reading modes." Re-scoped by Decision #32: only V1, S1, S2 and S4 on F remain, filled by the owner in `os1-owner-observations.json`. Do not resume OS-1 as written.
+  - **F automated evidence (uncommitted until V, Decision #27).** F = F″ c9d73ddd. Runs are in %TEMP%: candidate `blurby-reader-mode-separation-2-g6-fppfinal20261009195250888` (EPUB + chapters), speed capture `…-g6-fppspeed20261009200742973`, B0 `…-g6-bppfinal220261009205634479` (EPUB + chapters) plus B0 `…-g6-bprobe20261009205347560` (EPUB book transition only, Decision #30); candidate archive `C:\Projects\Blurby-artifacts\rms2-candidate-c9d73dddc57a` (manifest fbe3ff98…). B0 run `…-g6-bppfinal20261009200859177` is invalid (window throttled from its 5th case; Decision #26) and is not used. Reassemble (Windows paths; MSYS rewrites only the first entry of a comma list) with `node E/live/assemble-live-qa.mjs --candidate-cases=<fppfinal>/captures/fppfinal-epub/g6-cases.json,<fppfinal>/captures/fppfinal-chapters/g6-cases.json,<fppspeed>/captures/fppspeed-epub/g6-cases.json --b0-cases=<bppfinal2>/captures/bppfinal2-epub/g6-cases.json,<bppfinal2>/captures/bppfinal2-chapters/g6-cases.json,<bprobe>/captures/bprobe-epub/g6-cases.json --out=<scratch>` (bprobe last: the later B0 file wins for its one case), then add heardAudio, liveObservation and removedCrossOwnerEffects before writing `E/live-qa.json`.
+    - removedCrossOwnerEffects: (1) Narrate→Page lands on the handed-over word (B0 OBS-A3-1 landed on 0); (2) Narrate's bottom bar no longer shows Flow's leftover progress text (Decision #23).
+    - Deliberate improvement over B0, listed separately: the word timer restarts after an audio underrun (Decision #28a).
+  - **After "done", the executor:**
+    1. sets `baseline.json → admission: PASS` (D1);
+    2. assembles `live-qa.json` from the F automated runs, adding your heardAudio, liveObservation and confirmations;
+    3. runs the validator `--require-speed` on F;
+    4. runs F1 (every DoD row fresh), then F2–F5.
+
+## Front disposition — every front, with its status and the clause that gates it (S1)
+
+| # | Front | Status | Gate / authority |
+|---|---|---|---|
+| F1 | G0 automated half (A1-R, A2, A3 matrix) | DONE | `isolation.json`, `flow-reproduction.json`, `g0-matrix.json` |
+| F2 | G0 owner half (heard audio + residual live checks) | DONE per Decision #32 — B0 H1–H6 observed (Evan); H7, H8, V2, V3 dropped by owner ruling; V1 no B0 baseline | Owner gate (charter Escalation: owner gates; SRL-070) |
+| F3 | `baseline.json` → `admission: PASS` (D1) | READY — set at F1 per Decision #32 (observer Evan; dropped rows listed) | D1 requires the owner observation and the observer named |
+| F4 | Wave A census, ownership, dependencies | DONE | 63b10115 |
+| F5 | G4 behavior fixtures | DONE | c61bca67 (re-verified 5/5) |
+| F6 | `verification.json` (B0, I recorded; S, F pending) and `test-migration.json` (planned substitutions + Q-F rule) | DONE (S1d) | evidence under `E/` (pre-G0 allowed) |
+| F7 | Pre-Wave-B scope rules Q-A..Q-G; KF-1 decision table | DONE | Decision log #10, #11; staging fold-ins 3, 5 |
+| F8 | OBS-A3-2 classification (read-only) | DONE — cross-owner (b), Decision #12 | read-only diagnosis, S1 |
+| F9 | Monday Queued → In Flight | DONE — In Flight 2026-10-09 (handshake: plan → connector → confirm; readback status "In Flight", Seq 1, Started 2026-10-09; label "In Flight" created to match registry statusMappings) | Charter grant: transition "once D1 passes" |
+| F10 | G1/G2/G3 test files (`tests/readerModeBoundaries.test.ts`, `readerModeOwnership`, `readerModeIsolation`, `readerModes/*.contract`) | DONE — G1 16/16, G2×4, G3 (S d0c58af4, F″ c9d73ddd; production code = F′ 9a171504) | Pre-G0 write scope is limited to census, evidence, fixtures and harness under `E/` (charter Constraints; amendment 2026-10-09 item 4). G2/G3 also need the contract/port types, which item 4 moves to the start of Wave B |
+| F11 | Contract/port types and broker (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`, `createReaderPorts.ts`) | DONE — ports, broker, router (Waves B–E) | Amendment item 4: start of Wave B; no `src/` before D1 |
+| F12 | Waves B (Page, Focus), C (Flow), D (Narrate), E (removal, S) | DONE — B9 5a34f6e1, C4 9fa253b0, D4 e005d5eb, S d0c58af4 (verification.json → structuralCandidate) | Waves serial after G0 (charter Constraints; SRL-089) |
+| F13 | `scripts/check_reader_mode_evidence.mjs` (G6 validator) | DONE (E6) — validator committed; `--self-test` 11/11 controls; pre-G6 run exits 1 (no `live-qa.json`) | Launcher risk moot: since Wave B, `admission/isolated-launch.cjs` already refuses W (W's `src/` differs from the B0 pin). OS-1's B0 half must launch with root `C:\Projects\Blurby-artifacts\rms2-b0-checkout` (HEAD = `1e5485c6`), and G6 needs a candidate launcher. Both are harness items before E8 |
+| F14 | Speed dialog (→ F) | DONE — F″ c9d73ddd (966e3261 + c282950f + 9a171504; automated G6 and speed capture pass on F″) | Only after S (amendment 2026-09-23 speed dialog) |
+| F15 | D2–D9 verification, F1–F5 finalization | BLOCKED — OS-1 (BLOCKER(USER)); everything automated is ready | Need F; finalization follows verified.md |
+| F16 | Lessons and governance fold-ins | STAGED — fold-ins 3–8 (decisions through #28) | Staging memo fold-ins 3–5; applied by `/pointer-closeout` (worktree prohibition) |
+| F17 | Supporting loopback audio capture (charter A6) | DROPPED — Decision #32 (Narrate audio dropped by owner ruling) | Supporting only; heard audio is an owner gate (SRL-070); take it during the owner session |
+
+## Scope questions Q-A..Q-G — RESOLVED 2026-10-09 (Decision log #10; staging fold-in 3; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`). Wave B instruction:
+
+```
+Wave B (after D1): apply Q-A..Q-G per staging fold-in 3 — mirrored layout without TextView.tsx; App.tsx untouched
+(useReader/ReaderView originals kept only for it; no mode imports them); narration.ts runtime = TTS infra, copy
+findSectionForWord per mode; constants.ts shared-immutable; diagnostics via write-only broker port; extraction cache
+behind document port; per-mode owner needs privateCopiesFor; G4 compares baseline minus the recomputed cross-owner
+set (audio.* with neither mode before nor after = narrate), stored flags must equal recomputed, candidate emits zero;
+OBS-A3-1 governed by G3 (expect 7); classify OBS-A3-2 read-only against Focus's own snapshot (2 attempts, then issue).
+```
+
+Original questions (for reference):
+
+- Q-A. Non-EPUB views (`PageReaderView`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `PausedTextView`, `FlowCursorController`) are dead in production (not rendered; tree-shaken). Copying them into each mode's `TextView.tsx` copies dead code. Options: retire them in Wave E, or copy them as the spec says.
+- Q-B. `src/App.tsx` runs a standalone reader window with its own `useReader` / `ReaderView` / `useReaderKeys`. App.tsx is not an edit site, so Wave E cannot prove the legacy Focus entry points are absent without amending scope.
+- Q-C. `src/types/narration.ts` exports runtime code (`narrationReducer`, `findSectionForWord`), not only types.
+- Q-D. The allowed-shared categories have no slot for `src/constants.ts` or the diagnostics modules (`narrateDiagnostics.ts` holds process-global mutable state). `useNarrationCaching.ts` holds a module-level extraction cache that feeds all modes; the census places it in the document port.
+- Q-E. The census added owner value `per-mode` (with `privateCopiesFor`) for resources in code that every mode copies.
+- Q-F. G4 byte-for-byte vs G6 "cross-owner effects must be zero": the G4 fixtures tag today's cross-owner audio calls (`crossOwner: true`; Flow 35, Focus 30, Page 6, Narrate 0). G4 needs an approved rule: drop the tagged effects, assert that none remain, compare the rest.
+- Q-G. Baseline observations that later gates must treat explicitly: OBS-A3-1 (Narrate→Page highlight on word 0 while the persisted anchor is 7), OBS-A3-2 (Focus→Page readback 209), OBS-A3-3 (same-Page emits `audio.stop`), Flow resume = cold restart (fixture), warming start → next press resumes (fixture), Narrate→Page stops audio twice (fixture). Preserve them as baseline, or class them as cross-owner effects to remove?
+- Source: `dependencies.json`, `ownership.json` (`census/`, 63b10115). Key couplings: shared `highlightedWordIndex` / anchors; one `FoliatePageView` for all modes; `createInstance` clears Narrate's truth subscription; Narrate starts through `startFlow`.
 
 ## Decision log — append; never silently re-litigate
 
@@ -94,7 +175,88 @@ F5 done.md present here:              no
 |---|------|----------|-----|-------------------|
 | 1 | 2026-10-09 | Run on the existing branch `eb/reader-mode-separation-2`; bring the spec in by merging `origin/main` (`--no-ff`), not by rebasing | Preserves the 2026-09-23 evidence commits | Owner, at scaffold |
 | 2 | 2026-10-09 | Pre-launch amendment: authoritative packet in the run worktree; staged finalization; pre-G0 no `src/`; no implementation-wave action ceiling; B0 rebuild policy; identities B0/I/S/F | Adversarial review of the packet (8 findings) | Owner, ROADMAP amendment 2026-10-09 |
+| 3 | S1 | Push the run branch with the explicit refspec `HEAD:refs/heads/eb/reader-mode-separation-2` | Local loose ref enumerates as `EB/…` (case-insensitive FS); the named push fails | Grant: pushing the run branch |
+| 4 | S1 | Launch Q2/A5 answered yes | Owner set `/goal` and said "proceed without my approval overnight" | Owner message, S1 |
+| 5 | S1 | B0 validation PASS despite run-1 `npm test` exit 1 | Exit 1 came from KF-1 (0 failed tests); runs 2–3 exit 0 with identical counts; artifacts byte-identical; no identity, input or behavior difference, so the rebuild-policy trigger ("failed validation") is explained, not met | Charter grants (rebuild B0); escalation trigger evaluated |
+| 6 | S1 | A1-R runs as one driver script `admission/a1r-run.ps1` (test-only, registered) | Keeps preview restart, Hidden launch with redirects, capture, graceful close, preview stop and hash checks inside the 8-call budget | Grant: test-only harness under `E/` |
+| 7 | S1 | A1-R PASS with OBS-A1R-1 (Kokoro warm-up load error 13) classified as neither isolation nor write-path | Path inside the profile; downloaded model byte-identical to the installed one (SHA-256 `04cf570c…`); live profile unchanged | Amendment 2026-10-08 A1 criteria, evaluated mechanically |
+| 8 | S1 | A2 PASS on the EPUB; the legacy inline text fixture is a fixture gap, not a Flow defect | B0 renders every readable doc through foliate ("all docs should be EPUB since EPUB-2B"); inline record → re-import notice | Amendment 2026-09-23 A2 criteria |
+| 9 | S1 | A3's non-EPUB rows use a non-EPUB source converted through the app's import path; the launcher seeds the installed Kokoro model into the fresh profile | The only readable non-EPUB route on B0; avoids the fresh-profile concurrent-download race (OBS-A1R-1 recurred in A2) | Grant: test-only harness under `E/` |
+| 10 | S1 | Q-A..Q-G resolved: Type 1b (Q-A Type 2 narrowing) — see the block above | Census and G4 fixtures contradicted the spec; rules enforce isolation/parity intent, loosen no gate, touch nothing outside the existing-site table | Owner standing authorization + /virtuoso:mid-dispatch-decision; staging fold-in 3 |
+| 11 | S1 | KF-1 pre-registered decision table: G5/D6 stay exit-0; recurrence → one scoped hygiene fix to `tests/qwenStreaming.test.js` only (after D1); a `main/` need → BLOCKER(USER) | A flake must not pass by retry nor block silently | Owner standing authorization; staging fold-in 5 |
+| 12 | S1 | OBS-A3-2 = cross-owner overwrite. After Focus→Page re-pagination, `ReaderContainer` `onRelocate` writes `floor(fraction × activeDoc.wordCount)` (209 = ⌊0.125×1676⌋) into the Page highlight, unguarded because Focus's `onWordAdvance` consumed `resumeAnchorRef`. Focus itself stopped at ~27. Per the Q-G table, G3 governs: the post-separation Page highlight = Focus snapshot; G6 lists it as a removed cross-owner effect. OBS-A3-1 is very likely the same mechanism | Read-only trace, confidence 8/10. Discriminating experiment for Wave B/G6: log `detail.fraction`, `approxWordIdx`, `resumeAnchorRef` in `onRelocate`; negative control = Focus paused at 7 keeps 7 | Pre-registered Q-G table (fold-in 3) |
+| 13 | S1 | Owner gate re-sequenced: Waves B–E and the speed dialog start on the G0 automated evidence; the B0 listening checklist joins G6 and the speed-dialog check in one owner session (OS-1) before F1; D1/D7 stay owner-required; Monday → In Flight at Wave B start | B0 is frozen and re-launchable, so the observation is time-independent; owner directed "You make decisions… iterate until the entire epic is complete" | Owner direction 2026-10-09; /mid-dispatch-decision; staging fold-in 6 |
+| 14 | S1 | Waves B–E design accepted (DD-1..DD-7: build beside, cut over at E1; plain-class runtimes; shell TTS infra; legacy unreachable, not deleted). OC-1..OC-9 ruled (fold-in 7): stale-flag observation rule; v1 sibling contract; display-jump alias; dead-path tests on legacy hook; source-text re-point table; additive focusWpm/flowWpm; Kokoro UI 0.80–2.00/0.05 (buckets unchanged); Page ↑/↓ kept; no dead copies | Keeps every DoD row verifiable; removes only cross-owner artifacts | Owner delegation; mid-dispatch protocol; staging fold-in 7 |
+| 15 | S1 | `dependencies.json` / `ownership.json` stay frozen as the Wave A census of B0 (src tree `0c790075`). Their `--check` is meaningful only at that tree and reports stale once `src/` changes, which is expected. G1 calls the census library (`buildImportGraph`, `extractResources`) live on the current tree. Not regenerated | Regenerating would overwrite baseline evidence | Grant: evidence and harness under `E/` |
+| 16 | S1 | Wave B policy rulings:
+  - G1 allowance coverage is enforced once all four mode trees exist (unreachable until then; D2 runs on F);
+  - `blurby-icon.png` allowed as a passive asset;
+  - never-mutated constants allowed (`BLOCK_TAGS` ×2, `KNOWN_ABBREVIATIONS`);
+  - the ownership owner map is keyed with the verbatim anchor (two distinct same-named ResizeObservers);
+  - the handoff carries `engaged` (legacy `hasEngagedRef` persists per document) | Each keeps the check honest without loosening the final gate | Grant: harness/evidence; design §D.2 |
+
+| 17 | S1 | Wave D rulings: (a) G1 allowance coverage, now enforced with four trees, is satisfied by removing three allowances no mode uses: `ProgressBar` (a dead import in legacy `ReaderView`), `ErrorBoundary` (shell only) and `useFocusTrap` (speed dialog in `src/components`). This tightens the policy. (b) Narrate `BLOCK_TAGS` is an allowed singleton, like the other three modes. (c) Narrate emits its release calls in `stop`, as G2 requires zero calls after stop. (d) D3 reachability before E1 is accepted as designed (§C row D3) | Tightening only; behaviour-neutral | Grant: harness/evidence; design §C, §D.2 |
 
 ## Evidence
+| 18 | S1 | E1–E3 stop rulings. (a) The recorder drives the legacy orchestrator hook that E1 removes. Rather than adding a dead copy to `src/`, it is verified on the genuine B0 tree: `fixtures/verify-on-b0.mjs` copies the unchanged recorder and fixtures into the B0 checkout, runs them and removes the copy. Result 5/5 on src `0c790075`; the post-E1 W run (0/5) is the observed red state. (b) The `narrationIntegration` props `narrationPauseReason` and `getAudioProgress` fed only the legacy overlay cursor, which is gated off whenever `flowMode` (always true in Flow): verified dead in B0. OC-5b equivalent: the retained legacy gate is asserted and no mode consumes either value; recorded old→new | Stronger evidence than a `src/` copy; asserts the design fact, weakens nothing | Fold-in 7 OC-5; Type 2 |
+| 19 | S1 | Defect found at E1 review: runtimes keep the document snapshot they were created with, so full-book words from background extraction never reach the open mode (B0 passed them to the live view immediately). Fix: each runtime subscribes through its own document port (broker-guarded) and adopts same-id, same-generation snapshots. Test: G3 "late full-book words reach only the active session" (mutation-proven) | Restores B0 behavior; the stale session is rejected by the broker | Charter scope (preserve each mode's baseline); Type 1b |
+| 20 | S1 | E5 item 6 ruling. Everything is reachable from `main.tsx` through `App.tsx`, so "only via App.tsx" cannot discriminate. Assert instead: (6a) ReaderContainer's runtime closure ∩ legacy = exactly the declared `shellInfrastructure`; (6b) `useReader`, `ReaderView` and `PausedTextView` are outside the shell closure and reachable only with `App.tsx` on the path; (7) Q-A dead views and legacy hooks are unreachable | Keeps D2 exact and non-vacuous | Design §D.2; Type 1b |
+| 21 | S1 | E4 per the §D.6 rule: 7 legacy files have no retained importer or reader and are deleted. They are `PageReaderView`, `FlowCursorController`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `FocusModeAdapter` and `FlowModeAdapter`. `PageMode` stays (imported by `useReadingModeInstance` and the barrel); `src/modes/index.ts` is untouched (CLEANUP-MODE-BARREL-1). The design expected none, but the E2 relocations removed the last test readers | The deletion rule, applied mechanically; evidence goes in `verification.json → legacyUnreachable[]` | Design §C E4, §D.6 |
+| 22 | S1 | Q-E presence: the census anchors are verbatim lines from the old hooks, and DD-2 rewrote those hooks into classes, so verbatim presence cannot hold. Rather than loosen the matcher, G1 asserts a committed `boundary-policy.json → privateCopyMap`. It covers every (per-mode resource, mode) pair, each with an exact anchor line in that mode's own file or a `notCopied` reason from a closed set (`dead-OC-9`, `dead-design-B5`, `cross-owner-removed-Q-F`, `not-used-by-mode`) with a cite. A missing equivalent is a defect, never a `notCopied` | Keeps "each listed copy exists in exactly that mode's directory" mechanical | Fold-in 3 Q-E; Type 1b |
+| 23 | S1 | Cutover review (read-only, against B0) found no blocker. Fixed: (1) the cross-book overlay is cleared only once Flow runs in the next book; (2) `openDocument` releases the outgoing session inside a teardown window, so a speaking Narrate no longer keeps reading the old book, while unmount stays release-free for G4 parity; (3) a failed book-bytes read is no longer cached. Accepted: in Narrate the bottom bar no longer shows Flow's leftover progress text (removed cross-owner effect; goes in `live-qa.json → removedCrossOwnerEffects`). Skipped: TTS entry-coverage queueing, which is dead in B0 too | The stale audio in (2) is exactly what the epic forbids; B0 parity is kept wherever G4 records it | Charter scope; Type 1b |
+| 24 | S1 | G6 scoring rule. Per ROADMAP G6, "acceptance is equal to its recorded baseline except the removal of cross-owner effects". So each live-qa case's `expectedCanonicalIndex`, visible cursor count and owner come from the B0 run of the same harness revision, on the same fixture, made in the same session (cited per case as `baselineRef`: run id and case id). `pass` means the candidate equals B0, with stale effects 0. Scenarios B0 itself fails against the ideal are scored this way: Narrate stops at book end (no book transition) on both fixtures, and the EPUB section transition at 5480 jumps the view to section 3 without audio past the boundary. If the candidate reproduces B0 exactly, the case passes as baseline-equal and is listed in `live-qa.json → baselineEqualDeviations` for the owner's OS-1 confirmation. These two were already owner-checklist rows at admission (`g0-matrix.json` notCapturedByAutomation). A candidate result that differs from B0 is a fail, and no known-defect id beyond KD-CURSOR-LEAD / KD-RATE-1.4-OVERLAP is introduced. | The spec defines parity, not an ideal. Inventing new expected values would either fail a parity-preserving candidate or need a new known-defect id the spec forbids. Fixing B0 behaviour is out of scope (later items). | ROADMAP G6 text; Type 1b; owner confirms at OS-1 |
+| 25 | S1 | KF-2 `tests/sync-queue.test.js` Windows `EPERM` on `rename(tmp, queuePath)`, the same treatment as KF-1. Seen 3 times, only in full-suite runs; 5/5 isolated passes on both W and the B0 checkout. `main/sync-queue.js` and its test are unchanged since Sprint 19 and outside this epic. Cause: an immediate rename of a fresh `.tmp` file in the real OS temp folder races a Windows scanner handle. Rule: D6 requires an `npm test` exit 0 on F with no edit, skip or retry wrapper. Every failing run is recorded with its counts next to the passing one, never hidden. A failure in any other test, or a second failing test in the same run, is a real failure. A Windows-safe rename retry in `main/sync-queue.js` is staged as a follow-up item (lane D), not done here. | Code untouched by the epic; isolation proves it is environmental; fixing `main/` is outside scope | Owner standing authorization; Decision #11 precedent; Type 1b |
+| 26 | S1 | Throttled-window runs are invalid, never failures. In two candidate runs the chapters half degraded: no audio word events, Focus timers at about 1 s, CDP input unacknowledged. Diagnosis showed Chromium throttling the hidden harness window: frames stopped, and the state survives `Page.navigate`. A matched full rerun of the same commit (fixthreea) was clean at 26/27 + 26/27, with watchers showing a steady 60 fps, flat memory and handles, and no TTS backlog. Main-process TTS backlog and persisted state are refuted. Rule: the harness records visibility and a 200 ms frame count at every step and at case end. Any throttled sample makes the case `invalid`, which the validator rejects, so it must be rerun. Controls: stopped frames → 0; hidden → flagged. S = d0c58af4 (`verification.json → structuralCandidate`). G6 automated evidence is fixthreea vs bzeros; heard audio is pending OS-1. The cands and candc runs are kept and set aside with their reason. Follow-up (not this epic): the candidate-only ResizeObserver-loop console volume goes through `window.onerror` → `log-error` IPC. | A throttled run measures the OS, not the code; the matched rerun is the discriminating control | Owner standing authorization; Type 1b |
+| 27 | S1 | F and the end of the commit stream. The code is the speed dialog commit 966e3261 on top of S. F is the run-branch commit that adds the final G6 harness, the OS-1 checklist and this blocker (production inputs identical to 966e3261). After F, nothing is committed until F1's V: the F automated live runs, `live-qa.json` assembly, the owner's observation files and the state.md Evidence paste stay uncommitted. That keeps HEAD = F for the launcher's `--candidate == HEAD` rule and for D9. S's heard audio is not taken separately. The charter requires heard audio only on F (D7). The launcher cannot serve S once HEAD moves past it, and S and F differ only in the speed amendment. So S's G6 record is its automated half, preserved in `verification.json → structuralCandidate`. | The launcher, D7 and D9 all key on one F at HEAD; committing evidence before F1 would move HEAD away from the build the owner hears | launch.md F1; charter identities; Type 1b |
+| 28 | S1 | F live findings, ruled as follows.
+(a) The EPUB Narrate section stall at 5479 is a shared-scheduler bug present on B0: after an audio underrun, `audioScheduler.ts` leaves a stale `wordRafHandle`, so word events stop for the session. Fix it in shell infrastructure (one line plus a red→green test). This deliberately improves on B0; it is recorded as such, and the owner confirms by ear in H5. Without the fix the case is a coin flip on both builds (B0 crossed 6/10, F-lineage 2/7).
+(b) A real candidate regression: Narrate rebuilt its natural chunks on every render (0.75–1.9 s main-thread blocks; first audio 5–7 s vs B0's under 2 s). B0 built them once when full-book words arrived. Narrate and Flow now cache them independent of render version, built on the session timer.
+(c) The chapters book-end visible cursor is nondeterministic on B0 (5/9), from a post-end clear race. The harness now measures it while the last word plays (max of samples until Play returns), identically on both targets; post-end samples are kept as evidence.
+(d) The harness rate case measures at the settle moment (`NARRATE_SPEED_SETTLE_MS` after the last key).
+All of this lands as F′ (Decision #27 then applies to F′). | Parity is judged on behaviour the owner can hear or see. A latent shared bug that turns a G6 case into chance cannot yield mechanical evidence, and the chunk rebuild is a regression the owner would hear as a slow start | Owner standing authorization; Type 1b |
+| 29 | S1 | Pre-F1 dry run on F′ (9a171504): D2 16/16, D3 14/14, D4 38/38, D5 11/11 (fixtures unchanged since first added), D6 typecheck 0 / npm test 3342 passed, 133 skipped / build 0 / 318 paths registered, D9 B0 re-hash 21/21. But `git diff --check I F` exited 2:
+(a) a trailing space in `design/waves-b-e-design.md:688`: fixed;
+(b) a blank line at the end of `admission/fixture-chapters.txt`: a hash-pinned admission input (g0-matrix.json, the a3/a3g manifests; the G6 launcher refuses other bytes), so its bytes cannot change. A directory-scoped `admission/.gitattributes` sets `fixture-chapters.txt -whitespace`. That is git's own way to declare recorded data, it covers this one file only, and every other path stays checked.
+Both land as F″ (production inputs unchanged). The automated G6 runs and speed capture are re-run on F″, and Decision #27 then applies to F″. | D6 must exit 0 on F, and a pinned evidence input cannot be rewritten | Owner standing authorization; Type 1b |
+| 30 | S1 | On F″, B0 run bppfinal2 left the EPUB book-end cursor unmeasured: the last word's audio trace event did not arrive inside the harness's 60 s window, though the case's trace shows word 80492 played. That fits B0's scheduler-underrun stall (Decision #28a). The B0 run of that same case 3 minutes earlier on the same build (bprobe, run as a throttle probe) measured it, and it equals the candidate exactly (last audio word 80492, owner narrate, paused, 1 visible cursor, every check, stale 0). bprobe is that case's baseline; bppfinal2 stays as evidence. Earlier B0 run bpfinal (F′) also measured 1. | An unmeasured baseline is missing data, not a different value; the comparison uses a measured same-build, same-session B0 observation, named in baselineRef | Owner standing authorization; Type 1b |
+| 31 | S1 | OS-1 stopped after Part A item H6 (B0). Owner rulings, 2026-10-10:
+(a) Narration is to be ripped out and rebuilt from the ground up, disconnected from the other reading modes. Scope is everything, including the TTS engine (Kokoro, worker, caching).
+(b) This epic lands first. Narrate heard-audio parity is moot for a component being replaced, so the Narrate listening checks are dropped: OS-1 Part B H1–H8 and V3, S3, C1 and C2. A short non-narration owner check on F remains: V1 Flow scroll-away, and S1, S2 and S4 for the speed dialog in Focus, Flow and Page. Merge follows.
+(c) The interim is no narration: Narrate is removed from the app rather than kept until its replacement works.
+The amended D1/D7/D8 and F1–F5 wording goes through /mid-dispatch-decision. Sequencing confirmed by the owner (relayed by the planning session): remove Narrate in the first sprint after this epic merges, not on this branch, because changing F would void its automated G6 gates. | B0 Narrate on two books showed the cursor running ahead, a stuck highlight after an audio gap (#28a), 15–35 s waits at speed and section changes, 1.4x distortion or overlap, a double highlight and a shifting bottom bar (`g0-owner-observations.json`). The defects cluster in the narration engine, and four queued items would patch it piecemeal | Owner ruling 2026-10-10 (OS-1 session) |
+| 32 | S1 | Finish line narrowed per #31 (Type 2; issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-10.md`; staging fold-in 9).
+D1 is met by B0 H1–H6, observer Evan. H7, H8, V2 and V3 are dropped. V1 has no B0 baseline, so on F its bar is "works".
+D7 keeps every automated G6 case unchanged. Narrate audio cases record `heardAudio: { droppedBy: "owner-ruling-2026-10-10" }`: dropped, never heard.
+D8 keeps the automated speed checks. Its live observation is the owner's S1, S2 and S4; S3 is dropped.
+On F, only V1, S1, S2 and S4 remain, run by the owner personally. H1–H8, V2, V3, S3 and C1–C3 are marked "dropped by owner ruling". F17 is dropped.
+R6 in `scripts/check_reader_mode_evidence.mjs` also accepts that marker, with two self-test controls. This is evidence tooling, not consumed by `vite build`, the app or `npm test`, so F's archive and automated results are unchanged (R1 re-hashes at F1). The G6 launcher counts `scripts/` as a production input, so make the R6 edit only after the owner's F launch closes, and commit it with V. | Heard-audio parity of a component being deleted has no consumer. Automated cases still prove isolation. Charter: the user may loosen rows | Owner ruling 2026-10-10 (GO relayed by the planning session); /mid-dispatch-decision |
+| 33 | S1m | KF-3: owner ruling "Rule them environmental and finish the merge" (issue `Issue.READER-MODE-SEPARATION-2-S1.2026-10-10-2.md`; staging fold-in 11).
+Three node IDs get the KF-1/KF-2 treatment in full-suite runs: `updateInstallGating` "shows update-available as a passive library toast without install action", `updateInstallGating` "wires update-downloaded library banner to installUpdate", and G1 `readerModeBoundaries` "production mode graphs share only declared data and ports".
+Each may fail only by a 10 s timeout, and must pass alone. Any other failure is real. Every failing run is recorded. This applies to D6 (F1) and F2 step 5.
+Follow-ups: give the G1 graph test an explicit timeout (it uses about 6.5 s of 10 s alone); the `updateInstallGating` timeout; diagnose tonight's machine-wide slowdown (B0's suite took 60 s against its recorded 19 s). | Four F full runs failed only these timeouts. B0 failed the same class tonight. Isolated passes 5/5 on F and B0. Earlier full runs of this code were green. D6 loosening is the owner's alone (charter) | Owner ruling 2026-10-11 (executor session) |
 
-- (none yet)
+- A3: `admission/g0-matrix.json` (24 transitions + 4 same-mode cases per fixture; 0 stale effects; Narrate exact start; gaps → owner checklist). G4 fixtures: `fixtures/*.baseline.json` (verified 5/5, S1)
+- B0: `admission/baseline-build-rebuild.json` (21/21 identical; typecheck/build 0; tests 0 on 2 of 3 runs, KF-1 on run 1)
+- A1-R: `admission/isolation.json` (PASS, 7/8). A2: `admission/flow-reproduction.json` (PASS, 10/20)
+- Text-file SHA-256 values in those records are over the as-written (CRLF) bytes; git stores LF. Use `git hash-object` / blob ids for canonical comparison
+
+### F1 — 2026-10-11 (S1m), fresh on F = c9d73dddc57a3ff19532d14baf76ae84e3c5f4b5 (HEAD = F; working tree adds only evidence/tooling: R6, live-qa.json, packet records)
+- D1: `baseline.json` → `admission: PASS`, observer Evan (Decisions #13, #31, #32). B0 owner half H1–H6 in `g0-owner-observations.json`; H7, H8, V2, V3 dropped by owner ruling; known defects KD-CURSOR-LEAD, KD-RATE-1.4-OVERLAP, #28a; H4 new-problem is audio quality only, with no matrix contradiction.
+- D2: `npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts` → exit 0, "Test Files 2 passed (2) / Tests 16 passed (16)".
+- D3: `npm test -- tests/readerModes/{page,focus,flow,narrate}.contract.test.ts` → exit 0.
+- D4: `npm test -- tests/readerModeIsolation.test.ts` → exit 0.
+- D5: `npm test -- tests/readerModes/{page,focus,flow,narrate}.behavior.test.tsx` → exit 0. Behaviour baselines `fixtures/{page,focus,flow,narrate}.baseline.json` unchanged since first added (c61bca67); recorder tooling only changed (`record-mode-baselines.test.tsx` → `.recorder.tsx` rename per `paths.json → fixtureRenames`/Decision #18; `fixtures/vitest.config.mjs` 1 line).
+- D6:
+  - `npm run typecheck` → exit 0; `npm run build` → exit 0; `git diff --check I F` → exit 0; `git diff --name-only I F` = 319 paths, 0 outside `paths.json`.
+  - `npm test`: four full runs, each with only KF-3 timeouts (Decision #33), skipped 133 ≤ B0's 133:
+    - run 1: 2 failed / 3340 passed / 133 skipped (52.7 s);
+    - run 2: 2 / 3340 / 133 (58 s);
+    - run 3: 3 / 3339 / 133 (57 s);
+    - run 4: 3 / 3339 / 133 (38 s, load 24%).
+  - Every failure is a 10 s timeout in `updateInstallGating` ×2 or the G1 graph test. Alone: `updateInstallGating` 5/5 on F and 5/5 on B0; G1 16/16 (D2).
+  - Base the same night: B0 `npm test` failed 6 / passed 3052 in 60 s (recorded run: 0 failed, 19 s).
+- D7 + D8: `node scripts/check_reader_mode_evidence.mjs --candidate c9d73ddd… --evidence docs/planning/roadmap-reviews/reader-mode-separation-2 --require-speed` → "PASS: candidate c9d73dddc57a3ff19532d14baf76ae84e3c5f4b5 evidence complete (incl. speed dialog)". Self-test 13/13 controls.
+  - `live-qa.json` has 54 cases (54 pass). The 26 Narrate audio cases are `droppedBy: owner-ruling-2026-10-10`. `speedDialog.liveObservation`: owner S1, S2 and S4 (S4 is automated proof, owner-accepted). Owner V1 works. osonef live profile unchanged.
+  - D8 declared speed tests (`paths.json → speedAmendmentPaths` tests) → exit 0, 7 files, 106/106.
+- D9: `verification.json` names B0, I (92dda255), S (d0c58af4) and F (c9d73ddd). B0 archive re-hash vs `baseline-build-rebuild.json`: 21/21, 0 mismatches.
+- Owner Flow sighting (band not following the word cursor) did not reproduce on a 20 s F re-check; logged as intermittent (`os1-owner-observations.json` S2.separateObservation).

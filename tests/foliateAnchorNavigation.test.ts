@@ -1,8 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  jumpFoliateToWordAnchor,
-  type FoliateAnchorNavigationApi,
-} from "../src/utils/foliateAnchorNavigation";
+import * as legacyAnchorNavigation from "../src/utils/foliateAnchorNavigation";
+import type { FoliateAnchorNavigationApi } from "../src/utils/foliateAnchorNavigation";
+import * as pageAnchorNavigation from "../src/reader/modes/page/helpers/foliateAnchorNavigation";
+import * as focusAnchorNavigation from "../src/reader/modes/focus/helpers/foliateAnchorNavigation";
+import * as flowAnchorNavigation from "../src/reader/modes/flow/helpers/foliateAnchorNavigation";
+import * as narrateAnchorNavigation from "../src/reader/modes/narrate/helpers/foliateAnchorNavigation";
 
 function makeApi(overrides: Partial<FoliateAnchorNavigationApi> = {}): FoliateAnchorNavigationApi {
   return {
@@ -15,7 +17,9 @@ function makeApi(overrides: Partial<FoliateAnchorNavigationApi> = {}): FoliateAn
   };
 }
 
-describe("jumpFoliateToWordAnchor", () => {
+// READER-MODE-SEPARATION-2 (design §D.5): the same cases also run against each mode's private copy
+// (src/reader/modes/<mode>/helpers/), next to the retained legacy util.
+function anchorNavigationCases({ jumpFoliateToWordAnchor }: typeof legacyAnchorNavigation) {
   it("returns false for null or undefined API", async () => {
     expect(await jumpFoliateToWordAnchor(null, 10)).toBe(false);
     expect(await jumpFoliateToWordAnchor(undefined, 10)).toBe(false);
@@ -92,4 +96,17 @@ describe("jumpFoliateToWordAnchor", () => {
     expect(result).toBe(true);
     expect(api.highlightWordByIndex).toHaveBeenCalledWith(0, "flow", { allowMotion: true, forceMotion: true });
   });
+}
+
+describe("jumpFoliateToWordAnchor", () => {
+  anchorNavigationCases(legacyAnchorNavigation);
+});
+
+describe.each([
+  ["page", pageAnchorNavigation],
+  ["focus", focusAnchorNavigation],
+  ["flow", flowAnchorNavigation],
+  ["narrate", narrateAnchorNavigation],
+] as const)("jumpFoliateToWordAnchor (%s mode helper copy)", (_mode, anchorNavigation) => {
+  anchorNavigationCases(anchorNavigation);
 });

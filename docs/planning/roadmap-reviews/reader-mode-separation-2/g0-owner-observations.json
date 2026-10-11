@@ -1,0 +1,97 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "gate": "G0 (owner half: heard audio and residual live checks)",
+  "build": "B0 — C:\\Projects\\Blurby-artifacts\\rms2-baseline-build (see admission/baseline-build-rebuild.json)",
+  "observer": "Evan",
+  "audioDevice": "headphones",
+  "voice": "Kokoro af_bella (default)",
+  "date": "2026-10-10",
+  "launch": "live/live-run-g6.ps1 -Target b0 -Owner -Label osoneb (admission/owner-launch.ps1 refuses W since Wave B); profile C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-g6-osoneb20261010232530437",
+  "liveProfileUnchanged": "True (live-run-g6 result.json in C:UsersestraAppDataLocalTemp\blurby-reader-mode-separation-2-g6-osoneb20261010232530437-logs; window closed 2026-10-11T00:08:51Z)",
+  "items": [
+    {
+      "id": "H1",
+      "book": "G0 Bundled Meditations",
+      "check": "Narrate starts at the first word; cursor vs voice",
+      "observed": "Clicking Narrate from Flow jumped the view down the page (to the 'born on April 26th, A.D. 121' passage); on Play it jumped back up to the selected word and narration began there. Pressing Play briefly stalled the whole computer. The highlight runs ahead of the voice.",
+      "result": "known-defect:KD-CURSOR-LEAD"
+    },
+    {
+      "id": "H2",
+      "book": "G0 Bundled Meditations",
+      "check": "Narrate starts at the 8th word",
+      "observed": "After pausing, clicking the 8th word and pressing Play: narration began at the clicked word. Visual (B0 baseline, compare on F): while paused after the click, two words were highlighted at once: the clicked word (\"ancient\") and the word narration had stopped on (\"encounter\"). On Play, the highlighted word briefly snapped to the top of the window, then settled back at the top of the highlighted band.",
+      "result": "as-expected"
+    },
+    {
+      "id": "H3",
+      "book": "G0 Bundled Meditations",
+      "check": "Pause/resume continues without restart",
+      "observed": "Pause then Play (no click): narration resumed at the word directly after the one it stopped on; no sentence restart, no jump ahead. Pause -> Play without a speed change, several paragraphs further into the same chapter: under 2 s, near instant (contrast: about 35 s for a start in a new section, H5). Button state (B0 baseline, compare on F): clicking a word while paused started playback, but the button still showed Play; pressing it then showed Pause without interrupting playback, and a second press paused.",
+      "result": "as-expected"
+    },
+    {
+      "id": "H4",
+      "book": "G0 Bundled Meditations",
+      "check": "Rate 1.0 -> 1.4 -> 1.0: overlap, missing words, pauses",
+      "observed": "1.0 -> 1.4 while playing: severe wait, about 15 s (owner count) before 1.4x speech; audio distorted (warped by the speed increase; not two overlapping voices); a heavy pause mid-playback, as if it ran to the end of the prepared audio; the highlight stopped following. After the long pause it continued cleanly at 1.4x. 1.4 -> 1.0: highlight followed again, but the same wait before the switch and another pause at the end of the prepared audio. (B0 baseline, compare on F; highlight stopping after an underrun matches the scheduler bug F fixes on purpose, Decision #28a.) During playback the Blurby process used about 5.4 of 12 logical cores; no other process was busy. Result is new-problem because KD-RATE-1.4-OVERLAP is overlap and none was heard; audio quality only, so it does not contradict the matrix.",
+      "result": "new-problem"
+    },
+    {
+      "id": "H5",
+      "book": "G0 Bundled Meditations",
+      "check": "Section change during Narrate",
+      "observed": "Clicked a word in the last line of the first section (\"BOOKS\"), then Narrate, then Play: speech started after about 1 s and carried into the next section without skipping or stopping. Some jumps of the highlighted reading band. Correction: after moving into the next section and clicking \"His\" in the \"HIS FIRST BOOK\" heading, about 35 s passed before audio started. Clean retry at the First Book -> Second Book boundary (not the checklist Introduction -> First Book boundary), started on the last paragraph of the First Book with no input after Play: audio crossed into the Second Book after a 2-3 s gap, but the visual did not follow. The highlight and view stayed on the last paragraph of the First Book. This matches the B0 scheduler-underrun bug in Decision #28a (audio continues, word events stop), which F fixes on purpose; compare on F (C2).",
+      "result": "known-defect:DECISION-28A"
+    },
+    {
+      "id": "H6",
+      "book": "G0 Converted Two Chapters",
+      "check": "H1-H4 repeated on the non-EPUB",
+      "observed": "Executor drove the UI; owner listened. Start: Flow -> first word \"Chapter\" -> Narrate -> Play: about 16 s before the first audio, which began at \"Chapter\". The bottom bar rearranged on entering Narrate (speed buttons appear, Play moves). After a manual pause the reading band disappeared and the view scrolled back to the heading. 8th word: clicked \"window\" -> Play: narration began at \"window\", then a hard pause after the first stretch. Cursor lead: from about \"The north wind rested...\" the highlight ran ahead of the voice; three adjacent words (\"the birds settled\") were highlighted at once. Resume: Play after the pause continued correctly, with no repeated words. Rate 1.0 -> 1.4: distorted, possibly two voices overlapping (double speech) causing it. During playback the reading band (horizontal cursor) once stopped keeping pace, and the word highlight once ran far ahead.",
+      "result": "known-defect:KD-RATE-1.4-OVERLAP"
+    },
+    {
+      "id": "H7",
+      "book": "G0 Converted Two Chapters",
+      "check": "Chapter One -> Two during Narrate",
+      "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+      "result": "dropped"
+    },
+    {
+      "id": "H8",
+      "book": "G0 Converted Two Chapters",
+      "check": "End of book during Narrate",
+      "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+      "result": "dropped"
+    },
+    {
+      "id": "V1",
+      "book": "any",
+      "check": "Flow scroll-away pauses and Return to reading restores",
+      "observed": "not run on B0: no B0 baseline exists, so on F the bar is \"works\", not \"matches B0\" (Decision #32)",
+      "result": "not-run"
+    },
+    {
+      "id": "V2",
+      "book": "any",
+      "check": "Narrate -> Page: which word is highlighted",
+      "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+      "result": "dropped"
+    },
+    {
+      "id": "V3",
+      "book": "G0 Bundled Meditations",
+      "check": "Next-chapter arrow during Narrate",
+      "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+      "result": "dropped"
+    }
+  ],
+  "resultValues": [
+    "as-expected",
+    "known-defect:KD-CURSOR-LEAD",
+    "known-defect:KD-RATE-1.4-OVERLAP",
+    "new-problem"
+  ],
+  "stopped": "2026-10-10: owner stopped the session after H6. H7, H8, V2 and V3 were then dropped by owner ruling (Decision #32); V1 has no B0 baseline. Owner ruling: rip out narration and rebuild it from the ground up, disconnected from the other reading modes. Parts B-D of os1-owner-checklist.md were not started."
+}

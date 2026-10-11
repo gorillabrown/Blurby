@@ -1,0 +1,1969 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "slice": "A3 (independent G0 matrix, automated half)",
+  "recordedAtUtc": "2026-10-09T05:40:46.732Z",
+  "runId": "blurby-reader-mode-separation-2-a1-a3m20261009053032369",
+  "b0": "C:\\Projects\\Blurby-artifacts\\rms2-baseline-build",
+  "b0ServedFiles": 21,
+  "runHead": "63b10115e513e13e141b71927f9cdc02b5245235",
+  "viewport": {
+    "requestedContent": {
+      "width": 1100,
+      "height": 800
+    },
+    "contentBounds": {
+      "x": 498,
+      "y": 295,
+      "width": 1101,
+      "height": 801
+    }
+  },
+  "runtime": {
+    "electron": "41.1.0"
+  },
+  "kokoroSeed": {
+    "from": "C:\\Users\\estra\\AppData\\Roaming\\blurby\\models\\onnx-community\\Kokoro-82M-v1.0-ONNX",
+    "files": [
+      "config.json",
+      "onnx",
+      "onnx\\model_q4.onnx",
+      "tokenizer.json",
+      "tokenizer_config.json"
+    ]
+  },
+  "documents": [
+    {
+      "id": "g0-public-epub",
+      "kind": "native-epub",
+      "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+      "sourceSha256": null,
+      "wordCount": 80479,
+      "chapterCount": null
+    },
+    {
+      "id": "g0-converted-text",
+      "kind": "converted-import-non-epub-source",
+      "sha256": "d39f325a142c75d330211c56945a239aae57c2adefbce97b6674e041f04cafda",
+      "sourceSha256": "4a3ff25a3017e3510e8235670382ceb8420e5bf4fe2cc2c9cb72f988cfd2c0c3",
+      "wordCount": 339,
+      "chapterCount": 1
+    },
+    {
+      "id": "g0-converted-chapters",
+      "kind": "converted-import-non-epub-source",
+      "sha256": "544747da540301a8227e232c9f82435f28b341d78c2706875a23b3967faba3ef",
+      "sourceSha256": "76cfc042c9260fc834bf3f613db5a99d2880cfff7752405df092cca0aea8962f",
+      "wordCount": 1676,
+      "chapterCount": 2
+    }
+  ],
+  "device": "not recorded by the harness (owner observation records the audio device)",
+  "observer": "harness (DOM/CDP/trace) — NOT an audio observer",
+  "liveProfile": {
+    "before": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "after": [
+      {
+        "file": "library.json",
+        "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+      },
+      {
+        "file": "settings.json",
+        "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+      },
+      {
+        "file": "sync-queue.json",
+        "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+      }
+    ],
+    "unchanged": true
+  },
+  "leftoverProcesses": [],
+  "process": {
+    "graceful": true,
+    "exitCode": 0,
+    "cdpCloseExit": 0
+  },
+  "knownDefects": [
+    "KD-CURSOR-LEAD (Narrate cursor ahead of heard speech; owner 2026-09-23) — not measurable by this harness",
+    "KD-RATE-1.4-OVERLAP (historical 1.4x rate-change audio overlap) — audio-only, owner observation required"
+  ],
+  "heardAudio": "NOT VERIFIED — owner observation pending (BLOCKER(USER))",
+  "fixtures": {
+    "epub": {
+      "docId": "g0-public-epub",
+      "settings": {
+        "ttsEngine": "kokoro",
+        "ttsVoice": null,
+        "ttsRate": 1,
+        "wpm": 250
+      },
+      "consoleErrors": [
+        {
+          "at": "2026-10-09T05:32:02.655Z",
+          "method": "Runtime.exceptionThrown",
+          "text": "TypeError: Cannot destructure property 'style' of 'r' as it is null.\n    at Z (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:3578)\n    at ee.columnize (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:6154)\n    at ee.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:5260)\n    at It.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:97:2961)\n    at ResizeObserver.<anon"
+        },
+        {
+          "at": "2026-10-09T05:32:53.053Z",
+          "method": "Runtime.exceptionThrown",
+          "text": "TypeError: Cannot destructure property 'style' of 'r' as it is null.\n    at Z (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:3578)\n    at ee.columnize (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:6154)\n    at ee.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:1:5260)\n    at It.render (http://localhost:5173/assets/paginator-sOM65Gn3.js:97:2961)\n    at ResizeObserver.<anon"
+        }
+      ],
+      "rows": [
+        {
+          "case": "page-navigation-selection",
+          "status": "recorded",
+          "expected": null,
+          "actual": 0,
+          "match": null,
+          "method": null,
+          "anchorRoute": null,
+          "anchorPersisted": null,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-page-navigation-selection.png",
+          "clickTarget": null,
+          "spansByStep": [
+            "opened:0",
+            "next-page:187",
+            "previous-page:0",
+            "page-static-2s:0"
+          ],
+          "pageAutoAdvanced": true
+        },
+        {
+          "case": "focus-pacing-pause-resume",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "stop@0",
+              "stop@0",
+              "stop@0",
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-focus-pacing-pause-resume.png",
+          "displayed": [
+            "eBook",
+            "is",
+            "for",
+            "use",
+            "of",
+            "nayone",
+            "naywhere",
+            "in",
+            "the",
+            "nUited",
+            "tSates",
+            "and",
+            "most",
+            "other",
+            "parts",
+            "of",
+            "the",
+            "world",
+            "at",
+            "no"
+          ],
+          "pausedHeld": true
+        },
+        {
+          "case": "flow-follow-browse-return",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 6,
+          "match": false,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-flow-follow-browse-return.png",
+          "followFirst": 6,
+          "followLast": 6,
+          "flowWordEvents": 1,
+          "crossSectionReached": true,
+          "steps": [
+            {
+              "label": "after-wheel-same-section",
+              "play": "Pause",
+              "browsedAway": false,
+              "flowCursor": [
+                30
+              ],
+              "sections": [
+                1
+              ]
+            },
+            {
+              "label": "returned-same-section",
+              "play": "Pause",
+              "browsedAway": false,
+              "flowCursor": [
+                35
+              ],
+              "sections": [
+                1
+              ]
+            },
+            {
+              "label": "after-pagedown-cross-section",
+              "play": "Play",
+              "browsedAway": true,
+              "flowCursor": [],
+              "sections": [
+                2
+              ]
+            },
+            {
+              "label": "returned-cross-section",
+              "play": "Play",
+              "browsedAway": false,
+              "flowCursor": [
+                42
+              ],
+              "sections": [
+                1
+              ]
+            }
+          ]
+        },
+        {
+          "case": "narrate-start0-pause-resume-rate-section",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "pause@12",
+              "resume@12"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-narrate-start0-pause-resume-rate-section.png",
+          "resume": {
+            "resumeEvents": 1,
+            "startEvents": 0
+          },
+          "rates": [
+            "narrate-paused:1.0x",
+            "rate-1.4-0:1.4x",
+            "rate-1.4-1:1.4x",
+            "rate-1.4-2:1.4x",
+            "rate-1.0-0:1.0x",
+            "rate-1.0-1:1.0x",
+            "rate-1.0-2:1.0x"
+          ],
+          "section": [],
+          "chapters": [
+            "BOOKS"
+          ]
+        },
+        {
+          "case": "narrate-start7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-narrate-start7.png"
+        },
+        {
+          "case": "t-page-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "eBook",
+            "expectedWord": "eBook"
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-focus-w7.png"
+        },
+        {
+          "case": "t-page-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 6,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-flow-w7.png"
+        },
+        {
+          "case": "t-page-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "pause@12"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-narrate-w7.png"
+        },
+        {
+          "case": "t-focus-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-page-w7.png"
+        },
+        {
+          "case": "t-focus-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 6,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-flow-w7.png"
+        },
+        {
+          "case": "t-focus-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "pause@12"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-narrate-w7.png"
+        },
+        {
+          "case": "t-flow-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-page-w7.png"
+        },
+        {
+          "case": "t-flow-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "eBook",
+            "expectedWord": "eBook"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-focus-w7.png"
+        },
+        {
+          "case": "t-flow-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "start@7",
+              "first-audio@7 589ms",
+              "pause@12"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-narrate-w7.png"
+        },
+        {
+          "case": "t-narrate-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 0,
+          "match": false,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-page-w7.png"
+        },
+        {
+          "case": "t-narrate-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "eBook",
+            "expectedWord": "eBook"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-focus-w7.png"
+        },
+        {
+          "case": "t-narrate-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 6,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-flow-w7.png"
+        },
+        {
+          "case": "t-page-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "The",
+            "expectedWord": "The"
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-focus-w0.png"
+        },
+        {
+          "case": "t-page-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-flow-w0.png"
+        },
+        {
+          "case": "t-page-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "pause@2"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-narrate-w0.png"
+        },
+        {
+          "case": "t-focus-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-page-w0.png"
+        },
+        {
+          "case": "t-focus-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-flow-w0.png"
+        },
+        {
+          "case": "t-focus-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "pause@2"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-narrate-w0.png"
+        },
+        {
+          "case": "t-flow-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-page-w0.png"
+        },
+        {
+          "case": "t-flow-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "The",
+            "expectedWord": "The"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-focus-w0.png"
+        },
+        {
+          "case": "t-flow-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "start@0",
+              "first-audio@0 596ms",
+              "pause@2"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-narrate-w0.png"
+        },
+        {
+          "case": "t-narrate-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-page-w0.png"
+        },
+        {
+          "case": "t-narrate-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "The",
+            "expectedWord": "The"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-focus-w0.png"
+        },
+        {
+          "case": "t-narrate-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-flow-w0.png"
+        },
+        {
+          "case": "same-page",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-page.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": [
+            "lifecycle:stop"
+          ]
+        },
+        {
+          "case": "same-focus",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-focus.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        },
+        {
+          "case": "same-flow",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-flow.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        },
+        {
+          "case": "same-narrate",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-narrate.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        }
+      ]
+    },
+    "chapters": {
+      "docId": "g0-converted-chapters",
+      "settings": {
+        "ttsEngine": "kokoro",
+        "ttsVoice": null,
+        "ttsRate": 1,
+        "wpm": 250
+      },
+      "consoleErrors": [],
+      "rows": [
+        {
+          "case": "page-navigation-selection",
+          "status": "recorded",
+          "expected": null,
+          "actual": 12,
+          "match": null,
+          "method": null,
+          "anchorRoute": null,
+          "anchorPersisted": null,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-page-navigation-selection.png",
+          "clickTarget": {
+            "x": 93.49374961853027,
+            "y": 275.1999969482422,
+            "text": "and"
+          },
+          "singleClick": {
+            "highlighted": [
+              12
+            ],
+            "persisted": 12,
+            "spans": 838
+          },
+          "doubleClick": {
+            "highlighted": [
+              12
+            ],
+            "persisted": 12,
+            "spans": 838
+          },
+          "spansByStep": [
+            "opened:838",
+            "next-page:838",
+            "previous-page:838",
+            "single-click:838",
+            "double-click:838",
+            "page-static-2s:838"
+          ],
+          "pageAutoAdvanced": false
+        },
+        {
+          "case": "focus-pacing-pause-resume",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 209,
+          "match": false,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "stop@0",
+              "stop@0",
+              "stop@0",
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-focus-pacing-pause-resume.png",
+          "displayed": [
+            "ucrved",
+            "raound",
+            "the",
+            "iwndow",
+            "and",
+            "onbody",
+            "uhrried",
+            "at",
+            "all.",
+            "A",
+            "paper",
+            "alntern",
+            "stood",
+            "ebneath",
+            "the",
+            "lseeping",
+            "town",
+            "ebfore",
+            "the",
+            "next"
+          ],
+          "pausedHeld": true
+        },
+        {
+          "case": "flow-follow-browse-return",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 4,
+          "match": false,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-flow-follow-browse-return.png",
+          "followFirst": 4,
+          "followLast": 19,
+          "flowWordEvents": 3,
+          "crossSectionReached": true,
+          "steps": [
+            {
+              "label": "after-wheel-same-section",
+              "play": "Pause",
+              "browsedAway": false,
+              "flowCursor": [
+                30
+              ],
+              "sections": [
+                0
+              ]
+            },
+            {
+              "label": "returned-same-section",
+              "play": "Pause",
+              "browsedAway": false,
+              "flowCursor": [
+                35
+              ],
+              "sections": [
+                0
+              ]
+            },
+            {
+              "label": "after-pagedown-cross-section",
+              "play": "Play",
+              "browsedAway": true,
+              "flowCursor": [],
+              "sections": [
+                1
+              ]
+            },
+            {
+              "label": "returned-cross-section",
+              "play": "Play",
+              "browsedAway": false,
+              "flowCursor": [
+                40
+              ],
+              "sections": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "case": "narrate-start0-pause-resume-rate-section",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "pause@11",
+              "resume@11"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-narrate-start0-pause-resume-rate-section.png",
+          "resume": {
+            "resumeEvents": 1,
+            "startEvents": 0
+          },
+          "rates": [
+            "narrate-paused:1.0x",
+            "rate-1.4-0:1.4x",
+            "rate-1.4-1:1.4x",
+            "rate-1.4-2:1.4x",
+            "rate-1.0-0:1.0x",
+            "rate-1.0-1:1.0x",
+            "rate-1.0-2:1.0x"
+          ],
+          "section": [],
+          "chapters": [
+            "Chapter One: The Orchard"
+          ]
+        },
+        {
+          "case": "narrate-start7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-narrate-start7.png"
+        },
+        {
+          "case": "t-page-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "ucrved",
+            "expectedWord": "curved"
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-focus-w7.png"
+        },
+        {
+          "case": "t-page-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 4,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-flow-w7.png"
+        },
+        {
+          "case": "t-page-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "pause@10"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-narrate-w7.png"
+        },
+        {
+          "case": "t-focus-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-page-w7.png"
+        },
+        {
+          "case": "t-focus-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 4,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-flow-w7.png"
+        },
+        {
+          "case": "t-focus-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "pause@10"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-narrate-w7.png"
+        },
+        {
+          "case": "t-flow-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-page-w7.png"
+        },
+        {
+          "case": "t-flow-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "ucrved",
+            "expectedWord": "curved"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-focus-w7.png"
+        },
+        {
+          "case": "t-flow-narrate-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 7,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "narrate": {
+            "lifecycle": [
+              "start@7",
+              "first-audio@7 499ms",
+              "pause@10"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-narrate-w7.png"
+        },
+        {
+          "case": "t-narrate-page-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 0,
+          "match": false,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-page-w7.png"
+        },
+        {
+          "case": "t-narrate-focus-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "focus": {
+            "firstDisplayedText": "ucrved",
+            "expectedWord": "curved"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-focus-w7.png"
+        },
+        {
+          "case": "t-narrate-flow-w7",
+          "status": "recorded",
+          "expected": 7,
+          "actual": 4,
+          "match": false,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 7,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-flow-w7.png"
+        },
+        {
+          "case": "t-page-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "hCapter",
+            "expectedWord": "Chapter"
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-focus-w0.png"
+        },
+        {
+          "case": "t-page-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-flow-w0.png"
+        },
+        {
+          "case": "t-page-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "pause@3"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-narrate-w0.png"
+        },
+        {
+          "case": "t-focus-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-page-w0.png"
+        },
+        {
+          "case": "t-focus-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-flow-w0.png"
+        },
+        {
+          "case": "t-focus-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "pause@3"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-narrate-w0.png"
+        },
+        {
+          "case": "t-flow-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-page-w0.png"
+        },
+        {
+          "case": "t-flow-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "hCapter",
+            "expectedWord": "Chapter"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-focus-w0.png"
+        },
+        {
+          "case": "t-flow-narrate-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "narrate-lifecycle-start",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Narrate mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "narrate": {
+            "lifecycle": [
+              "start@0",
+              "first-audio@0 506ms",
+              "pause@3"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-narrate-w0.png"
+        },
+        {
+          "case": "t-narrate-page-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "page-highlighted",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Page mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-page-w0.png"
+        },
+        {
+          "case": "t-narrate-focus-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "match": null,
+          "method": "focus-first-displayed-text (Focus exposes no index; text evidence only)",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Focus mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "focus": {
+            "firstDisplayedText": "hCapter",
+            "expectedWord": "Chapter"
+          },
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-focus-w0.png"
+        },
+        {
+          "case": "t-narrate-flow-w0",
+          "status": "recorded",
+          "expected": 0,
+          "actual": 0,
+          "match": true,
+          "method": "flow-first-word-trace-event",
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 0,
+          "afterSwitch": {
+            "mode": "Flow mode",
+            "play": "Play",
+            "visibleCursorCount": 1
+          },
+          "staleEffectCount": 0,
+          "persistedAfter": 0,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-flow-w0.png"
+        },
+        {
+          "case": "same-page",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-page.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": [
+            "lifecycle:stop"
+          ]
+        },
+        {
+          "case": "same-focus",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-focus.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        },
+        {
+          "case": "same-flow",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-flow.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        },
+        {
+          "case": "same-narrate",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "match": null,
+          "method": null,
+          "anchorRoute": "page(open) -> flow(paused) -> click word (hard-selection)",
+          "anchorPersisted": 7,
+          "afterSwitch": null,
+          "staleEffectCount": null,
+          "persistedAfter": null,
+          "narrate": {
+            "lifecycle": [
+              "stop@0"
+            ]
+          },
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-narrate.png",
+          "modeUnchanged": true,
+          "cursorsUnchanged": true,
+          "newTraceEvents": []
+        }
+      ]
+    }
+  },
+  "retainedArtifacts": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-manifest.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-result.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-electron.out.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-electron.err.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-matrix-epub.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-page-navigation-selection.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-focus-pacing-pause-resume.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-flow-follow-browse-return.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-narrate-start0-pause-resume-rate-section.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-narrate-start7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-page-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-focus-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-flow-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-t-narrate-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-page.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-focus.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-flow.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-epub-same-narrate.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3-20261009053032369-matrix-chapters.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-page-navigation-selection.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-focus-pacing-pause-resume.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-flow-follow-browse-return.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-narrate-start0-pause-resume-rate-section.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-narrate-start7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-narrate-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-page-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-focus-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-flow-w7.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-page-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-focus-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-flow-narrate-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-page-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-focus-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-t-narrate-flow-w0.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-page.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-focus.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-flow.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3-20261009053032369-chapters-same-narrate.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3g-20261009054227210-manifest.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3g-20261009054227210-result.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3g-20261009054227210-electron.err.log",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3g-20261009054227210-matrix-epub.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-page-select-text-page.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-flow-wheel-margin.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-narrate-section-natural.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-narrate-next-chapter-paused.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a3g-20261009054227210-matrix-chapters.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-page-select-text-page.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-flow-wheel-margin.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-narrate-section-natural.png",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-narrate-next-chapter-paused.png"
+  ],
+  "gapIteration": {
+    "runId": "blurby-reader-mode-separation-2-a1-a3g20261009054227210",
+    "liveProfileUnchanged": true,
+    "process": {
+      "graceful": true,
+      "exitCode": -1073740791,
+      "cdpCloseExit": 0
+    },
+    "fixtures": {
+      "epub": [
+        {
+          "case": "gap-page-select-text-page",
+          "status": "recorded",
+          "expected": 12,
+          "actual": 12,
+          "highlighted": [
+            12
+          ],
+          "persisted": 12,
+          "clickTarget": {
+            "x": 803.8812561035156,
+            "y": 48.80000114440918,
+            "text": "of"
+          },
+          "sectionTransitionEvent": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-page-select-text-page.png"
+        },
+        {
+          "case": "gap-flow-wheel-margin",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "browsedAway": false,
+          "pausedByBrowse": false,
+          "returnedCursor": [
+            26
+          ],
+          "sectionTransitionEvent": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-flow-wheel-margin.png"
+        },
+        {
+          "case": "gap-narrate-section-natural",
+          "status": "recorded",
+          "expected": 176,
+          "actual": 7,
+          "sectionLastWord": 186,
+          "sectionTransitionEvent": null,
+          "chapters": [
+            "BOOKS"
+          ],
+          "audioWordsAfterSectionEnd": [],
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-narrate-section-natural.png"
+        },
+        {
+          "case": "gap-narrate-next-chapter-paused",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "sectionTransitionEvent": null,
+          "chapters": [
+            "BOOKS",
+            "BOOKS"
+          ],
+          "chapterChanged": false,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-epub-gap-narrate-next-chapter-paused.png"
+        }
+      ],
+      "chapters": [
+        {
+          "case": "gap-page-select-text-page",
+          "status": "recorded",
+          "expected": 0,
+          "actual": null,
+          "highlighted": [],
+          "persisted": 0,
+          "clickTarget": {
+            "x": -930.5062503814697,
+            "y": 275.1999969482422,
+            "text": "and"
+          },
+          "sectionTransitionEvent": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-page-select-text-page.png"
+        },
+        {
+          "case": "gap-flow-wheel-margin",
+          "status": "recorded",
+          "expected": 7,
+          "actual": null,
+          "browsedAway": false,
+          "pausedByBrowse": false,
+          "returnedCursor": [
+            26
+          ],
+          "sectionTransitionEvent": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-flow-wheel-margin.png"
+        },
+        {
+          "case": "gap-narrate-section-natural",
+          "status": "recorded",
+          "expected": 827,
+          "actual": 827,
+          "sectionLastWord": 837,
+          "sectionTransitionEvent": null,
+          "chapters": [
+            "Chapter One: The Orchard",
+            "Chapter Two: The River"
+          ],
+          "audioWordsAfterSectionEnd": [
+            838,
+            839,
+            840,
+            841,
+            842,
+            843,
+            844,
+            845,
+            846,
+            847
+          ],
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-narrate-section-natural.png"
+        },
+        {
+          "case": "gap-narrate-next-chapter-paused",
+          "status": "error",
+          "error": "word 7 not in loaded sections",
+          "expected": 7,
+          "actual": null,
+          "sectionTransitionEvent": null,
+          "screenshot": "docs/planning/roadmap-reviews/reader-mode-separation-2/admission/screenshots/a3g-20261009054227210-chapters-gap-narrate-next-chapter-paused.png"
+        }
+      ]
+    }
+  },
+  "classification": {
+    "captured": [
+      "12 ordered transitions x words 7 and 0 x EPUB and converted-text: destination entered paused, 1 visible cursor, 0 stale old-owner trace effects",
+      "4 same-mode selections x 2 fixtures: mode and cursors unchanged",
+      "Page word selection (real mouse click) on a text page: EPUB 12->12, chapters 12->12; Page does not auto-advance",
+      "Focus active pacing, pause holds, resume continues (text evidence; Focus exposes no index)",
+      "Flow active follow (first word at line start: 7->6 EPUB, 7->4 chapters; 0->0), PageDown cross-section browse-away pauses Flow, return pill restores",
+      "Narrate exact start at 0 and 7 on both fixtures; first audio 499-596 ms; pause/resume = 1 resume, 0 cold starts; rate UI 1.0->1.4->1.0",
+      "Narrate natural section transition on the converted two-chapter fixture (start 827, chapter One->Two, audio words 838+)"
+    ],
+    "observations": [
+      "OBS-A3-1 Narrate(paused)->Page at word 7: Page highlight lands on 0 while the persisted anchor stays 7 (both fixtures)",
+      "OBS-A3-2 Focus pause anchor read back via Page after pacing: chapters fixture highlight 209 after ~20 displayed words from 7; EPUB shows no highlight (persisted 7)",
+      "OBS-A3-3 Same-Page selection emits lifecycle:stop (stopAllModes -> narration.stop)",
+      "OBS-A3-4 Mouse wheel (frame center and margin) neither browses away nor pauses Flow on B0; PageDown does",
+      "OBS-A3-5 Next chapter (playing or paused Narrate, EPUB) did not change the chapter within 2-5 s",
+      "OBS-A3-6 B0 emits no transition:section trace event on a natural Narrate section change",
+      "OBS-A3-7 EPUB opens in Page on the image-only cover (no word spans); Page spans exist on text pages",
+      "OBS-A2-2 recurred: shutdown exit 0xC0000409 after the quit flush (2 of 4 runs)",
+      "Renderer exception once per EPUB run: paginator columnize 'Cannot destructure property style of r as it is null'"
+    ],
+    "notCapturedByAutomation": [
+      "Heard audio (all Narrate rows) — owner observation required (SRL-070)",
+      "KD-RATE-1.4-OVERLAP audible check at 1.0->1.4->1.0",
+      "KD-CURSOR-LEAD audible check",
+      "EPUB Narrate section transition and book transition",
+      "Flow same-section browse-away by wheel and return"
+    ],
+    "a3Outcome": "Automated half recorded; G0 remains BLOCKED on the owner checklist (g0-owner-checklist.md). Stopped on evidence that needs the owner, not on harness failure."
+  },
+  "parentToolCalls": {
+    "budget": 35,
+    "usedAtRecording": 27,
+    "plannedRemaining": [
+      "28 checkpoint commit + push"
+    ],
+    "ledger": "1 fixture; 2-3 launcher edits (converted fixtures, Kokoro seed); 4 matrix.mjs; 5 driver matrix support; 6 run (launcher refused: seed path); 7 inspect; 8 seed path fix; 9 run (content wait timeouts); 10 owner-launch.ps1; 11 wait/inspect; 12-15 Page span investigation; 16 anchor-via-Flow rework; 17 run; 18 wait (cover page timeouts); 19 screenshot; 20 open predicate fix; 21 run both fixtures; 22 wait; 23 g0-matrix.json; 24 failed-step inspection; 25 gap cases; 26 gap run; 27 this record"
+  }
+}

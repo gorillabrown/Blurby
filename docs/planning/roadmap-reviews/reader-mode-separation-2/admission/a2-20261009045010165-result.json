@@ -1,0 +1,98 @@
+{
+  "runId": "blurby-reader-mode-separation-2-a1-a220261009045010165",
+  "label": "a2",
+  "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165",
+  "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-a220261009045010165-logs",
+  "b0": "C:\\Projects\\Blurby-artifacts\\rms2-baseline-build",
+  "head": "5f0608b6ef8be190d5a29ef4ddf8f58f8ee3c58c",
+  "startedAt": "2026-10-09T04:50:10.2517185Z",
+  "steps": [
+    {
+      "at": "2026-10-09T04:50:10.9150502Z",
+      "step": "preview",
+      "data": {
+        "pid": 59232,
+        "up": true
+      }
+    },
+    {
+      "at": "2026-10-09T04:50:12.4830625Z",
+      "step": "renderer-ready",
+      "data": {
+        "electronExited": false,
+        "ready": true
+      }
+    },
+    {
+      "at": "2026-10-09T04:50:12.6619275Z",
+      "step": "visibility",
+      "data": {
+        "probe": "{\"visibilityState\":\"visible\",\"hidden\":false,\"hasFocus\":true,\"inner\":[1102,802]}"
+      }
+    },
+    {
+      "at": "2026-10-09T04:50:37.5978750Z",
+      "step": "capture",
+      "data": {
+        "run": "a2-epub-flow",
+        "exitCode": 0
+      }
+    },
+    {
+      "at": "2026-10-09T04:51:03.2292556Z",
+      "step": "capture",
+      "data": {
+        "run": "a2-text-flow",
+        "exitCode": 0
+      }
+    },
+    {
+      "at": "2026-10-09T04:51:09.9554959Z",
+      "step": "electron-close",
+      "data": {
+        "graceful": true,
+        "exitCode": -1073740791,
+        "cdpCloseExit": 0
+      }
+    },
+    {
+      "at": "2026-10-09T04:51:09.9582024Z",
+      "step": "preview-stop",
+      "data": {
+        "pid": 59232
+      }
+    }
+  ],
+  "liveBefore": [
+    {
+      "file": "library.json",
+      "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+    },
+    {
+      "file": "settings.json",
+      "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+    },
+    {
+      "file": "sync-queue.json",
+      "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+    }
+  ],
+  "electronPid": 10164,
+  "leftoverProcesses": [],
+  "liveAfter": [
+    {
+      "file": "library.json",
+      "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+    },
+    {
+      "file": "settings.json",
+      "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+    },
+    {
+      "file": "sync-queue.json",
+      "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+    }
+  ],
+  "liveProfileUnchanged": true,
+  "finishedAt": "2026-10-09T04:51:12.2543995Z"
+}

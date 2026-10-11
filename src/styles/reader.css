@@ -608,3 +608,58 @@
 .reader-apa-source-link:hover {
   text-decoration: underline;
 }
+
+/* Speed dialog (READER-MODE-SEPARATION-2 speed amendment): trigger + modal slider in the bottom bar */
+.rbb-speed-trigger {
+  padding: 2px 8px;
+  border: 1px solid var(--border, #444);
+  border-radius: 3px;
+  background: var(--bg-card, #222);
+  color: var(--text-dim, #888);
+  font-size: 12px;
+  font-family: var(--mono, monospace);
+  cursor: pointer;
+  min-width: 52px;
+}
+.rbb-speed-trigger:focus-visible {
+  outline: 2px solid var(--accent, #4488ff);
+  outline-offset: 2px;
+}
+.rbb-speed-dialog {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  margin-bottom: 6px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border, #444);
+  border-radius: 6px;
+  white-space: nowrap;
+}
+.rbb-speed-title {
+  font-size: 12px;
+  color: var(--text-dim, #888);
+}
+.rbb-speed-slider {
+  width: 180px;
+  accent-color: var(--accent);
+}
+.rbb-speed-value {
+  font-size: 12px;
+  font-family: var(--mono, monospace);
+  color: var(--text);
+  min-width: 170px;
+}
+.rbb-speed-close {
+  padding: 2px 8px;
+  border: 1px solid var(--border, #444);
+  border-radius: 3px;
+  background: transparent;
+  color: var(--text-dim, #888);
+  font-size: 11px;
+  cursor: pointer;
+}

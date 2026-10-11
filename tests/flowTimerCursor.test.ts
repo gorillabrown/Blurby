@@ -28,7 +28,7 @@ import {
   FLOW_TIMER_GLOW_PX,
   FLOW_LINE_COMPLETE_FLASH_MS,
 } from "../src/constants";
-import { FlowScrollEngine, FlowProgress } from "../src/utils/FlowScrollEngine";
+import { FlowScrollEngine, FlowProgress } from "../src/reader/modes/flow/helpers/FlowScrollEngine";
 
 // ── CSS helpers ───────────────────────────────────────────────────────────────
 

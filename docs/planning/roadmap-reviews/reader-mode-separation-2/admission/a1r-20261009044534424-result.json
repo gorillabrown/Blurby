@@ -1,0 +1,103 @@
+{
+  "runId": "blurby-reader-mode-separation-2-a1-r20261009044534424",
+  "profile": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424",
+  "logs": "C:\\Users\\estra\\AppData\\Local\\Temp\\blurby-reader-mode-separation-2-a1-r20261009044534424-logs",
+  "b0": "C:\\Projects\\Blurby-artifacts\\rms2-baseline-build",
+  "head": "a1a28a0658bcfddb85e8d2e23d9a7172ec65aaba",
+  "startedAt": "2026-10-09T04:45:34.5078450Z",
+  "steps": [
+    {
+      "at": "2026-10-09T04:45:35.7105779Z",
+      "step": "preview",
+      "data": {
+        "pid": 18780,
+        "up": true
+      }
+    },
+    {
+      "at": "2026-10-09T04:45:37.8339879Z",
+      "step": "renderer-ready",
+      "data": {
+        "electronExited": false,
+        "ready": true
+      }
+    },
+    {
+      "at": "2026-10-09T04:45:48.7383060Z",
+      "step": "capture",
+      "data": {
+        "exitCode": 0
+      }
+    },
+    {
+      "at": "2026-10-09T04:45:49.0453597Z",
+      "step": "electron-close",
+      "data": {
+        "exitCode": 0,
+        "cdpCloseExit": 0,
+        "graceful": false
+      }
+    },
+    {
+      "at": "2026-10-09T04:45:49.0460269Z",
+      "step": "preview-stop",
+      "data": {
+        "pid": 18780
+      }
+    }
+  ],
+  "liveBefore": [
+    {
+      "file": "library.json",
+      "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+    },
+    {
+      "file": "settings.json",
+      "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+    },
+    {
+      "file": "sync-queue.json",
+      "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+    }
+  ],
+  "electronPid": 9400,
+  "leftoverProcesses": [],
+  "liveAfter": [
+    {
+      "file": "library.json",
+      "sha256": "26481c1370d5e15a12dde73dede1d951148d9557468977500abef63619e135d6"
+    },
+    {
+      "file": "settings.json",
+      "sha256": "3e518dda37cfb85fb47d88c4ec4ab59aa3c4723a8fc323cdb68bfc5c13df893f"
+    },
+    {
+      "file": "sync-queue.json",
+      "sha256": "342dd888a0dfb1b9d547a303f17ab647e1d98aef1585a56144c2d1d6b86d1ac1"
+    }
+  ],
+  "liveProfileUnchanged": true,
+  "profileWrites": [
+    {
+      "file": "library.json",
+      "bytes": 2808,
+      "modifiedUtc": "2026-10-09T04:45:48.9295693Z"
+    },
+    {
+      "file": "settings.json",
+      "bytes": 377,
+      "modifiedUtc": "2026-10-09T04:45:38.2664698Z"
+    },
+    {
+      "file": "sync-queue.json",
+      "bytes": 125,
+      "modifiedUtc": "2026-10-09T04:45:38.2664698Z"
+    },
+    {
+      "file": "sync-state.json",
+      "bytes": 164,
+      "modifiedUtc": "2026-10-09T04:45:37.1859723Z"
+    }
+  ],
+  "finishedAt": "2026-10-09T04:45:51.3892387Z"
+}

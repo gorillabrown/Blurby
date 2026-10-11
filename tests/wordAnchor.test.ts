@@ -436,37 +436,55 @@ describe("Group E: BUG regressions", () => {
 
 // ── Group F: Persistent anchor integration ──────────────────────────────────
 
+// READER-MODE-SEPARATION-2 (OC-5): hard selection, mode advance and book-open positioning left
+// ReaderContainer at E1; each mode runtime owns its own copy.
+const MODE_RUNTIMES = ["page", "focus", "flow", "narrate"] as const;
+const readModeSource = (mode: string, file: string) => readFileSync(`src/reader/modes/${mode}/${file}`, "utf8");
+
 describe("persistent anchor integration policy", () => {
   it("documents that hard clicks must update the persistent anchor before any mode start", () => {
-    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
-
-    expect(source).toContain("usePersistentReadingAnchor");
-    expect(source).toContain("commitSharedWordAnchor(resolvedClickWordIndex, \"hard-selection\"");
-    expect(source).toContain("persistentWordIndexRef");
+    for (const mode of MODE_RUNTIMES) {
+      const runtime = readModeSource(mode, "ModeRuntime.ts");
+      expect(runtime).toContain("usePersistentReadingAnchor"); // OC-5a
+      expect(runtime).toContain("this.commitShared(resolved, \"hard-selection\", input.cfi)"); // OC-5b
+      const anchor = readModeSource(mode, "helpers/usePersistentReadingAnchor.ts");
+      expect(anchor).toContain("persistentWordIndexRef"); // OC-5a
+      expect(anchor).toContain("state.canonicalWordIndex = wordIndex;"); // supplementary code-level check
+    }
   });
 
   it("documents that mode advancement writes the persistent anchor without immediate disk writes", () => {
-    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+    // OC-5a: the Focus and Flow runtimes' engine word advance.
+    for (const mode of ["focus", "flow"] as const) {
+      const source = readModeSource(mode, "ModeRuntime.ts");
 
-    expect(source).toContain("commitPersistentWordIndex(idx, \"mode-advance\"");
-    expect(source).toContain("persist: false");
-    expect(source).toContain("publishState: false");
-    expect(source).toContain("navigate: false");
+      expect(source).toContain("commitPersistentWordIndex(idx, \"mode-advance\"");
+      expect(source).toContain("persist: false");
+      expect(source).toContain("publishState: false");
+      expect(source).toContain("navigate: false");
+    }
   });
 
   it("documents that hard clicks clear browse-away and hide the jump-back affordance", () => {
-    const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
+    for (const mode of MODE_RUNTIMES) {
+      const source = readModeSource(mode, "ModeRuntime.ts");
 
-    expect(source).toContain("foliateApiRef.current?.clearUserBrowsing?.()");
-    expect(source).toContain("setIsBrowsedAway(false)");
-    expect(source).toContain("shouldClearBrowseAwayOnAnchorEvent({ type: \"hard-selection\"");
+      expect(source).toContain("this.surface.clearUserBrowsing();"); // OC-5b
+      expect(source).toContain("s.isBrowsedAway = false;"); // OC-5b
+      expect(source).toContain("shouldClearBrowseAwayOnAnchorEvent({ type: \"hard-selection\""); // OC-5a
+    }
   });
 
   it("documents that stale CFI cannot override persistent word on Foliate startup", () => {
     const source = readFileSync("src/components/ReaderContainer.tsx", "utf8");
 
-    expect(source).toContain("resolveBookOpenInitialCfi");
-    expect(source).toContain("initialCfi={initialFoliateCfi}");
+    for (const mode of MODE_RUNTIMES) {
+      const runtime = readModeSource(mode, "ModeRuntime.ts");
+      expect(runtime).toContain("resolveBookOpenInitialCfi"); // OC-5a
+      // OC-5b: each runtime resolves its view's initial location from the handoff; its binding passes it.
+      expect(runtime).toContain("this.initialCfi = resolveBookOpenInitialCfi({ persistentWordIndex: handoff.canonicalWordIndex, cfi: handoff.cfi });");
+      expect(readModeSource(mode, "useModeBindings.ts")).toContain("initialCfi: runtime.initialCfi,");
+    }
     expect(source).not.toContain("initialCfi={activeDoc.cfi || null}");
   });
 });

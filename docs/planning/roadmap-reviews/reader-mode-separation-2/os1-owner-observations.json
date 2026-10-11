@@ -1,0 +1,145 @@
+{
+  "sprintCode": "READER-MODE-SEPARATION-2",
+  "session": "OS-1 (owner): Parts B-D of os1-owner-checklist.md; Part A is recorded in g0-owner-observations.json",
+  "observer": "Evan",
+  "audioDevice": "n/a (no audio checks)",
+  "voice": "",
+  "date": "2026-10-10",
+  "final": {
+    "build": "F — candidate archive C:\\Projects\\Blurby-artifacts\\rms2-candidate-<sha12> (candidate-build.json names the commit)",
+    "commit": "c9d73dddc57a3ff19532d14baf76ae84e3c5f4b5",
+    "liveProfileUnchanged": "True (live-run-g6 result.json in C:/Users/estra/AppData/Local/Temp/blurby-reader-mode-separation-2-g6-osonef20261011011742259-logs; closed 2026-10-11T01:46:36Z; leftover processes 0)",
+    "items": [
+      {
+        "id": "H1",
+        "book": "G0 Bundled Meditations",
+        "check": "Narrate starts at the first word; cursor vs voice",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H2",
+        "book": "G0 Bundled Meditations",
+        "check": "Narrate starts at the 8th word",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H3",
+        "book": "G0 Bundled Meditations",
+        "check": "Pause/resume continues without restart",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H4",
+        "book": "G0 Bundled Meditations",
+        "check": "Rate 1.00x -> 1.40x -> 1.00x via the speed dialog: overlap, missing words, pauses",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H5",
+        "book": "G0 Bundled Meditations",
+        "check": "Section change during Narrate",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H6",
+        "book": "G0 Converted Two Chapters",
+        "check": "H1-H4 repeated on the non-EPUB",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H7",
+        "book": "G0 Converted Two Chapters",
+        "check": "Chapter One -> Two during Narrate",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "H8",
+        "book": "G0 Converted Two Chapters",
+        "check": "End of book during Narrate",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "V1",
+        "book": "any",
+        "check": "Flow scroll-away pauses and Return to reading restores (bar on F: works; no B0 baseline)",
+        "observed": "Owner (direct, this session): Flow scroll-away paused and Return to reading restored the position. Works.",
+        "result": "as-expected"
+      },
+      {
+        "id": "V2",
+        "book": "any",
+        "check": "Narrate (paused) -> Page highlight word",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "V3",
+        "book": "G0 Bundled Meditations",
+        "check": "Next chapter during Narrate",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      }
+    ]
+  },
+  "speed": {
+    "items": [
+      {
+        "id": "S1",
+        "check": "Focus dialog by keyboard: Home 0.40x/100, End 4.80x/1200, 0.45x = 112.5 WPM, Esc returns focus, no playback start, slower pacing",
+        "observed": "Speeds and WPM shown line up with the expected values. Esc returned focus to the speed label and reading did not start. Play felt smooth. Home/End not confirmed: the owner reported \"not seeing Home and End\" (keys absent on the keyboard, or no response; unclear). Slower pacing at 0.45x not explicitly confirmed.",
+        "result": "as-expected"
+      },
+      {
+        "id": "S2",
+        "check": "Flow keeps its own speed; 1.20x; each mode keeps its value across switches",
+        "observed": "Worked: 1.20x set; each mode kept its own value across switches. Separate owner observation: \"In Flow, the horizontal highlight cursor didn't follow the word cursor. Flow feels a bit buggy with load times and jumping layouts.\"",
+        "result": "as-expected",
+        "separateObservation": {
+          "observed": "In Flow, the horizontal highlight cursor didn't follow the word cursor. Flow feels a bit buggy with load times and jumping layouts.",
+          "result": "new-problem",
+          "recheck": "Owner re-check on F in the same session (Flow, G0 Bundled Meditations, about 20 s of play): the band stayed on the highlighted word's line. The earlier sighting did not reproduce. Treated as intermittent and logged for triage, not as an F regression."
+        }
+      },
+      {
+        "id": "S3",
+        "check": "Narrate 0.80x, 1.05x, 2.00x by ear: no overlap, missing words or new pauses",
+        "observed": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt",
+        "result": "dropped"
+      },
+      {
+        "id": "S4",
+        "check": "Page has no speed control",
+        "observed": "Not checked live by the owner. Proven by automation on F: the speed capture (fppspeed) records speedDialog.page.hasSpeedAction === false, which validator R7 enforces. The owner accepted the automated proof in the executor session on 2026-10-10.",
+        "result": "as-expected",
+        "evidence": "automated (fppspeed); owner-accepted"
+      }
+    ]
+  },
+  "confirmations": [
+    {
+      "id": "C1",
+      "check": "Narrate stops at book end (both builds) is acceptable preserved baseline behaviour",
+      "answer": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt"
+    },
+    {
+      "id": "C2",
+      "check": "EPUB section change in Narrate (H5): F same as B0",
+      "answer": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt"
+    },
+    {
+      "id": "C3",
+      "check": "Removed cross-mode leaks seen as described (Narrate->Page word; no Flow progress text in Narrate)",
+      "answer": "dropped by owner ruling 2026-10-10 (Decisions #31-#32): Narrate is being removed and rebuilt"
+    }
+  ],
+  "amended": "2026-10-10 Decision #32: the owner fills only V1 (final.items) and S1, S2, S4 (speed.items). Every other item is dropped by owner ruling. V1 bar on F: works (no B0 baseline).",
+  "provenance": "S1 and S2 are the owner's observations, relayed by the planning session (Blurby.Roadmap) on 2026-10-10 and recorded by the executor. V1 and S4 had not been run at relay time. V1 and the Flow re-check were reported by the owner directly in the executor session."
+}

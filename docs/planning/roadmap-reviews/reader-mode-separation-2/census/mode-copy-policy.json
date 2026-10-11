@@ -1,0 +1,403 @@
+{
+  "_comment": "Judgment input for import-graph.mjs. Every runtime-reachable module must appear in exactly one of: modeEntrypoints (a mode absorbs/starts from it), allowedShared, shellOnly, narrateTtsPort, or modeHelperUsers (helpers reached through a mode walk). policyGaps in dependencies.json lists anything unclassified.",
+  "modeEntrypoints": {
+    "page": [
+      "src/modes/PageMode.ts",
+      "src/components/FoliatePageView.tsx",
+      "src/hooks/usePersistentReadingAnchor.ts",
+      "src/utils/persistentReadingAnchor.ts",
+      "src/utils/startWordIndex.ts",
+      "src/utils/foliateAnchorNavigation.ts"
+    ],
+    "focus": [
+      "src/modes/FocusMode.ts",
+      "src/reader/modes/FocusModeAdapter.ts",
+      "src/hooks/useReader.ts",
+      "src/components/ReaderView.tsx",
+      "src/components/PausedTextView.tsx",
+      "src/components/FoliatePageView.tsx",
+      "src/hooks/usePersistentReadingAnchor.ts",
+      "src/utils/persistentReadingAnchor.ts",
+      "src/utils/startWordIndex.ts",
+      "src/utils/foliateAnchorNavigation.ts"
+    ],
+    "flow": [
+      "src/modes/FlowMode.ts",
+      "src/reader/modes/FlowModeAdapter.ts",
+      "src/hooks/useFlowScrollSync.ts",
+      "src/utils/FlowScrollEngine.ts",
+      "src/utils/chunkReadingVisualState.ts",
+      "src/components/FoliatePageView.tsx",
+      "src/hooks/usePersistentReadingAnchor.ts",
+      "src/utils/persistentReadingAnchor.ts",
+      "src/utils/startWordIndex.ts",
+      "src/utils/foliateAnchorNavigation.ts"
+    ],
+    "narrate": [
+      "src/reader/modes/NarrateModeAdapter.ts",
+      "src/hooks/useNarrationSync.ts",
+      "src/hooks/useNarrationCaching.ts",
+      "src/utils/chunkReadingVisualState.ts",
+      "src/components/FoliatePageView.tsx",
+      "src/hooks/usePersistentReadingAnchor.ts",
+      "src/utils/persistentReadingAnchor.ts",
+      "src/utils/startWordIndex.ts",
+      "src/utils/foliateAnchorNavigation.ts"
+    ]
+  },
+  "layoutAbsorption": {
+    "page": {
+      "src/modes/PageMode.ts": "ModeRuntime.ts",
+      "src/components/FoliatePageView.tsx": "FoliateView.tsx",
+      "src/hooks/useReadingModeInstance.ts": "ModeRuntime.ts (page branch of createInstance)",
+      "src/components/ReaderContainer.tsx": "useModeBindings.ts (onRelocate soft-selection/progress, onLoad restore, onWordClick page path)",
+      "src/hooks/useDocumentLifecycle.ts": "ModeState.ts (resumeAnchorRef/userExplicitSelectionRef page policy)",
+      "src/hooks/useFoliateSync.ts": "useModeBindings.ts (browse-away polling)",
+      "src/styles/page-reader.css": "mode.css",
+      "src/styles/reader.css": "mode.css (page selectors only)"
+    },
+    "focus": {
+      "src/modes/FocusMode.ts": "ModeRuntime.ts",
+      "src/reader/modes/FocusModeAdapter.ts": "ModeRuntime.ts",
+      "src/hooks/useReader.ts": "ModeRuntime.ts (RSVP display state; its rAF tick is only started by StandaloneReader)",
+      "src/components/ReaderView.tsx": "ModeView.tsx",
+      "src/components/PausedTextView.tsx": "TextView.tsx",
+      "src/components/FoliatePageView.tsx": "FoliateView.tsx (scrolled surface under the Focus overlay)",
+      "src/hooks/useReaderMode.ts": "useModeBindings.ts (startFocus, captureCurrentAnchor focus branch)",
+      "src/hooks/useReadingModeInstance.ts": "ModeRuntime.ts (focus branch of createInstance)",
+      "src/hooks/useDocumentLifecycle.ts": "ModeState.ts (RSVP throttled progress save, resume refs)",
+      "src/hooks/useFoliateSync.ts": "useModeBindings.ts (section navigation, browse-away polling)",
+      "src/styles/reader.css": "mode.css (focus/RSVP selectors)"
+    },
+    "flow": {
+      "src/modes/FlowMode.ts": "ModeRuntime.ts",
+      "src/reader/modes/FlowModeAdapter.ts": "ModeRuntime.ts",
+      "src/hooks/useFlowScrollSync.ts": "useModeBindings.ts",
+      "src/components/FoliatePageView.tsx": "FoliateView.tsx",
+      "src/hooks/useReaderMode.ts": "useModeBindings.ts (startFlow targetMode=flow)",
+      "src/hooks/useReadingModeInstance.ts": "ModeRuntime.ts (flow branch incl. pause-on-miss bridge and pendingResumeRef)",
+      "src/hooks/useDocumentLifecycle.ts": "ModeState.ts (resume refs; cross-book timer cleanup)",
+      "src/hooks/useFoliateSync.ts": "useModeBindings.ts (section navigation, browse-away polling)",
+      "src/styles/flow.css": "mode.css",
+      "src/styles/page-reader.css": "mode.css (foliate flow-surface selectors)"
+    },
+    "narrate": {
+      "src/reader/modes/NarrateModeAdapter.ts": "ModeRuntime.ts",
+      "src/hooks/useReaderMode.ts": "ModeRuntime.ts (installNarrateTruthSync, syncFoliateNarrationCursor, startFlow targetMode=narrate)",
+      "src/hooks/useNarrationSync.ts": "useModeBindings.ts (TTS settings bridge)",
+      "src/hooks/useNarrationCaching.ts": "useModeBindings.ts (TTS cache bridge; full-book extraction result crosses as a value)",
+      "src/components/FoliatePageView.tsx": "FoliateView.tsx (narrate scroll-follow, displacement browse-away)",
+      "src/components/ReaderContainer.tsx": "useModeBindings.ts (applyNarrationActiveWord/ChunkBoundary/SegmentStart)",
+      "src/hooks/useDocumentLifecycle.ts": "ModeState.ts (narrationStateFlushRafRef/narrationStatePendingIdxRef)",
+      "src/hooks/useFoliateSync.ts": "useModeBindings.ts (section-end fallback wiring)",
+      "src/styles/page-reader.css": "mode.css (narrate cursor/chunk selectors)"
+    }
+  },
+  "modeHelperUsers": {
+    "src/utils/FlowScrollEngine.ts": [
+      "flow"
+    ],
+    "src/utils/silenceAwareCursor.ts": [],
+    "src/utils/rhythm.ts": [
+      "focus",
+      "flow"
+    ],
+    "src/utils/pauseDetection.ts": [
+      "focus",
+      "flow"
+    ],
+    "src/utils/einkErgonomics.ts": [
+      "focus"
+    ],
+    "src/utils/foliateHelpers.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateWordWrapping.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateWordOffsets.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateStyles.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateLayout.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateWordHighlight.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/wordPositionIndex.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/chunkReadingVisualState.ts": [
+      "flow",
+      "narrate"
+    ],
+    "src/utils/foliateAnchorNavigation.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/startWordIndex.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/utils/persistentReadingAnchor.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ],
+    "src/hooks/usePersistentReadingAnchor.ts": [
+      "page",
+      "focus",
+      "flow",
+      "narrate"
+    ]
+  },
+  "copyNotes": {
+    "src/utils/FlowScrollEngine.ts": "Page/Focus/Narrate FoliateView copies import only the string constant FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY (+ a type) from this module; inline that constant (or move it to the type contract) instead of copying the engine. Narrate today never runs this engine (useFlowScrollSync effect 1 requires readingMode==='flow'); its retargetActiveModeToWord jumpToWord call targets a stopped Flow engine.",
+    "src/utils/silenceAwareCursor.ts": "Only caller is FoliatePageView's legacy overlay-cursor rAF effect, guarded by `flowMode || readingMode !== \"flow\" || !flowPlaying`; ReaderContainer passes flowMode=true whenever readingMode is flow, so the branch is unreachable. Not copied; retire in Wave E. confidence: low (verify with G0 Flow trace).",
+    "src/utils/rhythm.ts": "Focus (FocusMode, useReader) and Flow (FlowMode, half-duration pauses) pacing. rhythm imports pauseDetection, which the TTS pipeline also uses; each mode's copy brings its own helpers/pauseDetection.ts.",
+    "src/utils/pauseDetection.ts": "Pulled in by rhythm.ts copies. The TTS port keeps the original for narration.",
+    "src/utils/einkErgonomics.ts": "Focus display (buildEinkFocusPhrase); the shell keeps nextEinkGhostingLoad via useEinkController.",
+    "src/utils/chunkReadingVisualState.ts": "Flow (publishFlowVisualState, syncLevel wpm) and Narrate (ReaderContainer applyNarration*, syncLevel word/chunk) publish into one shared chunkReadingVisualState today.",
+    "src/hooks/usePersistentReadingAnchor.ts": "Spec item: mode-specific anchor policy may land in ModeState.ts instead; listed as a helper copy so every touched source has an exact destination.",
+    "src/utils/foliateHelpers.ts": "Contains module-level BLOCK_TAGS (new Set, never mutated); each copy owns its own.",
+    "src/utils/wordPositionIndex.ts": "Class instance is created once per FoliatePageView today (shared by all modes); each mode's FoliateView must construct its own."
+  },
+  "allowedShared": {
+    "src/types.ts": {
+      "category": "type contract",
+      "justification": "Every importer is type-only or elided at emit; no runtime exports reached."
+    },
+    "src/types/chunkReading.ts": {
+      "category": "type contract",
+      "justification": "Pure type declarations; all edges type-only."
+    },
+    "src/modes/ModeInterface.ts": {
+      "category": "type contract",
+      "justification": "Interface/type declarations only; all edges type-only."
+    },
+    "src/reader/surface/SurfaceCommand.ts": {
+      "category": "type contract",
+      "justification": "Type union only; no runtime importer."
+    },
+    "src/types/narration.ts": {
+      "category": "type contract",
+      "justification": "Section boundary/BookWordArray types are document contracts.",
+      "confidence": "low",
+      "reason": "File also exports runtime functions: findSectionForWord/globalToLocal (document section math, runtime-imported by useFoliateSync) and createInitialNarrationState/narrationReducer (TTS state machine used by useNarration). Spec calls it type-only; split the runtime functions out (section math -> document preparation, reducer -> TTS port) before G1 can treat it as a type contract."
+    },
+    "src/types/ttsCache.ts": {
+      "category": "type contract",
+      "justification": "TTS cache record types (reached via TTS port only)."
+    },
+    "src/constants.ts": {
+      "category": "read-only tokens",
+      "justification": "Exported primitives/frozen values; no module-level mutation found by the census.",
+      "confidence": "low",
+      "reason": "Constants are not one of the five spec categories (types, immutable document preparation, theme tokens/passive UI, third-party, infrastructure ports). Either amend to allow read-only constants or copy each mode's constants into its directory; do not retune either way."
+    },
+    "src/utils/text.ts": {
+      "category": "immutable document/content preparation",
+      "justification": "tokenizeWithMeta/detectChapters/countWords/focusChar are pure functions over document text; MINOR_WORDS is a never-mutated Set."
+    },
+    "src/utils/naturalChunks.ts": {
+      "category": "immutable document/content preparation",
+      "justification": "buildNaturalChunks is a pure function of the token array."
+    },
+    "src/utils/segmentWords.ts": {
+      "category": "immutable document/content preparation",
+      "justification": "Pure Intl.Segmenter tokenization used by foliate word extraction."
+    },
+    "src/components/ErrorBoundary.tsx": {
+      "category": "passive UI",
+      "justification": "Generic React error boundary; no reader state."
+    },
+    "src/components/ProgressBar.tsx": {
+      "category": "passive UI",
+      "justification": "Presentational; props only."
+    },
+    "src/components/WpmGauge.tsx": {
+      "category": "passive UI",
+      "justification": "Presentational WPM gauge used by Focus view; props only."
+    },
+    "src/components/HighlightMenu.tsx": {
+      "category": "passive UI",
+      "justification": "Presentational context menu; local open/position state only."
+    },
+    "src/components/DefinitionPopup.tsx": {
+      "category": "passive UI",
+      "justification": "Presentational popup; fetches definition via IPC, no mode state."
+    },
+    "src/components/NotePopover.tsx": {
+      "category": "passive UI",
+      "justification": "Presentational popover (reached only through dead PageReaderView)."
+    },
+    "src/hooks/useFocusTrap.ts": {
+      "category": "passive UI",
+      "justification": "Accessibility focus trap; DOM-local."
+    },
+    "src/assets/blurby-icon.png": {
+      "category": "passive UI",
+      "justification": "Static asset."
+    },
+    "src/styles/themes.css": {
+      "category": "read-only theme tokens",
+      "justification": "Theme custom properties; spec keeps global theme tokens shared."
+    },
+    "src/styles/base.css": {
+      "category": "read-only theme tokens",
+      "justification": "Global base styles/tokens.",
+      "confidence": "low",
+      "reason": "Not yet audited selector-by-selector for mode classes; Wave B-D must move any mode selectors out."
+    },
+    "src/utils/dualSourceDiag.ts": {
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Gated diagnostic logger; no reader state.",
+      "confidence": "low",
+      "reason": "Diagnostics is not one of the named ports (settings/persistence/document/audio); needs an explicit allowance or per-mode sinks."
+    },
+    "src/utils/narrateDiagnostics.ts": {
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Diagnostic event ring used by FoliatePageView/ReaderContainer/TTS.",
+      "confidence": "low",
+      "reason": "Holds process-global mutable module state (_events, _snapshots) written by every mode's FoliatePageView path; spec forbids module singleton state for modes. Needs an explicit diagnostics-port allowance."
+    },
+    "src/utils/ttsEvalTrace.ts": {
+      "category": "infrastructure port (diagnostics)",
+      "justification": "Eval-trace sink factory; created once in ReaderContainer.",
+      "confidence": "low",
+      "reason": "Diagnostics not a named port category."
+    },
+    "src/utils/ttsProviderRegistry.ts": {
+      "category": "infrastructure port (audio)",
+      "justification": "Provider registry snapshot (reached from narrateDiagnostics and settings UI)."
+    }
+  },
+  "shellOnly": {
+    "src/components/ReaderContainer.tsx": "Document shell + toolbar + router host; mode branches move out (see layoutAbsorption).",
+    "src/reader/useReaderModeOrchestrator.ts": "Becomes the thin public router (spec item 4).",
+    "src/hooks/useReaderMode.ts": "Split across focus/flow/narrate runtimes; nothing of it remains shared.",
+    "src/hooks/useReadingModeInstance.ts": "Replaced by mode-local factories.",
+    "src/hooks/useDocumentLifecycle.ts": "Document load/session statistics stay in the shell; mode refs/timers move out.",
+    "src/hooks/useFoliateSync.ts": "Chapter charOffset sync stays in shell; mode effects split (see layoutAbsorption).",
+    "src/hooks/useKeyboardShortcuts.ts": "Routes reader keys through the router; also hosts library/global hooks.",
+    "src/components/ReaderBottomBar.tsx": "Toolbar consuming immutable snapshots.",
+    "src/hooks/useProgressTracker.ts": "Document progress/backtrack/goal accounting.",
+    "src/hooks/useEinkController.ts": "E-ink ghosting/refresh overlay state.",
+    "src/hooks/useReadingGoals.ts": "Reading goal persistence.",
+    "src/utils/readingGoals.ts": "Pure goal math.",
+    "src/utils/queue.ts": "Library queue selection; Flow/Narrate cross-book continuation should raise a value event to the shell instead of opening the next document themselves.",
+    "src/contexts/SettingsContext.tsx": "Settings provider (settings infrastructure port source).",
+    "src/contexts/ToastContext.tsx": "Toast provider.",
+    "src/components/MenuFlap.tsx": "Library/settings chrome.",
+    "src/components/SettingsMenu.tsx": "Settings chrome.",
+    "src/components/ReadingQueue.tsx": "Library chrome.",
+    "src/components/HotkeyCoach.tsx": "Hint chrome.",
+    "src/components/ThemeProvider.tsx": "Theme chrome.",
+    "src/components/BacktrackPrompt.tsx": "Shell prompt (progress tracker).",
+    "src/components/ReturnToReadingPill.tsx": "Shell pill; visibility derives from active-mode snapshot.",
+    "src/components/EinkRefreshOverlay.tsx": "Shell overlay.",
+    "src/components/settings/CacheSizeDisplay.tsx": "Settings UI.",
+    "src/components/settings/CloudSyncSettings.tsx": "Settings UI.",
+    "src/components/settings/ConnectorsSettings.tsx": "Settings UI.",
+    "src/components/settings/HelpSettings.tsx": "Settings UI.",
+    "src/components/settings/HotkeyMapSettings.tsx": "Settings UI.",
+    "src/components/settings/KokoroStatusSection.tsx": "Settings UI.",
+    "src/components/settings/LayoutSettings.tsx": "Settings UI.",
+    "src/components/settings/LibraryLayoutSettings.tsx": "Settings UI.",
+    "src/components/settings/MossNanoStatusSection.tsx": "Settings UI.",
+    "src/components/settings/NarrationDataSection.tsx": "Settings UI.",
+    "src/components/settings/PauseSettingsSection.tsx": "Settings UI.",
+    "src/components/settings/PocketTtsStatusSection.tsx": "Settings UI.",
+    "src/components/settings/PronunciationOverridesEditor.tsx": "Settings UI.",
+    "src/components/settings/QwenRuntimeSetupSection.tsx": "Settings UI.",
+    "src/components/settings/QwenStatusSection.tsx": "Settings UI.",
+    "src/components/settings/ReadingGoalsSettings.tsx": "Settings UI.",
+    "src/components/settings/SpeedReadingSettings.tsx": "Settings UI.",
+    "src/components/settings/TTSSettings.tsx": "Settings UI.",
+    "src/components/settings/ThemeSettings.tsx": "Settings UI.",
+    "src/components/settings/TtsEngineSelector.tsx": "Settings UI.",
+    "src/components/settings/qwenStatusPresentation.ts": "Settings UI.",
+    "src/components/settings/ttsPreview.ts": "Settings UI voice preview (owns its own audio player).",
+    "src/components/settings/useKokoroSettingsStatus.ts": "Settings UI.",
+    "src/components/settings/useMossNanoSettingsStatus.ts": "Settings UI.",
+    "src/components/settings/usePocketTtsSettingsStatus.ts": "Settings UI.",
+    "src/hooks/useQwenPrototypeStatus.ts": "Settings UI.",
+    "src/utils/narrationPortability.ts": "Settings UI import/export.",
+    "src/styles/index.css": "Global stylesheet entry (@import list).",
+    "src/styles/reader.css": "Reader chrome + mode selectors; mode selectors move to each mode.css (see layoutAbsorption).",
+    "src/styles/page-reader.css": "Foliate surface + page/flow/narrate selectors; mode selectors move to each mode.css.",
+    "src/styles/flow.css": "Flow selectors move to flow/mode.css.",
+    "src/styles/library.css": "Library chrome styles.",
+    "src/styles/keyboard.css": "Keyboard overlay styles.",
+    "src/styles/onboarding.css": "Onboarding styles.",
+    "src/styles/tts-settings.css": "Settings styles."
+  },
+  "narrateTtsPort": {
+    "src/hooks/useNarration.ts": "TTS implementation behind Narrate's port (spec item 5).",
+    "src/hooks/narration/kokoroStrategy.ts": "TTS strategy.",
+    "src/hooks/narration/mossNanoStrategy.ts": "TTS strategy (dormant engine).",
+    "src/hooks/narration/pocketTtsStrategy.ts": "TTS strategy (dormant engine).",
+    "src/hooks/narration/qwenStrategy.ts": "TTS strategy (retired engine).",
+    "src/hooks/narration/qwenStreamingStrategy.ts": "TTS strategy (retired engine).",
+    "src/hooks/narration/webSpeechStrategy.ts": "TTS strategy.",
+    "src/utils/audioScheduler.ts": "Audio scheduler behind the port (spec item 5).",
+    "src/utils/audioPlayer.ts": "Audio playback.",
+    "src/utils/audio/segmentKokoroChunk.ts": "Audio chunking.",
+    "src/utils/audio/tempoStretch.ts": "Audio tempo.",
+    "src/utils/generationPipeline.ts": "TTS generation pipeline.",
+    "src/utils/narrationPlanner.ts": "TTS planning.",
+    "src/utils/backgroundCacher.ts": "TTS background cache (instantiated by useNarrationCaching).",
+    "src/utils/ttsCache.ts": "TTS cache.",
+    "src/utils/ttsCacheIdentity.ts": "TTS cache keys.",
+    "src/utils/timingMetadataStore.ts": "TTS timing truth store.",
+    "src/utils/segmentNormalizer.ts": "TTS text normalization.",
+    "src/utils/spokenWordFilter.ts": "TTS spoken-word filter.",
+    "src/utils/streamAccumulator.ts": "TTS streaming (retired engine).",
+    "src/utils/pronunciationOverrides.ts": "TTS pronunciation overrides.",
+    "src/utils/voiceSelection.ts": "TTS voice selection.",
+    "src/utils/mediaSessionBridge.ts": "OS media session bridge for narration.",
+    "src/utils/highlightSyncController.ts": "Narration highlight-sync policy inside useNarration.",
+    "src/utils/kokoroStatus.ts": "Engine status.",
+    "src/utils/qwenStatus.ts": "Engine status (retired).",
+    "src/utils/narratePerf.ts": "TTS perf marks.",
+    "src/utils/kokoroRatePlan.ts": "Rate plan; also read by shell speed UI (ReaderBottomBar/ReaderContainer adjustSpeed)."
+  },
+  "retireNotCopy": {
+    "src/components/PageReaderView.tsx": "Imported by ReaderContainer but never rendered: the binding is unused, so tsc/esbuild elide the import and the component is absent from the production bundle. ReaderContainer renders only FoliatePageView (+ ReaderView overlay) and shows a re-import error for non-EPUB docs. Spec asks to copy it into each TextView.tsx; recommend retiring instead (scope amendment).",
+    "src/components/ScrollReaderView.tsx": "Same as PageReaderView: unused import in ReaderContainer, elided, not in the production bundle.",
+    "src/components/FlowText.tsx": "Only importer is ScrollReaderView (dead).",
+    "src/components/VirtualScrollText.tsx": "Only importer is ScrollReaderView (dead).",
+    "src/utils/FlowCursorController.ts": "Only importer is PageReaderView (dead). useReadingModeInstance comments still describe it as the non-EPUB Flow driver.",
+    "src/reader/anchors/useCurrentWordAnchor.ts": "No importer in src/ (tests only). Not wired into production.",
+    "src/modes/index.ts": "Barrel with no importer in src/ (CLEANUP-MODE-BARREL-1 scope)."
+  }
+}
