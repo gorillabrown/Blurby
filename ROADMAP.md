@@ -352,7 +352,7 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
     1. `npm test -- tests/commandPaletteRoutes.test.ts tests/seenBatcher.test.ts` exits 0.
     2. **Positive control (LL-138):** after Task 1's tests are added and before any production edit, `tests/commandPaletteRoutes.test.ts` fails on exactly the defects listed in *Why (A)* (bare `onOpenSettings()` ×3, `"text-size"`, the missing `reading-goals` entry, the three missing titles), and `tests/seenBatcher.test.ts` fails only because `src/utils/seenBatcher.ts` doesn't exist yet. Record the output in the close-out.
     3. `CommandPalette.tsx` contains no `onOpenSettings()` call without an argument, and no `"text-size"`.
-    4. `src/constants.ts` exports `LIBRARY_SEEN_DWELL_MS = 1000` and `LIBRARY_SEEN_FLUSH_DELAY_MS = 400`, placed directly after `NEW_LIBRARY_DAYS` (line 457). `LibraryView.tsx` contains no literal `1000`.
+    4. `src/constants.ts` exports `LIBRARY_SEEN_DWELL_MS = 1000` and `LIBRARY_SEEN_FLUSH_DELAY_MS = 400`, placed directly after `NEW_LIBRARY_DAYS` (line 474 on `main` @ `7d688f39`; it was 457 before the separation merge). `LibraryView.tsx` contains no literal `1000`.
     5. `npm test` exits 0 with no new skips, and `npm run build` exits 0.
     6. `git diff --name-only refs/remotes/origin/main` lists exactly the paths in the staging plan, plus `docs/governance/close-outs/Timing.LIBRARY-SETTINGS-FIX-1.jsonl` if kept (LL-136).
 - **Effort:** S.
@@ -382,7 +382,7 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
     - The observer effect (still keyed on `filteredLibrary`) calls `batcher.enter(docId)` when intersecting and `batcher.leave(docId)` otherwise. Its cleanup calls `observer.disconnect()` and `batcher.cancelPending()`, never `dispose()`, because a library update re-runs this effect.
     - A separate mount-only effect returns `() => batcher.dispose()`, which flushes on unmount.
     - `flushSeenDocs` becomes `() => batcher.flush()`. The three existing navigation call sites (lines 202-220) stay as they are.
-  - **`src/constants.ts`:** after line 457 add `export const LIBRARY_SEEN_DWELL_MS = 1000;` and `export const LIBRARY_SEEN_FLUSH_DELAY_MS = 400;`, each with a one-line comment.
+  - **`src/constants.ts`:** directly after `NEW_LIBRARY_DAYS` (line 474 on `7d688f39`) add `export const LIBRARY_SEEN_DWELL_MS = 1000;` and `export const LIBRARY_SEEN_FLUSH_DELAY_MS = 400;`, each with a one-line comment.
 - **Tests (Task 1, written before any production edit):**
   - **New `tests/commandPaletteRoutes.test.ts`** (text-read style, as in `tests/einkFoundation.test.ts`, reading files as `utf-8`):
     - (a) every `onOpenSettings(` call in `CommandPalette.tsx` has a string argument;
@@ -405,7 +405,7 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
   - Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree and push (Rule 5b).
 - **Failure handling:**
   - If the positive control fails differently from Done-when 2, fix the tests first; never edit production code in Task 1.
-  - If merging `src/constants.ts` conflicts (it is in the separation branch's diff, but that branch's hunks are at lines 13–30 and 250–270), keep both sides; never drop separation's lines.
+  - The separation epic merged on 2026-10-11, so `src/constants.ts` no longer races that branch. If a merge onto a newer `main` conflicts there, keep both sides and report it.
   - If an existing library test fails because seen state is now saved earlier, report the exact test and stop; do not weaken it.
   - Retry ceiling: two corrections per task, then BLOCKER(USER).
   - Rollback: `git revert -m 1 <merge>`.
