@@ -2717,3 +2717,32 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-088 — status (2026-10-10-2, 2026-10-11)
 **Status:** Observation - not promoted (roadmap review 2026-10-10-2): already covered by ROADMAP standing rule 37 (SRL-089); held in 2 close-outs
+
+### LL-139 — Mode-separation specs must be cut from an import-graph census, not a file inventory (READER-MODE-SEPARATION-2, 2026-10-09)
+
+**Verdict:** A Full Spec written from a source inventory listed dead views as copy targets, called a runtime-bearing file "type-only", missed a live second entry point (the standalone reader window in App.tsx), and required byte-for-byte parity with behaviour that included the very cross-owner effects the separation removes. All of this surfaced only at Wave A, through a TypeScript-resolver import graph and a production-path trace recorder.
+**Evidence:** READER-MODE-SEPARATION-2 Decision #3 (Q-A..Q-G scope rulings before the first Wave B edit); staging fold-in 4.
+**Recommendation:** Before declaring copy or move targets or parity gates, run an import-graph census from every real entry point and tag the effects the change is meant to remove. Write the parity gate as "baseline minus the mechanically recomputed removed-effect set, with the removed set asserted absent".
+**Applies to:** Spec authoring for refactors that split or move runtime code, especially the reader modes.
+**Status:** Observation
+**Related:** LL-118 (trace imports bottom-up), LL-128 (verify targets before create).
+
+### LL-140 — Hear the baseline before automating parity for it (READER-MODE-SEPARATION-2, 2026-10-10)
+
+**Verdict:** The epic preserved Narrate exactly. The owner's first listening of the baseline was moved to the end of the run for throughput (Decision #13). Three later decisions and repeated live runs went into proving Narrate parity. Twenty minutes into that listening, the owner ruled Narrate unfit and ordered it rebuilt (Decision #31), and the Narrate parity evidence lost its consumer.
+**Evidence:** READER-MODE-SEPARATION-2 Decisions #13, #31 and #32; `g0-owner-observations.json` H1–H6; staging fold-in 10.
+**Recommendation:** When an item preserves a user-facing behaviour the owner has not recently experienced, take a short owner observation of the baseline, or ask "preserve or replace?", before investing in parity automation. An owner gate may move late for throughput only when its verdict cannot change scope.
+**Applies to:** Epics and refactors that preserve user-facing behaviour; owner gates; narration and other perceptual features.
+**Status:** Observation
+**Related:** SRL-070 (heard audio needs the owner).
+
+### LL-141 — Automated control of the Electron app cannot reach some live behaviour; keep an owner-observed route and a throttle check (READER-MODE-SEPARATION-2, 2026-10-10)
+
+**Verdict:** GUI automation of the Electron app covered positions, transitions and cursor counts, but could not trigger every live behaviour. A synthetic mouse wheel never fired Flow's scroll-away (OBS-A3-4), and one unattended rerun was throttled after the display slept. Only a throttle check caught that and refused the results. The owner-observed checklist route closed both gaps (V1 run by the owner).
+**Evidence:** READER-MODE-SEPARATION-2 `g0-owner-checklist.md` V1 note; the B0 rerun discarded for throttling (Decision #30 context); the charter's escalation trigger "manual route after one recovery attempt".
+**Recommendation:** Specs with live UI gates name, up front, which behaviours need a human (real wheel and trackpad input, perceptual checks) and keep a short owner-observed checklist for them. Unattended live runs include a throttling or visibility check that invalidates results taken while the window was throttled.
+**Applies to:** Live UI verification of the Electron app, unattended epics with live gates, and owner checklists.
+**Status:** Observation
+
+### LL-136 — status (pointer-closeout, 2026-10-11)
+**Status:** Observation — recurred a third time (READER-MODE-SEPARATION-2, 2026-10-11). This time the registry refused `virtuoso` the time log in `closeOuts`; it was not an exact-path fence. Promotion candidate for the next roadmap review, together with a registry permission fix.

@@ -4845,3 +4845,523 @@ Run `npm test -- tests/pythonSidecarEngine.test.js tests/mossNanoEngine.test.js 
 - LL-088 / standing rule 37 (SRL-089) — Task 1 commits before Task 2; one implementer; disjoint from TERMINAL-BACKFILL-1.
 - LL-130 — if the run moves the Monday item to In Flight, it calls `mutation-plan` only to execute and confirms every plan.
 - LL-131 — considered; this item deletes no module, so no census applies.
+
+---
+
+<!-- Archived 2026-10-11 by /pointer-closeout READER-MODE-SEPARATION-2; close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md. The specification as it stood at ce740582, followed by its governance staging memo (fold-ins 1-11) verbatim. -->
+
+<a id="reader-mode-separation-2"></a>
+
+#### READER-MODE-SEPARATION-2 — Separate Page, Focus, Flow, and Narrate runtimes *(position 1 — Full Spec)*
+
+- **Specification state:** Full Spec; U1–U8 passed in the 2026-09-23 review. Execution gates remain unrun. Admission stopped twice on 2026-09-23 (Wave A 40-action ceiling; A1 EPIPE); see the Mid-Dispatch Amendments below.
+- **Path:** epic. Five serial gated waves, three admission slices, a manual-G0 fallback and a deferred speed-slider task make this multi-session by construction. Every stop so far needed a fresh dispatch to resume. `/next-pointer` routes it to `/epic`, which charters it with one completion condition: G0–G6 pass on one candidate and the speed-dialog amendment is verified against the final candidate. Owner-approved at the 2026-10-08 review.
+- **Deadline:** `policy.roadmap.deadlines.mode-separation` in `Virtuoso/workspace-layout.json` (set 2026-10-08; scope: this item). Read the date from the policy, not from copies.
+- **What:** Page, Focus, Flow, and Narrate run independently, with private behavior/state/rendering and matching public contracts; changing one implementation cannot change another through shared reader behavior.
+- **Why / user problem:** The owner reports repeated cross-mode regressions. The existing three concrete adapters leave runtime ownership in shared hooks and views; Narrate still routes through Flow. Sources: [owner charter](docs/planning/roadmap-reviews/2026-09-23-mode-separation.md#what-the-previous-isolation-actually-achieved), [ISO-1B findings](docs/governance/close-outs/CloseOut.READER-ISO-1B.2026-05-25.md#findings), [ISO-1D interpretation](docs/governance/close-outs/CloseOut.READER-ISO-1D.2026-05-26.md#interpretation), [ISO-1E findings](docs/governance/close-outs/CloseOut.READER-ISO-1E.2026-05-27.md#findings).
+- **Primary lane:** Reader Engine. Narrate consumes a narrow TTS port; it owns its reading surface independently of Flow.
+- **Prerequisites:** READER-ISO-1A, READER-ISO-1B, READER-ISO-1C, READER-ISO-1D, READER-ISO-1E, all Completed in Monday. Waves A→B→C→D→E run serially. A failed wave blocks its successors.
+- **Effort:** XL, five gated waves; engineering complexity estimate, not a duration promise. No calibrated hours/session conversion exists.
+- **Owners:** planner maintains this specification; implementation agent performs extraction; reviewer checks contract, behavior parity and evidence; repository operator stages exact paths and commits under registry Git policy. Shared write surfaces are serialized.
+- **Source baseline:** source checked against main @ `cd384b78cd5325e96429fe867c8b080ce1b39bb8` on 2026-09-23, package 1.75.1. [Source inventory and readiness evidence](docs/planning/roadmap-reviews/2026-09-23-readiness.md). Phase C explicitly approved by owner on 2026-09-23.
+- **Done when:** all gates G0–G6 below pass for the same final candidate commit, four independent runtime/view trees are in production use, and the old shared behavior is unreachable. The parent stays incomplete until Wave E passes.
+
+##### Product requirements and success measures
+
+**P0:** private state, lifecycle, timers, callbacks, render controllers and mode CSS; copy-only transitions; zero stale side effects; current user behavior retained; independent conformance and live gates. **P1:** no additional features admitted. **P2:** future consolidation may reuse the matching contract after a separate owner decision; no shared behavior base is introduced now.
+
+User stories: a Page reader can select/navigate without starting playback; a Focus reader can change pacing without changing Flow/Narrate; a Flow reader can browse and return without audio services; a Narrate listener can pause/resume and change sections without executing Flow's runtime. A maintainer can edit one mode and prove that the other three retain their baseline.
+
+Leading measures: zero disallowed dependency edges, zero unowned mutable resources, zero inactive-owner writes, 12/12 directed transitions and 4/4 same-mode cases passing. Lagging measure: zero new regressions in the recorded four-mode acceptance matrix at close-out. No historical defect is counted as repaired merely because extraction finishes.
+
+##### Mid-Dispatch Amendment — 2026-09-23 (speed dialog; folded in 2026-10-08)
+
+*Decision: Type 3 — Pivot Advance, owner-approved. Source: `docs/governance/close-outs/Memo.READER-MODE-SEPARATION-2.GovernanceStaging.2026-09-23.md` fold-in 2 (on `eb/reader-mode-separation-2`).*
+
+The owner approves this explicit exception to P1's additional-feature exclusion. Page is purely manual and exposes no speed control. In Focus, Flow and Narrate, clicking the current displayed speed opens a dialog containing a slider. The displayed and selectable value is a multiplier with 0.05x increments. Focus and Flow use a fixed 250 WPM reference for 1.00x, preserving their 100–1200 WPM bounds as 0.40x–4.80x; the resulting 12.5 WPM increments are retained without integer rounding. Narrate permits 0.80x–2.00x. If an existing interface cannot represent a fractional WPM value, record that exact incompatibility and obtain a scoped decision before changing the representation or rounding policy.
+
+Implement this feature only after the structural separation candidate has demonstrated G0–G6 parity. Preserve that candidate and its evidence independently. Then declare exact implementation/test paths and a bounded serial task for the slider amendment; verify it separately and re-run the affected regression, live-mode and final-candidate gates. The original four-mode baseline remains the structural comparison. The speed feature cannot be used to explain away a parity failure. The parent remains incomplete until both structural separation and this amendment are verified against the final candidate.
+
+Acceptance checklist:
+
+1. Page has neither a displayed speed action nor automatic playback; existing Page Space no-op remains intact.
+2. For each of Focus, Flow and Narrate, clicking its displayed speed opens the slider dialog; slider changes update the selected mode's display and effective rate.
+3. Focus/Flow enumerate exactly 89 selectable values from 0.40x through 4.80x inclusive. Every value maps to `multiplier * 250` WPM, including 0.45x = 112.5 WPM, 1.00x = 250 WPM and 4.80x = 1200 WPM. No out-of-range or silently rounded selection.
+4. Narrate enumerates exactly 25 selectable values from 0.80x through 2.00x inclusive in 0.05x steps; verify endpoints and an intermediate 1.05x value through its audio rate port and the live UI.
+5. Changing one mode's speed does not mutate another mode's settings or private state; opening/closing the dialog does not change position or start paused playback. Preserve each mode's existing play/pause semantics.
+6. Verify keyboard-operable slider/dialog interaction and a visible current value. Record live observations and behavioral assertions for the approved speed differences separately from extraction parity.
+
+Narrate cursor lead, heard-word synchronization, reload catch-up and rate-overlap repair remain follow-on sync work, as the owner expressly directed. This amendment does not authorize those repairs, a storage-format migration, or new shortcuts.
+
+**Excluded:** new shortcuts (Page Space remains a no-op in this stage), TTS latency tuning, rate-overlap repair, reducer/subscriber cleanup, dormant engines, extension work, content-format expansion, deduplication, and changes to document/settings storage formats. Keep known cursor-lead and 1.4x overlap defects recorded for the blocked successors.
+
+##### Implementation detail — contracts and sharing boundary
+
+1. Extend `src/reader/modes/ReaderModeAdapter.ts` with a versioned public runtime contract while retaining the seven existing lifecycle actions and snapshot semantics. Add value-only document/handoff types in new `src/reader/document/ReaderDocumentSnapshot.ts`, infrastructure port types in new `src/reader/ports/ReaderPorts.ts`, and the owner-checking broker in new `src/reader/ports/createReaderPorts.ts`. Values include document identity, document generation, mode session, canonical word/token position, optional CFI, selected intent/resume position, and settings snapshot. Arrays/objects are deeply copied into readonly value records; sets cross as copied number arrays and are rebuilt privately (freezing a Set alone is insufficient); DOM nodes, refs, callbacks and mutable service objects are never handoff payloads.
+2. Each mode exports a factory and matching lifecycle API from its own `index.ts`. Use the same file layout under `src/reader/modes/page/`, `focus/`, `flow/`, and `narrate/`: `index.ts`, `ModeRuntime.ts`, `ModeState.ts`, `useModeBindings.ts`, `ModeView.tsx`, `FoliateView.tsx`, `TextView.tsx`, `surface.ts`, `mode.css`. These are **new targets**, not existing files. Matching structure does not require identical pacing or display behavior. Mode-specific helper copies use `helpers/<original-file-basename>` below that mode's directory; the Wave A manifest expands every selected copy to an exact path. The existing-site table is the permitted source set.
+3. Private state includes highlighted/playback cursor, hard selection, soft/browse position, resume intent, playing state, pending extraction/section/book resumes, scroll engine, word-position index, visual chunk state, animation frames, timers and subscription cleanup. Each instance owns its own resources. No sibling imports, live sibling refs, module singleton state, shared behavioral hook/base class, shared mode CSS selectors, or process-global mode event bus.
+4. Rewrite `src/reader/useReaderModeOrchestrator.ts` as the thin public router. It selects the current factory, publishes immutable toolbar snapshots, routes user commands and performs explicit handoffs. On change: export a value snapshot; invalidate the outgoing session; stop/destroy and detach its view; construct/mount the incoming mode from copied values. Same-mode selection is a no-op preserving its active anchor and timers. Remove `toCompatibilityMode`; Narrate always has its own identity. Existing Flow→Narrate and Narrate→Flow user commands become explicit router transitions preserving current start/pause semantics.
+5. Shared code is restricted to type contracts, immutable document/content preparation, read-only theme tokens/passive UI, third-party libraries, and narrow settings/persistence/document/audio infrastructure ports. The broker owns only active identity and external side effects, not anchor priority, cursor advancement or scroll policy. Audio access is issued only to Narrate. A mode may use its own service instances; it cannot pass those instances to a sibling. `useNarration.ts`, its strategies and `audioScheduler.ts` remain the TTS implementation behind Narrate's port.
+6. Both runtime callbacks and broker calls must carry the captured `(documentId, documentGeneration, mode, session)`. Reject work whose tuple is stale before any state/DOM/persistence/audio write, including after an awaited operation resolves. Invalidate before cancellation; cancellation alone is insufficient. A stopped or destroyed session cannot restart audio, advance position, scroll, or persist. Repeated stop/destroy is idempotent.
+7. Share immutable document bytes/token metadata only. Every mounted mode receives its own Foliate element, DOM refs and layout caches. Copy the relevant project-owned Foliate/view/highlight/follow code into each mode; move mode behavior out of global styles into the mode root and into its own injected EPUB styles. Theme tokens may remain shared. Future consolidation requires a separate decision after independent parity evidence.
+
+##### Existing edit sites and destination ownership
+
+All paths below exist in the reviewed source; the destination tree above is planned. Move behavior with its refs/callbacks and tests. Legacy entry points may forward during Waves B–D only; Wave E must prove they are absent from the production dependency graph.
+
+| Existing source / symbols | Disposition |
+|---|---|
+| `src/components/ReaderContainer.tsx`: mode/play state, `applyNarrationActiveWord`, `applyNarrationChunkBoundary`, `applyNarrationSegmentStart`, rendering branches and hook wiring | Retain document shell, toolbar and public router wiring; move every behavioral owner into the appropriate mode |
+| `src/hooks/useReaderMode.ts`: `startFocus`, `startFlow`, `stopAllModes`, `captureCurrentAnchor`, truth-sync RAF/cursor refs and selection priority | Split into private runtimes/bindings; remove Narrate-through-startFlow and the shared ref bag |
+| `src/hooks/useReadingModeInstance.ts`: `createInstance`, `pendingResumeRef`, `buildConfig` and mode callbacks | Replace with mode-local factories; no central factory callback may clear another mode's truth subscription |
+| `src/hooks/useDocumentLifecycle.ts`: resume/explicit-selection refs, narration RAF cleanup, Focus progress timer, cross-book timer | Move mode state/timers locally; document load/session statistics stay in the shell via guarded value events |
+| `src/hooks/usePersistentReadingAnchor.ts`, `src/reader/anchors/useCurrentWordAnchor.ts`, `src/utils/startWordIndex.ts`, `src/utils/persistentReadingAnchor.ts` | Copy mode-specific anchor policy into each `ModeState.ts` / local helpers; persistence port accepts active-owner values only |
+| `src/modes/PageMode.ts`, `FocusMode.ts`, `FlowMode.ts`, `ModeInterface.ts`, `index.ts`; `src/reader/modes/FocusModeAdapter.ts`, `FlowModeAdapter.ts`, `NarrateModeAdapter.ts` | Relocate/copy each engine/adapter into its owner; type-only declarations may remain shared; introduce the missing Page runtime contract implementation |
+| `src/hooks/useReader.ts`, `src/components/ReaderView.tsx` | Focus owns its pacing/display implementation and animation handles |
+| `src/hooks/useFlowScrollSync.ts`, `src/utils/FlowScrollEngine.ts`, `src/utils/FlowCursorController.ts`, `src/components/FlowText.tsx` | Flow owns its timer/scroll paths; Narrate gets independent copies of required passive-follow behavior; no Flow runtime is imported by Narrate |
+| `src/hooks/useFoliateSync.ts`, `src/hooks/useNarrationSync.ts`, `src/hooks/useNarrationCaching.ts` | Split surface/section behavior per mode; TTS subscriptions/cache bridge belong only to Narrate; content-loading results cross as values |
+| `src/components/FoliatePageView.tsx`, `src/components/PageReaderView.tsx`, `src/components/ScrollReaderView.tsx`, `src/components/VirtualScrollText.tsx`, `src/components/PausedTextView.tsx` | Copy the relevant EPUB/non-EPUB view implementation into each mode's `FoliateView.tsx` / `TextView.tsx`; remove foreign mode flags and callbacks |
+| `src/utils/foliateStyles.ts`, `src/utils/foliateWordHighlight.ts`, `src/utils/foliateAnchorNavigation.ts`, `src/utils/wordPositionIndex.ts`, `src/utils/chunkReadingVisualState.ts`, `src/utils/silenceAwareCursor.ts`, `src/utils/foliateHelpers.ts`, `src/utils/foliateWordWrapping.ts`, `src/utils/foliateLayout.ts`, `src/utils/foliateWordOffsets.ts` | Copy mode behavior into private `surface.ts` / local helper files; independent class instances and scoped injected styles |
+| `src/reader/surface/SurfaceCommand.ts`, `src/types.ts`, `src/types/chunkReading.ts`, `src/types/narration.ts` | Type-only port/snapshot evolution; no storage-schema migration |
+| `src/hooks/useKeyboardShortcuts.ts`, `src/components/ReaderBottomBar.tsx` | Route existing commands and display snapshots through the public router; preserve current shortcut semantics |
+| `src/constants.ts`, `src/styles/reader.css`, `src/styles/page-reader.css`, `src/styles/flow.css`, `src/styles/base.css`, `src/styles/index.css`, `src/styles/themes.css` | Read/copy existing mode values/selectors into local ownership; keep global theme tokens; do not retune constants or fix unrelated theme bugs |
+
+Wave A's dependency census records every transitive project helper used by these surfaces. Any additional mode-behavior dependency must be copied under the same mode directory and entered in the exact-path manifest before it is touched. Any required edit outside the listed existing surfaces, new mode directories, named tests or evidence paths is a scope amendment, not permission for a broad refactor.
+
+##### Waves and verification gates
+
+| Wave | Work and exclusive write surface | Exit gate |
+|---|---|---|
+| A | Read current implementation; create contract/port types, dependency/ownership manifest, independent fixture/harness files and baseline reports. No production mode replacement yet | G0. Record a named owner for every resource/side effect; capture four user-behavior baselines and known failures before edits |
+| B | Page and Focus directories, source extraction sites belonging to those modes, shell/router wiring and their tests | G1/G2 for Page+Focus; Flow/Narrate baseline unchanged |
+| C | Flow directory, Flow-owned source extraction sites, shell/router and Flow tests | G1–G3 for Flow; Flow runs with a throwing/unavailable audio port; Page/Focus/Narrate baseline unchanged |
+| D | Narrate directory, its TTS bridge and owned surface/anchor extraction sites, shell/router and Narrate tests | G1–G4 for Narrate; no Flow alias/import; exact-start and pause/resume gates; other three baselines unchanged |
+| E | Remove obsolete shared behavioral bodies/legacy routing, finish boundary coverage and final evidence | G0–G6 on the same candidate; no surviving shared runtime path; parent eligible for close-out |
+
+At most 40 tool-use actions per implementation wave; if a wave reaches that ceiling without its gate, save evidence and stop that wave for re-slicing. Do not launch a dependent wave or concurrently edit the shared shell.
+
+##### Mid-Dispatch Amendment — 2026-09-23 (Wave A admission re-slice; folded in 2026-10-08)
+
+*Decision: Type 1b — Advance (Planner-Originated), owner-approved. Source: staging memo fold-in 1 and `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2.2026-09-23-2.md` (both on `eb/reader-mode-separation-2`).*
+
+The previous admission attempt reached its 40-action ceiling and stopped with partial live evidence; retain that record and the existing G0 requirements. Execute the following independently bounded deliverables serially, recording their own action totals and evidence. These are a prospective re-slicing of unfinished admission, not a reset of the prior attempt or a waiver of its stop. A ceiling or failed exit criterion stops that slice; preserve its evidence and route the unresolved decision before dependent work.
+
+| Slice | Owner / task | Maximum tool-use actions | Mechanical exit criterion |
+|---|---|---:|---|
+| A1 | Implementation agent: establish the isolated baseline profile and test-only launch/capture route | 20 | Record pinned source/build/document identity, fixed viewport, launched process identity, resolved app-data/storage paths and successful application writes within the dedicated test profile. Verify the known live-profile files retain their before/after hashes after flush and close. Retain launch/error output; zero unresolved isolation or write-path errors. No application source edit. |
+| A2 | Implementation agent and reviewer: reproduce and classify Flow using the A1 route | 20 | On a hash-identified document at a recorded canonical position, capture Page → paused Flow → Play → Pause with timestamped screenshots and renderer/main-process error output. Observe each selected state for at least 5 seconds; paused states must retain content and position, and active Flow must retain the reading surface while its position advances. Record blink/content-loss and error observations explicitly. If the surface fails to stabilize, stop with a concrete reproduction and narrowly scoped proposed repair; do not infer that earlier file-write errors caused it or admit a production fix through this slice. |
+| A3 | Implementation agent and reviewer: complete the independent G0 matrix | 35 | Record every original G0 live scenario on both EPUB and a non-EPUB fixture, including exact canonical positions, mode/play state, selection, scroll/effect traces, transitions and the required independent heard-audio observation. Record document/build hashes, viewport, engine/voice/device/rate and observer. Complete dependency and ownership census with exact paths. All original G0 requirements must be satisfied; retain explicit known sync/1.4x defect identifiers. Missing or failed evidence keeps G0 blocked. |
+
+Serial dependency: A1 → A2 → A3 → complete Wave A/G0 → B → C → D → E. The remainder of Wave A must also fit a declared bounded task plan before execution. Retain SRL-053 live verification and SRL-089 dependency serialization. No production extraction may begin before the complete original G0 admission gate passes. Refresh Monday and prerequisites at admission; only after G0 passes may the parent perform the governed in-flight transition. The test-only surface under `docs/planning/roadmap-reviews/reader-mode-separation-2/admission/` is limited initially to `isolated-launch.cjs`, `capture.mjs`, `fixture.txt`, `isolation.json`, `flow-reproduction.json` and `baseline-build.json`; record each retained output as an exact file in `paths.json`. Application source changes are excluded from A1–A3.
+
+##### Mid-Dispatch Amendment — 2026-10-08 (A1 recovery with manual fallback)
+
+*Decision: owner-approved at the 2026-10-08 roadmap review, Phase A checkpoint. Resolves the pending "Proposed recovery" in Issue `-2`.*
+
+A1's first run failed (`An object could not be cloned.` during renderer identity capture; uncaught `EPIPE` in `ReadableWorkerStdio.ondata`) and reached at least 21 actions against its 20-action cap. That stop stands. The test-only correction is checkpoint `30b72291` (serializable identity result); application source is unchanged at the pinned base.
+
+1. **A1-R (recovery), at most 8 parent tool calls including preview restart:** restart preview; use a fresh isolated profile (do not delete or reuse the failed one) and the exact unchanged archived baseline build; launch with `Start-Process -WindowStyle Hidden`, fresh persistent stdout/stderr redirects and `Wait-Process` lifecycle ownership; make one 10-second observation capture; close/flush the owned runtime, stop preview, verify the three live-profile SHA-256 values. Pass = zero unresolved isolation/write errors, retained screenshot/identity/output artifacts, and all A1 exit criteria above. A successful launch alone does not pass G0.
+2. **If A1-R passes:** continue A2 then A3 under the limits above.
+3. **If A1-R fails, or A2/A3 later stop on harness/automation failure rather than on an application finding: stop automating live capture.** Do not open another harness-repair slice. G0's live matrix switches to **owner-observed manual capture**: the planner writes `docs/planning/roadmap-reviews/reader-mode-separation-2/g0-manual-checklist.md` listing every G0 live scenario (EPUB and non-EPUB; Page/Focus/Flow/Narrate; the 12 transitions and 4 same-mode cases), each with fields for expected/actual canonical index, mode/play state, visible cursor count, screenshot filename and heard-audio note. The owner runs it against the archived baseline build and records results in `live-baseline-manual.json`. The automated typecheck/test/build baseline in `baseline.json` remains the automated half of G0. The owner is already the required heard-audio observer (SRL-070), so this moves the capture to the observer; it does not lower any G0 requirement.
+4. The same manual route is the fallback for G6 if the automated route is still unavailable at Wave E.
+
+##### Mid-Dispatch Amendment — 2026-10-09 (pre-launch execution contract; owner-approved)
+
+*Decision: owner-approved at the 2026-10-09 adversarial review of the epic packet (`docs/planning/epics/2026-10-09-reader-mode-separation-2`). It reconciles execution details only; scope, gates G0–G6 and the speed-dialog amendment are unchanged.*
+
+1. **Implementation-wave action ceiling removed.** The 40-tool-use ceiling per implementation wave (Waves B–E), and the "stop for re-slicing" step attached to it, no longer apply to this item. The admission slice budgets stay: A1-R ≤ 8, A2 ≤ 20, A3 ≤ 35 parent tool calls. Exhausting one routes to the manual-G0 fallback (2026-10-08 amendment), not to a continuation. The two-correction ceiling per gate failure stays.
+2. **Baseline rebuild policy.** The 2026-09-23 archive (`%TEMP%\blurby-separation2-baseline-build-20260923T212830157Z`) lost all 21 files to temp cleanup. Rebuild the G0 baseline from pinned commit `1e5485c6` (source tree `0c790075…`) in a clean checkout and store it at `C:\Projects\Blurby-artifacts\rms2-baseline-build\`. Requirements:
+   - every production input and `package-lock.json` match `1e5485c6`; record the Node, npm and dependency versions;
+   - fresh typecheck, test and build pass, and the complete live G0 matrix passes against the rebuild.
+
+   Preserve `admission/baseline-build.json` unchanged. Record the rebuild's hashes, and every mismatch against the original manifest, separately in `admission/baseline-build-rebuild.json`. A hash mismatch alone is not an escalation. Escalate on any source or input identity difference, failed validation, or unexplained behavioral difference. The rebuild is the baseline for every later parity comparison. Test-only harness checks (`admission/isolated-launch.cjs`, `admission/capture.mjs`) adopt the rebuild manifest and the current worktree path `C:/Projects/Blurby/.worktrees/reader-mode-separation-2`. Their pinned-source checks are preserved.
+3. **Named identities.** **B0** is the G0 baseline: the rebuilt build of `1e5485c6`, immutable once recorded. **I** is the integration base: the first commit on the run branch that merges current `main` (session 1). **S** is the structural candidate: the commit where G1–G6 first pass before the speed dialog; its evidence is preserved separately. **F** is the final candidate: after the speed dialog. "All gates pass for the same final candidate" means G1–G6 plus the speed checks all run on F, while G0 compares against B0 by its own definition. Implementation scope is checked as `git diff --name-only I..F` ⊆ `paths.json`.
+4. **Pre-G0 write scope.** Before G0 passes, no file under `src/` changes, including contract types and the port broker. Pre-G0 work is limited to the census, evidence, fixtures and the test-only harness under `docs/planning/roadmap-reviews/reader-mode-separation-2/`. Contract and port types (`ReaderModeAdapter.ts` extension, `ReaderDocumentSnapshot.ts`, `ReaderPorts.ts`) and the broker (`createReaderPorts.ts`) move to the start of Wave B.
+5. **Finalization is staged and recoverable.** Final verification writes a checkpointed `verified.md`. Integration happens in a clean dedicated worktree, never the dirty primary checkout. `done.md` exists only once `origin/main` carries the published merge. The epic packet's launch.md defines the stages.
+
+##### Mid-Dispatch Amendment — 2026-10-09b (owner rulings at the OS-1 phase close-out)
+
+*Decision: owner rulings on the run's recorded decisions (run worktree `eb/reader-mode-separation-2` @ `c9d73ddd`, packet state.md Decision log), made at the phase close-out on 2026-10-09. These amend the spec and the epic charter retroactively; the charter's frozen copy on the run branch is unchanged, and this amendment governs where they differ.*
+
+1. **Decision #13 ratified.** Waves B–E and the speed dialog could start on G0's automated half (admission evidence against B0). The owner's B0 listening (G0's owner half) is batched into the OS-1 session together with G6 and the speed-dialog check. This retroactively relaxes item 4 of the 2026-10-09 amendment and the charter's "no `src/` before D1" constraint, for this run only. Why it holds: B0 is frozen and re-launchable, so observing it later is equivalent to observing it first. D1 still requires the owner half (`g0-owner-observations.json`) before F1.
+2. **Decision #28a accepted as an owner-approved scope exception.** Narrate's word timer restarts after an audio underrun. G6 lists this as a deliberate difference from B0, separate from `removedCrossOwnerEffects`. It is not a parity failure, and it does not reopen the excluded TTS-repair scope.
+3. **Decision #30 accepted.** The EPUB book-end case's B0 reference comes from probe run `bprobe` (same B0 build, same session, measured). The clean rerun `bppfinal2`, which missed the measurement inside its 60 s window, is kept as evidence.
+4. **Evidence durability.** Copies of the five G6 run directories (candidate `fppfinal`, speed `fppspeed`, B0 `bppfinal2`, B0 `bprobe`, and the invalid throttled B0 `bppfinal`) are kept, hash-verified, at `C:\Projects\Blurby-artifacts\rms2-g6-runs\`. The `%TEMP%` originals may be used until F1; if they are gone, use the copies.
+
+
+**G0 — baseline/admission:** in the dedicated clean worktree run `git status --porcelain`, `git rev-parse HEAD`, `npm run typecheck`, `npm test`, `npm run build` before extraction. Record exit codes, suite counts, failed test names and source/build hashes in new `docs/planning/roadmap-reviews/reader-mode-separation-2/baseline.json`; capture the live matrix below. Any broad-suite/type/build failure blocks production edits until classified with its original evidence; no blanket waiver. The known live sync/1.4x defects are retained baseline exceptions, not suite failures being silently waived. Use a separate baseline build; do not compare the candidate to itself.
+
+**G1 — dependency/ownership:** new `tests/readerModeBoundaries.test.ts`, test **"production mode graphs share only declared data and ports"**, resolves TS imports/re-exports/dynamic imports transitively using the installed TypeScript resolver. Assert zero reachable sibling-private modules, zero shared project-owned behavioral modules, and no runtime imports of the legacy shared mode hooks/views. Type-only edges are recorded separately. New `tests/readerModeOwnership.test.ts`, **"every mutable resource has one active owner"**, cross-checks the source census of useRef/useState/timers/RAF/listeners and class resource fields against the ownership manifest, and asserts each declared ref/timer/subscription/view has one mode owner, no non-active mode emits effects, and no two mode states share mutable object identity. The manifest lists exact allowed shared modules and exports; allowances must match the restricted categories above and be exercised by tests, never a whole-directory wildcard.
+
+**G2 — common contract in isolation:** new `tests/readerModes/page.contract.test.ts`, `tests/readerModes/focus.contract.test.ts`, `tests/readerModes/flow.contract.test.ts`, `tests/readerModes/narrate.contract.test.ts` use shared *test-only* assertions against each real implementation in an isolated module registry. Each contains **"select is paused and word zero is valid"**, **"pause resume stop and destroy preserve their documented lifecycle"**, and **"snapshots and start inputs do not leak mutable state"**. Assert select(0) gives selected=true/currentWordIndex=0/playing=false/clockOwner=none; Page never auto-advances; active Focus uses wpm, Flow its own pacer, Narrate audio-truth; pause removes advancement, stop/destroy removes ownership; changing a returned snapshot or original input cannot change runtime state. Fake timers after destruction yield zero side effects. Repeated getSnapshot calls produce the same values and zero side effects. Test settings copied into one mode can change only that mode's settings; the other three snapshots and private object identities remain unchanged.
+
+**G3 — routing and concurrency:** new `tests/readerModeIsolation.test.ts`, **"handoff FROM to TO preserves position and rejects the old owner"**, generates all 12 ordered distinct-mode pairs. Begin at canonical word 7; capture old async/timer callbacks; switch; run those callbacks and pending promises; assert destination word=7, exactly one selected owner, no old-owner scroll/persistence/audio calls and no mutation of the other two mode snapshots. Repeat at word 0 and on a new document generation. **"selecting MODE twice is a no-op"** covers four same-mode cases, with unchanged valid anchor/session and no duplicate subscription. **"rejected mode work cannot escape through a port"** invokes callbacks after stop, destroy, document replacement and remount; broker effect counts remain unchanged.
+
+**G4 — mode behavior:** new `tests/readerModes/page.behavior.test.tsx`, `tests/readerModes/focus.behavior.test.tsx`, `tests/readerModes/flow.behavior.test.tsx`, `tests/readerModes/narrate.behavior.test.tsx` each contain **"preserves the recorded mode baseline"** and assert the Wave A fixture's command→position/playing/selection/scroll/effect trace byte-for-byte after stripping only declared wall-clock timestamps and replacing old/new private session identifiers with their role-local sequence numbers. Also add **"Flow works when audio access throws"** in Flow, **"Narrate delayed extraction preserves exact word and mode"** in Narrate (word 0 and word 2, start once, no Flow calls), and **"Narrate pause resume reuses the current audio session"** (one resume, zero cold starts/stops). **"Narrate start failure stays local"** injects warming/error from the audio port, preserves the recorded loading/error behavior, asserts no Flow/Focus/Page start, and asserts no cursor advancement before a successful active session. Fixture updates are not a way to pass extraction: if behavior differs, stop and resolve the causal change.
+
+**G5 — build/regression:** execute `npm run typecheck`, `npm test`, `npm run build`, `git diff --check`; each exit=0. Record full results and candidate hash. Run the targeted commands below during each wave and the full suite at the final integration gate. No new skipped tests; preserve all existing regression assertions except the explicit internal-seam substitutions below. Review `git diff --name-only` against the exact-path manifest.
+
+**G6 — live UI and audio:** launch the freshly built candidate with `npm start` and record package version, build hash, document hash, format, viewport, engine/voice/device/rate and observer. Repeat the baseline scenarios on EPUB and non-EPUB: Page static navigation/word selection; Focus active pacing/pause/resume; Flow active follow plus same/cross-section browse-away/return; Narrate exact start at 0 and a nonzero word, pause/resume without cold restart, section/book transition and rate sequence 1.0→1.4→1.0. Test all 12 distinct-mode transitions and four same-mode selections. For every case record expected/actual canonical index, active owner, playback state, visible cursor count and stale-effect count. Acceptance is equal to its recorded baseline except the removal of cross-owner effects (must be zero). Keep cursor drift and the existing 1.4x overlap as separately labelled known defects; no additional missing words, new overlap conditions or pauses allowed. Audio claims require a human heard-audio observation or captured output with an independent annotated word/timing reference; scheduler-derived signals alone cannot pass. Missing observation is NOT VERIFIED and blocks close-out. Store `live-qa.json` and screenshots/audio-reference pointers under the evidence directory; new `scripts/check_reader_mode_evidence.mjs` resolves the supplied candidate commit and asserts every case present, no pending/fail result, hashes match, known-defect identifiers explicit and all zero-effect/count requirements satisfied. The validator checks completeness; it does not replace listening.
+
+##### Exact test migration and commands
+
+Existing test files remain evidence. Move only their imports/harness seams where production symbols move. Keep original behavior assertions. The following replacements are specifically authorized because the old shared hooks are retired:
+
+| Current test in `tests/useReaderMode.test.ts` | Current assertion → intended public assertion |
+|---|---|
+| "page-mode play is a no-op — mode and playback state are unchanged" | `expect(harness.observed.readingMode).toBe("page")` and `expect(harness.narration.startCursorDriven).not.toHaveBeenCalled()` → same values asserted via router snapshot and audio-port spy; no saved-mode shortcut yet |
+| "selecting flow from page mode updates the selected mode without auto-playing it" | `expect(harness.modeInstance.startMode).not.toHaveBeenCalled()` → destination runtime `start` spy not called; mode=flow/playing=false and persisted lastReadingMode=flow retained |
+| "selecting focus from page mode does not auto-start focus playback" | `expect(harness.modeInstance.startMode).not.toHaveBeenCalled()` → Focus runtime `start` spy not called; mode=focus/playing=false retained |
+| "selecting narrate from page mode sets narrate paused without auto-starting TTS" | `expect(harness.narration.startCursorDriven).not.toHaveBeenCalled()` → Narrate audio-port start spy not called; selected=narrate/playing=false retained |
+| "resumes paused narrate through useNarration.resume instead of cold-starting again" | `expect(harness.narration.resume).toHaveBeenCalledWith()`; startCursorDriven/stop not called → identical assertions on the Narrate audio-port spy |
+| "preserves narrate startup options across delayed Foliate word extraction" | `startCursorDriven(["alpha", "beta", "gamma"], 2, 180, expect.any(Function))`; flowPlaying=false → same audio arguments, selected=narrate and Flow runtime receives zero start calls |
+
+Retain these names in `tests/useReaderMode.test.ts` with the new router harness; other legacy API/hook tests can keep their file/name and assert through the new owning runtime. Document each changed internal-spy assertion as old→new in `test-migration.json`; observable outcomes cannot weaken. Do not retain a shared production hook solely to satisfy old mocks.
+
+Regression suites explicitly in scope for import/harness migration: `tests/readerModeAdapterContract.test.ts`, `tests/focusModeAdapter.test.ts`, `tests/flowModeAdapter.test.ts`, `tests/narrateModeAdapter.test.ts`, `tests/modes.test.ts`, `tests/useReadingModeInstance.test.ts`, `tests/useReaderMode.test.ts`, `tests/readerModeControls.test.tsx`, `tests/readerKeyboard.test.tsx`, `tests/useKeyboardShortcuts.test.ts`, `tests/documentLifecycleModeRestore.test.ts`, `tests/currentWordAnchor.test.ts`, `tests/persistentReadingAnchor.test.ts`, `tests/crossBookFlow.test.ts`, `tests/flowTimerCursor.test.ts`, `tests/flowReadingZone.test.ts`, `tests/flowZoneAuto.test.ts`, `tests/flow-scroll-engine.test.js`, `tests/three-mode-reader.test.js`, `tests/foliate-bridge.test.ts`, `tests/foliateWordHighlight.test.ts`, `tests/foliateChunkHighlight.test.ts`, `tests/foliateAnchorNavigation.test.ts`, and `tests/narrationIntegration.test.ts`. Existing assertions not enumerated above remain unchanged; if they cannot be preserved, stop for a scoped spec amendment with the exact old/new assertion.
+
+Untouched audio baseline tests: `tests/narrateA5RateReseed.test.ts`, **"reseed index equals heard position, NOT the pre-fetch frontier"**, preserves `expect(reseedIdx).toBe(HEARD_POSITION)` and `expect(reseedIdx).not.toBe(PREFETCH_FRONTIER)`; this is algorithm coverage, not proof of perceptual truth. `tests/narratePauseResumeUnify.test.ts` and `tests/narrateIntentCursor.test.ts` stay in the broad regression run.
+
+Commands after the named new tests exist:
+- Boundary/ownership: `npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts`.
+- Independent modes: `npm test -- tests/readerModes/page.contract.test.ts tests/readerModes/page.behavior.test.tsx`, then the same two explicitly named paths with `focus`, `flow`, and `narrate` in separate runs.
+- Existing adapter/router baseline: `npm test -- tests/readerModeAdapterContract.test.ts tests/focusModeAdapter.test.ts tests/flowModeAdapter.test.ts tests/narrateModeAdapter.test.ts tests/useReaderMode.test.ts tests/readerModeControls.test.tsx`.
+- Audio invariants: `npm test -- tests/narrateA5RateReseed.test.ts tests/narratePauseResumeUnify.test.ts tests/narrateIntentCursor.test.ts`.
+- Final evidence: `node scripts/check_reader_mode_evidence.mjs --candidate HEAD --evidence docs/planning/roadmap-reviews/reader-mode-separation-2`; exit=0 only after G6 is complete. HEAD must be the tested source commit. Evidence files may be committed afterward with that source hash retained; a source change requires renewed gates. This standalone validator is deliberately outside the ordinary test discovery so missing future live evidence does not make the baseline suite impossible to run.
+
+##### Constants, failure handling and repository plan
+
+**Preserve constants:** `src/constants.ts` has NARRATION_CURSOR_LAG_MS=350 (line 113), TTS_TRUSTED_CURSOR_LAG_MS=450 (119), FOCUS_MODE_START_DELAY_MS=50 (405), FOLIATE_SECTION_LOAD_WAIT_MS=500 (407), checked on the stated base. Scheduler tick/getAudioProgress already apply lag. Do not add another compensation layer. Move mode-specific values into owner-local defaults without changing values; retain TTS constants in infrastructure.
+
+**Failures / retry ceiling:** if another mode's trace changes, stop the wave and locate the shared dependency; do not alter that other mode to accommodate it. If a stale callback writes, keep the wave blocked until both runtime and broker rejection tests pass. If extraction waits or document loads fail, cancel the captured session and retain the previous valid position; bounded retry at most once per unchanged session, then expose the existing error state. If live evidence is unavailable, stop close-out with NOT VERIFIED. If baseline/source/branch identity differs, re-audit affected sites before edits. At most two focused correction attempts for the same gate failure; thereafter record a local issue and route to mid-dispatch-decision. Never mask a failure with new skips, broad fallback, or rebaselining.
+
+**Branch/base:** `eb/reader-mode-separation-2` in a dedicated clean worktree, from the pinned governance commit on `eb/roadmap-review-2026-09-23` identified by the next-pointer handoff. That documentation-only commit descends directly from local `main` source baseline `cd384b78cd5325e96429fe867c8b080ce1b39bb8` and must have an identical application/test/config tree. This carries the approved specification and Monday registry without merging or disturbing the dirty primary checkout. Before creating the execution branch, verify the pinned commit, its spec anchor, its ancestry, its exact governance-only changed-path manifest and absence of an existing execution branch/worktree. A source difference or moved reference stops admission for refreshed evidence; never silently substitute current main or origin/main. Keep unrelated primary-tree edits and existing worktrees.
+
+**Exact-path staging:** build new `docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json` from the existing-site table, each actually created file under the four named mode directories, the four shared contract/port targets, named test files, `scripts/check_reader_mode_evidence.mjs`, and `baseline.json`, `ownership.json`, `dependencies.json`, `test-migration.json`, `live-qa.json`, `verification.json` in that evidence directory. Expand to exact files, never stage a directory/glob. Before and after staging, run `git status --porcelain` and `git diff --cached --name-only`; compare cached paths to the approved manifest. A dirty or unexpected index stops the commit. Implementation wave commits may use explicit paths under registry policy; per-wave commits stay on the branch until the epic's final candidate passes G0–G6 and the speed-dialog amendment; then merge to `main` with `--no-ff` and push per Rule 5b. No branch deletion or cleanup. Resolve policy again at execution.
+
+**Rollback:** one implementation wave per scoped commit, retaining the prior passing commit. On failure with uncommitted work, save the exact diff as evidence and undo only the authored failing hunks with a reviewed patch; leave every unrelated file intact. On a committed failed wave, use `git revert <that-wave-commit>` in the dedicated worktree after checking the index and hash; never reset/clean/force-push. Re-run the prior wave's gates and record the revert hash. Do not roll back the historical A5 position fix.
+
+**Queue-depth reconciliation:** the owner-approved isolation-first sequence is the bounded exception to CLAUDE.md Rules 5/5a and Planning Contract 6 for this item. One queued Full Spec is intentional while all four sequenced successors are blocked on separation and require its real edit sites. Do not invent parallel work, mark blocked items queued, or dispatch a successor to satisfy the buffer. Replenish specifications after the isolation close-out.
+
+**Rule reconciliation:** SRL-074 allowed ref-heavy code to stay in its owning hook during adapter scaffolding; this stage now moves the refs together with that implementation. The compensation-first rule applies to the later perceptual sync diagnosis, not the separately owner-mandated structural separation. No extension checks are declared in registry policy. No design decision is deferred by this specification; baseline execution and live observations are explicit gates, not assumed results.
+
+##### Lessons applied
+- The full deduplicated checklist the 2026-09-23 review applied to this specification is in [2026-09-23-lessons-applied.md](docs/planning/roadmap-reviews/2026-09-23-lessons-applied.md#deduplicated-checklist). Live lessons applied there by id: LL-108 (exact-zero anchors), LL-109 (stale-async rejection behind G3's session tuple), LL-112 (mirror first, no shared behavior base), LL-120/121/125 (complete local ownership; Narrate stays audio-owned), LL-124/126/127 (heard-audio grounding in G6; no added lag tuning).
+- Re-read on 2026-10-08: no lesson recorded after 2026-09-23 (there are no close-outs since). The A1 failure taught no recorded lesson yet. Its candidate, *GUI-automation admission of an Electron app is brittle; prefer an owner-observed checklist when the owner is already the required observer*, is applied here as the 2026-10-08 manual-fallback amendment and should be recorded by this item's close-out if it holds.
+
+##### Governance staging memo (verbatim, folded in at close-out)
+
+# Sprint Close-Out Governance Staging — READER-MODE-SEPARATION-2
+
+Session: Wave A admission continuation. Date: 2026-09-23. Lane: Reader Engine. Branch: `eb/reader-mode-separation-2`. Pinned HEAD: `1e5485c66e547392e7752240df71700267e8ede7`.
+
+This memo records governance change intent for later application by the registered writer. It is not a close-out or a G0 pass. The current user explicitly invoked Virtuoso and approved advancing the proposed bounded admission continuation. The memo location resolves from `Virtuoso/workspace-layout.json` role `closeOuts`; Virtuoso's worktree Rule 2 expressly requires this staging artifact. No registry permissions or canonical governance documents are changed. The earlier Wave A 40-action stop remains part of the evidence.
+
+## Mid-Dispatch Decisions Registry — READER-MODE-SEPARATION-2
+
+| # | Date | Pause point | Decision type | Disposition |
+|---|---|---|---|---|
+| 1 | 2026-09-23 | Wave A reached its 40-action admission ceiling with incomplete G0 evidence | Type 1b — Advance (Planner-Originated) | Resolved decision: owner approved prospective A1/A2/A3 re-slicing with 20/20/35-action limits; G0 execution remains incomplete and blocked |
+| 2 | 2026-09-23 | Owner requested speed dialogs beyond the original P1 scope | Type 3 — Pivot Advance | Resolved decision: admit the specified speed dialogs after structural parity, with separate verification; cursor synchronization remains follow-on work |
+| 3 | 2026-10-09 | Wave A census and G4 fixtures contradicted the spec in seven bounded places (Q-A..Q-G) before the first Wave B edit | Type 1b — Advance (Planner-Originated), Q-A as Type 2 narrowing | Resolved under the owner's standing overnight authorization: rules supplied for dead views, the standalone reader window, runtime code in narration types, shared constants/diagnostics/cache, per-mode ownership, cross-owner G4 comparison, and baseline anomalies; no gate loosened |
+| 4 | 2026-10-09 | A known full-suite flake (Qwen streaming test timer leak) can make the final suite gate exit 1 with zero failed tests | Type 1b — Advance (Planner-Originated), pre-registered decision table | Resolved: the gate stays exit-0; a recurrence triggers one scoped test-hygiene fix to the Qwen test only, never a retry-until-green |
+| 5 | 2026-10-09 | The owner listening gate on the frozen baseline blocked every remaining front in an unattended run | Type 3 — Pivot Advance (owner-directed) | Resolved: code waves start now on the automated baseline evidence; one combined owner session (baseline listening, new-build listening, speed-dialog check) before final verification; owner-required conditions unchanged |
+| 6 | 2026-10-09 | The Waves B–E design left nine contradictions between the spec, the recorded baselines and the speed amendment | Type 1b — Advance (Planner-Originated), owner-delegated | Resolved: all nine ruled (observation rule for stale playing flags; new contract interface; display-jump alias; dead-path tests kept on the legacy hook; source-text re-point table; per-mode speed keys; widened narration speed domain; Page keys kept; dead code not copied) |
+| 7 | 2026-10-10 | Owner stopped the listening session after six baseline items and ruled narration be removed and rebuilt from scratch | Type 2 — Advance with Narrowing (owner ruling) | Resolved: the epic lands first. The Narrate listening and Narrate-only visual checks are dropped and recorded as dropped. Every automated Narrate case stays. The heard-audio validator rule accepts an explicit owner-ruling marker. The owner runs four non-narration checks on the final build |
+| 8 | 2026-10-11 | At final verification the full suite failed three tests by timeout in four runs, while the old build's suite also failed timing tests on the same night | Type 1b — Advance (owner ruling) | Resolved: the owner ruled the three named timeouts environmental. They are recorded like the two earlier known flaky tests. Any other failure stays real. Follow-ups: timeout headroom for the new boundary test, and diagnosing the slowdown |
+
+## Target: ROADMAP.md
+
+### Fold-in 1 — Owner-approved admission continuation
+
+Section: `READER-MODE-SEPARATION-2` → `Waves and verification gates`, after the existing 40-action paragraph.
+Action: Insert after.
+Decision: Type 1b — Advance (Planner-Originated); bounded admission re-slice.
+Content:
+
+> **Mid-dispatch amendment — Wave A admission continuation (2026-09-23).** The previous admission attempt reached its 40-action ceiling and stopped with partial live evidence; retain that record and the existing G0 requirements. The owner approved the proposed continuation after that stop. Execute the following independently bounded deliverables serially, recording their own action totals and evidence. These are a prospective re-slicing of unfinished admission, not a reset of the prior attempt or a waiver of its stop. A ceiling or failed exit criterion stops that slice; preserve its evidence and route the unresolved decision before dependent work.
+
+| Slice | Owner / task | Maximum tool-use actions | Mechanical exit criterion |
+|---|---|---:|---|
+| A1 | Implementation agent: establish the isolated baseline profile and test-only launch/capture route | 20 | Record pinned source/build/document identity, fixed viewport, launched process identity, resolved app-data/storage paths and successful application writes within the dedicated test profile. Verify the known live-profile files retain their before/after hashes after flush and close. Retain launch/error output; zero unresolved isolation or write-path errors. No application source edit. |
+| A2 | Implementation agent and reviewer: reproduce and classify Flow using the A1 route | 20 | On a hash-identified document at a recorded canonical position, capture Page → paused Flow → Play → Pause with timestamped screenshots and renderer/main-process error output. Observe each selected state for at least 5 seconds; paused states must retain content and position, and active Flow must retain the reading surface while its position advances. Record blink/content-loss and error observations explicitly. If the surface fails to stabilize, stop with a concrete reproduction and narrowly scoped proposed repair; do not infer that earlier file-write errors caused it or admit a production fix through this slice. |
+| A3 | Implementation agent and reviewer: complete the independent G0 matrix | 35 | Record every original G0 live scenario on both EPUB and a non-EPUB fixture, including exact canonical positions, mode/play state, selection, scroll/effect traces, transitions and the required independent heard-audio observation. Record document/build hashes, viewport, engine/voice/device/rate and observer. Complete dependency and ownership census with exact paths. All original G0 requirements must be satisfied; retain explicit known sync/1.4x defect identifiers. Missing or failed evidence keeps G0 blocked. |
+
+Serial dependency: A1 → A2 → A3 → complete Wave A/G0 → B → C → D → E. The remainder of Wave A must also fit a declared bounded task plan before execution; the split does not grant an unbounded contract or census task. A failed slice blocks its dependent slice. Retain SRL-053 live verification and SRL-089 dependency serialization. No production extraction may begin before the complete original G0 admission gate passes. Refresh Monday and prerequisites at admission; only after G0 passes may the parent perform the governed in-flight transition.
+
+The added test-only surface under `docs/planning/roadmap-reviews/reader-mode-separation-2/admission/` is limited initially to `isolated-launch.cjs`, `capture.mjs`, `fixture.txt`, `isolation.json`, `flow-reproduction.json` and `baseline-build.json`. The latter records the independently archived pre-extraction build, with 21 files verified by SHA-256 and size; the build archive itself is outside the repository and does not imply G0 completion. Test-profile runtime artifacts stay within the dedicated profile and are not implicit Git staging targets. Record each retained screenshot, log, trace or other output as an exact file in `paths.json` when its name is known; no directory or wildcard staging. Launcher/capture instrumentation must not replace production behavior or manufacture baseline results. Application source changes are excluded from A1–A3. The existing baseline and issue remain preserved, with continuation evidence appended rather than silently rebaselined.
+
+### Fold-in 2 — Owner-approved speed dialog amendment
+
+Section: `READER-MODE-SEPARATION-2` → `Product requirements and success measures`, after the P0/P1/P2 paragraph.
+Action: Insert after.
+Decision: Type 3 — Pivot Advance; owner-approved speed-control scope addition.
+Content:
+
+> **Mid-dispatch amendment — speed dialog (2026-09-23).** The owner approves this explicit exception to P1's additional-feature exclusion. Page is purely manual and exposes no speed control. In Focus, Flow and Narrate, clicking the current displayed speed opens a dialog containing a slider. The displayed and selectable value is a multiplier with 0.05x increments. Focus and Flow use a fixed 250 WPM reference for 1.00x, preserving their 100–1200 WPM bounds as 0.40x–4.80x; the resulting 12.5 WPM increments are retained without integer rounding. Narrate permits 0.80x–2.00x. If an existing interface cannot represent a fractional WPM value, record that exact incompatibility and obtain a scoped decision before changing the representation or rounding policy.
+
+Implement this feature only after the structural separation candidate has demonstrated G0–G6 parity. Preserve that candidate and its evidence independently. Then declare exact implementation/test paths and a bounded serial task for the slider amendment; verify it separately and re-run the affected regression, live-mode and final-candidate gates. The original four-mode baseline remains the structural comparison. The speed feature cannot be used to explain away a parity failure. The parent remains incomplete until both structural separation and this amendment are verified against the final candidate.
+
+Acceptance checklist:
+
+1. Page has neither a displayed speed action nor automatic playback; existing Page Space no-op remains intact.
+2. For each of Focus, Flow and Narrate, clicking its displayed speed opens the slider dialog; slider changes update the selected mode's display and effective rate.
+3. Focus/Flow enumerate exactly 89 selectable values from 0.40x through 4.80x inclusive. Every value maps to `multiplier * 250` WPM, including 0.45x = 112.5 WPM, 1.00x = 250 WPM and 4.80x = 1200 WPM. No out-of-range or silently rounded selection.
+4. Narrate enumerates exactly 25 selectable values from 0.80x through 2.00x inclusive in 0.05x steps; verify endpoints and an intermediate 1.05x value through its audio rate port and the live UI.
+5. Changing one mode's speed does not mutate another mode's settings or private state; opening/closing the dialog does not change position or start paused playback. Preserve each mode's existing play/pause semantics.
+6. Verify keyboard-operable slider/dialog interaction and a visible current value. Record live observations and behavioral assertions for the approved speed differences separately from extraction parity.
+
+Narrate cursor lead, heard-word synchronization, reload catch-up and rate-overlap repair remain follow-on sync work, as the owner expressly directed. This amendment does not authorize those repairs, a storage-format migration, or new shortcuts.
+
+### Fold-in 3 — Mid-Dispatch Amendment (pre-Wave-B scope rules, Q-A..Q-G)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (pre-Wave-B scope rules)
+**Pause point:** The Wave A census (`dependencies.json`, `ownership.json`, `census/`; 63b10115) and the G4 fixtures (`fixtures/*.baseline.json`; c61bca67) contradicted the spec in seven places before any `src/` edit. Issue: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-09.md`.
+**Decision:** Type 1b — Advance (Planner-Originated); Q-A is a Type 2 narrowing. Decided under the owner's standing overnight authorization.
+**Rationale:** Each rule enforces the spec's stated isolation and parity intent more precisely; none loosens a gate, and the one new comparison rule is recomputed from data.
+**Scope change:**
+- **Q-A:**
+  - Do not copy the dead non-EPUB views (`PageReaderView`, `ScrollReaderView`, `FlowText`, `VirtualScrollText`, `PausedTextView`, `FlowCursorController`). The mirrored per-mode layout drops `TextView.tsx` in all four modes, leaving 8 files each.
+  - The shell keeps the existing non-EPUB re-import fallback, since that is the production non-EPUB behavior.
+  - Wave E removes the dead view imports from `ReaderContainer.tsx` and proves via G1 that no production graph reaches the dead views. A dead file is deleted only if no retained test imports it; otherwise it stays unreachable, with evidence.
+  - G0/G6 non-EPUB rows use converted imports.
+- **Q-B:**
+  - `src/App.tsx` (the live standalone reader window: Library "open in new window" → `open-reader-window` → `#reader/<id>`) stays untouched and outside the four-mode system.
+  - Modes copy what they need from `useReader.ts` / `ReaderView.tsx` into their own directories. The originals remain solely as the standalone window's private engine, and no mode may import them (G1).
+  - Wave E records App.tsx as their sole remaining consumer, with census evidence. Rewiring the standalone window is out of scope; it has no recorded baseline.
+- **Q-C:**
+  - `src/types/narration.ts` runtime exports (`narrationReducer`, `findSectionForWord`) remain TTS infrastructure behind Narrate's audio port, used by `useNarration.ts`, which is not edited.
+  - Mode-behavior consumers, such as `useFoliateSync`'s section lookup, get private copies under `src/reader/modes/<mode>/helpers/`.
+  - The ownership manifest classes narration.ts as infrastructure-port (TTS).
+- **Q-D:**
+  - `src/constants.ts` is allowed-shared as immutable configuration. Mode-specific values are copied into owner-local defaults with identical values, as the spec already requires; G1 asserts no mode writes it.
+  - Diagnostics (`narrateDiagnostics.ts`, `dualSourceDiag.ts`) are reachable from modes only through a write-only diagnostics infrastructure port on the broker, which carries the captured session tuple and is owner-checked. TTS infrastructure may keep its direct use.
+  - The `useNarrationCaching.ts` module-level extraction cache moves behind the document port, as immutable document/content preparation.
+- **Q-E:** The ownership-manifest owner value `per-mode` is legal only with an exact `privateCopiesFor` list. G1 asserts each listed copy exists in exactly that mode's directory and nowhere shared.
+- **Q-F:** G4 comparison rule.
+  - (1) Recompute the cross-owner set mechanically: any `audio.*` effect in a step whose mode before and mode after are both not `narrate`.
+  - (2) Assert that the stored `crossOwner: true` flags equal the recomputed set (instrument check).
+  - (3) Drop exactly that set from the baseline.
+  - (4) Assert that the candidate emits zero effects matching the same rule.
+  - (5) Compare the remainder byte-for-byte after the spec's timestamp and session-id normalization.
+  - No other effect may be dropped. Record the rule and the dropped list in `test-migration.json`. Fixture files are never edited.
+- **Q-G:** Baseline anomalies.
+  - Non-Narrate audio effects (OBS-A3-3 same-Page `audio.stop` and similar) are removed under Q-F.
+  - OBS-A3-1 (Narrate(paused)→Page highlight on word 0 while the persisted anchor is 7) is governed by G3's handoff rule: destination = source canonical word, copy-only. The expected post-separation value is 7, and G6 lists the row as a removed cross-owner effect, citing the baseline persisted anchor 7.
+  - OBS-A3-2 (Focus pacing→Page readback 209) is classified during Wave B, read-only, against Focus's own canonical position:
+    - if Page shows a value other than Focus's snapshot, G3 governs and the change is a removed cross-owner effect;
+    - if 209 is Focus's true canonical position, preserve it as baseline;
+    - if unclassifiable after two attempts, record an issue and route it.
+  - Preserved as baseline (G4 fixtures enforce): Flow resume = cold restart from the anchor; a warming Narrate start → the next press resumes; Narrate→Page issues `audio.stop` twice (idempotent stop/destroy may reproduce it).
+**Follow-up items:** Owner may later decide to rewire the standalone reader window (new item, not this epic). Provisional lesson staged below (number assigned at fold-in).
+
+### Fold-in 5 — Mid-Dispatch Amendment (KF-1 decision table for the suite gate)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (KF-1 pre-registered decision table)
+**Pause point:** In the B0 rebuild, 1 of 3 full `npm test` runs exited 1 with 0 failed tests. The cause was a load-dependent unhandled rejection: "Qwen streaming stream … timed out after 500 ms without stream_finished", reason `stream-timeout`, raised in `main/qwen-streaming-engine.js` and attributed to `tests/qwenStreaming.test.js`. The test is clean in isolation (3 of 3).
+**Decision:** Type 1b — pre-registered decision table. G5/D6 still require exit 0.
+**Rationale:** A known flake must never be absorbed by re-running until green (a matching count is not a pass), and it must not silently block the epic.
+**Decision table (applies at every G5/D6 run, after D1 only):**
+- `npm test` exit 0 → that row passes.
+- Exit 1, failed-test set empty, and every unhandled error matches the KF-1 identity above → the row is NOT passed. Apply one scoped test-hygiene fix: add exactly `tests/qwenStreaming.test.js` to `paths.json`, and make that test await or clear its pending stream-timeout before completing. No assertion is removed, no skip is added, and no `main/` file changes. Commit, then re-run the full gate fresh.
+- The fix would require editing `main/qwen-streaming-engine.js` (out of scope; owned by no lane here) → BLOCKER(USER).
+- Any other failure → normal handling (two focused corrections, then an issue).
+**Scope change:** `tests/qwenStreaming.test.js` is admissible only under the second row.
+**Follow-up items:** None.
+
+### Fold-in 6 — Mid-Dispatch Amendment (re-sequence the owner listening gate)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (owner gate re-sequenced; owner-directed)
+**Pause point:** Owner gate B1 (G0 heard audio on B0) unanswered. The pre-G0 `src/` freeze (amendment 2026-10-09 item 4) blocked every open front. Issue: `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09-2.md`.
+**Decision:** Type 3 — Pivot Advance, under the owner's direction of 2026-10-09: "You make decisions … advance with recommendations. Iterate until the entire epic is complete."
+**Rationale:** B0 is frozen, byte-identical and re-launchable, so the owner's observation of it is time-independent. All non-audio G0 evidence exists. No DoD row is loosened.
+**Scope change:**
+- Amendment 2026-10-09 item 4's pre-G0 `src/` freeze is lifted for Waves B–E and the speed dialog. Wave B admission evidence = the G0 automated half: `isolation.json` PASS, `flow-reproduction.json` PASS, `g0-matrix.json`, census, G4 fixtures.
+- **D1 stays unmet until the owner half is recorded.** `baseline.json` keeps `admission: BLOCKED (automated half PASS; owner half pending)` until then.
+- **D7 still requires the owner's heard-audio observation on F.**
+- One combined owner session (OS-1) runs before F1:
+  - (i) `g0-owner-checklist.md` on B0;
+  - (ii) the G6 live and heard-audio cases on a fresh build of F;
+  - (iii) the speed-dialog live check.
+- Monday Queued → In Flight runs at the start of Wave B (the work is in flight). It uses the provider handshake, with mutation-plan only to execute (LL-130).
+- F1–F5 cannot start until D1 and D7 pass.
+**Decision table for OS-1 results on B0:**
+- All items as-expected or known-defect → D1 PASS.
+- A `new-problem` in B0 behavior → it is baseline behavior: record it with an identifier; G6 compares equal to it. Code is unaffected.
+- The owner's observation contradicts an automated matrix fact (e.g. no audio heard) → re-base the affected G6 rows on the owner observation; re-verify only evidence.
+**Follow-up items:** OS-1 checklist written at Wave E alongside G6.
+
+### Fold-in 7 — Mid-Dispatch Amendment (design contradictions OC-1..OC-9)
+Section: §READER-MODE-SEPARATION-2 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-09 (Waves B–E design rulings)
+**Pause point:** `design/waves-b-e-design.md` §H listed nine contradictions. Issue: `Issue.READER-MODE-SEPARATION-2-S1.2026-10-09-3.md`.
+**Decision:** Type 1b — Advance (Planner-Originated), owner-delegated ("You make decisions … iterate until the entire epic is complete").
+**Rationale:** Each ruling keeps every DoD row mechanically verifiable and removes only cross-owner artifacts. The design's DD-1..DD-7 are accepted as within charter autonomy.
+**Scope change:**
+- **OC-1:** The G4 comparison gains one mechanically recomputed observation rule. In any step whose `modeAfter` ≠ m, observation `<m>Playing` must be `false`. Baseline values that differ form a recomputed dropped-observation list in `test-migration.json`. No other observation may be dropped.
+- **OC-2:** `ReaderModeRuntime` v1 is a sibling interface with the same seven actions and no `Set` or words in the start request. Legacy types are retained.
+- **OC-3:** `channelAliases`: `"focusView.jumpToWord"` → `"<mode> jumpDisplayToWord"`. Re-attribution only; nothing is dropped.
+- **OC-4:** The `toggleNarrationInFlow` cases in `tests/useReaderMode.test.ts` keep importing the retained legacy `src/hooks/useReaderMode.ts`, labelled as dead code under test. No production path is retained for them.
+- **OC-5:** Decision table at E1, for each failing source-text assertion on `ReaderContainer.tsx`:
+  - (a) the fragment exists verbatim in a new owner file → re-point the read path (authorized), recorded in `test-migration.json`;
+  - (b) the fragment was removed by design → add the equivalent assertion at the new owner, recorded old→new; if the intent cannot be preserved → issue and route;
+  - expected text is never weakened.
+- **OC-6:** Additive optional settings keys `focusWpm` and `flowWpm` (number; fall back to legacy `wpm` when absent). No migration and no `schemaVersion` bump; legacy `wpm` is retained for the App.tsx window. Focus/Flow read and write only their own key from the speed dialog and ↑/↓. This lets speed acceptance item 5 (and D8) verify.
+- **OC-7:** Authorized: the Kokoro UI speed domain widens to 0.80–2.00 in 0.05 steps.
+  - Change `KOKORO_UI_RATE_MIN`/`KOKORO_UI_RATE_MAX`/`KOKORO_UI_RATE_STEP`, and `KOKORO_UI_SPEEDS` if derived, in `src/constants.ts`, plus `normalizeKokoroUiSpeed`/`stepKokoroUiSpeed` in `src/utils/kokoroRatePlan.ts`.
+  - `KOKORO_RATE_BUCKETS` stay [1.0, 1.2, 1.5]; the existing pitch-preserving tempo stage covers the gap (LL-101): tempo 0.8 on bucket 1.0 up to 1.333 on bucket 1.5.
+  - `useNarration.ts` is not edited.
+  - Tests asserting the old domain are updated as declared speed-amendment differences, each listed old→new.
+  - The owner's listening check at 0.80/1.05/2.00 (item 4) joins OS-1.
+  - Non-Kokoro engines are dormant and keep their clamp.
+- **OC-8:** Page ↑/↓ is kept. "No speed control" means no displayed control. The keys adjust the speed key of `lastReadingMode` (focusWpm, flowWpm or ttsRate).
+- **OC-9:** The dead Focus progress-save effect and the `useReader` RAF tick are not copied. Evidence goes in the close-out.
+**Follow-up items:** The speed amendment's declared path list adds `src/utils/kokoroRatePlan.ts`, the settings type field additions (in a non-freeze file if possible; otherwise `src/types.ts` is scheduled under this epic's freeze ownership), and the affected rate tests.
+
+### Fold-in 8 — Mid-Dispatch Amendment (Wave D/E and G6 rulings, Decisions #17–#24)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 7 amendment
+Action: Append the block below verbatim
+Source: packet `state.md` Decision log rows 17–24 (authority: owner standing authorization, "You make decisions… iterate until the entire epic is complete"; each row cites its charter clause)
+
+#### Mid-Dispatch Amendment — 2026-10-09 (Wave D/E and G6 rulings)
+- **#17 G1 allowances tightened:** remove the unused `ProgressBar`, `ErrorBoundary` and `useFocusTrap` allowances. Narrate's `BLOCK_TAGS` is an allowed singleton, the same as in the other three modes.
+- **#18 Recorder verified on B0:** after E1, the G4 recorder is verified on the genuine B0 tree (`fixtures/verify-on-b0.mjs`, 5/5 on src `0c790075`), not through a dead copy in `src/`. The legacy-only dead-prop assertions became equivalent source-text assertions (OC-5b).
+- **#19 Late full-book words:** each runtime adopts same-document, same-generation snapshots through its own broker-guarded document port. G3 has a test for this.
+- **#20 E5 boundary rule:** ReaderContainer's runtime closure ∩ legacy equals exactly the declared `shellInfrastructure`. `useReader`, `ReaderView` and `PausedTextView` are reachable only with `App.tsx` on the path. Q-A dead views are unreachable from `main.tsx`.
+- **#21 E4 deletions:** the seven legacy files with no retained importer are deleted. `PageMode` and the `src/modes` barrel stay (CLEANUP-MODE-BARREL-1).
+- **#22 Q-E private copies:** proven by a committed `boundary-policy.json → privateCopyMap` (exact anchor or closed-list `notCopied` reason for every per-mode resource and mode), since DD-2 class rewrites make verbatim census anchors impossible.
+- **#23 Cutover review fixes:**
+  - The cross-book overlay is cleared only once Flow runs in the next book.
+  - `openDocument` releases the outgoing session inside a teardown window, so no stale Narrate audio carries into the new book.
+  - A failed book-bytes read is not cached.
+  - Narrate no longer shows Flow's leftover progress text. This is a removed cross-owner effect.
+- **#24 G6 scoring:** acceptance is equality with B0 run on the same harness revision. Two scenarios that B0 itself misses against the ideal pass only when the candidate reproduces B0 exactly, and are listed in `live-qa.json → baselineEqualDeviations` for the owner's confirmation at OS-1:
+  - Narrate has no book transition: B0's Narrate mode registers no end-of-book handler; only Flow, or Flow with narration, crosses books.
+  - EPUB section transition at 5480.
+
+  No new known-defect ids.
+- **#25 KF-2:** a `tests/sync-queue.test.js` Windows `EPERM` rename under full-suite load is recorded like KF-1. D6 needs an unedited `npm test` exit 0, with every failing run recorded.
+- **#26 Throttled live runs are invalid:** the G6 harness probes page visibility and frame rate at every step. A hidden or occluded window that Chromium throttles makes the case `invalid` (rerun), never pass or fail.
+- **#27 One F at HEAD:** F is the commit carrying the final code, harness and owner checklist. Nothing is committed after F until F1's V, so the launcher and D9 see HEAD = F. Heard audio is taken on F only (D7); S keeps its automated G6 half.
+
+**Follow-up items:** a later item (lane D) should make `main/sync-queue.js` `saveQueue` retry a transient Windows `EPERM`/`EBUSY` rename (KF-2, Decision #25; the same race affects real users' sync queues). A later item may also give Narrate a book transition. It is not this epic's scope; it is a behaviour addition beyond parity.
+
+### Fold-in 9 — Mid-Dispatch Amendment (OS-1 stopped; Narrate to be rebuilt, Decisions #31–#32)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 8 amendment
+Action: Append the block below verbatim
+Source: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-10.md` (Decision block); packet `state.md` Decisions #31–#32. Authority: owner ruling 2026-10-10 in the OS-1 session, with GO relayed by the planning session.
+
+#### Mid-Dispatch Amendment — 2026-10-10 (OS-1 stopped; Narrate to be rebuilt)
+
+**Pause point:** The owner stopped OS-1 after baseline item H6 and ruled that narration be removed and rebuilt from the ground up, disconnected from the other modes, with the TTS engine in scope (Decision #31).
+
+**Decision:** Type 2 — Advance with Narrowing (owner ruling).
+
+**Rationale:** Heard-audio parity for a component scheduled for deletion has no consumer. The separation itself is built and gated by automation, and it is the prerequisite for a rebuild that shares nothing with Page, Focus and Flow.
+
+**Scope change** (the charter allows a row to be loosened only by the user; the owner has done so here):
+
+- **D1 (B0 owner half):**
+  - It is met by H1–H6, observer Evan.
+  - H7, H8, V2 and V3 are dropped by owner ruling.
+  - V1 was not run on B0, so no B0 baseline exists. F's V1 bar is "works", not "matches B0".
+  - `baseline.json` → `admission: PASS` names the observer and lists the dropped rows.
+  - H4's `new-problem` (1.4x distortion) concerns audio quality only and does not contradict the automated matrix.
+- **D7:**
+  - Every automated G6 case remains required, unchanged: positions, transitions, cursor counts, zero stale effects, compared with B0.
+  - Narrate audio cases record `heardAudio: { droppedBy: "owner-ruling-2026-10-10" }`. They are recorded as dropped, never as heard or as passed by listening.
+- **D8:**
+  - The automated speed checks are unchanged: 89 Focus/Flow values, 25 Narrate values, no Page action, keyboard-operable.
+  - The live observation is the owner's S1, S2 and S4 on F. S3 (Narrate by ear) is dropped. R7 is unchanged.
+- **OS-1 on F:**
+  - Only V1 (`final.items`) and S1, S2 and S4 (`speed.items`) remain, and the owner runs them personally.
+  - H1–H8, V2, V3, S3 and C1–C3 are marked "dropped by owner ruling", not "not run".
+  - F17 (the supporting loopback capture) is dropped.
+- **R6 (`scripts/check_reader_mode_evidence.mjs`):**
+  - It also accepts `heardAudio.droppedBy === "owner-ruling-2026-10-10"`. Two self-test controls are added: the marker passes, and any other value fails R6.
+  - This file is evidence tooling: neither `vite build`, the app nor `npm test` consumes it. F's built archive and its automated G6 results are therefore unchanged, and R1 re-hashes the archive at F1.
+  - The G6 harness lists all of `scripts/` among production inputs, so its launcher refuses while the file is dirty. Apply the edit only after the owner's F launch has closed, and commit it with V at F1.
+- **F1–F5:** the mechanics are unchanged. F2 integrates onto the then-current `origin/main` (41ef49de at ruling time).
+
+**Follow-up items:**
+- **Narrate removal:** the first sprint after this epic merges (owner), not on this branch.
+- **The rebuild:** scoped separately (`/storyboard`, 2026-10-10).
+- **For `/roadmap-review`:**
+  - Retire or replace NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1, NARRATE-SUBSCRIBER-CURSOR-1 and KOKORO-EXPORT-1.
+  - UX-POLISH-1 needs a fallback for a saved `narrate` mode.
+  - CLEANUP-MODE-BARREL-1 keeps "no legacy NarrateMode" assertions.
+
+### Fold-in 11 — Mid-Dispatch Amendment (KF-3 full-suite timeouts, Decision #33)
+Section: § READER-MODE-SEPARATION-2, after the Fold-in 9 amendment
+Action: Append the block below verbatim
+Source: `docs/governance/bug-reports/Issue.READER-MODE-SEPARATION-2-S1.2026-10-10-2.md` (Decision block); packet `state.md` Decision #33. Authority: owner ruling 2026-10-11, "Rule them environmental and finish the merge."
+
+#### Mid-Dispatch Amendment — 2026-10-11 (KF-3)
+
+**Pause point:** At F1, D6's unedited `npm test` failed four times. Every failure was a 10 s timeout in the same three tests:
+- the two `updateInstallGating` tests, in every run;
+- the G1 boundary graph test, in two runs.
+
+The same night, B0's own suite failed timing tests too, and took 60 s against its recorded 19 s.
+
+**Decision:** Type 1b — Advance (owner ruling).
+
+**Rationale:**
+- Each test passes alone (`updateInstallGating` 5/5 on F and on B0; G1 16/16 in D2).
+- Earlier full runs of this code were green.
+- The base shows the same class of failure.
+
+**Scope change:** KF-3 extends the KF-1/KF-2 rule to exactly those three node IDs. Each may fail only by a timeout in a full-suite run, and must pass alone. Any other failure is real, and every failing run is recorded. This applies to D6 and to F2 step 5.
+
+**Follow-up items:**
+- Give the G1 graph test an explicit timeout: it uses about 6.5 s of its 10 s budget when run alone.
+- Address the `updateInstallGating` timeout (outside this epic).
+- Diagnose the machine-wide test slowdown.
+
+## Target: docs/governance/LESSONS_LEARNED.md
+
+### Fold-in 4 — Provisional lesson (number assigned at fold-in; worktree numbers are placeholders)
+Section: end of catalog
+Action: Append row
+Content:
+### LL-<next> — Mode-separation specs must be cut from an import-graph census, not a file inventory (READER-MODE-SEPARATION-2, 2026-10-09)
+- **Applies to:** spec authoring, refactors, reader modes
+- **Discovery:** A Full Spec written from a source inventory listed dead views as copy targets, a runtime-bearing file as "type-only", missed a live second entry point (App.tsx standalone window), and required byte-for-byte parity with behavior that included the very cross-owner effects the separation removes. All surfaced only at Wave A via a TypeScript-resolver import graph and a production-path trace recorder.
+- **Rule:** Before declaring copy/move targets or parity gates, run an import-graph census from the real entry points (all of them) and tag the effects the change is meant to remove; write the parity gate as "baseline minus mechanically recomputed removed-effect set, removed set asserted absent".
+- **Related:** LL-118 (trace imports bottom-up), LL-128 (verify targets before create).
+
+### Fold-in 10 — Provisional lesson (number assigned at fold-in)
+Section: end of catalog
+Action: Append row
+Content:
+### LL-<next> — Hear the baseline before automating parity for it (READER-MODE-SEPARATION-2, 2026-10-10)
+- **Applies to:** epics and refactors that preserve user-facing behaviour; owner gates; narration
+- **Discovery:** The epic preserved Narrate exactly, and the owner's first listening of the baseline was moved to the end of the run for throughput (Decision #13). Three later decisions and repeated live runs went into proving Narrate parity. Twenty minutes into that listening, the owner ruled Narrate unfit and ordered it rebuilt, and the Narrate parity evidence lost its consumer.
+- **Rule:** When an item preserves a user-facing behaviour the owner has not recently experienced, take a short owner observation of the baseline, or ask "preserve or replace?", before investing in parity automation for it. An owner gate may move late for throughput only when its verdict cannot change scope.
+- **Related:** SRL-070 (heard audio needs the owner); Decision #13 (owner gate re-sequenced).
+
+## Target: close-out memo §Mid-Dispatch Decisions
+
+### Fold-in 1 — Preserve the admission and speed decisions
+
+Action: Migrate.
+Source: this staging memo's two `ROADMAP.md` fold-ins, its Mid-Dispatch Decisions Registry, and both `Decision — 2026-09-23` blocks in `Issue.READER-MODE-SEPARATION-2.2026-09-23-2.md`.
+Destination: final close-out memo → `Mid-Dispatch Decisions`.
+
+Preserve the owner's authorization, prospective A1/A2/A3 action limits, unchanged G0 gate, known sync exclusions, speed ranges/reference/increments, deferred slider sequence and final verification disposition before any eventual inline-spec collapse. Do not describe proposed acceptance checks as completed. No automatic merge, push, cleanup or successor dispatch is authorized.
