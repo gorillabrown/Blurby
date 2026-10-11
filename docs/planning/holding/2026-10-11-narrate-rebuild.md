@@ -21,6 +21,7 @@
 | 2026-10-11 | planned | write-plan | HB-1 (Narrate removal) planned; rubric v1.2 PASS (U9, U10 mechanical); prerequisites pending: LIBRARY-SETTINGS-FIX-1, EINK-HOVER-FIX-1; rebuild epic-scale, held for review |
 | 2026-10-11 | storyboarded | storyboard | reopened for review G1-G8: F1 corrected (owner G2: saved Narrate preference becomes Flow; G6: rollback keeps flow) |
 | 2026-10-11 | planned | write-plan | HB-1 revision 3: two adversarial reviews applied (G1-G8 + 7 follow-ups; D12-D15, Done-when 16); rubric v1.2 PASS (U9, U10 mechanical; closure check v2 self-test 7/7, 0 on main); prerequisites pending: LIBRARY-SETTINGS-FIX-1 close-out, EINK-HOVER-FIX-1; Rule 5a queue depth 2 |
+| 2026-10-11 | absorbed | roadmap-review | as NARRATE-REMOVE-1 (queued, full-spec, from HB-1) and NARRATE-REBUILD-1 (Path: epic, blocked stub) |
 
 ## Storyboard
 
