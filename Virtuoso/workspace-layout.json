@@ -12,7 +12,16 @@
       "authority": "reference",
       "mutability": "read-write",
       "owner": "write-plan",
-      "allowedWriters": ["storyboard", "write-plan", "virtuoso", "pointer-closeout", "roadmap-review"],
+      "allowedWriters": [
+        "storyboard",
+        "write-plan",
+        "virtuoso",
+        "pointer-closeout",
+        "roadmap-review"
+      ],
+      "validation": "exists",
+      "classification": "unknown",
+      "origin": "unknown",
       "label": "Holding bay (ad hoc storyboards and plans awaiting roadmap review)"
     },
     "governance": {
@@ -120,7 +129,8 @@
       "mutability": "append-only",
       "owner": "pointer-closeout",
       "allowedWriters": [
-        "pointer-closeout"
+        "pointer-closeout",
+        "virtuoso"
       ],
       "validation": "exists",
       "classification": "active",
