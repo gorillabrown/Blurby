@@ -17,7 +17,7 @@ preview) to change them.
 | Blurby monday.com live work register | `monday:board/18432450217` | connector | live | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | external |
 | Verified completion ledger | `docs/governance/terminal-ledger.jsonl` | jsonl | terminal | append-only | pointer-closeout, roadmap-review | present |
 | Lessons / retrospective | `docs/governance/LESSONS_LEARNED.md` | markdown | reference | append-only | pointer-closeout, roadmap-review, mid-dispatch-decision | present |
-| Close-outs (directory) | `docs/governance/close-outs` | directory | evidence | append-only | pointer-closeout | present |
+| Close-outs (directory) | `docs/governance/close-outs` | directory | evidence | append-only | pointer-closeout, virtuoso | present |
 | Issues (directory) | `docs/governance/bug-reports` | directory | reference | read-write | mid-dispatch-decision, next-pointer, pointer-closeout, roadmap-review | present |
 | Roadmap reviews | `docs/planning/roadmap-reviews` | directory | report | read-write | roadmap-review, roadmap-status | present |
 | Outside audits (directory) | `docs/studies/audit` | directory | evidence | append-only | 3rd-party-audit | present |
@@ -26,6 +26,7 @@ preview) to change them.
 | Operational documents (directory) | `docs/governance` | directory | reference | read-write | — | present |
 | Temp (directory) | `.tmp` | directory | reference | read-write | — | registered, not present |
 | Workflow reference | `docs/governance/TECHNICAL_REFERENCE.md` | markdown | reference | read-write | — | present |
+| Holding bay (ad hoc storyboards and plans awaiting roadmap review) | `docs/planning/holding` | directory | reference | read-write | storyboard, write-plan, virtuoso, pointer-closeout, roadmap-review | present |
 | Epics (directory) | `docs/planning/epics` | directory | reference | read-write | epic | present |
 | Retired XLSX migration source | `docs/governance/sprint-queue.xlsx` | xlsx | evidence | read-only | — | present |
 | Timestamped monday.com connector snapshot | `Virtuoso/work-register.snapshot.json` | snapshot | mirror | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | present |
@@ -49,6 +50,7 @@ governance: docs/governance
 operational: docs/governance
 temp: .tmp
 workflowReference: docs/governance/TECHNICAL_REFERENCE.md
+holdingBay: docs/planning/holding
 epics: docs/planning/epics
 x-legacyWorkRegister: docs/governance/sprint-queue.xlsx
 snapshot: Virtuoso/work-register.snapshot.json
