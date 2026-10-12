@@ -1,0 +1,48 @@
+{
+  "id": "20261012T173647Z-external-record-completion-TEST-TIMEOUT-HEADROOM-1",
+  "operation": "external-record-completion",
+  "item_id": "TEST-TIMEOUT-HEADROOM-1",
+  "created": "2026-10-12T17:36:47Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "record-completion",
+    "fields": {
+      "status": "Completed",
+      "completed": "2026-10-12",
+      "evidence": "docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md",
+      "sequence": "",
+      "notes": "Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 072a65f3 (commit ff2cd5f1); full suite 3,410 passed / 0 failed / 133 skipped twice on the owner's machine; typecheck exit 0. Mid-dispatch amendment 2026-10-12 (option A): finished on the owner's machine after the cloud run paused, with the seenBatcher typing fix added. Ledger TR-062. Close-out docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md (merge f78a3768)."
+    },
+    "expectedRevision": "7bb50b78b69fd3289f68295ce02f1b29d8c9fc77b6e2d7ded25598600ea67bd1",
+    "idempotencyKey": "record-completion:TEST-TIMEOUT-HEADROOM-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md'), ('notes', \"Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 072a65f3 (commit ff2cd5f1); full suite 3,410 passed / 0 failed / 133 skipped twice on the owner's machine; typecheck exit 0. Mid-dispatch amendment 2026-10-12 (option A): finished on the owner's machine after the cloud run paused, with the seenBatcher typing fix added. Ledger TR-062. Close-out docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "TEST-TIMEOUT-HEADROOM-1",
+      "idempotencyKey": "record-completion:TEST-TIMEOUT-HEADROOM-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md'), ('notes', \"Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 072a65f3 (commit ff2cd5f1); full suite 3,410 passed / 0 failed / 133 skipped twice on the owner's machine; typecheck exit 0. Mid-dispatch amendment 2026-10-12 (option A): finished on the owner's machine after the cloud run paused, with the seenBatcher typing fix added. Ledger TR-062. Close-out docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+      "actualRevision": "2026-10-12T17:37:05Z",
+      "recoveryId": "20261012T173647Z-external-record-completion-TEST-TIMEOUT-HEADROOM-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-12T17:37:30Z",
+        "verifiedFields": [
+          "status",
+          "completed",
+          "evidence",
+          "sequence",
+          "notes"
+        ]
+      }
+    }
+  },
+  "resolved": "2026-10-12T17:37:19Z",
+  "outcome": "succeeded"
+}
