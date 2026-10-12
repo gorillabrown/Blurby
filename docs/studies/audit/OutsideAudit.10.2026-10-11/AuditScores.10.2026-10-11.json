@@ -1,0 +1,330 @@
+{
+  "applied_cap": 7.9,
+  "assessments": {
+    "coherence": {
+      "authority_ownership": {
+        "awarded_score": 6.5,
+        "citations": [
+          "src/reader/useReaderModeOrchestrator.ts:346",
+          "src/reader/ports/createReaderPorts.ts"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "boundary_consistency": {
+        "awarded_score": 6.0,
+        "citations": [
+          "main/ipc/state.js:22",
+          "ROADMAP.md:348"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      },
+      "governance_consistency": {
+        "awarded_score": 6.0,
+        "citations": [
+          "ROADMAP.md:205",
+          "ROADMAP.md:359",
+          "src/hooks/useKeyboardShortcuts.ts:249"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      },
+      "transaction_failure_semantics": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:617",
+          "git-resume-control-result.json"
+        ],
+        "evidence": "attacked",
+        "status": "red"
+      }
+    },
+    "delivery": {
+      "executor_autonomy": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:249",
+          "ROADMAP.md:359",
+          "AuditReport.10.2026-10-11.md:F5"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "milestone_readiness": {
+        "awarded_score": 3.0,
+        "citations": [
+          "AuditReport.10.2026-10-11.md:D finding ledger",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "operational_safety": {
+        "awarded_score": 6.0,
+        "citations": [
+          "main.js:130",
+          "removal-findings.md:R5",
+          "git-resume-control-result.json"
+        ],
+        "evidence": "attacked",
+        "status": "yellow"
+      },
+      "prerequisites": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:215",
+          "ROADMAP.md:611",
+          "board-readback.json"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      }
+    },
+    "extensibility": {
+      "change_isolation": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:600",
+          "tests/readerModeBoundaries.test.ts:203"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "migration_compatibility": {
+        "awarded_score": 6.0,
+        "citations": [
+          "ROADMAP.md:231",
+          "main/ipc/state.js:25",
+          "main.js:130"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      },
+      "single_authority": {
+        "awarded_score": 6.5,
+        "citations": [
+          "src/reader/useReaderModeOrchestrator.ts",
+          "ROADMAP.md:342"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "versioned_extension_points": {
+        "awarded_score": 6.5,
+        "citations": [
+          "src/reader/modes/ReaderModeAdapter.ts",
+          "src/reader/ports/ReaderPorts.ts"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      }
+    },
+    "grounding": {
+      "artifact_completeness": {
+        "awarded_score": 3.0,
+        "citations": [
+          "MANIFEST.md:3",
+          "package.json:27",
+          "AuditReport.10.2026-10-11.md:F1"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "code_schema_correspondence": {
+        "awarded_score": 6.5,
+        "citations": [
+          "main/migrations.js:259",
+          "ROADMAP.md:231",
+          "custody.json"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "divergence_disclosure": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:676",
+          "AuditOrientation.10.2026-10-11.docx:9 Notes and limits"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "runtime_reproduction": {
+        "awarded_score": 6.0,
+        "citations": [
+          "g0-owner-observations.json:H1-H6",
+          "AuditReport.10.2026-10-11.md:A evidence scope"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      }
+    },
+    "modeling": {
+      "calibration_identifiability": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:700",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "equations_units": {
+        "awarded_score": 6.0,
+        "citations": [
+          "AuditReport.10.2026-10-11.md:F2",
+          "supplemental-source/patches/kokoro-js+1.2.1.patch:7",
+          "external-primary/tokenizer-provenance.json"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      },
+      "invariants_edges": {
+        "awarded_score": 3.0,
+        "citations": [
+          "src/utils/audio/segmentKokoroChunk.ts:170",
+          "src/utils/audioScheduler.ts:473",
+          "ROADMAP.md:698"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "law_behavior_match": {
+        "awarded_score": 6.0,
+        "citations": [
+          "main/tts-worker.js:157",
+          "src/utils/audio/tempoStretch.ts:93",
+          "ROADMAP.md:688"
+        ],
+        "evidence": "inspected",
+        "status": "yellow"
+      }
+    },
+    "sequencing": {
+      "dependency_order": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:215",
+          "ROADMAP.md:696"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "entry_gates": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:611",
+          "board-readback.json"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      },
+      "exit_gates": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:249",
+          "ROADMAP.md:261",
+          "powershell-command-controls.json"
+        ],
+        "evidence": "attacked",
+        "status": "red"
+      },
+      "migration_cutover_order": {
+        "awarded_score": 6.5,
+        "citations": [
+          "ROADMAP.md:465",
+          "ROADMAP.md:473"
+        ],
+        "evidence": "inspected",
+        "status": "green"
+      }
+    },
+    "testability": {
+      "deterministic_inputs": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:680",
+          "ROADMAP.md:700",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ],
+        "evidence": "inspected",
+        "status": "red"
+      },
+      "evidence_custody": {
+        "awarded_score": 8.9,
+        "citations": [
+          "custody.json",
+          "supplemental-source/custody.json",
+          "board-readback.json"
+        ],
+        "evidence": "attacked",
+        "status": "green"
+      },
+      "executable_commands": {
+        "awarded_score": 3.0,
+        "citations": [
+          "ROADMAP.md:229",
+          "ROADMAP.md:261",
+          "powershell-command-controls.json"
+        ],
+        "evidence": "attacked",
+        "status": "red"
+      },
+      "negative_attacks": {
+        "awarded_score": 6.0,
+        "citations": [
+          "ROADMAP.md:539",
+          "git-resume-control-result.json",
+          "removal-findings.md:R1"
+        ],
+        "evidence": "attacked",
+        "status": "yellow"
+      }
+    }
+  },
+  "auditor_independence": "same-auditor",
+  "cap_reasons": [
+    "one or more mandatory milestone gates are red",
+    "review is not fresh and independent",
+    "independent verification gate is not green"
+  ],
+  "critical_failures": [],
+  "final_score": 5.2,
+  "gate_counts": {
+    "green": 0,
+    "not-applicable": 1,
+    "red": 4,
+    "yellow": 2
+  },
+  "gates": {
+    "acceptance_custody": "red",
+    "authority_reproducibility": "yellow",
+    "code_design_convergence": "red",
+    "independent_verification": "not-applicable",
+    "migration_recovery_safety": "red",
+    "modeling_closure": "red",
+    "state_transaction_integrity": "yellow"
+  },
+  "milestone": "Design approval of the Narrate removal-then-rebuild strategy, including removal dispatch specification and Phase0 experiment validity; excludes release acceptance and unimplemented future features",
+  "milestone_authorized": false,
+  "raw_score": 5.2,
+  "scores": {
+    "coherence": 5.4,
+    "delivery": 4.6,
+    "extensibility": 6.4,
+    "grounding": 5.5,
+    "modeling": 4.5,
+    "sequencing": 5.6,
+    "testability": 5.2
+  },
+  "weights": {
+    "coherence": 0.15,
+    "delivery": 0.15,
+    "extensibility": 0.1,
+    "grounding": 0.15,
+    "modeling": 0.15,
+    "sequencing": 0.1,
+    "testability": 0.2
+  }
+}

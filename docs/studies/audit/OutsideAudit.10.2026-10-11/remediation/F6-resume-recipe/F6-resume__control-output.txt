@@ -1,0 +1,38 @@
+== S0 n=0: branch created, no C1, main unchanged
+   literal[any]  : mb=0362f663 c1= n=0 -> (B) do step 4 (write C1)
+   literal[range]: mb=0362f663 c1= n=0 -> (B) do step 4 (write C1)
+   fix: n=0 published=yes -> resume/merge as usual (naive is-ancestor-first says: PUBLISHED)
+== S0b n=0: branch created, no C1, main advanced
+   literal[any]  : mb=0362f663 c1= n=0 -> (B) do step 4 (write C1)
+   literal[range]: mb=0362f663 c1= n=0 -> (B) do step 4 (write C1)
+   fix: n=0 published=yes -> resume/merge as usual (naive is-ancestor-first says: PUBLISHED)
+== S1 interrupted after C2
+   literal[any]  : mb=0362f663 n=2 -> (B) resume at C3
+   literal[range]: mb=0362f663 n=2 -> (B) resume at C3
+   fix: n=2 published=no -> resume/merge as usual (naive is-ancestor-first says: no)
+== S2 after C2, origin/main advanced by unrelated merge
+   literal[any]  : mb=0362f663 n=2 -> (B) resume at C3
+   literal[range]: mb=0362f663 n=2 -> (B) resume at C3
+   fix: n=2 published=no -> resume/merge as usual (naive is-ancestor-first says: no)
+== S3 C1..C5 made, not merged
+   literal[any]  : mb=0362f663 n=5 -> (B) run integration merge
+   literal[range]: mb=0362f663 n=5 -> (B) run integration merge
+   fix: n=5 published=no -> resume/merge as usual (naive is-ancestor-first says: no)
+== S4 merge-before-push (merge made in integration worktree, not pushed)
+   literal[any]  : mb=0362f663 n=5 -> (B) run integration merge
+   literal[range]: mb=0362f663 n=5 -> (B) run integration merge
+   fix: n=5 published=no -> resume/merge as usual (naive is-ancestor-first says: no)
+== S5 PUBLISHED (merge pushed), close-out interrupted
+   literal[any]  : mb=6064c583 trailer=0362f663 -> (C) CONFLICT: base != C1 trailer
+   literal[range]: mb=6064c583 c1= n=0 -> (B) do step 4 (write C1)
+   fix: n=5 published -> /pointer-closeout (naive is-ancestor-first says: PUBLISHED)
+   is-ancestor(branch, origin/main): yes
+   merge-base == branch tip: yes
+   git log base..branch (with mb) count: 0
+== S6 PUBLISHED then main advanced further
+   literal[any]  : mb=6064c583 trailer=0362f663 -> (C) CONFLICT: base != C1 trailer
+   literal[range]: mb=6064c583 c1= n=0 -> (B) do step 4 (write C1)
+   fix: n=5 published -> /pointer-closeout (naive is-ancestor-first says: PUBLISHED)
+== S7 (separate history) back-merge of main into an unfinished branch
+   literal[any]  : mb=0821aadd trailer=423c23b6 -> (C) CONFLICT: base != C1 trailer
+   fix: (C) non-prefixed commit in trailer-base range

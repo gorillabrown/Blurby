@@ -1,0 +1,51 @@
+== S0  branch created, C1 never committed (n=0)
+   literal[C1 anywhere]: merge-base=2728f9c tip=2728f9c n=0 -> (B) n=0: do step 4 (npm ci, base measurement, write C1 with trailer=2728f9c)
+   literal[C1 in range]: merge-base=2728f9c tip=2728f9c n=0 -> (B) n=0: do step 4 (npm ci, base measurement, write C1 with trailer=2728f9c)
+   auditor fix order   : publication check FIRST says PUBLISHED -> /pointer-closeout (c1=none)
+   refined order       : n=0, base=2728f9c -> step 4
+== S1  interrupted after C2 (spec walk-through)
+   literal[C1 anywhere]: merge-base=cfdfbcd tip=5383107 trailer=cfdfbcd n=2 -> (B) resume at C3
+   literal[C1 in range]: merge-base=cfdfbcd tip=5383107 trailer=cfdfbcd n=2 -> (B) resume at C3
+   auditor fix order   : resume at C3
+   refined order       : resume at C3 (trailer=cfdfbcd)
+== S2  interrupted after C2, main advanced (unrelated)
+   literal[C1 anywhere]: merge-base=96649a8 tip=db396c5 trailer=96649a8 n=2 -> (B) resume at C3
+   literal[C1 in range]: merge-base=96649a8 tip=db396c5 trailer=96649a8 n=2 -> (B) resume at C3
+   auditor fix order   : resume at C3
+   refined order       : resume at C3 (trailer=96649a8)
+== S3  C1..C5 made, main advanced, not merged
+   literal[C1 anywhere]: merge-base=46a3a25 tip=e0c0fb4 trailer=46a3a25 n=5 -> (B) n=5 -> run integration merge
+   literal[C1 in range]: merge-base=46a3a25 tip=e0c0fb4 trailer=46a3a25 n=5 -> (B) n=5 -> run integration merge
+   auditor fix order   : n=5 -> run integration merge
+   refined order       : n=5 -> run integration merge
+== S4  merge made in integration worktree, NOT pushed
+   literal[C1 anywhere]: merge-base=10ae3ce tip=28b83c1 trailer=10ae3ce n=5 -> (B) n=5 -> run integration merge
+   literal[C1 in range]: merge-base=10ae3ce tip=28b83c1 trailer=10ae3ce n=5 -> (B) n=5 -> run integration merge
+   auditor fix order   : n=5 -> run integration merge
+   refined order       : n=5 -> unpushed merge a200eeb found -> push it, then /pointer-closeout
+== S5  PUBLISHED: --no-ff merge pushed (main had advanced)
+   literal[C1 anywhere]: merge-base=16e78df tip=16e78df trailer=ccc0acc -> (C) CONFLICT: base != C1 trailer; STOP
+   literal[C1 in range]: merge-base=16e78df tip=16e78df n=0 -> (B) n=0: do step 4 (npm ci, base measurement, write C1 with trailer=16e78df)
+   auditor fix order   : publication check FIRST says PUBLISHED -> /pointer-closeout (c1=yes9b48bc712828cf9254499a50bb76a9831e2e70fb)
+   refined order       : n=5, trailer=ccc0acc -> PUBLISHED -> /pointer-closeout
+   control: is-ancestor(branch, origin/main)=yes; merge-base==tip: yes; base..branch count with merge-base: 0; recorded base=ccc0acc
+== S5b PUBLISHED with main NOT advanced first
+   literal[C1 anywhere]: merge-base=817923f tip=817923f trailer=c97e1b6 -> (C) CONFLICT: base != C1 trailer; STOP
+   literal[C1 in range]: merge-base=817923f tip=817923f n=0 -> (B) n=0: do step 4 (npm ci, base measurement, write C1 with trailer=817923f)
+   auditor fix order   : publication check FIRST says PUBLISHED -> /pointer-closeout (c1=yes0281c0db2361ec24de353c299d0d6fc73e4f7401)
+   refined order       : n=5, trailer=c97e1b6 -> PUBLISHED -> /pointer-closeout
+== S6  PUBLISHED, close-out interrupted after a further main commit
+   literal[C1 anywhere]: merge-base=f0430f7 tip=f0430f7 trailer=03f1028 -> (C) CONFLICT: base != C1 trailer; STOP
+   literal[C1 in range]: merge-base=f0430f7 tip=f0430f7 n=0 -> (B) n=0: do step 4 (npm ci, base measurement, write C1 with trailer=f0430f7)
+   auditor fix order   : publication check FIRST says PUBLISHED -> /pointer-closeout (c1=yesc648471905ab6fe51f9be5ea0bb7cc395da308f6)
+   refined order       : n=5, trailer=03f1028 -> PUBLISHED -> /pointer-closeout
+== S7  PUBLISHED, branch later deleted by maintenance, close-out unfinished
+   literal[C1 anywhere]: (A) START: create branch from origin/main and re-run the whole removal
+   literal[C1 in range]: (A) START: create branch from origin/main and re-run the whole removal
+   auditor fix order   : branch absent -> (A) START
+   refined order       : branch absent but C5 is on origin/main -> PUBLISHED -> /pointer-closeout
+== S8  integration INTO branch after C2 (back-merge of origin/main)
+   literal[C1 anywhere]: merge-base=260ec84 tip=86abc76 trailer=44aa089 -> (C) CONFLICT: base != C1 trailer; STOP
+   literal[C1 in range]: merge-base=260ec84 tip=86abc76 trailer=44aa089 -> (C) CONFLICT: base != C1 trailer; STOP
+   auditor fix order   : (C) CONFLICT: subject 'Merge origin/main into branch' in trailer-base range
+   refined order       : (C) CONFLICT: 'Merge origin/main into branch' on first-parent trailer-base range

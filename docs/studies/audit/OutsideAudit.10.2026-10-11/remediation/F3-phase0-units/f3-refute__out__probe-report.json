@@ -1,0 +1,806 @@
+{
+ "node": "v24.14.0",
+ "platform": "win32",
+ "arch": "arm64",
+ "cpus": 12,
+ "cpuModel": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+ "loadMs": 1975.0728999376297,
+ "outputNames": [
+  "waveform"
+ ],
+ "inputNames": [
+  "input_ids",
+  "style",
+  "speed"
+ ],
+ "warmupMs": 3351.006900072098,
+ "rawAudioKeys": [
+  "audio",
+  "sampling_rate"
+ ],
+ "rawAudioHasData": false,
+ "runs": [
+  {
+   "name": "med",
+   "speed": 0.8,
+   "mode": "asShipped",
+   "genMs": 22738,
+   "pcmSamples": 529200,
+   "sr": 24000,
+   "audioSec": 22.05,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 0.8,
+   "mode": "dataShim",
+   "genMs": 27768,
+   "pcmSamples": 529200,
+   "sr": 24000,
+   "audioSec": 22.05,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 0.8,
+   "mode": "dataShimNoSpecials",
+   "genMs": 18072,
+   "pcmSamples": 529200,
+   "sr": 24000,
+   "audioSec": 22.05,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1,
+   "mode": "asShipped",
+   "genMs": 19978,
+   "pcmSamples": 436800,
+   "sr": 24000,
+   "audioSec": 18.2,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1,
+   "mode": "dataShim",
+   "genMs": 15725,
+   "pcmSamples": 436800,
+   "sr": 24000,
+   "audioSec": 18.2,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1,
+   "mode": "dataShimNoSpecials",
+   "genMs": 13651,
+   "pcmSamples": 436800,
+   "sr": 24000,
+   "audioSec": 18.2,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1.4,
+   "mode": "asShipped",
+   "genMs": 12662,
+   "pcmSamples": 298800,
+   "sr": 24000,
+   "audioSec": 12.45,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1.4,
+   "mode": "dataShim",
+   "genMs": 13495,
+   "pcmSamples": 298800,
+   "sr": 24000,
+   "audioSec": 12.45,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 1.4,
+   "mode": "dataShimNoSpecials",
+   "genMs": 12908,
+   "pcmSamples": 298800,
+   "sr": 24000,
+   "audioSec": 12.45,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 2,
+   "mode": "asShipped",
+   "genMs": 11436,
+   "pcmSamples": 243000,
+   "sr": 24000,
+   "audioSec": 10.125,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 2,
+   "mode": "dataShim",
+   "genMs": 13505,
+   "pcmSamples": 243000,
+   "sr": 24000,
+   "audioSec": 10.125,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "med",
+   "speed": 2,
+   "mode": "dataShimNoSpecials",
+   "genMs": 21177,
+   "pcmSamples": 243000,
+   "sr": 24000,
+   "audioSec": 10.125,
+   "fullIdsLen": 295,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 293,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "fɹʌm maɪ ɡɹˈændfɑːðɚ vˈɛɹəs aɪ lˈɜːnd ɡˈʊd mˈɔːɹəlz ænd ðə ɡˈʌvɚnmənt ʌv maɪ tˈɛmpɚ. fɹʌmðə ɹˌɛpjuːtˈeɪʃən ænd ɹᵻmˈɛmbɹəns ʌv maɪ fˈɑːðɚ, mˈɑːdəsti ænd ɐ mˈænli kˈæɹɪktɚ. fɹʌm maɪ mˈʌðɚ, pˈaɪəɾi ænd bˈɛnɪfˌɪsəns, ænd ˈæbstɪnəns, nˌɑːt ˈoʊnli fɹʌm ˈiːvəl dˈiːdz, bˌʌt ˈiːvən fɹʌm ˈiːvəl θˈɔːts.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 0.8,
+   "mode": "asShipped",
+   "genMs": 15315,
+   "pcmSamples": 253800,
+   "sr": 24000,
+   "audioSec": 10.575,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 0.8,
+   "mode": "dataShim",
+   "genMs": 18882,
+   "pcmSamples": 253800,
+   "sr": 24000,
+   "audioSec": 10.575,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 0.8,
+   "mode": "dataShimNoSpecials",
+   "genMs": 10561,
+   "pcmSamples": 253800,
+   "sr": 24000,
+   "audioSec": 10.575,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1,
+   "mode": "asShipped",
+   "genMs": 8096,
+   "pcmSamples": 213000,
+   "sr": 24000,
+   "audioSec": 8.875,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1,
+   "mode": "dataShim",
+   "genMs": 9818,
+   "pcmSamples": 213000,
+   "sr": 24000,
+   "audioSec": 8.875,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1,
+   "mode": "dataShimNoSpecials",
+   "genMs": 8438,
+   "pcmSamples": 213000,
+   "sr": 24000,
+   "audioSec": 8.875,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1.4,
+   "mode": "asShipped",
+   "genMs": 8139,
+   "pcmSamples": 141600,
+   "sr": 24000,
+   "audioSec": 5.9,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1.4,
+   "mode": "dataShim",
+   "genMs": 7500,
+   "pcmSamples": 141600,
+   "sr": 24000,
+   "audioSec": 5.9,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 1.4,
+   "mode": "dataShimNoSpecials",
+   "genMs": 6746,
+   "pcmSamples": 141600,
+   "sr": 24000,
+   "audioSec": 5.9,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 2,
+   "mode": "asShipped",
+   "genMs": 5844,
+   "pcmSamples": 120600,
+   "sr": 24000,
+   "audioSec": 5.025,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 2,
+   "mode": "dataShim",
+   "genMs": 5786,
+   "pcmSamples": 120600,
+   "sr": 24000,
+   "audioSec": 5.025,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  },
+  {
+   "name": "stress",
+   "speed": 2,
+   "mode": "dataShimNoSpecials",
+   "genMs": 6547,
+   "pcmSamples": 120600,
+   "sr": 24000,
+   "audioSec": 5.025,
+   "fullIdsLen": 141,
+   "fullFirstLast": [
+    0,
+    0
+   ],
+   "durLen": null,
+   "sumRoundedBins": 0,
+   "samplesPerBin": null,
+   "perWordLens": [],
+   "perWordSpecialWrapped": 0,
+   "warns": [],
+   "gotTable": false,
+   "identity": {
+    "joinedLen": 0,
+    "synthLen": 139,
+    "exactMatch": false,
+    "firstDiff": 0,
+    "fullPhonemes": "ɪn ˈeɪtiːn sˈɪksti sˈɛvən, dˈɑːktɚ smˈɪθ pˈeɪd fˈoːɹ dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ θɹˈiː bˈʊks; ðə ðə bˈʊks wɜːɹ ˈoʊld, wˈoːɹn, ænd lˈʌvd.",
+    "perWordPhonemes": []
+   }
+  }
+ ],
+ "latency": [
+  {
+   "speed": 0.8,
+   "k": 0,
+   "ms": 8064,
+   "gotTable": false,
+   "audioSec": 7.25
+  },
+  {
+   "speed": 0.8,
+   "k": 1,
+   "ms": 6854,
+   "gotTable": false,
+   "audioSec": 7.25
+  },
+  {
+   "speed": 0.8,
+   "k": 2,
+   "ms": 6891,
+   "gotTable": false,
+   "audioSec": 7.25
+  },
+  {
+   "speed": 1,
+   "k": 0,
+   "ms": 6972,
+   "gotTable": false,
+   "audioSec": 6.08
+  },
+  {
+   "speed": 1,
+   "k": 1,
+   "ms": 6874,
+   "gotTable": false,
+   "audioSec": 6.08
+  },
+  {
+   "speed": 1,
+   "k": 2,
+   "ms": 6927,
+   "gotTable": false,
+   "audioSec": 6.08
+  },
+  {
+   "speed": 1.4,
+   "k": 0,
+   "ms": 6605,
+   "gotTable": false,
+   "audioSec": 4.17
+  },
+  {
+   "speed": 1.4,
+   "k": 1,
+   "ms": 6014,
+   "gotTable": false,
+   "audioSec": 4.17
+  },
+  {
+   "speed": 1.4,
+   "k": 2,
+   "ms": 4637,
+   "gotTable": false,
+   "audioSec": 4.17
+  },
+  {
+   "speed": 2,
+   "k": 0,
+   "ms": 5796,
+   "gotTable": false,
+   "audioSec": 3.38
+  },
+  {
+   "speed": 2,
+   "k": 1,
+   "ms": 5668,
+   "gotTable": false,
+   "audioSec": 3.38
+  },
+  {
+   "speed": 2,
+   "k": 2,
+   "ms": 5180,
+   "gotTable": false,
+   "audioSec": 3.38
+  }
+ ]
+}

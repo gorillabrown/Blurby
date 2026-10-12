@@ -1,0 +1,65 @@
+ONNX inputNames [ 'input_ids', 'style', 'speed' ] outputNames [ 'waveform' ]
+tokenize "həlˈoʊ" dims [ 1, 8 ] ids [
+    0, 50,  83, 54,
+  156, 57, 135,  0
+]
+tokenize "a" dims [ 1, 3 ] ids [ 0, 43, 0 ]
+tokenize "" dims [ 1, 2 ] ids [ 0, 0 ]
+[
+ {
+  "text": "Hello world.",
+  "words": 2,
+  "waveformSamples": 41400,
+  "hasDataGetter": false,
+  "hasDurations": false,
+  "hasWordTimestamps": false,
+  "durationsLen": null,
+  "durationsRawHead": null,
+  "sumRoundedFrames": null,
+  "samplesPerFrame": null,
+  "wordTimestamps": null,
+  "warnings": []
+ },
+ {
+  "text": "The quick brown fox jumps over the lazy dog.",
+  "words": 9,
+  "waveformSamples": 88800,
+  "hasDataGetter": false,
+  "hasDurations": false,
+  "hasWordTimestamps": false,
+  "durationsLen": null,
+  "durationsRawHead": null,
+  "sumRoundedFrames": null,
+  "samplesPerFrame": null,
+  "wordTimestamps": null,
+  "warnings": []
+ },
+ {
+  "text": "It was a bright cold day in April, and the clocks were striking thirteen.",
+  "words": 14,
+  "waveformSamples": 118800,
+  "hasDataGetter": false,
+  "hasDurations": false,
+  "hasWordTimestamps": false,
+  "durationsLen": null,
+  "durationsRawHead": null,
+  "sumRoundedFrames": null,
+  "samplesPerFrame": null,
+  "wordTimestamps": null,
+  "warnings": []
+ },
+ {
+  "text": "She paid $5.50 for 3 apples in 1984.",
+  "words": 8,
+  "waveformSamples": 135000,
+  "hasDataGetter": false,
+  "hasDurations": false,
+  "hasWordTimestamps": false,
+  "durationsLen": null,
+  "durationsRawHead": null,
+  "sumRoundedFrames": null,
+  "samplesPerFrame": null,
+  "wordTimestamps": null,
+  "warnings": []
+ }
+]

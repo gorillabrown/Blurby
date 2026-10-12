@@ -1,0 +1,73 @@
+== S11 fresh, no branch | expected: (A)
+   current : (A) START
+   proposed: (A) START
+== S0 branch, no C1, main static | expected: n=0 step 4
+   current : (B) n=0 -> step 4
+   proposed: (B) n=0 -> step 4
+== S0b branch, no C1, main advanced | expected: n=0 step 4
+   current : (B) n=0 -> step 4
+   proposed: (B) n=0 -> step 4
+== S1 after C2 | expected: resume C3
+   current : (B) resume C3
+   proposed: (B) resume C3
+== S2 after C2, main advanced | expected: resume C3
+   current : (B) resume C3
+   proposed: (B) resume C3
+== S3 C1-C5 unmerged, main advanced | expected: integration
+   current : (B) n=5 -> integration
+   proposed: (B) n=5 -> integration
+   integrate: merge -> Merge made by the 'ort' strategy.
+== S4 merged, not pushed | expected: integration (reuse)
+   current : (B) n=5 -> integration
+   proposed: (B) n=5 -> integration
+   integrate: merge already made, skip
+   integrate: pushed
+== S4 after re-integrate | expected: PUBLISHED
+   current : (C) base b71f4965 != trailer 94fc27ca
+   proposed: PUBLISHED -> /pointer-closeout (merge 6d1e3352)
+   integrate: merge -> Merge made by the 'ort' strategy.
+== S4b merged, not pushed, main advanced | expected: integration
+   current : (B) n=5 -> integration
+   proposed: (B) n=5 -> integration
+   integrate: merge already made, skip
+   integrate: push rejected -> (C)
+== S4b after rejected push | expected: n=5 integration, push already reported (C)
+   current : (B) n=5 -> integration
+   proposed: (B) n=5 -> integration
+== S4c merge worktree created, no merge, main advanced | expected: integration
+   current : (B) n=5 -> integration
+   proposed: (B) n=5 -> integration
+   integrate: merge -> Merge made by the 'ort' strategy.
+   integrate: pushed
+== S4c after integrate | expected: PUBLISHED
+   current : (C) base 433c6ee7 != trailer af90e39e
+   proposed: PUBLISHED -> /pointer-closeout (merge 78d7c4f2)
+   integrate: merge -> Merge made by the 'ort' strategy.
+   integrate: pushed
+== S5 published, main static | expected: PUBLISHED
+   current : (C) base af370161 != trailer 81257ae9
+   proposed: PUBLISHED -> /pointer-closeout (merge 1483910b)
+   integrate: merge -> Merge made by the 'ort' strategy.
+   integrate: pushed
+== S5b published, main advanced before and after | expected: PUBLISHED
+   current : (C) base 48c7daed != trailer d3547ce2
+   proposed: PUBLISHED -> /pointer-closeout (merge eb225893)
+   integrate: merge -> Merge made by the 'ort' strategy.
+   integrate: pushed
+== S6 published + partial close-out on main | expected: PUBLISHED
+   current : (C) base e8488b3c != trailer 017e60e9
+   proposed: PUBLISHED -> /pointer-closeout (merge b4c848f5)
+   integrate: merge -> Merge made by the 'ort' strategy.
+   integrate: pushed
+== S7 published then branch+worktrees removed | expected: (C), not (A)
+   current : (A) START
+   proposed: (C) C-commits on origin/main but no branch
+== S8 main merged into branch | expected: (C)
+   current : (C) base 77ca25b6 != trailer 7f43cae4
+   proposed: (C) bad chain at #3: unrelated 9
+== S9 fast-forward publication (no --no-ff) | expected: (C)
+   current : (C) base 77c3294e != trailer 099780e2
+   proposed: (C) on origin/main without exactly one --no-ff merge
+== S10 C1-C2 already on main | expected: (C)
+   current : (C) base 9bf1d975 != trailer d22f07fd
+   proposed: (C) partial chain already on origin/main

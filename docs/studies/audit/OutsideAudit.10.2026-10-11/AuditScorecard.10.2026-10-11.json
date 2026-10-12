@@ -1,0 +1,275 @@
+{
+  "milestone": "Design approval of the Narrate removal-then-rebuild strategy, including removal dispatch specification and Phase0 experiment validity; excludes release acceptance and unimplemented future features",
+  "assessments": {
+    "grounding": {
+      "artifact_completeness": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "MANIFEST.md:3",
+          "package.json:27",
+          "AuditReport.10.2026-10-11.md:F1"
+        ]
+      },
+      "code_schema_correspondence": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "main/migrations.js:259",
+          "ROADMAP.md:231",
+          "custody.json"
+        ]
+      },
+      "runtime_reproduction": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "g0-owner-observations.json:H1-H6",
+          "AuditReport.10.2026-10-11.md:A evidence scope"
+        ]
+      },
+      "divergence_disclosure": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:676",
+          "AuditOrientation.10.2026-10-11.docx:9 Notes and limits"
+        ]
+      }
+    },
+    "coherence": {
+      "authority_ownership": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "src/reader/useReaderModeOrchestrator.ts:346",
+          "src/reader/ports/createReaderPorts.ts"
+        ]
+      },
+      "boundary_consistency": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "main/ipc/state.js:22",
+          "ROADMAP.md:348"
+        ]
+      },
+      "transaction_failure_semantics": {
+        "status": "red",
+        "evidence": "attacked",
+        "citations": [
+          "ROADMAP.md:617",
+          "git-resume-control-result.json"
+        ]
+      },
+      "governance_consistency": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:205",
+          "ROADMAP.md:359",
+          "src/hooks/useKeyboardShortcuts.ts:249"
+        ]
+      }
+    },
+    "sequencing": {
+      "dependency_order": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:215",
+          "ROADMAP.md:696"
+        ]
+      },
+      "entry_gates": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:611",
+          "board-readback.json"
+        ]
+      },
+      "exit_gates": {
+        "status": "red",
+        "evidence": "attacked",
+        "citations": [
+          "ROADMAP.md:249",
+          "ROADMAP.md:261",
+          "powershell-command-controls.json"
+        ]
+      },
+      "migration_cutover_order": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:465",
+          "ROADMAP.md:473"
+        ]
+      }
+    },
+    "modeling": {
+      "equations_units": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "AuditReport.10.2026-10-11.md:F2",
+          "supplemental-source/patches/kokoro-js+1.2.1.patch:7",
+          "external-primary/tokenizer-provenance.json"
+        ]
+      },
+      "invariants_edges": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "src/utils/audio/segmentKokoroChunk.ts:170",
+          "src/utils/audioScheduler.ts:473",
+          "ROADMAP.md:698"
+        ]
+      },
+      "calibration_identifiability": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:700",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ]
+      },
+      "law_behavior_match": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "main/tts-worker.js:157",
+          "src/utils/audio/tempoStretch.ts:93",
+          "ROADMAP.md:688"
+        ]
+      }
+    },
+    "extensibility": {
+      "versioned_extension_points": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "src/reader/modes/ReaderModeAdapter.ts",
+          "src/reader/ports/ReaderPorts.ts"
+        ]
+      },
+      "migration_compatibility": {
+        "status": "yellow",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:231",
+          "main/ipc/state.js:25",
+          "main.js:130"
+        ]
+      },
+      "single_authority": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "src/reader/useReaderModeOrchestrator.ts",
+          "ROADMAP.md:342"
+        ]
+      },
+      "change_isolation": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:600",
+          "tests/readerModeBoundaries.test.ts:203"
+        ]
+      }
+    },
+    "testability": {
+      "executable_commands": {
+        "status": "red",
+        "evidence": "attacked",
+        "citations": [
+          "ROADMAP.md:229",
+          "ROADMAP.md:261",
+          "powershell-command-controls.json"
+        ]
+      },
+      "deterministic_inputs": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:680",
+          "ROADMAP.md:700",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ]
+      },
+      "negative_attacks": {
+        "status": "yellow",
+        "evidence": "attacked",
+        "citations": [
+          "ROADMAP.md:539",
+          "git-resume-control-result.json",
+          "removal-findings.md:R1"
+        ]
+      },
+      "evidence_custody": {
+        "status": "green",
+        "evidence": "attacked",
+        "citations": [
+          "custody.json",
+          "supplemental-source/custody.json",
+          "board-readback.json"
+        ]
+      }
+    },
+    "delivery": {
+      "prerequisites": {
+        "status": "green",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:215",
+          "ROADMAP.md:611",
+          "board-readback.json"
+        ]
+      },
+      "executor_autonomy": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "ROADMAP.md:249",
+          "ROADMAP.md:359",
+          "AuditReport.10.2026-10-11.md:F5"
+        ]
+      },
+      "operational_safety": {
+        "status": "yellow",
+        "evidence": "attacked",
+        "citations": [
+          "main.js:130",
+          "removal-findings.md:R5",
+          "git-resume-control-result.json"
+        ]
+      },
+      "milestone_readiness": {
+        "status": "red",
+        "evidence": "inspected",
+        "citations": [
+          "AuditReport.10.2026-10-11.md:D finding ledger",
+          "AuditReport.10.2026-10-11.md:G Phase0 gates"
+        ]
+      }
+    }
+  },
+  "gates": {
+    "authority_reproducibility": "yellow",
+    "code_design_convergence": "red",
+    "acceptance_custody": "red",
+    "modeling_closure": "red",
+    "state_transaction_integrity": "yellow",
+    "migration_recovery_safety": "red",
+    "independent_verification": "not-applicable"
+  },
+  "gate_exclusions": {
+    "independent_verification": "Internal technical audit coordinated by the prior reviewer, with fresh package-only analyst inputs. This is not independent milestone authorization or clean-room runtime reproduction."
+  },
+  "critical_failures": [],
+  "auditor_independence": "same-auditor",
+  "evidence_root": "C:\\Projects\\Blurby-artifacts\\outsideaudit-10-review-cfc4a61a",
+  "source_commit": "8ee49de3",
+  "package_sha256": "c0e210b722d824d3699a3a65a295d3f10ae55b0df894c85003a103a9b1e1c9e2"
+}

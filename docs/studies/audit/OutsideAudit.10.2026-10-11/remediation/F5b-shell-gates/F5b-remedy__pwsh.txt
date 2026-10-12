@@ -1,0 +1,13 @@
+DW1	exit=0	stdout_lines=35	stderr_lines=0	first=main/python-sidecar-engine.js
+DW5	exit=0	stdout_lines=9	stderr_lines=0	first=src/components/CommandPalette.tsx:112:      { type: "setting", label: "Narration (TTS)", sublabel: "Enable TTS, voice engine, Kokoro AI", onSelect: act(() => onOpenSettings("tts")) },
+DW8a	exit=0	stdout_lines=11	stderr_lines=0	first=main.js:443:function scheduleBackgroundStartupTasks(startupContext = {}) {
+DW9a	exit=0	stdout_lines=51	stderr_lines=0	first=preload.js:167:  kokoroPreload: () => ipcRenderer.invoke("tts-kokoro-preload"),
+DW9b	exit=0	stdout_lines=82	stderr_lines=0	first=src/components/ReaderContainer.tsx:620:        ? api.kokoroPreload
+DW10a	exit=0	stdout_lines=9	stderr_lines=0	first=main/moss-nano-engine.js
+DW10b	exit=0	stdout_lines=18	stderr_lines=0	first=main/ipc/tts.js:212:  ipcMain.handle("tts-nano-status", async () => {
+DW11	exit=0	stdout_lines=12	stderr_lines=0	first=.github/workflows/ci.yml:26:  quality-gate:
+NEG_nomatch	exit=1	stdout_lines=0	stderr_lines=0	first=
+NEG_badregex	exit=0	stdout_lines=112	stderr_lines=0	first=main/ipc/bug-report.js:19:  ipcMain.handle("capture-bug-screenshot", async () => {
+NEG_missingpath	exit=1	stdout_lines=0	stderr_lines=0	first=
+NEG_lsfiles_nomatch	exit=0	stdout_lines=0	stderr_lines=0	first=
+DW249h	exit=1	stdout_lines=0	stderr_lines=0	first=
