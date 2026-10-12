@@ -1,6 +1,6 @@
 # OutsideAudit.10 — Remediation Plan (D3)
 
-**Status:** draft, pending the owner rulings in §5. Nothing in ROADMAP.md, the register, or the code has changed yet. The exact edits land as a proposed diff on branch `eb/outside-audit-10-remediation` after the rulings, and merge only after the auditor's review (D4) closes the loop (D5).
+**Status:** owner rulings R1–R12 approved as recommended (owner, 2026-10-11; §5). The proposed diff on branch `eb/outside-audit-10-remediation` applies them to ROADMAP.md, the held storyboard and the governance docs. Nothing merges, and the register and the code stay unchanged, until the auditor's review (D4) closes the loop (D5).
 
 **Inputs:**
 - `AuditReport.10.2026-10-11.md` (D2): verdict "partially flawed", calculated 5.2/10, milestone not authorized.
@@ -46,7 +46,7 @@ These are places where verification found the report wrong, overstated or unders
 | C7 | F5c: Page Shift+Space | Confirmed. Shift+Space in Page has been select-only since `92d6b220` (2026-03-27); stale help text misled D15. Missed: D8's removal of `toggleNarration` shifts the positional `useReaderKeys` slots. The shifted callbacks are all optional `() => void`, so a misaligned call type-checks. The corrected smoke catches it |
 | C8 | F6: "moving main" breaks the base | The trigger is **publication itself**. Unrelated advances of `main` leave the merge-base unchanged. The report's fix is unsafe as written: a bare `is-ancestor` publication test sends an unstarted branch (n = 0) to close-out, because an empty branch is always an ancestor. Severity Medium (the failure is a safe STOP). 19-row disposable-repo control: `remediation/F6-resume-recipe/` |
 | C9 | F7: make the writer awaitable | It is not a one-liner. Returning the promise makes a failed startup write reject `loadState` inside `app.whenReady().then(...)`, which has no `catch`. The window would never open |
-| C10 | B/F: tempo "per-window shifts" | At 21 of the 22 non-bucket speeds the stretcher copies bucket-speed audio unchanged, then truncates or repeats its tail. Only 2.00x runs a real stretch. `getAudioProgress` (interpolated progress) is dead code after the separation. The live 450 ms lag sites are `audioScheduler.ts:587/620/630`, not `1007-1012` |
+| C10 | B/F: tempo "per-window shifts" | At 21 of the 22 non-bucket speeds the stretcher copies bucket-speed audio unchanged, then truncates or repeats its tail. Only 2.00x runs a real stretch. `getAudioProgress` (interpolated progress) is dead code after the separation. The live 450 ms lag sites are `audioScheduler.ts:587/619/631`, not `1007-1012` |
 | C11 | E: Rule 5a after 5–7 close | Worse than stated. The recipe moves the item to In Flight *before* step 2 counts the queue, so a stop orphans it In Flight. Other defects: the removal deletes evaluation-harness assets but does not own lane B; Done-when 8 implicitly freezes the kept Kokoro files, which the forbidden list does not name; and "the e-ink fix may run in parallel" contradicts the item's own prerequisites |
 
 ## 3. Response matrix
@@ -62,7 +62,7 @@ Dispositions: **A** accept · **AN** accept with narrowing · **D** defer · **R
 | **F5a** count gates contradict the prescribed code | A | True (C5) | Four fixed-string counts, each expecting `main/sync-engine.js:1`, dry-run against the prescribed edit, the base and three wrong variants | Removal spec rev 4 |
 | **F5b** invalid shell commands | A, wider (C6) | True and wider | One shell (PowerShell 7). `git grep -P` with single-quoted patterns (`\x22` for a quote). An exact-exit-code rule. No `rg`. A base positive control for every no-match gate | Removal spec rev 4; rebuild command convention |
 | **F5c** Page Shift+Space smoke is wrong | A | True (C7). Keep Page behaviour | Rewrite D15 (two routes) and smoke 16(f) (Page stays; outline alternates); add a slot-alignment review item. Stale help text and replica tests become a note for UX-POLISH-1's re-authoring, not new scope | Removal spec rev 4; UX-POLISH-1 note |
-| **F6** resume rejects published work | AN (re-rated Medium) | True (C8). Narrowed: one rule for an interrupted merge-before-push ("an unpushed merge of the branch tip already exists → push it"), not a full worktree protocol | Base from C1's trailer with `C1^ == base`. "Already published" only for n = 5 through one `--no-ff` merge. (A) checks `origin/main` for C-commits. New conflict cases and walk-through rows | Removal spec rev 4; rebuild charter carry-over |
+| **F6** resume rejects published work | AN (re-rated Medium) | True (C8). Narrowed: one rule for an interrupted merge-before-push ("an unpushed merge of the branch tip already exists → push it"), in one merge worktree that is reused, so a merge made before an interrupted push is pushed, not repeated | Base from C1's trailer with `C1^ == base`. "Already published" only for n = 5 through one `--no-ff` merge. (A) checks `origin/main` for C-commits. New conflict cases and walk-through rows | Removal spec rev 4; rebuild charter carry-over |
 | **F7** save submission presented as persistence | AN | True. Narrowed: the removal's invariant does not depend on completion, because every load and every cloud apply re-normalizes. Making the writer awaitable needs a startup failure policy (C9) | Reword "persists" to "submits"; add a D12 durability boundary; qualify D13 and its duplicate rollback and LL-006 lines; a gate checking the writer is unchanged. File **BUG-185** (Low, settings writer) | Removal spec rev 4; BUG_REPORT |
 | **SEC** inherited architecture facts (B/F) | AN | Load-bearing facts hold; two descriptions are wrong (C10). No removal change: every mechanism is deleted or byte-frozen (Done-when 8) | Six corrected charter inputs: no fixed lag, provenance not a flag, no stretch, no overlapping joins, raw audio first, one clock | Rebuild stub |
 | **GOV-1** Rule 5a stops the removal | A | True and worse (C11) | Read-only step 2 *before* the In Flight move (D14 aligned). Rule 5a per owner ruling R1 | Removal spec rev 4 |
@@ -85,8 +85,8 @@ The verified per-finding designs gave old → new text for each line. They overl
 | ID | Change | Resolves |
 |---|---|---|
 | R-1 | **Settings IPC seam.** Covers the What sentence, D12 (three seams, rationale), Done-when 7 case (e), the omission control, wiring, Review focus 1, the Wave B edit site (`main/ipc/state.js`: `require` plus `normalizeReaderModes(settings);` directly after `Object.assign`), Tests, C3 staging and LL-121 applied | F4 |
-| R-2 | **Wiring gates.** Four `git grep -cF` counts, each expecting `main/sync-engine.js:1`, single-quoted per R-3. A dry-run note covers *all* new wiring gates, F4's and F7's included | F5a, critic |
-| R-3 | **Shell and exit-code rule.** The Done-when header names PowerShell 7 and the gate rule. The seven `rg` gates become `git grep -P`; `ls-files` loses its pipe; the `:453` constants rule is fixed; the recipe preamble names `pwsh`; step 4 adds base positive controls (35, 9, 11, 51, 82, 9, 18, 12 lines on `b4335606`) | F5b |
+| R-2 | **Wiring gates.** Four `git grep -cF` counts (`-w` on the two call-site counts), each expecting `main/sync-engine.js:1`, single-quoted per R-3. A dry-run note covers *all* new wiring gates, F4's and F7's included | F5a, critic |
+| R-3 | **Shell and exit-code rule.** The Done-when header names PowerShell 7 and the gate rule. The seven `rg` gates become `git grep -P`; `ls-files` loses its pipe; the `:453` constants rule is fixed; the recipe preamble names `pwsh`; step 4 adds base positive controls (35, 9, 11, 51, 68, 9, 18, 12 lines on `b4335606`; the second Done-when 9 search excludes the kept `ttsCacheEnabled` field) | F5b |
 | R-4 | **Shift+Space.** D15 rewritten (Page: `cycleMode`, select-only; Focus/Flow: `cycleAndStart`); smoke 16(f) rewritten; Review focus 6 added (slot alignment after D8); task row 7 updated | F5c |
 | R-5 | **Resume recipe.** Base from C1's trailer with `C1^ == base`; at most one C1; the n = 0 rule; the "already published" exit (n = 5, one `--no-ff` merge whose second parent is the branch tip); (A) checks `origin/main`; new (C) examples; walk-through rows; D14 rewritten. Wave C: an existing unpushed merge is pushed, not repeated; the integration-tree check (G6) runs before the push | F6, G6 |
 | R-6 | **Durability boundary.** "Persists" becomes "submits to the settings save" (Done-when 7 a–c, Wave B edit sites). D12 gets a durability-boundary paragraph. D13 and the duplicate claims at Rollback and LL-006 are qualified. A gate checks the writer is unchanged; `applyCloudSettings` stays synchronous | F7 |
@@ -110,7 +110,7 @@ What does **not** change: the Delete list, the kept files, the waves, the 16 Don
 | B-7 | **Carry-overs.** The acceptance-command convention (F5b); the resume base comes from the phase's own trailer (F6); `/epic` estimates and timeboxes Phase 0 | F5b, F6, critic |
 | B-8 | **Why line.** H1–H6 were observed on estimated timing labelled trusted, and no single mechanism is proved responsible | F2, A10 |
 | B-9 | **Done-when 3 and 5.** Tolerance per R4, with an "inconclusive, not a pass" rule; the Phase 0 verdict records each failure's classification | F3 |
-| B-10 | **Storyboard.** The A8 row rewritten once; A1/F5 cold scope per R3; the Decisions table gets the new rulings; the draft stub mirrors ROADMAP, which governs where they differ | F2, F3 |
+| B-10 | **Storyboard.** The A8 row rewritten once; A1/F5 cold scope per R3; the Decisions table gets the new rulings; the draft stub is not mirrored: a note above it says ROADMAP.md NARRATE-REBUILD-1 governs for Phase 0 and the core contract | F2, F3 |
 
 ### Package G — governance corrections (docs only)
 
@@ -125,13 +125,13 @@ What does **not** change: the Delete list, the kept files, the waves, the 16 Don
 - **CLAUDE.md:** the open-bug count becomes 3. At D5, add an OutsideAudit.10 row to External Audit Outcomes, marked "internal, coordinated; not independent".
 - **Register:** one combined mutation on NARRATE-REMOVE-1 (notes: "spec revision 4, OutsideAudit.10"; status and Seq unchanged) after the merged diff lands. Then read it back and refresh the snapshot (standing rule 40).
 
-## 5. Blocking decisions — owner rulings needed
+## 5. Owner rulings (2026-10-11: all approved as recommended)
 
-Each has a recommended answer. The proposed diff will use the ruled values; until then they are proposals.
+Each was approved as recommended on 2026-10-11; the proposed diff uses these values.
 
 | # | Decision | Recommended |
 |---|---|---|
-| R1 | Rule 5a (queue depth ≥ 3) will stop the removal once items 5–7 close: every other open item is blocked on the removal itself. Waive it **for this one dispatch**, re-armed at the removal's close-out, where `/roadmap-review` backfills? | **Yes, waive for this dispatch only.** Backfilling means writing three unrelated specs that can't run alongside a shared-core sprint |
+| R1 | Rule 5a (queue depth ≥ 3) will stop the removal once items 5–7 close: every other open item is blocked on the removal itself. Waive it **for this one dispatch**, re-armed at the removal's close-out, where `/roadmap-review` backfills? | **Yes, waive for this dispatch only.** Backfilling means writing three unrelated specs that can't run alongside a shared-core sprint. The waiver names both places the stop is written, CLAUDE.md Rule 5a and ROADMAP standing rule 8, and covers no other dispatch |
 | R2 | May Phase 0 (and the shipped rebuild) use a Kokoro model that exposes its predicted durations? It would be made by a deterministic, hash-checked **local** edit of the pinned model, with no download, kept beside the original, which stays untouched. And does an export, adapter, unit or mapping failure count as a repair, not a bake-off trigger? | **Yes to both.** Verified offline: exposing the internal tensor gives 600 × Σ = PCM length exactly. The gap is in the export, not in Kokoro |
 | R3 | The 2-second start target (A1): does it cover a cold start, meaning the first Play after launch or after the 5-minute idle unload? | **2 s once the voice is ready; a cold start shows "voice loading" and must speak within 8 s.** The 8 s is fixed now, before measurement, so it can fail. Cold load measured about 5 s in plain Node (indicative only) |
 | R4 | Boundary accuracy: worst error ≤ 30 ms at every boundary the waveform-only reference resolves, with reference uncertainty ≤ 10 ms (otherwise "inconclusive"), plus a 40 ms negative control. Interior boundaries with no pause rely on the model's frame-exact construction and P0-2's mapping coverage, with no manual annotation | **Accept as proposed.** The fallback option adds a small owner-annotated interior sample |
@@ -155,14 +155,22 @@ Each has a recommended answer. The proposed diff will use the ruled values; unti
 6. Run F4 case (e) as a scratch control: it fails on the base and passes with the two-line edit.
 7. Check every code citation in the revised stub against `b4335606`.
 
+**Results on the proposed diff (2026-10-11).** A second verification run applied the edits and checked them with seven independent checks: gates, recipe replay, closure check, settings-IPC control, spec compliance, an executor's read and citations. One fix round followed, then a re-check; the planner applied the final fixes. Outputs are in `remediation/post-apply/`.
+- **Gates:** every command parses in PowerShell 7 and 5.1. The base positive controls give 35, 9, 11, 51, 68, 9, 18 and 12 lines. Every wiring gate prints its stated line on the prescribed edits, and each wrong variant fails at least one.
+- **Recipe:** 52 scenario rows replayed in disposable repositories. Every row gives the outcome the spec text predicts, including published work, a merge made before an interrupted push, `main` moving during the run, and a removed branch.
+- **Closure check v3:** the ROADMAP code block is byte-identical to the verified checker. Its self-test reports 7/7, and it finds 0 dangling imports on the tree.
+- **Case (e):** written exactly as specified and run with vitest. It fails on the base, passes with the two-line edit, and fails again when the normalize line is omitted.
+- **Spec compliance:** all 31 merge-brief items are applied, and nothing else changed in the removal's scope. The lessons gate passes for both items.
+- **Executor's read:** of the 23 ambiguities found in the first read, all are resolved. Of the issues raised in the re-read, the last two majors, standing rule 8 and a commit slot for fixes after C4, were fixed by the planner afterwards.
+
 **At removal execution:** the revised Done-when, which are unchanged in scope. Then the integration-tree check before the push (R-5).
 
 **At Phase 0:** P0-1…P0-5 per the charter. The verdict classifies each failure as repaired adapter or engine limit.
 
 ## 7. Corrected execution order
 
-1. **Now:** owner rulings R1–R12.
-2. **Planner:** proposed diff on `eb/outside-audit-10-remediation` (Packages R, B, G), the §6 dry-runs, and the D4 package.
+1. **Done (2026-10-11):** owner rulings R1–R12, all as recommended.
+2. **Done (2026-10-11):** proposed diff on `eb/outside-audit-10-remediation` (Packages R, B, G), the §6 dry-runs, and the D4 package (`AuditResponse.10.2026-10-11.zip`).
 3. **D4:** a fresh reviewer gets the D4 package and the Step 3 prompt, and answers line by line.
 4. **D5:** apply the final decisions; merge; one register mutation; CLAUDE.md audit row; lessons.
 5. **Not blocked by this audit, in parallel now:** TEST-TIMEOUT-HEADROOM-1 (5) ∥ EINK-HOVER-FIX-1 (6), then the LIBRARY-SETTINGS-FIX-1 close-out (7).

@@ -1,0 +1,23 @@
+01 exit=0 lines=35 stderr=none first=main/python-sidecar-engine.js
+02 exit=0 lines=9 stderr=none first=src/components/CommandPalette.tsx:112:      { type: "setting", label: "Narration (TTS)", sublabel: "Enable TTS, voice engine, Kokoro AI", onSelect: act(() => onOpenSettings("tts")) },
+03 exit=0 lines=11 stderr=none first=main.js:443:function scheduleBackgroundStartupTasks(startupContext = {}) {
+04 exit=0 lines=0 stderr=none first=
+05 exit=0 lines=51 stderr=none first=preload.js:167:  kokoroPreload: () => ipcRenderer.invoke("tts-kokoro-preload"),
+06 exit=0 lines=82 stderr=none first=src/components/ReaderContainer.tsx:620:        ? api.kokoroPreload
+07 exit=0 lines=9 stderr=none first=main/moss-nano-engine.js
+08 exit=0 lines=18 stderr=none first=main/ipc/tts.js:212:  ipcMain.handle("tts-nano-status", async () => {
+09 exit=1 lines=0 stderr=none first=
+10 exit=0 lines=12 stderr=none first=.github/workflows/ci.yml:26:  quality-gate:
+11 exit=0 lines=0 stderr=none first=
+12 exit=0 lines=0 stderr=none first=
+13 exit=0 lines=3 stderr=none first=NARRATE_SPEED_MIN_HUNDREDTHS
+14 exit=1 lines=0 stderr=none first=
+15 exit=0 lines=0 stderr=none first=
+16 exit=0 lines=0 stderr=none first=
+17 exit=1 lines=0 stderr=none first=
+18 exit=1 lines=0 stderr=none first=
+19 exit=0 lines=1 stderr=none first=main/sync-engine.js:2
+20 exit=0 lines=1 stderr=none first=main/sync-engine.js:2
+21 exit=1 lines=0 stderr=none first=
+22 exit=0 lines=1 stderr=none first=main.js:130:function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }
+23 exit=1 lines=0 stderr=none first=

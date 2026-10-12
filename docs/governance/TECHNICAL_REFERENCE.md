@@ -346,7 +346,7 @@ Infinite-scroll reading with a reading-window/line progression pacer.
 TTS-driven reading with chunk/word highlight and audio-owned progress.
 
 - Delegates all playback timing to the narration engine (`useNarration` hook)
-- Kokoro uses trusted word-native timing when accepted by `audioScheduler`; Web Speech uses browser boundary events when available
+- Kokoro uses trusted word-native timing when accepted by `audioScheduler`; Web Speech uses browser boundary events when available (OutsideAudit.10: on the installed model this was always the weighted fallback labelled trusted; see the correction above the NARR-TIMING section and LL-142)
 - Speed controlled by TTS rate (0.5-2.0x), not WPM
 - Effective WPM derived as: `ttsRate * TTS_RATE_BASELINE_WPM` (150)
 - Uses `NarrationInterface` to bridge with hook consumers without importing React into mode abstractions
@@ -604,6 +604,8 @@ Standing architecture-decision reference: `docs/governance/TTS_ARCHITECTURE_DECI
 **Canonical cursor separation (TTS-7R):** `useNarration.ts` holds `lastConfirmedAudioWordRef = useRef(0)`, updated only by the audio scheduler's `onWordAdvance` callback (confirmed audio boundary crossings). `speakNextChunkKokoro` reads chunk start from `lastConfirmedAudioWordRef.current`, never from `cursorWordIndex` (which tracks visual/UI state). This breaks the visual-contamination loop: if the visual band drifts ahead, chunk generation always restarts from the last word audio confirmed it played, not from the band's current position. Truth-sync corrects the overlay element's transform directly (visual guardrail only) — it does not write to `lastConfirmedAudioWordRef` or dispatch any reducer action. The overlay band is fixed-size (line-height measured once at narration start; width = content area); `measureNarrationWindow` is not called per-frame. `.page-word--narration-context` per-word highlight CSS removed.
 
 **Narration UI affordances (HOTFIX-12):** `ReaderBottomBar` accepts a `narrationWordIndex` prop (number | null). When narration is active (`narrationStatus === "speaking"`), `ReaderContainer` passes `cursorWordIndex`; otherwise null. The chapter dropdown derives `curChapterIdx` from `narrationWordIndex ?? wordIndex` — so the dropdown tracks the narrated chapter, not the reading position. A floating "Return to narration" pill button renders in `ReaderContainer` when narration is active and `cursorWordIndex` is outside the currently-visible word range; clicking it navigates the reader to the narration position. Position restore toast: on initial book open when the resume anchor restores a saved position > 0, a 2-second "Restored to your last position" toast is shown (gated by a `hasShownRestoreToast` ref).
+
+> **Correction (OutsideAudit.10 F3, 2026-10-11; LL-142):** the section below describes the design, not observed behaviour. On the installed `model_q4.onnx` the model outputs only `waveform`, so `_durations` is never set and no native table is produced. Every chunk therefore took the `computeWordWeights` fallback (inferred from the code path). The patch also assumes 256 samples per frame (measured: 600), counts the tokenizer's two special tokens per word, and reads `RawAudio.data` (transformers 3.8.1 has `.audio`). NARRATE-REMOVE-1 deletes this pipeline, and NARRATE-REBUILD-1 Phase 0 rebuilds the producer.
 
 **Real word-level timestamps (NARR-TIMING):** `computeWordBoundaries()` in `audioScheduler.ts` now prefers real per-word timestamps from Kokoro's duration tensor over the `computeWordWeights` character-count heuristic. The full pipeline:
 

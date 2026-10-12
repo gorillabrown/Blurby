@@ -1,0 +1,230 @@
+== FRESH register Queued, prerequisites completed
+   expected (spec): step 2 passes, item -> In Flight, (A)
+   actual         : (A) start -> step 4 (base cbed169a) | register: In Flight
+== GATE prerequisite not completed
+   expected (spec): step 2 stops; item stays Queued; nothing written
+   actual         : STOP at step 2 (EINK-HOVER-FIX-1=Queued); item stays Queued, nothing written | register: Queued, reg unchanged=y, refs unchanged=y, worktrees=1
+== S11 fresh, no branch
+   expected (spec): (A)
+   actual         : (A) start -> step 4 (base cc90273d)
+== IBC interrupted before branch creation (In Flight, owner confirms)
+   expected (spec): (A)
+   actual         : (A) start -> step 4 (base 7ea25472)
+== OWN In Flight, owner does not confirm
+   expected (spec): stop at the In Flight move, before step 3
+   actual         : STOP: In Flight, owner does not confirm (before step 3)
+== S0 branch, no C1, main static (time log + memo untracked)
+   expected (spec): (B) n=0 -> step 4
+   actual         : (B) n=0 -> step 4, then C1
+== S0b branch, no C1, main advanced
+   expected (spec): (B) n=0 -> step 4
+   actual         : (B) n=0 -> step 4, then C1
+== S1 after C2 (time log + memo uncommitted, perf dirty)
+   expected (spec): (B) resume C3
+   actual         : (B) resume C3
+== S1T after C2 with C3 work in progress + time log + memo
+   expected (spec): (B) resume C3 (prev issue 2)
+   actual         : (B) resume C3
+== S1X after C2 with a stray file outside C3
+   expected (spec): (C) dirt outside C3
+   actual         : (C) [branch worktree dirt outside C3: ?? stray]
+== S2 after C2, main advanced
+   expected (spec): (B) resume C3
+   actual         : (B) resume C3
+== S3 C1-C5 unmerged, main advanced (integration-tree check triggers)
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merged ac56897
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+== S3 after integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge ac568971)
+   npm log: npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm ci @narrate-remove-1-merge;typecheck @narrate-remove-1-merge;closure . @narrate-remove-1-merge;npm test @narrate-remove-1-merge;
+   integrate: merged 8b98196
+   integrate: interrupted after merge
+== S4 merged, not pushed (main static)
+   expected (spec): (B) n=5 -> integration reuses the merge
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S4 after re-integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 8b981968)
+   integrate: merged 7e6bd47
+   integrate: interrupted after merge
+== S4b merged, not pushed, main advanced after the merge
+   expected (spec): (B) n=5 -> integration; push rejected -> (C)
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: trees identical, check skipped
+   integrate: push rejected -> (C), merge stays
+== S4b after the rejected push
+   expected (spec): (B) n=5 again; integration reuses and is rejected again -> (C)
+   actual         : (B) n=5 -> Wave C integration
+== S4c merge worktree created, no merge, main advanced
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merged 5f0c9d5
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+== S4c after integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 5f0c9d54)
+   integrate: merged 983fc72
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: interrupted after check, before push
+== S4d main moved; merged + check ran (perf dirty in merge wt); interrupted before push
+   expected (spec): (B) n=5 -> integration reuses merge, check reruns, push (prev issue 1)
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+== S4d after re-integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 983fc723)
+   integrate: merged 723283b
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S5 published, main static
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 723283be)
+   integrate: merged 0a7d6c3
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+== S5b published, main advanced before and after
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 0a7d6c34)
+   integrate: merged 121b4ef
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S6 published + partial close-out on main
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 121b4ef1)
+   integrate: merged 976172b
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S7 published then branch + worktrees removed
+   expected (spec): (C), not (A)
+   actual         : (C) [no local branch: remote= wt= origin-C-commits=y]
+   integrate: merged b205977
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S7b published, branch removed, merge worktree kept
+   expected (spec): (C)
+   actual         : (C) [no local branch: remote= wt=y origin-C-commits=y]
+   integrate: merged c48e658
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S7c published, branch worktree removed, branch kept
+   expected (spec): PUBLISHED (before re-attach)
+   actual         : PUBLISHED -> /pointer-closeout (merge c48e658e)
+== S8 main merged into branch
+   expected (spec): (C)
+   actual         : (C) [chain #3: unrelated 11]
+== S9 fast-forward publication (no --no-ff)
+   expected (spec): (C)
+   actual         : (C) [on origin/main without exactly one --no-ff merge]
+== S10 C1-C2 already on main
+   expected (spec): (C)
+   actual         : (C) [1-4 commits on origin/main]
+== IMP n=5 before merge
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merged 1ccab21
+   integrate: interrupted after merge
+== IMP interrupted between merge and push (main static)
+   expected (spec): (B) n=5 -> integration finds the merge and pushes it
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: trees identical, check skipped
+   integrate: pushed
+== IMP after re-integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 1ccab21a)
+== PR push rejected (origin/main moves between fetch and push)
+   expected (spec): rejected push -> (C); merge stays in the merge worktree
+   integrate: merged 0c86cc5
+   integrate: trees identical, check skipped
+   integrate: push rejected -> (C), merge stays
+   merge worktree HEAD contains the branch: y
+== PR next session
+   expected (spec): (B) n=5 -> integration reuses the stale merge -> rejected again -> (C)
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: trees identical, check skipped
+   integrate: push rejected -> (C), merge stays
+== MAR main advanced during the run
+   expected (spec): (B) n=5 -> integration; integration-tree check: npm ci, typecheck, closure, npm test; push
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merged 726651e
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+   npm log: npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm test @narrate-remove-1;npm ci @narrate-remove-1-merge;typecheck @narrate-remove-1-merge;closure . @narrate-remove-1-merge;npm test @narrate-remove-1-merge;
+== MAR after integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 726651ec)
+== MARF main advanced, integration-tree check fails
+   expected (spec): no push; (C) (prev issue 3)
+   integrate: merged 93fb7d2
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=1)
+   integrate: check failed -> (C), no push, worktree left as is
+== MARF next session (after the decision allows a rerun)
+   expected (spec): (B) n=5 -> integration reuses merge, reruns check
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge already made, skip to check
+   integrate: integration-tree check ran (typecheck=0 closure=0 test=0)
+   integrate: pushed
+== MARF after re-integrate
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 93fb7d2c)
+== MCF main advanced with a conflicting change
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merge stopped -> (C), worktree left as is: CONFLICT (content): Merge conflict in f
+   merge worktree state: A  c1 A  c2 A  c3 A  c4 A  c5 A  docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-12.md A  docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl UU f
+== MCF next session
+   expected (spec): (B) n=5 -> integration -> (C) dirty merge worktree (prev issue 3)
+   actual         : (B) n=5 -> Wave C integration
+   integrate: (C) merge worktree dirty: A  c1 A  c2 A  c3 A  c4 A  c5 A  docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-12.md A  docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl UU f
+== S12 remote-only branch
+   expected (spec): (C)
+   actual         : (C) [no local branch: remote=y wt= origin-C-commits=]
+== S13 branch worktree dir deleted by hand (still listed)
+   expected (spec): (C), no prune (prev issue 4)
+   actual         : (C) [branch worktree missing but still listed (prunable); no prune]
+== S14 branch worktree removed with git worktree remove
+   expected (spec): (B) re-attach, resume C3
+   actual         : (B) resume C3 (re-attached)
+   re-attached HEAD: refs/heads/eb/narrate-remove-1
+   integrate: merged d0385be
+   integrate: interrupted after merge
+== S15 merge worktree dir deleted by hand after the merge (still listed)
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: (C) merge worktree listed but missing; no prune
+   expected (spec): integration -> (C), no prune (prev issue 4)
+   integrate: merged dc74948
+   integrate: interrupted after merge
+== S15b merge worktree removed with git worktree remove after merge
+   expected (spec): (B) n=5 -> integration
+   actual         : (B) n=5 -> Wave C integration
+   integrate: merged 81601b1
+   integrate: trees identical, check skipped
+   integrate: pushed
+== S15b after integrate (fresh merge worktree, merge redone)
+   expected (spec): PUBLISHED
+   actual         : PUBLISHED -> /pointer-closeout (merge 81601b1c)
+== SMF C5 memo records 16(e) fail
+   expected (spec): (C)
+   actual         : (C) [n=5 but C5 memo does not record 16(a)-(f) pass]
+== S6N a sixth C commit
+   expected (spec): (C) (n outside 0-5)
+   actual         : (C) [n=6, outside 0-5]
+== S1F C2 amended (still one C2)
+   expected (spec): (B) resume C3
+   actual         : (B) resume C3
+== FRESHM fresh start; step 2's queued count written to the memo 'once the worktree exists', then step 4
+   expected (spec): (A), then step 4 'For (A), git status --porcelain must be empty' (no route if not)
+   actual         : (A) start -> step 4 (base 998e5884); memo written; step 4 status: [?? docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-12.md ?? docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl ]

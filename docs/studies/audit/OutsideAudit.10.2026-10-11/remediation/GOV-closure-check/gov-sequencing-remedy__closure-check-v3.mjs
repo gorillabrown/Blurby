@@ -1,8 +1,8 @@
 // NARRATE-REMOVE-1 closure check v3: every relative import must resolve to an existing file. Exit 1 on any finding.
 // Usage: node closure-check.mjs <repoRoot> | node closure-check.mjs --self-test
 // Imports are found by TypeScript's own scanner (ts.preProcessFile: static, side-effect, type-only, dynamic import(),
-// require()), so strings and comments are never imports. vi.mock() calls come from the syntax tree, and CSS @import
-// is matched after CSS comments are stripped, so lookalikes in strings and comments never count for those forms either.
+// require()), so strings and comments are never imports. vi.mock() calls come from the syntax tree, so lookalikes in
+// strings and comments never count for them; CSS @import is matched after CSS comments (not strings) are stripped.
 import fs from "node:fs"; import os from "node:os"; import path from "node:path"; import { createRequire } from "node:module";
 // TypeScript is loaded once, resolved from the directory the check runs in (the repository root).
 const ts = createRequire(path.join(process.cwd(), "package.json"))("typescript");
@@ -45,7 +45,7 @@ if (process.argv[2] === "--self-test") { // negative controls: each missing-impo
     const want = ["../src/missing-mock", "./missing-at-import.css", "./missing-dynamic", "./missing-named", "./missing-require", "./missing-side.css", "./missing-type"].sort();
     const pass = JSON.stringify(got) === JSON.stringify(want);
     console.log(pass ? "self-test: 7/7 missing-import forms reported; lookalike strings and comments ignored" : `self-test FAILED: got ${JSON.stringify(got)}`);
-    process.exit(pass ? 0 : 1);
+    fs.rmSync(dir, { recursive: true, force: true }); process.exit(pass ? 0 : 1); // process.exit skips finally
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 }
 const bad = check(path.resolve(process.argv[2] ?? "."));

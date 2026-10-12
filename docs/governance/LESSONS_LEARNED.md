@@ -1094,6 +1094,8 @@ const fixedHeight = narrationBandLineHeightRef.current > 0
 
 **Related:** NARR-TIMING sprint, `patches/kokoro-js+1.2.1.patch`, LL-057 (kokoro-js import path split)
 
+**Correction (OutsideAudit.10 F2, 2026-10-11):** the duration tensor this fork reads does not exist in the installed onnx-community q4 export, and the fork's `generate()` reads `RawAudio.data`, which transformers 3.8.1 lacks. The forked timing path never executed (see LL-142). The fork is kept only as dormant Kokoro packaging (NARRATE-REMOVE-1 D16). The CJS/ESM regeneration guardrail still applies while it is kept.
+
 ### [2026-04-07] LL-090: Verify Bug Reports Against Current Codebase Before Filing
 
 **Area:** bug triage, investigation gate, sprint planning
@@ -2749,3 +2751,29 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-136 — status (2026-10-11, 2026-10-11)
 **Status:** Promoted -> ROADMAP standing rule 41
+
+### LL-142 — A timing label is a declaration, not evidence; prove a producer by executing it against the installed artifact (OutsideAudit.10, 2026-10-11)
+
+**Verdict:** NARR-TIMING's Kokoro word-timestamp producer never ran. The installed q4 export has no durations output, so the patch's alignment was skipped silently, and its `generate()` reads `RawAudio.data`, which transformers 3.8.1 lacks. Segmentation then substituted a weighted estimate, which the pipeline had labelled `word-native` before generation and the scheduler trusted on structure alone. So every Kokoro table since v1.44.0, the Step 3.5 QA's "every chunk WORD-NATIVE" logs and the 350 → 450 ms trusted-lag tuning rested on estimates (inferred from the code path). The audit package also omitted `patches/` and the lockfile and stated no model, tokenizer or asset exclusions (F1).
+**Evidence:** OutsideAudit.10 F1–F3 and the planner's verification probes. The installed `model_q4.onnx` (sha256 `04cf570c…`) outputs only `waveform`, and `wordTimestamps` was null in 10 of 10 generations. With the duration tensor exposed in a scratch copy, waveform samples = 600 × Σpred_dur (5 of 5; the patch hardcodes 256), and the patch's alignment still failed 5 of 5 (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F2-producer-probe/`, `remediation/F3-phase0-units/`). At `b4335606` the label is declared at `kokoroStrategy.ts:368` and copied at `generationPipeline.ts:523-525`; the fallback is `segmentKokoroChunk.ts:154-189`; trust is structure-only at `audioScheduler.ts:478-491` (`remediation/F2-consumer-trust/`). All 4,505 cache sidecars are `heuristic`, with no table, under a declared `timingTruth: "word-native"`. `tests/narrTiming.test.ts` re-implemented the arithmetic with its own 256 hop and never executed the patch or the model.
+**Recommendation:** (1) Before any output of an engine, adapter or dependency patch is labelled native, exact or trusted, an executed probe against the installed artifact, named by hash, shows that output present (output names plus one non-null sample) and used on the production path. A unit test that re-implements the function under test is not evidence. (2) The producer records timing provenance from what it actually returned; no requester, cache key or default declares it. (3) Trust needs native provenance plus a correspondence check against the PCM actually played, never structure alone; totals and monotonicity cannot prove interior boundaries. (4) Every timing-trust test feeds a missing or estimated table through the full path and asserts it is untrusted. (5) Every fallback is visible in telemetry; a log line or label emitted on both the native and the fallback path proves nothing. (6) Audit packages always include `patches/` and the lockfile, name the model and tokenizer hashes, and state every exclusion.
+**Applies to:** TTS engines and adapters, dependency patches, provenance labels, NARRATE-REBUILD-1 Phase 0 and its charter, audit package preparation.
+**Status:** Observation
+**Related:** LL-089 and BUG-161 (both corrected by this audit).
+
+### LL-143 — Dry-run every acceptance gate against the prescribed edit and the base; name the shell; pass only on an exact exit code (OutsideAudit.10, 2026-10-11)
+
+**Verdict:** NARRATE-REMOVE-1's text gates were written by hand and never run. Its wiring counts contradicted the code the same spec prescribed: the helper's declaration was a third `applyCloudSettings(ctx` match and its body held the one remaining `Object.assign(settings`, so only a reworded helper could pass, and a renamed helper passed. Its "prints nothing" searches passed on errors. In PowerShell, a bash-style `\"` split Done-when 5's pattern (`rg` exit 2, empty output, against 9 real hits), and Done-when 10's search did not parse. `rg` was not on PowerShell's PATH, so all seven `rg` gates were vacuous. Windows PowerShell 5.1 drops an embedded `"` from native arguments, and `git grep` exits 1 silently on a mistyped path.
+**Evidence:** OutsideAudit.10 F5a and F5b, planner dry-runs at `b4335606`. On the prescribed `main/sync-engine.js` edit the old gates printed `main/sync-engine.js:3` and one line; `git grep -c` prints `path:count`, never a bare count (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F5a-count-gates/`). The replacement gates gave the same results in `pwsh` 7.6, Windows PowerShell 5.1 and bash (`remediation/F5b-shell-gates/`).
+**Recommendation:** Every acceptance command names its shell and passes only on an exact exit code (a `git grep` no-match exits 1; `git ls-files` and `git diff` exit 0). Any other code, any stderr text or a command that did not run fails the gate. Searches use single-quoted `git grep -P` patterns with no embedded double quote (write `\x22`), never `rg`. Count gates pin exact statements with `git grep -cF` and state output as `path:count`. Before dispatch, run each gate against the prescribed edit (it must pass) and against the base plus at least one wrong variant (each must fail), and show every no-match gate finding hits on its base.
+**Applies to:** Spec authoring, Done-when gates and reconciliation recipes, including the NARRATE-REBUILD-1 charter and its Phase 0 commands.
+**Status:** Observation
+**Related:** LL-138 (positive controls).
+
+### LL-144 — Take a resume base from the first commit's trailer; never recompute it against the publication target (OutsideAudit.10, 2026-10-11)
+
+**Verdict:** NARRATE-REMOVE-1's resume recipe recomputed its base as `git merge-base <branch> origin/main` and required it to equal C1's base trailer. That holds only until the branch is published: after a pushed `--no-ff` merge, merge-base returns the branch tip, so the recipe could never reach its own "already on main" exit. Unrelated advances of `main` do not move the merge-base; publication does.
+**Evidence:** OutsideAudit.10 F6. A disposable-repo control ran both recipes command for command through 19 states. The old recipe stopped at (C) in every published state, and restarted at (A) once the branch was removed after publication; the corrected recipe gave the expected outcome in all 19 (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F6-resume-recipe/`).
+**Recommendation:** Take the base from the first commit's trailer and check that `C1^` equals it. Recognize publication only for the full trailer-validated chain on the target through exactly one `--no-ff` merge. Never apply an ancestry-only publication test to an empty branch: it always passes, and would close out unstarted work.
+**Applies to:** Resume and reconciliation recipes for multi-commit items, and every NARRATE-REBUILD-1 phase that commits and publishes.
+**Status:** Observation

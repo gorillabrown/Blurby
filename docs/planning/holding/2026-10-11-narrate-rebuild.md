@@ -71,14 +71,14 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 
 | Assumption | Resolution |
 |---|---|
-| A1 Speech starts within 2 s of Play or a word click. A speed change takes effect within 2 s. No audible stall at chunk, section or chapter boundaries | confirmed (owner, 2026-10-11) |
+| A1 Speech starts within 2 s of Play or a word click. A speed change takes effect within 2 s. No audible stall at chunk, section or chapter boundaries | confirmed (owner, 2026-10-11). Scope (OutsideAudit.10 owner ruling R3, 2026-10-11): 2 s once the voice is ready; a cold start is F5 and must speak within 8 s. |
 | A2 Speed range stays 0.80–2.00x in 0.05 steps. Audio is generated at the chosen speed and never stretched afterwards, because stretching breaks the exact word table | confirmed |
 | A3 The removal deletes no user data. Saved voice, speed, overrides and profiles stay in settings. The audio cache (up to 2 GB) and the Kokoro model stay on disk. A book saved in Narrate mode opens in Flow | confirmed |
 | A4 The removal also retires the old TTS quality-gate CI job and its eval scripts; the rebuild brings its own checks | confirmed |
 | A5 The new Narrate plugs into the mode framework from READER-MODE-SEPARATION-2. Page, Focus and Flow change only at registration and in the bottom bar | confirmed |
 | A6 One voice to start (current default af_bella); the voice picker returns later | confirmed |
 | A7 No hard deadline; the next roadmap review places a new finish line | confirmed |
-| A8 Kokoro's word table is exact for the audio it generates, because its predicted durations drive the synthesis | accepted. Guard: Rebuild Phase 0 verifies it on real passages before any build. A failure sends the engine choice to a bake-off |
+| A8 Kokoro's word table can be exact for the audio it generates, because its predicted durations drive the synthesis. The installed model does not output those durations today (OutsideAudit.10 F3: outputs `waveform` only), so the table must first be produced | accepted, corrected after OutsideAudit.10. With `pred_dur` exposed in a scratch copy, waveform samples = 600 × Σpred_dur exactly. Guard: Rebuild Phase 0 (P0-1 to P0-5, ROADMAP NARRATE-REBUILD-1) produces and verifies it. Export, adapter, unit or mapping failures are repaired and rerun; only a failure under a verified contract sends the engine choice to a bake-off |
 
 **Decisions:**
 
@@ -94,6 +94,14 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 | Engine approach | Prove Kokoro (Phase 0), then build; bake-off only on failure | the owner | 2026-10-11 |
 | Saved Narrate preference (review G2) | Flow is remembered: Page unchanged; click Flow, then Play | the owner | 2026-10-11 |
 | Rollback of the v13 migration (review G6) | Keep "flow": a code revert keeps migrated preferences, and the settings backup is not restored | the owner | 2026-10-11 |
+| Durations-bearing model (OutsideAudit.10 R2) | A deterministic, hash-checked local graph edit of the pinned `model_q4.onnx`, with no download, stored beside the untouched original. An export, adapter, unit, mapping or harness failure is repaired and Phase 0 reruns; only a failure under a verified P0-1/P0-2 contract goes to the bake-off | the owner | 2026-10-11 |
+| Cold-start scope of the 2 s target (OutsideAudit.10 R3) | 2 s once the voice is ready; a cold start shows "voice loading" and must speak within 8 s of Play. Both numbers are fixed before measurement; a cold result above 8 s is a visible fail | the owner | 2026-10-11 |
+| Boundary accuracy (OutsideAudit.10 R4) | Worst error at most 30 ms at every boundary the waveform-only reference resolves; reference uncertainty at most 10 ms, otherwise inconclusive; a 40 ms shifted-boundary control must be caught; no manual annotation | the owner | 2026-10-11 |
+| Device output delay (OutsideAudit.10 R5) | No per-device delay calibration on day one; Phase 0 documents its output route and records the reported output latency with a one-off probe outside the offline harness (`AudioContext.baseLatency` and `outputLatency` in an Electron renderer on the owner's default device), and no Phase 0 pass rule depends on it; revisit only if the listening sign-off hears the cursor lead | the owner | 2026-10-11 |
+| Cursor during silence (OutsideAudit.10 R6) | The last spoken word stays highlighted; the cursor never advances to the next word early | the owner | 2026-10-11 |
+| Speed change mid-word (OutsideAudit.10 R7) | The current word finishes at the old speed; the new speed starts from the next word | the owner | 2026-10-11 |
+| Old audio cache (OutsideAudit.10 R10) | Stays on disk untouched; version one plays freshly generated audio only and never plays the cache or reads its timing | the owner | 2026-10-11 |
+| Phase 0 timing (OutsideAudit.10 R11) | Phase 0 code starts after the removal merges; the `/epic` charter (docs only) may be written while it runs | the owner | 2026-10-11 |
 
 **Impact map:**
 
@@ -119,7 +127,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 
    *(confirmed. Corrected by the owner on 2026-10-11, after the adversarial review's G2: books always open in Page, and Play does nothing in Page, so "opens in Flow" was replaced. The owner chose "Flow is remembered" over pulling UX-POLISH-1's Page change into the removal.)*
 2. **F2 Main success.** Given the rebuilt Narrate on *Meditations*, when you click "ancient" mid-paragraph and press Play, then:
-   - "ancient" is the first word heard, within 2 s;
+   - "ancient" is the first word heard, within 2 s once the voice is ready (a cold start is F5; OutsideAudit.10 owner ruling R3);
    - the highlight sits on each word exactly while it is spoken, and recorded output shows every cursor change on the word change;
    - it reads from the Introduction into "HIS FIRST BOOK" with no stall, and the highlight comes along.
 
@@ -131,7 +139,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
    - the chunk is never played with a guessed cursor.
 
    *(confirmed)*
-5. **F5 Voice not ready.** Given the Kokoro model is still loading, when you press Play, then you see a clear "voice loading" state, and speech starts on your word once it is ready. It never hangs silently. *(confirmed)*
+5. **F5 Voice not ready.** Given the Kokoro model is still loading, when you press Play, then you see a clear "voice loading" state, and speech starts on your word once it is ready. It never hangs silently. Speech starts within 8 s of Play from a cold start (OutsideAudit.10 owner ruling R3). *(confirmed)*
 6. **F6 What does not change.** Given narration is playing, when you switch to Flow, Page or Focus, then:
    - narration stops cleanly, and that mode opens at the word that was playing;
    - Page, Focus and Flow behave exactly as today, and the separation's boundary and behaviour tests pass unchanged;
@@ -155,6 +163,8 @@ Considered and set aside:
 - **Removing Kokoro too:** leaves nothing to benchmark, and risks re-adding it.
 - **Removing only the mode's entry points:** 26k lines of old narration would linger.
 - **Calibrating per-device delay:** rejected by the owner; the cursor is tied to the audio stream itself.
+
+> Superseded for Phase 0 and the core contract by ROADMAP.md NARRATE-REBUILD-1 (revised after OutsideAudit.10, 2026-10-11), which governs where the two differ.
 
 ### Draft stub
 
