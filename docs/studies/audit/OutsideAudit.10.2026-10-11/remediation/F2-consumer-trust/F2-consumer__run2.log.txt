@@ -1,0 +1,1414 @@
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 802ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 740ms)
+[scheduler] scheduleChunk: drift=-787.8ms (ctx=0.000 start=0.788)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 708ms)
+[scheduler] scheduleChunk: drift=-1514.0ms (ctx=0.000 start=1.514)
+[TTS-7G] first-chunk response: 1.41ms (schedule: 1.40ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 802ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 740ms)
+[scheduler] scheduleChunk: drift=-787.8ms (ctx=0.000 start=0.788)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 718ms)
+[scheduler] scheduleChunk: drift=-1514.0ms (ctx=0.000 start=1.514)
+[TTS-7G] first-chunk response: 0.63ms (schedule: 0.62ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 802ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 740ms)
+[scheduler] scheduleChunk: drift=-787.8ms (ctx=0.000 start=0.788)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 718ms)
+[scheduler] scheduleChunk: drift=-1514.0ms (ctx=0.000 start=1.514)
+[TTS-7G] first-chunk response: 0.55ms (schedule: 0.54ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (2 words, 538ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@2 → WORD-NATIVE timing (2 words, 538ms)
+[scheduler] scheduleChunk: drift=-524.3ms (ctx=0.000 start=0.524)
+[audioScheduler] chunk@4 → WORD-NATIVE timing (3 words, 807ms)
+[scheduler] scheduleChunk: drift=-1048.7ms (ctx=0.000 start=1.049)
+[audioScheduler] chunk@7 → WORD-NATIVE timing (2 words, 571ms)
+[scheduler] scheduleChunk: drift=-1842.1ms (ctx=0.000 start=1.842)
+[TTS-7G] first-chunk response: 19.94ms (schedule: 19.94ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 802ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 740ms)
+[scheduler] scheduleChunk: drift=-787.8ms (ctx=0.000 start=0.788)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 708ms)
+[scheduler] scheduleChunk: drift=-1514.0ms (ctx=0.000 start=1.514)
+[TTS-7G] first-chunk response: 0.19ms (schedule: 0.17ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[pipeline] produceChunk: startIdx=0, endIdx=9, firstWord="The", text="The quick brown fox jumps over the lazy dog...."
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 700ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 700ms)
+[scheduler] scheduleChunk: drift=-686.0ms (ctx=0.000 start=0.686)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 750ms)
+[scheduler] scheduleChunk: drift=-1372.0ms (ctx=0.000 start=1.372)
+[TTS-7G] first-chunk response: 0.22ms (schedule: 0.21ms), words: 9, startIdx: 0
+[TTS-7Q] chunk handoff carry-over: lastConfirmedWordIndex = 8 trusted = true timingTruth = word-native
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@0 → WORD-NATIVE timing (3 words, 802ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@3 → WORD-NATIVE timing (3 words, 740ms)
+[scheduler] scheduleChunk: drift=-787.8ms (ctx=0.000 start=0.788)
+[audioScheduler] chunk@6 → WORD-NATIVE timing (3 words, 708ms)
+[scheduler] scheduleChunk: drift=-1514.0ms (ctx=0.000 start=1.514)
+[audioScheduler] chunk@0 → WORD-NATIVE timing (2 words, 1000ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+[audioScheduler] chunk@0 → WORD-NATIVE timing (2 words, 1000ms)
+[scheduler] scheduleChunk: drift=0.0ms (ctx=0.000 start=0.000)
+[audioScheduler] word timer started — trustedLag=450ms, heuristicLag=350ms
+F2_RESULT {
+ "A_native_missing_fresh": {
+  "generateCalls": 1,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 801.8,
+    "audioLen": 19244
+   },
+   {
+    "startIdx": 3,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 740.2,
+    "audioLen": 17764
+   },
+   {
+    "startIdx": 6,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4317
+    ],
+    "durationMs": 708.1,
+    "audioLen": 16994
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-3"
+   },
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "3-6"
+   },
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "6-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 801.8,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 3,
+    "source": "kokoro-duration-tensor",
+    "durMs": 740.2,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 6,
+    "source": "kokoro-duration-tensor",
+    "durMs": 708.1,
+    "starts": [
+     0,
+     0.185,
+     0.4317
+    ]
+   }
+  ]
+ },
+ "A_weighted_expectation": [
+  0,
+  0.185,
+  0.4934,
+  0.8018,
+  0.9868,
+  1.2952,
+  1.5419,
+  1.727,
+  1.9737
+ ],
+ "A_reassembled_starts": [
+  0,
+  0.185,
+  0.4934,
+  0.8018,
+  0.9868,
+  1.2952,
+  1.542,
+  1.727,
+  1.9737
+ ],
+ "C_cache_hit_after_native_missing": {
+  "generateCalls": 0,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 801.8,
+    "audioLen": 19244
+   },
+   {
+    "startIdx": 3,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 740.2,
+    "audioLen": 17764
+   },
+   {
+    "startIdx": 6,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4317
+    ],
+    "durationMs": 718.1,
+    "audioLen": 17234
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-3"
+   },
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "3-6"
+   },
+   {
+    "chunkId": "book-A:0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "6-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 801.8,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 3,
+    "source": "kokoro-duration-tensor",
+    "durMs": 740.2,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 6,
+    "source": "kokoro-duration-tensor",
+    "durMs": 718.1,
+    "starts": [
+     0,
+     0.185,
+     0.4317
+    ]
+   }
+  ]
+ },
+ "C2_cross_book_cache_hit": {
+  "generateCalls": 0,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 801.8,
+    "audioLen": 19244
+   },
+   {
+    "startIdx": 3,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 740.2,
+    "audioLen": 17764
+   },
+   {
+    "startIdx": 6,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4317
+    ],
+    "durationMs": 718.1,
+    "audioLen": 17234
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": "book-Z:0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-3"
+   },
+   {
+    "chunkId": "book-Z:0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "3-6"
+   },
+   {
+    "chunkId": "book-Z:0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "6-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 801.8,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 3,
+    "source": "kokoro-duration-tensor",
+    "durMs": 740.2,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 6,
+    "source": "kokoro-duration-tensor",
+    "durMs": 718.1,
+    "starts": [
+     0,
+     0.185,
+     0.4317
+    ]
+   }
+  ]
+ },
+ "A_sidecars_on_disk": [
+  {
+   "file": "chunk-0.timing.json",
+   "timingTruth": "word-native",
+   "timingClassification": "heuristic",
+   "hasWordTimestamps": false,
+   "durationMs": 2250
+  }
+ ],
+ "D_rate_plan": {
+  "selectedSpeed": 1.1,
+  "generationBucket": 1.2,
+  "tempoFactor": 0.9166666666666667
+ },
+ "D_tempo_1_1_native_missing": {
+  "generateCalls": 1,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 2,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185
+    ],
+    "durationMs": 493.5,
+    "audioLen": 11843
+   },
+   {
+    "startIdx": 2,
+    "n": 2,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.3084
+    ],
+    "durationMs": 493.5,
+    "audioLen": 11843
+   },
+   {
+    "startIdx": 4,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.3084,
+     0.5551
+    ],
+    "durationMs": 740.2,
+    "audioLen": 17764
+   },
+   {
+    "startIdx": 7,
+    "n": 2,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.2467
+    ],
+    "durationMs": 523,
+    "audioLen": 12553
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": ":0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-2"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "2-4"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "4-7"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-3",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "7-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 538.3,
+    "starts": [
+     0,
+     0.2019
+    ]
+   },
+   {
+    "startIdx": 2,
+    "source": "kokoro-duration-tensor",
+    "durMs": 538.3,
+    "starts": [
+     0,
+     0.3364
+    ]
+   },
+   {
+    "startIdx": 4,
+    "source": "kokoro-duration-tensor",
+    "durMs": 807.5,
+    "starts": [
+     0,
+     0.3364,
+     0.6056
+    ]
+   },
+   {
+    "startIdx": 7,
+    "source": "kokoro-duration-tensor",
+    "durMs": 570.6,
+    "starts": [
+     0,
+     0.2691
+    ]
+   }
+  ]
+ },
+ "E_native_misaligned": {
+  "generateCalls": 1,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 801.8,
+    "audioLen": 19244
+   },
+   {
+    "startIdx": 3,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4934
+    ],
+    "durationMs": 740.2,
+    "audioLen": 17764
+   },
+   {
+    "startIdx": 6,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.185,
+     0.4317
+    ],
+    "durationMs": 708.1,
+    "audioLen": 16994
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": ":0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-3"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "3-6"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "6-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 801.8,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 3,
+    "source": "kokoro-duration-tensor",
+    "durMs": 740.2,
+    "starts": [
+     0,
+     0.185,
+     0.4934
+    ]
+   },
+   {
+    "startIdx": 6,
+    "source": "kokoro-duration-tensor",
+    "durMs": 708.1,
+    "starts": [
+     0,
+     0.185,
+     0.4317
+    ]
+   }
+  ]
+ },
+ "F_native_ok": {
+  "generateCalls": 1,
+  "segmentsIn": [
+   {
+    "startIdx": 0,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.25,
+     0.5
+    ],
+    "durationMs": 700,
+    "audioLen": 16800
+   },
+   {
+    "startIdx": 3,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.25,
+     0.5
+    ],
+    "durationMs": 700,
+    "audioLen": 16800
+   },
+   {
+    "startIdx": 6,
+    "n": 3,
+    "timingTruth": "word-native",
+    "wordTimestamps": [
+     0,
+     0.25,
+     0.5
+    ],
+    "durationMs": 750,
+    "audioLen": 18000
+   }
+  ],
+  "timingMetadata": [
+   {
+    "chunkId": ":0:1x1jhqw:segment-0",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "0-3"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-1",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "3-6"
+   },
+   {
+    "chunkId": ":0:1x1jhqw:segment-2",
+    "timingTruth": "word-native",
+    "timingClassification": "trusted",
+    "hasTrustedWordTiming": true,
+    "words": "6-9"
+   }
+  ],
+  "truthSync": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true
+   },
+   {
+    "w": 1,
+    "trusted": true
+   },
+   {
+    "w": 2,
+    "trusted": true
+   },
+   {
+    "w": 3,
+    "trusted": true
+   },
+   {
+    "w": 4,
+    "trusted": true
+   },
+   {
+    "w": 5,
+    "trusted": true
+   },
+   {
+    "w": 6,
+    "trusted": true
+   },
+   {
+    "w": 7,
+    "trusted": true
+   },
+   {
+    "w": 8,
+    "trusted": true
+   }
+  ],
+  "telemetry": [
+   {
+    "startIdx": 0,
+    "source": "kokoro-duration-tensor",
+    "durMs": 700,
+    "starts": [
+     0,
+     0.25,
+     0.5
+    ]
+   },
+   {
+    "startIdx": 3,
+    "source": "kokoro-duration-tensor",
+    "durMs": 700,
+    "starts": [
+     0,
+     0.25,
+     0.5
+    ]
+   },
+   {
+    "startIdx": 6,
+    "source": "kokoro-duration-tensor",
+    "durMs": 750,
+    "starts": [
+     0,
+     0.25,
+     0.5
+    ]
+   }
+  ]
+ },
+ "B_unsegmented_null_table": {
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": false,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": false,
+    "timingTruth": "word-native"
+   }
+  ],
+  "timingMetadata": [
+   {
+    "timingTruth": "word-native",
+    "cls": "heuristic"
+   }
+  ],
+  "telemetry": [
+   "heuristic"
+  ]
+ },
+ "B2_segmented_null_table_no_truth": {
+  "wordAdvance": [
+   {
+    "w": 0,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 1,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 2,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 3,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 4,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 5,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 6,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 7,
+    "trusted": true,
+    "timingTruth": "word-native"
+   },
+   {
+    "w": 8,
+    "trusted": true,
+    "timingTruth": "word-native"
+   }
+  ],
+  "timingMetadata": [
+   {
+    "timingTruth": "word-native",
+    "cls": "trusted"
+   },
+   {
+    "timingTruth": "word-native",
+    "cls": "trusted"
+   },
+   {
+    "timingTruth": "word-native",
+    "cls": "trusted"
+   }
+  ],
+  "telemetry": [
+   "kokoro-duration-tensor",
+   "kokoro-duration-tensor",
+   "kokoro-duration-tensor"
+  ]
+ },
+ "G_interior_boundary": [
+  {
+   "betaStart": 0.4,
+   "events": [
+    {
+     "w": 0,
+     "trusted": true
+    },
+    {
+     "w": 1,
+     "trusted": true
+    }
+   ],
+   "telemetry": [
+    "kokoro-duration-tensor"
+   ]
+  },
+  {
+   "betaStart": 0.7,
+   "events": [
+    {
+     "w": 0,
+     "trusted": true
+    },
+    {
+     "w": 1,
+     "trusted": true
+    }
+   ],
+   "telemetry": [
+    "kokoro-duration-tensor"
+   ]
+  }
+ ]
+}
