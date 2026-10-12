@@ -63,6 +63,13 @@ describe("EINK-6A: E-Ink Foundation", () => {
     expect(block).toMatch(/transition:\s*none\s*!important/);
   });
 
+  it("e-ink hover suppression targets interactive leaves, not ancestors (BUG-184)", () => {
+    const css = read("src/styles/themes.css");
+    expect(css).not.toContain('[data-eink="true"] *:hover');
+    const sel = '[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover';
+    expect(extractCssBlock(css, sel)).toMatch(/background-color:\s*inherit/);
+  });
+
   it("greyscale theme palette stays under data-theme=eink without behavioral overrides", () => {
     const css = read("src/styles/themes.css");
     const paletteBlock = extractCssBlock(css, '[data-theme="eink"]');
