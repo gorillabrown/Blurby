@@ -1,6 +1,6 @@
 # OutsideAudit.10 — Remediation Plan (D3)
 
-**Status:** owner rulings R1–R12 approved as recommended (owner, 2026-10-11; §5). The proposed diff on branch `eb/outside-audit-10-remediation` applies them to ROADMAP.md, the held storyboard and the governance docs. Nothing merges, and the register and the code stay unchanged, until D5. The auditor's review (D4) is done and its corrections are applied (§9); a review of those exact revisions (D4b) comes first.
+**Status:** closed at D5, 2026-10-12. Owner rulings R1–R12 were approved as recommended on 2026-10-11 (§5); the owner confirmed R1's scope on 2026-10-12. The D4 corrections are applied (§9), and the fresh delta review (D4b) authorized them (§10). Final decisions: `AuditDecisions.10.2026-10-12.md`.
 
 **Inputs:**
 - `AuditReport.10.2026-10-11.md` (D2): verdict "partially flawed", calculated 5.2/10, milestone not authorized.
@@ -144,7 +144,7 @@ Each was approved as recommended on 2026-10-11; the proposed diff uses these val
 | R11 | Does Phase 0 code run in parallel with the removal, or after it merges? | **After it merges.** The `/epic` charter (docs only) can be written while the removal runs |
 | R12 | Who reviews this response (D4)? | **A fresh, history-free session.** It also serves as the fresh review the audit requires |
 
-[Notes added after approval, 2026-10-12: these clarify rows R1–R3 as approved above and change no ruling. **R1:** the waiver names both places the stop is written, CLAUDE.md Rule 5a and ROADMAP standing rule 8, and covers no other dispatch. **R2:** "exactly" holds in every saved row (five speed-1 rows in `remediation/F2-producer-probe/f2-producer__probe3.out`; eight four-rate rows in `remediation/d4-evidence/units/units-four-rates.txt`), and the law is a total-length and unit check only, not interior acoustic alignment. **R3:** the cold-load figure is load plus warm-up, saved in `remediation/F3-phase0-units/f3-refute__out__probe-report.json` (`loadMs` 1975 plus `warmupMs` 3351, about 5.3 s; still indicative only). The cold 8 s bound applies to any request (Play, resume, word click or speed change) made while the voice is not ready, including after the idle unload; this is a clarification of R3, not a change (ROADMAP NARRATE-REBUILD-1, *Latency budget*).]
+[Notes added after approval, 2026-10-12: these clarify rows R1–R3 as approved above and change no ruling. **R1:** the waiver names both places the stop is written, CLAUDE.md Rule 5a and ROADMAP standing rule 8, and covers no other dispatch. The owner confirmed this scope on 2026-10-12: it is one waiver of the same queue-depth gate, for NARRATE-REMOVE-1's dispatch only, and it is re-armed at that item's close-out. **R2:** "exactly" holds in every saved row (five speed-1 rows in `remediation/F2-producer-probe/f2-producer__probe3.out`; eight four-rate rows in `remediation/d4-evidence/units/units-four-rates.txt`), and the law is a total-length and unit check only, not interior acoustic alignment. **R3:** the cold-load figure is load plus warm-up, saved in `remediation/F3-phase0-units/f3-refute__out__probe-report.json` (`loadMs` 1975 plus `warmupMs` 3351, about 5.3 s; still indicative only). The cold 8 s bound applies to any request (Play, resume, word click or speed change) made while the voice is not ready, including after the idle unload; this is a clarification of R3, not a change (ROADMAP NARRATE-REBUILD-1, *Latency budget*).]
 
 ## 6. Testing and validation plan
 
@@ -175,7 +175,7 @@ Each was approved as recommended on 2026-10-11; the proposed diff uses these val
 2. **Done (2026-10-11):** proposed diff on `eb/outside-audit-10-remediation` (Packages R, B, G), the §6 dry-runs, and the D4 package (`AuditResponse.10.2026-10-11.zip`).
 3. **Done (2026-10-11):** D4 by a fresh, history-free reviewer (`AuditReviewResponse.10.2026-10-11.md`). It accepted the direction and most remedies but did not authorize the package as supplied: seven corrections, D4-01…D4-07.
 4. **Done (2026-10-12):** the D4 corrections, a fix round, a pre-review hardening round (Round 2) and a check of it on `eb/outside-audit-10-remediation`, with replays of the final text (§9).
-5. **Next: D4b**, a review of exactly those revisions. Then **D5:** record the owner's confirmation that R1's waiver covers standing rule 8 as Rule 5a's restatement (the §5 note; the planner's first merge brief named Rule 5a only); apply the final decisions; merge; one register mutation; CLAUDE.md audit row; lessons.
+5. **Done (2026-10-12):** D4b, a fresh review of exactly those revisions (`AuditReviewResponse.10.2026-10-12.md`), closed all 21 requested dispositions (§10). D5 (`AuditDecisions.10.2026-10-12.md`) then recorded the owner's confirmation of R1's scope and merged the branch to `main`. It added CLAUDE.md's audit row and LL-145. It made no register write: the 3rd-party-audit ceremony is not an allowed writer, NARRATE-REMOVE-1's row is already correct, and `/next-pointer` records the revision at dispatch.
 6. **Not blocked by this audit, in parallel now:** TEST-TIMEOUT-HEADROOM-1 (5) ∥ EINK-HOVER-FIX-1 (6), then the LIBRARY-SETTINGS-FIX-1 close-out (7).
 7. **NARRATE-REMOVE-1 (8)** dispatches after D5, on spec revision 4, once 5–7 read Completed (Rule 5a per R1).
 8. **NARRATE-REBUILD-1 (9):** `/epic` writes the charter while the removal runs; Phase 0 starts after the removal merges.
@@ -240,6 +240,15 @@ Three earlier wording refinements of merge brief 2's text, for the delta reviewe
 - `remediation/d4-evidence/units/`: the four-rate rows, re-run on 2026-10-12 with the recorded invocation, reproduced byte for byte (`run-config.txt`).
 
 No application, full suite or build ran. The removal and the rebuild remain specifications.
+
+## 10. D4b and D5 (2026-10-12)
+
+A second fresh, package-only reviewer checked exactly the revisions in §9: package `AuditDeltaReview.10.2026-10-12.zip`, sha256 `dcb98968…`, built from `77c36fb3`. It closed D4-01…D4-07 and all fourteen requested narrowings, and found no new defect. It also verified all 155 evidence hashes and both replay identities against the final ROADMAP.md (`06a14e71…`). Its verdicts:
+- the direction: **authorized**;
+- the removal specification: **authorized**;
+- Phase 0 and the overall design milestone: **authorized with conditions**, namely the declared charter obligations and the later owner gate on merged words.
+
+Actual removal acceptance and the Phase 0 results remain future gates. D5's decisions are in `AuditDecisions.10.2026-10-12.md`.
 
 ## Evidence index
 

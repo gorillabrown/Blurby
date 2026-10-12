@@ -2777,3 +2777,19 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Recommendation:** Take the base from the first commit's trailer and check that `C1^` equals it. Recognize publication only for the full trailer-validated chain on the target through exactly one `--no-ff` merge. Never apply an ancestry-only publication test to an empty branch: it always passes, and would close out unstarted work.
 **Applies to:** Resume and reconciliation recipes for multi-commit items, and every NARRATE-REBUILD-1 phase that commits and publishes.
 **Status:** Observation
+
+### LL-145 — A coordinated audit closes only through a fresh, package-only review of the exact revisions; keep approved rulings verbatim (OutsideAudit.10, 2026-10-12)
+**Verdict:** OutsideAudit.10's report (D2) was written by a coordinator with project history, so it could not authorize the milestone. The planner's own verification was extensive: two-lens checks on every finding, a completeness critic, and replays of the gates and the recipe. It strengthened the evidence but did not catch the four restart and integration defects that the first fresh, package-only reviewer (D4) found (D4-01…D4-04). A second fresh review of only the corrected revisions (D4b) closed them and authorized the removal specification. Separately, clarifications had been edited into the owner-approved text of rulings R2 and R3. A re-check flagged it, and the approved wording was restored verbatim, with a dated note beneath it.
+**Evidence:** `docs/studies/audit/OutsideAudit.10.2026-10-11/`:
+- D2 §A, the independence statement;
+- `AuditReviewResponse.10.2026-10-11.md`, D4: "not authorized as packaged", seven corrections;
+- `AuditReviewResponse.10.2026-10-12.md`, D4b: 21 dispositions closed and the removal specification authorized;
+- D3 §5 and its note, and §9's round 2.
+**Recommendation:**
+- When an audit's author is not independent, send the response (D3) and the exact proposed diff to a fresh, package-only reviewer.
+- Budget a delta review (D4b) of the corrections before D5.
+- Treat internal adversarial verification as evidence, not authorization.
+- Keep owner-approved ruling text verbatim, and put later clarifications in a dated note beneath it.
+- Tie every claim to a saved file and to the final artifact's hash, or label it "reported, not packaged".
+**Applies to:** 3rd-party-audit cycles (D2–D5), remediation plans, and owner-decision records.
+**Status:** Observation

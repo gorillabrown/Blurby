@@ -1,0 +1,24 @@
+{
+  "clientDate": "2026-10-12",
+  "timezone": "America/Chicago",
+  "reviewStage": "D4b",
+  "reviewer": "fresh package-only agent /root/d4b_independent_review; fork_turns none; max effort",
+  "reportSha256": "9ff0eae7fff003154bd6ab91130169d7217683d8871d3210a223a013c359e11a",
+  "deltaPackageSha256": "dcb9896840edde8238375bbbdce5586dcceb4266cb46a76034cca81588edf2d7",
+  "sourceCommit": "77c36fb3",
+  "packageCommit": "04b4323897c4d72fe6bd483369dcdbac910f4e64",
+  "roadmapSha256": "06a14e71c3ead0bb179f68cbc375645f2c592292b33cb95d4bd0f5a316cc897f",
+  "evidenceManifestHashChecks": 155,
+  "evidenceGitBlobChecks": 155,
+  "mismatches": [],
+  "requiredRows": 21,
+  "decisions": {
+    "removalSpecification": "authorized",
+    "phase0": "authorized with existing charter and owner-gate conditions",
+    "overall": "authorized with existing conditions"
+  },
+  "waiverInterpretation": "R1 covers the same queue-depth requirement in CLAUDE.md Rule5a and ROADMAP standing rule8 for NARRATE-REMOVE-1 only; re-arms at close-out",
+  "coordinatorAction": "exact report delivery and custody verification; no changes to reviewer technical text",
+  "D5Performed": false,
+  "runtimeAppModelTestsExecutedDuringReview": false
+}
