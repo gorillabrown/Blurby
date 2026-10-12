@@ -5418,3 +5418,293 @@ The four prior detailed specs are preserved in [the pre-isolation spec archive](
 - **Historical specification state:** Full Spec in the register; preserved in the deferred source archive, not certified for current dispatch.
 - **Scope / gate:** Optional M4B/SRT/ASS export after Reading Experience v2. Keep its worktree and historical evidence; no queue position, implementation authorization or new estimate is created by this review.
 - **Source:** [deferred archive](docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md); Monday item 13118856529.
+
+---
+
+<!-- Archived 2026-10-12 by /pointer-closeout TEST-TIMEOUT-HEADROOM-1; close-out docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md. The specification as it stood at 072a65f3, with its mid-dispatch amendment of 2026-10-12. -->
+
+#### TEST-TIMEOUT-HEADROOM-1 — Give the three slow tests explicit time limits *(position 5 — Full Spec)*
+
+- **What:** Give the three tests that exceed Vitest's default 10 s budget under full-suite load an explicit 30 s timeout each:
+  - `tests/readerModeBoundaries.test.ts` "production mode graphs share only declared data and ports" (G1, line 203);
+  - `tests/updateInstallGating.test.tsx` "shows update-available as a passive library toast without install action" (line 131);
+  - `tests/updateInstallGating.test.tsx` "wires update-downloaded library banner to installUpdate" (line 150).
+
+  This retires the KF-3 exception (ruling #33).
+- **Why:**
+  - G1 builds the full import graph and takes about 6.5 s alone. The two `updateInstallGating` tests dynamically import all of `LibraryContainer` on first use.
+  - Under full-suite load all three run past 10 s. In a full `npm test` they fail by timeout, while each passes alone.
+  - This blocked READER-MODE-SEPARATION-2 (ruled environmental, #33) and then LIBRARY-SETTINGS-FIX-1. The owner ruled on 2026-10-11 that the timeout be fixed before LIBRARY-SETTINGS-FIX-1 closes.
+  - Evidence: the 2026-10-11 audit F2 (full suite 3,408 passed / 1 failed, the G1 timeout, on the LIBRARY-SETTINGS-FIX-1 tree); the READER-MODE-SEPARATION-2 close-out (all three, `Test timed out in 10000ms`, and they pass alone).
+- **Design decision (planner, 2026-10-11):**
+  - Use a per-test timeout (the third argument of `it`), not a global `testTimeout` change, so every other test keeps its 10 s budget and its early warning.
+  - Choose 30 s: about 4.5 times G1's solo time, and above the 16.8 s observed for its whole file under load.
+  - Write the value inline with a one-line comment. These are test-harness budgets, not product behaviour, so the constants-file rule does not apply.
+- **Out of scope:** making these tests faster; diagnosing the machine-wide slowdown seen on 2026-10-10; any other test; product code.
+- **Prerequisites:** none.
+- **Done when:**
+    1. In PowerShell 7, `git grep -c -F '}, 30_000);' -- tests/readerModeBoundaries.test.ts tests/updateInstallGating.test.tsx` prints `tests/readerModeBoundaries.test.ts:1` and `tests/updateInstallGating.test.tsx:2`; on the base it prints nothing and exits 1. (`rg` is not on PowerShell's PATH on this machine; LL-143 of the pending OutsideAudit.10 remediation.) No other test in either file gains a timeout.
+    2. `npx vitest run tests/readerModeBoundaries.test.ts tests/updateInstallGating.test.tsx` exits 0.
+    3. Full `npm test` exits 0 twice in a row on this machine. Record both summary lines in the close-out.
+    4. `npm run typecheck` exits 0.
+    5. `git diff --name-only refs/remotes/origin/main` lists exactly the two test files, plus `docs/governance/close-outs/Timing.TEST-TIMEOUT-HEADROOM-1.jsonl` if kept (standing rule 41).
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer re-reads both full-suite summaries; repository operator merges.
+- **Lane:** Platform & Maintenance. Execution surface B (evaluation harness).
+- **Source:** [2026-10-11 audit F2](docs/planning/roadmap-reviews/2026-10-11-audit.md); [CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md) (KF-3, Decision #33); owner ruling 2026-10-11.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `cf17a95d`):
+  - `tests/readerModeBoundaries.test.ts:222`: the closing `  });` of the G1 test becomes `  }, 30_000); // G1 builds the whole import graph (~6.5 s alone); the 10 s default has no headroom under full-suite load (KF-3)`.
+  - `tests/updateInstallGating.test.tsx:148` and `:176`: each test's closing `  });` becomes `  }, 30_000); // first dynamic import of LibraryContainer is slow under full-suite load (KF-3)`.
+- **Tests:** no new tests. The edited tests keep every assertion unchanged.
+- **Constants:** none.
+- **Branch:** `eb/test-timeout-headroom-1` from `refs/remotes/origin/main`, in worktree `.worktrees/test-timeout-headroom-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** exactly `tests/readerModeBoundaries.test.ts` and `tests/updateInstallGating.test.tsx`, in one commit. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree, and push (Rule 5b).
+- **Failure handling:**
+  - If either full run fails on a different test, stop and report it. That is a new finding, not this item's scope; do not raise its timeout.
+  - If any of the three tests still times out at 30 s, stop with BLOCKER(USER). That would be real slowness, not missing headroom.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface B only.
+  - **Forbidden:** every file except the two test files; specifically EINK-HOVER-FIX-1's files (`src/styles/themes.css`, `tests/einkFoundation.test.ts`, `docs/governance/BUG_REPORT.md`) and the shared-core freeze set.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of EINK-HOVER-FIX-1. After this merges, the LIBRARY-SETTINGS-FIX-1 close-out resumes and re-runs its Done-when 5.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Three slow tests carry explicit 30 s timeouts | calculable | test edit | mechanical | low | 10m (three one-line edits) | — | — |
+| 2 | Full suite green twice, merged and pushed | calculable | merge and verify | mechanical | low | 25m (two full `npm test` runs + typecheck + one --no-ff merge) | — | — |
+
+**Total:** chain 35m · sum 35m; 0 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- Standing rule 41 (LL-136): the exact-path fence exempts `Timing.TEST-TIMEOUT-HEADROOM-1.jsonl`.
+- LL-135: the dispatch carries its filled reconciliation recipe.
+- Standing rule 13 (broad-suite-before-CI): the item fixes the cause rather than waiving the timeouts as debt. Any other failure stays real (Failure handling).
+- LL-138: considered. There is no approved behaviour change to control for, and the failing state is already recorded (audit F2).
+
+#### Mid-Dispatch Amendment — 2026-10-12
+
+**Pause point:** The first run, in a cloud container, stopped before merging. Typecheck and full-suite failures outside this item stood in its way, and the safety check refused its push.
+**Decision:** Type 1b — Advance, planner-originated. The owner approved it on 2026-10-12 (option A): execution moves to the owner's machine.
+**Rationale:**
+- Done-when 3 is defined "on this machine", which a cloud container cannot satisfy. On the owner's machine, with the three edits, none of the three slow tests failed in two full runs.
+- The typecheck failure is pre-existing on `main`. `tests/seenBatcher.test.ts` lines 8 and 13 hold an untyped `vi.fn()` added by LIBRARY-SETTINGS-FIX-1 (`685b7f35`), and it blocks every later typecheck gate.
+- Two OutsideAudit.10 evidence scripts named `*.test.*` had been collected by vitest since `d4184a1c`. The planner renamed them to `*.test.ts.txt` and `*.test.js.txt`, in the same planning merge as this amendment.
+
+**Scope change:**
+- **Edit sites:** add `tests/seenBatcher.test.ts`.
+  - Line 8: `  let onFlush: ReturnType<typeof vi.fn>;` becomes `  let onFlush: ReturnType<typeof vi.fn<(ids: string[]) => void>>;`.
+  - Line 13: `    onFlush = vi.fn();` becomes `    onFlush = vi.fn<(ids: string[]) => void>();`.
+  - With these, `npm run typecheck` exits 0 (planner-verified on the owner's machine).
+- **Staging plan and Done-when 5:** the commit, and the `git diff --name-only` list, hold exactly the three test files.
+- **Done-when 3:** every test must pass in both runs, with two exceptions.
+  - `tests/qwenRuntimeHardening.test.js` failing only under full-suite load, while passing alone, does not fail the row, because NARRATE-REMOVE-1 deletes it. Record its runs in the close-out.
+  - `tests/wordPositionIndex.test.ts` "builds a 5,000-span section and keeps lookup coverage intact" asserts `buildTimeMs < 200`. If it fails in one run and passes alone, record it as a new low bug, not fixed here. If it fails in both runs, stop with BLOCKER(USER).
+
+**Follow-up items:**
+- A low bug for the load-sensitive word-index timing assertion, if it fails.
+- Lessons LL-146 (evidence named like tests) and LL-147 (machine-bound gates need a local session).
+- The missing typecheck row in LIBRARY-SETTINGS-FIX-1 belongs to that item's close-out.
+
+**Close-Out Preservation:**
+- **Where:** migrate this block verbatim into `docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.<date>.md`, under §Mid-Dispatch Decisions.
+- **When:** before the spec is archived.
+- **Risk if skipped:** the third file and the narrowed Done-when 3 lose their authority, and a later reader sees an out-of-fence edit.
+
+---
+
+<!-- Archived 2026-10-12 by /pointer-closeout EINK-HOVER-FIX-1; close-out docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md. The specification as it stood at 072a65f3. -->
+
+#### EINK-HOVER-FIX-1 — Stop the e-ink hover rule wiping overlay backgrounds *(position 6 — Full Spec)*
+
+- **What:** Narrow the e-ink "no hover effects" rule so it only neutralizes hover on interactive leaf elements. Today it matches every hovered ancestor, so with e-ink mode on, the Settings panel (`.menu-flap`) and other overlays go transparent while the pointer is over them. Fixes BUG-184.
+- **Why:** `src/styles/themes.css:145-147` is `[data-eink="true"] *:hover { background-color: inherit; }`, specificity (0,2,0), and it loads after base, reader and library CSS (`src/styles/index.css:4`). Because `:hover` matches the hovered element and all its ancestors, any panel with its own background takes its parent's (often transparent) background while hovered. The investigation on `main` @ `95aae83e` (2026-10-10) found about 25 affected overlays, each losing to this rule:
+  - `.menu-flap` (library.css:986/992);
+  - `.command-palette-container` (keyboard.css:194);
+  - the shortcuts, highlights, snooze, tag-picker and quick-settings containers (keyboard.css:268–461);
+  - `.note-popover` (page-reader.css:691) and `.hotkey-coach` (page-reader.css:770);
+  - `.delete-confirm` and `.toast` (base.css:205/335);
+  - the import, cloud-merge, search-dropdown, recent-folders and context-menu panels (library.css);
+  - the bug-report and metadata-wizard dialogs (onboarding.css:216/291);
+  - the chapter dropdowns (reader.css:228, page-reader.css:639).
+
+  The e-ink rules for `.highlight-menu` (themes.css:120) and `.definition-popup` (:128) also lose, because they come earlier in the file.
+- **Design decision (planner, 2026-10-10):** keep the rule's intent ("no hover effects — e-ink devices are often touch-only", its only comment, since 36b8361e) but limit it to interactive leaves. Wrap the list in `:where()` so specificity stays exactly (0,2,0) and every existing e-ink override keeps today's precedence. Excluding overlays with `:not()` would need about 25 selectors and still break their descendants. Adding about 25 explicit backgrounds would leave the ancestor bug for any future panel. Both alternatives were rejected.
+- **Accepted residual:** a non-listed hovered row that sets a hover background, and is not a button, link or ARIA button/option/menuitem, regains its hover background in e-ink mode. That is cosmetic, and the owner smoke test below covers what matters. `.doc-card` (role=button) keeps today's behavior.
+- **Out of scope:** any other e-ink rule; the reader surfaces (`src/styles/reader.css` is in the separation branch's diff and must not be touched); BUG-154.
+- **Prerequisites:** none.
+- **Done when:**
+    1. `src/styles/themes.css` no longer contains the string `[data-eink="true"] *:hover`, and contains exactly one hover-neutralizing rule, `[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover`, whose body is `background-color: inherit;`.
+    2. `npm test -- tests/einkFoundation.test.ts` exits 0 and includes the new test `"e-ink hover suppression targets interactive leaves, not ancestors (BUG-184)"` (spec below).
+    3. **Positive control (LL-138):** with Task 1's test added and the CSS not yet changed, that one test fails and every other test in the file passes. Record the failing output in the close-out.
+    4. `npm test` exits 0 with no new skips, and `npm run build` exits 0.
+    5. `docs/governance/BUG_REPORT.md` BUG-184 **Status** reads `RESOLVED in source (EINK-HOVER-FIX-1, <merge sha>) — OPEN until rebuild + owner smoke (SRL-079)`, and **Last updated** is the merge date.
+    6. `git diff --name-only refs/remotes/origin/main` lists exactly `src/styles/themes.css`, `tests/einkFoundation.test.ts`, `docs/governance/BUG_REPORT.md` and, if kept, `docs/governance/close-outs/Timing.EINK-HOVER-FIX-1.jsonl` (LL-136 exemption).
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer confirms the positive control; repository operator merges; **owner** runs the smoke test after rebuild (below).
+- **Lane:** UX polish. Execution surface C.
+- **Source:** [BUG_REPORT.md BUG-184](docs/governance/BUG_REPORT.md); [2026-10-10-2 audit F2](docs/planning/roadmap-reviews/2026-10-10-2-audit.md); the e-ink overlay investigation (2026-10-10, quoted above).
+
+##### Implementation detail
+- **Edit sites:**
+  - `src/styles/themes.css:144-147`. Replace the comment and rule with:
+    ```css
+    /* No hover effects — e-ink devices are often touch-only. Interactive leaves only:
+       `*:hover` also matched every hovered ancestor and wiped overlay backgrounds (BUG-184). */
+    [data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover {
+      background-color: inherit;
+    }
+    ```
+    `.queue-item:hover` (library.css:1060) and `.page-word:hover` (page-reader.css:124) are listed by name because they are not buttons.
+  - `tests/einkFoundation.test.ts`. Add one `it(...)` after the test at line 59–64, inside the existing `describe` (which closes at line 105). It reuses `read` and `extractCssBlock`:
+    ```ts
+    it("e-ink hover suppression targets interactive leaves, not ancestors (BUG-184)", () => {
+      const css = read("src/styles/themes.css");
+      expect(css).not.toContain('[data-eink="true"] *:hover');
+      const sel = '[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover';
+      expect(extractCssBlock(css, sel)).toMatch(/background-color:\s*inherit/);
+    });
+    ```
+  - `docs/governance/BUG_REPORT.md:14`: the Status line per Done-when 5, plus line 5 **Last updated**.
+- **Tests:** the new test above. The existing test "behavioral e-ink CSS disables transitions under data-eink" (line 59) reads the first `[data-eink="true"] *` block (line 41) and is unaffected; it must still pass unchanged.
+- **Constants:** none.
+- **Branch:** `eb/eink-hover-fix-1` from `refs/remotes/origin/main`, in worktree `.worktrees/eink-hover-fix-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** Task 1 commit: exactly `tests/einkFoundation.test.ts`. Task 2 commit: exactly `src/styles/themes.css` and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree and push (Rule 5b).
+- **Failure handling:**
+  - If the positive control shows anything other than exactly the new test failing, stop and report; do not change the CSS until the test is right.
+  - If any other existing test fails after Task 2, the selector broke an assertion. Report the exact test; do not edit other tests.
+  - If `npm run build` fails, report it; it is not expected from a CSS selector change.
+  - Retry ceiling: two corrections, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C only.
+  - **Forbidden:** every file in READER-MODE-SEPARATION-2's diff (notably `src/styles/reader.css`, `src/reader/**`, `src/constants.ts`, `src/types.ts`), the shared-core freeze set, and LIBRARY-SETTINGS-FIX-1's files (`src/components/CommandPalette.tsx`, `MenuFlap.tsx`, `LibraryView.tsx`, `src/utils/seenBatcher.ts`, its tests).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of LIBRARY-SETTINGS-FIX-1 and the separation run.
+- **Owner smoke (after merge and rebuild; closes BUG-184 per SRL-079):** run `npm run build`, start the app, and turn on Settings → Theme → E-Ink Display Mode. Hover inside the Settings panel, then open Ctrl+K and hover the palette list. Both panels stay opaque. Hover a Settings menu item: no hover highlight. If both checks pass, BUG-184's Status becomes `RESOLVED (verified <date>)`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Failing regression test for the ancestor hover wipe | calculable | regression test | mechanical | low | 10m (one text-assertion test plus the positive-control run) | — | — |
+| 2 | Hover rule narrowed to interactive leaves; bug record updated | calculable | css fix | mechanical | low | 10m (one rule replacement plus a status line) | — | — |
+| 3 | Suite and build green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (full `npm test` + `npm run build` + one --no-ff merge) | — | — |
+
+**Total:** chain 40m · sum 40m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-138 — positive control: Done-when 3 requires the new test to fail alone before the CSS changes.
+- LL-136 — the exact-path fence exempts `Timing.EINK-HOVER-FIX-1.jsonl`, so a time log can be kept.
+- LL-135 — the dispatch prompt must carry the filled reconciliation recipe itself.
+- LL-137 — the test reads CSS through the existing `read()` helper (`utf-8`); any ad hoc check script opens files as UTF-8.
+- Standing rule 35 (SRL-079) — BUG-184 stays OPEN until rebuild + owner smoke (Done-when 5, Owner smoke).
+- LL-024 — considered (CSS/Electron window management); not applicable, since nothing here touches window chrome.
+
+---
+
+<!-- Archived 2026-10-12 by /pointer-closeout LIBRARY-SETTINGS-FIX-1; close-out docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md. The specification as it stood at 072a65f3. -->
+
+#### LIBRARY-SETTINGS-FIX-1 — Fix command-palette settings routing and live "New"-dot clearing *(position 7 — Full Spec)*
+
+- **What:** Two small fixes in the library surface.
+  - **(A) Command palette (Ctrl+K) settings routing:** every entry opens a real settings page, every page has an entry, and every page shows its title.
+  - **(B) The "New" dot on library cards clears live:** a card counts as seen after it has been at least half visible for the dwell time, and that is saved a moment later, so the dot disappears while the card is on screen and survives quitting the app.
+- **Why:**
+  - **(A)** On `main` @ `95aae83e`, `src/components/CommandPalette.tsx` has these defects:
+    - "Open Settings" (line 83), "Settings: Help" (103) and "Check for Updates" (155) call `onOpenSettings()` with no page. `LibraryContainer.tsx:276-279` turns that into `settingsPage = null`, so `MenuFlap.tsx:62` opens the **reading queue**, not settings. Help and "Check for updates" live on the main settings list (`SettingsMenu.tsx:127`, `HelpSettings`).
+    - "Settings: Text Size" (104) routes to `"text-size"`, a page that no longer exists (it was merged into Reading Layout), so it shows an empty sub-page.
+    - "Settings: Layout" (99) doesn't match the page's own name, "Reading Layout".
+    - Reading Goals (`SettingsMenu.tsx:31`) has no entry.
+    - `MenuFlap.tsx:10-20` `TITLES` has no `tts`, `reading-goals` or `cloud-sync`, so those pages show their raw id as the header (line 121).
+  - **(B)** `src/components/LibraryView.tsx:148-220` records seen cards in `seenDocIdsRef` after a hardcoded 1000 ms dwell (line 167). It only saves them (`flushSeenDocs`, 194-199 → `markDocsSeen`, `LibraryContainer.tsx:441-450`, which writes library.json) when the user opens a document, the flap, or goals settings. Staying in the library never clears a dot, and quitting loses the seen ids. The original idea (IDEAS F2, BUG-067) is "dot clears after card scrolls into viewport". The 1000 ms literal also breaks the constants rule.
+- **Owner decision (2026-10-10):** clear live.
+- **Out of scope:** IDEAS I1 (the "[Sample]" prefix was already removed in 5c662a78); the age-based "New" tab (`NEW_LIBRARY_DAYS`); the reader-side palette (`ReaderContainer.tsx` is in the separation branch's diff and the shared-core freeze set); a dedicated Help sub-page; the unused `help` key in `TITLES` (left as is).
+- **Prerequisites:** none.
+- **Done when:**
+    1. `npm test -- tests/commandPaletteRoutes.test.ts tests/seenBatcher.test.ts` exits 0.
+    2. **Positive control (LL-138):** after Task 1's tests are added and before any production edit, `tests/commandPaletteRoutes.test.ts` fails on exactly the defects listed in *Why (A)* (bare `onOpenSettings()` ×3, `"text-size"`, the missing `reading-goals` entry, the three missing titles), and `tests/seenBatcher.test.ts` fails only because `src/utils/seenBatcher.ts` doesn't exist yet. Record the output in the close-out.
+    3. `CommandPalette.tsx` contains no `onOpenSettings()` call without an argument, and no `"text-size"`.
+    4. `src/constants.ts` exports `LIBRARY_SEEN_DWELL_MS = 1000` and `LIBRARY_SEEN_FLUSH_DELAY_MS = 400`, placed directly after `NEW_LIBRARY_DAYS` (line 474 on `main` @ `7d688f39`; it was 457 before the separation merge). `LibraryView.tsx` contains no literal `1000`.
+    5. `npm test` exits 0 with no new skips, and `npm run build` exits 0.
+    6. `git diff --name-only refs/remotes/origin/main` lists exactly the paths in the staging plan, plus `docs/governance/close-outs/Timing.LIBRARY-SETTINGS-FIX-1.jsonl` if kept (LL-136).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer confirms the positive control; repository operator merges.
+- **Lane:** Library & Content. Execution surface C.
+- **Source:** [IDEAS.md F2, G3](docs/governance/IDEAS.md); [2026-10-10-2 plan](docs/planning/roadmap-reviews/2026-10-10-2-plan.md); the library/settings investigation (2026-10-10, quoted above, spot-checked by the planner on `95aae83e`).
+
+##### Implementation detail
+- **Edit sites (A), `src/components/CommandPalette.tsx`:**
+  - line 83: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - line 99: label `"Settings: Layout"` → `"Settings: Reading Layout"` (route `"layout"` unchanged);
+  - line 103: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - line 104: `onOpenSettings("text-size")` → `onOpenSettings("layout")` (keep the label "Settings: Text Size");
+  - line 155: `onOpenSettings()` → `onOpenSettings("settings")`;
+  - after line 105, add `{ type: "setting", label: "Settings: Reading Goals", sublabel: "Daily, weekly and book goals", onSelect: act(() => onOpenSettings("reading-goals")) },`.
+- **Edit sites (A), `src/components/MenuFlap.tsx:10-20`:** add `tts: "Narration (TTS)"`, `"reading-goals": "Reading Goals"` and `"cloud-sync": "Cloud Sync"` to `TITLES`. These match the `SettingsMenu.tsx:25-38` labels.
+- **Edit sites (B):**
+  - **New `src/utils/seenBatcher.ts`** exports `createSeenBatcher({ dwellMs, flushDelayMs, onFlush })`, which returns `{ enter(id), leave(id), cancelPending(), flush(), dispose() }`:
+    - `enter` starts a dwell timer for an id unless one is already running or the id is already seen;
+    - when the dwell timer fires, the id is added to the seen set and a single flush timer (`flushDelayMs`) is scheduled if none is pending;
+    - `leave` cancels that id's dwell timer;
+    - `cancelPending` cancels all dwell timers but keeps seen ids and the pending flush;
+    - `flush` cancels the flush timer and, if the seen set is non-empty, calls `onFlush([...ids])` once and clears the set;
+    - `dispose` = `cancelPending` + `flush`.
+  - **`src/components/LibraryView.tsx:148-199`:**
+    - Replace `seenDocIdsRef` and `seenTimersRef` with one `useRef` holding a batcher created once, with `dwellMs: LIBRARY_SEEN_DWELL_MS`, `flushDelayMs: LIBRARY_SEEN_FLUSH_DELAY_MS` and `onFlush: (ids) => onMarkDocsSeenRef.current?.(ids)`. `onMarkDocsSeenRef` is a ref updated each render to the latest `onMarkDocsSeen`, so a late flush never uses a stale `library` closure.
+    - The observer effect (still keyed on `filteredLibrary`) calls `batcher.enter(docId)` when intersecting and `batcher.leave(docId)` otherwise. Its cleanup calls `observer.disconnect()` and `batcher.cancelPending()`, never `dispose()`, because a library update re-runs this effect.
+    - A separate mount-only effect returns `() => batcher.dispose()`, which flushes on unmount.
+    - `flushSeenDocs` becomes `() => batcher.flush()`. The three existing navigation call sites (lines 202-220) stay as they are.
+  - **`src/constants.ts`:** directly after `NEW_LIBRARY_DAYS` (line 474 on `7d688f39`) add `export const LIBRARY_SEEN_DWELL_MS = 1000;` and `export const LIBRARY_SEEN_FLUSH_DELAY_MS = 400;`, each with a one-line comment.
+- **Tests (Task 1, written before any production edit):**
+  - **New `tests/commandPaletteRoutes.test.ts`** (text-read style, as in `tests/einkFoundation.test.ts`, reading files as `utf-8`):
+    - (a) every `onOpenSettings(` call in `CommandPalette.tsx` has a string argument;
+    - (b) every argument is one of the `id:` values in `SettingsMenu.tsx`'s `CATEGORIES`/`SECONDARY_CATEGORIES` or `"settings"`;
+    - (c) every `CATEGORIES`/`SECONDARY_CATEGORIES` id appears as an argument at least once;
+    - (d) every such id is a key in `MenuFlap.tsx` `TITLES`.
+  - **New `tests/seenBatcher.test.ts`** (`vi.useFakeTimers()`):
+    - (1) `enter`, then advancing `dwellMs - 1` calls nothing;
+    - (2) `enter`, then `dwellMs + flushDelayMs` calls `onFlush(["a"])` exactly once;
+    - (3) two ids entered together flush in one call;
+    - (4) `leave` before the dwell completes means no flush;
+    - (5) `cancelPending` after the dwell keeps the id, and `flush()` then delivers it;
+    - (6) `dispose()` with a seen id flushes it immediately;
+    - (7) an id already flushed is not re-flushed on a second `enter`.
+- **Constants:** `LIBRARY_SEEN_DWELL_MS`, `LIBRARY_SEEN_FLUSH_DELAY_MS` (above).
+- **Branch:** `eb/library-settings-fix-1` from `refs/remotes/origin/main`, in worktree `.worktrees/library-settings-fix-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - Task 1 commit: exactly `tests/commandPaletteRoutes.test.ts` and `tests/seenBatcher.test.ts`.
+  - Task 2 commit: exactly `src/components/CommandPalette.tsx`, `src/components/MenuFlap.tsx`, `src/utils/seenBatcher.ts`, `src/components/LibraryView.tsx` and `src/constants.ts`.
+  - Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` from a clean worktree and push (Rule 5b).
+- **Failure handling:**
+  - If the positive control fails differently from Done-when 2, fix the tests first; never edit production code in Task 1.
+  - The separation epic merged on 2026-10-11, so `src/constants.ts` no longer races that branch. If a merge onto a newer `main` conflicts there, keep both sides and report it.
+  - If an existing library test fails because seen state is now saved earlier, report the exact test and stop; do not weaken it.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C only.
+  - **Forbidden:** every file in READER-MODE-SEPARATION-2's diff except the two appended lines in `src/constants.ts` (notably `src/reader/**`, `ReaderContainer.tsx`, `src/types.ts`), the shared-core freeze set, `src/components/LibraryContainer.tsx` (not needed: `markDocsSeen` already saves), and EINK-HOVER-FIX-1's files (`src/styles/themes.css`, `tests/einkFoundation.test.ts`, `docs/governance/BUG_REPORT.md`).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of EINK-HOVER-FIX-1. If the separation run merges first, rebase onto `main` before merging.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Route-consistency and seen-batcher tests failing on current code | calculable | regression test | bounded | medium | 25m (two new test files plus the positive-control run) | — | — |
+| 2 | Palette routes, flap titles and live seen-batching implemented | calculable | ui fix | bounded | medium | 35m (six palette edits, three titles, one small util, a LibraryView refactor of ~50 lines) | — | — |
+| 3 | Suite and build green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (full `npm test` + `npm run build` + one --no-ff merge) | — | — |
+
+**Total:** chain 1h20m · sum 1h20m; 0 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- LL-138 — positive control: Done-when 2 requires both new tests to fail first, on exactly the listed defects.
+- LL-136 — the exact-path fence exempts `Timing.LIBRARY-SETTINGS-FIX-1.jsonl`.
+- LL-135 — the dispatch prompt must carry the filled reconciliation recipe itself.
+- LL-137 — the route test reads source files as `utf-8`.
+- LL-016 — refs, not state, carry values across effect runs: the batcher lives in a `useRef` created once and survives the observer effect re-running on each library update.
+- LL-017 — imperative callbacks read from refs: the batcher's `onFlush` calls `onMarkDocsSeenRef.current`, never a closed-over `onMarkDocsSeen`, so a late flush never uses a stale library.
+- LL-131 — considered: no module is deleted, so no importer census is needed.
+- Standing rule 37 (SRL-089) — Task 1 commits before Task 2; one implementer; file-disjoint from EINK-HOVER-FIX-1.
