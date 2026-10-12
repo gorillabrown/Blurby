@@ -1,27 +1,23 @@
-// READER-MODE-SEPARATION-2 speed amendment (design §E): the shell's speed dialog for Focus, Flow and Narrate.
+// READER-MODE-SEPARATION-2 speed amendment (design §E): the shell's speed dialog for Focus and Flow.
 // Passive UI: the selected value lives in the active runtime (snapshot.speed); this dialog only reports
 // the user's choice through onChange. Every value is an integer slider index, so nothing is ever rounded.
 import { useEffect, useId, useRef } from "react";
 import {
   FOCUS_FLOW_SPEED_MAX_HUNDREDTHS,
   FOCUS_FLOW_SPEED_MIN_HUNDREDTHS,
-  NARRATE_SPEED_MAX_HUNDREDTHS,
-  NARRATE_SPEED_MIN_HUNDREDTHS,
   SPEED_DIALOG_REFERENCE_WPM,
   SPEED_DIALOG_STEP_HUNDREDTHS,
 } from "../constants";
 import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 
-export type SpeedDialogMode = "focus" | "flow" | "narrate";
+export type SpeedDialogMode = "focus" | "flow";
 
-function range(mode: SpeedDialogMode): { readonly min: number; readonly max: number } {
-  return mode === "narrate"
-    ? { min: NARRATE_SPEED_MIN_HUNDREDTHS, max: NARRATE_SPEED_MAX_HUNDREDTHS }
-    : { min: FOCUS_FLOW_SPEED_MIN_HUNDREDTHS, max: FOCUS_FLOW_SPEED_MAX_HUNDREDTHS };
+function range(_mode: SpeedDialogMode): { readonly min: number; readonly max: number } {
+  return { min: FOCUS_FLOW_SPEED_MIN_HUNDREDTHS, max: FOCUS_FLOW_SPEED_MAX_HUNDREDTHS };
 }
 
-/** Highest slider index: 88 for Focus/Flow (0.40–4.80x), 24 for Narrate (0.80–2.00x). */
+/** Highest slider index: 88 for Focus/Flow (0.40–4.80x). */
 export function speedMaxIndex(mode: SpeedDialogMode): number {
   const { min, max } = range(mode);
   return (max - min) / SPEED_DIALOG_STEP_HUNDREDTHS;
@@ -31,16 +27,14 @@ function hundredthsAt(mode: SpeedDialogMode, index: number): number {
   return range(mode).min + SPEED_DIALOG_STEP_HUNDREDTHS * index;
 }
 
-/** Index → speed. Focus/Flow: (40 + 5i) × 2.5 WPM; Narrate: (80 + 5j) / 100. Exact in binary. */
+/** Index → speed. Focus/Flow: (40 + 5i) × 2.5 WPM. Exact in binary. */
 export function speedAt(mode: SpeedDialogMode, index: number): ReaderModeSpeed {
   const h = hundredthsAt(mode, index);
-  return mode === "narrate"
-    ? { kind: "rate", rate: h / 100 }
-    : { kind: "wpm", wpm: (h * SPEED_DIALOG_REFERENCE_WPM) / 100 };
+  return { kind: "wpm", wpm: (h * SPEED_DIALOG_REFERENCE_WPM) / 100 };
 }
 
 function speedHundredths(speed: ReaderModeSpeed): number {
-  return speed.kind === "rate" ? Math.round(speed.rate * 100) : Math.round((speed.wpm * 100) / SPEED_DIALOG_REFERENCE_WPM);
+  return Math.round((speed.wpm * 100) / SPEED_DIALOG_REFERENCE_WPM);
 }
 
 /** Speed → the nearest slider index (display only; nothing is written until the user moves the slider). */
@@ -54,13 +48,12 @@ export function formatSpeedMultiplier(speed: ReaderModeSpeed): string {
   return `${(speedHundredths(speed) / 100).toFixed(2)}x`;
 }
 
-/** Slider aria-valuetext: "0.45x, 112.5 words per minute" (Focus/Flow) or "1.05x" (Narrate). */
+/** Slider aria-valuetext: "0.45x, 112.5 words per minute". */
 export function formatSpeedValueText(speed: ReaderModeSpeed): string {
-  const multiplier = formatSpeedMultiplier(speed);
-  return speed.kind === "wpm" ? `${multiplier}, ${speed.wpm} words per minute` : multiplier;
+  return `${formatSpeedMultiplier(speed)}, ${speed.wpm} words per minute`;
 }
 
-const MODE_LABEL: Record<SpeedDialogMode, string> = { focus: "Focus", flow: "Flow", narrate: "Narrate" };
+const MODE_LABEL: Record<SpeedDialogMode, string> = { focus: "Focus", flow: "Flow" };
 
 export interface ReaderSpeedDialogProps {
   readonly mode: SpeedDialogMode;

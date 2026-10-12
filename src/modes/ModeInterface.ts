@@ -121,9 +121,6 @@ export interface ModeConfig {
   /** Settings relevant to the mode */
   settings: {
     rhythmPauses?: any;
-    ttsRate?: number;
-    ttsEngine?: string;
-    ttsVoiceName?: string;
     focusSpan?: number;
     focusMarks?: boolean;
     flowWordsPerHighlight?: number;

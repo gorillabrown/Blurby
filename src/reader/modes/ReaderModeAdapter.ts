@@ -26,7 +26,7 @@ import type {
 } from "../document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../ports/ReaderPorts";
 
-export type ReaderModeId = "page" | "focus" | "flow" | "narrate";
+export type ReaderModeId = "page" | "focus" | "flow";
 
 export type ReaderModeStartCause =
   | "play-button"
@@ -131,8 +131,7 @@ export interface ReaderModeStartRequestV1 {
 }
 
 export type ReaderModeSpeed =
-  | { readonly kind: "wpm"; readonly wpm: number }    // Focus, Flow
-  | { readonly kind: "rate"; readonly rate: number }; // Narrate
+  | { readonly kind: "wpm"; readonly wpm: number }; // Focus, Flow
 
 export interface ReaderModeRuntimeSnapshotV1 extends ReaderModeRuntimeSnapshot {
   readonly contractVersion: typeof READER_MODE_RUNTIME_CONTRACT_VERSION;

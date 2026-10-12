@@ -11,14 +11,8 @@ import type { MutableRefObject } from "react";
 import type { ReadingMode, ModeConfig, ModeState } from "../../../modes/ModeInterface";
 import {
   FOLIATE_MIN_ENGAGEMENT_POSITION,
-  KOKORO_UI_RATE_MAX,
-  KOKORO_UI_RATE_MIN,
-  KOKORO_UI_RATE_STEP,
   MAX_WPM,
   MIN_WPM,
-  TTS_MAX_RATE,
-  TTS_MIN_RATE,
-  TTS_RATE_STEP,
 } from "../../../constants";
 import { findSentenceBoundary } from "../../../utils/text";
 import {
@@ -114,17 +108,6 @@ export class PageMode implements ReadingMode {
     const wordsLeft = Math.max(0, totalWords - this.currentWord);
     return (wordsLeft / this.config.wpm) * 60000;
   }
-}
-
-// Owner-local copy of the Kokoro UI speed step (src/utils/kokoroRatePlan.ts, same domain; Q-D).
-// OC-7/OC-8: 0.80–2.00 in 0.05 steps, read from the shared constants; integer hundredths, no rounding drift.
-function stepKokoroUiSpeed(current: number, delta: number): number {
-  const min = Math.round(KOKORO_UI_RATE_MIN * 100);
-  const step = Math.round(KOKORO_UI_RATE_STEP * 100);
-  const last = Math.round((KOKORO_UI_RATE_MAX * 100 - min) / step);
-  const clampIndex = (i: number) => Math.max(0, Math.min(last, i));
-  const idx = clampIndex(Math.round(((Number.isFinite(current) ? current : 1.0) * 100 - min) / step));
-  return (min + step * clampIndex(idx + (delta > 0 ? 1 : -1))) / 100;
 }
 
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
@@ -376,18 +359,6 @@ export class PageModeRuntime implements ReaderModeRuntime {
   adjustSpeed(delta: number): void {
     if (!this.alive) return;
     const settings = this.settingsSnapshot.settings;
-    if (settings.lastReadingMode === "narrate") {
-      let newRate: number;
-      if (settings.ttsEngine === "kokoro") {
-        newRate = stepKokoroUiSpeed(settings.ttsRate || 1.0, delta);
-      } else {
-        const step = delta > 0 ? TTS_RATE_STEP : -TTS_RATE_STEP;
-        newRate = Math.round(Math.min(TTS_MAX_RATE, Math.max(TTS_MIN_RATE, (settings.ttsRate || 1.0) + step)) * 10) / 10;
-      }
-      // The legacy narration.adjustRate(newRate) is a cross-owner effect (design §B.1): Narrate applies the rate when it mounts.
-      this.ports.settings.update({ ttsRate: newRate });
-      return;
-    }
     // OC-6/OC-8: the selected mode's own key (focusWpm or flowWpm; absent → the legacy wpm), never the shared wpm.
     const focus = settings.lastReadingMode === "focus";
     const current = (focus ? settings.focusWpm : settings.flowWpm) ?? this.wpm;
@@ -700,9 +671,6 @@ export class PageModeRuntime implements ReaderModeRuntime {
       paragraphBreaks: numberArrayToSet(this.document.paragraphBreaks),
       settings: {
         rhythmPauses: settings.rhythmPauses,
-        ttsRate: settings.ttsRate,
-        ttsEngine: settings.ttsEngine,
-        ttsVoiceName: settings.ttsVoiceName ?? undefined,
         focusSpan: settings.focusSpan,
         focusMarks: settings.focusMarks,
         flowCursorStyle: settings.flowCursorStyle ?? undefined,

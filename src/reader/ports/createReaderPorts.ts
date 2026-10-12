@@ -9,13 +9,12 @@
  *   - teardown(key, run) lets run() make release-class calls only (READER_PORT_RELEASE_CALLS);
  *   - callbacks registered into infrastructure are wrapped and dropped once the key is not active;
  *   - promises returned to a session never settle once the key is not active (LL-109);
- *   - audio is issued only to Narrate; other modes get a port whose every method throws;
  *   - invalidate, teardown and closeAll are idempotent.
  * No module-level mutable state: all state lives in the closure of one createReaderPorts() call.
  */
 import type { ReaderModeId } from "../modes/ReaderModeAdapter";
 import type { ReaderSessionKey } from "../document/ReaderDocumentSnapshot";
-import type { ReaderAudioPort, ReaderPorts } from "./ReaderPorts";
+import type { ReaderPorts } from "./ReaderPorts";
 
 /** The shell-side implementations the broker forwards accepted calls to. */
 export type ReaderPortInfrastructure = ReaderPorts;
@@ -45,12 +44,6 @@ export interface ReaderPortBroker {
 
 /** Calls a session may still make inside its teardown window. */
 export const READER_PORT_RELEASE_CALLS: readonly string[] = Object.freeze([
-  "audio.stop",
-  "audio.setOnTruthSync(null)",
-  "audio.setPageEndWord(null)",
-  "audio.setOnChunkBoundary(null)",
-  "audio.setOnSegmentStart(null)",
-  "audio.setOnSectionEnd(null)",
   "settings.update{isNarrating}",
   "diagnostics.*",
 ]);
@@ -66,26 +59,16 @@ const PORT_METHODS = {
   settings: ["read", "update", "setWpm"],
   persistence: ["updateDocProgress", "updateProgress", "recordCfi", "markEngaged", "markPageActivity", "scheduleRelocateSave"],
   document: ["snapshot", "readBookBytes", "ensureBookWords", "subscribe"],
-  audio: [
-    "readState", "start", "pause", "resume", "stop", "setOnTruthSync", "setPageEndWord", "resync",
-    "setOnChunkBoundary", "setOnSegmentStart", "setOnSectionEnd", "updateWords", "adjustRate",
-    "resolveHighlightSync", "getAudioProgress", "updateCacheCursor", "configure",
-  ],
   diagnostics: ["record", "transition", "trace"],
   shell: ["reportRelocate", "reportToc", "reportEinkContentChange", "requestCompletionToPage", "requestCrossBook"],
 } as const satisfies { readonly [G in keyof ReaderPorts]: readonly (keyof ReaderPorts[G])[] };
 
 /** Index of the callback argument a method registers into infrastructure. */
 const CALLBACK_ARG: Readonly<Record<string, number>> = Object.freeze({
-  "audio.start": 3,
-  "audio.setOnTruthSync": 0,
-  "audio.setOnChunkBoundary": 0,
-  "audio.setOnSegmentStart": 0,
-  "audio.setOnSectionEnd": 0,
   "document.subscribe": 0,
 });
 /** Reads whose rejected value is the session's last accepted (frozen) result. */
-const CACHED_READS: readonly string[] = Object.freeze(["settings.read", "document.snapshot", "audio.readState"]);
+const CACHED_READS: readonly string[] = Object.freeze(["settings.read", "document.snapshot"]);
 const ASYNC_METHODS: readonly string[] = Object.freeze(["document.readBookBytes", "document.ensureBookWords"]);
 
 type AnyFn = (...args: unknown[]) => unknown;
@@ -103,14 +86,6 @@ function neverSettles(): Promise<never> {
 
 function keyId(key: ReaderSessionKey): string {
   return JSON.stringify([key.documentId, key.documentGeneration, key.mode, key.session]);
-}
-
-function throwingAudioPort(mode: ReaderModeId): ReaderAudioPort {
-  return new Proxy({} as ReaderAudioPort, {
-    get: (_target, prop) => () => {
-      throw new ReaderPortAccessError(`audio.${String(prop)}`, mode);
-    },
-  });
 }
 
 export function createReaderPorts(infra: ReaderPortInfrastructure): ReaderPortBroker {
@@ -138,8 +113,6 @@ export function createReaderPorts(infra: ReaderPortInfrastructure): ReaderPortBr
         infra.diagnostics.record("port-rejected", `${method} ${id}`);
         if (CACHED_READS.includes(method)) return lastRead.get(method);
         if (ASYNC_METHODS.includes(method)) return neverSettles();
-        if (method === "audio.start") return "error";
-        if (method === "audio.getAudioProgress") return null;
         if (method === "document.subscribe") return () => {};
         return undefined;
       }
@@ -177,13 +150,11 @@ export function createReaderPorts(infra: ReaderPortInfrastructure): ReaderPortBr
     // Seed the cached reads so a rejected read always has a frozen value to return.
     lastRead.set("settings.read", infra.settings.read());
     lastRead.set("document.snapshot", infra.document.snapshot());
-    if (key.mode === "narrate") lastRead.set("audio.readState", infra.audio.readState());
 
     return Object.freeze({
       settings: group("settings"),
       persistence: group("persistence"),
       document: group("document"),
-      audio: key.mode === "narrate" ? group("audio") : throwingAudioPort(key.mode),
       diagnostics: group("diagnostics"),
       shell: group("shell"),
     });
