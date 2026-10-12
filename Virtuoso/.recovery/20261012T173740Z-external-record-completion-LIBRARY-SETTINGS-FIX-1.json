@@ -1,0 +1,48 @@
+{
+  "id": "20261012T173740Z-external-record-completion-LIBRARY-SETTINGS-FIX-1",
+  "operation": "external-record-completion",
+  "item_id": "LIBRARY-SETTINGS-FIX-1",
+  "created": "2026-10-12T17:37:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "record-completion",
+    "fields": {
+      "status": "Completed",
+      "completed": "2026-10-12",
+      "evidence": "docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md",
+      "sequence": "",
+      "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Owner decision 2026-10-10: clear live. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 8c41095e on 2026-10-11 (Task 1 685b7f35, Task 2 fd7a483f); close-out held for the timeout fix (owner, 2026-10-11); Done-when 4 accepted by owner amendment. The register stayed Queued during the run. Its new test's typecheck error was fixed by TEST-TIMEOUT-HEADROOM-1 (ff2cd5f1); LL-149. Ledger TR-064. Close-out docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md (merge f78a3768)."
+    },
+    "expectedRevision": "a4d100913821425fa8e51ace8366aef087ac507e5d802bd9e7a385d9d14c404f",
+    "idempotencyKey": "record-completion:LIBRARY-SETTINGS-FIX-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md'), ('notes', \"Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Owner decision 2026-10-10: clear live. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 8c41095e on 2026-10-11 (Task 1 685b7f35, Task 2 fd7a483f); close-out held for the timeout fix (owner, 2026-10-11); Done-when 4 accepted by owner amendment. The register stayed Queued during the run. Its new test's typecheck error was fixed by TEST-TIMEOUT-HEADROOM-1 (ff2cd5f1); LL-149. Ledger TR-064. Close-out docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "LIBRARY-SETTINGS-FIX-1",
+      "idempotencyKey": "record-completion:LIBRARY-SETTINGS-FIX-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md'), ('notes', \"Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Owner decision 2026-10-10: clear live. Full Spec: U1-U10 pass. Completed 2026-10-12: merge 8c41095e on 2026-10-11 (Task 1 685b7f35, Task 2 fd7a483f); close-out held for the timeout fix (owner, 2026-10-11); Done-when 4 accepted by owner amendment. The register stayed Queued during the run. Its new test's typecheck error was fixed by TEST-TIMEOUT-HEADROOM-1 (ff2cd5f1); LL-149. Ledger TR-064. Close-out docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+      "actualRevision": "2026-10-12T17:37:45Z",
+      "recoveryId": "20261012T173740Z-external-record-completion-LIBRARY-SETTINGS-FIX-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-12T17:38:10Z",
+        "verifiedFields": [
+          "status",
+          "completed",
+          "evidence",
+          "sequence",
+          "notes"
+        ]
+      }
+    }
+  },
+  "resolved": "2026-10-12T17:37:57Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,48 @@
+{
+  "id": "20261012T173719Z-external-record-completion-EINK-HOVER-FIX-1",
+  "operation": "external-record-completion",
+  "item_id": "EINK-HOVER-FIX-1",
+  "created": "2026-10-12T17:37:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "record-completion",
+    "fields": {
+      "status": "Completed",
+      "completed": "2026-10-12",
+      "evidence": "docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md",
+      "sequence": "",
+      "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Full Spec: U1-U10 pass. Completed 2026-10-12: merge 61bad595 (Task 1 073cd5a3, Task 2 51399dc0; sha record 956e077f, merge 1916d899), run in a cloud session; Done-when 4 met on the owner's machine (3,410 passed / 133 skipped). It was moved In Flight without a mutation plan. BUG-184 stays open until a rebuild and the owner's e-ink smoke. Ledger TR-063. Close-out docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md (merge f78a3768)."
+    },
+    "expectedRevision": "541691f9ff27fadab6fb7407c7f44f2687ad2a9d420effbc91b1450a067957fb",
+    "idempotencyKey": "record-completion:EINK-HOVER-FIX-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md'), ('notes', \"Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Full Spec: U1-U10 pass. Completed 2026-10-12: merge 61bad595 (Task 1 073cd5a3, Task 2 51399dc0; sha record 956e077f, merge 1916d899), run in a cloud session; Done-when 4 met on the owner's machine (3,410 passed / 133 skipped). It was moved In Flight without a mutation plan. BUG-184 stays open until a rebuild and the owner's e-ink smoke. Ledger TR-063. Close-out docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "EINK-HOVER-FIX-1",
+      "idempotencyKey": "record-completion:EINK-HOVER-FIX-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md'), ('notes', \"Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Full Spec: U1-U10 pass. Completed 2026-10-12: merge 61bad595 (Task 1 073cd5a3, Task 2 51399dc0; sha record 956e077f, merge 1916d899), run in a cloud session; Done-when 4 met on the owner's machine (3,410 passed / 133 skipped). It was moved In Flight without a mutation plan. BUG-184 stays open until a rebuild and the owner's e-ink smoke. Ledger TR-063. Close-out docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md (merge f78a3768).\"), ('sequence', ''), ('status', 'Completed')]",
+      "actualRevision": "2026-10-12T17:37:25Z",
+      "recoveryId": "20261012T173719Z-external-record-completion-EINK-HOVER-FIX-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-12T17:37:50Z",
+        "verifiedFields": [
+          "status",
+          "completed",
+          "evidence",
+          "sequence",
+          "notes"
+        ]
+      }
+    }
+  },
+  "resolved": "2026-10-12T17:37:39Z",
+  "outcome": "succeeded"
+}
