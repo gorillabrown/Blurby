@@ -1,0 +1,267 @@
+[
+  {
+    "name": "A_both_narrate",
+    "registered": [
+      "get-state",
+      "get-platform",
+      "get-system-theme",
+      "save-settings",
+      "get-launch-at-login",
+      "set-launch-at-login",
+      "select-folder",
+      "switch-folder"
+    ],
+    "inMemoryBeforeDebounce": {
+      "schemaVersion": 13,
+      "readingMode": "narrate",
+      "lastReadingMode": "narrate",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "writesBeforeDebounce": 0,
+    "timersScheduled": 1,
+    "timersLive": 1,
+    "debounceMs": [
+      500
+    ],
+    "writerReceived": [
+      {
+        "schemaVersion": 13,
+        "readingMode": "narrate",
+        "lastReadingMode": "narrate",
+        "wpm": 300,
+        "ttsVoiceName": "af_bella",
+        "ttsRate": 1.2
+      }
+    ],
+    "fileOnDisk": {
+      "schemaVersion": 13,
+      "readingMode": "narrate",
+      "lastReadingMode": "narrate",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "syncEnqueued": [
+      {
+        "op": "update-settings",
+        "p": {
+          "revision": 7
+        }
+      }
+    ]
+  },
+  {
+    "name": "B_control_flow",
+    "registered": [
+      "get-state",
+      "get-platform",
+      "get-system-theme",
+      "save-settings",
+      "get-launch-at-login",
+      "set-launch-at-login",
+      "select-folder",
+      "switch-folder"
+    ],
+    "inMemoryBeforeDebounce": {
+      "schemaVersion": 13,
+      "readingMode": "focus",
+      "lastReadingMode": "flow",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "writesBeforeDebounce": 0,
+    "timersScheduled": 1,
+    "timersLive": 1,
+    "debounceMs": [
+      500
+    ],
+    "writerReceived": [
+      {
+        "schemaVersion": 13,
+        "readingMode": "focus",
+        "lastReadingMode": "flow",
+        "wpm": 300,
+        "ttsVoiceName": "af_bella",
+        "ttsRate": 1.2
+      }
+    ],
+    "fileOnDisk": {
+      "schemaVersion": 13,
+      "readingMode": "focus",
+      "lastReadingMode": "flow",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "syncEnqueued": [
+      {
+        "op": "update-settings",
+        "p": {
+          "revision": 7
+        }
+      }
+    ]
+  },
+  {
+    "name": "C_last_only_narrate",
+    "registered": [
+      "get-state",
+      "get-platform",
+      "get-system-theme",
+      "save-settings",
+      "get-launch-at-login",
+      "set-launch-at-login",
+      "select-folder",
+      "switch-folder"
+    ],
+    "inMemoryBeforeDebounce": {
+      "schemaVersion": 13,
+      "readingMode": "flow",
+      "lastReadingMode": "narrate",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "writesBeforeDebounce": 0,
+    "timersScheduled": 1,
+    "timersLive": 1,
+    "debounceMs": [
+      500
+    ],
+    "writerReceived": [
+      {
+        "schemaVersion": 13,
+        "readingMode": "flow",
+        "lastReadingMode": "narrate",
+        "wpm": 300,
+        "ttsVoiceName": "af_bella",
+        "ttsRate": 1.2
+      }
+    ],
+    "fileOnDisk": {
+      "schemaVersion": 13,
+      "readingMode": "flow",
+      "lastReadingMode": "narrate",
+      "wpm": 300,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "syncEnqueued": [
+      {
+        "op": "update-settings",
+        "p": {
+          "revision": 7
+        }
+      }
+    ]
+  },
+  {
+    "name": "D_coalesce",
+    "registered": [
+      "get-state",
+      "get-platform",
+      "get-system-theme",
+      "save-settings",
+      "get-launch-at-login",
+      "set-launch-at-login",
+      "select-folder",
+      "switch-folder"
+    ],
+    "inMemoryBeforeDebounce": {
+      "schemaVersion": 13,
+      "readingMode": "narrate",
+      "lastReadingMode": "focus",
+      "wpm": 450,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "writesBeforeDebounce": 0,
+    "timersScheduled": 2,
+    "timersLive": 1,
+    "debounceMs": [
+      500
+    ],
+    "writerReceived": [
+      {
+        "schemaVersion": 13,
+        "readingMode": "narrate",
+        "lastReadingMode": "focus",
+        "wpm": 450,
+        "ttsVoiceName": "af_bella",
+        "ttsRate": 1.2
+      }
+    ],
+    "fileOnDisk": {
+      "schemaVersion": 13,
+      "readingMode": "narrate",
+      "lastReadingMode": "focus",
+      "wpm": 450,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "syncEnqueued": [
+      {
+        "op": "update-settings",
+        "p": {
+          "revision": 7
+        }
+      }
+    ]
+  },
+  {
+    "name": "E_modeled_fix",
+    "registered": [
+      "get-state",
+      "get-platform",
+      "get-system-theme",
+      "save-settings",
+      "get-launch-at-login",
+      "set-launch-at-login",
+      "select-folder",
+      "switch-folder"
+    ],
+    "inMemoryBeforeDebounce": {
+      "schemaVersion": 13,
+      "readingMode": "flow",
+      "lastReadingMode": "flow",
+      "wpm": 410,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "writesBeforeDebounce": 0,
+    "timersScheduled": 1,
+    "timersLive": 1,
+    "debounceMs": [
+      500
+    ],
+    "writerReceived": [
+      {
+        "schemaVersion": 13,
+        "readingMode": "flow",
+        "lastReadingMode": "flow",
+        "wpm": 410,
+        "ttsVoiceName": "af_bella",
+        "ttsRate": 1.2
+      }
+    ],
+    "fileOnDisk": {
+      "schemaVersion": 13,
+      "readingMode": "flow",
+      "lastReadingMode": "flow",
+      "wpm": 410,
+      "ttsVoiceName": "af_bella",
+      "ttsRate": 1.2
+    },
+    "syncEnqueued": [
+      {
+        "op": "update-settings",
+        "p": {
+          "revision": 7
+        }
+      }
+    ]
+  }
+]

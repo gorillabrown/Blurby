@@ -1,0 +1,10 @@
+
+ RUN  v4.1.2 C:/Users/estra/AppData/Local/Temp/claude/C--Projects-Blurby/434edb3e-445a-43bb-b775-d5ca825754b7/scratchpad/audit10/work2/ipc
+
+ ✓ tests/settingsNarrateNormalization.e.test.js > NARRATE-REMOVE-1 Done-when 7 (e): settings IPC > save-settings normalizes narrate before get-state, the debounced save and the sync enqueue 12ms
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  21:13:17
+   Duration  493ms (transform 25ms, setup 0ms, import 75ms, tests 13ms, environment 0ms)
+

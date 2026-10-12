@@ -1,0 +1,12 @@
+sha256 of Kokoro q4 model files used by units-four-rates.txt (computed 2026-10-11, sha256sum)
+
+original model copy (F2/models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model_q4.onnx):
+04cf570cf9c4153694f76347ed4b9a48c1b59ff1de0999e6605d123966b197c7
+
+duration-exposed copy (F2/models/local/kokoro-dur/onnx/model_q4.onnx):
+2eccfc53272a6d9b302320cf522a0f3cd6201cd29f0c872fad9433c207b95cad
+
+user's installed model (%APPDATA%/Blurby/models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model_q4.onnx, read-only):
+04cf570cf9c4153694f76347ed4b9a48c1b59ff1de0999e6605d123966b197c7
+
+F2 = scratchpad/audit10/work/f2-producer

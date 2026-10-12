@@ -1,0 +1,1206 @@
+{
+  "section": [
+    189,
+    755
+  ],
+  "count": 133,
+  "rows": [
+    {
+      "id": 1,
+      "line": 217,
+      "zone": "header",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 2,
+      "line": 221,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 3,
+      "line": 221,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git ls-files",
+      "substituted": "git ls-files"
+    },
+    {
+      "id": 4,
+      "line": 221,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --name-only",
+      "substituted": "git diff --name-only"
+    },
+    {
+      "id": 5,
+      "line": 221,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 6,
+      "line": 221,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -P",
+      "substituted": "git grep -P"
+    },
+    {
+      "id": 7,
+      "line": 222,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs",
+      "substituted": "git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs"
+    },
+    {
+      "id": 8,
+      "line": 223,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/readerModeIsolation.test.ts",
+      "substituted": "npm test -- tests/readerModeIsolation.test.ts"
+    },
+    {
+      "id": 9,
+      "line": 224,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx",
+      "substituted": "npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx"
+    },
+    {
+      "id": 10,
+      "line": 228,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx",
+      "substituted": "npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx"
+    },
+    {
+      "id": 11,
+      "line": 229,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/commandPaletteRoutes.test.ts",
+      "substituted": "npm test -- tests/commandPaletteRoutes.test.ts"
+    },
+    {
+      "id": 12,
+      "line": 229,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P '\\x22tts\\x22|Narration \\(TTS\\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx",
+      "substituted": "git grep -n -P '\\x22tts\\x22|Narration \\(TTS\\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx"
+    },
+    {
+      "id": 13,
+      "line": 237,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/settingsMigrationV13.test.js",
+      "substituted": "npm test -- tests/settingsMigrationV13.test.js"
+    },
+    {
+      "id": 14,
+      "line": 263,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/settingsNarrateNormalization.test.js",
+      "substituted": "npm test -- tests/settingsNarrateNormalization.test.js"
+    },
+    {
+      "id": 15,
+      "line": 267,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -cF",
+      "substituted": "git grep -cF"
+    },
+    {
+      "id": 16,
+      "line": 268,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js",
+      "substituted": "git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js"
+    },
+    {
+      "id": 17,
+      "line": 269,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js",
+      "substituted": "git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js"
+    },
+    {
+      "id": 18,
+      "line": 270,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -cF 'Object.assign(settings' -- main/sync-engine.js",
+      "substituted": "git grep -cF 'Object.assign(settings' -- main/sync-engine.js"
+    },
+    {
+      "id": 19,
+      "line": 271,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js",
+      "substituted": "git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js"
+    },
+    {
+      "id": 20,
+      "line": 272,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js",
+      "substituted": "git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js"
+    },
+    {
+      "id": 21,
+      "line": 273,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js",
+      "substituted": "git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js"
+    },
+    {
+      "id": 22,
+      "line": 274,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js",
+      "substituted": "git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js"
+    },
+    {
+      "id": 23,
+      "line": 279,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js",
+      "substituted": "git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js"
+    },
+    {
+      "id": 24,
+      "line": 279,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js",
+      "substituted": "git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js"
+    },
+    {
+      "id": 25,
+      "line": 281,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js",
+      "substituted": "git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js"
+    },
+    {
+      "id": 26,
+      "line": 282,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\\b)[A-Z]' -- src",
+      "substituted": "git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\\b)[A-Z]' -- src"
+    },
+    {
+      "id": 27,
+      "line": 283,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/tts-engine.test.js tests/tts-worker.test.js",
+      "substituted": "npm test -- tests/tts-engine.test.js tests/tts-worker.test.js"
+    },
+    {
+      "id": 28,
+      "line": 285,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'",
+      "substituted": "git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'"
+    },
+    {
+      "id": 29,
+      "line": 286,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P 'ipcMain\\.handle\\(\\x22tts-(nano|pocket|qwen)-' -- main",
+      "substituted": "git grep -n -P 'ipcMain\\.handle\\(\\x22tts-(nano|pocket|qwen)-' -- main"
+    },
+    {
+      "id": 30,
+      "line": 287,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "node -e \"const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)\"",
+      "substituted": "node -e \"const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)\""
+    },
+    {
+      "id": 31,
+      "line": 290,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json",
+      "substituted": "git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json"
+    },
+    {
+      "id": 32,
+      "line": 292,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/",
+      "substituted": "npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/"
+    },
+    {
+      "id": 33,
+      "line": 293,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json",
+      "substituted": "git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json"
+    },
+    {
+      "id": 34,
+      "line": 294,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow",
+      "substituted": "git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow"
+    },
+    {
+      "id": 35,
+      "line": 296,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run typecheck",
+      "substituted": "npm run typecheck"
+    },
+    {
+      "id": 36,
+      "line": 302,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 37,
+      "line": 302,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run build",
+      "substituted": "npm run build"
+    },
+    {
+      "id": 38,
+      "line": 302,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git diff --check <base>",
+      "substituted": "git diff --check 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 39,
+      "line": 303,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --name-status refs/remotes/origin/main...HEAD",
+      "substituted": "git diff --name-status refs/remotes/origin/main...HEAD"
+    },
+    {
+      "id": 40,
+      "line": 310,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run build",
+      "substituted": "npm run build"
+    },
+    {
+      "id": 41,
+      "line": 310,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run dev",
+      "substituted": "npm run dev"
+    },
+    {
+      "id": 42,
+      "line": 310,
+      "zone": "done-when",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm start",
+      "substituted": "npm start"
+    },
+    {
+      "id": 43,
+      "line": 355,
+      "zone": "design",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep -w",
+      "substituted": "git grep -w"
+    },
+    {
+      "id": 44,
+      "line": 383,
+      "zone": "design",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git revert -m 1 <merge sha>",
+      "substituted": "git revert -m 1 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 45,
+      "line": 386,
+      "zone": "design",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git merge-base",
+      "substituted": "git merge-base"
+    },
+    {
+      "id": 46,
+      "line": 398,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rm",
+      "substituted": "git rm"
+    },
+    {
+      "id": 47,
+      "line": 465,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 48,
+      "line": 487,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git grep -n -w '<NAME>' -- src tests",
+      "substituted": "git grep -n -w 'NARRATE_SPEED_MIN_HUNDREDTHS' -- src tests"
+    },
+    {
+      "id": 49,
+      "line": 487,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git grep -h -o -w -P '<the family with each * written as \\w+>' -- src/constants.ts",
+      "substituted": "git grep -h -o -w -P 'NARRATE_SPEED_\\w+' -- src/constants.ts"
+    },
+    {
+      "id": 50,
+      "line": 555,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": true,
+      "raw": "node <file> --self-test",
+      "substituted": "node closure-check.mjs --self-test"
+    },
+    {
+      "id": 51,
+      "line": 555,
+      "zone": "edit-sites",
+      "reference": false,
+      "placeholder": true,
+      "raw": "node <file> .",
+      "substituted": "node closure-check.mjs ."
+    },
+    {
+      "id": 52,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rm <path>",
+      "substituted": "git rm src/x.ts"
+    },
+    {
+      "id": 53,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rm -r <path>",
+      "substituted": "git rm -r src/x.ts"
+    },
+    {
+      "id": 54,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git add <path>",
+      "substituted": "git add src/x.ts"
+    },
+    {
+      "id": 55,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git add -A",
+      "substituted": "git add -A"
+    },
+    {
+      "id": 56,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --cached --stat",
+      "substituted": "git diff --cached --stat"
+    },
+    {
+      "id": 57,
+      "line": 623,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse",
+      "substituted": "git rev-parse"
+    },
+    {
+      "id": 58,
+      "line": 626,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run typecheck",
+      "substituted": "npm run typecheck"
+    },
+    {
+      "id": 59,
+      "line": 630,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git commit --amend",
+      "substituted": "git commit --amend"
+    },
+    {
+      "id": 60,
+      "line": 635,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run build",
+      "substituted": "npm run build"
+    },
+    {
+      "id": 61,
+      "line": 637,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git fetch origin --prune",
+      "substituted": "git fetch origin --prune"
+    },
+    {
+      "id": 62,
+      "line": 639,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree list",
+      "substituted": "git worktree list"
+    },
+    {
+      "id": 63,
+      "line": 639,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree add --detach C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1-merge refs/remotes/origin/main",
+      "substituted": "git worktree add --detach C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1-merge refs/remotes/origin/main"
+    },
+    {
+      "id": 64,
+      "line": 639,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git status --porcelain",
+      "substituted": "git status --porcelain"
+    },
+    {
+      "id": 65,
+      "line": 639,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 66,
+      "line": 641,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-list --parents -n 1 HEAD",
+      "substituted": "git rev-list --parents -n 1 HEAD"
+    },
+    {
+      "id": 67,
+      "line": 641,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse refs/heads/eb/narrate-remove-1",
+      "substituted": "git rev-parse refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 68,
+      "line": 641,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse refs/remotes/origin/main",
+      "substituted": "git rev-parse refs/remotes/origin/main"
+    },
+    {
+      "id": 69,
+      "line": 641,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git log -1 --format=%s HEAD",
+      "substituted": "git log -1 --format=%s HEAD"
+    },
+    {
+      "id": 70,
+      "line": 642,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git merge-base --is-ancestor HEAD refs/remotes/origin/main",
+      "substituted": "git merge-base --is-ancestor HEAD refs/remotes/origin/main"
+    },
+    {
+      "id": 71,
+      "line": 642,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git switch --detach refs/remotes/origin/main",
+      "substituted": "git switch --detach refs/remotes/origin/main"
+    },
+    {
+      "id": 72,
+      "line": 642,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git merge --no-ff -m \"Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)\" refs/heads/eb/narrate-remove-1",
+      "substituted": "git merge --no-ff -m \"Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)\" refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 73,
+      "line": 644,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --quiet refs/heads/eb/narrate-remove-1 HEAD",
+      "substituted": "git diff --quiet refs/heads/eb/narrate-remove-1 HEAD"
+    },
+    {
+      "id": 74,
+      "line": 646,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm ci",
+      "substituted": "npm ci"
+    },
+    {
+      "id": 75,
+      "line": 646,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run typecheck",
+      "substituted": "npm run typecheck"
+    },
+    {
+      "id": 76,
+      "line": 646,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 77,
+      "line": 646,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run build",
+      "substituted": "npm run build"
+    },
+    {
+      "id": 78,
+      "line": 646,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --name-only refs/heads/eb/narrate-remove-1 HEAD",
+      "substituted": "git diff --name-only refs/heads/eb/narrate-remove-1 HEAD"
+    },
+    {
+      "id": 79,
+      "line": 651,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git push origin HEAD:refs/heads/main",
+      "substituted": "git push origin HEAD:refs/heads/main"
+    },
+    {
+      "id": 80,
+      "line": 651,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git fetch origin",
+      "substituted": "git fetch origin"
+    },
+    {
+      "id": 81,
+      "line": 651,
+      "zone": "staging-integration",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git merge-base --is-ancestor <merge sha> refs/remotes/origin/main",
+      "substituted": "git merge-base --is-ancestor 0123456789abcdef0123456789abcdef01234567 refs/remotes/origin/main"
+    },
+    {
+      "id": 82,
+      "line": 659,
+      "zone": "failure-lane",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git revert -m 1 <merge sha>",
+      "substituted": "git revert -m 1 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 83,
+      "line": 670,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree list --porcelain",
+      "substituted": "git worktree list --porcelain"
+    },
+    {
+      "id": 84,
+      "line": 670,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git -C <path> rev-parse --show-toplevel",
+      "substituted": "git -C src/x.ts rev-parse --show-toplevel"
+    },
+    {
+      "id": 85,
+      "line": 670,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git -C C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 symbolic-ref -q HEAD",
+      "substituted": "git -C C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 symbolic-ref -q HEAD"
+    },
+    {
+      "id": 86,
+      "line": 674,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git fetch origin --prune",
+      "substituted": "git fetch origin --prune"
+    },
+    {
+      "id": 87,
+      "line": 675,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "& \"$HOME/.virtuoso/bin/virtuoso.ps1\" virtuoso_registry --root . items --all --json",
+      "substituted": "& \"$HOME/.virtuoso/bin/virtuoso.ps1\" virtuoso_registry --root . items --all --json"
+    },
+    {
+      "id": 88,
+      "line": 676,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git branch -a --list \"*narrate-remove-1*\"",
+      "substituted": "git branch -a --list \"*narrate-remove-1*\""
+    },
+    {
+      "id": 89,
+      "line": 676,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree list",
+      "substituted": "git worktree list"
+    },
+    {
+      "id": 90,
+      "line": 677,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main",
+      "substituted": "git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main"
+    },
+    {
+      "id": 91,
+      "line": 678,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree add C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main",
+      "substituted": "git worktree add C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main"
+    },
+    {
+      "id": 92,
+      "line": 680,
+      "zone": "recipe",
+      "reference": true,
+      "placeholder": false,
+      "raw": "git merge-base … refs/remotes/origin/main",
+      "substituted": "git merge-base … refs/remotes/origin/main"
+    },
+    {
+      "id": 93,
+      "line": 681,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1",
+      "substituted": "git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 94,
+      "line": 682,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>",
+      "substituted": "git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 95,
+      "line": 682,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rev-parse <C1 sha>^",
+      "substituted": "git rev-parse 0123456789abcdef0123456789abcdef01234567^"
+    },
+    {
+      "id": 96,
+      "line": 682,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rev-parse <base>",
+      "substituted": "git rev-parse 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 97,
+      "line": 683,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main",
+      "substituted": "git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main"
+    },
+    {
+      "id": 98,
+      "line": 683,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse refs/heads/eb/narrate-remove-1",
+      "substituted": "git rev-parse refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 99,
+      "line": 684,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1",
+      "substituted": "git log --reverse --format=%s 0123456789abcdef0123456789abcdef01234567..refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 100,
+      "line": 685,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main",
+      "substituted": "git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main"
+    },
+    {
+      "id": 101,
+      "line": 685,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git log --merges --ancestry-path --format=\"%H %P\" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main",
+      "substituted": "git log --merges --ancestry-path --format=\"%H %P\" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main"
+    },
+    {
+      "id": 102,
+      "line": 685,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse refs/heads/eb/narrate-remove-1",
+      "substituted": "git rev-parse refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 103,
+      "line": 685,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git status --porcelain",
+      "substituted": "git status --porcelain"
+    },
+    {
+      "id": 104,
+      "line": 686,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree list",
+      "substituted": "git worktree list"
+    },
+    {
+      "id": 105,
+      "line": 686,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree add C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 eb/narrate-remove-1",
+      "substituted": "git worktree add C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1 eb/narrate-remove-1"
+    },
+    {
+      "id": 106,
+      "line": 686,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm ci",
+      "substituted": "npm ci"
+    },
+    {
+      "id": 107,
+      "line": 687,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git status --porcelain --untracked-files=all",
+      "substituted": "git status --porcelain --untracked-files=all"
+    },
+    {
+      "id": 108,
+      "line": 687,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 109,
+      "line": 688,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse refs/heads/eb/narrate-remove-1",
+      "substituted": "git rev-parse refs/heads/eb/narrate-remove-1"
+    },
+    {
+      "id": 110,
+      "line": 688,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git cat-file -e <base>:<path>",
+      "substituted": "git cat-file -e 0123456789abcdef0123456789abcdef01234567:src/x.ts"
+    },
+    {
+      "id": 111,
+      "line": 688,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git hash-object -- <path>",
+      "substituted": "git hash-object -- src/x.ts"
+    },
+    {
+      "id": 112,
+      "line": 688,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rev-parse <base>:<path>",
+      "substituted": "git rev-parse 0123456789abcdef0123456789abcdef01234567:src/x.ts"
+    },
+    {
+      "id": 113,
+      "line": 690,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git rev-parse <C5 sha>^",
+      "substituted": "git rev-parse 0123456789abcdef0123456789abcdef01234567^"
+    },
+    {
+      "id": 114,
+      "line": 707,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git status --porcelain",
+      "substituted": "git status --porcelain"
+    },
+    {
+      "id": 115,
+      "line": 708,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git worktree list",
+      "substituted": "git worktree list"
+    },
+    {
+      "id": 116,
+      "line": 708,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": true,
+      "raw": "git worktree add --detach C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1-base <base sha>",
+      "substituted": "git worktree add --detach C:\\Projects\\Blurby\\.worktrees\\narrate-remove-1-base 0123456789abcdef0123456789abcdef01234567"
+    },
+    {
+      "id": 117,
+      "line": 708,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git rev-parse HEAD",
+      "substituted": "git rev-parse HEAD"
+    },
+    {
+      "id": 118,
+      "line": 708,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git status --porcelain",
+      "substituted": "git status --porcelain"
+    },
+    {
+      "id": 119,
+      "line": 709,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm ci",
+      "substituted": "npm ci"
+    },
+    {
+      "id": 120,
+      "line": 710,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run typecheck",
+      "substituted": "npm run typecheck"
+    },
+    {
+      "id": 121,
+      "line": 710,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test",
+      "substituted": "npm test"
+    },
+    {
+      "id": 122,
+      "line": 710,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm run build",
+      "substituted": "npm run build"
+    },
+    {
+      "id": 123,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git ls-files",
+      "substituted": "git ls-files"
+    },
+    {
+      "id": 124,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 125,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 126,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 127,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git ls-files",
+      "substituted": "git ls-files"
+    },
+    {
+      "id": 128,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 129,
+      "line": 712,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git grep",
+      "substituted": "git grep"
+    },
+    {
+      "id": 130,
+      "line": 714,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm ci",
+      "substituted": "npm ci"
+    },
+    {
+      "id": 131,
+      "line": 714,
+      "zone": "recipe",
+      "reference": false,
+      "placeholder": false,
+      "raw": "npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js",
+      "substituted": "npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js"
+    },
+    {
+      "id": 132,
+      "line": 742,
+      "zone": "lessons",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git diff --cached --stat",
+      "substituted": "git diff --cached --stat"
+    },
+    {
+      "id": 133,
+      "line": 749,
+      "zone": "lessons",
+      "reference": false,
+      "placeholder": false,
+      "raw": "git merge-base",
+      "substituted": "git merge-base"
+    }
+  ]
+}

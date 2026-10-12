@@ -1,0 +1,4 @@
+RESOLVED esm C:/Projects/Blurby/node_modules/kokoro-js/dist/kokoro.js hasPatch true
+LOADED ms 932
+SESSIONS {"model":{"inputs":["input_ids","style","speed"],"outputs":["waveform"]}}
+DONE

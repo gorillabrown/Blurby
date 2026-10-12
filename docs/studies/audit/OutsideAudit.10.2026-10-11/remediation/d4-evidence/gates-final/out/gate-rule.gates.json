@@ -1,0 +1,32 @@
+[
+  {
+    "id": "r1",
+    "line": 221,
+    "label": "git grep no match (rule: exit 1, empty)",
+    "cmd": "git grep -n -P 'zzz_no_such_token_zzz' -- main.js"
+  },
+  {
+    "id": "r2",
+    "line": 221,
+    "label": "git grep bad pattern (rule: other exit = fail)",
+    "cmd": "git grep -n -P '(' -- main.js"
+  },
+  {
+    "id": "r3",
+    "line": 221,
+    "label": "git ls-files nothing listed (rule: exit 0, empty)",
+    "cmd": "git ls-files -- no/such/path"
+  },
+  {
+    "id": "r4",
+    "line": 221,
+    "label": "git diff --name-only nothing listed (rule: exit 0, empty)",
+    "cmd": "git diff --name-only refs/remotes/origin/main -- no/such/path"
+  },
+  {
+    "id": "r5",
+    "line": 221,
+    "label": "git diff --name-only bad ref (rule: other exit = fail)",
+    "cmd": "git diff --name-only refs/remotes/origin/no-such-ref -- main.js"
+  }
+]

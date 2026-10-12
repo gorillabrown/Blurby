@@ -1,0 +1,14 @@
+{
+ "filesScanned": 591,
+ "viMockRegexHits": 70,
+ "viMockInCommentOrString": [],
+ "cssImportInComment": [],
+ "otherMockForms": [
+  "tests/auth.test.js:201 require.resolve ../main/auth.js",
+  "tests/cloudOnedrive.test.js:26 require.resolve ../main/auth.js",
+  "tests/cloudOnedrive.test.js:29 require.resolve ../main/constants.js",
+  "tests/documentsOpenSource.test.js:10 require.resolve ../main/ipc/documents.js",
+  "tests/ttsContinuityReadiness.test.ts:66 doMock ../src/utils/FlowScrollEngine",
+  "tests/ttsContinuityReadiness.test.ts:119 doUnmock ../src/utils/FlowScrollEngine"
+ ]
+}

@@ -1,0 +1,1080 @@
+[
+ {
+  "speed": 1,
+  "raw": "The cat sat on the mat.",
+  "text": "The cat sat on the mat.",
+  "words": [
+   "The",
+   "cat",
+   "sat",
+   "on",
+   "the",
+   "mat."
+  ],
+  "samples": 48000,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     48000
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "ðə kˈæt sˈæt ɔnðə mˈæt.",
+  "fullIdsLen": 25,
+  "fullIds": [
+   0,
+   81,
+   83,
+   16,
+   53,
+   156,
+   72,
+   62,
+   16,
+   61,
+   156,
+   72,
+   62,
+   16,
+   76,
+   56,
+   81,
+   83,
+   16,
+   55,
+   156,
+   72,
+   62,
+   4,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~41, got 25 (delta -16)",
+   "perWordLens": [
+    5,
+    6,
+    6,
+    5,
+    5,
+    7
+   ],
+   "perWordIds": [
+    [
+     0,
+     81,
+     156,
+     83,
+     0
+    ],
+    [
+     0,
+     53,
+     156,
+     72,
+     62,
+     0
+    ],
+    [
+     0,
+     61,
+     156,
+     72,
+     62,
+     0
+    ],
+    [
+     0,
+     156,
+     76,
+     56,
+     0
+    ],
+    [
+     0,
+     81,
+     156,
+     83,
+     0
+    ],
+    [
+     0,
+     55,
+     156,
+     72,
+     62,
+     4,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "speed": 1,
+  "raw": "In 1984, Dr. Smith paid $3.50 for it.",
+  "text": "In nineteen eighty four, Doctor Smith paid three dollars and fifty cents for it.",
+  "words": [
+   "In",
+   "1984,",
+   "Dr.",
+   "Smith",
+   "paid",
+   "$3.50",
+   "for",
+   "it."
+  ],
+  "samples": 125400,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     125400
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "ɪn nˈaɪntiːn ˈeɪɾi fˈoːɹ, dˈɑːktɚ smˈɪθ pˈeɪd θɹˈiː dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ ɪt.",
+  "fullIdsLen": 88,
+  "fullIds": [
+   0,
+   102,
+   56,
+   16,
+   56,
+   156,
+   43,
+   102,
+   56,
+   62,
+   51,
+   158,
+   56,
+   16,
+   156,
+   47,
+   102,
+   125,
+   51,
+   16,
+   48,
+   156,
+   57,
+   158,
+   123,
+   3,
+   16,
+   46,
+   156,
+   69,
+   158,
+   53,
+   62,
+   85,
+   16,
+   61,
+   55,
+   156,
+   102,
+   119,
+   16,
+   58,
+   156,
+   47,
+   102,
+   46,
+   16,
+   119,
+   123,
+   156,
+   51,
+   158,
+   16,
+   46,
+   156,
+   69,
+   158,
+   54,
+   85,
+   68,
+   16,
+   72,
+   56,
+   46,
+   16,
+   48,
+   156,
+   102,
+   48,
+   62,
+   51,
+   16,
+   61,
+   156,
+   86,
+   56,
+   62,
+   61,
+   16,
+   48,
+   76,
+   158,
+   123,
+   16,
+   102,
+   62,
+   4,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~105, got 88 (delta -17)",
+   "perWordLens": [
+    5,
+    33,
+    10,
+    7,
+    7,
+    21,
+    7,
+    6
+   ],
+   "perWordIds": [
+    [
+     0,
+     156,
+     102,
+     56,
+     0
+    ],
+    [
+     0,
+     56,
+     156,
+     43,
+     102,
+     56,
+     62,
+     51,
+     158,
+     56,
+     16,
+     50,
+     156,
+     138,
+     56,
+     46,
+     123,
+     102,
+     46,
+     16,
+     156,
+     47,
+     102,
+     125,
+     51,
+     16,
+     48,
+     156,
+     57,
+     158,
+     123,
+     3,
+     0
+    ],
+    [
+     0,
+     46,
+     156,
+     69,
+     158,
+     53,
+     62,
+     85,
+     4,
+     0
+    ],
+    [
+     0,
+     61,
+     55,
+     156,
+     102,
+     119,
+     0
+    ],
+    [
+     0,
+     58,
+     156,
+     47,
+     102,
+     46,
+     0
+    ],
+    [
+     0,
+     46,
+     156,
+     69,
+     158,
+     54,
+     85,
+     16,
+     119,
+     123,
+     156,
+     51,
+     158,
+     4,
+     48,
+     156,
+     102,
+     48,
+     62,
+     51,
+     0
+    ],
+    [
+     0,
+     48,
+     156,
+     76,
+     158,
+     123,
+     0
+    ],
+    [
+     0,
+     156,
+     102,
+     62,
+     4,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "speed": 1,
+  "raw": "Wait. Wait, wait! Really?",
+  "text": "Wait. Wait, wait! Really?",
+  "words": [
+   "Wait.",
+   "Wait,",
+   "wait!",
+   "Really?"
+  ],
+  "samples": 60600,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     60600
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "wˈeɪt. wˈeɪt, wˈeɪt! ɹˈiəli?",
+  "fullIdsLen": 30,
+  "fullIds": [
+   0,
+   65,
+   156,
+   47,
+   102,
+   62,
+   4,
+   16,
+   65,
+   156,
+   47,
+   102,
+   62,
+   3,
+   16,
+   65,
+   156,
+   47,
+   102,
+   62,
+   5,
+   16,
+   123,
+   156,
+   51,
+   83,
+   54,
+   51,
+   6,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~38, got 30 (delta -8)",
+   "perWordLens": [
+    8,
+    8,
+    8,
+    9
+   ],
+   "perWordIds": [
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     4,
+     0
+    ],
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     3,
+     0
+    ],
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     5,
+     0
+    ],
+    [
+     0,
+     123,
+     156,
+     51,
+     83,
+     54,
+     51,
+     6,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "speed": 1.5,
+  "raw": "The cat sat on the mat.",
+  "text": "The cat sat on the mat.",
+  "words": [
+   "The",
+   "cat",
+   "sat",
+   "on",
+   "the",
+   "mat."
+  ],
+  "samples": 31800,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     31800
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "ðə kˈæt sˈæt ɔnðə mˈæt.",
+  "fullIdsLen": 25,
+  "fullIds": [
+   0,
+   81,
+   83,
+   16,
+   53,
+   156,
+   72,
+   62,
+   16,
+   61,
+   156,
+   72,
+   62,
+   16,
+   76,
+   56,
+   81,
+   83,
+   16,
+   55,
+   156,
+   72,
+   62,
+   4,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~41, got 25 (delta -16)",
+   "perWordLens": [
+    5,
+    6,
+    6,
+    5,
+    5,
+    7
+   ],
+   "perWordIds": [
+    [
+     0,
+     81,
+     156,
+     83,
+     0
+    ],
+    [
+     0,
+     53,
+     156,
+     72,
+     62,
+     0
+    ],
+    [
+     0,
+     61,
+     156,
+     72,
+     62,
+     0
+    ],
+    [
+     0,
+     156,
+     76,
+     56,
+     0
+    ],
+    [
+     0,
+     81,
+     156,
+     83,
+     0
+    ],
+    [
+     0,
+     55,
+     156,
+     72,
+     62,
+     4,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "speed": 1.5,
+  "raw": "In 1984, Dr. Smith paid $3.50 for it.",
+  "text": "In nineteen eighty four, Doctor Smith paid three dollars and fifty cents for it.",
+  "words": [
+   "In",
+   "1984,",
+   "Dr.",
+   "Smith",
+   "paid",
+   "$3.50",
+   "for",
+   "it."
+  ],
+  "samples": 82200,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     82200
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "ɪn nˈaɪntiːn ˈeɪɾi fˈoːɹ, dˈɑːktɚ smˈɪθ pˈeɪd θɹˈiː dˈɑːlɚz ænd fˈɪfti sˈɛnts fɔːɹ ɪt.",
+  "fullIdsLen": 88,
+  "fullIds": [
+   0,
+   102,
+   56,
+   16,
+   56,
+   156,
+   43,
+   102,
+   56,
+   62,
+   51,
+   158,
+   56,
+   16,
+   156,
+   47,
+   102,
+   125,
+   51,
+   16,
+   48,
+   156,
+   57,
+   158,
+   123,
+   3,
+   16,
+   46,
+   156,
+   69,
+   158,
+   53,
+   62,
+   85,
+   16,
+   61,
+   55,
+   156,
+   102,
+   119,
+   16,
+   58,
+   156,
+   47,
+   102,
+   46,
+   16,
+   119,
+   123,
+   156,
+   51,
+   158,
+   16,
+   46,
+   156,
+   69,
+   158,
+   54,
+   85,
+   68,
+   16,
+   72,
+   56,
+   46,
+   16,
+   48,
+   156,
+   102,
+   48,
+   62,
+   51,
+   16,
+   61,
+   156,
+   86,
+   56,
+   62,
+   61,
+   16,
+   48,
+   76,
+   158,
+   123,
+   16,
+   102,
+   62,
+   4,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~105, got 88 (delta -17)",
+   "perWordLens": [
+    5,
+    33,
+    10,
+    7,
+    7,
+    21,
+    7,
+    6
+   ],
+   "perWordIds": [
+    [
+     0,
+     156,
+     102,
+     56,
+     0
+    ],
+    [
+     0,
+     56,
+     156,
+     43,
+     102,
+     56,
+     62,
+     51,
+     158,
+     56,
+     16,
+     50,
+     156,
+     138,
+     56,
+     46,
+     123,
+     102,
+     46,
+     16,
+     156,
+     47,
+     102,
+     125,
+     51,
+     16,
+     48,
+     156,
+     57,
+     158,
+     123,
+     3,
+     0
+    ],
+    [
+     0,
+     46,
+     156,
+     69,
+     158,
+     53,
+     62,
+     85,
+     4,
+     0
+    ],
+    [
+     0,
+     61,
+     55,
+     156,
+     102,
+     119,
+     0
+    ],
+    [
+     0,
+     58,
+     156,
+     47,
+     102,
+     46,
+     0
+    ],
+    [
+     0,
+     46,
+     156,
+     69,
+     158,
+     54,
+     85,
+     16,
+     119,
+     123,
+     156,
+     51,
+     158,
+     4,
+     48,
+     156,
+     102,
+     48,
+     62,
+     51,
+     0
+    ],
+    [
+     0,
+     48,
+     156,
+     76,
+     158,
+     123,
+     0
+    ],
+    [
+     0,
+     156,
+     102,
+     62,
+     4,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "speed": 1.5,
+  "raw": "Wait. Wait, wait! Really?",
+  "text": "Wait. Wait, wait! Really?",
+  "words": [
+   "Wait.",
+   "Wait,",
+   "wait!",
+   "Really?"
+  ],
+  "samples": 40200,
+  "sr": 24000,
+  "audioHasDataField": false,
+  "outKeys": [
+   "waveform"
+  ],
+  "outDims": {
+   "waveform": [
+    "float32",
+    [
+     1,
+     40200
+    ]
+   ]
+  },
+  "hasAudioDurations": false,
+  "fullPhonemes": "wˈeɪt. wˈeɪt, wˈeɪt! ɹˈiəli?",
+  "fullIdsLen": 30,
+  "fullIds": [
+   0,
+   65,
+   156,
+   47,
+   102,
+   62,
+   4,
+   16,
+   65,
+   156,
+   47,
+   102,
+   62,
+   3,
+   16,
+   65,
+   156,
+   47,
+   102,
+   62,
+   5,
+   16,
+   123,
+   156,
+   51,
+   83,
+   54,
+   51,
+   6,
+   0
+  ],
+  "durLen": null,
+  "durSumRaw": 0,
+  "durSumRound": 0,
+  "samplesPerDurRaw": null,
+  "samplesPerDurRound": null,
+  "perWord": [],
+  "sumPerWordLens": 0,
+  "alignSynthetic": {
+   "ok": false,
+   "err": "Token count mismatch: expected ~38, got 30 (delta -8)",
+   "perWordLens": [
+    8,
+    8,
+    8,
+    9
+   ],
+   "perWordIds": [
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     4,
+     0
+    ],
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     3,
+     0
+    ],
+    [
+     0,
+     65,
+     156,
+     47,
+     102,
+     62,
+     5,
+     0
+    ],
+    [
+     0,
+     123,
+     156,
+     51,
+     83,
+     54,
+     51,
+     6,
+     0
+    ]
+   ]
+  },
+  "wordTimestamps": null,
+  "warns": [],
+  "dur": null
+ },
+ {
+  "singleWord": {
+   "ipa": "kˈæt",
+   "ids": [
+    0,
+    53,
+    156,
+    72,
+    62,
+    0
+   ],
+   "dims": [
+    1,
+    6
+   ]
+  },
+  "post_processor": {
+   "type": "TemplateProcessing",
+   "single": [
+    {
+     "SpecialToken": {
+      "id": "$",
+      "type_id": 0
+     }
+    },
+    {
+     "Sequence": {
+      "id": "A",
+      "type_id": 0
+     }
+    },
+    {
+     "SpecialToken": {
+      "id": "$",
+      "type_id": 0
+     }
+    }
+   ],
+   "special_tokens": {
+    "$": {
+     "id": "$",
+     "ids": [
+      0
+     ],
+     "tokens": [
+      "$"
+     ]
+    }
+   }
+  },
+  "spaceId": 16
+ }
+]

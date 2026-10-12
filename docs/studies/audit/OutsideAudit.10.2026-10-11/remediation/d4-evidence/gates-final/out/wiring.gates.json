@@ -1,0 +1,56 @@
+[
+  {
+    "id": "g1",
+    "line": 268,
+    "label": "DW7 wiring 1",
+    "cmd": "git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js"
+  },
+  {
+    "id": "g2",
+    "line": 269,
+    "label": "DW7 wiring 2",
+    "cmd": "git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js"
+  },
+  {
+    "id": "g3",
+    "line": 270,
+    "label": "DW7 wiring 3",
+    "cmd": "git grep -cF 'Object.assign(settings' -- main/sync-engine.js"
+  },
+  {
+    "id": "g4",
+    "line": 271,
+    "label": "DW7 wiring 4",
+    "cmd": "git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js"
+  },
+  {
+    "id": "g5",
+    "line": 272,
+    "label": "DW7 wiring 5",
+    "cmd": "git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js"
+  },
+  {
+    "id": "g6",
+    "line": 273,
+    "label": "DW7 wiring 6",
+    "cmd": "git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js"
+  },
+  {
+    "id": "g7",
+    "line": 274,
+    "label": "DW7 wiring 7",
+    "cmd": "git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js"
+  },
+  {
+    "id": "x1",
+    "line": 268,
+    "label": "control without -w (info)",
+    "cmd": "git grep -cF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js"
+  },
+  {
+    "id": "x2",
+    "line": 269,
+    "label": "control without -w (info)",
+    "cmd": "git grep -cF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js"
+  }
+]

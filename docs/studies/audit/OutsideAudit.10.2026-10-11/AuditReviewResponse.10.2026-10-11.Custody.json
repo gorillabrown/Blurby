@@ -1,0 +1,24 @@
+{
+  "clientAuditDate": "2026-10-11",
+  "timezone": "America/Chicago",
+  "responsePackageSha256": "892f09139654ee5ee2f4286f82a246722d3c3278a8e35b024068fc7674de6bcb",
+  "D4ReportSha256": "582c0dc39bce9f27d7cb299e102b4754e59b03c6fd6e4d295ee95ecfa953cb2c",
+  "D4Reviewer": "fresh package-only agent /root/d4_independent_review; fork_turns none; max effort",
+  "coordinatorRole": "custody verification and exact report delivery; prior project history excluded from reviewer prompt",
+  "sourceBranch": "eb/outside-audit-10-remediation",
+  "sourceBranchTip": "a0e8acfe3cae2d1eaf90f0273fed943ea27fc132",
+  "baseAndRemoteMain": "b4335606c951cba7a4d2cecd6b151d6aad86d205",
+  "runtimeCodeChanged": false,
+  "requiredMatrixRows": 18,
+  "requiredCorrectionRows": 11,
+  "recordedEvidenceHashesVerified": 88,
+  "proposedDocumentsMatchCommittedBlob": 6,
+  "reviewRoot": "C:\\Projects\\Blurby-artifacts\\outsideaudit-10-d4-f1a51951",
+  "decisions": {
+    "direction": "authorized",
+    "removalDispatch": "not authorized",
+    "phase0": "authorized with conditions for chartering; not an executed proof",
+    "overall": "not authorized as packaged"
+  },
+  "D5Performed": false
+}

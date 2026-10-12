@@ -1,0 +1,28 @@
+{
+  "base": null,
+  "prescribed": {},
+  "wrong-1-renamed-helper": {
+    "helperName": "reapplyCloudSettings"
+  },
+  "wrong-2-unconverted-path": {
+    "leaveForced": true
+  },
+  "wrong-3-leftover-save": {
+    "leftoverSaveMerge": true
+  },
+  "supp-renamed-locals": {
+    "renameLocals": true
+  },
+  "supp-unconverted-merge-path": {
+    "leaveMerge": true
+  },
+  "supp-leftover-save-forced": {
+    "leftoverSaveForced": true
+  },
+  "supp-state-misplaced": {
+    "stateMisplaced": true
+  },
+  "supp-main-no-save": {
+    "mainNoSave": true
+  }
+}

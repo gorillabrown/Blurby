@@ -1,0 +1,30 @@
+
+ RUN  v4.1.2 C:/Users/estra/AppData/Local/Temp/claude/C--Projects-Blurby/434edb3e-445a-43bb-b775-d5ca825754b7/scratchpad/audit10/work2/ipc
+
+ × tests/settingsNarrateNormalization.e.test.js > NARRATE-REMOVE-1 Done-when 7 (e): settings IPC > save-settings normalizes narrate before get-state, the debounced save and the sync enqueue 21ms
+   → expected 'narrate' to be 'flow' // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/settingsNarrateNormalization.e.test.js > NARRATE-REMOVE-1 Done-when 7 (e): settings IPC > save-settings normalizes narrate before get-state, the debounced save and the sync enqueue
+AssertionError: expected 'narrate' to be 'flow' // Object.is equality
+
+Expected: "flow"
+Received: "narrate"
+
+ ❯ tests/settingsNarrateNormalization.e.test.js:60:39
+     58|
+     59|     const state = ipcHandlers.get("get-state")();
+     60|     check(state.settings.readingMode).toBe("flow");
+       |                                       ^
+     61|     check(state.settings.lastReadingMode).toBe("flow");
+     62|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  21:13:21
+   Duration  510ms (transform 27ms, setup 0ms, import 86ms, tests 23ms, environment 0ms)
+

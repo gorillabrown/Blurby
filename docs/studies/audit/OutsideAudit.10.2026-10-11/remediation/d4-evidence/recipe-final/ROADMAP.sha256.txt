@@ -1,0 +1,5 @@
+06a14e71c3ead0bb179f68cbc375645f2c592292b33cb95d4bd0f5a316cc897f  ROADMAP.md
+Source: C:\Projects\Blurby\.worktrees\outside-audit-10-remediation\ROADMAP.md (branch eb/outside-audit-10-remediation at 4b944aaf, working tree with the uncommitted Round 2 pre-review hardening and the fixes from its check), hashed before and after the replay.
+Replayed text: Done-when 15 and 16 (lines 303-316), D14 (384-387), Staging plan with "Corrections after C4" and Wave C integration (623-651), Failure handling's exception rule (653), Repository reconciliation with its run-worktree rule, steps 1-4 and the scenario walk-through (666-715).
+Run: 2026-10-12 04:03:08 to 04:36:29 -0500, bash recipe_final.sh <scratch dir> with ROADMAP=<that file>: 198 rows, 103 checks, 0 mismatches, exit 0.
+The same hash is printed on the first line of recipe_final__out.txt.

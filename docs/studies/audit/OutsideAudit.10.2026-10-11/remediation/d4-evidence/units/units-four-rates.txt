@@ -1,0 +1,9 @@
+original outputs [ 'waveform' ]
+{"text":"Hello world.","speed":0.8,"keys":["audio","sampling_rate"],"pcm":49800,"frames":16,"sum":83,"ratio":600}
+{"text":"Hello world.","speed":1,"keys":["audio","sampling_rate"],"pcm":41400,"frames":16,"sum":69,"ratio":600}
+{"text":"Hello world.","speed":1.4,"keys":["audio","sampling_rate"],"pcm":27000,"frames":16,"sum":45,"ratio":600}
+{"text":"Hello world.","speed":2,"keys":["audio","sampling_rate"],"pcm":20400,"frames":16,"sum":34,"ratio":600}
+{"text":"Marcus wrote","speed":0.8,"keys":["audio","sampling_rate"],"pcm":168000,"frames":95,"sum":280,"ratio":600}
+{"text":"Marcus wrote","speed":1,"keys":["audio","sampling_rate"],"pcm":138600,"frames":95,"sum":231,"ratio":600}
+{"text":"Marcus wrote","speed":1.4,"keys":["audio","sampling_rate"],"pcm":94800,"frames":95,"sum":158,"ratio":600}
+{"text":"Marcus wrote","speed":2,"keys":["audio","sampling_rate"],"pcm":76800,"frames":95,"sum":128,"ratio":600}

@@ -1,0 +1,133 @@
+npm test
+git grep
+git ls-files
+git diff --name-only
+git grep
+git grep -P
+git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs
+npm test -- tests/readerModeIsolation.test.ts
+npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx
+npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx
+npm test -- tests/commandPaletteRoutes.test.ts
+git grep -n -P '\x22tts\x22|Narration \(TTS\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx
+npm test -- tests/settingsMigrationV13.test.js
+npm test -- tests/settingsNarrateNormalization.test.js
+git grep -cF
+git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js
+git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js
+git grep -cF 'Object.assign(settings' -- main/sync-engine.js
+git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js
+git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js
+git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js
+git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js
+git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js
+git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js
+git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js
+git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\b)[A-Z]' -- src
+npm test -- tests/tts-engine.test.js tests/tts-worker.test.js
+git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'
+git grep -n -P 'ipcMain\.handle\(\x22tts-(nano|pocket|qwen)-' -- main
+node -e "const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)"
+git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json
+npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/
+git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json
+git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow
+npm run typecheck
+npm test
+npm run build
+git diff --check <base>
+git diff --name-status refs/remotes/origin/main...HEAD
+npm run build
+npm run dev
+npm start
+git grep -w
+git revert -m 1 <merge sha>
+git merge-base
+git rm
+git grep
+git grep -n -w '<NAME>' -- src tests
+git grep -h -o -w -P '<the family with each * written as \w+>' -- src/constants.ts
+node <file> --self-test
+node <file> .
+git rm <path>
+git rm -r <path>
+git add <path>
+git add -A
+git diff --cached --stat
+git rev-parse
+npm run typecheck
+git commit --amend
+npm run build
+git fetch origin --prune
+git worktree list
+git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main
+git status --porcelain
+npm test
+git rev-list --parents -n 1 HEAD
+git rev-parse refs/heads/eb/narrate-remove-1
+git rev-parse refs/remotes/origin/main
+git log -1 --format=%s HEAD
+git merge-base --is-ancestor HEAD refs/remotes/origin/main
+git switch --detach refs/remotes/origin/main
+git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1
+git diff --quiet refs/heads/eb/narrate-remove-1 HEAD
+npm ci
+npm run typecheck
+npm test
+npm run build
+git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
+git push origin HEAD:refs/heads/main
+git fetch origin
+git merge-base --is-ancestor <merge sha> refs/remotes/origin/main
+git revert -m 1 <merge sha>
+git worktree list --porcelain
+git -C <path> rev-parse --show-toplevel
+git -C C:\Projects\Blurby\.worktrees\narrate-remove-1 symbolic-ref -q HEAD
+git fetch origin --prune
+& "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
+git branch -a --list "*narrate-remove-1*"
+git worktree list
+git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main
+git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main
+git merge-base … refs/remotes/origin/main
+git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1
+git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>
+git rev-parse <C1 sha>^
+git rev-parse <base>
+git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main
+git rev-parse refs/heads/eb/narrate-remove-1
+git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1
+git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main
+git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main
+git rev-parse refs/heads/eb/narrate-remove-1
+git status --porcelain
+git worktree list
+git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
+npm ci
+git status --porcelain --untracked-files=all
+npm test
+git rev-parse refs/heads/eb/narrate-remove-1
+git cat-file -e <base>:<path>
+git hash-object -- <path>
+git rev-parse <base>:<path>
+git rev-parse <C5 sha>^
+git status --porcelain
+git worktree list
+git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base <base sha>
+git rev-parse HEAD
+git status --porcelain
+npm ci
+npm run typecheck
+npm test
+npm run build
+git ls-files
+git grep
+git grep
+git grep
+git ls-files
+git grep
+git grep
+npm ci
+npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js
+git diff --cached --stat
+git merge-base

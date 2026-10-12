@@ -1,0 +1,31 @@
+== fix_probe [pwsh]
+["-n","\"tts\"|Narration \\(TTS\\)","src/components/SettingsMenu.tsx"]
+["-n","ipcMain\\.handle\\(\"tts-(nano|pocket|qwen)-","main"]
+["-n","\\x22tts\\x22|Narration \\(TTS\\)","src/components/SettingsMenu.tsx"]
+
+== rg_ps [pwsh]
+rg: C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\434edb3e-445a-43bb-b775-d5ca825754b7\scratchpad\audit10\work\F5b-shell\rg_ps.ps1:2
+Line |
+   2 |  $out = rg -n "kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano| …
+     |         ~~
+     | The term 'rg' is not recognized as a name of a cmdlet, function, script file, or executable program. Check the
+     | spelling of the name, or if a path was included, verify that the path is correct and try again.
+stdout_lines=1 LASTEXITCODE= success=True
+
+== fix_probe [powershell.exe]
+["-n","tts|Narration \\(TTS\\)","src/components/SettingsMenu.tsx"]
+["-n","ipcMain\\.handle\\(tts-(nano|pocket|qwen)- main"]
+["-n","\\x22tts\\x22|Narration \\(TTS\\)","src/components/SettingsMenu.tsx"]
+
+== rg_ps [powershell.exe]
+rg : The term 'rg' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the 
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\434edb3e-445a-43bb-b775-d5ca825754b7\scratchpad\audit10\
+work\F5b-shell\rg_ps.ps1:2 char:8
++ $out = rg -n "kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano| ...
++        ~~
+    + CategoryInfo          : ObjectNotFound: (rg:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+stdout_lines=1 LASTEXITCODE= success=True
+
