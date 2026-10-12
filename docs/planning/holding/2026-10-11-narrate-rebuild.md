@@ -78,7 +78,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 | A5 The new Narrate plugs into the mode framework from READER-MODE-SEPARATION-2. Page, Focus and Flow change only at registration and in the bottom bar | confirmed |
 | A6 One voice to start (current default af_bella); the voice picker returns later | confirmed |
 | A7 No hard deadline; the next roadmap review places a new finish line | confirmed |
-| A8 Kokoro's word table can be exact for the audio it generates, because its predicted durations drive the synthesis. The installed model does not output those durations today (OutsideAudit.10 F3: outputs `waveform` only), so the table must first be produced | accepted, corrected after OutsideAudit.10. With `pred_dur` exposed in a scratch copy, five saved speed-1 rows show 600 samples per frame (waveform samples = 600 × Σpred_dur), as do the saved four-rate rows in `remediation/d4-evidence/units/units-four-rates.txt` (under `docs/studies/audit/OutsideAudit.10.2026-10-11/`); that law proves total-length/unit consistency, not interior acoustic alignment. Guard: Rebuild Phase 0 (P0-1 to P0-5, ROADMAP NARRATE-REBUILD-1) produces the table and reports separately its construction, its error at independently identified acoustic anchors, and the interior boundaries the reference cannot resolve (OutsideAudit.10 D4-06). Export, adapter, unit or mapping failures are repaired and rerun; only a failure under a verified contract sends the engine choice to a bake-off |
+| A8 Kokoro's word table can be exact for the audio it generates, because its predicted durations drive the synthesis. The installed model does not output those durations today (OutsideAudit.10 F3: outputs `waveform` only), so the table must first be produced | accepted, corrected after OutsideAudit.10. With `pred_dur` exposed in a scratch copy, five saved speed-1 rows (`remediation/F2-producer-probe/f2-producer__probe3.out`) show 600 samples per frame (waveform samples = 600 × Σpred_dur), as do the saved four-rate rows in `remediation/d4-evidence/units/units-four-rates.txt` (both under `docs/studies/audit/OutsideAudit.10.2026-10-11/`); that law proves total-length/unit consistency, not interior acoustic alignment. Guard: Rebuild Phase 0 (P0-1 to P0-5, ROADMAP NARRATE-REBUILD-1) produces the table and reports separately its construction, its error at independently identified acoustic anchors, and the interior boundaries the reference cannot resolve (OutsideAudit.10 D4-06). Export, adapter, unit or mapping failures are repaired and rerun; only a failure under a verified contract sends the engine choice to a bake-off |
 
 **Decisions:**
 
@@ -151,7 +151,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 ### Approach
 
 **Prove Kokoro, then build.** The removal clears every narration path but leaves the Kokoro engine dormant in the main process, with no UI or preload path. The rebuild's Phase 0 measures the two unknowns on the owner's machine:
-- whether Kokoro's word table is exact against its own audio;
+- whether Kokoro's word table is exact against its own audio, as far as Phase 0 can check it (it checks the table at independently resolved anchors and lists unresolved interiors; ROADMAP NARRATE-REBUILD-1 Verdict);
 - whether speech can start, and a speed change (generated at the new speed) can apply, within 2 s. Phase 0 measures only the harness component; the 2 s / 8 s totals are Core acceptance's *Latency budget* (ROADMAP NARRATE-REBUILD-1).
 
 On a pass, the new Narrate is built on Kokoro. On a failure, a bake-off against the shortlisted engines (`docs/studies/research/tts-engine-scan/SHORTLIST.md`) comes before any building. This also satisfies standing rule 38 (measure before perceptual rewrites). Prior studies already rank Kokoro the best CPU fit.
@@ -231,7 +231,7 @@ Considered and set aside:
 
 - **What:** A new Narrate, built from scratch on the separation's mode contract.
   - **Phase 0 proves Kokoro:**
-    - the word table matches its own audio on real passages;
+    - the word table matches its own audio on real passages, as far as Phase 0 can check it (it checks the table at independently resolved anchors and lists unresolved interiors; ROADMAP NARRATE-REBUILD-1 Verdict);
     - start within 2 s;
     - a speed change, generated at the new speed, within 2 s.
 

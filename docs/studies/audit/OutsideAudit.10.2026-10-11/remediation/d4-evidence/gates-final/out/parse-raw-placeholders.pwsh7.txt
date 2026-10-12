@@ -50,79 +50,85 @@
 050 PARSE-ERROR The '<' operator is reserved for future use. :: node <file> --self-test
 051 PARSE-ERROR The '<' operator is reserved for future use. :: node <file> .
 052 PARSE-ERROR The '<' operator is reserved for future use. :: git rm <path>
-053 PARSE-ERROR The '<' operator is reserved for future use. :: git add <path>
-054 ok single-command elements=3 redirections=0 invocation=Unknown :: git add -A
-055 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
-056 ok single-command elements=2 redirections=0 invocation=Unknown :: git rev-parse
-057 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
-058 ok single-command elements=3 redirections=0 invocation=Unknown :: git commit --amend
-059 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
-060 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
-061 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
-062 ok single-command elements=6 redirections=0 invocation=Unknown :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main
-063 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
-064 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
-065 ok single-command elements=6 redirections=0 invocation=Unknown :: git rev-list --parents -n 1 HEAD
-066 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
-067 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/remotes/origin/main
-068 ok single-command elements=5 redirections=0 invocation=Unknown :: git log -1 --format=%s HEAD
-069 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor HEAD refs/remotes/origin/main
-070 ok single-command elements=4 redirections=0 invocation=Unknown :: git switch --detach refs/remotes/origin/main
-071 ok single-command elements=6 redirections=0 invocation=Unknown :: git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1
-072 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --quiet refs/heads/eb/narrate-remove-1 HEAD
-073 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
-074 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
-075 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
-076 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
-077 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
-078 ok single-command elements=4 redirections=0 invocation=Unknown :: git push origin HEAD:refs/heads/main
-079 PARSE-ERROR The '<' operator is reserved for future use. :: git revert -m 1 <merge sha>
-080 ok single-command elements=4 redirections=0 invocation=Unknown :: git worktree list --porcelain
-081 PARSE-ERROR The '<' operator is reserved for future use. :: git -C <path> rev-parse --show-toplevel
-082 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
-083 ok single-command elements=7 redirections=0 invocation=Ampersand :: & "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
-084 ok single-command elements=5 redirections=0 invocation=Unknown :: git branch -a --list "*narrate-remove-1*"
-085 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
-086 ok single-command elements=6 redirections=0 invocation=Unknown :: git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main
-087 ok single-command elements=7 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main
-088 ok single-command elements=4 redirections=0 invocation=Unknown :: git merge-base … refs/remotes/origin/main
-089 ok single-command elements=5 redirections=0 invocation=Unknown :: git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1
-090 PARSE-ERROR The '<' operator is reserved for future use. :: git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>
-091 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <C1 sha>^
-092 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <base>
-093 ok single-command elements=4 redirections=0 invocation=Unknown :: git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main
-094 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
-095 PARSE-ERROR The '<' operator is reserved for future use. :: git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1
-096 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main
-097 ok single-command elements=6 redirections=0 invocation=Unknown :: git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main
+053 PARSE-ERROR The '<' operator is reserved for future use. :: git rm -r <path>
+054 PARSE-ERROR The '<' operator is reserved for future use. :: git add <path>
+055 ok single-command elements=3 redirections=0 invocation=Unknown :: git add -A
+056 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
+057 ok single-command elements=2 redirections=0 invocation=Unknown :: git rev-parse
+058 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+059 ok single-command elements=3 redirections=0 invocation=Unknown :: git commit --amend
+060 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+061 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
+062 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+063 ok single-command elements=6 redirections=0 invocation=Unknown :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main
+064 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+065 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+066 ok single-command elements=6 redirections=0 invocation=Unknown :: git rev-list --parents -n 1 HEAD
+067 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+068 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/remotes/origin/main
+069 ok single-command elements=5 redirections=0 invocation=Unknown :: git log -1 --format=%s HEAD
+070 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor HEAD refs/remotes/origin/main
+071 ok single-command elements=4 redirections=0 invocation=Unknown :: git switch --detach refs/remotes/origin/main
+072 ok single-command elements=6 redirections=0 invocation=Unknown :: git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1
+073 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --quiet refs/heads/eb/narrate-remove-1 HEAD
+074 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+075 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+076 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+077 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+078 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
+079 ok single-command elements=4 redirections=0 invocation=Unknown :: git push origin HEAD:refs/heads/main
+080 ok single-command elements=3 redirections=0 invocation=Unknown :: git fetch origin
+081 PARSE-ERROR The '<' operator is reserved for future use. :: git merge-base --is-ancestor <merge sha> refs/remotes/origin/main
+082 PARSE-ERROR The '<' operator is reserved for future use. :: git revert -m 1 <merge sha>
+083 ok single-command elements=4 redirections=0 invocation=Unknown :: git worktree list --porcelain
+084 PARSE-ERROR The '<' operator is reserved for future use. :: git -C <path> rev-parse --show-toplevel
+085 ok single-command elements=6 redirections=0 invocation=Unknown :: git -C C:\Projects\Blurby\.worktrees\narrate-remove-1 symbolic-ref -q HEAD
+086 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
+087 ok single-command elements=7 redirections=0 invocation=Ampersand :: & "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
+088 ok single-command elements=5 redirections=0 invocation=Unknown :: git branch -a --list "*narrate-remove-1*"
+089 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+090 ok single-command elements=6 redirections=0 invocation=Unknown :: git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main
+091 ok single-command elements=7 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main
+092 ok single-command elements=4 redirections=0 invocation=Unknown :: git merge-base … refs/remotes/origin/main
+093 ok single-command elements=5 redirections=0 invocation=Unknown :: git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1
+094 PARSE-ERROR The '<' operator is reserved for future use. :: git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>
+095 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <C1 sha>^
+096 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <base>
+097 ok single-command elements=4 redirections=0 invocation=Unknown :: git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main
 098 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
-099 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
-100 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
-101 ok single-command elements=5 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
-102 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
-103 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
-104 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
-105 PARSE-ERROR The '<' operator is reserved for future use. :: git cat-file -e <base>:<path>
-106 PARSE-ERROR The '<' operator is reserved for future use. :: git diff --quiet <base> -- <path>
-107 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <C5 sha>^
-108 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
-109 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
-110 PARSE-ERROR The '<' operator is reserved for future use. :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base <base sha>
-111 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse HEAD
-112 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
-113 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
-114 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
-115 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
-116 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
-117 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
-118 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
-119 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
-120 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
-121 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
-122 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
-123 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
-124 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
-125 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js
-126 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
-127 ok single-command elements=2 redirections=0 invocation=Unknown :: git merge-base
-SUMMARY Core 7.6.0: 127 commands, 16 parse errors, 0 not single-command
+099 PARSE-ERROR The '<' operator is reserved for future use. :: git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1
+100 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main
+101 ok single-command elements=6 redirections=0 invocation=Unknown :: git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main
+102 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+103 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+104 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+105 ok single-command elements=5 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
+106 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+107 ok single-command elements=4 redirections=0 invocation=Unknown :: git status --porcelain --untracked-files=all
+108 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+109 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+110 PARSE-ERROR The '<' operator is reserved for future use. :: git cat-file -e <base>:<path>
+111 PARSE-ERROR The '<' operator is reserved for future use. :: git hash-object -- <path>
+112 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <base>:<path>
+113 PARSE-ERROR The '<' operator is reserved for future use. :: git rev-parse <C5 sha>^
+114 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+115 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+116 PARSE-ERROR The '<' operator is reserved for future use. :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base <base sha>
+117 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse HEAD
+118 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+119 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+120 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+121 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+122 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+123 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
+124 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+125 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+126 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+127 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
+128 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+129 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+130 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+131 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js
+132 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
+133 ok single-command elements=2 redirections=0 invocation=Unknown :: git merge-base
+SUMMARY Core 7.6.0: 133 commands, 19 parse errors, 0 not single-command

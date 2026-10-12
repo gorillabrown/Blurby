@@ -1,0 +1,618 @@
+[
+  {
+    "id": "o1",
+    "inv": 34,
+    "line": 294,
+    "label": "Done-when 12 diff after the Edit-site changes",
+    "cwd": "chg/dw12/repo",
+    "cmd": "git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow"
+  },
+  {
+    "id": "m1",
+    "inv": 52,
+    "line": 623,
+    "label": "control: git rm without -r on a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm src/utils/audio/"
+  },
+  {
+    "id": "m2",
+    "inv": 52,
+    "line": 623,
+    "label": "git rm of a Delete-list file",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm src/hooks/useNarration.ts"
+  },
+  {
+    "id": "m3",
+    "inv": 52,
+    "line": 623,
+    "label": "git rm of a Delete-list file",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm src/reader/modes/NarrateModeAdapter.ts"
+  },
+  {
+    "id": "m4",
+    "inv": 53,
+    "line": 623,
+    "label": "git rm -r of a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm -r src/reader/modes/narrate/"
+  },
+  {
+    "id": "m5",
+    "inv": 53,
+    "line": 623,
+    "label": "git rm -r of a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm -r src/hooks/narration/"
+  },
+  {
+    "id": "m6",
+    "inv": 53,
+    "line": 623,
+    "label": "git rm -r of a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm -r src/utils/audio/"
+  },
+  {
+    "id": "m7",
+    "inv": 53,
+    "line": 623,
+    "label": "git rm -r of a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm -r tests/fixtures/narration/"
+  },
+  {
+    "id": "m8",
+    "inv": 53,
+    "line": 623,
+    "label": "git rm -r of a Delete-list directory",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git rm -r tests/fixtures/tts-normalization/"
+  },
+  {
+    "id": "m9",
+    "inv": 123,
+    "line": 712,
+    "label": "check: what the index still lists",
+    "cwd": "chg/rm/<shell>/repo",
+    "cmd": "git ls-files"
+  },
+  {
+    "id": "p1",
+    "inv": 79,
+    "line": 651,
+    "label": "ok: push from the merge worktree",
+    "cwd": "chg/push/<shell>/ok/merge",
+    "cmd": "git push origin HEAD:refs/heads/main"
+  },
+  {
+    "id": "p2",
+    "inv": 80,
+    "line": 651,
+    "label": "ok: post-push fetch",
+    "cwd": "chg/push/<shell>/ok/merge",
+    "cmd": "git fetch origin"
+  },
+  {
+    "id": "p3",
+    "inv": 81,
+    "line": 651,
+    "label": "ok: post-push check on the merge sha",
+    "cwd": "chg/push/<shell>/ok/merge",
+    "cmd": "git merge-base --is-ancestor 294f5c22f8f1585fdad7c8864012cf439501c2ac refs/remotes/origin/main"
+  },
+  {
+    "id": "p4",
+    "inv": 79,
+    "line": 651,
+    "label": "wrongdir: push run from the primary checkout",
+    "cwd": "chg/push/<shell>/wrongdir/primary",
+    "cmd": "git push origin HEAD:refs/heads/main"
+  },
+  {
+    "id": "p5",
+    "inv": 80,
+    "line": 651,
+    "label": "wrongdir: post-push fetch, also from the primary checkout",
+    "cwd": "chg/push/<shell>/wrongdir/primary",
+    "cmd": "git fetch origin"
+  },
+  {
+    "id": "p6",
+    "inv": 81,
+    "line": 651,
+    "label": "wrongdir: post-push check on the merge sha, from the primary checkout",
+    "cwd": "chg/push/<shell>/wrongdir/primary",
+    "cmd": "git merge-base --is-ancestor 294f5c22f8f1585fdad7c8864012cf439501c2ac refs/remotes/origin/main"
+  },
+  {
+    "id": "p6m",
+    "inv": 81,
+    "line": 651,
+    "label": "wrongdir: the same check in the merge worktree",
+    "cwd": "chg/push/<shell>/wrongdir/merge",
+    "cmd": "git merge-base --is-ancestor 294f5c22f8f1585fdad7c8864012cf439501c2ac refs/remotes/origin/main"
+  },
+  {
+    "id": "p6x",
+    "inv": null,
+    "line": 651,
+    "label": "wrongdir: control, the replaced HEAD form run in the primary checkout",
+    "cwd": "chg/push/<shell>/wrongdir/primary",
+    "cmd": "git merge-base --is-ancestor HEAD refs/remotes/origin/main"
+  },
+  {
+    "id": "p7",
+    "inv": 79,
+    "line": 651,
+    "label": "rejected: push after origin/main moved",
+    "cwd": "chg/push/<shell>/rejected/merge",
+    "cmd": "git push origin HEAD:refs/heads/main"
+  },
+  {
+    "id": "p8",
+    "inv": 80,
+    "line": 651,
+    "label": "rejected: fetch",
+    "cwd": "chg/push/<shell>/rejected/merge",
+    "cmd": "git fetch origin"
+  },
+  {
+    "id": "p9",
+    "inv": 81,
+    "line": 651,
+    "label": "rejected: post-push check on the merge sha",
+    "cwd": "chg/push/<shell>/rejected/merge",
+    "cmd": "git merge-base --is-ancestor 294f5c22f8f1585fdad7c8864012cf439501c2ac refs/remotes/origin/main"
+  },
+  {
+    "id": "s1",
+    "inv": 85,
+    "line": 670,
+    "label": "symbolic-ref check, worktree on eb/narrate-remove-1",
+    "cwd": "chg/symref",
+    "cmd": "git -C <run>\\chg\\symref\\nr1-branch symbolic-ref -q HEAD"
+  },
+  {
+    "id": "s2",
+    "inv": 85,
+    "line": 670,
+    "label": "symbolic-ref check, worktree detached at the branch tip",
+    "cwd": "chg/symref",
+    "cmd": "git -C <run>\\chg\\symref\\nr1-detached symbolic-ref -q HEAD"
+  },
+  {
+    "id": "s3",
+    "inv": 85,
+    "line": 670,
+    "label": "symbolic-ref check, worktree on eb/other",
+    "cwd": "chg/symref",
+    "cmd": "git -C <run>\\chg\\symref\\nr1-other symbolic-ref -q HEAD"
+  },
+  {
+    "id": "h00",
+    "inv": 107,
+    "line": 687,
+    "label": "check: the dirty paths, one per line",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git status --porcelain --untracked-files=all"
+  },
+  {
+    "id": "h00x",
+    "inv": null,
+    "line": 687,
+    "label": "control: the replaced listing",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git status --porcelain"
+  },
+  {
+    "id": "h01c",
+    "inv": 110,
+    "line": 688,
+    "label": "m.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:m.txt"
+  },
+  {
+    "id": "h01h",
+    "inv": 111,
+    "line": 688,
+    "label": "m.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- m.txt"
+  },
+  {
+    "id": "h01r",
+    "inv": 112,
+    "line": 688,
+    "label": "m.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:m.txt"
+  },
+  {
+    "id": "h01q",
+    "inv": null,
+    "line": 688,
+    "label": "m.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- m.txt"
+  },
+  {
+    "id": "h02c",
+    "inv": 110,
+    "line": 688,
+    "label": "m2.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:m2.txt"
+  },
+  {
+    "id": "h02h",
+    "inv": 111,
+    "line": 688,
+    "label": "m2.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- m2.txt"
+  },
+  {
+    "id": "h02r",
+    "inv": 112,
+    "line": 688,
+    "label": "m2.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:m2.txt"
+  },
+  {
+    "id": "h02q",
+    "inv": null,
+    "line": 688,
+    "label": "m2.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- m2.txt"
+  },
+  {
+    "id": "h03c",
+    "inv": 110,
+    "line": 688,
+    "label": "crlf.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:crlf.txt"
+  },
+  {
+    "id": "h03h",
+    "inv": 111,
+    "line": 688,
+    "label": "crlf.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- crlf.txt"
+  },
+  {
+    "id": "h03r",
+    "inv": 112,
+    "line": 688,
+    "label": "crlf.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:crlf.txt"
+  },
+  {
+    "id": "h03q",
+    "inv": null,
+    "line": 688,
+    "label": "crlf.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- crlf.txt"
+  },
+  {
+    "id": "h04c",
+    "inv": 110,
+    "line": 688,
+    "label": "d.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:d.txt"
+  },
+  {
+    "id": "h04h",
+    "inv": 111,
+    "line": 688,
+    "label": "d.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- d.txt"
+  },
+  {
+    "id": "h04r",
+    "inv": 112,
+    "line": 688,
+    "label": "d.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:d.txt"
+  },
+  {
+    "id": "h04q",
+    "inv": null,
+    "line": 688,
+    "label": "d.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- d.txt"
+  },
+  {
+    "id": "h05c",
+    "inv": 110,
+    "line": 688,
+    "label": "d2.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:d2.txt"
+  },
+  {
+    "id": "h05h",
+    "inv": 111,
+    "line": 688,
+    "label": "d2.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- d2.txt"
+  },
+  {
+    "id": "h05r",
+    "inv": 112,
+    "line": 688,
+    "label": "d2.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:d2.txt"
+  },
+  {
+    "id": "h05q",
+    "inv": null,
+    "line": 688,
+    "label": "d2.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- d2.txt"
+  },
+  {
+    "id": "h06c",
+    "inv": 110,
+    "line": 688,
+    "label": "a.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:a.txt"
+  },
+  {
+    "id": "h06h",
+    "inv": 111,
+    "line": 688,
+    "label": "a.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- a.txt"
+  },
+  {
+    "id": "h06r",
+    "inv": 112,
+    "line": 688,
+    "label": "a.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:a.txt"
+  },
+  {
+    "id": "h06q",
+    "inv": null,
+    "line": 688,
+    "label": "a.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- a.txt"
+  },
+  {
+    "id": "h07c",
+    "inv": 110,
+    "line": 688,
+    "label": "a2.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:a2.txt"
+  },
+  {
+    "id": "h07h",
+    "inv": 111,
+    "line": 688,
+    "label": "a2.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- a2.txt"
+  },
+  {
+    "id": "h07r",
+    "inv": 112,
+    "line": 688,
+    "label": "a2.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:a2.txt"
+  },
+  {
+    "id": "h07q",
+    "inv": null,
+    "line": 688,
+    "label": "a2.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- a2.txt"
+  },
+  {
+    "id": "h08c",
+    "inv": 110,
+    "line": 688,
+    "label": "m3.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:m3.txt"
+  },
+  {
+    "id": "h08h",
+    "inv": 111,
+    "line": 688,
+    "label": "m3.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- m3.txt"
+  },
+  {
+    "id": "h08r",
+    "inv": 112,
+    "line": 688,
+    "label": "m3.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:m3.txt"
+  },
+  {
+    "id": "h08q",
+    "inv": null,
+    "line": 688,
+    "label": "m3.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- m3.txt"
+  },
+  {
+    "id": "h09c",
+    "inv": 110,
+    "line": 688,
+    "label": "s.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:s.txt"
+  },
+  {
+    "id": "h09h",
+    "inv": 111,
+    "line": 688,
+    "label": "s.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- s.txt"
+  },
+  {
+    "id": "h09r",
+    "inv": 112,
+    "line": 688,
+    "label": "s.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:s.txt"
+  },
+  {
+    "id": "h09q",
+    "inv": null,
+    "line": 688,
+    "label": "s.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- s.txt"
+  },
+  {
+    "id": "h10c",
+    "inv": 110,
+    "line": 688,
+    "label": "x.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:x.txt"
+  },
+  {
+    "id": "h10h",
+    "inv": 111,
+    "line": 688,
+    "label": "x.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- x.txt"
+  },
+  {
+    "id": "h10r",
+    "inv": 112,
+    "line": 688,
+    "label": "x.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:x.txt"
+  },
+  {
+    "id": "h10q",
+    "inv": null,
+    "line": 688,
+    "label": "x.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- x.txt"
+  },
+  {
+    "id": "h11c",
+    "inv": 110,
+    "line": 688,
+    "label": "rdir/f1.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/f1.txt"
+  },
+  {
+    "id": "h11h",
+    "inv": 111,
+    "line": 688,
+    "label": "rdir/f1.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- rdir/f1.txt"
+  },
+  {
+    "id": "h11r",
+    "inv": 112,
+    "line": 688,
+    "label": "rdir/f1.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/f1.txt"
+  },
+  {
+    "id": "h11q",
+    "inv": null,
+    "line": 688,
+    "label": "rdir/f1.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- rdir/f1.txt"
+  },
+  {
+    "id": "h12c",
+    "inv": 110,
+    "line": 688,
+    "label": "rdir/f2.txt: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/f2.txt"
+  },
+  {
+    "id": "h12h",
+    "inv": 111,
+    "line": 688,
+    "label": "rdir/f2.txt: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- rdir/f2.txt"
+  },
+  {
+    "id": "h12r",
+    "inv": 112,
+    "line": 688,
+    "label": "rdir/f2.txt: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/f2.txt"
+  },
+  {
+    "id": "h12q",
+    "inv": null,
+    "line": 688,
+    "label": "rdir/f2.txt: control, the replaced diff --quiet rule",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git diff --quiet 3ab59c8523e8c06d496d7ea265544adc74f34e62 -- rdir/f2.txt"
+  },
+  {
+    "id": "e01c",
+    "inv": 110,
+    "line": 688,
+    "label": "control rdir/, the replaced listing's entry: cat-file",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git cat-file -e 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/"
+  },
+  {
+    "id": "e01h",
+    "inv": 111,
+    "line": 688,
+    "label": "control rdir/: hash-object",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git hash-object -- rdir/"
+  },
+  {
+    "id": "e01r",
+    "inv": 112,
+    "line": 688,
+    "label": "control rdir/: rev-parse",
+    "cwd": "chg/hashobj/repo",
+    "cmd": "git rev-parse 3ab59c8523e8c06d496d7ea265544adc74f34e62:rdir/"
+  }
+]

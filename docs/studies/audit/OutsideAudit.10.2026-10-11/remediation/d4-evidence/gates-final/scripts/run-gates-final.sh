@@ -61,7 +61,15 @@ node '$(w "$RUN/closure-check.mjs")' --self-test; "exit=\$LASTEXITCODE"
 node '$(w "$RUN/closure-check.mjs")' .; "exit=\$LASTEXITCODE"
 PS
 { echo "closure-check.mjs sha256 $(sha256sum closure-check.mjs | cut -d' ' -f1) ($(wc -l < closure-check.mjs) lines, extracted verbatim from the snapshot)"; pwsh7 run-closure.ps1 2>&1; ps51 run-closure.ps1 2>&1; } | tr -d '\r' > out/closure-check.txt
-# 7. the ROADMAP must not have changed during the replay
+# 7. commands changed since the previous replay: scratch repos, then each command verbatim in every shell; inventory delta
+node "$S/mkchanged.cjs" "$(w "$WT")" "$(w "$RUN")" "$RUN"
+for s in pwsh7 ps51 bash; do mkdir -p "res/chg-$s"; node "$S/mkrunner.cjs" "chg/gates.$s.json" "$(w "$RUN/chg")" "$RUN/chg" "$(w "$RUN/res/chg-$s")" "$RUN/res/chg-$s" "run-chg-$s"; done
+pwsh7 run-chg-pwsh7.ps1; ps51 run-chg-ps51.ps1; bash run-chg-bash.sh
+node "$S/evalchanged.cjs"
+P=docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/out
+git -C "$WT" show "HEAD:$P/commands.json" > prev-commands.json; git -C "$WT" show "HEAD:$P/roadmap.sha256.txt" > prev-roadmap.sha256.txt
+node "$S/delta.cjs" prev-commands.json prev-roadmap.sha256.txt
+# 8. the ROADMAP must not have changed during the replay
 H1=$(sha256sum "$WT/ROADMAP.md" | cut -d' ' -f1)
 { echo "ROADMAP.md sha256 at start $H0"; echo "ROADMAP.md sha256 at end   $H1"; [ "$H0" = "$H1" ] && echo "unchanged during the replay" || echo "CHANGED DURING THE REPLAY"; } > out/roadmap.sha256.txt
 cat out/roadmap.sha256.txt

@@ -1,0 +1,179 @@
+== Done-when 12 path order (ROADMAP states, in that order: src/reader/modes/flow/ModeRuntime.ts, src/reader/modes/focus/ModeRuntime.ts, src/reader/modes/page/ModeRuntime.ts)
+  MATCH pwsh7 o1 exit=0 stdout=["src/reader/modes/flow/ModeRuntime.ts","src/reader/modes/focus/ModeRuntime.ts","src/reader/modes/page/ModeRuntime.ts"] stderr=empty
+  MATCH ps51 o1 exit=0 stdout=["src/reader/modes/flow/ModeRuntime.ts","src/reader/modes/focus/ModeRuntime.ts","src/reader/modes/page/ModeRuntime.ts"] stderr=empty
+  MATCH bash o1 exit=0 stdout=["src/reader/modes/flow/ModeRuntime.ts","src/reader/modes/focus/ModeRuntime.ts","src/reader/modes/page/ModeRuntime.ts"] stderr=empty
+  MATCH o1 identical in all three shells
+== Staging plan: git rm <path> for a file, git rm -r <path> for a directory (a copy of the scratch repo per shell)
+  MATCH pwsh7 m1 control, git rm without -r on a directory: exit 128 with 'recursively without -r' (exit=128 stdout=[] stderr="fatal: not removing 'src/utils/audio/' recursively without -r")
+  MATCH pwsh7 m2 exit 0, 1 rm lines (git rm src/hooks/useNarration.ts)
+  MATCH pwsh7 m3 exit 0, 1 rm lines (git rm src/reader/modes/NarrateModeAdapter.ts)
+  MATCH pwsh7 m4 exit 0, 20 rm lines (git rm -r src/reader/modes/narrate/)
+  MATCH pwsh7 m5 exit 0, 6 rm lines (git rm -r src/hooks/narration/)
+  MATCH pwsh7 m6 exit 0, 2 rm lines (git rm -r src/utils/audio/)
+  MATCH pwsh7 m7 exit 0, 35 rm lines (git rm -r tests/fixtures/narration/)
+  MATCH pwsh7 m8 exit 0, 1 rm lines (git rm -r tests/fixtures/tts-normalization/)
+  MATCH pwsh7 m9 the index lists only .gitattributes, src/utils/ttsEvalTrace.ts (exit=0 stdout=[".gitattributes","src/utils/ttsEvalTrace.ts"] stderr=empty)
+  MATCH ps51 m1 control, git rm without -r on a directory: exit 128 with 'recursively without -r' (exit=128 stdout=[] stderr="git : fatal: not removing 'src/utils/audio/' recursively without -r")
+  MATCH ps51 m2 exit 0, 1 rm lines (git rm src/hooks/useNarration.ts)
+  MATCH ps51 m3 exit 0, 1 rm lines (git rm src/reader/modes/NarrateModeAdapter.ts)
+  MATCH ps51 m4 exit 0, 20 rm lines (git rm -r src/reader/modes/narrate/)
+  MATCH ps51 m5 exit 0, 6 rm lines (git rm -r src/hooks/narration/)
+  MATCH ps51 m6 exit 0, 2 rm lines (git rm -r src/utils/audio/)
+  MATCH ps51 m7 exit 0, 35 rm lines (git rm -r tests/fixtures/narration/)
+  MATCH ps51 m8 exit 0, 1 rm lines (git rm -r tests/fixtures/tts-normalization/)
+  MATCH ps51 m9 the index lists only .gitattributes, src/utils/ttsEvalTrace.ts (exit=0 stdout=[".gitattributes","src/utils/ttsEvalTrace.ts"] stderr=empty)
+  MATCH bash m1 control, git rm without -r on a directory: exit 128 with 'recursively without -r' (exit=128 stdout=[] stderr="fatal: not removing 'src/utils/audio/' recursively without -r")
+  MATCH bash m2 exit 0, 1 rm lines (git rm src/hooks/useNarration.ts)
+  MATCH bash m3 exit 0, 1 rm lines (git rm src/reader/modes/NarrateModeAdapter.ts)
+  MATCH bash m4 exit 0, 20 rm lines (git rm -r src/reader/modes/narrate/)
+  MATCH bash m5 exit 0, 6 rm lines (git rm -r src/hooks/narration/)
+  MATCH bash m6 exit 0, 2 rm lines (git rm -r src/utils/audio/)
+  MATCH bash m7 exit 0, 35 rm lines (git rm -r tests/fixtures/narration/)
+  MATCH bash m8 exit 0, 1 rm lines (git rm -r tests/fixtures/tts-normalization/)
+  MATCH bash m9 the index lists only .gitattributes, src/utils/ttsEvalTrace.ts (exit=0 stdout=[".gitattributes","src/utils/ttsEvalTrace.ts"] stderr=empty)
+  MATCH m1 identical in all three shells
+  MATCH m2 identical in all three shells
+  MATCH m3 identical in all three shells
+  MATCH m4 identical in all three shells
+  MATCH m5 identical in all three shells
+  MATCH m6 identical in all three shells
+  MATCH m7 identical in all three shells
+  MATCH m8 identical in all three shells
+  MATCH m9 identical in all three shells
+== Integration push and post-push check on the memo's merge sha (a local bare repository as origin; a copy per shell and case)
+  MATCH pwsh7 ok: push exit 0, fetch exit 0, check exit 0; origin main = the merge: true
+  MATCH pwsh7 wrongdir: push from the primary checkout exit 0 ("Everything up-to-date"); the check exits 1 there and 1 in the merge worktree -> (C) from either folder; origin main = the merge: false
+  MATCH pwsh7 wrongdir control: the replaced HEAD form, run in the primary checkout, exits 0, a false pass the merge sha removes
+  MATCH pwsh7 rejected: push exit 1 (rejected) -> (C); fetch exit 0; check exit 1
+  MATCH ps51 ok: push exit 0, fetch exit 0, check exit 0; origin main = the merge: true
+  MATCH ps51 wrongdir: push from the primary checkout exit 0 ("git : Everything up-to-date"); the check exits 1 there and 1 in the merge worktree -> (C) from either folder; origin main = the merge: false
+  MATCH ps51 wrongdir control: the replaced HEAD form, run in the primary checkout, exits 0, a false pass the merge sha removes
+  MATCH ps51 rejected: push exit 1 (rejected) -> (C); fetch exit 0; check exit 1
+  MATCH bash ok: push exit 0, fetch exit 0, check exit 0; origin main = the merge: true
+  MATCH bash wrongdir: push from the primary checkout exit 0 ("Everything up-to-date"); the check exits 1 there and 1 in the merge worktree -> (C) from either folder; origin main = the merge: false
+  MATCH bash wrongdir control: the replaced HEAD form, run in the primary checkout, exits 0, a false pass the merge sha removes
+  MATCH bash rejected: push exit 1 (rejected) -> (C); fetch exit 0; check exit 1
+  MATCH p1 exit and stdout identical in all three shells
+  MATCH p2 exit and stdout identical in all three shells
+  MATCH p3 exit and stdout identical in all three shells
+  MATCH p4 exit and stdout identical in all three shells
+  MATCH p5 exit and stdout identical in all three shells
+  MATCH p6 exit and stdout identical in all three shells
+  MATCH p6m exit and stdout identical in all three shells
+  MATCH p6x exit and stdout identical in all three shells
+  MATCH p7 exit and stdout identical in all three shells
+  MATCH p8 exit and stdout identical in all three shells
+  MATCH p9 exit and stdout identical in all three shells
+== Preamble symbolic-ref check (the recipe runs it in pwsh; the backslash path does not survive bash)
+  MATCH pwsh7 s1 on the branch prints refs/heads/eb/narrate-remove-1 (exit=0 stdout=["refs/heads/eb/narrate-remove-1"] stderr=empty)
+  MATCH pwsh7 s2 detached prints nothing, exit 1 -> fails the check (exit=1 stdout=[] stderr=empty)
+  MATCH pwsh7 s3 another branch prints ["refs/heads/eb/other"] -> fails the check
+  MATCH ps51 s1 on the branch prints refs/heads/eb/narrate-remove-1 (exit=0 stdout=["refs/heads/eb/narrate-remove-1"] stderr=empty)
+  MATCH ps51 s2 detached prints nothing, exit 1 -> fails the check (exit=1 stdout=[] stderr=empty)
+  MATCH ps51 s3 another branch prints ["refs/heads/eb/other"] -> fails the check
+  MATCH s1 identical in pwsh 7 and 5.1
+  MATCH s2 identical in pwsh 7 and 5.1
+  MATCH s3 identical in pwsh 7 and 5.1
+  info bash s1 exit=128 stdout=[] stderr="fatal: cannot change to '<run>chgsymrefnr1-branch': Filename too long" (backslash path, pwsh only as stated)
+  info bash s2 exit=128 stdout=[] stderr="fatal: cannot change to '<run>chgsymrefnr1-detached': Filename too long" (backslash path, pwsh only as stated)
+  info bash s3 exit=128 stdout=[] stderr="fatal: cannot change to '<run>chgsymrefnr1-other': Filename too long" (backslash path, pwsh only as stated)
+== Step 3 (B) dirt listing and the unfinished C4 correction's 'already matches <base>' (base 3ab59c8523e8c06d496d7ea265544adc74f34e62)
+  dirty paths (h00, git status --porcelain --untracked-files=all): [" D a.txt","D  a2.txt"," M crlf.txt","A  d2.txt"," M m.txt","M  m2.txt"," M m3.txt"," D x.txt","?? d.txt","?? rdir/f1.txt","?? rdir/f2.txt","?? s.txt"]
+  MATCH pwsh7 h00 exit 0: each of the 12 dirty paths on its own line, no directory entry
+  MATCH ps51 h00 exit 0: each of the 12 dirty paths on its own line, no directory entry
+  MATCH bash h00 exit 0: each of the 12 dirty paths on its own line, no directory entry
+  MATCH pwsh7 m.txt: cat-file exit 0; hash-object d5c61d0806b0; rev-parse d5c61d0806b0; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 m2.txt: cat-file exit 0; hash-object 72ad76dbae2d; rev-parse 72ad76dbae2d; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 crlf.txt: cat-file exit 0; hash-object 18c77b3af9bf; rev-parse 18c77b3af9bf; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 d.txt: cat-file exit 0; hash-object af4a46018f0e; rev-parse af4a46018f0e; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 d2.txt: cat-file exit 0; hash-object 72584953c0db; rev-parse 72584953c0db; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 a.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "fatal: could not open 'a.txt' for reading: No such file or directory"
+  MATCH pwsh7 a2.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "fatal: could not open 'a2.txt' for reading: No such file or directory"
+  MATCH pwsh7 m3.txt: cat-file exit 0; hash-object d52f626a4576; rev-parse e78880912fbb; exists=true -> rule says does not match; truth does not match
+  MATCH pwsh7 s.txt: cat-file exit 128; hash-object 5e845d291949; rev-parse exit 128; exists=true -> rule says does not match; truth does not match
+  MATCH pwsh7 x.txt: cat-file exit 0; hash-object exit 128; rev-parse 1d16aa921464; exists=false -> rule says does not match; truth does not match; hash-object stderr "fatal: could not open 'x.txt' for reading: No such file or directory"
+  MATCH pwsh7 rdir/f1.txt: cat-file exit 0; hash-object a776cd9b23c1; rev-parse a776cd9b23c1; exists=true -> rule says matches; truth matches
+  MATCH pwsh7 rdir/f2.txt: cat-file exit 0; hash-object f7e71363dd62; rev-parse f7e71363dd62; exists=true -> rule says matches; truth matches
+  MATCH ps51 m.txt: cat-file exit 0; hash-object d5c61d0806b0; rev-parse d5c61d0806b0; exists=true -> rule says matches; truth matches
+  MATCH ps51 m2.txt: cat-file exit 0; hash-object 72ad76dbae2d; rev-parse 72ad76dbae2d; exists=true -> rule says matches; truth matches
+  MATCH ps51 crlf.txt: cat-file exit 0; hash-object 18c77b3af9bf; rev-parse 18c77b3af9bf; exists=true -> rule says matches; truth matches
+  MATCH ps51 d.txt: cat-file exit 0; hash-object af4a46018f0e; rev-parse af4a46018f0e; exists=true -> rule says matches; truth matches
+  MATCH ps51 d2.txt: cat-file exit 0; hash-object 72584953c0db; rev-parse 72584953c0db; exists=true -> rule says matches; truth matches
+  MATCH ps51 a.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "git : fatal: could not open 'a.txt' for reading: No such file or directory"
+  MATCH ps51 a2.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "git : fatal: could not open 'a2.txt' for reading: No such file or directory"
+  MATCH ps51 m3.txt: cat-file exit 0; hash-object d52f626a4576; rev-parse e78880912fbb; exists=true -> rule says does not match; truth does not match
+  MATCH ps51 s.txt: cat-file exit 128; hash-object 5e845d291949; rev-parse exit 128; exists=true -> rule says does not match; truth does not match
+  MATCH ps51 x.txt: cat-file exit 0; hash-object exit 128; rev-parse 1d16aa921464; exists=false -> rule says does not match; truth does not match; hash-object stderr "git : fatal: could not open 'x.txt' for reading: No such file or directory"
+  MATCH ps51 rdir/f1.txt: cat-file exit 0; hash-object a776cd9b23c1; rev-parse a776cd9b23c1; exists=true -> rule says matches; truth matches
+  MATCH ps51 rdir/f2.txt: cat-file exit 0; hash-object f7e71363dd62; rev-parse f7e71363dd62; exists=true -> rule says matches; truth matches
+  MATCH bash m.txt: cat-file exit 0; hash-object d5c61d0806b0; rev-parse d5c61d0806b0; exists=true -> rule says matches; truth matches
+  MATCH bash m2.txt: cat-file exit 0; hash-object 72ad76dbae2d; rev-parse 72ad76dbae2d; exists=true -> rule says matches; truth matches
+  MATCH bash crlf.txt: cat-file exit 0; hash-object 18c77b3af9bf; rev-parse 18c77b3af9bf; exists=true -> rule says matches; truth matches
+  MATCH bash d.txt: cat-file exit 0; hash-object af4a46018f0e; rev-parse af4a46018f0e; exists=true -> rule says matches; truth matches
+  MATCH bash d2.txt: cat-file exit 0; hash-object 72584953c0db; rev-parse 72584953c0db; exists=true -> rule says matches; truth matches
+  MATCH bash a.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "fatal: could not open 'a.txt' for reading: No such file or directory"
+  MATCH bash a2.txt: cat-file exit 128; hash-object exit 128; rev-parse exit 128; exists=false -> rule says matches; truth matches; hash-object stderr "fatal: could not open 'a2.txt' for reading: No such file or directory"
+  MATCH bash m3.txt: cat-file exit 0; hash-object d52f626a4576; rev-parse e78880912fbb; exists=true -> rule says does not match; truth does not match
+  MATCH bash s.txt: cat-file exit 128; hash-object 5e845d291949; rev-parse exit 128; exists=true -> rule says does not match; truth does not match
+  MATCH bash x.txt: cat-file exit 0; hash-object exit 128; rev-parse 1d16aa921464; exists=false -> rule says does not match; truth does not match; hash-object stderr "fatal: could not open 'x.txt' for reading: No such file or directory"
+  MATCH bash rdir/f1.txt: cat-file exit 0; hash-object a776cd9b23c1; rev-parse a776cd9b23c1; exists=true -> rule says matches; truth matches
+  MATCH bash rdir/f2.txt: cat-file exit 0; hash-object f7e71363dd62; rev-parse f7e71363dd62; exists=true -> rule says matches; truth matches
+  MATCH h00 identical in all three shells
+  MATCH h00x identical in all three shells
+  MATCH h01c identical in all three shells
+  MATCH h01h identical in all three shells
+  MATCH h01r identical in all three shells
+  MATCH h01q identical in all three shells
+  MATCH h02c identical in all three shells
+  MATCH h02h identical in all three shells
+  MATCH h02r identical in all three shells
+  MATCH h02q identical in all three shells
+  MATCH h03c identical in all three shells
+  MATCH h03h identical in all three shells
+  MATCH h03r identical in all three shells
+  MATCH h03q identical in all three shells
+  MATCH h04c identical in all three shells
+  MATCH h04h identical in all three shells
+  MATCH h04r identical in all three shells
+  MATCH h04q identical in all three shells
+  MATCH h05c identical in all three shells
+  MATCH h05h identical in all three shells
+  MATCH h05r identical in all three shells
+  MATCH h05q identical in all three shells
+  MATCH h06c identical in all three shells
+  MATCH h06h identical in all three shells
+  MATCH h06r identical in all three shells
+  MATCH h06q identical in all three shells
+  MATCH h07c identical in all three shells
+  MATCH h07h identical in all three shells
+  MATCH h07r identical in all three shells
+  MATCH h07q identical in all three shells
+  MATCH h08c identical in all three shells
+  MATCH h08h identical in all three shells
+  MATCH h08r identical in all three shells
+  MATCH h08q identical in all three shells
+  MATCH h09c identical in all three shells
+  MATCH h09h identical in all three shells
+  MATCH h09r identical in all three shells
+  MATCH h09q identical in all three shells
+  MATCH h10c identical in all three shells
+  MATCH h10h identical in all three shells
+  MATCH h10r identical in all three shells
+  MATCH h10q identical in all three shells
+  MATCH h11c identical in all three shells
+  MATCH h11h identical in all three shells
+  MATCH h11r identical in all three shells
+  MATCH h11q identical in all three shells
+  MATCH h12c identical in all three shells
+  MATCH h12h identical in all three shells
+  MATCH h12r identical in all three shells
+  MATCH h12q identical in all three shells
+  MATCH e01c identical in all three shells
+  MATCH e01h identical in all three shells
+  MATCH e01r identical in all three shells
+  control: the replaced rule (cat-file -e, then diff --quiet) misclassifies d.txt, a.txt, a2.txt, rdir/f1.txt, rdir/f2.txt
+  MATCH pwsh7 control: git status --porcelain lists "?? rdir/"; for it cat-file exits 0 and hash-object 128 ("fatal: Unable to hash rdir/"), so the rule says no match although rdir/ equals base
+  MATCH ps51 control: git status --porcelain lists "?? rdir/"; for it cat-file exits 0 and hash-object 128 ("git : fatal: Unable to hash rdir/"), so the rule says no match although rdir/ equals base
+  MATCH bash control: git status --porcelain lists "?? rdir/"; for it cat-file exits 0 and hash-object 128 ("fatal: Unable to hash rdir/"), so the rule says no match although rdir/ equals base
+  control: without --untracked-files=all, git status --porcelain lists a restored directory as one entry (?? rdir/) and hash-object exits 128 on it, so the rule would send it to a false (C)
+SUMMARY changed commands: 77 gates x 3 shells; 167 checks; problems=0

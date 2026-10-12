@@ -50,6 +50,7 @@ git grep -h -o -w -P 'NARRATE_SPEED_\w+' -- src/constants.ts
 node closure-check.mjs --self-test
 node closure-check.mjs .
 git rm src/x.ts
+git rm -r src/x.ts
 git add src/x.ts
 git add -A
 git diff --cached --stat
@@ -76,9 +77,12 @@ npm test
 npm run build
 git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
 git push origin HEAD:refs/heads/main
+git fetch origin
+git merge-base --is-ancestor 0123456789abcdef0123456789abcdef01234567 refs/remotes/origin/main
 git revert -m 1 0123456789abcdef0123456789abcdef01234567
 git worktree list --porcelain
 git -C src/x.ts rev-parse --show-toplevel
+git -C C:\Projects\Blurby\.worktrees\narrate-remove-1 symbolic-ref -q HEAD
 git fetch origin --prune
 & "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
 git branch -a --list "*narrate-remove-1*"
@@ -99,11 +103,13 @@ git rev-parse refs/heads/eb/narrate-remove-1
 git status --porcelain
 git worktree list
 git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
-git status --porcelain
+npm ci
+git status --porcelain --untracked-files=all
 npm test
 git rev-parse refs/heads/eb/narrate-remove-1
 git cat-file -e 0123456789abcdef0123456789abcdef01234567:src/x.ts
-git diff --quiet 0123456789abcdef0123456789abcdef01234567 -- src/x.ts
+git hash-object -- src/x.ts
+git rev-parse 0123456789abcdef0123456789abcdef01234567:src/x.ts
 git rev-parse 0123456789abcdef0123456789abcdef01234567^
 git status --porcelain
 git worktree list

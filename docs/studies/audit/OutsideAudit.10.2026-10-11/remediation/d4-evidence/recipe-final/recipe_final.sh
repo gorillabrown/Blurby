@@ -1,11 +1,18 @@
 #!/usr/bin/env bash
 # recipe_final.sh - replays the FINAL NARRATE-REMOVE-1 reconciliation recipe and integration text against disposable
-# git repositories. Source text (ROADMAP.md; sha256 in ROADMAP.sha256.txt): D14 (lines 384-387), Done-when 15 and 16
-# (303-316), Staging plan incl. "Corrections after C4" and Wave C integration (623-650), Failure handling's exception
-# rule (652), and "Repository reconciliation - run this FIRST" with its run-worktree rule, steps 1-4 and the scenario
-# walk-through (665-714). Rewritten from
-# post-apply/recipe-v3__recipe_v3.sh: every function now mirrors the final commands, and every row asserts its
-# outcome token against the token the spec text predicts (exit 0 only when all rows and checks match).
+# git repositories. Source text (ROADMAP.md; sha256 in ROADMAP.sha256.txt): Done-when 15 and 16 (lines 303-316), D14
+# (384-387), Staging plan incl. "Corrections after C4" and Wave C integration (623-651), Failure handling's exception
+# rule (653), and "Repository reconciliation - run this FIRST" with its run-worktree rule, steps 1-4 and the scenario
+# walk-through (666-715). This revision mirrors the fix-round-2 text: Wave C integration's folders (fetch, commit check
+# and the merge worktree's existence check from the primary checkout, everything else in the merge worktree), the push
+# from the merge worktree and its post-push check, the branch worktree's symbolic-ref check (run-worktree rule, and
+# before every commit), the re-attach's non-zero exit route and npm ci, the hash-object match to <base>, the Smoke:
+# line format, Done-when 15's Exception: line and `git rm -r` for a deleted directory. It also mirrors the Round 2
+# check's text: a passing smoke reads the last Smoke: line per check (635, 690), the post-push check names the memo's
+# integration merge sha (651), step 3 (B) lists dirt with git status --porcelain --untracked-files=all (687), the
+# re-attach names the branch (686) and the "already matches <base>" test runs in the branch worktree (688). Every row
+# asserts its outcome token against the token the spec text predicts, and every check asserts one fact; exit 0 only
+# when all of them match.
 #
 # STUBS (they only log and return an exit code): npm ci, npm run typecheck, the Closure check, npm test, npm run build,
 # the Task 6 reviews and the owner smoke (Done-when 16). npm test also emulates vitest discovery: a test file marked
@@ -13,6 +20,8 @@
 # fail on the base and pass after C3. Git commands, the Done-when 15 fence check and the step-4 search positive
 # controls are real. The spec runs the same git commands in PowerShell 7; this replay runs them in bash.
 # Path model: the C1-C5 path sets and the Done-when 15 fence are small stand-ins for the real lists (see constants).
+# Smoke record (635): a passing smoke on a sha means that, for each of (a)-(f), the last in-format Smoke: line for that
+# sha reads pass; rows SM10, SP, SM11 and SM12 show it, with the earlier "six lines, all pass" reading as a control.
 # Usage: ROADMAP=<path to ROADMAP.md> recipe_final.sh <scratch-dir>   (keep <scratch-dir> short on Windows)
 set -u
 [ -n "${1:-}" ] || { echo "usage: $0 <scratch-dir>"; exit 2; }
@@ -32,18 +41,20 @@ TLOG=$CO/Timing.NARRATE-REMOVE-1.jsonl
 MEMO=$CO/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-12.md
 T1=tests/settingsMigrationV13.test.js
 T2=tests/settingsNarrateNormalization.test.js
-# Staging plan path sets (stand-ins): C1 the two tests, C2 Wave A renderer, C3 main process, C4 tests, C5 memo + time log
+FIXD=tests/fixtures/narration/ # a Delete-list directory, removed with git rm -r (Staging plan)
+# Staging plan path sets (stand-ins): C1 the two tests, C2 Wave A renderer, C3 main process, C4 tests, C5 memo + time log.
+# An entry ending in / is a directory and covers every path under it.
 C1P="$T1 $T2"
 C2P="src/components/ReaderContainer.tsx src/hooks/useNarration.ts src/reader/modes/page/ModeRuntime.ts"
 C3P="main/sync-engine.js"
-C4P="tests/narrTiming.test.ts tests/foliate-bridge.test.ts tests/fixtures/narration/a.json"
+C4P="tests/narrTiming.test.ts tests/foliate-bridge.test.ts $FIXD"
 C5P="$MEMO $TLOG"
 C6P="" # n = 5: no next commit, so any other dirt is outside C<n+1>
-# Done-when 15 fence: D of Delete list, M of Edit sites, A of the two tests, the staging memo and the time log
-DEL="src/hooks/useNarration.ts tests/narrTiming.test.ts tests/fixtures/narration/a.json"
+# Done-when 15 fence: D of Delete list, M of Edit sites, A of the two tests; the staging memo and the time log
+DEL="src/hooks/useNarration.ts tests/narrTiming.test.ts $FIXD"
 EDIT="src/components/ReaderContainer.tsx src/reader/modes/page/ModeRuntime.ts main/sync-engine.js tests/foliate-bridge.test.ts"
 FENCE="$DEL $EDIT $T1 $T2 $MEMO $TLOG"
-BASEFILES="src/components/ReaderContainer.tsx src/hooks/useNarration.ts src/reader/modes/page/ModeRuntime.ts src/reader/modes/page/view.ts main/sync-engine.js main/tts-engine.js tests/narrTiming.test.ts tests/foliate-bridge.test.ts tests/ok.test.ts tests/fixtures/narration/a.json docs/notes.md main.js preload.js package.json package-lock.json vite.config.js index.html"
+BASEFILES="src/components/ReaderContainer.tsx src/hooks/useNarration.ts src/reader/modes/page/ModeRuntime.ts src/reader/modes/page/view.ts main/sync-engine.js main/tts-engine.js tests/narrTiming.test.ts tests/foliate-bridge.test.ts tests/ok.test.ts tests/fixtures/narration/a.json tests/fixtures/narration/b.json docs/notes.md main.js preload.js package.json package-lock.json vite.config.js index.html"
 ctr=0; ROWS=0; CHECKS=0; FAILS=0
 
 setup() {
@@ -56,8 +67,9 @@ setup() {
   git -C "$O" add -A; git -C "$O" commit -qm base; git -C "$O" push -q origin main
   git clone -q "$W/origin.git" "$W/other" 2>/dev/null
   REG="$W/register"; printf 'TEST-TIMEOUT-HEADROOM-1 completed\nLIBRARY-SETTINGS-FIX-1 completed\nEINK-HOVER-FIX-1 completed\nNARRATE-REMOVE-1 Queued\nNARRATE-REBUILD-1 Queued\n' > "$REG"
-  LOG="$W/npm.log"; : > "$LOG";
+  LOG="$W/npm.log"; : > "$LOG"
   CI_RC=0; TC_RC=0; TEST_RC=0; BUILD_RC=0; SMOKE=pass; SMOKE2=pass; C4_EXTRA=; QCOUNT=; BASE=; N=; MODE=; RES=; FAILED=
+  CC=; WHY=; REATT_RC=; PUSH_RC=; PUSHDIR=
 }
 advance() { # an unrelated commit lands on origin/main from another clone; $1 optional path to change
   ctr=$((ctr+1)); local f=${1:-u$ctr.txt}
@@ -69,16 +81,30 @@ say() { RES="$*"; }
 om() { git -C "$O" rev-parse refs/remotes/origin/main; }
 remote_main() { git -C "$W/origin.git" rev-parse refs/heads/main; } # the true remote state
 short() { git -C "$1" rev-parse --short=8 HEAD; }
-inlist() { local x=$1 y; shift; for y in "$@"; do [ "$x" = "$y" ] && return 0; done; return 1; }
+inlist() { local x=$1 y; shift; for y in "$@"; do [ "$x" = "$y" ] && return 0; case $y in */) [ "${x#"$y"}" != "$x" ] && return 0;; esac; done; return 1; }
 listed() { git -C "$O" worktree list | grep -qE "/$1[[:space:]]"; } # is a worktree with this basename registered
-# run-worktree rule (preamble): git worktree list --porcelain lists the path AND rev-parse --show-toplevel there prints it
-is_run_wt() { local m; m=$(cygpath -m "$1"); git -C "$O" worktree list --porcelain | grep -qxF "worktree $m" && [ "$(git -C "$1" rev-parse --show-toplevel 2>/dev/null)" = "$m" ]; }
-stray_at() { [ -d "$1" ] && ! is_run_wt "$1"; } # a directory at a run worktree path that git does not list as that worktree
-exc() { grep -qF "Exception: $1 — " "$WT/$MEMO" 2>/dev/null; } # Failure handling: a path named on an Exception: line
-dirty_except() { # $1 dir, rest: paths whose `git status --porcelain` lines are ignored; prints the remaining lines
-  local d=$1 l; shift
-  while IFS= read -r l; do [ -z "$l" ] && continue; inlist "${l:3}" "$@" || printf '%s\n' "$l"; done <<< "$(git -C "$d" status --porcelain)"
+# run-worktree rule (preamble): git worktree list --porcelain lists the path, rev-parse --show-toplevel there prints it,
+# and for the branch worktree symbolic-ref -q HEAD prints refs/heads/eb/narrate-remove-1. WHY names the check that failed.
+is_run_wt() {
+  local m; m=$(cygpath -m "$1"); WHY=
+  git -C "$O" worktree list --porcelain | grep -qxF "worktree $m" || { WHY="git worktree list --porcelain does not list it"; return 1; }
+  [ "$(git -C "$1" rev-parse --show-toplevel 2>/dev/null)" = "$m" ] || { WHY="rev-parse --show-toplevel prints another path"; return 1; }
+  [ "$1" != "$WT" ] || [ "$(git -C "$1" symbolic-ref -q HEAD)" = "refs/heads/$B" ] || { WHY="symbolic-ref -q HEAD does not print refs/heads/$B"; return 1; }
 }
+branch_ok() { [ "$(git -C "$WT" symbolic-ref -q HEAD)" = "refs/heads/$B" ]; } # Staging plan: commit only while this holds
+exc() { grep -qF "Exception: $1 — " "${EXCMEMO:-$WT/$MEMO}" 2>/dev/null; } # Failure handling: a path named on an Exception: line
+dirty_except() { # $1 dir, rest: paths whose `git status --porcelain` lines are ignored; prints the remaining lines
+  # UALL=1 lists each untracked file (--untracked-files=all), as step 3 (B)'s dirt rule does (687)
+  local d=$1 l; shift
+  while IFS= read -r l; do [ -z "$l" ] && continue; inlist "${l:3}" "$@" || printf '%s\n' "$l"; done <<< "$(git -C "$d" status --porcelain ${UALL:+--untracked-files=all})"
+}
+memo_merge() { sed -n 's/^Integration: \([0-9a-f]\{40\}\) — .*/\1/p' "$WT/$MEMO" 2>/dev/null | tail -1; } # the integration merge sha the memo records
+matches_base() { # step 3 (B), unfinished C4 correction: the dirty path "already matches <base>" (688), in the branch worktree
+  if git -C "$WT" cat-file -e "$BASE:$1" 2>/dev/null; then
+    [ -f "$WT/$1" ] && [ "$(git -C "$WT" hash-object -- "$1")" = "$(git -C "$WT" rev-parse "$BASE:$1")" ]
+  else [ ! -e "$WT/$1" ]; fi
+}
+old_matches_base() { git -C "$WT" cat-file -e "$BASE:$1" 2>/dev/null && git -C "$WT" diff --quiet "$BASE" -- "$1"; } # the replaced rule (controls only)
 
 # ---- stubs (exit codes only)
 npm_ci()        { mkdir -p "$1/node_modules"; echo x > "$1/node_modules/m"; echo "npm ci @$(basename "$1") rc=$CI_RC" >> "$LOG"; return $CI_RC; }
@@ -98,15 +124,17 @@ npm_test() { # $1 dir, rest optional test files; rewrites the tracked perf file 
 smoke()  { echo "smoke 16(a)-(f) @$(basename "$1") $2" >> "$LOG"; [ "$2" = pass ]; }
 task6()  { echo "task6 reviews @$(basename "$1")" >> "$LOG"; }
 tlog()   { [ -d "$WT" ] && echo "{\"ev\":\"$1\"}" >> "$WT/$TLOG"; } # standing rule 41 time log, appended throughout
-dw15() { # Done-when 15, real: every path of `git diff --name-status refs/remotes/origin/main...HEAD` is inside the fence
+dw15() { # Done-when 15, real: every path of `git diff --name-status refs/remotes/origin/main...HEAD` is inside the fence,
+  # or an Exception: line of the staging memo names it (309)
   local d=$1 k p rc=0
   while IFS=$'\t' read -r k p; do
     [ -z "$k" ] && continue
-    case "$k" in D) inlist "$p" $DEL;; M) inlist "$p" $EDIT;; A) inlist "$p" $T1 $T2 $MEMO $TLOG;; *) false;; esac || exc "$p" \
+    { inlist "$p" $MEMO $TLOG || case "$k" in D) inlist "$p" $DEL;; M) inlist "$p" $EDIT;; A) inlist "$p" $T1 $T2;; *) false;; esac; } || exc "$p" \
       || { echo "   Done-when 15: $k $p is outside the fence"; rc=1; }
   done <<< "$(git -C "$d" diff --name-status refs/remotes/origin/main...HEAD)"
   echo "dw15 @$(basename "$d") rc=$rc" >> "$LOG"; return $rc
 }
+dw15_noexc() { local EXCMEMO=/dev/null; dw15 "$WT"; } # control: the same diff with no Exception: line
 dw1_14() { local d=$1; npm_typecheck "$d"; closure "$d" --self-test; closure "$d" .; npm_test "$d" && npm_build "$d"; }
 
 # ---- "Where this recipe sits": step 2 (read-only), then the In Flight move
@@ -124,14 +152,44 @@ gate_and_claim() { # $1 = owner answer if asked (yes|no)
   return 0
 }
 
-smoke_ok() { # $1 sha, $2 memo text: each of 16(a)-(f) has a last record "Smoke: <sha> 16(x) pass"
-  local x last
-  for x in a b c d e f; do last=$(printf '%s\n' "$2" | grep -F "Smoke: $1 16($x) " | tail -1); [ "${last##* }" = pass ] || return 1; done
+# ---- the smoke record (Staging plan, Wave C): one memo line per check, `Smoke: <full sha> 16(<a-f>) <pass|fail>`;
+# a passing smoke on a sha means that, for each of (a)-(f), the last such line for that sha reads pass (635)
+smoke_ok() { # $1 sha, $2 memo text
+  local x last; for x in a b c d e f; do last=$(printf '%s\n' "$2" | grep -E "^Smoke: $1 16\($x\) (pass|fail)\$" | tail -1); [ "${last##* }" = pass ] || return 1; done
+}
+smoke_ok_six() { # control only: the earlier reading, exactly six in-format lines for the sha, one per check, all pass
+  local l; l=$(printf '%s\n' "$2" | grep -E "^Smoke: $1 16\([a-f]\) (pass|fail)\$")
+  [ "$(printf '%s' "$l" | grep -c .)" = 6 ] && [ "$(printf '%s\n' "$l" | grep -c ' pass$')" = 6 ] \
+    && [ "$(printf '%s\n' "$l" | sed -E 's/.* 16\(([a-f])\) .*/\1/' | sort -u | tr -d '\n')" = abcdef ]
+}
+smoke_lines() { local x v; for x in a b c d e f; do v=pass; [ $x = e ] && v=$2; echo "Smoke: $1 16($x) $v" >> "$WT/$MEMO"; done; } # $1 sha, $2 check (e)
+
+# ---- step 3 (B)'s commit check, run from the primary checkout (step 3, and Wave C integration's first bullet, 638).
+# Sets BASE and N; on a mismatch sets CC (the reason) and returns 1.
+commit_check() {
+  local c1 cnt T s; CC=
+  c1=$(git -C "$O" log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/$B)
+  cnt=$(printf '%s' "$c1" | grep -c .)
+  if [ "$cnt" -gt 1 ]; then CC="two C1 commits"; return 1
+  elif [ "$cnt" = 1 ]; then
+    T=$(git -C "$O" log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' "$c1" | tr -d '\n')
+    { [ -n "$T" ] && [ "$(git -C "$O" rev-parse "$c1^")" = "$(git -C "$O" rev-parse "$T" 2>/dev/null)" ]; } || { CC="C1 parent is not its trailer sha"; return 1; }
+    BASE=$T
+  else
+    [ -z "$(git -C "$O" rev-list refs/heads/$B ^refs/remotes/origin/main)" ] || { CC="no C1 but commits off origin/main"; return 1; }
+    BASE=$(git -C "$O" rev-parse refs/heads/$B)
+  fi
+  N=0
+  while IFS= read -r s; do
+    [ -z "$s" ] && continue; N=$((N+1))
+    case "$s" in "NARRATE-REMOVE-1 C$N:"*) ;; *) CC="chain #$N: $s"; return 1;; esac
+  done <<< "$(git -C "$O" log --reverse --format=%s "$BASE"..refs/heads/$B)"
+  [ $N -le 5 ] || { CC="n=$N, outside 0-5"; return 1; }
 }
 
-# ---- step 3 (ROADMAP 675-690). Sets RES (token + detail), BASE, N, MODE, FIX.
+# ---- step 3 (ROADMAP 676-705). Sets RES (token + detail), BASE, N, MODE, FIX.
 step3() {
-  local brs lb rb wtx oc sd c1 cnt T s tip lines st l p bad last ok REATT=""
+  local brs lb rb wtx oc sd tip lines l p bad last ok REATT=""
   FIX=0
   brs=$(git -C "$O" branch -a --list "*narrate-remove-1*" | sed 's/^[*+ ] //')
   lb=$(printf '%s\n' "$brs" | grep -x "$B"); rb=$(printf '%s\n' "$brs" | grep -x "remotes/origin/$B")
@@ -145,23 +203,7 @@ step3() {
   fi
   [ -n "$lb" ] || { say C "[not (A) and no local branch: remote=${rb:+y} worktree=${wtx:+y} origin-C-commits=${oc:+y} dirs=${sd:- none}]"; return; }
   MODE=B
-  c1=$(git -C "$O" log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/$B)
-  cnt=$(printf '%s' "$c1" | grep -c .)
-  if [ "$cnt" -gt 1 ]; then say C "[two C1 commits]"; return
-  elif [ "$cnt" = 1 ]; then
-    T=$(git -C "$O" log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' "$c1" | tr -d '\n')
-    if [ -z "$T" ] || [ "$(git -C "$O" rev-parse "$c1^")" != "$(git -C "$O" rev-parse "$T" 2>/dev/null)" ]; then say C "[C1 parent is not its trailer sha]"; return; fi
-    BASE=$T
-  else
-    [ -z "$(git -C "$O" rev-list refs/heads/$B ^refs/remotes/origin/main)" ] || { say C "[no C1 but commits off origin/main]"; return; }
-    BASE=$(git -C "$O" rev-parse refs/heads/$B)
-  fi
-  N=0
-  while IFS= read -r s; do
-    [ -z "$s" ] && continue; N=$((N+1))
-    case "$s" in "NARRATE-REMOVE-1 C$N:"*) ;; *) say C "[chain #$N: $s]"; return;; esac
-  done <<< "$(git -C "$O" log --reverse --format=%s "$BASE"..refs/heads/$B)"
-  [ $N -le 5 ] || { say C "[n=$N, outside 0-5]"; return; }
+  commit_check || { say C "[$CC]"; return; }
   tip=$(git -C "$O" rev-parse refs/heads/$B)
   if [ $N = 5 ]; then
     if git -C "$O" merge-base --is-ancestor refs/heads/$B refs/remotes/origin/main; then
@@ -174,25 +216,26 @@ step3() {
   fi
   if [ ! -d "$WT" ]; then
     if listed narrate-remove-1; then say C "[branch worktree listed (prunable) but its directory is missing; no prune]"; return; fi
-    git -C "$O" worktree add -q "$WT" $B 2>"$W/reattach.err" || { say C "[re-attach failed: $(head -1 "$W/reattach.err")]"; return; }
-    REATT=" (re-attached)"
-  elif stray_at "$WT"; then say C "[a directory at the branch worktree path is not that worktree]"; return
+    git -C "$O" worktree add -q "$WT" $B 2>"$W/reattach.err"; REATT_RC=$?
+    [ "$REATT_RC" = 0 ] || { say C "[re-attach exited $REATT_RC: $(grep -m1 -E 'fatal|error' "$W/reattach.err" | sed "s|$(cygpath -m "$W")|<run>|g")]"; return; }
+    npm_ci "$WT"; REATT=" (re-attached; npm ci first)" # after a re-attach, npm ci in the worktree before any gate (686)
+  elif ! is_run_wt "$WT"; then say C "[the directory at the branch worktree path is not that run worktree: $WHY]"; return
   fi
-  # dirt: only C<n+1> paths; the perf file, the time log and the run's own staging memo are ignored
+  # dirt (git status --porcelain --untracked-files=all, 687): only C<n+1> paths; the perf file, the time log and the
+  # run's own staging memo are ignored
   bad=""
   while IFS= read -r l; do
     [ -z "$l" ] && continue; p=${l:3}
-    eval "inlist \"\$p\" \$C$((N+1))P" 2>/dev/null || exc "$p" || bad="$bad $p"
-  done <<< "$(dirty_except "$WT" "$PERF" "$TLOG" "$MEMO")"
-  if [ $N = 4 ]; then # unfinished C4 correction (D4-02): the memo's last "C4 correction:" line names the current C4 (631, 687)
+    eval "inlist \"\$p\" \$C$((N+1))P" || exc "$p" || bad="$bad $p"
+  done <<< "$(UALL=1 dirty_except "$WT" "$PERF" "$TLOG" "$MEMO")"
+  if [ $N = 4 ]; then # unfinished C4 correction (D4-02): the memo's last "C4 correction:" line names the current C4 (631, 688)
     last=$(grep '^C4 correction: ' "$WT/$MEMO" 2>/dev/null | tail -1)
     [ -n "$last" ] && [ "$(printf '%s' "$last" | cut -d' ' -f3)" = "$tip" ] && FIX=1
   fi
   if [ -n "$bad" ] && [ $FIX = 1 ]; then # its dirt is accepted inside the fence, on an Exception: line, or where it already matches <base>
     ok=1
     for p in $bad; do
-      inlist "$p" $FENCE || exc "$p" || { git -C "$WT" cat-file -e "$BASE:$p" 2>/dev/null && git -C "$WT" diff --quiet "$BASE" -- "$p"; } \
-        || { ok=0; echo "   step 3: $p is outside the fence and does not match <base>"; }
+      inlist "$p" $FENCE || exc "$p" || matches_base "$p" || { ok=0; echo "   step 3: $p is outside the fence and does not match <base>"; }
     done
     [ $ok = 1 ] && bad=""
   fi
@@ -203,12 +246,12 @@ step3() {
        elif smoke_ok "$tip" "$(cat "$WT/$MEMO" 2>/dev/null)"; then say B4smoked "n=4, passing smoke on the current C4 -> C5$REATT"
        else say B4 "n=4 -> Done-when 1-15 and Task 6 again, then smoke, then C5$REATT"; fi;;
     5) if smoke_ok "$(git -C "$O" rev-parse "$tip^")" "$(git -C "$O" show "$tip:$MEMO" 2>/dev/null)"; then say B5 "n=5 -> Wave C integration$REATT"
-       else say C "[n=5 but C5's memo does not record 16(a)-(f) pass on C5^]"; fi;;
+       else say C "[n=5 but C5's memo does not record a passing smoke on C5^: for some check of (a)-(f) the last Smoke: line is missing or reads fail]"; fi;;
     *) say B$N "resume C$((N+1))$REATT";;
   esac
 }
 
-# ---- step 4 (ROADMAP 705-714), for (A) or (B) with n = 0. Sets RES: MEASURED | REUSED | RED | C
+# ---- step 4 (ROADMAP 706-715), for (A) or (B) with n = 0. Sets RES: MEASURED | REUSED | RED | C
 step4() {
   local d st a b c s1 s2 g1 g2 res rec
   if [ "$MODE" = A ]; then
@@ -216,15 +259,17 @@ step4() {
     d=$WT
   else
     rec=$(grep "^Base measurement: $BASE " "$WT/$MEMO" 2>/dev/null | tail -1)
-    if [ -n "$rec" ]; then # reuse, do not re-measure; the red-base rule (714) still reads the reused results
-      printf '%s' "$rec" | grep -qE ' typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=[1-9][0-9]*,[1-9]'         && say REUSED "memo holds the base measurement for ${BASE:0:8}; not re-measured"         || say RED "[reused base record is red: ${rec#*— }] -> issue file"
+    if [ -n "$rec" ]; then # reuse, do not re-measure; the red-base rule (715) still reads the reused results
+      if printf '%s' "$rec" | grep -qE ' typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=[1-9][0-9]*,[1-9]'; then
+        say REUSED "memo holds the base measurement for ${BASE:0:8}; not re-measured"
+      else say RED "[reused base record is red: ${rec#*— }] -> issue file"; fi
       return
     fi
     if [ ! -d "$BW" ]; then
       if listed narrate-remove-1-base; then say C "[base worktree listed, directory missing; no prune]"; return; fi
       git -C "$O" worktree add -q --detach "$BW" "$BASE"
     else
-      is_run_wt "$BW" || { say C "[a directory at the base worktree path is not that worktree]"; return; }
+      is_run_wt "$BW" || { say C "[the directory at the base worktree path is not that run worktree: $WHY]"; return; }
       [ "$(git -C "$BW" rev-parse HEAD)" = "$BASE" ] || { say C "[base worktree sits at another sha]"; return; }
       st=$(dirty_except "$BW" "$PERF"); [ -z "$st" ] || { say C "[base worktree dirty: $(printf '%s' "$st" | tr '\n' ' ')]"; return; }
     fi
@@ -235,11 +280,11 @@ step4() {
   g1=$(git -C "$d" ls-files src/hooks/useNarration.ts tests/narrTiming.test.ts | grep -c .)
   g2=$(git -C "$d" grep -n -P 'useNarration|narrTiming' -- src tests | grep -c .)
   res="typecheck=$a test=$b build=$c closure-self-test=$s1 closure=$s2 positive-controls=$g1,$g2"
-  echo "Base measurement: $BASE — $res" >> "$WT/$MEMO" # written as soon as they finish (712), before the red-base rule
+  echo "Base measurement: $BASE — $res" >> "$WT/$MEMO" # written as soon as they finish (713), before the red-base rule
   { [ "$a$b$c$s1$s2" = 00000 ] && [ "$g1" -gt 0 ] && [ "$g2" -gt 0 ]; } || { say RED "[red base or empty positive control in $(basename "$d"): $res] -> issue file"; return; }
   say MEASURED "in $(basename "$d"): $res"
 }
-c1gate() { # C1's own gate, in the branch worktree before C1 is committed; (B) runs npm ci there first
+c1gate() { # C1's own gate, in the branch worktree before C1 is committed; (B) runs npm ci there first (714)
   [ "$MODE" = B ] && npm_ci "$WT"
   npm_test "$WT" $T1 $T2; local rc=$?
   [ $rc = 1 ] && [[ " $FAILED " == *" $T1 "* ]] && [[ " $FAILED " == *" $T2 "* ]]
@@ -247,38 +292,49 @@ c1gate() { # C1's own gate, in the branch worktree before C1 is committed; (B) r
 
 # ---- simulated work in the spec's own commit format (D14, step 4, Staging plan)
 write_tests() { local t; for t in $T1 $T2; do printf '// REQUIRES-NORMALIZE positive control\n' > "$WT/$t"; done; }
-commit_c() {
+commit_c() { # the work of C<n>, then the Staging plan's symbolic-ref check, then the commit
+  local k q
   case $1 in
     1) write_tests; c1gate || { echo "   C1 gate did not fail as required"; return 1; }
-       git -C "$WT" add $T1 $T2
-       git -C "$WT" commit -qm "NARRATE-REMOVE-1 C1: positive controls" -m "$(grep '^Base measurement:' "$WT/$MEMO" | tail -1)" -m "NARRATE-REMOVE-1-Base: $BASE
-Co-Authored-By: Claude <noreply@anthropic.com>";;
+       git -C "$WT" add $T1 $T2;;
     2) echo "C2 edit" >> "$WT/src/components/ReaderContainer.tsx"; echo "C2 edit" >> "$WT/src/reader/modes/page/ModeRuntime.ts"
        git -C "$WT" rm -q src/hooks/useNarration.ts; git -C "$WT" add src/components/ReaderContainer.tsx src/reader/modes/page/ModeRuntime.ts
-       npm_typecheck "$WT"; closure "$WT" .
-       git -C "$WT" commit -qm "NARRATE-REMOVE-1 C2: Wave A renderer removal";;
+       npm_typecheck "$WT"; closure "$WT" .;;
     3) echo "normalizeReaderModes(settings);" >> "$WT/main/sync-engine.js"; git -C "$WT" add main/sync-engine.js
-       npm_test "$WT" $T1 $T2 || { echo "   C3 gate failed"; return 1; }
-       git -C "$WT" commit -qm "NARRATE-REMOVE-1 C3: main process";;
-    4) git -C "$WT" rm -q tests/narrTiming.test.ts tests/fixtures/narration/a.json; echo "C4 edit" >> "$WT/tests/foliate-bridge.test.ts"; git -C "$WT" add tests/foliate-bridge.test.ts
-       if [ -n "$C4_EXTRA" ]; then echo "stray C4 edit" >> "$WT/$C4_EXTRA"; git -C "$WT" add "$C4_EXTRA"; fi
-       dw1_14 "$WT" || { echo "   C4 gate failed"; return 1; }
-       git -C "$WT" commit -qm "NARRATE-REMOVE-1 C4: tests reconciled";;
-    5) git -C "$WT" add "$MEMO" "$TLOG"; git -C "$WT" commit -qm "NARRATE-REMOVE-1 C5: staging memo, smoke record, time log";;
+       npm_test "$WT" $T1 $T2 || { echo "   C3 gate failed"; return 1; };;
+    4) git -C "$WT" rm -q tests/narrTiming.test.ts; git -C "$WT" rm -r -q "$FIXD" # git rm -r for a deleted directory
+       echo "C4 edit" >> "$WT/tests/foliate-bridge.test.ts"; git -C "$WT" add tests/foliate-bridge.test.ts
+       if [ -n "$C4_EXTRA" ]; then k=${C4_EXTRA%%:*}; q=${C4_EXTRA#*:} # a stray C4 change: M edit, D delete, A add, R delete a directory
+         case $k in M) echo "stray C4 edit" >> "$WT/$q"; git -C "$WT" add "$q";; D) git -C "$WT" rm -q "$q";; A) echo "stray C4 file" > "$WT/$q"; git -C "$WT" add "$q";; R) git -C "$WT" rm -r -q "$q";; esac
+       fi
+       dw1_14 "$WT" || { echo "   C4 gate failed"; return 1; };;
+    5) git -C "$WT" add "$MEMO" "$TLOG";;
+  esac
+  branch_ok || { say C "[symbolic-ref check fails before C$1's commit: nothing committed]"; return 1; }
+  case $1 in
+    1) git -C "$WT" commit -qm "NARRATE-REMOVE-1 C1: positive controls" -m "$(grep '^Base measurement:' "$WT/$MEMO" | tail -1)" -m "NARRATE-REMOVE-1-Base: $BASE
+Co-Authored-By: Claude <noreply@anthropic.com>";;
+    2) git -C "$WT" commit -qm "NARRATE-REMOVE-1 C2: Wave A renderer removal";;
+    3) git -C "$WT" commit -qm "NARRATE-REMOVE-1 C3: main process";;
+    4) git -C "$WT" commit -qm "NARRATE-REMOVE-1 C4: tests reconciled";;
+    5) git -C "$WT" commit -qm "NARRATE-REMOVE-1 C5: staging memo, smoke record, time log";;
   esac
   tlog "C$1"
 }
-smoke_record() { # Wave C: owner smoke on the build of the final C4 tree, recorded with C4's sha
-  local s x v; s=$(git -C "$WT" rev-parse HEAD); npm_build "$WT"
-  for x in a b c d e f; do v=pass; [ $x = e ] && v=$SMOKE; echo "Smoke: $s 16($x) $v" >> "$WT/$MEMO"; done
+smoke_record() { # Wave C: owner smoke on the build of the final C4 tree, one memo line per check on C4's full sha
+  local s; s=$(git -C "$WT" rev-parse HEAD); npm_build "$WT"; smoke "$WT" "$SMOKE"; smoke_lines "$s" "$SMOKE"
 }
 post_c4() { dw15 "$WT" && task6 "$WT"; } # Task 5's diff fence and the Task 6 reviews after C4
 cs() { local i; for i in $(seq 1 "$1"); do [ "$i" = 5 ] && { post_c4; smoke_record; }; commit_c "$i" || return 1; done; }
-correct_c4() { # "Corrections after C4": memo line first, then the edit ($1 = path, $2 = edit|restore)
+correct_c4() { # "Corrections after C4": the memo line first, then the edit ($1 path, $2 edit|restore, $3 finding, $4 staged)
   echo "C4 correction: $(git -C "$WT" rev-parse HEAD) — ${3:-Task 6 finding}" >> "$WT/$MEMO"
-  if [ "$2" = restore ]; then git -C "$WT" show "$BASE:$1" > "$WT/$1"; else echo "correction" >> "$WT/$1"; fi
+  if [ "$2" != restore ]; then echo "correction" >> "$WT/$1"
+  elif git -C "$WT" cat-file -e "$BASE:$1" 2>/dev/null; then git -C "$WT" show "$BASE:$1" > "$WT/$1" # its content at <base>
+  elif [ "${4:-}" = staged ]; then git -C "$WT" rm -q "$1"; return # or removed, if <base> lacks it
+  else rm -f "$WT/$1"; fi
+  if [ "${4:-}" = staged ]; then git -C "$WT" add "$1"; fi
 }
-amend_c4() { git -C "$WT" add "$@"; git -C "$WT" commit -q --amend --no-edit; }
+amend_c4() { [ $# = 0 ] || git -C "$WT" add "$@"; branch_ok || { say C "[symbolic-ref check fails before the C4 amend]"; return 1; }; git -C "$WT" commit -q --amend --no-edit; }
 start() { # fresh run: step 2 + In Flight, step 3 (A), queued count into the memo, step 4 (unless $1 = nomeasure)
   gate_and_claim yes; git -C "$O" fetch -q origin --prune; step3
   [ "${RES%% *}" = A ] || { echo "   start: unexpected $RES"; return 1; }
@@ -287,18 +343,22 @@ start() { # fresh run: step 2 + In Flight, step 3 (A), queued count into the mem
   step4; [ "${RES%% *}" = MEASURED ] || echo "   start step 4: $RES"
 }
 
-# ---- Wave C integration (ROADMAP 637-650). $1 stop point: full|after-merge|after-checks ; $2 race (origin moves before push)
-smoke_trigger() { printf '%s\n' "$1" | grep -qvE '^(docs/|tests/)|^[^/]*\.md$'; } # any path not under docs/ or tests/ and not a root-level *.md (645)
+# ---- Wave C integration (ROADMAP 637-651). $1 stop point: full|after-merge|after-checks ; $2 race (origin moves before
+# the push); PUSHDIR=<dir> replays a push run outside the merge worktree, CHECKDIR=<dir> a post-push check run outside it
+smoke_trigger() { printf '%s\n' "$1" | grep -qvE '^(docs/|tests/)|^[^/]*\.md$'; } # any path not under docs/ or tests/ and not a root-level *.md (646)
 integrate() {
-  local stop=${1:-full} race=${2:-no} st msg rc a b c d e names rec sm; local -a P
+  local stop=${1:-full} race=${2:-no} st msg rc a b c d e names rec m ms pdir=${PUSHDIR:-$MW} cdir=${CHECKDIR:-$MW}; local -a P
+  # from the primary checkout: git fetch origin --prune, the commit check, the merge worktree's existence check and creation
   git -C "$O" fetch -q origin --prune
+  { commit_check && [ "$N" = 5 ]; } || { say C "[integration: step 3 (B)'s commit check on refs/heads/$B gives ${CC:-n = $N}, not n = 5]"; return; }
   if [ ! -d "$MW" ]; then
     if listed narrate-remove-1-merge; then say C "[merge worktree listed, directory missing; no prune]"; return; fi
     git -C "$O" worktree add -q --detach "$MW" refs/remotes/origin/main
   else
-    is_run_wt "$MW" || { say C "[a directory at the merge worktree path is not that worktree]"; return; }
+    is_run_wt "$MW" || { say C "[the directory at the merge worktree path is not that run worktree: $WHY]"; return; }
     st=$(dirty_except "$MW" "$PERF"); [ -z "$st" ] || { say C "[merge worktree dirty: $(printf '%s' "$st" | tr '\n' ' ')]"; return; }
   fi
+  # every other command in the merge worktree
   read -r -a P <<< "$(git -C "$MW" rev-list --parents -n 1 HEAD)"
   if [ ${#P[@]} = 3 ] && [ "${P[2]}" = "$(git -C "$MW" rev-parse refs/heads/$B)" ] && [ "${P[1]}" = "$(git -C "$MW" rev-parse refs/remotes/origin/main)" ] \
      && [ "$(git -C "$MW" log -1 --format=%s HEAD)" = "$SUBJ" ]; then
@@ -311,22 +371,30 @@ integrate() {
     say C "[merge worktree HEAD $(short "$MW") is neither a valid earlier merge nor on origin/main: $((${#P[@]}-1)) parent(s), subject '$(git -C "$MW" log -1 --format=%s HEAD)']"; return
   fi
   [ "$stop" = after-merge ] && { say INTERRUPTED "after the merge, before the integration-tree check"; return; }
+  m=$(git -C "$MW" rev-parse HEAD)
   git -C "$MW" diff --quiet refs/heads/$B HEAD; rc=$?
-  case $rc in
-    0) rec="trees identical; branch evidence (Done-when 12-16) covers it";;
+  case $rc in # each result goes into the staging memo in the branch worktree as it finishes (649)
+    0) rec="trees identical; branch evidence (Done-when 12-16) covers it"; echo "Integration: $m — $rec" >> "$WT/$MEMO";;
     1) npm_ci "$MW"; a=$?; npm_typecheck "$MW"; b=$?; closure "$MW" .; c=$?; npm_test "$MW"; d=$?; npm_build "$MW"; e=$?
-       rec="npm ci=$a typecheck=$b closure=$c test=$d build=$e"
+       rec="npm ci=$a typecheck=$b closure=$c test=$d build=$e"; echo "Integration: $m — $rec" >> "$WT/$MEMO"
+       [ "$a$b$c$d$e" = 00000 ] || { say C "[integration-tree check failed ($rec); no push, worktree left as is]"; return; }
        names=$(git -C "$MW" diff --name-only refs/heads/$B HEAD)
-       if [ "$a$b$c$d$e" = 00000 ] && smoke_trigger "$names"; then smoke "$MW" "$SMOKE2"; sm=$?; rec="$rec renewed-smoke=$SMOKE2"; else sm=0; fi
-       echo "Integration: $(git -C "$MW" rev-parse HEAD) — $rec" >> "$WT/$MEMO"
-       { [ "$a$b$c$d$e" = 00000 ] && [ $sm = 0 ]; } || { say C "[integration-tree check failed ($rec); no push, worktree left as is]"; return; };;
+       if smoke_trigger "$names"; then # the owner repeats Done-when 16 (a)-(f) in the merge worktree; one Smoke: line per check
+         smoke "$MW" "$SMOKE2"; smoke_lines "$m" "$SMOKE2"; rec="$rec renewed-smoke=$SMOKE2"
+         [ "$SMOKE2" = pass ] || { say C "[renewed smoke failed ($rec); no push, worktree left as is]"; return; }
+       fi;;
     *) say C "[git diff --quiet exited $rc]"; return;;
   esac
-  [ $rc = 0 ] && echo "Integration: $(git -C "$MW" rev-parse HEAD) — $rec" >> "$WT/$MEMO"
   echo "   integrate: $rec"
   [ "$stop" = after-checks ] && { say INTERRUPTED "after the integration-tree check, before the push"; return; }
   [ "$race" = race ] && advance
-  if git -C "$MW" push -q origin HEAD:refs/heads/main 2>/dev/null; then say PUSHED "$(short "$MW") to origin/main"; else say C "[push rejected; the merge stays in the merge worktree]"; fi
+  git -C "$pdir" push origin HEAD:refs/heads/main > "$W/push.out" 2>&1; PUSH_RC=$? # the text: in the merge worktree
+  [ "$PUSH_RC" = 0 ] || { say C "[push rejected; the merge stays in the merge worktree]"; return; }
+  # post-push check (651): git fetch origin, then the ancestor check on the integration merge sha the memo records; it
+  # names the merge, not HEAD, so it gives the same answer in any folder (the text runs it in the merge worktree)
+  ms=$(memo_merge); git -C "$cdir" fetch -q origin
+  if git -C "$cdir" merge-base --is-ancestor "$ms" refs/remotes/origin/main; then say PUSHED "${ms:0:8} to origin/main; post-push check passes"
+  else say C "[post-push check: the memo's merge ${ms:0:8} is not on origin/main (push run in $(basename "$pdir"), check in $(basename "$cdir"))]"; fi
 }
 
 # ---- row harness: every row asserts its token
@@ -346,6 +414,9 @@ logged() { grep -qF "$1" "$LOG"; }
 not()    { ! "$@"; }
 main_is() { [ "$(remote_main)" = "$1" ]; }
 hashes() { (cd "$WT" && sha256sum $T1 $T2 2>/dev/null); }
+smk() { # SM rows: the memo before the smoke plus six lines from the printf format $1 (%s = the check letter)
+  local x; cp "$W/memo0" "$WT/$MEMO"; for x in a b c d e f; do printf "$1\n" "$x" >> "$WT/$MEMO"; done
+}
 
 echo "ROADMAP.md replayed: sha256 $(sha256sum < "${ROADMAP:-/dev/null}" | cut -d' ' -f1) (set ROADMAP=<path>)"
 echo "STUBS: npm ci, npm run typecheck, the Closure check, npm test, npm run build, the Task 6 reviews and the owner smoke only log and return an exit code; git commands, the Done-when 15 fence and the step-4 search positive controls are real; bash, not pwsh"
@@ -367,7 +438,7 @@ setup S1T; start; cs 2; echo partial >> "$WT/main/sync-engine.js"; row "S1T afte
 setup S1X; start; cs 2; echo stray > "$WT/stray"; row "S1X after C2 with a stray file outside C3" "(C) dirt outside C3" C
 setup S2; start; cs 2; advance; row "S2 after C2, main advanced" "(B) resume C3" B2
 setup S3; start; cs 5; advance; row "S3 C1-C5 unmerged, main advanced" "(B) n=5 -> integration" B5
-integ "S3 integration" "no merge yet -> merge; tree differs -> five checks; push" PUSHED
+integ "S3 integration" "no merge yet -> merge; tree differs -> five checks; push; post-push check" PUSHED
 check "build ran in the merge worktree" logged "build @narrate-remove-1-merge rc=0"
 row "S3 after integrate" "already published" PUBLISHED
 setup S4; start; cs 5; integ "S4 merged, interrupted before the check" "merge made, run stops" INTERRUPTED after-merge
@@ -377,7 +448,7 @@ check "the pushed merge is the earlier merge (not repeated)" main_is "$m0"
 row "S4 after re-integrate" "already published" PUBLISHED
 setup S4b; start; cs 5; integ "S4b merged, interrupted" "merge made" INTERRUPTED after-merge; advance; m0=$(remote_main)
 row "S4b next session, main advanced after the merge" "(B) n=5 -> integration" B5
-integ "S4b integration" "merge onto an older main: first parent is not origin/main -> (C) (walk-through 701)" C
+integ "S4b integration" "merge onto an older main: first parent is not origin/main -> (C) (walk-through 702)" C
 check "origin/main unchanged" main_is "$m0"
 row "S4b next session again" "(B) n=5 -> integration" B5
 integ "S4b integration again" "still a merge onto an older main -> (C)" C
@@ -405,7 +476,7 @@ setup S10; start; cs 2; git -C "$O" push -q origin refs/heads/$B:refs/heads/main
 setup IMP; start; cs 5; row "IMP n=5 before the merge" "(B) n=5 -> integration" B5
 integ "IMP merge, interrupted before the push" "merge made" INTERRUPTED after-merge
 row "IMP next session (main static)" "(B) n=5 -> integration" B5
-integ "IMP integration" "valid earlier merge reused, pushed (walk-through 701)" PUSHED
+integ "IMP integration" "valid earlier merge reused, pushed (walk-through 702)" PUSHED
 row "IMP after re-integrate" "already published" PUBLISHED
 setup PR; start; cs 5; integ "PR push rejected (origin/main moves between fetch and push)" "rejected push -> (C); merge stays" C full race
 check "merge worktree HEAD is the merge (contains the branch)" git -C "$MW" merge-base --is-ancestor refs/heads/$B HEAD
@@ -427,8 +498,9 @@ row "MCF next session" "(B) n=5 -> integration" B5
 integ "MCF integration again" "dirty merge worktree -> (C)" C
 setup S12; git -C "$W/other" push -q origin refs/heads/main:refs/heads/$B; row "S12 remote-only branch" "(C)" C
 setup S13; start; cs 2; rm -rf "$WT"; row "S13 branch worktree directory deleted by hand (still listed)" "(C), no prune" C
-setup S14; start; cs 2; git -C "$O" worktree remove --force "$WT"; row "S14 branch worktree removed with git worktree remove" "(B) re-attach, resume C3" B2
+setup S14; start; cs 2; git -C "$O" worktree remove --force "$WT"; : > "$LOG"; row "S14 branch worktree removed with git worktree remove" "(B) re-attach, npm ci, resume C3" B2
 check "re-attached on the branch" test "$(git -C "$WT" symbolic-ref -q HEAD)" = "refs/heads/$B"
+check "npm ci ran in the re-attached worktree before any gate (first logged command)" test "$(head -1 "$LOG")" = "npm ci @narrate-remove-1 rc=0"
 setup S15; start; cs 5; integrate after-merge; rm -rf "$MW"; row "S15 merge worktree directory deleted by hand after the merge" "(B) n=5 -> integration" B5
 integ "S15 integration" "merge worktree listed but missing -> (C), no prune" C
 setup S15b; start; cs 5; integrate after-merge; git -C "$O" worktree remove --force "$MW"
@@ -478,11 +550,11 @@ integ "M8 integration" "second parent is not the branch -> (C)" C; check "origin
 
 echo; echo "######## D4-02: a resumable post-C4 correction"
 setup K1; start; cs 4; post_c4; c4a=$(git -C "$WT" rev-parse HEAD); correct_c4 src/components/ReaderContainer.tsx edit "Task 6: useReaderKeys slot order"
-row "K1 interrupted mid-correction after C4 (memo names the current C4 sha; Edit-sites file changed)" "(B), finish the correction (walk-through 699)" B4fix
+row "K1 interrupted mid-correction after C4 (memo names the current C4 sha; Edit-sites file changed)" "(B), finish the correction (walk-through 700)" B4fix
 amend_c4 src/components/ReaderContainer.tsx
 check "amend keeps the C4 subject" test "$(git -C "$WT" log -1 --format=%s HEAD)" = "NARRATE-REMOVE-1 C4: tests reconciled"
 check "C4 sha changed" test "$(git -C "$WT" rev-parse HEAD)" != "$c4a"
-row "K1 interrupted after the amend, before its reruns" "(B); Done-when 1-15 and Task 6 again, then smoke (walk-through 700)" B4
+row "K1 interrupted after the amend, before its reruns" "(B); Done-when 1-15 and Task 6 again, then smoke (walk-through 701)" B4
 : > "$LOG"; dw1_14 "$WT"; post_c4; check "Done-when 1-15 and Task 6 reran" logged "task6 reviews @narrate-remove-1"
 smoke_record; row "K1 smoke recorded on the amended C4" "(B) n=4, passing smoke on the current C4 -> C5" B4smoked
 commit_c 5; row "K1 after C5" "(B) n=5 -> integration" B5
@@ -494,17 +566,17 @@ setup K3; start; cs 4; post_c4; correct_c4 src/components/ReaderContainer.tsx ed
 row "K3 n=4 dirt; the memo's last correction line names an older C4 sha" "(C)" C
 setup K4; start; cs 4; post_c4; correct_c4 src/reader/modes/page/view.ts edit
 row "K4 n=4 memo names the current C4; a dirty path outside the fence that differs from <base>" "(C)" C
-setup K5; start; cs 3; C4_EXTRA=src/reader/modes/page/view.ts; commit_c 4
+setup K5; start; cs 3; C4_EXTRA=M:src/reader/modes/page/view.ts; commit_c 4
 check "(control) Done-when 15 fails on C4 (view.ts outside the fence)" not dw15 "$WT"
 correct_c4 src/reader/modes/page/view.ts restore "failed Done-when 15"
-row "K5 correction returns the out-of-fence path to its <base> content" "(B) unfinished correction (path matches <base>)" B4fix
+row "K5 correction returns the out-of-fence path to its <base> content" "(B) unfinished correction (hash-object equals <base>)" B4fix
 amend_c4 src/reader/modes/page/view.ts; check "Done-when 15 passes after the amend" dw15 "$WT"
 row "K5 after the amend" "(B) n=4, reruns then smoke" B4
 setup K6; start; cs 4; post_c4; correct_c4 src/components/ReaderContainer.tsx edit; echo stray > "$WT/src/reader/modes/page/stray.ts"
-row "K6 memo names the current C4; untracked stray outside the fence" "git cat-file -e <base>:<path> fails (absent from <base>), so it does not match <base> -> (C)" C
+row "K6 memo names the current C4; untracked stray outside the fence" "git cat-file -e <base>:<path> fails and the path exists in the working tree, so it does not match <base> -> (C)" C
 check "(control) git diff --quiet <base> -- <untracked path> alone exits 0" git -C "$WT" diff --quiet "$BASE" -- src/reader/modes/page/stray.ts
 setup K11; start; cs 4; post_c4; echo "C4 correction: $(git -C "$WT" rev-parse HEAD) — Task 6 finding" >> "$WT/$MEMO"
-row "K11 memo line written, interrupted before any edit (no dirt)" "(B); the correction is unfinished while the memo names the current C4 -> finish it first (631, 687, 689)" B4fix
+row "K11 memo line written, interrupted before any edit (no dirt)" "(B); the correction is unfinished while the memo names the current C4 -> finish it first (631, 688, 690)" B4fix
 setup K8; start; cs 4; post_c4; smoke_record; row "K8 n=4 with a passing smoke on the current C4" "(B) -> C5 without repeating the smoke" B4smoked
 setup K9; start; cs 4; post_c4; smoke_record; correct_c4 src/components/ReaderContainer.tsx edit
 row "K9 correction started after the smoke" "(B) unfinished correction" B4fix
@@ -515,7 +587,7 @@ row "K10 C5 memo with six duplicate 16(a) pass lines" "(C)" C
 
 echo; echo "######## D4-03: keep the base measurement clean at n = 0"
 setup Z1; start; write_tests
-row "Z1 n=0, both C1 tests written, memo holds the base record" "(B) n=0 (walk-through 696)" B0
+row "Z1 n=0, both C1 tests written, memo holds the base record" "(B) n=0 (walk-through 697)" B0
 : > "$LOG"; step4; report "Z1 step 4" "reuse the base record; do not re-measure" REUSED
 check "no base worktree created" not listed narrate-remove-1-base
 check "nothing measured" not grep -qE '^(typecheck|build) |^npm test @' "$LOG"
@@ -535,7 +607,7 @@ check "(control) measuring in the branch worktree would be red" not npm_test "$W
 commit_c 1; row "Z2 after C1" "(B) resume C2" B1
 setup Z3; start nomeasure; write_tests; git -C "$O" worktree add -q --detach "$BW" "$(om)"
 row "Z3 n=0, existing clean base worktree at the base" "(B) n=0" B0
-step4; report "Z3 step 4" "reuse the base worktree and measure there" MEASURED
+step4; report "Z3 step 4" "reuse the base worktree and measure there (a detached HEAD is right for it)" MEASURED
 setup Z4; start nomeasure; write_tests; advance; git -C "$O" fetch -q; git -C "$O" worktree add -q --detach "$BW" refs/remotes/origin/main
 row "Z4 n=0, base worktree at another sha" "(B) n=0" B0
 step4; report "Z4 step 4" "(C)" C
@@ -550,12 +622,12 @@ row "Z7 n=0, memo holds a base record for another sha only" "(B) n=0" B0
 step4; report "Z7 step 4" "the record is not for this base sha -> measure in the base worktree" MEASURED
 setup Z10; start nomeasure; echo "Base measurement: $(om) — typecheck=0 test=1 build=0 closure-self-test=0 closure=0 positive-controls=2,3" >> "$WT/$MEMO"; write_tests
 row "Z10 n=0, memo holds a red base record for this sha" "(B) n=0" B0
-: > "$LOG"; step4; report "Z10 step 4" "reuse it (no re-measure); a red base goes to an issue file (714)" RED
+: > "$LOG"; step4; report "Z10 step 4" "reuse it (no re-measure); a red base goes to an issue file (715)" RED
 check "nothing measured" not grep -qE '^(typecheck|build) |^npm test @' "$LOG"
 setup Z11; start nomeasure; TEST_RC=1; write_tests
 row "Z11 n=0, no record, the base itself is red" "(B) n=0" B0
 step4; report "Z11 step 4" "measured in the base worktree; the line is written, then the red-base rule stops" RED
-check "the red results were written to the memo first (712)" grep -q "^Base measurement: $BASE — typecheck=0 test=1 " "$WT/$MEMO"
+check "the red results were written to the memo first (713)" grep -q "^Base measurement: $BASE — typecheck=0 test=1 " "$WT/$MEMO"
 setup Z8; git -C "$O" worktree add -q --detach "$BW" refs/remotes/origin/main
 row "Z8 leftover base worktree, no branch" "not (A) (no narrate-remove-1-base worktree allowed) -> (C)" C
 setup Z9; start; cs 2; echo other > "$WT/$CO/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-13.md"
@@ -566,7 +638,8 @@ setup I1; start; cs 5; advance src/other.ts; row "I1 main moved with a src/ chan
 : > "$LOG"; integ "I1 integration" "five checks, renewed smoke (src/ changed), push" PUSHED
 check "build ran in the merge worktree" logged "build @narrate-remove-1-merge rc=0"
 check "renewed smoke on the merge build" logged "smoke 16(a)-(f) @narrate-remove-1-merge pass"
-check "the staging memo binds the merge sha to the exit codes (648)" grep -qE "^Integration: $(remote_main) — npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass$" "$WT/$MEMO"
+check "the staging memo binds the merge sha to the five exit codes (649)" grep -qxF "Integration: $(remote_main) — npm ci=0 typecheck=0 closure=0 test=0 build=0" "$WT/$MEMO"
+check "the renewed smoke is recorded as Smoke: lines on the merge sha, the last for each check reading pass (649)" smoke_ok "$(remote_main)" "$(cat "$WT/$MEMO")"
 check "the integration lines stay uncommitted after C5 (memo modified, not committed)" test "$(git -C "$WT" status --porcelain -- "$MEMO")" = " M $MEMO"
 setup I2; start; cs 5; advance package-lock.json; row "I2 main moved with a package-lock.json change" "(B) n=5 -> integration" B5
 : > "$LOG"; integ "I2 integration" "five checks, renewed smoke, push" PUSHED; check "renewed smoke" logged "smoke 16(a)-(f)"
@@ -577,6 +650,7 @@ setup I4; start; cs 5; advance src/other.ts; BUILD_RC=1; m0=$(remote_main); row 
 integ "I4 integration" "build exit 1 -> no push -> (C)" C; check "origin/main unchanged" main_is "$m0"
 setup I5; start; cs 5; advance main/other.js; SMOKE2=fail; m0=$(remote_main); row "I5 main moved with a main/ change; renewed smoke fails" "(B) n=5 -> integration" B5
 integ "I5 integration" "renewed smoke fails -> no push -> (C)" C; check "origin/main unchanged" main_is "$m0"
+check "the memo records 16(e) fail on the merge sha" grep -qxF "Smoke: $(git -C "$MW" rev-parse HEAD) 16(e) fail" "$WT/$MEMO"
 setup I6; start; cs 5; row "I6 main static" "(B) n=5 -> integration" B5
 : > "$LOG"; integ "I6 integration" "trees identical -> no checks, push" PUSHED; check "nothing ran" not grep -qE "@narrate-remove-1-merge" "$LOG"
 echo "== I7 (informational) renewed-smoke trigger, path by path (the text: any path not under docs/ or tests/ and not a root-level *.md)"
@@ -622,8 +696,9 @@ setup MM1; gate_and_claim yes; git -C "$O" fetch -q origin --prune; step3; repor
 row "MM1 next session (In Flight, owner confirms)" "(B) n=0; a memo is created with the count not recorded" B0
 check "memo created with the count not recorded (step 2)" grep -qx "Queued at start: not recorded: the first run stopped before the memo existed" "$WT/$MEMO"
 step4; report "MM1 step 4" "no base record -> measured in the base worktree" MEASURED
-setup F1; start; cs 3; git -C "$WT" rm -q tests/fixtures/narration/a.json
-row "F1 after C3; the fixture deletion is in progress" "(B) resume C4 (C4 owns the fixture deletions)" B3
+setup F1; start; cs 3; git -C "$WT" rm -q -n "$FIXD" > /dev/null 2>&1; rc=$?; git -C "$WT" rm -r -q "$FIXD"
+row "F1 after C3; the fixture directory deletion (git rm -r) is in progress" "(B) resume C4 (C4 owns the fixture deletions)" B3
+check "(control) git rm without -r on the Delete-list directory exits 128" test "$rc" = 128
 setup Z12; start; cs 2; advance; git -C "$O" fetch -q; git -C "$O" worktree add -q --detach "$BW" refs/remotes/origin/main
 row "Z12 n=2; a leftover base worktree at another sha" "(B) resume C3: with n >= 1 the base worktree is not consulted" B2
 
@@ -632,6 +707,121 @@ setup I8; start; cs 5; advance vite.config.js; row "I8 main moved with a vite.co
 : > "$LOG"; integ "I8 integration" "five checks, renewed smoke, push" PUSHED; check "renewed smoke" logged "smoke 16(a)-(f) @narrate-remove-1-merge pass"
 setup I9; start; cs 5; advance tests/other.test.ts; row "I9 main moved with a tests/ change only" "(B) n=5 -> integration" B5
 : > "$LOG"; integ "I9 integration" "five checks, no renewed smoke, push" PUSHED; check "build ran" logged "build @narrate-remove-1-merge"; check "no renewed smoke" not logged "smoke"
+
+echo; echo "######## Fix round 2 and the Round 2 check: Wave C integration's folders; the push and its post-push check on the memo's merge sha (637, 651)"
+setup P1; start; cs 5; m0=$(remote_main)
+PUSHDIR=$O; CHECKDIR=$O; integ "P1 the push and the post-push check both run from the primary checkout (on main at origin/main), not the merge worktree" "the push exits 0 and publishes nothing; the check on the memo's merge sha exits 1 there -> (C)" C; PUSHDIR=; CHECKDIR=
+check "(control) that push exited 0" test "$PUSH_RC" = 0
+check "(control) it printed 'Everything up-to-date'" grep -q "Everything up-to-date" "$W/push.out"
+check "origin/main unchanged" main_is "$m0"
+check "the same check in the merge worktree also exits 1 (its answer does not depend on the folder)" not git -C "$MW" merge-base --is-ancestor "$(memo_merge)" refs/remotes/origin/main
+check "(control) the replaced HEAD form, run in the primary checkout, would pass (its HEAD is origin/main)" git -C "$O" merge-base --is-ancestor HEAD refs/remotes/origin/main
+row "P1 next session" "(B) n=5, not on origin/main -> integration" B5
+integ "P1 integration, push from the merge worktree" "valid earlier merge reused; trees identical; push; post-push check passes" PUSHED
+row "P1 after integrate" "already published" PUBLISHED
+setup P2; start; cs 5; CHECKDIR=$O
+integ "P2 the push from the merge worktree; the post-push check run from the primary checkout" "the merge landed, and the check on the memo's merge sha passes there too" PUSHED; CHECKDIR=
+check "origin/main is the memo's merge" main_is "$(memo_merge)"
+row "P2 after integrate" "already published" PUBLISHED
+
+echo; echo "######## Fix round 2: the branch worktree's symbolic-ref check (preamble 670, Staging plan 623, integration 638)"
+setup D1; start; cs 2; git -C "$WT" switch -q --detach
+row "D1 n=2; the branch worktree switched to a detached HEAD at the branch tip, status clean" "listed and its own toplevel, but symbolic-ref -q HEAD prints nothing -> not a run worktree -> (C)" C
+check "(control) git worktree list --porcelain lists it" eval 'git -C "$O" worktree list --porcelain | grep -qxF "worktree $(cygpath -m "$WT")"'
+check "(control) rev-parse --show-toplevel there prints its own path" test "$(git -C "$WT" rev-parse --show-toplevel)" = "$(cygpath -m "$WT")"
+check "(control) its status is clean apart from the memo and time log" test -z "$(dirty_except "$WT" "$PERF" "$TLOG" "$MEMO")"
+setup D2; start; cs 2; c2=$(git -C "$WT" rev-parse HEAD); git -C "$WT" switch -q --detach
+commit_c 3; report "D2 the branch worktree detached during the run, before C3's commit" "commit only while the symbolic-ref check holds -> (C), nothing committed" C
+check "no commit: HEAD and refs/heads/eb/narrate-remove-1 are still C2" test "$(git -C "$WT" rev-parse HEAD) $(git -C "$O" rev-parse refs/heads/$B)" = "$c2 $c2"
+setup D3; start; cs 2; git -C "$WT" switch -q --detach; m0=$(remote_main)
+for i in 3 4 5; do echo "C$i" >> "$WT/main/sync-engine.js"; git -C "$WT" add main/sync-engine.js; git -C "$WT" commit -qm "NARRATE-REMOVE-1 C$i: on a detached HEAD"; done
+check "(control) refs/heads/eb/narrate-remove-1 is still C2; C3-C5 sit on the detached HEAD" test "$(git -C "$O" log -1 --format=%s refs/heads/$B)" = "NARRATE-REMOVE-1 C2: Wave A renderer removal"
+integ "D3 C3-C5 committed on a detached HEAD (the earlier text had no symbolic-ref check); the uninterrupted run reaches integration" "the commit check gives n = 2, not 5 -> (C) before any merge worktree" C
+check "origin/main unchanged" main_is "$m0"
+check "no merge worktree created" not listed narrate-remove-1-merge
+
+echo; echo "######## Fix round 2: a re-attach that exits non-zero goes to (C); a re-attach runs npm ci first (686; S14); the text names the branch, because the full ref detaches (R3)"
+setup R1; start; cs 2; git -C "$O" worktree remove --force "$WT"; git -C "$O" switch -q $B
+row "R1 n=2; branch worktree removed; the branch is checked out in the primary checkout" "git worktree add exits 128 (already used by a worktree) -> (C)" C
+check "the re-attach exited 128" test "$REATT_RC" = 128
+check "no branch worktree registered" not listed narrate-remove-1
+setup R2; start; cs 2; git -C "$O" worktree remove --force "$WT"; git -C "$O" worktree add -q "$O/.worktrees/other" $B
+row "R2 n=2; branch worktree removed; the branch is checked out in another worktree" "git worktree add exits 128 -> (C)" C
+check "the re-attach exited 128" test "$REATT_RC" = 128
+setup R3; start; cs 2; git -C "$O" worktree remove --force "$WT"; git -C "$O" worktree add -q "$WT" refs/heads/$B; rc=$?; npm_ci "$WT"
+check "(control) a re-attach written with the full ref refs/heads/eb/narrate-remove-1, against the text (686 names the branch), exits 0" test "$rc" = 0
+check "(control) and leaves a detached HEAD" not branch_ok
+commit_c 3; report "R3 that re-attach (exit 0, detached HEAD); the run goes on to C3" "the Staging plan's symbolic-ref check refuses C3's commit -> (C)" C
+row "R3 next session" "the directory fails the run-worktree rule (symbolic-ref) -> (C)" C
+
+echo; echo "######## Fix round 2: an unfinished C4 correction's path that already matches <base> (cat-file -e, then hash-object; 632, 688)"
+setup H1; start; cs 3; C4_EXTRA=D:tests/ok.test.ts; commit_c 4
+check "(control) Done-when 15 fails on C4: D tests/ok.test.ts is outside the fence" not dw15 "$WT"
+correct_c4 tests/ok.test.ts restore "Done-when 15: D tests/ok.test.ts"
+row "H1 C4 deleted tests/ok.test.ts by mistake; restored to its <base> content, not staged (untracked)" "cat-file -e exits 0 and hash-object equals rev-parse <base>:<path> -> unfinished correction" B4fix
+check "(control) the replaced rule rejects it: git diff --quiet <base> -- <path> exits 1 on the untracked file" not old_matches_base tests/ok.test.ts
+amend_c4 tests/ok.test.ts; check "Done-when 15 passes after the amend" dw15 "$WT"
+row "H1 after the amend" "(B) n=4 -> Done-when 1-15 and Task 6 again, then smoke" B4
+setup H2; start; cs 3; C4_EXTRA=D:tests/ok.test.ts; commit_c 4; correct_c4 tests/ok.test.ts restore "Done-when 15: D tests/ok.test.ts" staged
+row "H2 the same deletion; restored and staged with git add" "hash-object equals <base> -> unfinished correction" B4fix
+amend_c4; check "Done-when 15 passes after the amend" dw15 "$WT"
+setup H3; start; cs 3; C4_EXTRA=A:src/reader/modes/page/stray.ts; commit_c 4
+check "(control) Done-when 15 fails on C4: A src/reader/modes/page/stray.ts is outside the fence" not dw15 "$WT"
+correct_c4 src/reader/modes/page/stray.ts restore "Done-when 15: A src/reader/modes/page/stray.ts"
+row "H3 C4 added src/reader/modes/page/stray.ts by mistake; removed (absent from <base>), not staged" "cat-file -e exits non-zero and the path is absent from the working tree -> unfinished correction" B4fix
+check "(control) the replaced rule rejects it: git cat-file -e <base>:<path> exits non-zero" not old_matches_base src/reader/modes/page/stray.ts
+amend_c4 src/reader/modes/page/stray.ts; check "Done-when 15 passes after the amend" dw15 "$WT"
+row "H3 after the amend" "(B) n=4 -> Done-when 1-15 and Task 6 again, then smoke" B4
+setup H4; start; cs 3; C4_EXTRA=A:src/reader/modes/page/stray.ts; commit_c 4; correct_c4 src/reader/modes/page/stray.ts restore "Done-when 15: A src/reader/modes/page/stray.ts" staged
+row "H4 the same addition; removed with git rm (staged)" "path absent -> unfinished correction" B4fix
+check "(control) the replaced rule rejects it" not old_matches_base src/reader/modes/page/stray.ts
+amend_c4; check "Done-when 15 passes after the amend" dw15 "$WT"
+setup H5; start; cs 3; C4_EXTRA=D:tests/ok.test.ts; commit_c 4; correct_c4 tests/ok.test.ts edit "Done-when 15: D tests/ok.test.ts"
+row "H5 the same deletion; the file re-created with other content" "hash-object differs from rev-parse <base>:<path> -> (C)" C
+check "(control) run from the primary checkout, the recipe's default folder, instead of the branch worktree the text names (688), hash-object hashes that checkout's copy, which equals <base>" test "$(git -C "$O" hash-object -- tests/ok.test.ts)" = "$(git -C "$O" rev-parse "$BASE:tests/ok.test.ts")"
+
+echo; echo "######## Round 2 check: a directory a C4 correction restores is listed file by file (687) and each file matches <base> (688)"
+setup H6; advance src/reader/modes/page/parts/a.ts; advance src/reader/modes/page/parts/b.ts; start; cs 3
+C4_EXTRA=R:src/reader/modes/page/parts; commit_c 4
+check "(control) Done-when 15 fails on C4: the deleted directory src/reader/modes/page/parts/ is outside the fence" not dw15 "$WT"
+echo "C4 correction: $(git -C "$WT" rev-parse HEAD) — Done-when 15: D src/reader/modes/page/parts/" >> "$WT/$MEMO"
+mkdir -p "$WT/src/reader/modes/page/parts"; for f in a.ts b.ts; do git -C "$WT" show "$BASE:src/reader/modes/page/parts/$f" > "$WT/src/reader/modes/page/parts/$f"; done
+row "H6 C4 deleted the directory src/reader/modes/page/parts/ by mistake; its two files restored to their <base> content by writing them, not staged" "git status --porcelain --untracked-files=all lists each file, and each hash-object equals rev-parse <base>:<path> -> unfinished correction" B4fix
+check "(control) git status --porcelain without --untracked-files=all lists the directory as one entry" test "$(git -C "$WT" status --porcelain -- src/reader/modes/page/parts)" = "?? src/reader/modes/page/parts/"
+check "(control) hash-object fails on that entry, so judged as one entry it would not match <base> (a false (C))" not git -C "$WT" hash-object -- src/reader/modes/page/parts/
+amend_c4 src/reader/modes/page/parts; check "Done-when 15 passes after the amend" dw15 "$WT"
+row "H6 after the amend" "(B) n=4 -> Done-when 1-15 and Task 6 again, then smoke" B4
+
+echo; echo "######## Fix round 2: the smoke record, one line per check: Smoke: <full sha> 16(<a-f>) <pass|fail> (635, 649)"
+setup SM; start; cs 4; post_c4; s=$(git -C "$WT" rev-parse HEAD); cp "$WT/$MEMO" "$W/memo0"
+smk "Smoke: $s 16(%s) pass"; row "SM1 n=4; six in-format lines on the current C4, all pass" "a passing smoke -> C5 without repeating it" B4smoked
+smk "Smoke: ${s:0:8} 16(%s) pass"; row "SM2 n=4; six lines with an 8-character sha" "not the full sha -> no passing smoke -> reruns, then the smoke again" B4
+smk "Smoke: $s 16(%s) PASS"; row "SM3 n=4; six lines reading PASS" "out of format -> no passing smoke" B4
+smk "Smoke: $s 16%s pass"; row "SM4 n=4; six lines without the parentheses (16a)" "out of format -> no passing smoke" B4
+smk "Smoke: $s 16(%s) pass — owner"; row "SM5 n=4; six lines with trailing text" "out of format -> no passing smoke" B4
+cp "$W/memo0" "$WT/$MEMO"; echo "Smoke: $s 16(a–f) pass" >> "$WT/$MEMO"; row "SM6 n=4; one summary line, 16(a–f) pass" "16(a–f) names no single check, so no in-format line for any of (a)-(f) -> no passing smoke" B4
+smk "Smoke: $s 16(a) pass"; row "SM7 n=4; six in-format lines, all for 16(a)" "not one line per check (a)-(f) -> no passing smoke" B4
+smk "Smoke: $s 16(%s) pass"; sed -i '/ 16(f) pass$/d' "$WT/$MEMO"; row "SM8 n=4; five in-format lines, 16(f) missing" "-> no passing smoke" B4
+smk "Smoke: $s 16(%s) pass"; sed -i 's/ 16(e) pass$/ 16(e) fail/' "$WT/$MEMO"; row "SM9 n=4; six in-format lines, 16(e) fail" "not all pass -> no passing smoke" B4
+cp "$W/memo0" "$WT/$MEMO"; for x in a b c; do echo "Smoke: $s 16($x) pass" >> "$WT/$MEMO"; done; for x in a b c d e f; do echo "Smoke: $s 16($x) pass" >> "$WT/$MEMO"; done
+row "SM10 n=4; an interrupted smoke (a-c), then its complete repeat on the same sha: nine in-format lines, all pass" "the last line for each of (a)-(f) reads pass -> a passing smoke -> C5 without repeating it" B4smoked
+check "(control) the earlier reading ('six such lines for it, all pass') rejects the same memo: nine lines, not six" not smoke_ok_six "$s" "$(cat "$WT/$MEMO")"
+cp "$W/memo0" "$WT/$MEMO"; smoke_lines "$s" pass; echo "Smoke: $s 16(a) pass" >> "$WT/$MEMO"; echo "Smoke: $s 16(b) fail" >> "$WT/$MEMO"
+row "SM11 n=4; a passing smoke, then a repeat stopped after 16(b) fail" "the last 16(b) line reads fail -> no passing smoke" B4
+cp "$W/memo0" "$WT/$MEMO"; smoke_lines "$s" fail; smoke_lines "$s" pass
+row "SM12 n=4; a smoke with 16(e) fail, then its complete repeat, all pass" "the last line for each check reads pass -> a passing smoke (a completed repeat)" B4smoked
+setup SN; start; cs 4; post_c4; s=$(git -C "$WT" rev-parse HEAD); for x in a b c d e f; do echo "Smoke: ${s:0:8} 16($x) pass" >> "$WT/$MEMO"; done; commit_c 5
+row "SN n=5; C5's memo records the smoke with an 8-character sha" "no in-format line for C5^ -> (C)" C
+setup SP; start; cs 4; post_c4; s=$(git -C "$WT" rev-parse HEAD); for x in a b c; do echo "Smoke: $s 16($x) pass" >> "$WT/$MEMO"; done; smoke_record; commit_c 5
+row "SP n=5; C5's memo holds an interrupted smoke (a-c) and its complete repeat on C5^ (nine lines, all pass)" "the last line per check reads pass -> (B) n=5 -> integration" B5
+check "(control) the earlier reading ('six such lines') would give (C)" not smoke_ok_six "$(git -C "$O" rev-parse "refs/heads/$B^")" "$(git -C "$O" show "refs/heads/$B:$MEMO")"
+integ "SP integration" "no merge yet -> merge -> identical -> push" PUSHED
+
+echo; echo "######## Fix round 2: Done-when 15 passes a path that an Exception: line of the staging memo names (309)"
+setup E1; start; cs 3; echo "Exception: tests/ok.test.ts — imports a deleted module" >> "$WT/$MEMO"; C4_EXTRA=M:tests/ok.test.ts; commit_c 4
+check "Done-when 15 passes: its one out-of-fence path (M tests/ok.test.ts) is named on an Exception: line" dw15 "$WT"
+check "(control) the same commit fails Done-when 15 when the memo has no Exception: line" not dw15_noexc
+row "E1 n=4 after C4, which edits an Exception-named file outside Edit sites" "(B) n=4 -> Done-when 1-15 and Task 6 again, then smoke" B4
 
 echo; echo "rows: $ROWS  checks: $CHECKS  mismatches: $FAILS"
 [ $FAILS = 0 ]
