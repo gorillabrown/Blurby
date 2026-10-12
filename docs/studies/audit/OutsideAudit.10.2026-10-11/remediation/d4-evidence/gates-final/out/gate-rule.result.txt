@@ -1,0 +1,5 @@
+worktree r1 ROADMAP:221 git grep no match (rule: exit 1, empty): exit=1 stdout=[] stderr(bash)=empty shells-identical=true  [git grep -n -P 'zzz_no_such_token_zzz' -- main.js]
+worktree r2 ROADMAP:221 git grep bad pattern (rule: other exit = fail): exit=128 stdout=[] stderr(bash)="fatal: unmatched ( for expression group" shells-identical=true  [git grep -n -P '(' -- main.js]
+worktree r3 ROADMAP:221 git ls-files nothing listed (rule: exit 0, empty): exit=0 stdout=[] stderr(bash)=empty shells-identical=true  [git ls-files -- no/such/path]
+worktree r4 ROADMAP:221 git diff --name-only nothing listed (rule: exit 0, empty): exit=0 stdout=[] stderr(bash)=empty shells-identical=true  [git diff --name-only refs/remotes/origin/main -- no/such/path]
+worktree r5 ROADMAP:221 git diff --name-only bad ref (rule: other exit = fail): exit=128 stdout=[] stderr(bash)="fatal: bad revision 'refs/remotes/origin/no-such-ref'" shells-identical=true  [git diff --name-only refs/remotes/origin/no-such-ref -- main.js]

@@ -78,7 +78,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 | A5 The new Narrate plugs into the mode framework from READER-MODE-SEPARATION-2. Page, Focus and Flow change only at registration and in the bottom bar | confirmed |
 | A6 One voice to start (current default af_bella); the voice picker returns later | confirmed |
 | A7 No hard deadline; the next roadmap review places a new finish line | confirmed |
-| A8 Kokoro's word table can be exact for the audio it generates, because its predicted durations drive the synthesis. The installed model does not output those durations today (OutsideAudit.10 F3: outputs `waveform` only), so the table must first be produced | accepted, corrected after OutsideAudit.10. With `pred_dur` exposed in a scratch copy, waveform samples = 600 × Σpred_dur exactly. Guard: Rebuild Phase 0 (P0-1 to P0-5, ROADMAP NARRATE-REBUILD-1) produces and verifies it. Export, adapter, unit or mapping failures are repaired and rerun; only a failure under a verified contract sends the engine choice to a bake-off |
+| A8 Kokoro's word table can be exact for the audio it generates, because its predicted durations drive the synthesis. The installed model does not output those durations today (OutsideAudit.10 F3: outputs `waveform` only), so the table must first be produced | accepted, corrected after OutsideAudit.10. With `pred_dur` exposed in a scratch copy, five saved speed-1 rows show 600 samples per frame (waveform samples = 600 × Σpred_dur), as do the saved four-rate rows in `remediation/d4-evidence/units/units-four-rates.txt` (under `docs/studies/audit/OutsideAudit.10.2026-10-11/`); that law proves total-length/unit consistency, not interior acoustic alignment. Guard: Rebuild Phase 0 (P0-1 to P0-5, ROADMAP NARRATE-REBUILD-1) produces the table and reports separately its construction, its error at independently identified acoustic anchors, and the interior boundaries the reference cannot resolve (OutsideAudit.10 D4-06). Export, adapter, unit or mapping failures are repaired and rerun; only a failure under a verified contract sends the engine choice to a bake-off |
 
 **Decisions:**
 
@@ -102,6 +102,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 | Speed change mid-word (OutsideAudit.10 R7) | The current word finishes at the old speed; the new speed starts from the next word | the owner | 2026-10-11 |
 | Old audio cache (OutsideAudit.10 R10) | Stays on disk untouched; version one plays freshly generated audio only and never plays the cache or reads its timing | the owner | 2026-10-11 |
 | Phase 0 timing (OutsideAudit.10 R11) | Phase 0 code starts after the removal merges; the `/epic` charter (docs only) may be written while it runs | the owner | 2026-10-11 |
+| Merged-word display (OutsideAudit.10 D4-06) | Open gate: split or unit. A fused token run is either split from the same pass's boundary marks or highlighted as one merged unit. During Phase 0, P0-2 is judged with every fused run reconciled as one unit; Phase 0 reports, per rate, the share of source words inside fused runs and, for each run, whether the same pass emits a word-boundary mark inside it (split coverage), and split may be chosen only where that coverage is complete. Decided before core implementation, never an automatic pass; choosing the unit changes F2's "the highlight sits on each word exactly while it is spoken", F3, R7 and Done-when 3's "every cursor change on the word change" (word becomes unit in each), and the owner approves that change before core work starts | the owner, at the Phase 0 verdict | open |
 
 **Impact map:**
 
@@ -151,7 +152,7 @@ The four queued patch items (heard cursor, rate-change collapse, subscriber curs
 
 **Prove Kokoro, then build.** The removal clears every narration path but leaves the Kokoro engine dormant in the main process, with no UI or preload path. The rebuild's Phase 0 measures the two unknowns on the owner's machine:
 - whether Kokoro's word table is exact against its own audio;
-- whether speech can start, and a speed change (generated at the new speed) can apply, within 2 s.
+- whether speech can start, and a speed change (generated at the new speed) can apply, within 2 s. Phase 0 measures only the harness component; the 2 s / 8 s totals are Core acceptance's *Latency budget* (ROADMAP NARRATE-REBUILD-1).
 
 On a pass, the new Narrate is built on Kokoro. On a failure, a bake-off against the shortlisted engines (`docs/studies/research/tts-engine-scan/SHORTLIST.md`) comes before any building. This also satisfies standing rule 38 (measure before perceptual rewrites). Prior studies already rank Kokoro the best CPU fit.
 
@@ -234,6 +235,8 @@ Considered and set aside:
     - start within 2 s;
     - a speed change, generated at the new speed, within 2 s.
 
+    Phase 0 measures only the harness component of these times; the 2 s / 8 s totals are Core acceptance's *Latency budget* (ROADMAP NARRATE-REBUILD-1).
+
     Pass → build on Kokoro. Fail → bake-off on the shortlist first.
   - **Core:**
     - a per-chunk exact word table plus the audio playback clock, so cursor = word at the current playback sample;
@@ -283,6 +286,8 @@ Considered and set aside:
 Aligned — 2026-10-11. The user approved: "(a) Approve (Recommended)".
 
 ## Plan
+
+> Superseded by ROADMAP.md NARRATE-REMOVE-1 (revision 4, after OutsideAudit.10), which governs where the two differ, including the closure check, the gates and the recipe. The HB-1 text below is kept as the revision 3 record.
 
 Written by `/write-plan` on 2026-10-11 against `main` @ `45d45473`. It plans **HB-1, the Narrate removal**, only. The Narrate rebuild is epic-scale: it gets no HB number here, and the next `/roadmap-review` places it as `Path: epic`.
 

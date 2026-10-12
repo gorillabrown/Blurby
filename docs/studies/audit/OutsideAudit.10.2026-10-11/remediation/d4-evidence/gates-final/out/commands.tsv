@@ -1,0 +1,128 @@
+id	line	zone	reference	placeholder	raw
+1	217	header	false	false	npm test
+2	221	done-when	false	false	git grep
+3	221	done-when	false	false	git ls-files
+4	221	done-when	false	false	git diff --name-only
+5	221	done-when	false	false	git grep
+6	221	done-when	false	false	git grep -P
+7	222	done-when	false	false	git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs
+8	223	done-when	false	false	npm test -- tests/readerModeIsolation.test.ts
+9	224	done-when	false	false	npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx
+10	228	done-when	false	false	npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx
+11	229	done-when	false	false	npm test -- tests/commandPaletteRoutes.test.ts
+12	229	done-when	false	false	git grep -n -P '\x22tts\x22|Narration \(TTS\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx
+13	237	done-when	false	false	npm test -- tests/settingsMigrationV13.test.js
+14	263	done-when	false	false	npm test -- tests/settingsNarrateNormalization.test.js
+15	267	done-when	false	false	git grep -cF
+16	268	done-when	false	false	git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js
+17	269	done-when	false	false	git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js
+18	270	done-when	false	false	git grep -cF 'Object.assign(settings' -- main/sync-engine.js
+19	271	done-when	false	false	git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js
+20	272	done-when	false	false	git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js
+21	273	done-when	false	false	git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js
+22	274	done-when	false	false	git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js
+23	279	done-when	false	false	git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js
+24	279	done-when	false	false	git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js
+25	281	done-when	false	false	git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js
+26	282	done-when	false	false	git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\b)[A-Z]' -- src
+27	283	done-when	false	false	npm test -- tests/tts-engine.test.js tests/tts-worker.test.js
+28	285	done-when	false	false	git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'
+29	286	done-when	false	false	git grep -n -P 'ipcMain\.handle\(\x22tts-(nano|pocket|qwen)-' -- main
+30	287	done-when	false	false	node -e "const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)"
+31	290	done-when	false	false	git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json
+32	292	done-when	false	false	npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/
+33	293	done-when	false	false	git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json
+34	294	done-when	false	false	git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow
+35	296	done-when	false	false	npm run typecheck
+36	302	done-when	false	false	npm test
+37	302	done-when	false	false	npm run build
+38	302	done-when	false	true	git diff --check <base>
+39	303	done-when	false	false	git diff --name-status refs/remotes/origin/main...HEAD
+40	310	done-when	false	false	npm run build
+41	310	done-when	false	false	npm run dev
+42	310	done-when	false	false	npm start
+43	355	design	false	false	git grep -w
+44	383	design	false	true	git revert -m 1 <merge sha>
+45	386	design	false	false	git merge-base
+46	398	edit-sites	false	false	git rm
+47	465	edit-sites	false	false	git grep
+48	487	edit-sites	false	true	git grep -n -w '<NAME>' -- src tests
+49	487	edit-sites	false	true	git grep -h -o -w -P '<the family with each * written as \w+>' -- src/constants.ts
+50	555	edit-sites	false	true	node <file> --self-test
+51	555	edit-sites	false	true	node <file> .
+52	623	staging-integration	false	true	git rm <path>
+53	623	staging-integration	false	true	git add <path>
+54	623	staging-integration	false	false	git add -A
+55	623	staging-integration	false	false	git diff --cached --stat
+56	623	staging-integration	false	false	git rev-parse
+57	626	staging-integration	false	false	npm run typecheck
+58	630	staging-integration	false	false	git commit --amend
+59	635	staging-integration	false	false	npm run build
+60	637	staging-integration	false	false	git fetch origin --prune
+61	638	staging-integration	false	false	git worktree list
+62	638	staging-integration	false	false	git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main
+63	638	staging-integration	false	false	git status --porcelain
+64	638	staging-integration	false	false	npm test
+65	640	staging-integration	false	false	git rev-list --parents -n 1 HEAD
+66	640	staging-integration	false	false	git rev-parse refs/heads/eb/narrate-remove-1
+67	640	staging-integration	false	false	git rev-parse refs/remotes/origin/main
+68	640	staging-integration	false	false	git log -1 --format=%s HEAD
+69	641	staging-integration	false	false	git merge-base --is-ancestor HEAD refs/remotes/origin/main
+70	641	staging-integration	false	false	git switch --detach refs/remotes/origin/main
+71	641	staging-integration	false	false	git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1
+72	643	staging-integration	false	false	git diff --quiet refs/heads/eb/narrate-remove-1 HEAD
+73	645	staging-integration	false	false	npm ci
+74	645	staging-integration	false	false	npm run typecheck
+75	645	staging-integration	false	false	npm test
+76	645	staging-integration	false	false	npm run build
+77	645	staging-integration	false	false	git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
+78	650	staging-integration	false	false	git push origin HEAD:refs/heads/main
+79	658	failure-lane	false	true	git revert -m 1 <merge sha>
+80	669	recipe	false	false	git worktree list --porcelain
+81	669	recipe	false	true	git -C <path> rev-parse --show-toplevel
+82	673	recipe	false	false	git fetch origin --prune
+83	674	recipe	false	false	& "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
+84	675	recipe	false	false	git branch -a --list "*narrate-remove-1*"
+85	675	recipe	false	false	git worktree list
+86	676	recipe	false	false	git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main
+87	677	recipe	false	false	git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main
+88	679	recipe	true	false	git merge-base … refs/remotes/origin/main
+89	680	recipe	false	false	git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1
+90	681	recipe	false	true	git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>
+91	681	recipe	false	true	git rev-parse <C1 sha>^
+92	681	recipe	false	true	git rev-parse <base>
+93	682	recipe	false	false	git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main
+94	682	recipe	false	false	git rev-parse refs/heads/eb/narrate-remove-1
+95	683	recipe	false	true	git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1
+96	684	recipe	false	false	git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main
+97	684	recipe	false	false	git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main
+98	684	recipe	false	false	git rev-parse refs/heads/eb/narrate-remove-1
+99	684	recipe	false	false	git status --porcelain
+100	685	recipe	false	false	git worktree list
+101	685	recipe	false	false	git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
+102	686	recipe	false	false	git status --porcelain
+103	686	recipe	false	false	npm test
+104	687	recipe	false	false	git rev-parse refs/heads/eb/narrate-remove-1
+105	687	recipe	false	true	git cat-file -e <base>:<path>
+106	687	recipe	false	true	git diff --quiet <base> -- <path>
+107	689	recipe	false	true	git rev-parse <C5 sha>^
+108	706	recipe	false	false	git status --porcelain
+109	707	recipe	false	false	git worktree list
+110	707	recipe	false	true	git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base <base sha>
+111	707	recipe	false	false	git rev-parse HEAD
+112	707	recipe	false	false	git status --porcelain
+113	708	recipe	false	false	npm ci
+114	709	recipe	false	false	npm run typecheck
+115	709	recipe	false	false	npm test
+116	709	recipe	false	false	npm run build
+117	711	recipe	false	false	git ls-files
+118	711	recipe	false	false	git grep
+119	711	recipe	false	false	git grep
+120	711	recipe	false	false	git grep
+121	711	recipe	false	false	git ls-files
+122	711	recipe	false	false	git grep
+123	711	recipe	false	false	git grep
+124	713	recipe	false	false	npm ci
+125	713	recipe	false	false	npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js
+126	741	lessons	false	false	git diff --cached --stat
+127	748	lessons	false	false	git merge-base

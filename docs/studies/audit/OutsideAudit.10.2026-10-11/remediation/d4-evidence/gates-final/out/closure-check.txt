@@ -1,0 +1,11 @@
+closure-check.mjs sha256 3b5c8d6f0c269f9ba3968816a98a8a5d1c974ce59596a12fd9ec7d76aa826e08 (53 lines, extracted verbatim from the snapshot)
+PS 7.6.0
+self-test: 7/7 missing-import forms reported; its 5 lookalikes ignored
+exit=0
+dangling relative imports: 0
+exit=0
+PS 5.1.26100.9457
+self-test: 7/7 missing-import forms reported; its 5 lookalikes ignored
+exit=0
+dangling relative imports: 0
+exit=0

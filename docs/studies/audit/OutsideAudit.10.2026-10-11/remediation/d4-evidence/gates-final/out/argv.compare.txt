@@ -1,0 +1,6 @@
+pwsh7 vs ps51: identical argv for all 126 commands
+pwsh7 vs bash (differing ids):
+062
+087
+101
+110

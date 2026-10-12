@@ -1,0 +1,20 @@
+[
+  {
+    "id": "k1",
+    "line": 487,
+    "label": "literal family name matches nothing (stated exit 1)",
+    "cmd": "git grep -n -w 'NARRATE_SPEED_*' -- src tests"
+  },
+  {
+    "id": "k2",
+    "line": 487,
+    "label": "family expansion (stated: exit 0 or 1 is a result)",
+    "cmd": "git grep -h -o -w -P 'NARRATE_SPEED_\\w+' -- src/constants.ts"
+  },
+  {
+    "id": "k3",
+    "line": 487,
+    "label": "ReaderSpeedDialog.tsx imports two names (stated :8-9)",
+    "cmd": "git grep -n -w -P 'NARRATE_SPEED_\\w+' -- src/components/ReaderSpeedDialog.tsx"
+  }
+]

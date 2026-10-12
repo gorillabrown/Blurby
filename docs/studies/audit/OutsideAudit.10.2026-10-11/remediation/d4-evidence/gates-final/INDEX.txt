@@ -1,0 +1,81 @@
+OutsideAudit.10 D4 follow-up: final-command gate replay for ROADMAP.md NARRATE-REMOVE-1
+
+ROADMAP.md sha256 at start 027788d5b804d05f1ff3a438c5f03c8665fe5ecc9ce5cacfa47579f430255b4a
+ROADMAP.md sha256 at end   027788d5b804d05f1ff3a438c5f03c8665fe5ecc9ce5cacfa47579f430255b4a
+unchanged during the replay
+section text (ROADMAP lines 189-754) sha256 32d57dd16add02f8548b57e14510be8c4250d2cf59dbc427e35a86b6ba50b8d6
+Worktree: eb/outside-audit-10-remediation @ a0e8acfe plus uncommitted docs; code identical to b4335606. refs/remotes/origin/main is 98333a98,
+which differs from b4335606 only in ROADMAP.md. The wiring trees are built from the b4335606 blobs.
+Shells: PowerShell 7.6.0, Windows PowerShell 5.1.26100.9457, GNU bash 5.2.37 (msys); git 2.53.0.windows.2; node v24.14.0.
+Scope: read-only on the worktree. The wiring gates ran on scratch git trees outside the repository. No npm ci, typecheck, test, build,
+fetch, commit, merge or push ran; the recipe commands were parsed and argv-echoed only, never executed.
+
+Results
+1. Inventory: 127 inline-code commands in the section (18 with placeholders; 1 prose reference with an ellipsis).
+2. Parsers: 0 parse errors and 127 single commands in PowerShell 7 and 5.1 (placeholders substituted). Unsubstituted, 16 fail on the < operator, as the spec warns.
+3. Argv: pwsh 7 and 5.1 deliver identical argv for all 126 runnable commands; bash differs only on the four backslash worktree paths the recipe confines to pwsh.
+4. Step 4 positive controls on the worktree: 35, 9, 11, 51, 68, 9, 18 and 12 lines, exit 0, empty stderr, in all three shells. Matches the stated counts.
+5. Done-when 7 wiring gates, identical in all three shells: the base prints nothing, nothing, :2, :2 and nothing (state.js), as the dry-run paragraph states.
+   The prescribed Edit-site text prints every stated line (sync-engine :1 four times; main.js:292 then main.js-293-  await saveSettingsFn();
+   main.js:130; state.js-26-    Object.assign(settings, newSettings); then state.js:27). The renamed helper (reapplyCloudSettings) fails g1 and g2;
+   the unconverted forced-download path fails g2, g3 and g4; the leftover merge-path save fails g4. Of the supplementary variants, the dropped startup
+   save fails g5 and the normalize call after the theme check fails g7, in the gate output itself; renamed locals fail g3 and g4, the unconverted merge
+   path g1, g3 and g4, and a leftover forced-path save g4. Without -w the renamed helper would pass g1 and g2 (controls x1, x2).
+6. Supplementary: closure check self-test 7/7 and 0 dangling imports; the constants-family statements hold; gate-rule exit codes hold in all shells.
+
+Observations (no mismatch with a stated output)
+- The earlier one-line forms of g5 and g7 print a single line on supp-main-no-save and supp-state-misplaced as on the prescribed tree
+  (out/adjacency-proposal.result.txt); the -A1/-B1 forms the spec now uses show the adjacency in their output.
+- With PowerShell's default console encoding, non-ASCII hit lines display as mojibake; exit codes and counts are unaffected.
+- Windows PowerShell 5.1 wraps redirected native stderr in error records; exit codes are unaffected.
+
+Files (sha256)
+599f496a4d3d3b83f4801ff8d5c00f6bcc06d5e9ad50f10e596fa6cf19b48d63  scripts/apply-variants.cjs  scratch application of the Edit-site text to the b4335606 blobs: base, prescribed, three wrong variants, five supplementary variants
+b48649d90f417f795e5e98aef2b60322c34a662ebfe8d45101baa273188bfd7f  scripts/echo.cjs  prints the argv a shell delivers (programs replaced, nothing executed)
+fe9206405a1ac36b26c3f1afc8a0236a109618afabda7419b10b193140fba985  scripts/evalpc.cjs  judges step 4 positive controls against the stated counts
+631f3c479adc666b9a0fd167e92dac61db9c18cc3de70c4f194248f70dd26af1  scripts/evalpcu.cjs  byte comparison of UTF-8-console PowerShell reruns with bash
+f9e84529b15bc321f6572e3b1ef91064b178e210a43196fb0c66d21285fd71ee  scripts/evalsimple.cjs  tabulates the supplementary gate lists
+dd481fb61ac98128098fa164f6e52a7e78f3f3e9047f9a889e07e533b2704cc4  scripts/evalwiring.cjs  judges Done-when 7 wiring gates against the stated outputs and the dry-run paragraph
+997f6650aead1d968ea31dcbb6e1842f8bef927310829f16d709adfe5b0b6ec0  scripts/extract.cjs  extracts every inline-code command from the NARRATE-REMOVE-1 section; substitutes placeholders
+c4632e37e5248a0a3aad9ca465b9c372d7bc25c4cb673c83e5d5fbc534a2dc43  scripts/hygiene.cjs  UTF-8 / LF / trailing-whitespace check
+5e66cb066291e5f12e1e1d5820573dba167801e341becfbb539c109a36efc7e9  scripts/mkecho.cjs  builds the per-shell argv-echo scripts
+1233b10af26d1cf0837729624a0173b6c1fec74c7d1838e921d4f69dde92dfcd  scripts/mkgates.cjs  builds the gate lists from the inventory ids
+977374477a3ac0029efd218a9316f1476547968c8c567ccc11e2baf5f2662a2c  scripts/mkindex.cjs  writes this index
+c9d2330940824f492bc002f3f84548468b66aa922c6a4ce75879f9ff812482d4  scripts/mkrunner.cjs  writes per-shell runners that execute each gate verbatim, capturing stdout, stderr and exit
+188ca81d5a803f31d144265eaeebd4e50b73cf3e0ddb2db71a5305f0a3fd3891  scripts/parse.ps1  PowerShell parser check (run under pwsh 7.6.0 and Windows PowerShell 5.1)
+948f11b90321df026010a2a9a43ac8172546a98e198abfa8c74854df8d91ce3f  scripts/readres.cjs  decodes captures (UTF-8, or UTF-16LE from Windows PowerShell 5.1)
+f603e3a623b6a61483a871ee9b36e9b16d3d321d82986d8c28219114b12ac577  scripts/run-gates-final.sh  driver: bash run-gates-final.sh <worktree> <fresh run dir>; reproduces every file under out/ (read-only on the worktree)
+ab39f59f1b8be81a1526d6d9e020376660b5e24c54ac41dddc578cad0bcf217d  out/adjacency-proposal.result.txt  control: the one-line forms print one line on the prescribed tree and on both adjacency variants alike; only the -A1/-B1 forms the spec now uses show the adjacency
+d04f53ad7e1ca84b3e75c664687925cd7f3f92ad46611450ff277ef16c5f1525  out/adjacency.gates.json  control: g5 and g7 without -A1/-B1 (the earlier one-line forms)
+5440c557d2b0df14cc5d53b3f3ac469e237b4c380e6196e380a4e429b05f4207  out/argv.bash.txt  argv delivered by bash
+e79827844758fcfa32c5614b2d55611b4b14a577e8efe8654711e39ab54a8d50  out/argv.compare.txt  pwsh 7 = 5.1 for all 126; bash differs only on the four backslash worktree paths (062, 087, 101, 110), which the recipe runs in pwsh only
+9544a6e74e13bc5d843432cd20f9361600ef4c414357de6a7d049aa7b0b04988  out/argv.ps51.txt  argv delivered by Windows PowerShell 5.1
+9544a6e74e13bc5d843432cd20f9361600ef4c414357de6a7d049aa7b0b04988  out/argv.pwsh7.txt  argv delivered by pwsh 7 for 126 commands (the & call excluded)
+2266919e928f83524d3432755f2ab66341611481bbd8ae9d182f36e9d64ccc27  out/base-blobs.sha256  sha256 of the b4335606 blobs used as the base
+2636241db05ac7619438498dff3cb536561f1d580ad251936108ffc04674f70d  out/closure-check.txt  the spec closure check, extracted verbatim: self-test 7/7 and dangling relative imports: 0, exit 0, in pwsh 7 and 5.1
+0b848c9193d86275fa94e2c167d8982296ad5a0bf1225f893d66940c5aa36989  out/commands.json  command inventory: 127 inline-code commands with line, zone, raw and substituted text
+2427e0fb7bb3072b4315bef3e62137ba9f8473fbf0f3bf9867927e835a0e7c08  out/commands.raw.txt  raw commands, one per line
+81cb2eefb4bb76f36c8df1fbf3b3043e42a8074ab0bd0e7ddfbd8ebe3dc80c24  out/commands.substituted.txt  commands with placeholders substituted, one per line
+db4f44a70e20617eb8c021a9ba8e45cfcd6a1669b62ea0ee0e0a3fb82d4b5fdc  out/commands.tsv  command inventory (tabular)
+daaf6d79d8b1770f4d2af016e5a72a87044a9314e0f2179eb7387967216ff40a  out/constants-family.gates.json  constants-family statements (src/constants.ts paragraph of Edit sites)
+a16b0f8f1d50630a3dc3180d81fecd94c6bcee4e8d1af24c73448fea043dd9f0  out/constants-family.result.txt  literal NARRATE_SPEED_* exits 1; the expansion lists 3 names; ReaderSpeedDialog.tsx:8-9 import two of them
+7653f0867f8c155f087445bd99020d659a682bec94a6fcb55672729f72da0ef9  out/environment.txt  tool versions, worktree HEAD and origin/main
+fb37eb4dad9d0801677fc39d60273e71192750ded7185aaf6bf0c733df85628b  out/gate-rule.gates.json  gate-rule exit-semantics controls
+ab7007dba981286c9fcb0acf7e225897b395b3e05e4b487c16357278f910d008  out/gate-rule.result.txt  no-match grep exits 1; empty ls-files/diff exit 0; bad pattern and bad ref exit 128 with stderr; same exits in all shells
+b78b75867513c8ee133569f46dbce3983943077ad68575a116260f573ff93a6e  out/parse-raw-placeholders.ps51.txt  control: the same in Windows PowerShell 5.1
+85831bca270a3f318bd6f4c63b5646c41d64f3588a2e3dfb2f9dc9e2c6090057  out/parse-raw-placeholders.pwsh7.txt  control: unsubstituted <placeholders> give 16 parse errors (the < operator)
+d392dd5a8ec4da850b57bde0cd6d1be59e9c80fcce290a74f00238f63d4b205e  out/parse.ps51.txt  parse result, Windows PowerShell 5.1: 127 commands, 0 errors, each a single command
+9c3d5d9194e64cbc7712cfdf0f39b6ba5be7d988aad8195ab17251cf866aeaf2  out/parse.pwsh7.txt  parse result, PowerShell 7.6.0: 127 commands, 0 errors, each a single command
+7bb2be2888b9c2a30975465e4ae5bb24bfd94e4b647b0948b25f31479c04c1cc  out/positive-controls.gates.json  step 4 positive controls (8) plus 4 informational Done-when checks
+330ac578f6d17b431a0ef20db778f498d6b0d1963848d49388d07c29eb14c5c0  out/positive-controls.result.txt  8 of 8 match the step 4 counts 35, 9, 11, 51, 68, 9, 18, 12 in all three shells
+05f1bfecc920337b1c7ff4e31c26b205a096de0ef11b28122e1781d9c92a79f5  out/positive-controls.stdout.bash.txt  bash stdout (JSON lines)
+739379c4208f018b278e05102332a6609271efe0db2b145ef470da2fe32705c1  out/positive-controls.stdout.ps51.txt  verbatim Windows PowerShell 5.1 stdout (JSON lines)
+05f1bfecc920337b1c7ff4e31c26b205a096de0ef11b28122e1781d9c92a79f5  out/positive-controls.stdout.pwsh7.txt  verbatim pwsh 7 stdout (JSON lines; non-ASCII shows the default console decoding)
+7f9b2bbd5195f6f27ce6e70d56b18edf9bcd4f35ee01a68b1c5e65b7142e0635  out/positive-controls.utf8-console-check.txt  with a UTF-8 console encoding, PowerShell stdout is byte-identical to bash
+32d57dd16add02f8548b57e14510be8c4250d2cf59dbc427e35a86b6ba50b8d6  out/roadmap-section.snapshot.txt  the NARRATE-REMOVE-1 section text replayed (ROADMAP.md lines 189-754)
+bbb993b3bc2546e3bf741c823e75e2617de3c67aa7ec4cf527268b636747b56f  out/roadmap.sha256.txt  sha256 of ROADMAP.md at the start and end of the replay, and of the section text
+d89fec6deea1712dba3aebdc76350bc4d18e95fa9212b56d13418829a56bd548  out/variants.diff  each scratch tree against the base (diff -U0)
+81d30a6ca2314d0eecec41baf4a5eac47e1e5e85dd0934a49db6a495613632a3  out/variants.json  variant definitions
+51afbafe11992e6fde068629b6fa7e38d378e024ef7d1fb42b7ea4c9fb815ec0  out/wiring.gates.json  Done-when 7 wiring gates g1-g7 plus two controls without -w
+53ed553e821da8e9e88ed90a507f801192127204e1294917637231e4e856afd2  out/wiring.raw-by-shell.txt  every wiring gate result per tree and shell
+4617579f5348d2cb8dcad43020d03f562a8a03503a8d32dec76c370c214c4016  out/wiring.result.txt  per-tree verdicts: base matches the dry-run paragraph; prescribed prints every stated line; every wrong variant fails at least one gate

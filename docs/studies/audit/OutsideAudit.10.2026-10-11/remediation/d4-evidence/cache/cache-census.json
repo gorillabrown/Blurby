@@ -1,0 +1,42 @@
+{
+  "censusDate": "2026-10-11",
+  "censusAtUtc": "2026-10-12T04:22:18.156Z",
+  "source": "owner TTS cache (%APPDATA%\\Blurby\\tts-cache), read-only",
+  "script": "cache-census.cjs",
+  "opusFiles": {
+    "total": 4861,
+    "v2": 4505,
+    "legacy": 356
+  },
+  "timingSidecars": {
+    "total": 4505,
+    "unparseable": 0,
+    "bySchemaVersion": {
+      "1": 4505
+    },
+    "byTimingClassification": {
+      "heuristic": 4505
+    },
+    "byTimingTruth": {
+      "word-native": 4505
+    },
+    "byTruthAndClassification": {
+      "word-native|heuristic": 4505
+    },
+    "withNonEmptyWordTimestamps": 0
+  },
+  "otherFiles": {
+    "manifestTmp": 2,
+    "other": 0
+  },
+  "manifest": {
+    "schemaVersion": 2,
+    "bookEntries": 4510,
+    "bookEntriesBySchemaVersion": {
+      "1": 5,
+      "2": 4505
+    },
+    "chunkEntries": 4861,
+    "contentIndexEntries": 4496
+  }
+}

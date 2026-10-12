@@ -1,0 +1,14 @@
+[
+  {
+    "id": "a1",
+    "line": 272,
+    "label": "control: g5 without -A1 (the earlier one-line form)",
+    "cmd": "git grep -n -F 'settings = loadSettingsData(rawSettings);' -- main.js"
+  },
+  {
+    "id": "a2",
+    "line": 274,
+    "label": "control: g7 without -B1 (the earlier one-line form)",
+    "cmd": "git grep -n -F 'normalizeReaderModes(settings);' -- main/ipc/state.js"
+  }
+]

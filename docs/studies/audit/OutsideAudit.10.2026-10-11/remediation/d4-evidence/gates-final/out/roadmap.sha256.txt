@@ -1,0 +1,4 @@
+ROADMAP.md sha256 at start 027788d5b804d05f1ff3a438c5f03c8665fe5ecc9ce5cacfa47579f430255b4a
+ROADMAP.md sha256 at end   027788d5b804d05f1ff3a438c5f03c8665fe5ecc9ce5cacfa47579f430255b4a
+unchanged during the replay
+section text (ROADMAP lines 189-754) sha256 32d57dd16add02f8548b57e14510be8c4250d2cf59dbc427e35a86b6ba50b8d6

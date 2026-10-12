@@ -1,0 +1,811 @@
+ROADMAP.md replayed: sha256 027788d5b804d05f1ff3a438c5f03c8665fe5ecc9ce5cacfa47579f430255b4a (set ROADMAP=<path>)
+STUBS: npm ci, npm run typecheck, the Closure check, npm test, npm run build, the Task 6 reviews and the owner smoke only log and return an exit code; git commands, the Done-when 15 fence and the step-4 search positive controls are real; bash, not pwsh
+
+######## Earlier rows (recipe-v3), replayed against the final text
+== FRESH register Queued, prerequisites completed
+   expected (spec): step 2 passes, item -> In Flight, (A) [A]
+   actual         : A start -> step 4 (base bc58a24d)
+   PASS
+   check: register reads In Flight -> PASS
+== GATE prerequisite not completed
+   expected (spec): step 2 stops; item stays Queued; nothing written [STOP2]
+   actual         : STOP2 step 2 stops (EINK-HOVER-FIX-1=Queued); item stays Queued, nothing written
+   PASS
+   check: register unchanged -> PASS
+   check: refs unchanged -> PASS
+   check: no worktree added -> PASS
+== S11 fresh, no branch
+   expected (spec): (A) [A]
+   actual         : A start -> step 4 (base e6d4f24c)
+   PASS
+== IBC interrupted before branch creation (In Flight, owner confirms)
+   expected (spec): (A) [A]
+   actual         : A start -> step 4 (base 96b4f509)
+   PASS
+== OWN In Flight, owner does not confirm
+   expected (spec): stop at the In Flight move, before step 3 [STOP-OWNER]
+   actual         : STOP-OWNER In Flight and the owner does not confirm: stop before step 3
+   PASS
+== S0 branch, no C1, main static (time log + memo untracked)
+   expected (spec): (B) n=0 -> step 4 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== S0b branch, no C1, main advanced
+   expected (spec): (B) n=0 -> step 4 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== S1 after C2 (time log + memo uncommitted, perf dirty)
+   expected (spec): (B) resume C3 [B2]
+   actual         : B2 resume C3
+   PASS
+== S1T after C2 with C3 work in progress + time log + memo
+   expected (spec): (B) resume C3 [B2]
+   actual         : B2 resume C3
+   PASS
+== S1X after C2 with a stray file outside C3
+   expected (spec): (C) dirt outside C3 [C]
+   actual         : C [branch worktree dirt outside C3: stray]
+   PASS
+== S2 after C2, main advanced
+   expected (spec): (B) resume C3 [B2]
+   actual         : B2 resume C3
+   PASS
+== S3 C1-C5 unmerged, main advanced
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 161c3fbe
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== S3 integration
+   expected (spec): no merge yet -> merge; tree differs -> five checks; push [PUSHED]
+   actual         : PUSHED 161c3fbe to origin/main
+   PASS
+   check: build ran in the merge worktree -> PASS
+== S3 after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 161c3fbe)
+   PASS
+   integrate: no merge yet -> merged e0dfa039
+== S4 merged, interrupted before the check
+   expected (spec): merge made, run stops [INTERRUPTED]
+   actual         : INTERRUPTED after the merge, before the integration-tree check
+   PASS
+== S4 next session (main static)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: HEAD e0dfa039 is a valid earlier merge -> reused
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S4 integration
+   expected (spec): valid earlier merge reused; trees identical; push [PUSHED]
+   actual         : PUSHED e0dfa039 to origin/main
+   PASS
+   check: the pushed merge is the earlier merge (not repeated) -> PASS
+== S4 after re-integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge e0dfa039)
+   PASS
+   integrate: no merge yet -> merged 0d495806
+== S4b merged, interrupted
+   expected (spec): merge made [INTERRUPTED]
+   actual         : INTERRUPTED after the merge, before the integration-tree check
+   PASS
+== S4b next session, main advanced after the merge
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== S4b integration
+   expected (spec): merge onto an older main: first parent is not origin/main -> (C) (walk-through 701) [C]
+   actual         : C [merge worktree HEAD 0d495806 is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)']
+   PASS
+   check: origin/main unchanged -> PASS
+== S4b next session again
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== S4b integration again
+   expected (spec): still a merge onto an older main -> (C) [C]
+   actual         : C [merge worktree HEAD 0d495806 is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)']
+   PASS
+== S4c merge worktree created at the old main, no merge, main advanced
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 2cc5641a
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== S4c integration
+   expected (spec): HEAD is an ancestor of origin/main -> no merge yet -> switch, merge, five checks, push [PUSHED]
+   actual         : PUSHED 2cc5641a to origin/main
+   PASS
+== S4c after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 2cc5641a)
+   PASS
+   integrate: no merge yet -> merged 08de1522
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== S4d main moved; merged + check ran; interrupted before the push
+   expected (spec): merge + check [INTERRUPTED]
+   actual         : INTERRUPTED after the integration-tree check, before the push
+   PASS
+== S4d next session
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: HEAD 08de1522 is a valid earlier merge -> reused
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== S4d integration
+   expected (spec): valid earlier merge reused; check runs again; push [PUSHED]
+   actual         : PUSHED 08de1522 to origin/main
+   PASS
+   check: check reran (build logged again) -> PASS
+== S4d after re-integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 08de1522)
+   PASS
+   integrate: no merge yet -> merged b8fd94fd
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S5 published, main static
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge b8fd94fd)
+   PASS
+   integrate: no merge yet -> merged cff0a1c8
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== S5b published, main advanced before and after
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge cff0a1c8)
+   PASS
+   integrate: no merge yet -> merged eda32ceb
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S6 published + partial close-out on main
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge eda32ceb)
+   PASS
+   integrate: no merge yet -> merged c318c2a3
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S7 published, then branch and worktrees removed
+   expected (spec): (C), not (A) [C]
+   actual         : C [not (A) and no local branch: remote= worktree= origin-C-commits=y dirs= none]
+   PASS
+   integrate: no merge yet -> merged 7cce70e4
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S7b published, branch removed, merge worktree kept
+   expected (spec): (C) [C]
+   actual         : C [not (A) and no local branch: remote= worktree=y origin-C-commits=y dirs= narrate-remove-1-merge]
+   PASS
+   integrate: no merge yet -> merged 419dd8eb
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S7c published, branch worktree removed, branch kept
+   expected (spec): already published (before re-attach) [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 419dd8eb)
+   PASS
+== S8 main merged into the branch
+   expected (spec): (C) [C]
+   actual         : C [chain #3: unrelated 11]
+   PASS
+== S9 fast-forward publication (no --no-ff)
+   expected (spec): (C) [C]
+   actual         : C [n=5 on origin/main without exactly one --no-ff publication merge]
+   PASS
+== S10 C1-C2 already on main
+   expected (spec): (C) [C]
+   actual         : C [2 of 5 commits already on origin/main]
+   PASS
+== IMP n=5 before the merge
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 6c3281c8
+== IMP merge, interrupted before the push
+   expected (spec): merge made [INTERRUPTED]
+   actual         : INTERRUPTED after the merge, before the integration-tree check
+   PASS
+== IMP next session (main static)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: HEAD 6c3281c8 is a valid earlier merge -> reused
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== IMP integration
+   expected (spec): valid earlier merge reused, pushed (walk-through 701) [PUSHED]
+   actual         : PUSHED 6c3281c8 to origin/main
+   PASS
+== IMP after re-integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 6c3281c8)
+   PASS
+   integrate: no merge yet -> merged 901d76ab
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== PR push rejected (origin/main moves between fetch and push)
+   expected (spec): rejected push -> (C); merge stays [C]
+   actual         : C [push rejected; the merge stays in the merge worktree]
+   PASS
+   check: merge worktree HEAD is the merge (contains the branch) -> PASS
+== PR next session
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== PR integration
+   expected (spec): the stale merge's first parent is not origin/main -> (C) [C]
+   actual         : C [merge worktree HEAD 901d76ab is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)']
+   PASS
+== MAR main advanced during the run
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged ae383c2d
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== MAR integration
+   expected (spec): five checks (npm ci, typecheck, closure, test, build); a root-level file changed, so the smoke is renewed; push [PUSHED]
+   actual         : PUSHED ae383c2d to origin/main
+   PASS
+   npm log: npm ci @narrate-remove-1-merge rc=0;typecheck @narrate-remove-1-merge rc=0;closure . @narrate-remove-1-merge rc=0;npm test @narrate-remove-1-merge rc=0;build @narrate-remove-1-merge rc=0;smoke 16(a)-(f) @narrate-remove-1-merge pass;
+   check: renewed smoke (a root-level u*.txt is not under docs/ or tests/ and not a *.md) -> PASS
+== MAR after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge ae383c2d)
+   PASS
+   integrate: no merge yet -> merged 9c7ac491
+== MARF main advanced, integration-tree check fails
+   expected (spec): no push; (C) [C]
+   actual         : C [integration-tree check failed (npm ci=0 typecheck=0 closure=0 test=1 build=0); no push, worktree left as is]
+   PASS
+== MARF next session (after the decision allows a rerun)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: HEAD 9c7ac491 is a valid earlier merge -> reused
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== MARF integration
+   expected (spec): valid earlier merge reused; check reruns; push [PUSHED]
+   actual         : PUSHED 9c7ac491 to origin/main
+   PASS
+== MARF after re-integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 9c7ac491)
+   PASS
+== MCF main advanced with a conflicting change
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== MCF integration
+   expected (spec): merge conflict -> (C), worktree left as is [C]
+   actual         : C [merge failed, worktree left as is: CONFLICT (content): Merge conflict in src/components/ReaderContainer.tsx]
+   PASS
+== MCF next session
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== MCF integration again
+   expected (spec): dirty merge worktree -> (C) [C]
+   actual         : C [merge worktree dirty: A  docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-12.md A  docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl M  main/sync-engine.js UU src/components/ReaderContainer.tsx D  src/hooks/useNarration.ts M  src/reader/modes/page/ModeRuntime.ts D  tests/fixtures/narration/a.json M  tests/foliate-bridge.test.ts D  tests/narrTiming.test.ts A  tests/settingsMigrationV13.test.js A  tests/settingsNarrateNormalization.test.js]
+   PASS
+== S12 remote-only branch
+   expected (spec): (C) [C]
+   actual         : C [not (A) and no local branch: remote=y worktree= origin-C-commits= dirs= none]
+   PASS
+== S13 branch worktree directory deleted by hand (still listed)
+   expected (spec): (C), no prune [C]
+   actual         : C [branch worktree listed (prunable) but its directory is missing; no prune]
+   PASS
+== S14 branch worktree removed with git worktree remove
+   expected (spec): (B) re-attach, resume C3 [B2]
+   actual         : B2 resume C3 (re-attached)
+   PASS
+   check: re-attached on the branch -> PASS
+   integrate: no merge yet -> merged bcf655ee
+== S15 merge worktree directory deleted by hand after the merge
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== S15 integration
+   expected (spec): merge worktree listed but missing -> (C), no prune [C]
+   actual         : C [merge worktree listed, directory missing; no prune]
+   PASS
+   integrate: no merge yet -> merged 150b7e3d
+== S15b merge worktree removed with git worktree remove after the merge
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 8d884f2d
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== S15b integration
+   expected (spec): fresh merge worktree at origin/main -> merge redone -> push [PUSHED]
+   actual         : PUSHED 8d884f2d to origin/main
+   PASS
+== S15b after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 8d884f2d)
+   PASS
+== SMF C5 memo records 16(e) fail
+   expected (spec): (C) [C]
+   actual         : C [n=5 but C5's memo does not record 16(a)-(f) pass on C5^]
+   PASS
+== S6N a sixth C commit
+   expected (spec): (C), n outside 0-5 [C]
+   actual         : C [n=6, outside 0-5]
+   PASS
+== S1F C2 amended (still one C2)
+   expected (spec): (B) resume C3 [B2]
+   actual         : B2 resume C3
+   PASS
+== FRESHM fresh start
+   expected (spec): (A) [A]
+   actual         : A start -> step 4 (base 543a12ad)
+   PASS
+== FRESHM step 4 with the memo and time log present
+   expected (spec): (A)'s status check exempts the memo and time log; measure in the branch worktree [MEASURED]
+   actual         : MEASURED in narrate-remove-1: typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=2,2
+   PASS
+   check: memo holds the base measurement line -> PASS
+
+######## D4-01: authenticate a recovered integration merge
+== M1 clean merge worktree parked with HEAD = C5
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   check: (control) the old ancestry predicate would have accepted it -> PASS
+== M1 integration
+   expected (spec): 2 shas, not a merge; not an ancestor of origin/main -> anything else -> (C) [C]
+   actual         : C [merge worktree HEAD 667c790a is neither a valid earlier merge nor on origin/main: 1 parent(s), subject 'NARRATE-REMOVE-1 C5: staging memo, smoke record, time log']
+   PASS
+   check: origin/main unchanged (no fast-forward of C5) -> PASS
+== M2 merge worktree at an unrelated descendant of C5
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M2 integration
+   expected (spec): -> (C) [C]
+   actual         : C [merge worktree HEAD 22885b2c is neither a valid earlier merge nor on origin/main: 1 parent(s), subject 'unreviewed descendant of C5']
+   PASS
+   check: origin/main unchanged -> PASS
+   integrate: no merge yet -> merged 5a189e4b
+== M3 merge worktree at an unrelated descendant of a valid merge
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M3 integration
+   expected (spec): one parent, wrong subject; not on origin/main -> (C) [C]
+   actual         : C [merge worktree HEAD ed5fce37 is neither a valid earlier merge nor on origin/main: 1 parent(s), subject 'unreviewed descendant of the merge']
+   PASS
+   check: origin/main unchanged -> PASS
+== M4 merge worktree at an unrelated commit on top of origin/main
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M4 integration
+   expected (spec): not on origin/main -> (C); the commit is not switched away from [C]
+   actual         : C [merge worktree HEAD 9f51589a is neither a valid earlier merge nor on origin/main: 1 parent(s), subject 'foreign unpublished commit']
+   PASS
+   check: merge worktree still at the foreign commit -> PASS
+   check: origin/main unchanged -> PASS
+   integrate: no merge yet -> merged a7f61c26
+== M5 valid interrupted merge (main static)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: HEAD a7f61c26 is a valid earlier merge -> reused
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== M5 integration
+   expected (spec): three shas, second parent = branch, first parent = origin/main, exact subject -> reused; check; push [PUSHED]
+   actual         : PUSHED a7f61c26 to origin/main
+   PASS
+   check: the pushed commit is the recovered merge -> PASS
+   check: no new merge was made (HEAD unchanged) -> PASS
+== M5 after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge a7f61c26)
+   PASS
+   integrate: no merge yet -> merged 698a4320
+== M6 merge onto an older main (origin/main advanced after the merge)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M6 integration
+   expected (spec): first parent is not the current origin/main -> (C) [C]
+   actual         : C [merge worktree HEAD 698a4320 is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)']
+   PASS
+   check: origin/main unchanged -> PASS
+== M7 merge with the right parents and a different subject
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M7 integration
+   expected (spec): subject differs -> (C) [C]
+   actual         : C [merge worktree HEAD 57008ba3 is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge branch eb/narrate-remove-1']
+   PASS
+   check: origin/main unchanged -> PASS
+   integrate: no merge yet -> merged bbe8bfe9
+== M8 merge of an older C5 (C5 re-created after the merge)
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+== M8 integration
+   expected (spec): second parent is not the branch -> (C) [C]
+   actual         : C [merge worktree HEAD bbe8bfe9 is neither a valid earlier merge nor on origin/main: 2 parent(s), subject 'Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)']
+   PASS
+   check: origin/main unchanged -> PASS
+
+######## D4-02: a resumable post-C4 correction
+== K1 interrupted mid-correction after C4 (memo names the current C4 sha; Edit-sites file changed)
+   expected (spec): (B), finish the correction (walk-through 699) [B4fix]
+   actual         : B4fix n=4, unfinished C4 correction on 9e55e403 -> finish it (amend C4, Done-when 1-15, Task 6), then smoke, C5
+   PASS
+   check: amend keeps the C4 subject -> PASS
+   check: C4 sha changed -> PASS
+== K1 interrupted after the amend, before its reruns
+   expected (spec): (B); Done-when 1-15 and Task 6 again, then smoke (walk-through 700) [B4]
+   actual         : B4 n=4 -> Done-when 1-15 and Task 6 again, then smoke, then C5
+   PASS
+   check: Done-when 1-15 and Task 6 reran -> PASS
+== K1 smoke recorded on the amended C4
+   expected (spec): (B) n=4, passing smoke on the current C4 -> C5 [B4smoked]
+   actual         : B4smoked n=4, passing smoke on the current C4 -> C5
+   PASS
+== K1 after C5
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 8a36dc0b
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== K1 integration
+   expected (spec): no merge yet -> merge -> identical -> push [PUSHED]
+   actual         : PUSHED 8a36dc0b to origin/main
+   PASS
+== K1 after integrate
+   expected (spec): already published [PUBLISHED]
+   actual         : PUBLISHED -> /pointer-closeout (merge 8a36dc0b)
+   PASS
+== K2 n=4 with correction dirt but no memo line
+   expected (spec): (C) [C]
+   actual         : C [branch worktree dirt outside C5: src/components/ReaderContainer.tsx]
+   PASS
+== K3 n=4 dirt; the memo's last correction line names an older C4 sha
+   expected (spec): (C) [C]
+   actual         : C [branch worktree dirt outside C5: main/sync-engine.js]
+   PASS
+   step 3: src/reader/modes/page/view.ts is outside the fence and does not match <base>
+== K4 n=4 memo names the current C4; a dirty path outside the fence that differs from <base>
+   expected (spec): (C) [C]
+   actual         : C [branch worktree dirt outside C5: src/reader/modes/page/view.ts]
+   PASS
+   check: (control) Done-when 15 fails on C4 (view.ts outside the fence) -> PASS
+== K5 correction returns the out-of-fence path to its <base> content
+   expected (spec): (B) unfinished correction (path matches <base>) [B4fix]
+   actual         : B4fix n=4, unfinished C4 correction on a8e581d4 -> finish it (amend C4, Done-when 1-15, Task 6), then smoke, C5
+   PASS
+   check: Done-when 15 passes after the amend -> PASS
+== K5 after the amend
+   expected (spec): (B) n=4, reruns then smoke [B4]
+   actual         : B4 n=4 -> Done-when 1-15 and Task 6 again, then smoke, then C5
+   PASS
+   step 3: src/reader/modes/page/stray.ts is outside the fence and does not match <base>
+== K6 memo names the current C4; untracked stray outside the fence
+   expected (spec): git cat-file -e <base>:<path> fails (absent from <base>), so it does not match <base> -> (C) [C]
+   actual         : C [branch worktree dirt outside C5: src/components/ReaderContainer.tsx src/reader/modes/page/stray.ts]
+   PASS
+   check: (control) git diff --quiet <base> -- <untracked path> alone exits 0 -> PASS
+== K11 memo line written, interrupted before any edit (no dirt)
+   expected (spec): (B); the correction is unfinished while the memo names the current C4 -> finish it first (631, 687, 689) [B4fix]
+   actual         : B4fix n=4, unfinished C4 correction on 24320b11 -> finish it (amend C4, Done-when 1-15, Task 6), then smoke, C5
+   PASS
+== K8 n=4 with a passing smoke on the current C4
+   expected (spec): (B) -> C5 without repeating the smoke [B4smoked]
+   actual         : B4smoked n=4, passing smoke on the current C4 -> C5
+   PASS
+== K9 correction started after the smoke
+   expected (spec): (B) unfinished correction [B4fix]
+   actual         : B4fix n=4, unfinished C4 correction on a3fed454 -> finish it (amend C4, Done-when 1-15, Task 6), then smoke, C5
+   PASS
+== K9 after the amend
+   expected (spec): (B); the smoke on the older C4 sha is void -> reruns and smoke [B4]
+   actual         : B4 n=4 -> Done-when 1-15 and Task 6 again, then smoke, then C5
+   PASS
+== K9 C5 committed without repeating the smoke
+   expected (spec): (C): no passing smoke on C5^ [C]
+   actual         : C [n=5 but C5's memo does not record 16(a)-(f) pass on C5^]
+   PASS
+== K10 C5 memo with six duplicate 16(a) pass lines
+   expected (spec): (C) [C]
+   actual         : C [n=5 but C5's memo does not record 16(a)-(f) pass on C5^]
+   PASS
+
+######## D4-03: keep the base measurement clean at n = 0
+== Z1 n=0, both C1 tests written, memo holds the base record
+   expected (spec): (B) n=0 (walk-through 696) [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z1 step 4
+   expected (spec): reuse the base record; do not re-measure [REUSED]
+   actual         : REUSED memo holds the base measurement for b8952785; not re-measured
+   PASS
+   check: no base worktree created -> PASS
+   check: nothing measured -> PASS
+   check: C1's own gate: npm ci in the branch worktree -> PASS
+   check: C1's own gate: both new tests fail (exit 1) -> PASS
+   check: C1 trailer is the base -> PASS
+== Z1 after C1
+   expected (spec): (B) resume C2 [B1]
+   actual         : B1 resume C2
+   PASS
+== Z2 n=0, C1 tests written, no base record
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z2 step 4
+   expected (spec): measured in a detached base worktree, green [MEASURED]
+   actual         : MEASURED in narrate-remove-1-base: typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=2,2
+   PASS
+   check: base worktree is detached at the base -> PASS
+   check: full suite ran in the base worktree only -> PASS
+   check: C1 test files untouched -> PASS
+   check: branch worktree status unchanged except the memo -> PASS
+   check: memo holds the base measurement line -> PASS
+   check: (control) measuring in the branch worktree would be red -> PASS
+== Z2 after C1
+   expected (spec): (B) resume C2 [B1]
+   actual         : B1 resume C2
+   PASS
+== Z3 n=0, existing clean base worktree at the base
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z3 step 4
+   expected (spec): reuse the base worktree and measure there [MEASURED]
+   actual         : MEASURED in narrate-remove-1-base: typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=2,2
+   PASS
+== Z4 n=0, base worktree at another sha
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z4 step 4
+   expected (spec): (C) [C]
+   actual         : C [base worktree sits at another sha]
+   PASS
+== Z5 n=0, dirty base worktree
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z5 step 4
+   expected (spec): (C) [C]
+   actual         : C [base worktree dirty:  M docs/notes.md]
+   PASS
+== Z6 n=0, base worktree listed, directory missing
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z6 step 4
+   expected (spec): (C), no prune [C]
+   actual         : C [base worktree listed, directory missing; no prune]
+   PASS
+== Z7 n=0, memo holds a base record for another sha only
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z7 step 4
+   expected (spec): the record is not for this base sha -> measure in the base worktree [MEASURED]
+   actual         : MEASURED in narrate-remove-1-base: typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=2,2
+   PASS
+== Z10 n=0, memo holds a red base record for this sha
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z10 step 4
+   expected (spec): reuse it (no re-measure); a red base goes to an issue file (714) [RED]
+   actual         : RED [reused base record is red: typecheck=0 test=1 build=0 closure-self-test=0 closure=0 positive-controls=2,3] -> issue file
+   PASS
+   check: nothing measured -> PASS
+== Z11 n=0, no record, the base itself is red
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== Z11 step 4
+   expected (spec): measured in the base worktree; the line is written, then the red-base rule stops [RED]
+   actual         : RED [red base or empty positive control in narrate-remove-1-base: typecheck=0 test=1 build=0 closure-self-test=0 closure=0 positive-controls=2,2] -> issue file
+   PASS
+   check: the red results were written to the memo first (712) -> PASS
+== Z8 leftover base worktree, no branch
+   expected (spec): not (A) (no narrate-remove-1-base worktree allowed) -> (C) [C]
+   actual         : C [not (A) and no local branch: remote= worktree=y origin-C-commits= dirs= narrate-remove-1-base]
+   PASS
+== Z9 a second staging memo
+   expected (spec): (C): exactly one memo; the second is dirt outside C3 [C]
+   actual         : C [branch worktree dirt outside C3: docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.2026-10-13.md]
+   PASS
+
+######## D4-04: verify a different integration tree fully
+== I1 main moved with a src/ change
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 59c2d389
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== I1 integration
+   expected (spec): five checks, renewed smoke (src/ changed), push [PUSHED]
+   actual         : PUSHED 59c2d389 to origin/main
+   PASS
+   check: build ran in the merge worktree -> PASS
+   check: renewed smoke on the merge build -> PASS
+   check: the staging memo binds the merge sha to the exit codes (648) -> PASS
+   check: the integration lines stay uncommitted after C5 (memo modified, not committed) -> PASS
+== I2 main moved with a package-lock.json change
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged c380e067
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== I2 integration
+   expected (spec): five checks, renewed smoke, push [PUSHED]
+   actual         : PUSHED c380e067 to origin/main
+   PASS
+   check: renewed smoke -> PASS
+== I3 main moved, docs only
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 63a251e4
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0
+== I3 integration
+   expected (spec): five checks, no renewed smoke, push [PUSHED]
+   actual         : PUSHED 63a251e4 to origin/main
+   PASS
+   check: build ran -> PASS
+   check: no renewed smoke -> PASS
+== I4 main moved with a src/ change; build fails
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 91201d4b
+== I4 integration
+   expected (spec): build exit 1 -> no push -> (C) [C]
+   actual         : C [integration-tree check failed (npm ci=0 typecheck=0 closure=0 test=0 build=1); no push, worktree left as is]
+   PASS
+   check: origin/main unchanged -> PASS
+== I5 main moved with a main/ change; renewed smoke fails
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 1c013c5c
+== I5 integration
+   expected (spec): renewed smoke fails -> no push -> (C) [C]
+   actual         : C [integration-tree check failed (npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=fail); no push, worktree left as is]
+   PASS
+   check: origin/main unchanged -> PASS
+== I6 main static
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged e5429a02
+   integrate: trees identical; branch evidence (Done-when 12-16) covers it
+== I6 integration
+   expected (spec): trees identical -> no checks, push [PUSHED]
+   actual         : PUSHED e5429a02 to origin/main
+   PASS
+   check: nothing ran -> PASS
+== I7 (informational) renewed-smoke trigger, path by path (the text: any path not under docs/ or tests/ and not a root-level *.md)
+   src/a.ts                           renewed smoke: yes
+   main/b.js                          renewed smoke: yes
+   main.js                            renewed smoke: yes
+   preload.js                         renewed smoke: yes
+   package.json                       renewed smoke: yes
+   package-lock.json                  renewed smoke: yes
+   docs/a.md                          renewed smoke: no
+   tests/a.test.ts                    renewed smoke: no
+   README.md                          renewed smoke: no
+   docs/x/CHANGELOG.md                renewed smoke: no
+   vite.config.js                     renewed smoke: yes
+   index.html                         renewed smoke: yes
+   public/x.png                       renewed smoke: yes
+   resources/icon.png                 renewed smoke: yes
+   tsconfig.json                      renewed smoke: yes
+   patches/kokoro-js+1.2.1.patch      renewed smoke: yes
+   scripts/patch-onnxruntime.js       renewed smoke: yes
+   .github/workflows/ci.yml           renewed smoke: yes
+   mainx.js                           renewed smoke: yes
+
+######## Publication check: exactly three fields (the merge and its two parents)
+Fast-forwarding to: side
+Trying simple merge with refs/heads/eb/narrate-remove-1
+== O1 published through an octopus merge whose last parent is C5
+   expected (spec): the line ending with the tip has four fields, not three -> (C) [C]
+   actual         : C [n=5 on origin/main without exactly one --no-ff publication merge]
+   PASS
+
+######## Run-worktree rule (preamble): listed by git worktree list --porcelain and its own toplevel
+== W1 no branch; a stray directory at the branch worktree path
+   expected (spec): not (A): a directory at a run worktree path -> (C) [C]
+   actual         : C [not (A) and no local branch: remote= worktree= origin-C-commits= dirs= narrate-remove-1]
+   PASS
+   check: (control) git in the stray directory acts on the primary checkout -> PASS
+   check: no worktree added -> PASS
+== W2 n=2; branch worktree unregistered, a stray directory left at its path
+   expected (spec): not a run worktree -> (C), no re-attach [C]
+   actual         : C [a directory at the branch worktree path is not that worktree]
+   PASS
+   check: the stray directory is untouched -> PASS
+== W3 n=5; a stray directory at the merge worktree path
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   check: (control) without the rule, HEAD there is the primary checkout's and an ancestor of origin/main -> PASS
+== W3 integration
+   expected (spec): not a run worktree -> (C); nothing switched, merged or pushed [C]
+   actual         : C [a directory at the merge worktree path is not that worktree]
+   PASS
+   check: origin/main unchanged -> PASS
+   check: the primary checkout is still on main -> PASS
+== W4 n=0; a stray directory at the base worktree path
+   expected (spec): (B) n=0 [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+== W4 step 4
+   expected (spec): not a run worktree -> (C) [C]
+   actual         : C [a directory at the base worktree path is not that worktree]
+   PASS
+
+######## Exception: lines (Failure handling) and the staging memo
+== X1 after C2; an out-of-C3 file named on an Exception: line
+   expected (spec): (B) resume C3; the Exception: line accepts it [B2]
+   actual         : B2 resume C3
+   PASS
+== X2 after C2; the same file with no Exception: line
+   expected (spec): (C) dirt outside C3 [C]
+   actual         : C [branch worktree dirt outside C3: tests/ok.test.ts]
+   PASS
+== X3 n=4; correction of a file named on an Exception: line
+   expected (spec): (B) unfinished correction [B4fix]
+   actual         : B4fix n=4, unfinished C4 correction on 8f770376 -> finish it (amend C4, Done-when 1-15, Task 6), then smoke, C5
+   PASS
+   check: Done-when 15 holds after the amend (the exception is listed) -> PASS
+== K12 the memo names the current C4 by a short sha
+   expected (spec): not the full 40-character sha, so no unfinished correction -> (C) [C]
+   actual         : C [branch worktree dirt outside C5: src/components/ReaderContainer.tsx]
+   PASS
+== MM1 fresh start; the run stops before writing the memo
+   expected (spec): (A) [A]
+   actual         : A start -> step 4 (base dcefce4e)
+   PASS
+== MM1 next session (In Flight, owner confirms)
+   expected (spec): (B) n=0; a memo is created with the count not recorded [B0]
+   actual         : B0 n=0 -> step 4, then C1
+   PASS
+   check: memo created with the count not recorded (step 2) -> PASS
+== MM1 step 4
+   expected (spec): no base record -> measured in the base worktree [MEASURED]
+   actual         : MEASURED in narrate-remove-1-base: typecheck=0 test=0 build=0 closure-self-test=0 closure=0 positive-controls=2,2
+   PASS
+== F1 after C3; the fixture deletion is in progress
+   expected (spec): (B) resume C4 (C4 owns the fixture deletions) [B3]
+   actual         : B3 resume C4
+   PASS
+== Z12 n=2; a leftover base worktree at another sha
+   expected (spec): (B) resume C3: with n >= 1 the base worktree is not consulted [B2]
+   actual         : B2 resume C3
+   PASS
+
+######## Renewed smoke after a moved main (any path not under docs/ or tests/ and not a root-level *.md)
+== I8 main moved with a vite.config.js change
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 211aabc3
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0 renewed-smoke=pass
+== I8 integration
+   expected (spec): five checks, renewed smoke, push [PUSHED]
+   actual         : PUSHED 211aabc3 to origin/main
+   PASS
+   check: renewed smoke -> PASS
+== I9 main moved with a tests/ change only
+   expected (spec): (B) n=5 -> integration [B5]
+   actual         : B5 n=5 -> Wave C integration
+   PASS
+   integrate: no merge yet -> merged 67f15339
+   integrate: npm ci=0 typecheck=0 closure=0 test=0 build=0
+== I9 integration
+   expected (spec): five checks, no renewed smoke, push [PUSHED]
+   actual         : PUSHED 67f15339 to origin/main
+   PASS
+   check: build ran -> PASS
+   check: no renewed smoke -> PASS
+
+rows: 160  checks: 63  mismatches: 0
+exit=0

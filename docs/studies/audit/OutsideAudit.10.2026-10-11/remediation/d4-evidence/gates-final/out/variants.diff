@@ -1,0 +1,278 @@
+--- base/main.js
++++ prescribed/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ prescribed/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1139 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ prescribed/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ supp-leftover-save-forced/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ supp-leftover-save-forced/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,2 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1140 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ supp-leftover-save-forced/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ supp-main-no-save/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292,2 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
+-  await saveSettingsFn();
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ supp-main-no-save/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1139 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ supp-main-no-save/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ supp-renamed-locals/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ supp-renamed-locals/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(c, data) { const s = c.getSettings(); Object.assign(s, data); normalizeReaderModes(s); c.saveSettings(); return s; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1139 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ supp-renamed-locals/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ supp-state-misplaced/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ supp-state-misplaced/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1139 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ supp-state-misplaced/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -26,0 +28 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ supp-unconverted-merge-path/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ supp-unconverted-merge-path/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -1058,3 +1061 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1140 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ supp-unconverted-merge-path/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ wrong-1-renamed-helper/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ wrong-1-renamed-helper/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function reapplyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      reapplyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1060 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        reapplyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1139 @@
++  reapplyCloudSettings,
+--- base/main/ipc/state.js
++++ wrong-1-renamed-helper/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ wrong-2-unconverted-path/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ wrong-2-unconverted-path/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814,2 +817 @@
+-      Object.assign(settings, settingsResult.data);
+-      ctx.saveSettings();
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1138,0 +1141 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ wrong-2-unconverted-path/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
+--- base/main.js
++++ wrong-3-leftover-save/main.js
+@@ -11 +11 @@
+-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
++        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
+@@ -292 +292 @@
+-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
++  settings = loadSettingsData(rawSettings);
+--- base/main/sync-engine.js
++++ wrong-3-leftover-save/main/sync-engine.js
+@@ -19,0 +20 @@
++const { normalizeReaderModes } = require("./migrations");
+@@ -390,0 +392,2 @@
++function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
++
+@@ -814 +817 @@
+-      Object.assign(settings, settingsResult.data);
++      applyCloudSettings(ctx, settingsResult.data);
+@@ -1058,3 +1061 @@
+-        const settings = ctx.getSettings();
+-        Object.assign(settings, cloudSettings);
+-        ctx.saveSettings();
++        applyCloudSettings(ctx, cloudSettings);
+@@ -1138,0 +1140 @@
++  applyCloudSettings,
+--- base/main/ipc/state.js
++++ wrong-3-leftover-save/main/ipc/state.js
+@@ -9,0 +10 @@
++const { normalizeReaderModes } = require("../migrations");
+@@ -25,0 +27 @@
++    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)

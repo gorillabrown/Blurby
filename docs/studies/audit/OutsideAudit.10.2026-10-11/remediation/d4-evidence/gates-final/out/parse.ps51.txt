@@ -1,0 +1,128 @@
+001 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+002 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+003 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
+004 ok single-command elements=3 redirections=0 invocation=Unknown :: git diff --name-only
+005 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+006 ok single-command elements=3 redirections=0 invocation=Unknown :: git grep -P
+007 ok single-command elements=13 redirections=0 invocation=Unknown :: git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs
+008 ok single-command elements=4 redirections=0 invocation=Unknown :: npm test -- tests/readerModeIsolation.test.ts
+009 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx
+010 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx
+011 ok single-command elements=4 redirections=0 invocation=Unknown :: npm test -- tests/commandPaletteRoutes.test.ts
+012 ok single-command elements=9 redirections=0 invocation=Unknown :: git grep -n -P '\x22tts\x22|Narration \(TTS\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx
+013 ok single-command elements=4 redirections=0 invocation=Unknown :: npm test -- tests/settingsMigrationV13.test.js
+014 ok single-command elements=4 redirections=0 invocation=Unknown :: npm test -- tests/settingsNarrateNormalization.test.js
+015 ok single-command elements=3 redirections=0 invocation=Unknown :: git grep -cF
+016 ok single-command elements=6 redirections=0 invocation=Unknown :: git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js
+017 ok single-command elements=6 redirections=0 invocation=Unknown :: git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js
+018 ok single-command elements=6 redirections=0 invocation=Unknown :: git grep -cF 'Object.assign(settings' -- main/sync-engine.js
+019 ok single-command elements=6 redirections=0 invocation=Unknown :: git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js
+020 ok single-command elements=8 redirections=0 invocation=Unknown :: git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js
+021 ok single-command elements=7 redirections=0 invocation=Unknown :: git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js
+022 ok single-command elements=8 redirections=0 invocation=Unknown :: git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js
+023 ok single-command elements=7 redirections=0 invocation=Unknown :: git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js
+024 ok single-command elements=10 redirections=0 invocation=Unknown :: git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js
+025 ok single-command elements=7 redirections=0 invocation=Unknown :: git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js
+026 ok single-command elements=7 redirections=0 invocation=Unknown :: git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\b)[A-Z]' -- src
+027 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/tts-engine.test.js tests/tts-worker.test.js
+028 ok single-command elements=7 redirections=0 invocation=Unknown :: git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'
+029 ok single-command elements=7 redirections=0 invocation=Unknown :: git grep -n -P 'ipcMain\.handle\(\x22tts-(nano|pocket|qwen)-' -- main
+030 ok single-command elements=3 redirections=0 invocation=Unknown :: node -e "const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)"
+031 ok single-command elements=8 redirections=0 invocation=Unknown :: git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json
+032 ok single-command elements=7 redirections=0 invocation=Unknown :: npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/
+033 ok single-command elements=8 redirections=0 invocation=Unknown :: git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json
+034 ok single-command elements=8 redirections=0 invocation=Unknown :: git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow
+035 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+036 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+037 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+038 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --check 0123456789abcdef0123456789abcdef01234567
+039 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --name-status refs/remotes/origin/main...HEAD
+040 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+041 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run dev
+042 ok single-command elements=2 redirections=0 invocation=Unknown :: npm start
+043 ok single-command elements=3 redirections=0 invocation=Unknown :: git grep -w
+044 ok single-command elements=5 redirections=0 invocation=Unknown :: git revert -m 1 0123456789abcdef0123456789abcdef01234567
+045 ok single-command elements=2 redirections=0 invocation=Unknown :: git merge-base
+046 ok single-command elements=2 redirections=0 invocation=Unknown :: git rm
+047 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+048 ok single-command elements=8 redirections=0 invocation=Unknown :: git grep -n -w 'NARRATE_SPEED_MIN_HUNDREDTHS' -- src tests
+049 ok single-command elements=9 redirections=0 invocation=Unknown :: git grep -h -o -w -P 'NARRATE_SPEED_\w+' -- src/constants.ts
+050 ok single-command elements=3 redirections=0 invocation=Unknown :: node closure-check.mjs --self-test
+051 ok single-command elements=3 redirections=0 invocation=Unknown :: node closure-check.mjs .
+052 ok single-command elements=3 redirections=0 invocation=Unknown :: git rm src/x.ts
+053 ok single-command elements=3 redirections=0 invocation=Unknown :: git add src/x.ts
+054 ok single-command elements=3 redirections=0 invocation=Unknown :: git add -A
+055 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
+056 ok single-command elements=2 redirections=0 invocation=Unknown :: git rev-parse
+057 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+058 ok single-command elements=3 redirections=0 invocation=Unknown :: git commit --amend
+059 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+060 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
+061 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+062 ok single-command elements=6 redirections=0 invocation=Unknown :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main
+063 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+064 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+065 ok single-command elements=6 redirections=0 invocation=Unknown :: git rev-list --parents -n 1 HEAD
+066 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+067 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/remotes/origin/main
+068 ok single-command elements=5 redirections=0 invocation=Unknown :: git log -1 --format=%s HEAD
+069 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor HEAD refs/remotes/origin/main
+070 ok single-command elements=4 redirections=0 invocation=Unknown :: git switch --detach refs/remotes/origin/main
+071 ok single-command elements=6 redirections=0 invocation=Unknown :: git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1
+072 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --quiet refs/heads/eb/narrate-remove-1 HEAD
+073 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+074 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+075 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+076 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+077 ok single-command elements=5 redirections=0 invocation=Unknown :: git diff --name-only refs/heads/eb/narrate-remove-1 HEAD
+078 ok single-command elements=4 redirections=0 invocation=Unknown :: git push origin HEAD:refs/heads/main
+079 ok single-command elements=5 redirections=0 invocation=Unknown :: git revert -m 1 0123456789abcdef0123456789abcdef01234567
+080 ok single-command elements=4 redirections=0 invocation=Unknown :: git worktree list --porcelain
+081 ok single-command elements=5 redirections=0 invocation=Unknown :: git -C src/x.ts rev-parse --show-toplevel
+082 ok single-command elements=4 redirections=0 invocation=Unknown :: git fetch origin --prune
+083 ok single-command elements=7 redirections=0 invocation=Ampersand :: & "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json
+084 ok single-command elements=5 redirections=0 invocation=Unknown :: git branch -a --list "*narrate-remove-1*"
+085 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+086 ok single-command elements=6 redirections=0 invocation=Unknown :: git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main
+087 ok single-command elements=7 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main
+088 ok single-command elements=4 redirections=0 invocation=Unknown :: git merge-base … refs/remotes/origin/main
+089 ok single-command elements=5 redirections=0 invocation=Unknown :: git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1
+090 ok single-command elements=5 redirections=0 invocation=Unknown :: git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' 0123456789abcdef0123456789abcdef01234567
+091 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse 0123456789abcdef0123456789abcdef01234567^
+092 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse 0123456789abcdef0123456789abcdef01234567
+093 ok single-command elements=4 redirections=0 invocation=Unknown :: git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main
+094 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+095 ok single-command elements=5 redirections=0 invocation=Unknown :: git log --reverse --format=%s 0123456789abcdef0123456789abcdef01234567..refs/heads/eb/narrate-remove-1
+096 ok single-command elements=5 redirections=0 invocation=Unknown :: git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main
+097 ok single-command elements=6 redirections=0 invocation=Unknown :: git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main
+098 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+099 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+100 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+101 ok single-command elements=5 redirections=0 invocation=Unknown :: git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1
+102 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+103 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+104 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse refs/heads/eb/narrate-remove-1
+105 ok single-command elements=4 redirections=0 invocation=Unknown :: git cat-file -e 0123456789abcdef0123456789abcdef01234567:src/x.ts
+106 ok single-command elements=6 redirections=0 invocation=Unknown :: git diff --quiet 0123456789abcdef0123456789abcdef01234567 -- src/x.ts
+107 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse 0123456789abcdef0123456789abcdef01234567^
+108 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+109 ok single-command elements=3 redirections=0 invocation=Unknown :: git worktree list
+110 ok single-command elements=6 redirections=0 invocation=Unknown :: git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base 0123456789abcdef0123456789abcdef01234567
+111 ok single-command elements=3 redirections=0 invocation=Unknown :: git rev-parse HEAD
+112 ok single-command elements=3 redirections=0 invocation=Unknown :: git status --porcelain
+113 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+114 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run typecheck
+115 ok single-command elements=2 redirections=0 invocation=Unknown :: npm test
+116 ok single-command elements=3 redirections=0 invocation=Unknown :: npm run build
+117 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
+118 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+119 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+120 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+121 ok single-command elements=2 redirections=0 invocation=Unknown :: git ls-files
+122 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+123 ok single-command elements=2 redirections=0 invocation=Unknown :: git grep
+124 ok single-command elements=2 redirections=0 invocation=Unknown :: npm ci
+125 ok single-command elements=5 redirections=0 invocation=Unknown :: npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js
+126 ok single-command elements=4 redirections=0 invocation=Unknown :: git diff --cached --stat
+127 ok single-command elements=2 redirections=0 invocation=Unknown :: git merge-base
+SUMMARY Desktop 5.1.26100.9457: 127 commands, 0 parse errors, 0 not single-command

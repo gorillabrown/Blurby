@@ -1,0 +1,1 @@
+utf8-console rerun: stdout, stderr and exit identical to bash for all 12 gates in pwsh7 and ps51
