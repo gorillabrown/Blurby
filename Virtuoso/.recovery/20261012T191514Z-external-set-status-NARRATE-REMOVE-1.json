@@ -1,0 +1,44 @@
+{
+  "id": "20261012T191514Z-external-set-status-NARRATE-REMOVE-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-REMOVE-1",
+  "created": "2026-10-12T19:15:14Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-12",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147)."
+    },
+    "expectedRevision": "e86f5029a568bb8cd07499716f2b2f03d7b6af8dcaabd3f029d81ac1ff39d5f6",
+    "idempotencyKey": "set-status:NARRATE-REMOVE-1:[('notes', 'origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147).'), ('started', '2026-10-12'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-REMOVE-1",
+      "idempotencyKey": "set-status:NARRATE-REMOVE-1:[('notes', 'origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147).'), ('started', '2026-10-12'), ('status', 'In Flight')]",
+      "actualRevision": "2026-10-12T19:15:18Z",
+      "recoveryId": "20261012T191514Z-external-set-status-NARRATE-REMOVE-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-12T19:15:40Z",
+        "verifiedFields": [
+          "status",
+          "started",
+          "notes"
+        ]
+      }
+    }
+  },
+  "resolved": "2026-10-12T19:15:32Z",
+  "outcome": "succeeded"
+}
