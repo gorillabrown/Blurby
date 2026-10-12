@@ -759,7 +759,7 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
 - **Out of scope:** making these tests faster; diagnosing the machine-wide slowdown seen on 2026-10-10; any other test; product code.
 - **Prerequisites:** none.
 - **Done when:**
-    1. `rg -c "\}, 30_000\);" tests/readerModeBoundaries.test.ts tests/updateInstallGating.test.tsx` reports `1` and `2`. No other test in either file gains a timeout.
+    1. In PowerShell 7, `git grep -c -F '}, 30_000);' -- tests/readerModeBoundaries.test.ts tests/updateInstallGating.test.tsx` prints `tests/readerModeBoundaries.test.ts:1` and `tests/updateInstallGating.test.tsx:2`; on the base it prints nothing and exits 1. (`rg` is not on PowerShell's PATH on this machine; LL-143 of the pending OutsideAudit.10 remediation.) No other test in either file gains a timeout.
     2. `npx vitest run tests/readerModeBoundaries.test.ts tests/updateInstallGating.test.tsx` exits 0.
     3. Full `npm test` exits 0 twice in a row on this machine. Record both summary lines in the close-out.
     4. `npm run typecheck` exits 0.
