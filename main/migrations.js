@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 12;
+const CURRENT_SETTINGS_SCHEMA = 13;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -17,6 +17,21 @@ function countWords(text) {
     inWord = !isSpace;
   }
   return count;
+}
+
+/**
+ * NARRATE-REMOVE-1: map a saved "narrate" reading mode to "flow" in place.
+ * Covers readingMode and lastReadingMode. Returns true if anything changed.
+ */
+function normalizeReaderModes(data) {
+  let changed = false;
+  for (const key of ["readingMode", "lastReadingMode"]) {
+    if (data[key] === "narrate") {
+      data[key] = "flow";
+      changed = true;
+    }
+  }
+  return changed;
 }
 
 const settingsMigrations = [
@@ -161,6 +176,8 @@ const settingsMigrations = [
     data.schemaVersion = 12;
     return data;
   },
+  // v12 → v13: Narrate removed (NARRATE-REMOVE-1) — a saved narrate mode becomes flow
+  (data) => { normalizeReaderModes(data); data.schemaVersion = 13; return data; },
 ];
 
 const libraryMigrations = [
@@ -268,10 +285,22 @@ function runMigrations(data, migrations, currentVersion) {
   return migrated;
 }
 
+/**
+ * Settings load path: run the migrations, then normalize. The normalize step covers an
+ * already-current schema-13 file that still holds "narrate", because the runner skips current files.
+ */
+function loadSettingsData(raw) {
+  const s = runMigrations(raw, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
+  normalizeReaderModes(s);
+  return s;
+}
+
 module.exports = {
   CURRENT_SETTINGS_SCHEMA,
   CURRENT_LIBRARY_SCHEMA,
   settingsMigrations,
   libraryMigrations,
   runMigrations,
+  normalizeReaderModes,
+  loadSettingsData,
 };

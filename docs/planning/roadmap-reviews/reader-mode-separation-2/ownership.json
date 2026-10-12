@@ -2872,8 +2872,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -2893,8 +2892,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -2914,8 +2912,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -2935,8 +2932,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -2956,8 +2952,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -2977,8 +2972,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3011,8 +3005,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3032,8 +3025,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3051,8 +3043,7 @@
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Window-capture wheel browse-away listener, active whenever flowMode (scrolled surface)."
     },
@@ -3073,8 +3064,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3095,8 +3085,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3117,8 +3106,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3161,8 +3149,7 @@
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Scrolled-surface entry scroll (uncancelled)."
     },
@@ -3182,8 +3169,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3203,8 +3189,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3220,8 +3205,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Mirror of the shared Flow/Narrate chunk visual state."
     },
@@ -3241,8 +3225,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3274,8 +3257,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3319,8 +3301,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3340,8 +3321,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3361,8 +3341,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3382,8 +3361,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3415,8 +3393,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3436,8 +3413,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3453,8 +3429,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Chunk scroll-follow de-dupe key."
     },
@@ -3474,8 +3449,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3495,8 +3469,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3516,8 +3489,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3600,8 +3572,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3621,8 +3592,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3642,8 +3612,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3663,8 +3632,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3696,8 +3664,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3717,8 +3684,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3738,8 +3704,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3759,8 +3724,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3780,8 +3744,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3801,8 +3764,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -3822,8 +3784,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One FoliatePageView instance (one foliate-view element, DOM refs, layout caches) serves every mode today; spec item 7 gives each mode its own FoliateView."
     },
@@ -4331,8 +4292,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "onLoad 200 ms timer: bumps foliateRenderVersion in every mode, runs Page restore otherwise; uncancelled."
     },
@@ -4363,8 +4323,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "onWordsReextracted pending-resume: resumes the Flow instance or restores Narrate's highlight after a section load; uncancelled and not owner-checked."
     },
@@ -4445,8 +4404,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Browse-away polling, section nav and section-end fallback against the shared view."
     },
@@ -4516,8 +4474,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Single persistent anchor commit path used by every mode."
     },
@@ -4770,8 +4727,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Hard selection set by clicks in any mode, cleared by every mode's advance path."
     },
@@ -4857,8 +4813,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One imperative Foliate API handed to every mode hook (orchestrator, flow sync, caching, foliate sync)."
     },
@@ -4894,8 +4849,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "DOM word slice re-extracted by every mode."
     },
@@ -4927,8 +4881,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Ref mirror of the shared cursor; written synchronously by clicks, onWordAdvance, persistent-anchor writeRefs."
     },
@@ -4960,8 +4913,7 @@
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Section-nav throttle in useFoliateSync effect 3 (runs for focus and compatibility-'flow', which includes Narrate)."
     },
@@ -5108,8 +5060,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Page soft selection consumed by every mode start via resolveModeStartWordIndex."
     },
@@ -5154,8 +5105,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One state written by Flow (publishFlowVisualState) and Narrate (applyNarration*) publishers; rendered by the shared FoliatePageView."
     },
@@ -5276,8 +5226,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Surface re-render counter driving Flow line-map rebuilds, word-position index rebuilds and the post-switch anchor effect."
     },
@@ -5297,8 +5246,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Written on every word extraction; value never read (render-trigger only).",
       "confidence": "low",
@@ -5321,8 +5269,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Single highlighted cursor written by every mode's advance path and read by FoliatePageView, keyboard nav and toolbar."
     },
@@ -6127,8 +6074,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Resume intent set/consumed by every mode (doc restore, click, pause, mode start)."
     },
@@ -6461,8 +6407,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Browse-away polling runs in every mode against the shared Foliate view."
     },
@@ -6496,8 +6441,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Browse-away polling runs in every mode against the shared Foliate view."
     },
@@ -6826,8 +6770,7 @@
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Created by the narration bridge but written by useFoliateSync section nav for Focus and compatibility-'flow' (Flow + Narrate)."
     },
@@ -6923,8 +6866,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One persistent anchor shared by all modes today; each ModeState owns its anchor and hands off by value; the persistence port accepts active-owner values only."
     },
@@ -6944,8 +6886,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "One persistent anchor shared by all modes today; each ModeState owns its anchor and hands off by value; the persistence port accepts active-owner values only."
     },
@@ -7322,8 +7263,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "The active word array for every mode (orchestrator, caching, foliate sync, flow sync all receive reader.wordsRef)."
     },
@@ -7404,8 +7344,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "startFlow section-load retry serves both Flow and Narrate (targetMode); uncancelled, re-enters startFlow."
     },
@@ -7462,8 +7401,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Second mirror of the shared highlighted cursor (diverges from ReaderContainer's ref between renders)."
     },
@@ -7704,8 +7642,7 @@
       ],
       "proposedOwner": "per-mode",
       "privateCopiesFor": [
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Flow pause-on-miss and Narrate truth-sync miss both write this single slot; ReaderContainer onWordsReextracted consumes it."
     },
@@ -8938,8 +8875,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Retry delay inside jumpFoliateToWordAnchor, called from page onLoad restore and every mode's jump-back."
     },
@@ -8959,8 +8895,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "BLOCK_TAGS is a never-mutated module Set; each mode's helper copy holds its own."
     },
@@ -8980,8 +8915,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Batch-yield timer inside wrapWordsInSpans (section load in every mode; Narrate restamp)."
     },
@@ -9070,8 +9004,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Single WordPositionIndex per FoliatePageView today; each mode's FoliateView constructs its own."
     },
@@ -9092,8 +9025,7 @@
       "privateCopiesFor": [
         "page",
         "focus",
-        "flow",
-        "narrate"
+        "flow"
       ],
       "rationale": "Single WordPositionIndex per FoliatePageView today; each mode's FoliateView constructs its own."
     }

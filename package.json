@@ -14,16 +14,6 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "perf": "vitest run tests/perf-baseline.test.ts",
-    "moss:preflight": "node scripts/moss_preflight.mjs",
-    "moss:nano:resident": "node scripts/moss_nano_probe.mjs --runtime-mode resident",
-    "tts:eval": "node scripts/tts_eval_runner.mjs",
-    "tts:eval:matrix": "node scripts/tts_eval_runner.mjs --matrix",
-    "tts:eval:matrix:gated": "node scripts/tts_eval_runner.mjs --matrix --gates",
-    "test:quality": "node scripts/tts_eval_runner.mjs --mode=gate --baseline=docs/testing/tts_eval_baseline_v2.json --gates=docs/testing/tts_quality_gates.v2.json",
-    "tts:eval:soak:short": "node scripts/tts_eval_runner.mjs --soak-profile short",
-    "tts:eval:gates": "node scripts/tts_eval_gate.mjs",
-    "tts:scan:index": "node scripts/tts_engine_scan_index.mjs",
-    "tts:scan:validate": "vitest run tests/ttsEngineScanCorpus.test.ts tests/ttsEngineScanIndex.test.ts",
     "postinstall": "patch-package && node scripts/patch-onnxruntime.js"
   },
   "build": {
@@ -47,13 +37,9 @@
       "main.js",
       "preload.js",
       "main/**/*",
-      "dist/**/*",
-      "scripts/moss_nano_app_sidecar.py",
-      "scripts/pocket_tts_sidecar.py"
+      "dist/**/*"
     ],
     "asarUnpack": [
-      "scripts/moss_nano_app_sidecar.py",
-      "scripts/pocket_tts_sidecar.py",
       "node_modules/onnxruntime-node/**",
       "node_modules/onnxruntime-common/**",
       "node_modules/kokoro-js/**",
