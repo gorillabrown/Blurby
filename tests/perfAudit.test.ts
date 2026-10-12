@@ -258,16 +258,15 @@ describe("startup parallelization — window before auth/sync", () => {
     expect(authCompleted).toBe(true);
   });
 
-  it("keeps Kokoro warm-up in a delayed background startup scheduler", () => {
+  it("starts no Kokoro warm-up at app launch", () => {
     const src = fs.readFileSync(
       path.resolve(__dirname, "../main.js"),
       "utf-8"
     );
 
-    expect(src).toContain("function scheduleBackgroundStartupTasks");
-    expect(src).toContain("STARTUP_BACKGROUND_DELAY_MS");
-    expect(src).toContain("mainWindow.once(\"show\", runKokoroWarmup)");
-    expect(src).toMatch(/setTimeout\(\(\)\s*=>\s*\{[\s\S]*ttsEngine\.downloadModel/);
+    expect(src).not.toContain("scheduleBackgroundStartupTasks");
+    expect(src).not.toContain("runKokoroWarmup");
+    expect(src).not.toMatch(/ttsEngine\.downloadModel/);
   });
 
   it("does not run immediate Kokoro model download in the startup critical section", () => {
@@ -611,48 +610,6 @@ describe("snoozed doc index (Set-based check)", () => {
     // Empty Set → no iterations at all
     expect(scanCount.count).toBe(0);
     expect(expired).toHaveLength(0);
-  });
-
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// k. Voice sync effect dependency array ≤ 3 items
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("voice sync useEffect dependency array", () => {
-
-  it("k: useNarrationSync voice sync effect depends on ≤ 3 items", () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/hooks/useNarrationSync.ts"),
-      "utf-8"
-    );
-
-    // The voice-sync effect is the one that calls setKokoroVoice / selectVoice.
-    // Its dep array should be tightly scoped to the two voice identity values.
-    // Find the specific pattern: `setKokoroVoice` appears in the effect body,
-    // then its dep array immediately follows.
-    //
-    // Find all dep arrays containing ttsVoiceName and pick the smallest one —
-    // that is the tightened voice-sync effect.
-    const allMatches = [...src.matchAll(/\},\s*\[([^\]]*ttsVoiceName[^\]]*)\]\s*\);/g)];
-    expect(allMatches.length).toBeGreaterThan(0);
-
-    // The voice-sync effect should be the one with the fewest deps
-    const depCounts = allMatches.map((m) => m[1].split(",").map((d) => d.trim()).filter(Boolean).length);
-    const minDeps = Math.min(...depCounts);
-
-    // The tightened voice-sync effect must have ≤ 3 deps (should be exactly 2)
-    expect(minDeps).toBeLessThanOrEqual(3);
-  });
-
-  it("k: voice sync effect includes settings.ttsEngine and settings.ttsVoiceName as deps", () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/hooks/useNarrationSync.ts"),
-      "utf-8"
-    );
-
-    // The tight voice-sync effect: }, [settings.ttsEngine, settings.ttsVoiceName]);
-    expect(src).toContain("[settings.ttsEngine, settings.ttsVoiceName]");
   });
 
 });

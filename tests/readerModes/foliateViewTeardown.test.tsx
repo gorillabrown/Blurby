@@ -13,7 +13,6 @@ import { createFakeDocument } from "./harness/fakePorts";
 import PageFoliateView from "../../src/reader/modes/page/FoliateView";
 import FocusFoliateView from "../../src/reader/modes/focus/FoliateView";
 import FlowFoliateView from "../../src/reader/modes/flow/FoliateView";
-import NarrateFoliateView from "../../src/reader/modes/narrate/FoliateView";
 
 vi.mock("foliate-js/view.js", () => ({}));
 
@@ -56,7 +55,7 @@ function flushFrames(): unknown[] {
   return errors;
 }
 
-const VIEWS = { page: PageFoliateView, focus: FocusFoliateView, flow: FlowFoliateView, narrate: NarrateFoliateView };
+const VIEWS = { page: PageFoliateView, focus: FocusFoliateView, flow: FlowFoliateView };
 
 describe("mode FoliateView teardown vs foliate's pending frame work (S1 G6)", () => {
   beforeEach(() => {

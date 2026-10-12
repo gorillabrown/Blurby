@@ -7,7 +7,7 @@
 // mode-owned resources, shell files hold shell-owned ones, shared value files hold none, the broker holds
 // declared infrastructure. Q-E: per-mode census resources live in a private copy in every listed mode.
 // Dynamic: sessions issued in turn through the broker (only the active key's calls reach infrastructure), and
-// four runtimes created from one handoff and one settings object share no mutable object identity.
+// three runtimes created from one handoff and one settings object share no mutable object identity.
 import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -214,7 +214,7 @@ describe("reader mode ownership (G1)", () => {
     for (const owner of owners.values()) byOwner[owner] = (byOwner[owner] ?? 0) + 1;
     console.info(`[G1 ownership] files in scope: ${scope.length}; resources: ${resources.length}; by owner: ${JSON.stringify(byOwner)}`);
     expect(resources.length).toBeGreaterThan(0);
-    for (const owner of ["page", "focus", "flow", "narrate", "shell", "infrastructure"]) expect(byOwner[owner], `resources owned by ${owner}`).toBeGreaterThan(0);
+    for (const owner of ["page", "focus", "flow", "shell", "infrastructure"]) expect(byOwner[owner], `resources owned by ${owner}`).toBeGreaterThan(0);
     expect(violations).toEqual([]);
     expect(owners.size).toBe(resources.length);
 
@@ -223,7 +223,7 @@ describe("reader mode ownership (G1)", () => {
     const broker = createReaderPorts(fake.infra);
     broker.openDocument("doc-1");
     const issued: { mode: ReaderModeId; key: ReaderSessionKey; ports: ReaderPorts }[] = [];
-    for (const mode of ["page", "focus", "flow", "narrate"] as ReaderModeId[]) {
+    for (const mode of ["page", "focus", "flow"] as ReaderModeId[]) {
       const previous = issued.at(-1);
       if (previous) {
         broker.invalidate(previous.key);
@@ -232,8 +232,8 @@ describe("reader mode ownership (G1)", () => {
       issued.push({ mode, ...broker.issue(mode) });
       for (const { mode: owner, ports: p } of issued) p.persistence.updateProgress("doc-1", owner.length);
     }
-    expect(fake.effects.map((c) => c.args[1])).toEqual(["page", "focus", "flow", "narrate"].map((m) => m.length));
-    expect(broker.stats.rejected["persistence.updateProgress"]).toBe(1 + 2 + 3);
+    expect(fake.effects.map((c) => c.args[1])).toEqual(["page", "focus", "flow"].map((m) => m.length));
+    expect(broker.stats.rejected["persistence.updateProgress"]).toBe(1 + 2);
   });
 
   it("rejects resources in shared files, module state in modes and undeclared infrastructure (negative control)", () => {
@@ -347,7 +347,7 @@ describe("reader mode ownership (G1)", () => {
     expect(checkPerModeCopies([resource], { page: ["const aRef = useRef(0);"], focus: ["x const aRef = useRef(0); y"] }, {})).toEqual({ missing: [], inShared: [] });
   });
 
-  it("four runtimes created from one handoff and one settings object share no mutable object identity (dynamic)", async () => {
+  it("three runtimes created from one handoff and one settings object share no mutable object identity (dynamic)", async () => {
     const fake = createFakeInfrastructure();
     const broker = createReaderPorts(fake.infra);
     const document = fake.infra.document.snapshot();
@@ -359,11 +359,10 @@ describe("reader mode ownership (G1)", () => {
       page: (await import("../src/reader/modes/page/index")).pageMode,
       focus: (await import("../src/reader/modes/focus/index")).focusMode,
       flow: (await import("../src/reader/modes/flow/index")).flowMode,
-      narrate: (await import("../src/reader/modes/narrate/index")).narrateMode,
     };
     const graphs: Record<string, Set<object>> = {};
     let previous: ReaderSessionKey | null = null;
-    for (const mode of ["page", "focus", "flow", "narrate"] as ReaderModeId[]) {
+    for (const mode of ["page", "focus", "flow"] as ReaderModeId[]) {
       // The broker admits one active session; the earlier runtime objects stay alive and inspectable.
       if (previous) broker.invalidate(previous);
       const { key, ports } = broker.issue(mode);

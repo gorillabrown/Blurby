@@ -5,7 +5,6 @@
 // (useFlowScrollSync publishFlowVisualState) therefore lived for one commit: FoliatePageView's effect applied
 // it (and followed it to the reading zone), then the null cleared page-word--active-word again. G6 B0 never
 // shows an active word in Flow; the candidate kept the state, leaving active-word on the start word.
-// Narrate keeps its chunk state (the effect installs the publishers instead), so its active word stays.
 import { act, createElement, useSyncExternalStore } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -31,7 +30,6 @@ const seam = vi.hoisted(() => {
 vi.mock("../../src/reader/modes/page/FoliateView", seam.recordingView("page"));
 vi.mock("../../src/reader/modes/focus/FoliateView", seam.recordingView("focus"));
 vi.mock("../../src/reader/modes/flow/FoliateView", seam.recordingView("flow"));
-vi.mock("../../src/reader/modes/narrate/FoliateView", seam.recordingView("narrate"));
 
 type Router = ReturnType<typeof createReaderModeRouter>;
 
@@ -89,21 +87,6 @@ describe("chunk visual state lifetime matches B0 (S1 G6)", () => {
     // ...and B0's per-render null followed in the next commit, so the view's null branch clears the classes.
     expect(seen.at(-1)).toBeNull();
     expect(runtime.getChunkVisualState()).toBeNull();
-    router.destroy();
-  });
-
-  it("Narrate: a chunk-boundary state stays applied (B0 keeps Narrate's chunk state)", async () => {
-    const fake = createFakeInfrastructure();
-    fake.infra.audio.resolveHighlightSync = (() => ({ syncLevel: "word-synced" })) as never;
-    const router = await mount(fake);
-    await act(async () => { router.select("narrate"); });
-    seam.applied.length = 0;
-    await act(async () => { (fake.registered.chunkBoundary as unknown as (endIdx: number) => void)(21); });
-
-    const runtime = router.getActive()!.runtime as unknown as { getChunkVisualState(): ChunkReadingVisualState | null };
-    const seen = seam.applied.filter((e) => e.mode === "narrate").map((e) => e.state);
-    expect(seen.at(-1)).toMatchObject({ mode: "narrate", activeWordIndex: 20 });
-    expect(runtime.getChunkVisualState()).toMatchObject({ mode: "narrate", activeWordIndex: 20 });
     router.destroy();
   });
 });

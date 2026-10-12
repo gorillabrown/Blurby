@@ -21,7 +21,6 @@ const baseProps = {
   wpm: 250,
   focusTextSize: 100,
   readingMode: "page" as const,
-  isNarrating: false,
   playing: false,
   isEink: false,
   chapters: [],
@@ -30,7 +29,6 @@ const baseProps = {
   onEnterPage: vi.fn(),
   onEnterFocus: vi.fn(),
   onEnterFlow: vi.fn(),
-  onToggleNarration: vi.fn(),
   onTogglePlay: vi.fn(),
 };
 
@@ -51,13 +49,12 @@ describe("ReaderBottomBar controls", () => {
     container.remove();
   });
 
-  it("renders Page, Focus, Flow, and Narrate controls and routes clicks", async () => {
+  it("renders Page, Focus, and Flow controls and routes clicks", async () => {
     const props = {
       ...baseProps,
       onEnterPage: vi.fn(),
       onEnterFocus: vi.fn(),
       onEnterFlow: vi.fn(),
-      onToggleNarration: vi.fn(),
     };
 
     await act(async () => {
@@ -73,70 +70,25 @@ describe("ReaderBottomBar controls", () => {
     const flowButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.trim() === "Flow",
     );
-    const narrateButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim() === "Narrate",
-    );
 
     expect(pageButton).toBeDefined();
     expect(focusButton).toBeDefined();
     expect(flowButton).toBeDefined();
-    expect(narrateButton).toBeDefined();
 
     await act(async () => {
       pageButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       focusButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       flowButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
-      narrateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(props.onEnterPage).toHaveBeenCalledTimes(1);
     expect(props.onEnterFocus).toHaveBeenCalledTimes(1);
     expect(props.onEnterFlow).toHaveBeenCalledTimes(1);
-    expect(props.onToggleNarration).toHaveBeenCalledTimes(1);
-  });
-
-  it("keeps Narrate visibly selected even when narration is paused", async () => {
-    await act(async () => {
-      root.render(
-        <ReaderBottomBar
-          {...baseProps}
-          readingMode="narrate"
-          isNarrating={false}
-          playing={false}
-        />,
-      );
-    });
-
-    const narrateButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim() === "Narrate",
-    );
-    const flowButton = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim() === "Flow",
-    );
-
-    expect(narrateButton?.getAttribute("aria-pressed")).toBe("true");
-    expect(flowButton?.getAttribute("aria-pressed")).toBe("false");
-  });
-
-  it("uses neutral Kokoro wording for the assistive TTS rate label", async () => {
-    await act(async () => {
-      root.render(
-        <ReaderBottomBar
-          {...baseProps}
-          readingMode="narrate"
-          isNarrating={false}
-          speed={{ kind: "rate", rate: 1 }}
-        />,
-      );
-    });
-
-    expect(container.querySelector('button.rbb-speed-trigger[aria-haspopup="dialog"][aria-label="Speed 1.00x"]')).not.toBeNull();
-    expect(container.querySelector('[aria-label="Legacy Kokoro rate"]')).toBeNull();
   });
 });
 
-// READER-4M-2: Four mode buttons — Group A tests
-describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
+// READER-4M-2 / NARRATE-REMOVE-1: three mode buttons — Group A tests
+describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
   let container: HTMLDivElement;
   let root: Root;
 
@@ -158,18 +110,35 @@ describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
     return group ? Array.from(group.querySelectorAll("button")) : [];
   }
 
-  // Test 1: all four mode buttons rendered in order Page / Focus / Flow / Narrate
-  it("renders all four mode buttons: Page, Focus, Flow, Narrate — in that order", async () => {
+  // Test 1 (NARRATE-REMOVE-1 Done-when 3): exactly the mode buttons Page, Focus and Flow, in that order
+  it("renders exactly the mode buttons Page, Focus and Flow", async () => {
     await act(async () => {
       root.render(<ReaderBottomBar {...baseProps} readingMode="page" />);
     });
 
+    expect(getModeButtons(container).map((button) => button.textContent?.trim())).toEqual(["Page", "Focus", "Flow"]);
+  });
+
+  // Test 1b (NARRATE-REMOVE-1 Done-when 3): no element's text contains "Narrat", in any reading mode
+  it.each(["page", "focus", "flow"] as const)("renders no element whose text contains Narrat in %s mode", async (mode) => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode={mode} />);
+    });
+
+    const withNarrateText = Array.from(container.querySelectorAll("*")).filter((el) => el.textContent?.includes("Narrat"));
+    expect(withNarrateText).toEqual([]);
+  });
+
+  // Test 1c (NARRATE-REMOVE-1 Done-when 3, D11): in Page the remembered Flow is outlined as the last mode
+  it("marks the Flow button rbb-mode-btn--last when readingMode is page and lastReadingMode is flow", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="page" lastReadingMode="flow" />);
+    });
+
     const buttons = getModeButtons(container);
-    expect(buttons).toHaveLength(4);
-    expect(buttons[0].textContent?.trim()).toBe("Page");
-    expect(buttons[1].textContent?.trim()).toBe("Focus");
     expect(buttons[2].textContent?.trim()).toBe("Flow");
-    expect(buttons[3].textContent?.trim()).toBe("Narrate");
+    expect(buttons[2].classList.contains("rbb-mode-btn--last")).toBe(true);
+    expect(buttons[1].classList.contains("rbb-mode-btn--last")).toBe(false);
   });
 
   // Test 2: Page button has aria-label "Page mode" and is active when readingMode === "page"
@@ -185,7 +154,6 @@ describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
     // Other buttons must not be pressed
     expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
   });
 
   // Test 3: Focus button is active (aria-pressed true) when readingMode === "focus"
@@ -199,7 +167,6 @@ describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
     expect(buttons[1].getAttribute("aria-pressed")).toBe("true");
     expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
   });
 
   // Test 4: Flow button is active when readingMode === "flow"
@@ -213,23 +180,6 @@ describe("ReaderBottomBar — four mode buttons (READER-4M-2)", () => {
     expect(buttons[2].getAttribute("aria-pressed")).toBe("true");
     expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
-  });
-
-  // Test 5: Narrate button is active when readingMode === "narrate"
-  it("Narrate button is aria-pressed when readingMode is narrate", async () => {
-    await act(async () => {
-      root.render(
-        <ReaderBottomBar {...baseProps} readingMode="narrate" isNarrating={false} />,
-      );
-    });
-
-    const buttons = getModeButtons(container);
-    expect(buttons[3].getAttribute("aria-label")).toBe("Narrate mode");
-    expect(buttons[3].getAttribute("aria-pressed")).toBe("true");
-    expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
-    expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
   });
 });
 
@@ -266,10 +216,10 @@ describe("ReaderBottomBar — Page Play disabled", () => {
     expect(onTogglePlay).not.toHaveBeenCalled();
   });
 
-  it("keeps Play enabled for Focus, Flow, and Narrate", async () => {
+  it("keeps Play enabled for Focus and Flow", async () => {
     const onTogglePlay = vi.fn();
 
-    for (const mode of ["focus", "flow", "narrate"] as const) {
+    for (const mode of ["focus", "flow"] as const) {
       await act(async () => {
         root.render(<ReaderBottomBar {...baseProps} readingMode={mode} onTogglePlay={onTogglePlay} />);
       });

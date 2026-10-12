@@ -4,7 +4,6 @@
 // Structural verification tests for the four main workstreams of REFACTOR-1B:
 //   (a) foliateHelpers.ts extraction — 12 named exports from FoliatePageView
 //   (b) foliateStyles.ts extraction — injectStyles export
-//   (c) TTSSettings sub-component split — 3 sub-components imported
 //   (d) Inline style → CSS migration — < 30 inline styles across src/components/
 //   (e) global.css domain split — 8 domain files + index.css imports
 //
@@ -61,26 +60,6 @@ describe("foliateHelpers.ts — extraction structure", () => {
       expect(src, `Expected export: ${fn}`).toContain(`export function ${fn}`);
     }
   });
-
-  it("(a5) FoliatePageView.tsx imports from foliateHelpers (not inline definitions)", () => {
-    const fpv = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/FoliatePageView.tsx"),
-      "utf-8"
-    );
-    expect(fpv).toContain("from \"../utils/foliateHelpers\"");
-    // Spot-check a few key imports are present
-    expect(fpv).toContain("extractWordsFromView");
-  });
-
-  it("(a6) FoliatePageView.tsx does NOT define hasToken inline", () => {
-    const fpv = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/FoliatePageView.tsx"),
-      "utf-8"
-    );
-    // Should not have local function definition — only imports from foliateHelpers
-    expect(fpv).not.toMatch(/^function hasToken/m);
-    expect(fpv).not.toMatch(/^const hasToken/m);
-  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -111,79 +90,6 @@ describe("foliateStyles.ts — extraction structure", () => {
     expect(src).toContain("blurby-theme");
     expect(src).toContain("style.id");
   });
-
-  it("(b4) FoliatePageView.tsx imports injectStyles from foliateStyles (not inline)", () => {
-    const fpv = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/FoliatePageView.tsx"),
-      "utf-8"
-    );
-    expect(fpv).toContain("from \"../utils/foliateStyles\"");
-    expect(fpv).toContain("injectStyles");
-    // Must not define injectStyles locally
-    expect(fpv).not.toMatch(/^function injectStyles/m);
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// (c) TTSSettings sub-component split
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("TTSSettings — sub-component split", () => {
-  const settingsDir = path.resolve(__dirname, "../src/components/settings");
-  let ttsSrc: string;
-
-  beforeAll(() => {
-    ttsSrc = fs.readFileSync(path.join(settingsDir, "TTSSettings.tsx"), "utf-8");
-  });
-
-  it("(c1) KokoroStatusSection.tsx exists", () => {
-    expect(fs.existsSync(path.join(settingsDir, "KokoroStatusSection.tsx"))).toBe(true);
-  });
-
-  it("(c2) PauseSettingsSection.tsx exists", () => {
-    expect(fs.existsSync(path.join(settingsDir, "PauseSettingsSection.tsx"))).toBe(true);
-  });
-
-  it("(c3) PronunciationOverridesEditor.tsx exists", () => {
-    expect(fs.existsSync(path.join(settingsDir, "PronunciationOverridesEditor.tsx"))).toBe(
-      true
-    );
-  });
-
-  it("(c4) TTSSettings.tsx imports all 3 sub-components", () => {
-    expect(ttsSrc).toContain("KokoroStatusSection");
-    expect(ttsSrc).toContain("PauseSettingsSection");
-    expect(ttsSrc).toContain("PronunciationOverridesEditor");
-  });
-
-  it("(c5) TTSSettings.tsx is under 600 lines", () => {
-    const lineCount = ttsSrc.split("\n").length;
-    expect(lineCount).toBeLessThan(600);
-  });
-
-  it("(c6) KokoroStatusSection.tsx exports KokoroStatusSection component", () => {
-    const src = fs.readFileSync(
-      path.join(settingsDir, "KokoroStatusSection.tsx"),
-      "utf-8"
-    );
-    expect(src).toMatch(/export.*KokoroStatusSection/);
-  });
-
-  it("(c7) PauseSettingsSection.tsx exports PauseSettingsSection component", () => {
-    const src = fs.readFileSync(
-      path.join(settingsDir, "PauseSettingsSection.tsx"),
-      "utf-8"
-    );
-    expect(src).toMatch(/export.*PauseSettingsSection/);
-  });
-
-  it("(c8) PronunciationOverridesEditor.tsx exports PronunciationOverridesEditor component", () => {
-    const src = fs.readFileSync(
-      path.join(settingsDir, "PronunciationOverridesEditor.tsx"),
-      "utf-8"
-    );
-    expect(src).toMatch(/export.*PronunciationOverridesEditor/);
-  });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -207,21 +113,6 @@ describe("Inline style migration — src/components/", () => {
     return results;
   }
 
-  it("(d1) tts-settings.css exists", () => {
-    expect(
-      fs.existsSync(path.resolve(__dirname, "../src/styles/tts-settings.css"))
-    ).toBe(true);
-  });
-
-  it("(d2) tts-settings.css contains TTS-related CSS class names", () => {
-    const css = fs.readFileSync(
-      path.resolve(__dirname, "../src/styles/tts-settings.css"),
-      "utf-8"
-    );
-    // Must contain at least one .tts- prefixed class
-    expect(css).toMatch(/\.tts-/);
-  });
-
   it("(d3) total inline style count across all .tsx files in src/components/ is < 30", () => {
     const files = collectTsxFiles(componentsDir);
     let total = 0;
@@ -232,27 +123,6 @@ describe("Inline style migration — src/components/", () => {
     }
     // Sprint target was 179 → 27. Allow a small buffer above 27 for dynamic-only exceptions.
     expect(total).toBeLessThan(30);
-  });
-
-  it("(d4) TTSSettings.tsx has ≤ 1 inline style (dynamic CSS custom property setters only)", () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/settings/TTSSettings.tsx"),
-      "utf-8"
-    );
-    const matches = src.match(/style=\{\{/g);
-    const count = matches ? matches.length : 0;
-    // TTSSettings should have 0 static inline styles; allow max 1 for CSS var injection
-    expect(count).toBeLessThanOrEqual(1);
-  });
-
-  it("(d5) KokoroStatusSection.tsx has ≤ 1 inline style (dynamic progress bar width only)", () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/components/settings/KokoroStatusSection.tsx"),
-      "utf-8"
-    );
-    const matches = src.match(/style=\{\{/g);
-    const count = matches ? matches.length : 0;
-    expect(count).toBeLessThanOrEqual(1);
   });
 });
 
@@ -290,10 +160,6 @@ describe("global.css domain split — index.css + 8 domain files", () => {
     for (const file of requiredImports) {
       expect(indexSrc, `Expected @import for ${file}`).toContain(file);
     }
-  });
-
-  it("(e4) index.css also imports tts-settings.css", () => {
-    expect(indexSrc).toContain("tts-settings.css");
   });
 
   it("(e5) all 8 domain CSS files physically exist in src/styles/", () => {

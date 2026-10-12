@@ -14,6 +14,7 @@ import type {
   ReaderModeModule,
   ReaderModeRuntime,
   ReaderModeRuntimeSnapshotV1,
+  ReaderModeSpeed,
 } from "../../../src/reader/modes/ReaderModeAdapter";
 import { createFakeDocument, createFakeInfrastructure } from "./fakePorts";
 
@@ -140,7 +141,7 @@ export function assertLifecycle(module: ReaderModeModule, expectations: Lifecycl
     runtime.jumpBack();
     runtime.adjustSpeed(25);
     runtime.setSpeed({ kind: "wpm", wpm: 112.5 });
-    runtime.setSpeed({ kind: "rate", rate: 1.05 });
+    runtime.setSpeed({ kind: "rate", rate: 1.05 } as unknown as ReaderModeSpeed);
     runtime.handleCommand({ kind: "move-selection", direction: "right" });
     expect(runtime.getSnapshot()).toEqual(stopped);
     // Destroyed runtimes produce zero side effects under fake timers.
@@ -224,7 +225,7 @@ export function assertNoSpeed(module: ReaderModeModule): void {
   expect(before.speed).toBeNull();
   const callsBefore = calls.length;
   runtime.setSpeed({ kind: "wpm", wpm: 112.5 });
-  runtime.setSpeed({ kind: "rate", rate: 1.05 });
+  runtime.setSpeed({ kind: "rate", rate: 1.05 } as unknown as ReaderModeSpeed);
   expect(runtime.getSnapshot()).toEqual(before);
   expect(calls.slice(callsBefore)).toEqual([]);
   runtime.destroy();

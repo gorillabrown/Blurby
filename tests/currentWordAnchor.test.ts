@@ -164,8 +164,8 @@ describe("setRestore", () => {
   it("is outranked by mode-advance when active", () => {
     const anchor = createCurrentWordAnchor();
     anchor.setRestore(6);
-    anchor.setActiveMode("narrate");
-    anchor.setModeAdvance("narrate", 11);
+    anchor.setActiveMode("flow");
+    anchor.setModeAdvance("flow", 11);
     expect(anchor.getCurrent()).toBe(11);
   });
 });
