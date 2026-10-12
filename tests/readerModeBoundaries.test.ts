@@ -219,7 +219,7 @@ describe("reader mode boundaries (G1)", () => {
     } else if (unexercised.length > 0) {
       console.info(`[G1] unreachable until all mode trees exist: ${unexercised.join(", ")}`);
     }
-  });
+  }, 30_000); // G1 builds the whole import graph (~6.5 s alone); the 10 s default has no headroom under full-suite load (KF-3)
 
   it("rejects sibling, legacy, undeclared-module, undeclared-export and external violations (negative control)", () => {
     const synthetic: Graph = {
