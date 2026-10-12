@@ -7,6 +7,7 @@ const {
   MAX_RECENT_FOLDERS,
 } = require("../constants");
 const fsPromises = require("fs/promises");
+const { normalizeReaderModes } = require("../migrations");
 
 let saveSettingsTimeout = null;
 
@@ -23,6 +24,7 @@ function register(ctx) {
     const settings = ctx.getSettings();
     // Update in-memory state immediately so all readers see the new value
     Object.assign(settings, newSettings);
+    normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)
     if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
 
     // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write

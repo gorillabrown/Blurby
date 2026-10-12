@@ -8,7 +8,7 @@ const fsPromises = require("fs/promises");
 
 // ── Module imports ─────────────────────────────────────────────────────────
 const { CURRENT_SETTINGS_SCHEMA, CURRENT_LIBRARY_SCHEMA,
-        settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");
+        settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
 const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = require("./main/ipc-handlers");
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
@@ -289,7 +289,7 @@ function broadcastLibraryNow() {
 async function loadState() {
   const rawSettings = await readJSON(getSettingsPath(), settings);
   if ((rawSettings.schemaVersion || 0) < CURRENT_SETTINGS_SCHEMA) await backupFile(getSettingsPath());
-  settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
+  settings = loadSettingsData(rawSettings);
   await saveSettingsFn();
 
   const rawLibrary = await readJSON(getLibraryPath(), []);
@@ -440,58 +440,6 @@ function startWatcherFn() {
   });
 }
 
-function scheduleBackgroundStartupTasks(startupContext = {}) {
-  const STARTUP_BACKGROUND_DELAY_MS = 3000;
-  const CACHE_CLEANUP_DELAY_MS = 5000;
-  const mainWindow = startupContext.mainWindow;
-
-  const runKokoroWarmup = () => {
-    setTimeout(() => {
-      try {
-        const ttsEngine = require("./main/tts-engine");
-        if (ttsEngine.isModelReady()) return;
-
-        ttsEngine.downloadModel((progress) => {
-          if (mainWindow && !mainWindow.isDestroyed()) {
-            mainWindow.webContents.send("tts-kokoro-download-progress", progress);
-          }
-        }).then(() => {
-          console.log("[kokoro] Background warm-up complete");
-        }).catch((err) => {
-          console.log("[kokoro] Background warm-up failed (will retry on demand):", err.message);
-        });
-      } catch (err) {
-        console.log("[kokoro] Background warm-up scheduling failed:", err.message);
-      }
-    }, STARTUP_BACKGROUND_DELAY_MS);
-  };
-
-  const runCacheCleanup = () => {
-    try {
-      const ttsCache = require("./main/tts-cache");
-      if (typeof ttsCache.scheduleCleanupOrphans === "function") {
-        ttsCache.scheduleCleanupOrphans(CACHE_CLEANUP_DELAY_MS);
-      }
-    } catch (err) {
-      console.log("[tts-cache] Deferred cleanup scheduling failed:", err.message);
-    }
-  };
-
-  const runBackgroundTasks = () => {
-    runKokoroWarmup();
-    runCacheCleanup();
-  };
-
-  if (mainWindow && !mainWindow.isDestroyed()) {
-    if (mainWindow.isVisible()) {
-      runBackgroundTasks();
-    } else {
-      mainWindow.once("show", runKokoroWarmup);
-      mainWindow.once("show", runCacheCleanup);
-    }
-  }
-}
-
 // ── Reading statistics ─────────────────────────────────────────────────────────
 function recordReadingSession(docTitle, wordsRead, durationMs, wpm) {
   const today = new Date().toISOString().slice(0, 10);
@@ -622,12 +570,6 @@ app.whenReady().then(async () => {
   // Register IPC handlers before window opens (renderer needs them on load)
   registerIpcHandlers(ipcContext);
 
-  // Initialize TTS audio cache (NAR-2) — fire-and-forget
-  const ttsCache = require("./main/tts-cache");
-  ttsCache.init(app.getPath("userData")).catch((err) => {
-    console.error("[tts-cache] Init failed:", err.message);
-  });
-
   // Start WebSocket server for Chrome extension
   const wsServer = require("./main/ws-server");
   wsServer.startServer(ipcContext);
@@ -641,7 +583,6 @@ app.whenReady().then(async () => {
   });
   updateWindowTheme(mainWindow, settings);
   if (!isDev) setupAutoUpdater(mainWindow);
-  scheduleBackgroundStartupTasks({ mainWindow, settings });
 
   // ── Phase 3: Auth + sync init in parallel (window already visible) ───────
   await Promise.all([

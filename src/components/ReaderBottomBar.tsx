@@ -1,6 +1,6 @@
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { formatTime, detectChapters, chaptersFromCharOffsets, currentChapterIndex } from "../utils/text";
-import { FOCUS_TEXT_SIZE_STEP, TTS_RATE_BASELINE_WPM } from "../constants";
+import { FOCUS_TEXT_SIZE_STEP } from "../constants";
 import type { BlurbyDoc, ReaderMode } from "../types";
 import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
 import ReaderSpeedDialog, { formatSpeedMultiplier, formatSpeedValueText } from "./ReaderSpeedDialog";
@@ -21,7 +21,6 @@ interface ReaderBottomBarProps {
   wpm: number;
   focusTextSize: number;
   readingMode: ReaderMode;
-  isNarrating?: boolean;
   playing: boolean;
   isEink: boolean;
   chapters: Array<{ title: string; charOffset: number; depth?: number }>;
@@ -29,24 +28,19 @@ interface ReaderBottomBarProps {
   onEnterPage?: () => void;
   onEnterFocus: () => void;
   onEnterFlow: () => void;
-  onToggleNarration?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
   onTogglePlay?: () => void;
   chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
-  lastReadingMode?: "focus" | "flow" | "narrate";
-  ttsRate?: number;
+  lastReadingMode?: "focus" | "flow";
   /** The active mode's speed (snapshot.speed): null in Page, which shows no speed control. */
   speed?: ReaderModeSpeed | null;
   /** Routed to the active runtime only (router handleSetSpeed). */
   onSetSpeed?: (speed: ReaderModeSpeed) => void;
   /** For foliate EPUBs: authoritative progress fraction (0.0–1.0) from foliate's relocate event */
   foliateFraction?: number;
-  /** When narration is active, the narration cursor word index — used to track current chapter.
-   *  null when narration is not speaking (falls back to wordIndex). */
-  narrationWordIndex?: number | null;
   flowZoneLines?: number;
   onSetFlowZoneLines?: (lines: number) => void;
   flowProgress?: {
@@ -59,7 +53,7 @@ interface ReaderBottomBarProps {
 const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
-  flow: "← → speed  ↑ ↓ line  N narrate  space play/pause  M menu",
+  flow: "← → speed  ↑ ↓ line  space play/pause  M menu",
 };
 
 export default function ReaderBottomBar({
@@ -69,7 +63,6 @@ export default function ReaderBottomBar({
   wpm,
   focusTextSize,
   readingMode,
-  isNarrating = false,
   playing,
   isEink,
   chapters,
@@ -77,7 +70,6 @@ export default function ReaderBottomBar({
   onEnterPage,
   onEnterFocus,
   onEnterFlow,
-  onToggleNarration,
   onPrevChapter,
   onNextChapter,
   onJumpToChapter,
@@ -85,17 +77,15 @@ export default function ReaderBottomBar({
   onTogglePlay,
   chapterListRef,
   lastReadingMode = "flow",
-  ttsRate = 1.0,
   speed = null,
   onSetSpeed,
   foliateFraction,
-  narrationWordIndex = null,
   flowZoneLines,
   onSetFlowZoneLines,
   flowProgress,
   currentChapterName,
 }: ReaderBottomBarProps) {
-  const surfaceMode = readingMode === "narrate" ? "flow" : readingMode;
+  const surfaceMode = readingMode;
   const [chapterDropdownOpen, setChapterDropdownOpen] = useState(false);
   const [focusedChapterIdx, setFocusedChapterIdx] = useState(0);
   const chapterGroupRef = useRef<HTMLDivElement | null>(null);
@@ -127,10 +117,8 @@ export default function ReaderBottomBar({
     ? foliateFraction * 100
     : words.length > 0 ? (wordIndex / words.length) * 100 : 0;
 
-  // Time remaining — use TTS-derived WPM when narration is selected
-  const isNarrationSelected = readingMode === "narrate" || isNarrating;
   // Focus/Flow time estimates use the active mode's own WPM (OC-6); Page keeps the legacy wpm.
-  const effectiveWpm = isNarrationSelected ? Math.round(ttsRate * TTS_RATE_BASELINE_WPM) : speed?.kind === "wpm" ? speed.wpm : wpm;
+  const effectiveWpm = speed?.kind === "wpm" ? speed.wpm : wpm;
   // Doc time: for foliate EPUBs, use whole-book word count × fraction remaining
   // instead of section words (which only covers the current chapter)
   const docWordsRemaining = foliateFraction != null && activeDoc.wordCount > 0
@@ -151,10 +139,9 @@ export default function ReaderBottomBar({
     return detectChapters(activeDoc.content, words);
   }, [activeDoc.content, chapters, words]);
 
-  // Use narration cursor position when narration is speaking; fall back to reading position
   const curChapterIdx = useMemo(
-    () => currentChapterIndex(chapterList, narrationWordIndex ?? wordIndex),
-    [chapterList, narrationWordIndex, wordIndex]
+    () => currentChapterIndex(chapterList, wordIndex),
+    [chapterList, wordIndex]
   );
   const currentChapter = chapterList[curChapterIdx];
 
@@ -248,7 +235,7 @@ export default function ReaderBottomBar({
 
       {/* Row 2: Controls */}
       <div className="reader-bottom-bar-controls">
-        {/* Speed: the current value opens the speed dialog (Focus, Flow, Narrate). Page shows none. */}
+        {/* Speed: the current value opens the speed dialog (Focus, Flow). Page shows none. */}
         {speed !== null && speedMode !== null && (
           <div className="rbb-wpm-group">
             <button
@@ -342,23 +329,12 @@ export default function ReaderBottomBar({
           >
             Flow
           </button>
-          <button
-            className={`rbb-mode-btn ${readingMode === "narrate" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narrate" ? " rbb-mode-btn--last" : ""}`}
-            onClick={(e) => { onToggleNarration?.(); if (e.detail > 0) e.currentTarget.blur(); }}
-            aria-label="Narrate mode"
-            aria-pressed={readingMode === "narrate"}
-          >
-            Narrate
-          </button>
         </div>
 
         {/* Flow zone controls and progress — visible in flow mode only */}
         {surfaceMode === "flow" && (
           <>
             <div className="rbb-flow-zone-controls">
-              {isNarrating && (
-                <span className="rbb-flow-progress-text">Narrating</span>
-              )}
               <label className="rbb-flow-zone-label">
                 Lines
                 <input
@@ -376,7 +352,7 @@ export default function ReaderBottomBar({
             {flowProgress && (
               <div className="rbb-flow-progress">
                 <span className="rbb-flow-progress-text">
-                  {isNarrating ? "Narrating · " : ""}{currentChapterName ? `${currentChapterName} · ` : ""}{Math.round((foliateFraction != null ? foliateFraction : flowProgress.bookPct) * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
+                  {currentChapterName ? `${currentChapterName} · ` : ""}{Math.round((foliateFraction != null ? foliateFraction : flowProgress.bookPct) * 100)}%{flowProgress.estimatedMinutesLeft > 0 ? ` · ~${Math.ceil(flowProgress.estimatedMinutesLeft)} min left` : ""}
                 </span>
               </div>
             )}

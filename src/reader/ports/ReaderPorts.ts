@@ -3,16 +3,11 @@
  * (READER-MODE-SEPARATION-2 contract item 5). Types only.
  *
  * A mode receives ports from the broker (createReaderPorts.ts); every method is bound to the
- * session key it was issued for. Audio is issued only to Narrate. Surfaces and scroll are not
+ * session key it was issued for. Surfaces and scroll are not
  * ports: each mode owns its own Foliate element, surface controller and (Flow) scroll engine.
  */
-import type { BlurbySettings, PronunciationOverride, TtsEngine } from "../../types";
-import type { NarrationStatus, PauseReason } from "../../types/narration";
+import type { BlurbySettings } from "../../types";
 import type { TtsEvalTraceInputEvent } from "../../types/eval";
-import type { AudioProgressReport, ChunkBoundaryPayload } from "../../utils/audioScheduler";
-import type { HighlightSyncDecision, HighlightSyncResolveInput } from "../../utils/highlightSyncController";
-import type { PauseConfig } from "../../utils/pauseDetection";
-import type { MediaSessionBookMetadata } from "../../utils/mediaSessionBridge";
 import type { DeepReadonly, ReaderBookWordsValue, ReaderDocumentSnapshot, ReaderSettingsSnapshot } from "../document/ReaderDocumentSnapshot";
 
 export interface ReaderSettingsPort {
@@ -43,56 +38,6 @@ export interface ReaderDocumentPort {
   subscribe(listener: (snapshot: ReaderDocumentSnapshot) => void): () => void;
 }
 
-export type ReaderAudioStartResult = "started" | "warming" | "error";
-
-export interface ReaderAudioState {
-  readonly status: NarrationStatus;
-  readonly speaking: boolean;
-  readonly warming: boolean;
-  readonly kokoroLoading: boolean;
-  readonly cursorWordIndex: number;
-  readonly pauseReason: PauseReason | null;
-  readonly rate: number;
-}
-
-/** useNarrationSync bridge: one configure() call per changed field group. */
-export type ReaderAudioConfig = Readonly<Partial<{
-  bookId: string;
-  engine: TtsEngine;
-  pauseConfig: Readonly<PauseConfig>;
-  footnoteMode: "skip" | "read";
-  footnoteCues: readonly Readonly<{ afterWordIdx: number; text: string }>[];
-  pronunciationOverrides: readonly Readonly<PronunciationOverride>[];
-  bookPronunciationOverrides: readonly Readonly<PronunciationOverride>[];
-  mediaSessionBook: Readonly<MediaSessionBookMetadata> | null;
-  /** useNarrationSync effect 1a: the cover the shell resolves (getCoverImage) into the MediaSession art. */
-  mediaSessionCoverPath: string | null;
-  /** useNarrationSync effect 5: settings.ttsVoiceName; the engine-specific voice pick stays in TTS infrastructure. */
-  voiceName: string;
-}>>;
-
-export interface ReaderAudioPort {
-  readState(): ReaderAudioState;
-  start(words: readonly string[], wordIndex: number, rate: number, onWord: (wordIndex: number) => void): ReaderAudioStartResult;
-  pause(reason: PauseReason): void;
-  /** No arguments, as in production. */
-  resume(): void;
-  stop(reason: PauseReason): void;
-  setOnTruthSync(cb: ((wordIndex: number) => void) | null): void;
-  setPageEndWord(wordIndex: number | null): void;
-  resync(wordIndex: number, rate: number): void;
-  setOnChunkBoundary(cb: ((endIdx: number, meta?: ChunkBoundaryPayload) => void) | null): void;
-  setOnSegmentStart(cb: ((wordIndex: number) => void) | null): void;
-  setOnSectionEnd(cb: (() => void) | null): void;
-  updateWords(words: readonly string[], globalStartIdx: number, options?: { readonly mode?: "passive" | "handoff" }): void;
-  adjustRate(rate: number): void;
-  resolveHighlightSync(input: HighlightSyncResolveInput): HighlightSyncDecision | undefined;
-  getAudioProgress(): AudioProgressReport | null;
-  /** Shell background cacher cursor. */
-  updateCacheCursor(wordIndex: number): void;
-  configure(config: ReaderAudioConfig): void;
-}
-
 /** Write-only (Q-D). */
 export interface ReaderDiagnosticsPort {
   /** narrateDiagnostics.recordDiagEvent */
@@ -119,7 +64,6 @@ export interface ReaderPorts {
   readonly settings: ReaderSettingsPort;
   readonly persistence: ReaderPersistencePort;
   readonly document: ReaderDocumentPort;
-  readonly audio: ReaderAudioPort;
   readonly diagnostics: ReaderDiagnosticsPort;
   readonly shell: ReaderShellEventsPort;
 }

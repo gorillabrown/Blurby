@@ -1,12 +1,11 @@
 // ReaderContainer — the reader shell (READER-MODE-SEPARATION-2 design §A.7, step E1).
 //
 // The shell owns document identity and session stats, the toolbar (ReaderBottomBar), keyboard
-// (useReaderKeys), TTS infrastructure (useNarration, warm-up, background cacher), the progress tracker,
-// e-ink, the chapter list and the cross-book overlay. It owns no reading-mode behavior: page, focus,
-// flow and narrate reading each run in their own runtime (src/reader/modes/<mode>/), reached only
+// (useReaderKeys), the progress tracker, e-ink, the chapter list and the cross-book overlay. It owns
+// no reading-mode behavior: page, focus and flow reading each run in their own runtime
+// (src/reader/modes/<mode>/), reached only
 // through the thin router (useReaderModeOrchestrator). The shell renders exactly one active mode view,
 // keyed by session, and hands the runtimes infrastructure through the owner-checking port broker.
-// Only Narrate is issued the audio port (DD-3); the mode-independent TTS warm-up stays here (DD-7).
 import { useState, useCallback, useRef, useMemo, useEffect, type ComponentType } from "react";
 import { tokenizeWithMeta, detectChapters, chaptersFromCharOffsets, currentChapterIndex as getCurChIdx } from "../utils/text";
 import {
@@ -20,7 +19,6 @@ import {
 import { useEinkController } from "../hooks/useEinkController";
 import { useProgressTracker } from "../hooks/useProgressTracker";
 import { READER_MODE_MODULES, useReaderModeOrchestrator } from "../reader/useReaderModeOrchestrator";
-import useNarration from "../hooks/useNarration";
 import { recordDiagEvent, type NarrateDiagEvent } from "../utils/narrateDiagnostics";
 import { logDualSourceTransition } from "../utils/dualSourceDiag";
 import type { BlurbyDoc, BlurbySettings, ReaderMode } from "../types";
@@ -34,11 +32,8 @@ import MenuFlap from "./MenuFlap";
 import { useSettings } from "../contexts/SettingsContext";
 import { useToast } from "../contexts/ToastContext";
 import { createWindowEvalTraceSink } from "../utils/ttsEvalTrace";
-import { resolveKokoroRatePlan } from "../utils/kokoroRatePlan";
 import { useReadingGoals } from "../hooks/useReadingGoals";
 import { calculateHighWaterPagesReadDelta } from "../utils/readingGoals";
-import { createBackgroundCacher, type BackgroundCacher } from "../utils/backgroundCacher";
-import { mergeOverrides, overrideHash } from "../utils/pronunciationOverrides";
 import { getNextQueuedBook } from "../utils/queue";
 import {
   createReaderDocumentSnapshot,
@@ -49,7 +44,6 @@ import {
   type ReaderSettingsSnapshot,
 } from "../reader/document/ReaderDocumentSnapshot";
 import type { ReaderPortInfrastructure } from "../reader/ports/createReaderPorts";
-import type { ReaderAudioConfig } from "../reader/ports/ReaderPorts";
 import type { ReaderModeRuntime, ReaderModeViewProps } from "../reader/modes/ReaderModeAdapter";
 
 const api = window.electronAPI;
@@ -198,17 +192,6 @@ export default function ReaderContainer({
   // Enforce e-ink WPM ceiling
   const effectiveWpm = isEink ? Math.min(wpm, settings.einkWpmCeiling || DEFAULT_EINK_WPM_CEILING) : wpm;
 
-  // ── TTS infrastructure (DD-3): one useNarration per shell; only Narrate is issued its port ──
-  const readingModeRef = useRef<ReaderMode>("page");
-  const narration = useNarration({
-    evalTrace: evalTraceSink,
-    experimentalNano: settings.ttsEngine === "nano",
-    getReadingMode: () => evalTraceSink?.captureMode ?? readingModeRef.current,
-  });
-  const narrationRef = useRef(narration);
-  narrationRef.current = narration;
-  const backgroundCacherRef = useRef<BackgroundCacher | null>(null);
-
   // ── Document infrastructure: full-book words (TTS-6O / HOTFIX-6 extraction behind the document port) ──
   const [bookWordsState, setBookWordsState] = useState<{ docId: string; value: ReaderBookWordsValue } | null>(null);
   const bookWords = bookWordsState && bookWordsState.docId === activeDoc.id ? bookWordsState.value : null;
@@ -285,7 +268,6 @@ export default function ReaderContainer({
     furthestPositionRef: { current: 0 } as React.MutableRefObject<number>,
     lastSavedPosRef: { current: 0 } as React.MutableRefObject<number>,
   });
-  const mediaSessionRequestRef = useRef(0);
 
   const ensureBookWords = useCallback((): Promise<ReaderBookWordsValue | null> => {
     const doc = liveDocRef.current.activeDoc;
@@ -366,71 +348,6 @@ export default function ReaderContainer({
         return () => { documentListenersRef.current.delete(listener); };
       },
     },
-    audio: {
-      readState: () => {
-        const n = narrationRef.current;
-        return {
-          status: n.status,
-          speaking: n.speaking,
-          warming: n.warming,
-          kokoroLoading: n.kokoroLoading,
-          cursorWordIndex: n.cursorWordIndex,
-          pauseReason: n.pauseReason,
-          rate: n.rate,
-        };
-      },
-      start: (startWords, wordIndex, rate, onWord) => narrationRef.current.startCursorDriven([...startWords], wordIndex, rate, onWord),
-      pause: (reason) => narrationRef.current.pause(reason),
-      resume: () => narrationRef.current.resume(),
-      stop: (reason) => narrationRef.current.stop(reason),
-      setOnTruthSync: (cb) => narrationRef.current.setOnTruthSync(cb),
-      setPageEndWord: (wordIndex) => narrationRef.current.setPageEndWord(wordIndex),
-      resync: (wordIndex, rate) => narrationRef.current.resyncToCursor(wordIndex, rate),
-      setOnChunkBoundary: (cb) => narrationRef.current.setOnChunkBoundary?.(cb),
-      setOnSegmentStart: (cb) => narrationRef.current.setOnSegmentStart?.(cb),
-      setOnSectionEnd: (cb) => narrationRef.current.setOnSectionEnd(cb),
-      updateWords: (nextWords, globalStartIdx, options) => narrationRef.current.updateWords([...nextWords], globalStartIdx, options),
-      adjustRate: (rate) => narrationRef.current.adjustRate(rate),
-      resolveHighlightSync: (input) => narrationRef.current.resolveHighlightSync?.(input),
-      getAudioProgress: () => narrationRef.current.getAudioProgress(),
-      // TTS-7A: the background cacher follows the live narration cursor.
-      updateCacheCursor: (wordIndex) => backgroundCacherRef.current?.updateCursorPosition(wordIndex),
-      // useNarrationSync bridge (one call per changed field group).
-      configure: (config: ReaderAudioConfig) => {
-        const n = narrationRef.current;
-        if (config.bookId !== undefined) n.setBookId(config.bookId);
-        if (config.engine !== undefined) n.setEngine(config.engine);
-        if (config.pauseConfig !== undefined) n.setPauseConfig({ ...config.pauseConfig });
-        if (config.footnoteMode !== undefined) n.setFootnoteMode(config.footnoteMode);
-        if (config.footnoteCues !== undefined) n.setFootnoteCues(config.footnoteCues.map((cue) => ({ ...cue })));
-        if (config.pronunciationOverrides !== undefined) n.setPronunciationOverrides(config.pronunciationOverrides.map((o) => ({ ...o })));
-        if (config.bookPronunciationOverrides !== undefined) n.setBookPronunciationOverrides(config.bookPronunciationOverrides.map((o) => ({ ...o })));
-        if (config.voiceName !== undefined) {
-          // useNarrationSync effect 5: the engine-specific voice pick stays in TTS infrastructure.
-          if (shellRef.current.settings.ttsEngine === "kokoro" && config.voiceName) {
-            n.setKokoroVoice(config.voiceName);
-          } else if (config.voiceName && n.voices.length > 0) {
-            const voice = n.voices.find((v) => v.name === config.voiceName);
-            if (voice && voice.name !== n.currentVoice?.name) n.selectVoice(voice);
-          }
-        }
-        if (config.mediaSessionBook !== undefined) {
-          // useNarrationSync effect 1a: resolve the cover into the MediaSession art (latest request wins).
-          const book = config.mediaSessionBook;
-          const request = ++mediaSessionRequestRef.current;
-          const commit = (coverArtUrl: string | null) => {
-            if (request !== mediaSessionRequestRef.current) return;
-            narrationRef.current.setMediaSessionBook(book ? { ...book, coverArtUrl } : null);
-          };
-          const coverPath = config.mediaSessionCoverPath;
-          if (!book || !coverPath || !window.electronAPI?.getCoverImage) {
-            commit(book?.coverArtUrl ?? null);
-          } else {
-            window.electronAPI.getCoverImage(coverPath).then((src) => commit(src || null)).catch(() => commit(null));
-          }
-        }
-      },
-    },
     diagnostics: {
       record: (kind, detail) => { recordDiagEvent(kind as NarrateDiagEvent["event"], detail); },
       transition: (name, payload) => logDualSourceTransition(name, payload),
@@ -499,22 +416,19 @@ export default function ReaderContainer({
     snapshot: toolbar,
     active,
     handleTogglePlay, handlePauseToPage,
-    handleEnterFocus, handleEnterFlow, handleEnterNarrate, handleToggleNarration,
+    handleEnterFocus, handleEnterFlow,
     handleExitToPage, handleNavigateTo, handleJumpBack, adjustSpeed, handleCommand, handleSetSpeed,
     handleCycleMode, handleCycleAndStart,
   } = modeHook;
 
   const readingMode: ReaderMode = toolbar?.readingMode ?? "page";
-  readingModeRef.current = readingMode;
-  const isNarrating = toolbar?.narrating ?? false;
   const isBrowsedAway = toolbar?.isBrowsedAway ?? false;
   const highlightedWordIndex = toolbar?.highlightedWordIndex ?? (activeDoc.position || 0);
   // Canonical anchor (legacy persistentWordIndex state) for the toolbar, progress and exit.
   const canonicalWordAnchor = toolbar?.currentWordIndex ?? (activeDoc.position || 0);
   const flowProgress = toolbar?.flowProgress ?? null;
-  const isScrolledSurfaceMode = readingMode === "focus" || readingMode === "flow" || readingMode === "narrate";
-  // Narrate's playing indicator is TTS truth (narration.speaking); Focus/Flow report their own clocks.
-  const modePlaying = readingMode === "narrate" ? narration.speaking : (toolbar?.playing ?? false);
+  const isScrolledSurfaceMode = readingMode === "focus" || readingMode === "flow";
+  const modePlaying = toolbar?.playing ?? false;
   const isActivelyReading = modePlaying;
   // useProgressTracker: the Focus display position while Focus is active.
   const focusWordIndex = active?.mode === "focus" ? active.runtime.getSnapshot().currentWordIndex : canonicalWordAnchor;
@@ -598,7 +512,7 @@ export default function ReaderContainer({
   }, [bookWords, getDocument]);
 
   // ── Document lifecycle (shell half of useDocumentLifecycle) ─────────────────
-  // Restore toast + chapters + delayed Kokoro prewarm on mount / doc change.
+  // Restore toast + chapters on mount / doc change.
   useEffect(() => {
     api.getDocChapters(activeDoc.id).then((ch: any) => setDocChapters(ch || [])).catch(() => setDocChapters([]));
     // BUG-148: Inform the user their reading position was restored. Fire once per book open,
@@ -613,18 +527,8 @@ export default function ReaderContainer({
         }
       }, 500);
     }
-    // Delayed prewarm: start Kokoro model load 2s after reader opens (never startup-blocking)
-    let prewarmTimer: ReturnType<typeof setTimeout> | undefined;
-    const preloadTtsEngine =
-      settings.ttsEngine === "kokoro"
-        ? api.kokoroPreload
-        : null;
-    if (preloadTtsEngine) {
-      prewarmTimer = setTimeout(() => preloadTtsEngine().catch(() => {}), 2000);
-    }
     return () => {
       clearTimeout(restoreTimer);
-      clearTimeout(prewarmTimer);
     };
   }, [activeDoc.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -681,90 +585,6 @@ export default function ReaderContainer({
       })),
     );
   }, [useFoliate, bookWords, activeDoc.wordCount]);
-
-  // ── TTS infrastructure (useNarrationCaching effects 1–4, DD-7) ──────────────────
-  const effectiveOverrides = mergeOverrides(settings.pronunciationOverrides || [], activeDoc.pronunciationOverrides || []);
-  const effectiveOverrideKey = overrideHash(effectiveOverrides);
-  const rateBucket = resolveKokoroRatePlan(settings.ttsRate || 1.0).generationBucket;
-  // The cacher's word source: full-book words once extracted, else the tokenized text (non-EPUB).
-  const cacheWords = bookWords ? bookWords.words : (useFoliate ? [] : words);
-  const cacheWordsRef = useRef(cacheWords);
-  cacheWordsRef.current = cacheWords;
-  const highlightedWordIndexRef = useRef(highlightedWordIndex);
-  highlightedWordIndexRef.current = highlightedWordIndex;
-
-  // NAR-2: Pre-warm Kokoro model + AudioContext on reader mount
-  useEffect(() => {
-    if (settings.ttsEngine === "kokoro") {
-      if (api?.kokoroPreload) api.kokoroPreload().catch(() => {});
-      // NAR-5: Preload marathon worker in parallel (background caching)
-      if (api?.kokoroPreloadMarathon) api.kokoroPreloadMarathon().catch(() => {});
-      // Warm up AudioContext so first play has zero audio driver latency
-      narration.warmUp();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Only on mount
-
-  // NAR-5: Background cacher — marathon worker fills disk cache ahead of reading position
-  useEffect(() => {
-    if (settings.ttsEngine !== "kokoro" || settings.ttsCacheEnabled === false) return;
-    if (!api?.kokoroGenerateMarathon) return;
-
-    const cacher = createBackgroundCacher({
-      generateFn: async (text, voiceId, speed) => {
-        const result = await api.kokoroGenerateMarathon(text, voiceId, speed);
-        if (result.error || !result.audio || !result.sampleRate) {
-          return { error: result.error || "no audio returned" };
-        }
-        const durationMs = (result as any).durationMs ?? (result.audio.length / result.sampleRate) * 1000;
-        return { audio: result.audio, sampleRate: result.sampleRate, durationMs };
-      },
-      getVoiceId: () => settings.ttsVoiceName || "af_bella",
-      isCacheEnabled: () => settings.ttsCacheEnabled !== false,
-      getRateBucket: () => rateBucket,
-      getPronunciationOverrides: () => effectiveOverrides,
-    });
-    backgroundCacherRef.current = cacher;
-    cacher.start();
-
-    return () => {
-      cacher.stop();
-      backgroundCacherRef.current = null;
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsCacheEnabled, settings.ttsEngine, settings.ttsVoiceName]);
-
-  // TTS-START-1: Queue entry coverage using the current opening-ramp start identity.
-  useEffect(() => {
-    const cacher = backgroundCacherRef.current;
-    if (!cacher) return;
-    const cacheBookWords = cacheWordsRef.current;
-    if (cacheBookWords.length > 0 && settings.ttsEngine === "kokoro" && settings.ttsCacheEnabled !== false) {
-      const startPosition = highlightedWordIndexRef.current ?? activeDoc.position ?? 0;
-      cacher.queueEntryCoverage({
-        id: activeDoc.id,
-        words: [...cacheBookWords],
-        position: startPosition,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsCacheEnabled, settings.ttsEngine, settings.ttsVoiceName]);
-
-  // NAR-5: Set active book on the background cacher when text is available
-  useEffect(() => {
-    const cacher = backgroundCacherRef.current;
-    if (!cacher) return;
-    const cacheBookWords = cacheWordsRef.current;
-    if (cacheBookWords.length > 0) {
-      const startPosition = highlightedWordIndexRef.current ?? activeDoc.position ?? 0;
-      cacher.setActiveBook({
-        id: activeDoc.id,
-        words: [...cacheBookWords],
-        position: startPosition,
-      });
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeDoc.id, effectiveOverrideKey, rateBucket, settings.ttsVoiceName, cacheWords.length]);
 
   // TTS-6O: Background pre-extraction — full-book words ahead of any mode that needs them.
   useEffect(() => {
@@ -886,7 +706,7 @@ export default function ReaderContainer({
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<ChapterListHandle | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
-  useReaderKeys("reader", readingMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handleToggleNarration, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart, handleSentencePrev, handleSentenceNext, handleEnterNarrate);
+  useReaderKeys("reader", readingMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart, handleSentencePrev, handleSentenceNext);
 
   const menuFlap = (
     <MenuFlap
@@ -947,16 +767,6 @@ export default function ReaderContainer({
           <ErrorBoundary onReset={() => onExitReader(currentWordIndex)}>
             {renderView()}
           </ErrorBoundary>
-          {/* Narration engine warming/loading indicator */}
-          {(narration.warming || narration.kokoroLoading) && (
-            <div className="kokoro-loading-toast" role="status" aria-live="polite">
-              {narration.warming
-                ? settings.ttsEngine === "kokoro"
-                  ? "Starting Kokoro..."
-                  : "Starting narration..."
-                : "Loading voice model..."}
-            </div>
-          )}
         </div>
 
         {/* Unified bottom bar — rendered at container level */}
@@ -967,7 +777,6 @@ export default function ReaderContainer({
           wpm={effectiveWpm}
           focusTextSize={focusTextSize}
           readingMode={readingMode}
-          isNarrating={isNarrating && narration.speaking && !narration.warming}
           playing={modePlaying}
           isEink={isEink}
           chapters={docChapters}
@@ -981,7 +790,6 @@ export default function ReaderContainer({
           onEnterPage={handleEnterPageMode}
           onEnterFocus={handleEnterFocus}
           onEnterFlow={handleEnterFlow}
-          onToggleNarration={handleEnterNarrate}
           onPrevChapter={handlePrevChapter}
           onNextChapter={handleNextChapter}
           onJumpToChapter={handleJumpToChapter}
@@ -989,11 +797,9 @@ export default function ReaderContainer({
           onTogglePlay={handleTogglePlay}
           chapterListRef={chapterListRef}
           lastReadingMode={settings.lastReadingMode || "flow"}
-          ttsRate={settings.ttsRate || 1.0}
           speed={toolbar?.speed ?? null}
           onSetSpeed={handleSetSpeed}
           foliateFraction={useFoliate ? foliateFraction : undefined}
-          narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
           flowZoneLines={settings.flowZoneLines}
           onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
         />
@@ -1001,7 +807,7 @@ export default function ReaderContainer({
 
       {menuFlap}
       <ReturnToReadingPill
-        visible={isBrowsedAway && isScrolledSurfaceMode && !narration.speaking}
+        visible={isBrowsedAway && isScrolledSurfaceMode}
         activeOverlay={menuFlapOpen || showBacktrackPrompt}
         onReturn={handleJumpBack}
       />

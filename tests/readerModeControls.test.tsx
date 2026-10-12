@@ -21,7 +21,6 @@ const baseProps = {
   wpm: 250,
   focusTextSize: 100,
   readingMode: "flow" as const,
-  isNarrating: false,
   playing: false,
   isEink: false,
   chapters: [],
@@ -30,7 +29,6 @@ const baseProps = {
   onEnterPage: vi.fn(),
   onEnterFocus: vi.fn(),
   onEnterFlow: vi.fn(),
-  onToggleNarration: vi.fn(),
   onTogglePlay: vi.fn(),
 };
 

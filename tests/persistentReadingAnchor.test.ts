@@ -15,7 +15,6 @@ import { usePersistentReadingAnchor } from "../src/hooks/usePersistentReadingAnc
 import * as pageAnchorCopy from "../src/reader/modes/page/helpers/usePersistentReadingAnchor";
 import * as focusAnchorCopy from "../src/reader/modes/focus/helpers/usePersistentReadingAnchor";
 import * as flowAnchorCopy from "../src/reader/modes/flow/helpers/usePersistentReadingAnchor";
-import * as narrateAnchorCopy from "../src/reader/modes/narrate/helpers/usePersistentReadingAnchor";
 import type { PersistentReadingAnchorState } from "../src/reader/modes/page/helpers/usePersistentReadingAnchor";
 import { createInitialHandoff, createReaderDocumentSnapshot } from "../src/reader/document/ReaderDocumentSnapshot";
 
@@ -79,7 +78,7 @@ describe("persistentReadingAnchor", () => {
     expect(isAwayFromPersistentAnchor(36, 30, 5)).toBe(true);
   });
 
-  it.each(["page", "focus", "flow", "narrate"] as const)(
+  it.each(["page", "focus", "flow"] as const)(
     "blocks relocate CFI and progress saves while browsing away in %s mode",
     (mode) => {
       expect(shouldWriteRelocateCfi({ mode, userBrowsing: true })).toBe(false);
@@ -246,7 +245,6 @@ describe.each([
   ["page", pageAnchorCopy],
   ["focus", focusAnchorCopy],
   ["flow", flowAnchorCopy],
-  ["narrate", narrateAnchorCopy],
 ] as const)("%s helpers/usePersistentReadingAnchor copy", (_mode, copy) => {
   function anchorState(overrides: Partial<PersistentReadingAnchorState> = {}): PersistentReadingAnchorState {
     return {

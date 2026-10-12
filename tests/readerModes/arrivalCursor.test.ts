@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // READER-MODE-SEPARATION-2-S1 (G6 cursor regression). On B0 one foliate surface outlived every mode switch,
 // so the word clicked in paused Flow kept its cursor class in the destination (page-word--flow-cursor in
-// Focus/Flow/Narrate; Page's highlight effect repainted it as page-word--highlighted). After separation each
+// Focus/Flow; Page's highlight effect repainted it as page-word--highlighted). After separation each
 // destination mounts a fresh view: the destination runtime must paint the handed-over word itself once its
 // view has loaded a section. Book open in Page paints nothing (B0 "text-page" shows no cursor).
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -30,7 +30,7 @@ function stubView(runtime: unknown, calls: Highlight[]): void {
 }
 
 const ANCHOR = 7;
-const MODES: ReaderModeId[] = ["page", "focus", "flow", "narrate"];
+const MODES: ReaderModeId[] = ["page", "focus", "flow"];
 
 function setup() {
   const fake = createFakeInfrastructure();
@@ -79,10 +79,10 @@ describe("paused mode switch paints the handed-over cursor (S1 G6)", () => {
 
         const calls = loadSection(router);
         const handed = active.runtime.getSnapshot().highlightedWordIndex;
-        // Page repaints with its own highlight style; Focus, Flow and Narrate show B0's flow cursor.
+        // Page repaints with its own highlight style; Focus and Flow show B0's flow cursor.
         const hint = to === "page" ? undefined : "flow";
         expect(calls).toContainEqual([handed, hint, { allowMotion: false }]);
-        if (from !== "narrate" || to !== "page") expect(handed).toBe(ANCHOR);
+        expect(handed).toBe(ANCHOR);
         router.destroy();
       });
     }

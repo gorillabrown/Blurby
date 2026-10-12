@@ -8,7 +8,7 @@
 //     c) clearVisualWordClasses also clears .page-word--soft-selected
 //     d) applySoftHighlight removes previous soft highlight before applying new one
 //   Group B: Mode gating
-//     e) Soft selection logic should not fire when readingMode is "narration"
+//     e) Soft selection logic should not fire when readingMode is "focus"
 //     f) Soft selection logic should not fire when readingMode is "flow"
 //     g) Soft selection cleared on mode start
 //   Group C: Hard/soft interaction
@@ -17,10 +17,9 @@
 //     j) On page turn after hard click, userExplicitSelectionRef resets to false
 //   Group D: Resolution chain
 //     k) Canonical anchor is mode-aware and preserves explicit 0 anchors
-//     l) Narrate follows spoken-word truth on the shared surface
+//     l) Foliate start-word resolution accepts canonical anchors; every source absent resolves to 0
 //   Group E: BUG regressions
 //     m) BUG-152: getEffectiveWords returns full-book words when extraction complete
-//     n) BUG-151: Narration band fallback height capped at 40px
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { readFileSync } from "node:fs";
@@ -163,8 +162,8 @@ describe("Group B: Mode gating", () => {
     return readingMode === "page" && !hasResumeAnchor && !userExplicitSelection;
   }
 
-  it("e) Soft selection guard blocks when readingMode is 'narration'", () => {
-    expect(shouldApplySoftHighlight("narration", false, false)).toBe(false);
+  it("e) Soft selection guard blocks when readingMode is 'focus'", () => {
+    expect(shouldApplySoftHighlight("focus", false, false)).toBe(false);
   });
 
   it("f) Soft selection guard blocks when readingMode is 'flow'", () => {
@@ -304,30 +303,10 @@ describe("Group D: Mode start resolution chain", () => {
     })).toBe(11);
   });
 
-  it("l) narrate mode resolves from spoken-word truth before page highlight and soft anchor", () => {
-    expect(resolveCanonicalWordAnchor({
-      readingMode: "narrate",
-      resumeAnchor: null,
-      narrationWordIndex: 305,
-      highlightedWordIndex: 150,
-      softWordIndex: 10,
-    })).toBe(305);
-  });
-
-  it("l) narrate mode also honors resumeAnchor over the live spoken cursor", () => {
-    expect(resolveCanonicalWordAnchor({
-      readingMode: "narrate",
-      resumeAnchor: 90,
-      narrationWordIndex: 305,
-      highlightedWordIndex: 150,
-      softWordIndex: 10,
-    })).toBe(90);
-  });
-
   it("l) foliate start-word resolution still accepts canonical anchors against the global word count", () => {
     const canonicalAnchor = resolveCanonicalWordAnchor({
-      readingMode: "narrate",
-      narrationWordIndex: 1603,
+      readingMode: "focus",
+      focusWordIndex: 1603,
       highlightedWordIndex: 14,
       softWordIndex: 2,
     });
@@ -337,12 +316,11 @@ describe("Group D: Mode start resolution chain", () => {
 
   it("l) canonical anchor resolution returns 0 when every source is absent", () => {
     expect(resolveCanonicalWordAnchor({
-      readingMode: "narrate",
+      readingMode: "focus",
       resumeAnchor: null,
       highlightedWordIndex: null,
       softWordIndex: null,
       focusWordIndex: null,
-      narrationWordIndex: null,
     })).toBe(0);
   });
 });
@@ -394,51 +372,13 @@ describe("Group E: BUG regressions", () => {
     expect(result).toBe(foliateWordStrings);
     expect(result.length).toBe(3);
   });
-
-  it("n) BUG-151: Narration band fallback height is capped at 40px", () => {
-    // The exact expression from FoliatePageView lines 577, 698, 903:
-    //   Math.min(Math.max(12, from.height), 40)  or  Math.min(currentWindow.height, 40)
-    // We test the cap expression in isolation.
-
-    function resolveFixedHeight(narrationBandLineHeight: number, rawHeight: number): number {
-      return narrationBandLineHeight > 0 ? narrationBandLineHeight : Math.min(Math.max(12, rawHeight), 40);
-    }
-
-    // When narrationBandLineHeightRef is 0 (not measured yet), cap at 40px
-    expect(resolveFixedHeight(0, 50)).toBe(40);  // 50px raw → capped at 40
-    expect(resolveFixedHeight(0, 80)).toBe(40);  // 80px raw → capped at 40
-    expect(resolveFixedHeight(0, 24)).toBe(24);  // 24px raw → within cap
-    expect(resolveFixedHeight(0, 8)).toBe(12);   // 8px raw → floored at 12
-    expect(resolveFixedHeight(0, 40)).toBe(40);  // exactly 40 → allowed
-
-    // When narrationBandLineHeightRef is set (measured), use it directly (no cap applied)
-    expect(resolveFixedHeight(22, 999)).toBe(22); // measured value takes precedence
-    expect(resolveFixedHeight(48, 999)).toBe(48); // even large measured values pass through
-  });
-
-  it("n) BUG-151: Height cap applies consistently across all three overlay code paths", () => {
-    // Mirrors lines 577, 698, 903 of FoliatePageView — all three use the same cap pattern
-    const capAt40 = (rawHeight: number) => Math.min(rawHeight, 40);
-    const floorAt12ThenCapAt40 = (rawHeight: number) => Math.min(Math.max(12, rawHeight), 40);
-
-    // Path 577 uses: Math.min(Math.max(12, from.height), 40)
-    expect(floorAt12ThenCapAt40(100)).toBe(40);
-    expect(floorAt12ThenCapAt40(20)).toBe(20);
-    expect(floorAt12ThenCapAt40(5)).toBe(12); // floor
-
-    // Path 698, 903 use: Math.min(currentWindow.height, 40)
-    expect(capAt40(100)).toBe(40);
-    expect(capAt40(20)).toBe(20);
-    expect(capAt40(40)).toBe(40); // exact boundary
-    expect(capAt40(39)).toBe(39); // just below cap
-  });
 });
 
 // ── Group F: Persistent anchor integration ──────────────────────────────────
 
 // READER-MODE-SEPARATION-2 (OC-5): hard selection, mode advance and book-open positioning left
 // ReaderContainer at E1; each mode runtime owns its own copy.
-const MODE_RUNTIMES = ["page", "focus", "flow", "narrate"] as const;
+const MODE_RUNTIMES = ["page", "focus", "flow"] as const;
 const readModeSource = (mode: string, file: string) => readFileSync(`src/reader/modes/${mode}/${file}`, "utf8");
 
 describe("persistent anchor integration policy", () => {

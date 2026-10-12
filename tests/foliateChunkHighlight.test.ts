@@ -8,8 +8,6 @@ import * as focusWordHighlight from "../src/reader/modes/focus/helpers/foliateWo
 import * as focusStyles from "../src/reader/modes/focus/helpers/foliateStyles";
 import * as flowWordHighlight from "../src/reader/modes/flow/helpers/foliateWordHighlight";
 import * as flowStyles from "../src/reader/modes/flow/helpers/foliateStyles";
-import * as narrateWordHighlight from "../src/reader/modes/narrate/helpers/foliateWordHighlight";
-import * as narrateStyles from "../src/reader/modes/narrate/helpers/foliateStyles";
 import type { ChunkReadingVisualState } from "../src/types/chunkReading";
 import type { FlowRenderedWordRootDescriptor } from "../src/utils/FlowScrollEngine";
 import type { BlurbySettings } from "../src/types";
@@ -115,7 +113,6 @@ function chunkVisualStateCases(
     `);
 
     applyChunkReadingVisualStateToRoots(roots, state({
-      mode: "narrate",
       activeWordIndex: null,
       syncLevel: "chunk-synced",
     }));
@@ -497,7 +494,6 @@ describe.each([
   ["page", pageWordHighlight, pageStyles],
   ["focus", focusWordHighlight, focusStyles],
   ["flow", flowWordHighlight, flowStyles],
-  ["narrate", narrateWordHighlight, narrateStyles],
 ] as const)("Foliate chunk visual state rendering (%s mode helper copy)", (_mode, wordHighlight, styles) => {
   chunkVisualStateCases(wordHighlight, styles);
 });

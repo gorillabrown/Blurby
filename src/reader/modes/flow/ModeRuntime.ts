@@ -1167,9 +1167,6 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       paragraphBreaks: numberArrayToSet(paragraphBreaks),
       settings: {
         rhythmPauses: settings.rhythmPauses,
-        ttsRate: settings.ttsRate,
-        ttsEngine: settings.ttsEngine,
-        ttsVoiceName: settings.ttsVoiceName ?? undefined,
         focusSpan: settings.focusSpan,
         focusMarks: settings.focusMarks,
         flowCursorStyle: settings.flowCursorStyle ?? undefined,

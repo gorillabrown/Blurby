@@ -4,7 +4,6 @@ import type { FoliateAnchorNavigationApi } from "../src/utils/foliateAnchorNavig
 import * as pageAnchorNavigation from "../src/reader/modes/page/helpers/foliateAnchorNavigation";
 import * as focusAnchorNavigation from "../src/reader/modes/focus/helpers/foliateAnchorNavigation";
 import * as flowAnchorNavigation from "../src/reader/modes/flow/helpers/foliateAnchorNavigation";
-import * as narrateAnchorNavigation from "../src/reader/modes/narrate/helpers/foliateAnchorNavigation";
 
 function makeApi(overrides: Partial<FoliateAnchorNavigationApi> = {}): FoliateAnchorNavigationApi {
   return {
@@ -62,7 +61,7 @@ function anchorNavigationCases({ jumpFoliateToWordAnchor }: typeof legacyAnchorN
       getSectionForWordIndex: vi.fn(() => 3),
     });
 
-    const result = await jumpFoliateToWordAnchor(api, 500, "narrate");
+    const result = await jumpFoliateToWordAnchor(api, 500, "flow");
     expect(result).toBe(true);
     expect(api.getSectionForWordIndex).toHaveBeenCalledWith(500);
     expect(api.goToSection).toHaveBeenCalledWith(3);
@@ -106,7 +105,6 @@ describe.each([
   ["page", pageAnchorNavigation],
   ["focus", focusAnchorNavigation],
   ["flow", flowAnchorNavigation],
-  ["narrate", narrateAnchorNavigation],
 ] as const)("jumpFoliateToWordAnchor (%s mode helper copy)", (_mode, anchorNavigation) => {
   anchorNavigationCases(anchorNavigation);
 });

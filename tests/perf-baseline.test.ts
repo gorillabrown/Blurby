@@ -31,7 +31,6 @@ import {
   PUNCTUATION_PAUSE_MS, INITIAL_PAUSE_MS,
   DEFAULT_FOCUS_TEXT_SIZE, MIN_FOCUS_TEXT_SIZE, MAX_FOCUS_TEXT_SIZE,
   TOAST_DEFAULT_DURATION_MS, G_SEQUENCE_TIMEOUT_MS,
-  TTS_CHUNK_SIZE, TTS_MAX_RATE, TTS_MIN_RATE,
   APPROX_WORDS_PER_PAGE,
 } from "../src/constants";
 import type { ModeConfig } from "../src/modes/ModeInterface";
@@ -326,13 +325,6 @@ describe("Performance Baseline", () => {
       expect(INITIAL_PAUSE_MS).toBeGreaterThan(0);
       expect(TOAST_DEFAULT_DURATION_MS).toBeGreaterThan(0);
       expect(G_SEQUENCE_TIMEOUT_MS).toBeGreaterThan(0);
-    });
-
-    test("TTS constants are within valid ranges", () => {
-      expect(TTS_CHUNK_SIZE).toBeGreaterThan(0);
-      expect(TTS_MIN_RATE).toBeGreaterThanOrEqual(0.1);
-      expect(TTS_MAX_RATE).toBeLessThanOrEqual(10);
-      expect(TTS_MIN_RATE).toBeLessThan(TTS_MAX_RATE);
     });
 
     test("APPROX_WORDS_PER_PAGE is reasonable", () => {

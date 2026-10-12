@@ -5,7 +5,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   READER_PORT_RELEASE_CALLS,
-  ReaderPortAccessError,
   createReaderPorts,
   type ReaderPortBroker,
 } from "../src/reader/ports/createReaderPorts";
@@ -23,7 +22,6 @@ import type { ReaderPorts } from "../src/reader/ports/ReaderPorts";
 import { pageMode } from "../src/reader/modes/page/index";
 import { focusMode } from "../src/reader/modes/focus/index";
 import { flowMode } from "../src/reader/modes/flow/index";
-import { narrateMode } from "../src/reader/modes/narrate/index";
 import { buildImportGraph } from "../docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs";
 
 const flushMicrotasks = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
@@ -40,26 +38,26 @@ const methods = (fake: FakeInfrastructure) => fake.effects.map((c) => c.method);
 describe("reader port broker", () => {
   it("issues frozen ports bound to the (documentId, generation, mode, session) tuple", () => {
     const { fake, broker } = setup();
-    const { key, ports } = broker.issue("narrate");
-    expect(key).toEqual({ documentId: "doc-1", documentGeneration: 1, mode: "narrate", session: 1 });
+    const { key, ports } = broker.issue("flow");
+    expect(key).toEqual({ documentId: "doc-1", documentGeneration: 1, mode: "flow", session: 1 });
     expect(Object.isFrozen(key)).toBe(true);
     expect(Object.isFrozen(ports)).toBe(true);
     expect(Object.isFrozen(ports.persistence)).toBe(true);
     expect(broker.isCurrent(key)).toBe(true);
 
     ports.persistence.updateProgress("doc-1", 0);
-    ports.audio.stop("user-stop");
+    ports.persistence.markEngaged();
     expect(fake.effects).toEqual([
       { method: "persistence.updateProgress", args: ["doc-1", 0] },
-      { method: "audio.stop", args: ["user-stop"] },
+      { method: "persistence.markEngaged", args: [] },
     ]);
-    expect(broker.stats.accepted).toEqual({ "persistence.updateProgress": 1, "audio.stop": 1 });
+    expect(broker.stats.accepted).toEqual({ "persistence.updateProgress": 1, "persistence.markEngaged": 1 });
     expect(broker.stats.rejected).toEqual({});
   });
 
   it("brokers every infrastructure method", () => {
     const { fake, broker } = setup();
-    const { ports } = broker.issue("narrate");
+    const { ports } = broker.issue("flow");
     for (const group of Object.keys(fake.infra) as (keyof typeof fake.infra)[]) {
       expect(Object.keys(ports[group]).sort(), group).toEqual(Object.keys(fake.infra[group]).sort());
     }
@@ -78,14 +76,12 @@ describe("reader port broker", () => {
 
   it("rejects every call after invalidate with a neutral value and counts it", () => {
     const { fake, broker } = setup();
-    const { key, ports } = broker.issue("narrate");
+    const { key, ports } = broker.issue("flow");
     const settingsBefore = ports.settings.read();
     broker.invalidate(key);
     broker.invalidate(key); // idempotent
 
     expect(broker.isCurrent(key)).toBe(false);
-    expect(ports.audio.start(["a"], 0, 1, () => {})).toBe("error");
-    expect(ports.audio.getAudioProgress()).toBeNull();
     expect(ports.persistence.updateDocProgress("doc-1", 0)).toBeUndefined();
     expect(ports.settings.read()).toBe(settingsBefore);
     expect(typeof ports.document.subscribe(() => {})).toBe("function");
@@ -93,64 +89,51 @@ describe("reader port broker", () => {
     expect(fake.effects).toEqual([]);
     expect(broker.stats.accepted).toEqual({ "settings.read": 1 });
     expect(broker.stats.rejected).toEqual({
-      "audio.start": 1,
-      "audio.getAudioProgress": 1,
       "persistence.updateDocProgress": 1,
       "settings.read": 1,
       "document.subscribe": 1,
     });
-    expect(fake.diagnostics.filter((c) => c.args[0] === "port-rejected")).toHaveLength(5);
+    expect(fake.diagnostics.filter((c) => c.args[0] === "port-rejected")).toHaveLength(3);
   });
 
   it("lets teardown run only release-class calls, then closes the key", () => {
     const { fake, broker } = setup();
-    const { key, ports } = broker.issue("narrate");
-    expect(READER_PORT_RELEASE_CALLS).toContain("audio.stop");
+    const { key, ports } = broker.issue("flow");
+    expect(READER_PORT_RELEASE_CALLS).toContain("settings.update{isNarrating}");
     broker.invalidate(key);
     let runs = 0;
     broker.teardown(key, () => {
       runs += 1;
-      ports.audio.stop("mode-switch");
-      ports.audio.setOnTruthSync(null);
-      ports.audio.setPageEndWord(null);
       ports.settings.update({ isNarrating: false });
       ports.diagnostics.record("teardown", "ok");
       // Not release-class: rejected inside the window.
-      ports.audio.start(["a"], 0, 1, () => {});
-      ports.audio.resume();
-      ports.audio.resync(3, 1);
-      ports.audio.setOnTruthSync(() => {});
       ports.persistence.updateProgress("doc-1", 3);
       ports.settings.setWpm(250);
       ports.settings.update({ readingMode: "page" });
     });
     expect(runs).toBe(1);
-    expect(methods(fake)).toEqual(["audio.stop", "audio.setOnTruthSync", "audio.setPageEndWord", "settings.update"]);
-    expect(fake.effects[3].args).toEqual([{ isNarrating: false }]);
+    expect(methods(fake)).toEqual(["settings.update"]);
+    expect(fake.effects[0].args).toEqual([{ isNarrating: false }]);
     expect(broker.stats.rejected).toEqual({
-      "audio.start": 1,
-      "audio.resume": 1,
-      "audio.resync": 1,
-      "audio.setOnTruthSync": 1,
       "persistence.updateProgress": 1,
       "settings.setWpm": 1,
       "settings.update": 1,
     });
 
     // Closed: release calls are rejected too, and a second teardown does not run.
-    ports.audio.stop("mode-switch");
+    ports.settings.update({ isNarrating: false });
     broker.teardown(key, () => { runs += 1; });
     expect(runs).toBe(1);
-    expect(methods(fake)).toHaveLength(4);
-    expect(broker.stats.rejected["audio.stop"]).toBe(1);
+    expect(methods(fake)).toHaveLength(1);
+    expect(broker.stats.rejected["settings.update"]).toBe(2);
   });
 
   it("closeAll and openDocument close every key with no release window", () => {
     const { fake, broker } = setup();
-    const first = broker.issue("narrate");
+    const first = broker.issue("flow");
     broker.closeAll();
     broker.closeAll(); // idempotent
-    first.ports.audio.stop("mode-switch");
+    first.ports.settings.update({ isNarrating: false });
     expect(broker.isCurrent(first.key)).toBe(false);
 
     const second = broker.issue("flow");
@@ -160,31 +143,12 @@ describe("reader port broker", () => {
     const third = broker.issue("page");
     expect(third.key).toEqual({ documentId: "doc-2", documentGeneration: 2, mode: "page", session: 3 });
     expect(fake.effects).toEqual([]);
-    expect(broker.stats.rejected).toEqual({ "audio.stop": 1, "persistence.updateProgress": 1 });
-  });
-
-  it("drops infrastructure callbacks once the key is no longer active", () => {
-    const { fake, broker } = setup();
-    const { key, ports } = broker.issue("narrate");
-    const seen: number[] = [];
-    ports.audio.setOnTruthSync((i) => seen.push(i));
-    ports.audio.start(["a", "b"], 0, 1, (i) => seen.push(100 + i));
-    const truthSync = fake.registered.truthSync as (i: number) => void;
-    const onWord = fake.registered.onWord as (i: number) => void;
-    truthSync(1);
-    onWord(1);
-    expect(seen).toEqual([1, 101]);
-
-    broker.invalidate(key);
-    truthSync(2);
-    onWord(2);
-    expect(seen).toEqual([1, 101]);
-    expect(broker.stats.rejected).toEqual({ "audio.setOnTruthSync:callback": 1, "audio.start:callback": 1 });
+    expect(broker.stats.rejected).toEqual({ "settings.update": 1, "persistence.updateProgress": 1 });
   });
 
   it("rejects a stale continuation after an awaited promise resolves (LL-109)", async () => {
     const { fake, broker } = setup();
-    const live = broker.issue("narrate");
+    const live = broker.issue("flow");
     const liveResult = live.ports.document.ensureBookWords();
     fake.resolveBookWords(null);
     await expect(liveResult).resolves.toBeNull();
@@ -206,17 +170,6 @@ describe("reader port broker", () => {
     await flushMicrotasks();
     expect(continued).toBe(false);
     expect(methods(fake)).toEqual(["document.ensureBookWords", "document.ensureBookWords", "document.readBookBytes"]);
-  });
-
-  it("issues audio only to narrate; every other mode's audio port throws", () => {
-    for (const mode of ["page", "focus", "flow"] as ReaderModeId[]) {
-      const { fake, broker } = setup();
-      const { ports } = broker.issue(mode);
-      expect(() => ports.audio.start(["a"], 0, 1, () => {})).toThrow(ReaderPortAccessError);
-      expect(() => ports.audio.readState()).toThrow(`audio.readState is not issued to ${mode}`);
-      ports.persistence.markEngaged();
-      expect(methods(fake)).toEqual(["persistence.markEngaged"]);
-    }
   });
 });
 
@@ -250,7 +203,6 @@ function fakeModule(mode: ReaderModeId, log: string[], made: FakeRuntimeRecord[]
         resume() {},
         stop(reason, context) {
           log.push(`stop:${mode}:${reason}:${context?.destination}`);
-          if (mode === "narrate") input.ports.audio.stop("mode-switch"); // release-class: accepted
           input.ports.persistence.updateProgress(input.key.documentId, canonical); // not release-class: rejected
         },
         jumpToWord(i) { highlighted = i; notify(); },
@@ -301,7 +253,7 @@ function routerSetup() {
     teardown: (key, run) => { log.push(`teardown:${key.mode}`); real.teardown(key, run); },
     issue: (mode) => { log.push(`issue:${mode}`); return real.issue(mode); },
   };
-  const modules = Object.fromEntries((["page", "focus", "flow", "narrate"] as ReaderModeId[]).map((m) => [m, fakeModule(m, log, made)]));
+  const modules = Object.fromEntries((["page", "focus", "flow"] as ReaderModeId[]).map((m) => [m, fakeModule(m, log, made)]));
   const document = createFakeDocument();
   const router = createReaderModeRouter({ modules, broker, getDocument: () => document, getSettings: () => fake.infra.settings.read() });
   router.openDocument(document);
@@ -336,19 +288,6 @@ describe("reader mode router core", () => {
     expect(router.getSnapshot()?.readingMode).toBe("focus");
   });
 
-  it("pauses Narrate to Page with release calls only inside the teardown window", () => {
-    const { log, fake, broker, router } = routerSetup();
-    router.select("narrate");
-    log.length = 0;
-    router.pauseToPage();
-    expect(log).toEqual([
-      "export:narrate:capture-current", "invalidate:narrate", "teardown:narrate", "stop:narrate:mode-switch:page", "destroy:narrate",
-      "issue:page", "create:page:pause-to-page", "select:page:7",
-    ]);
-    expect(fake.effects.map((c) => c.method)).toEqual(["audio.stop"]);
-    expect(broker.stats.rejected["persistence.updateProgress"]).toBe(2);
-  });
-
   it("selecting the active mode is a no-op; pause-to-page in Page reselects without a new session", () => {
     const { log, made, router } = routerSetup();
     router.select("flow");
@@ -368,17 +307,16 @@ describe("reader mode router core", () => {
     expect(made.at(-1)!.subscriptions).toBe(1);
   });
 
-  // Decision #23: closing on openDocument uses the same invalidate → teardown order as a transition, so the
-  // outgoing session's release calls (Narrate's audio.stop) reach infrastructure instead of leaving audio running.
+  // Decision #23: closing on openDocument uses the same invalidate → teardown order as a transition.
   it("openDocument starts a new generation and releases the old session inside a teardown window", () => {
     const { log, made, fake, broker, router, document } = routerSetup();
-    router.select("narrate");
-    const narrateKey = router.getActive()!.key;
+    router.select("flow");
+    const flowKey = router.getActive()!.key;
     log.length = 0;
     router.openDocument({ ...document, position: 0 });
-    expect(log).toEqual(["invalidate:narrate", "teardown:narrate", "stop:narrate:user-stop:undefined", "destroy:narrate", "issue:page", "create:page:silent", "select:page:0"]);
-    expect(broker.isCurrent(narrateKey)).toBe(false);
-    expect(fake.effects.map((c) => c.method)).toEqual(["audio.stop"]);
+    expect(log).toEqual(["invalidate:flow", "teardown:flow", "stop:flow:user-stop:undefined", "destroy:flow", "issue:page", "create:page:silent", "select:page:0"]);
+    expect(broker.isCurrent(flowKey)).toBe(false);
+    expect(fake.effects).toEqual([]);
     expect(router.getActive()!.key).toEqual({ documentId: "doc-1", documentGeneration: 2, mode: "page", session: 3 });
     expect(made.at(-1)!.input.handoff.canonicalWordIndex).toBe(0);
   });
@@ -435,12 +373,12 @@ describe("reader mode router core", () => {
 });
 
 // ── G3 over the real mode modules (design §D.3) ──────────────────────────────
-// The generators run over every mode whose module is registered here (all four since Wave D); the
+// The generators run over every mode whose module is registered here (all three since NARRATE-REMOVE-1); the
 // generated names extend without renaming.
-const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode, narrate: narrateMode };
-const PRESENT_MODES = (["page", "focus", "flow", "narrate"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
+const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode };
+const PRESENT_MODES = (["page", "focus", "flow"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
 const ORDERED_PAIRS = PRESENT_MODES.flatMap((from) => PRESENT_MODES.filter((to) => to !== from).map((to) => [from, to] as const));
-const PLAYABLE = new Set<ReaderModeId>(["focus", "flow", "narrate"]);
+const PLAYABLE = new Set<ReaderModeId>(["focus", "flow"]);
 
 const keyId = (key: ReaderSessionKey) => JSON.stringify([key.documentId, key.documentGeneration, key.mode, key.session]);
 const acceptedTotal = (broker: ReaderPortBroker) => Object.values(broker.stats.accepted).reduce((sum, n) => sum + n, 0);
@@ -517,7 +455,6 @@ function invokeCapturedWork(
   ports: ReaderPorts,
   key: ReaderSessionKey,
   router: ReturnType<typeof createReaderModeRouter>,
-  options: { readonly ports: boolean } = { ports: true },
 ): void {
   const view = runtime as unknown as Record<string, unknown>;
   const call = (name: string, ...args: unknown[]) => {
@@ -532,13 +469,6 @@ function invokeCapturedWork(
   call("onTocReady", [{ label: "c1" }], 1);
   call("recordDiagnostic", "late", "work");
   call("readBookBytes");
-  // Narrate's binding-driven work (section end, HOTFIX-6 extraction, audio bridge, the render poll).
-  call("syncSectionEnd");
-  call("releaseSectionEnd");
-  call("ensureFullBookWords");
-  call("configureAudio", { bookId: "late" });
-  call("syncAudioRate");
-  call("readNarrationWordIndex");
   runtime.select(3);
   runtime.start({ cause: "programmatic" });
   runtime.resume();
@@ -547,60 +477,13 @@ function invokeCapturedWork(
   runtime.navigateTo(5);
   runtime.jumpBack();
   runtime.adjustSpeed(25);
-  // The ports themselves (completion, cross-book, persistence, settings, diagnostics, audio). Skipped
-  // when the key is still current (a runtime stopped in place): then only the runtime layer is under test.
-  if (!options.ports) return;
+  // The ports themselves (completion, cross-book, persistence, settings, diagnostics).
   ports.shell.requestCompletionToPage();
   ports.shell.requestCrossBook({ finishedWordIndex: 5 });
   ports.persistence.updateProgress(key.documentId, 5);
   ports.settings.update({ readingMode: key.mode });
   ports.diagnostics.record("late", "work");
-  try {
-    ports.audio.stop("mode-switch");
-  } catch (error) {
-    if (!(error instanceof ReaderPortAccessError)) throw error;
-  }
   router.requestCompletionToPage(key);
-}
-
-/** Fire every callback in a registration set (audio onWord/truth sync/chunk/segment/section end, subscriptions). */
-function fireCallbacks(registered: FakeInfrastructure["registered"]): void {
-  for (const cb of Object.values(registered)) {
-    if (typeof cb === "function") (cb as (...a: unknown[]) => unknown)(1);
-  }
-}
-
-/** Fire every callback infrastructure still holds. */
-function fireRegisteredCallbacks(fake: FakeInfrastructure): void {
-  fireCallbacks(fake.registered);
-}
-
-/** Infrastructure slots that currently hold a callback. */
-const heldSlots = (fake: FakeInfrastructure) =>
-  Object.entries(fake.registered).filter(([, cb]) => cb != null).map(([slot]) => slot).sort();
-
-/** The slots a selected (not started) Narrate session holds: its chunk publishers (legacy narrate effect). */
-const NARRATE_SELECTED_SLOTS = ["chunkBoundary", "segmentStart"];
-
-/**
- * A mounted Narrate view stand-in (ready; `words` loaded), so start installs the truth sync, as on a
- * Foliate surface. With no words, start takes the legacy empty-words retry (next() + delayed timer).
- */
-function stubNarrateView(runtime: ReaderModeRuntime, words: readonly string[]): void {
-  const loaded = words.map((word) => ({ word, range: null, sectionIndex: 0 }));
-  (runtime as unknown as { viewApiRef: { current: unknown } }).viewApiRef.current = {
-    getWords: () => loaded,
-    getParagraphBreaks: () => new Set<number>(),
-    highlightWordByIndex: () => true,
-    next: () => {},
-    goToSection: () => Promise.resolve(),
-    waitForSectionReady: () => Promise.resolve(0),
-    getSectionForWordIndex: () => 0,
-    findFirstVisibleWordIndex: () => 0,
-    isUserBrowsing: () => false,
-    clearSoftHighlight: () => {},
-    clearUserBrowsing: () => {},
-  };
 }
 
 /** A complete full-book extraction (so an unguarded HOTFIX-6 continuation would make port calls). */
@@ -617,7 +500,7 @@ describe("reader mode isolation (G3)", () => {
   });
 
   it("covers every ordered pair of the present modes", () => {
-    expect(PRESENT_MODES).toEqual(["page", "focus", "flow", "narrate"]);
+    expect(PRESENT_MODES).toEqual(["page", "focus", "flow"]);
     expect(ORDERED_PAIRS).toHaveLength(PRESENT_MODES.length * (PRESENT_MODES.length - 1));
   });
 
@@ -654,7 +537,6 @@ describe("reader mode isolation (G3)", () => {
         expect(callsFor(old.key), label).toEqual(teardownCalls);
         fake.resolveBookBytes(new ArrayBuffer(1));
         fake.resolveBookWords(null);
-        fireRegisteredCallbacks(fake);
         invokeCapturedWork(old.runtime, oldPorts, old.key, router);
         await flushAll();
 
@@ -665,20 +547,8 @@ describe("reader mode isolation (G3)", () => {
         expect(broker.isCurrent(old.key), label).toBe(false);
         expect(callsFor(old.key).accepted - teardownCalls.accepted, label).toBe(0);
         expect(continued, label).toEqual([]);
-        // Other modes untouched: the switch created only the destination, and no callback is held.
+        // Other modes untouched: the switch created only the destination.
         expect(runtimes.slice(createdBefore).map((r) => r.mode), label).toEqual([to]);
-        // No callback held for the old owner or any other mode; a Narrate destination holds only its own
-        // chunk publishers (the old session's onWord/truth sync/section end were released in teardown).
-        expect(heldSlots(fake), label).toEqual(to === "narrate" ? NARRATE_SELECTED_SLOTS : []);
-        if (from === "narrate" && to === "page") {
-          // OBS-A3-1 (legacy showed highlight 0): Page receives Narrate's canonical word, and the audio
-          // cursor of the session Narrate actually started (here the same word).
-          expect(active.runtime.getSnapshot(), label).toMatchObject({
-            canonicalWordIndex: scenario.position,
-            publishedWordIndex: scenario.position,
-            highlightedWordIndex: scenario.position,
-          });
-        }
         router.destroy();
       }
     });
@@ -691,7 +561,6 @@ describe("reader mode isolation (G3)", () => {
       await flushAll();
       const before = router.getActive()!;
       const snapshot = before.runtime.getSnapshot();
-      const registered = { ...fake.registered };
       const effects = fake.effects.length;
       const created = runtimes.length;
 
@@ -708,7 +577,6 @@ describe("reader mode isolation (G3)", () => {
         highlightedWordIndex: snapshot.highlightedWordIndex,
         playing: snapshot.playing,
       });
-      expect(fake.registered).toEqual(registered);
       // Page alone re-emits its readingMode write (legacy handlePauseToPage in Page, page fixture step 5).
       expect(fake.effects.slice(effects)).toEqual(mode === "page"
         ? [{ method: "settings.update", args: [{ readingMode: "page" }] }]
@@ -716,57 +584,22 @@ describe("reader mode isolation (G3)", () => {
     });
   }
 
-  it("Narrate that never started hands Page its own word, not the stale audio cursor (OBS-A3-1)", async () => {
-    const { fake, router, enter } = isolationSetup(7);
-    enter("narrate");
-    await flushAll();
-    expect(fake.audio.cursorWordIndex).toBe(0); // the legacy captureCurrentAnchor read this stale cursor
-    router.pauseToPage();
-    expect(router.getActive()!.mode).toBe("page");
-    expect(router.getActive()!.runtime.getSnapshot()).toMatchObject({ canonicalWordIndex: 7, highlightedWordIndex: 7 });
-    router.destroy();
-  });
-
   it("rejected mode work cannot escape through a port", async () => {
-    // Narrate runs twice more: started on a (stub) Foliate surface, so onWord, truth sync, chunk
-    // boundary, segment start and section end are all registered and a truth frame is pending; and a
-    // delayed-extraction start whose retry timer is pending. Narrate also exits by "stop" in place (the
-    // key stays current, so only the runtime's own token can drop its work).
-    const cases = PRESENT_MODES.flatMap((mode) => {
-      const starts = mode === "narrate" ? ["started", "delayed-extraction"] as const : ["default"] as const;
-      const exits = mode === "narrate"
-        ? ["stop", "switch", "openDocument", "remount"] as const
-        : ["switch", "openDocument", "remount"] as const;
-      return starts.flatMap((start) => exits.map((exit) => ({ mode, start, exit })));
-    });
-    for (const { mode, start, exit } of cases) {
-      const label = `${mode}${start === "default" ? "" : ` (${start})`} after ${exit}`;
+    // Every mode exits by a switch, an openDocument or a remount (a new session of the same mode); the old
+    // owner's captured work then tries every route it still holds.
+    const cases = PRESENT_MODES.flatMap((mode) => (["switch", "openDocument", "remount"] as const).map((exit) => ({ mode, exit })));
+    for (const { mode, exit } of cases) {
+      const label = `${mode} after ${exit}`;
       const { fake, broker, router, document, enter, callsFor, portsFor } = isolationSetup(7);
       enter(mode);
       const old = router.getActive()!;
-      if (mode === "narrate") stubNarrateView(old.runtime, start === "delayed-extraction" ? [] : document.tokenWords);
       if (PLAYABLE.has(mode)) router.togglePlay();
       (old.runtime as { onSurfaceLoad?: () => void }).onSurfaceLoad?.(); // a pending delayed-load timer
-      if (mode === "narrate") {
-        const narrate = old.runtime as unknown as { syncSectionEnd: () => void; ensureFullBookWords: () => void };
-        narrate.syncSectionEnd(); // the section-end fallback (binding-driven in production)
-        narrate.ensureFullBookWords(); // a pending HOTFIX-6 extraction (only while narrating)
-        if (start === "started") {
-          expect(heldSlots(fake), label).toEqual(["chunkBoundary", "onWord", "sectionEnd", "segmentStart", "truthSync"]);
-          (fake.registered.truthSync as (i: number) => void)(9); // a pending truth frame
-        } else {
-          expect(heldSlots(fake), label).toEqual(["chunkBoundary", "sectionEnd", "segmentStart"]);
-          expect(old.runtime.getSnapshot().narrating, label).toBe(false); // waiting on the retry timer
-        }
-      }
-      // The old owner's captured infrastructure callbacks, as registered before it lost the session.
-      const captured = { ...fake.registered };
       const oldPorts = portsFor(old.key);
       const continued: string[] = [];
-      if (exit !== "stop") void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
+      void oldPorts.document.ensureBookWords().then(() => continued.push("ensureBookWords"));
 
-      if (exit === "stop") old.runtime.stop("user-stop");
-      else if (exit === "switch") enter(PRESENT_MODES.find((m) => m !== mode)!);
+      if (exit === "switch") enter(PRESENT_MODES.find((m) => m !== mode)!);
       else router.openDocument(document);
       if (exit === "remount") enter(mode); // a new session of the same mode
       await flushAll();
@@ -777,8 +610,7 @@ describe("reader mode isolation (G3)", () => {
       const effectsBefore = fake.effects.length;
       const oldSnapshot = old.runtime.getSnapshot();
       fake.resolveBookWords(bookWordsValue(document));
-      fireCallbacks(captured);
-      invokeCapturedWork(old.runtime, oldPorts, old.key, router, { ports: exit !== "stop" });
+      invokeCapturedWork(old.runtime, oldPorts, old.key, router);
       await flushAll();
 
       expect(broker.stats.accepted, label).toEqual(acceptedBefore);
@@ -854,12 +686,11 @@ describe("reader mode isolation (G3)", () => {
 // ── Router module registry (design §C step D3) ────────────────────────────────
 
 describe("reader mode router registry (D3)", () => {
-  it("registers the four modes and reaches each only through its index.ts", () => {
-    expect(Object.keys(READER_MODE_MODULES)).toEqual(["page", "focus", "flow", "narrate"]);
+  it("registers the three modes and reaches each only through its index.ts", () => {
+    expect(Object.keys(READER_MODE_MODULES).sort()).toEqual(["flow", "focus", "page"]);
     expect(READER_MODE_MODULES.page).toBe(pageMode);
     expect(READER_MODE_MODULES.focus).toBe(focusMode);
     expect(READER_MODE_MODULES.flow).toBe(flowMode);
-    expect(READER_MODE_MODULES.narrate).toBe(narrateMode);
     for (const [mode, module] of Object.entries(READER_MODE_MODULES)) expect(module.id).toBe(mode);
 
     const ROUTER = "src/reader/useReaderModeOrchestrator.ts";
@@ -869,13 +700,13 @@ describe("reader mode router registry (D3)", () => {
     const modeDir = (file: string) => /^src\/reader\/modes\/([^/]+)\//.exec(file)?.[1] ?? null;
     const routerEdges = graph.modules.find((m) => m.path === ROUTER)!.edges;
     expect(routerEdges.filter((e) => modeDir(e.to)).map((e) => e.to).sort()).toEqual(
-      ["flow", "focus", "narrate", "page"].map((m) => `src/reader/modes/${m}/index.ts`),
+      ["flow", "focus", "page"].map((m) => `src/reader/modes/${m}/index.ts`),
     );
     // Graph-wide: every edge entering a mode directory from outside it lands on that mode's index.ts.
     const crossings = graph.modules.flatMap((m) => m.edges
       .filter((e) => modeDir(e.to) && modeDir(e.to) !== modeDir(m.path))
       .map((e) => `${m.path} -> ${e.to}`));
-    expect(crossings.length).toBeGreaterThanOrEqual(4);
+    expect(crossings.length).toBeGreaterThanOrEqual(3);
     expect(crossings.filter((c) => !c.endsWith("/index.ts"))).toEqual([]);
     // The TypeScript-resolver graph build takes ~3 s alone and 13.6 s under full-suite load (F′ gate, 2026-10-09);
     // the default 10 s timeout measured the machine, not the router. No assertion changes.

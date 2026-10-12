@@ -102,7 +102,7 @@ function makeMockAdapter(modeId: ReaderModeId = "focus"): ReaderModeAdapter {
 // Type shape verification
 // ---------------------------------------------------------------------------
 
-describe("ReaderModeId — all 4 modes", () => {
+describe("ReaderModeId — all 3 modes", () => {
   it("includes page", () => {
     const id: ReaderModeId = "page";
     expect(id).toBe("page");
@@ -116,11 +116,6 @@ describe("ReaderModeId — all 4 modes", () => {
   it("includes flow", () => {
     const id: ReaderModeId = "flow";
     expect(id).toBe("flow");
-  });
-
-  it("includes narrate", () => {
-    const id: ReaderModeId = "narrate";
-    expect(id).toBe("narrate");
   });
 });
 
@@ -306,8 +301,8 @@ describe("Mode-advance isolation", () => {
   });
 
   it("snapshot mode matches adapter identity regardless of start request", () => {
-    const adapter = makeMockAdapter("narrate");
-    adapter.start(makeStartRequest({ mode: "narrate", wordIndex: 3 }));
-    expect(adapter.getSnapshot().mode).toBe("narrate");
+    const adapter = makeMockAdapter("flow");
+    adapter.start(makeStartRequest({ mode: "flow", wordIndex: 3 }));
+    expect(adapter.getSnapshot().mode).toBe("flow");
   });
 });

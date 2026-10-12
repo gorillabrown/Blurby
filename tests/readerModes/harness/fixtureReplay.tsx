@@ -16,7 +16,7 @@
 //   src/reader/modes/<m>/surface             → recordingSurfaceModule("create<M>Surface")
 //   src/reader/modes/<m>/helpers/usePersistentReadingAnchor → recordingAnchorModule(actual, "<m>")
 //   src/reader/modes/<m>/FoliateView        → stubFoliateViewModule() (jsdom cannot host foliate)
-// Fake infrastructure (audio, persistence, settings) sits behind the real broker, so only accepted
+// Fake infrastructure (persistence, settings) sits behind the real broker, so only accepted
 // port calls are recorded. Unrecorded port methods go to non-recording fakes. The shell's
 // requestCompletionToPage is wired to the router as the E1 shell wires it: an accepted call comes from
 // the active session, so the router queues completion for the active key.
@@ -33,7 +33,6 @@ import {
   type ReaderSettingsSnapshot,
 } from "../../../src/reader/document/ReaderDocumentSnapshot";
 import { createReaderPorts, type ReaderPortBroker, type ReaderPortInfrastructure } from "../../../src/reader/ports/createReaderPorts";
-import type { ReaderAudioStartResult } from "../../../src/reader/ports/ReaderPorts";
 import type { ReaderModeId, ReaderModeModule } from "../../../src/reader/modes/ReaderModeAdapter";
 // Type-only: the router module statically registers every mode tree (READER_MODE_MODULES, step D3), and
 // the behavior tests' vi.mock factories import this harness while those trees load. A static import here
@@ -62,7 +61,7 @@ const PLAYING_OBSERVATIONS: ReadonlyArray<readonly [ReaderModeId, string]> = [["
 interface Effect { channel: string; args: unknown[]; crossOwner?: true }
 type Observation = Record<string, unknown>;
 interface Step { step: number; command: string; args: Record<string, unknown>; observation: Observation; effects: Effect[] }
-export interface Script { name: string; startWord: number; audioStartResults: ReaderAudioStartResult[]; commands: Step[] }
+export interface Script { name: string; startWord: number; audioStartResults: string[]; commands: Step[] }
 interface Fixture { mode: ReaderModeId; scripts: Script[]; [key: string]: unknown }
 
 // ── JSON-safe copying (recorder toJson) ───────────────────────────────────────
@@ -107,14 +106,6 @@ let currentEnv: ReplayEnv | null = null;
 
 function record(channel: string, args: unknown[]): void {
   currentEnv?.effects.push({ channel, args: args.map(toJson) });
-}
-
-/**
- * Records a channel from a seam a behavior test spies on itself (design §D.4: `narrateView.applyActiveWord`
- * is the Narrate runtime's applyNarrationActiveWord, spied on its prototype). No-op outside a replay.
- */
-export function recordSeam(channel: string, args: unknown[]): void {
-  record(channel, args);
 }
 
 /**
@@ -197,11 +188,7 @@ export function stubFoliateViewModule(): Record<string, unknown> {
 }
 
 // ── Fake infrastructure with the fixture's fakeSemantics ──────────────────────
-function createReplayInfrastructure(script: Script, document: ReaderDocumentSnapshot, getRouter: () => ReaderModeRouter | null) {
-  const startResults = [...script.audioStartResults];
-  const audio = { status: "idle", speaking: false, warming: false, cursorWordIndex: 0 };
-  let wordCb: ((i: number) => void) | null = null;
-  let truthCb: ((i: number) => void) | null = null;
+function createReplayInfrastructure(document: ReaderDocumentSnapshot, getRouter: () => ReaderModeRouter | null) {
   let settings = { ...(DEFAULT_SETTINGS as unknown as BlurbySettings), readingMode: "page", lastReadingMode: "flow", isNarrating: false } as BlurbySettings;
   let wpm = WPM;
   const snapshotSettings = (): ReaderSettingsSnapshot => createReaderSettingsSnapshot({
@@ -228,27 +215,6 @@ function createReplayInfrastructure(script: Script, document: ReaderDocumentSnap
       ensureBookWords: () => new Promise(() => {}),
       subscribe: () => noop,
     },
-    audio: {
-      readState: () => ({ status: audio.status as never, speaking: audio.speaking, warming: audio.warming, kokoroLoading: false, cursorWordIndex: audio.cursorWordIndex, pauseReason: null, rate: 1 }),
-      start: (words, wordIndex, rate, onWord) => {
-        record("audio.start", [words, wordIndex, rate]);
-        const result = startResults.length > 1 ? startResults.shift()! : startResults[0];
-        wordCb = onWord;
-        audio.cursorWordIndex = wordIndex;
-        audio.status = result === "started" ? "speaking" : result;
-        audio.speaking = result === "started";
-        audio.warming = result === "warming";
-        return result;
-      },
-      pause: (...a) => { record("audio.pause", a); audio.status = "paused"; audio.speaking = false; },
-      resume: (...a: unknown[]) => { record("audio.resume", a); audio.status = "speaking"; audio.speaking = true; audio.warming = false; },
-      stop: (...a) => { record("audio.stop", a); audio.status = "idle"; audio.speaking = false; audio.warming = false; wordCb = null; },
-      setOnTruthSync: (cb) => { record("audio.setOnTruthSync", [cb ? "<fn>" : null]); truthCb = cb; },
-      setPageEndWord: rec("audio.setPageEndWord"),
-      resync: (wordIndex, rate) => { record("audio.resync", [wordIndex, rate]); audio.cursorWordIndex = wordIndex; },
-      setOnChunkBoundary: noop, setOnSegmentStart: noop, setOnSectionEnd: noop, updateWords: noop, adjustRate: noop,
-      resolveHighlightSync: () => undefined, getAudioProgress: () => null, updateCacheCursor: noop, configure: noop,
-    },
     diagnostics: { record: noop, transition: noop, trace: noop },
     shell: {
       reportRelocate: noop, reportToc: noop, reportEinkContentChange: noop,
@@ -264,9 +230,6 @@ function createReplayInfrastructure(script: Script, document: ReaderDocumentSnap
     infra,
     getSettings: () => settingsSnapshot,
     persistedSettings: () => ({ readingMode: settings.readingMode, lastReadingMode: settings.lastReadingMode, isNarrating: settings.isNarrating }),
-    audioObservation: () => ({ status: audio.status, cursorWordIndex: audio.cursorWordIndex }),
-    emitWord: (i: number) => { audio.cursorWordIndex = i; wordCb?.(i); },
-    emitTruth: (i: number) => { audio.cursorWordIndex = i; truthCb?.(i); },
   };
 }
 
@@ -281,7 +244,7 @@ function ActiveModeView({ router, modules }: { router: ReaderModeRouter; modules
 
 const flushPromises = () => Promise.resolve().then(() => Promise.resolve());
 
-/** Optional replay instrumentation (e.g. a throwing audio infrastructure, a counting broker). */
+/** Optional replay instrumentation (e.g. a counting broker). */
 export interface ReplayOptions {
   /** Replaces the fake infrastructure the real broker forwards to (recording fakes stay the observers). */
   readonly infra?: (infra: ReaderPortInfrastructure) => ReaderPortInfrastructure;
@@ -304,7 +267,7 @@ async function replayScript(
   });
   const env: ReplayEnv = { mode, effects: [], loaded: open.args.surfaceLoaded === false ? [] : [...WORDS] };
   let routerRef: ReaderModeRouter | null = null;
-  const fake = createReplayInfrastructure(script, document, () => routerRef);
+  const fake = createReplayInfrastructure(document, () => routerRef);
   const { createReaderModeRouter } = await import("../../../src/reader/useReaderModeOrchestrator");
   const broker = createReaderPorts(options.infra ? options.infra(fake.infra) : fake.infra);
   const router = createReaderModeRouter({
@@ -318,13 +281,14 @@ async function replayScript(
       readingMode: active.mode,
       focusPlaying: active.mode === "focus" ? s.playing : false,
       flowPlaying: active.mode === "flow" ? s.playing : false,
-      isNarrating: active.mode === "narrate" ? s.narrating : false,
+      // Narrate and the audio port are gone; the baselines still record these fields, so they keep their constant values.
+      isNarrating: false,
       isBrowsedAway: s.isBrowsedAway,
       highlightedWordIndex: s.highlightedWordIndex,
       publishedWordIndex: s.publishedWordIndex,
       canonicalWordIndex: s.canonicalWordIndex,
       persistedSettings: fake.persistedSettings(),
-      audio: fake.audioObservation(),
+      audio: { status: "idle", cursorWordIndex: 0 },
     };
   };
 
@@ -350,13 +314,11 @@ async function replayScript(
             break;
           case "selectMode":
             if (a.mode === "page") router.pauseToPage();
-            else router.select(a.mode as "focus" | "flow" | "narrate");
+            else router.select(a.mode as "focus" | "flow");
             break;
           case "togglePlay": router.togglePlay(); break;
           case "hardSelect": router.hardSelect({ globalWordIndex: a.wordIndex, cfi: null, word: WORDS[a.wordIndex] ?? "" }); break;
           case "advanceTime": vi.advanceTimersByTime(a.ms); break;
-          case "audioWordAdvance": fake.emitWord(a.wordIndex); break;
-          case "audioTruthSync": fake.emitTruth(a.wordIndex); break;
           case "surfaceLoadsWords": env.loaded = [...WORDS]; break;
           case "teardown": root!.unmount(); router.destroy(); mounted = false; break;
           default: throw new Error(`${script.name}: unknown command ${cmd.command}`);
@@ -432,7 +394,7 @@ export function compareReplay(baselineText: string, candidateInput: readonly Scr
   }
 
   // Q-F (4) on the candidate; OC-3 alias back to the baseline channel name (any mode's display seam).
-  const modes: readonly ReaderModeId[] = ["page", "focus", "flow", "narrate"];
+  const modes: readonly ReaderModeId[] = ["page", "focus", "flow"];
   const aliases = new Map(modes.flatMap((m) => Object.entries(CHANNEL_ALIASES).map(([from, to]) => [to(m), from] as const)));
   const candidate = candidateScripts.map((script) => {
     for (const id of crossOwnerSet(script)) errors.push(`Q-F candidate emitted a cross-owner effect: ${id}`);

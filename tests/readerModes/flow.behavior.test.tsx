@@ -7,8 +7,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { compareReplay, readFixtureText, replayFixture } from "./harness/fixtureReplay";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
-import { createReaderPorts, ReaderPortAccessError, type ReaderPortBroker } from "../../src/reader/ports/createReaderPorts";
-import type { ReaderAudioPort } from "../../src/reader/ports/ReaderPorts";
+import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { createReaderModeRouter } from "../../src/reader/useReaderModeOrchestrator";
 import { pageMode } from "../../src/reader/modes/page/index";
 import { focusMode } from "../../src/reader/modes/focus/index";
@@ -100,55 +99,6 @@ describe("flow mode behavior (G4)", () => {
     const staleFocus = JSON.parse(committed);
     staleFocus.scripts[0].commands[3].observation.flowPlaying = false;
     expect(compareReplay(JSON.stringify(staleFocus, null, 2) + "\n", result.candidateScripts).diff).not.toBeNull();
-  });
-
-  it("Flow works when audio access throws", async () => {
-    let accessErrors = 0;
-    let infraAudioCalls = 0;
-    // Infrastructure audio: every method throws (and is counted).
-    const throwingAudio = new Proxy({} as ReaderAudioPort, {
-      get: (_target, prop) => () => {
-        infraAudioCalls += 1;
-        throw new ReaderPortAccessError(`audio.${String(prop)}`, "flow");
-      },
-    });
-    // Issued ports: count every ReaderPortAccessError a session's audio port raises, even if swallowed.
-    const countingBroker = (broker: ReaderPortBroker): ReaderPortBroker => ({
-      ...broker,
-      stats: broker.stats,
-      issue: (mode) => {
-        const issued = broker.issue(mode);
-        const audio = new Proxy({} as ReaderAudioPort, {
-          get: (_target, prop) => (...args: unknown[]) => {
-            try {
-              return (issued.ports.audio as unknown as Record<string, (...a: unknown[]) => unknown>)[String(prop)](...args);
-            } catch (error) {
-              if (error instanceof ReaderPortAccessError) accessErrors += 1;
-              throw error;
-            }
-          },
-        });
-        return Object.freeze({ key: issued.key, ports: Object.freeze({ ...issued.ports, audio }) });
-      },
-    });
-    const fixture = JSON.parse(readFixtureText("flow"));
-    const onlyStart7 = JSON.stringify({ ...fixture, scripts: fixture.scripts.filter((s: { name: string }) => s.name === "flow-core-start-7") }, null, 2) + "\n";
-
-    const result = await replayFixture("flow", MODULES, onlyStart7, {
-      infra: (infra) => ({ ...infra, audio: throwingAudio }),
-      broker: countingBroker,
-    });
-    expect(result.candidateScripts.map((s) => s.name)).toEqual(["flow-core-start-7"]);
-    // Same remainder as the committed baseline (Q-F + OC-1), zero access errors, zero infrastructure audio.
-    expect(result.errors).toEqual([]);
-    expect(result.diff).toBeNull();
-    expect(result.droppedEffects).toHaveLength(19);
-    expect(result.droppedObservations).toEqual(EXPECTED_DROPPED_OBSERVATIONS);
-    expect(accessErrors).toBe(0);
-    expect(infraAudioCalls).toBe(0);
-    // Not vacuous: Flow really started, paced and completed to Page in this replay.
-    expect(result.candidateScripts[0].commands[3].observation).toMatchObject({ readingMode: "flow", flowPlaying: true, canonicalWordIndex: 17 });
-    expect(result.candidateScripts[0].commands[7].observation).toMatchObject({ readingMode: "page", canonicalWordIndex: 24 });
   });
 
   it("resumes Flow after a cross-book open without select arrival effects (useFlowScrollSync effect 2)", () => {

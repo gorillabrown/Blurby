@@ -4,12 +4,10 @@
 // Covers:
 //   BUG-162a — .foliate-loading CSS exists with z-index > content
 //   BUG-162b — wrapWordsInSpans is async / yields between batches / identical DOM output
-//   BUG-163  — TTS preload IPC exists in preload bridge
-//   BUG-164  — sentence-snap tolerance widened to ±25
+//   BUG-163  — no Kokoro preload at app/library mount; tts-cache defers orphan cleanup
 //   BUG-165  — FlowScrollEngine buildLineMap retry logic
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { snapToSentenceBoundary } from "../src/utils/generationPipeline";
 import { FlowScrollEngine } from "../src/utils/FlowScrollEngine";
 import { wrapWordsInSpans } from "../src/utils/foliateWordWrapping";
 import * as fs from "fs";
@@ -108,40 +106,10 @@ describe("BUG-162b: wrapWordsInSpans async", () => {
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BUG-163: TTS preload IPC channel exists
+// BUG-163: Kokoro preload and cache startup guards
 // ─────────────────────────────────────────────────────────────────────────────
 
 describe("BUG-163: TTS preload IPC", () => {
-  it("preload.js exposes kokoroPreload channel", () => {
-    const preloadSrc = fs.readFileSync(
-      path.resolve(__dirname, "../preload.js"),
-      "utf-8"
-    );
-    expect(preloadSrc).toContain("tts-kokoro-preload");
-    expect(preloadSrc).toContain("kokoroPreload");
-  });
-
-  it("useDocumentLifecycle calls kokoroPreload on book open", () => {
-    const readerSrc = fs.readFileSync(
-      path.resolve(__dirname, "../src/hooks/useDocumentLifecycle.ts"),
-      "utf-8"
-    );
-    expect(readerSrc).toContain("kokoroPreload");
-    // Verify it's called in a useEffect associated with book open
-    expect(readerSrc).toMatch(/api\.kokoroPreload/);
-  });
-
-  it("book-open lifecycle does not reinitialize on mode/engine setting toggles", () => {
-    const readerSrc = fs.readFileSync(
-      path.resolve(__dirname, "../src/hooks/useDocumentLifecycle.ts"),
-      "utf-8"
-    );
-    // Re-initializing on settings.readingMode/ttsEngine changes can overwrite
-    // explicit word selection with stale saved-position resume anchors.
-    expect(readerSrc).toContain("}, [activeDoc.id, initReader]);");
-    expect(readerSrc).not.toContain("}, [activeDoc.id, initReader, settings.readingMode, settings.ttsEngine]);");
-  });
-
   it("LibraryContainer does not start Kokoro preload on app/library mount", () => {
     const librarySrc = fs.readFileSync(
       path.resolve(__dirname, "../src/components/LibraryContainer.tsx"),
@@ -163,42 +131,6 @@ describe("BUG-163: TTS preload IPC", () => {
     expect(cacheSrc).toContain("function scheduleCleanupOrphans");
     expect(cacheSrc).toContain("scheduleCleanupOrphans");
     expect(initBody).not.toContain("await cleanupOrphans();");
-  });
-});
-
-// ─────────────────────────────────────────────────────────────────────────────
-// BUG-164: Sentence-snap tolerance
-// ─────────────────────────────────────────────────────────────────────────────
-
-describe("BUG-164: sentence-snap tolerance", () => {
-  it("default tolerance is 25 (not 15)", () => {
-    const src = fs.readFileSync(
-      path.resolve(__dirname, "../src/utils/generationPipeline.ts"),
-      "utf-8"
-    );
-    // The default parameter should be 25
-    expect(src).toMatch(/tolerance\s*=\s*25/);
-    expect(src).not.toMatch(/tolerance\s*=\s*15/);
-  });
-
-  it("finds sentence boundary within ±25 words", () => {
-    // Build a word array: 30 plain words, then a sentence-ending word at index 30
-    const words = Array.from({ length: 30 }, () => "word");
-    words.push("done."); // sentence boundary at index 30
-    // Next word must start uppercase — isSentenceEnd returns false if next word is lowercase
-    words.push(...Array.from({ length: 10 }, () => "More"));
-
-    // Target end at index 25, tolerance 25 means forward search range [25..50]
-    // Must use targetEndIdx > 20 to avoid the small-chunk early return (clampedEnd - startIdx <= 20)
-    // Should find "done." at index 30 (within +25 of target 25) → snaps to 31 (after sentence-ending word)
-    const snapped = snapToSentenceBoundary(words, 0, 25);
-    expect(snapped).toBe(31);
-  });
-
-  it("returns targetEndIdx if no boundary found within tolerance", () => {
-    const words = Array.from({ length: 60 }, () => "word"); // no sentence boundaries
-    const result = snapToSentenceBoundary(words, 0, 20);
-    expect(result).toBe(20); // unchanged
   });
 });
 

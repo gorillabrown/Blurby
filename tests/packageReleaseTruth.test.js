@@ -17,17 +17,4 @@ describe("POSTV2 release package truth", () => {
     expect(lock.version).toBe(pkg.version);
     expect(lock.packages[""].version).toBe(pkg.version);
   });
-
-  it("packages Python sidecar bridge scripts so packaged engines do not require a dev checkout", () => {
-    const pkg = readJson("package.json");
-
-    expect(pkg.build.files).toEqual(expect.arrayContaining([
-      "scripts/moss_nano_app_sidecar.py",
-      "scripts/pocket_tts_sidecar.py",
-    ]));
-    expect(pkg.build.asarUnpack).toEqual(expect.arrayContaining([
-      "scripts/moss_nano_app_sidecar.py",
-      "scripts/pocket_tts_sidecar.py",
-    ]));
-  });
 });

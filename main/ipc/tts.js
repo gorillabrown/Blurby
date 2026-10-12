@@ -3,62 +3,6 @@
 
 const { ipcMain } = require("electron");
 
-const QWEN_DISABLED_REASON = "qwen-disabled";
-const QWEN_DISABLED_DETAIL = "Qwen is retired for Desktop v2 and remains disabled.";
-const ENGINE_DORMANT_REASON = "engine-dormant";
-const NANO_DORMANT_DETAIL = "MOSS-Nano is dormant for this Kokoro-focused architecture phase and is unavailable.";
-const POCKET_DORMANT_DETAIL = "Pocket TTS is dormant for this Kokoro-focused architecture phase and is unavailable.";
-
-function qwenDisabledStatus() {
-  return {
-    status: "unavailable",
-    detail: QWEN_DISABLED_DETAIL,
-    reason: QWEN_DISABLED_REASON,
-    ready: false,
-    loading: false,
-    recoverable: false,
-  };
-}
-
-function qwenDisabledStreamStatus() {
-  return {
-    ...qwenDisabledStatus(),
-    model_loaded: false,
-    device: "disabled",
-  };
-}
-
-function qwenDisabledError() {
-  return {
-    error: QWEN_DISABLED_DETAIL,
-    reason: QWEN_DISABLED_REASON,
-    status: "unavailable",
-    recoverable: false,
-  };
-}
-
-function dormantStatus(detail) {
-  return {
-    ok: false,
-    status: "unavailable",
-    detail,
-    reason: ENGINE_DORMANT_REASON,
-    ready: false,
-    loading: false,
-    recoverable: false,
-  };
-}
-
-function dormantError(detail) {
-  return {
-    ok: false,
-    error: detail,
-    reason: ENGINE_DORMANT_REASON,
-    status: "unavailable",
-    recoverable: false,
-  };
-}
-
 function toErrorResponse(err) {
   const error = err instanceof Error ? err : new Error(String(err || "TTS IPC failure"));
   const response = {
@@ -77,28 +21,6 @@ function toErrorResponse(err) {
     response.spikeWarning = error.spikeWarning;
   }
   return response;
-}
-
-function toNanoErrorResponse(err) {
-  const error = err instanceof Error ? err : new Error(String(err || "MOSS Nano IPC failure"));
-  return {
-    ok: false,
-    error: error.message,
-    reason: error.reason || null,
-    status: error.status || "failed",
-    recoverable: typeof error.recoverable === "boolean" ? error.recoverable : true,
-  };
-}
-
-function toPocketErrorResponse(err) {
-  const error = err instanceof Error ? err : new Error(String(err || "Pocket TTS IPC failure"));
-  return {
-    ok: false,
-    error: error.message,
-    reason: error.reason || null,
-    status: error.status || "failed",
-    recoverable: typeof error.recoverable === "boolean" ? error.recoverable : true,
-  };
 }
 
 function isFiniteNumber(value) {
@@ -208,78 +130,6 @@ function register(ctx) {
       return toErrorResponse(err);
     }
   });
-
-  ipcMain.handle("tts-nano-status", async () => {
-    return dormantStatus(NANO_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-nano-synthesize", async (_event, payload) => {
-    return dormantError(NANO_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-nano-cancel", async (_event, requestId) => {
-    return dormantError(NANO_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-nano-shutdown", async () => {
-    return dormantError(NANO_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-nano-restart", async () => {
-    return dormantError(NANO_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-pocket-status", async () => {
-    return dormantStatus(POCKET_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-pocket-synthesize", async (_event, payload) => {
-    return dormantError(POCKET_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-pocket-cancel", async (_event, requestId) => {
-    return dormantError(POCKET_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-pocket-shutdown", async () => {
-    return dormantError(POCKET_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-pocket-restart", async () => {
-    return dormantError(POCKET_DORMANT_DETAIL);
-  });
-
-  ipcMain.handle("tts-qwen-model-status", async () => qwenDisabledStatus());
-
-  ipcMain.handle("tts-qwen-preload", async () => qwenDisabledError());
-
-  ipcMain.handle("tts-qwen-preflight", async () => ({
-    ...qwenDisabledStatus(),
-    supportedHost: false,
-    checkedAt: new Date().toISOString(),
-    checks: [
-      {
-        key: QWEN_DISABLED_REASON,
-        label: "Qwen retired",
-        status: "skip",
-        detail: QWEN_DISABLED_DETAIL,
-      },
-    ],
-  }));
-
-  ipcMain.handle("tts-qwen-voices", async () => ({ voices: [], ...qwenDisabledError() }));
-
-  ipcMain.handle("tts-qwen-generate", async () => qwenDisabledError());
-
-  // --- Streaming Qwen handlers ---
-  ipcMain.handle("tts-qwen-stream-start", async () => ({
-    ok: false,
-    ...qwenDisabledError(),
-  }));
-
-  ipcMain.handle("tts-qwen-stream-cancel", async () => ({ ok: true }));
-
-  ipcMain.handle("tts-qwen-stream-status", () => qwenDisabledStreamStatus());
 
   // ── Marathon Worker (NAR-5: background caching) ─────────────────────────
   const marathonEngine = require("../tts-engine-marathon");

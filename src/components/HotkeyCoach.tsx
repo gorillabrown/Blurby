@@ -22,7 +22,6 @@ const COACH_HINTS: Record<string, CoachHint> = {
   play: { action: "play/pause", hotkey: "Space" },
   enterFocus: { action: "enter Focus mode", hotkey: "Shift+Space" },
   enterFlow: { action: "enter Flow mode", hotkey: "Space" },
-  narration: { action: "toggle narration", hotkey: "N" },
   fontSize: { action: "adjust font size", hotkey: "Ctrl+=/\u2212" },
   prevChapter: { action: "go to previous chapter", hotkey: "[" },
   nextChapter: { action: "go to next chapter", hotkey: "]" },

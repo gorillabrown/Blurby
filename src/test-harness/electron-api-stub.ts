@@ -2,7 +2,6 @@
 // Dev-only. Implements all 73 IPC methods + 10 event listeners from preload.js.
 // Auto-injected when window.electronAPI is undefined (i.e., outside Electron).
 
-import { generateMockAudio, getMockModelStatus, getMockVoices } from "./mock-kokoro";
 import type { BlurbyDoc, BlurbySettings, ReadingStats, ElectronAPI } from "../types";
 
 // ── Console tracing helper ──────────────────────────────────────────────────
@@ -21,7 +20,6 @@ function traceMut<T>(method: string, args: unknown[], result: T): T {
 // ── Event emitter system ────────────────────────────────────────────────────
 type EventCallback = (...args: any[]) => void;
 const eventListeners = new Map<string, Set<EventCallback>>();
-const stubTtsCache = new Map<string, { audio: number[]; sampleRate: number; durationMs: number; wordCount?: number }>();
 
 function addEventListener(event: string, callback: EventCallback): () => void {
   if (!eventListeners.has(event)) eventListeners.set(event, new Set());
@@ -614,149 +612,6 @@ export const electronAPIStub: ElectronAPI = {
     return trace("extractEpubWords", [bookId], { words, sections, totalWords: words.length });
   },
 
-  // ── Kokoro TTS ──────────────────────────────────────────────────────────
-  kokoroPreload: async () => trace("kokoroPreload", [], { success: true }),
-  kokoroPreloadMarathon: async () => trace("kokoroPreloadMarathon", [], { success: true }),
-
-  kokoroGenerate: async (text: string, voice: string, speed: number) => {
-    const result = generateMockAudio(text, voice, speed);
-    console.debug("[stub] kokoroGenerate", `[${text.length} chars]`, voice, speed, "→", result.audio.length, "samples,", result.durationMs.toFixed(0), "ms");
-    return result;
-  },
-
-  kokoroGenerateMarathon: async (text: string, voice: string, speed: number) => {
-    const result = generateMockAudio(text, voice, speed);
-    console.debug("[stub] kokoroGenerateMarathon", `[${text.length} chars]`, voice, speed, "→", result.audio.length, "samples,", result.durationMs.toFixed(0), "ms");
-    return result;
-  },
-
-  kokoroVoices: async () => trace("kokoroVoices", [], getMockVoices()),
-
-  kokoroModelStatus: async () => trace("kokoroModelStatus", [], getMockModelStatus()),
-
-  kokoroDownload: async () => {
-    // Simulate download progress
-    setTimeout(() => emitEvent("tts-kokoro-download-progress", 0.25), 200);
-    setTimeout(() => emitEvent("tts-kokoro-download-progress", 0.5), 400);
-    setTimeout(() => emitEvent("tts-kokoro-download-progress", 0.75), 600);
-    setTimeout(() => emitEvent("tts-kokoro-download-progress", 1.0), 800);
-    return trace("kokoroDownload", [], { ok: true });
-  },
-
-  // ── Qwen TTS runtime lane ─────────────────────────────────────────────
-  qwenPreload: async () => trace("qwenPreload", [], {
-    error: "Qwen is retired for Desktop v2 and remains disabled.",
-    reason: "qwen-disabled",
-    status: "unavailable",
-    recoverable: false,
-  }),
-
-  qwenPreflight: async () => trace("qwenPreflight", [], {
-    status: "unavailable",
-    reason: "qwen-disabled",
-    detail: "Qwen is retired for Desktop v2 and remains disabled.",
-    recoverable: false,
-    supportedHost: false,
-    requestedDevice: "cuda:0",
-    pythonExe: "C:\\runtime\\qwen\\.venv\\Scripts\\python.exe",
-    modelId: "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
-    attnImplementation: "flash_attention_2",
-    configPath: "C:\\Users\\estra\\Projects\\Blurby\\.runtime\\qwen\\config.json",
-    checkedAt: "2026-04-20T12:00:00.000Z",
-    checks: [
-      { key: "qwen-disabled", label: "Qwen retired", status: "skip", detail: "Qwen is retired for Desktop v2 and remains disabled." },
-    ],
-  }),
-
-  qwenModelStatus: async () => trace("qwenModelStatus", [], {
-    status: "unavailable",
-    detail: "Qwen is retired for Desktop v2 and remains disabled.",
-    reason: "qwen-disabled",
-    ready: false,
-    loading: false,
-    recoverable: false,
-    preloadTimingMs: 620,
-    statusTimingMs: 48,
-    generateTimingMs: null,
-    voiceListTimingMs: 36,
-    spikeWarningThresholdMs: 3000,
-    spikeWarning: false,
-  }),
-
-  qwenVoices: async () => trace("qwenVoices", [], {
-    voices: [],
-    error: "Qwen is retired for Desktop v2 and remains disabled.",
-    status: "unavailable",
-    reason: "qwen-disabled",
-    recoverable: false,
-  }),
-
-  qwenGenerate: async (text: string, speaker: string, rate: number, words?: string[]) => {
-    return trace("qwenGenerate", [`[${text.length} chars]`, speaker, rate, words?.length ?? 0], {
-      error: "Qwen is retired for Desktop v2 and remains disabled.",
-      reason: "qwen-disabled",
-      status: "unavailable",
-      recoverable: false,
-    });
-  },
-
-  qwenStreamStart: async () => trace("qwenStreamStart", [], {
-    ok: false,
-    error: "Qwen is retired for Desktop v2 and remains disabled.",
-    status: "unavailable",
-    reason: "qwen-disabled",
-    recoverable: false,
-  }),
-  qwenStreamCancel: async (_streamId: string) => trace("qwenStreamCancel", [_streamId], { ok: true }),
-  qwenStreamStatus: async () => trace("qwenStreamStatus", [], {
-    status: "unavailable",
-    reason: "qwen-disabled",
-    recoverable: false,
-    ready: false,
-    model_loaded: false,
-    device: "disabled",
-    loading: false,
-    error: "Qwen is retired for Desktop v2 and remains disabled.",
-  }),
-  onQwenStreamAudio: (_cb: EventCallback) => addEventListener("tts-qwen-stream-audio", _cb),
-
-  // ── TTS Cache (NAR-2) — in-memory for browser testing ────────────────
-  ttsCacheRead: async (bookId: string, voiceId: any, startIdx: number) => {
-    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
-    const entry = stubTtsCache.get(key);
-    if (entry) return trace("ttsCacheRead", [bookId, voiceId, startIdx], entry);
-    return trace("ttsCacheRead", [bookId, voiceId, startIdx], { miss: true });
-  },
-  ttsCacheWrite: async (bookId: string, voiceId: any, startIdx: number, audioArr: number[] | Float32Array, sampleRate: number, durationMs: number, wordCount?: number | null) => {
-    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
-    stubTtsCache.set(key, { audio: Array.from(audioArr), sampleRate, durationMs, wordCount: wordCount ?? undefined });
-    return trace("ttsCacheWrite", [bookId, voiceId, startIdx], { success: true });
-  },
-  ttsCacheHas: async (bookId: string, voiceId: any, startIdx: number) => {
-    const key = `${bookId}:${JSON.stringify(voiceId)}:${startIdx}`;
-    return trace("ttsCacheHas", [bookId, voiceId, startIdx], stubTtsCache.has(key));
-  },
-  ttsCacheChunks: async (bookId: string, voiceId: any) => {
-    const prefix = `${bookId}:${JSON.stringify(voiceId)}:`;
-    const indices = [...stubTtsCache.keys()]
-      .filter(k => k.startsWith(prefix))
-      .map(k => parseInt(k.slice(prefix.length), 10));
-    return trace("ttsCacheChunks", [bookId, voiceId], indices);
-  },
-  ttsCacheEvictBook: async (bookId: string) => {
-    for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(`${bookId}:`)) stubTtsCache.delete(key); }
-    return trace("ttsCacheEvictBook", [bookId], { success: true });
-  },
-  ttsCacheEvictVoice: async (bookId: string, voiceId: any) => {
-    const prefix = `${bookId}:${JSON.stringify(voiceId)}:`;
-    for (const key of [...stubTtsCache.keys()]) { if (key.startsWith(prefix)) stubTtsCache.delete(key); }
-    return trace("ttsCacheEvictVoice", [bookId, voiceId], { success: true });
-  },
-  ttsCacheInfo: async () => {
-    const size = stubTtsCache.size;
-    return trace("ttsCacheInfo", [], { totalBytes: size * 1000, totalMB: Number((size * 1000 / 1048576).toFixed(2)), bookCount: new Set([...stubTtsCache.keys()].map(k => k.split(":")[0])).size });
-  },
-
   // ── Event listeners ───────────────────────────────────────────────────
   onLibraryUpdated: (cb: EventCallback) => addEventListener("library-updated", cb),
   onUpdateAvailable: (cb: EventCallback) => addEventListener("update-available", cb),
@@ -765,12 +620,6 @@ export const electronAPIStub: ElectronAPI = {
   onCloudSyncStatusChanged: (cb: EventCallback) => addEventListener("cloud-sync-status-changed", cb),
   onCloudAuthRequired: (cb: EventCallback) => addEventListener("cloud-auth-required", cb),
   onWatcherError: (cb: EventCallback) => addEventListener("watcher-error", cb),
-  onKokoroDownloadProgress: (cb: EventCallback) => addEventListener("tts-kokoro-download-progress", cb),
-  onKokoroLoading: (cb: EventCallback) => addEventListener("tts-kokoro-loading", cb),
-  onKokoroEngineStatus: (cb: EventCallback) => addEventListener("tts-kokoro-engine-status", cb),
-  onKokoroDownloadError: (cb: EventCallback) => addEventListener("tts-kokoro-download-error", cb),
-  onQwenEngineStatus: (cb: EventCallback) => addEventListener("tts-qwen-engine-status", cb),
-  onQwenRuntimeError: (cb: EventCallback) => addEventListener("tts-qwen-runtime-error", cb),
   onWsConnectionAttempt: (cb: EventCallback) => addEventListener("ws-connection-attempt", cb),
   onWsPairingSuccess: (cb: EventCallback) => addEventListener("ws-pairing-success", cb),
 };
