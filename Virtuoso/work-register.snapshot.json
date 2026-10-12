@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-11T22:59:59Z",
+  "takenAt": "2026-10-12T17:34:25Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -47,12 +47,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md",
       "description": "Owner-mandated step 1: independent Page, Focus, Flow and Narrate state, lifecycle, timers, callbacks, DOM/rendering and styles. Matching private module layouts and public contracts permit a later consolidation decision. Approved waves: A baseline/contracts; B Page + Focus; C Flow; D Narrate; E remove shared behavior and prove isolation. Acceptance covers import boundaries, private resource ownership, 12 cross-mode transitions, four same-mode cases, stale-session rejection, preserved per-mode behavior and live audio/UI evidence.",
       "notes": "Completed 2026-10-11: merge d96d2f3f, packet ce740582; D1-D9 pass (D1/D7/D8 amended by owner ruling #32: Narrate listening checks dropped; D6 under KF-3 #33). Ledger TR-057. Owner ruling #31: Narrate to be removed next sprint and rebuilt. Close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md (merge c991e35c)",
-      "revision": "e0ced92148d7a2648395989350bee22c03dd4911e342c711b45f594c1b7f7318",
+      "revision": "b4a68e478c1fdbcd8726c5092b1d52f6f3970e335c491cede8db6ae3ec488f02",
       "extra": {
         "id": "13119306772",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119306772",
         "updated_at": "2026-10-11T03:43:55Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -78,12 +80,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Route both the visible highlight and FlowScrollEngine.followWord through ONE lag-compensated heard cursor (getAudioProgress / heard-floor clamp); extract tunable TTS_VISUAL_CURSOR_LAG_MS; tune by ear. No reducer/WORD_ADVANCE change. Live-QA verdict gates SUBSCRIBER-CURSOR-1.",
       "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-058.",
-      "revision": "dcd3bbb62b748a3c01019a1ea24e1effc11c63b38ef6b157edfa54f48160346b",
+      "revision": "6f4495e7f5d864829dfebe828f5a45f4bf38ac20db3185e97d00ef3c6012494f",
       "extra": {
         "id": "13118863178",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863178",
         "updated_at": "2026-10-11T22:58:04Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -109,12 +113,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Collapse 14 speakNextChunk paths in applyRateChange (lines 1722-1871) into single restartGeneration(reason) helper; delete Web/Qwen/Pocket/Nano reseed branches per Kokoro-only design constraint; fold applyVoiceChange into same helper. Fixes A5 (rate-change skip).",
       "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-059.",
-      "revision": "50ba5650d9763c4cfbf0ac88e22335e49bdb96f2563731b8d1a9776fa2d5d0fc",
+      "revision": "2217b0af008dc8237cbf5fe78f8e0c29ce5d4c40751d6aae1f49818060f0f77c",
       "extra": {
         "id": "13118840646",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840646",
         "updated_at": "2026-10-11T22:58:06Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -138,12 +144,14 @@
       "evidence": "",
       "description": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
       "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references.",
-      "revision": "1cd25f3a93606b508d124d58cfe36169394e2af5252cee2437d2332f215371fa",
+      "revision": "f4b202f1ac83dc5a1496c0d020dc34f733817b24c44f3ee76ec1f22eb48b0353",
       "extra": {
         "id": "13118847895",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
         "updated_at": "2026-10-11T22:58:39Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -165,20 +173,22 @@
       "evidence": "docs/governance/close-outs/CloseOut.TERMINAL-BACKFILL-1.2026-10-10.md",
       "description": "Append one terminal record for each of the 51 items that reached a terminal status before the ledger existed, from the reviewed manifest docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json, via the plugin ledger API as pointer-closeout. Owner-approved exception: existing evidence, no re-verification.",
       "notes": "Completed 2026-10-10: 51 historical records TR-004..TR-054 appended (merge 6e898edf); ledger 3 -> 54. Ledger TR-055. Close-out docs/governance/close-outs/CloseOut.TERMINAL-BACKFILL-1.2026-10-10.md (merge 6ec6de3d)",
-      "revision": "392e72a1fddc232ad6a5a0e946fcbf340c8370a4ca6da47b544cdbd0580a8a06",
+      "revision": "00f8b1fde4b9c5a683a303556f5439bfc50aaed0b983e4867f58a7350cea1358",
       "extra": {
         "id": "13256739205",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13256739205",
         "updated_at": "2026-10-10T23:00:27Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
       "id": "EINK-HOVER-FIX-1",
       "title": "Stop the e-ink hover rule wiping overlay backgrounds",
       "sequence": 6,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -187,17 +197,19 @@
       "group": "Parallel Polish",
       "spec_link": "ROADMAP.md#eink-hover-fix-1",
       "branch": "eb/eink-hover-fix-1",
-      "started": "",
+      "started": "2026-10-12",
       "completed": "",
       "evidence": "",
       "description": "Fixes BUG-184: narrow themes.css:145 [data-eink] *:hover (which matches every hovered ancestor and wipes overlay backgrounds) to interactive leaves inside :where(), keeping specificity (0,2,0). Positive-control regression test first. BUG-184 stays OPEN until rebuild + owner smoke (SRL-079).",
       "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Full Spec: U1-U10 pass.",
-      "revision": "1a99305c34112b9f507a6df3061c045f11ae14188402ae0320bc531ac3c2e957",
+      "revision": "541691f9ff27fadab6fb7407c7f44f2687ad2a9d420effbc91b1450a067957fb",
       "extra": {
         "id": "13257621189",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13257621189",
-        "updated_at": "2026-10-11T00:27:10Z",
-        "group": "group_mm7femyn"
+        "updated_at": "2026-10-12T15:36:12Z",
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -219,20 +231,22 @@
       "evidence": "",
       "description": "(A) Ctrl+K palette: Open Settings / Help / Check for Updates open the reading queue (bare onOpenSettings()), Text Size routes to a removed page, Reading Goals has no entry, three flap titles missing. (B) New dot clears live: seen cards saved after dwell via a small seenBatcher util, flushed on unmount; dwell/flush delays moved to constants. Positive-control tests first.",
       "notes": "Created by roadmap-review 2026-10-10-2 (parallel work outside the separation fence). Owner decision 2026-10-10: clear live. Full Spec: U1-U10 pass.",
-      "revision": "9e65919fe5e704018df5972316ff4c0d7cbecb5dcd5e718cb089d962caec3893",
+      "revision": "a4d100913821425fa8e51ace8366aef087ac507e5d802bd9e7a385d9d14c404f",
       "extra": {
         "id": "13257524973",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13257524973",
         "updated_at": "2026-10-11T00:27:38Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
       "id": "TEST-TIMEOUT-HEADROOM-1",
       "title": "Give the three slow tests explicit time limits",
       "sequence": 5,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -241,17 +255,19 @@
       "group": "Test Health",
       "spec_link": "ROADMAP.md#test-timeout-headroom-1",
       "branch": "eb/test-timeout-headroom-1",
-      "started": "",
+      "started": "2026-10-12",
       "completed": "",
       "evidence": "",
       "description": "Explicit 30 s per-test timeouts for the G1 boundary test and the two updateInstallGating tests, which exceed the 10 s default under full-suite load (KF-3). Retires the KF-3 exception; any other failure stays real.",
       "notes": "Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass.",
-      "revision": "afade3565c3753594967163a0b91d36c9af29075765e2a217509cad899042889",
+      "revision": "7bb50b78b69fd3289f68295ce02f1b29d8c9fc77b6e2d7ded25598600ea67bd1",
       "extra": {
         "id": "13261060490",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261060490",
-        "updated_at": "2026-10-11T22:59:21Z",
-        "group": "group_mm7femyn"
+        "updated_at": "2026-10-12T15:34:29Z",
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -277,12 +293,14 @@
       "evidence": "",
       "description": "Delete the Narrate mode and all narration logic (hooks, strategies, scheduler, TTS settings UI, dormant MOSS/Pocket/Qwen engines, eval harness, CI quality-gate), keeping the Kokoro engine dormant with no renderer or preload path; v13 migration turns a saved narrate mode into flow. 3 waves; touches the shared-core freeze set, so it runs alone.",
       "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass.",
-      "revision": "754f9d8a06626d01dfc90cbf6b5ec7091916b92b2c53db783199c94417c79d14",
+      "revision": "e86f5029a568bb8cd07499716f2b2f03d7b6af8dcaabd3f029d81ac1ff39d5f6",
       "extra": {
         "id": "13261071931",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261071931",
         "updated_at": "2026-10-11T22:59:22Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -306,12 +324,14 @@
       "evidence": "",
       "description": "Path: epic. Phase 0 proves Kokoro (word table exact vs its own audio; start and speed change within 2 s), then a deterministic core: per-chunk exact word table + playback clock, cursor = word at the current playback sample, no estimated timing, no stretching. Finish line: Narration rebuilt.",
       "notes": "origin: held plan 2026-10-11-narrate-rebuild (rebuild draft stub). Absorbed by roadmap review 2026-10-11 as Path: epic; /epic charters it when it reaches the head.",
-      "revision": "a4200ce7e01a08e10677e4949d97110775f7d1975bcd1372e70a8e8426bd18c1",
+      "revision": "14bd14f2123f0a1d22d4c79018703d068a94f80b2264d78e3c4ecb2d4cba8890",
       "extra": {
         "id": "13261025969",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261025969",
         "updated_at": "2026-10-11T22:59:24Z",
-        "group": "group_mm7femyn"
+        "group": "group_mm7femyn",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -338,12 +358,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "If NARRATE-CURSOR-TRACKING-DIAG-1 confirms the subscriber/direct-callback model, rename lastConfirmedAudioWordRef -> subscriberCursorRef, remove cursorWordIndex from React reducer state, remove WORD_ADVANCE action, and wire visual/view follow via the verdict-approved live target.",
       "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-060.",
-      "revision": "514946af9e654048cfca5b6317d9272240dfb4e29a89d90b64a70154494df378",
+      "revision": "d280042654f931f6dd267a229dedd22c2362e669ee685d4e1bd0a7d9b8dcb07c",
       "extra": {
         "id": "13118808496",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808496",
         "updated_at": "2026-10-11T22:58:07Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -367,12 +389,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
       "description": "Long-form audio export from Kokoro",
       "notes": "Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061.",
-      "revision": "6ccee81753681135bb7c8d4526ed8ad012681bbd02429d235e76c6cd9a2df777",
+      "revision": "65da5446e1f6b3c29ce848940f35392d5cc8863938db696aefda402b414bce46",
       "extra": {
         "id": "13118856529",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856529",
         "updated_at": "2026-10-11T22:58:09Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -394,12 +418,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
       "description": "Delete main/legacy-parsers.js after a fresh production/test/build reference census confirms no consumers. Preserve active main/file-parsers.js behavior and parser dependencies used elsewhere.",
       "notes": "Completed 2026-10-10 via EPIC-MAIN-PROCESS-CLEANUP: merge b95dbb55 (item 91e48416). Census Decision #7 owner-ratified. Ledger TR-003. Close-out docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
-      "revision": "8df09679cb20591df7baa5881d28b74544a67b511ae7a74ce8d05804b0abdc49",
+      "revision": "aeb897b8bb9b1d84dbab0a4a6cfe844ee39036fe95b6e138e89a91d2ed536600",
       "extra": {
         "id": "13122896722",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122896722",
         "updated_at": "2026-10-10T19:29:35Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -421,12 +447,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
       "description": "Extract duplicated process startup, JSON-lines message handling, request correlation, timeout, cancellation and shutdown from main/moss-nano-sidecar.js and main/pocket-tts-sidecar.js into one shared implementation parameterized by provider settings.",
       "notes": "Completed 2026-10-10 via EPIC-MAIN-PROCESS-CLEANUP: merge 7a462bf7 (Task 1 65cb5774, Task 2 18f453fa). Ledger TR-002. Close-out docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
-      "revision": "2dff0816d0f75563fb0080ec26ab1505931a288f5f66e00fde39594bcd6a50eb",
+      "revision": "c6f10183e362bd3abece3b3ce31ea8c9b395db762f8770ee47fe858436e9a832",
       "extra": {
         "id": "13122892116",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122892116",
         "updated_at": "2026-10-10T19:29:34Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -450,12 +478,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md",
       "description": "Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.",
       "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer.",
-      "revision": "f3f7b58cf619ac07671453204780b3425573b54052bba439812f817235d2457a",
+      "revision": "7cc7ac51cf3c88423d273a06a6baa930d00976a3165687c4702a18d6b8a0d72a",
       "extra": {
         "id": "13122892318",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122892318",
         "updated_at": "2026-10-11T22:58:40Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -479,12 +509,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md",
       "description": "Extract duplicated lifecycle, startup gating, status normalization, in-flight request settlement, synthesize/cancel/shutdown/restart from main/moss-nano-engine.js and main/pocket-tts-engine.js. Keep provider configuration in thin compatible entry points.",
       "notes": "Completed 2026-10-10: merge 8cedd0cc (Task 1 2c9bde42, Task 2 1391a6d1); suite 3,113 passed / 0 failed / 133 skipped, skip set identical to base. Register was not moved to In Flight during the run. Ledger TR-056. Close-out docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md (merge 50aa9c9a)",
-      "revision": "1b9cf2249d912719598293f9a129142b68348d7ea0ae16a66561c3b261e370b8",
+      "revision": "1e6ff7e9d9159cb9f17dbbf936a494d75bc70a6c0efbe5433c04b1e337b20895",
       "extra": {
         "id": "13122908614",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122908614",
         "updated_at": "2026-10-10T23:08:11Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -506,12 +538,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
       "description": "Replace duplicated withRetry loops in main/cloud-google.js and main/cloud-onedrive.js with a shared helper that receives the provider token-refresh function.",
       "notes": "Completed 2026-10-10 via EPIC-MAIN-PROCESS-CLEANUP: merge dd3db29c (item f3abb524). Ledger TR-001. Close-out docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md",
-      "revision": "88761f1d4d5d3681f50f16a8b0383353be885650925c34b68127366f3fb0edcb",
+      "revision": "94a4c9552170b4106cd51bf9e5ef76fbef894c65bb75dd1286072fe02a717e59",
       "extra": {
         "id": "13122896723",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122896723",
         "updated_at": "2026-10-10T19:29:32Z",
-        "group": "group_mm7fb4db"
+        "group": "group_mm7fb4db",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -535,12 +569,14 @@
       "evidence": "",
       "description": "Provider-neutral diagnostics bundle",
       "notes": "",
-      "revision": "13ab23cd3f4777d6240f47a7220ee9071affad2c3cc4112dddeb937f2a5ca821",
+      "revision": "6542ada8b4238d5a2845ecc3aa5d9c9d1b9da6a7ffe32a2904793a123ca133af",
       "extra": {
         "id": "13118840645",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840645",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -562,12 +598,14 @@
       "evidence": "",
       "description": "Schema-versioned v2 cache identities and atomic timing sidecars",
       "notes": "",
-      "revision": "b8d947962be482971a15e36c1bc920e47dc39189232082fa1f075cac8d4257c2",
+      "revision": "11cc8def4985cdabdd641f23b40272faed2530f652a8044b1b0c27de12181cd9",
       "extra": {
         "id": "13118832408",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832408",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -591,12 +629,14 @@
       "evidence": "",
       "description": "Merge sync and diagnostics branches to main",
       "notes": "Dispatch-ready; dormancy gate complete.",
-      "revision": "5e4f8c6f1ba6e7122c7a3a9e9a1d379e1b6b2ce09a8ea391a43586b96a256ce1",
+      "revision": "0aa08f90ac578d741c8e9e45d5abd397908bf2529284ebd65d5832d411d3bc7f",
       "extra": {
         "id": "13118863177",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863177",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -618,12 +658,14 @@
       "evidence": "",
       "description": "Kokoro readiness and preflight checks",
       "notes": "",
-      "revision": "22908b05d8e51f17ea2ceeaa176565442938c5e05b6ca99bc432a11fc052e7a3",
+      "revision": "fa33b951ba012fbe6bd807e27037baf996a27fb625521ae4ac7a6045c2a2e373",
       "extra": {
         "id": "13118791925",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118791925",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -645,12 +687,14 @@
       "evidence": "",
       "description": "Voice mixing feasibility study",
       "notes": "",
-      "revision": "a7992ee9518627cbee60b1c26ad2eb3cb00973c9bcfc2c1756e72177b382f977",
+      "revision": "727cd3d1f9534240b86191f33050ff901bc502127f3826dc9e15ed06ad640b4b",
       "extra": {
         "id": "13118841616",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841616",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -672,12 +716,14 @@
       "evidence": "",
       "description": "Disable dormant sidecar engines",
       "notes": "Dormant at settings/IPC; code preserved; Nano probes opt-in.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "b88f3841453c2d760c284dff8560444d88dd4c5a6d4053dcf664b7ab3a99101e",
+      "revision": "3e53624af6edcd08bcc9ac8ee57873e342b3f6b60acdba134c4ae8ebb8b1699a",
       "extra": {
         "id": "13118818984",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818984",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -701,12 +747,14 @@
       "evidence": "",
       "description": "Cache-hit timing parity, type harmonization, IPC validation",
       "notes": "Findings-driven: impl review A8 + lit review §4.6",
-      "revision": "228c5e750d11b8d0652fec40827d6a2d840a6f64b022670944384f12056343aa",
+      "revision": "4a0f853196f56767e886c36f156f9ce748a8cc75a13616bc44bf7f7700782186",
       "extra": {
         "id": "13118833358",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833358",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -730,12 +778,14 @@
       "evidence": "",
       "description": "Centralized narration highlight sync policy",
       "notes": "",
-      "revision": "763b287a2ad884078bb66d6afc40c79b74fc81a603d75280a0d1d71af2cb9ea3",
+      "revision": "8d98a2f6c7ade26533c9f65fabcf076bcca8bb69687ac2b32d3e6cb77ce37d75",
       "extra": {
         "id": "13118856198",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856198",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -757,12 +807,14 @@
       "evidence": "",
       "description": "Provider capability truth in ttsProviderRegistry",
       "notes": "",
-      "revision": "3a79a84efdc84022aa5998e41b2d48eb836081ce5517bdf3e112cb705527abd3",
+      "revision": "1178dc426875592775ce9400bc170a67cc95761d0c3fb9d711c78497954886fb",
       "extra": {
         "id": "13118808495",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118808495",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -786,12 +838,14 @@
       "evidence": "",
       "description": "Event-driven word sync from research",
       "notes": "Research: readest + RealtimeTTS + sioyek; landed a71df02 via 2c946ad; governance commit 800c9e2\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"TTS-CACHE-HARDEN-1 (completed 2026-05-16)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "15d659950c19de0fb6b2c805d51126b122e35a04035b9b30742160c4b336eb80",
+      "revision": "82ce17ca6c884ace275f8e4e08bab62eb85e59cd448548cbb7d4d97183571a89",
       "extra": {
         "id": "13118819556",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819556",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -813,12 +867,14 @@
       "evidence": "",
       "description": "Natural chunk highlighting for Kokoro TTS",
       "notes": "",
-      "revision": "99103f5de27449d3f9c0d049f8bbfec70ebadae9969189c33a42ffc78f844860",
+      "revision": "4a9483e41c5229eb63814c8060f597518b751d813ec1d8e3e750543f1dfa81cc",
       "extra": {
         "id": "13118840647",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840647",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -842,12 +898,14 @@
       "evidence": "",
       "description": "Sioyek-inspired word position index",
       "notes": "Research: sioyek. Landed 2eabf36, merged 8545895.",
-      "revision": "7bc8c4bd4ccf73a57e1e96694ac1a84edae0fd2dd9c1960ab1d5843f1bb45432",
+      "revision": "317e3d63929bf5ee1f36b7ed3404039634de8f5c671ac95ab5a568c51d362288",
       "extra": {
         "id": "13118819999",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118819999",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -871,12 +929,14 @@
       "evidence": "",
       "description": "End-to-end pipeline integration tests",
       "notes": "Pipeline identity/integration coverage. Landed 022d161, merged 994f218.",
-      "revision": "f4d1759ed0b4096ea4de3db3787d178d111d3ae0144d95b2edb9facda41bcdda",
+      "revision": "c354833c7793642d5e3f4f77a639e788d22b60ee96f0cf0693854317b94e11a4",
       "extra": {
         "id": "13118841422",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841422",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -900,12 +960,14 @@
       "evidence": "",
       "description": "Fill normalizer gaps from abogen research",
       "notes": "Research: abogen. Landed de5b441, merged dcf8a7d, governance closeout 2c7ada8.",
-      "revision": "aa4a0d1b98276e5271c64036b418f976a08ac6d82a737a80c7b4831af6b05cf1",
+      "revision": "c069f29264172fd6ace51ae29dd4e0123db69e4ac8218dc75d0586c1baa2f5c1",
       "extra": {
         "id": "13118833144",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833144",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -927,12 +989,14 @@
       "evidence": "",
       "description": "English-first spoken-text normalization",
       "notes": "",
-      "revision": "0b37d65c1a30e487e437cb7cab6c65e8f99cded83542689b5d3a363607ae16a4",
+      "revision": "56cba5ead15961b53704c105f8a47717735bc79be72964fbb84c77bfd555901a",
       "extra": {
         "id": "13118863192",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863192",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -956,12 +1020,14 @@
       "evidence": "",
       "description": "Filter punctuation-only tokens from phoneme alignment input",
       "notes": "",
-      "revision": "3e43e3ad4fdd81fbebe117659584cbd6b489498dbea2756165f95774763afa64",
+      "revision": "862856cc6b1dd00aa61d3cc5fc82d5fbe6d5624ac50d95997138d8f562355fe3",
       "extra": {
         "id": "13118863341",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118863341",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -985,12 +1051,14 @@
       "evidence": "",
       "description": "Move Narrate lifecycle behind audio truth-sync owned adapter",
       "notes": "Narrate starts at exact selected/current word and never follows Flow engine.",
-      "revision": "d6ee49fb1139bf4785a6b93a0e1e499c28bce1ad882aad48e71ea59b4bbc01d9",
+      "revision": "caac30ec3f2735ecd1b36dee66d0c1718dc48300c7f65f26fbd4d6a00f479bb0",
       "extra": {
         "id": "13118832563",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832563",
         "updated_at": "2026-09-23T19:00:25Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1016,12 +1084,14 @@
       "evidence": "",
       "description": "Freeze cursor during inter-word silence using real endTime timestamps",
       "notes": "",
-      "revision": "576977afa2f02e5d0833f541e6eaad41fafa6cd36e21b18bd492edcd90a7ca15",
+      "revision": "da25c9b51deacd5b09d8f14cf9b93eed3028168f23d3a9f24d22449defd71c60",
       "extra": {
         "id": "13118833585",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118833585",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1043,12 +1113,14 @@
       "evidence": "",
       "description": "Fix content omission: seed automatic chunk continuation from produced-end (nextGenWordIndexRef), not lastConfirmedAudioWordRef (cursor twin); hard-click still re-anchors. Add schedule-vs-wallclock log. Gate: no words omitted by ear in The Raven. See ROADMAP Step 3.6.",
       "notes": "Repair lane closed by explicit disposition; S1/S4/S8/S12/S18 fixed, S5 accepted partial, S9 deferred, S13 moved to post-isolation NARRATE-CLOSED-LOOP-CURSOR.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"Step 3.5 manual QA: S13 split -> Bug2 content omission (this); Bug1 visual lead deferred post-ISO\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "ad21a20b4b528e5360e09d9e63bf22bbf234d6d690a92fc083dd445e4260aef5",
+      "revision": "45cf0284eea320bebbba976ac3cf2d2cc80d4247091ea2373926c52bdf6baf2c",
       "extra": {
         "id": "13118842117",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842117",
         "updated_at": "2026-09-23T19:31:45Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1072,12 +1144,14 @@
       "evidence": "",
       "description": "Move Focus behind adapter and begin passive surface command typing",
       "notes": "Completed and merged to main at 634bac2; first concrete Focus adapter plus passive SurfaceCommand types.",
-      "revision": "66085ff9b7772c0a688d00dff4cba531131c690b33e94b0c65bea424e13c9f1a",
+      "revision": "2ea7689cb0f5e9979b3cbdeb8eda498a7598882fa9c1399631476b81bc863942",
       "extra": {
         "id": "13118847249",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847249",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1102,12 +1176,14 @@
       "evidence": "",
       "description": "Review, stage, verify, and commit Phase 0 plus governance sweep baseline",
       "notes": "Completed in three pushed commits: reader anchors, governance sweep, roadmap queue resequence.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-MODE-ISOLATION-1 Phase 0; GOVERNANCE-SWEEP\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "1dd9601fdeba7da2cdc26ae161916333293d56faccb1b85d1e3b2902eaa6f174",
+      "revision": "9e2723ff4c2450b6d4f37a647e19325cb0d01e15aa96fc1e7880297e241e63db",
       "extra": {
         "id": "13118832411",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832411",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1131,12 +1207,14 @@
       "evidence": "",
       "description": "Extract mode orchestrator shell while preserving exact-start and no-auto-start semantics",
       "notes": "Completed and merged to main at 1f4a75a; behavior-preserving orchestrator shell extraction.",
-      "revision": "fc4d9204fd935beb8e0e69b121f296b55b25b36dd17700e92c60818a64f42fcc",
+      "revision": "dba8ea3693d68ee55111400b5a6f1f2d5ba2e4884e19ca2ef0b0353f62793794",
       "extra": {
         "id": "13118847250",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847250",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1160,12 +1238,14 @@
       "evidence": "",
       "description": "Fix cache silence parity, trusted progress lag, resume backpressure",
       "notes": "OutsideAudit.9 hardening gate. Three defects, three tests.",
-      "revision": "8b3b9931923ec6f27380cfbc1d11a6c912d1804827250b47fb6bccf203cbeb89",
+      "revision": "84a9d8009d1329f8490cd26eb7bcf1f8a6dc099a59ddfa353620c833cb89452a",
       "extra": {
         "id": "13118840970",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840970",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1189,12 +1269,14 @@
       "evidence": "",
       "description": "Reproduce and classify broad-suite failures before CI gating",
       "notes": "Completed at 172cffb; 12 failures classified/resolved, 3 environmental flakes documented.",
-      "revision": "cfd9751aaec180c4319d574688611a318c2bfaf115afaaf2727e5e7296f6bea7",
+      "revision": "b4fe1d80ed0edaa98437209bfb1de10d0c0a9b92beb46e96eaee2ff5c36359b1",
       "extra": {
         "id": "13118856777",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118856777",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1216,12 +1298,14 @@
       "evidence": "",
       "description": "OS media controls via Electron MediaSession API",
       "notes": "Roadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "cc7c8fb0c8cd52ea0acbd9203e82904a606e375b5d786725383895ecd943bed9",
+      "revision": "6779f9a4fb034d6e77b40fc1c905ed477c84715b06acb8cd0a03db270d4a9ddf",
       "extra": {
         "id": "13118862674",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862674",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1243,12 +1327,14 @@
       "evidence": "",
       "description": "PauseReason discriminant for smarter resume behavior",
       "notes": "Roadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "d0a83b08a28e4e146be7be999aeb4ff00a106399ecda9ef0cfd0827cc507df14",
+      "revision": "ee513182e84d1d594c5a4a2ceada9280f711a75f23c5738730a726505a670f53",
       "extra": {
         "id": "13118864160",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118864160",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1273,12 +1359,14 @@
       "evidence": "",
       "description": "Add adapter contracts and tested shared current-word anchor service",
       "notes": "Completed and merged to main at 32f4543; behavior-preserving adapter contract and anchor service sprint.",
-      "revision": "3460778cd16959f5cc68568f932fc80acd4aec5975083992b02e890b8a68d6d6",
+      "revision": "2c89c13396f67fbb480a35e15f76796f13a5e3e1556b9343f54c1aac316692ba",
       "extra": {
         "id": "13118886594",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118886594",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1300,12 +1388,14 @@
       "evidence": "",
       "description": "Extend eval harness with quality scoring dimensions and CI gate config",
       "notes": "Roadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"None\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "4b666f1c7bb45819cda95c0a16ab2a19d8987f2dc3fdf7ee22aa88f08cd52b44",
+      "revision": "d4a2967f4206f92fdb53be4862a7023a0ca114f892939bb003d0b852b8d09c85",
       "extra": {
         "id": "13118840971",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840971",
         "updated_at": "2026-09-23T19:31:45Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1327,12 +1417,14 @@
       "evidence": "",
       "description": "Architecture decision records for TTS",
       "notes": "Architecture decision record. Landed 66a73b1, merged 65629bc.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"All above\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "6811aebb3790cccbb605816aaecc5aa59e04f6bb27eec2ca0ee3dbef43efc729",
+      "revision": "8d30566eb9eb73371a918020a0869e10345426e97b1b8cd977ea14f94bcb46b0",
       "extra": {
         "id": "13118862481",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118862481",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1356,12 +1448,14 @@
       "evidence": "",
       "description": "Move Flow lifecycle and FlowScrollEngine ownership behind Flow adapter",
       "notes": "Flow owns section-handoff restart; no Narrate truth-sync changes.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-ISO-1C; persistent-anchor repair lane closed by explicit disposition; Flow S9 lazy-follow deferred\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "7aba5a35ca00c8ffb7315bb704f2c4fb42f9b5d58ddd646b79c10541a7abfc8c",
+      "revision": "c39d569ce86babac60d5764296e5ebefdc6dcb57bd2a05cb4df762fd528ebb58",
       "extra": {
         "id": "13118841621",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841621",
         "updated_at": "2026-09-23T19:31:49Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1385,12 +1479,14 @@
       "evidence": "",
       "description": "Resolve deferred governance-sweep human-review items",
       "notes": "Docs-only. Doc-keeper agent renamed Herodotus -> MarcusAurelius across canonical surfaces; Hercules.md -> hercules.md; 8 close-outs archived; rosters reconciled; governance-sweep-spec archived. Merge handed off to user per git-handoff rule.",
-      "revision": "99c40d444bbf446788123f8b0f2960bb5fdc75b50f35520de1d66325b34bf32f",
+      "revision": "130bc4733271e14336e59f41a64a389f98979c565e139587f419781563f11aae",
       "extra": {
         "id": "13118840660",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118840660",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1415,12 +1511,14 @@
       "evidence": "",
       "description": "Wire TTS quality gates into CI after suite health and reader runtime are stable",
       "notes": "Deferred until broad-suite health is clean or formally classified.",
-      "revision": "defbb817d8db705440e1d1e6a7668160d46b70dc477ef238c6ccadbf5316d293",
+      "revision": "4d3785b73e6ac73bd583df36c8eb87c38ca12c661f01c1a1d9802f776a42fc2e",
       "extra": {
         "id": "13118827986",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118827986",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1442,12 +1540,14 @@
       "evidence": "",
       "description": "Resolve settings↔tts circular chunk warning and audit theme-context subscription across Settings sub-pages. Closes BUG-182.",
       "notes": "Hotfix for BUG-182. Build clean; live smoke PASS on v1.75.1 dev build with E-Ink Display Mode OFF. New BUG-184 filed for einkMode panel transparency.",
-      "revision": "564ce5ef75c3bfddcce62375eafcd681716beb69a648eadb1b969f373ad3fc4b",
+      "revision": "ea5f092c8812ac029f402ac80a23d6d7a2ced73dfe999443c280abcb0c9c7ab4",
       "extra": {
         "id": "13118841260",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118841260",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1469,12 +1569,14 @@
       "evidence": "",
       "description": "Add app.requestSingleInstanceLock() + second-instance handler to focus existing window instead of spawning duplicate BrowserWindow. ~5 LOC. Closes F1 from discovery sweep.",
       "notes": "XS effort. Manual smoke PASS (launch twice -> one window, existing window focuses/restores). Parallel-safe with everything in buffer (Lane D, main-process only).",
-      "revision": "a20e3d773b4f6c50f2caf5548f2297cc9fd88b5f745c01aa348d9c322ddaf33e",
+      "revision": "befb0d10f8317b975d8142a7dff25227f7b012ff8340b8d7e75f6356e5ab9c65",
       "extra": {
         "id": "13118832662",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118832662",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1496,12 +1598,14 @@
       "evidence": "",
       "description": "Split WS_AUTH_TIMEOUT_MS into a generous pairing window (5 min) for first-time human pair and the existing tight 5s window for stored-token re-auth. Closes BUG-183.",
       "notes": "Hotfix for BUG-183 (filed 2026-05-28). Aristotle-gated. Parallel-safe with TTS-QUAL-CI-1 + SINGLE-INSTANCE-LOCK-1.",
-      "revision": "e40f531a085df8f138337883d8081c3d2a56a997275f7c26637aed936be1e183",
+      "revision": "a3b250284dbc46a73b6e93f75639f930d746b63c58f7eebdffea4c5a78c7bd8c",
       "extra": {
         "id": "13118818711",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118818711",
         "updated_at": "2026-09-23T19:00:26Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1525,12 +1629,14 @@
       "evidence": "",
       "description": "Introduce resumeTargetRef; pause() captures heardFloor BEFORE strategy clears scheduler sources; resume() reads from priority chain intent ?? resumeTarget ?? subscriber. Fixes A4 (play->pause->play resets to book start).",
       "notes": "Source merged at db2d1bc; anchor-correctness follow-up merged at 1299808. Live A4 retest still recommended before user-facing gate is declared closed.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-INTENT-CURSOR-1 (provides getNextChunkSeed helper)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "cbb40d66467c90451f15d527dda912b62aa651d72a367721e165657855582050",
+      "revision": "1a2c17db2868b3656e9d5da9b47d1fc64bc1d1d904288e15bc235f89f84dae94",
       "extra": {
         "id": "13118810192",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810192",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1554,12 +1660,14 @@
       "evidence": "",
       "description": "Reseed applyRateChange Kokoro bucket-change from heardFloor, not nextGenWordIndexRef (A5 fix)",
       "notes": "Position fix merged 145c385; residual 1.4x-bucket overlap -> APPLYRATECHANGE-COLLAPSE-1. No formal CloseOut authored (interim evidence: live-QA gate report). Reconciled 2026-07-02.",
-      "revision": "1092153b7fe305a84ffdc7112e24aac2504a179599caf031946411bad4b67fd2",
+      "revision": "b09aff0d778f355257351461b9def2fb10fab3eeb87bfb782fd71ebda245e317",
       "extra": {
         "id": "13118825485",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825485",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1583,12 +1691,14 @@
       "evidence": "",
       "description": "Instrument cursor, heard-floor, anchor, Foliate, and Flow follow signals to prove which source should drive visible cursor and view-follow before another fix.",
       "notes": "Live-QA trace 2026-05-31 (Meditations, DIAG on/reverted). Hypothesis REFUTED: schedulerActiveWord==heardFloor lead the heard voice; wordIndex (visible cursor) closest but still leads & drifts; nextGenWordIndex is pre-fetch frontier; resumeTarget/subscriberCursor no-data. SUBSCRIBER-CURSOR-1 amended -> publish lag-compensated heard cursor. See investigations/NARRATE-CURSOR-TRACKING-DIAG-1.md.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-PAUSE-RESUME-UNIFY-1; revert fcea6a8\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "4fac7ac6f75e608cf7b2438bb365172fc3a393b33811ab3dbb533b494f0babb4",
+      "revision": "54ab483f3bac1e436e0fc8dc730d8edf48785ebf62e76929760e4d8acdc2d110",
       "extra": {
         "id": "13118810126",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118810126",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1612,12 +1722,14 @@
       "evidence": "",
       "description": "Introduce intentCursorRef as user-intent half of Evan's two-cursor model; retire nextKokoroExactStartRef (the secret cursor); resyncToCursor becomes thin wrapper that sets intent + triggers restartGeneration if playing",
       "notes": "PARTIAL: A1 PASS, A4 FAIL 0-of-3. Consume lifecycle landed; reactive not preventive. PAUSE-RESUME-UNIFY-1 completes.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-DUAL-SOURCE-DIAG-1 (verdict CONFIRMED or PARTIAL)\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "07882b49afb4692be17bb1d9e2c49d54baf4ee3269b756ab348dd4007e5f6f24",
+      "revision": "45a4ae7e8189e667de95681a777c0981bc5ac79a62f1bf62aec662771197b2b5",
       "extra": {
         "id": "13118801914",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118801914",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1641,12 +1753,14 @@
       "evidence": "",
       "description": "1-day investigation: instrument every audio-decision read in useNarration.ts, re-run live-QA A1/A4/A5, produce verdict report confirming/refuting dual-source diagnosis from 2026-05-29 ULTRATHINK",
       "notes": "Gating sprint for positions 2-5. Per SRL-072: do not iterate on ahead-of-heard refs without first verifying their role. Logs gated by localStorage.BLURBY_DUAL_SOURCE_DIAG=\"1\". | Verdict YELLOW: A4=reader-layer resumeAnchor (dual-source race REFUTED), A5=wrong rate seed.\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"NARRATE-CLOSED-LOOP-CURSOR dissolved\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "5d4eeaba3f52ad6670bf62f02f80588be162242374764691ed2c231dfc968e7c",
+      "revision": "1c75059c9d465b539d9a51b1696c548f08cfd439c9cf9b25a9aecc6a066130ca",
       "extra": {
         "id": "13118811955",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811955",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1668,12 +1782,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.SK-HYG-2.2026-05-16.md",
       "description": "Directory reorganization (historical reconciliation)",
       "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry and close-out Outcome PASS; not new delivery.",
-      "revision": "839a973518d13e2ed44ee5a51d6217f5fa823d6c5b3e26427087bad07b466f31",
+      "revision": "40cd74bbf278164a8b61d4cb7d06b76da865c75d5367d95ffb3d753a44ff1e2a",
       "extra": {
         "id": "13119055963",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119055963",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1695,12 +1811,14 @@
       "evidence": "git:abbca5c; git:5c46aee",
       "description": "Descending auto-advancing reading zone",
       "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry. Merge abbca5c ancestry verified against cd384b78; 5c46aee records the close-out and LL-119. No separate CloseOut file is asserted.",
-      "revision": "f451ad185cfe57c2f27977402ad8d1f811cce99e48e3c4affbecca1b629338f9",
+      "revision": "0e26ffd906ca8c1a4c1f5ab5bf616c82f0af6ac81320b6cbc53d5de68eb08689",
       "extra": {
         "id": "13119055220",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119055220",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1722,12 +1840,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-ISOLATION-1-PHASE-0.2026-05-21.md",
       "description": "Reader mode isolation — Phase 0 stabilization",
       "notes": "Owner approved historical register reconciliation on 2026-09-23. Canonical Sprint Code from close-out frontmatter; roadmap display alias was READER-MODE-ISOLATION-1 Phase 0. Commit 563072e verified on HEAD. Close-out preserves unrelated broad-suite failures; not a claim of current test health.",
-      "revision": "c04b194a7c10759b3d7d3a6355b6e8b1523888f9fd59067c302fc2396b39a234",
+      "revision": "8c1a1774734c18c6a47e26abc06e1959a0a0fa6a71abecb96a869cd1cb03d2f4",
       "extra": {
         "id": "13119034606",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119034606",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1749,12 +1869,14 @@
       "evidence": "docs/governance/close-outs/CloseOut.BASELINE-SYNC-1.2026-05-22.md; git:dbc3a63",
       "description": "Governance document and queue hygiene",
       "notes": "Owner approved historical register reconciliation on 2026-09-23. Existing roadmap Completed entry; BASELINE-SYNC close-out records dbc3a63. Historical administrative work, not new delivery.",
-      "revision": "05d3dee9f19287105acc6592db1865c7a46cf91bd7599d05e6d0757b165997af",
+      "revision": "591c07845d9eeb2c7c317484e0dedb14f6269f7906c804d88cc88d7efba2ec64",
       "extra": {
         "id": "13119074046",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13119074046",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fjhwd"
+        "group": "group_mm7fjhwd",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1778,12 +1900,14 @@
       "evidence": "",
       "description": "Reason-aware pause and resume state transitions",
       "notes": "Superseded by new TTS Quality + Reading Exp v2 conveyor (2026-05-17)",
-      "revision": "90b20d6a17dd6998e3aa40a8ba62b105d20277fa51d70125204b69834ec2cc6d",
+      "revision": "6e0792fea429eb24307c983ae36596ad90051e957fee13ad58a390464f2fadef",
       "extra": {
         "id": "13118837533",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118837533",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1805,12 +1929,14 @@
       "evidence": "docs/planning/roadmap-reviews/2026-09-23-monday-migration.md",
       "description": "Restore Dashboard KPIs as live Excel formulas + normalize Catalog vocab/LOE + recalc.py Dashboard guardrail + SPREADSHEET_CONVENTIONS.md. Dashboard confirmed inert (0 formula cells).",
       "notes": "Created during TTS-QUAL-CI-1 close-out 2026-05-28. Lane E governance tooling. Parallel-safe with all other queued sprints.\n\nOwner decision 2026-09-23: replace XLSX governance with monday.com board 18432450217. Excel Dashboard restoration is superseded, not implemented.",
-      "revision": "2aad55302f1b7a0eb33df78d2b0eb2eaa9794436e6f7f67906ff1547e82e5dd3",
+      "revision": "13dc141a6b24126e6f219415323e08a4b8e850c0d1be68dc146de24fb991a43c",
       "extra": {
         "id": "13118825193",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118825193",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1832,12 +1958,14 @@
       "evidence": "",
       "description": "Registry-driven engine dispatch",
       "notes": "Dissolved 2026-05-15 — single active engine",
-      "revision": "a0026a5d20746f08daf12d8c9fb1deebc7e3650a8e8d5ce53cbe9eeb760c6f1b",
+      "revision": "feec656c75846a01901f13b105e596b913f84a5603452b2cf02da17e9fb8769a",
       "extra": {
         "id": "13118811322",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811322",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1861,12 +1989,14 @@
       "evidence": "",
       "description": "Make currently-playing audio source's real word position the SINGLE source of truth for cursor + re-entry seeding; retire ahead-of-heard refs; bound prefetch window.",
       "notes": "Superseded 2026-05-29 by NARRATE-DUAL-SOURCE-DIAG-1 + INTENT-CURSOR-1 + PAUSE-RESUME-UNIFY-1 + APPLYRATECHANGE-COLLAPSE-1 + SUBSCRIBER-CURSOR-1 after live-QA A4 FAIL + ULTRATHINK identified dual-source root cause requiring 5-sprint completion of the unification\n\nRoadmap review 2026-09-23: historical prerequisite wording preserved verbatim: \"READER-ISO-1E (Narrate adapter) complete\". The structured field now contains only unambiguous register IDs. Non-ID conditions, 'None', and unresolved shorthand are retained here as history; no historical condition is newly certified, no dependency guessed, and no status/sequence changed.",
-      "revision": "f5c3bf6c02bb5dcecf017b1a025c979a52a90f4a202597153224effcc7b73187",
+      "revision": "a523920dd65e94b0c779b261b4e41d61f7a47a7ab1cc8835ce05fff676e9948e",
       "extra": {
         "id": "13118797794",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118797794",
         "updated_at": "2026-09-23T19:31:46Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1888,12 +2018,14 @@
       "evidence": "",
       "description": "Engine readiness probe system",
       "notes": "Dissolved 2026-05-15 — sidecar engines dormant",
-      "revision": "4b93a53d948f4f84a36bd9f89986a56510a1a9a90f70740c9ecf65821d158bef",
+      "revision": "833017a7c88cffbc22a561571668679828f2905028da7accbba3697da669bc1b",
       "extra": {
         "id": "13118811197",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811197",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1915,12 +2047,14 @@
       "evidence": "",
       "description": "Test harness stability work",
       "notes": "Dissolved 2026-05-15 — Nano probes irrelevant",
-      "revision": "2ac2b7f967ae27a5592080b3b1ddf69c33fe9e3c382306e6dfe35987ed342a98",
+      "revision": "1112a71fc326a44a02540e543ac9f5bf8f876db818de92ea38671d5a45184e66",
       "extra": {
         "id": "13118842583",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118842583",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     },
     {
@@ -1944,12 +2078,14 @@
       "evidence": "",
       "description": "OS media transport controls for active narration",
       "notes": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work.",
-      "revision": "da5ff6e4a56be8a3ad5c0e989260b932c36895cec9c64fe4508c29f4a0b487f4",
+      "revision": "4dce82fa0d26a0e512de73135804ee8942a49dbb03b291eda07f24f6bb60a88c",
       "extra": {
         "id": "13118811133",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118811133",
         "updated_at": "2026-09-23T19:00:28Z",
-        "group": "group_mm7fp5qw"
+        "group": "group_mm7fp5qw",
+        "person": "",
+        "date4": ""
       }
     }
   ],

@@ -2807,3 +2807,23 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 **Recommendation:** Dispatch an item whose acceptance names the owner's machine (load-dependent timeouts, live smoke, Windows paths) to a local session, and say so in the pointer. Use cloud sessions only when every gate is platform-neutral, and when its red baseline is compared against the owner's machine before merging.
 **Applies to:** `/next-pointer` dispatch prompts, the spawn of task chips, and Done-when rows that name a machine.
 **Status:** Observation
+
+### LL-148 — A file cannot carry the sha of the merge that brings it in: record the merge sha after the merge (EINK-HOVER-FIX-1, 2026-10-12)
+**Verdict:** EINK-HOVER-FIX-1's Done-when 5 required `BUG_REPORT.md` to read `RESOLVED in source (EINK-HOVER-FIX-1, <merge sha>)` inside the change that merge lands. A merge commit's hash depends on the tree it records, so no file in that tree can name it. The run merged (`61bad595`), then committed the sha (`956e077f`) and merged a second time (`1916d899`): two merges on `main` for one XS item.
+**Evidence:** `git log --merges --oneline a042d6d7..1916d899` lists both merges; the EINK-HOVER-FIX-1 close-out, Done-when 5 and disposition 3.
+**Recommendation:** A Done-when row or staging plan never asks a file to name the merge that lands it. Write the item identifier in the in-change status line (`RESOLVED in source (EINK-HOVER-FIX-1)`), and record the merge sha in what is written after the merge: the close-out, the register's evidence and the terminal ledger. A close-out that edits the status line may add the sha then.
+**Applies to:** Spec authoring for Done-when rows and status lines that cite a merge sha (BUG_REPORT, ROADMAP and CLAUDE.md lines updated by the same item).
+**Status:** Observation
+
+### LL-149 — Every Done-when list restates the standing type and build gates: a run gates on its Done-when (LIBRARY-SETTINGS-FIX-1, 2026-10-12)
+**Verdict:** LIBRARY-SETTINGS-FIX-1's Done-when named `npm test` and `npm run build` but not `npm run typecheck`, though standing rule 1 requires it after any code change. Its new `tests/seenBatcher.test.ts` declared its mock with an untyped `vi.fn()`, which `tsc --noEmit` rejects. Neither vitest nor the Vite build type-checks test files, so every row passed, the item merged (`8c41095e`), and `main`'s typecheck stayed red until TEST-TIMEOUT-HEADROOM-1's run found it; that item's amendment fixed it (`ff2cd5f1`).
+**Evidence:** `npm run typecheck` exited 2 on `c77d10e5` (`tests/seenBatcher.test.ts(14,58)`, TS2322) and 0 on `ff2cd5f1`; the TEST-TIMEOUT-HEADROOM-1 mid-dispatch amendment; the LIBRARY-SETTINGS-FIX-1 close-out.
+**Recommendation:** Every item that adds or edits TypeScript, test files included, lists "`npm run typecheck` exits 0" in its Done-when, next to `npm test` and `npm run build`. A run gates on its Done-when, not on the standing rules it was told to read, so readiness review checks each Done-when list against standing rule 1.
+**Applies to:** Spec authoring and dispatch-readiness review for any item that touches `.ts` or `.tsx` files, including the NARRATE-REBUILD-1 charter and its phases.
+**Status:** Observation
+
+### LL-143 — status (pointer-closeout, 2026-10-12)
+**Status:** Observation — recurred (LIBRARY-SETTINGS-FIX-1, 2026-10-12): Done-when 4's "`LibraryView.tsx` contains no literal `1000`" was never run against the prescribed edit, which keeps two unrelated day conversions (`NEW_DAYS * 24 * 60 * 60 * 1000`, lines 136 and 216 at `8c41095e`), so the row could not pass as written; the owner accepted it by amendment (2026-10-11). Second occurrence; promotion candidate for the next roadmap review.
+
+### LL-138 — status (pointer-closeout, 2026-10-12)
+**Status:** Observation — held twice more: EINK-HOVER-FIX-1 (the new test alone failed before the CSS change; reproduced at `073cd5a3`, 1 failed and 11 passed) and LIBRARY-SETTINGS-FIX-1 (both new test files failed on exactly the listed defects). Gap: LIBRARY-SETTINGS-FIX-1 kept no output, so its close-out reproduced the control at `685b7f35`. Promotion candidate for the next roadmap review.
