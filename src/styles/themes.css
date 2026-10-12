@@ -141,8 +141,9 @@
 
 /* Scrollbar: simple, high contrast — uses CSS custom properties, auto-updates */
 
-/* No hover effects — e-ink devices are often touch-only */
-[data-eink="true"] *:hover {
+/* No hover effects — e-ink devices are often touch-only. Interactive leaves only:
+   `*:hover` also matched every hovered ancestor and wiped overlay backgrounds (BUG-184). */
+[data-eink="true"] :where(button, a, [role="button"], [role="option"], [role="menuitem"], .queue-item, .page-word):hover {
   background-color: inherit;
 }
 
