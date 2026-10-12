@@ -2793,3 +2793,17 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 - Tie every claim to a saved file and to the final artifact's hash, or label it "reported, not packaged".
 **Applies to:** 3rd-party-audit cycles (D2–D5), remediation plans, and owner-decision records.
 **Status:** Observation
+
+### LL-146 — Evidence that looks like a test is a test: never commit `*.test.*` files outside the suite (TEST-TIMEOUT-HEADROOM-1, 2026-10-12)
+**Verdict:** The OutsideAudit.10 D5 merge (`d4184a1c`) committed two evidence scripts named `*.test.ts` and `*.test.js` under `docs/studies/audit/.../remediation/`. vitest's default pattern collects every `*.test.*` file in the repository, so `main`'s full suite failed on them from that merge on. Two dispatches then stopped, or merged red, on failures outside their scope.
+**Evidence:** The owner's-machine full runs on 2026-10-12, and the EINK-HOVER-FIX-1 cloud report, both failed on these two files. They were renamed to `*.test.ts.txt` and `*.test.js.txt` in the TEST-TIMEOUT-HEADROOM-1 planning merge.
+**Recommendation:** Save scripts and tests copied as evidence under a name the test runner does not collect (append `.txt`). Before merging a docs commit that adds code-like files, run the full suite, or at least `npx vitest list`, to confirm the collected set did not change.
+**Applies to:** Audit and evidence packaging, and remediation records that keep executable controls.
+**Status:** Observation
+
+### LL-147 — A gate defined on the owner's machine needs a local session; one-click task chips start cloud sessions (TEST-TIMEOUT-HEADROOM-1, 2026-10-12)
+**Verdict:** Both Stage 6 fixes were started from one-click task chips, which ran as cloud sessions on Linux containers. TEST-TIMEOUT-HEADROOM-1's Done-when 3 ("full `npm test` exits 0 twice in a row on this machine") cannot be met there, and EINK-HOVER-FIX-1's "`npm test` exits 0" was met only by comparison with a red container baseline (Windows-path tests, an unapplied postinstall, missing Electron).
+**Evidence:** The EINK-HOVER-FIX-1 cloud report (merged with `npm test` red; same five failures before and after). The TEST-TIMEOUT-HEADROOM-1 pause, and the mid-dispatch decision of 2026-10-12 that moved its finish to the owner's machine.
+**Recommendation:** Dispatch an item whose acceptance names the owner's machine (load-dependent timeouts, live smoke, Windows paths) to a local session, and say so in the pointer. Use cloud sessions only when every gate is platform-neutral, and when its red baseline is compared against the owner's machine before merging.
+**Applies to:** `/next-pointer` dispatch prompts, the spawn of task chips, and Done-when rows that name a machine.
+**Status:** Observation

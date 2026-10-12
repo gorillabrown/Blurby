@@ -956,6 +956,35 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
 - Standing rule 13 (broad-suite-before-CI): the item fixes the cause rather than waiving the timeouts as debt. Any other failure stays real (Failure handling).
 - LL-138: considered. There is no approved behaviour change to control for, and the failing state is already recorded (audit F2).
 
+#### Mid-Dispatch Amendment — 2026-10-12
+
+**Pause point:** The first run, in a cloud container, stopped before merging. Typecheck and full-suite failures outside this item stood in its way, and the safety check refused its push.
+**Decision:** Type 1b — Advance, planner-originated. The owner approved it on 2026-10-12 (option A): execution moves to the owner's machine.
+**Rationale:**
+- Done-when 3 is defined "on this machine", which a cloud container cannot satisfy. On the owner's machine, with the three edits, none of the three slow tests failed in two full runs.
+- The typecheck failure is pre-existing on `main`. `tests/seenBatcher.test.ts` lines 8 and 13 hold an untyped `vi.fn()` added by LIBRARY-SETTINGS-FIX-1 (`685b7f35`), and it blocks every later typecheck gate.
+- Two OutsideAudit.10 evidence scripts named `*.test.*` had been collected by vitest since `d4184a1c`. The planner renamed them to `*.test.ts.txt` and `*.test.js.txt`, in the same planning merge as this amendment.
+
+**Scope change:**
+- **Edit sites:** add `tests/seenBatcher.test.ts`.
+  - Line 8: `  let onFlush: ReturnType<typeof vi.fn>;` becomes `  let onFlush: ReturnType<typeof vi.fn<(ids: string[]) => void>>;`.
+  - Line 13: `    onFlush = vi.fn();` becomes `    onFlush = vi.fn<(ids: string[]) => void>();`.
+  - With these, `npm run typecheck` exits 0 (planner-verified on the owner's machine).
+- **Staging plan and Done-when 5:** the commit, and the `git diff --name-only` list, hold exactly the three test files.
+- **Done-when 3:** every test must pass in both runs, with two exceptions.
+  - `tests/qwenRuntimeHardening.test.js` failing only under full-suite load, while passing alone, does not fail the row, because NARRATE-REMOVE-1 deletes it. Record its runs in the close-out.
+  - `tests/wordPositionIndex.test.ts` "builds a 5,000-span section and keeps lookup coverage intact" asserts `buildTimeMs < 200`. If it fails in one run and passes alone, record it as a new low bug, not fixed here. If it fails in both runs, stop with BLOCKER(USER).
+
+**Follow-up items:**
+- A low bug for the load-sensitive word-index timing assertion, if it fails.
+- Lessons LL-146 (evidence named like tests) and LL-147 (machine-bound gates need a local session).
+- The missing typecheck row in LIBRARY-SETTINGS-FIX-1 belongs to that item's close-out.
+
+**Close-Out Preservation:**
+- **Where:** migrate this block verbatim into `docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.<date>.md`, under §Mid-Dispatch Decisions.
+- **When:** before the spec is archived.
+- **Risk if skipped:** the third file and the narrowed Done-when 3 lose their authority, and a later reader sees an out-of-fence edit.
+
 <a id="eink-hover-fix-1"></a>
 
 #### EINK-HOVER-FIX-1 — Stop the e-ink hover rule wiping overlay backgrounds *(position 6 — Full Spec)*
