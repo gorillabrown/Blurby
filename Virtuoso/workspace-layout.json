@@ -1,7 +1,7 @@
 {
   "layout": "plugin-only",
   "documentationRoot": "docs",
-  "_note": "Repointed 2026-07-02 (via /virtuoso:roadmap-review) at Blurby-native governance docs. Virtuoso skills operate on the live root ROADMAP.md + docs/governance/ system, not the Project Documentation/ scaffold. The Project Documentation/ and Virtuoso/{Roadmap.md,sprint-queue.xlsx,SpecRetro.Lessons_Learned.md,WORKFLOW_REFERENCE.md} files are unused scaffolding retained per no-wipe policy.",
+  "_note": "Repointed 2026-07-02 (via /virtuoso:roadmap-review) at Blurby-native governance docs. Virtuoso skills operate on the live root ROADMAP.md + docs/governance/ system. The unused virtuoso-init scaffolding (Project Documentation/ and Virtuoso/{Roadmap.md,sprint-queue.xlsx,SpecRetro.Lessons_Learned.md,WORKFLOW_REFERENCE.md}) was moved to Virtuoso/.quarantine/ by the 2026-10-13 governance sweep, which also added governance-sweep as a writer of the docs/governance roles, ROADMAP.md and CLAUDE.md.",
   "schemaVersion": 2,
   "pluginCompatibility": ">=1.4.0 <2.0.0",
   "adopted": false,
@@ -29,6 +29,9 @@
       "provider": "directory",
       "authority": "reference",
       "mutability": "read-write",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
       "validation": "exists",
       "classification": "active",
       "origin": "authored",
@@ -39,6 +42,9 @@
       "provider": "directory",
       "authority": "reference",
       "mutability": "read-write",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
       "validation": "exists",
       "classification": "active",
       "origin": "authored",
@@ -73,7 +79,9 @@
       "provider": "directory",
       "authority": "reference",
       "mutability": "read-write",
-      "allowedWriters": [],
+      "allowedWriters": [
+        "governance-sweep"
+      ],
       "validation": "exists",
       "classification": "active",
       "origin": "authored",
@@ -89,7 +97,8 @@
         "roadmap-review",
         "next-pointer",
         "mid-dispatch-decision",
-        "pointer-closeout"
+        "pointer-closeout",
+        "governance-sweep"
       ],
       "validation": "markdown",
       "classification": "active",
@@ -117,6 +126,9 @@
       "provider": "markdown",
       "authority": "reference",
       "mutability": "read-write",
+      "allowedWriters": [
+        "governance-sweep"
+      ],
       "validation": "markdown",
       "classification": "active",
       "origin": "authored",
@@ -147,7 +159,8 @@
         "mid-dispatch-decision",
         "next-pointer",
         "pointer-closeout",
-        "roadmap-review"
+        "roadmap-review",
+        "governance-sweep"
       ],
       "validation": "exists",
       "classification": "active",
@@ -260,7 +273,8 @@
       "mutability": "read-write",
       "owner": "roadmap-review",
       "allowedWriters": [
-        "roadmap-review"
+        "roadmap-review",
+        "governance-sweep"
       ],
       "validation": "exists",
       "classification": "active",
