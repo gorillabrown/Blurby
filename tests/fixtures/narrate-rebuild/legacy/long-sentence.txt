@@ -1,0 +1,2 @@
+Because the archive had been copied, compressed, transmitted, unpacked, indexed, and re-indexed across three systems before dawn, the only way to trust the result was to replay each boundary condition slowly and verify that no handoff silently dropped the active cursor.
+

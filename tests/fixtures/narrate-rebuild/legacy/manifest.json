@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "fixtures": [
+    {
+      "id": "prose-basic",
+      "title": "Prose Baseline",
+      "sourceType": "prose",
+      "file": "prose-basic.txt",
+      "expectedCoverage": ["start-latency", "word-progression"]
+    },
+    {
+      "id": "dialogue-switches",
+      "title": "Dialogue and Attribution",
+      "sourceType": "dialogue",
+      "file": "dialogue-switches.txt",
+      "expectedCoverage": ["pause-resume", "word-progression"]
+    },
+    {
+      "id": "long-sentence",
+      "title": "Long Sentence Stress",
+      "sourceType": "prose",
+      "file": "long-sentence.txt",
+      "expectedCoverage": ["start-latency", "cursor-highlight-drift"]
+    },
+    {
+      "id": "punctuation-dense",
+      "title": "Punctuation Dense",
+      "sourceType": "punctuation",
+      "file": "punctuation-dense.txt",
+      "expectedCoverage": ["pause-resume", "start-latency"]
+    },
+    {
+      "id": "section-transition",
+      "title": "Section Transition",
+      "sourceType": "transition",
+      "file": "section-transition.txt",
+      "expectedCoverage": ["handoff", "transition-accounting"]
+    },
+    {
+      "id": "chapter-transition",
+      "title": "Chapter Transition",
+      "sourceType": "transition",
+      "file": "chapter-transition.txt",
+      "expectedCoverage": ["handoff", "transition-accounting"]
+    },
+    {
+      "id": "queued-handoff",
+      "title": "Cross Book Queue Handoff",
+      "sourceType": "transition",
+      "file": "queued-handoff.txt",
+      "expectedCoverage": ["handoff", "book-transition"]
+    },
+    {
+      "id": "pause-resume",
+      "title": "Pause Resume Integrity",
+      "sourceType": "pause-resume",
+      "file": "pause-resume.txt",
+      "expectedCoverage": ["pause-resume", "start-latency"]
+    }
+  ]
+}
+
