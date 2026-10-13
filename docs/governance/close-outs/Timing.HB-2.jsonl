@@ -16,3 +16,10 @@
 {"event": "wait", "row": 5, "reason": "owner", "at": "2026-10-13T19:05:05Z"}
 {"event": "start", "row": 7, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:05:58Z"}
 {"event": "end", "row": 7, "evidence": "preflight: registry is valid; x-notion.phaseLayer present; grep -c 'Phase link drift' CLAUDE.md = 1; CLAUDE.md 34367 chars; NARRATE-REMOVE-1 bullet moved to archive", "result": "done", "at": "2026-10-13T19:06:37Z"}
+{"event": "resume", "row": 5, "at": "2026-10-13T19:26:31Z"}
+{"event": "end", "row": 5, "evidence": "views: All items (renamed), Queue, Status board, History, Timeline, Phase link drift; drift formula filter added by owner in UI (connector drops formula filters); drift view query returns 0 rows", "result": "done", "at": "2026-10-13T19:26:32Z"}
+{"event": "start", "row": 6, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:26:32Z"}
+{"event": "wait", "row": 6, "reason": "owner", "at": "2026-10-13T19:27:09Z"}
+{"event": "resume", "row": 6, "at": "2026-10-13T19:30:25Z"}
+{"event": "end", "row": 6, "evidence": "DW1 Q1 72 rows sha256 9729d554..059c8e before=after (tamper control changes hash); DW2 Queue view = 7 queued Seq 9-15; DW3 Projects = 11 phase names, Narration Rebuild 2 items, Closed true on 65/false on 7 queued -> 1/2; DW4 statuses match; DW5 68 linked + 4 unlinked no-Phase, drift 0; DW6 clearing CLEANUP-MODE-BARREL-1 link -> formula flags it, owner saw it in UI view, restore -> 0; DW7 Tasks database deleted, Projects has no Tasks column", "result": "done", "at": "2026-10-13T19:30:26Z"}
+{"event": "start", "row": 8, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:30:27Z"}
