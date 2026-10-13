@@ -5,19 +5,23 @@ import { useEffect, useId, useRef } from "react";
 import {
   FOCUS_FLOW_SPEED_MAX_HUNDREDTHS,
   FOCUS_FLOW_SPEED_MIN_HUNDREDTHS,
+  KOKORO_UI_RATE_MAX,
+  KOKORO_UI_RATE_MIN,
   SPEED_DIALOG_REFERENCE_WPM,
   SPEED_DIALOG_STEP_HUNDREDTHS,
 } from "../constants";
 import type { ReaderModeSpeed } from "../reader/modes/ReaderModeAdapter";
 import { useFocusTrap } from "../hooks/useFocusTrap";
 
-export type SpeedDialogMode = "focus" | "flow";
+export type SpeedDialogMode = "focus" | "flow" | "narrate";
 
-function range(_mode: SpeedDialogMode): { readonly min: number; readonly max: number } {
+function range(mode: SpeedDialogMode): { readonly min: number; readonly max: number } {
+  // Narrate: the generation rate in hundredths (0.80–2.00x; KOKORO_UI_RATE_STEP is the same 5-hundredth grid).
+  if (mode === "narrate") return { min: Math.round(KOKORO_UI_RATE_MIN * 100), max: Math.round(KOKORO_UI_RATE_MAX * 100) };
   return { min: FOCUS_FLOW_SPEED_MIN_HUNDREDTHS, max: FOCUS_FLOW_SPEED_MAX_HUNDREDTHS };
 }
 
-/** Highest slider index: 88 for Focus/Flow (0.40–4.80x). */
+/** Highest slider index: 88 for Focus/Flow (0.40–4.80x), 24 for Narrate (0.80–2.00x). */
 export function speedMaxIndex(mode: SpeedDialogMode): number {
   const { min, max } = range(mode);
   return (max - min) / SPEED_DIALOG_STEP_HUNDREDTHS;
@@ -27,13 +31,15 @@ function hundredthsAt(mode: SpeedDialogMode, index: number): number {
   return range(mode).min + SPEED_DIALOG_STEP_HUNDREDTHS * index;
 }
 
-/** Index → speed. Focus/Flow: (40 + 5i) × 2.5 WPM. Exact in binary. */
+/** Index → speed. Focus/Flow: (40 + 5i) × 2.5 WPM, exact in binary. Narrate: (80 + 5i) / 100 as the rate. */
 export function speedAt(mode: SpeedDialogMode, index: number): ReaderModeSpeed {
   const h = hundredthsAt(mode, index);
+  if (mode === "narrate") return { kind: "rate", rate: h / 100 };
   return { kind: "wpm", wpm: (h * SPEED_DIALOG_REFERENCE_WPM) / 100 };
 }
 
 function speedHundredths(speed: ReaderModeSpeed): number {
+  if (speed.kind === "rate") return Math.round(speed.rate * 100);
   return Math.round((speed.wpm * 100) / SPEED_DIALOG_REFERENCE_WPM);
 }
 
@@ -48,12 +54,13 @@ export function formatSpeedMultiplier(speed: ReaderModeSpeed): string {
   return `${(speedHundredths(speed) / 100).toFixed(2)}x`;
 }
 
-/** Slider aria-valuetext: "0.45x, 112.5 words per minute". */
+/** Slider aria-valuetext: "0.45x, 112.5 words per minute"; Narrate: "1.00x narration rate". */
 export function formatSpeedValueText(speed: ReaderModeSpeed): string {
+  if (speed.kind === "rate") return `${formatSpeedMultiplier(speed)} narration rate`;
   return `${formatSpeedMultiplier(speed)}, ${speed.wpm} words per minute`;
 }
 
-const MODE_LABEL: Record<SpeedDialogMode, string> = { focus: "Focus", flow: "Flow" };
+const MODE_LABEL: Record<SpeedDialogMode, string> = { focus: "Focus", flow: "Flow", narrate: "Narrate" };
 
 export interface ReaderSpeedDialogProps {
   readonly mode: SpeedDialogMode;

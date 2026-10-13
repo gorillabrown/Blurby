@@ -17,7 +17,6 @@ const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
 const syncQueue = require("./sync-queue");
-const { normalizeReaderModes } = require("./migrations");
 const {
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,
@@ -389,9 +388,9 @@ function mergeSettings(local, cloud, fieldTimestamps) {
   return merged;
 }
 
-// Apply cloud settings to the live settings object: assign, normalize, then submit to the settings writer.
+// Apply cloud settings to the live settings object: assign, then submit to the settings writer.
 // Synchronous on purpose, and never awaits the save: a settings write failure must not abort startSync (NARRATE-REMOVE-1 D12).
-function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }
+function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); ctx.saveSettings(); return settings; }
 
 /**
  * History merge: union sessions, take max docsCompleted, take newer streaks.

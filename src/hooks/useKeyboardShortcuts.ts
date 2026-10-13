@@ -77,6 +77,8 @@ interface ReaderKeysState {
   // Sentence navigation (Ctrl+Up/Down)
   sentencePrev?: () => void;
   sentenceNext?: () => void;
+  // Narrate (N, all reader surfaces)
+  enterNarrate?: () => void;
 }
 
 export type ReaderKeyboardMode = ReaderMode | "speed" | "scroll";
@@ -152,7 +154,8 @@ export function useReaderKeys(
   cycleMode?: () => void,
   cycleAndStart?: () => void,
   sentencePrev?: () => void,
-  sentenceNext?: () => void
+  sentenceNext?: () => void,
+  enterNarrate?: () => void
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
@@ -162,7 +165,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
-    sentencePrev, sentenceNext,
+    sentencePrev, sentenceNext, enterNarrate,
   });
 
   stateRef.current = {
@@ -173,7 +176,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
-    sentencePrev, sentenceNext,
+    sentencePrev, sentenceNext, enterNarrate,
   };
 
   useEffect(() => {
@@ -210,6 +213,8 @@ export function useReaderKeys(
       }
       // S toggles favorite
       if (e.code === "KeyS" && !e.shiftKey && !e.ctrlKey && !e.metaKey) { e.preventDefault(); s.toggleFavorite?.(); return; }
+      // N enters Narrate on every surface (NARRATE-REBUILD-1 P4); Shift+N stays Page's make-note. Claimed only when bound.
+      if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey && s.enterNarrate) { e.preventDefault(); s.enterNarrate(); return; }
       // [ ] chapter navigation (all modes); P prev chapter (non-page modes)
       if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.prevChapter?.(); return; }
       if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) { e.preventDefault(); s.nextChapter?.(); return; }

@@ -612,6 +612,12 @@ export const electronAPIStub: ElectronAPI = {
     return trace("extractEpubWords", [bookId], { words, sections, totalWords: words.length });
   },
 
+  // ── Rebuilt Narrate producer (NARRATE-REBUILD-1 P4): no engine in the browser harness, so every request is F4 ──
+  narrateGenerate: async (text: string, voice: string, speed: number) =>
+    trace("narrateGenerate", [text, voice, speed], { error: "narrate producer is not available in the browser harness" }),
+  narratePreload: async () => trace("narratePreload", [], { ok: false, error: "narrate producer is not available in the browser harness" }),
+  narrateStatus: async () => trace("narrateStatus", [], { state: "unavailable" }),
+
   // ── Event listeners ───────────────────────────────────────────────────
   onLibraryUpdated: (cb: EventCallback) => addEventListener("library-updated", cb),
   onUpdateAvailable: (cb: EventCallback) => addEventListener("update-available", cb),
