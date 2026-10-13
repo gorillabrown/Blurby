@@ -284,6 +284,8 @@ create(config) → start(wordIdx) → [advance / pause / resume / setSpeed] → 
 
 `ReaderContainer` orchestrates transitions between modes. Selecting a mode changes the visible mode only; playback starts only when the user presses Play/Space. When playback begins, the selected mode consumes the current word anchor and starts the mode-specific owner.
 
+> **Partly historical (governance sweep 2026-10-13).** `useFlowScrollSync`, `useFoliateSync` and `useDocumentLifecycle` below were deleted by NARRATE-REMOVE-1 (2026-10-12). Mode state and lifecycle now live in each runtime under `src/reader/modes/{page,focus,flow}/` (`ModeRuntime.ts`, `useModeBindings.ts`).
+
 **ReaderContainer decomposition (REFACTOR-1A, v1.48.0):** The 33 useEffect hooks that previously lived in `ReaderContainer.tsx` were extracted into 5 domain-specific custom hooks to reduce re-render cost and improve maintainability. `ReaderContainer` is now a thin orchestrator that composes these hooks:
 
 | Hook | File | Effects | Domain |
@@ -337,6 +339,8 @@ RSVP (Rapid Serial Visual Presentation). Displays one word at a time centered on
 
 ### Flow Mode (`src/modes/FlowMode.ts` + `src/utils/FlowScrollEngine.ts`)
 
+> **Historical paths (governance sweep 2026-10-13).** `useFlowScrollSync`, `useReaderMode.ts`, `FlowScrollView` and `FoliatePageView` named below were deleted by NARRATE-REMOVE-1. Flow now lives in `src/reader/modes/flow/` (`FoliateView.tsx`, `ModeRuntime.ts`, `useModeBindings.ts`).
+
 Infinite-scroll reading with a reading-window/line progression pacer.
 
 - **Architecture:** Foliate Flow is paced by `FlowScrollEngine` through `useFlowScrollSync`. Non-Foliate/legacy Flow can still use `FlowMode.ts` via `modeInstance.startMode("flow", ...)`.
@@ -383,7 +387,7 @@ All modes receive a `ModeConfig` at construction:
 
 ## 6. EPUB Rendering (foliate-js)
 
-EPUBs are rendered natively via foliate-js in `src/components/FoliatePageView.tsx`, preserving full HTML formatting, images, and CSS.
+EPUBs are rendered natively via foliate-js in the per-mode `src/reader/modes/{page,focus,flow}/FoliateView.tsx` components (the shared `FoliatePageView.tsx` was deleted by NARRATE-REMOVE-1), preserving full HTML formatting, images, and CSS.
 
 ### Loading Pipeline
 
@@ -405,7 +409,7 @@ foliate-js renders EPUB content inside a shadow DOM containing an iframe per sec
 
 ### Word Extraction
 
-`extractWordsFromView()` in `FoliatePageView.tsx`:
+`extractWordsFromView()` in each mode's `FoliateView.tsx` (helpers in `src/reader/modes/<mode>/helpers/foliateHelpers.ts`):
 
 1. Iterates over `view.renderer.getContents()` (currently loaded sections)
 2. Uses `TreeWalker` to find all text nodes (skipping `<script>` and `<style>`)
@@ -443,7 +447,7 @@ interface FoliateWord {
 
 ## 7. TTS Engine Landscape
 
-**Status since NARRATE-REMOVE-1 (2026-10-12): Kokoro is the only engine in the tree and it is dormant.** Nothing starts it at launch, the renderer has no narration path, and `preload.js` exposes no Kokoro or TTS-cache methods (it keeps `extractEpubWords` and the eval-trace bridge). In `main/ipc/tts.js` the handlers `tts-kokoro-generate`, `tts-kokoro-voices`, `tts-kokoro-model-status`, `tts-kokoro-preflight`, `tts-kokoro-download`, `tts-kokoro-preload`, `tts-kokoro-generate-marathon`, `tts-kokoro-preload-marathon`, `extract-epub-words` and the `tts-cache-*` family (`read`, `write`, `has`, `chunks`, `evict-book`, `evict-voice`, `info`, `opening-coverage`) stay registered but unreachable from the UI. The five Kokoro main files (`main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/tts-worker.js`, `main/tts-cache.js`, `main/tts-opus.js`) are unchanged. `main.js` no longer calls `ttsCache.init`, so NARRATE-REBUILD-1 must call it before using the cache. The MOSS-Nano, Pocket and Qwen modules (the shared sidecar adapter and engine, the provider configurations, the Qwen engine, sidecar and streaming files, their scripts, IPC handlers, preload methods, packaging entries, CI paths and tests) were deleted. The paragraphs below describe the pre-removal landscape and are historical wherever they name a deleted engine, provider-registry entry, strategy or setting.
+**Status since NARRATE-REMOVE-1 (2026-10-12): Kokoro is the only engine in the tree and it is dormant.** Nothing starts it at launch, the renderer has no narration path, and `preload.js` exposes no Kokoro or TTS-cache methods (it keeps `extractEpubWords` and the eval-trace bridge). In `main/ipc/tts.js` the handlers `tts-kokoro-generate`, `tts-kokoro-voices`, `tts-kokoro-model-status`, `tts-kokoro-preflight`, `tts-kokoro-download`, `tts-kokoro-preload`, `tts-kokoro-generate-marathon`, `tts-kokoro-preload-marathon`, `extract-epub-words` and the `tts-cache-*` family (`read`, `write`, `has`, `chunks`, `evict-book`, `evict-voice`, `info`, `opening-coverage`) stay registered but unreachable from the UI. The five Kokoro main files (`main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/tts-worker.js`, `main/tts-cache.js`, `main/tts-opus.js`) are unchanged. `main.js` no longer calls `ttsCache.init`, so NARRATE-REBUILD-1 must call it before using the cache. The MOSS-Nano, Pocket and Qwen modules (the shared sidecar adapter and engine, the provider configurations, the Qwen engine, sidecar and streaming files, their scripts, IPC handlers, preload methods, packaging entries, CI paths and tests) were deleted. The paragraphs below describe the pre-removal landscape and are historical wherever they name a deleted engine, provider-registry entry, strategy or setting. NARRATE-REBUILD-1 P3 (merge `ef245815`, 2026-10-13) added a second Kokoro producer under `main/narrate/` with IPC in `main/ipc/narrate.js` (`narrate-generate`, `narrate-preload`, `narrate-status`) and a renderer engine in `src/reader/modes/narrate/engine/`. P4 (merge `331f8313`, 2026-10-13) exposed the producer as preload `narrateGenerate`, `narratePreload` and `narrateStatus` and added the Narrate mode runtime, so the opening sentence of this section ("the renderer has no narration path") no longer holds for the rebuilt Narrate. Live state: `docs/planning/epics/2026-10-12-narrate-rebuild/state.md`.
 
 Pre-removal text of this paragraph, kept for history: Blurby's Desktop v2.0 TTS product posture was Kokoro as the default and available operational floor, MOSS-Nano as a recommended opt-in local engine after MOSS-NANO-13e, Pocket TTS as an available opt-in third engine after POCKET-TTS-1, and Qwen disabled.
 
@@ -490,6 +494,8 @@ Defined in `src/constants.ts` (`KOKORO_VOICE_NAMES`):
 Voice labels use the format "Name — Accent" (e.g., "Bella — American", "Daniel — British"). No gender prefix.
 
 ### Rolling Audio Queue (NAR-1)
+
+> **Removed by NARRATE-REMOVE-1 (2026-10-12), historical.** The renderer files named in this subsection and those that follow through the TTS Glossary (`audioQueue.ts`, `voiceSelection.ts`, `TTSSettings.tsx`, the narration strategies) were deleted. Main-process Kokoro behavior described here still applies.
 
 The narration engine uses a producer-consumer rolling audio queue (`src/utils/audioQueue.ts`) for Kokoro playback. This replaces the earlier pre-buffer bolt-on (see LL-047).
 
@@ -590,6 +596,8 @@ Narrate mode reads user-provided text verbatim. No content filtering, generation
 
 ### Narrate Mode Architecture (Post-Stabilization) — TTS-7G Final Closeout
 
+> **Removed by NARRATE-REMOVE-1 (2026-10-12), historical.** Every renderer file named in this section (`useNarration.ts`, `kokoroStrategy.ts`, `narrationPlanner.ts`, `audioScheduler.ts`, `generationPipeline.ts`, `qwenStreamingStrategy.ts` and the rest) was deleted. The rebuild's producer and engine are `main/narrate/`, `main/ipc/narrate.js` and `src/reader/modes/narrate/engine/`; see `docs/planning/epics/2026-10-12-narrate-rebuild/`.
+
 Standing architecture-decision reference: `docs/governance/TTS_ARCHITECTURE_DECISIONS.md` (engine posture, invariants, adopt/reject/defer register, and cache-evolution roadmap).
 
 **Narrate lock-in contract (2026-05-21):** Narrate is not a Flow timer with audio attached. It may reuse the Foliate scrolled surface and natural chunk renderer, but its authoritative clock is TTS/audio truth-sync. The runtime must preserve exact selected-word startup, keep `flowPlaying=false` for Narrate, avoid `modeInstance.startMode("flow", ...)`, and route trusted word updates through `setOnTruthSync`. If Foliate extraction is delayed, retry with the original Narrate options rather than falling back to Flow defaults.
@@ -637,6 +645,8 @@ Standing architecture-decision reference: `docs/governance/TTS_ARCHITECTURE_DECI
 
 ### Qwen Streaming Architecture (QWEN-STREAM-1 through QWEN-STREAM-3, v1.74.0)
 
+> **Deleted by NARRATE-REMOVE-1 (2026-10-12), historical.** No Qwen code remains in the tree.
+
 Blurby supports a streaming Qwen TTS engine as an alternative to the batch Kokoro pipeline. The streaming lane uses a binary-framed PCM protocol over stdin/stdout between the Electron main process and a Python sidecar.
 
 **IPC event chain for streaming audio:**
@@ -675,7 +685,7 @@ All format parsing lives in `main/file-parsers.js` (content extraction) and `mai
 
 ### Single Renderer Architecture (EPUB-2B)
 
-All documents render through foliate-js (`FoliatePageView.tsx`). Every format is converted to EPUB on import via `convertToEpub()`. URL-imported articles and Chrome extension articles also produce EPUB (not PDF/TXT). Documents without an EPUB path show a "needs re-import" error. The legacy text rendering fallback has been removed — plain-text extraction during import uses `extractContent()` in `main/file-parsers.js`.
+All documents render through foliate-js (the per-mode `FoliateView.tsx` components). Every format is converted to EPUB on import via `convertToEpub()`. URL-imported articles and Chrome extension articles also produce EPUB (not PDF/TXT). Documents without an EPUB path show a "needs re-import" error. The legacy text rendering fallback has been removed — plain-text extraction during import uses `extractContent()` in `main/file-parsers.js`.
 
 - All formats (HTML/TXT/MD/DOCX/PDF/MOBI/AZW) → EPUB on import
 - URL articles → `extractArticleFromHtml` → `htmlToEpub` (with metadata in OPF)
@@ -1025,6 +1035,8 @@ Vitest 4.1, configured to run with `npm test` (`vitest run`).
 `Intl.Segmenter` is used throughout (`segmentWords.ts`, `FoliatePageView.tsx`) but TypeScript's lib types may not include it in all configurations. The `tsconfig.json` must include `"lib": ["ES2022", "DOM"]` or later for proper typing.
 
 ### FoliatePageView Decomposition
+
+> **Superseded (governance sweep 2026-10-13).** `FoliatePageView.tsx` was deleted by NARRATE-REMOVE-1; READER-MODE-SEPARATION-2 split it into the per-mode `src/reader/modes/{page,focus,flow}/FoliateView.tsx` components. Kept for history.
 
 `FoliatePageView.tsx` is a large component (~800+ lines) handling EPUB loading, word extraction, overlay rendering, mode integration, and event handling. It should be decomposed into smaller focused modules, but the tight coupling between foliate-js events and DOM Range management makes extraction non-trivial.
 

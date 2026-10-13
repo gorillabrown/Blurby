@@ -2,11 +2,29 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-12
+**Last updated:** 2026-10-13
 
 ---
 
 ## Incomplete
+
+### BUG-191 — Narration reads four-digit years as cardinal numbers
+**Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
+**Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
+**Status:** OPEN — carry into NARRATE-REBUILD-1 text normalization. Lane: TTS / Narration Engine.
+**Location:** the removed Narrate pipeline's spoken-text normalization (Kokoro, voice `am_adam`, 1.2x); no live code path until NARRATE-REBUILD-1.
+**Description:** "Years are read like one thousand and seventy four instead of the standard nineteen seventy four." A year such as 1974 is spoken as a cardinal number instead of in paired-digit year form.
+**Evidence:** `docs/bug-reports/.Archive/bug-2026-05-20T21-03-25Z.json` and `.png` (gitignored, local to the owner's machine).
+**Fix path:** NARRATE-REBUILD-1 normalization reads four-digit numbers in year contexts (1100–2099 standing alone or after "in", "since", "by" and similar) as paired digits, with a regression fixture.
+
+### BUG-190 — A PDF import fails with "The original file could not be converted"
+**Reported:** 2026-05-21 (in-app report `bug-2026-05-21T14-56-19Z`; triaged 2026-10-13 by the governance sweep)
+**Severity:** MEDIUM (reporter marked it Broken; the document cannot be read)
+**Status:** OPEN — not reproduced since 2026-05-21; needs a live reproduction on the current build. Lane: Library & Content.
+**Location:** PDF-to-EPUB conversion on import (`convertToEpub()` path, `main/` file parsers); exact site undetermined.
+**Description:** A 223-page PDF ("Dnc. May-20-2026") shows in the library, but opening it shows the toast "This document needs to be re-imported. The original file could not be converted." with a Remove action.
+**Evidence:** `docs/bug-reports/.Archive/bug-2026-05-21T14-56-19Z.json` and `.png` (gitignored, local); the report's console log holds no conversion error.
+**Fix path:** Reproduce with the same or a similar large PDF on the current build; capture the main-process conversion error; then decide whether it is a parser failure or a missing original file.
 
 ### BUG-189 — Dev-mode (`npm run dev`) is slow across the whole app
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
@@ -233,7 +251,7 @@
 ### BUG-168 - Opening narration chunks can ignore natural/header boundaries
 **Reported:** 2026-05-18
 **Severity:** High (current audiobook pacing/chunking regression)
-**Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
+**Status:** OBSOLETE (governance sweep 2026-10-13) — the Narrate chunking pipeline named below was deleted by NARRATE-REMOVE-1 (2026-10-12). NARRATE-REBUILD-1 should keep heading and natural boundaries in its chunk plan. Originally elevated from `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
 **Location:** `src/utils/generationPipeline.ts`, `src/utils/narrationPlanner.ts`, `src/utils/naturalChunks.ts`
 **Description:** Narrate can begin with a chunk boundary in the wrong location and provide no break after a header. The report says "no break after header" and "Chunk are happening in the wrong location." The console shows narration starts at `globalWordIndex: 187 word: INTRODUCTION`, then emits a first chunk of 13 words.
 **Root cause candidate (confirmed by code inspection 2026-05-18):** The opening ramp path uses small chunks before cruise generation. `snapToSentenceBoundary(...)` returns the raw end when the chunk is `<= 20` words, so the first 13-word ramp chunk bypasses sentence/header/line-break snapping. Separately, `narrationPlanner.ts` documents clause-boundary fallback but currently searches sentence boundaries and then falls back to raw target, so clause/header breaks are underused.
@@ -248,6 +266,7 @@
 **Severity:** High (can destabilize live reading modes)
 **Status:** OPEN - elevated from `docs/bug-reports/bug-2026-05-18T21-10-16Z.json` and `docs/bug-reports/bug-2026-05-18T21-27-17Z.json`
 **Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`, `src/hooks/useDocumentLifecycle.ts`
+**Note (governance sweep 2026-10-13):** `FoliatePageView.tsx` and `useDocumentLifecycle.ts` were deleted by NARRATE-REMOVE-1, and the Narrate half no longer exists. The Flow relocation half has not been re-tested and stays open (BUG-188 cross-references it).
 **Description:** Both fresh bug captures include React `Maximum update depth exceeded` console errors while Foliate relocation, resume-anchor skipping, and selection/highlight diagnostics are active. This is likely related to BUG-166, but it should remain separately tracked because it can freeze or destabilize the app even if anchoring is fixed.
 **Evidence:** The 21:10 report records two maximum-depth errors; the 21:27 report records four. Both include repeated `[TTS-7M] onRelocate: resume anchor active ... skipping approx ...` logs around the same session window.
 **Fix spec (CLI-ready):**
@@ -925,26 +944,26 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Fix:** Added explicit user-selection protection so delayed onLoad restore cannot overwrite a chosen start point, and unified start-word resolution across modes via `resolveFoliateStartWord`.
 **Status:** Resolved. Sprint: TTS-7J.
 
-### BUG-131: EPUB narration still starts from loaded DOM slice instead of full-book words
+### ~~BUG-131~~ ✅ Fixed — TTS-7K (v1.33.6), duplicate entry: EPUB narration still starts from loaded DOM slice instead of full-book words
 **Reported:** 2026-04-04
 **Severity:** High
 **Location:** `src/components/ReaderContainer.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useReadingModeInstance.ts`
 **Description:** Even after full-book extraction completes (for example `69160` words), narrate start still uses tiny loaded DOM word counts like `14`, `674`, or `293`. Active EPUB modes are still sourcing words from `foliateApiRef.current.getWords()` rather than the global extracted book word source, so narration is built on a moving partial viewport instead of the full book.
-**Status:** Open. Sprint: TTS-7K.
+**Status:** Resolved (duplicate of the fixed entry above; marked by the governance sweep 2026-10-13). Sprint: TTS-7K.
 
-### BUG-132: Cursor and narration are using mixed EPUB index spaces
+### ~~BUG-132~~ ✅ Fixed — TTS-7K (v1.33.6), duplicate entry: Cursor and narration are using mixed EPUB index spaces
 **Reported:** 2026-04-04
 **Severity:** High
 **Location:** `src/hooks/useReaderMode.ts`, `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
 **Description:** Logs show explicit global selections like `1603`, but narrate still freezes launch at `0` because the start-word resolver validates against the small currently loaded DOM word array. Cursor/highlight/progress are tracking global EPUB indices while narration/chunk generation still runs on partial local slices, causing visible desync.
-**Status:** Open. Sprint: TTS-7K.
+**Status:** Resolved (duplicate of the fixed entry above; marked by the governance sweep 2026-10-13). Sprint: TTS-7K.
 
-### BUG-133: Page mode is still coupled to narration-only EPUB repair state
+### ~~BUG-133~~ ✅ Fixed — TTS-7K (v1.33.6), duplicate entry: Page mode is still coupled to narration-only EPUB repair state
 **Reported:** 2026-04-04
 **Severity:** High
 **Location:** `src/components/ReaderContainer.tsx`, `src/components/FoliatePageView.tsx`
 **Description:** User could not advance past the third page even without narration on. Page-mode behavior is still likely being influenced by mutable narration-specific word-source refresh and/or section-repair state, so ordinary page turning is not isolated from the EPUB narration machinery.
-**Status:** Open. Sprint: TTS-7K.
+**Status:** Resolved (duplicate of the fixed entry above; marked by the governance sweep 2026-10-13). Sprint: TTS-7K.
 
 ### ~~BUG-119~~ ✅ Fixed — TTS-7F (v1.33.1)
 **Reported:** 2026-04-04 | **Resolved:** 2026-04-04

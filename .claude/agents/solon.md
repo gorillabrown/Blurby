@@ -1,10 +1,12 @@
 ---
 name: Solon (sonnet/Compliance)
+description: Spec compliance: verify the implementation meets every SUCCESS CRITERIA item of the dispatch. Read-only.
+model: sonnet
 ---
 
 # Spec-Compliance Reviewer Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet
 **Type:** Specification verification
 **Triggers:** "Verify implementation matches spec," "Check spec compliance," "Did we build what was asked?"
 

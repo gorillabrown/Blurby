@@ -60,7 +60,7 @@ The Monday Lane field uses the six product domains declared in registry policy.r
 
 Reading-mode separation is complete (READER-MODE-SEPARATION-2, 2026-10-11): Page, Focus and Flow own independent state, lifecycle, timers, rendering and tests behind a thin router; Narrate is removed (NARRATE-REMOVE-1, 2026-10-12). Keep that isolation: no sibling-runtime imports, no shared mutable mode store, and the rebuilt Narrate joins as a fourth independent runtime.
 
-Owner ruling #31: remove Narrate (NARRATE-REMOVE-1, done 2026-10-12, keeping the Kokoro engine dormant with no UI path), then rebuild it from scratch (NARRATE-REBUILD-1, `Path: epic`, now unblocked). The rebuild's Phase 0 proves Kokoro first: the installed export outputs audio only, so Phase 0 first exposes its predicted durations, then checks the table at independently resolved anchors (OutsideAudit.10; LL-142). Its core requirement: the cursor is the word at the current playback sample, from an exact word table, with no estimated timing. The finish line is "Narration rebuilt". See ROADMAP.md Stage 3 and the absorbed storyboard `docs/planning/holding/2026-10-11-narrate-rebuild.md`.
+Owner ruling #31: remove Narrate (NARRATE-REMOVE-1, done 2026-10-12, keeping the Kokoro engine dormant with no UI path), then rebuild it from scratch (NARRATE-REBUILD-1, `Path: epic`, in progress: P0–P4 merged by 2026-10-13; state: `docs/planning/epics/2026-10-12-narrate-rebuild/state.md`). The rebuild's Phase 0 proves Kokoro first: the installed export outputs audio only, so Phase 0 first exposes its predicted durations, then checks the table at independently resolved anchors (OutsideAudit.10; LL-142). Its core requirement: the cursor is the word at the current playback sample, from an exact word table, with no estimated timing. The finish line is "Narration rebuilt". See ROADMAP.md Stage 3 and the absorbed storyboard `docs/planning/holding/2026-10-11-narrate-rebuild.md`.
 
 #### Parallel Sprint Policy (Execution Surface Ownership)
 
@@ -174,7 +174,7 @@ The dispatch's Task table tells Zeus:
 | `Plato` | Architecture compliance, known-trap detection, code quality | Read-only review pass |
 | `MarcusAurelius` | Documentation updates (mandatory penultimate step in every sprint) | `CLAUDE.md`, `ROADMAP.md`, `docs/governance/` |
 | `Aristotle` | Root-cause analysis when investigation is needed | Read-only diagnosis + fix spec |
-| `Simonides` | Cross-agent memory, findings queue, continuity | `.claude/agents/memory/` |
+| `Simonides` | Cross-agent memory, findings queue, continuity | `.claude/agents/memory.yaml` (created on first save) |
 
 **Orchestration:**
 
@@ -213,14 +213,14 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the M
 - **READ BEFORE YOU WRITE.** Every CLI session MUST read `docs/governance/LESSONS_LEARNED.md` and the relevant ROADMAP section BEFORE making any code changes. This is non-negotiable. Skipping this step causes regressions.
 - **Do not clean away local work.** Never run destructive cleanup flows like `git reset --hard`, `git clean`, or equivalent workspace-wiping actions unless the user explicitly requests that exact outcome for this repo.
 - **Branch-per-sprint.** Use the named branch in an isolated checkout; current task convention uses `eb/`. Never commit directly to main. Resolve registry policy.git before mutation: policy=push, networkOperations=allow. Per Rule 5b, a sprint that passes verification, spec compliance, quality review and docs close-out is committed on its branch, merged to `main` with `--no-ff`, and pushed, unless its spec says otherwise. Branch deletion and worktree pruning stay maintenance, never automatic.
-- **Local-first development.** Working directory at `C:\Users\estra\Projects\Blurby`. Push to GitHub after every sprint. Pull before every session. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
+- **Local-first development.** Working directory at `C:\Projects\Blurby`. Push to GitHub after every sprint. Pull before every session. See `docs/governance/DEVELOPMENT_SYNC.md` for full SOP.
 - **Electron main process stays CommonJS.** Renderer stays ESM/TypeScript. Never cross the boundary.
 - **All file I/O in main process modules must be async** (fs.promises). No synchronous reads/writes.
 - **preload.js is the security boundary.** Keep it minimal. All system access goes through IPC.
 - **LESSONS_LEARNED is a required engineering artifact.** Update immediately on non-trivial discovery.
 - **After any engine change → run tests before proceeding.** `npm test` must pass.
 - **After any UI change → build verification.** `npm run build` must succeed.
-- **CSS custom properties for theming.** No inline styles. All styles in `src/styles/global.css`.
+- **CSS custom properties for theming.** No inline styles. All styles in `src/styles/*.css` (entry `index.css`).
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
 - **Dispatch sizing: 40 tool-use ceiling per wave.** A single Zeus dispatch must stay under ~40 tool uses. **Sprints with 5+ implementation tasks MUST be pre-split into waves at dispatch time** (don't wait for a runtime ceiling hit). Standard wave split: Wave A = implement + test, Wave B = verify + docs + git. Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
@@ -297,8 +297,8 @@ When a sprint **completes**:
 | Completed governance sprint files | `docs/planning/.Archive/` | Move on completion. |
 | Current system state + agent config | `CLAUDE.md` | Keep under ~35k chars. Archive old sprint details. |
 | Bugs (active) | `docs/governance/BUG_REPORT.md` | Remove when fixed + verified. |
-| Bug reports (raw, unprocessed) | `docs/governance/bug-reports/` | In-app submissions. Triage → file in BUG_REPORT.md → archive to `.Archive/`. |
-| Bug reports (processed) | `docs/governance/bug-reports/.Archive/` | Archived after triage. Reference only. |
+| Bug reports (raw, unprocessed) | `docs/bug-reports/` (gitignored, local) | In-app submissions. Triage → file in BUG_REPORT.md → archive to `.Archive/`. |
+| Bug reports (processed) | `docs/bug-reports/.Archive/` | Archived after triage. Reference only. |
 | Feature requests (unroadmapped) | `docs/governance/IDEAS.md` | Reviewed at phase pauses. |
 | Engineering discoveries | `docs/governance/LESSONS_LEARNED.md` | Append immediately on discovery. |
 | Architecture + data model | `docs/governance/TECHNICAL_REFERENCE.md` | Update when architecture changes. |
@@ -324,18 +324,18 @@ When a sprint **completes**:
 
 ### Bug Report Triage Workflow
 
-When `docs/governance/bug-reports/` contains unprocessed `.json` + `.png` files:
+When `docs/bug-reports/` contains unprocessed `.json` + `.png` files:
 
 1. **Read** all JSON reports and view all screenshots.
 2. **Group** reports by root cause or feature area — deduplicate related reports.
 3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
 4. **Group into hotfix sprints** — write HOTFIX-NN specifications in ROADMAP.md and register the matching monday.com items through create-item mutation-plan/confirm.
-5. **Archive** processed reports: move all `.json` + `.png` files to `docs/governance/bug-reports/.Archive/`.
+5. **Archive** processed reports: move all `.json` + `.png` files to `docs/bug-reports/.Archive/`.
 6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
 
 ### Constants Separation Rule
 
-All tunable behavioral constants must be extracted into a dedicated constants file — not hardcoded in source. This includes default WPM, default word count per flow page, snooze intervals, toast durations, coaching limits, LRU cache sizes, sync intervals, tombstone TTL, reconciliation period, and similar values currently scattered across main process and renderer code. CSS custom properties for theming are exempt (they already live in `global.css`).
+All tunable behavioral constants must be extracted into a dedicated constants file — not hardcoded in source. This includes default WPM, default word count per flow page, snooze intervals, toast durations, coaching limits, LRU cache sizes, sync intervals, tombstone TTL, reconciliation period, and similar values currently scattered across main process and renderer code. CSS custom properties for theming are exempt (they already live in `src/styles/`).
 
 ### External Audit Cadence
 
@@ -362,14 +362,13 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **Qwen code deleted** — NARRATE-REMOVE-1 (2026-10-12) deleted every Qwen, MOSS-Nano and Pocket module, handler, preload method, test and packaging entry. The earlier "qwen-disabled" stub no longer exists; no engine other than Kokoro (dormant) is in the tree.
 
 **Current operational state:**
-- **Engine posture:** Kokoro is the sole engine and is dormant. NARRATE-REMOVE-1 (2026-10-12) removed the Narrate mode and deleted the MOSS-Nano, Pocket and Qwen code; the Kokoro main-process files (`main/tts-engine.js`, `tts-engine-marathon.js`, `tts-worker.js`, `tts-cache.js`, `tts-opus.js`) are byte-identical to the base, their IPC handlers stay registered in `main/ipc/tts.js`, nothing starts Kokoro at launch, and the renderer and `preload.js` have no path to it. NARRATE-REBUILD-1 builds the new Narrate on it (or, if Phase 0 fails, on a bake-off winner) and must call `ttsCache.init` before using the cache. The reading modes are Page, Focus and Flow; settings schema 13 turns a saved `narrate` mode into `flow`. Desktop v2.0 shipped.
+- **Engine posture:** Kokoro is the sole engine and is dormant. NARRATE-REMOVE-1 (2026-10-12) removed the Narrate mode and deleted the MOSS-Nano, Pocket and Qwen code; the Kokoro main-process files (`main/tts-engine.js`, `tts-engine-marathon.js`, `tts-worker.js`, `tts-cache.js`, `tts-opus.js`) are byte-identical to the base, their IPC handlers stay registered in `main/ipc/tts.js`, nothing starts Kokoro at launch, and `preload.js` exposes none of those `tts-*` handlers. NARRATE-REBUILD-1 P3 added a second producer (`main/narrate/`, `main/ipc/narrate.js`) and an engine (`src/reader/modes/narrate/engine/`); P4 (`331f8313`) exposed them as preload `narrate*` and added the Narrate mode. NARRATE-REBUILD-1 builds the new Narrate on it (or, if Phase 0 fails, on a bake-off winner) and must call `ttsCache.init` before using the cache. The reading modes are Page, Focus and Flow; settings schema 13 turns a saved `narrate` mode into `flow`. Desktop v2.0 shipped.
 - **Queue (roadmap review 2026-10-12):** monday.com board 18432450217. NARRATE-REBUILD-1 (9, Path: epic, head) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14) → DEV-PERF-MEASURE-1 (15, stub); buffer 5 of 5. LL-135, LL-138, LL-143 and LL-141 promoted to standing rules 42–45. Completed 2026-10-12: NARRATE-REMOVE-1 (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`); close-outs in `docs/governance/close-outs/`. NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1 and NARRATE-SUBSCRIBER-CURSOR-1 were superseded, and KOKORO-EXPORT-1 dissolved, on 2026-10-11. Standing rule 41 (LL-136): exact-path fences exempt the time log.
   - NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`; close-out `docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md`; OutsideAudit.10 D4b): the Narrate mode, its hooks and strategies, its renderer UI, the dormant MOSS-Nano, Pocket and Qwen engines and 139 test files are deleted (diff against the base: 247 deleted, 66 modified, 3 added); a v13 settings migration plus three ingestion points (`loadSettingsData`, `applyCloudSettings`, the `save-settings` handler) normalize `narrate` to `flow`; the Reading Goals styles moved to `src/styles/reading-goals.css` by owner decision; the Page, Focus and Flow baselines are byte-identical. Suite 1,955 passed / 1 skipped in 134 files.
-  - READER-MODE-SEPARATION-2 completed 2026-10-11 (merge `d96d2f3f`; close-out `docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md`): Page, Focus, Flow and Narrate are independent runtimes. Owner ruling #31: Narrate is removed in the next sprint and rebuilt from scratch; its listening checks were dropped (#32). The 2026-10-11 roadmap review settled the narration items, the finish line ("Narration rebuilt") and the priority above.
-  - Completions of 2026-10-10 (EPIC-MAIN-PROCESS-CLEANUP, TTS-ENGINE-SHARED-1, TERMINAL-BACKFILL-1): archived to `docs/planning/CLAUDE_md_archive_session1.md`.
+  - Completions of 2026-10-10 and 2026-10-11 (EPIC-MAIN-PROCESS-CLEANUP, TTS-ENGINE-SHARED-1, TERMINAL-BACKFILL-1, READER-MODE-SEPARATION-2): archived to `docs/planning/CLAUDE_md_archive_session1.md`.
 - **Open bugs:** 7 — BUG-186 (a 5,000-span word-index test asserts a 200 ms build time and failed once under load at 218 ms; Low), BUG-187 (dev-mode `ResizeObserver loop` warning flood in the profile error.log; Low, needs read-only diagnosis), BUG-188 (Focus and Flow horizontal cursor band sits apart from the word cursor; pre-existing; Low), BUG-189 (dev-mode slowness across the whole app, equal on the base; Low), BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (e-ink hover wiped overlay backgrounds; resolved in source by EINK-HOVER-FIX-1 `61bad595`, open until a rebuild and the owner's e-ink smoke), BUG-185 (settings writes are fire-and-forget with a shared .tmp path; filed 2026-10-11 from OutsideAudit.10 F7, Low, scheduled as SETTINGS-WRITE-DURABLE-1; observed live at startup during the NARRATE-REMOVE-1 smoke, ENOENT on the settings.json and sync-queue.json renames).
 - **Deferred lanes:** Android APK, Cloud Sync, RSS/News, long-form audio export (KOKORO-EXPORT-1 dissolved). MOSS-Nano, Pocket TTS and Qwen were deleted by NARRATE-REMOVE-1 (2026-10-12).
-- **Most recent implementation:** NARRATE-REMOVE-1 (merge `386651fc`, 2026-10-12): Narrate and the dormant non-Kokoro engines removed, Kokoro kept dormant, settings schema 13. Before it, TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`).
+- **Most recent implementation:** NARRATE-REBUILD-1 P4 The mode (merge `331f8313`) and P3 Core engine (`ef245815`), 2026-10-13. Before it, NARRATE-REMOVE-1 (merge `386651fc`, 2026-10-12): Narrate and the dormant non-Kokoro engines removed, Kokoro kept dormant, settings schema 13. Before it, TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`).
 - Suite on the owner's machine (2026-10-12, sprint tree): 1,955 passed / 1 skipped / 0 failed in 134 files (base: 3,410 passed / 133 skipped in 235 files); `npm run typecheck` exits 0; `npm run build` exits 0. One full run showed `tests/wordPositionIndex.test.ts` over its 200 ms budget under load (BUG-186); the next full run passed.
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). The TTS `quality-gate` job was removed by NARRATE-REMOVE-1.
 - Governance tooling: Virtuoso connector-backed register, timestamped snapshots, and durable mutation recovery. The XLSX and scripts/recalc.py are historical tools; the live queue no longer depends on Excel.
@@ -385,4 +384,4 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 ### Architecture
 
-- **Main process** — modularized with domain-split IPC:
+See `docs/governance/TECHNICAL_REFERENCE.md` (main process: domain-split IPC under `main/ipc/`).

@@ -1,10 +1,12 @@
 ---
 name: Hippocrates (haiku/Tester)
+description: Test execution: run npm test / typecheck / build, categorize failures, report pass/fail.
+model: haiku
 ---
 
 # Test Runner Agent
 
-**Model:** [CUSTOMIZE: fastest/cheapest model -- e.g., claude-haiku]
+**Model:** claude-haiku
 **Type:** Lightweight test execution
 **Triggers:** "Run tests," "Verify no regression," "Check test status," "Before/after validation"
 

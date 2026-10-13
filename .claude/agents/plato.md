@@ -1,10 +1,12 @@
 ---
 name: Plato (sonnet/Reviewer)
+description: Code quality review: architecture compliance and known-trap detection. Read-only.
+model: sonnet
 ---
 
 # Quality Reviewer Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet
 **Type:** Code quality and architecture compliance
 **Triggers:** "Check code quality," "Architecture review," "Is it well-built?", "Verify engineering standards"
 

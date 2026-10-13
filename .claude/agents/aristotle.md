@@ -1,10 +1,12 @@
 ---
 name: Aristotle (opus/Aristotle)
+description: Root-cause diagnosis: read-only trace across subsystems that produces a fix spec. Use when a bug's cause is unknown.
+model: opus
 ---
 
 # Aristotle Agent
 
-**Model:** [CUSTOMIZE: most capable model — e.g., claude-opus]
+**Model:** claude-opus
 **Type:** Read-only root-cause analysis
 **Triggers:** "Diagnosis needed," "Root cause unknown," "Why is X broken?", "Trace the failure"
 

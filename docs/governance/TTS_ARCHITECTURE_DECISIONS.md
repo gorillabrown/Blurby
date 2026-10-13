@@ -7,14 +7,16 @@
 - Last updated: 2026-05-21.
 - Runtime implementation detail reference: `docs/governance/TECHNICAL_REFERENCE.md` (see Narrate Mode Architecture section).
 
+> **Historical since NARRATE-REMOVE-1 (2026-10-12; banner added by the 2026-10-13 governance sweep).** The Narrate mode, its renderer pipeline (registry, normalizer, scheduler, generation pipeline, `useNarration`, `useReaderMode`, the strategies) and the MOSS-Nano, Pocket and Qwen engines were deleted. Kokoro is the only engine in the tree and is dormant until NARRATE-REBUILD-1. Component names in the tables below describe the pre-removal pipeline. The rebuild's decisions live in `docs/planning/epics/2026-10-12-narrate-rebuild/`.
+
 ## 1. Engine Posture Decisions
 
 | Engine | Current status | Decision date | Rationale | Reactivation conditions |
 |---|---|---|---|---|
-| Kokoro | Active default / operational floor | 2026-05-16 (`ENGINE-DORMANCY-1` close-out reaffirmation) | Only engine kept fully active through TTS Architecture Completion; provides trusted word-native timing. | N/A (already active). |
-| MOSS-Nano | Dormant (settings + IPC disabled) | 2026-05-16 (`ENGINE-DORMANCY-1`) | Prevent multi-engine drift while finishing Kokoro reliability conveyor. Keep code intact for reversible posture. | 1) Change registry posture (`selectable`, `disabledReason`, copy) in `src/utils/ttsProviderRegistry.ts`; 2) re-enable runtime IPC entry points in `main/ipc/tts.js`; 3) re-enable settings selection UX; 4) pass full gate verification. |
-| Pocket TTS | Dormant (settings + IPC disabled) | 2026-05-16 (`ENGINE-DORMANCY-1`) | Same dormancy rationale as Nano; isolate Kokoro stabilization path while preserving future optional lane. | Same four-step reactivation contract as Nano. |
-| Qwen | Retired/disabled | 2026-05-15 (`QWEN_SUPPORTED_HOST_POLICY.md`) | Desktop v2 posture keeps Qwen non-selectable and non-runtime-active. | Separate post-v2 approved sprint; must not ride along with unrelated TTS work. |
+| Kokoro | Dormant, sole engine, until NARRATE-REBUILD-1 (since 2026-10-12); was Active default / operational floor | 2026-05-16 (`ENGINE-DORMANCY-1` close-out reaffirmation) | Only engine kept fully active through TTS Architecture Completion; provides trusted word-native timing. | N/A (already active). |
+| MOSS-Nano | Deleted (NARRATE-REMOVE-1, 2026-10-12); was Dormant (settings + IPC disabled) | 2026-05-16 (`ENGINE-DORMANCY-1`) | Prevent multi-engine drift while finishing Kokoro reliability conveyor. Keep code intact for reversible posture. | 1) Change registry posture (`selectable`, `disabledReason`, copy) in `src/utils/ttsProviderRegistry.ts`; 2) re-enable runtime IPC entry points in `main/ipc/tts.js`; 3) re-enable settings selection UX; 4) pass full gate verification. |
+| Pocket TTS | Deleted (NARRATE-REMOVE-1, 2026-10-12); was Dormant (settings + IPC disabled) | 2026-05-16 (`ENGINE-DORMANCY-1`) | Same dormancy rationale as Nano; isolate Kokoro stabilization path while preserving future optional lane. | Same four-step reactivation contract as Nano. |
+| Qwen | Deleted (NARRATE-REMOVE-1, 2026-10-12); was Retired/disabled | 2026-05-15 (`docs/planning/.Archive/QWEN_SUPPORTED_HOST_POLICY.md`) | Desktop v2 posture keeps Qwen non-selectable and non-runtime-active. | Separate post-v2 approved sprint; must not ride along with unrelated TTS work. |
 | Web Speech | Active fallback only | Reaffirmed 2026-05-11 literature/codebase review | Keep platform reach layer but do not treat boundary events as timing truth authority. | N/A; fallback role remains by design. |
 
 Notes:
@@ -116,7 +118,7 @@ Reactivation checklist (required as a set):
 ### Engine reactivation conditions
 
 - Nano/Pocket: run the full dormancy reactivation checklist in this document.
-- Qwen: separate approved post-v2 sprint only (`QWEN_SUPPORTED_HOST_POLICY.md`).
+- Qwen: separate approved post-v2 sprint only (`docs/planning/.Archive/QWEN_SUPPORTED_HOST_POLICY.md`).
 
 ### Deferred architecture lanes
 
@@ -198,7 +200,7 @@ This table accounts for every P1/P2 item from:
 
 ## 11. AD-1 Through AD-4 Migration (Verbatim)
 
-The following AD blocks are migrated verbatim from `ROADMAP_SPECS.md` ("Architecture Decisions (Resolved)") and are now governed here as the standing architecture-decision reference.
+The following AD blocks are migrated verbatim from `ROADMAP_SPECS.md` (archived 2026-10-13 to `docs/planning/.Archive/ROADMAP_SPECS.md`) ("Architecture Decisions (Resolved)") and are now governed here as the standing architecture-decision reference.
 
 #### AD-1: Segment Identity vs Cache Identity
 

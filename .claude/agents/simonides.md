@@ -1,5 +1,7 @@
 ---
 name: Simonides (sonnet/Memory)
+description: Memory guide: shared memory system, findings queue and cross-agent continuity.
+model: sonnet
 ---
 
 # Memory Guide

@@ -10,7 +10,6 @@ release checklists, and the planning archive.
 | `AGENT_FINDINGS.md` | markdown | Triage queue of agent-reported findings |
 | `CLAUDE_md_archive_session1.md` | markdown | Archived CLAUDE.md sprint history (session 1) |
 | `hotkey-reference.md` | markdown | Hotkey reference |
-| `postv2-narr-1-debt-map.md` | markdown | Post-v2 narration tech-debt map |
 | `desktop-v2.0-release-checklist.md` | markdown | Desktop v2.0 release checklist |
 | `desktop-v2.0-release-notes.md` | markdown | Desktop v2.0 release notes |
 | `Reading_Log_Blurby_Template.xlsx` | binary/xlsx | Reading-log template |
