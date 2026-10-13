@@ -13,6 +13,7 @@ function registerIpcHandlers(ctx) {
   require("./ipc/stats").register(ctx);
   require("./ipc/cloud").register(ctx);
   require("./ipc/tts").register(ctx);
+  require("./ipc/narrate").register(ctx);
   require("./ipc/misc").register(ctx);
   require("./ipc/bug-report").register(ctx);
 }
