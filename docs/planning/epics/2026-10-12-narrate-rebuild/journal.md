@@ -95,6 +95,15 @@
 - **Git:** eb/narrate-rebuild-1-p3 @ 14c57558; uncommitted at writing, committed as the next checkpoint: `main/narrate/{constants,producer-worker,producer}.js`, `main/ipc/narrate.js`, `main/ipc-handlers.js`, `scripts/narrate-rebuild/p3-producer-check.mjs`, `src/reader/modes/narrate/engine/{playbackClock,narrateEngine}.ts`, `tests/narrate/{harness/*,narrate.engine,narrate.negativeControls,narrate.structural}.test.ts`, the time log, `state.md`, `plan.md`, `journal.md`, the memo, the close-out.
 - **Next:** full suite result → checkpoint → P3 gate fresh → merge per GIT WORK → open P4 with the records.
 
+## S1 — 2026-10-13 11:40 — P3 gate passed; P3 merged ef245815; P4 opened
+
+- **Did:** full `npm test` in the P3 worktree exit 0 (139 files, 1,984 passed / 1 skipped); checkpoint `f4971196` pushed. P3 gate fresh at that commit: the three named suites exit 0 (19 tests), typecheck exit 0, the producer check exit 0 with `--break` exit 1 (11:30). Merged per GIT WORK: detached worktree `.worktrees/narrate-rebuild-1-merge-p3` at `origin/main` (`d81aeb4b`), `merge --no-ff eb/narrate-rebuild-1-p3` → `ef245815` "Merge eb/narrate-rebuild-1-p3: Core engine", pushed, `merge-base --is-ancestor` exit 0. P4 opened: `eb/narrate-rebuild-1-p4` from `origin/main` at `ef245815`, worktree `.worktrees/narrate-rebuild-1-p4`, `npm ci` started; the time log carried forward; Gate log row for P3 and Evidence rows written here (LL-148); P4 worklist in plan.md. Clock note: the machine reads 11:36 at the merge; the earlier P3 build entry's heading says 11:35 and its records 11:10–11:33.
+- **Learned:** the `git -C C:\Projects\Blurby` commands of the merge recipe moved this session's shell into the primary checkout for a moment; every run and edit stayed in the worktrees (nothing was executed there), and the shell is back in the P4 worktree.
+- **Decisions:** none new.
+- **Gate/DoD movement:** P3 gate PASS (plan.md Gate log); D13 holds for P1–P3; D4 suites on `main`.
+- **Git:** eb/narrate-rebuild-1-p4 @ ef245815 (base; the first phase commit follows this entry with the trailer `NARRATE-REBUILD-1-P4-Base: ef245815…`); uncommitted at writing: `state.md`, `plan.md`, `journal.md`, the close-out, the time log.
+- **Next:** P4 census, then the runtime shell over the engine, the preload surface, registration and the bar entry, the mode id with the normalization retirement, the P4 gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
