@@ -307,7 +307,7 @@ async function run(ctx) {
     } catch (err) { console.error("[narrate-trial] summary write failed:", err.message); }
   }
   // app.exit skips will-quit: stop the producer workers here, so the exit code is the trial's, not a crash's.
-  try { require("./producer").shutdown(); } catch { /* not loaded */ }
+  try { await require("./producer").shutdown(); } catch { /* not loaded */ }
   setTimeout(() => app.exit(exitCode), 500);
 }
 

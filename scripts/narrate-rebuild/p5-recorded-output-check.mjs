@@ -85,9 +85,17 @@ export function analyze(events, { minMinutes = 5 } = {}) {
   const outside = [];
   let worstLateMs = null;
   const baseLimit = (refreshMs ?? 0) + FRAME_TOLERANCE_MS;
+  // A unit's boundary on the playback clock is never before its chunk starts sounding: the samples before the
+  // schedule's start (the leading trim, or a resume's paused sample) are never played. startAt comes from the
+  // chunk's own schedule record in the same epoch, the latest one made before the commit.
+  const sounding = (c) => {
+    let start = -Infinity;
+    for (const s of schedules) if (s.chunkStart === c.chunkStart && s.epoch === c.epoch && s.t <= c.t) start = s.startAt;
+    return start;
+  };
   for (const c of mapped) {
     const playback = c.otsCtx + (c.t - c.otsPerf) / 1000;
-    const lateMs = (playback - c.boundaryCtx) * 1000;
+    const lateMs = (playback - Math.max(c.boundaryCtx, sounding(c))) * 1000;
     const frame = typeof c.frameDt === "number" && c.frameDt > 0 && c.frameDt < 1000 ? c.frameDt : 0;
     const limit = Math.max(baseLimit, frame + FRAME_TOLERANCE_MS);
     if (worstLateMs === null || Math.abs(lateMs) > Math.abs(worstLateMs)) worstLateMs = lateMs;

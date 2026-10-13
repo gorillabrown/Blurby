@@ -13,7 +13,7 @@ let workers = [];
 let failExtraLoad = false;
 
 class FakeWorker extends EventEmitter {
-  constructor() { super(); this.generates = []; this.terminated = false; this.index = workers.length; workers.push(this); }
+  constructor() { super(); this.generates = []; this.terminated = false; this.exited = false; this.index = workers.length; workers.push(this); }
   postMessage(msg) {
     if (msg.type === "load") {
       setTimeout(() => {
@@ -22,6 +22,9 @@ class FakeWorker extends EventEmitter {
       }, 0);
     } else if (msg.type === "generate") {
       this.generates.push(msg);
+    } else if (msg.type === "stop") {
+      // A worker stops by itself once its generation in progress is done (here: at once).
+      setTimeout(() => { this.exited = true; this.emit("exit", 0); }, 0);
     }
   }
   /** Answer the oldest generate request this worker holds. */
@@ -47,8 +50,8 @@ beforeEach(() => {
   producer = require(PRODUCER);
 });
 
-afterEach(() => {
-  producer.shutdown();
+afterEach(async () => {
+  await producer.shutdown();
   Module._load = originalLoad;
   delete require.cache[PRODUCER];
   delete process.env.NARRATE_MODELS_ROOT;
@@ -88,13 +91,14 @@ describe("narrate producer pool (D6)", () => {
     await expect(r).resolves.toBeTruthy();
   });
 
-  it("shutdown terminates every worker and fails what is pending", async () => {
+  it("shutdown stops every worker gracefully, resolves once all have exited, and fails what is pending", async () => {
     await producer.ensureReady();
     await settle();
     const pending = producer.generate("never answered", {});
     await settle();
-    producer.shutdown();
+    const done = producer.shutdown();
     await expect(pending).rejects.toThrow(/stopped: shutdown/);
-    expect(workers.every((w) => w.terminated)).toBe(true);
+    await done;
+    expect(workers.every((w) => w.exited && !w.terminated)).toBe(true); // asked to stop, never killed under a live run
   });
 });

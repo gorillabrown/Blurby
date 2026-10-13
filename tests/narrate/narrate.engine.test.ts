@@ -3,9 +3,9 @@
 // click and speed changes; silence holds the last word (R6); a speed change finishes the unit in progress and
 // starts the next word at the new speed (R7), rapid changes coalesce, stale results are dropped.
 import { describe, expect, it, vi } from "vitest";
-import { NarrateEngine, type EngineFailure, type EngineState } from "../../src/reader/modes/narrate/engine/narrateEngine";
+import { NarrateEngine, leadingTrim, type EngineFailure, type EngineState } from "../../src/reader/modes/narrate/engine/narrateEngine";
 import { FakeAudioOutput } from "./harness/fakeAudioOutput";
-import { FakeProducer, SAMPLE_RATE, SPF } from "./harness/fakeProducer";
+import { FakeProducer, SAMPLE_RATE, SPF, lawfulTable } from "./harness/fakeProducer";
 
 const WORDS = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned to be religious, and bountiful; not only to do, but to intend any evil. Of my great grandfather I have learned to be frugal."
   .split(" ");
@@ -69,6 +69,18 @@ describe("narrate engine (D5-engine)", () => {
     await flush();
     expect(h.producer.requests[before].text).toBe("to do,"); // a new request: the ramp starts again (3-word cap, cut at its pause mark)
     expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("the leading trim stops at the first voiced sample, but never past the first unit's last table frame (2.00x: no first-word drop)", () => {
+    const o = { framesPerWord: FRAMES, leadFrames: 2, tailFrames: 1 };
+    const { table, pcm } = lawfulTable(["Of", "my", "grandfather"], 1.0, o);
+    expect(leadingTrim(pcm, SAMPLE_RATE, table)).toBe(2 * SPF); // voiced from the first word's first sample
+    // The table's first unit ends before any sound (the VERDICT's early first word at >= 1.40x): silence through unit 0.
+    const late = pcm.slice();
+    late.fill(0, 0, table.units[1].sampleStart + 3 * SPF);
+    const trim = leadingTrim(late, SAMPLE_RATE, table);
+    expect(trim).toBe(table.units[0].sampleEnd - SPF);
+    expect(trim).toBeLessThan(table.units[0].sampleEnd); // unit 0 still sounds (under the cursor) for one table frame
   });
 
   it("the cursor is the unit at the current playback sample, published once per change, in order", async () => {

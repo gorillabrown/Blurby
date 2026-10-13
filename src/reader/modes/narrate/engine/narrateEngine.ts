@@ -25,6 +25,19 @@ import type {
 
 export type EngineRequestCause = TtsEvalNarrateRequestCause;
 
+/**
+ * The leading silence skipped at playback (T6, the P3 latency lever): up to the first voiced sample, but never into
+ * the last duration frame of the first unit, so the chunk's first word always sounds under the cursor for at least
+ * one table frame. At >= 1.40x the table's first unit can end before the first voiced sample (VERDICT P0-3); trimming
+ * past it would skip that word's highlight (D5: a drop). Both bounds are exact sample counts; nothing is estimated.
+ */
+export function leadingTrim(pcm: Float32Array, sampleRate: number, table: ChunkTable): number {
+  const voiced = firstVoicedSample(pcm, sampleRate);
+  const first = table.units[0];
+  if (!first) return voiced;
+  return Math.max(0, Math.min(voiced, first.sampleEnd - table.samplesPerFrame));
+}
+
 /** D3/D5/D6 recorded output (the sink stamps `ts`): every record names a clock field by its clock, nothing is estimated. */
 export type EngineTraceEvent =
   | Omit<TtsEvalNarrateCommitEvent, "ts">
@@ -311,7 +324,7 @@ export class NarrateEngine {
     const unitWord: number[] = [];
     let w = 0;
     for (const u of table.units) { unitWord.push(w); w += u.words.length; }
-    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: firstVoicedSample(result.pcm, result.sampleRate), unitWord, offset: 0, startAt: 0, endAt: 0, source: null };
+    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, offset: 0, startAt: 0, endAt: 0, source: null };
     this.chunks.push(chunk);
     if (this.state === "playing") {
       const prev = this.chunks.at(-2);

@@ -25,4 +25,6 @@ module.exports = {
   NARRATE_WARMUP_TEXT: "Hello.",
   NARRATE_LOAD_TIMEOUT_MS: 120000,
   NARRATE_IDLE_UNLOAD_MS: 10 * 60 * 1000,
+  /** How long a stopping worker may take to finish its generation in progress before it is terminated. */
+  NARRATE_STOP_TIMEOUT_MS: 30000,
 };

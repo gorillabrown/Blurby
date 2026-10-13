@@ -109,14 +109,29 @@ async function generate(id, text, voice, speed) {
   }
 }
 
+// Stop (P5): no new generation starts; the ones in progress finish (onnxruntime cannot abort a run, and a thread
+// ended under a live native run takes the process down with 0xC0000409); then the thread exits.
+const inflight = new Set();
+let stopping = false;
+
 parentPort.on("message", async (msg) => {
   switch (msg.type) {
+    case "stop":
+      stopping = true;
+      await Promise.allSettled([...inflight]);
+      process.exit(0);
+      break;
     case "load":
       try { await load(msg); } catch (err) { parentPort.postMessage({ type: "load-error", error: err?.message || String(err), stack: err?.stack }); }
       break;
-    case "generate":
-      await generate(msg.id, msg.text, msg.voice, msg.speed);
+    case "generate": {
+      if (stopping) { parentPort.postMessage({ type: "result", id: msg.id, error: "producer stopping" }); break; }
+      const run = generate(msg.id, msg.text, msg.voice, msg.speed);
+      inflight.add(run);
+      await run;
+      inflight.delete(run);
       break;
+    }
     case "status":
       parentPort.postMessage({ type: "status", id: msg.id, loaded, ready, runtime });
       break;

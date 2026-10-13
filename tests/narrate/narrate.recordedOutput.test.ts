@@ -52,6 +52,21 @@ async function record(seconds: number, speed = 1.0): Promise<Rec[]> {
 describe("p5-recorded-output-check analysis (D3, D5 in the app)", () => {
   afterEach(() => { vi.restoreAllMocks(); });
 
+  it("a first unit whose table boundary lies inside the trimmed leading silence is due when its chunk starts sounding, not before", async () => {
+    const events = await record(5.2 * 60);
+    const firstUnitCommits = events.filter((e) => e.kind === "narrate-commit" && e.unit === 0);
+    expect(firstUnitCommits.length).toBeGreaterThan(5);
+    // The trim cut 200 ms into unit 0 (the 2.00x case): its table boundary is before the chunk's start.
+    const trimmed = events.map((e) => (e.kind === "narrate-commit" && e.unit === 0 ? { ...e, boundaryCtx: (e.boundaryCtx as number) - 0.2 } : e));
+    expect(run(trimmed, { minMinutes: 5 }).verdict).toBe("PASS");
+    // A first-unit commit made a tenth of a second after its chunk started sounding is still late.
+    const target = firstUnitCommits[3];
+    const late = trimmed.map((e) => (e === trimmed[events.indexOf(target)] ? { ...e, t: (e.t as number) + 100 } : e));
+    const r = run(late, { minMinutes: 5 });
+    expect(r.verdict).toBe("FAIL");
+    expect(r.failures.join(" ")).toMatch(/1 commits outside one display frame/);
+  }, 60_000);
+
   it("passes a five-minute recorded session and reports its refresh interval and clock mapping", async () => {
     const events = await record(5.2 * 60);
     const r = run(events, { minMinutes: 5 });

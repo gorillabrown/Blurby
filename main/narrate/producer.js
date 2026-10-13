@@ -46,18 +46,29 @@ function failPending(err) {
   for (const [id, p] of pending) { pending.delete(id); p.reject(err); }
 }
 
-function dispose(reason) {
+/** Ask a worker to finish what it is running and exit; terminate it only if it has not exited by the deadline. */
+function stopWorker(w) {
+  return new Promise((resolve) => {
+    const timer = setTimeout(() => { w.terminate().catch(() => {}).finally(resolve); }, C.NARRATE_STOP_TIMEOUT_MS);
+    w.once("exit", () => { clearTimeout(timer); resolve(); });
+    try { w.postMessage({ type: "stop" }); } catch { clearTimeout(timer); resolve(); }
+  });
+}
+
+/** Stop every worker (gracefully, or at once after a worker error) and fail what is pending. Resolves when all have exited. */
+function dispose(reason, graceful = false) {
   const slots = workers; workers = [];
-  for (const s of slots) s.w.terminate().catch(() => {});
+  const stopped = Promise.all(slots.map((s) => (graceful ? stopWorker(s.w) : s.w.terminate().catch(() => {}))));
   ready = false; loading = null;
   if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
   failPending(new Error(`narrate producer stopped: ${reason}`));
   setStatus({ state: "idle", detail: reason });
+  return stopped;
 }
 
 function touchIdle() {
   if (idleTimer) clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => dispose("idle unload"), C.NARRATE_IDLE_UNLOAD_MS);
+  idleTimer = setTimeout(() => { dispose("idle unload", true); }, C.NARRATE_IDLE_UNLOAD_MS);
   idleTimer.unref?.();
 }
 
@@ -130,6 +141,7 @@ async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0 } =
 }
 
 function getStatus() { return { ...status, ready, pending: pending.size, workersReady: workers.filter((w) => w.ready).length }; }
-function shutdown() { dispose("shutdown"); }
+/** Resolves once every worker has exited (before the process may exit: see stopWorker). */
+function shutdown() { return dispose("shutdown", true); }
 
 module.exports = { ensureReady, generate, getStatus, shutdown, getModelsRoot };

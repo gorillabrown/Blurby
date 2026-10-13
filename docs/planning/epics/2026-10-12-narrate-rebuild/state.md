@@ -1,7 +1,7 @@
 ---
 epic: narrate-rebuild
-last_updated: 2026-10-13 12:35
-updated_by: session 1 (S1, P4 merged 331f8313, P5 opened)
+last_updated: 2026-10-13 14:20
+updated_by: session 2 (S2, P5 recovery, D6 repair, crossings; D3 sessions running)
 ---
 
 # State — single source of current truth
@@ -26,22 +26,22 @@ updated_by: session 1 (S1, P4 merged 331f8313, P5 opened)
 ## Where we are
 
 ```
-phase:        P5 — Speed, crossings, latency end to end, recorded output (open; branch eb/narrate-rebuild-1-p5, base 331f8313 = the P4 merge; census pending)
-next_action:  P5 census (LL-139, LL-150) → D10 patch timing removal → D3 log + check script (with the D5 overlap/drop/repeat analysis) → D5 crossings with named tests → D6 end-to-end latency on the ordinary desktop → P5 gate
+phase:        P5 — Speed, crossings, latency end to end, recorded output (branch eb/narrate-rebuild-1-p5, base 331f8313; S2 checkpoints 238f47ec, 573706ea)
+next_action:  D3 sessions (5 min at 1.00x and 2.00x) → D6 trials per T7 after the Decision #17 repair (a trial at or over budget now = BLOCKER(USER), the charter's one repair attempt is spent) → P5 gate → merge → P6
 blockers:     none open (settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main, A5; no acceptance criterion treats them as persisted)
-session:      1 of ~14 budgeted
-dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls (merged ef245815; the structural scanner covers the runtime since 331f8313); D5's engine half passes on the fake clock (crossings and the D3 analysis are P5); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D13 holds for P1–P4; D2, D3, D6, D10–D12 unmet
+session:      2 of ~14 budgeted
+dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls; D5's engine half and the crossings suite pass (573706ea; the D3 in-app analysis pending); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D10 met on the P5 branch (grep exit 1, patch deleted); D13 holds for P1–P4; D2, D3, D6, D11 (fresh), D12 unmet
 ```
 
 Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, P0-2, P0-4 PASS on both voices (500 chunks); P0-3 FAIL where conclusive (passage A at 0.80x/1.00x on both voices, 1.40x on Bella: at interior onsets the table is late by ≈ 50 ms ÷ rate; the first word of every chunk is late at ≤ 1.00x and early at ≥ 1.40x, −147 to +139 ms, because the rendered leading silence of ≈ 360–500 ms does not follow the BOS token) and INCONCLUSIVE elsewhere (passage B at every rate, 2.00x on both passages, 1.40x on Emma) after the two reference repairs the charter allows; the 40 ms control is caught; P0-5 PASS at 4 intra-op threads (worst warm 1,940 ms, worst cold 3,032 ms; default threads fail at 4,507 ms). Classification: P0-3 FAIL = engine property under a verified contract; INCONCLUSIVE = reference coverage → owner. Addendum (2026-10-13, G1 route b): the fp32 and fp16 exports, with the same edit, reproduce the q4 error within 1 ms at every paired anchor on passage A at 1.00x (both voices) — precision is not the cause, and the charter's bake-off condition is met.
 
 ## Next actions — max 5, near horizon only
 
-1. [x] P4 gate passed fresh at `5edbea58` (12:26) and merged `331f8313` (12:27); P5 opened at `331f8313` (`npm ci` started 12:30)
-2. [ ] P5 census (LL-139, LL-150): the D3 hook point and the `getOutputTimestamp` seam, a run-scoped log location by environment override (never the profile), the patch's timing code and its callers (D10), the old cache's read paths (R10), the crossing seams — recorded in plan.md's worklist before any change
-3. [ ] D10 (patch timing removed or replaced, grep exit 1, producer check still exit 0) → D3 log + `p5-recorded-output-check.mjs` with the D5 overlap/drop/repeat analysis and a `--break` control
-4. [ ] D5 crossings with `tests/narrate/narrate.crossings.test.ts` (section and chapter crossing, F2's Introduction → "HIS FIRST BOOK"; adjacent and extreme speed changes at the runtime seam)
-5. [ ] D6 end-to-end latency per T7 on the owner's ordinary desktop (Decision #13) → P5 gate → merge → P6 (production build, G2 stop). The staging memo's observations go to the planner's close-out, never folded in from this run
+1. [x] S2 recovery (14:05): S1's uncommitted P5 tree committed `238f47ec` with the D6 repair (Decision #17); crossings fixed and tested `573706ea`
+2. [ ] D3: `p5-latency-e2e.mjs --only session --minutes 5 --rates 1.0,2.0` → `recorded-output.json` PASS on both (`--break` control seen exit 1 on the smoke trace, 14:14)
+3. [ ] D6: `p5-latency-e2e.mjs --only warm` then `--only cold` (T7: warm 20 per type at 1.00x and 2.00x; cold 5 per type), host busy recorded per run; any trial at or over budget → BLOCKER(USER) with the figures
+4. [ ] P5 gate fresh at the checkpoint: D3/D5/D6 scripts, D10 grep exit 1, typecheck, `npm test`, `npm run build` → merge per GIT WORK → P6 (production build, G2 stop)
+5. [ ] Staging memo observations go to the planner's close-out, never folded in from this run
 
 ## Working set — verified facts this epic relies on
 

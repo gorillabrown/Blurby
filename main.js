@@ -685,10 +685,18 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-app.on("will-quit", async () => {
+let narrateProducerStopped = false;
+app.on("will-quit", async (event) => {
+  // Stop the Narrate producer workers before the process exits: a worker ended under a live onnxruntime run takes
+  // the process down with 0xC0000409. Quit waits once for them, then quits again.
+  if (!narrateProducerStopped) {
+    narrateProducerStopped = true;
+    event.preventDefault();
+    try { await require("./main/narrate/producer").shutdown(); } catch { /* ignore */ }
+    app.quit();
+    return;
+  }
   if (watcher) watcher.close();
-  // Stop the Narrate producer workers before the process exits (live onnxruntime threads at exit end it with 0xC0000409).
-  try { require("./main/narrate/producer").shutdown(); } catch { /* ignore */ }
   // Stop WebSocket server
   try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
   await flushTtsEvalTraceCaptures();
