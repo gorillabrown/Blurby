@@ -11,7 +11,7 @@ Source-of-truth operational and governance documents. Several of these are the
 | `LESSONS_LEARNED.md` | markdown | Engineering discoveries, standing rules, anti-patterns |
 | `IDEAS.md` | markdown | Unroadmapped concepts, reviewed at phase pauses |
 | `DEVELOPMENT_SYNC.md` | markdown | Local-first git workflow SOP |
-| `sprint-queue.xlsx` | binary/xlsx | Retired XLSX queue, read-only evidence. The live queue is the [monday.com work register](https://estrattbrown.monday.com/boards/18432450217) |
+| `sprint-queue.xlsx` | binary/xlsx | Retired XLSX queue, read-only evidence. The live queue is the [Notion work register](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca) |
 | `terminal-ledger.jsonl` | jsonl | Append-only ledger of terminal (completed) work items |
 | `TTS_ARCHITECTURE_DECISIONS.md` | markdown | TTS architecture decisions (historical since NARRATE-REMOVE-1) |
 
