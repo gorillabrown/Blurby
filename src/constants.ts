@@ -35,6 +35,8 @@ export const KOKORO_DEFAULT_VOICE = "af_bella";
 export const NARRATE_CHUNK_RAMP: readonly number[] = [6, 12, 24];
 /** Narrate: the timer that keeps the prefetch going when the window gets no display frames (hidden or covered). */
 export const NARRATE_PUMP_INTERVAL_MS = 250;
+/** Narrate (Decision #18): seconds of audio kept scheduled ahead of the playback position. */
+export const NARRATE_PREFETCH_AHEAD_S = 8;
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 

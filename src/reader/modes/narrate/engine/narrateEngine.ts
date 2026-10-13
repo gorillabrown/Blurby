@@ -96,6 +96,8 @@ export interface EngineOptions {
   readonly prefetch?: number;
   /** Seconds between "now" and the first scheduled sample (default 0.03). */
   readonly leadSeconds?: number;
+  /** Decision #18: keep at least this many seconds of audio scheduled ahead (the prefetch measured in audio, not chunks). */
+  readonly prefetchSeconds?: number;
   /** Word caps for the first chunks of every epoch (chunkPlan ramp; the P5 latency lever). Default: none (T2's first chunk, then token packing). */
   readonly chunkRamp?: readonly number[];
 }
@@ -124,6 +126,7 @@ export class NarrateEngine {
   private readonly prefetch: number;
   private readonly lead: number;
   private readonly ramp: readonly number[];
+  private readonly prefetchSeconds: number | null;
   private voice: string;
   private speed: number;
 
@@ -153,6 +156,7 @@ export class NarrateEngine {
     this.prefetch = options.prefetch ?? 1;
     this.lead = options.leadSeconds ?? 0.03;
     this.ramp = options.chunkRamp ?? [];
+    this.prefetchSeconds = options.prefetchSeconds ?? null;
     this.voice = options.voice;
     this.speed = options.speed;
   }
@@ -189,7 +193,8 @@ export class NarrateEngine {
     if (this.state !== "paused") return;
     if (this.failure && !this.pausedAt) return;
     this.setState("playing");
-    const at = this.pausedAt;
+    // A pause in a gap has no paused sample; a chunk that arrived during the pause is where speech continues.
+    const at = this.pausedAt ?? this.firstUnscheduled();
     this.pausedAt = null;
     this.request(cause, at ? this.chunks[at.index].entry.startWord + this.chunks[at.index].unitWord[Math.max(0, lookupUnit(this.chunks[at.index].table.units, at.sample))] : this.nextWord);
     if (!at) { this.fill(); return; }
@@ -298,8 +303,11 @@ export class NarrateEngine {
     if (this.state !== "playing" || this.failure || this.inFlight > 0) return;
     if (this.nextWord >= this.words.length) return;
     const now = this.output.now();
-    const ahead = this.chunks.filter((c) => c.endAt > now).length;
-    if (ahead > this.prefetch) return;
+    if (this.prefetchSeconds !== null) {
+      // By audio: one-word heading chunks no longer leave a gap a pause can fall into (Decision #18).
+      const scheduledEnd = this.chunks.reduce((end, c) => Math.max(end, c.endAt), 0);
+      if (scheduledEnd - now >= this.prefetchSeconds) return;
+    } else if (this.chunks.filter((c) => c.endAt > now).length > this.prefetch) return;
     const [entry] = planChunks(this.words, this.nextWord, { maxChunks: 1, breaks: this.breaks, ramp: this.ramp, rampIndex: this.chunkSeq });
     if (!entry) return;
     this.chunkSeq += 1;
@@ -421,6 +429,12 @@ export class NarrateEngine {
   }
 
   /** Paused in a gap: resume from the first chunk not yet started, at its trim. */
+  /** The first chunk that arrived while paused and was never scheduled (endAt is set only by scheduling). */
+  private firstUnscheduled(): { readonly index: number; readonly sample: number } | null {
+    const i = this.chunks.findIndex((c) => c.endAt === 0);
+    return i >= 0 ? { index: i, sample: this.chunks[i].trim } : null;
+  }
+
   private nextScheduledPause(): { readonly index: number; readonly sample: number } | null {
     const now = this.output.now();
     const i = this.chunks.findIndex((c) => c.startAt >= now || c.source === null);

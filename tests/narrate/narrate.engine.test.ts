@@ -12,7 +12,7 @@ const WORDS = "Of my grandfather Verus I have learned to be gentle and meek. Of 
 const FRAMES = 8; // 200 ms per word at 1.00x in the fake
 const WORD_S = (FRAMES * SPF) / SAMPLE_RATE;
 
-function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: number; chunkRamp?: readonly number[] } = {}) {
+function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: number; prefetchSeconds?: number; chunkRamp?: readonly number[] } = {}) {
   const output = new FakeAudioOutput();
   const producer = new FakeProducer({ hold: options.hold ?? false, framesPerWord: options.framesPerWord ?? FRAMES, leadFrames: 2, tailFrames: 1 });
   const cursor: number[] = [];
@@ -21,7 +21,7 @@ function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: n
   const diagnostics: string[] = [];
   const complete = vi.fn();
   const engine = new NarrateEngine({
-    words: WORDS, producer, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, leadSeconds: 0.03, chunkRamp: options.chunkRamp,
+    words: WORDS, producer, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, prefetchSeconds: options.prefetchSeconds, leadSeconds: 0.03, chunkRamp: options.chunkRamp,
     events: { onCursor: (w) => cursor.push(w), onState: (s) => states.push(s), onFailure: (f) => failures.push(f), onComplete: complete, onDiagnostic: (k, d) => diagnostics.push(`${k}: ${d}`) },
   });
   return { engine, output, producer, cursor, states, failures, diagnostics, complete };
@@ -93,6 +93,39 @@ describe("narrate engine (D5-engine)", () => {
     expect(h.output.overlaps()).toEqual([]);
     expect(h.complete).toHaveBeenCalledTimes(1);
     expect(h.states.at(-1)).toBe("stopped");
+  });
+
+  it("a pause in a gap (the next chunk still generating) resumes at that chunk once it arrives: no word is skipped", async () => {
+    const h = harness({ hold: true });
+    h.engine.play(0);
+    await flush();
+    h.producer.requests[0].release(); // the first sentence (words 0-11)
+    await flush();
+    expect(h.producer.requests).toHaveLength(2); // the second sentence (from word 12) is generating, held
+    run(h, 0.03 + 12 * WORD_S + 0.2); // the first chunk plays out: a gap, nothing scheduled
+    h.engine.pause();
+    h.producer.requests[1].release(); // it arrives while paused
+    await flush();
+    h.engine.resume();
+    await flush();
+    run(h, 0.5);
+    expect(h.cursor).toContain(12); // the resume plays the chunk that arrived in the pause …
+    expect(h.cursor.filter((w) => w > 11)[0]).toBe(12); // … from its first word, nothing skipped
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("prefetch by seconds keeps that much audio scheduled ahead, however short the chunks (Decision #18)", async () => {
+    const h = harness({ prefetchSeconds: 3, chunkRamp: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }); // one-word chunks, 0.2 s each
+    h.engine.play(0);
+    for (let i = 0; i < 40; i++) await flush();
+    const ahead = Math.max(...h.output.sources.map((s) => s.startAt + (s.samples - s.offset) / SAMPLE_RATE)) - h.output.now();
+    expect(ahead).toBeGreaterThanOrEqual(3);
+    expect(h.producer.requests.length).toBeGreaterThan(10); // far more than one chunk ahead
+    run(h, 1.0);
+    await flush();
+    const after = Math.max(...h.output.sources.map((s) => s.startAt + (s.samples - s.offset) / SAMPLE_RATE)) - h.output.now();
+    expect(after).toBeGreaterThanOrEqual(2.8); // topped up as it plays
+    expect(h.output.overlaps()).toEqual([]);
   });
 
   it("the cursor is the unit at the current playback sample, published once per change, in order", async () => {
