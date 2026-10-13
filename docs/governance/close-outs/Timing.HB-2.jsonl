@@ -23,3 +23,4 @@
 {"event": "resume", "row": 6, "at": "2026-10-13T19:30:25Z"}
 {"event": "end", "row": 6, "evidence": "DW1 Q1 72 rows sha256 9729d554..059c8e before=after (tamper control changes hash); DW2 Queue view = 7 queued Seq 9-15; DW3 Projects = 11 phase names, Narration Rebuild 2 items, Closed true on 65/false on 7 queued -> 1/2; DW4 statuses match; DW5 68 linked + 4 unlinked no-Phase, drift 0; DW6 clearing CLEANUP-MODE-BARREL-1 link -> formula flags it, owner saw it in UI view, restore -> 0; DW7 Tasks database deleted, Projects has no Tasks column", "result": "done", "at": "2026-10-13T19:30:26Z"}
 {"event": "start", "row": 8, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:30:27Z"}
+{"event": "end", "row": 8, "evidence": "merge 48cf6a3e (--no-ff eb/hb-2) pushed to origin/main; artifacts-exist pass", "result": "done", "at": "2026-10-13T19:31:08Z"}

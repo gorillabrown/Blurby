@@ -2896,3 +2896,17 @@ Related: LL-136 (standing rule 41), standing rule 40.
 
 ### LL-141 — status (2026-10-12, 2026-10-13)
 **Status:** Promoted -> ROADMAP standing rule 45
+
+### LL-154 — The Notion connector cannot build cross-relation formulas or formula view filters, and its view-mode query misreads formula-filtered views (HB-2, 2026-10-13)
+**Verdict:** Through the Notion connector, a formula that reads a property of related pages is refused, a view filter on a formula column is accepted and silently dropped, and a view-mode query of a formula-filtered view returns no rows even when rows match. Relations, rollups and formulas over a row's own properties work.
+**Evidence:** HB-2 (2026-10-13): `ADD COLUMN "Completion" FORMULA(...)` over `prop("Items")...current.prop("Status")` failed twice with "Type error with formula"; `FILTER "Phase link drift" = TRUE`, `= true` and `IS NOT EMPTY` each returned a view with an empty filter group; after the owner set the filter in the UI, `query-data-sources` in view mode returned 0 rows while a rows-mode `resultFilter` on the same formula returned CLEANUP-MODE-BARREL-1 and the owner saw it in the view. The fallback `ROLLUP('Items','Closed','percent_checked')` over a same-row `Closed` formula was accepted.
+**Recommendation:** In a specification that builds Notion schema through the connector, compute per-row flags as same-row formulas and aggregate them with a rollup rather than a cross-relation formula; plan any formula-filtered view as an owner UI step; verify a formula column with a rows-mode `resultFilter` query and the owner's look at the view, never with a view-mode query.
+**Applies to:** Specifications and verification steps that create or check Notion formulas, rollups or views through the connector (work-register views, phase layers, dashboards).
+**Status:** Observation
+Related: LL-153.
+
+### LL-153 — status (HB-2, 2026-10-13)
+**Status:** Observation — held: the executing session wrote only display-only Notion columns, pages and views, moved no item status, and the SHA-256 of the 16 mapped columns over 72 rows was identical before and after (`9729d554…`).
+
+### LL-137 — status (HB-2, 2026-10-13)
+**Status:** Observation — held: the register reads were hashed as UTF-8 canonical JSON and the CLAUDE.md size was counted with the file opened as UTF-8; no code-page artefact appeared.
