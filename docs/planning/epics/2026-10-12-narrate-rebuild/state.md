@@ -28,7 +28,7 @@ updated_by: session 2 (S2, P5 recovery, D6 repair, crossings; D3 sessions runnin
 ```
 phase:        P5 — Speed, crossings, latency end to end, recorded output (branch eb/narrate-rebuild-1-p5, base 331f8313; S2 checkpoints 238f47ec, 573706ea)
 next_action:  D3 sessions (5 min at 1.00x and 2.00x) → D6 trials per T7 after the Decision #17 repair (a trial at or over budget now = BLOCKER(USER), the charter's one repair attempt is spent) → P5 gate → merge → P6
-blockers:     none open (settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main, A5; no acceptance criterion treats them as persisted)
+blockers:     BLOCKER(USER) D6 warm latency over budget after the one repair (see Blockers); settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main (A5)
 session:      2 of ~14 budgeted
 dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls; D5's engine half and the crossings suite pass (573706ea; the D3 in-app analysis pending); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D10 met on the P5 branch (grep exit 1, patch deleted); D13 holds for P1–P4; D2, D3, D6, D11 (fresh), D12 unmet
 ```
@@ -63,6 +63,31 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 | Producer (P3) | `main/narrate/producer.js` → `producer-worker.js` loads the exposed copy by `StyleTextToSpeech2Model.from_pretrained` + `new KokoroTTS(model, tokenizer)` at 4 intra-op threads (`NARRATE_INTRA_OP_THREADS` override; `"default"` = onnxruntime's); `NARRATE_MODELS_ROOT` override else `userData/models`; provenance is written only in `main/narrate/capture.js`. The thread count leaves the table and the T3 onsets unchanged but not the waveform bytes (1 ms envelope within 3.7 % of peak; identical at the default). First generation after warm-up at a new shape: 1.9–2.3 s at 4 threads, 4.8–5.2 s at the default | `p3-producer-check.mjs`, S1 2026-10-13 |
 
 ## Blockers
+
+### BLOCKER(USER) — D6 warm latency over budget after the one repair attempt (raised 2026-10-13 15:07 by S2). Open.
+
+The charter trigger: "any harness or in-app latency trial at or above its budget total after one repair attempt (a visible fail, never waived)". The repair was Decision #17 (two workers, chunk ramp, preload on entry). The in-app warm run (`p5-latency-e2e.mjs --only warm`, 20 cycles, request → first voiced sample *heard*, the sample's context time mapped through the output-timestamp pair) at 1.00x, host 88 % busy (`docs/studies/narrate-rebuild-1/phase5/latency-e2e.json`, committed with this entry):
+
+| 1.00x | worst | median | ≥ 2,000 ms |
+|---|---|---|---|
+| Play | 1,750 | 1,337 | 0 / 20 |
+| Resume | 4,286 | 83 | 4 / 20 |
+| Click | 2,860 | 1,408 | 8 / 20 |
+| Speed | 9,228 | 1,572 | 13 / 40 |
+
+The 2.00x run ended after one cycle on a separate correctness defect (a chunk packed to the 400-token estimate came out at 405 ids and failed closed, F4), fixed below; its one resume took 5,488 ms. The causes are measured, not guessed: (1) a request waits when both workers are still finishing stale generations from the requests before it (requests 2 s apart; onnxruntime cannot abort a run; on this host a generation takes 3–8 s, so stale work piles up: the 8–9 s speed trials each followed a click whose prefetch was still running); (2) a resume after a pause that fell in a gap (1–2-word heading chunks near word 77,554, one chunk prefetched) has no audio to replay and must generate; (3) host load 76–88 % (the charter's D6 row says "on a quiet machine", Decision #13 says the ordinary desktop: these runs are the latter).
+
+Fixed meanwhile (correctness and harness, not latency levers): `PACK_TARGET_TOKENS` 400 → 360 under the hard cap of 400 ids (the margin the estimate needs; this also makes steady-state chunks ≈ 10 % shorter); one fresh scratch profile per trial launch (a reused one carried the last run's reading anchor and rate: the warm runs started at word 77,554 instead of 8,723). The cold trials run for information while this waits.
+
+Decide how D6 proceeds and write the answer inline:
+
+- **(a) Authorize a second repair round** (executor's recommendation), then re-measure all of T7: abandon stale work instead of waiting for it (a request that finds every worker busy with an older epoch's generation goes to a freshly started spare worker, or a third worker is kept warm); prefetch by seconds of audio ahead rather than by chunk count (so a pause never falls in a gap and a resume always replays); keep steady-state chunks short (≈ 24–30 words) so stale work is short. Memory cost: one more model session (≈ 300 MB) if a third worker is used.
+- **(b) Judge D6 on a quiet machine as the charter row says** (amend Decision #13 back): the executor re-runs T7 with the host's background load stopped by the owner, no code change. Today's figures suggest click and speed would still fail on stale-work waits.
+- **(c) Amend the budget or the trial definition** (owner only, in charter.md): e.g. a warm budget per request type, or requests spaced so stale work can finish.
+- **(d) Bake-off** for a faster engine (`docs/studies/research/tts-engine-scan/SHORTLIST.md`); back to the planner first.
+
+Answer:
+
 
 ### P3 opening questions — answered 2026-10-13 11:05 in session (raised 11:00 by S1). Decision #14, #15. No open blocker.
 

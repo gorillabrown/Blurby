@@ -55,12 +55,14 @@ const tracePathFor = (label) => path.join(traceDir, `${slug(label)}.trace.json`)
 
 async function launch(label, trial) {
   if (!fs.existsSync(path.join(ROOT, "dist", "index.html"))) throw new Error("dist/index.html is missing: run npm run build first");
-  for (const d of [traceDir, path.join(OUT, "logs"), path.join(OUT, "summaries"), path.join(OUT, "profile")]) fs.mkdirSync(d, { recursive: true });
+  // A fresh scratch profile per launch: a reused one carries the last run's reading anchor and rate into the next.
+  const profile = path.join(OUT, "profiles", `${label}-${Date.now()}`);
+  for (const d of [traceDir, path.join(OUT, "logs"), path.join(OUT, "summaries"), profile]) fs.mkdirSync(d, { recursive: true });
   try { fs.rmSync(tracePathFor(label), { force: true }); } catch { /* none */ }
   const env = {
     ...process.env,
     BLURBY_USE_DIST: "1",
-    BLURBY_USER_DATA_DIR: path.join(OUT, "profile"),
+    BLURBY_USER_DATA_DIR: profile,
     BLURBY_TTS_EVAL_TRACE_DIR: traceDir,
     BLURBY_TTS_EVAL_TRACE_CONFIG: JSON.stringify({ mode: label, runId: label }),
     BLURBY_NARRATE_TRIAL: JSON.stringify({ ...trial, position: POSITION, timeoutMs: TRIAL_TIMEOUT_MS, diag: DIAG, out: path.join(OUT, "summaries") }),

@@ -11,7 +11,11 @@
  */
 
 export const FIRST_CHUNK_MAX_WORDS = 15;
-export const PACK_TARGET_TOKENS = 400;
+/**
+ * The packing target, under the producer's hard cap of 400 input ids (T2) by a margin for the estimate's error: packed to
+ * 400 itself, a chunk came out at 405 ids in the D6 warm run (2026-10-13) and failed closed (F4) on ordinary text.
+ */
+export const PACK_TARGET_TOKENS = 360;
 /** Phoneme characters per text character measured on the Phase 0 smoke run (1.04), padded. */
 export const estimateTokens = (text: string): number => Math.ceil(text.length * 1.15) + 2;
 
