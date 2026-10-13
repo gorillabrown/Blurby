@@ -3,7 +3,7 @@
 **Last updated**: 2026-10-12 (roadmap review: buffer refilled to 5 full specifications from real defects, NARRATE-REBUILD-1 stays the head, LL-135/138/143/141 promoted to standing rules 42–45; see the [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head: `/epic` charters it) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12, read-only) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14; not during the epic's Core phase) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5.
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head; chartered 2026-10-12, [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12, read-only) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14; not during the epic's Core phase) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5.
 **Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -205,7 +205,7 @@ NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`), so NARRATE-REBUILD-1 h
 
 <a id="narrate-rebuild-1"></a>
 
-#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word *(position 9 — epic stub)*
+#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word *(position 9 — epic, chartered 2026-10-12: [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md))*
 
 - **Path:** epic — outcome-stated, multi-phase (Phase 0 proves Kokoro, then the core, the mode, speed, crossings and failure states), with owner gates; it cannot be one dispatch. `/next-pointer` routes it to `/epic` when it reaches the head.
 - **What:** A new Narrate, built from scratch on the separation's mode contract.
@@ -749,7 +749,7 @@ roadmap_doc: ROADMAP.md
 work_register: monday:board/18432450217
 buffer_target: 5
 buffer_actual_full_specs: 5
-buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1, READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1, UX-POLISH-1) + 1 epic (NARRATE-REBUILD-1, head, excluded from buffer)
+buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1, READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1, UX-POLISH-1) + 1 epic (NARRATE-REBUILD-1, head, chartered 2026-10-12, excluded from buffer)
 buffer_actual_stubs: 1 (DEV-PERF-MEASURE-1)
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->
