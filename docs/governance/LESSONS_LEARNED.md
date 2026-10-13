@@ -2924,3 +2924,6 @@ Related: LL-153, LL-154.
 
 ### LL-154 — status (HB-3, 2026-10-13)
 **Status:** Observation — held: verification used SQL and rows-mode reads only, never a view-mode query, and the Phase link drift view was not touched.
+
+### LL-153 — status (2026-10-13, 2026-10-13)
+**Status:** Promoted -> standing rule 46

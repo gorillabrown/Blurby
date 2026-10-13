@@ -1,0 +1,52 @@
+{
+  "id": "20261013T215315Z-external-create-item-GOV-NOTION-LINKS-1",
+  "operation": "external-create-item",
+  "item_id": "GOV-NOTION-LINKS-1",
+  "created": "2026-10-13T21:53:15Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Notion register link repair",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Governance Measurement",
+      "started": "2026-10-13",
+      "completed": "2026-10-13",
+      "branch": "eb/hb-3",
+      "spec_link": "docs/planning/holding/2026-10-13-notion-link-repair.md",
+      "evidence": "docs/governance/close-outs/CloseOut.HB-3.2026-10-13.md",
+      "description": "Repaired 94 auto-generated links in 91 register text values on 61 items (every dotted name in backticks, markdown characters escaped), with the mapped-column hash unchanged; Notion register text rule recorded in CLAUDE.md and the registry.",
+      "notes": "origin: held plan 2026-10-13-notion-link-repair (HB-3). Absorbed by roadmap review 2026-10-13. Merge 003c08e4.",
+      "id": "GOV-NOTION-LINKS-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-13T00:51:50Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:GOV-NOTION-LINKS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "GOV-NOTION-LINKS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:GOV-NOTION-LINKS-1",
+      "actualRevision": "2026-10-13T21:54:00Z",
+      "recoveryId": "20261013T215315Z-external-create-item-GOV-NOTION-LINKS-1",
+      "detail": {},
+      "providerItemId": "3f87c96c-c31e-813c-8efe-f409a0669212",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-13T21:53:50Z",
+  "outcome": "succeeded"
+}

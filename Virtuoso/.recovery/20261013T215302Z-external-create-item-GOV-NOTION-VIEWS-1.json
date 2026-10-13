@@ -1,0 +1,52 @@
+{
+  "id": "20261013T215302Z-external-create-item-GOV-NOTION-VIEWS-1",
+  "operation": "external-create-item",
+  "item_id": "GOV-NOTION-VIEWS-1",
+  "created": "2026-10-13T21:53:02Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Notion roadmap views and phase layer",
+      "status": "Completed",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Governance Measurement",
+      "started": "2026-10-13",
+      "completed": "2026-10-13",
+      "branch": "eb/hb-2",
+      "spec_link": "docs/planning/holding/2026-10-13-notion-phase-views.md",
+      "evidence": "docs/governance/close-outs/CloseOut.HB-2.2026-10-13.md",
+      "description": "Six named views on Blurby.Roadmap, a phase layer of 11 phase pages linked to every phased item with a percent-complete rollup, and a Phase link drift check.",
+      "notes": "origin: held plan 2026-10-13-notion-phase-views (HB-2). Absorbed by roadmap review 2026-10-13. Merge 48cf6a3e.",
+      "id": "GOV-NOTION-VIEWS-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-13T00:51:50Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:GOV-NOTION-VIEWS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "GOV-NOTION-VIEWS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:GOV-NOTION-VIEWS-1",
+      "actualRevision": "2026-10-13T21:54:00Z",
+      "recoveryId": "20261013T215302Z-external-create-item-GOV-NOTION-VIEWS-1",
+      "detail": {},
+      "providerItemId": "3f87c96c-c31e-8113-88a6-f03d5394a365",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-13T21:53:49Z",
+  "outcome": "succeeded"
+}
