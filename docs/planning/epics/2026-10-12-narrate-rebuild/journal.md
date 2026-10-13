@@ -77,6 +77,15 @@
 - **Git:** eb/narrate-rebuild-1-p2 @ 61fd0987; uncommitted at writing, committed as the next checkpoint: `phase0/VERDICT.md`, `phase0/latency.gate-p2.run1.json`, `latency.gate-p2.run2.json`, `phase0/acoustic/*.json` (gate rerun outputs), the staging memo, the close-out, the time log, `state.md`, `plan.md`, `journal.md`.
 - **Next:** the owner answers the latency blocker in state.md → Blockers. Then: adopt, merge P2 per GIT WORK, Gate log and Evidence on the P3 branch, open P3 (route a).
 
+## S1 — 2026-10-13 10:55 — latency answer (a) adopted; P2 merged d81aeb4b; P3 opened
+
+- **Did:** the owner answered the latency blocker in session at 10:35: (a) record P0-5 as measured and keep route (a) — Decision #13, the Blockers entry closed; checkpoint `65e0b15b` on P2. Merged P2 per GIT WORK: detached worktree `.worktrees/narrate-rebuild-1-merge-p2` at `origin/main` (`7bbf6b20`), `merge --no-ff eb/narrate-rebuild-1-p2` → `d81aeb4b` "Merge eb/narrate-rebuild-1-p2: Acoustic check, latency and the verdict", pushed to `main`, `merge-base --is-ancestor` exit 0. P3 opened: `eb/narrate-rebuild-1-p3` from `origin/main` at `d81aeb4b`, worktree `.worktrees/narrate-rebuild-1-p3`, `npm ci` started; the time log carried over from the P2 worktree (rows 25–27 added for this burst; the P2 worktree keeps an uncommitted copy of the same log, harmless). Gate log and Evidence rows for the P2 merge written here, never in a file the merge landed (LL-148). Read for P3: the charter DoD, ROADMAP § NARRATE-REBUILD-1 Core and acceptance, the mode contract (`ReaderModeAdapter.ts`, the router, ports and broker), Flow's runtime, state, bindings and view as the shape to follow, the test harness under `tests/readerModes/harness/`, `main/tts-engine.js`, `tts-worker.js`, `ipc/tts.js` and the `preload.js` surface.
+- **Learned:** the time log lives in whichever worktree holds the session, so it is copied forward at a phase boundary (the helper has no notion of phases). GIT WORK's merge recipe ran clean a second time.
+- **Decisions:** #13 (owner).
+- **Gate/DoD movement:** the P2 gate is in plan.md's Gate log; D13 holds for P1 and P2 (one `--no-ff` merge each, trailers valid); D1's verdict and decisions are on `main`, its wording against Decision #12 is the owner's to settle.
+- **Git:** eb/narrate-rebuild-1-p3 @ d81aeb4b (base; the first phase commit follows this entry with the trailer `NARRATE-REBUILD-1-P3-Base: d81aeb4b…`); uncommitted at writing: `state.md`, `plan.md`, `journal.md`, the close-out, the time log.
+- **Next:** P3 design (row 27): the engine's shape, the D4/D5 suite names, and two owner questions (D1's wording; where the product keeps its duration-exposed model copy, since `%APPDATA%\Blurby` is off limits to the run); then the producer and engine fronts.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
