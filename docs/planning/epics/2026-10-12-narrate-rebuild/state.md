@@ -66,7 +66,7 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 
 ### BLOCKER(USER) — D6 warm latency over budget after the one repair attempt (raised 2026-10-13 15:07 by S2). Open.
 
-The charter trigger: "any harness or in-app latency trial at or above its budget total after one repair attempt (a visible fail, never waived)". The repair was Decision #17 (two workers, chunk ramp, preload on entry). The in-app warm run (`p5-latency-e2e.mjs --only warm`, 20 cycles, request → first voiced sample *heard*, the sample's context time mapped through the output-timestamp pair) at 1.00x, host 88 % busy (`docs/studies/narrate-rebuild-1/phase5/latency-e2e.json`, committed with this entry):
+The charter trigger: "any harness or in-app latency trial at or above its budget total after one repair attempt (a visible fail, never waived)". The repair was Decision #17 (two workers, chunk ramp, preload on entry). The in-app warm run (`p5-latency-e2e.mjs --only warm`, 20 cycles, request → first voiced sample *heard*, the sample's context time mapped through the output-timestamp pair) at 1.00x, host 88 % busy (`docs/studies/narrate-rebuild-1/phase5/latency-e2e.warm-1.json`):
 
 | 1.00x | worst | median | ≥ 2,000 ms |
 |---|---|---|---|
