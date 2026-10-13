@@ -3,7 +3,7 @@
 // follow (effect 3) and the display-frame tick that lets the engine publish the unit at the current playback
 // sample. The runtime owns every port call and the engine; React only drives the frames (LL-014).
 import { useEffect, useSyncExternalStore } from "react";
-import { FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
+import { FOLIATE_BROWSING_CHECK_INTERVAL_MS, NARRATE_PUMP_INTERVAL_MS } from "../../../constants";
 import type { NarrateFoliateViewProps } from "./FoliateView";
 import type { NarrateModeRuntime } from "./ModeRuntime";
 
@@ -36,7 +36,9 @@ export function useNarrateModeBindings(runtime: NarrateModeRuntime): {
     let raf = 0;
     const frame = () => { runtime.tick(); raf = requestAnimationFrame(frame); };
     raf = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(raf);
+    // A hidden, minimized or covered window gets no frames: the prefetch and the end of audio run on a timer too.
+    const pump = setInterval(runtime.pump, NARRATE_PUMP_INTERVAL_MS);
+    return () => { cancelAnimationFrame(raf); clearInterval(pump); };
   }, [runtime, snapshot.playing]);
 
   return {

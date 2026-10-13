@@ -248,35 +248,20 @@ export class NarrateEngine {
     this.voice = voice;
   }
 
-  /** Publish the cursor for the current playback sample. Called once per display frame by the binding. */
-  tick(): void {
+  /**
+   * Upkeep that must not wait for display frames — a hidden, minimized or covered window gets none, and narration
+   * would stop once the prefetched audio ran out: drop long-finished chunks, keep the prefetch window full, and at the
+   * end of the scheduled audio finish (or pause on a failure). The binding runs it on a timer as well as every tick.
+   */
+  pump(): void {
     if (this.state !== "playing") return;
-    const now = this.output.playbackPosition(); // the cursor is the unit at the heard sample (D3)
-    const t = perfNow();
-    const frameDt = this.lastTickPerf === null ? null : t - this.lastTickPerf;
-    this.lastTickPerf = t;
-    // Keep the prefetch window full as chunks finish, and let long-finished chunks go (their indices are
-    // referenced only within a call; a pause's resume index is taken fresh at the pause).
+    const now = this.output.playbackPosition();
+    // Chunk indices are referenced only within a call; a pause's resume index is taken fresh at the pause.
     const gone = this.chunks.findIndex((c) => c.endAt > now - 2);
     if (gone > 0) this.chunks.splice(0, gone);
     else if (gone < 0 && this.chunks.length > 1) this.chunks.splice(0, this.chunks.length - 1);
     this.fill();
-    const pos = this.position(now);
-    if (pos) {
-      if (pos.unit >= 0) {
-        const c = this.chunks[pos.index];
-        const word = c.entry.startWord + c.unitWord[pos.unit];
-        if (this.publish(word) && this.events.onTrace) {
-          const ots = this.output.outputTimestamp();
-          this.events.onTrace({
-            kind: "narrate-commit", t, word, chunkStart: c.entry.startWord, unit: pos.unit,
-            boundaryCtx: c.startAt + (c.table.units[pos.unit].sampleStart - c.offset) / this.output.sampleRate,
-            nowCtx: now, headCtx: this.output.now(), otsCtx: ots?.contextTime ?? null, otsPerf: ots?.performanceTime ?? null, frameDt, speed: this.speed, epoch: this.epoch,
-          });
-        }
-      }
-      return;
-    }
+    if (this.position(now)) return;
     // Past the last scheduled sample: hold the last word (R6) until the next chunk starts, or finish.
     const last = this.chunks.at(-1);
     if (last && now >= last.endAt && this.inFlight === 0 && this.speedChangeAt === null) {
@@ -284,6 +269,29 @@ export class NarrateEngine {
       if (this.nextWord >= this.words.length) { this.setState("stopped"); this.events.onComplete(); }
     }
   }
+
+  /** Publish the cursor for the current playback sample. Called once per display frame by the binding. */
+  tick(): void {
+    this.pump();
+    if (this.state !== "playing") return;
+    const now = this.output.playbackPosition(); // the cursor is the unit at the heard sample (D3)
+    const t = perfNow();
+    const frameDt = this.lastTickPerf === null ? null : t - this.lastTickPerf;
+    this.lastTickPerf = t;
+    const pos = this.position(now);
+    if (!pos || pos.unit < 0) return; // silence holds the last word (R6)
+    const c = this.chunks[pos.index];
+    const word = c.entry.startWord + c.unitWord[pos.unit];
+    if (this.publish(word) && this.events.onTrace) {
+      const ots = this.output.outputTimestamp();
+      this.events.onTrace({
+        kind: "narrate-commit", t, word, chunkStart: c.entry.startWord, unit: pos.unit,
+        boundaryCtx: c.startAt + (c.table.units[pos.unit].sampleStart - c.offset) / this.output.sampleRate,
+        nowCtx: now, headCtx: this.output.now(), otsCtx: ots?.contextTime ?? null, otsPerf: ots?.performanceTime ?? null, frameDt, speed: this.speed, epoch: this.epoch,
+      });
+    }
+  }
+
 
   // ── Generation and scheduling ─────────────────────────────────────────────
   private fill(): void {

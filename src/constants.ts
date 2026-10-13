@@ -33,6 +33,8 @@ export const KOKORO_DEFAULT_VOICE = "af_bella";
  * without audio, click, speed); a short first chunk sounds sooner and each next one is generated while the last plays.
  * Past the ramp, chunks pack whole sentences under the token estimate (T2). */
 export const NARRATE_CHUNK_RAMP: readonly number[] = [6, 12, 24];
+/** Narrate: the timer that keeps the prefetch going when the window gets no display frames (hidden or covered). */
+export const NARRATE_PUMP_INTERVAL_MS = 250;
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 

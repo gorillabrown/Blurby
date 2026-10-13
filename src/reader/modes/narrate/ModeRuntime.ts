@@ -558,6 +558,12 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.engine?.tick();
   };
 
+  /** Timer-driven upkeep (prefetch, end of audio) that keeps narration going while the window gets no frames. */
+  pump = (): void => {
+    if (!this.alive || !this.state.playing) return;
+    this.engine?.pump();
+  };
+
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();
 
   recordDiagnostic = (kind: string, detail: string): void => {

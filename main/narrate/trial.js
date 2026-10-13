@@ -204,10 +204,15 @@ async function run(ctx) {
       await waitFor(() => js("!window.__narrateTrial.narrateOn()"), { what: "Page mode" });
       await sleep(800);
     };
+    // From the rate the bar shows (the scratch profile keeps the last run's rate), then checked: a run at the wrong
+    // rate is no evidence for its label.
+    const shownRate = async () => parseFloat(String(await js("window.__narrateTrial.speedText()")).replace(/[^0-9.]/g, ""));
     const setRate = async (rate) => {
-      const steps = Math.round((rate - 1.0) / 0.05);
+      const steps = Math.round((rate - (await shownRate())) / 0.05);
       for (let i = 0; i < Math.abs(steps); i++) { await js(`window.__narrateTrial.key(${steps > 0 ? '"ArrowUp"' : '"ArrowDown"'})`); await sleep(40); }
       await sleep(200);
+      const shown = await shownRate();
+      if (Math.abs(shown - rate) > 0.001) throw new Error(`trial: rate ${shown} shown, ${rate} wanted`);
       return js("window.__narrateTrial.speedText()");
     };
     const count = (cause) => js(`window.__narrateTrial.count("narrate-first-voiced", ${cause ? `"${cause}"` : "null"})`);

@@ -83,6 +83,18 @@ describe("narrate engine (D5-engine)", () => {
     expect(trim).toBeLessThan(table.units[0].sampleEnd); // unit 0 still sounds (under the cursor) for one table frame
   });
 
+  it("with no display frames (a hidden or covered window) the timer pump alone keeps the prefetch going to the end", async () => {
+    const h = harness();
+    h.engine.play(0);
+    await flush();
+    const total = WORDS.length * WORD_S + 2;
+    for (let elapsed = 0; elapsed < total; elapsed += 0.25) { h.output.advance(0.25); h.engine.pump(); await flush(); }
+    expect(h.producer.requests.map((r) => r.text).join(" ")).toBe(WORDS.join(" ")); // every word was generated
+    expect(h.output.overlaps()).toEqual([]);
+    expect(h.complete).toHaveBeenCalledTimes(1);
+    expect(h.states.at(-1)).toBe("stopped");
+  });
+
   it("the cursor is the unit at the current playback sample, published once per change, in order", async () => {
     const h = harness();
     h.engine.play(0);
