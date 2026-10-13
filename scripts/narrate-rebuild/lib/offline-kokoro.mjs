@@ -118,7 +118,7 @@ export async function synthesize(tts, capture, text, { voice, speed }) {
   if (!m.durations) throw new Error("producer returned no durations output (fail closed)");
   if (m.idsSent.length !== tok.ids.length || m.idsSent.some((v, i) => v !== tok.ids[i])) throw new Error("ids sent to the model differ from the tokenizer output");
   if (m.durations.length !== tok.ids.length) throw new Error(`durations length ${m.durations.length} != input_ids length ${tok.ids.length}`);
-  if (m.speedSent !== speed) throw new Error(`speed sent ${m.speedSent} != requested ${speed}`);
+  if (m.speedSent !== Math.fround(speed)) throw new Error(`speed sent ${m.speedSent} != requested ${speed} (float32 ${Math.fround(speed)})`); // the speed tensor is float32
   const pcm = audio.audio;
   if (!(pcm instanceof Float32Array)) throw new Error("RawAudio.audio is not a Float32Array");
   return {

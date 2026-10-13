@@ -36,9 +36,10 @@ The prohibition in P0-2 ("never re-phonemize word by word") exists because espea
 
 - vowels are dropped (consonant skeleton compared by relative edit distance), because reduction changes vowel quality ("a" is `eɪ` alone and `ə` in "for a");
 - stress and length marks are dropped; the flap `ɾ` is folded to `t`;
-- the syllable count (vowel runs) must agree; each syllable of mismatch costs 0.34.
+- the syllable count (vowel runs) must agree; each syllable of mismatch costs 0.34. Syllables are counted per word and summed, so two vowel-adjacent words ("for" + "a") keep both syllables instead of merging into one run;
+- for the British voices (en-gb) an `ɹ` in the group that the isolated forms lack costs nothing: espeak's en-gb is non-rhotic in isolation ("for" alone ends in a vowel) and pronounces the linking r before a vowel ("for a" carries it). No other consonant is free, and nothing is free for en-us.
 
-A unit whose best cost exceeds 0.5 is **unreconciled** and the chunk fails closed (reported in `failures`); the owner sees it rather than a guess. Every unit records its `evidenceCost` and the `isolated` forms it was compared with, so a reviewer can audit each decision from the table alone. The measured matrix had no unreconciled chunk.
+A unit whose best cost exceeds 0.5 is **unreconciled** and the chunk fails closed (reported in `failures`); the owner sees it rather than a guess. Every unit records its `evidenceCost` and the `isolated` forms it was compared with, so a reviewer can audit each decision from the table alone. The first full matrix (2026-10-12) had exactly one unreconciled unit: Emma's "for a" (cost 0.84 at all 25 rates), which exposed the two rules above (per-word syllables; the en-gb linking r). The matrix was regenerated with them; the current result is `summary.json`.
 
 ## 5. Normalization, punctuation, numbers and language
 

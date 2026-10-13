@@ -66,7 +66,7 @@ for (const voice of voices) {
         });
         console.log(`${passageId} ${voice} ${key} chunk ${c.index}: tokens ${rec.ids.length} frames ${wm.law.sumFrames} x${wm.law.factor} = ${rec.pcm.length} law ${wm.law.ok ? "ok" : "FAIL"} reconciled ${wm.reconciled} fused ${wm.coverage.fusedRuns} gen ${Math.round(rec.genMs)} ms`);
       }
-      entry.complete = entry.chunks.length === chunks.length;
+      entry.complete = entry.chunks.length === chunks.length && entry.chunks.every((c) => !c.error);
       entry.finishedAt = new Date().toISOString();
       table.rates[key] = entry;
       fs.writeFileSync(file, JSON.stringify(table) + "\n");

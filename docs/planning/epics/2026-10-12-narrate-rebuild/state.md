@@ -1,6 +1,6 @@
 ---
 epic: narrate-rebuild
-last_updated: 2026-10-12 20:30
+last_updated: 2026-10-13 00:15
 updated_by: session 1 (S1, P1 open)
 ---
 
@@ -27,21 +27,21 @@ updated_by: session 1 (S1, P1 open)
 
 ```
 phase:        P1 — Producer and harness (open; branch eb/narrate-rebuild-1-p1 @ 0c0ea56f, base 25ba145d)
-next_action:  full generation matrix running in the background (p0-generate.mjs, resumable); then p0-summary gate, P1 merge, open P2
+next_action:  matrix regenerating with the P0-2 evidence fix (per-word syllables, en-gb linking r); then p0-summary exit 0 / --break exit 1, checkpoint, p1-gate.ps1, P1 merge, open P2
 blockers:     none
 session:      1 of ~14 budgeted
-dod:          D1..D13 unmet (A1, A2 verified; P0-1 PASS; P0-2 holds on every chunk generated so far; corpus recovered; baseline green)
+dod:          D1..D13 unmet (A1, A2 verified; P0-1 PASS; first matrix: P0-4 PASS, P0-2 FAIL on one Emma unit "for a" = evidence defect, fixed; regeneration running; baseline green)
 ```
 
 Emerging P2 findings (Bella only, 0.80x and 1.00x, from `scripts/narrate-rebuild/p0-acoustic.mjs` — not yet the verdict): (1) the literal "pause k ↔ mark k" association drifts (Kokoro pauses without marks, skips pauses at dense commas, 60–80 ms stop closures register as pauses), so T4 is implemented as a monotone alignment on text-only priors (voiced ms per voiced phoneme char against the chunk mean), only pauses ≥ 120 ms ÷ rate may anchor a mark, and every anchor adjoining a count mismatch is unresolved (T4's own rule); (2) the table's word onset sits after the acoustic onset at 1% of peak by a mean +45 ms at 1.00x and +65 ms at 0.80x on passage A (22/24 and 16/24 anchors resolved, uncertainty ≤ 5.5 ms, worst 81 and 106 ms; energy is already at 30–80% of peak for 40–70 ms before the table's start, so the reference is sound) — beyond R4's 30 ms at 20 of 22 anchors; assigning the preceding space token's frames to the word centres the mean (−3 ms) but leaves a ±45 ms spread (6–7 of 22 beyond 30 ms); (3) passage B yields only 8 onset anchors at these rates (its dense punctuation is mostly unrealized as pauses) → INCONCLUSIVE under T5 after the two reference repairs (association method; offset anchors, which turned out not to be anchors: the table ends each word ~280–490 ms after the energy drops, because the pause's frames belong to the preceding phoneme); (4) warm generation of an 11–13-word chunk takes 3.7–7 s here (the audit's probe agrees), above R3's 2 s warm budget. P2 runs the full P0-3 (4 rates × 2 voices × 2 passages), P0-5 with thread settings tried, and classifies everything in the verdict.
 
 ## Next actions — max 5, near horizon only
 
-1. [x] Open P1 (branch, worktree, base trailer on the first commit). — branch and worktree done; trailer goes on the first commit
-2. [x] Baseline `npm test` / `npm run typecheck` in the P1 worktree — typecheck 0; 134 files, 1,955 passed / 1 skipped / 0 failed
-3. [x] Re-hash the pinned model against the OutsideAudit.10 record (A1) — match
-4. [x] Copy the model to the artifacts folder and expose the duration tensor (A2) — exposed copy sha256 = audit record
-5. [ ] Write `scripts/narrate-rebuild/` (offline load + capture, T2 chunker, P0-2 word map, P0-1 identity, P0-2/P0-4 generation, summary with positive control) and `docs/studies/narrate-rebuild-1/phase0/MAPPING_POLICY.md`
+1. [x] P1 opened; baseline green; A1/A2 verified; corpus; harness; identity PASS; policy; first matrix 21:44 (495 chunks, 0 generation errors; P0-2 FAIL on Emma "for a" = evidence defect, fixed in `lib/wordmap.mjs`)
+2. [ ] Regenerate the matrix with the fixed evidence (running, `scratchpad/p0-generate-run2.log`); compare run 1 vs run 2 chunk by chunk (audio sha, phonemes, durations, spans); `p0-summary.mjs` exit 0 and `--break` exit 1
+3. [ ] Checkpoint tables + summary; `scratchpad/p1-gate.ps1` (and `-SelfTest`); P1 merge per GIT WORK; Gate log + Evidence rows
+4. [ ] Open P2; commit `p0-acoustic.mjs` / `p0-latency.mjs` there; P0-3 at 0.80/1.00/1.40/2.00 x both voices x both passages; P0-5 on Bella with a thread sweep first
+5. [ ] VERDICT.md (three parts, P0-5 beside them, every failure classified, both reference repairs stated); P2 gate; G1 BLOCKER(USER)
 
 ## Working set — verified facts this epic relies on
 

@@ -16,3 +16,5 @@
 {"event": "end", "row": 8, "evidence": "p0-summary.mjs on the partial matrix: P0-1 PASS, P0-2 PASS, P0-4 FAIL (missing rates) exit 1; --break control flips P0-2 to FAIL exit 1 (recorder proven); recorder integrity check exits 2 on mismatch", "result": "done", "at": "2026-10-13T01:38:08Z"}
 {"event": "start", "row": 9, "model": "claude-fable-5-1", "host": "local-windows", "at": "2026-10-13T01:38:11Z"}
 {"event": "end", "row": 6, "evidence": "lib/wordmap.mjs + lib/chunker.mjs + lib/offline-kokoro.mjs; MAPPING_POLICY.md written; dev run: both passages' first chunks reconcile (fused units to+be, From+the, in+the, for+a, than+a identified; evidence costs recorded), factor 600, token identity ok", "result": "done", "at": "2026-10-13T01:39:18Z"}
+{"event": "wait", "row": 9, "reason": "owner", "at": "2026-10-13T02:26:54Z"}
+{"event": "resume", "row": 9, "at": "2026-10-13T05:00:46Z"}
