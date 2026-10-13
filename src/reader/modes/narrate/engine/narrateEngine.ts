@@ -157,6 +157,9 @@ export class NarrateEngine {
   private chunks: Chunk[] = [];
   private nextWord = 0;
   private inFlight = 0;
+  /** The generation in flight (at most one; read only while inFlight > 0): its first word, and whether it is a request's first chunk. */
+  private inFlightStart = 0;
+  private inFlightIsRequest = false;
   private cursor = -1;
   private failure: EngineFailure | null = null;
   private pausedAt: { readonly index: number; readonly sample: number } | null = null;
@@ -217,8 +220,13 @@ export class NarrateEngine {
     // A pause in a gap has no paused sample; a chunk that arrived during the pause is where speech continues.
     const at = this.pausedAt ?? this.firstUnscheduled();
     this.pausedAt = null;
+    // Nothing to replay: speech restarts like a Play, with the ramp's short first chunk as a request. A prefetch still
+    // generating from before the pause (long, and no one is waiting on it) is abandoned: its epoch is stale, so it is
+    // dropped on arrival and the producer drops what of it is still queued. A first chunk still generating is already
+    // that request and is kept.
+    if (!at && this.inFlight > 0 && !this.inFlightIsRequest) { this.epoch += 1; this.inFlight = 0; this.nextWord = this.inFlightStart; }
     this.request(cause, at ? this.chunks[at.index].entry.startWord + this.chunks[at.index].unitWord[Math.max(0, lookupUnit(this.chunks[at.index].table.units, at.sample))] : this.nextWord);
-    if (!at) { this.chunkSeq = 0; this.fill(); return; } // nothing to replay: the next chunk answers a request
+    if (!at) { if (this.inFlight === 0) this.chunkSeq = 0; this.fill(); return; } // the next chunk planned answers the request
     let startAt = this.output.now() + this.lead;
     for (let i = at.index; i < this.chunks.length; i++) {
       const c = this.chunks[i];
@@ -242,12 +250,14 @@ export class NarrateEngine {
     if (this.speedChangeAt !== null) return; // coalesce: the pending regeneration reads this.speed when it is requested
     const now = this.output.playbackPosition(); // the unit in progress is the heard one
     const pos = this.position(now);
+    // The chunk still generating (at the old speed) is abandoned below; its words are the next unplayed ones.
+    const generatingFrom = this.inFlight > 0 ? this.inFlightStart : null;
     this.epoch += 1; // every in-flight generation at the old speed is stale
     this.inFlight = 0;
     if (!pos) {
       // In a gap or before the first chunk: nothing voiced is in progress; regenerate from the next unplayed word.
       const first = this.chunks.find((c) => c.startAt > now);
-      const from = first ? first.entry.startWord : this.nextWord;
+      const from = first ? first.entry.startWord : generatingFrom ?? this.nextWord;
       this.dropFrom(first ? this.chunks.indexOf(first) : this.chunks.length);
       this.nextWord = from;
       this.speedChangeAt = now;
@@ -335,9 +345,11 @@ export class NarrateEngine {
     this.nextWord = entry.endWord;
     const epoch = this.epoch;
     const speed = this.speed;
-    this.inFlight += 1;
-    const requestedT = perfNow();
     const priority = this.chunkSeq === 1 ? "request" : "prefetch"; // the first chunk planned since the request
+    this.inFlight += 1;
+    this.inFlightStart = entry.startWord;
+    this.inFlightIsRequest = priority === "request";
+    const requestedT = perfNow();
     this.producer.generate({ text: entry.text, voice: this.voice, speed, priority, group: `${this.id}:${epoch}` }).then(
       (result) => this.onResult(entry, result, epoch, speed, requestedT),
       (error: unknown) => this.onError(entry, error, epoch),

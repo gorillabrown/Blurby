@@ -273,17 +273,27 @@ async function run(ctx) {
     } else if (cfg.kind === "cold") {
       // One entry path in a fresh process; the first voiced sample of the process is the measurement, whatever
       // cause the engine records for it (the launcher reports both). play: Play. speed: ArrowUp, then Play.
-      // resume: Play, pause at once (the model still loading), Play again. click: Play, pause at once, click a
-      // word in the section the view stepped to, Play again.
+      // resume: Play, pause at once (the model still loading), Play again. click: Play, then a click on a word while
+      // it plays (below). Clicking while paused would only set where Play starts (cause "play"), and Play's own audio
+      // would be the first voiced sample.
       const type = cfg.type ?? "play";
       if (type === "speed") { await js(`window.__narrateTrial.key("${(cfg.rate ?? 1) >= 2.0 ? "ArrowDown" : "ArrowUp"}")`); await sleep(100); }
       const b = await count(null);
       await press(".rbb-play-btn");
       if (type === "resume") { await sleep(60); await press(".rbb-play-btn"); await sleep(400); await press(".rbb-play-btn"); }
-      // click: the view can open on a near-empty section (a cover page) and moves on only while playing, so wait for the
-      // section's word spans before pausing; then click a word and Play. The launcher flags a trial whose first voiced
-      // sample came from the Play instead of the click.
-      if (type === "click") { await waitWords(); await press(".rbb-play-btn"); const clicked = await clickWord(60); step("clicked while paused", clicked); await sleep(300); await press(".rbb-play-btn"); }
+      // click: the view can open on a near-empty section (a cover page) and moves on only while playing; Play steps it to
+      // the section that holds the start word and then starts the engine, whose "play" request is traced at that moment
+      // (the section's words are stamped and Play is playing). The click goes in right then, before that request's first
+      // chunk is voiced (a cold generation takes far longer than this 20 ms poll): engine.play(word, "click") starts a new
+      // epoch, Play's chunk is dropped when it arrives, and the process's first voiced sample answers the click. A click
+      // before the engine starts would only move where Play starts. voicedBeforeClick records a lost race (the launcher
+      // flags the trial too: its first voiced sample would answer "play").
+      if (type === "click") {
+        await waitFor(async () => (await js('window.__narrateTrial.count("narrate-request", "play")')) > 0, { what: "the Play's request (the engine started)", timeoutMs, everyMs: 20 });
+        const voicedBeforeClick = (await count(null)) > b;
+        const clicked = await clickWord(60);
+        step("clicked while playing", { clicked, voicedBeforeClick });
+      }
       await waitFor(async () => (await count(null)) > b, { what: `the first voiced sample (cold ${type})`, timeoutMs: 60000, everyMs: 50 });
       await sleep(1500);
       await press(".rbb-play-btn");

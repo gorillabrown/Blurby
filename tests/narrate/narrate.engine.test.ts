@@ -3,7 +3,7 @@
 // click and speed changes; silence holds the last word (R6); a speed change finishes the unit in progress and
 // starts the next word at the new speed (R7), rapid changes coalesce, stale results are dropped.
 import { describe, expect, it, vi } from "vitest";
-import { NarrateEngine, leadingTrim, type EngineFailure, type EngineState } from "../../src/reader/modes/narrate/engine/narrateEngine";
+import { NarrateEngine, leadingTrim, type EngineFailure, type EngineState, type ProducerPort } from "../../src/reader/modes/narrate/engine/narrateEngine";
 import { FakeAudioOutput } from "./harness/fakeAudioOutput";
 import { FakeProducer, SAMPLE_RATE, SPF, lawfulTable } from "./harness/fakeProducer";
 
@@ -20,11 +20,14 @@ function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: n
   const failures: EngineFailure[] = [];
   const diagnostics: string[] = [];
   const complete = vi.fn();
+  // What the engine asked the producer for (the fake ignores priority and group): the same order as producer.requests.
+  const calls: Array<{ text: string; priority?: string; group?: string }> = [];
+  const port: ProducerPort = { generate: (r) => { calls.push({ text: r.text, priority: r.priority, group: r.group }); return producer.generate(r); } };
   const engine = new NarrateEngine({
-    words: WORDS, producer, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, prefetchSeconds: options.prefetchSeconds, leadSeconds: 0.03, chunkRamp: options.chunkRamp,
+    words: WORDS, producer: port, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, prefetchSeconds: options.prefetchSeconds, leadSeconds: 0.03, chunkRamp: options.chunkRamp,
     events: { onCursor: (w) => cursor.push(w), onState: (s) => states.push(s), onFailure: (f) => failures.push(f), onComplete: complete, onDiagnostic: (k, d) => diagnostics.push(`${k}: ${d}`) },
   });
-  return { engine, output, producer, cursor, states, failures, diagnostics, complete };
+  return { engine, output, producer, calls, cursor, states, failures, diagnostics, complete };
 }
 
 const flush = () => new Promise<void>((r) => setTimeout(r, 0));
@@ -114,6 +117,76 @@ describe("narrate engine (D5-engine)", () => {
     expect(h.output.overlaps()).toEqual([]);
   });
 
+  it("a resume with nothing replayable starts like a Play: the stale prefetch is abandoned and the next request is the ramp's short first chunk, priority request (Decision #19)", async () => {
+    const h = harness({ hold: true, chunkRamp: [3, 5] });
+    h.engine.play(0);
+    await flush();
+    h.producer.requests[0].release(); // ramp step 0: "Of my grandfather"
+    await flush();
+    expect(h.calls.map((c) => c.priority)).toEqual(["request", "prefetch"]);
+    expect(h.calls[1].text).toBe("Verus I have learned to"); // the step-1 prefetch, held: a long generation still running
+    run(h, 0.8); // chunk 0 plays out (0.575 s): a gap, nothing scheduled ahead
+    h.engine.pause();
+    const epoch = h.engine.getSnapshot().epoch;
+    h.engine.resume();
+    await flush();
+    expect(h.calls).toHaveLength(3); // the resume asked for a chunk; it did not wait behind the stale prefetch
+    expect(h.calls[2].text).toBe("Verus I have"); // ramp step 0 from the first word not yet heard
+    expect(h.calls[2].priority).toBe("request");
+    expect(h.calls[2].group).not.toBe(h.calls[1].group); // a new epoch, so the producer drops older queued prefetch
+    expect(h.engine.getSnapshot().epoch).toBeGreaterThan(epoch);
+    expect(h.producer.requests[1].settled).toBe(false); // the old generation is still running, not waited for
+    h.producer.requests[1].release(); // it arrives late
+    await flush();
+    expect(h.output.sources).toHaveLength(1); // dropped as stale, never scheduled
+    expect(h.diagnostics.some((d) => d.startsWith("narrate:stale-result"))).toBe(true);
+    h.producer.requests[2].release();
+    await flush();
+    expect(h.calls[3]).toMatchObject({ text: "learned to be gentle and", priority: "prefetch" }); // the ramp goes on from step 1
+    run(h, 0.5);
+    expect(h.cursor).toEqual([0, 1, 2, 3, 4, 5]); // speech continues at word 3: none skipped, none repeated
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("a resume that replays audio never regenerates: paused inside a chunk with the prefetch still generating", async () => {
+    const h = harness({ hold: true, chunkRamp: [3, 5] });
+    h.engine.play(0);
+    await flush();
+    h.producer.requests[0].release();
+    await flush();
+    run(h, 0.03 + WORD_S * 1.5); // inside word 1; the step-1 prefetch is held
+    h.engine.pause();
+    const epoch = h.engine.getSnapshot().epoch;
+    h.engine.resume();
+    await flush();
+    expect(h.calls).toHaveLength(2); // nothing asked again, nothing abandoned
+    expect(h.engine.getSnapshot().epoch).toBe(epoch);
+    h.producer.requests[1].release(); // the prefetch arrives and follows the replayed audio
+    await flush();
+    run(h, 1.0);
+    expect(h.cursor).toEqual([...Array(h.cursor.length).keys()]);
+    expect(h.cursor.at(-1)).toBeGreaterThanOrEqual(5);
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("a resume while the request's own first chunk is still generating keeps it: no second request, and the ramp goes on from step 1", async () => {
+    const h = harness({ hold: true, chunkRamp: [3, 5] });
+    h.engine.play(0);
+    await flush();
+    h.engine.pause(); // before anything arrived: nothing to replay
+    h.engine.resume();
+    await flush();
+    expect(h.calls).toHaveLength(1); // the in-flight chunk is already the request's step 0
+    expect(h.calls[0]).toMatchObject({ text: "Of my grandfather", priority: "request" });
+    h.producer.requests[0].release();
+    await flush();
+    expect(h.calls[1]).toMatchObject({ text: "Verus I have learned to", priority: "prefetch" }); // not a second step 0 labeled request
+    run(h, 0.3);
+    expect(h.cursor[0]).toBe(0);
+    expect(h.output.sources).toHaveLength(1); // the step-1 prefetch is held
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
   it("prefetch by seconds keeps that much audio scheduled ahead, however short the chunks (Decision #18)", async () => {
     const h = harness({ prefetchSeconds: 3, chunkRamp: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1] }); // one-word chunks, 0.2 s each
     h.engine.play(0);
@@ -126,6 +199,21 @@ describe("narrate engine (D5-engine)", () => {
     const after = Math.max(...h.output.sources.map((s) => s.startAt + (s.samples - s.offset) / SAMPLE_RATE)) - h.output.now();
     expect(after).toBeGreaterThanOrEqual(2.8); // topped up as it plays
     expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("a speed change in a gap (the next chunk still generating) regenerates from that chunk's first word: none skipped", async () => {
+    const h = harness({ hold: true });
+    h.engine.play(0);
+    await flush();
+    h.producer.requests[0].release(); // words 0-11
+    await flush();
+    expect(h.producer.requests).toHaveLength(2); // words 12.. generating, held
+    run(h, 0.03 + 12 * WORD_S + 0.2); // the first chunk plays out: a gap
+    h.engine.setSpeed(1.5);
+    await flush();
+    const last = h.producer.requests.at(-1)!;
+    expect(last.speed).toBe(1.5);
+    expect(last.text.startsWith("Of my mother")).toBe(true); // word 12, not past the abandoned chunk
   });
 
   it("the cursor is the unit at the current playback sample, published once per change, in order", async () => {
