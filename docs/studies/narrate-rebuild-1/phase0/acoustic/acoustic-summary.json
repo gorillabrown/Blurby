@@ -1,6 +1,7 @@
 {
  "schema": "narrate-rebuild-1/phase0/acoustic-summary@1",
- "recordedAt": "2026-10-13T05:56:53.617Z",
+ "recordedAt": "2026-10-13T15:15:38.011Z",
+ "dtype": "q4",
  "pass": false,
  "control": {
   "passage": "passage-a",

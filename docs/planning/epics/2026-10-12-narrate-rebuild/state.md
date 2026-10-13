@@ -1,7 +1,7 @@
 ---
 epic: narrate-rebuild
-last_updated: 2026-10-13 09:10
-updated_by: session 1 (S1, P2 waiting at G1 for the route after the precision trial)
+last_updated: 2026-10-13 10:30
+updated_by: session 1 (S1, P2 gate: latency rerun failed twice, BLOCKER(USER))
 ---
 
 # State — single source of current truth
@@ -26,11 +26,11 @@ updated_by: session 1 (S1, P2 waiting at G1 for the route after the precision tr
 ## Where we are
 
 ```
-phase:        P2 — Acoustic check, latency and the verdict (open; branch eb/narrate-rebuild-1-p2, base 7bbf6b20; VERDICT.md and its precision addendum written; WAITING AT G1 for the route)
-next_action:  owner answers the route question in Blockers (a or c) → adopt into the Decision log → P2 gate (merge per GIT WORK) → route
-blockers:     G1 BLOCKER(USER) route, raised 2026-10-13 09:10 (see Blockers); nothing else
+phase:        P2 — Acoustic check, latency and the verdict (open; branch eb/narrate-rebuild-1-p2, base 7bbf6b20; G1 answered, route (a); P2 gate run 10:15–10:24: latency rerun FAILED twice → BLOCKER(USER); NOT merged)
+next_action:  owner answers the latency blocker in Blockers → adopt → merge P2 per GIT WORK → Gate log/Evidence on the P3 branch → open P3 (route a)
+blockers:     BLOCKER(USER) latency, raised 2026-10-13 10:30 (see Blockers); nothing else
 session:      1 of ~14 budgeted
-dod:          D1 awaits the route answer (verdict parts i–iii, P0-5 and the precision addendum written; P0-1/P0-2/P0-4 PASS, P0-3 FAIL where conclusive / INCONCLUSIVE elsewhere and unchanged by precision, P0-5 PASS at 4 threads); D13 holds for P1; D2–D12 unmet
+dod:          D1 awaits the latency answer (verdict parts i–iii, P0-5 and the precision addendum written; P0-1/P0-2/P0-4 PASS, P0-3 FAIL where conclusive / INCONCLUSIVE elsewhere and unchanged by precision, P0-5 PASS on the quiet measurement and FAIL on both gate reruns under ordinary desktop load); D13 holds for P1; D2–D12 unmet
 ```
 
 Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, P0-2, P0-4 PASS on both voices (500 chunks); P0-3 FAIL where conclusive (passage A at 0.80x/1.00x on both voices, 1.40x on Bella: at interior onsets the table is late by ≈ 50 ms ÷ rate; the first word of every chunk is late at ≤ 1.00x and early at ≥ 1.40x, −147 to +139 ms, because the rendered leading silence of ≈ 360–500 ms does not follow the BOS token) and INCONCLUSIVE elsewhere (passage B at every rate, 2.00x on both passages, 1.40x on Emma) after the two reference repairs the charter allows; the 40 ms control is caught; P0-5 PASS at 4 intra-op threads (worst warm 1,940 ms, worst cold 3,032 ms; default threads fail at 4,507 ms). Classification: P0-3 FAIL = engine property under a verified contract; INCONCLUSIVE = reference coverage → owner. Addendum (2026-10-13, G1 route b): the fp32 and fp16 exports, with the same edit, reproduce the q4 error within 1 ms at every paired anchor on passage A at 1.00x (both voices) — precision is not the cause, and the charter's bake-off condition is met.
@@ -40,8 +40,8 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 1. [x] P2 opened at `7bbf6b20`; P0-3 run (`phase0/acoustic/`); P0-5 thread sweep and T7 run (`phase0/latency*.json`); VERDICT.md; records and close-out committed on `eb/narrate-rebuild-1-p2`
 2. [x] **G1 (owner):** answered 2026-10-13 in session — route (b), one unit per fused run, mode id `"narrate"`, R4 as written → Decision log #8–#11
 3. [x] Precision trial on this branch (2026-10-13 08:57–09:05): fp32/fp16 downloaded and hash-checked, durations exposed by Decision #4's edit, `p0-generate.mjs` / `p0-acoustic.mjs --dtype fp32|fp16 --passages passage-a --rates 1.00`, `p0-precision.mjs`; VERDICT.md § Addendum: error unchanged within 1 ms → G1 re-raised for the route
-4. [ ] **G1 (owner):** answer the route question in Blockers — (a) continue on Kokoro or (c) bake-off; the next burst adopts it into the Decision log with its date
-5. [ ] P2 gate after the route answer: `node scripts/narrate-rebuild/p0-acoustic.mjs` (exit 1, classification recorded in VERDICT.md), `node scripts/narrate-rebuild/p0-latency.mjs --threads 4` (exit 0), VERDICT.md's three parts and addendum present → merge per GIT WORK → plan.md Gate log → (a) open P3 once SETTINGS-WRITE-DURABLE-1 is on `main` (A5), or (c) bake-off per `docs/studies/research/tts-engine-scan/SHORTLIST.md` against these gates, planned by the planner. The staging memo's observations go to the planner's close-out, never folded in from this run
+4. [x] **G1 (owner):** route answered 2026-10-13 10:15 — (a) continue on Kokoro → Decision #12
+5. [ ] P2 gate run 2026-10-13 10:15–10:24: `p0-acoustic.mjs` exit 1 with the classification recorded ✓; VERDICT.md's three parts and addendum present ✓; `p0-latency.mjs --threads 4` **exit 1 twice** (worst warm 2,297 then 2,451 ms at 39–40 % host busy; the T7 measurement passed at 36 %) → **BLOCKER(USER)** (Blockers). After the answer: merge P2 per GIT WORK → plan.md Gate log and Evidence on the P3 branch → open P3 (route a; durable writes wait for SETTINGS-WRITE-DURABLE-1 on `main`, A5). The staging memo's observations go to the planner's close-out, never folded in from this run
 
 ## Working set — verified facts this epic relies on
 
@@ -63,13 +63,22 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 
 ## Blockers
 
-### BLOCKER(USER) — G1, the route after the precision trial (raised 2026-10-13 09:10 by S1). P2 cannot merge and nothing opens until answered.
+### BLOCKER(USER) — P0-5 latency: the P2 gate rerun fails under ordinary desktop load (raised 2026-10-13 10:30 by S1). Unblocks the P2 merge and the opening of P3.
+
+The charter's trigger: "any harness or in-app latency trial at or above its budget total after one repair attempt (a visible fail, never waived)". The T7 measurement of 01:12 passed on a quiet machine (worst warm 1,940 ms at 36 % host busy — a 60 ms, 3 % margin). The phase-gate rerun of the same command at 10:15 failed (worst warm 2,297 ms, 5 of 160 trials over 2,000 ms, host busy 40 %), and the single repair attempt at 10:20 failed again (2,451 ms, 4 over, 39 %). The foreign load was the owner's IDE (idea64, about a third of one core), which the executor cannot close; generation itself takes 33 % of the 12 cores at 4 threads. Cold trials pass in every run (worst 3,122 ms). VERDICT.md § P0-5 carries both reruns. Decide how P0-5 stands and write the answer inline:
+
+- **(a) Record P0-5 as measured — PASS on a quiet host, FAIL under ordinary desktop load — and keep route (a) (Decision #12).** P2 merges; P3 opens with the latency risk on its worklist: trim the leading silence at playback (exact: 290–440 ms of every total; the first word's table claim is unchanged), a shorter first chunk within T2's cap, generation of the next chunk while the current one plays, and the end-to-end D6 measurement on the owner's ordinary desktop, not a quiet one. *Executor's recommendation:* the engine component alone cannot be made to fit 2 s at 1.00x with a 433 ms leading silence and an 11-word first chunk on a loaded host; the product has exact levers that P0-5's fixed texts do not, and D6 is where the budget is judged.
+- **(b) Amend R3 or T7** (owner only; e.g. a stated host-load ceiling for the trial, or a different warm total). The executor applies nothing until charter.md changes.
+- **(c) Bake-off for a faster engine** on `docs/studies/research/tts-engine-scan/SHORTLIST.md` (the condition is met); goes back to the planner before any engine runs.
+   Answer:
+
+### G1, the route after the precision trial — answered 2026-10-13 10:15 (raised 09:10 by S1): (a) continue on Kokoro. Decision #12.
 
 The precision trial (VERDICT.md § Addendum) is done: the fp32 and fp16 exports, with the same duration-exposing edit, reproduce the q4 error within 1 ms at every paired anchor (passage A at 1.00x, both voices; 21 and 10 anchors; leading silence identical to the millisecond). The failure is the model's alignment, not its quantization, and the charter's bake-off condition (precision and thread settings tried under a verified contract) is met. Choose the route and write it inline; the next burst adopts it.
 
 - **(a) Continue on Kokoro** with this error profile and R4 as written (Decision #11, no correction): the exact table marks each interior word about 45 ms after the audio starts it at 1.00x (≈ 50 ms ÷ rate), and the first word of every chunk up to ≈ 150 ms off at the rate extremes. P3 opens after SETTINGS-WRITE-DURABLE-1 is on `main`.
 - **(c) Start the bake-off** on `docs/studies/research/tts-engine-scan/SHORTLIST.md`, every engine against these same gates. plan.md has no bake-off phase, so this goes back to the planner (`/write-plan`, or a charter amendment by the owner) before any engine is run.
-   Answer:
+   Answer: **(a) continue on Kokoro** (owner, 2026-10-13 10:15, in session). Decision #12. G1 is closed.
 
 ### G1, Phase 0 verdict — answered 2026-10-13 (raised 01:35 by S1); kept for the record, adopted as Decision log #8–#11.
 
@@ -99,6 +108,7 @@ Read `docs/studies/narrate-rebuild-1/phase0/VERDICT.md` (Summary, Part ii, § De
 | 9 | 2026-10-13 | Merged-word display: one unit per fused run; the wording change word → unit in F2, F3, R7 and Done-when 3 is approved. charter.md is edited by the owner or the planner, never by the executor | Split coverage is 0 %; any split would be estimated timing (R4, R10) | Owner (G1 answer 2, 2026-10-13) |
 | 10 | 2026-10-13 | Mode id `"narrate"`; P4 retires the three `normalizeReaderModes` runtime calls with a settings-schema step so a saved `narrate` survives | The id the product already had; the v13 narrate → flow normalization must not swallow the new mode | Owner (G1 answer 3, 2026-10-13) |
 | 11 | 2026-10-13 | No measured timing correction: R4 stands as written, the cursor uses the model's table only; revisit after the precision trial, by charter amendment only | A correction would be timing that does not come from the table | Owner (G1 answer 4, 2026-10-13) |
+| 12 | 2026-10-13 | G1 route after the precision trial: **(a) continue on Kokoro** with the verdict's error profile and R4 as written; no bake-off. P2 merges; P3 opens on the exact table | Precision is excluded as the cause (Addendum); the same decoder lead is expected of any duration-predictor TTS, so a bake-off is unlikely to buy accuracy; the table stays exact and lawful | Owner (G1 route answer, 2026-10-13) |
 
 ## Evidence
 
@@ -110,3 +120,4 @@ Read `docs/studies/narrate-rebuild-1/phase0/VERDICT.md` (Summary, Part ii, § De
 - **P0-3** (S1, 2026-10-13 00:56): `node scripts/narrate-rebuild/p0-acoustic.mjs` exit 1 over 16 runs — FAIL A/Bella 0.80 (16/24 resolved, worst +106, mean +64.9), A/Bella 1.00 (22/24, +81, +45.0), A/Bella 1.40 (15/24, −53, +15.7), A/Emma 0.80 (10/24, +139, +85.2), A/Emma 1.00 (10/24, +58, +44.4); INCONCLUSIVE the other eleven (2–8 resolved of 24/31); every uncertainty ≤ 9.5 ms; control +17 → +57 ms caught. Records `phase0/acoustic/*.json`; table in VERDICT.md Part ii.
 - **P0-5** (S1, 2026-10-13 01:12): `node scripts/narrate-rebuild/p0-latency.mjs --threads 4` exit 0 — 160 warm trials all < 2,000 ms (worst 1,940, speed change at 1.00x), 20 cold all < 8,000 ms (worst 3,032), RTF 1.82/1.73/1.50/1.39 at 0.80/1.00/1.40/2.00x; sweep `latency.sweep.threads-*.json` (default 4,507 / 5,495 worst warm/cold; 1: 3,727 / 4,606; 2: 2,414 / 3,073; 4: 2,014 / 2,897; 8: 3,062 / 4,630; 12: 4,522 / 6,491).
 - **Precision trial** (S1, 2026-10-13 08:57–09:05; G1 route b): download sha256 = Hub LFS oids (`8fbea51e…` fp32, `ba4527a8…` fp16); exposed copies `9336bfc9…` (fp32, output declared float) and `72715098…` (fp16, declared float16 — onnxruntime refuses the float declaration at session creation). `p0-generate.mjs --dtype fp32|fp16 --passages passage-a --rates 1.00` exit 0 each: 10 chunks per precision, ids identical to q4, law ×600, all reconciled, durations differing from q4 at 6–37 positions per chunk by 1–6 frames. `p0-acoustic.mjs --dtype fp32|fp16 --passages passage-a --rates 1.00` exit 1 each — A/Bella FAIL 21/24 resolved, worst +73, mean +43.6 (fp32) / +43.8 (fp16) against q4's +45.0; A/Emma FAIL 11/24, worst +62 / +63, mean +43.9 against +44.4; paired anchors (21 Bella, 10 Emma) change by −0.9 / −0.8 and −0.4 / −0.5 ms, range −15…+10; control caught (+16 → +56, +15 → +55). Records `phase0/tables-fp32`, `tables-fp16`, `acoustic-fp32`, `acoustic-fp16`; comparison `scripts/narrate-rebuild/p0-precision.mjs`.
+- **P2 gate** (S1, 2026-10-13 10:15–10:24): VERDICT.md parts (i)–(iii), P0-5 and the addendum present (headings at lines 29, 38, 84, 104, 135); `node scripts/narrate-rebuild/p0-acoustic.mjs` exit 1 — 16 runs, 5 FAIL / 11 INCONCLUSIVE as in the verdict, control caught (+17 → +57), outputs byte-identical to the committed records apart from the new `dtype` field and the timestamp; `node scripts/narrate-rebuild/p0-latency.mjs --threads 4` **exit 1** (`latency.gate-p2.run1.json`: worst warm 2,297 ms speed change 1.00x, 5/160 over, cold worst 2,861; host busy mean 40.1 %, max 54.6) and the repair rerun **exit 1** (`latency.gate-p2.run2.json`: worst warm 2,451 ms resume 1.00x, 4/160 over, cold worst 3,122; busy mean 38.9 %, max 49.7); the committed `latency.json` (01:12, pass, busy mean 36.2 %) is unchanged. Escalated as the BLOCKER(USER) above; P2 not merged.

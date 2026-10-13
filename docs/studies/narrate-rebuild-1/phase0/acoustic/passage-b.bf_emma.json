@@ -2,6 +2,7 @@
  "schema": "narrate-rebuild-1/phase0/acoustic@1",
  "passage": "passage-b",
  "voice": "bf_emma",
+ "dtype": "q4",
  "params": {
   "WIN_MS": 1,
   "LOW": 0.01,
