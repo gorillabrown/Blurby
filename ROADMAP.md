@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-12 (close-out: NARRATE-REMOVE-1 completed, merge `386651fc`; NARRATE-REBUILD-1 heads the queue). Earlier that day, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed: NARRATE-REMOVE-1 specification revision 4 and the NARRATE-REBUILD-1 Phase 0 protocol were authorized by a fresh review; see [the D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md). Before that, 2026-10-11 (roadmap review: Narrate removal and rebuild placed; four old narration items retired; TEST-TIMEOUT-HEADROOM-1 added; finish line now "Narration rebuilt"; LL-136 promoted to standing rule 41). See the [2026-10-11 plan](docs/planning/roadmap-reviews/2026-10-11-plan.md).
+**Last updated**: 2026-10-12 (roadmap review: buffer refilled to 5 full specifications from real defects, NARRATE-REBUILD-1 stays the head, LL-135/138/143/141 promoted to standing rules 42–45; see the [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, unblocked: `/epic` may start) → CLEANUP-MODE-BARREL-1 (10) and UX-POLISH-1 (11), both unblocked stubs awaiting re-authoring against the separated graph. NARRATE-REMOVE-1 (8) completed 2026-10-12, and Stage 6 (5–7) completed the same day. **Dispatch-ready depth is below 3** (no full specification is queued; the epic is excluded from the buffer): standing rule 8 and CLAUDE.md Rule 5a apply again, so `/roadmap-review` backfills before the next dispatch.
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head: `/epic` charters it) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12, read-only) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14; not during the epic's Core phase) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5.
 **Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -19,12 +19,12 @@ The owner requested product lanes on 2026-09-23. Each Monday record has one prim
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
-| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke |
+| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is a Full Spec (14; Space enters the remembered mode paused, owner 2026-10-12) |
 | TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
-| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 10 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT) |
+| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 10 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
 | Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6 |
-| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9 |
+| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185), DEV-PERF-MEASURE-1 (15, stub, BUG-189) |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
 
@@ -161,6 +161,14 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 
 41. **LL-136 — Exact-path fences exempt the time log.** Every Done-when row of the form "the diff lists exactly …" exempts `docs/governance/close-outs/Timing.<ITEM-ID>.jsonl`, and the registry must let the executing ceremony write it. **Why:** recurred three times (TERMINAL-BACKFILL-1, TTS-ENGINE-SHARED-1, READER-MODE-SEPARATION-2); each time no time log was kept and effort calibration stayed not computable. (Promoted at the 2026-10-11 roadmap review.)
 
+42. **LL-135 — A dispatch carries its reconciliation recipe.** Every dispatch prompt pastes the filled repository-reconciliation recipe, or cites a committed path to it; a chat message is never an input. **Why:** applied and held in four close-outs (TERMINAL-BACKFILL-1 introduced it; EINK-HOVER-FIX-1, LIBRARY-SETTINGS-FIX-1, TEST-TIMEOUT-HEADROOM-1 and NARRATE-REMOVE-1 held it). (Promoted at the 2026-10-12 roadmap review.)
+
+43. **LL-138 — A behaviour change needs a positive control.** Before a change is made, the test that guards it is committed and shown to fail on the unchanged code for the stated reason, and the failing output is recorded; a gate that cannot fail proves nothing. **Why:** held in TTS-ENGINE-SHARED-1, EINK-HOVER-FIX-1, LIBRARY-SETTINGS-FIX-1 and NARRATE-REMOVE-1 (where omission controls also proved each normalization seam). (Promoted at the 2026-10-12 roadmap review.)
+
+44. **LL-143 — Dry-run every acceptance gate.** Every Done-when command names its shell and passes only on an exact exit code; any other code, any stderr text or a command that did not run fails it. Before dispatch, each gate is run against the base (a search gate must find its hits there) and against the prescribed edit. **Why:** OutsideAudit.10 found vacuous `rg` gates and miscounted wiring gates (F5a, F5b), and LIBRARY-SETTINGS-FIX-1's "no literal 1000" row could not pass as written: two occurrences. (Promoted at the 2026-10-12 roadmap review.)
+
+45. **LL-141 — Live UI gates keep an owner-observed route.** A specification with live UI checks names up front which behaviours need a human (real input, perceptual checks) and keeps a short owner checklist for them; unattended live runs include a throttle or visibility check that voids results taken while the window was throttled. **Why:** held in READER-MODE-SEPARATION-2 and NARRATE-REMOVE-1 (whose Done-when 16 was owner-observed). (Promoted at the 2026-10-12 roadmap review.)
+
 **Rule provenance:** Existing numbered rules above retain their historical source labels; registry policy.standingRules.ids declares no additional IDs. Ref ownership in SRL-074 was an intermediate extraction boundary: this approved stage moves the refs together with the owning implementation. User-mandated complete mode separation governs the target architecture.
 
 Deviation protocol: a skeleton may override a standing rule only by naming the rule and justifying the waiver in its spec.
@@ -255,7 +263,7 @@ NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`), so NARRATE-REBUILD-1 h
     - section and chapter crossing;
     - failure states F4 (timing missing, unverified or not engine-native: pause on the last exactly-timed word, and never substitute an estimated table) and F5 (voice loading).
 - **Why:** The owner's requirement that the cursor be "literally attached" to the word being spoken, plus reliability. On the baseline the owner heard the cursor lead the voice, the highlight freeze after gaps, 15–35 s stalls and distorted speed changes (`g0-owner-observations.json` H1–H6). The present pinned path produces estimates: on the installed artifacts, `model_q4.onnx` exports only `waveform` and 10 of 10 control generations returned no word table, and the current code path substitutes a weighted estimate that carries the requester's `word-native` label and the scheduler trusts (9 of 9 trusted word advances in the saved missing-table control; OutsideAudit.10 F2). That H1–H6 were heard on such estimates is an inference, assuming the same model file was installed throughout; no historical artifact chain was kept. If so, they describe the old estimator and scheduler, not Kokoro's native timing; either way, no single mechanism is proved responsible for H1–H6 (OutsideAudit.10 A10). Past `WORD-NATIVE` console logs (Step 3.5 QA; SpecRetro.Lessons_Learned.md line 517) are not evidence of native timing, because the scheduler prints that line for any structurally valid table, including the weighted fallback (`audioScheduler.ts:478-498`; `F2-consumer__run2.log.txt`).
-- **Prerequisites:** NARRATE-REMOVE-1 (completed 2026-10-12; merge `386651fc`).
+- **Prerequisites:** NARRATE-REMOVE-1 (completed 2026-10-12; merge `386651fc`). **Core phase only:** SETTINGS-WRITE-DURABLE-1 (position 11) must merge before the Core phase writes any state to disk (OutsideAudit.10 F7; roadmap review 2026-10-12). Phase 0 has no such prerequisite.
 - **Done when (draft; `/epic` sharpens it into the charter's DoD):**
     1. Storyboard frames F2–F6 hold.
     2. Assumptions A1 (latency) and A2 (speed) hold.
@@ -311,31 +319,159 @@ This is a stub; `/epic` applies the full set in the charter.
 
 <a id="ux-polish-1"></a>
 
-#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 11 — unblocked stub)*
+#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 14 — Full Spec)*
 
-- **Lane:** UX polish; calls only the reader router's public mode-entry contract.
-- **Prerequisite:** none open. NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`); its v13 migration turns a saved `narrate` mode into `flow`, so this item only ever sees Page, Focus or Flow.
-- **Scope:** Page-mode Space enters the saved last mode (Focus or Flow) with Flow fallback. The current Page Space route is a no-op. Preserve input guards, modifiers and both Shift+Space routes (decision D15: in Page it only moves the remembered mode; in Focus or Flow it switches modes). No Narrate references remain.
-- **Spec:** Re-author against the router after NARRATE-REMOVE-1 lands. It may not access another mode's internal state.
-- **Re-authoring note (OutsideAudit.10 F5c):** in Page, Shift+Space only moves the remembered mode (D15). The in-app shortcut help (`ShortcutsOverlay.tsx` Page rows, `HotkeyCoach.tsx`) and two replica tests (`tests/three-mode-reader.test.js`, `tests/notes-reading-log.test.js`) still describe the behaviour before 2026-03-27 (`92d6b220`, from `git log -L` on the repository; not in the audit package); weigh them when this item is re-authored.
-- **Re-authoring note (NARRATE-REMOVE-1 run, 2026-10-12):** `src/components/settings/HotkeyMapSettings.tsx` still shows `] / N` for Next chapter, though bare `N` is unbound after the removal; fix the hint when this item re-authors the shortcut help. The owner's live smoke on the removal (Done-when 16(f)) saw Shift+Space open no mode from Page and switch modes from Flow, consistent with D15.
+- **What:** In Page view, Space enters the remembered mode (`lastReadingMode`, Focus or Flow; Flow when unset), **paused**, exactly as clicking that mode's button does. Correct the shortcut help that still describes the behaviour before 2026-03-27, and replace the stale replica tests with tests of the real keyboard hook.
+- **Why:**
+  - Page Space is a no-op today: `src/hooks/useKeyboardShortcuts.ts:239` calls `s.togglePlay()`, which ends at Page's no-op `togglePlay` (`src/reader/modes/page/ModeRuntime.ts:240-243`). The comment on `:238` still says "start the selected mode".
+  - The bottom bar already outlines the mode Space should enter (`rbb-mode-btn--last`, `src/components/ReaderBottomBar.tsx:317`, `:325`).
+  - The help surfaces describe old behaviour: `src/components/ShortcutsOverlay.tsx:74-75` (Space enters Focus, Shift+Space enters Flow), `:98` and `:125` (Space "returns to Page view"), the Flow arrows (`:126-127`, `:134-137`); `src/components/HotkeyCoach.tsx:23-24`; `src/components/settings/HotkeyMapSettings.tsx:82`, `:90-91`, `:98-101` and `:104` (including `] / N`, though bare N is unbound since NARRATE-REMOVE-1).
+- **Owner decision (2026-10-12):** Space from Page enters the remembered mode **paused**, matching the buttons and the 2026-05-22 change that stopped modes auto-playing on entry (`6e370639`). The next Space plays.
+- **Design decisions (planner, 2026-10-12):**
+  - Route at the keyboard layer through the router's existing public entry: Page Space calls the `enterFocus` or `enterFlow` handler the container already passes (`ReaderContainer.tsx:709`, slots 10 and 15, which the handler stores but never reads). Those are `handleSelectMode("focus" | "flow")` (`src/reader/useReaderModeOrchestrator.ts:92-109`), the same path as the buttons. Page's `togglePlay` and `router.togglePlay` stay untouched, so `tests/readerSpeedDialog.test.tsx:178` ("Space (togglePlay) stays a no-op") keeps holding, and no mode reaches into another's state.
+  - The hook learns the remembered mode through one **new last parameter**, `lastReadingMode?: ReaderLastMode`, appended after `sentenceNext`. Appending, not inserting, moves no existing slot; the one call site appends `settings.lastReadingMode`. (A misplaced positional argument still type-checks; Done-when 2 and the smoke catch it.)
+  - Keep every guard and modifier exactly as today: the `view` and typing guards (`useKeyboardShortcuts.ts:182-189`), and both Shift+Space routes (`:241` Page, `:257` Focus/Flow).
+- **Out of scope:** auto-play on entry; modifier handling for Ctrl/Alt+Space (unchanged); a full audit of every help row against the handler beyond the rows named here; the `flowZonePosition` setting.
+- **Prerequisites:** none (NARRATE-REMOVE-1 completed 2026-10-12).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `a0e09189` are noted.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerKeyboard.test.tsx` exits 1, and exactly the three new Page-Space tests fail (each sees `togglePlay` called and no enter handler); record the output in the staging memo.
+    2. After C2, `npx vitest run tests/readerKeyboard.test.tsx tests/useKeyboardShortcuts.test.ts tests/readerSpeedDialog.test.tsx tests/readerBottomBarControls.test.tsx tests/three-mode-reader.test.js tests/notes-reading-log.test.js` exits 0.
+    3. `git grep -n -E 'Enter Focus mode at highlighted word|Enter Flow mode at highlighted word|Pause and return to Page view' -- src` prints nothing (dry-run: four lines in `src/components/ShortcutsOverlay.tsx`).
+    4. `git grep -n -F '] / N' -- src` prints nothing (dry-run: `HotkeyMapSettings.tsx:82` and `:104`).
+    5. `git grep -n -F '"Shift+Space" }' -- src/components/HotkeyCoach.tsx` prints nothing (dry-run: `:23`).
+    6. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149).
+    7. **Owner smoke** (standing rule 45), on a production build where possible (LL-152), recorded per check in the staging memo: (a) open a book (it opens in Page); with Flow outlined, press Space: Flow opens paused at the saved word, and Space again plays; (b) back in Page, press Shift+Space: the outline moves to Focus and no mode opens; press Space: Focus opens paused; (c) in Focus, Shift+Space switches to Flow; (d) with the cursor in a text field (for example the note popover), Space types a space; (e) the shortcuts overlay (`?`) shows the corrected Page, Focus and Flow rows.
+    8. `git diff --name-status refs/remotes/origin/main` lists exactly the `M` paths in *Edit sites* and *Tests* below, plus the time log and staging memo if kept (standing rule 41).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 7.
+- **Lane:** UX polish. Execution surface C, with one appended argument in `src/components/ReaderContainer.tsx` (shared-core freeze set).
+- **Source:** the read-only census of 2026-10-12 for this review (keyboard, router, help surfaces, tests); NARRATE-REMOVE-1 D15 (`docs/planning/.Archive/ROADMAP_legacy.md`); OutsideAudit.10 F5c; owner decision 2026-10-12.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `a0e09189`):
+  - **`src/hooks/useKeyboardShortcuts.ts`:**
+    - add `lastReadingMode?: ReaderLastMode;` to `ReaderKeysState` (`:47-80`), importing `ReaderLastMode` from `../types` as a type;
+    - append the parameter `lastReadingMode?: ReaderLastMode` after `sentenceNext?: () => void` (`:155`), and add `lastReadingMode` to both `stateRef` objects (`:157-166`, `:168-177`);
+    - `:238-239` become `// Space → enter the remembered mode (Flow when unset), paused` and `if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); (s.lastReadingMode === "focus" ? s.enterFocus : s.enterFlow)?.(); return; }`.
+  - **`src/components/ReaderContainer.tsx:709`:** append `, settings.lastReadingMode` as the last argument of the `useReaderKeys(` call. Nothing else in this file changes.
+  - **`src/components/ShortcutsOverlay.tsx`:**
+    - Page `:74` → `{ keys: ["Space"], description: "Enter your last mode (Focus or Flow), paused" }`; `:75` → `{ keys: ["Shift", "Space"], description: "Switch the remembered mode (Focus ↔ Flow)" }`;
+    - Focus `:98` and Flow `:125` → `{ keys: ["Space"], description: "Play / pause" }`, each followed by a new row `{ keys: ["Shift", "Space"], description: "Switch to the other mode" }`;
+    - Flow `:126` → `{ keys: ["←"], description: "Adjust WPM (-25)" }`, `:127` → `{ keys: ["→"], description: "Adjust WPM (+25)" }`, `:134` → `{ keys: ["Shift", "↑"], description: "Previous paragraph" }`, `:135` → `{ keys: ["Shift", "↓"], description: "Next paragraph" }`, `:136` → `{ keys: ["↑"], description: "Previous line" }`, `:137` → `{ keys: ["↓"], description: "Next line" }` (per `useKeyboardShortcuts.ts:264-271`).
+  - **`src/components/HotkeyCoach.tsx:23-24`:** `enterFocus` and `enterFlow` both become `{ action: "enter your last mode from Page", hotkey: "Space" }`.
+  - **`src/components/settings/HotkeyMapSettings.tsx`:** `:82` and `:104` → `{ action: "Next chapter", key: "]" }`; Flow `:90` → `{ action: "Previous line", key: "Up Arrow" }`, `:91` → `{ action: "Next line", key: "Down Arrow" }`, `:98` → `{ action: "Previous paragraph", key: "Shift + Up" }`, `:99` → `{ action: "Next paragraph", key: "Shift + Down" }`, `:100` → `{ action: "Speed up", key: "Right Arrow" }`, `:101` → `{ action: "Slow down", key: "Left Arrow" }`.
+  - **`docs/governance/TECHNICAL_REFERENCE.md:218`:** the `lastReadingMode` row's text becomes `Space bar enters this mode, paused, from Page view: "focus" or "flow" (a saved "narrate" is normalized to "flow")`.
+- **Tests:**
+  - **`tests/readerKeyboard.test.tsx`** (the real hook, jsdom): extend `KeyboardHarness` with a `startMode` prop and `lastReadingMode`, passing `enterFocus` (slot 10), `enterFlow` (slot 15), `cycleMode` (24) and `cycleAndStart` (25) spies and `lastReadingMode` last (fill slots 16–23 with `undefined`; see the slot comment at `:10-11`). New tests (C1): (a) Page + Space with `lastReadingMode: "focus"` calls `enterFocus` once and neither `enterFlow` nor `togglePlay`; (b) with `"flow"` calls `enterFlow` once; (c) with `undefined` calls `enterFlow` once. Also (d) Page + Shift+Space calls `cycleMode` once and no enter handler; (e) Space with an `<input>` focused calls nothing.
+  - **`tests/three-mode-reader.test.js:133-200`:** delete the replica block (comment, `transitionMode` and its tests, the three-mode `cycleMode`); it imports no source and asserts the pre-2026-03-27 behaviour. Keep the rest of the file.
+  - **`tests/notes-reading-log.test.js`:** update the `COACH_HINTS` replica (`:58-74`) to match `HotkeyCoach.tsx` after the edit (drop the `narration` entry; `enterFocus`/`enterFlow` as above) and its assertions in "reader coaching hints" (`:285`).
+  - **`tests/useKeyboardShortcuts.test.ts`:** in the replica `resolveReaderKey` Page branch (`:74`), Space returns `"enterLastMode"`; add the matching assertion. The Focus/Flow Space tests stay.
+- **Constants:** none.
+- **Branch:** `eb/ux-polish-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\ux-polish-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** C1: `tests/readerKeyboard.test.tsx` only (gate: Done-when 1). C2: every other path (gate: Done-when 2–6 and 8). Owner smoke (Done-when 7) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If the positive control fails in a different way (for example `enterFlow` already called on the base), stop: the hook changed since this spec.
+  - If any existing keyboard, bottom-bar or speed-dialog test fails, report the exact test and stop; do not weaken it.
+  - If smoke (a) opens the mode playing, or (b) opens a mode, record a fail: a slot is misplaced or the wrong handler is wired.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C plus the one appended argument in `ReaderContainer.tsx`.
+  - **Forbidden:** every file not named above; `src/reader/**`; any other line of `ReaderContainer.tsx`.
+  - **Shared-core touches:** `src/components/ReaderContainer.tsx:709`, one appended argument. It must not run while another item edits that file; NARRATE-REBUILD-1's Core phase is expected to (it adds the rebuilt mode), so this item runs before the Core phase or after it merges.
+  - **Merge order:** after CLEANUP-MODE-BARREL-1 is fine either way (no shared file); before or after the rebuild's Core, never during.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Real-hook Page-Space tests committed and failing on the current handler | calculable | positive control | bounded | low | 20m (harness extension and five tests) | — | — |
+| 2 | Page Space enters the remembered mode paused; help surfaces and replica tests corrected | calculable | ui fix | bounded | medium | 35m (one handler line, one parameter, one appended argument, about 20 help rows, three test files) | — | — |
+| 3 | Suites, typecheck and build green; owner smoke recorded; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 26m · sum 26m; 2 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138)** — the real-hook tests fail on the current handler before it changes (Done-when 1).
+- **Standing rule 44 (LL-143)** — every gate names its shell and exit code; the search gates were dry-run on the base.
+- **Standing rule 45 (LL-141)** and **LL-152** — live keyboard behaviour is owner-observed, preferably on a production build, because dev mode is slow (BUG-189).
+- **Standing rule 37 (SRL-089)** — the one shared-core edit forbids running beside the rebuild's Core phase.
+- **LL-149** and **LL-147** — typecheck and build are listed; the suite runs on the owner's machine.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
 
 ---
 
 #### Stage 4 — Codebase simplification (owner-requested backlog)
 
-Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1, run together as EPIC-MAIN-PROCESS-CLEANUP and merged to `main` (`dd3db29c`, `7a462bf7`, `b95dbb55`). See the [close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md); the full specifications are preserved at `git show aafed6c4:ROADMAP.md`. <a id="cloud-retry-shared-1"></a><a id="tts-sidecar-shared-1"></a><a id="cleanup-legacy-parsers-1"></a> **Completed 2026-10-10:** TTS-ENGINE-SHARED-1 — `main/python-sidecar-engine.js` is the one MOSS/Pocket engine implementation (merge `8cedd0cc`; [close-out](docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md); specification archived to `docs/planning/.Archive/ROADMAP_legacy.md`). <a id="tts-engine-shared-1"></a> **Open follow-up (unscheduled):** `getSharedMossNanoEngine` / `getSharedPocketTtsEngine` with `{reset:true}` replace the singleton without shutting the old engine down; both engines are dormant. Remaining: CLEANUP-MODE-BARREL-1 (after NARRATE-REMOVE-1, which deletes the barrel's only importer, `src/hooks/useReadingModeInstance.ts`).
+Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SHARED-1, TTS-SIDECAR-SHARED-1 and CLEANUP-LEGACY-PARSERS-1, run together as EPIC-MAIN-PROCESS-CLEANUP and merged to `main` (`dd3db29c`, `7a462bf7`, `b95dbb55`). See the [close-out](docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md); the full specifications are preserved at `git show aafed6c4:ROADMAP.md`. <a id="cloud-retry-shared-1"></a><a id="tts-sidecar-shared-1"></a><a id="cleanup-legacy-parsers-1"></a> **Completed 2026-10-10:** TTS-ENGINE-SHARED-1 — `main/python-sidecar-engine.js` is the one MOSS/Pocket engine implementation (merge `8cedd0cc`; [close-out](docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md); specification archived to `docs/planning/.Archive/ROADMAP_legacy.md`). <a id="tts-engine-shared-1"></a> **Open follow-up (unscheduled):** `getSharedMossNanoEngine` / `getSharedPocketTtsEngine` with `{reset:true}` replace the singleton without shutting the old engine down; both engines are dormant. Remaining: CLEANUP-MODE-BARREL-1 (Full Spec, position 13; roadmap review 2026-10-12).
 
 <a id="cleanup-mode-barrel-1"></a>
 
-#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and update structural tests *(position 10 — unblocked stub)*
+#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and the legacy mode engines *(position 13 — Full Spec)*
 
-- **Lane:** Reader Engine.
-- **Prerequisites:** none open. NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`) and deleted `src/hooks/useReadingModeInstance.ts`, the barrel's only importer; READER-MODE-SEPARATION-2 completed 2026-10-11. Re-author against the post-removal tree: the two structural suites named below may already have been edited or deleted by the removal (re-check with `git ls-files tests`). The kept helpers' local `"narrate"` style-hint literals and the `"audio-truth"` `clockOwner` member are candidates for this item (NARRATE-REBUILD-1 charter inputs, item 4).
-- **Scope:** Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.
-- **Constraints / evidence:** Production searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.
-- **Verification to specify:** The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.
-- **Spec state:** Stub; exact implementation/helper/test design, effort, rollback and U1–U9 review remain for dispatch specification. [Cleanup review](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+- **What:** Delete the unused barrel `src/modes/index.ts` and the three legacy engine files `src/modes/PageMode.ts`, `FocusMode.ts` and `FlowMode.ts`; point the one test that still imports two of them at the per-mode copies; drop the dead `NarrateMode` chunk rule from `vite.config.js`; and add a structural test that keeps `src/modes/` down to its shared type contract.
+- **Why:**
+  - Nothing imports `src/modes/index.ts` (verified on `a0e09189`): its last importer, `src/hooks/useReadingModeInstance.ts`, went with NARRATE-REMOVE-1.
+  - The engines were copied into the per-mode runtimes during separation (`src/reader/modes/page/ModeRuntime.ts:55`, `focus/ModeRuntime.ts:72`, `flow/ModeRuntime.ts:83`, each "Relocated from src/modes/…"). No production file imports `src/modes/PageMode.ts`, `FocusMode.ts` or `FlowMode.ts`; only `tests/perf-baseline.test.ts:27-28` imports the last two, while `tests/modes.test.ts:2-4` already uses the copies.
+  - The two structural suites the old stub named (`tests/narrLayer1bConsolidation.test.ts`, `tests/tts7b-cursorContract.test.ts`) were deleted with Narrate, so no test now guards against a legacy `NarrateMode` coming back. The only remaining mention is a dead build rule, `vite.config.js:49`.
+- **Design decision (planner, 2026-10-12):** keep `src/modes/ModeInterface.ts`. All three mode runtimes import its types (`page/ModeRuntime.ts:11`, `focus/ModeRuntime.ts:15`, `flow/ModeRuntime.ts:18`), and the separation boundary policy lists it as the one allowed shared type contract (`census/boundary-policy.json` `allowedShared`, which `tests/readerModeBoundaries.test.ts` requires to be reached). Moving it would touch the boundary test for no gain.
+- **Out of scope:**
+  - The leftover `"narrate"` literals and the unproduced `"audio-truth"` and `"flow-engine"` `clockOwner` members (NARRATE-REBUILD-1 charter input 4). The rebuild runs first and may reuse them; it retires or re-adds them with tests. Several are still tested (`tests/chunkReadingVisualState.test.ts`, `tests/narrateIntentCursor.test.ts:76`, `tests/readerModeAdapterContract.test.ts:188-199`).
+  - The legacy `src/utils/` helpers that each mode now carries as a private copy (for example `src/utils/wordPositionIndex.ts`, byte-identical to its three per-mode copies and imported only by its test). A follow-up candidate for the next review, after the rebuild.
+  - The other dead `tts` chunk entries in `vite.config.js` (for files NARRATE-REMOVE-1 deleted), and the census JSON lists that name the deleted files (`legacy` and `deadViews` tolerate absent files; the census is a historical record).
+- **Prerequisites:** none (NARRATE-REMOVE-1 completed 2026-10-12).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `a0e09189` are noted.
+    1. `git ls-files src/modes` prints exactly `src/modes/ModeInterface.ts` (dry-run: five files).
+    2. `git grep -n -E 'src/modes/(index|PageMode|FocusMode|FlowMode)' -- tests vite.config.js` prints nothing (dry-run: `tests/perf-baseline.test.ts:27` and `:28`).
+    3. `git grep -n -F 'NarrateMode' -- src scripts vite.config.js` prints nothing (dry-run: `vite.config.js:49`).
+    4. **Positive control (standing rule 43):** at C1, `npx vitest run tests/modeLegacyRetired.test.ts` exits 1, failing on the four legacy files and the `NarrateMode` rule; record the output in the staging memo. After C2 it exits 0.
+    5. `npx vitest run tests/perf-baseline.test.ts tests/modes.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/perfAudit.test.ts` exits 0.
+    6. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149).
+    7. `git diff --name-status refs/remotes/origin/main` lists exactly: `D src/modes/index.ts`, `D src/modes/PageMode.ts`, `D src/modes/FocusMode.ts`, `D src/modes/FlowMode.ts`, `M tests/perf-baseline.test.ts`, `M vite.config.js`, `A tests/modeLegacyRetired.test.ts`, plus the time log and staging memo if kept (standing rule 41).
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer; repository operator merges.
+- **Lane:** Reader Engine. Execution surface A (dead runtime files only) and B (tests).
+- **Source:** the read-only census of 2026-10-12 for this review (importers, census policy, typecheck coverage); [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md); [cleanup review 2026-09-23](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `a0e09189`):
+  - `git rm src/modes/index.ts src/modes/PageMode.ts src/modes/FocusMode.ts src/modes/FlowMode.ts`.
+  - `tests/perf-baseline.test.ts:27-28`: `import { FocusMode } from "../src/modes/FocusMode";` becomes `import { FocusMode } from "../src/reader/modes/focus/ModeRuntime";`, and `import { FlowMode } from "../src/modes/FlowMode";` becomes `import { FlowMode } from "../src/reader/modes/flow/ModeRuntime";` (the pattern of `tests/modes.test.ts:2-3`). Line 36's `import type { ModeConfig } from "../src/modes/ModeInterface";` stays.
+  - `vite.config.js:49`: delete the line `            id.includes("src/modes/NarrateMode") ||`. Keep the `tts` chunk itself; `tests/perfAudit.test.ts:645-647` asserts it.
+- **Tests:** **new `tests/modeLegacyRetired.test.ts`** (reads files as UTF-8 with `node:fs`, as `tests/einkFoundation.test.ts` does):
+  - (a) the entries of `src/modes/` are exactly `["ModeInterface.ts"]`;
+  - (b) `vite.config.js` does not contain `src/modes/NarrateMode`;
+  - (c) no file under `src/` contains the identifier `NarrateMode` (walk `src/`, read each `.ts`/`.tsx`; build the needle as `"Narrate" + "Mode"` so this test file does not match gate 3).
+- **Constants:** none.
+- **Branch:** `eb/cleanup-mode-barrel-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\cleanup-mode-barrel-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** C1: `tests/modeLegacyRetired.test.ts` alone (gate: Done-when 4's failing control). C2: the four deletions (`git rm`), `tests/perf-baseline.test.ts` and `vite.config.js` (gate: Done-when 1–3 and 5–7). Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
+- **Failure handling:**
+  - If `tests/perf-baseline.test.ts` fails after the re-point (the per-mode copies differ in timing or constructor), report the exact test and stop; do not loosen its thresholds.
+  - If typecheck finds any other importer of the deleted files, stop and report it: the census missed it.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surfaces A (the four deleted files only) and B.
+  - **Forbidden:** every file not named above; `src/modes/ModeInterface.ts`; `src/reader/**`; the shared-core freeze set; the census JSON; any file the rebuild epic's current phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of the other buffer items; if NARRATE-REBUILD-1's Core adds a mode under `src/reader/modes/`, this item still merges cleanly (no shared file).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Structural test committed and failing on the legacy files | calculable | positive control | mechanical | low | 10m (one small test file and its failing run) | — | — |
+| 2 | Legacy barrel and engines deleted; perf test re-pointed; dead build rule removed | calculable | dead-code removal | mechanical | low | 10m (four deletions, two import edits, one config line) | — | — |
+| 3 | Suites, typecheck and build green; merged and pushed | calculable | merge and verify | mechanical | low | 20m (targeted suites + full `npm test` + typecheck + build + one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-131** — the census matched references (imports, re-exports, config strings, census JSON), not identifiers; the comments that mention the old paths are not importers.
+- **LL-139** — the deletion list comes from an import census of `a0e09189`, and every remaining importer is an edit site.
+- **LL-150** — no stylesheet or asset is deleted; the deleted files are TypeScript only.
+- **Standing rule 43 (LL-138)** — the structural test fails on the legacy files before they are deleted.
+- **Standing rule 44 (LL-143)** — every gate names its shell and exit code and was dry-run on the base.
+- **LL-149** and **LL-147** — typecheck and build are in the Done-when list, and the full suite runs on the owner's machine.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
 
 #### Stage 6 — Parallel polish (outside the separation fence)
 
@@ -346,6 +482,235 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
 - <a id="test-timeout-headroom-1"></a>**TEST-TIMEOUT-HEADROOM-1** — the three load-sensitive tests carry 30 s timeouts (KF-3 retired), and `tests/seenBatcher.test.ts` types its mock (mid-dispatch amendment). The full suite passed twice on the owner's machine, and typecheck exits 0 (merge `072a65f3`; [close-out](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md)).
 - <a id="eink-hover-fix-1"></a>**EINK-HOVER-FIX-1** — the e-ink hover rule is limited to interactive leaves, so overlays stay opaque (merge `61bad595`, sha record `1916d899`; [close-out](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md)). BUG-184 stays open until the owner's e-ink smoke after a rebuild.
 - <a id="library-settings-fix-1"></a>**LIBRARY-SETTINGS-FIX-1** — every Ctrl+K settings entry opens a titled page, and a library card's "New" dot clears live (merge `8c41095e`; [close-out](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)).
+
+#### Stage 7 — Platform health and reader polish (roadmap review 2026-10-12)
+
+Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real defects while the Narrate rebuild epic runs (owner decision: the epic first, these as the buffer). Each item states its lane ownership; it may run beside the epic only when its files are disjoint from the epic's current phase. SETTINGS-WRITE-DURABLE-1 must merge before the epic's Core phase writes state to disk. See the [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+
+<a id="test-budget-wordindex-1"></a>
+
+#### TEST-BUDGET-WORDINDEX-1 — Give the word-index build-time test headroom under load *(position 10 — Full Spec)*
+
+- **What:** Raise the wall-clock budget in `tests/wordPositionIndex.test.ts` "builds a 5,000-span section and keeps lookup coverage intact" from 200 ms to 1,000 ms, keep every coverage assertion, and mark BUG-186 resolved in source.
+- **Why:** BUG-186. The first full run of NARRATE-REMOVE-1's suite failed only this test (`expected 218.2757999999999 to be less than 200`, `tests/wordPositionIndex.test.ts:148`); it passed alone and on the rerun. A wall-clock assertion with no headroom fails any full-suite gate on a loaded machine, including the rebuild epic's. It is the same family as the three tests TEST-TIMEOUT-HEADROOM-1 fixed.
+- **Design decision (planner, 2026-10-12):** 1,000 ms is about 4.6 times the worst observed time under load. It still fails a gross regression, such as a quadratic build over 5,000 spans, which is what the budget is for; it is not a micro-benchmark. The value stays inline with a one-line comment: it is a test-harness budget, not product behaviour, so the constants rule does not apply (precedent: TEST-TIMEOUT-HEADROOM-1).
+- **Out of scope:**
+  - The four other wall-clock assertions (`tests/tts7j-foliate-section-sync.test.ts:315`, `tests/tts7k-global-word-source.test.ts:217`, `tests/tts7l-exact-selection-mapping.test.ts:297`, `tests/stress.test.ts:53`/`:156`): none has been seen failing.
+  - The tested module itself: `src/utils/wordPositionIndex.ts` has no production importer; Page, Focus and Flow each use a byte-identical private copy under `src/reader/modes/*/helpers/` (all four blobs `d9ff280f21`). Retiring the orphan is a cleanup question (see CLEANUP-MODE-BARREL-1's follow-up note), not this fix.
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr; any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
+    1. `git grep -c -F 'toBeLessThan(1000)' -- tests/wordPositionIndex.test.ts` prints `tests/wordPositionIndex.test.ts:1` and exits 0, and `git grep -c -F 'toBeLessThan(200)' -- tests/wordPositionIndex.test.ts` prints nothing and exits 1. (Dry-run on `a0e09189`: the first exits 1 with no output; the second prints `tests/wordPositionIndex.test.ts:1`.)
+    2. `npx vitest run tests/wordPositionIndex.test.ts` exits 0, with all five tests passing.
+    3. `npm test` exits 0 on the owner's machine (LL-147), and `npm run typecheck` exits 0 (LL-149).
+    4. `docs/governance/BUG_REPORT.md` BUG-186 **Status** reads `RESOLVED in source (TEST-BUDGET-WORDINDEX-1): budget raised to 1,000 ms.` (no merge sha in the change, LL-148).
+    5. `git diff --name-only refs/remotes/origin/main` lists exactly `docs/governance/BUG_REPORT.md` and `tests/wordPositionIndex.test.ts`, plus `docs/governance/close-outs/Timing.TEST-BUDGET-WORDINDEX-1.jsonl` and the run's staging memo if kept (standing rule 41).
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer re-reads the full-suite summary; repository operator merges.
+- **Lane:** Platform & Maintenance. Execution surface B (evaluation harness).
+- **Source:** [BUG_REPORT.md BUG-186](docs/governance/BUG_REPORT.md); the NARRATE-REMOVE-1 close-out (full-suite note); [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `a0e09189`):
+  - `tests/wordPositionIndex.test.ts:147-148`:
+    - `    // Non-flaky budget guard for mocked DOM builds.` becomes `    // Gross-regression guard, not a micro-benchmark: 200 ms failed under full-suite load at 218 ms (BUG-186).`
+    - `    expect(build.buildTimeMs).toBeLessThan(200);` becomes `    expect(build.buildTimeMs).toBeLessThan(1000);`
+  - `docs/governance/BUG_REPORT.md`, BUG-186's `**Status:**` line, per Done-when 4.
+- **Tests:** no new test. Every other assertion in the file is unchanged.
+- **Constants:** none.
+- **Branch:** `eb/test-budget-wordindex-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\test-budget-wordindex-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** one commit with exactly `tests/wordPositionIndex.test.ts` and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
+- **Failure handling:**
+  - If the full suite fails on any other test, stop and report it as a new finding; do not change that test.
+  - If this test fails at 1,000 ms, stop with BLOCKER(USER): that is real slowness, not missing headroom.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface B only.
+  - **Forbidden:** every file except the two above; the shared-core freeze set; every file the rebuild epic's current phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of every other item.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Budget raised and bug status updated | calculable | test edit | mechanical | low | 10m (one assertion, one comment, one status line) | — | — |
+| 2 | Full suite and typecheck green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (one full `npm test` + typecheck + one --no-ff merge) | — | — |
+
+**Total:** chain 2m · sum 2m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 44 (LL-143)** — every gate names its shell and exact exit code, and both search gates were dry-run on the base.
+- **LL-147** — the full-suite row is defined on the owner's machine, so the run is a local session.
+- **LL-149** — the Done-when list carries `npm run typecheck`.
+- **LL-148** — the bug's status line names the item, not a merge sha.
+- **Standing rule 41 (LL-136)** — the exact-path fence exempts the time log and staging memo.
+- **Standing rule 43 (LL-138)** — considered: no behaviour change needs a positive control; the failing state is already recorded (BUG-186).
+
+<a id="settings-write-durable-1"></a>
+
+#### SETTINGS-WRITE-DURABLE-1 — Make settings writes durable and race-free *(position 11 — Full Spec)*
+
+- **What:** Serialize JSON writes per file, make the settings, history and site-cookie saves return a promise that reports failure without rejecting, give `sync-queue.json` the same serialized writer, and flush settings at quit. Fixes BUG-185.
+- **Why:**
+  - `writeJSON` (`main.js:55-60`) uses one fixed temporary file, `<file>.tmp`. Two overlapping writes to the same file share it: one rename moves the other's temporary file away, so the second rename fails with ENOENT, or an older snapshot lands last. OutsideAudit.10 F7 reproduced it on NTFS (ENOENT in 46 of 400 two-way calls and 96 of 160 eight-way calls; an older snapshot in 4 of 30 eight-way rounds). The NARRATE-REMOVE-1 smoke saw it live at startup on both `settings.json` and `sync-queue.json`.
+  - `saveSettingsFn` (`main.js:130`), `saveHistory` (`:153`) and `saveSiteCookies` (`:154`) drop the promise, so a failure is an unhandled rejection and `await saveSettingsFn()` in `loadState` (`:293`) waits for nothing.
+  - `main/sync-queue.js:52-57` `saveQueue` has its own copy of the same fixed-name pattern; its callers fire `enqueue` without awaiting it (`main/ipc/library.js:41`, `:97`; `main/ipc/documents.js:30`, `:47`; `main/ipc/state.js:40`).
+  - `will-quit` (`main.js:678-695`) flushes the library but not settings, so a change still inside the renderer IPC's 500 ms debounce is lost at quit.
+  - The OutsideAudit.10 decisions require this before any rebuild state must reach disk (NARRATE-REBUILD-1 charter input).
+- **Design decisions (planner, 2026-10-12):**
+  - **Serialize per file, keep the `.tmp` name.** Each write to a path waits for the previous write to that path; the payload is serialized when the call is made, so later calls carry later data and the last call's data lands last. This fixes both the ENOENT and the stale-snapshot race without changing the write-then-rename pattern, so standing rule 3 (PR-10) and LL-006's guardrail hold as written. A unique temporary name alone would fix ENOENT but not the ordering.
+  - **Failure policy: log and continue.** The save wrappers resolve `true` on success and `false` on failure, logging one line with the label and error; they never reject. Startup therefore proceeds when a settings write fails (as `readJSON` already proceeds with a fallback), no caller needs a new `catch`, and `applyCloudSettings` stays synchronous and non-blocking (NARRATE-REMOVE-1 D12). `writeJSON` itself still rejects, for the awaited library path.
+  - **Quit flush:** `will-quit` awaits one settings save after the library flush. In-memory settings are already current (the IPC handler assigns before its debounce), so this writes the latest state; the debounced `update-settings` sync enqueue is not flushed (out of scope).
+- **Out of scope:**
+  - The other fixed-name writers, each awaited by its single caller and not seen racing: `main/auth.js:108-110`, `main/sync-engine.js:94-99`, `main/ipc/reader.js:185-187` and `:242-244`, `main/ipc/stats.js:204-206`.
+  - The Windows `EPERM` rename seen in full-suite runs (separation KF-2); `app.whenReady()`'s missing `.catch` for failures other than settings writes; flushing the debounced sync enqueue at quit; the hardcoded 500 ms debounce literal (asserted by `tests/perfAudit.test.ts`).
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr; any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44). Dry-runs on `a0e09189` are noted.
+    1. **Positive control (standing rule 43):** at C1 (tests added, writer moved verbatim, no behaviour change), `npx vitest run tests/jsonStore.test.js tests/sync-queue.test.js` exits 1; the concurrent-write test in each file fails (ENOENT, or the final file is not the last payload), and the two `saveJSON` tests fail because `saveJSON` is not exported. Record the failing names and messages in the staging memo.
+    2. `npx vitest run tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/settingsMigrationV13.test.js` exits 0 after C2.
+    3. `git grep -n -F 'const tmp = filepath + ".tmp";' -- main.js` prints nothing (dry-run: prints `main.js:57`), and `git grep -n -F 'const tmp = queuePath + ".tmp";' -- main/sync-queue.js` prints nothing (dry-run: prints `main/sync-queue.js:54`).
+    4. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:2` (`loadState` and `will-quit`; dry-run: `main.js:1`).
+    5. `git grep -c -F 'return saveJSON(' -- main.js` prints `main.js:3` (settings, history, site cookies).
+    6. `npm test` exits 0 on the owner's machine (LL-147), `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
+    7. **Owner smoke** (standing rule 45): start the app with `npm run dev` from the worktree; the terminal shows no `ENOENT` for `settings.json.tmp` or `sync-queue.json.tmp`. Change a setting (for example the theme) and quit within one second; start again: the change is kept. Record pass or fail per check in the staging memo.
+    8. `docs/governance/BUG_REPORT.md` BUG-185 **Status** reads `RESOLVED in source (SETTINGS-WRITE-DURABLE-1): per-file serialized writes, non-rejecting saves, settings flushed at quit.` and `docs/governance/TECHNICAL_REFERENCE.md:236`'s last sentence reads `Settings writes are serialized per file and report failure without rejecting (SETTINGS-WRITE-DURABLE-1).`
+    9. `git diff --name-status refs/remotes/origin/main` lists exactly: `A main/json-store.js`, `A tests/jsonStore.test.js`, `M main.js`, `M main/sync-queue.js`, `M tests/sync-queue.test.js`, `M docs/governance/BUG_REPORT.md`, `M docs/governance/TECHNICAL_REFERENCE.md`, plus the time log and staging memo if kept (standing rule 41).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 7.
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:** [BUG_REPORT.md BUG-185](docs/governance/BUG_REPORT.md); OutsideAudit.10 F7 and its scripts (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F7-settings-writer/`); the NARRATE-REMOVE-1 smoke record; [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `a0e09189`):
+  - **New `main/json-store.js`** (CommonJS, async I/O only):
+    - `readJSON(filepath, fallback)`: moved verbatim from `main.js:48-54`.
+    - `writeJSON(filepath, data)`: serializes `data` with `JSON.stringify(data, null, 2)` at call time; chains the write onto the previous write for the same `filepath` (a `Map` of tail promises, entry removed when its tail settles); each write is `writeFile(filepath + ".tmp", text, "utf-8")` then `rename(filepath + ".tmp", filepath)`; resolves when its own rename completes, rejects with its own error, and a failure never blocks later writes to that path.
+    - `saveJSON(filepath, data, label)`: `writeJSON(...)` then `true`; on error, `console.error("[json-store] " + label + " write failed:", err.message)` and `false`.
+    - `module.exports = { readJSON, writeJSON, saveJSON };`
+  - **`main.js`:**
+    - delete `readJSON` and `writeJSON` (`:48-60`; keep `backupFile` at `:61-65`) and add `const { readJSON, writeJSON, saveJSON } = require("./main/json-store");` beside the other `./main/` requires (after `:15`);
+    - `:130` becomes `function saveSettingsFn() { return saveJSON(getSettingsPath(), settings, "settings"); }`;
+    - `:153` becomes `function saveHistory() { return saveJSON(getHistoryPath(), history, "history"); }`;
+    - `:154` becomes `function saveSiteCookies() { return saveJSON(getSiteCookiesPath(), siteCookies, "site-cookies"); }`;
+    - in `will-quit` (`:678-695`), add `await saveSettingsFn();` on the line after `await saveLibraryNow();`.
+    - `saveLibrary`, `saveLibraryNow` and the eval-trace writer keep using `writeJSON` unchanged.
+  - **`main/sync-queue.js`:** `saveQueue` (`:52-57`) becomes `if (!queuePath) return; await writeJSON(queuePath, queue);` with `const { writeJSON } = require("./json-store");` at the top. The file format is unchanged (`JSON.stringify(queue, null, 2)`).
+  - **Docs:** BUG-185's Status line and `TECHNICAL_REFERENCE.md:236`, per Done-when 8.
+- **Tests:**
+  - **New `tests/jsonStore.test.js`** (real temporary directory under `os.tmpdir()`, as `tests/sync-queue.test.js` does; `await import("../main/json-store.js")`):
+    - (a) 20 rounds of 8 concurrent `writeJSON` calls to one path, each with a distinct payload: none rejects; after each round the file parses to the round's last payload; no `*.tmp` file remains.
+    - (b) `saveJSON` to a path whose parent is a regular file resolves `false`, does not reject, and logs once (spy on `console.error`).
+    - (c) after a failed write to a path, a later write to the same path succeeds.
+  - **`tests/sync-queue.test.js`:** add "concurrent enqueues all persist": after `initSyncQueue(TEST_DIR, …)`, 8 concurrent `enqueue` calls with distinct ops resolve; `sync-queue.json` parses and holds all 8. Also correct the stale header comment ("File I/O is mocked"): the file uses a real temporary directory.
+- **Constants:** none.
+- **Branch:** `eb/settings-write-durable-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\settings-write-durable-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - C1: `main/json-store.js` with `readJSON` and `writeJSON` moved verbatim from `main.js` (no serialization, no `saveJSON` yet), `main.js` requiring them, `tests/jsonStore.test.js` and the `tests/sync-queue.test.js` addition. Gate: Done-when 1 (the controls fail as stated) and `npm run typecheck` exits 0.
+  - C2: the serialized writer, `saveJSON`, the three wrappers, the quit flush, `main/sync-queue.js`, and the two docs. Gate: Done-when 2–6 and 8–9.
+  - Owner smoke (Done-when 7) on C2; then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If the C1 controls pass on the unchanged writer (the race did not trigger), raise the rounds to 50 once; if they still pass, stop with BLOCKER(USER): the test cannot see the defect.
+  - If an existing test fails because a save now returns a promise or because `sync-queue.json` is written through `json-store`, report the exact test and stop; do not weaken it.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`; the file formats are unchanged, so no data migration is involved.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:** every file not named above; the shared-core freeze set; `main/ipc/state.js`, `main/sync-engine.js` and `main/migrations.js` (the NARRATE-REMOVE-1 normalization seams stay as they are); any file the rebuild epic's current phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** before NARRATE-REBUILD-1's Core phase; independent of the other buffer items.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Writer moved to its own module; concurrency and failure tests committed and failing on the unchanged writer | calculable | positive control | bounded | medium | 30m (one module move, two test files, the control run) | — | — |
+| 2 | Serialized writer, non-rejecting saves, quit flush and sync-queue writer in place; docs updated | calculable | main-process fix | bounded | medium | 35m (one small module, five call-site edits, two doc lines) | — | — |
+| 3 | Full suite, typecheck and build green; owner smoke recorded; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 11m · sum 11m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138)** — C1 commits the tests against the unchanged writer and records them failing (Done-when 1).
+- **Standing rule 44 (LL-143)** — every gate names its shell and exit code; the search gates were dry-run on the base.
+- **LL-006 / standing rule 3 (PR-10)** — the write-then-rename pattern is kept; only the ordering changes.
+- **LL-142** — durability claims are about completed writes: the tests read the file back rather than trusting a call.
+- **Standing rule 45 (LL-141)** and **LL-147** — the startup and quit checks need the owner's machine and eyes (Done-when 7).
+- **LL-149** — the Done-when list carries typecheck and build.
+- **LL-148** — the bug's status line names the item, not a merge sha.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
+
+<a id="reader-visual-diag-1"></a>
+
+#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 12 — Full Spec)*
+
+- **What:** A read-only diagnosis, measured live, of two pre-existing reader defects. It confirms or refutes the static findings below and ends with a diagnosis report and a fix specification for each bug. No product code is committed.
+  - **BUG-188:** the Focus/Flow "band" sits apart from the word cursor.
+  - **BUG-187:** "ResizeObserver loop completed with undelivered notifications" floods the profile `error.log`.
+- **Why:** both bugs are Low but visible in every Focus and Flow session, and the rebuilt Narrate will sit beside the same Flow surface. Rule 6a forbids specifying a fix before the cause is known.
+- **Static findings to test** (read-only census of `a0e09189`, 2026-10-12; none measured live yet):
+  - **The band is the reading-zone mask.** It is the `mask-image` gradient on `.rm-focus-view` and `.rm-flow-view` (`src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), placed by `--flow-zone-top` and `--flow-zone-bottom`. `.flow-shrink-cursor` is hidden (`src/styles/flow.css:49`, `flow/mode.css:113`), so BUG-188's Location is wrong.
+  - **H1 — The band is about 3 lines when it should be 5.** `applyZoneProperties` (`focus/FoliateView.tsx:1170-1184`, `flow/FoliateView.tsx:1246-1260`) and `onZoneTopChange` (`flow/useModeBindings.ts:34-44`) compute the zone height as `parseFloat(getComputedStyle(container).lineHeight) || 24` on the outer view. No rule sets that line-height, so Chromium's `normal` gives the 24 px fallback. The EPUB lines are 18 px × zoom × 1.8, which is 38.9 px at 120%, so 5 × 24 px covers about 3.1 lines.
+  - **H2 — In Focus nothing ties the band to the word cursor.** The band is fixed at 15% (`FLOW_ZONE_INITIAL_TOP`). The arrival scroll centres the cursor word (`scrollIntoView({ block: "center" })`, `focus/FoliateView.tsx:1047-1060`).
+  - **H3 — In Flow two clocks drive the band and the underline.** The `FlowMode` word timer paints the underline (`flow/ModeRuntime.ts:1181-1213`). The `FlowScrollEngine` line pacer scrolls its own line under the band (`flow/helpers/FlowScrollEngine.ts:746-753`, `stableWindowScroll` branch, untested). The pacer starts later and adds 150 ms per line, and a chunk follow scrolls to the band's middle instead (`flow/FoliateView.tsx:642-672`, `:495-505`).
+  - **H4 — BUG-187 is an observer loop.** Five observers exist: `page/FoliateView.tsx:1018`, `focus/FoliateView.tsx:1188` and `:1212`, `flow/FoliateView.tsx:1264` and `:1288`. Their callbacks rewrite renderer attributes and iframe padding with no equality check, on `overflow: auto` containers. Every window `error` event reaches `error.log` unfiltered (`src/App.tsx:130-143` → `preload.js:122` → `main/ipc/misc.js:334-336`). About 22 lines a second suggests a sustained frame-by-frame loop. StrictMode double effects apply in dev only.
+- **Out of scope:** any committed product-code change (the fixes are separate items, specified by this one); BUG-169 (a different defect, a React update-depth loop whose cited files no longer exist); BUG-189 (dev-mode speed; DEV-PERF-MEASURE-1).
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` exists, and for each of H1–H4 records a verdict (confirmed, refuted or partly confirmed) with the measurement behind it. The measurements:
+       - **H1:** in Focus and Flow at 100% and 120% zoom, the outer view's computed line-height, the zone height in px and the rendered EPUB line height in px.
+       - **H2:** in Focus, paused after opening a book, the band's top and bottom against the cursor word's rect.
+       - **H3:** in Flow, playing for 2 minutes at the default speed, the word-timer index against the pacer's line index, sampled once a second (count of samples where the underline word is outside the band).
+       - **H4:** `error.log` lines per minute in two equal-length sessions (5 minutes each, same book and actions) on `612d03f5` (before the Narrate removal) and on this item's base, in dev; the same on a production build (`npm run build`, then the built app); and, with temporary counters, which observer callback fires per frame and which attribute or size changes each time.
+    2. The report ends with one fix specification per bug, in the roadmap's D.5.2 format (What, Why, Done when, Edit sites, Tests), ready for the next roadmap review.
+    3. The report corrects BUG-188's Location (the zone mask, not `.flow-shrink-cursor`) and states whether BUG-188 is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2).
+    4. `git diff --name-status refs/remotes/origin/main` lists exactly `A docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` and `M docs/governance/BUG_REPORT.md` (BUG-187 and BUG-188 updated with the verdict and a pointer to the report), plus the time log and staging memo if kept (standing rule 41). Temporary instrumentation is never committed: `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing.
+- **Effort:** S.
+- **Owners:** implementation agent (read-only diagnosis, Aristotle role); owner for the live sessions; reviewer re-reads the measurements.
+- **Lane:** Reader Engine. Execution surface B (evaluation).
+- **Source:** [BUG_REPORT.md BUG-187, BUG-188](docs/governance/BUG_REPORT.md); the read-only census of 2026-10-12 for this review; the owner's screenshot (`C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png`); `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json` S2; the NARRATE-REMOVE-1 smoke record.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** none in product code. Temporary instrumentation (console counters in the five observer callbacks, a sampler of the Flow word and line indexes) lives in the worktree only and is reverted before the commit; record the exact temporary diff in the report.
+- **Tests:** none (diagnosis). Measurement scripts, if any, are saved outside the repository or under a name the test runner does not collect (LL-146).
+- **Constants:** none.
+- **Branch:** `eb/reader-visual-diag-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\reader-visual-diag-1`. Write refs in full.
+- **Staging plan:** one commit with exactly the report and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
+- **Failure handling:**
+  - If H4 does not reproduce in either 5-minute session on the base or the branch, record "not reproduced" with the session details, extend once to 10 minutes, and then report the negative result; do not invent a cause.
+  - If a measurement needs a product-code change to be possible, stop with BLOCKER(USER) and describe the change; it is not this item's to make.
+  - Rollback: `git revert -m 1 <merge>` (docs only).
+- **Lane ownership (parallel run):** surface B; read-only on code.
+  - **Forbidden:** committing any path outside the two documents; the live user profile's settings (use a copied profile or the test profile for sessions).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent; may run beside any item.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Band hypotheses H1–H3 measured live in Focus and Flow | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 2 | Observer flood H4 reproduced with equal sessions on base, branch and production, and its oscillating observer named | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 3 | Report and two fix specifications written; bug records updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, two bug updates, one --no-ff merge) | — | — |
+
+**Total:** chain 5m · sum 5m + 2 timeboxed ≤4h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-152** — like-for-like A/B sessions on the base, and a production-build measurement, before attributing the flood.
+- **LL-142** — every verdict rests on a measurement on the running app, not on the static reading above.
+- **LL-146** — measurement scripts are never committed under a collectable test name.
+- **Standing rule 45 (LL-141)** — the live sessions are owner-observed, with the session length and actions recorded.
+- **Standing rule 38** — measure the signal chain before proposing a rewrite of cursor behaviour.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+
+<a id="dev-perf-measure-1"></a>
+
+#### DEV-PERF-MEASURE-1 — Measure dev-mode slowness against a production build *(position 15 — stub)*
+
+- **Lane:** Platform & Maintenance.
+- **Source:** BUG-189 (whole-app dev-mode slowness, equal on the base); LL-152.
+- **Scope:** measure the same actions (library open, book open, mode switch, 1 minute of Flow) on `npm run dev` and on the production build, with renderer profiles, before naming any cause (Pike rule 1). Output: a measurement report and, if warranted, a fix specification. Specified at a later review.
 
 ## Deferred Lanes
 
@@ -377,14 +742,14 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-10-11
+last_review: 2026-10-12
 review_status: complete-with-recorded-buffer-and-governance-gaps
 finish_line: "Narration rebuilt"
 roadmap_doc: ROADMAP.md
 work_register: monday:board/18432450217
 buffer_target: 5
-buffer_actual_full_specs: 0
-buffer_dispatch_readiness: 0 dispatch-ready (NARRATE-REMOVE-1 completed 2026-10-12; below the dispatchBuffer, so /roadmap-review backfills before the next dispatch) + 1 epic (NARRATE-REBUILD-1, unblocked, excluded from buffer) + 2 unblocked stubs awaiting re-authoring (CLEANUP-MODE-BARREL-1, UX-POLISH-1)
-buffer_actual_stubs: 6
+buffer_actual_full_specs: 5
+buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1, READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1, UX-POLISH-1) + 1 epic (NARRATE-REBUILD-1, head, excluded from buffer)
+buffer_actual_stubs: 1 (DEV-PERF-MEASURE-1)
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->

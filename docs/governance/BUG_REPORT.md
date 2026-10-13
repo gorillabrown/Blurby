@@ -11,7 +11,7 @@
 ### BUG-189 — Dev-mode (`npm run dev`) is slow across the whole app
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (development and owner-smoke friction; the production build was not measured)
-**Status:** OPEN — unscheduled. Lane: Platform & Maintenance.
+**Status:** OPEN — measurement stub DEV-PERF-MEASURE-1 (roadmap position 15; roadmap review 2026-10-12). Lane: Platform & Maintenance.
 **Location:** the dev server and Electron dev build on the owner's machine; no source location identified.
 **Description:** The whole app, the library included, is too slow in dev mode to drive timing-sensitive live checks. The owner could not judge the Shift+Space sequence (Done-when 16(f)), which was accepted from static verification instead.
 **Root cause:** Undetermined. An A/B on 2026-10-12 ran the base (`main` @ `612d03f5`, same profile, same actions) and the owner reported it equally slow, so the cause is pre-existing and not the removal.
@@ -22,11 +22,11 @@
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
 **Severity:** LOW (visual; reading stays possible)
 **Status:** OPEN — pre-existing; triage together with BUG-169 and the "Flow band" item the removal spec lists as out of scope. Lane: Reader Engine.
-**Location:** `src/styles/flow.css` and `src/reader/modes/flow/mode.css` (`.flow-shrink-cursor`); the Focus and Flow word-cursor positioning code. Not touched by the removal.
+**Location:** corrected 2026-10-12 (roadmap review static census): the visible "band" is the reading-zone mask (`mask-image` on `.rm-focus-view` / `.rm-flow-view`, `src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), positioned by `applyZoneProperties` and the Flow line pacer; `.flow-shrink-cursor` is hidden and is not the band.
 **Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
 **Root cause:** Undetermined. The base build (`main` @ `612d03f5`, same profile, A/B 2026-10-12) shows the same placement, so the removal did not cause it. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
 **Evidence:** Owner screenshot 1250x849, `C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png` (kept outside the repository: `docs/governance/bug-reports/.gitignore` excludes screenshots); the staging memo's observation and evidence paragraph.
-**Fix path:** Triage first (read-only diagnosis, Aristotle): decide whether this is BUG-169, the known Flow band item, or new, then spec a fix.
+**Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) measures hypotheses H1–H3 live and writes the fix specification. Static census: not BUG-169 (a React update-depth loop); the same defect as the owner's 2026-10-10 "Flow band" sighting.
 
 ### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
@@ -36,12 +36,12 @@
 **Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
 **Root cause:** Undetermined. A base session of about one minute the same day logged none, but the sessions differ in length and actions, so a pre-existing pattern and a change of this sprint are both still open.
 **Evidence:** The staging memo's smoke note and observation (counts, timestamps).
-**Fix path:** Aristotle: reproduce on the base with a comparable session, then locate the observer callback that writes layout state inside its own notification; guard with an equality check or a deferred write.
+**Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) reproduces it with equal-length sessions on the base, the branch and a production build, names the oscillating observer (hypothesis H4) and writes the fix specification.
 
 ### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
 **Severity:** LOW (test flake; the product code is not implicated)
-**Status:** OPEN — unscheduled, not fixed in NARRATE-REMOVE-1 (per the TEST-TIMEOUT-HEADROOM-1 close-out ruling: a new low bug, not an in-sprint fix). Lane: Platform & Maintenance.
+**Status:** OPEN — scheduled as TEST-BUDGET-WORDINDEX-1 (roadmap position 10; roadmap review 2026-10-12). Lane: Platform & Maintenance.
 **Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
 **Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
 **Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
@@ -51,7 +51,7 @@
 ### BUG-185 — Settings writes are fire-and-forget and share one .tmp path
 **Reported:** 2026-10-11 (OutsideAudit.10 F7 remediation)
 **Severity:** LOW (durability; a failed or overlapping settings write can be lost silently)
-**Status:** OPEN — unscheduled, not queued. Lane: Platform & Maintenance.
+**Status:** OPEN — scheduled as SETTINGS-WRITE-DURABLE-1 (roadmap position 11; roadmap review 2026-10-12). Lane: Platform & Maintenance.
 **Location:** `main.js` lines 55-60 (`writeJSON`, fixed temp name `filepath + ".tmp"`), line 130 (`saveSettingsFn` drops the writer's promise), line 293 (`await saveSettingsFn();` in `loadState` waits for nothing), lines 737-754 (`will-quit` awaits `saveLibraryNow()` but flushes no pending settings save); `main/ipc/state.js` lines 29-31 (500 ms debounced settings save)
 **Description:** Every settings save is fire-and-forget. `saveSettingsFn` calls the async `writeJSON` without returning its promise, so no caller can wait for the temp write and rename, and a failed write surfaces only as an unhandled rejection. Overlapping writes to one file share one `settings.json.tmp`. At quit, a settings save still inside the IPC handler's 500 ms debounce is not flushed. History and site-cookie writes (`main.js:153-154`) follow the same pattern; not verified.
 **Root cause:** `writeJSON` uses a fixed temp name per file, and its wrappers drop the promise. The writer predates NARRATE-REMOVE-1, which leaves it unchanged on purpose (its D12 durability boundary).
