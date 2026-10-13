@@ -416,7 +416,7 @@ export default function ReaderContainer({
     snapshot: toolbar,
     active,
     handleTogglePlay, handlePauseToPage,
-    handleEnterFocus, handleEnterFlow,
+    handleEnterFocus, handleEnterFlow, handleEnterNarrate,
     handleExitToPage, handleNavigateTo, handleJumpBack, adjustSpeed, handleCommand, handleSetSpeed,
     handleCycleMode, handleCycleAndStart,
   } = modeHook;
@@ -427,7 +427,7 @@ export default function ReaderContainer({
   // Canonical anchor (legacy persistentWordIndex state) for the toolbar, progress and exit.
   const canonicalWordAnchor = toolbar?.currentWordIndex ?? (activeDoc.position || 0);
   const flowProgress = toolbar?.flowProgress ?? null;
-  const isScrolledSurfaceMode = readingMode === "focus" || readingMode === "flow";
+  const isScrolledSurfaceMode = readingMode === "focus" || readingMode === "flow" || readingMode === "narrate";
   const modePlaying = toolbar?.playing ?? false;
   const isActivelyReading = modePlaying;
   // useProgressTracker: the Focus display position while Focus is active.
@@ -706,7 +706,7 @@ export default function ReaderContainer({
   // Keyboard shortcuts — fully mode-aware
   const chapterListRef = useRef<ChapterListHandle | null>(null);
   const handleOpenChapterList = useCallback(() => { chapterListRef.current?.toggle(); }, []);
-  useReaderKeys("reader", readingMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart, handleSentencePrev, handleSentenceNext);
+  useReaderKeys("reader", readingMode, handleTogglePlay, seekWords, adjustSpeed, handleExitReader, adjustFocusTextSize, toggleMenuFlap, handleToggleFavoriteReader, handleEnterFocus, handlePrevChapter, handleNextChapter, handlePrevPage, handleNextPage, handleEnterFlow, handleMoveWordSelection, handleDefineWord, handleMakeNote, handleParagraphPrev, handleParagraphNext, handleFlowPrevLine, handleFlowNextLine, handleOpenChapterList, handleCycleMode, handleCycleAndStart, handleSentencePrev, handleSentenceNext, handleEnterNarrate);
 
   const menuFlap = (
     <MenuFlap
@@ -790,6 +790,7 @@ export default function ReaderContainer({
           onEnterPage={handleEnterPageMode}
           onEnterFocus={handleEnterFocus}
           onEnterFlow={handleEnterFlow}
+          onEnterNarrate={handleEnterNarrate}
           onPrevChapter={handlePrevChapter}
           onNextChapter={handleNextChapter}
           onJumpToChapter={handleJumpToChapter}

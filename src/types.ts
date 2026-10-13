@@ -133,8 +133,8 @@ export interface LayoutSpacing {
   word: number;
 }
 
-export type ReaderMode = "page" | "focus" | "flow";
-export type ReaderLastMode = "focus" | "flow";
+export type ReaderMode = "page" | "focus" | "flow" | "narrate";
+export type ReaderLastMode = "focus" | "flow" | "narrate";
 
 export interface BlurbySettings {
   schemaVersion: number;
@@ -377,6 +377,17 @@ export interface ElectronAPI {
     totalWords?: number;
     error?: string;
   }>;
+  // Rebuilt Narrate (NARRATE-REBUILD-1 P4): the main-process producer. The table is the model's own word
+  // table (verified again in the renderer before it is played); an { error } reply is F4.
+  narrateGenerate?: (text: string, voice: string, speed: number) => Promise<{
+    table?: unknown;
+    pcm?: Float32Array;
+    sampleRate?: number;
+    genMs?: number;
+    error?: string;
+  }>;
+  narratePreload?: () => Promise<{ ok: boolean; status?: unknown; error?: string }>;
+  narrateStatus?: () => Promise<unknown>;
 }
 
 declare global {

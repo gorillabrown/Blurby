@@ -22,6 +22,13 @@ export const SPEED_DIALOG_STEP_HUNDREDTHS = 5;
 export const FOCUS_FLOW_SPEED_MIN_HUNDREDTHS = 40;
 /** Focus/Flow 4.80x = MAX_WPM */
 export const FOCUS_FLOW_SPEED_MAX_HUNDREDTHS = 480;
+// Narrate (NARRATE-REBUILD-1): the generation rate handed to Kokoro (1.00 = the model's native pace).
+// The dialog shows it on the same 0.05 grid, so a selected value is exact after the ×100 round trip.
+export const KOKORO_UI_RATE_MIN = 0.8;
+export const KOKORO_UI_RATE_MAX = 2.0;
+export const KOKORO_UI_RATE_STEP = SPEED_DIALOG_STEP_HUNDREDTHS / 100;
+/** The voice when settings name none (main/narrate/constants.js NARRATE_DEFAULT_VOICE). */
+export const KOKORO_DEFAULT_VOICE = "af_bella";
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 

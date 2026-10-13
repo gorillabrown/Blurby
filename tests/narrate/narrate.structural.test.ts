@@ -1,5 +1,7 @@
 // NARRATE-REBUILD-1 P3 — D4 structural test: no estimated-timing path exists in the rebuilt Narrate.
-// Scans the engine (src/reader/modes/narrate/**) and the producer (main/narrate/**) as text:
+// Scans the timing modules as text: the engine (src/reader/modes/narrate/engine/**), the runtime, state and
+// binding that forward its cursor (ModeRuntime, ModeState, useModeBindings) and the producer (main/narrate/**).
+// The display files (FoliateView and helpers/, restored for P4) paint a word index and carry no timing.
 //   1. timing provenance is written in exactly one place, the capture seam, from what the model returned;
 //   2. no module computes timing from word lengths, weights, rates, stretching or a lag constant;
 //   3. the engine imports no sibling runtime and no legacy mode module.
@@ -9,7 +11,9 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 const ROOT = path.resolve(__dirname, "../..");
-const ENGINE_DIR = path.join(ROOT, "src/reader/modes/narrate");
+const NARRATE_DIR = path.join(ROOT, "src/reader/modes/narrate");
+const ENGINE_DIR = path.join(NARRATE_DIR, "engine");
+const RUNTIME_FILES = ["ModeRuntime.ts", "ModeState.ts", "useModeBindings.ts"].map((f) => path.join(NARRATE_DIR, f));
 const PRODUCER_DIR = path.join(ROOT, "main/narrate");
 const PROVENANCE_WRITER = "main/narrate/capture.js";
 
@@ -59,16 +63,18 @@ export function scan(files: ReadonlyArray<{ readonly file: string; readonly text
 }
 
 const read = (files: string[]) => files.map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
+const timingFiles = () => [...listFiles(ENGINE_DIR), ...RUNTIME_FILES, ...listFiles(PRODUCER_DIR)];
 
 describe("narrate structural test (D4: no estimated-timing path)", () => {
-  it("scans every engine and producer module and finds nothing", () => {
-    const files = [...listFiles(ENGINE_DIR), ...listFiles(PRODUCER_DIR)];
+  it("scans every timing module (engine, runtime, producer) and finds nothing", () => {
+    expect(RUNTIME_FILES.every((f) => fs.existsSync(f))).toBe(true);
+    const files = timingFiles();
     expect(files.length).toBeGreaterThanOrEqual(8);
     expect(scan(read(files))).toEqual([]);
   });
 
   it("the provenance literal lives in the capture seam and in the engine's constant only", () => {
-    const hits = read([...listFiles(ENGINE_DIR), ...listFiles(PRODUCER_DIR)])
+    const hits = read(timingFiles())
       .filter(({ text }) => /["'`]model-output["'`]/.test(stripComments(text)))
       .map(({ file }) => path.relative(ROOT, file).split(path.sep).join("/"));
     expect(hits.sort()).toEqual(["main/narrate/capture.js", "src/reader/modes/narrate/engine/wordTable.ts"]);

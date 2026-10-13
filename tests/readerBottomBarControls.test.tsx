@@ -29,6 +29,7 @@ const baseProps = {
   onEnterPage: vi.fn(),
   onEnterFocus: vi.fn(),
   onEnterFlow: vi.fn(),
+  onEnterNarrate: vi.fn(),
   onTogglePlay: vi.fn(),
 };
 
@@ -49,12 +50,13 @@ describe("ReaderBottomBar controls", () => {
     container.remove();
   });
 
-  it("renders Page, Focus, and Flow controls and routes clicks", async () => {
+  it("renders Page, Focus, Flow and Narrate controls and routes clicks", async () => {
     const props = {
       ...baseProps,
       onEnterPage: vi.fn(),
       onEnterFocus: vi.fn(),
       onEnterFlow: vi.fn(),
+      onEnterNarrate: vi.fn(),
     };
 
     await act(async () => {
@@ -70,25 +72,31 @@ describe("ReaderBottomBar controls", () => {
     const flowButton = Array.from(container.querySelectorAll("button")).find(
       (button) => button.textContent?.trim() === "Flow",
     );
+    const narrateButton = Array.from(container.querySelectorAll("button")).find(
+      (button) => button.textContent?.trim() === "Narrate",
+    );
 
     expect(pageButton).toBeDefined();
     expect(focusButton).toBeDefined();
     expect(flowButton).toBeDefined();
+    expect(narrateButton).toBeDefined();
 
     await act(async () => {
       pageButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       focusButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
       flowButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+      narrateButton?.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
 
     expect(props.onEnterPage).toHaveBeenCalledTimes(1);
     expect(props.onEnterFocus).toHaveBeenCalledTimes(1);
     expect(props.onEnterFlow).toHaveBeenCalledTimes(1);
+    expect(props.onEnterNarrate).toHaveBeenCalledTimes(1);
   });
 });
 
-// READER-4M-2 / NARRATE-REMOVE-1: three mode buttons — Group A tests
-describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
+// READER-4M-2 / NARRATE-REBUILD-1 P4: four mode buttons — Group A tests
+describe("ReaderBottomBar — four mode buttons (NARRATE-REBUILD-1 P4)", () => {
   let container: HTMLDivElement;
   let root: Root;
 
@@ -110,26 +118,30 @@ describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
     return group ? Array.from(group.querySelectorAll("button")) : [];
   }
 
-  // Test 1 (NARRATE-REMOVE-1 Done-when 3): exactly the mode buttons Page, Focus and Flow, in that order
-  it("renders exactly the mode buttons Page, Focus and Flow", async () => {
+  // Test 1 (NARRATE-REBUILD-1 P4, D7): exactly the mode buttons Page, Focus, Flow and Narrate, in that order
+  it("renders exactly the mode buttons Page, Focus, Flow and Narrate", async () => {
     await act(async () => {
       root.render(<ReaderBottomBar {...baseProps} readingMode="page" />);
     });
 
-    expect(getModeButtons(container).map((button) => button.textContent?.trim())).toEqual(["Page", "Focus", "Flow"]);
+    expect(getModeButtons(container).map((button) => button.textContent?.trim())).toEqual(["Page", "Focus", "Flow", "Narrate"]);
   });
 
-  // Test 1b (NARRATE-REMOVE-1 Done-when 3): no element's text contains "Narrat", in any reading mode
-  it.each(["page", "focus", "flow"] as const)("renders no element whose text contains Narrat in %s mode", async (mode) => {
+  // Test 1b: the Narrate mode button is the only source of "Narrat" text, in every reading mode
+  it.each(["page", "focus", "flow", "narrate"] as const)("the Narrate button is the only element whose own text contains Narrat in %s mode", async (mode) => {
     await act(async () => {
       root.render(<ReaderBottomBar {...baseProps} readingMode={mode} />);
     });
 
+    const narrateButton = getModeButtons(container)[3];
+    expect(narrateButton.getAttribute("aria-label")).toBe("Narrate mode");
     const withNarrateText = Array.from(container.querySelectorAll("*")).filter((el) => el.textContent?.includes("Narrat"));
-    expect(withNarrateText).toEqual([]);
+    // Every match is the button itself or one of its ancestors (textContent includes descendants).
+    expect(withNarrateText.length).toBeGreaterThan(0);
+    expect(withNarrateText.every((el) => el === narrateButton || el.contains(narrateButton))).toBe(true);
   });
 
-  // Test 1c (NARRATE-REMOVE-1 Done-when 3, D11): in Page the remembered Flow is outlined as the last mode
+  // Test 1c (D11): in Page the remembered mode is outlined as the last mode — Flow and Narrate alike
   it("marks the Flow button rbb-mode-btn--last when readingMode is page and lastReadingMode is flow", async () => {
     await act(async () => {
       root.render(<ReaderBottomBar {...baseProps} readingMode="page" lastReadingMode="flow" />);
@@ -139,6 +151,18 @@ describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
     expect(buttons[2].textContent?.trim()).toBe("Flow");
     expect(buttons[2].classList.contains("rbb-mode-btn--last")).toBe(true);
     expect(buttons[1].classList.contains("rbb-mode-btn--last")).toBe(false);
+    expect(buttons[3].classList.contains("rbb-mode-btn--last")).toBe(false);
+  });
+
+  it("marks the Narrate button rbb-mode-btn--last when readingMode is page and lastReadingMode is narrate", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="page" lastReadingMode="narrate" />);
+    });
+
+    const buttons = getModeButtons(container);
+    expect(buttons[3].textContent?.trim()).toBe("Narrate");
+    expect(buttons[3].classList.contains("rbb-mode-btn--last")).toBe(true);
+    expect(buttons[2].classList.contains("rbb-mode-btn--last")).toBe(false);
   });
 
   // Test 2: Page button has aria-label "Page mode" and is active when readingMode === "page"
@@ -154,6 +178,7 @@ describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
     // Other buttons must not be pressed
     expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
   });
 
   // Test 3: Focus button is active (aria-pressed true) when readingMode === "focus"
@@ -167,6 +192,7 @@ describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
     expect(buttons[1].getAttribute("aria-pressed")).toBe("true");
     expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
   });
 
   // Test 4: Flow button is active when readingMode === "flow"
@@ -180,6 +206,21 @@ describe("ReaderBottomBar — three mode buttons (NARRATE-REMOVE-1)", () => {
     expect(buttons[2].getAttribute("aria-pressed")).toBe("true");
     expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
     expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[3].getAttribute("aria-pressed")).toBe("false");
+  });
+
+  // Test 5 (NARRATE-REBUILD-1 P4): Narrate button is active when readingMode === "narrate"
+  it("Narrate button is aria-pressed when readingMode is narrate", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="narrate" />);
+    });
+
+    const buttons = getModeButtons(container);
+    expect(buttons[3].getAttribute("aria-label")).toBe("Narrate mode");
+    expect(buttons[3].getAttribute("aria-pressed")).toBe("true");
+    expect(buttons[0].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[1].getAttribute("aria-pressed")).toBe("false");
+    expect(buttons[2].getAttribute("aria-pressed")).toBe("false");
   });
 });
 
@@ -216,10 +257,10 @@ describe("ReaderBottomBar — Page Play disabled", () => {
     expect(onTogglePlay).not.toHaveBeenCalled();
   });
 
-  it("keeps Play enabled for Focus and Flow", async () => {
+  it("keeps Play enabled for Focus, Flow and Narrate", async () => {
     const onTogglePlay = vi.fn();
 
-    for (const mode of ["focus", "flow"] as const) {
+    for (const mode of ["focus", "flow", "narrate"] as const) {
       await act(async () => {
         root.render(<ReaderBottomBar {...baseProps} readingMode={mode} onTogglePlay={onTogglePlay} />);
       });

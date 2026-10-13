@@ -1,0 +1,176 @@
+// @vitest-environment jsdom
+// NARRATE-REBUILD-1 P4 — the Narrate mode over the P3 engine, through the real broker with fake infrastructure,
+// the P3 FakeProducer (lawful tables, D4 controls) and the hand-advanced FakeAudioOutput. Covers the charter's
+// two notices (F5 voice loading, F4 "couldn't be timed"), the cursor as the table lookup at the playback sample,
+// the rate grid (R7 at the runtime seam) and the view rendering both notices for a non-EPUB document.
+import React from "react";
+import { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, describe, expect, it } from "vitest";
+import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
+import { createInitialHandoff, type ReaderDocumentSnapshot } from "../../src/reader/document/ReaderDocumentSnapshot";
+import { createNarrateRuntime, NarrateModeView } from "../../src/reader/modes/narrate/index";
+import type { NarrateModeRuntime } from "../../src/reader/modes/narrate/ModeRuntime";
+import { createFakeDocument, createFakeInfrastructure } from "../readerModes/harness/fakePorts";
+import { FakeAudioOutput } from "./harness/fakeAudioOutput";
+import { FakeProducer, SPF } from "./harness/fakeProducer";
+
+const flush = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
+/** Engine default lead (narrateEngine leadSeconds) plus one fake-table lead (2 frames) and a little. */
+const INTO_FIRST_WORD_S = 0.03 + (2 * SPF) / 24000 + 0.01;
+const WORD_S = (8 * SPF) / 24000; // FakeProducer default: 8 frames per word at speed 1.0
+
+function open(options: { producer?: FakeProducer; output?: FakeAudioOutput; document?: Partial<ReaderDocumentSnapshot> } = {}) {
+  const producer = options.producer ?? new FakeProducer();
+  const output = options.output ?? new FakeAudioOutput();
+  const fake = createFakeInfrastructure({ document: createFakeDocument({ position: 7, ...options.document }) });
+  const broker = createReaderPorts(fake.infra);
+  const document = fake.infra.document.snapshot();
+  broker.openDocument(document.documentId);
+  const { key, ports } = broker.issue("narrate");
+  const runtime = createNarrateRuntime(
+    { key, ports, document, settings: fake.infra.settings.read(), handoff: createInitialHandoff(document, document.wordCount), arrival: "silent" },
+    { producer, createOutput: () => output },
+  ) as NarrateModeRuntime;
+  return { fake, runtime, producer, output };
+}
+
+const settingsWrites = (fake: ReturnType<typeof createFakeInfrastructure>) =>
+  fake.effects.filter((c) => c.method === "settings.update").map((c) => c.args[0] as Record<string, unknown>);
+
+describe("narrate mode (P4)", () => {
+  const opened: NarrateModeRuntime[] = [];
+  afterEach(() => { for (const r of opened.splice(0)) r.destroy(); });
+
+  it("F5: start shows the voice-loading notice until the first word is timed; then the cursor is the table lookup at the playback sample", async () => {
+    const { fake, runtime, producer, output } = open();
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.start({ cause: "play-button" });
+    expect(runtime.getNotice()).toEqual({ kind: "loading", text: "Voice loading…" });
+    expect(runtime.getSnapshot()).toMatchObject({ playing: true, clockOwner: "audio-truth", narrating: true, currentWordIndex: 7, speed: { kind: "rate", rate: 1 } });
+    expect(runtime.getNarrationWordIndex()).toBe(7); // the start word is highlighted while the voice loads
+    expect(settingsWrites(fake)).toContainEqual({ readingMode: "narrate", lastReadingMode: "narrate", isNarrating: true });
+
+    await flush(); // the producer answered and the engine scheduled the first chunk at now + lead
+    expect(producer.requests.length).toBeGreaterThan(0);
+    expect(producer.requests[0].text.startsWith("w7 ")).toBe(true);
+    runtime.tick();
+    expect(runtime.getNotice()?.kind).toBe("loading"); // nothing has sounded yet
+
+    output.advance(INTO_FIRST_WORD_S);
+    runtime.tick();
+    expect(runtime.getNotice()).toBeNull();
+    expect(runtime.getSnapshot()).toMatchObject({ playing: true, highlightedWordIndex: 7, currentWordIndex: 7, canonicalWordIndex: 7 });
+
+    output.advance(WORD_S);
+    runtime.tick();
+    expect(runtime.getSnapshot()).toMatchObject({ highlightedWordIndex: 8, currentWordIndex: 8 });
+    expect(runtime.getNarrationWordIndex()).toBe(8);
+
+    runtime.pause();
+    expect(runtime.getSnapshot()).toMatchObject({ playing: false, clockOwner: "none", narrating: true, highlightedWordIndex: 8 });
+    expect(runtime.getNarrationWordIndex()).toBeUndefined();
+  });
+
+  it("F4: a refused chunk shows the timing-missing notice, narration pauses on the last timed word, and Play restarts it", async () => {
+    const { runtime, producer, output } = open();
+    opened.push(runtime);
+    producer.nextControl("missing-table");
+    runtime.select(7);
+    runtime.start({ cause: "play-button" });
+    expect(runtime.getNotice()?.kind).toBe("loading");
+
+    await flush();
+    expect(runtime.getNotice()).toEqual({ kind: "timing-missing", text: "This passage couldn't be timed. Narration paused on the last timed word." });
+    expect(runtime.getSnapshot()).toMatchObject({ playing: false, clockOwner: "none", highlightedWordIndex: 7 });
+    expect(runtime.getNarrationWordIndex()).toBeUndefined();
+    expect(output.sources).toEqual([]); // nothing was ever scheduled from an untimed chunk
+
+    // Play again: the failure clears, a lawful table arrives and the cursor is timed from the start word.
+    runtime.togglePlay();
+    expect(runtime.getNotice()?.kind).toBe("loading");
+    await flush();
+    output.advance(INTO_FIRST_WORD_S);
+    runtime.tick();
+    expect(runtime.getNotice()).toBeNull();
+    expect(runtime.getSnapshot()).toMatchObject({ playing: true, highlightedWordIndex: 7 });
+  });
+
+  it("speed: the rate lives on the 0.05 grid inside 0.80–2.00, is written to settings, and WPM speeds are ignored", () => {
+    const { fake, runtime } = open();
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.setSpeed({ kind: "rate", rate: 1.5 });
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 1.5 });
+    expect(settingsWrites(fake)).toContainEqual({ ttsRate: 1.5 });
+    runtime.adjustSpeed(1);
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 1.55 });
+    runtime.adjustSpeed(-1);
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 1.5 });
+    runtime.setSpeed({ kind: "rate", rate: 1.234 });
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 1.25 });
+    runtime.setSpeed({ kind: "rate", rate: 3 });
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 2 });
+    runtime.setSpeed({ kind: "rate", rate: 0.1 });
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 0.8 });
+    runtime.setSpeed({ kind: "wpm", wpm: 300 });
+    expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 0.8 });
+  });
+
+  it("the generated speed is the selected rate: a chunk requested after a change carries it", async () => {
+    const { runtime, producer } = open();
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.setSpeed({ kind: "rate", rate: 1.5 });
+    runtime.start({ cause: "play-button" });
+    await flush();
+    expect(producer.requests[0].speed).toBe(1.5);
+    expect(producer.requests[0].voice).toBe("af_bella");
+  });
+
+  describe("view", () => {
+    let container: HTMLDivElement;
+    let root: Root;
+    beforeEachRender();
+
+    function beforeEachRender() {
+      // eslint-disable-next-line vitest/no-hooks
+      afterEach(async () => {
+        await act(async () => { root?.unmount(); });
+        container?.remove();
+      });
+    }
+
+    async function mount(runtime: NarrateModeRuntime) {
+      container = document.createElement("div");
+      document.body.appendChild(container);
+      root = createRoot(container);
+      await act(async () => { root.render(React.createElement(NarrateModeView, { runtime })); });
+    }
+
+    it("renders the loading notice while the first word is on its way and the timing-missing notice after a refusal (non-EPUB document)", async () => {
+      const { runtime, producer, output } = open({ document: { useFoliate: false, filepath: "/fixture.txt" } });
+      opened.push(runtime);
+      await mount(runtime);
+      expect(container.querySelector(".rm-narrate-root")).not.toBeNull();
+      expect(container.querySelector(".rm-narrate-notice")).toBeNull();
+
+      await act(async () => { runtime.select(7); runtime.start({ cause: "play-button" }); });
+      const loading = container.querySelector(".rm-narrate-notice--loading");
+      expect(loading?.textContent).toBe("Voice loading…");
+      expect(loading?.getAttribute("role")).toBe("status");
+
+      await act(async () => { await flush(); output.advance(INTO_FIRST_WORD_S); runtime.tick(); });
+      expect(container.querySelector(".rm-narrate-notice")).toBeNull();
+
+      // F2: a click while playing restarts speech at the clicked word. That chunk is refused: the notice names
+      // it and the mode pauses (nothing untimed is ever scheduled).
+      producer.nextControl("missing-table");
+      await act(async () => { runtime.hardSelect({ cfi: null, word: "w20", globalWordIndex: 20 }); await flush(); });
+      expect(producer.requests.at(-1)?.text.startsWith("w20")).toBe(true);
+      expect(container.querySelector(".rm-narrate-notice--timing-missing")?.textContent).toContain("couldn't be timed");
+      expect(runtime.getSnapshot()).toMatchObject({ playing: false, clockOwner: "none", highlightedWordIndex: 20 });
+    });
+  });
+});
