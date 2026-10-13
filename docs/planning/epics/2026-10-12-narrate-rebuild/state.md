@@ -26,12 +26,14 @@ updated_by: session 1 (S1, P1 open)
 ## Where we are
 
 ```
-phase:        P1 — Producer and harness (open; branch eb/narrate-rebuild-1-p1, base 25ba145d)
-next_action:  harness library + P0-1 identity script + P0-2 mapping policy under scripts/narrate-rebuild/
+phase:        P1 — Producer and harness (open; branch eb/narrate-rebuild-1-p1 @ 0c0ea56f, base 25ba145d)
+next_action:  full generation matrix running in the background (p0-generate.mjs, resumable); then p0-summary gate, P1 merge, open P2
 blockers:     none
 session:      1 of ~14 budgeted
-dod:          D1..D13 unmet (A1, A2 verified; corpus recovered; baseline green)
+dod:          D1..D13 unmet (A1, A2 verified; P0-1 PASS; P0-2 holds on every chunk generated so far; corpus recovered; baseline green)
 ```
+
+Emerging P2 findings (Bella only, 0.80x and 1.00x, from `scripts/narrate-rebuild/p0-acoustic.mjs` — not yet the verdict): (1) the literal "pause k ↔ mark k" association drifts (Kokoro pauses without marks, skips pauses at dense commas, 60–80 ms stop closures register as pauses), so T4 is implemented as a monotone alignment on text-only priors (voiced ms per voiced phoneme char against the chunk mean), only pauses ≥ 120 ms ÷ rate may anchor a mark, and every anchor adjoining a count mismatch is unresolved (T4's own rule); (2) the table's word onset sits after the acoustic onset at 1% of peak by a mean +45 ms at 1.00x and +65 ms at 0.80x on passage A (22/24 and 16/24 anchors resolved, uncertainty ≤ 5.5 ms, worst 81 and 106 ms; energy is already at 30–80% of peak for 40–70 ms before the table's start, so the reference is sound) — beyond R4's 30 ms at 20 of 22 anchors; assigning the preceding space token's frames to the word centres the mean (−3 ms) but leaves a ±45 ms spread (6–7 of 22 beyond 30 ms); (3) passage B yields only 8 onset anchors at these rates (its dense punctuation is mostly unrealized as pauses) → INCONCLUSIVE under T5 after the two reference repairs (association method; offset anchors, which turned out not to be anchors: the table ends each word ~280–490 ms after the energy drops, because the pause's frames belong to the preceding phoneme); (4) warm generation of an 11–13-word chunk takes 3.7–7 s here (the audit's probe agrees), above R3's 2 s warm budget. P2 runs the full P0-3 (4 rates × 2 voices × 2 passages), P0-5 with thread settings tried, and classifies everything in the verdict.
 
 ## Next actions — max 5, near horizon only
 
