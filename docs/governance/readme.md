@@ -11,21 +11,17 @@ Source-of-truth operational and governance documents. Several of these are the
 | `LESSONS_LEARNED.md` | markdown | Engineering discoveries, standing rules, anti-patterns |
 | `IDEAS.md` | markdown | Unroadmapped concepts, reviewed at phase pauses |
 | `DEVELOPMENT_SYNC.md` | markdown | Local-first git workflow SOP |
-| `sprint-queue.xlsx` | binary/xlsx | **Authoritative** FIFO sprint queue (Catalog + Dashboard tabs) |
-| `TTS_ARCHITECTURE_DECISIONS.md` | markdown | Canonical TTS architecture decisions |
-| `TTS-AUDIT-2026-03-28.md` | markdown | TTS audit record |
-| `TTS-AUDIT-ORIENTATION.md` | markdown | TTS audit orientation |
-| `TTS-AUDIT-REVIEW.md` | markdown | TTS audit review |
-| `TTS_EVAL_RUNBOOK.md` | markdown | TTS eval runbook |
-| `TTS_EVAL_REVIEW_TEMPLATE.md` | markdown | TTS eval review template |
-| `QWEN_SUPPORTED_HOST_POLICY.md` | markdown | Qwen supported-host policy |
-| `blurby-tts-audit-package.zip` | binary/zip | Bundled TTS audit package (historical) |
+| `sprint-queue.xlsx` | binary/xlsx | Retired XLSX queue, read-only evidence. The live queue is the [monday.com work register](https://estrattbrown.monday.com/boards/18432450217) |
+| `terminal-ledger.jsonl` | jsonl | Append-only ledger of terminal (completed) work items |
+| `TTS_ARCHITECTURE_DECISIONS.md` | markdown | TTS architecture decisions (historical since NARRATE-REMOVE-1) |
+
+The TTS audit set, TTS eval runbook and template, and the Qwen host policy were archived to `docs/planning/.Archive/` on 2026-10-13.
 
 ## Subdirectories
 | Directory | Purpose |
 |-----------|---------|
 | `close-outs/` | Per-sprint close-out reports (`CloseOut.<ID>.<YYYY-MM-DD>.md`) and SpecRetro |
-| `bug-reports/` | In-app bug-report intake (with `.Archive/` for processed reports) |
+| `bug-reports/` | Issue documents (`Issue.<ID>.<date>.md`) from stops, holds and escalations. Raw in-app bug reports land in the gitignored `docs/bug-reports/` |
 
 ## Naming conventions
 - Close-outs: `CloseOut.<SPRINT-ID>.<YYYY-MM-DD>.md`
