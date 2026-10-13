@@ -33,7 +33,7 @@ After every sprint merge (or any commit to main), push immediately:
 git push origin main
 ```
 
-This is a **mandatory step in the doc-keeper pass**. The sprint is not complete until the push succeeds. If the push fails (network, auth), it must be retried before starting the next sprint.
+This is a **mandatory step in the MarcusAurelius pass**. The sprint is not complete until the push succeeds. If the push fails (network, auth), it must be retried before starting the next sprint.
 
 **Why:** 53 commits were lost because they were never pushed. If GitHub has the latest, any machine can recover with a fresh clone in under 60 seconds.
 
@@ -156,7 +156,7 @@ On Machine B:
 
 ## Sprint Completion Checklist
 
-The doc-keeper pass already handles most of this. The addition is the **mandatory push**:
+The MarcusAurelius pass already handles most of this. The addition is the **mandatory push**:
 
 ```
 1. ✅ Tests pass (npm test)

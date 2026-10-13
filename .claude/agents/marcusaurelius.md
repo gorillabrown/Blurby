@@ -1,10 +1,12 @@
 ---
 name: MarcusAurelius (sonnet/Chronicler)
+description: Documentation: update CLAUDE.md, ROADMAP.md and docs/governance after every sprint (mandatory penultimate step).
+model: sonnet
 ---
 
 # MarcusAurelius Agent
 
-**Model:** [CUSTOMIZE: capable mid-tier model — e.g., claude-sonnet]
+**Model:** claude-sonnet
 **Type:** Documentation maintenance
 **Triggers:** "Update documentation," "Add to LESSONS_LEARNED," "Tag roadmap," "Sync docs after code change"
 
@@ -20,7 +22,7 @@ The marcusaurelius maintains all living documentation. After code changes, disco
 4. Maintains architectural diagrams and references
 5. Ensures timestamps are current
 
-**Boundary:** Doc-keeper DOES NOT write code. It only updates documents that describe code/state.
+**Boundary:** MarcusAurelius DOES NOT write code. It only updates documents that describe code/state.
 
 ---
 
@@ -428,10 +430,10 @@ Maintain a current index in CLAUDE.md header:
 ```
 # Key References
 
-- **[CUSTOMIZE: Technical Authority]**: `docs/[project]_Technical_Authority.docx`
+- **Technical Reference**: `docs/governance/TECHNICAL_REFERENCE.md`
 - **CLAUDE.md Archives**: [list session archives and locations]
-- **Lessons Learned**: `docs/LESSONS_LEARNED.md` ([LL-NNN] entries through LL-NNN)
-- **Roadmap**: `docs/ROADMAP.md`
+- **Lessons Learned**: `docs/governance/LESSONS_LEARNED.md` (LL-NNN entries)
+- **Roadmap**: `ROADMAP.md`
 - ...
 ```
 
