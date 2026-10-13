@@ -37,8 +37,8 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 
 ## Next actions — max 5, near horizon only
 
-1. [x] P3 gate passed and merged `ef245815` 2026-10-13 11:36; P4 opened at it; Gate log and Evidence rows written here; first P4 commit carries the base trailer
-2. [ ] P4 census (importers, selectors, absence assertions, normalization sites; LL-139, LL-150) → plan.md worklist with the D7/D8/D9 suite names
+1. [x] P3 merged `ef245815`; P4 opened; census done 2026-10-13 12:00 (plan.md worklist: every seam, policy entry, test rewrite and suite named); the old Narrate display files are restored from `612d03f5` into the worktree (untracked until the runtime compiles against them)
+2. [ ] New `src/reader/modes/narrate/ModeRuntime.ts` over the P3 engine (producer over `window.electronAPI.narrate*`, one `WebAudioOutput`, F4 notice, F5 loading state); adapt `useModeBindings.ts` (rAF tick, cursor → view), `ModeState.ts`, `ModeView.tsx`
 3. [ ] Runtime shell, view and bindings over the P3 engine (`src/reader/modes/narrate/`); producer port over the preload surface; F4 notice; F5 voice-loading state
 4. [ ] Preload `narrate*` surface, router registration, bottom-bar entry and KeyN, mode id `"narrate"` with the normalization retirement and schema step; D8/D9 suites rewritten, never deleted
 5. [ ] P4 gate (D7; D8 with the three G4 baselines byte-identical; D9; `npm test`; typecheck; `npm run build`) → merge → P5 (D3 log and check script, D6 on the ordinary desktop, crossings, D10's patch timing removal). The staging memo's observations go to the planner's close-out, never folded in from this run
