@@ -17,7 +17,8 @@ import { createFakeDocument, createFakeInfrastructure } from "../readerModes/har
 import { FakeAudioOutput } from "./harness/fakeAudioOutput";
 import { FakeProducer, SAMPLE_RATE, SPF } from "./harness/fakeProducer";
 
-const SECTION_A = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned to be religious.".split(" ");
+// Section A ends without terminal punctuation (a heading or epigraph line), so only the section end can stop a chunk there.
+const SECTION_A = "Of my grandfather Verus I have learned to be gentle and meek. Of my mother I have learned to be religious".split(" ");
 const SECTION_B = "HIS FIRST BOOK concerning himself. Wherein Antoninus recordeth what and of whom he learned.".split(" ");
 const WORDS = [...SECTION_A, ...SECTION_B];
 const BOUNDARY = SECTION_A.length;
@@ -47,7 +48,7 @@ describe("narrate crossings (D5)", () => {
     const output = new FakeAudioOutput();
     const producer = new FakeProducer({ framesPerWord: FRAMES, leadFrames: 2, tailFrames: 1 });
     const document = createFakeDocument({
-      position: BOUNDARY - 6, tokenWords: WORDS, wordCount: WORDS.length, paragraphBreaks: [],
+      position: BOUNDARY - 3, tokenWords: WORDS, wordCount: WORDS.length, paragraphBreaks: [],
       bookWords: { words: WORDS, sections: SECTIONS, totalWords: WORDS.length, footnoteCues: [] },
     });
     const fake = createFakeInfrastructure({ document });
@@ -83,17 +84,17 @@ describe("narrate crossings (D5)", () => {
     let clock = 1_000_000;
     vi.spyOn(Date, "now").mockImplementation(() => clock);
 
-    runtime.select(BOUNDARY - 6);
+    runtime.select(BOUNDARY - 3);
     runtime.start({ cause: "play-button" });
     await flush();
     // The first chunk ends exactly at the section end; the next starts exactly there.
-    expect(producer.requests[0].text).toBe(WORDS.slice(BOUNDARY - 6, BOUNDARY).join(" "));
+    expect(producer.requests[0].text).toBe(WORDS.slice(BOUNDARY - 3, BOUNDARY).join(" "));
     expect(producer.requests[1].text.startsWith("HIS FIRST BOOK")).toBe(true);
     expect(producer.requests.every((r) => { const n = r.text.split(" ").length; const start = WORDS.indexOf(r.text.split(" ")[0]); return !(start < BOUNDARY && start + n > BOUNDARY); })).toBe(true);
 
     // Play through the first chunk into the second: the cursor crosses the boundary.
     const seen: number[] = [];
-    const ticks = Math.round((0.03 + 6 * WORD_S + 0.5) / STEP);
+    const ticks = Math.round((0.03 + 3 * WORD_S + 0.5) / STEP);
     for (let i = 0; i < ticks; i++) {
       output.advance(STEP);
       runtime.tick();
@@ -103,7 +104,7 @@ describe("narrate crossings (D5)", () => {
     }
     expect(seen).toContain(BOUNDARY - 1);
     expect(seen).toContain(BOUNDARY);
-    expect(seen.slice(seen.indexOf(BOUNDARY - 6))).toEqual(seen.slice(seen.indexOf(BOUNDARY - 6)).map((_, i) => BOUNDARY - 6 + i)); // in order, none dropped or repeated
+    expect(seen.slice(seen.indexOf(BOUNDARY - 3))).toEqual(seen.slice(seen.indexOf(BOUNDARY - 3)).map((_, i) => BOUNDARY - 3 + i)); // in order, none dropped or repeated
 
     // The view was asked for the next section when the first word past the boundary could not be painted,
     // and paints it once that section's words are in (the pending-resume path).

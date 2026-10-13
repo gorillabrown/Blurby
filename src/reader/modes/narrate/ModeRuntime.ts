@@ -604,7 +604,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
    */
   private chunkBreaks(words: readonly string[]): ReadonlySet<number> {
     const bookWords = this.document.bookWords;
-    if (bookWords && words === bookWords.words) {
+    // By content: start() hands the engine a copy of the words, never the snapshot's own array.
+    if (bookWords && words.length === bookWords.words.length && words.every((w, i) => w === bookWords.words[i])) {
       const ends = new Set<number>();
       for (const section of bookWords.sections) if (section.endWordIdx > 0) ends.add(section.endWordIdx - 1);
       return ends;
