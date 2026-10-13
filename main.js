@@ -23,6 +23,8 @@ const { extractContent, extractDocMetadata, countWords,
 // built renderer unpackaged; BLURBY_USER_DATA_DIR keeps a trial's profile out of the real one (set before any path is read).
 const isDev = !app.isPackaged && !process.env.BLURBY_USE_DIST;
 if (process.env.BLURBY_USER_DATA_DIR) app.setPath("userData", path.resolve(process.env.BLURBY_USER_DATA_DIR));
+// A Narrate trial measures the highlight on display frames: keep painting while another window covers this one.
+if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
