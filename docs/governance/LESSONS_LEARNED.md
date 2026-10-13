@@ -2827,3 +2827,60 @@ Each entry below restates an earlier LL entry in this file in id-first form so t
 
 ### LL-138 — status (pointer-closeout, 2026-10-12)
 **Status:** Observation — held twice more: EINK-HOVER-FIX-1 (the new test alone failed before the CSS change; reproduced at `073cd5a3`, 1 failed and 11 passed) and LIBRARY-SETTINGS-FIX-1 (both new test files failed on exactly the listed defects). Gap: LIBRARY-SETTINGS-FIX-1 kept no output, so its close-out reproduced the control at `685b7f35`. Promotion candidate for the next roadmap review.
+
+### LL-150 — A Delete-list file can carry rules for retained features: census every deleted stylesheet's selectors (NARRATE-REMOVE-1, 2026-10-12)
+**Verdict:** The deletion spec listed `src/styles/tts-settings.css` as narration-only. It also held the Reading Goals settings styles (nine classes: `.reading-goals-create`, `.reading-goal-row`, `.reading-goal-unit`, `.reading-goal-progress`, `.reading-goal-streak`, `.reading-goals-empty`, `.reading-goal-delete` and the inputs inside them), used by the retained `ReadingGoalsSettings.tsx` and defined nowhere else. The import-graph census (LL-139) found no dangling import because CSS selectors and assets are not imports; a spec-compliant deletion would have left Settings → Reading Goals unstyled.
+**Evidence:** Spec-compliance review of C1–C4 (finding 1, MEDIUM). Fix: the block was restored verbatim into `src/styles/reading-goals.css`, imported from `src/styles/index.css`, as an `Exception:` path by owner decision (staging memo, "C4 correction"); the owner confirmed the page styled in smoke 16(c). A `git grep` for `tts|kokoro|narrat|qwen|moss|pocket` in `src/styles/reading-goals.css` exits 1.
+**Recommendation:** A deletion spec that removes any stylesheet (or other asset: image, font, JSON) adds a selector-usage census to its readiness step: list every class the file defines, `git grep` each against retained `className` and CSS uses, and name every hit as a move, not a delete, with a Done-when row that checks it.
+**Applies to:** Deletion and removal specs (NARRATE-REMOVE-1 and its siblings, CLEANUP-MODE-BARREL-1), any CSS consolidation, and spec-compliance review checklists.
+**Status:** Observation
+Related: LL-139 (import-graph census; this is its CSS and asset gap), LL-143.
+
+### LL-151 — A gate recorder must be proven able to record a failure before its PASS is trusted (INSTRUMENT-CONTROL) (NARRATE-REMOVE-1, 2026-10-12)
+**Verdict:** The first run of the 34-check Done-when gate script recorded nothing while every check ran: its PowerShell recorder function was named `R`, which the built-in alias for `Invoke-History` silently shadowed, so no result reached the summary. It was caught only because the summary read 0 PASS / 0 FAIL. A recorder that cannot record a failure also cannot record a pass, and a summary of zero is not a pass.
+**Evidence:** The gate run on C4, 2026-10-12: summary "0 PASS / 0 FAIL"; the function was renamed to a name no alias owns and the script re-run (34/34 PASS on C4 `75095813`, then on amended C4 `31793182`). Same discipline as the spec's positive controls (LL-138): a check is proven only once it has been seen to fail.
+**Recommendation:** A gate script (1) uses a recorder name with no alias or built-in collision (verb-noun; `Get-Alias <name>` finds nothing), (2) asserts at the end that PASS + FAIL equals the number of checks it defines and exits non-zero otherwise, and (3) is run once with a deliberately failing check to prove the recorder shows a FAIL. Specs that ship a gate script say so.
+**Applies to:** Every Done-when gate script, PowerShell especially, and its use by `/pointer-closeout`.
+**Status:** Observation
+Related: LL-138 (positive controls), LL-143 (acceptance-command convention).
+
+### LL-152 — When a live owner gate is blocked by environment slowness, A/B the same actions on the base build before attributing it (NARRATE-REMOVE-1, 2026-10-12)
+**Verdict:** The owner reported the sprint build too slow in dev mode to run Done-when 16(e) and 16(f). Running the base (`main` @ `612d03f5`, same profile, same actions, about one minute) showed it equally slow, which settled the slowness as pre-existing in minutes rather than leaving the sprint blocked. The same A/B settled the horizontal cursor band's placement as pre-existing (BUG-188, provisional) but was inconclusive on the ResizeObserver flood (BUG-187, provisional), because the sessions differed in length. An A/B proves "same on the base" only for like-for-like sessions.
+**Evidence:** The staging memo's "A/B on the slowness" and "Observation" lines; the owner's confirmation for each case.
+**Recommendation:** (1) When a live gate is blocked or surprising, run the same actions on the base before attributing the cause, and record the session length and actions so the comparison is fair. (2) Specs with live owner gates name a production-build smoke route (the built app), not only `npm run dev`, because dev mode is slow on this machine (BUG-189, provisional). (3) When a gate cannot be driven live, an owner-accepted static verification is recorded as such, with the live observations beside it.
+**Applies to:** Spec authoring for any item with a live smoke row, and the owner-gate steps in `/next-pointer` dispatch prompts.
+**Status:** Observation
+Related: LL-141 (owner-observed route and throttle check), LL-147 (local session for owner-machine gates).
+
+### LL-153 — Settle at dispatch what the executing session may write: board status moves stay with the ceremonies (NARRATE-REMOVE-1, 2026-10-12)
+**Verdict:** The executing ceremony (`virtuoso`) is served the monday register read-only (`workRegister.allowedWriters` does not name it), and until 2026-10-12 it could not write `closeOuts` either, where its time log and staging memo live. Specs still told runs to move their item In Flight and keep a time log, so runs left the card Queued (TTS-ENGINE-SHARED-1, LIBRARY-SETTINGS-FIX-1), moved it through the connector without the mutation handshake (EINK-HOVER-FIX-1), or went without a time log (READER-MODE-SEPARATION-2; LL-136).
+**Evidence:** The `/next-pointer` pre-flight for NARRATE-REMOVE-1 (2026-10-12): `provider --actor virtuoso` reported `readOnly: true`, and `closeOuts` allowed only `pointer-closeout`. By owner decision, `/next-pointer` moved the card In Flight at dispatch and the registry added `virtuoso` to `closeOuts` (merge `19e9459a`, standing rule 41's clause). The run then kept a complete time log (13 rows, 58 min measured) and needed no register write.
+**Recommendation:** At dispatch, run `virtuoso_registry provider --actor virtuoso` and read the `closeOuts` writers. Board status moves belong to the ceremonies: `/next-pointer` moves the card In Flight after reading the prerequisites, and `/pointer-closeout` closes it. A spec never tells the run to write the register.
+**Applies to:** `/next-pointer` pre-flight, spec recipes that mention register writes, and registry permission changes.
+**Status:** Observation
+Related: LL-136 (standing rule 41), standing rule 40.
+
+### LL-138 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: the two new positive-control tests failed on the base 15/15 (C1, `238e12e6`) and passed after C3 (`0d411010`); the omission controls held (removing `normalizeReaderModes` from `loadSettingsData` fails (a); from `applyCloudSettings` fails (b) and (c); from the `save-settings` handler fails (e)), each line restored hash-identical. Each control's output is kept in the staging memo.
+
+### LL-139 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held with a gap: the import-graph census gave 0 import fix rounds, and the closure check (self-test 7/7) reported 0 dangling relative imports. The gap is CSS and asset references, which the census does not cover (see LL-150, provisional).
+
+### LL-143 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: every gate named its shell and exit code and passed only on an exact code; the 34-check gate script ran on C4 and on amended C4. One spec typo found by review (INFO): `git log --format=%H -- tests/perf-baseline-results.json 612d03f5..HEAD` puts the range after `--`, where git reads it as a path; the correct form is `git log --format=%H 612d03f5..HEAD -- tests/perf-baseline-results.json`. Recorded for the next spec edit; no change to the recurrence count.
+
+### LL-144 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: the resume base was taken from C1's `NARRATE-REMOVE-1-Base:` trailer (`612d03f5bdadf861a875d76c6260fd8d3a7520aa`), never recomputed against `origin/main`.
+
+### LL-146 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: the closure-check script was kept outside the repository, so it added no collectable `*.test.*` file.
+
+### LL-147 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: the run was a local session, and the owner-machine gates (full suite, build, live smoke) ran on the owner's machine. Caveat: dev-mode slowness blocked the timing-sensitive live checks (see LL-152, provisional).
+
+### LL-148 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: no committed file on the branch names the merge sha; the sha is recorded in what is written after the merge (close-out, register evidence, terminal ledger), and every staged fold-in reads ``386651fc``.
+
+
+### LL-068 — status (NARRATE-REMOVE-1, 2026-10-12)
+**Status:** Observation — held: `git diff --stat` shrinkage was checked per commit (C2 24,827 deletions; C3 16,123; C4 41,916 in its original form, then amended with the restored stylesheet); every large decrease was a listed deletion, and no file was truncated.

@@ -62,3 +62,4 @@
 {"recordId": "TR-062", "itemId": "TEST-TIMEOUT-HEADROOM-1", "completed": "2026-10-12", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md", "corrects": "", "effort": "XS"}
 {"recordId": "TR-063", "itemId": "EINK-HOVER-FIX-1", "completed": "2026-10-12", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md", "corrects": "", "effort": "XS"}
 {"recordId": "TR-064", "itemId": "LIBRARY-SETTINGS-FIX-1", "completed": "2026-10-12", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md", "corrects": "", "effort": "S"}
+{"recordId": "TR-065", "itemId": "NARRATE-REMOVE-1", "completed": "2026-10-12", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md", "corrects": "", "effortEstimate": "11h15m", "effortActual": "58m", "effort": "L"}

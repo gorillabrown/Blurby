@@ -8,6 +8,46 @@
 
 ## Incomplete
 
+### BUG-189 — Dev-mode (`npm run dev`) is slow across the whole app
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
+**Severity:** LOW (development and owner-smoke friction; the production build was not measured)
+**Status:** OPEN — unscheduled. Lane: Platform & Maintenance.
+**Location:** the dev server and Electron dev build on the owner's machine; no source location identified.
+**Description:** The whole app, the library included, is too slow in dev mode to drive timing-sensitive live checks. The owner could not judge the Shift+Space sequence (Done-when 16(f)), which was accepted from static verification instead.
+**Root cause:** Undetermined. An A/B on 2026-10-12 ran the base (`main` @ `612d03f5`, same profile, same actions) and the owner reported it equally slow, so the cause is pre-existing and not the removal.
+**Evidence:** The NARRATE-REMOVE-1 run record (staging memo, "A/B on the slowness"); LL-152.
+**Fix path:** Measure first (Pike rule 1): compare a production build against dev on the same actions, then profile the renderer. Until then, specs with live owner gates name a production-build smoke route.
+
+### BUG-188 — Focus and Flow horizontal cursor band sits apart from the word cursor
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
+**Severity:** LOW (visual; reading stays possible)
+**Status:** OPEN — pre-existing; triage together with BUG-169 and the "Flow band" item the removal spec lists as out of scope. Lane: Reader Engine.
+**Location:** `src/styles/flow.css` and `src/reader/modes/flow/mode.css` (`.flow-shrink-cursor`); the Focus and Flow word-cursor positioning code. Not touched by the removal.
+**Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
+**Root cause:** Undetermined. The base build (`main` @ `612d03f5`, same profile, A/B 2026-10-12) shows the same placement, so the removal did not cause it. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
+**Evidence:** Owner screenshot 1250x849, `C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png` (kept outside the repository: `docs/governance/bug-reports/.gitignore` excludes screenshots); the staging memo's observation and evidence paragraph.
+**Fix path:** Triage first (read-only diagnosis, Aristotle): decide whether this is BUG-169, the known Flow band item, or new, then spec a fix.
+
+### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
+**Severity:** LOW (log noise and possible render cost; no visible failure reported)
+**Status:** OPEN — cause undetermined; needs a read-only diagnosis. Lane: Reader Engine.
+**Location:** the five `ResizeObserver` instances in the Page, Focus and Flow Foliate view files, which NARRATE-REMOVE-1 did not touch.
+**Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
+**Root cause:** Undetermined. A base session of about one minute the same day logged none, but the sessions differ in length and actions, so a pre-existing pattern and a change of this sprint are both still open.
+**Evidence:** The staging memo's smoke note and observation (counts, timestamps).
+**Fix path:** Aristotle: reproduce on the base with a comparable session, then locate the observer callback that writes layout state inside its own notification; guard with an equality check or a deferred write.
+
+### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
+**Severity:** LOW (test flake; the product code is not implicated)
+**Status:** OPEN — unscheduled, not fixed in NARRATE-REMOVE-1 (per the TEST-TIMEOUT-HEADROOM-1 close-out ruling: a new low bug, not an in-sprint fix). Lane: Platform & Maintenance.
+**Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
+**Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
+**Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
+**Evidence:** The staging memo's full-suite note.
+**Fix path:** Widen or relax the budget (assert a generous multiple, or compare against a same-run baseline) and keep the coverage assertions strict.
+
 ### BUG-185 — Settings writes are fire-and-forget and share one .tmp path
 **Reported:** 2026-10-11 (OutsideAudit.10 F7 remediation)
 **Severity:** LOW (durability; a failed or overlapping settings write can be lost silently)
@@ -18,6 +58,7 @@
 **Evidence:** OutsideAudit.10 F7. The planner's verifications ran the verbatim writer with deferred and rejecting fake filesystems (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F7-settings-writer/`). In Node on real NTFS, overlapping writes to one path rejected with ENOENT (46 of 400 calls in 2-way overlap, 96 of 160 in 8-way), and 8-way overlap left an older snapshot in 4 of 30 rounds (counts reported, not packaged: the scripts are saved, their output is not). Not reproduced under Electron.
 **Fix path:** Give each write a unique temp name, or serialize writes per path; return the writer promise and log failures at callers; wrap the settings save in `loadState` in try/catch with a log, so startup proceeds when the write fails (`app.whenReady().then(...)` at `main.js:611-731` has no catch); keep cloud apply non-blocking; flush a pending debounced settings save at `will-quit`; add tests with a deferred and a rejecting fake filesystem.
 **Severity rationale:** Every launch re-normalizes settings, and no loss has been observed under Electron. It matters once a feature needs settings to reach disk (NARRATE-REBUILD-1's settings-durability charter input).
+**Update 2026-10-12 (NARRATE-REMOVE-1 smoke):** observed live at startup on the sprint build: the dev log shows ENOENT on the rename `settings.json.tmp` → `settings.json` and `sync-queue.json.tmp` → `sync-queue.json` (the shared `.tmp` path race described above). Out of scope for NARRATE-REMOVE-1 by its spec; the app wrote schema 13 correctly. Status stays OPEN, unscheduled. Note for the rebuild: the v13 migration and the three ingestion points add settings writes on launch, so the race is exercised on every start.
 
 ### BUG-184 — E-Ink Display Mode toggle strips Settings panel background (transparent overlay)
 **Reported:** 2026-05-29 (THEME-SYNC-1 smoke test retest on v1.75.1)
@@ -28,6 +69,7 @@
 **Root cause:** `themes.css:145` has `[data-eink="true"] *:hover { background-color: inherit; }` — a nuclear wildcard hover rule that overrides `.menu-flap`'s `background: var(--bg-raised)` when the cursor is over the panel. The `inherit` value pulls from the parent element's background, which is transparent (the app container behind the fixed-position flap).
 **Fix path:** XS — either scope the hover rule to exclude `.menu-flap` (e.g., `[data-eink="true"] *:not(.menu-flap):hover`), or add `[data-eink="true"] .menu-flap { background: var(--bg-raised); }` after line 151. Reader surfaces work correctly with einkMode ON — the bug is Settings panel only.
 **Severity rationale:** einkMode is an opt-in power feature (toggle OFF by default), so impact is narrow. But the transparency makes Settings completely unusable when enabled.
+**Update 2026-10-12 (NARRATE-REMOVE-1):** no change to the e-ink hover rule; the removal deleted `src/styles/tts-settings.css`, which held no e-ink rule. Status stays "RESOLVED in source — OPEN until rebuild + owner smoke (SRL-079)".
 
 ### BUG-183 — Chrome extension cannot pair with Blurby desktop (auth handshake timeout)
 **Reported:** 2026-05-28 (post v1.75.1 rebuild verification pass)

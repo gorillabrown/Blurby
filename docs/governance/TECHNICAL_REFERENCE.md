@@ -49,8 +49,8 @@ Blurby is an Electron application with a clear three-layer architecture.
 │  main/migrations.js ─── schema migrations with backup        │
 │  main/ws-server.js ─── WebSocket for Chrome extension        │
 │  main/folder-watcher.js ─── chokidar folder watching         │
-│  main/tts-engine.js ─── Kokoro TTS worker wrapper            │
-│  main/tts-worker.js ─── Kokoro inference (worker thread)     │
+│  main/tts-engine.js ─── Kokoro TTS worker wrapper (dormant)  │
+│  main/tts-worker.js ─── Kokoro inference (dormant)           │
 │  main/cloud-storage.js ─── provider factory                  │
 └──────────────────────┬──────────────────────────────────────┘
                        │ IPC (invoke/handle + send/on)
@@ -62,7 +62,7 @@ Blurby is an Electron application with a clear three-layer architecture.
 │                   Renderer Process (Chromium)                 │
 │  src/App.tsx ─── thin orchestrator                           │
 │  src/components/ ─── 39 UI components + 8 settings pages     │
-│  src/modes/ ─── ReadingMode strategy pattern (4 modes)       │
+│  src/modes/ ─── ReadingMode strategy pattern (3 modes)       │
 │  src/hooks/ ─── useReader, useLibrary, useKeyboardShortcuts  │
 │  src/contexts/ ─── SettingsContext, ToastContext              │
 │  src/utils/ ─── text, pdf, rhythm, queue, segmentWords       │
@@ -214,14 +214,26 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 |-------|---------|---------|
 | `wpm` | 300 | Reading speed (words per minute) |
 | `theme` | `"dark"` | `"dark" | "light" | "blurby" | "eink" | "system"` |
-| `readingMode` | `"focus"` | Active mode type |
-| `lastReadingMode` | `"flow"` | Space bar starts this mode from Page view |
-| `ttsEngine` | `"web"` | `"web" | "kokoro" | "qwen" | "nano" | "pocket-tts"`; Desktop v2.0 product posture keeps Kokoro default, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen disabled. |
+| `readingMode` | `"focus"` | Active mode type: `"page"`, `"focus"` or `"flow"` (a saved `"narrate"` is normalized to `"flow"`) |
+| `lastReadingMode` | `"flow"` | Space bar starts this mode from Page view; same three values, same normalization |
+| `ttsEngine` | `"web"` | `"web" | "kokoro"`; the MOSS-Nano, Pocket and Qwen engines and their values were deleted by NARRATE-REMOVE-1 (2026-10-12). Kokoro is dormant: no UI path selects or starts it until NARRATE-REBUILD-1. |
 | `ttsRate` | 1.0 | TTS speech rate (0.5-2.0) |
 | `rhythmPauses` | object | Comma, sentence, paragraph, number, long-word pauses |
 | `layoutSpacing` | object | Line height, character spacing, word spacing |
 | `focusTextSize` | 110 | Font size percentage (60-200) |
 | `syncIntervalMinutes` | 5 | Auto-sync frequency |
+
+#### Settings schema 13 and reading-mode normalization (NARRATE-REMOVE-1, 2026-10-12)
+
+`settings.json` is at `schemaVersion` 13. The v13 migration in `main/migrations.js` runs `normalizeReaderModes(data)`, which maps `readingMode` and `lastReadingMode` from `"narrate"` to `"flow"`; the migration framework keeps the pre-upgrade backup (`settings.json.bak`). Because the removed mode can reappear from sources other than the local file, the same function is also applied at every ingestion point, so a saved or synced `narrate` never reaches the renderer:
+
+| Ingestion point | File | Behaviour |
+|---|---|---|
+| Startup load | `loadSettingsData` in `main/migrations.js` | Normalizes on every launch after migration; writes no new backup when the file is already schema 13 |
+| Cloud apply | `applyCloudSettings` in `main/sync-engine.js` | Normalizes after the merge and before the settings save |
+| Renderer write | the `save-settings` handler in `main/ipc/state.js` | Normalizes before `get-state`, before the debounced save and before the sync enqueue |
+
+Each site has an omission control in `tests/` (removing the call fails its test). NARRATE-REBUILD-1 retires these calls only if the rebuilt mode's id is `"narrate"`. Settings durability is unchanged: writes stay fire-and-forget with a shared `.tmp` path (BUG-185).
 
 ### EPUB CFI Position Tracking
 
@@ -246,7 +258,7 @@ Sync uses revision counters and tombstones for conflict resolution:
 
 ## 5. Reading Modes
 
-Blurby exposes four user-facing reading modes: Page, Focus, Flow, and Narrate. Page/Focus/legacy Flow still use the mode-interface pattern where appropriate, but current Foliate Flow and Narrate are orchestrated by hook-level runtime owners in `ReaderContainer.tsx`, `useReaderMode.ts`, `useFlowScrollSync.ts`, and `useNarration.ts`.
+Blurby exposes three user-facing reading modes: Page, Focus and Flow. Each is an independent runtime under `src/reader/modes/{page,focus,flow}/` (own state, lifecycle, timers, rendering and tests) behind a thin router; there is no sibling-runtime import and no shared mutable mode store (READER-MODE-SEPARATION-2, 2026-10-11). Narrate was removed by NARRATE-REMOVE-1 (2026-10-12) and is rebuilt from scratch by NARRATE-REBUILD-1; until then a saved `narrate` mode is normalized to `flow` (see §4, Settings schema 13). The mode runtimes keep `narrating: false` / `isNarrating: false` and a `click-to-narrate` tag deliberately (decision D5), so the rebuilt mode can join without a router change.
 
 ### ReadingMode Interface Contract
 
@@ -276,8 +288,6 @@ create(config) → start(wordIdx) → [advance / pause / resume / setSpeed] → 
 
 | Hook | File | Effects | Domain |
 |------|------|---------|--------|
-| `useNarrationSync` | `src/hooks/useNarrationSync.ts` | 12 | TTS cursor sync, narration state, audio glide wiring |
-| `useNarrationCaching` | `src/hooks/useNarrationCaching.ts` | 4 | TTS preload, cache invalidation, voice change |
 | `useFlowScrollSync` | `src/hooks/useFlowScrollSync.ts` | 6 | Flow scroll position, line map, zone sync |
 | `useFoliateSync` | `src/hooks/useFoliateSync.ts` | 4 | Foliate renderer events, CFI/word index sync |
 | `useDocumentLifecycle` | `src/hooks/useDocumentLifecycle.ts` | 7 | Book open/close, fileHashes cleanup, history |
@@ -341,7 +351,9 @@ Infinite-scroll reading with a reading-window/line progression pacer.
 - **Constants:** `FLOW_READING_ZONE_POSITION` (0.25), `FLOW_CURSOR_HEIGHT_PX` (3), `FLOW_CURSOR_EINK_HEIGHT_PX` (4), `FLOW_SCROLL_RESUME_DELAY_MS` (2000), `FLOW_LINE_ADVANCE_BUFFER_MS` (50).
 - **Reverses LL-013** ("Flow belongs in Page View") — see LL-067. Infinite scroll is fundamentally incompatible with CSS multi-column pagination.
 
-### Narrate Mode (hook-driven via `useReaderMode.ts` + `useNarration.ts`)
+### Narrate Mode (REMOVED 2026-10-12 — historical; NARRATE-REBUILD-1 rebuilds it)
+
+> **Removed by NARRATE-REMOVE-1.** `useNarration.ts`, `useNarrationSync.ts`, `useNarrationCaching.ts`, the narration strategies under `src/hooks/narration/`, `audioScheduler`, the Narrate mode runtime (`src/reader/modes/narrate/`), its bottom-bar entry and settings pages, and the narration-only tests no longer exist. The bullets below describe the deleted design and are kept for the rebuild's reference; the installed Kokoro export emits no durations (LL-142), so none of its timing claims survive.
 
 TTS-driven reading with chunk/word highlight and audio-owned progress.
 
@@ -431,7 +443,9 @@ interface FoliateWord {
 
 ## 7. TTS Engine Landscape
 
-Blurby's Desktop v2.0 TTS product posture is Kokoro as the default and available operational floor, MOSS-Nano as a recommended opt-in local engine after MOSS-NANO-13e, Pocket TTS as an available opt-in third engine after POCKET-TTS-1, and Qwen disabled. Web Speech remains the platform TTS backend where available, but the v2.0 successor-engine posture is bounded to these explicit engine states and keeps Kokoro available.
+**Status since NARRATE-REMOVE-1 (2026-10-12): Kokoro is the only engine in the tree and it is dormant.** Nothing starts it at launch, the renderer has no narration path, and `preload.js` exposes no Kokoro or TTS-cache methods (it keeps `extractEpubWords` and the eval-trace bridge). In `main/ipc/tts.js` the handlers `tts-kokoro-generate`, `tts-kokoro-voices`, `tts-kokoro-model-status`, `tts-kokoro-preflight`, `tts-kokoro-download`, `tts-kokoro-preload`, `tts-kokoro-generate-marathon`, `tts-kokoro-preload-marathon`, `extract-epub-words` and the `tts-cache-*` family (`read`, `write`, `has`, `chunks`, `evict-book`, `evict-voice`, `info`, `opening-coverage`) stay registered but unreachable from the UI. The five Kokoro main files (`main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/tts-worker.js`, `main/tts-cache.js`, `main/tts-opus.js`) are unchanged. `main.js` no longer calls `ttsCache.init`, so NARRATE-REBUILD-1 must call it before using the cache. The MOSS-Nano, Pocket and Qwen modules (the shared sidecar adapter and engine, the provider configurations, the Qwen engine, sidecar and streaming files, their scripts, IPC handlers, preload methods, packaging entries, CI paths and tests) were deleted. The paragraphs below describe the pre-removal landscape and are historical wherever they name a deleted engine, provider-registry entry, strategy or setting.
+
+Pre-removal text of this paragraph, kept for history: Blurby's Desktop v2.0 TTS product posture was Kokoro as the default and available operational floor, MOSS-Nano as a recommended opt-in local engine after MOSS-NANO-13e, Pocket TTS as an available opt-in third engine after POCKET-TTS-1, and Qwen disabled.
 
 TTS-REGISTRY-1 makes provider capability truth explicit in `src/types/ttsProvider.ts` and `src/utils/ttsProviderRegistry.ts`. The registry records each provider's selectable/default/experimental state, offline and sidecar requirements, streaming support, timing truth, voice blending/cloning posture, supported languages, sample rate, license, cacheability, status kind, and settings/status copy. This registry is informational and settings-facing today: it does not change playback strategy selection, Kokoro default behavior, explicit-only fallback policy, or Qwen disablement. Current truth: Kokoro is default and word-native; Web Speech is a platform fallback with unreliable boundary timing; MOSS-Nano and Pocket TTS are sidecar-backed segment-following opt-in engines; Qwen is disabled and unselectable.
 
@@ -758,6 +772,8 @@ Eight settings sub-pages in `src/components/settings/`:
 | Cloud Sync | Provider sign-in, sync frequency, manual sync |
 | Help | Version info, auto-updater, error logs |
 
+The narration settings pages (voice, engine and Narrate options) were deleted by NARRATE-REMOVE-1. The Reading Goals page (`ReadingGoalsSettings.tsx`) is retained; its styles live in `src/styles/reading-goals.css` (restored verbatim from the deleted `tts-settings.css` by owner decision, 2026-10-12). `HotkeyMapSettings.tsx` still shows `] / N` for Next chapter although bare `N` is unbound (to be fixed with UX-POLISH-1).
+
 ### Settings Cascade
 
 ```
@@ -965,6 +981,8 @@ Vitest 4.1, configured to run with `npm test` (`vitest run`).
 | `getOverlayPosition.test.ts` | Overlay positioning |
 | `startWordIndex.test.ts` | Start word index calculation |
 | `useProgressTracker.test.ts` | Progress tracking and engagement gating |
+
+**Suite size after NARRATE-REMOVE-1 (2026-10-12):** 134 files, 1,955 passed / 1 skipped / 0 failed (base: 235 files, 3,410 passed / 133 skipped). 139 test files and two fixture directories were deleted with the narration code (recoverable from `612d03f5bdadf861a875d76c6260fd8d3a7520aa`), and 32 mixed tests were edited. Two new positive-control suites cover the v13 migration and the ingestion normalization (they fail on the base). Coverage gap: the kept per-mode helpers' local `"narrate"` style-hint literals are no longer exercised by any test, and `tests/foliate-bridge.test.ts` dropped its `page-reader.css` assertions together with the narration ones.
 
 ### Current Coverage
 
