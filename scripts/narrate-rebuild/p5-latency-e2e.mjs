@@ -138,7 +138,7 @@ function firstVoiced(tracePath) {
 }
 
 const failures = [];
-const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS }, rates: RATES, runs: [], warm: {}, cold: {}, sessions: {} };
+const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS, foreignCeilingPct: 25, cycleCap: 40 }, rates: RATES, runs: [], warm: {}, cold: {}, sessions: {} };
 
 const want = (k) => !ONLY || ONLY === k;
 
@@ -154,43 +154,85 @@ if (want("session")) {
   }
 }
 
+// ── D6 counting (charter D6 as amended 2026-10-13, Decision #19) ─────────────────────────────────────────────
+// A trial counts only when foreign CPU (host busy minus Blurby's own process tree) averages <= 25 % over it. A trial
+// above the ceiling (or with no CPU split) is listed separately, never counted, never dropped; another cycle replaces
+// it, up to 40 cycles per type, after which the run stops and asks the owner for a quiet window.
+const FOREIGN_CEILING_PCT = 25;
+const CYCLE_CAP = 40;
+const counts = (x) => x.latencyMs !== null && x.cpu !== null && x.cpu.foreignPct <= FOREIGN_CEILING_PCT;
+const brief = (x) => ({ latencyMs: x.latencyMs, cause: x.cause, cpu: x.cpu, run: x.run ?? null });
+
 // ── D6 warm ───────────────────────────────────────────────────────────────────────────────────────────────
 if (want("warm")) {
   for (const rate of RATES) {
-    const label = `warm-${rateLabel(rate)}`;
-    if (!ANALYZE_ONLY) report.runs.push(await launch(label, { kind: "warm", rate, repeat: WARM }));
-    const trials = firstVoiced(tracePathFor(label));
+    const r = rateLabel(rate);
+    const all = [];
+    let cycles = 0;
+    // Cycles still needed for every type to reach WARM counting trials (a speed cycle makes two speed requests).
+    const need = () => Math.max(...TYPES.map((t) => Math.ceil(Math.max(0, WARM - all.filter((x) => x.cause === t && counts(x)).length) / (t === "speed" ? 2 : 1))));
+    for (let part = 1; ; part++) {
+      const label = part === 1 ? `warm-${r}` : `warm-${r}-${part}`;
+      if (ANALYZE_ONLY) {
+        if (!fs.existsSync(tracePathFor(label))) break;
+      } else {
+        const repeat = part === 1 ? WARM : Math.min(need(), CYCLE_CAP - cycles);
+        if (repeat <= 0) break;
+        report.runs.push({ ...(await launch(label, { kind: "warm", rate, repeat })), cycles: repeat });
+        cycles += repeat;
+      }
+      all.push(...firstVoiced(tracePathFor(label)).map((x) => ({ ...x, run: label })));
+      if (!ANALYZE_ONLY && (need() <= 0 || cycles >= CYCLE_CAP)) break;
+    }
     const byCause = {};
     for (const t of TYPES) {
-      const own = trials.filter((x) => x.cause === t);
-      const measured = own.filter((x) => x.latencyMs !== null);
-      byCause[t] = { n: own.length, worstMs: measured.length ? Math.max(...measured.map((x) => x.latencyMs)) : null, over: measured.filter((x) => x.latencyMs >= WARM_BUDGET_MS).length, unmeasured: own.length - measured.length, trials: own };
-      if (byCause[t].unmeasured) failures.push(`warm ${rateLabel(rate)} ${t}: ${byCause[t].unmeasured} trials with no output-timestamp pair`);
-      if (own.length < WARM) failures.push(`warm ${rateLabel(rate)} ${t}: ${own.length} trials < ${WARM}`);
-      if (byCause[t].over) failures.push(`warm ${rateLabel(rate)} ${t}: ${byCause[t].over} trials at or over ${WARM_BUDGET_MS} ms (worst ${byCause[t].worstMs})`);
+      const own = all.filter((x) => x.cause === t);
+      const counting = own.filter(counts);
+      const unmeasured = own.filter((x) => x.latencyMs === null);
+      const overCeiling = own.filter((x) => x.latencyMs !== null && !counts(x));
+      byCause[t] = {
+        n: own.length, counting: counting.length,
+        worstMs: counting.length ? Math.max(...counting.map((x) => x.latencyMs)) : null,
+        over: counting.filter((x) => x.latencyMs >= WARM_BUDGET_MS).length,
+        unmeasured: unmeasured.length, overCeiling: overCeiling.map(brief), trials: own,
+      };
+      if (unmeasured.length) failures.push(`warm ${r} ${t}: ${unmeasured.length} trials with no output-timestamp pair`);
+      if (counting.length < WARM) failures.push(`warm ${r} ${t}: only ${counting.length} counting trials (< ${WARM}) within ${CYCLE_CAP} cycles - ask the owner for a quiet window`);
+      if (byCause[t].over) failures.push(`warm ${r} ${t}: ${byCause[t].over} counting trials at or over ${WARM_BUDGET_MS} ms (worst ${byCause[t].worstMs})`);
     }
-    report.warm[rateLabel(rate)] = byCause;
+    report.warm[r] = byCause;
   }
 }
 
 // ── D6 cold ───────────────────────────────────────────────────────────────────────────────────────────────
 if (want("cold")) {
   for (const rate of RATES) {
-    report.cold[rateLabel(rate)] = {};
+    const r = rateLabel(rate);
+    report.cold[r] = {};
     for (const type of TYPES) {
       const rows = [];
-      for (let i = 0; i < COLD; i++) {
-        const label = `cold-${type}-${rateLabel(rate)}-${i + 1}`;
+      const countingRows = () => rows.filter((x) => x.counts).length;
+      for (let i = 1; i <= CYCLE_CAP && countingRows() < COLD; i++) {
+        const label = `cold-${type}-${r}-${i}`;
         let run = null;
-        if (!ANALYZE_ONLY) { run = await launch(label, { kind: "cold", rate, type }); report.runs.push(run); }
+        if (ANALYZE_ONLY) { if (!fs.existsSync(tracePathFor(label))) break; }
+        else { run = await launch(label, { kind: "cold", rate, type }); report.runs.push(run); }
         const first = firstVoiced(tracePathFor(label))[0] ?? null;
-        rows.push({ trial: i + 1, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null });
-        if (!first) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no first voiced sample recorded`);
-        else if (first.latencyMs === null) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no output-timestamp pair`);
-        else if (type === "click" && first.cause !== "click") failures.push(`cold click ${rateLabel(rate)} trial ${i + 1}: the first voiced sample answered ${first.cause}, not the click`);
-        else if (first.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: ${first.latencyMs} ms >= ${COLD_BUDGET_MS}`);
+        const row = { trial: i, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, cpu: first ? first.cpu : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null };
+        if (!first) failures.push(`cold ${type} ${r} trial ${i}: no first voiced sample recorded`);
+        else if (first.latencyMs === null) failures.push(`cold ${type} ${r} trial ${i}: no output-timestamp pair`);
+        else if (type === "click" && first.cause !== "click") failures.push(`cold click ${r} trial ${i}: the first voiced sample answered ${first.cause}, not the click`);
+        row.counts = Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
+        if (row.counts && row.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${r} trial ${i}: ${row.latencyMs} ms >= ${COLD_BUDGET_MS}`);
+        rows.push(row);
       }
-      report.cold[rateLabel(rate)][type] = { n: rows.length, worstMs: rows.some((r) => r.latencyMs !== null) ? Math.max(...rows.filter((r) => r.latencyMs !== null).map((r) => r.latencyMs)) : null, trials: rows };
+      const counting = rows.filter((x) => x.counts);
+      if (counting.length < COLD) failures.push(`cold ${type} ${r}: only ${counting.length} counting trials (< ${COLD}) within ${CYCLE_CAP} launches - ask the owner for a quiet window`);
+      report.cold[r][type] = {
+        n: rows.length, counting: counting.length,
+        worstMs: counting.length ? Math.max(...counting.map((x) => x.latencyMs)) : null,
+        overCeiling: rows.filter((x) => x.latencyMs !== null && !x.counts), trials: rows,
+      };
     }
   }
 }
