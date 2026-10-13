@@ -149,6 +149,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
 - **Next:** the owner's answer. On (a): stale-work bypass (spare worker), prefetch by seconds ahead, short steady chunks, the cold-click driver fix, then T7 in full (warm then cold), then the P5 gate. Every other front waits on D6 (P5's merge gates P6).
 
+## S2 — 2026-10-13 17:35 — Decision #18 round: levers in, T7 FAIL → BLOCKER(USER) (c)/(d); session stops
+
+- **Did:** recorded the owner's answer (Decision #18) with the planner's staging memo (`4d65aa60`). Lever 1 (`e71f8924`): prefetch by seconds ahead (8 s); found and fixed a drop — a resume after a pause in a gap skipped the chunk that arrived during the pause. Lever 2 (`25ee0e23`): steady chunk cap 30 words (renderer constant: chunks are planned in the renderer, not main). Instrumentation: per-chunk request/result/queue/post/receive/synthesis/map stamps, worker and pool load. Lever 3 (`e3e97983`): the producer posts only to idle workers from a queue in main; a prefetch leaves one worker idle for requests; a request drops queued prefetch of older epochs. Harness (`d5eb4893`): per-trial CPU split, cold-click driver change, env-gated stall logs. Three workers measured (same freeze, more memory) and reverted; a forced collection at load tried and reverted. T7 in full 15:58–17:30: FAIL (7 warm trials ≥ 2 s; cold all < 8 s); evidence `phase5/latency-e2e.t7-1.json`, `recorded-output.t7-1.json`. BLOCKER(USER) raised with only (c) and (d).
+- **Learned:** after the levers, requests never wait in a queue (queued → posted 0 ms in every T7 trial). What remains: (1) a once-per-process freeze of both producer workers (6–35 s, ≈ 30 s after load, when each releases ≈ 291 MiB external memory; Electron only; main thread unaffected); (2) synthesis of a request chunk at 2.1–2.2 s under contention plus ≈ 49 % foreign load; (3) a rare resume that must generate. The owner's machine ran at 61–93 % host busy, narration's own share 16–31 %. Cold-click trials need a different driver (the Play's audio arrives before the click).
+- **Decisions:** #18 recorded.
+- **Gate/DoD movement:** D6 FAIL (blocker); D3 2.00x showed one drop in the T7 run (P5 gate re-runs D3/D5).
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** the owner's (c) or (d). Every front waits on D6 (P5's merge gates P6).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

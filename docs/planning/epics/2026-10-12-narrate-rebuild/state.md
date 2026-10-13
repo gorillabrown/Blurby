@@ -27,8 +27,8 @@ updated_by: session 2 (S2, P5 recovery, D6 repair, crossings; D3 sessions runnin
 
 ```
 phase:        P5 — Speed, crossings, latency end to end, recorded output (branch eb/narrate-rebuild-1-p5, base 331f8313; S2 checkpoints 238f47ec, 573706ea)
-next_action:  Decision #18 repair round (prefetch by seconds → chunk cap → reserved/third worker, a warm smoke after each) → harness fixes → T7 in full → P5 gate (D3, D5 re-run)
-blockers:     none open (D6 answered: Decision #18, one more repair round, no third); settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main (A5)
+next_action:  owner answer to the D6 BLOCKER(USER) ((c) or (d)); the P5 gate (D3, D5 re-run) waits on D6
+blockers:     BLOCKER(USER) D6 T7 FAIL after the final repair round (only (c) or (d)); settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main (A5)
 session:      2 of ~14 budgeted
 dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls; D5's engine half, the crossings suite and the in-app analysis pass (0 overlap/drop/repeat in both D3 sessions); D3 met on the branch (run 3, 28c21e40: 0 commits outside one frame at 1.00x and 2.00x, mapping 0.78 ms); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D10 met on the P5 branch; D13 holds for P1–P4; D6 FAIL (blocker); D2, D11 (fresh), D12 unmet
 ```
@@ -63,6 +63,36 @@ Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, 
 | Producer (P3) | `main/narrate/producer.js` → `producer-worker.js` loads the exposed copy by `StyleTextToSpeech2Model.from_pretrained` + `new KokoroTTS(model, tokenizer)` at 4 intra-op threads (`NARRATE_INTRA_OP_THREADS` override; `"default"` = onnxruntime's); `NARRATE_MODELS_ROOT` override else `userData/models`; provenance is written only in `main/narrate/capture.js`. The thread count leaves the table and the T3 onsets unchanged but not the waveform bytes (1 ms envelope within 3.7 % of peak; identical at the default). First generation after warm-up at a new shape: 1.9–2.3 s at 4 threads, 4.8–5.2 s at the default | `p3-producer-check.mjs`, S1 2026-10-13 |
 
 ## Blockers
+
+### BLOCKER(USER) — D6 after the second (final) repair round: T7 FAIL (raised 2026-10-13 17:35 by S2). Open.
+
+Decision #18's round is spent (levers 1–3 in, a third worker measured and reverted). T7 in full on the ordinary desktop, 15:58–17:30, request → first voiced sample heard (`docs/studies/narrate-rebuild-1/phase5/latency-e2e.t7-1.json`; all 44 launches exit 0). CPU per run (host busy / narration's own app tree / foreign): warm 1.00x 80 / 31 / 49 %, warm 2.00x 61 / 31 / 31 %, D3 sessions 91–93 / 16–19 / 72–77 %.
+
+| warm, 20 per type | 1.00x worst (median) | ≥ 2 s | 2.00x worst (median) | ≥ 2 s |
+|---|---|---|---|---|
+| Play | 1,271 (1,092) | 0 | 828 (599) | 0 |
+| Resume | 3,434 (80) | 1 | 83 (80) | 0 |
+| Click | 6,362 (1,200) | 4 | 945 (625) | 0 |
+| Speed (40) | 2,203 (1,261) | 1 | 7,007 (609) | 1 |
+
+Cold, 5 per type, fresh process: every trial under 8 s (worst 1,300 ms). The cold-click trials were answered by the Play or resume before the click (the driver waits for the word spans while playing; a harness defect, the figures stand as cold first-voice measurements).
+
+The seven over-budget trials, measured from the per-chunk stage stamps:
+- **2 — a producer-worker freeze** (click 6,362 at 1.00x; speed 7,007 at 2.00x): once per app process, about 30 s after the voice loads, both worker threads stop for 6–35 s together (seen in every smoke and both T7 warm runs) while the main thread keeps running, at the moment each worker's ≈ 291 MiB of external memory — the model file's size — is released. Electron only (plain Node: no stall in 90 s); not CPU, not queueing, not Narrate's heap (< 25 MB); a third worker and a forced collection at load did not prevent it. A defect, not engine speed.
+- **4 — CPU contention** (clicks 2,269–2,445, speed 2,203 at 1.00x): a 6-word request chunk took 2.1–2.2 s to synthesize while the other worker ran a prefetch, with foreign load ≈ 49 % (uncontended ≈ 0.7–1.4 s).
+- **1 — a resume with nothing to replay** (3,434 at 1.00x): it generated a 19-word chunk.
+
+The D3 sessions in the same run: 1.00x PASS; 2.00x one unit never committed inside a fully played chunk (a drop; 0 outside one frame). Run 3's PASS at both rates (`28c21e40`) predates the levers; the P5 gate re-runs D3 and D5 as planned.
+
+Per Decision #18, no third repair round. Decide, and write the answer inline:
+
+- **(c) Amend the budget or the trial definition** (owner, in charter.md). The figures support, for example: a warm budget judged on a quiet host or with a stated foreign-load ceiling (the contention trials), and/or a stated allowance for the first ≈ 40 s after the voice loads (the freeze, until it is fixed as a defect outside D6).
+- **(d) Bake-off** for a faster engine (`docs/studies/research/tts-engine-scan/SHORTLIST.md`); back to the planner first.
+
+Executor's note (information, not a third option): the freeze is a correctness defect in the producer runtime (narration silent for up to 35 s once per launch) that neither (c) nor (d) removes; it can be filed as its own bug and specified by the planner whichever way D6 goes.
+
+Answer:
+
 
 ### BLOCKER(USER) — D6 warm latency over budget after the one repair attempt (raised 2026-10-13 15:07 by S2). Answered 2026-10-13 16:15 — Decision #18.
 
