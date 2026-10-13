@@ -223,6 +223,7 @@ After EVERY sprint completion — hotfixes included, no exceptions — run the M
 - **CSS custom properties for theming.** No inline styles. All styles in `src/styles/*.css` (entry `index.css`).
 - **Never import Node.js modules in renderer code.** All system access through IPC via `window.electronAPI`.
 - Folder-sourced docs don't store content in library.json — loaded on-demand via `load-doc-content` IPC.
+- **Notion register text.** Anything the tooling reads from the Notion register comes from a SQL (plain-text) read, never rows mode or page fetch. When writing text to it, wrap every dotted name in backticks and backslash-escape markdown characters, or Notion links or drops them (`x-notion.textRules`).
 - **Dispatch sizing: 40 tool-use ceiling per wave.** A single Zeus dispatch must stay under ~40 tool uses. **Sprints with 5+ implementation tasks MUST be pre-split into waves at dispatch time** (don't wait for a runtime ceiling hit). Standard wave split: Wave A = implement + test, Wave B = verify + docs + git. Each wave is a separate CLI dispatch. Estimate: 1 tool use per file read, 1-2 per file write, 3-5 per sub-agent spawn, 1 per bash command.
 - **Parallel-safe execution beats queue speed theater.** Do not dispatch two sprints in parallel if both touch the shared-core freeze set. Run them sequentially or split one sprint so only non-core scaffolding runs in parallel.
 - **Verify file integrity after changes.** Run `git diff --stat` before committing. If any file shows an unexpected size decrease, check for truncation.

@@ -437,6 +437,13 @@
     "legacyIdMap": {
       "LEGACY-NARR-MEDIA-1-DISSOLVED": "NARR-MEDIA-1 (legacy dissolved variant)"
     },
+    "textRules": {
+      "read": "build register reads the tooling consumes from SQL (plain-text) reads; strip `[T](http://T)` links from any rows-mode read",
+      "write": "wrap every dotted name in backticks; backslash-escape markdown characters outside code spans",
+      "dottedNamePattern": "\\w\\.[A-Za-z][A-Za-z0-9]+",
+      "escapeCharacters": "\\ ` * _ [ ] < > ~ $ ^ | #",
+      "source": "HB-3 (2026-10-13); recipe from the GoG.Gov register migration"
+    },
     "phaseLayer": {
       "_note": "Display-only phase layer added 2026-10-13 by HB-2. Phase on each item stays the source of truth; nothing here is mapped in policy.workRegister.fieldMappings, so snapshot import reports these columns as [DRIFT] notes.",
       "database": "45b7c96cc31e83b6a3ba81e47caced95",
