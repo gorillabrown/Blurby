@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "passages": [
+    {
+      "id": "passage-a",
+      "file": "passage-a.txt",
+      "words": 165,
+      "source": {
+        "type": "epub",
+        "path": "resources/sample-meditations.epub",
+        "sha256": "8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb",
+        "entry": "OEBPS/5709277951690388395_2680-h-2.htm.xhtml",
+        "span": "Book 1 section I in full and the first sentence of section II (Casaubon translation, Project Gutenberg #2680)"
+      }
+    },
+    {
+      "id": "passage-b",
+      "file": "passage-b.txt",
+      "words": 122,
+      "source": {
+        "type": "composite",
+        "of": [
+          "legacy/prose-basic.txt",
+          "legacy/dialogue-switches.txt",
+          "legacy/punctuation-dense.txt",
+          "legacy/section-transition.txt"
+        ],
+        "sectionBreak": "blank line before section-transition"
+      }
+    }
+  ],
+  "legacy": {
+    "sourceSha": "612d03f5bdadf861a875d76c6260fd8d3a7520aa",
+    "sourcePath": "tests/fixtures/narration/",
+    "copied": [
+      "chapter-transition.txt",
+      "dialogue-switches.txt",
+      "engine-scan/continuous-chapter-passage.txt",
+      "engine-scan/dialogue-attribution.txt",
+      "engine-scan/heading-short-lines.txt",
+      "engine-scan/literary-punctuation.txt",
+      "engine-scan/long-sentence-cadence.txt",
+      "engine-scan/manifest.json",
+      "engine-scan/transition-reentry.txt",
+      "long-sentence.txt",
+      "manifest.json",
+      "pause-resume.txt",
+      "prose-basic.txt",
+      "punctuation-dense.txt",
+      "queued-handoff.txt",
+      "section-transition.txt"
+    ],
+    "omitted": [
+      "baseline/chapter-transition-1776382372190.summary.json",
+      "baseline/chapter-transition-1776382372190.trace.json",
+      "baseline/dialogue-switches-1776382372179.summary.json",
+      "baseline/dialogue-switches-1776382372179.trace.json",
+      "baseline/long-sentence-1776382372187.summary.json",
+      "baseline/long-sentence-1776382372187.trace.json",
+      "baseline/pause-resume-1776382372191.summary.json",
+      "baseline/pause-resume-1776382372191.trace.json",
+      "baseline/prose-basic-1776382372177.summary.json",
+      "baseline/prose-basic-1776382372177.trace.json",
+      "baseline/punctuation-dense-1776382372188.summary.json",
+      "baseline/punctuation-dense-1776382372188.trace.json",
+      "baseline/queued-handoff-1776382372190.summary.json",
+      "baseline/queued-handoff-1776382372190.trace.json",
+      "baseline/section-transition-1776382372189.summary.json",
+      "baseline/section-transition-1776382372189.trace.json",
+      "baseline/summary.json",
+      "baseline/summary.txt",
+      "matrix.manifest.json"
+    ]
+  },
+  "voices": [
+    "af_bella",
+    "bf_emma"
+  ],
+  "rates": [0.80, 0.85, 0.90, 0.95, 1.00, 1.05, 1.10, 1.15, 1.20, 1.25, 1.30, 1.35, 1.40, 1.45, 1.50, 1.55, 1.60, 1.65, 1.70, 1.75, 1.80, 1.85, 1.90, 1.95, 2.00]
+}

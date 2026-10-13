@@ -1,0 +1,54 @@
+# Phase 0 mapping policy — words to token spans (P0-2)
+
+NARRATE-REBUILD-1, charter (`docs/planning/epics/2026-10-12-narrate-rebuild/charter.md`) and ROADMAP § NARRATE-REBUILD-1 P0-2. Implemented in `scripts/narrate-rebuild/lib/wordmap.mjs`; measured by `scripts/narrate-rebuild/p0-generate.mjs` and judged by `scripts/narrate-rebuild/p0-summary.mjs`. Written 2026-10-12 (session S1) under the executor's autonomy grant for the policy text; the merged-word display choice stays the owner's at gate G1.
+
+## 1. What the table is
+
+For one synthesis call, kokoro-js 1.2.1 (`dist/kokoro.cjs`, hash in `identity.json`) normalizes the chunk text, splits it at punctuation, phonemizes each punctuation-free segment once with `phonemizer.phonemize(segment, lang)` (espeak-ng), joins the pieces with the punctuation kept, applies its fixed post-replacements, and tokenizes the final phoneme string one character per id, wrapped as `[0, …, 0]`. The model returns `waveform` and, on the duration-exposed copy, `durations`: one frame count per input id.
+
+The harness captures all three seams on the production `generate()` path (the phonemizer's per-segment output, the tokenizer's phoneme string and ids, the model's raw tensors) and checks, per chunk:
+
+- **Token identity.** `ids.length === chars(phonemes) + 2`, `ids[0] === 0 && ids.at(-1) === 0`, `durations.length === ids.length`, and the ids the model received equal the tokenizer's output. Any mismatch fails the chunk closed.
+- **Units law.** `Σ durations × F === pcm.length` exactly, with every duration a non-negative integer and `F = pcm.length / Σ durations` an integer. `F` is measured per chunk, never assumed; the summary requires one `F` across the whole matrix (600 at 24 kHz in every chunk so far, where the old patch hardcoded 256). The law proves total-length and unit consistency only, never interior acoustic alignment (that is P0-3's job).
+- **Int64 handling.** The duration tensor's element type is recorded (`durationsType`); values are read with `Array.from(data, Number)`, which handles both float32 and BigInt64 data. The exposed tensor is float32 with integer values (post-round, post-clamp).
+
+## 2. Frames to characters, characters to groups
+
+Duration `d[0]` belongs to the leading special token and `d[n−1]` to the trailing one: they are leading and trailing audio, not words. Duration `d[c+1]` belongs to phoneme character `c`. Cumulative frames give every character an exact `[frameStart, frameEnd)`, and samples are frames × F.
+
+A **group** is a maximal run of characters that are neither a space nor one of kokoro's punctuation characters `;:,.!?¡¿—…"«»“”(){}[]`. Spaces and punctuation between groups carry their own frames; those frames belong to no word. During them the cursor holds the last spoken word (ruling R6), so a unit's highlight extends from its first voiced frame to the next unit's first voiced frame, while its *acoustic* span (used by P0-3) is `[frameStart, frameEnd)` of its own characters only.
+
+## 3. Segments, source words and the one pass
+
+The captured phonemizer calls give, in order, each normalized punctuation-free segment and espeak's output for it. Source words are the whitespace-split words of each normalized segment; they are what the pass saw. Each segment's output, after kokoro's own post-replacements (`kokoroPost`, reproduced from the pinned dist), is split on spaces into expected groups. The sequence of expected groups across all segments must equal, string for string, the sequence of groups in the final phoneme string; otherwise the chunk is unreconciled and fails closed. This ties every group to its segment without re-phonemizing anything.
+
+Within a segment of W words and G groups:
+
+- **W = G (the common case):** word *i* is group *i*. espeak preserves word order and, in this corpus, never splits one word into several groups; a count match with an exact group sequence is the identity evidence. The isolated-form cost (below) is still recorded for every 1:1 unit as a consistency signal, and a diagonal unit is never failed on it.
+- **G < W (fusion):** espeak merged two or more adjacent words into one group with no separator and no boundary mark of any kind (observed: "to be"→`təbi`, "from the"→`fɹʌmðə`, "in the"→`ɪnðə`, "of the"→`ʌvðə`, "on the"→`ɔnðə`, "for a"→`fɚɹə`, "than a"→`ðænə`). Which words share the group is decided by a monotone alignment (dynamic programme) whose cost compares each candidate group with the concatenation of the words' **isolated** phonemes — identification evidence only, see §4. The chosen alignment's units are the fused runs.
+- **G > W (a word split into groups):** handled symmetrically (one word, up to three groups); not observed in this corpus.
+
+Every fused run is **one unit**: its words are highlighted together for exactly the run's frames. No proportional split is ever made (forbidden by P0-2). The split option is reported, per run, as `splitExact`: true only when the group is literally the words' own isolated sounds back to back (then the boundary is an exact character offset). The phonemizer emits no word-boundary mark, so `wordBoundaryMarkInside` is false for every run; the split option's coverage is therefore whatever `splitExact` yields (0 in the measured matrix). Every fused run's interior boundary is listed among the unresolved interiors (verdict part iii).
+
+## 4. Isolated phonemes are identification evidence, never timing
+
+The prohibition in P0-2 ("never re-phonemize word by word") exists because espeak's per-word output differs from its in-context output (reduced vowels, moved stress, fusions), so spans derived from it would be estimates. This policy keeps that line: **no frame, sample or span is ever taken from a per-word phonemization.** Isolated forms are used for one thing: deciding which source words a fused group contains. The comparison deliberately ignores what context changes:
+
+- vowels are dropped (consonant skeleton compared by relative edit distance), because reduction changes vowel quality ("a" is `eɪ` alone and `ə` in "for a");
+- stress and length marks are dropped; the flap `ɾ` is folded to `t`;
+- the syllable count (vowel runs) must agree; each syllable of mismatch costs 0.34. Syllables are counted per word and summed, so two vowel-adjacent words ("for" + "a") keep both syllables instead of merging into one run;
+- for the British voices (en-gb) an `ɹ` in the group that the isolated forms lack costs nothing: espeak's en-gb is non-rhotic in isolation ("for" alone ends in a vowel) and pronounces the linking r before a vowel ("for a" carries it). No other consonant is free, and nothing is free for en-us.
+
+A unit whose best cost exceeds 0.5 is **unreconciled** and the chunk fails closed (reported in `failures`); the owner sees it rather than a guess. Every unit records its `evidenceCost` and the `isolated` forms it was compared with, so a reviewer can audit each decision from the table alone. The first full matrix (2026-10-12) had exactly one unreconciled unit: Emma's "for a" (cost 0.84 at all 25 rates), which exposed the two rules above (per-word syllables; the en-gb linking r). The matrix was regenerated with them; the current result is `summary.json`.
+
+## 5. Normalization, punctuation, numbers and language
+
+- **Normalization** is kokoro's (`generate()` → its normalizer): quote and bracket folding, `Dr.`/`Mr.`/`Mrs.`/`Ms.`, years and times (`1984` → "nineteen eighty four", `10:30`), money (`$5.50`), decimals, ranges, possessives and initials. Source words in this policy are the **normalized** words; the rebuild owns the book-word → spoken-word map on top of it (an expansion such as `1984` maps one book word to the three spoken words that follow it, in order). Digits that kokoro leaves alone (`1, 2, 3`) are read by espeak and stay one word each.
+- **Punctuation** never belongs to a word's acoustic span: it is a separator with its own frames (a pause), and the pause marks `. , ; : — ? !` and section breaks are P0-3's association anchors (T4). An em dash joining two words (`Wait—are`) splits them into two normalized words, as kokoro's splitter does.
+- **Section breaks** (a blank line) are hard chunk boundaries (T2); nothing is mapped across a chunk.
+- **Language.** `af_*` voices phonemize as `en-us` (kokoro lang `a`), `bf_*` as `en` (British, lang `b`); the post-replacement `nˈaɪnti`→`nˈaɪndi` applies to `a` only. The same policy runs unchanged on both; the matrix reports both.
+- **Chunk bounds (T2).** Chunks are packed from kokoro's own sentence splitter to about 400 tokens; the exact cap (400 ids) is enforced on the tokenizer's output *before* synthesis — an over-long chunk throws and fails closed, it is never truncated. The first chunk is one short sentence of at most 15 words, or that sentence cut at its last pause mark within 15 words (passage A: "…gentle and meek,"). The largest chunk tested is reported by the summary.
+
+## 6. What the summary reports (P0-2 pass rule)
+
+P0-2 passes when every chunk of both passages, at every rate, on both voices (P0-4) satisfies token identity, the units law with one shared factor, the exact segment/group sequence, and reconciliation under §3–§4 with no failure, under the token cap, with provenance recorded from the model's actual output. The summary also reports, per voice and rate, the share of source words inside fused runs, the number of fused runs, and how many of them admit an exact split (`splitExact`) — the inputs to the owner's merged-word decision at G1.
