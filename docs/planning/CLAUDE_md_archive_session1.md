@@ -117,3 +117,7 @@ Archived from `Current System State` section of CLAUDE.md. These are completed s
 ## Archived 2026-10-13 (governance sweep; CLAUDE.md size rule)
 
 - READER-MODE-SEPARATION-2 completed 2026-10-11 (merge `d96d2f3f`; close-out `docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md`): Page, Focus, Flow and Narrate are independent runtimes. Owner ruling #31: Narrate is removed in the next sprint and rebuilt from scratch; its listening checks were dropped (#32). The 2026-10-11 roadmap review settled the narration items, the finish line ("Narration rebuilt") and the priority above.
+
+## Archived 2026-10-13 (HB-2; CLAUDE.md size rule)
+
+- NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`; close-out `docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md`; OutsideAudit.10 D4b): the Narrate mode, its hooks and strategies, its renderer UI, the dormant MOSS-Nano, Pocket and Qwen engines and 139 test files are deleted (diff against the base: 247 deleted, 66 modified, 3 added); a v13 settings migration plus three ingestion points (`loadSettingsData`, `applyCloudSettings`, the `save-settings` handler) normalize `narrate` to `flow`; the Reading Goals styles moved to `src/styles/reading-goals.css` by owner decision; the Page, Focus and Flow baselines are byte-identical. Suite 1,955 passed / 1 skipped in 134 files.

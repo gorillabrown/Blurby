@@ -4,3 +4,15 @@
 {"event": "end", "row": 9, "evidence": "holding --check in-flight; conflict check clean (no edit-site drift since 3a56d096; stale branches only); worktree .worktrees/hb-2 @3cd18ddc clean", "result": "done", "at": "2026-10-13T18:59:07Z"}
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T18:59:09Z"}
 {"event": "wait", "row": 1, "reason": "owner", "at": "2026-10-13T18:59:10Z"}
+{"event": "resume", "row": 1, "at": "2026-10-13T19:02:02Z"}
+{"event": "end", "row": 1, "evidence": "Projects SQL read: 0 rows (owner trash done); Q1 baseline 72 rows sha256 9729d5549c3116b0dbc5df0f0c646832b46d775b17db71b470ff7bd651059c8e", "result": "done", "at": "2026-10-13T19:02:40Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:02:41Z"}
+{"event": "end", "row": 2, "evidence": "Projects: Completion+Tasks dropped; Roadmap: Phase page relation (DUAL Items), Closed formula, Phase link drift formula accepted; Projects Completion = ROLLUP(Items, Closed, percent_checked) via F-2 fallback after 2 formula type errors", "result": "done", "at": "2026-10-13T19:03:32Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:03:34Z"}
+{"event": "end", "row": 3, "evidence": "notion-create-pages: 11 Projects pages, Status per Done-when 4, Items set from the phase side (68 links: 5+1+2+2+2+3+1+25+20+6+1)", "result": "done", "at": "2026-10-13T19:04:04Z"}
+{"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:04:05Z"}
+{"event": "end", "row": 4, "evidence": "Tasks data source in_trash=true (fetch shows deleted); Projects & Tasks tip replaced with Blurby phases line", "result": "done", "at": "2026-10-13T19:04:22Z"}
+{"event": "start", "row": 5, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:04:24Z"}
+{"event": "wait", "row": 5, "reason": "owner", "at": "2026-10-13T19:05:05Z"}
+{"event": "start", "row": 7, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T19:05:58Z"}
+{"event": "end", "row": 7, "evidence": "preflight: registry is valid; x-notion.phaseLayer present; grep -c 'Phase link drift' CLAUDE.md = 1; CLAUDE.md 34367 chars; NARRATE-REMOVE-1 bullet moved to archive", "result": "done", "at": "2026-10-13T19:06:37Z"}

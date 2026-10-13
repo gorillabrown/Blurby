@@ -436,6 +436,25 @@
     },
     "legacyIdMap": {
       "LEGACY-NARR-MEDIA-1-DISSOLVED": "NARR-MEDIA-1 (legacy dissolved variant)"
+    },
+    "phaseLayer": {
+      "_note": "Display-only phase layer added 2026-10-13 by HB-2. Phase on each item stays the source of truth; nothing here is mapped in policy.workRegister.fieldMappings, so snapshot import reports these columns as [DRIFT] notes.",
+      "database": "45b7c96cc31e83b6a3ba81e47caced95",
+      "dataSource": "collection://2677c96c-c31e-820e-b56f-879c3132df45",
+      "titleColumn": "Project name",
+      "relation": {
+        "roadmapColumn": "Phase page",
+        "phaseColumn": "Items"
+      },
+      "completion": "Projects.Completion = ROLLUP(Items, Closed, percent_checked)",
+      "displayOnlyColumns": [
+        "Board Group",
+        "Monday Item ID",
+        "Phase page",
+        "Phase link drift",
+        "Closed"
+      ],
+      "driftView": "Phase link drift"
     }
   }
 }
