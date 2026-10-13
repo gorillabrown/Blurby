@@ -25,6 +25,10 @@ import { createReaderPorts, type ReaderPortBroker, type ReaderPortInfrastructure
 import { pageMode } from "./modes/page/index";
 import { focusMode } from "./modes/focus/index";
 import { flowMode } from "./modes/flow/index";
+import { narrateMode } from "./modes/narrate/index";
+
+/** The modes a user can select from the bar or the keys (Page is reached by pauseToPage / exitToPage). */
+export type ReaderSelectableMode = "focus" | "flow" | "narrate";
 
 // ── React wrapper (READER-MODE-SEPARATION-2, step E1) ────────────────────────
 // A thin binding over createReaderModeRouter + READER_MODE_MODULES (design §A.6). It owns one broker and
@@ -52,10 +56,11 @@ export interface UseReaderModeOrchestratorReturn {
   readonly snapshot: ReaderToolbarSnapshot | null;
   readonly active: ReaderActiveMode | null;
   handleTogglePlay: () => void;
-  handleSelectMode: (mode: "focus" | "flow") => void;
+  handleSelectMode: (mode: ReaderSelectableMode) => void;
   handlePauseToPage: () => void;
   handleEnterFocus: () => void;
   handleEnterFlow: () => void;
+  handleEnterNarrate: () => void;
   handleExitToPage: () => void;
   handleHardSelect: (input: ReaderHardSelectInput) => void;
   handleNavigateTo: (wordIndex: number) => void;
@@ -89,7 +94,7 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
     return "focus";
   }, []);
 
-  const handleSelectMode = useCallback((target: "focus" | "flow") => {
+  const handleSelectMode = useCallback((target: ReaderSelectableMode) => {
     const fromMode = router.getActive()?.mode;
     if (!fromMode || fromMode === target) return;
     router.select(target);
@@ -107,6 +112,7 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
 
   const handleEnterFocus = useCallback(() => handleSelectMode("focus"), [handleSelectMode]);
   const handleEnterFlow = useCallback(() => handleSelectMode("flow"), [handleSelectMode]);
+  const handleEnterNarrate = useCallback(() => handleSelectMode("narrate"), [handleSelectMode]);
 
   const handlePauseToPage = useCallback(() => {
     const fromMode = router.getActive()?.mode;
@@ -154,6 +160,7 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
     handlePauseToPage,
     handleEnterFocus,
     handleEnterFlow,
+    handleEnterNarrate,
     handleExitToPage,
     handleHardSelect,
     handleNavigateTo,
@@ -172,7 +179,7 @@ export function useReaderModeOrchestrator(params: UseReaderModeOrchestratorParam
 // issue → create → publish → select. The incoming runtime never holds a reference to the outgoing one.
 
 /** The router's module registry (Wave D, step D3): each mode is reached only through its index.ts. */
-export const READER_MODE_MODULES = { page: pageMode, focus: focusMode, flow: flowMode };
+export const READER_MODE_MODULES = { page: pageMode, focus: focusMode, flow: flowMode, narrate: narrateMode };
 
 export interface ReaderModeRouterOptions {
   readonly modules: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>>;
@@ -208,7 +215,7 @@ export interface ReaderModeRouter {
   /** New generation → Page, arrival "silent", initial handoff. */
   openDocument(doc: ReaderDocumentSnapshot): void;
   /** Legacy handleSelectMode; selecting the active mode is a no-op. */
-  select(target: "focus" | "flow"): void;
+  select(target: ReaderSelectableMode): void;
   /** Legacy handlePauseToPage. */
   pauseToPage(): void;
   /** Legacy handleExitReader, non-page branch. */

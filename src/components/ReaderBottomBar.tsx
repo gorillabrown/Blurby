@@ -28,13 +28,14 @@ interface ReaderBottomBarProps {
   onEnterPage?: () => void;
   onEnterFocus: () => void;
   onEnterFlow: () => void;
+  onEnterNarrate?: () => void;
   onPrevChapter?: () => void;
   onNextChapter?: () => void;
   onJumpToChapter?: (chapterIndex: number) => void;
   onEinkRefresh?: () => void;
   onTogglePlay?: () => void;
   chapterListRef?: React.MutableRefObject<ChapterListHandle | null>;
-  lastReadingMode?: "focus" | "flow";
+  lastReadingMode?: "focus" | "flow" | "narrate";
   /** The active mode's speed (snapshot.speed): null in Page, which shows no speed control. */
   speed?: ReaderModeSpeed | null;
   /** Routed to the active runtime only (router handleSetSpeed). */
@@ -54,6 +55,7 @@ const HINT_TEXT: Record<string, string> = {
   page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
   flow: "← → speed  ↑ ↓ line  space play/pause  M menu",
+  narrate: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
 };
 
 export default function ReaderBottomBar({
@@ -70,6 +72,7 @@ export default function ReaderBottomBar({
   onEnterPage,
   onEnterFocus,
   onEnterFlow,
+  onEnterNarrate,
   onPrevChapter,
   onNextChapter,
   onJumpToChapter,
@@ -328,6 +331,14 @@ export default function ReaderBottomBar({
             aria-pressed={readingMode === "flow"}
           >
             Flow
+          </button>
+          <button
+            className={`rbb-mode-btn ${readingMode === "narrate" ? "rbb-mode-btn--active" : ""}${readingMode === "page" && lastReadingMode === "narrate" ? " rbb-mode-btn--last" : ""}`}
+            onClick={(e) => { onEnterNarrate?.(); if (e.detail > 0) e.currentTarget.blur(); }}
+            aria-label="Narrate mode"
+            aria-pressed={readingMode === "narrate"}
+          >
+            Narrate
           </button>
         </div>
 

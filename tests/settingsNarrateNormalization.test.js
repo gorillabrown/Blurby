@@ -1,9 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createRequire } from "module";
 
-// NARRATE-REMOVE-1, Done-when 7 (F1, normalization at the real ingestion seams): positive control.
-// Fails on the base (loadSettingsData, applyCloudSettings and normalizeReaderModes do not exist,
-// and the save-settings handler stores "narrate" as-is) and passes once the seams normalize.
+// NARRATE-REBUILD-1 P4 (D9): "narrate" is a reading mode again, so the three ingestion seams that
+// NARRATE-REMOVE-1 made normalize it to "flow" (loadSettingsData, applyCloudSettings, the save-settings
+// handler) now keep it. The v13 migration still maps a pre-rebuild schema-12 file once, and
+// normalizeReaderModes stays as the migration's helper. Positive control: on the NARRATE-REMOVE-1 code
+// (a), (b), (c) and (e) fail because the seams rewrite narrate to flow.
 //
 // Each case drives a production path: loadSettingsData (startup), applyCloudSettings (both cloud
 // apply paths) and the registered save-settings IPC handler, not a reconstruction of them.
@@ -68,7 +70,7 @@ function makeCtx(initial) {
 }
 
 describe("(a) startup: loadSettingsData", () => {
-  it("normalizes a schema-13 object that still holds narrate", () => {
+  it("keeps a schema-13 object that holds narrate", () => {
     const result = migrations.loadSettingsData({
       schemaVersion: 13,
       readingMode: "narrate",
@@ -77,13 +79,13 @@ describe("(a) startup: loadSettingsData", () => {
     });
     expect(result).toEqual({
       schemaVersion: 13,
-      readingMode: "flow",
-      lastReadingMode: "flow",
+      readingMode: "narrate",
+      lastReadingMode: "narrate",
       wpm: 300,
     });
   });
 
-  it("migrates a schema-12 input to schema 13 with flow", () => {
+  it("still migrates a schema-12 input to schema 13 with flow (the one-time v13 mapping)", () => {
     const result = migrations.loadSettingsData({
       schemaVersion: 12,
       readingMode: "narrate",
@@ -100,16 +102,16 @@ describe("(a) startup: loadSettingsData", () => {
 });
 
 describe("(b) cloud apply: applyCloudSettings", () => {
-  it("normalizes before the settings save and keeps unrelated keys", () => {
+  it("keeps narrate through the settings save and keeps unrelated keys", () => {
     const { ctx, saved } = makeCtx({ schemaVersion: 13, lastReadingMode: "flow", wpm: 300 });
     applyCloudSettings(ctx, { lastReadingMode: "narrate", fontSize: 20 });
     expect(saved.length).toBe(1);
-    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "flow", wpm: 300, fontSize: 20 });
+    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, fontSize: 20 });
   });
 });
 
 describe("(c) merge feeds apply: mergeSettings then applyCloudSettings", () => {
-  it("a newer cloud narrate wins the merge, then apply submits flow", () => {
+  it("a newer cloud narrate wins the merge, then apply submits narrate", () => {
     const local = { schemaVersion: 13, lastReadingMode: "flow", wpm: 300 };
     const cloud = { schemaVersion: 12, lastReadingMode: "narrate", fontSize: 20 };
     const ts = {
@@ -121,12 +123,12 @@ describe("(c) merge feeds apply: mergeSettings then applyCloudSettings", () => {
     const { ctx, saved } = makeCtx(local);
     applyCloudSettings(ctx, merged);
     expect(saved.length).toBe(1);
-    expect(saved[0].lastReadingMode).toBe("flow");
-    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "flow", wpm: 300, fontSize: 20 });
+    expect(saved[0].lastReadingMode).toBe("narrate");
+    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, fontSize: 20 });
   });
 });
 
-describe("(d) normalizeReaderModes", () => {
+describe("(d) normalizeReaderModes (kept for the v13 migration)", () => {
   it("maps narrate to flow on both mode keys and returns true", () => {
     const data = { readingMode: "narrate", lastReadingMode: "narrate" };
     expect(migrations.normalizeReaderModes(data)).toBe(true);
@@ -174,7 +176,7 @@ describe("(e) settings IPC: the registered save-settings handler", () => {
     vi.useRealTimers();
   });
 
-  it("normalizes before get-state and before the debounced save and sync enqueue", () => {
+  it("keeps narrate in get-state and in the debounced save and sync enqueue", () => {
     vi.useFakeTimers();
 
     const handlers = new Map();
@@ -211,10 +213,10 @@ describe("(e) settings IPC: the registered save-settings handler", () => {
 
     handlers.get("save-settings")({}, { readingMode: "narrate", lastReadingMode: "narrate", wpm: 410 });
 
-    // In-memory state is already normalized before the timer fires.
+    // In-memory state holds the written mode before the timer fires.
     const state = handlers.get("get-state")({});
-    expect(state.settings.readingMode).toBe("flow");
-    expect(state.settings.lastReadingMode).toBe("flow");
+    expect(state.settings.readingMode).toBe("narrate");
+    expect(state.settings.lastReadingMode).toBe("narrate");
     expect(saved.length).toBe(0);
 
     vi.advanceTimersByTime(500);
@@ -222,8 +224,8 @@ describe("(e) settings IPC: the registered save-settings handler", () => {
     expect(saved.length).toBe(1);
     expect(saved[0]).toEqual({
       schemaVersion: 13,
-      readingMode: "flow",
-      lastReadingMode: "flow",
+      readingMode: "narrate",
+      lastReadingMode: "narrate",
       wpm: 410,
       ttsVoiceName: "af_bella",
     });

@@ -286,13 +286,11 @@ function runMigrations(data, migrations, currentVersion) {
 }
 
 /**
- * Settings load path: run the migrations, then normalize. The normalize step covers an
- * already-current schema-13 file that still holds "narrate", because the runner skips current files.
+ * Settings load path: run the migrations. The v13 step mapped a pre-rebuild "narrate" to "flow" once;
+ * "narrate" is a reading mode again (NARRATE-REBUILD-1 P4, D9), so a current file is loaded as written.
  */
 function loadSettingsData(raw) {
-  const s = runMigrations(raw, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
-  normalizeReaderModes(s);
-  return s;
+  return runMigrations(raw, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
 }
 
 module.exports = {

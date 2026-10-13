@@ -163,6 +163,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // EPUB word extraction (HOTFIX-6: main-process extraction, no foliate navigation)
   extractEpubWords: (bookId) => ipcRenderer.invoke("extract-epub-words", bookId),
 
+  // Rebuilt Narrate (NARRATE-REBUILD-1 P4): the producer's narrow surface, nothing else of Kokoro is reachable
+  narrateGenerate: (text, voice, speed) => ipcRenderer.invoke("narrate-generate", text, voice, speed),
+  narratePreload: () => ipcRenderer.invoke("narrate-preload"),
+  narrateStatus: () => ipcRenderer.invoke("narrate-status"),
+
   // Events from main
   onSyncProgress: (callback) => {
     const handler = (_event, progress) => callback(progress);

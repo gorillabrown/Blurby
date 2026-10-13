@@ -47,11 +47,12 @@ type Action =
   | "fontUp"
   | "fontDown"
   | "exit"
+  | "enterNarrate"
   | "none";
 
 function resolveReaderKey(
   e: KeyEvent,
-  readerMode: "page" | "focus" | "flow" | "speed" | "scroll",
+  readerMode: "page" | "focus" | "flow" | "narrate" | "speed" | "scroll",
 ): Action {
   const surface = getReaderKeyboardModeSurface(readerMode);
 
@@ -69,6 +70,8 @@ function resolveReaderKey(
   // [ / ] chapter navigation (all modes)
   if (e.code === "BracketLeft" && !e.shiftKey && !e.ctrlKey) return "prevChapter";
   if (e.code === "BracketRight" && !e.shiftKey && !e.ctrlKey) return "nextChapter";
+  // N enters Narrate (all surfaces; NARRATE-REBUILD-1 P4)
+  if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) return "enterNarrate";
   // Page-mode only keys
   if (surface === "page") {
     if (e.code === "Space" && !e.shiftKey) return "togglePlay";
@@ -100,6 +103,7 @@ describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
     expect(getReaderKeyboardModeSurface("page")).toBe("page");
     expect(getReaderKeyboardModeSurface("focus")).toBe("focus");
     expect(getReaderKeyboardModeSurface("flow")).toBe("flow");
+    expect(getReaderKeyboardModeSurface("narrate")).toBe("focus");
     expect(getReaderKeyboardModeSurface("speed")).toBe("focus");
     expect(getReaderKeyboardModeSurface("scroll")).toBe("flow");
   });
@@ -181,8 +185,8 @@ describe("useKeyboardShortcuts — flow surface keys", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "flow")).toBe("togglePlay");
   });
 
-  it("legacy scroll maps to the flow keyboard surface and resolves N to no action", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "scroll")).toBe("none");
+  it("legacy scroll maps to the flow keyboard surface and resolves N to enterNarrate", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "scroll")).toBe("enterNarrate");
   });
 
   it("legacy scroll keeps the flow playback and coarse-rate controls", () => {
@@ -263,17 +267,19 @@ describe("useGlobalKeys — settings shortcut", () => {
   });
 });
 
-// NARRATE-REMOVE-1 Done-when 4: bare N had one binding (enter Narrate). It is gone, so N is unbound.
-describe("NARRATE-REMOVE-1 — N key is unbound", () => {
-  it("N (bare) resolves to no action in Flow", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "flow")).toBe("none");
+// NARRATE-REBUILD-1 P4 (D7): bare N enters Narrate on every reader surface; Shift+N stays Page's make-note.
+describe("NARRATE-REBUILD-1 — N key enters Narrate", () => {
+  it("N (bare) resolves to enterNarrate in Flow, Page and Focus — never nextChapter", () => {
+    for (const mode of ["flow", "page", "focus"] as const) {
+      const action = resolveReaderKey(makeKeyEvent({ code: "KeyN" }), mode);
+      expect(action, mode).toBe("enterNarrate");
+      expect(action).not.toBe("nextChapter");
+    }
   });
 
-  it("N (bare) resolves to no action in Page and Focus — not nextChapter", () => {
-    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "page")).toBe("none");
-    const action = resolveReaderKey(makeKeyEvent({ code: "KeyN" }), "focus");
-    expect(action).toBe("none");
-    expect(action).not.toBe("nextChapter");
+  it("Shift+N and Ctrl+N do not enter Narrate", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", shiftKey: true }), "flow")).not.toBe("enterNarrate");
+    expect(resolveReaderKey(makeKeyEvent({ code: "KeyN", ctrlKey: true }), "focus")).not.toBe("enterNarrate");
   });
 });
 

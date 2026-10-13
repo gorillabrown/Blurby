@@ -22,7 +22,9 @@ import type { ReaderPorts } from "../src/reader/ports/ReaderPorts";
 import { pageMode } from "../src/reader/modes/page/index";
 import { focusMode } from "../src/reader/modes/focus/index";
 import { flowMode } from "../src/reader/modes/flow/index";
+import { narrateMode } from "../src/reader/modes/narrate/index";
 import { buildImportGraph } from "../docs/planning/roadmap-reviews/reader-mode-separation-2/census/import-graph.mjs";
+import { installFakeNarrateHost } from "./narrate/harness/fakeNarrateHost";
 
 const flushMicrotasks = () => new Promise<void>((resolve) => setTimeout(resolve, 0));
 
@@ -373,12 +375,12 @@ describe("reader mode router core", () => {
 });
 
 // ── G3 over the real mode modules (design §D.3) ──────────────────────────────
-// The generators run over every mode whose module is registered here (all three since NARRATE-REMOVE-1); the
-// generated names extend without renaming.
-const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode };
-const PRESENT_MODES = (["page", "focus", "flow"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
+// The generators run over every mode whose module is registered here (all four since NARRATE-REBUILD-1 P4); the
+// generated names extend without renaming. Narrate plays through a fake AudioContext and a fake preload producer.
+const REAL_MODULES: Readonly<Partial<Record<ReaderModeId, ReaderModeModule>>> = { page: pageMode, focus: focusMode, flow: flowMode, narrate: narrateMode };
+const PRESENT_MODES = (["page", "focus", "flow", "narrate"] as ReaderModeId[]).filter((m) => REAL_MODULES[m]);
 const ORDERED_PAIRS = PRESENT_MODES.flatMap((from) => PRESENT_MODES.filter((to) => to !== from).map((to) => [from, to] as const));
-const PLAYABLE = new Set<ReaderModeId>(["focus", "flow"]);
+const PLAYABLE = new Set<ReaderModeId>(["focus", "flow", "narrate"]);
 
 const keyId = (key: ReaderSessionKey) => JSON.stringify([key.documentId, key.documentGeneration, key.mode, key.session]);
 const acceptedTotal = (broker: ReaderPortBroker) => Object.values(broker.stats.accepted).reduce((sum, n) => sum + n, 0);
@@ -493,14 +495,16 @@ function bookWordsValue(document: { tokenWords: readonly string[] }) {
 }
 
 describe("reader mode isolation (G3)", () => {
-  beforeEach(() => { vi.useFakeTimers({ now: 0 }); });
+  let restoreHost: () => void = () => {};
+  beforeEach(() => { vi.useFakeTimers({ now: 0 }); restoreHost = installFakeNarrateHost(); });
   afterEach(() => {
+    restoreHost();
     vi.clearAllTimers();
     vi.useRealTimers();
   });
 
   it("covers every ordered pair of the present modes", () => {
-    expect(PRESENT_MODES).toEqual(["page", "focus", "flow"]);
+    expect(PRESENT_MODES).toEqual(["page", "focus", "flow", "narrate"]);
     expect(ORDERED_PAIRS).toHaveLength(PRESENT_MODES.length * (PRESENT_MODES.length - 1));
   });
 
@@ -686,11 +690,12 @@ describe("reader mode isolation (G3)", () => {
 // ── Router module registry (design §C step D3) ────────────────────────────────
 
 describe("reader mode router registry (D3)", () => {
-  it("registers the three modes and reaches each only through its index.ts", () => {
-    expect(Object.keys(READER_MODE_MODULES).sort()).toEqual(["flow", "focus", "page"]);
+  it("registers the four modes and reaches each only through its index.ts", () => {
+    expect(Object.keys(READER_MODE_MODULES).sort()).toEqual(["flow", "focus", "narrate", "page"]);
     expect(READER_MODE_MODULES.page).toBe(pageMode);
     expect(READER_MODE_MODULES.focus).toBe(focusMode);
     expect(READER_MODE_MODULES.flow).toBe(flowMode);
+    expect(READER_MODE_MODULES.narrate).toBe(narrateMode);
     for (const [mode, module] of Object.entries(READER_MODE_MODULES)) expect(module.id).toBe(mode);
 
     const ROUTER = "src/reader/useReaderModeOrchestrator.ts";
@@ -700,7 +705,7 @@ describe("reader mode router registry (D3)", () => {
     const modeDir = (file: string) => /^src\/reader\/modes\/([^/]+)\//.exec(file)?.[1] ?? null;
     const routerEdges = graph.modules.find((m) => m.path === ROUTER)!.edges;
     expect(routerEdges.filter((e) => modeDir(e.to)).map((e) => e.to).sort()).toEqual(
-      ["flow", "focus", "page"].map((m) => `src/reader/modes/${m}/index.ts`),
+      ["flow", "focus", "narrate", "page"].map((m) => `src/reader/modes/${m}/index.ts`),
     );
     // Graph-wide: every edge entering a mode directory from outside it lands on that mode's index.ts.
     const crossings = graph.modules.flatMap((m) => m.edges
