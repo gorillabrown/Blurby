@@ -2,7 +2,7 @@
 
 Written 2026-10-13 by session S1 of the epic, phase P2 (`eb/narrate-rebuild-1-p2`, base `7bbf6b20`), from the harness under `scripts/narrate-rebuild/` and the records under `docs/studies/narrate-rebuild-1/phase0/`. Rulings R2–R11 and charter choices T1–T7 (ROADMAP § NARRATE-REBUILD-1; charter.md) govern the method; nothing below was measured in-app. Every number is from a committed JSON record named in its section; audio stays outside the repository (`C:\Projects\Blurby-artifacts\narrate-rebuild-1\audio`).
 
-**What was tested.** `onnx-community/Kokoro-82M-v1.0-ONNX` `model_q4.onnx` as pinned in the owner profile (sha256 `04cf570c…`), with its predicted-duration tensor `/encoder/Clip_output_0` exposed as `durations` in a hash-checked copy (sha256 `2eccfc53…`, the OutsideAudit.10 record); kokoro-js 1.2.1 with the repository's patch, transformers 3.8.1, onnxruntime-node 1.24.3, phonemizer 1.2.1 (espeak), Node v24.14.0; voices af_bella (en-us) and bf_emma (en-gb); passages A (165 words, *Meditations* Book 1) and B (122 words, composite with dense punctuation and a section break); rates 0.80–2.00 in 0.05 steps. Host: the owner's machine — Snapdragon X Elite X1E80100 (12 cores, ARM64), Windows 11 10.0.26200, 63.5 GB; CPU execution provider, q4 weights.
+**What was tested.** `onnx-community/Kokoro-82M-v1.0-ONNX` `model_q4.onnx` as pinned in the owner profile (sha256 `04cf570c…`), with its predicted-duration tensor `/encoder/Clip_output_0` exposed as `durations` in a hash-checked copy (sha256 `2eccfc53…`, the OutsideAudit.10 record); kokoro-js 1.2.1 with the repository's patch, transformers 3.8.1, onnxruntime-node 1.24.3, phonemizer 1.2.1 (espeak), Node v24.14.0; voices af_bella (en-us) and bf_emma (en-gb); passages A (165 words, *Meditations* Book 1) and B (122 words, composite with dense punctuation and a section break); rates 0.80–2.00 in 0.05 steps. Host: the owner's machine — Snapdragon X Elite X1E80100 (12 cores, ARM64), Windows 11 10.0.26200, 63.5 GB; CPU execution provider, q4 weights. The addendum of 2026-10-13 (G1 route b) adds the fp32 and fp16 exports of the same model, downloaded with the owner's authorization, on passage A at 1.00x.
 
 **Re-run (pwsh, from the phase worktree root; exact exit codes):**
 
@@ -11,6 +11,9 @@ node scripts/narrate-rebuild/p0-summary.mjs             # construction: exit 0
 node scripts/narrate-rebuild/p0-summary.mjs --break     # positive control: exit 1
 node scripts/narrate-rebuild/p0-acoustic.mjs            # P0-3: exit 1 (this verdict)
 node scripts/narrate-rebuild/p0-latency.mjs --threads 4 # P0-5: see its section
+node scripts/narrate-rebuild/p0-generate.mjs --dtype fp32 --passages passage-a --rates 1.00  # addendum: exit 0 (then --dtype fp16)
+node scripts/narrate-rebuild/p0-acoustic.mjs --dtype fp32 --passages passage-a --rates 1.00  # addendum: exit 1 (then --dtype fp16)
+node scripts/narrate-rebuild/p0-precision.mjs           # addendum comparison (report; exit 0)
 ```
 
 ## Summary
@@ -20,11 +23,11 @@ node scripts/narrate-rebuild/p0-latency.mjs --threads 4 # P0-5: see its section
 | P0-1 producer identity | **PASS** both copies | — |
 | P0-2 mapping law | **PASS** 500/500 chunks reconciled, both voices | one *harness* repair (identification evidence; no table, span or sample changed) |
 | P0-4 rate capability | **PASS** 25 rates × 2 voices × 2 passages | — |
-| P0-3 acoustic check | **FAIL** where conclusive (passage A at 0.80x and 1.00x on both voices, 1.40x on Bella); **INCONCLUSIVE** on passage B at every rate, at 2.00x on both passages, and at 1.40x on Emma | FAIL: *engine* — the model's predicted alignment sits late against its own rendered audio by a rate-dependent amount, under a verified P0-1/P0-2 contract; model precision **not** tried (only the q4 export is available offline), thread settings do not touch timing. INCONCLUSIVE: *reference* coverage, after the two repairs the charter allows → owner (charter escalation trigger) |
+| P0-3 acoustic check | **FAIL** where conclusive (passage A at 0.80x and 1.00x on both voices, 1.40x on Bella); **INCONCLUSIVE** on passage B at every rate, at 2.00x on both passages, and at 1.40x on Emma | FAIL: *engine* — the model's predicted alignment sits late against its own rendered audio by a rate-dependent amount, under a verified P0-1/P0-2 contract; model precision **tried** (§ Addendum: fp32 and fp16 reproduce the error within 1 ms at every paired anchor), thread settings do not touch timing; the charter's bake-off condition is met. INCONCLUSIVE: *reference* coverage, after the two repairs the charter allows → owner (charter escalation trigger) |
 | 40 ms negative control | **caught** (best anchor +17 ms → +57 ms) | — |
 | P0-5 latency (beside the three parts) | **PASS** at 4 intra-op threads: 160 warm trials all < 2,000 ms (worst 1,940), 20 cold all < 8,000 ms (worst 3,032), generation outpaces playback at 2.00x (RTF 1.39). onnxruntime-node's default thread count **fails** (worst warm 4,507 ms) | thread settings tried (sweep of six); nothing waived |
 
-The engine is not sent to a bake-off by this verdict: the charter requires model precision to have been tried first, and that needs a download the harness forbids. The route is the owner's at G1 (§ Decisions).
+This verdict does not by itself send the engine to a bake-off. The charter's precondition for one — precision and thread settings tried under a verified contract — is met by the addendum of 2026-10-13 (fp32 and fp16); whether to take it is the owner's choice at G1 (§ Decisions).
 
 ## Part (i) — Construction (P0-1, P0-2, P0-4)
 
@@ -79,7 +82,7 @@ Every resolved anchor has uncertainty ≤ 9.5 ms (R4's 10 ms holds), so the erro
 
 **Negative control (R4).** Shifting the best-agreeing anchor's table onset by +40 ms moves its error from +17 to +57 ms and is caught by the 30 ms limit (`acoustic-summary.json` → `control`).
 
-**Classification.** FAIL (five conclusive runs): engine, under a verified P0-1/P0-2 contract. The charter's bake-off condition also asks for model precision and thread settings to have been tried: thread count is a compute setting that cannot move a duration frame; precision was *not* tried — the pinned export is q4 and the harness runs offline, so fp32/fp16 trials need the owner's authorization to download. INCONCLUSIVE (eleven runs): reference coverage, after two repairs — passage B's dense punctuation is mostly not realized as pauses (12–21 marks per run with no pause at all), and at 2.00x both passages lose their pauses; this is the charter's "inconclusive after two repairs" trigger, which goes to the owner rather than to a third repair.
+**Classification.** FAIL (five conclusive runs): engine, under a verified P0-1/P0-2 contract. The charter's bake-off condition also asks for model precision and thread settings to have been tried: thread count is a compute setting that cannot move a duration frame; precision was tried after G1 answer 1 (§ Addendum): the fp32 and fp16 exports, with the same edit, reproduce both components within 1 ms, so the error is a property of the model, not of its quantization. INCONCLUSIVE (eleven runs): reference coverage, after two repairs — passage B's dense punctuation is mostly not realized as pauses (12–21 marks per run with no pause at all), and at 2.00x both passages lose their pauses; this is the charter's "inconclusive after two repairs" trigger, which goes to the owner rather than to a third repair.
 
 ## Part (iii) — Unresolved interiors
 
@@ -129,9 +132,34 @@ Model load in a fresh process: 694–1,188 ms. Real-time factor from the generat
 
 **Classification.** PASS; nothing to classify. The failing thread settings are recorded above, not waived.
 
+## Addendum (2026-10-13) — Precision trial, G1 route (b)
+
+**Why.** G1 answer 1 (state.md Decision #8): try model precision before choosing between continuing on Kokoro and the bake-off, because the charter admits a bake-off only once precision and thread settings have been tried under a verified P0-1/P0-2 contract.
+
+**What was done.** With the owner's authorization the fp32 and fp16 exports of the same model were downloaded from `onnx-community/Kokoro-82M-v1.0-ONNX` into the artifacts folder beside the q4 original: `onnx/model.onnx` 325,532,232 bytes, sha256 `8fbea51ea711f2af382e88c833d9e288c6dc82ce5e98421ea61c058ce21a34cb`; `onnx/model_fp16.onnx` 163,234,740 bytes, sha256 `ba4527a874b42b21e35f468c10d326fdff3c7fc8cac1f85e9eb6c0dfc35c334a` — both equal to the Hub's LFS records. Each received the same graph edit as the q4 copy (Decision #4: `f2-producer__expose_dur.cjs`, tensor `/encoder/Clip_output_0`, run from pwsh), declaring the exposed output as float for fp32 (exposed copy 325,532,316 bytes, sha256 `9336bfc9997f011849f68c306814c91c8a8aae60daa6ac0e08c6f8ab49a9c9fa`) and as float16 for fp16, whose graph carries that tensor in half precision (163,234,824 bytes, sha256 `72715098ccf04fda3cb0d3ac5ed8395bbd872629064605403d9fb8675b093065`; declared as float, onnxruntime refuses the session: "Type (tensor(float)) of output arg (durations) of node (expose_durations) does not match expected type (tensor(float16))"). `p0-generate.mjs --dtype fp32|fp16` and `p0-acoustic.mjs --dtype fp32|fp16` run the unchanged harness against them and write `tables-<dtype>/` and `acoustic-<dtype>/` beside the q4 records (audio under `audio\<dtype>\`), at onnxruntime's default thread count as for the q4 tables. Scope, per the answer: passage A at 1.00x on both voices (5 chunks each).
+
+**Construction for the trial copies (P0-1, P0-2).** Both exposed copies list `waveform` and `durations`. On all 10 chunks per precision the ids are identical to q4's, the durations are one integer per id (float32 for fp32, float16 for fp16 — Node 24's `Float16Array` carries them exactly), Σ frames × 600 = PCM samples, and every unit reconciles. The duration tables are not identical to q4's: 6–37 positions per chunk differ by 1–6 frames (chunk totals move by −18 to +9 frames), and the rendered audio moves with them.
+
+**Result** (`acoustic-fp32/`, `acoustic-fp16/`; `p0-precision.mjs`; error = table onset − acoustic onset, ms; q4 rows repeated from Part ii):
+
+| Passage A, 1.00x | Verdict | Resolved | Worst | Signed mean | p50 \|e\| | \|e\| > 30 | Chunk-start mean | Interior mean | Rendered leading silence, 5 chunks (ms) |
+|---|---|---|---|---|---|---|---|---|---|
+| Bella q4 | FAIL | 22 / 24 | +81 | +45.0 | 43 | 20 | +38.6 | +46.9 | 433 · 421 · 415 · 410 · 428 |
+| Bella fp32 | FAIL | 21 / 24 | +73 | +43.6 | 42 | 19 | +38.0 | +45.4 | 434 · 422 · 414 · 410 · 430 |
+| Bella fp16 | FAIL | 21 / 24 | +73 | +43.8 | 43 | 19 | +38.0 | +45.6 | 434 · 422 · 415 · 410 · 429 |
+| Emma q4 | FAIL | 10 / 24 | +58 | +44.4 | 46 | 9 | +44.8 | +44.0 | 278 · 303 · 307 · 306 · 307 |
+| Emma fp32 | FAIL | 11 / 24 | +62 | +43.9 | 44 | 10 | +44.6 | +43.3 | 278 · 303 · 308 · 306 · 307 |
+| Emma fp16 | FAIL | 11 / 24 | +63 | +43.9 | 44 | 10 | +44.8 | +43.2 | 278 · 303 · 307 · 306 · 307 |
+
+Anchor by anchor (the same chunk, mark and word resolved under both precisions): 21 common anchors on Bella and 10 on Emma. The error changes by a mean of −0.9 ms (fp32) and −0.8 ms (fp16) on Bella and by −0.4 and −0.5 ms on Emma, within −15…+10 ms at every anchor. Where the table moved (by up to 475 ms at a late word, as frame differences accumulate), the acoustic onset moved with it to within a frame: the relation between the table and the audio is unchanged. The 40 ms control is caught under both precisions (+16 → +56 ms; +15 → +55 ms). Max uncertainty 3.5–9.5 ms.
+
+**Classification.** Both components of the P0-3 failure — interior onsets late by ≈ 2 frames at 1.00x, and a leading silence that does not follow the BOS token — are reproduced by the fp32 and fp16 exports within 1 ms. The failure is a property of the model's learned alignment, not of its quantization. With precision and thread settings tried under a verified contract, the charter's condition for a bake-off is met; taking it is the owner's choice (route (a) or (c)).
+
+**Not done.** Other rates and passage B were not run under fp32/fp16 (the answer scoped the trial to passage A at 1.00x); the q8 and uint8 exports were not tried (less precision than q4's weights is not the question); P0-5 was not re-measured for fp32/fp16 (at default threads generation took 1.0× and 1.4–1.8× the q4 time).
+
 ## Decisions for the owner at G1 (charter → Owner gates)
 
-The executor stops here. State.md carries the BLOCKER(USER) with the same questions and an `Answer:` slot each; answers are adopted into state.md's Decision log with their date.
+The executor stops here. State.md carries the BLOCKER(USER) with the same questions and an `Answer:` slot each; answers are adopted into state.md's Decision log with their date. **Answered 2026-10-13** (state.md Decision log #8–#11): 1 → (b), done above, the choice between (a) and (c) is re-raised; 2 → one unit per fused run, wording change approved; 3 → `"narrate"`; 4 → R4 as written.
 
 1. **Route.** (a) Continue on Kokoro with this verdict's error profile; (b) authorize the precision trial the charter names before any bake-off — download the fp32 and fp16 exports, expose their duration tensors by the same hash-checked edit, rerun P0-3 on passage A at 1.00x; (c) start the bake-off on `docs/studies/research/tts-engine-scan/SHORTLIST.md`, every engine against these same gates. The executor's reading of the data: the two components are properties of the model's learned alignment, and a different quantization is unlikely to move them, but the charter's condition is unmet until it is tried.
 2. **Merged-word display.** The split option has zero coverage (no fused run carries a boundary mark). The choices are therefore one unit per fused run, or an estimated split, which R4/R10 forbid. If one unit is chosen, the owner approves the wording change to F2, F3, R7 and Done-when 3 (word → unit).
@@ -143,5 +171,6 @@ The executor stops here. State.md carries the BLOCKER(USER) with the same questi
 - `identity.json`, `summary.json`, `tables/<passage>.<voice>.json` (Part i; P1, merge `7bbf6b20`)
 - `acoustic/<passage>.<voice>.json`, `acoustic/acoustic-summary.json` (Parts ii–iii)
 - `latency.json` (T7 measurement), `latency.sweep.threads-*.json` (thread sweep) (P0-5)
+- `tables-fp32/`, `tables-fp16/`, `acoustic-fp32/`, `acoustic-fp16/` (passage A at 1.00x; Addendum), compared by `scripts/narrate-rebuild/p0-precision.mjs`
 - `MAPPING_POLICY.md` (P0-2 policy, with the §4 evidence rules)
 - Epic packet: `docs/planning/epics/2026-10-12-narrate-rebuild/` (state.md Evidence, journal S1 entries of 2026-10-12/13)

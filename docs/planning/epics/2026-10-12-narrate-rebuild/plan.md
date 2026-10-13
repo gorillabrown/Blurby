@@ -56,4 +56,5 @@ Every phase runs on its own branch `eb/narrate-rebuild-1-p<n>` cut from `origin/
 
 - [x] P1 opened 2026-10-12, gate passed and merged `7bbf6b20` 2026-10-13.
 - [x] P2: base trailer commit, P0-3 run, P0-5 sweep and T7 run, VERDICT.md, G1 BLOCKER(USER) raised 2026-10-13 01:35.
-- [ ] G1 answers adopted → P2 gate (p0-acoustic exit 1 with classification, p0-latency --threads 4 exit 0, VERDICT.md three parts) → merge → Gate log → route per answer 1.
+- [x] G1 answers adopted 2026-10-13 (state.md Decision log #8–#11); route (b) precision trial run on the P2 branch (fp32 and fp16, passage A at 1.00x; VERDICT.md § Addendum): the error profile is unchanged within 1 ms, so the bake-off condition is met.
+- [ ] G1 route answered (a or c) → P2 gate (p0-acoustic exit 1 with classification, p0-latency --threads 4 exit 0, VERDICT.md three parts and addendum) → merge → Gate log → route.

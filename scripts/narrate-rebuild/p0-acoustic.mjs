@@ -5,7 +5,7 @@
 // Writes docs/studies/narrate-rebuild-1/phase0/acoustic/<passage>.<voice>.json and acoustic-summary.json.
 // Exit 0 only when every passage x voice x rate passes (>= 10 resolved anchors, uncertainty <= 10 ms,
 // worst |error| <= 30 ms) and the 40 ms negative control is caught; 1 otherwise; 2 on a recorder fault.
-// Run from pwsh in the phase worktree: node scripts/narrate-rebuild/p0-acoustic.mjs [--rates 0.80,1.00,1.40,2.00]
+// Run from pwsh in the phase worktree: node scripts/narrate-rebuild/p0-acoustic.mjs [--rates 0.80,1.00,1.40,2.00] [--dtype q4|fp32|fp16]
 import fs from "node:fs";
 import path from "node:path";
 import { PHASE0_DIR, CORPUS_DIR, AUDIO_ROOT, SAMPLE_RATE } from "./lib/offline-kokoro.mjs";
@@ -17,7 +17,8 @@ const manifest = JSON.parse(fs.readFileSync(path.join(CORPUS_DIR, "manifest.json
 const rates = arg("--rates", "0.80,1.00,1.40,2.00").split(",");
 const voices = arg("--voices", manifest.voices.join(",")).split(",");
 const passages = arg("--passages", manifest.passages.map((p) => p.id).join(",")).split(",");
-const OUT = path.join(PHASE0_DIR, "acoustic");
+const DTYPE = arg("--dtype", "q4"); // precision trial (G1 route b): reads tables-<dtype>, writes acoustic-<dtype>
+const OUT = path.join(PHASE0_DIR, DTYPE === "q4" ? "acoustic" : `acoustic-${DTYPE}`);
 fs.mkdirSync(OUT, { recursive: true });
 
 // ---- T3: envelope, pauses, onsets ------------------------------------------------------------------
@@ -133,10 +134,10 @@ const rec = (ok, name, detail) => { defined++; results.push({ ok, name, detail }
 const perRun = {};
 let control = null;
 for (const voice of voices) for (const passageId of passages) {
-  const tablePath = path.join(PHASE0_DIR, "tables", `${passageId}.${voice}.json`);
+  const tablePath = path.join(PHASE0_DIR, DTYPE === "q4" ? "tables" : `tables-${DTYPE}`, `${passageId}.${voice}.json`);
   if (!fs.existsSync(tablePath)) { rec(false, `${passageId}/${voice}: table present`, tablePath); continue; }
   const table = JSON.parse(fs.readFileSync(tablePath, "utf8"));
-  const out = { schema: "narrate-rebuild-1/phase0/acoustic@1", passage: passageId, voice, params: { WIN_MS, LOW, HIGH, MAX_SPREAD_MS, UNCERTAINTY_FLOOR_MS, ASSOC_MAX_COST, MIN_SPAN_CHARS, SKIP_MARK_COST, SKIP_PAUSE_COST, minAnchorPauseMs: minAnchorPauseMs(1), ERROR_LIMIT_MS, UNCERTAINTY_LIMIT_MS, MIN_RESOLVED }, rates: {} };
+  const out = { schema: "narrate-rebuild-1/phase0/acoustic@1", passage: passageId, voice, dtype: DTYPE, params: { WIN_MS, LOW, HIGH, MAX_SPREAD_MS, UNCERTAINTY_FLOOR_MS, ASSOC_MAX_COST, MIN_SPAN_CHARS, SKIP_MARK_COST, SKIP_PAUSE_COST, minAnchorPauseMs: minAnchorPauseMs(1), ERROR_LIMIT_MS, UNCERTAINTY_LIMIT_MS, MIN_RESOLVED }, rates: {} };
   for (const r of rates) {
     const entry = table.rates[r];
     if (!entry?.complete) { rec(false, `${passageId}/${voice} ${r}: rate present in table`, null); continue; }
@@ -219,7 +220,7 @@ for (const voice of voices) for (const passageId of passages) {
 rec(!!control?.caught, "40 ms negative control caught", control);
 if (recorded !== defined || defined === 0) { console.error(`recorder mismatch ${recorded}/${defined}`); process.exit(2); }
 const pass = results.every((r) => r.ok);
-const summary = { schema: "narrate-rebuild-1/phase0/acoustic-summary@1", recordedAt: new Date().toISOString(), pass, control, runs: perRun, checks: results };
+const summary = { schema: "narrate-rebuild-1/phase0/acoustic-summary@1", recordedAt: new Date().toISOString(), dtype: DTYPE, pass, control, runs: perRun, checks: results };
 fs.writeFileSync(path.join(OUT, "acoustic-summary.json"), JSON.stringify(summary, null, 1) + "\n");
 for (const [k, s] of Object.entries(perRun)) console.log(`${k.padEnd(28)} ${s.verdict.padEnd(12)} resolved ${String(s.resolved).padStart(2)}/${s.totalAnchors} unc<=${s.maxUncertaintyMs} ms  worst ${s.worstErrMs} ms  mean ${s.signedMeanMs}  p50 ${s.p50AbsMs}  >30: ${s.over30}  | offsets n=${s.offsets.resolved} mean ${s.offsets.signedMeanMs}  | space rule mean ${s.spaceRule.signedMeanMs} worst ${s.spaceRule.worstAbsMs} >30: ${s.spaceRule.over30}  | fused interiors ${s.unresolvedInteriorFusedRuns}  largest ${s.largestChunk.words} w / ${s.largestChunk.samples} smp`);
 console.log("control:", JSON.stringify(control));

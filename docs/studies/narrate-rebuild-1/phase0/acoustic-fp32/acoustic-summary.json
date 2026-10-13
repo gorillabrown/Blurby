@@ -1,0 +1,146 @@
+{
+ "schema": "narrate-rebuild-1/phase0/acoustic-summary@1",
+ "recordedAt": "2026-10-13T14:01:15.738Z",
+ "dtype": "fp32",
+ "pass": false,
+ "control": {
+  "passage": "passage-a",
+  "voice": "af_bella",
+  "rate": "1.00",
+  "anchor": "but",
+  "errMs": 16,
+  "shiftedErrMs": 56,
+  "caught": true
+ },
+ "runs": {
+  "passage-a/af_bella/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 427200,
+    "tokens": 286,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 21,
+   "resolvedShare": 0.875,
+   "offsets": {
+    "resolved": 8,
+    "signedMeanMs": 300.9,
+    "p50AbsMs": 298,
+    "worstAbsMs": 460,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 13,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 3.5,
+   "worstErrMs": 73,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ":",
+    "word": "nor",
+    "kind": "word",
+    "acousticMs": 9452,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 665,
+    "assocCost": 0.088,
+    "tableMs": 9525,
+    "errMs": 73,
+    "tableSpaceMs": 9425,
+    "errSpaceMs": -27
+   },
+   "signedMeanMs": 43.6,
+   "p50AbsMs": 42,
+   "p90AbsMs": 60,
+   "over30": 19,
+   "spaceRule": {
+    "signedMeanMs": -1.6,
+    "worstAbsMs": 45,
+    "p50AbsMs": 15,
+    "over30": 6
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/bf_emma/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 388800,
+    "tokens": 278,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 11,
+   "resolvedShare": 0.458,
+   "offsets": {
+    "resolved": 4,
+    "signedMeanMs": 469,
+    "p50AbsMs": 540,
+    "worstAbsMs": 607,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 23,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": 62,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ",",
+    "word": "not",
+    "kind": "word",
+    "acousticMs": 1738,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 371,
+    "assocCost": 0.222,
+    "tableMs": 1800,
+    "errMs": 62,
+    "tableSpaceMs": 1750,
+    "errSpaceMs": 12
+   },
+   "signedMeanMs": 43.9,
+   "p50AbsMs": 44,
+   "p90AbsMs": 47,
+   "over30": 10,
+   "spaceRule": {
+    "signedMeanMs": 16.6,
+    "worstAbsMs": 47,
+    "p50AbsMs": 30,
+    "over30": 5
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  }
+ },
+ "checks": [
+  {
+   "ok": false,
+   "name": "passage-a/af_bella 1.00: P0-3 FAIL (resolved 21/24, worst 73 ms, max unc 3.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/bf_emma 1.00: P0-3 FAIL (resolved 11/24, worst 62 ms, max unc 9.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": true,
+   "name": "40 ms negative control caught",
+   "detail": {
+    "passage": "passage-a",
+    "voice": "af_bella",
+    "rate": "1.00",
+    "anchor": "but",
+    "errMs": 16,
+    "shiftedErrMs": 56,
+    "caught": true
+   }
+  }
+ ]
+}
