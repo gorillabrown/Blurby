@@ -4,3 +4,5 @@
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:12:02Z"}
 {"event": "end", "row": 2, "evidence": "backup Virtuoso/.backups/20261013T171747Z-governance-sweep: 70 entries re-hashed OK; 332 protected hashes; F22 narrowed (tmp/tts-candidates kept)", "result": "done", "at": "2026-10-13T17:18:20Z"}
 {"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:18:23Z"}
+{"event": "end", "row": 3, "evidence": "commit ffbb7a02; preflight check valid; readme generated region synced", "result": "done", "at": "2026-10-13T17:20:44Z"}
+{"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:20:46Z"}
