@@ -1,7 +1,7 @@
 {
   "layout": "plugin-only",
   "documentationRoot": "docs",
-  "_note": "Repointed 2026-07-02 (via /virtuoso:roadmap-review) at Blurby-native governance docs. Virtuoso skills operate on the live root ROADMAP.md + docs/governance/ system. The unused virtuoso-init scaffolding (Project Documentation/ and Virtuoso/{Roadmap.md,sprint-queue.xlsx,SpecRetro.Lessons_Learned.md,WORKFLOW_REFERENCE.md}) was moved to Virtuoso/.quarantine/ by the 2026-10-13 governance sweep, which also added governance-sweep as a writer of the docs/governance roles, ROADMAP.md and CLAUDE.md.",
+  "_note": "Repointed 2026-07-02 (via /virtuoso:roadmap-review) at Blurby-native governance docs. Virtuoso skills operate on the live root ROADMAP.md + docs/governance/ system. The unused virtuoso-init scaffolding (Project Documentation/ and Virtuoso/{Roadmap.md,sprint-queue.xlsx,SpecRetro.Lessons_Learned.md,WORKFLOW_REFERENCE.md}) was moved to Virtuoso/.quarantine/ by the 2026-10-13 governance sweep, which also added governance-sweep as a writer of the docs/governance roles, ROADMAP.md and CLAUDE.md. On 2026-10-13 the live work register moved from monday.com board 18432450217 to the Notion database Blurby.Roadmap (x-notion).",
   "schemaVersion": 2,
   "pluginCompatibility": ">=1.4.0 <2.0.0",
   "adopted": false,
@@ -196,7 +196,7 @@
       "origin": "unknown"
     },
     "workRegister": {
-      "external": "monday:board/18432450217",
+      "external": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
       "provider": "connector",
       "authority": "live",
       "mutability": "read-write",
@@ -210,7 +210,7 @@
       "validation": "external",
       "classification": "active",
       "origin": "authored",
-      "label": "Blurby monday.com live work register"
+      "label": "Blurby Notion roadmap database (Blurby.Roadmap), live work register"
     },
     "terminalLedger": {
       "path": "docs/governance/terminal-ledger.jsonl",
@@ -254,7 +254,7 @@
       "classification": "active",
       "origin": "generated",
       "generatedFrom": "workRegister",
-      "label": "Timestamped monday.com connector snapshot"
+      "label": "Timestamped Notion connector snapshot"
     },
     "x-migrationSource": {
       "path": "docs/planning/roadmap-reviews/2026-09-23-migration-source.json",
@@ -325,22 +325,22 @@
     "workRegister": {
       "snapshot": "snapshot",
       "fieldMappings": {
-        "title": "name",
-        "status": "status",
-        "id": "text_mm7f7e7n",
-        "sequence": "numeric_mm7fsex9",
-        "written_status": "color_mm7fspz9",
-        "prerequisites": "long_text_mm7fgw3w",
-        "effort": "text_mm7ftzsz",
-        "lane": "text_mm7fhjb6",
-        "group": "text_mm7ftkmm",
-        "spec_link": "long_text_mm7f66fk",
-        "branch": "text_mm7fs69e",
-        "started": "date_mm7f6dw",
-        "completed": "date_mm7fw9mx",
-        "evidence": "long_text_mm7fyyfy",
-        "description": "long_text_mm7fv3sg",
-        "notes": "long_text_mm7fncbd"
+        "title": "Name",
+        "status": "Status",
+        "id": "Sprint Code",
+        "sequence": "Seq",
+        "written_status": "Spec State",
+        "prerequisites": "Prerequisites",
+        "effort": "Effort",
+        "lane": "Lane",
+        "group": "Phase",
+        "spec_link": "Spec Reference",
+        "branch": "Branch",
+        "started": "Started",
+        "completed": "Completed",
+        "evidence": "Evidence",
+        "description": "Description",
+        "notes": "Notes"
       },
       "statusMappings": {
         "queued": [
@@ -418,12 +418,22 @@
       "scripts": "scripts"
     }
   },
-  "x-monday": {
-    "boardId": "18432450217",
-    "boardUrl": "https://estrattbrown.monday.com/boards/18432450217",
-    "itemIdentityColumn": "text_mm7f7e7n",
+  "x-notion": {
+    "databaseId": "3f87c96cc31e800580cfe019c89a56ca",
+    "databaseUrl": "https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca",
+    "dataSource": "collection://3f87c96c-c31e-80bd-b6f0-000bdc2d7c2c",
+    "itemIdentityColumn": "Sprint Code",
     "placeholderPolicy": "Rows without Sprint Code are excluded from the work register.",
-    "migrationDate": "2026-09-23",
+    "migrationDate": "2026-10-13",
+    "migratedFrom": {
+      "provider": "monday.com",
+      "boardId": "18432450217",
+      "boardUrl": "https://estrattbrown.monday.com/boards/18432450217",
+      "export": "Blurby_1791913334.xlsx: 72 items migrated; 5 template rows (Item 1-5) excluded",
+      "provenanceColumn": "Monday Item ID",
+      "groupColumn": "Board Group",
+      "previousMigrationDate": "2026-09-23"
+    },
     "legacyIdMap": {
       "LEGACY-NARR-MEDIA-1-DISSOLVED": "NARR-MEDIA-1 (legacy dissolved variant)"
     }

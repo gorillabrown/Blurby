@@ -8,12 +8,12 @@
 3. After completion of codebase work by Claude Code, tag each completed item with inline `✅ COMPLETED` markers in ROADMAP.md.
 4. **Use plain language with codebase terms parenthetical** — e.g., focus reading (ReaderView), flow reading (ScrollReaderView), page reading (PageReaderView), bottom bar (ReaderBottomBar), word index (wordIndex), etc.
 5. **Roadmap must spec out at least three sprints in advance** — current + two future sprints fully articulated with acceptance criteria.
-5a. **Queue depth below 3 is a stop signal.** If the registered monday.com work register has fewer than three queued sprints, pause implementation and backfill specifications before the next dispatch. Blocked items do not count as queued.
+5a. **Queue depth below 3 is a stop signal.** If the registered Notion work register has fewer than three queued sprints, pause implementation and backfill specifications before the next dispatch. Blocked items do not count as queued.
 5b. **Successful CLI sprints auto-merge by default.** When a sprint passes verification, spec compliance, quality review, and docs closeout, the default CLI closeout path is: stage specific files, commit on the sprint branch, merge to `main` with `--no-ff`, and push. A sprint spec must explicitly say otherwise to skip auto-merge.
 6. **Aggressively parallelize.** Look for work that Cowork and Claude Code CLI can do simultaneously. Independent tasks run in parallel. Dependent tasks are sequenced. **We cannot waste a second.**
 6a. **CLI executes, it does not investigate.** Every sprint dispatched to Claude Code CLI must be fully investigated and spec'd beforehand. CLI receives exact directions — file paths, line numbers, what to change, why. All ambiguity is resolved by Cowork before dispatch. If a bug's root cause is unknown, Cowork investigates first (live debug, code tracing, hypothesis testing). If a feature's design is unresolved, Cowork specs it first. CLI never explores or diagnoses — it builds to spec. A sprint is not dispatch-ready until its investigation gate is cleared.
 7. **CLAUDE.md stays under ~35k chars.** When approaching threshold, archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
-8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the monday.com item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
+8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the Notion item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
 
@@ -43,18 +43,18 @@ This repo uses a strict two-layer planning system:
    - Tasks
    - Execution Sequence
    - SUCCESS CRITERIA
-2. **[Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) is the authoritative work register.** Sprint Code is stable identity, Seq is FIFO order, and Status is live state. ROADMAP.md holds full specifications. Virtuoso/workspace-layout.json declares the connector and column map; local timestamped snapshots are caches, never independent authority.
+2. **[Blurby Notion roadmap](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca) is the authoritative work register.** Sprint Code is stable identity, Seq is FIFO order, and Status is live state. ROADMAP.md holds full specifications. Virtuoso/workspace-layout.json declares the connector and column map; local timestamped snapshots are caches, never independent authority.
 3. **Cowork's primary job is plan quality.** Pressure-test scope, sequencing, edge cases, cache/UX implications, spec clarity, and documentation drift so Claude Code can execute with minimal ambiguity.
 4. **Execution is selective.** Cowork only performs direct coding or file edits when:
    - the user explicitly asks for implementation, or
    - the work is especially delicate/complex and the user wants Cowork to handle it directly.
-5. **Default output for implementation planning work:** update ROADMAP.md, then the matching monday.com item through mutation-plan → connector → mutation-confirm. Refresh and read back the board snapshot.
-6. **Minimum queue depth is mandatory.** Keep at least three queued monday.com items with full ROADMAP.md specs; below three, pause implementation and backfill.
+5. **Default output for implementation planning work:** update ROADMAP.md, then the matching Notion item through mutation-plan → connector → mutation-confirm. Refresh and read back the board snapshot.
+6. **Minimum queue depth is mandatory.** Keep at least three queued Notion items with full ROADMAP.md specs; below three, pause implementation and backfill.
 7. **Parallel sprinting requires lane ownership + shared-core freeze.** We only run code-changing sprints in parallel when each sprint declares an owned lane and avoids the shared-core freeze set unless explicitly scheduled for an integration window.
 
-#### Product lanes (roadmap and Monday)
+#### Product lanes (roadmap and Notion)
 
-The Monday Lane field uses the six product domains declared in registry policy.roadmap.lanes: UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
+The Notion Lane field uses the six product domains declared in registry policy.roadmap.lanes: UX polish; TTS / Narration Engine; Reader Engine; Chrome Extension; Library & Content; Platform & Maintenance. Each item has one primary product lane. Record cross-lane dependencies in its specification; TTS cursor work requires Reader integration. ROADMAP.md's Work lanes table defines ownership and current disposition.
 
 #### Owner priority: rebuild Narrate (removal complete 2026-10-12)
 
@@ -64,13 +64,13 @@ Owner ruling #31: remove Narrate (NARRATE-REMOVE-1, done 2026-10-12, keeping the
 
 #### Parallel Sprint Policy (Execution Surface Ownership)
 
-When proposing parallel execution, classify each sprint into one or more of the legacy A-E execution surfaces below. These are file-ownership fences, distinct from the product domains in Monday's Lane field:
+When proposing parallel execution, classify each sprint into one or more of the legacy A-E execution surfaces below. These are file-ownership fences, distinct from the product domains in Notion's Lane field:
 
 - **Lane A: Runtime Core** — narration/flow state machine and synchronization behavior
 - **Lane B: Evaluation Harness** — fixtures, trace schema, runners, scoring artifacts
 - **Lane C: UI Surfaces** — controls, settings UI, display-only reader chrome
 - **Lane D: Platform/Main Process** — `main/`, preload, IPC contracts, auth/cloud/import
-- **Lane E: Governance/Planning** — roadmap, monday.com work register, close-out/reporting docs
+- **Lane E: Governance/Planning** — roadmap, Notion work register, close-out/reporting docs
 
 #### Shared-Core Freeze Set
 
@@ -200,7 +200,7 @@ Before committing, verify ALL of these:
 After EVERY sprint completion — hotfixes included, no exceptions — run the MarcusAurelius pass:
 
 1. **ROADMAP.md** — Update header (version, date, state). Archive completed sprint spec to `docs/planning/.Archive/ROADMAP_legacy.md`. Update Sprint Status table.
-2. **monday.com work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
+2. **Notion work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
 3. **CLAUDE.md** — Update version, sprint list, dependency chain, test counts.
 4. **LESSONS_LEARNED.md** — Add entry if any non-trivial discovery was made.
 5. **BUG_REPORT.md** — Mark any bugs fixed by this sprint as resolved.
@@ -261,7 +261,7 @@ Every session starts with awareness of these 7 documents. They are the single so
 | 4 | **Lessons Learned** | `docs/governance/LESSONS_LEARNED.md` | Engineering discoveries, persistent rules, anti-patterns |
 | 5 | **Ideas** | `docs/governance/IDEAS.md` | Unroadmapped concepts — reviewed at phase pauses |
 | 6 | **CLAUDE.md** | `CLAUDE.md` | Agent operational config — rules, agents, workflow |
-| 7 | **Work register** | [Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) | Live item status and FIFO order; specifications remain in ROADMAP.md |
+| 7 | **Work register** | [Blurby Notion roadmap](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca) | Live item status and FIFO order; specifications remain in ROADMAP.md |
 
 ### Other References
 
@@ -278,8 +278,8 @@ Every session starts with awareness of these 7 documents. They are the single so
 
 When a sprint **completes**:
 
-1. **monday.com work register** — Record completion, date and evidence through the provider/connector flow, then refresh the snapshot.
-2. **monday.com work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
+1. **Notion work register** — Record completion, date and evidence through the provider/connector flow, then refresh the snapshot.
+2. **Notion work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
 3. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
 4. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
 5. **ROADMAP.md** — Update Execution Order diagram.
@@ -291,7 +291,7 @@ When a sprint **completes**:
 | Content | File | Rule |
 |---------|------|------|
 | Forward-looking sprint specs (full CLI Evergreen) | `ROADMAP.md` | Only upcoming work. Archive on completion. |
-| Sprint dispatch queue (summary pointers) | [Blurby monday.com work register](https://estrattbrown.monday.com/boards/18432450217) | Sprint Code + Seq + Status → ROADMAP spec; at least 3 queued entries |
+| Sprint dispatch queue (summary pointers) | [Blurby Notion roadmap](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca) | Sprint Code + Seq + Status → ROADMAP spec; at least 3 queued entries |
 | Completed sprint specs | `docs/planning/.Archive/ROADMAP_legacy.md` | Append-only. Reference, don't modify. |
 | Completed Cowork plans/specs | `docs/planning/{plans,specs}/.Archive/` | Move on completion. |
 | Completed governance sprint files | `docs/planning/.Archive/` | Move on completion. |
@@ -320,7 +320,7 @@ When a sprint **completes**:
 2. Read `docs/governance/LESSONS_LEARNED.md` (if session may change codebase)
 3. Read `ROADMAP.md` (full active sprint specs)
 4. Read `docs/governance/BUG_REPORT.md` (if session involves bug fixes)
-5. Read the registered monday.com provider; refresh its connector snapshot and check timestamp, Seq, Status, prerequisites and spec references.
+5. Read the registered Notion provider; refresh its connector snapshot and check timestamp, Seq, Status, prerequisites and spec references.
 
 ### Bug Report Triage Workflow
 
@@ -329,7 +329,7 @@ When `docs/bug-reports/` contains unprocessed `.json` + `.png` files:
 1. **Read** all JSON reports and view all screenshots.
 2. **Group** reports by root cause or feature area — deduplicate related reports.
 3. **File** each unique bug in `docs/governance/BUG_REPORT.md` with next BUG-NNN number. Include: description, severity, location, probable cause, screenshots, fix approach.
-4. **Group into hotfix sprints** — write HOTFIX-NN specifications in ROADMAP.md and register the matching monday.com items through create-item mutation-plan/confirm.
+4. **Group into hotfix sprints** — write HOTFIX-NN specifications in ROADMAP.md and register the matching Notion items through create-item mutation-plan/confirm.
 5. **Archive** processed reports: move all `.json` + `.png` files to `docs/bug-reports/.Archive/`.
 6. **Report** findings to user with grouped summary and proposed hotfix sprint structure.
 
@@ -363,7 +363,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole engine and is dormant. NARRATE-REMOVE-1 (2026-10-12) removed the Narrate mode and deleted the MOSS-Nano, Pocket and Qwen code; the Kokoro main-process files (`main/tts-engine.js`, `tts-engine-marathon.js`, `tts-worker.js`, `tts-cache.js`, `tts-opus.js`) are byte-identical to the base, their IPC handlers stay registered in `main/ipc/tts.js`, nothing starts Kokoro at launch, and `preload.js` exposes none of those `tts-*` handlers. NARRATE-REBUILD-1 P3 added a second producer (`main/narrate/`, `main/ipc/narrate.js`) and an engine (`src/reader/modes/narrate/engine/`); P4 (`331f8313`) exposed them as preload `narrate*` and added the Narrate mode. NARRATE-REBUILD-1 builds the new Narrate on it (or, if Phase 0 fails, on a bake-off winner) and must call `ttsCache.init` before using the cache. The reading modes are Page, Focus and Flow; settings schema 13 turns a saved `narrate` mode into `flow`. Desktop v2.0 shipped.
-- **Queue (roadmap review 2026-10-12):** monday.com board 18432450217. NARRATE-REBUILD-1 (9, Path: epic, head) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14) → DEV-PERF-MEASURE-1 (15, stub); buffer 5 of 5. LL-135, LL-138, LL-143 and LL-141 promoted to standing rules 42–45. Completed 2026-10-12: NARRATE-REMOVE-1 (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`); close-outs in `docs/governance/close-outs/`. NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1 and NARRATE-SUBSCRIBER-CURSOR-1 were superseded, and KOKORO-EXPORT-1 dissolved, on 2026-10-11. Standing rule 41 (LL-136): exact-path fences exempt the time log.
+- **Queue (roadmap review 2026-10-12):** Notion database Blurby.Roadmap. NARRATE-REBUILD-1 (9, Path: epic, head) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14) → DEV-PERF-MEASURE-1 (15, stub); buffer 5 of 5. LL-135, LL-138, LL-143 and LL-141 promoted to standing rules 42–45. Completed 2026-10-12: NARRATE-REMOVE-1 (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`); close-outs in `docs/governance/close-outs/`. NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1 and NARRATE-SUBSCRIBER-CURSOR-1 were superseded, and KOKORO-EXPORT-1 dissolved, on 2026-10-11. Standing rule 41 (LL-136): exact-path fences exempt the time log.
   - NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`; close-out `docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md`; OutsideAudit.10 D4b): the Narrate mode, its hooks and strategies, its renderer UI, the dormant MOSS-Nano, Pocket and Qwen engines and 139 test files are deleted (diff against the base: 247 deleted, 66 modified, 3 added); a v13 settings migration plus three ingestion points (`loadSettingsData`, `applyCloudSettings`, the `save-settings` handler) normalize `narrate` to `flow`; the Reading Goals styles moved to `src/styles/reading-goals.css` by owner decision; the Page, Focus and Flow baselines are byte-identical. Suite 1,955 passed / 1 skipped in 134 files.
   - Completions of 2026-10-10 and 2026-10-11 (EPIC-MAIN-PROCESS-CLEANUP, TTS-ENGINE-SHARED-1, TERMINAL-BACKFILL-1, READER-MODE-SEPARATION-2): archived to `docs/planning/CLAUDE_md_archive_session1.md`.
 - **Open bugs:** 7 — BUG-186 (a 5,000-span word-index test asserts a 200 ms build time and failed once under load at 218 ms; Low), BUG-187 (dev-mode `ResizeObserver loop` warning flood in the profile error.log; Low, needs read-only diagnosis), BUG-188 (Focus and Flow horizontal cursor band sits apart from the word cursor; pre-existing; Low), BUG-189 (dev-mode slowness across the whole app, equal on the base; Low), BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (e-ink hover wiped overlay backgrounds; resolved in source by EINK-HOVER-FIX-1 `61bad595`, open until a rebuild and the owner's e-ink smoke), BUG-185 (settings writes are fire-and-forget with a shared .tmp path; filed 2026-10-11 from OutsideAudit.10 F7, Low, scheduled as SETTINGS-WRITE-DURABLE-1; observed live at startup during the NARRATE-REMOVE-1 smoke, ENOENT on the settings.json and sync-queue.json renames).

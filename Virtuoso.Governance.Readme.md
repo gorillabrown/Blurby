@@ -14,7 +14,7 @@ preview) to change them.
 | Role | Target | Provider | Authority | Mutability | Writers | State |
 |------|--------|----------|-----------|------------|---------|-------|
 | Roadmap / specification store | `ROADMAP.md` | markdown | live | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout, governance-sweep | present |
-| Blurby monday.com live work register | `monday:board/18432450217` | connector | live | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | external |
+| Blurby Notion roadmap database (Blurby.Roadmap), live work register | `notion:database/3f87c96cc31e800580cfe019c89a56ca` | connector | live | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | external |
 | Verified completion ledger | `docs/governance/terminal-ledger.jsonl` | jsonl | terminal | append-only | pointer-closeout, roadmap-review | present |
 | Lessons / retrospective | `docs/governance/LESSONS_LEARNED.md` | markdown | reference | append-only | pointer-closeout, roadmap-review, mid-dispatch-decision | present |
 | Close-outs (directory) | `docs/governance/close-outs` | directory | evidence | append-only | pointer-closeout, virtuoso | present |
@@ -29,7 +29,7 @@ preview) to change them.
 | Holding bay (ad hoc storyboards and plans awaiting roadmap review) | `docs/planning/holding` | directory | reference | read-write | storyboard, write-plan, virtuoso, pointer-closeout, roadmap-review | present |
 | Epics (directory) | `docs/planning/epics` | directory | reference | read-write | epic | present |
 | Retired XLSX migration source | `docs/governance/sprint-queue.xlsx` | xlsx | evidence | read-only | — | present |
-| Timestamped monday.com connector snapshot | `Virtuoso/work-register.snapshot.json` | snapshot | mirror | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | present |
+| Timestamped Notion connector snapshot | `Virtuoso/work-register.snapshot.json` | snapshot | mirror | read-write | roadmap-review, next-pointer, mid-dispatch-decision, pointer-closeout | present |
 | Preserved XLSX provider snapshot | `docs/planning/roadmap-reviews/2026-09-23-migration-source.json` | json | evidence | read-only | — | present |
 | Project agent instructions | `CLAUDE.md` | markdown | reference | read-write | roadmap-review, governance-sweep | present |
 | Roadmap board (generated page) | `roadmap-board.html` | none | report | generated | roadmap-review, pointer-closeout, next-pointer | registered, not present |
@@ -38,7 +38,7 @@ preview) to change them.
 <!-- virtuoso-governance-registry
 # Generated view of Virtuoso/workspace-layout.json — the manifest is the authority.
 roadmap: ROADMAP.md
-workRegister: monday:board/18432450217
+workRegister: notion:database/3f87c96cc31e800580cfe019c89a56ca
 terminalLedger: docs/governance/terminal-ledger.jsonl
 lessons: docs/governance/LESSONS_LEARNED.md
 closeOuts: docs/governance/close-outs
