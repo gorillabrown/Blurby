@@ -41,6 +41,15 @@
 - **Git:** eb/narrate-rebuild-1-p1 @ 5089627c; uncommitted at writing (committed as the next checkpoint): `scripts/narrate-rebuild/lib/wordmap.mjs`, `lib/offline-kokoro.mjs` (float32 speed check), `p0-generate.mjs` (complete flag), `phase0/MAPPING_POLICY.md`, the time log, `state.md`, `journal.md`; untracked: P2 scripts, `phase0/acoustic/`, the regenerating `phase0/tables/`.
 - **Next:** when run 2 finishes: compare, summary exit 0, `--break` exit 1, checkpoint, `p1-gate.ps1`, merge, open P2.
 
+## S1 — 2026-10-13 01:10 — P1 gate passed and merged; P2 opens
+
+- **Did:** run 2 of the matrix finished 00:51: 500 chunks (5 per passage × 25 rates × 2 voices × 2 passages), 0 unreconciled, 2,612 s of generation on a quiet machine (run 1 under load: 3,654 s). Compared with run 1 chunk by chunk (scratchpad `compare-runs.mjs`): 500/500 identical in audio sha256 and length, phonemes, ids, durations and unit spans; the only verdict change is Emma's "for a" (false → true); the evidence fix also lowered seven informational costs on diagonal en-gb words (0.333/0.5 → 0). `p0-summary.mjs` exit 0: P0-1 PASS, P0-2 PASS, P0-4 PASS, 514/514; `--break` exit 1. Checkpoints `4ec72642` (fix + records) and `bd831b66` (tables + summary) pushed. `p1-gate.ps1` 11/11 PASS (typecheck 0; `npm test` 134 files, 1,955 passed / 1 skipped / 0 failed); `-SelfTest` exit 1 with its deliberate FAIL recorded. Merged per GIT WORK: detached worktree `.worktrees/narrate-rebuild-1-merge-p1`, `7bbf6b20` "Merge eb/narrate-rebuild-1-p1: Producer and harness", pushed, ancestor check exit 0. P2 opened: `eb/narrate-rebuild-1-p2` from `origin/main` at `7bbf6b20`, worktree `.worktrees/narrate-rebuild-1-p2`, `npm ci` exit 0; `p0-acoustic.mjs` and `p0-latency.mjs` moved from the P1 worktree into it (untracked there, never in a P1 commit); the P1 prototype outputs `phase0/acoustic/` moved to the scratchpad. The P1 worktree is left with the gate's rerun of `summary.json` (timestamp only) and the suite's `tests/perf-baseline-results.json` modified, uncommitted on purpose.
+- **Learned:** the first-matrix count in the 20:55 entry was a log-line count; the matrix has 500 chunks. The time log accepts no note on `--end`; evidence goes in state.md. Run the time-log helper with an absolute `--root`: a relative root once wrote to another worktree's copy.
+- **Decisions:** none.
+- **Gate/DoD movement:** P1 gate PASS (plan.md Gate log); P0-1/P0-2/P0-4 PASS both voices; D13 holds for P1.
+- **Git:** eb/narrate-rebuild-1-p2 @ 7bbf6b20 (base; first phase commit follows this entry with the trailer); uncommitted at writing: `scripts/narrate-rebuild/p0-acoustic.mjs`, `p0-latency.mjs`, `state.md`, `plan.md`, `journal.md`, the time log.
+- **Next:** P0-3 run on the merged tables; P0-5 thread sweep then the full run; VERDICT.md; P2 gate; G1.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

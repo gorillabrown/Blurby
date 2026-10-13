@@ -1,0 +1,1408 @@
+{
+ "schema": "narrate-rebuild-1/phase0/acoustic@1",
+ "passage": "passage-b",
+ "voice": "bf_emma",
+ "params": {
+  "WIN_MS": 1,
+  "LOW": 0.01,
+  "HIGH": 0.03,
+  "MAX_SPREAD_MS": 9.5,
+  "UNCERTAINTY_FLOOR_MS": 0.5,
+  "ASSOC_MAX_COST": 0.3,
+  "MIN_SPAN_CHARS": 6,
+  "SKIP_MARK_COST": 0.6,
+  "SKIP_PAUSE_COST": 1.2,
+  "minAnchorPauseMs": 120,
+  "ERROR_LIMIT_MS": 30,
+  "UNCERTAINTY_LIMIT_MS": 10,
+  "MIN_RESOLVED": 10
+ },
+ "rates": {
+  "0.80": {
+   "summary": {
+    "rate": 0.8,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 62,
+     "samples": 521400,
+     "tokens": 351,
+     "chunk": 1
+    },
+    "totalAnchors": 31,
+    "resolved": 6,
+    "resolvedShare": 0.194,
+    "offsets": {
+     "resolved": 2,
+     "signedMeanMs": 544,
+     "p50AbsMs": 681,
+     "worstAbsMs": 681,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 28,
+    "unresolvedInteriorFusedRuns": 3,
+    "maxUncertaintyMs": 9.5,
+    "worstErrMs": 125,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 300,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 300,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 125,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 125
+    },
+    "signedMeanMs": 83.2,
+    "p50AbsMs": 86,
+    "p90AbsMs": 125,
+    "over30": 6,
+    "spaceRule": {
+     "signedMeanMs": 66.5,
+     "worstAbsMs": 125,
+     "p50AbsMs": 86,
+     "over30": 4
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "Every",
+     "kind": "word",
+     "acousticMs": 332,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 332,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 93,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 93
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "?",
+     "word": "Maya",
+     "kind": "word",
+     "acousticMs": 10410,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 216,
+     "assocCost": 0.155,
+     "tableMs": 10475,
+     "errMs": 65,
+     "tableSpaceMs": 10425,
+     "errSpaceMs": 15
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": ".",
+     "word": "I",
+     "kind": "word",
+     "acousticMs": 11757,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 514,
+     "assocCost": 0.155,
+     "tableMs": 11825,
+     "errMs": 68,
+     "tableSpaceMs": 11825,
+     "errSpaceMs": 68
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 18088,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 190,
+     "assocCost": 0.198,
+     "tableMs": 18150,
+     "errMs": 62,
+     "tableSpaceMs": 18100,
+     "errSpaceMs": 12
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Wait",
+     "kind": "word",
+     "acousticMs": 339,
+     "uncertaintyMs": 4.5,
+     "pauseLenMs": 339,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 86,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 86
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 300,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 300,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 125,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 125
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 1,
+     "mark": ".",
+     "word": "asked",
+     "kind": "word",
+     "acousticMs": 11243,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 514,
+     "assocCost": 0.155,
+     "tableMs": 11650,
+     "errMs": 407,
+     "tableSpaceMs": 11650,
+     "errSpaceMs": 407
+    },
+    {
+     "boundary": "offset",
+     "chunk": 2,
+     "mark": "chunk-end",
+     "word": "rhythm",
+     "kind": "word",
+     "acousticMs": 11844,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 931,
+     "assocCost": 0,
+     "tableMs": 12525,
+     "errMs": 681,
+     "tableSpaceMs": 12525,
+     "errSpaceMs": 681
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "The",
+     "why": "onset spread 20 ms > 9.5"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "By",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "You",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "Devon",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "Then",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "He",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "lowering",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "exactly",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "for+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "than+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "no",
+     "why": "association cost 0.21/0.39 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 4/4 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ":",
+     "word": "yes",
+     "why": "association cost 0.39/0.92 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 10/4 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "3",
+     "why": "association cost 0.92/0.22 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 4/5 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "carefully",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "because",
+     "why": "association cost 0.13/0.36 > 0.3; counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": "—",
+     "word": "are",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "?",
+     "word": "Yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "maybe",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "actually",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Count",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "2",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "pause",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Then",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "clauses",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Section",
+     "why": "onset spread 16 ms > 9.5"
+    }
+   ]
+  },
+  "1.00": {
+   "summary": {
+    "rate": 1,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 62,
+     "samples": 454200,
+     "tokens": 351,
+     "chunk": 1
+    },
+    "totalAnchors": 31,
+    "resolved": 7,
+    "resolvedShare": 0.226,
+    "offsets": {
+     "resolved": 3,
+     "signedMeanMs": 475.3,
+     "p50AbsMs": 525,
+     "worstAbsMs": 563,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 27,
+    "unresolvedInteriorFusedRuns": 3,
+    "maxUncertaintyMs": 9.5,
+    "worstErrMs": 74,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 276,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 276,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 74,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 74
+    },
+    "signedMeanMs": 50,
+    "p50AbsMs": 61,
+    "p90AbsMs": 74,
+    "over30": 6,
+    "spaceRule": {
+     "signedMeanMs": 42.9,
+     "worstAbsMs": 74,
+     "p50AbsMs": 34,
+     "over30": 5
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "The",
+     "kind": "word",
+     "acousticMs": 291,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 291,
+     "assocCost": 0,
+     "tableMs": 325,
+     "errMs": 34,
+     "tableSpaceMs": 325,
+     "errSpaceMs": 34
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "Every",
+     "kind": "word",
+     "acousticMs": 316,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 316,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 34,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 34
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "?",
+     "word": "Maya",
+     "kind": "word",
+     "acousticMs": 9089,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 206,
+     "assocCost": 0.069,
+     "tableMs": 9150,
+     "errMs": 61,
+     "tableSpaceMs": 9100,
+     "errSpaceMs": 11
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": ".",
+     "word": "I",
+     "kind": "word",
+     "acousticMs": 10212,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 450,
+     "assocCost": 0.069,
+     "tableMs": 10275,
+     "errMs": 63,
+     "tableSpaceMs": 10275,
+     "errSpaceMs": 63
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Wait",
+     "kind": "word",
+     "acousticMs": 311,
+     "uncertaintyMs": 4.5,
+     "pauseLenMs": 311,
+     "assocCost": 0,
+     "tableMs": 325,
+     "errMs": 14,
+     "tableSpaceMs": 325,
+     "errSpaceMs": 14
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 280,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 280,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 70,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 70
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 276,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 276,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 74,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 74
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 1,
+     "mark": ".",
+     "word": "asked",
+     "kind": "word",
+     "acousticMs": 9762,
+     "uncertaintyMs": 6.5,
+     "pauseLenMs": 450,
+     "assocCost": 0.069,
+     "tableMs": 10100,
+     "errMs": 338,
+     "tableSpaceMs": 10100,
+     "errSpaceMs": 338
+    },
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": "chunk-end",
+     "word": "region",
+     "kind": "word",
+     "acousticMs": 4400,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 725,
+     "assocCost": 0,
+     "tableMs": 4925,
+     "errMs": 525,
+     "tableSpaceMs": 4925,
+     "errSpaceMs": 525
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": "chunk-end",
+     "word": "rewinding",
+     "kind": "word",
+     "acousticMs": 5337,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 763,
+     "assocCost": 0,
+     "tableMs": 5900,
+     "errMs": 563,
+     "tableSpaceMs": 5900,
+     "errSpaceMs": 563
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "By",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "You",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "Devon",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "Then",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "He",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "lowering",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "exactly",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "onset spread 13 ms > 9.5"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "for+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "than+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "no",
+     "why": "association cost 0.33/0.41 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 4/4 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ":",
+     "word": "yes",
+     "why": "association cost 0.41/0.87 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 10/4 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "3",
+     "why": "association cost 0.87/0.22 > 0.3; counts disagree next to this mark (2 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4); text span 4/5 chars < 6"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "carefully",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "because",
+     "why": "association cost 0.11/0.37 > 0.3; counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": "—",
+     "word": "are",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "?",
+     "word": "Yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "maybe",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "actually",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Count",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "2",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "pause",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Then",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "clauses",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    }
+   ]
+  },
+  "1.40": {
+   "summary": {
+    "rate": 1.4,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 62,
+     "samples": 301200,
+     "tokens": 351,
+     "chunk": 1
+    },
+    "totalAnchors": 31,
+    "resolved": 2,
+    "resolvedShare": 0.065,
+    "offsets": {
+     "resolved": 3,
+     "signedMeanMs": 400.7,
+     "p50AbsMs": 402,
+     "worstAbsMs": 416,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 32,
+    "unresolvedInteriorFusedRuns": 3,
+    "maxUncertaintyMs": 5.5,
+    "worstErrMs": 53,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "?",
+     "word": "Maya",
+     "kind": "word",
+     "acousticMs": 5947,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 90,
+     "assocCost": 0.106,
+     "tableMs": 6000,
+     "errMs": 53,
+     "tableSpaceMs": 5975,
+     "errSpaceMs": 28
+    },
+    "signedMeanMs": 30.5,
+    "p50AbsMs": 53,
+    "p90AbsMs": 53,
+    "over30": 1,
+    "spaceRule": {
+     "signedMeanMs": 18,
+     "worstAbsMs": 28,
+     "p50AbsMs": 28,
+     "over30": 0
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "The",
+     "kind": "word",
+     "acousticMs": 217,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 217,
+     "assocCost": 0,
+     "tableMs": 225,
+     "errMs": 8,
+     "tableSpaceMs": 225,
+     "errSpaceMs": 8
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "?",
+     "word": "Maya",
+     "kind": "word",
+     "acousticMs": 5947,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 90,
+     "assocCost": 0.106,
+     "tableMs": 6000,
+     "errMs": 53,
+     "tableSpaceMs": 5975,
+     "errSpaceMs": 28
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 2,
+     "mark": "chunk-end",
+     "word": "rhythm",
+     "kind": "word",
+     "acousticMs": 6809,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 566,
+     "assocCost": 0,
+     "tableMs": 7225,
+     "errMs": 416,
+     "tableSpaceMs": 7225,
+     "errSpaceMs": 416
+    },
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": "chunk-end",
+     "word": "region",
+     "kind": "word",
+     "acousticMs": 2816,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 534,
+     "assocCost": 0,
+     "tableMs": 3200,
+     "errMs": 384,
+     "tableSpaceMs": 3200,
+     "errSpaceMs": 384
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": "chunk-end",
+     "word": "rewinding",
+     "kind": "word",
+     "acousticMs": 3498,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 552,
+     "assocCost": 0,
+     "tableMs": 3900,
+     "errMs": 402,
+     "tableSpaceMs": 3900,
+     "errSpaceMs": 402
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "By",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "You",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "I",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "Then",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "He",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "Devon",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "lowering",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "exactly",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "Every",
+     "why": "onset spread 25 ms > 9.5"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "for+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "than+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": "—",
+     "word": "are",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "?",
+     "word": "Yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "no",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "maybe",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "actually",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ":",
+     "word": "yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Count",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "2",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "3",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "pause",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Then",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "carefully",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "because",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "clauses",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Wait",
+     "why": "onset spread 11 ms > 9.5"
+    },
+    {
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Section",
+     "why": "onset spread 16 ms > 9.5"
+    },
+    {
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Section",
+     "why": "onset spread 25 ms > 9.5"
+    }
+   ]
+  },
+  "2.00": {
+   "summary": {
+    "rate": 2,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 62,
+     "samples": 261600,
+     "tokens": 351,
+     "chunk": 1
+    },
+    "totalAnchors": 31,
+    "resolved": 5,
+    "resolvedShare": 0.161,
+    "offsets": {
+     "resolved": 2,
+     "signedMeanMs": 394.5,
+     "p50AbsMs": 451,
+     "worstAbsMs": 451,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 29,
+    "unresolvedInteriorFusedRuns": 3,
+    "maxUncertaintyMs": 6.5,
+    "worstErrMs": -100,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Wait",
+     "kind": "word",
+     "acousticMs": 275,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 275,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -100,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -100
+    },
+    "signedMeanMs": -66.2,
+    "p50AbsMs": 50,
+    "p90AbsMs": 100,
+    "over30": 5,
+    "spaceRule": {
+     "signedMeanMs": -66.2,
+     "worstAbsMs": 100,
+     "p50AbsMs": 50,
+     "over30": 5
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "The",
+     "kind": "word",
+     "acousticMs": 200,
+     "uncertaintyMs": 6.5,
+     "pauseLenMs": 200,
+     "assocCost": 0,
+     "tableMs": 150,
+     "errMs": -50,
+     "tableSpaceMs": 150,
+     "errSpaceMs": -50
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "Every",
+     "kind": "word",
+     "acousticMs": 261,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 261,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -86,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -86
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Wait",
+     "kind": "word",
+     "acousticMs": 275,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 275,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -100,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -100
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 221,
+     "uncertaintyMs": 4.5,
+     "pauseLenMs": 221,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -46,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -46
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Section",
+     "kind": "word",
+     "acousticMs": 224,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 224,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -49,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -49
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 1,
+     "mark": "chunk-end",
+     "word": "sentence",
+     "kind": "word",
+     "acousticMs": 10324,
+     "uncertaintyMs": 2.5,
+     "pauseLenMs": 576,
+     "assocCost": 0,
+     "tableMs": 10775,
+     "errMs": 451,
+     "tableSpaceMs": 10775,
+     "errSpaceMs": 451
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": "chunk-end",
+     "word": "rewinding",
+     "kind": "word",
+     "acousticMs": 2887,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 438,
+     "assocCost": 0,
+     "tableMs": 3225,
+     "errMs": 338,
+     "tableSpaceMs": 3225,
+     "errSpaceMs": 338
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "By",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "You",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "I",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 3 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "Then",
+     "why": "counts disagree next to this mark (2 marks / 1 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "He",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": "?",
+     "word": "Maya",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "Devon",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "lowering",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "exactly",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "for+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "than+a",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": "—",
+     "word": "are",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "?",
+     "word": "Yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "no",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "maybe",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "actually",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ":",
+     "word": "yes",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Count",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "2",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "3",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "pause",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ".",
+     "word": "Then",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "carefully",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "because",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "clauses",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,1567 @@
+{
+ "schema": "narrate-rebuild-1/phase0/acoustic@1",
+ "passage": "passage-a",
+ "voice": "bf_emma",
+ "params": {
+  "WIN_MS": 1,
+  "LOW": 0.01,
+  "HIGH": 0.03,
+  "MAX_SPREAD_MS": 9.5,
+  "UNCERTAINTY_FLOOR_MS": 0.5,
+  "ASSOC_MAX_COST": 0.3,
+  "MIN_SPAN_CHARS": 6,
+  "SKIP_MARK_COST": 0.6,
+  "SKIP_PAUSE_COST": 1.2,
+  "minAnchorPauseMs": 120,
+  "ERROR_LIMIT_MS": 30,
+  "UNCERTAINTY_LIMIT_MS": 10,
+  "MIN_RESOLVED": 10
+ },
+ "rates": {
+  "0.80": {
+   "summary": {
+    "rate": 0.8,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 48,
+     "samples": 465000,
+     "tokens": 278,
+     "chunk": 4
+    },
+    "totalAnchors": 24,
+    "resolved": 10,
+    "resolvedShare": 0.417,
+    "offsets": {
+     "resolved": 2,
+     "signedMeanMs": 446,
+     "p50AbsMs": 772,
+     "worstAbsMs": 772,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 24,
+    "unresolvedInteriorFusedRuns": 10,
+    "maxUncertaintyMs": 3.5,
+    "worstErrMs": 139,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 286,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 286,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 139,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 139
+    },
+    "signedMeanMs": 85.2,
+    "p50AbsMs": 84,
+    "p90AbsMs": 139,
+    "over30": 9,
+    "spaceRule": {
+     "signedMeanMs": 42.7,
+     "worstAbsMs": 139,
+     "p50AbsMs": 49,
+     "over30": 5
+    },
+    "inconclusive": false,
+    "pass": false,
+    "verdict": "FAIL"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 286,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 286,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 139,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 139
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 312,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 312,
+     "assocCost": 0,
+     "tableMs": 450,
+     "errMs": 138,
+     "tableSpaceMs": 450,
+     "errSpaceMs": 138
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 11296,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 539,
+     "assocCost": 0.15,
+     "tableMs": 11350,
+     "errMs": 54,
+     "tableSpaceMs": 11300,
+     "errSpaceMs": 4
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 337,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 337,
+     "assocCost": 0,
+     "tableMs": 425,
+     "errMs": 88,
+     "tableSpaceMs": 425,
+     "errSpaceMs": 88
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "both",
+     "kind": "word",
+     "acousticMs": 2249,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 390,
+     "assocCost": 0.166,
+     "tableMs": 2275,
+     "errMs": 26,
+     "tableSpaceMs": 2200,
+     "errSpaceMs": -49
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 5353,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 512,
+     "assocCost": 0.166,
+     "tableMs": 5425,
+     "errMs": 72,
+     "tableSpaceMs": 5350,
+     "errSpaceMs": -3
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ";",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 8681,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 878,
+     "assocCost": 0.127,
+     "tableMs": 8750,
+     "errMs": 69,
+     "tableSpaceMs": 8675,
+     "errSpaceMs": -6
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 337,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 337,
+     "assocCost": 0,
+     "tableMs": 450,
+     "errMs": 113,
+     "tableSpaceMs": 450,
+     "errSpaceMs": 113
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "kind": "word",
+     "acousticMs": 2191,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 549,
+     "assocCost": 0.197,
+     "tableMs": 2275,
+     "errMs": 84,
+     "tableSpaceMs": 2200,
+     "errSpaceMs": 9
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "kind": "word",
+     "acousticMs": 14231,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 201,
+     "assocCost": 0.242,
+     "tableMs": 14300,
+     "errMs": 69,
+     "tableSpaceMs": 14225,
+     "errSpaceMs": -6
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": ";",
+     "word": "home",
+     "kind": "word",
+     "acousticMs": 7803,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 878,
+     "assocCost": 0.127,
+     "tableMs": 8575,
+     "errMs": 772,
+     "tableSpaceMs": 8575,
+     "errSpaceMs": 772
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "gladiators",
+     "kind": "word",
+     "acousticMs": 14030,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 201,
+     "assocCost": 0.242,
+     "tableMs": 14150,
+     "errMs": 120,
+     "tableSpaceMs": 14150,
+     "errSpaceMs": 120
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 0,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "From+the",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "From+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "to",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "not",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "but",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Of",
+     "why": "onset spread 11 ms > 9.5"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "as+is",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "if",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "I",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "called",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ":",
+     "word": "nor",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "as",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    }
+   ]
+  },
+  "1.00": {
+   "summary": {
+    "rate": 1,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 48,
+     "samples": 393600,
+     "tokens": 278,
+     "chunk": 4
+    },
+    "totalAnchors": 24,
+    "resolved": 10,
+    "resolvedShare": 0.417,
+    "offsets": {
+     "resolved": 3,
+     "signedMeanMs": 569.3,
+     "p50AbsMs": 542,
+     "worstAbsMs": 629,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 24,
+    "unresolvedInteriorFusedRuns": 10,
+    "maxUncertaintyMs": 6.5,
+    "worstErrMs": 58,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "kind": "word",
+     "acousticMs": 1817,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 425,
+     "assocCost": 0.218,
+     "tableMs": 1875,
+     "errMs": 58,
+     "tableSpaceMs": 1825,
+     "errSpaceMs": 8
+    },
+    "signedMeanMs": 44.4,
+    "p50AbsMs": 46,
+    "p90AbsMs": 58,
+    "over30": 9,
+    "spaceRule": {
+     "signedMeanMs": 19.4,
+     "worstAbsMs": 47,
+     "p50AbsMs": 43,
+     "over30": 5
+    },
+    "inconclusive": false,
+    "pass": false,
+    "verdict": "FAIL"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 278,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 278,
+     "assocCost": 0,
+     "tableMs": 325,
+     "errMs": 47,
+     "tableSpaceMs": 325,
+     "errSpaceMs": 47
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 303,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 303,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 47,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 47
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 307,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 307,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 43,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 43
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 9356,
+     "uncertaintyMs": 6.5,
+     "pauseLenMs": 430,
+     "assocCost": 0.134,
+     "tableMs": 9400,
+     "errMs": 44,
+     "tableSpaceMs": 9350,
+     "errSpaceMs": -6
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 306,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 306,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 44,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 44
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "both",
+     "kind": "word",
+     "acousticMs": 1829,
+     "uncertaintyMs": 2.5,
+     "pauseLenMs": 296,
+     "assocCost": 0.139,
+     "tableMs": 1850,
+     "errMs": 21,
+     "tableSpaceMs": 1800,
+     "errSpaceMs": -29
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ";",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 7229,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 708,
+     "assocCost": 0.147,
+     "tableMs": 7275,
+     "errMs": 46,
+     "tableSpaceMs": 7225,
+     "errSpaceMs": -4
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 307,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 307,
+     "assocCost": 0,
+     "tableMs": 350,
+     "errMs": 43,
+     "tableSpaceMs": 350,
+     "errSpaceMs": 43
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "kind": "word",
+     "acousticMs": 1817,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 425,
+     "assocCost": 0.218,
+     "tableMs": 1875,
+     "errMs": 58,
+     "tableSpaceMs": 1825,
+     "errSpaceMs": 8
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "kind": "word",
+     "acousticMs": 12199,
+     "uncertaintyMs": 4.5,
+     "pauseLenMs": 121,
+     "assocCost": 0.238,
+     "tableMs": 12250,
+     "errMs": 51,
+     "tableSpaceMs": 12200,
+     "errSpaceMs": 1
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": "chunk-end",
+     "word": "charges",
+     "kind": "word",
+     "acousticMs": 11713,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 737,
+     "assocCost": 0,
+     "tableMs": 12250,
+     "errMs": 537,
+     "tableSpaceMs": 12250,
+     "errSpaceMs": 537
+    },
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": ";",
+     "word": "home",
+     "kind": "word",
+     "acousticMs": 6521,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 708,
+     "assocCost": 0.147,
+     "tableMs": 7150,
+     "errMs": 629,
+     "tableSpaceMs": 7150,
+     "errSpaceMs": 629
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": "chunk-end",
+     "word": "Secutores",
+     "kind": "word",
+     "acousticMs": 15658,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 742,
+     "assocCost": 0,
+     "tableMs": 16200,
+     "errMs": 542,
+     "tableSpaceMs": 16200,
+     "errSpaceMs": 542
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 0,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "From+the",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "From+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "to",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "not",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "but",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "as+is",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "if",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "I",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "and",
+     "why": "onset spread 10 ms > 9.5"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "called",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ":",
+     "word": "nor",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "as",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    }
+   ]
+  },
+  "1.40": {
+   "summary": {
+    "rate": 1.4,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 48,
+     "samples": 260400,
+     "tokens": 278,
+     "chunk": 4
+    },
+    "totalAnchors": 24,
+    "resolved": 8,
+    "resolvedShare": 0.333,
+    "offsets": {
+     "resolved": 2,
+     "signedMeanMs": 273,
+     "p50AbsMs": 275,
+     "worstAbsMs": 275,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 26,
+    "unresolvedInteriorFusedRuns": 10,
+    "maxUncertaintyMs": 8.5,
+    "worstErrMs": 47,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "kind": "word",
+     "acousticMs": 1303,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 328,
+     "assocCost": 0.225,
+     "tableMs": 1350,
+     "errMs": 47,
+     "tableSpaceMs": 1300,
+     "errSpaceMs": -3
+    },
+    "signedMeanMs": 1.9,
+    "p50AbsMs": 23,
+    "p90AbsMs": 47,
+    "over30": 3,
+    "spaceRule": {
+     "signedMeanMs": -16.9,
+     "worstAbsMs": 37,
+     "p50AbsMs": 18,
+     "over30": 2
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 255,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 255,
+     "assocCost": 0,
+     "tableMs": 250,
+     "errMs": -5,
+     "tableSpaceMs": 250,
+     "errSpaceMs": -5
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 287,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 287,
+     "assocCost": 0,
+     "tableMs": 250,
+     "errMs": -37,
+     "tableSpaceMs": 250,
+     "errSpaceMs": -37
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 6358,
+     "uncertaintyMs": 2.5,
+     "pauseLenMs": 311,
+     "assocCost": 0.147,
+     "tableMs": 6375,
+     "errMs": 17,
+     "tableSpaceMs": 6350,
+     "errSpaceMs": -8
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 285,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 285,
+     "assocCost": 0,
+     "tableMs": 250,
+     "errMs": -35,
+     "tableSpaceMs": 250,
+     "errSpaceMs": -35
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "both",
+     "kind": "word",
+     "acousticMs": 1227,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 182,
+     "assocCost": 0.163,
+     "tableMs": 1250,
+     "errMs": 23,
+     "tableSpaceMs": 1200,
+     "errSpaceMs": -27
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 3027,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 323,
+     "assocCost": 0.163,
+     "tableMs": 3050,
+     "errMs": 23,
+     "tableSpaceMs": 3025,
+     "errSpaceMs": -2
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 268,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 268,
+     "assocCost": 0,
+     "tableMs": 250,
+     "errMs": -18,
+     "tableSpaceMs": 250,
+     "errSpaceMs": -18
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "kind": "word",
+     "acousticMs": 1303,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 328,
+     "assocCost": 0.225,
+     "tableMs": 1350,
+     "errMs": 47,
+     "tableSpaceMs": 1300,
+     "errSpaceMs": -3
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "auditories",
+     "kind": "word",
+     "acousticMs": 2704,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 323,
+     "assocCost": 0.163,
+     "tableMs": 2975,
+     "errMs": 271,
+     "tableSpaceMs": 2975,
+     "errSpaceMs": 271
+    },
+    {
+     "boundary": "offset",
+     "chunk": 4,
+     "mark": ",",
+     "word": "up",
+     "kind": "word",
+     "acousticMs": 975,
+     "uncertaintyMs": 2.5,
+     "pauseLenMs": 328,
+     "assocCost": 0.225,
+     "tableMs": 1250,
+     "errMs": 275,
+     "tableSpaceMs": 1250,
+     "errSpaceMs": 275
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "Of",
+     "why": "onset spread 24 ms > 9.5"
+    },
+    {
+     "chunk": 0,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "From+the",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "From+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "to",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "not",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "but",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "as+is",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 3,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "if",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "I",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "called",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ":",
+     "word": "nor",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "as",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    }
+   ]
+  },
+  "2.00": {
+   "summary": {
+    "rate": 2,
+    "chunks": 5,
+    "largestChunk": {
+     "words": 48,
+     "samples": 220200,
+     "tokens": 278,
+     "chunk": 4
+    },
+    "totalAnchors": 24,
+    "resolved": 8,
+    "resolvedShare": 0.333,
+    "offsets": {
+     "resolved": 4,
+     "signedMeanMs": 252.5,
+     "p50AbsMs": 242,
+     "worstAbsMs": 412,
+     "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+    },
+    "unresolved": 26,
+    "unresolvedInteriorFusedRuns": 10,
+    "maxUncertaintyMs": 9.5,
+    "worstErrMs": -97,
+    "worstAnchor": {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 272,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 272,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -97,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -97
+    },
+    "signedMeanMs": -39.4,
+    "p50AbsMs": 55,
+    "p90AbsMs": 97,
+    "over30": 5,
+    "spaceRule": {
+     "signedMeanMs": -48.8,
+     "worstAbsMs": 97,
+     "p50AbsMs": 55,
+     "over30": 5
+    },
+    "inconclusive": true,
+    "pass": false,
+    "verdict": "INCONCLUSIVE"
+   },
+   "anchors": [
+    {
+     "boundary": "onset",
+     "chunk": 0,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 223,
+     "uncertaintyMs": 4.5,
+     "pauseLenMs": 223,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -48,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -48
+    },
+    {
+     "boundary": "onset",
+     "chunk": 1,
+     "mark": "chunk-start",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 230,
+     "uncertaintyMs": 1.5,
+     "pauseLenMs": 230,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -55,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -55
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 272,
+     "uncertaintyMs": 5.5,
+     "pauseLenMs": 272,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -97,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -97
+    },
+    {
+     "boundary": "onset",
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 5391,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 224,
+     "assocCost": 0.139,
+     "tableMs": 5400,
+     "errMs": 9,
+     "tableSpaceMs": 5375,
+     "errSpaceMs": -16
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 251,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 251,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -76,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -76
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "both",
+     "kind": "word",
+     "acousticMs": 956,
+     "uncertaintyMs": 0.5,
+     "pauseLenMs": 86,
+     "assocCost": 0.207,
+     "tableMs": 975,
+     "errMs": 19,
+     "tableSpaceMs": 950,
+     "errSpaceMs": -6
+    },
+    {
+     "boundary": "onset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "and",
+     "kind": "word",
+     "acousticMs": 2508,
+     "uncertaintyMs": 7.5,
+     "pauseLenMs": 206,
+     "assocCost": 0.123,
+     "tableMs": 2525,
+     "errMs": 17,
+     "tableSpaceMs": 2500,
+     "errSpaceMs": -8
+    },
+    {
+     "boundary": "onset",
+     "chunk": 4,
+     "mark": "chunk-start",
+     "word": "Of",
+     "kind": "word",
+     "acousticMs": 259,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 259,
+     "assocCost": 0,
+     "tableMs": 175,
+     "errMs": -84,
+     "tableSpaceMs": 175,
+     "errSpaceMs": -84
+    }
+   ],
+   "offsets": [
+    {
+     "boundary": "offset",
+     "chunk": 1,
+     "mark": ".",
+     "word": "passion",
+     "kind": "word",
+     "acousticMs": 1308,
+     "uncertaintyMs": 3.5,
+     "pauseLenMs": 306,
+     "assocCost": 0.164,
+     "tableMs": 1550,
+     "errMs": 242,
+     "tableSpaceMs": 1550,
+     "errSpaceMs": 242
+    },
+    {
+     "boundary": "offset",
+     "chunk": 2,
+     "mark": ",",
+     "word": "diet",
+     "kind": "word",
+     "acousticMs": 5167,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 224,
+     "assocCost": 0.139,
+     "tableMs": 5350,
+     "errMs": 183,
+     "tableSpaceMs": 5350,
+     "errSpaceMs": 183
+    },
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": "chunk-end",
+     "word": "charges",
+     "kind": "word",
+     "acousticMs": 6613,
+     "uncertaintyMs": 9.5,
+     "pauseLenMs": 537,
+     "assocCost": 0,
+     "tableMs": 7025,
+     "errMs": 412,
+     "tableSpaceMs": 7025,
+     "errSpaceMs": 412
+    },
+    {
+     "boundary": "offset",
+     "chunk": 3,
+     "mark": ",",
+     "word": "auditories",
+     "kind": "word",
+     "acousticMs": 2302,
+     "uncertaintyMs": 8.5,
+     "pauseLenMs": 206,
+     "assocCost": 0.123,
+     "tableMs": 2475,
+     "errMs": 173,
+     "tableSpaceMs": 2475,
+     "errSpaceMs": 173
+    }
+   ],
+   "unresolved": [
+    {
+     "chunk": 0,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 1,
+     "mark": ".",
+     "word": "From+the",
+     "why": "onset spread 28 ms > 9.5"
+    },
+    {
+     "chunk": 1,
+     "mark": null,
+     "word": "From+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ";",
+     "word": "to",
+     "why": "counts disagree next to this mark (2 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "not",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": ",",
+     "word": "but",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 2,
+     "mark": null,
+     "word": "as+is",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 3,
+     "mark": ";",
+     "word": "and",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "if",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 3,
+     "mark": ",",
+     "word": "I",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "not",
+     "why": "counts disagree next to this mark (0 marks / 1 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "called",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 1 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ":",
+     "word": "nor",
+     "why": "counts disagree next to this mark (1 marks / 0 pauses skipped before, 0 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "counts disagree next to this mark (0 marks / 0 pauses skipped before, 2 after): neighbour of a mismatch, unresolved (T4)"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "and",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "as",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": ",",
+     "word": "or",
+     "why": "no pause paired with this mark"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "to+be",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "in+the",
+     "why": "fused-run interior (no pause)"
+    },
+    {
+     "chunk": 4,
+     "mark": null,
+     "word": "of+the",
+     "why": "fused-run interior (no pause)"
+    }
+   ]
+  }
+ }
+}
