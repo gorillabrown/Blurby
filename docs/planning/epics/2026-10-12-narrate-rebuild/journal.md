@@ -113,6 +113,15 @@
 - **Git:** eb/narrate-rebuild-1-p4 @ 09455064; uncommitted at writing, committed as the next checkpoint: the 22 modified paths of the P4 diff, the nine untracked `src/reader/modes/narrate/` entries (with `helpers/`), `tests/narrate/harness/fakeNarrateHost.ts`, `tests/narrate/narrate.mode.test.ts`, `tests/readerModes/narrate.contract.test.ts`, the time log, `state.md`, `plan.md`, `journal.md`.
 - **Next:** checkpoint → P4 gate fresh at that commit → merge per GIT WORK → open P5 with the records.
 
+## S1 — 2026-10-13 12:35 — P4 gate passed; P4 merged 331f8313; P5 opened
+
+- **Did:** checkpoint `5edbea58` on P4 (49 exact paths; `tests/perf-baseline-results.json` left out; the restored display files byte-identical to `612d03f5` once staged), pushed. P4 gate fresh at that commit, 12:24–12:26: the D7/D8/D9 suites exit 0 (26 files, 207 tests), the three G4 baselines byte-identical against `ef245815`, typecheck 0, `npm test` 141 files / 2,004 passed / 1 skipped, build 0. Merged per GIT WORK from the detached worktree `.worktrees/narrate-rebuild-1-merge-p4`: `origin/main` was `49a84a55` (the planner's "chartered" marking had landed after `ef245815`), `merge --no-ff eb/narrate-rebuild-1-p4` → `331f8313` "Merge eb/narrate-rebuild-1-p4: The mode", pushed, `merge-base --is-ancestor` exit 0. P5 opened at 12:27: `eb/narrate-rebuild-1-p5` from `origin/main` at `331f8313`, worktree `.worktrees/narrate-rebuild-1-p5`, `npm ci` started; the time log is on `main` through the checkpoint, so P5 continues it in place (row 39 closed here, rows 40–45 added for P5). Gate log row for P4 and Evidence rows written here (LL-148); P5 worklist in plan.md from the charter's D3, D5, D6 and D10 rows.
+- **Learned:** the previous entry's heading (12:30) and the "12:25" stamps were written ahead of the machine clock, which read 12:20–12:22; corrected in state.md's P4 build row, left as written here. `origin/main` can move between a phase's base and its merge (the planner's docs commit did); the recipe's detached worktree at `origin/main` absorbs that without a rebase, and the base trailer still names the phase's own base.
+- **Decisions:** none new.
+- **Gate/DoD movement:** P4 gate PASS (plan.md Gate log); D7's tests, D8 and D9 on `main`; D13 holds for P1–P4 (four `--no-ff` merges, one per phase, trailers valid).
+- **Git:** eb/narrate-rebuild-1-p5 @ 331f8313 (base; the first phase commit follows this entry with the trailer `NARRATE-REBUILD-1-P5-Base: 331f8313…`); uncommitted at writing: `state.md`, `plan.md`, `journal.md`, the close-out, the memo, the time log.
+- **Next:** P5 census, then D10, the D3 log and check script, the crossings, the D6 end-to-end latency, the P5 gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
