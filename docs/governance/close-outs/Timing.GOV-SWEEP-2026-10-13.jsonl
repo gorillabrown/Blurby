@@ -20,3 +20,7 @@
 {"event": "start", "row": 10, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:25:29Z"}
 {"event": "end", "row": 10, "evidence": "commit f9de3c4c", "result": "done", "at": "2026-10-13T17:25:32Z"}
 {"event": "start", "row": 11, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:25:35Z"}
+{"event": "end", "row": 11, "evidence": "commit 8a8eff25; body [CUSTOMIZE] blocks deferred", "result": "done", "at": "2026-10-13T17:26:27Z"}
+{"event": "start", "row": 12, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:26:43Z"}
+{"event": "end", "row": 12, "evidence": "17 files to docs/bug-reports/.Archive (gitignored, main checkout), 0 hash mismatches; clock started late", "result": "done", "at": "2026-10-13T17:26:44Z"}
+{"event": "start", "row": 13, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:26:53Z"}
