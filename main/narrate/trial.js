@@ -260,9 +260,11 @@ async function run(ctx) {
         const offset = 40 + ((i * 37) % 120);
         b = await count("click"); const clicked = await clickWord(offset); await waitVoiced("click", b, `click ${i} (word ${clicked})`);
         await sleep(2000);
-        b = await count("speed"); await js('window.__narrateTrial.key("ArrowUp")'); await waitVoiced("speed", b, `speed up ${i}`);
+        // One step away from the trial's rate and back (down first at the top of the range, where up changes nothing).
+        const [away, back] = (cfg.rate ?? 1) >= 2.0 ? ["ArrowDown", "ArrowUp"] : ["ArrowUp", "ArrowDown"];
+        b = await count("speed"); await js(`window.__narrateTrial.key("${away}")`); await waitVoiced("speed", b, `speed ${away} ${i}`);
         await sleep(2000);
-        b = await count("speed"); await js('window.__narrateTrial.key("ArrowDown")'); await waitVoiced("speed", b, `speed down ${i}`);
+        b = await count("speed"); await js(`window.__narrateTrial.key("${back}")`); await waitVoiced("speed", b, `speed ${back} ${i}`);
         await sleep(1500);
         await press(".rbb-play-btn"); // pause before the mode switch
         await sleep(300);
@@ -274,7 +276,7 @@ async function run(ctx) {
       // resume: Play, pause at once (the model still loading), Play again. click: Play, pause at once, click a
       // word in the section the view stepped to, Play again.
       const type = cfg.type ?? "play";
-      if (type === "speed") { await js('window.__narrateTrial.key("ArrowUp")'); await sleep(100); }
+      if (type === "speed") { await js(`window.__narrateTrial.key("${(cfg.rate ?? 1) >= 2.0 ? "ArrowDown" : "ArrowUp"}")`); await sleep(100); }
       const b = await count(null);
       await press(".rbb-play-btn");
       if (type === "resume") { await sleep(60); await press(".rbb-play-btn"); await sleep(400); await press(".rbb-play-btn"); }

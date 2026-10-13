@@ -1,0 +1,91 @@
+{
+  "generatedAt": "2026-10-13T19:44:06.639Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "minutes": 5,
+  "sessions": {
+    "1.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-1-00.trace.json",
+      "verdict": "PASS",
+      "failures": [],
+      "holds": [],
+      "stats": {
+        "commits": 798,
+        "schedules": 22,
+        "stops": 2,
+        "requests": 1,
+        "minutes": 5.02,
+        "speeds": [
+          1
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.78,
+        "outside": 0,
+        "worstLateMs": 17.34,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 20,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 30
+        }
+      },
+      "outside": []
+    },
+    "2.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-2-00.trace.json",
+      "verdict": "PASS",
+      "failures": [],
+      "holds": [],
+      "stats": {
+        "commits": 1413,
+        "schedules": 35,
+        "stops": 1,
+        "requests": 1,
+        "minutes": 5.03,
+        "speeds": [
+          2
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.77,
+        "outside": 0,
+        "worstLateMs": 33.58,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 34,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 30
+        }
+      },
+      "outside": []
+    }
+  },
+  "runs": [
+    {
+      "label": "session-1.00",
+      "code": 0,
+      "wallMs": 316341,
+      "hostBusyPct": 78.1,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-1-00.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "session-2.00",
+      "code": 0,
+      "wallMs": 313056,
+      "hostBusyPct": 75.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-2-00.trace.json",
+      "traceExists": true
+    }
+  ]
+}

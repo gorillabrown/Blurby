@@ -131,6 +131,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ 84d35933; uncommitted: the S1 P5 tree above.
 - **Next:** wire the ramp (row 46 with the preload, the quit shutdown and the trial warm-up), checkpoint, crossings (row 43), then D3/D6 trials once the host is not saturated.
 
+## S2 — 2026-10-13 14:44 — D6 repair, crossings fix, three D3 runs and what each one found
+
+- **Did:** `238f47ec` recovery checkpoint + D6 repair (Decision #17). `573706ea` crossings: the runtime's `chunkBreaks` matched the engine words to `bookWords.words` by identity, but `start()` passes a copy, so in the product no chunk ever broke at a section end; the crossing test only passed because a sentence ended at its boundary (made non-vacuous, seen failing on the old code). D3 run 1 (14:15–14:26; the owner asked about the audio, then approved): 1.00x PASS (803 commits, 0 outside, mapping 0.8 ms), 2.00x FAIL (30 outside, 6 drops). Cause: at 2.00x the leading trim (first voiced sample) passed the whole first table unit in 12 of 35 chunks (the VERDICT's early first word at ≥ 1.40x), losing that word's highlight, and the check timed a unit that starts inside the trimmed silence from before its chunk sounded. Fixes `f25b8660`: `leadingTrim` never passes the first unit's last table frame; the check takes a unit's boundary no earlier than its chunk's `startAt` (from the raw schedule record); graceful producer stop (the worker finishes the run in progress, then exits) awaited on `will-quit` and before the trial's `app.exit` — the 0xC0000409 exits are gone (both run-2 exits 0). D3 run 2 (14:29–14:41): both INCONCLUSIVE (2.19 and 3.16 min of commits): the engine's upkeep ran only on rAF, which stops when the window gets no frames, so narration went silent after the prefetched audio once the window was covered — a product defect (listening with Blurby minimized). Fixes `0b7db8ca`: `pump()` (prefetch, end of audio) on a 250 ms timer as well as every frame; the trial's rate is set from the rate the bar shows and checked (run 2's "1.00x" session ran at 2.00x from the profile). `5875b858`: trial runs only, native window occlusion off.
+- **Learned:** rAF is not a clock for anything but painting. A trial's scratch profile carries settings between runs. `worker.terminate()` does not stop a native onnxruntime run; the process exit under it is the 0xC0000409. Frame stalls of 111–1,458 ms occur at 2.00x on this host and are excused by the check only up to a 1 s frame.
+- **Decisions:** #17 (state.md).
+- **Gate/DoD movement:** D5 crossings suite passes (`573706ea`); D3 1.00x PASS on run 1 (pre-fix engine, superseded by run 3).
+- **Git:** eb/narrate-rebuild-1-p5 @ 5875b858; uncommitted: this entry, `phase5/recorded-output.json` (run 2, to be overwritten by run 3).
+- **Next:** D3 run 3 → D6 warm and cold → P5 gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

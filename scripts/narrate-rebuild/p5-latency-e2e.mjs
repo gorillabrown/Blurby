@@ -34,6 +34,9 @@ const OUT = path.resolve(arg("--out", "C:/Projects/Blurby-artifacts/narrate-rebu
 const ANALYZE_ONLY = process.argv.includes("--analyze-only");
 const TRIAL_TIMEOUT_MS = Number(arg("--trial-timeout", 120000));
 const DIAG = process.argv.includes("--diag");
+// --break plants 2.5 s on the first trial read (the positive control, LL-151): any run must then exit 1.
+const BREAK = process.argv.includes("--break");
+let breakPlanted = false;
 // The book word every session opens at. 8723 is 700 words before THE SECOND BOOK (word 9423 of the sample EPUB's
 // extraction), so a five-minute session crosses a section boundary (D5, F2) inside plain body text.
 const POSITION = Number(arg("--position", 8723));
@@ -79,9 +82,22 @@ async function launch(label, trial) {
   return result;
 }
 
+// Request → the first voiced sample heard (T6, the playback clock): the sample's context time (startAt) mapped to
+// performance.now() through the output-timestamp pair of the first commit after it, minus the request's
+// performance.now(). The context clock does not run before the first audio, so startAt − ctxAtRequest alone (kept as
+// ctxLatencyMs) can read near zero for a first request. No pair → no measurement (null, a failure, never a pass).
 function firstVoiced(tracePath) {
   if (!fs.existsSync(tracePath)) return [];
-  return readTraceEvents(tracePath).filter((e) => e.kind === "narrate-first-voiced").map((e) => ({ cause: e.cause, speed: e.speed, word: e.word, latencyMs: +(e.latencyS * 1000).toFixed(0), leadMs: +(e.leadS * 1000).toFixed(0), trimMs: +((e.trimSamples / 24000) * 1000).toFixed(0) }));
+  const ev = readTraceEvents(tracePath);
+  const out = [];
+  ev.forEach((e, i) => {
+    if (e.kind !== "narrate-first-voiced") return;
+    const pair = ev.slice(i + 1).find((c) => c.kind === "narrate-commit" && c.otsPerf > 0 && typeof c.otsCtx === "number");
+    let latencyMs = pair ? +(pair.otsPerf + (e.startAt - pair.otsCtx) * 1000 - e.requestT).toFixed(0) : null;
+    if (BREAK && !breakPlanted && latencyMs !== null) { latencyMs += 2500; breakPlanted = true; }
+    out.push({ cause: e.cause, speed: e.speed, word: e.word, latencyMs, ctxLatencyMs: +(e.latencyS * 1000).toFixed(0), scheduledWallMs: e.latencyWallMs == null ? null : +e.latencyWallMs.toFixed(0), leadMs: +(e.leadS * 1000).toFixed(0), trimMs: +((e.trimSamples / 24000) * 1000).toFixed(0) });
+  });
+  return out;
 }
 
 const failures = [];
@@ -110,7 +126,9 @@ if (want("warm")) {
     const byCause = {};
     for (const t of TYPES) {
       const own = trials.filter((x) => x.cause === t);
-      byCause[t] = { n: own.length, worstMs: own.length ? Math.max(...own.map((x) => x.latencyMs)) : null, over: own.filter((x) => x.latencyMs >= WARM_BUDGET_MS).length, trials: own };
+      const measured = own.filter((x) => x.latencyMs !== null);
+      byCause[t] = { n: own.length, worstMs: measured.length ? Math.max(...measured.map((x) => x.latencyMs)) : null, over: measured.filter((x) => x.latencyMs >= WARM_BUDGET_MS).length, unmeasured: own.length - measured.length, trials: own };
+      if (byCause[t].unmeasured) failures.push(`warm ${rateLabel(rate)} ${t}: ${byCause[t].unmeasured} trials with no output-timestamp pair`);
       if (own.length < WARM) failures.push(`warm ${rateLabel(rate)} ${t}: ${own.length} trials < ${WARM}`);
       if (byCause[t].over) failures.push(`warm ${rateLabel(rate)} ${t}: ${byCause[t].over} trials at or over ${WARM_BUDGET_MS} ms (worst ${byCause[t].worstMs})`);
     }
@@ -131,6 +149,7 @@ if (want("cold")) {
         const first = firstVoiced(tracePathFor(label))[0] ?? null;
         rows.push({ trial: i + 1, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null });
         if (!first) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no first voiced sample recorded`);
+        else if (first.latencyMs === null) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no output-timestamp pair`);
         else if (first.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: ${first.latencyMs} ms >= ${COLD_BUDGET_MS}`);
       }
       report.cold[rateLabel(rate)][type] = { n: rows.length, worstMs: rows.some((r) => r.latencyMs !== null) ? Math.max(...rows.filter((r) => r.latencyMs !== null).map((r) => r.latencyMs)) : null, trials: rows };
