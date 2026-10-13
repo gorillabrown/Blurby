@@ -379,7 +379,7 @@ export interface ElectronAPI {
   }>;
   // Rebuilt Narrate (NARRATE-REBUILD-1 P4): the main-process producer. The table is the model's own word
   // table (verified again in the renderer before it is played); an { error } reply is F4.
-  narrateGenerate?: (text: string, voice: string, speed: number) => Promise<{
+  narrateGenerate?: (text: string, voice: string, speed: number, options?: { priority: "request" | "prefetch"; group: string }) => Promise<{
     table?: unknown;
     pcm?: Float32Array;
     sampleRate?: number;

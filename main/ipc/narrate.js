@@ -8,10 +8,14 @@ const { ipcMain } = require("electron");
 function register() {
   const producer = require("../narrate/producer");
 
-  ipcMain.handle("narrate-generate", async (_, text, voice, speed) => {
+  ipcMain.handle("narrate-generate", async (_, text, voice, speed, options) => {
+    const recvEpoch = performance.timeOrigin + performance.now(); // D6 analysis: when main received the request
     try {
-      const r = await producer.generate(text, { voice, speed });
-      return { table: r.table, pcm: r.pcm, sampleRate: r.sampleRate, genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign };
+      const priority = options?.priority === "prefetch" ? "prefetch" : "request";
+      const group = typeof options?.group === "string" ? options.group : null;
+      const r = await producer.generate(text, { voice, speed, priority, group });
+      const ipc = { recvEpoch, replyEpoch: performance.timeOrigin + performance.now() };
+      return { table: r.table, pcm: r.pcm, sampleRate: r.sampleRate, genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign, ipc: { ...ipc, stages: r.stages } };
     } catch (err) {
       console.error("[narrate] generate failed:", err?.message || String(err));
       return { error: err?.message || String(err) };

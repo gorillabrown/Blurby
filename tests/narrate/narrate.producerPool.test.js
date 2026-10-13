@@ -78,6 +78,33 @@ describe("narrate producer pool (D6)", () => {
     await Promise.all([stale, next]);
   });
 
+  it("a prefetch never takes the last idle worker; a request does, and drops the queued prefetch of an older group (Decision #18)", async () => {
+    await producer.ensureReady();
+    await settle();
+    const stale = producer.generate("stale prefetch, epoch 1", { priority: "prefetch", group: "e:1" }); // both idle: posted
+    await settle();
+    expect(workers[0].generates.map((m) => m.text)).toEqual(["stale prefetch, epoch 1"]);
+    const queuedOld = producer.generate("older prefetch, epoch 1", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    await settle();
+    expect(workers[1].generates).toEqual([]); // held in main: the last idle worker is reserved for a request
+    const req = producer.generate("clicked word, epoch 2", { priority: "request", group: "e:2" });
+    await settle();
+    expect(workers[1].generates.map((m) => m.text)).toEqual(["clicked word, epoch 2"]); // never behind the stale run
+    expect(await queuedOld).toBeInstanceOf(Error); // superseded, never started
+    expect((await queuedOld).message).toMatch(/superseded/);
+    workers[1].answer();
+    await req;
+    const next = producer.generate("next chunk, epoch 2", { priority: "prefetch", group: "e:2" });
+    await settle();
+    expect(workers[1].generates).toEqual([]); // still one busy (the stale run): the other stays reserved
+    workers[0].answer();
+    await stale;
+    await settle();
+    expect(workers.flatMap((w) => w.generates.map((m) => m.text))).toEqual(["next chunk, epoch 2"]); // posted once one more is idle
+    workers.find((w) => w.generates.length).answer();
+    await next;
+  });
+
   it("an extra worker that fails to load leaves the producer on the first", async () => {
     failExtraLoad = true;
     await producer.ensureReady();

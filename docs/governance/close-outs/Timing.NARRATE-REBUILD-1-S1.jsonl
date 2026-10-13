@@ -101,3 +101,5 @@
 {"event": "start", "row": 47, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T21:16:19Z"}
 {"event": "end", "row": 47, "evidence": "e71f8924: prefetch by seconds (8 s), gap-pause resume drop fixed; tests + controls; smoke 1.00x x3: resume 75-85 ms (was up to 4,286), click <=1,072, play <=1,387, one speed 17,456 (stale work, lever 3)", "result": "done", "at": "2026-10-13T21:21:35Z"}
 {"event": "start", "row": 48, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T21:21:35Z"}
+{"event": "end", "row": 48, "evidence": "25ee0e23: steady cap 30 words (src/constants.ts; renderer plans chunks), cap test + control; smoke 1.00/2.00 x3 all in budget except one speed per run (18,972 / 9,386): instrumentation (hops, stages) shows the request posted to a worker busy with stale work, received 12.3 s later (both workers busy) -> lever 3", "result": "done", "at": "2026-10-13T21:30:33Z"}
+{"event": "start", "row": 49, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T21:30:34Z"}

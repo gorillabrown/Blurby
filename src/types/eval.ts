@@ -171,6 +171,8 @@ export interface TtsEvalNarrateScheduleEvent extends TtsEvalTraceBaseEvent {
   /** Which producer worker generated it, and what that worker and the pool were running when it was assigned. */
   worker?: number | null;
   busyAtAssign?: { worker: number; pool: number; workers: number } | null;
+  /** Epoch ms: the request leaving the renderer, main receiving it, main replying, the result reaching the engine. */
+  hops?: { requested: number; mainRecv: number | null; mainReply: number | null; result: number; stages?: Record<string, number> | null } | null;
 }
 
 /** A scheduled chunk stopped before its natural end: at a pause, at a speed change (R7, at the unit's end) or dropped. */

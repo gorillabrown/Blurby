@@ -48,6 +48,8 @@ export type EngineTraceEvent =
   | Omit<TtsEvalNarrateFailureEvent, "ts">;
 
 const perfNow = (): number => (typeof performance !== "undefined" ? performance.now() : Date.now());
+/** A performance.now() reading as epoch ms (trace only: compares with main-process stamps). */
+const epochOf = (t: number): number => (typeof performance !== "undefined" && performance.timeOrigin ? performance.timeOrigin + t : t);
 
 export interface ProducerResult {
   readonly table: ChunkTable | null;
@@ -57,10 +59,12 @@ export interface ProducerResult {
   readonly genMs?: number;
   readonly worker?: number;
   readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
+  readonly ipc?: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> };
 }
 
 export interface ProducerPort {
-  generate(request: { readonly text: string; readonly voice: string; readonly speed: number }): Promise<ProducerResult>;
+  /** priority: the first chunk after a request, or prefetch; group: the engine epoch (Decision #18). */
+  generate(request: { readonly text: string; readonly voice: string; readonly speed: number; readonly priority?: "request" | "prefetch"; readonly group?: string }): Promise<ProducerResult>;
   /** Load and warm the voice ahead of the first request (the mode calls it on entry); never required. */
   preload?(): Promise<void>;
 }
@@ -122,6 +126,7 @@ interface Chunk {
   readonly genMs: number | null;
   readonly worker: number | null;
   readonly busyAtAssign: { readonly worker: number; readonly pool: number; readonly workers: number } | null;
+  readonly ipc: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> } | null;
   /** Current scheduling: the sample playback began at, and the context time it began. */
   offset: number;
   startAt: number;
@@ -144,6 +149,8 @@ export class NarrateEngine {
   private speed: number;
 
   private state: EngineState = "idle";
+  /** Distinguishes this engine's epochs from another engine's in the producer's queue groups. */
+  private readonly id = Math.random().toString(36).slice(2, 10);
   private epoch = 0;
   /** Chunks planned since the epoch began (the ramp step). */
   private chunkSeq = 0;
@@ -211,7 +218,7 @@ export class NarrateEngine {
     const at = this.pausedAt ?? this.firstUnscheduled();
     this.pausedAt = null;
     this.request(cause, at ? this.chunks[at.index].entry.startWord + this.chunks[at.index].unitWord[Math.max(0, lookupUnit(this.chunks[at.index].table.units, at.sample))] : this.nextWord);
-    if (!at) { this.fill(); return; }
+    if (!at) { this.chunkSeq = 0; this.fill(); return; } // nothing to replay: the next chunk answers a request
     let startAt = this.output.now() + this.lead;
     for (let i = at.index; i < this.chunks.length; i++) {
       const c = this.chunks[i];
@@ -330,7 +337,8 @@ export class NarrateEngine {
     const speed = this.speed;
     this.inFlight += 1;
     const requestedT = perfNow();
-    this.producer.generate({ text: entry.text, voice: this.voice, speed }).then(
+    const priority = this.chunkSeq === 1 ? "request" : "prefetch"; // the first chunk planned since the request
+    this.producer.generate({ text: entry.text, voice: this.voice, speed, priority, group: `${this.id}:${epoch}` }).then(
       (result) => this.onResult(entry, result, epoch, speed, requestedT),
       (error: unknown) => this.onError(entry, error, epoch),
     );
@@ -356,7 +364,7 @@ export class NarrateEngine {
     const unitWord: number[] = [];
     let w = 0;
     for (const u of table.units) { unitWord.push(w); w += u.words.length; }
-    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, requestedT, resultT, genMs: result.genMs ?? null, worker: result.worker ?? null, busyAtAssign: result.busyAtAssign ?? null, offset: 0, startAt: 0, endAt: 0, source: null };
+    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, requestedT, resultT, genMs: result.genMs ?? null, worker: result.worker ?? null, busyAtAssign: result.busyAtAssign ?? null, ipc: result.ipc ?? null, offset: 0, startAt: 0, endAt: 0, source: null };
     this.chunks.push(chunk);
     if (this.state === "playing") {
       const prev = this.chunks.at(-2);
@@ -388,6 +396,7 @@ export class NarrateEngine {
       unitStarts: c.unitWord.map((w) => c.entry.startWord + w),
       unitBoundaryCtx: c.table.units.map((u) => startAt + (u.sampleStart - offset) / sr),
       requestedT: c.requestedT, resultT: c.resultT, genMs: c.genMs, worker: c.worker, busyAtAssign: c.busyAtAssign ? { ...c.busyAtAssign } : null,
+      hops: { requested: epochOf(c.requestedT), mainRecv: c.ipc?.recvEpoch ?? null, mainReply: c.ipc?.replyEpoch ?? null, result: epochOf(c.resultT), stages: c.ipc?.stages ? { ...c.ipc.stages } : null },
     });
     const req = this.pendingRequest;
     if (!req) return;

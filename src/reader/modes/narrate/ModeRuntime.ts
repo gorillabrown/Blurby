@@ -97,18 +97,19 @@ interface NarrateIpcResult {
   readonly genMs?: number;
   readonly worker?: number;
   readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
+  readonly ipc?: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> };
   readonly error?: string;
 }
 
 function preloadProducer(): ProducerPort {
   return {
     async generate(request): Promise<ProducerResult> {
-      const api = (globalThis as { electronAPI?: { narrateGenerate?: (text: string, voice: string, speed: number) => Promise<NarrateIpcResult> } }).electronAPI;
+      const api = (globalThis as { electronAPI?: { narrateGenerate?: (text: string, voice: string, speed: number, options?: { priority: "request" | "prefetch"; group: string }) => Promise<NarrateIpcResult> } }).electronAPI;
       if (!api?.narrateGenerate) throw new Error("narrate producer unavailable (no preload surface)");
-      const r = await api.narrateGenerate(request.text, request.voice, request.speed);
+      const r = await api.narrateGenerate(request.text, request.voice, request.speed, { priority: request.priority ?? "request", group: request.group ?? "" });
       if (!r || r.error) throw new Error(r?.error ?? "narrate producer returned nothing");
       if (!(r.pcm instanceof Float32Array)) throw new Error("narrate producer returned no PCM");
-      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r), genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign };
+      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r), genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign, ipc: r.ipc };
     },
     async preload(): Promise<void> {
       const api = (globalThis as { electronAPI?: { narratePreload?: () => Promise<unknown> } }).electronAPI;

@@ -45,6 +45,7 @@ function setStatus(patch) { status = { ...status, ...patch }; }
 
 function failPending(err) {
   for (const [id, p] of pending) { pending.delete(id); p.reject(err); }
+  for (const job of queue.splice(0)) job.reject(err);
 }
 
 /** Ask a worker to finish what it is running and exit; terminate it only if it has not exited by the deadline. */
@@ -115,9 +116,9 @@ function startWorker(modelsRoot, primary) {
     const timer = setTimeout(() => { reject(new Error("narrate producer load timed out")); lost("load timed out"); }, C.NARRATE_LOAD_TIMEOUT_MS);
     w.on("message", (msg) => {
       switch (msg.type) {
-        case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); break;
+        case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); dispatch(); break;
         case "load-error": clearTimeout(timer); reject(new Error(msg.error)); lost(`load error: ${msg.error}`); break;
-        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign }); break; }
+        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign, stages: { queued: p.queued, posted: p.posted, ...(msg.stages ?? {}), received: performance.timeOrigin + performance.now() } }); dispatch(); break; }
         default: break;
       }
     });
@@ -128,22 +129,53 @@ function startWorker(modelsRoot, primary) {
 }
 
 /** Generate one chunk: { table, pcm: Float32Array, sampleRate, genMs }. Rejects on any producer failure. */
-async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0 } = {}) {
+// Jobs not yet posted to a worker (Decision #18): a worker runs one generation at a time, and only idle workers take
+// jobs, so nothing ever queues inside a worker behind work that cannot be aborted.
+const queue = [];
+const epochNow = () => performance.timeOrigin + performance.now();
+
+/**
+ * Post queued jobs to idle workers. A request takes any idle worker; a prefetch takes one only while
+ * NARRATE_RESERVED_WORKERS others stay idle for the next request (all of them when fewer are ready).
+ */
+function dispatch() {
+  for (let i = 0; i < queue.length;) {
+    const idle = workers.filter((s) => s.ready && s.busy === 0);
+    const readyCount = workers.filter((s) => s.ready).length;
+    const job = queue[i];
+    const need = job.priority === "prefetch" ? Math.min(1 + C.NARRATE_RESERVED_WORKERS, readyCount) : 1;
+    if (idle.length < need || idle.length === 0) { i += 1; continue; }
+    queue.splice(i, 1);
+    const slot = idle[0];
+    // D6 analysis: what the pool was running when the job was posted, and how long it waited for a worker.
+    const busyAtAssign = { worker: slot.busy, pool: workers.reduce((n, s) => n + s.busy, 0), workers: readyCount };
+    slot.busy += 1;
+    const posted = epochNow();
+    pending.set(job.id, { resolve: job.resolve, reject: job.reject, slot, busyAtAssign, posted, queued: job.queued });
+    slot.w.postMessage({ type: "generate", id: job.id, text: job.text, voice: job.voice, speed: job.speed });
+  }
+}
+
+/**
+ * Generate one chunk: { table, pcm: Float32Array, sampleRate, genMs }. Rejects on any producer failure. priority:
+ * "request" (the first chunk after a Play, click, resume or speed change) or "prefetch"; a request drops every queued,
+ * not yet started prefetch of another group (an engine epoch), which rejects with "superseded".
+ */
+async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0, priority = "request", group = null } = {}) {
   await ensureReady();
   touchIdle();
-  const id = ++requestId;
-  // The least busy ready worker: an idle one when any is idle.
-  const slot = workers.filter((s) => s.ready).reduce((a, b) => (b.busy < a.busy ? b : a));
-  // D6 analysis: how many generations the chosen worker and the whole pool were already running.
-  const busyAtAssign = { worker: slot.busy, pool: workers.reduce((n, s) => n + s.busy, 0), workers: workers.filter((s) => s.ready).length };
-  slot.busy += 1;
+  if (priority === "request" && group !== null) {
+    for (let i = queue.length - 1; i >= 0; i--) {
+      if (queue[i].priority === "prefetch" && queue[i].group !== group) queue.splice(i, 1)[0].reject(new Error("narrate generation superseded"));
+    }
+  }
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject, slot, busyAtAssign });
-    slot.w.postMessage({ type: "generate", id, text, voice, speed });
+    queue.push({ id: ++requestId, text, voice, speed, priority, group, resolve, reject, queued: epochNow() });
+    dispatch();
   });
 }
 
-function getStatus() { return { ...status, ready, pending: pending.size, workersReady: workers.filter((w) => w.ready).length }; }
+function getStatus() { return { ...status, ready, pending: pending.size + queue.length, workersReady: workers.filter((w) => w.ready).length }; }
 /** Resolves once every worker has exited (before the process may exit: see stopWorker). */
 function shutdown() { return dispose("shutdown", true); }
 

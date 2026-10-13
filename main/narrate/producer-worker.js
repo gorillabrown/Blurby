@@ -79,11 +79,16 @@ async function load({ modelsRoot, modulePath, threads }) {
   parentPort.postMessage({ type: "model-ready", runtime });
 }
 
-async function generate(id, text, voice, speed) {
+const epochNow = () => performance.timeOrigin + performance.now();
+
+async function generate(id, text, voice, speed, recv = epochNow()) {
   try {
     if (!ready) { parentPort.postMessage({ type: "result", id, error: "producer not ready" }); return; }
+    const start = epochNow();
     const rec = await synthesize(tts, capture, text, { voice, speed });
+    const synthDone = epochNow();
     const wm = await buildWordMap(rec, capture.phonemizeIsolated);
+    const mapDone = epochNow();
     // The units' words are the spoken (normalized, punctuation-free) words; the engine needs the chunk's source words
     // (NARRATE-REBUILD-1 P5). mapUnitsToSourceWords is exact and verified against the capture; it throws (F4) otherwise.
     const units = wm.reconciled ? mapUnitsToSourceWords(text, rec.segments, wm.units) : wm.units;
@@ -103,7 +108,9 @@ async function generate(id, text, voice, speed) {
       tailFrames: wm.tailFrames,
     };
     const pcm = rec.pcm;
-    parentPort.postMessage({ type: "result", id, table, pcm, sampleRate: rec.sampleRate, genMs: Math.round(rec.genMs) }, [pcm.buffer]);
+    // D6 analysis: epoch ms at receipt, the start of synthesis, its end, the word map's end, the post.
+    const stages = { recv, start, synthDone, mapDone, post: epochNow() };
+    parentPort.postMessage({ type: "result", id, table, pcm, sampleRate: rec.sampleRate, genMs: Math.round(rec.genMs), stages }, [pcm.buffer]);
   } catch (err) {
     parentPort.postMessage({ type: "result", id, error: err?.message || String(err) });
   }
@@ -126,7 +133,7 @@ parentPort.on("message", async (msg) => {
       break;
     case "generate": {
       if (stopping) { parentPort.postMessage({ type: "result", id: msg.id, error: "producer stopping" }); break; }
-      const run = generate(msg.id, msg.text, msg.voice, msg.speed);
+      const run = generate(msg.id, msg.text, msg.voice, msg.speed, epochNow());
       inflight.add(run);
       await run;
       inflight.delete(run);
