@@ -35,6 +35,8 @@ export interface ChunkPlanOptions {
   readonly breaks?: ReadonlySet<number>;
   /** Word caps for the first chunks of an epoch, by step; past its end the token packing applies. Empty = T2's 15-word first chunk only. */
   readonly ramp?: readonly number[];
+  /** Decision #18: past the ramp, a chunk holds at most this many words (bounds the stale work a request can wait on). */
+  readonly maxWords?: number;
   /** The step this plan starts at (the engine plans one chunk per call and counts the steps of an epoch). */
   readonly rampIndex?: number;
 }
@@ -93,8 +95,9 @@ export function planChunks(words: readonly string[], from: number, options: Chun
       end = packSentences(words, at, total, breaks, (e) => e - at <= cap);
       if (end === at) end = cutAtPause(words, at, cap);
     } else {
-      // Steady state: whole sentences packed under the token estimate; a sentence too long on its own is cut to fit.
-      end = packSentences(words, at, total, breaks, (e) => tokens(at, e) <= PACK_TARGET_TOKENS);
+      // Steady state: whole sentences packed under the token estimate and the word cap; a sentence too long on its own is cut to fit.
+      const maxWords = options.maxWords ?? Infinity;
+      end = packSentences(words, at, total, breaks, (e) => e - at <= maxWords && tokens(at, e) <= PACK_TARGET_TOKENS);
       if (end === at) {
         // One sentence over the estimate: cut at the last pause mark that fits, else at the last word that fits.
         const sentenceEnd = sentenceEnds(words, at, total, breaks)[0];
@@ -103,6 +106,7 @@ export function planChunks(words: readonly string[], from: number, options: Chun
         let atPause = -1;
         for (let i = cut - 1; i > at; i--) if (PAUSE_MARK.test(words[i])) { atPause = i + 1; break; }
         end = atPause > at ? atPause : cut;
+        if (end - at > maxWords) end = cutAtPause(words, at, maxWords);
       }
     }
     out.push(entry(at, end));

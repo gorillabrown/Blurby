@@ -44,6 +44,15 @@ describe("narrate crossings (D5)", () => {
     expect(without.some((c) => c.startWord < BOUNDARY && c.endWord > BOUNDARY)).toBe(true);
   });
 
+  it("past the ramp a chunk never exceeds the steady-state word cap (Decision #18), and packs past it without one (control)", () => {
+    const long = Array.from({ length: 12 }, (_, i) => `Sentence ${i} has exactly twelve words in it and then it stops here.`).join(" ").split(" ");
+    const capped = planChunks(long, 0, { ramp: [6, 12], maxWords: 20 });
+    expect(capped.slice(2).every((c) => c.endWord - c.startWord <= 20)).toBe(true);
+    expect(capped.map((c) => c.text).join(" ")).toBe(long.join(" ")); // every word, in order, once
+    const uncapped = planChunks(long, 0, { ramp: [6, 12] });
+    expect(uncapped.slice(2).some((c) => c.endWord - c.startWord > 20)).toBe(true);
+  });
+
   it("the runtime chunks at the book's section ends, the cursor crosses, the view is stepped and the pending word painted, the section follow records the transition", async () => {
     const output = new FakeAudioOutput();
     const producer = new FakeProducer({ framesPerWord: FRAMES, leadFrames: 2, tailFrames: 1 });

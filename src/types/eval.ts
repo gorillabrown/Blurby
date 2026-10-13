@@ -163,6 +163,14 @@ export interface TtsEvalNarrateScheduleEvent extends TtsEvalTraceBaseEvent {
   offset: number;
   unitStarts: number[];
   unitBoundaryCtx: number[];
+  /** performance.now() when the chunk was requested from the producer, and when its result arrived (D6 analysis). */
+  requestedT?: number;
+  resultT?: number;
+  /** The producer's own generation time for the chunk (worker-side), when reported. */
+  genMs?: number | null;
+  /** Which producer worker generated it, and what that worker and the pool were running when it was assigned. */
+  worker?: number | null;
+  busyAtAssign?: { worker: number; pool: number; workers: number } | null;
 }
 
 /** A scheduled chunk stopped before its natural end: at a pause, at a speed change (R7, at the unit's end) or dropped. */

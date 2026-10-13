@@ -13,6 +13,7 @@ const C = require("./constants");
 // A pool of NARRATE_PRODUCER_WORKERS workers (P5, Decision #17): a request goes to an idle worker, so a click or a
 // speed change never waits behind the stale prefetch generation another worker is still finishing (onnxruntime
 // cannot abort a run). The first worker gates readiness; the others load behind it and join when warm.
+let slotCount = 0;
 let workers = [], ready = false, loading = null, requestId = 0, lifecycle = 0, idleTimer = null;
 const pending = new Map(); // id -> { resolve, reject, slot }
 let status = { state: "idle", detail: null, modelsRoot: null, exposed: null, runtime: null };
@@ -101,7 +102,7 @@ async function ensureReady() {
 
 /** One worker; resolves with its runtime once its model is loaded and warmed up on the production path. */
 function startWorker(modelsRoot, primary) {
-  const slot = { w: new Worker(path.join(__dirname, "producer-worker.js")), ready: false, busy: 0 };
+  const slot = { w: new Worker(path.join(__dirname, "producer-worker.js")), ready: false, busy: 0, index: ++slotCount };
   workers.push(slot);
   const { w } = slot;
   // A ready or primary worker failing stops the producer (its requests fail closed); an extra one still loading just leaves.
@@ -116,7 +117,7 @@ function startWorker(modelsRoot, primary) {
       switch (msg.type) {
         case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); break;
         case "load-error": clearTimeout(timer); reject(new Error(msg.error)); lost(`load error: ${msg.error}`); break;
-        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs }); break; }
+        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign }); break; }
         default: break;
       }
     });
@@ -133,9 +134,11 @@ async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0 } =
   const id = ++requestId;
   // The least busy ready worker: an idle one when any is idle.
   const slot = workers.filter((s) => s.ready).reduce((a, b) => (b.busy < a.busy ? b : a));
+  // D6 analysis: how many generations the chosen worker and the whole pool were already running.
+  const busyAtAssign = { worker: slot.busy, pool: workers.reduce((n, s) => n + s.busy, 0), workers: workers.filter((s) => s.ready).length };
   slot.busy += 1;
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject, slot });
+    pending.set(id, { resolve, reject, slot, busyAtAssign });
     slot.w.postMessage({ type: "generate", id, text, voice, speed });
   });
 }

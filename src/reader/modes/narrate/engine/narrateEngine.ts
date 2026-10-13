@@ -53,6 +53,10 @@ export interface ProducerResult {
   readonly table: ChunkTable | null;
   readonly pcm: Float32Array;
   readonly sampleRate: number;
+  /** The producer's generation time (worker-side), when it reports one, and its worker and load at assignment (trace only). */
+  readonly genMs?: number;
+  readonly worker?: number;
+  readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
 }
 
 export interface ProducerPort {
@@ -98,6 +102,8 @@ export interface EngineOptions {
   readonly leadSeconds?: number;
   /** Decision #18: keep at least this many seconds of audio scheduled ahead (the prefetch measured in audio, not chunks). */
   readonly prefetchSeconds?: number;
+  /** Decision #18: the steady-state chunk's word cap (chunkPlan maxWords). Default: none. */
+  readonly chunkMaxWords?: number;
   /** Word caps for the first chunks of every epoch (chunkPlan ramp; the P5 latency lever). Default: none (T2's first chunk, then token packing). */
   readonly chunkRamp?: readonly number[];
 }
@@ -110,6 +116,12 @@ interface Chunk {
   readonly trim: number;
   /** First book-word offset of each unit within the chunk. */
   readonly unitWord: readonly number[];
+  /** performance.now() at the request and at the result, and the producer's generation time (trace only). */
+  readonly requestedT: number;
+  readonly resultT: number;
+  readonly genMs: number | null;
+  readonly worker: number | null;
+  readonly busyAtAssign: { readonly worker: number; readonly pool: number; readonly workers: number } | null;
   /** Current scheduling: the sample playback began at, and the context time it began. */
   offset: number;
   startAt: number;
@@ -127,6 +139,7 @@ export class NarrateEngine {
   private readonly lead: number;
   private readonly ramp: readonly number[];
   private readonly prefetchSeconds: number | null;
+  private readonly chunkMaxWords: number | undefined;
   private voice: string;
   private speed: number;
 
@@ -157,6 +170,7 @@ export class NarrateEngine {
     this.lead = options.leadSeconds ?? 0.03;
     this.ramp = options.chunkRamp ?? [];
     this.prefetchSeconds = options.prefetchSeconds ?? null;
+    this.chunkMaxWords = options.chunkMaxWords;
     this.voice = options.voice;
     this.speed = options.speed;
   }
@@ -308,20 +322,22 @@ export class NarrateEngine {
       const scheduledEnd = this.chunks.reduce((end, c) => Math.max(end, c.endAt), 0);
       if (scheduledEnd - now >= this.prefetchSeconds) return;
     } else if (this.chunks.filter((c) => c.endAt > now).length > this.prefetch) return;
-    const [entry] = planChunks(this.words, this.nextWord, { maxChunks: 1, breaks: this.breaks, ramp: this.ramp, rampIndex: this.chunkSeq });
+    const [entry] = planChunks(this.words, this.nextWord, { maxChunks: 1, breaks: this.breaks, ramp: this.ramp, rampIndex: this.chunkSeq, maxWords: this.chunkMaxWords });
     if (!entry) return;
     this.chunkSeq += 1;
     this.nextWord = entry.endWord;
     const epoch = this.epoch;
     const speed = this.speed;
     this.inFlight += 1;
+    const requestedT = perfNow();
     this.producer.generate({ text: entry.text, voice: this.voice, speed }).then(
-      (result) => this.onResult(entry, result, epoch, speed),
+      (result) => this.onResult(entry, result, epoch, speed, requestedT),
       (error: unknown) => this.onError(entry, error, epoch),
     );
   }
 
-  private onResult(entry: ChunkPlanEntry, result: ProducerResult, epoch: number, speed: number): void {
+  private onResult(entry: ChunkPlanEntry, result: ProducerResult, epoch: number, speed: number, requestedT = perfNow()): void {
+    const resultT = perfNow();
     if (epoch !== this.epoch) { this.diag("narrate:stale-result", `epoch ${epoch} < ${this.epoch}: ${entry.startWord}-${entry.endWord}`); return; }
     this.inFlight -= 1;
     if (this.state === "stopped" || this.state === "idle") return;
@@ -340,7 +356,7 @@ export class NarrateEngine {
     const unitWord: number[] = [];
     let w = 0;
     for (const u of table.units) { unitWord.push(w); w += u.words.length; }
-    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, offset: 0, startAt: 0, endAt: 0, source: null };
+    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, requestedT, resultT, genMs: result.genMs ?? null, worker: result.worker ?? null, busyAtAssign: result.busyAtAssign ?? null, offset: 0, startAt: 0, endAt: 0, source: null };
     this.chunks.push(chunk);
     if (this.state === "playing") {
       const prev = this.chunks.at(-2);
@@ -371,6 +387,7 @@ export class NarrateEngine {
       kind: "narrate-schedule", t: perfNow(), epoch: this.epoch, chunkStart: c.entry.startWord, chunkEnd: c.entry.endWord, startAt, endAt: c.endAt, offset,
       unitStarts: c.unitWord.map((w) => c.entry.startWord + w),
       unitBoundaryCtx: c.table.units.map((u) => startAt + (u.sampleStart - offset) / sr),
+      requestedT: c.requestedT, resultT: c.resultT, genMs: c.genMs, worker: c.worker, busyAtAssign: c.busyAtAssign ? { ...c.busyAtAssign } : null,
     });
     const req = this.pendingRequest;
     if (!req) return;

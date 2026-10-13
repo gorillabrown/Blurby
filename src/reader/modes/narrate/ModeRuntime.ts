@@ -15,6 +15,7 @@ import {
   KOKORO_DEFAULT_VOICE,
   NARRATE_CHUNK_RAMP,
   NARRATE_PREFETCH_AHEAD_S,
+  NARRATE_STEADY_CHUNK_MAX_WORDS,
   KOKORO_UI_RATE_MAX,
   KOKORO_UI_RATE_MIN,
   KOKORO_UI_RATE_STEP,
@@ -93,6 +94,9 @@ interface NarrateIpcResult {
   readonly table?: unknown;
   readonly pcm?: Float32Array;
   readonly sampleRate?: number;
+  readonly genMs?: number;
+  readonly worker?: number;
+  readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
   readonly error?: string;
 }
 
@@ -104,7 +108,7 @@ function preloadProducer(): ProducerPort {
       const r = await api.narrateGenerate(request.text, request.voice, request.speed);
       if (!r || r.error) throw new Error(r?.error ?? "narrate producer returned nothing");
       if (!(r.pcm instanceof Float32Array)) throw new Error("narrate producer returned no PCM");
-      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r) };
+      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r), genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign };
     },
     async preload(): Promise<void> {
       const api = (globalThis as { electronAPI?: { narratePreload?: () => Promise<unknown> } }).electronAPI;
@@ -589,6 +593,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       breaks: this.chunkBreaks(words),
       chunkRamp: NARRATE_CHUNK_RAMP,
       prefetchSeconds: NARRATE_PREFETCH_AHEAD_S,
+      chunkMaxWords: NARRATE_STEADY_CHUNK_MAX_WORDS,
       producer: this.deps.producer,
       output: this.output,
       voice: this.voice,

@@ -11,7 +11,7 @@ function register() {
   ipcMain.handle("narrate-generate", async (_, text, voice, speed) => {
     try {
       const r = await producer.generate(text, { voice, speed });
-      return { table: r.table, pcm: r.pcm, sampleRate: r.sampleRate, genMs: r.genMs };
+      return { table: r.table, pcm: r.pcm, sampleRate: r.sampleRate, genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign };
     } catch (err) {
       console.error("[narrate] generate failed:", err?.message || String(err));
       return { error: err?.message || String(err) };

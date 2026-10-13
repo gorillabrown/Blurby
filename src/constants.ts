@@ -37,6 +37,9 @@ export const NARRATE_CHUNK_RAMP: readonly number[] = [6, 12, 24];
 export const NARRATE_PUMP_INTERVAL_MS = 250;
 /** Narrate (Decision #18): seconds of audio kept scheduled ahead of the playback position. */
 export const NARRATE_PREFETCH_AHEAD_S = 8;
+/** Narrate (Decision #18): past the ramp, a chunk holds at most this many words, which bounds the stale generation a
+ * request can wait behind (onnxruntime cannot abort a run). Planned in the renderer, so it lives here, not in main. */
+export const NARRATE_STEADY_CHUNK_MAX_WORDS = 30;
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 
