@@ -140,6 +140,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ 5875b858; uncommitted: this entry, `phase5/recorded-output.json` (run 2, to be overwritten by run 3).
 - **Next:** D3 run 3 → D6 warm and cold → P5 gate.
 
+## S2 — 2026-10-13 15:33 — D3 PASS; D6 warm FAIL after the one repair → BLOCKER(USER); cold under budget
+
+- **Did:** D3 run 3 (14:44–14:56) PASS at both rates: 1.00x 798 commits, 2.00x 1,413, 0 outside one frame, mapping 0.77–0.78 ms, 0 overlap/drop/repeat, exits 0 (`28c21e40`). D6 metric corrected to request → first voiced sample *heard* (the context clock does not run before the first audio, so startAt − ctxAtRequest read 30 ms for a first Play whose sample was heard at 1,433 ms); `--break` added. D6 warm (14:58–15:06): 1.00x FAIL — worst Play 1,750, resume 4,286, click 2,860, speed 9,228 ms (4, 8 and 13 trials ≥ 2 s), host 88 % busy; 2.00x ended after one cycle on a 405-id chunk (packed to the 400 estimate) failing closed. Fixed: packing target 360; one fresh scratch profile per launch (the reused one carried the anchor to word 77,554 and the rate). BLOCKER(USER) raised 15:07 with the measured causes and four options (`7fd74fd5`). D6 cold for information (15:10–15:31): every measured trial under 8 s (worst 1,524 ms); 5 click trials lost to a driver timing defect.
+- **Learned:** stale generations cannot be cancelled, so requests 2 s apart pile work onto both workers on a loaded host; prefetch counted in chunks leaves gaps when chunks are one-word headings; a trial profile is state and must be fresh per launch; the playback clock does not start before the first audio, so latency has to be read where the sample is heard.
+- **Decisions:** none new (the D6 route is the owner's).
+- **Gate/DoD movement:** D3 met on the branch; D5's in-app analysis passes; D6 FAIL (blocker); cold within budget.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** the owner's answer. On (a): stale-work bypass (spare worker), prefetch by seconds ahead, short steady chunks, the cold-click driver fix, then T7 in full (warm then cold), then the P5 gate. Every other front waits on D6 (P5's merge gates P6).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

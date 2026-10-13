@@ -27,21 +27,21 @@ updated_by: session 2 (S2, P5 recovery, D6 repair, crossings; D3 sessions runnin
 
 ```
 phase:        P5 — Speed, crossings, latency end to end, recorded output (branch eb/narrate-rebuild-1-p5, base 331f8313; S2 checkpoints 238f47ec, 573706ea)
-next_action:  D3 sessions (5 min at 1.00x and 2.00x) → D6 trials per T7 after the Decision #17 repair (a trial at or over budget now = BLOCKER(USER), the charter's one repair attempt is spent) → P5 gate → merge → P6
+next_action:  owner answer to the D6 BLOCKER(USER); meanwhile D6 cold for information. D3 PASS both rates (28c21e40); D5 crossings pass
 blockers:     BLOCKER(USER) D6 warm latency over budget after the one repair (see Blockers); settings writes stay fire-and-forget until SETTINGS-WRITE-DURABLE-1 is on main (A5)
 session:      2 of ~14 budgeted
-dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls; D5's engine half and the crossings suite pass (573706ea; the D3 in-app analysis pending); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D10 met on the P5 branch (grep exit 1, patch deleted); D13 holds for P1–P4; D2, D3, D6, D11 (fresh), D12 unmet
+dod:          D1 recorded (Decision #14); D4's suites pass with their positive controls; D5's engine half, the crossings suite and the in-app analysis pass (0 overlap/drop/repeat in both D3 sessions); D3 met on the branch (run 3, 28c21e40: 0 commits outside one frame at 1.00x and 2.00x, mapping 0.78 ms); D7's tests, D8 and D9 pass (merged 331f8313; D7's owner-observed F5 is G2); D10 met on the P5 branch; D13 holds for P1–P4; D6 FAIL (blocker); D2, D11 (fresh), D12 unmet
 ```
 
 Verdict (`docs/studies/narrate-rebuild-1/phase0/VERDICT.md`, 2026-10-13): P0-1, P0-2, P0-4 PASS on both voices (500 chunks); P0-3 FAIL where conclusive (passage A at 0.80x/1.00x on both voices, 1.40x on Bella: at interior onsets the table is late by ≈ 50 ms ÷ rate; the first word of every chunk is late at ≤ 1.00x and early at ≥ 1.40x, −147 to +139 ms, because the rendered leading silence of ≈ 360–500 ms does not follow the BOS token) and INCONCLUSIVE elsewhere (passage B at every rate, 2.00x on both passages, 1.40x on Emma) after the two reference repairs the charter allows; the 40 ms control is caught; P0-5 PASS at 4 intra-op threads (worst warm 1,940 ms, worst cold 3,032 ms; default threads fail at 4,507 ms). Classification: P0-3 FAIL = engine property under a verified contract; INCONCLUSIVE = reference coverage → owner. Addendum (2026-10-13, G1 route b): the fp32 and fp16 exports, with the same edit, reproduce the q4 error within 1 ms at every paired anchor on passage A at 1.00x (both voices) — precision is not the cause, and the charter's bake-off condition is met.
 
 ## Next actions — max 5, near horizon only
 
-1. [x] S2 recovery (14:05): S1's uncommitted P5 tree committed `238f47ec` with the D6 repair (Decision #17); crossings fixed and tested `573706ea`
-2. [ ] D3: `p5-latency-e2e.mjs --only session --minutes 5 --rates 1.0,2.0` → `recorded-output.json` PASS on both (`--break` control seen exit 1 on the smoke trace, 14:14)
-3. [ ] D6: `p5-latency-e2e.mjs --only warm` then `--only cold` (T7: warm 20 per type at 1.00x and 2.00x; cold 5 per type), host busy recorded per run; any trial at or over budget → BLOCKER(USER) with the figures
-4. [ ] P5 gate fresh at the checkpoint: D3/D5/D6 scripts, D10 grep exit 1, typecheck, `npm test`, `npm run build` → merge per GIT WORK → P6 (production build, G2 stop)
-5. [ ] Staging memo observations go to the planner's close-out, never folded in from this run
+1. [x] D3 PASS at 1.00x and 2.00x (run 3, `28c21e40`); D5 crossings suite (`573706ea`); D10 met on the branch
+2. [x] D6 warm FAIL after the one repair → BLOCKER(USER) above (`7fd74fd5`, `latency-e2e.warm-1.json`)
+3. [ ] D6 cold (5 per type at 1.00x and 2.00x, fresh profile and process each) running for information (15:10); its figures go into the blocker as context
+4. [ ] On the owner's answer: (a) second repair round, then all of T7 again; (b) T7 on a quiet machine; (c) per charter amendment; (d) back to the planner
+5. [ ] P5 gate once D6 passes: D3/D5/D6 scripts, D10 grep, typecheck, `npm test`, build → merge per GIT WORK → P6 (G2 stop)
 
 ## Working set — verified facts this epic relies on
 
@@ -78,6 +78,8 @@ The charter trigger: "any harness or in-app latency trial at or above its budget
 The 2.00x run ended after one cycle on a separate correctness defect (a chunk packed to the 400-token estimate came out at 405 ids and failed closed, F4), fixed below; its one resume took 5,488 ms. The causes are measured, not guessed: (1) a request waits when both workers are still finishing stale generations from the requests before it (requests 2 s apart; onnxruntime cannot abort a run; on this host a generation takes 3–8 s, so stale work piles up: the 8–9 s speed trials each followed a click whose prefetch was still running); (2) a resume after a pause that fell in a gap (1–2-word heading chunks near word 77,554, one chunk prefetched) has no audio to replay and must generate; (3) host load 76–88 % (the charter's D6 row says "on a quiet machine", Decision #13 says the ordinary desktop: these runs are the latter).
 
 Fixed meanwhile (correctness and harness, not latency levers): `PACK_TARGET_TOKENS` 400 → 360 under the hard cap of 400 ids (the margin the estimate needs; this also makes steady-state chunks ≈ 10 % shorter); one fresh scratch profile per trial launch (a reused one carried the last run's reading anchor and rate: the warm runs started at word 77,554 instead of 8,723). The cold trials run for information while this waits.
+
+Cold, for information (15:10–15:31, fresh profile and process per trial, host 27–71 % busy; `phase5/latency-e2e.cold-1.json`): every measured trial is under the 8,000 ms budget — worst Play 1,524 ms at 1.00x and 729 at 2.00x, resume 984 / 550, speed 799 / 1,369, click 1,002 / 927 (the mode preloads the voice on entry, so a cold Play starts with the model loading). 5 of the 10 click trials recorded nothing: the driver's cold-click path pauses 60 ms after Play, before the section's word spans exist, and timed out waiting for them (a harness defect, fixed with the next trials). Cold is not the blocker; warm click, speed and resume are.
 
 Decide how D6 proceeds and write the answer inline:
 
