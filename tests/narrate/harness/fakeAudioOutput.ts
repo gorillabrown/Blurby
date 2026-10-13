@@ -18,6 +18,8 @@ export class FakeAudioOutput implements AudioOutput {
   private t = 0;
 
   now(): number { return this.t; }
+  /** The fake has no output latency: the heard sample is the scheduling head. */
+  playbackPosition(): number { return this.t; }
   advance(seconds: number): void { this.t += seconds; }
   set(seconds: number): void { this.t = seconds; }
   outputTimestamp(): { readonly contextTime: number; readonly performanceTime: number } { return { contextTime: this.t, performanceTime: this.t * 1000 }; }

@@ -12,7 +12,7 @@ const WORDS = "Of my grandfather Verus I have learned to be gentle and meek. Of 
 const FRAMES = 8; // 200 ms per word at 1.00x in the fake
 const WORD_S = (FRAMES * SPF) / SAMPLE_RATE;
 
-function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: number } = {}) {
+function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: number; chunkRamp?: readonly number[] } = {}) {
   const output = new FakeAudioOutput();
   const producer = new FakeProducer({ hold: options.hold ?? false, framesPerWord: options.framesPerWord ?? FRAMES, leadFrames: 2, tailFrames: 1 });
   const cursor: number[] = [];
@@ -21,7 +21,7 @@ function harness(options: { hold?: boolean; framesPerWord?: number; prefetch?: n
   const diagnostics: string[] = [];
   const complete = vi.fn();
   const engine = new NarrateEngine({
-    words: WORDS, producer, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, leadSeconds: 0.03,
+    words: WORDS, producer, output, voice: "af_bella", speed: 1.0, prefetch: options.prefetch ?? 1, leadSeconds: 0.03, chunkRamp: options.chunkRamp,
     events: { onCursor: (w) => cursor.push(w), onState: (s) => states.push(s), onFailure: (f) => failures.push(f), onComplete: complete, onDiagnostic: (k, d) => diagnostics.push(`${k}: ${d}`) },
   });
   return { engine, output, producer, cursor, states, failures, diagnostics, complete };
@@ -50,6 +50,24 @@ describe("narrate engine (D5-engine)", () => {
     expect(h.producer.requests[1].text.startsWith("Of my mother")).toBe(true);
     expect(h.output.sources).toHaveLength(2); // … and, the fake answering at once, scheduled contiguously after the first
     expect(h.output.sources[1].startAt).toBeCloseTo(first.startAt + (first.samples - first.offset) / SAMPLE_RATE, 9);
+    expect(h.output.overlaps()).toEqual([]);
+  });
+
+  it("the chunk ramp (D6 lever) caps the first chunks of every request, then whole sentences pack; a click starts it again", async () => {
+    const h = harness({ chunkRamp: [3, 5] });
+    const words = (i: number) => h.producer.requests[i].text.split(" ").length;
+    h.engine.play(0);
+    await flush();
+    expect(h.producer.requests[0].text).toBe("Of my grandfather"); // step 0: 3 words of a 12-word sentence, no pause mark
+    expect(h.producer.requests[1].text).toBe("Verus I have learned to"); // step 1: 5 words
+    run(h, 2.5);
+    await flush();
+    expect(h.producer.requests.length).toBeGreaterThan(2);
+    expect(words(2)).toBeGreaterThan(5); // past the ramp: whole sentences under the token estimate (T2)
+    const before = h.producer.requests.length;
+    h.engine.play(25, "click");
+    await flush();
+    expect(h.producer.requests[before].text).toBe("to do,"); // a new request: the ramp starts again (3-word cap, cut at its pause mark)
     expect(h.output.overlaps()).toEqual([]);
   });
 

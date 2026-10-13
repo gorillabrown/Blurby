@@ -1,0 +1,108 @@
+{
+  "generatedAt": "2026-10-13T18:34:21.922Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "electron": null,
+  "budgets": {
+    "warmMs": 2000,
+    "coldMs": 8000
+  },
+  "rates": [
+    1
+  ],
+  "runs": [
+    {
+      "label": "warm-1.00",
+      "code": 3221226505,
+      "wallMs": 33813,
+      "hostBusyPct": 47.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-smoke\\traces\\warm-1-00.trace.json",
+      "traceExists": true
+    }
+  ],
+  "warm": {
+    "1.00": {
+      "play": {
+        "n": 1,
+        "worstMs": 4931,
+        "over": 1,
+        "trials": [
+          {
+            "cause": "play",
+            "speed": 1,
+            "word": 8723,
+            "latencyMs": 4931,
+            "leadMs": 30,
+            "trimMs": 409
+          }
+        ]
+      },
+      "resume": {
+        "n": 1,
+        "worstMs": 30,
+        "over": 0,
+        "trials": [
+          {
+            "cause": "resume",
+            "speed": 1,
+            "word": 8729,
+            "latencyMs": 30,
+            "leadMs": 30,
+            "trimMs": 2337
+          }
+        ]
+      },
+      "click": {
+        "n": 1,
+        "worstMs": 3598,
+        "over": 1,
+        "trials": [
+          {
+            "cause": "click",
+            "speed": 1,
+            "word": 227,
+            "latencyMs": 3598,
+            "leadMs": 30,
+            "trimMs": 433
+          }
+        ]
+      },
+      "speed": {
+        "n": 2,
+        "worstMs": 2889,
+        "over": 2,
+        "trials": [
+          {
+            "cause": "speed",
+            "speed": 1.05,
+            "word": 235,
+            "latencyMs": 2483,
+            "leadMs": 30,
+            "trimMs": 414
+          },
+          {
+            "cause": "speed",
+            "speed": 1,
+            "word": 253,
+            "latencyMs": 2889,
+            "leadMs": 30,
+            "trimMs": 414
+          }
+        ]
+      }
+    }
+  },
+  "cold": {},
+  "sessions": {},
+  "verdict": "FAIL",
+  "failures": [
+    "warm 1.00 play: 1 trials at or over 2000 ms (worst 4931)",
+    "warm 1.00 click: 1 trials at or over 2000 ms (worst 3598)",
+    "warm 1.00 speed: 2 trials at or over 2000 ms (worst 2889)"
+  ]
+}

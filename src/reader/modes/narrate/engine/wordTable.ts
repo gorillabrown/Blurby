@@ -12,6 +12,8 @@ export const NATIVE_SOURCE = "model-output";
 
 export interface TableUnit {
   readonly words: readonly string[];
+  /** The normalized words kokoro spoke for these source words (identity only; every span is the table's). */
+  readonly spoken?: readonly string[];
   readonly kind: "word" | "fused" | "split-word";
   readonly frameStart: number;
   readonly frameEnd: number;

@@ -1,0 +1,56 @@
+{
+  "generatedAt": "2026-10-13T18:32:58.952Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "minutes": 0.5,
+  "sessions": {
+    "1.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-smoke\\traces\\session-1-00.trace.json",
+      "verdict": "INCONCLUSIVE",
+      "failures": [],
+      "holds": [
+        "only 59 commits (need 100)",
+        "session 0.45 min < 0.5 min"
+      ],
+      "stats": {
+        "commits": 59,
+        "schedules": 8,
+        "stops": 1,
+        "requests": 1,
+        "minutes": 0.45,
+        "speeds": [
+          1
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.74,
+        "outside": 0,
+        "worstLateMs": 18.27,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 7,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 3694
+        }
+      },
+      "outside": []
+    }
+  },
+  "runs": [
+    {
+      "label": "session-1.00",
+      "code": 3221226505,
+      "wallMs": 45690,
+      "hostBusyPct": 45.6,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-smoke\\traces\\session-1-00.trace.json",
+      "traceExists": true
+    }
+  ]
+}

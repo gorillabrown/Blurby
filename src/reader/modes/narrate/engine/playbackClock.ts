@@ -15,8 +15,14 @@ export interface ScheduledSource {
 
 export interface AudioOutput {
   readonly sampleRate: number;
-  /** The context's current time, seconds. */
+  /** The context's current time, seconds: the scheduling head (where new audio may start). */
   now(): number;
+  /**
+   * The context time of the sample leaving the device at this instant (the heard sample), from the output
+   * timestamp extrapolated to performance.now(); the scheduling head when the API is unavailable. The cursor,
+   * a pause's resume point and a speed change's unit in progress are decided on this clock (D3: the playback clock).
+   */
+  playbackPosition(): number;
   /** AudioContext.getOutputTimestamp(): the sample clock mapped to performance.now() (D3). null when unavailable. */
   outputTimestamp(): { readonly contextTime: number; readonly performanceTime: number } | null;
   /** Play pcm[offsetSamples..] starting exactly at context time startAt. */
@@ -59,6 +65,14 @@ export class WebAudioOutput implements AudioOutput {
 
   now(): number {
     return this.ctx.currentTime;
+  }
+
+  playbackPosition(): number {
+    const ts = this.outputTimestamp();
+    if (!ts) return this.ctx.currentTime;
+    // While the context has not started outputting (both zero) the head is the best estimate.
+    if (ts.contextTime === 0 && ts.performanceTime === 0) return this.ctx.currentTime;
+    return ts.contextTime + (performance.now() - ts.performanceTime) / 1000;
   }
 
   outputTimestamp(): { readonly contextTime: number; readonly performanceTime: number } | null {

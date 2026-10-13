@@ -11,6 +11,7 @@ const path = require("path");
 const Module = require("module");
 const { attachCapture, synthesize } = require("./capture");
 const { buildWordMap } = require("./wordmap");
+const { mapUnitsToSourceWords } = require("./normalize");
 const C = require("./constants");
 
 const OPTIONAL_PACKAGED_MODULE_STUBS = new Map([["sharp", path.join(__dirname, "..", "sharp-stub.js")]]);
@@ -83,13 +84,16 @@ async function generate(id, text, voice, speed) {
     if (!ready) { parentPort.postMessage({ type: "result", id, error: "producer not ready" }); return; }
     const rec = await synthesize(tts, capture, text, { voice, speed });
     const wm = await buildWordMap(rec, capture.phonemizeIsolated);
+    // The units' words are the spoken (normalized, punctuation-free) words; the engine needs the chunk's source words
+    // (NARRATE-REBUILD-1 P5). mapUnitsToSourceWords is exact and verified against the capture; it throws (F4) otherwise.
+    const units = wm.reconciled ? mapUnitsToSourceWords(text, rec.segments, wm.units) : wm.units;
     const table = {
       provenance: rec.provenance,
       durations: rec.durations,
       durationsType: rec.durationsType,
       samplesPerFrame: wm.law.factor,
       sampleRate: rec.sampleRate,
-      units: wm.units.map((u) => ({ words: u.words, kind: u.kind, frameStart: u.frameStart, frameEnd: u.frameEnd, sampleStart: u.sampleStart, sampleEnd: u.sampleEnd })),
+      units: units.map((u) => ({ words: u.words, spoken: u.spoken ?? u.words, kind: u.kind, frameStart: u.frameStart, frameEnd: u.frameEnd, sampleStart: u.sampleStart, sampleEnd: u.sampleEnd })),
       reconciled: wm.reconciled,
       failures: wm.failures,
       identity: wm.identity.ok,

@@ -10,8 +10,11 @@ const path = require("path");
 const { ensureExposedModel } = require("./expose-durations");
 const C = require("./constants");
 
-let worker = null, ready = false, loading = null, requestId = 0, lifecycle = 0, idleTimer = null;
-const pending = new Map(); // id -> { resolve, reject, owner }
+// A pool of NARRATE_PRODUCER_WORKERS workers (P5, Decision #17): a request goes to an idle worker, so a click or a
+// speed change never waits behind the stale prefetch generation another worker is still finishing (onnxruntime
+// cannot abort a run). The first worker gates readiness; the others load behind it and join when warm.
+let workers = [], ready = false, loading = null, requestId = 0, lifecycle = 0, idleTimer = null;
+const pending = new Map(); // id -> { resolve, reject, slot }
 let status = { state: "idle", detail: null, modelsRoot: null, exposed: null, runtime: null };
 
 function getModelsRoot() {
@@ -44,7 +47,8 @@ function failPending(err) {
 }
 
 function dispose(reason) {
-  if (worker) { const w = worker; worker = null; w.terminate().catch(() => {}); }
+  const slots = workers; workers = [];
+  for (const s of slots) s.w.terminate().catch(() => {});
   ready = false; loading = null;
   if (idleTimer) { clearTimeout(idleTimer); idleTimer = null; }
   failPending(new Error(`narrate producer stopped: ${reason}`));
@@ -72,26 +76,43 @@ async function ensureReady() {
     });
     if (thisLifecycle !== lifecycle) throw new Error("narrate producer restarted during load");
     setStatus({ state: "loading", exposed });
-    const w = new Worker(path.join(__dirname, "producer-worker.js"));
-    worker = w;
-    await new Promise((resolve, reject) => {
-      const timer = setTimeout(() => { reject(new Error("narrate producer load timed out")); }, C.NARRATE_LOAD_TIMEOUT_MS);
-      w.on("message", (msg) => {
-        switch (msg.type) {
-          case "model-ready": clearTimeout(timer); ready = true; setStatus({ state: "ready", runtime: msg.runtime }); resolve(); break;
-          case "load-error": clearTimeout(timer); reject(new Error(msg.error)); break;
-          case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs }); break; }
-          default: break;
-        }
-      });
-      w.on("error", (err) => { clearTimeout(timer); reject(err); if (worker === w) dispose(`worker error: ${err.message}`); });
-      w.on("exit", (code) => { if (worker === w) dispose(`worker exited (${code})`); });
-      w.postMessage({ type: "load", modelsRoot, modulePath: getPackagedModulePath(), threads: getThreads() });
-    });
+    const runtime = await startWorker(modelsRoot, true);
+    ready = true;
+    setStatus({ state: "ready", runtime });
+    for (let i = 1; i < C.NARRATE_PRODUCER_WORKERS; i++) {
+      startWorker(modelsRoot, false).catch((err) => console.warn("[narrate] extra producer worker not started:", err.message));
+    }
     touchIdle();
     return status;
   })();
   try { return await loading; } catch (err) { dispose(err.message); throw err; } finally { loading = null; }
+}
+
+/** One worker; resolves with its runtime once its model is loaded and warmed up on the production path. */
+function startWorker(modelsRoot, primary) {
+  const slot = { w: new Worker(path.join(__dirname, "producer-worker.js")), ready: false, busy: 0 };
+  workers.push(slot);
+  const { w } = slot;
+  // A ready or primary worker failing stops the producer (its requests fail closed); an extra one still loading just leaves.
+  const lost = (reason) => {
+    if (!workers.includes(slot)) return;
+    if (primary || slot.ready) dispose(reason);
+    else { workers = workers.filter((s) => s !== slot); w.terminate().catch(() => {}); }
+  };
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { reject(new Error("narrate producer load timed out")); lost("load timed out"); }, C.NARRATE_LOAD_TIMEOUT_MS);
+    w.on("message", (msg) => {
+      switch (msg.type) {
+        case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); break;
+        case "load-error": clearTimeout(timer); reject(new Error(msg.error)); lost(`load error: ${msg.error}`); break;
+        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs }); break; }
+        default: break;
+      }
+    });
+    w.on("error", (err) => { clearTimeout(timer); reject(err); lost(`worker error: ${err.message}`); });
+    w.on("exit", (code) => { clearTimeout(timer); reject(new Error(`worker exited (${code})`)); lost(`worker exited (${code})`); });
+    w.postMessage({ type: "load", modelsRoot, modulePath: getPackagedModulePath(), threads: getThreads() });
+  });
 }
 
 /** Generate one chunk: { table, pcm: Float32Array, sampleRate, genMs }. Rejects on any producer failure. */
@@ -99,14 +120,16 @@ async function generate(text, { voice = C.NARRATE_DEFAULT_VOICE, speed = 1.0 } =
   await ensureReady();
   touchIdle();
   const id = ++requestId;
-  const owner = worker;
+  // The least busy ready worker: an idle one when any is idle.
+  const slot = workers.filter((s) => s.ready).reduce((a, b) => (b.busy < a.busy ? b : a));
+  slot.busy += 1;
   return new Promise((resolve, reject) => {
-    pending.set(id, { resolve, reject, owner });
-    owner.postMessage({ type: "generate", id, text, voice, speed });
+    pending.set(id, { resolve, reject, slot });
+    slot.w.postMessage({ type: "generate", id, text, voice, speed });
   });
 }
 
-function getStatus() { return { ...status, ready, pending: pending.size }; }
+function getStatus() { return { ...status, ready, pending: pending.size, workersReady: workers.filter((w) => w.ready).length }; }
 function shutdown() { dispose("shutdown"); }
 
 module.exports = { ensureReady, generate, getStatus, shutdown, getModelsRoot };

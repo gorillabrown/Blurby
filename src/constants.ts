@@ -29,6 +29,10 @@ export const KOKORO_UI_RATE_MAX = 2.0;
 export const KOKORO_UI_RATE_STEP = SPEED_DIALOG_STEP_HUNDREDTHS / 100;
 /** The voice when settings name none (main/narrate/constants.js NARRATE_DEFAULT_VOICE). */
 export const KOKORO_DEFAULT_VOICE = "af_bella";
+/** Narrate D6 latency lever (Decision #17): word caps for the first chunks after every request (Play, resume
+ * without audio, click, speed); a short first chunk sounds sooner and each next one is generated while the last plays.
+ * Past the ramp, chunks pack whole sentences under the token estimate (T2). */
+export const NARRATE_CHUNK_RAMP: readonly number[] = [6, 12, 24];
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 

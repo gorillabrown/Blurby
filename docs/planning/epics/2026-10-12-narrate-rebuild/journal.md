@@ -122,6 +122,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ 331f8313 (base; the first phase commit follows this entry with the trailer `NARRATE-REBUILD-1-P5-Base: 331f8313…`); uncommitted at writing: `state.md`, `plan.md`, `journal.md`, the close-out, the memo, the time log.
 - **Next:** P5 census, then D10, the D3 log and check script, the crossings, the D6 end-to-end latency, the P5 gate.
 
+## S2 — 2026-10-13 14:05 — session start after an unclean end of S1 (machine restart ≈ 13:50)
+
+- **Did:** resume protocol. S1 ended without a journal entry after 12:35: the machine restarted ≈ 13:49 (every process started 13:49–13:56). Reality on `eb/narrate-rebuild-1-p5` @ `84d35933` (= origin, 0/0): the census (row 40) and D10 (row 41) are done and recorded in plan.md and the time log; row 42 onward is uncommitted work in the tree — the D3 trace kinds (`src/types/eval.ts`), engine/runtime trace emission, `main/narrate/normalize.js` (units → source words), `main/narrate/trial.js` + the three Decision #16 levers in `main.js`, `p5-recorded-output-check.mjs`, `p5-latency-e2e.mjs`, four new suites, and a half-wired chunk ramp (`narrateEngine.ts` declares `ramp` but never assigns it: typecheck fails TS2564). The narrate + readerModes suites pass (23 files, 110 tests); the D10 grep exits 1. Smoke outputs (13:33–13:34, `docs/studies/narrate-rebuild-1/phase5/`): D3 0.45-min session INCONCLUSIVE (too short; 0 outside, 0 overlap/drop/repeat), D6 warm 1.00x × 1 FAIL — play 4,931 ms, click 3,598, speed 2,483/2,889, resume 30. Row 42 recorded `--wait session-ended` / `--resume`.
+- **Learned:** the smoke play trial was the process's first generation (the mode never calls `narratePreload`, so the first Play pays the load and the first inference: a cold trial labelled warm); click and speed waited behind the stale prefetch generation the single producer worker was still running. Electron exit `0xC0000409` on both trial runs: nothing calls `producer.shutdown()` before `app.exit`. Generation scaling measured on the host now (scratch, 4 threads, 100 % host load — the IDE at ≈ 5 cores after the restart): 4 words ≈ 0.8–1.4 s, 8 ≈ 1.0–2.9 s, 12 ≈ 1.7–3.8 s, 60 ≈ 8.5–29 s; not representative and not evidence, but it says the first chunk must be short.
+- **Decisions:** none new yet.
+- **Gate/DoD movement:** none.
+- **Git:** eb/narrate-rebuild-1-p5 @ 84d35933; uncommitted: the S1 P5 tree above.
+- **Next:** wire the ramp (row 46 with the preload, the quit shutdown and the trial warm-up), checkpoint, crossings (row 43), then D3/D6 trials once the host is not saturated.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

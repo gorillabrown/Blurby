@@ -13,6 +13,7 @@ import type { MutableRefObject } from "react";
 import {
   FOLIATE_SECTION_LOAD_WAIT_MS,
   KOKORO_DEFAULT_VOICE,
+  NARRATE_CHUNK_RAMP,
   KOKORO_UI_RATE_MAX,
   KOKORO_UI_RATE_MIN,
   KOKORO_UI_RATE_STEP,
@@ -104,6 +105,10 @@ function preloadProducer(): ProducerPort {
       if (!(r.pcm instanceof Float32Array)) throw new Error("narrate producer returned no PCM");
       return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r) };
     },
+    async preload(): Promise<void> {
+      const api = (globalThis as { electronAPI?: { narratePreload?: () => Promise<unknown> } }).electronAPI;
+      await api?.narratePreload?.();
+    },
   };
 }
 function NarrateIpcSampleRate(_r: NarrateIpcResult): number { return NARRATE_SAMPLE_RATE; }
@@ -162,6 +167,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       diagnostics: this.ports.diagnostics,
     };
     this.anchor = createPersistentReadingAnchor(this.state, this.anchorDeps);
+    // D6: load and warm the voice on entering the mode, so the first Play does not pay the model load (F5 still
+    // covers a Play that arrives first). A failure here surfaces again, fail-closed, on the first generate.
+    this.deps.producer.preload?.().catch(() => {});
   }
 
   // ── Store ──────────────────────────────────────────────────────────────────
@@ -341,7 +349,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   jumpToWord(wordIndex: number, _cause: ReaderModeJumpCause): void {
     if (!this.alive) return;
-    if (this.state.playing && this.engine) { this.engine.play(wordIndex); return; }
+    if (this.state.playing && this.engine) { this.engine.play(wordIndex, "navigate"); return; }
     this.state.currentWordIndex = wordIndex;
     this.state.notify();
   }
@@ -407,7 +415,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       s.explicitSelectionAnchor = resolved;
       const anchored = this.commitShared(resolved, "hard-selection", input.cfi);
       // F2: a click while playing restarts speech at the clicked word; while paused it sets where Play starts.
-      if (s.playing && this.engine) { s.failure = null; s.loading = true; this.engine.play(anchored); }
+      if (s.playing && this.engine) { s.failure = null; s.loading = true; this.engine.play(anchored, "click"); }
       if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchored })) {
         this.surface.clearUserBrowsing();
         s.isBrowsedAway = false;
@@ -424,7 +432,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   navigateTo(wordIndex: number): void {
     if (!this.alive) return;
     this.commitShared(wordIndex, "explicit-navigation", undefined);
-    if (this.state.playing && this.engine) this.engine.play(this.state.currentWordIndex);
+    if (this.state.playing && this.engine) this.engine.play(this.state.currentWordIndex, "navigate");
     this.state.notify();
   }
 
@@ -537,8 +545,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (!sec || sec.sectionIndex === s.currentSection) return;
     const now = Date.now();
     if (now - s.lastGoToSectionTime < NARRATE_SECTION_SYNC_THROTTLE_MS) return;
+    const from = s.currentSection;
     s.currentSection = sec.sectionIndex;
     s.lastGoToSectionTime = now;
+    this.ports.diagnostics.trace({ kind: "transition", transition: "section", from, to: sec.sectionIndex, context: `word ${s.publishedHighlightedWordIndex}` });
     this.surface.goToSection(sec.sectionIndex).catch(() => {});
   };
 
@@ -569,7 +579,8 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.output ??= this.deps.createOutput(NARRATE_SAMPLE_RATE);
     this.engine = new NarrateEngine({
       words,
-      breaks: numberArrayToSet(this.document.paragraphBreaks),
+      breaks: this.chunkBreaks(words),
+      chunkRamp: NARRATE_CHUNK_RAMP,
       producer: this.deps.producer,
       output: this.output,
       voice: this.voice,
@@ -580,9 +591,25 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
         onFailure: (failure) => this.onEngineFailure(failure),
         onComplete: () => this.onEngineComplete(),
         onDiagnostic: (kind, detail) => { if (this.alive) this.ports.diagnostics.record(kind, detail); },
+        // D3 recorded output: the engine's records go to the diagnostics port (the eval-trace sink when enabled).
+        onTrace: (event) => { if (this.alive) this.ports.diagnostics.trace(event); },
       },
     });
     return this.engine;
+  }
+
+  /**
+   * Where a chunk may never cross (D5 crossings): the book's section ends when the engine speaks the book words
+   * (the tokenized content's paragraph breaks index tokenWords, not bookWords), else the paragraph breaks.
+   */
+  private chunkBreaks(words: readonly string[]): ReadonlySet<number> {
+    const bookWords = this.document.bookWords;
+    if (bookWords && words === bookWords.words) {
+      const ends = new Set<number>();
+      for (const section of bookWords.sections) if (section.endWordIdx > 0) ends.add(section.endWordIdx - 1);
+      return ends;
+    }
+    return numberArrayToSet(this.document.paragraphBreaks);
   }
 
   private onEngineCursor(word: number): void {
@@ -601,7 +628,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (this.document.useFoliate && this.surface.isReady()) {
       if (!this.surface.highlight(word, "narrate", { allowMotion: false })) { s.pendingResume = word; this.surface.next(); }
     }
-    this.ports.diagnostics.trace({ kind: "word", source: "narrate", wordIndex: word } as never);
+    this.ports.diagnostics.trace({ kind: "word", source: "audio", wordIndex: word });
     s.notify();
   }
 
