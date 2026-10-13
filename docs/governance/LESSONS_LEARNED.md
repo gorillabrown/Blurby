@@ -2884,3 +2884,15 @@ Related: LL-136 (standing rule 41), standing rule 40.
 
 ### LL-068 — status (NARRATE-REMOVE-1, 2026-10-12)
 **Status:** Observation — held: `git diff --stat` shrinkage was checked per commit (C2 24,827 deletions; C3 16,123; C4 41,916 in its original form, then amended with the restored stylesheet); every large decrease was a listed deletion, and no file was truncated.
+
+### LL-135 — status (2026-10-12, 2026-10-13)
+**Status:** Promoted -> ROADMAP standing rule 42
+
+### LL-138 — status (2026-10-12, 2026-10-13)
+**Status:** Promoted -> ROADMAP standing rule 43
+
+### LL-143 — status (2026-10-12, 2026-10-13)
+**Status:** Promoted -> ROADMAP standing rule 44
+
+### LL-141 — status (2026-10-12, 2026-10-13)
+**Status:** Promoted -> ROADMAP standing rule 45
