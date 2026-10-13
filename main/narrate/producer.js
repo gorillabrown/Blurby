@@ -136,6 +136,15 @@ const queue = [];
 const epochNow = () => performance.timeOrigin + performance.now();
 // Diagnostics (NARRATE_PRODUCER_LOG=1 only): every post and result per worker, stale ones included, and worker stalls.
 const plog = process.env.NARRATE_PRODUCER_LOG === "1" ? (...a) => console.log("[narrate-producer]", Math.round(epochNow()), ...a) : () => {};
+if (process.env.NARRATE_PRODUCER_LOG === "1") {
+  // The main thread's own stalls, to tell a process-wide freeze from a worker-only one.
+  let last = epochNow();
+  setInterval(() => {
+    const now = epochNow();
+    if (now - last > 250) { const m = process.memoryUsage(); plog("lag", "main", Math.round(now - last - 50), "ms", `rss ${Math.round(m.rss / 1048576)} heap ${Math.round(m.heapUsed / 1048576)}`); }
+    last = now;
+  }, 50).unref();
+}
 
 /**
  * Post queued jobs to idle workers. A request takes any idle worker; a prefetch takes one only while
