@@ -2,7 +2,7 @@
 // Writes redacted numeric tables to docs/studies/narrate-rebuild-1/phase0/tables/<passage>.<voice>.json
 // and WAV audio outside the repository (artifacts/audio). Resumable: rates already in a table are skipped.
 // Run from pwsh in the phase worktree:
-//   node scripts/narrate-rebuild/p0-generate.mjs [--passages passage-a,passage-b] [--voices af_bella,bf_emma] [--rates all|1.00,2.00]
+//   node scripts/narrate-rebuild/p0-generate.mjs [--passages passage-a,passage-b] [--voices af_bella,bf_emma] [--rates all|1.00,2.00] [--dtype q4|fp32|fp16]
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
@@ -17,7 +17,8 @@ const passages = arg("--passages", manifest.passages.map((p) => p.id).join(","))
 const voices = arg("--voices", manifest.voices.join(",")).split(",");
 const ratesArg = arg("--rates", "all");
 const rates = ratesArg === "all" ? manifest.rates : ratesArg.split(",").map(Number);
-const TABLES = path.join(PHASE0_DIR, "tables");
+const DTYPE = arg("--dtype", "q4"); // precision trial (G1 route b): fp32 and fp16 tables and audio live beside the q4 ones, never over them
+const TABLES = path.join(PHASE0_DIR, DTYPE === "q4" ? "tables" : `tables-${DTYPE}`);
 fs.mkdirSync(TABLES, { recursive: true });
 
 const rt = loadRuntime();
@@ -25,7 +26,7 @@ const { TextSplitterStream } = createRequire(rt.kokoroPath)(rt.kokoroPath);
 const rateKey = (r) => r.toFixed(2);
 
 for (const voice of voices) {
-  const { tts, loadMs, outputNames } = await loadKokoro(rt);
+  const { tts, loadMs, outputNames } = await loadKokoro(rt, { dtype: DTYPE });
   const cap = attachCapture(tts, rt.ph);
   console.log(JSON.stringify({ voice, loadMs: Math.round(loadMs), outputNames }));
   for (const passageId of passages) {
@@ -34,7 +35,7 @@ for (const voice of voices) {
     const chunks = chunkPassage(TextSplitterStream, text);
     const file = path.join(TABLES, `${passageId}.${voice}.json`);
     const table = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {
-      schema: "narrate-rebuild-1/phase0/table@1", passage: passageId, voice, dtype: "q4", device: "cpu", tokenCap: TOKEN_CAP,
+      schema: "narrate-rebuild-1/phase0/table@1", passage: passageId, voice, dtype: DTYPE, device: "cpu", tokenCap: TOKEN_CAP,
       host: rt.host, runtime: rt.versions, startedAt: new Date().toISOString(),
       chunks: chunks.map((c) => ({ index: c.index, words: c.words, sectionIndex: c.sectionIndex, sectionBreakBefore: c.sectionBreakBefore, firstChunkCut: c.firstChunkCut ?? null, text: c.text })),
       rates: {},
@@ -54,7 +55,7 @@ for (const voice of voices) {
           console.log(`FAIL ${passageId} ${voice} ${key} chunk ${c.index}: ${error}`);
           continue;
         }
-        const wavRel = path.join(passageId, voice, key, `chunk-${c.index}.wav`);
+        const wavRel = path.join(...(DTYPE === "q4" ? [] : [DTYPE]), passageId, voice, key, `chunk-${c.index}.wav`);
         writeWav(path.join(AUDIO_ROOT, wavRel), rec.pcm, rec.sampleRate);
         entry.chunks.push({
           index: c.index, text: c.text, phonemes: rec.phonemes, ids: rec.ids, durations: rec.durations, durationsType: rec.durationsType,

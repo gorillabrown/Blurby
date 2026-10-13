@@ -1,0 +1,944 @@
+{
+ "schema": "narrate-rebuild-1/phase0/acoustic-summary@1",
+ "recordedAt": "2026-10-13T15:15:38.011Z",
+ "dtype": "q4",
+ "pass": false,
+ "control": {
+  "passage": "passage-a",
+  "voice": "af_bella",
+  "rate": "0.80",
+  "anchor": "but",
+  "errMs": 17,
+  "shiftedErrMs": 57,
+  "caught": true
+ },
+ "runs": {
+  "passage-a/af_bella/0.80": {
+   "rate": 0.8,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 521400,
+    "tokens": 286,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 16,
+   "resolvedShare": 0.667,
+   "offsets": {
+    "resolved": 10,
+    "signedMeanMs": 384.9,
+    "p50AbsMs": 479,
+    "worstAbsMs": 581,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 18,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 3.5,
+   "worstErrMs": 106,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ":",
+    "word": "nor",
+    "kind": "word",
+    "acousticMs": 11494,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 775,
+    "assocCost": 0.201,
+    "tableMs": 11600,
+    "errMs": 106,
+    "tableSpaceMs": 11475,
+    "errSpaceMs": -19
+   },
+   "signedMeanMs": 64.9,
+   "p50AbsMs": 61,
+   "p90AbsMs": 104,
+   "over30": 15,
+   "spaceRule": {
+    "signedMeanMs": -3.9,
+    "worstAbsMs": 90,
+    "p50AbsMs": 19,
+    "over30": 3
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/af_bella/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 438000,
+    "tokens": 286,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 22,
+   "resolvedShare": 0.917,
+   "offsets": {
+    "resolved": 11,
+    "signedMeanMs": 281.6,
+    "p50AbsMs": 292,
+    "worstAbsMs": 433,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 12,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 5.5,
+   "worstErrMs": 81,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ":",
+    "word": "nor",
+    "kind": "word",
+    "acousticMs": 9744,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 634,
+    "assocCost": 0.118,
+    "tableMs": 9825,
+    "errMs": 81,
+    "tableSpaceMs": 9725,
+    "errSpaceMs": -19
+   },
+   "signedMeanMs": 45,
+   "p50AbsMs": 43,
+   "p90AbsMs": 59,
+   "over30": 20,
+   "spaceRule": {
+    "signedMeanMs": -2.7,
+    "worstAbsMs": 47,
+    "p50AbsMs": 19,
+    "over30": 6
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/af_bella/1.40": {
+   "rate": 1.4,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 291600,
+    "tokens": 286,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 15,
+   "resolvedShare": 0.625,
+   "offsets": {
+    "resolved": 4,
+    "signedMeanMs": 235.3,
+    "p50AbsMs": 234,
+    "worstAbsMs": 268,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 19,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 6.5,
+   "worstErrMs": -53,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 0,
+    "mark": "chunk-start",
+    "word": "Of",
+    "kind": "word",
+    "acousticMs": 378,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 378,
+    "assocCost": 0,
+    "tableMs": 325,
+    "errMs": -53,
+    "tableSpaceMs": 325,
+    "errSpaceMs": -53
+   },
+   "signedMeanMs": 15.7,
+   "p50AbsMs": 38,
+   "p90AbsMs": 53,
+   "over30": 11,
+   "spaceRule": {
+    "signedMeanMs": -21,
+    "worstAbsMs": 53,
+    "p50AbsMs": 17,
+    "over30": 4
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/af_bella/2.00": {
+   "rate": 2,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 233400,
+    "tokens": 286,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 8,
+   "resolvedShare": 0.333,
+   "offsets": {
+    "resolved": 1,
+    "signedMeanMs": 189,
+    "p50AbsMs": 189,
+    "worstAbsMs": 189,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 26,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": -147,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 2,
+    "mark": "chunk-start",
+    "word": "Of",
+    "kind": "word",
+    "acousticMs": 372,
+    "uncertaintyMs": 3.5,
+    "pauseLenMs": 372,
+    "assocCost": 0,
+    "tableMs": 225,
+    "errMs": -147,
+    "tableSpaceMs": 225,
+    "errSpaceMs": -147
+   },
+   "signedMeanMs": -55.4,
+   "p50AbsMs": 53,
+   "p90AbsMs": 147,
+   "over30": 4,
+   "spaceRule": {
+    "signedMeanMs": -67.9,
+    "worstAbsMs": 147,
+    "p50AbsMs": 53,
+    "over30": 4
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/af_bella/0.80": {
+   "rate": 0.8,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 609000,
+    "tokens": 352,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 8,
+   "resolvedShare": 0.258,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 487,
+    "p50AbsMs": 505,
+    "worstAbsMs": 505,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 26,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 5.5,
+   "worstErrMs": 126,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": "chunk-start",
+    "word": "Section",
+    "kind": "word",
+    "acousticMs": 449,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 449,
+    "assocCost": 0,
+    "tableMs": 575,
+    "errMs": 126,
+    "tableSpaceMs": 575,
+    "errSpaceMs": 126
+   },
+   "signedMeanMs": 88.8,
+   "p50AbsMs": 77,
+   "p90AbsMs": 126,
+   "over30": 8,
+   "spaceRule": {
+    "signedMeanMs": 70,
+    "worstAbsMs": 126,
+    "p50AbsMs": 77,
+    "over30": 6
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/af_bella/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 502200,
+    "tokens": 352,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 8,
+   "resolvedShare": 0.258,
+   "offsets": {
+    "resolved": 4,
+    "signedMeanMs": 311,
+    "p50AbsMs": 383,
+    "worstAbsMs": 389,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 26,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 7.5,
+   "worstErrMs": 71,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": "chunk-start",
+    "word": "Section",
+    "kind": "word",
+    "acousticMs": 379,
+    "uncertaintyMs": 7.5,
+    "pauseLenMs": 379,
+    "assocCost": 0,
+    "tableMs": 450,
+    "errMs": 71,
+    "tableSpaceMs": 450,
+    "errSpaceMs": 71
+   },
+   "signedMeanMs": 46.6,
+   "p50AbsMs": 48,
+   "p90AbsMs": 71,
+   "over30": 6,
+   "spaceRule": {
+    "signedMeanMs": 34.1,
+    "worstAbsMs": 71,
+    "p50AbsMs": 44,
+    "over30": 4
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/af_bella/1.40": {
+   "rate": 1.4,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 343200,
+    "tokens": 352,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 6,
+   "resolvedShare": 0.194,
+   "offsets": {
+    "resolved": 3,
+    "signedMeanMs": 247.7,
+    "p50AbsMs": 238,
+    "worstAbsMs": 297,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 28,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": 57,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 1,
+    "mark": "?",
+    "word": "Maya",
+    "kind": "word",
+    "acousticMs": 6843,
+    "uncertaintyMs": 2.5,
+    "pauseLenMs": 301,
+    "assocCost": 0.185,
+    "tableMs": 6900,
+    "errMs": 57,
+    "tableSpaceMs": 6850,
+    "errSpaceMs": 7
+   },
+   "signedMeanMs": 10.2,
+   "p50AbsMs": 43,
+   "p90AbsMs": 57,
+   "over30": 4,
+   "spaceRule": {
+    "signedMeanMs": 1.8,
+    "worstAbsMs": 56,
+    "p50AbsMs": 32,
+    "over30": 3
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/af_bella/2.00": {
+   "rate": 2,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 279000,
+    "tokens": 352,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 4,
+   "resolvedShare": 0.129,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 161.5,
+    "p50AbsMs": 166,
+    "worstAbsMs": 166,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 30,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 6.5,
+   "worstErrMs": -133,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": "chunk-start",
+    "word": "Section",
+    "kind": "word",
+    "acousticMs": 358,
+    "uncertaintyMs": 2.5,
+    "pauseLenMs": 358,
+    "assocCost": 0,
+    "tableMs": 225,
+    "errMs": -133,
+    "tableSpaceMs": 225,
+    "errSpaceMs": -133
+   },
+   "signedMeanMs": -40.8,
+   "p50AbsMs": 90,
+   "p90AbsMs": 133,
+   "over30": 3,
+   "spaceRule": {
+    "signedMeanMs": -47,
+    "worstAbsMs": 133,
+    "p50AbsMs": 90,
+    "over30": 2
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-a/bf_emma/0.80": {
+   "rate": 0.8,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 465000,
+    "tokens": 278,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 10,
+   "resolvedShare": 0.417,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 446,
+    "p50AbsMs": 772,
+    "worstAbsMs": 772,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 24,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 3.5,
+   "worstErrMs": 139,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 0,
+    "mark": "chunk-start",
+    "word": "Of",
+    "kind": "word",
+    "acousticMs": 286,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 286,
+    "assocCost": 0,
+    "tableMs": 425,
+    "errMs": 139,
+    "tableSpaceMs": 425,
+    "errSpaceMs": 139
+   },
+   "signedMeanMs": 85.2,
+   "p50AbsMs": 84,
+   "p90AbsMs": 139,
+   "over30": 9,
+   "spaceRule": {
+    "signedMeanMs": 42.7,
+    "worstAbsMs": 139,
+    "p50AbsMs": 49,
+    "over30": 5
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/bf_emma/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 393600,
+    "tokens": 278,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 10,
+   "resolvedShare": 0.417,
+   "offsets": {
+    "resolved": 3,
+    "signedMeanMs": 569.3,
+    "p50AbsMs": 542,
+    "worstAbsMs": 629,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 24,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 6.5,
+   "worstErrMs": 58,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ",",
+    "word": "not",
+    "kind": "word",
+    "acousticMs": 1817,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 425,
+    "assocCost": 0.218,
+    "tableMs": 1875,
+    "errMs": 58,
+    "tableSpaceMs": 1825,
+    "errSpaceMs": 8
+   },
+   "signedMeanMs": 44.4,
+   "p50AbsMs": 46,
+   "p90AbsMs": 58,
+   "over30": 9,
+   "spaceRule": {
+    "signedMeanMs": 19.4,
+    "worstAbsMs": 47,
+    "p50AbsMs": 43,
+    "over30": 5
+   },
+   "inconclusive": false,
+   "pass": false,
+   "verdict": "FAIL"
+  },
+  "passage-a/bf_emma/1.40": {
+   "rate": 1.4,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 260400,
+    "tokens": 278,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 8,
+   "resolvedShare": 0.333,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 273,
+    "p50AbsMs": 275,
+    "worstAbsMs": 275,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 26,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 8.5,
+   "worstErrMs": 47,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": ",",
+    "word": "not",
+    "kind": "word",
+    "acousticMs": 1303,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 328,
+    "assocCost": 0.225,
+    "tableMs": 1350,
+    "errMs": 47,
+    "tableSpaceMs": 1300,
+    "errSpaceMs": -3
+   },
+   "signedMeanMs": 1.9,
+   "p50AbsMs": 23,
+   "p90AbsMs": 47,
+   "over30": 3,
+   "spaceRule": {
+    "signedMeanMs": -16.9,
+    "worstAbsMs": 37,
+    "p50AbsMs": 18,
+    "over30": 2
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-a/bf_emma/2.00": {
+   "rate": 2,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 48,
+    "samples": 220200,
+    "tokens": 278,
+    "chunk": 4
+   },
+   "totalAnchors": 24,
+   "resolved": 8,
+   "resolvedShare": 0.333,
+   "offsets": {
+    "resolved": 4,
+    "signedMeanMs": 252.5,
+    "p50AbsMs": 242,
+    "worstAbsMs": 412,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 26,
+   "unresolvedInteriorFusedRuns": 10,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": -97,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 2,
+    "mark": "chunk-start",
+    "word": "Of",
+    "kind": "word",
+    "acousticMs": 272,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 272,
+    "assocCost": 0,
+    "tableMs": 175,
+    "errMs": -97,
+    "tableSpaceMs": 175,
+    "errSpaceMs": -97
+   },
+   "signedMeanMs": -39.4,
+   "p50AbsMs": 55,
+   "p90AbsMs": 97,
+   "over30": 5,
+   "spaceRule": {
+    "signedMeanMs": -48.8,
+    "worstAbsMs": 97,
+    "p50AbsMs": 55,
+    "over30": 5
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/bf_emma/0.80": {
+   "rate": 0.8,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 521400,
+    "tokens": 351,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 6,
+   "resolvedShare": 0.194,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 544,
+    "p50AbsMs": 681,
+    "worstAbsMs": 681,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 28,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": 125,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 3,
+    "mark": "chunk-start",
+    "word": "Section",
+    "kind": "word",
+    "acousticMs": 300,
+    "uncertaintyMs": 9.5,
+    "pauseLenMs": 300,
+    "assocCost": 0,
+    "tableMs": 425,
+    "errMs": 125,
+    "tableSpaceMs": 425,
+    "errSpaceMs": 125
+   },
+   "signedMeanMs": 83.2,
+   "p50AbsMs": 86,
+   "p90AbsMs": 125,
+   "over30": 6,
+   "spaceRule": {
+    "signedMeanMs": 66.5,
+    "worstAbsMs": 125,
+    "p50AbsMs": 86,
+    "over30": 4
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/bf_emma/1.00": {
+   "rate": 1,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 454200,
+    "tokens": 351,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 7,
+   "resolvedShare": 0.226,
+   "offsets": {
+    "resolved": 3,
+    "signedMeanMs": 475.3,
+    "p50AbsMs": 525,
+    "worstAbsMs": 563,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 27,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 9.5,
+   "worstErrMs": 74,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 4,
+    "mark": "chunk-start",
+    "word": "Section",
+    "kind": "word",
+    "acousticMs": 276,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 276,
+    "assocCost": 0,
+    "tableMs": 350,
+    "errMs": 74,
+    "tableSpaceMs": 350,
+    "errSpaceMs": 74
+   },
+   "signedMeanMs": 50,
+   "p50AbsMs": 61,
+   "p90AbsMs": 74,
+   "over30": 6,
+   "spaceRule": {
+    "signedMeanMs": 42.9,
+    "worstAbsMs": 74,
+    "p50AbsMs": 34,
+    "over30": 5
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/bf_emma/1.40": {
+   "rate": 1.4,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 301200,
+    "tokens": 351,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 2,
+   "resolvedShare": 0.065,
+   "offsets": {
+    "resolved": 3,
+    "signedMeanMs": 400.7,
+    "p50AbsMs": 402,
+    "worstAbsMs": 416,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 32,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 5.5,
+   "worstErrMs": 53,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 1,
+    "mark": "?",
+    "word": "Maya",
+    "kind": "word",
+    "acousticMs": 5947,
+    "uncertaintyMs": 5.5,
+    "pauseLenMs": 90,
+    "assocCost": 0.106,
+    "tableMs": 6000,
+    "errMs": 53,
+    "tableSpaceMs": 5975,
+    "errSpaceMs": 28
+   },
+   "signedMeanMs": 30.5,
+   "p50AbsMs": 53,
+   "p90AbsMs": 53,
+   "over30": 1,
+   "spaceRule": {
+    "signedMeanMs": 18,
+    "worstAbsMs": 28,
+    "p50AbsMs": 28,
+    "over30": 0
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  },
+  "passage-b/bf_emma/2.00": {
+   "rate": 2,
+   "chunks": 5,
+   "largestChunk": {
+    "words": 62,
+    "samples": 261600,
+    "tokens": 351,
+    "chunk": 1
+   },
+   "totalAnchors": 31,
+   "resolved": 5,
+   "resolvedShare": 0.161,
+   "offsets": {
+    "resolved": 2,
+    "signedMeanMs": 394.5,
+    "p50AbsMs": 451,
+    "worstAbsMs": 451,
+    "note": "word end before a pause vs the table's last-phoneme frame end; the pause's frames belong to the preceding phoneme in the table, so this is reported, not judged"
+   },
+   "unresolved": 29,
+   "unresolvedInteriorFusedRuns": 3,
+   "maxUncertaintyMs": 6.5,
+   "worstErrMs": -100,
+   "worstAnchor": {
+    "boundary": "onset",
+    "chunk": 2,
+    "mark": "chunk-start",
+    "word": "Wait",
+    "kind": "word",
+    "acousticMs": 275,
+    "uncertaintyMs": 1.5,
+    "pauseLenMs": 275,
+    "assocCost": 0,
+    "tableMs": 175,
+    "errMs": -100,
+    "tableSpaceMs": 175,
+    "errSpaceMs": -100
+   },
+   "signedMeanMs": -66.2,
+   "p50AbsMs": 50,
+   "p90AbsMs": 100,
+   "over30": 5,
+   "spaceRule": {
+    "signedMeanMs": -66.2,
+    "worstAbsMs": 100,
+    "p50AbsMs": 50,
+    "over30": 5
+   },
+   "inconclusive": true,
+   "pass": false,
+   "verdict": "INCONCLUSIVE"
+  }
+ },
+ "checks": [
+  {
+   "ok": false,
+   "name": "passage-a/af_bella 0.80: P0-3 FAIL (resolved 16/24, worst 106 ms, max unc 3.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/af_bella 1.00: P0-3 FAIL (resolved 22/24, worst 81 ms, max unc 5.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/af_bella 1.40: P0-3 FAIL (resolved 15/24, worst -53 ms, max unc 6.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/af_bella 2.00: P0-3 INCONCLUSIVE (resolved 8/24, worst -147 ms, max unc 9.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/af_bella 0.80: P0-3 INCONCLUSIVE (resolved 8/31, worst 126 ms, max unc 5.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/af_bella 1.00: P0-3 INCONCLUSIVE (resolved 8/31, worst 71 ms, max unc 7.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/af_bella 1.40: P0-3 INCONCLUSIVE (resolved 6/31, worst 57 ms, max unc 9.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/af_bella 2.00: P0-3 INCONCLUSIVE (resolved 4/31, worst -133 ms, max unc 6.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-a/bf_emma 0.80: P0-3 FAIL (resolved 10/24, worst 139 ms, max unc 3.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/bf_emma 1.00: P0-3 FAIL (resolved 10/24, worst 58 ms, max unc 6.5 ms)",
+   "detail": null
+  },
+  {
+   "ok": false,
+   "name": "passage-a/bf_emma 1.40: P0-3 INCONCLUSIVE (resolved 8/24, worst 47 ms, max unc 8.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-a/bf_emma 2.00: P0-3 INCONCLUSIVE (resolved 8/24, worst -97 ms, max unc 9.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/bf_emma 0.80: P0-3 INCONCLUSIVE (resolved 6/31, worst 125 ms, max unc 9.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/bf_emma 1.00: P0-3 INCONCLUSIVE (resolved 7/31, worst 74 ms, max unc 9.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/bf_emma 1.40: P0-3 INCONCLUSIVE (resolved 2/31, worst 53 ms, max unc 5.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": false,
+   "name": "passage-b/bf_emma 2.00: P0-3 INCONCLUSIVE (resolved 5/31, worst -100 ms, max unc 6.5 ms)",
+   "detail": "inconclusive: reference repair required (T5/R4)"
+  },
+  {
+   "ok": true,
+   "name": "40 ms negative control caught",
+   "detail": {
+    "passage": "passage-a",
+    "voice": "af_bella",
+    "rate": "0.80",
+    "anchor": "but",
+    "errMs": 17,
+    "shiftedErrMs": 57,
+    "caught": true
+   }
+  }
+ ]
+}

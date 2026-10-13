@@ -48,9 +48,15 @@ Every phase runs on its own branch `eb/narrate-rebuild-1-p<n>` cut from `origin/
 
 | Date | Gate | Evidence |
 |------|------|----------|
+| 2026-10-13 | P1 — Producer and harness | `p0-summary.mjs` exit 0: P0-1, P0-2, P0-4 PASS on both voices (514/514, 500 chunks, factor 600); `--break` exit 1; `p1-gate.ps1` 11/11 with `-SelfTest` recording a FAIL; typecheck 0; `npm test` 1,955 passed / 1 skipped / 0 failed; merge `7bbf6b20` pushed, ancestor check exit 0 (state.md → Evidence) |
 
 ## Current-phase worklist
 
 <!-- Owned by the executor. Regenerate when a phase opens. -->
 
-- [ ] P1 opens: create `eb/narrate-rebuild-1-p1` per GIT WORK, measure the baseline in that worktree.
+- [x] P1 opened 2026-10-12, gate passed and merged `7bbf6b20` 2026-10-13.
+- [x] P2: base trailer commit, P0-3 run, P0-5 sweep and T7 run, VERDICT.md, G1 BLOCKER(USER) raised 2026-10-13 01:35.
+- [x] G1 answers adopted 2026-10-13 (state.md Decision log #8–#11); route (b) precision trial run on the P2 branch (fp32 and fp16, passage A at 1.00x; VERDICT.md § Addendum): the error profile is unchanged within 1 ms, so the bake-off condition is met.
+- [x] G1 route answered 2026-10-13 10:15: (a) continue on Kokoro (Decision #12).
+- [x] P2 gate run 2026-10-13 10:15–10:24: VERDICT.md three parts + addendum present; p0-acoustic exit 1 with the classification recorded; p0-latency --threads 4 **exit 1 twice** (worst warm 2,297 / 2,451 ms at 39–40 % host busy) → charter latency trigger → BLOCKER(USER) in state.md. P2 **not merged**.
+- [ ] Owner's latency answer adopted → merge P2 per GIT WORK → Gate log and Evidence on the P3 branch → open P3.
