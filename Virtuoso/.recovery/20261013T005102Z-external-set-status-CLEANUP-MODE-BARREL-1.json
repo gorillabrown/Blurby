@@ -1,0 +1,50 @@
+{
+  "id": "20261013T005102Z-external-set-status-CLEANUP-MODE-BARREL-1",
+  "operation": "external-set-status",
+  "item_id": "CLEANUP-MODE-BARREL-1",
+  "created": "2026-10-13T00:51:02Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "title": "Remove the unused mode barrel and the legacy mode engines",
+      "sequence": 13,
+      "written_status": "Full Spec",
+      "effort": "XS",
+      "branch": "eb/cleanup-mode-barrel-1",
+      "description": "Delete src/modes/index.ts and the dead PageMode/FocusMode/FlowMode engines, re-point tests/perf-baseline.test.ts to the per-mode copies, drop the dead NarrateMode chunk rule, and add a structural test; ModeInterface.ts stays.",
+      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass."
+    },
+    "expectedRevision": "90f0c1f7ae374000d3f2a986e0082cac62ab44c8112f5b6b019853bf7ef823e3",
+    "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('branch', 'eb/cleanup-mode-barrel-1'), ('description', 'Delete src/modes/index.ts and the dead PageMode/FocusMode/FlowMode engines, re-point tests/perf-baseline.test.ts to the per-mode copies, drop the dead NarrateMode chunk rule, and add a structural test; ModeInterface.ts stays.'), ('effort', 'XS'), ('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.\"), ('sequence', 13), ('title', 'Remove the unused mode barrel and the legacy mode engines'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CLEANUP-MODE-BARREL-1",
+      "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('branch', 'eb/cleanup-mode-barrel-1'), ('description', 'Delete src/modes/index.ts and the dead PageMode/FocusMode/FlowMode engines, re-point tests/perf-baseline.test.ts to the per-mode copies, drop the dead NarrateMode chunk rule, and add a structural test; ModeInterface.ts stays.'), ('effort', 'XS'), ('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.\"), ('sequence', 13), ('title', 'Remove the unused mode barrel and the legacy mode engines'), ('written_status', 'Full Spec')]",
+      "actualRevision": "2026-10-13T00:51:09Z",
+      "recoveryId": "20261013T005102Z-external-set-status-CLEANUP-MODE-BARREL-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "title",
+          "sequence",
+          "written_status",
+          "effort",
+          "branch"
+        ],
+        "otherFieldsVerifiedBy": "connector write response"
+      }
+    }
+  },
+  "resolved": "2026-10-13T00:51:20Z",
+  "outcome": "succeeded"
+}

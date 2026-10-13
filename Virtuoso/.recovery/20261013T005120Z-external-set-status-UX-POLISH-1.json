@@ -1,0 +1,48 @@
+{
+  "id": "20261013T005120Z-external-set-status-UX-POLISH-1",
+  "operation": "external-set-status",
+  "item_id": "UX-POLISH-1",
+  "created": "2026-10-13T00:51:20Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 14,
+      "written_status": "Full Spec",
+      "effort": "S",
+      "branch": "eb/ux-polish-1",
+      "description": "In Page, Space enters the remembered mode (Focus or Flow; Flow when unset) paused, like the buttons (owner decision 2026-10-12); shortcut help and replica tests corrected.",
+      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass."
+    },
+    "expectedRevision": "ff10693df05561b9df876c6cb5c5efabd1ee30b24e9516560bc40da50d3022bf",
+    "idempotencyKey": "set-status:UX-POLISH-1:[('branch', 'eb/ux-polish-1'), ('description', 'In Page, Space enters the remembered mode (Focus or Flow; Flow when unset) paused, like the buttons (owner decision 2026-10-12); shortcut help and replica tests corrected.'), ('effort', 'S'), ('notes', 'Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.'), ('sequence', 14), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "UX-POLISH-1",
+      "idempotencyKey": "set-status:UX-POLISH-1:[('branch', 'eb/ux-polish-1'), ('description', 'In Page, Space enters the remembered mode (Focus or Flow; Flow when unset) paused, like the buttons (owner decision 2026-10-12); shortcut help and replica tests corrected.'), ('effort', 'S'), ('notes', 'Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.'), ('sequence', 14), ('written_status', 'Full Spec')]",
+      "actualRevision": "2026-10-13T00:51:27Z",
+      "recoveryId": "20261013T005120Z-external-set-status-UX-POLISH-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "sequence",
+          "written_status",
+          "effort",
+          "branch"
+        ],
+        "otherFieldsVerifiedBy": "connector write response"
+      }
+    }
+  },
+  "resolved": "2026-10-13T00:51:37Z",
+  "outcome": "succeeded"
+}

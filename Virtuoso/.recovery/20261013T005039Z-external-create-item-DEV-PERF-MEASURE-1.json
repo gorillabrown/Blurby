@@ -1,0 +1,61 @@
+{
+  "id": "20261013T005039Z-external-create-item-DEV-PERF-MEASURE-1",
+  "operation": "external-create-item",
+  "item_id": "DEV-PERF-MEASURE-1",
+  "created": "2026-10-13T00:50:39Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "title": "Measure dev-mode slowness against a production build",
+      "sequence": 15,
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#dev-perf-measure-1",
+      "branch": "",
+      "prerequisites": [],
+      "description": "Measure the same actions on npm run dev and on the production build, with renderer profiles, before naming a cause of BUG-189.",
+      "notes": "Created by roadmap review 2026-10-12 (BUG-189). Stub.",
+      "id": "DEV-PERF-MEASURE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-13T00:49:29Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:DEV-PERF-MEASURE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "DEV-PERF-MEASURE-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:DEV-PERF-MEASURE-1",
+      "actualRevision": "2026-10-13T00:50:44Z",
+      "recoveryId": "20261013T005039Z-external-create-item-DEV-PERF-MEASURE-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "id",
+          "sequence",
+          "status",
+          "written_status",
+          "effort",
+          "spec_link",
+          "group"
+        ]
+      },
+      "providerItemId": "13271920462",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-13T00:51:02Z",
+  "outcome": "succeeded"
+}
