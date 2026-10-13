@@ -108,3 +108,8 @@ Archived from `Current System State` section of CLAUDE.md. These are completed s
 ### Guardrails (still active — preserved in CLAUDE.md)
 
 - **Diagnostics export guardrail** — Diagnostics exports are evidence artifacts, not user-content artifacts. Do not commit generated local user diagnostics unless an explicit test fixture creates them; raw text and audio-shaped fields must remain redacted/rejected in both producers and validators.
+
+## Archived 2026-10-12 (NARRATE-REMOVE-1 close-out; CLAUDE.md size rule)
+
+- Completed 2026-10-10 (EPIC-MAIN-PROCESS-CLEANUP, close-out `docs/governance/close-outs/CloseOut.EPIC-MAIN-PROCESS-CLEANUP.2026-10-10.md`): CLOUD-RETRY-SHARED-1 (shared `main/cloud-retry.js`), TTS-SIDECAR-SHARED-1 (shared `main/python-sidecar-adapter.js`), CLEANUP-LEGACY-PARSERS-1 (`main/legacy-parsers.js` deleted). Suite 3,088 passed / 133 skipped.
+- TTS-ENGINE-SHARED-1 completed 2026-10-10: `main/python-sidecar-engine.js` is the one MOSS/Pocket engine (merge `8cedd0cc`, close-out `docs/governance/close-outs/CloseOut.TTS-ENGINE-SHARED-1.2026-10-10.md`; suite 3,113 passed / 133 skipped). TERMINAL-BACKFILL-1 completed 2026-10-10: the terminal ledger holds every terminal item (close-out `docs/governance/close-outs/CloseOut.TERMINAL-BACKFILL-1.2026-10-10.md`). Second roadmap review 2026-10-10 queued two parallel items outside the separation fence: EINK-HOVER-FIX-1 (6, XS, fixes BUG-184) and LIBRARY-SETTINGS-FIX-1 (7, S, Ctrl+K settings routing + live New-dot clearing). LL-112 and LL-130 promoted to ROADMAP standing rules 39 and 40.

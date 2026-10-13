@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-12 (close-outs: TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed; NARRATE-REMOVE-1 heads the queue). Earlier that day, OutsideAudit.10 closed: NARRATE-REMOVE-1 specification revision 4 and the NARRATE-REBUILD-1 Phase 0 protocol were authorized by a fresh review; see [the D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md). Before that, 2026-10-11 (roadmap review: Narrate removal and rebuild placed; four old narration items retired; TEST-TIMEOUT-HEADROOM-1 added; finish line now "Narration rebuilt"; LL-136 promoted to standing rule 41). See the [2026-10-11 plan](docs/planning/roadmap-reviews/2026-10-11-plan.md).
-**Current state**: v1.75.1 baseline. Page, Focus, Flow and Narrate run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). The full suite passes on the owner's machine (3,410 passed / 133 skipped, two runs, 2026-10-12), and typecheck exits 0. Kokoro is the sole engine. Narrate is next to be removed (NARRATE-REMOVE-1) and rebuilt from scratch (NARRATE-REBUILD-1).
+**Last updated**: 2026-10-12 (close-out: NARRATE-REMOVE-1 completed, merge `386651fc`; NARRATE-REBUILD-1 heads the queue). Earlier that day, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed: NARRATE-REMOVE-1 specification revision 4 and the NARRATE-REBUILD-1 Phase 0 protocol were authorized by a fresh review; see [the D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md). Before that, 2026-10-11 (roadmap review: Narrate removal and rebuild placed; four old narration items retired; TEST-TIMEOUT-HEADROOM-1 added; finish line now "Narration rebuilt"; LL-136 promoted to standing rule 41). See the [2026-10-11 plan](docs/planning/roadmap-reviews/2026-10-11-plan.md).
+**Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REMOVE-1 (8, Full Spec revision 4, 3 waves, runs alone: shared-core freeze set; the queue-depth gate is waived for this one dispatch, R1) → NARRATE-REBUILD-1 (9, **Path: epic**) → CLEANUP-MODE-BARREL-1 (10) and UX-POLISH-1 (11), both after the removal. Stage 6 (5–7) completed 2026-10-12.
-**Last sprint**: TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, unblocked: `/epic` may start) → CLEANUP-MODE-BARREL-1 (10) and UX-POLISH-1 (11), both unblocked stubs awaiting re-authoring against the separated graph. NARRATE-REMOVE-1 (8) completed 2026-10-12, and Stage 6 (5–7) completed the same day. **Dispatch-ready depth is below 3** (no full specification is queued; the epic is excluded from the buffer): standing rule 8 and CLAUDE.md Rule 5a apply again, so `/roadmap-review` backfills before the next dispatch.
+**Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby on monday.com](https://estrattbrown.monday.com/boards/18432450217), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -19,9 +19,9 @@ The owner requested product lanes on 2026-09-23. Each Monday record has one prim
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
-| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), blocked on mode separation; BUG-184 Settings transparency is an open, unqueued candidate |
-| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | HEARD-CURSOR probe, APPLYRATECHANGE-COLLAPSE, conditional SUBSCRIBER-CURSOR, all held behind mode separation; KOKORO-EXPORT deferred; sidecar/engine deduplication stubs at positions 7–8 |
-| Reader Engine | Page/Focus/Flow/Narrate mode lifecycle, EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 is step 1; isolate Page/Focus/Flow/Narrate before downstream fixes; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 10 |
+| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke |
+| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
+| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 10 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT) |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
 | Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6 |
 | Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9 |
@@ -121,6 +121,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 6. **PR-26:** Settings that control a runtime engine must have explicit sync bridges.
 7. **SRL-012:** For Full-tier sprints, Solon and Plato tasks MUST be marked parallel-eligible.
 8. **Queue depth >=3:** If queue drops below 3 after completion, stop and backfill before next dispatch.
+    - *Status (2026-10-12):* after NARRATE-REMOVE-1 the dispatch-ready depth is 0 full specs plus one epic (excluded); this rule and CLAUDE.md Rule 5a stop the next dispatch until `/roadmap-review` backfills.
 9. **Spec-compliance before quality:** Each task gets Solon check (does it match spec?) before Plato check (is it well-built?).
 10. **Dispatch sizing:** 40 tool-use ceiling per wave. Sprints with 5+ implementation tasks must be pre-split into waves.
 11. **SRL-046:** Cross-mode/shared-surface refactors must start with a preflight stabilization gate that locks exact-anchor, visual-follow, and mode-switch invariants.
@@ -145,6 +146,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 30. **SRL-068:** Prefer canonical content alignment over tokenizer unification across renderer/source boundaries.
 31. **SRL-069:** Prefetched audio boundaries must be source-owned before driving heard-audio cursors.
 32. **SRL-070:** Narrate/sync QA gates require an audio-independent ground truth (Evan's ear, or a non-self-referential instrument such as schedule-vs-wallclock drift). Scheduler-derived metrics (boundary drift, scroll-follow, handoff index) are NOT sync evidence.
+    - *Scope note (NARRATE-REMOVE-1, 2026-10-12):* rules 22–32 (SRL-060 to SRL-070) are Narrate-specific. Narrate is removed, so they have no code to govern today; they are kept, not deleted, and apply to NARRATE-REBUILD-1 (its charter restates the ones it adopts).
 33. **SRL-073:** Adapter/anchor services that mutate active-owner state must include transition tests proving cleanup happens when ownership changes, plus no-op tests proving same-owner selection does not clear valid state.
 34. **SRL-074:** Orchestrators route public lifecycle actions; ref-heavy teardown/truth-sync functions stay as building blocks in the owning hook until their adapter owns the relevant refs — do not force them across a boundary just to make an extraction look complete.
 35. **SRL-079 — Source-fix verification needs rebuild gate.** Any bug whose disposition is "RESOLVED in source — production build needs rebuild" stays OPEN in BUG_REPORT.md until `npm run build` + a smoke-test pass against the bug's original reproducer confirms the rebuilt binary behaves correctly. The fix is not closed when the source diff lands; it is closed when the binary the user is actually running embodies the diff. **Why:** Five consecutive bugs drifted past close-out with the fix in source but the running binary stale (BUG-176/178/179/180/181), and the 2026-05-27 live-QA discovery sweep re-found BUG-181 as "F2" because rebuild had never happened. The pattern wastes downstream investigation cycles. **How to apply:** Any sprint with "verification blocked by stale production build" in close-out remains OPEN. Adopt rebuild+smoke as the explicit final acceptance step for source-fix-only sprints. (Promoted 2026-05-28 after the discovery sweep / rebuild verification pass.)
@@ -189,576 +191,9 @@ The four earlier narration items were retired on 2026-10-11:
 
 Their stubs are archived to `docs/planning/.Archive/ROADMAP_legacy.md`. <a id="narrate-heard-cursor-1"></a><a id="narrate-applyratechange-collapse-1"></a><a id="narrate-subscriber-cursor-1"></a><a id="kokoro-export-1"></a>
 
-<a id="narrate-remove-1"></a>
+NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`), so NARRATE-REBUILD-1 has no open prerequisite and `/epic` may start. The removal base is `612d03f5bdadf861a875d76c6260fd8d3a7520aa` (the `NARRATE-REMOVE-1-Base:` trailer of C1, `238e12e6`); the deleted fixtures and code are recoverable at that sha (`git show 612d03f5bdadf861a875d76c6260fd8d3a7520aa:<path>`).
 
-#### NARRATE-REMOVE-1 — Narrate removal (keep Kokoro dormant) *(position 8 — Full Spec)*
-
-- **What:** Remove the Narrate reading mode and all narration logic from Blurby:
-  - Narrate's mode, view and helpers, and every narration hook, strategy and utility;
-  - the narration types and constants, the TTS settings screens and CSS;
-  - the Narrate button, shortcut, palette and settings entries;
-  - the dormant MOSS-Nano, Pocket and Qwen engines, their IPC, sidecars and scripts;
-  - the TTS evaluation scripts and the CI `quality-gate` job;
-  - the legacy dead cluster that imports narration.
-
-  Keep the Kokoro engine in the main process (`tts-engine`, `tts-worker`, the marathon worker, the cache and opus modules, and their IPC handlers), **unreachable**: there is no preload method and no `ElectronAPI` member, and it does not start at app launch.
-
-  Normalize a saved `narrate` reading mode to `flow` everywhere settings enter the app: in migration v13, when an already-current settings file is loaded, after each cloud-sync settings apply, and when the renderer saves settings through the `save-settings` IPC. Keep every other settings key and every file on disk.
-- **Why:** Owner ruling #31 (`docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md`), and the aligned storyboard above. It clears the ground for the rebuild epic without touching Page, Focus or Flow.
-- **Out of scope:**
-  - Any change to Page, Focus or Flow behaviour, including Page Play/Space (that is UX-POLISH-1's job), and their committed G4 baselines.
-  - Deleting user data (`settings.json` keys other than the two normalized values, `userData/tts-cache`, `userData/models`); restoring settings on rollback.
-  - Removing or repairing Kokoro or its packaging (`kokoro-js`, the onnxruntime overrides and unpack entries, `patches/kokoro-js+1.2.1.patch`, `scripts/patch-onnxruntime.js`). The patch's word-timing code is inert on the installed model, which outputs audio only, so it is not evidence of exact timing (D16). Repairing it is Phase 0 of NARRATE-REBUILD-1.
-  - New narration; renaming `narrateDiagnostics`.
-  - `src/modes/index.ts`, `src/modes/PageMode.ts`, `src/modes/FocusMode.ts` and `src/modes/FlowMode.ts` (CLEANUP-MODE-BARREL-1). The one exception is `src/modes/ModeInterface.ts`, which **is** edited: its three `tts*` fields are removed. Also out of scope: the `vite.config.js` `tts` manual chunk.
-  - The Speed Reading settings' Kokoro note and Rhythm Pauses visibility.
-  - Docs other than this sprint's staging fold-ins; BUG-168 and BUG-169 re-triage; the Flow band triage.
-- **Prerequisites:**
-  - Reading-mode separation (READER-MODE-SEPARATION-2): completed.
-  - Command-palette settings fix (LIBRARY-SETTINGS-FIX-1): code on `main` (`8c41095e`); must read `completed`.
-  - E-ink hover fix (EINK-HOVER-FIX-1): ordering only; must read `completed`.
-  - Test timeout headroom (TEST-TIMEOUT-HEADROOM-1): must read `completed`, because Done-when 14 needs a full `npm test` exit 0.
-  - Queue depth (CLAUDE.md Rule 5a, restated as standing rule 8): **waived for this dispatch only** by owner ruling R1 (OutsideAudit.10 D3 §5, 2026-10-11), naming both rules under the deviation protocol. Every other open item (NARRATE-REBUILD-1, CLEANUP-MODE-BARREL-1, UX-POLISH-1) is blocked on this removal, and this sprint runs alone over the shared-core freeze set. Both rules apply again at this item's close-out, where `/roadmap-review` backfills before the next dispatch. The waiver covers no other dispatch.
-
-  The wait is encoded in reconciliation step 2.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the NARRATE-REMOVE-1 worktree root. **Gate rule (OutsideAudit.10 F5b):** a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and empty stderr. A `git ls-files` or `git diff --name-only` check that "prints nothing" passes only when it exits 0 with empty stdout and empty stderr. Exit 0 from `git grep` means residue was found. Any other exit code (git returns 128 for a bad pattern or ref), any stderr text, or a command that did not run (a parse error, a command not found) fails the gate. It is never a clean result. Patterns are single-quoted and contain no double quote: a literal `"` inside a pattern is written `\x22`, which is why the searches use `git grep -P`. Each command is written to run unchanged in `pwsh` 7, Windows PowerShell 5.1 and bash, except step 2's `&` call and the backslash worktree paths (the recipe's and Wave C's integration), which run in `pwsh` only. The final-command replay (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/`) parsed every command in both PowerShells and found the same arguments delivered in all three shells, except step 2's `&` call (`pwsh` only; not argv-compared) and the backslash worktree paths. Do not substitute `rg`, which was not on PowerShell's PATH on the owner's machine (observed 2026-10-11). git treats a mistyped path as matching nothing, not as an error, so every search gate is first shown to find hits on the base (reconciliation step 4). Text in `<angle brackets>` is a placeholder to replace before running.
-    1. **F1, deleted paths absent:** `git ls-files src/reader/modes/narrate src/reader/modes/NarrateModeAdapter.ts src/hooks/useNarration.ts src/hooks/narration src/components/settings/TTSSettings.tsx src/styles/tts-settings.css src/components/FoliatePageView.tsx src/hooks/useReaderMode.ts main/qwen-engine.js main/python-sidecar-engine.js scripts/tts_eval_runner.mjs` prints nothing.
-    2. **F1, registry is three modes:** `npm test -- tests/readerModeIsolation.test.ts` exits 0. Its registry test asserts `Object.keys(READER_MODE_MODULES).sort()` equals `["flow","focus","page"]`.
-    3. **F1, bottom bar:** `npm test -- tests/readerBottomBarControls.test.tsx tests/readerModeControls.test.tsx` exits 0, with these new assertions:
-       - the bar renders exactly the mode buttons Page, Focus and Flow;
-       - no element's text contains `Narrat`;
-       - with `readingMode="page"` and `lastReadingMode="flow"`, the Flow button has the class `rbb-mode-btn--last`.
-    4. **F1, shortcuts:** `npm test -- tests/useKeyboardShortcuts.test.ts tests/readerKeyboard.test.tsx` exits 0. The mirror's KeyN rule is gone, and pressing `n` in Flow resolves to no action.
-    5. **F1, settings and palette:** `npm test -- tests/commandPaletteRoutes.test.ts` exits 0, and `git grep -n -P '\x22tts\x22|Narration \(TTS\)' -- src/components/SettingsMenu.tsx src/components/CommandPalette.tsx src/components/MenuFlap.tsx` prints nothing.
-    6. **F1, migration v13** (positive control, LL-138): the new `tests/settingsMigrationV13.test.js` requires `../main/migrations.js` and asserts:
-       - (a) v12 data `{readingMode:"narrate", lastReadingMode:"narrate"}` migrates to `"flow"`/`"flow"` with `schemaVersion` 13;
-       - (b) v12 `readingMode:"page"`, `lastReadingMode:"focus"` are unchanged;
-       - (c) `isNarrating`, `ttsEngine`, `ttsVoiceName`, `ttsRate`, `pronunciationOverrides` and `narrationProfiles` are deep-equal before and after. Take the "before" copy with `structuredClone` first, because the migrations mutate their input in place;
-       - (d) repeat run: running the migrations again on the v13 result returns it deep-equal;
-       - (e) **downgrade (G6):** `runMigrations(v13Result, settingsMigrations.slice(0, 12), 12)`, which simulates the reverted code's runner, returns it deep-equal, still `"flow"`.
-
-       It fails on the base (recorded in the close-out), and `npm test -- tests/settingsMigrationV13.test.js` exits 0 after.
-    7. **F1, normalization at the real ingestion seams (G3; revision 3):** the new `tests/settingsNarrateNormalization.test.js` exercises the three production paths every ingress now goes through (two functions and the registered `save-settings` handler), not a reconstruction of them:
-       - (a) **Startup:** `loadSettingsData` (exported from `main/migrations.js`; `main.js` `loadState` calls it, then calls `saveSettingsFn()`) is called with a **schema-13 object that still contains Narrate**: `{schemaVersion:13, readingMode:"narrate", lastReadingMode:"narrate", wpm:300}`. It returns `{schemaVersion:13, readingMode:"flow", lastReadingMode:"flow", wpm:300}`. A schema-12 input also returns schema 13 with `"flow"`.
-       - (b) **Cloud apply:** `applyCloudSettings(ctx, data)` (exported from `main/sync-engine.js`; both apply paths call it) is called with a fake `ctx`, whose `getSettings()` returns `s = {schemaVersion:13, lastReadingMode:"flow", wpm:300}` and whose `saveSettings()` pushes `structuredClone(s)` into `saved`. The data is `{lastReadingMode:"narrate", fontSize:20}`. The result: `saved.length === 1` and `saved[0]` deep-equals `{schemaVersion:13, lastReadingMode:"flow", wpm:300, fontSize:20}`. That is the value submitted to the settings save: normalized before the save call, with unrelated keys kept. `writeJSON` serializes at call time (`main.js:58`), so this equals the bytes a successful write lands; write completion and failure are outside this test (D12 durability boundary).
-       - (c) **Merge feeds apply:** `mergeSettings(local, cloud, ts)` with local `{schemaVersion:13, lastReadingMode:"flow", wpm:300}`, cloud `{schemaVersion:12, lastReadingMode:"narrate", fontSize:20}` and `ts = { settings: { "local:lastReadingMode": 1, "cloud:lastReadingMode": 2, "cloud:fontSize": 2 } }` returns `{schemaVersion:13, lastReadingMode:"narrate", wpm:300, fontSize:20}`: a cloud field wins only when its `cloud:` timestamp is newer, and the local `schemaVersion` is kept. Passing that through (b)'s `applyCloudSettings` submits `"flow"` to the settings save.
-       - (d) **`normalizeReaderModes`** maps only those two keys and returns `true` only when it changed something.
-       - (e) **Settings IPC:** load the real `main/ipc/state.js` through a `Module._load` hook, the pattern of `tests/documentsOpenSource.test.js:14-49`. The hook returns fakes for:
-         - `electron`: `ipcMain.handle` stores each handler by channel;
-         - `../window-manager`: `getSystemTheme` and `updateWindowTheme` as `vi.fn()`;
-         - `../sync-engine`: `getSyncStatus: () => ({ revision: 7 })`;
-         - `../sync-queue`: `enqueue: vi.fn(async () => {})`.
-
-         Delete the module from `require.cache` before loading it. Keep the hook installed until the debounce has fired, because the handler requires `../sync-engine` and `../sync-queue` inside its timer. Restore `Module._load` and call `vi.useRealTimers()` in `afterEach`.
-
-         Call `register(ctx)` with this `ctx`:
-         - `getSettings()` returns `s = {schemaVersion:13, readingMode:"flow", lastReadingMode:"focus", wpm:300, ttsVoiceName:"af_bella"}`;
-         - `getLibrary: () => []` and `getMainWindow: () => null`;
-         - `saveSettings()` pushes `structuredClone(s)` into `saved`.
-
-         Under `vi.useFakeTimers()`, call the captured `save-settings` handler with `({}, {readingMode:"narrate", lastReadingMode:"narrate", wpm:410})`. Then:
-         - the captured `get-state` handler's `settings` already shows `"flow"`/`"flow"` before the timer fires;
-         - after `vi.advanceTimersByTime(500)`, `saved.length === 1` and `saved[0]` deep-equals `{schemaVersion:13, readingMode:"flow", lastReadingMode:"flow", wpm:410, ttsVoiceName:"af_bella"}`;
-         - `enqueue` was called once, with `("update-settings", {revision:7})`.
-
-         Like (b), this checks the value submitted to the save, not a completed disk write (D12 durability boundary).
-
-       It fails on the base. `npm test -- tests/settingsNarrateNormalization.test.js` exits 0 after.
-
-       **Omission control:** with the `normalizeReaderModes(...)` line temporarily removed from `loadSettingsData`, (a) fails; with it removed from `applyCloudSettings`, (b) and (c) fail; with it removed from the `save-settings` handler in `main/ipc/state.js`, (e) fails. Run all three before C3 is committed, restore each line, and record the failing output in the close-out.
-
-       **Wiring** (the counts use `git grep -cF`, plus `-w` for the two call-site counts so that a longer name ending in `applyCloudSettings` does not match; each prints `path:count`, and prints nothing when nothing matches):
-       - `git grep -cwF 'applyCloudSettings(ctx, settingsResult.data);' -- main/sync-engine.js` prints `main/sync-engine.js:1` (the merge-path call that replaces lines 814–815);
-       - `git grep -cwF 'applyCloudSettings(ctx, cloudSettings);' -- main/sync-engine.js` prints `main/sync-engine.js:1` (the forced-download call that replaces lines 1058–1060);
-       - `git grep -cF 'Object.assign(settings' -- main/sync-engine.js` prints `main/sync-engine.js:1`: the helper's own `Object.assign(settings, data);` is the only assignment left;
-       - `git grep -cF 'ctx.saveSettings()' -- main/sync-engine.js` prints `main/sync-engine.js:1`: the helper's own save, so neither call site keeps a second save;
-       - `git grep -n -A1 -F 'settings = loadSettingsData(rawSettings);' -- main.js` prints exactly two lines: the match `main.js:<n>:  settings = loadSettingsData(rawSettings);`, then `main.js-<n+1>-  await saveSettingsFn();`. This is a source-order check only: that `await` does not wait for the write (D12 durability boundary);
-       - `git grep -n -F 'function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }' -- main.js` prints exactly one line: the settings writer contract is unchanged in this sprint (BUG-185);
-       - `git grep -n -B1 -F 'normalizeReaderModes(settings);' -- main/ipc/state.js` prints exactly two lines: `main/ipc/state.js-<n-1>-    Object.assign(settings, newSettings);`, then the match `main/ipc/state.js:<n>:    normalizeReaderModes(settings);` with its *Edit sites* comment.
-
-       These wiring gates were replayed in PowerShell 7, Windows PowerShell 5.1 and bash on scratch trees built from the `b4335606` blobs (the final-command replay, `docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/`, which records the sha256 of the ROADMAP.md it ran against). On the base the sync-engine counts print nothing, nothing, `:2`, `:2` and the state.js gate prints nothing; with the prescribed edits every gate prints its stated lines. A renamed helper, one path left unconverted, a leftover save at a call site, a dropped startup save and a normalize call placed after the `theme` check each fail at least one gate. Write the helper exactly as the Edit sites give it; if a count is off, stop and escalate rather than rewording code to fit it.
-
-       No end-to-end sync harness exists in the repository, so the disk and cloud paths are proven up to save submission through these two shared seams, and the settings IPC through its registered handler. Each path cannot apply settings except through its seam.
-    8. **F1, user data untouched:** `git grep -n -P 'scheduleBackgroundStartupTasks|runKokoroWarmup|ttsCache\.init|scheduleCleanupOrphans|runCacheCleanup' -- main.js` prints nothing, and `git diff --name-only refs/remotes/origin/main -- main/tts-cache.js main/tts-engine.js main/tts-worker.js main/tts-engine-marathon.js main/tts-opus.js` prints nothing.
-    9. **Kokoro dormant and unreachable:**
-       - `git grep -n -P 'kokoro|tts-kokoro|tts-cache|ttsCache|tts-qwen|tts-nano|tts-pocket' -- preload.js` prints nothing;
-       - `git grep -n -P 'kokoroPreload|kokoroGenerate|ttsCache(?!Enabled\b)[A-Z]' -- src` prints nothing (the kept settings field `ttsCacheEnabled`, D5, is not an API member);
-       - `npm test -- tests/tts-engine.test.js tests/tts-worker.test.js` exits 0, so the engine still loads in isolation.
-    10. **Dormant engines gone (G5), checking files, registrations and packaging, not historical strings:**
-        - `git ls-files -- 'main/*moss*' 'main/*pocket*' 'main/*qwen*' 'main/*sidecar*'` prints nothing;
-        - `git grep -n -P 'ipcMain\.handle\(\x22tts-(nano|pocket|qwen)-' -- main` prints nothing;
-        - `node -e "const b=require('./package.json').build;const s=JSON.stringify([b.files,b.asarUnpack]);process.exit(/moss_nano|pocket_tts|qwen_/.test(s)?1:0)"` exits 0.
-
-        Historical engine names in `main/migrations.js` (the v10→v12 entries) and in eval-trace labels are allowed.
-    11. **CI and scripts:** `git grep -n -P 'quality-gate|test:quality|tts:eval|tts:scan|moss:' -- .github/workflows/ci.yml package.json` prints nothing.
-    12. **F6, Page, Focus and Flow unchanged:**
-        - `npm test -- tests/readerModeBoundaries.test.ts tests/readerModeOwnership.test.ts tests/readerModeIsolation.test.ts tests/readerModes/` exits 0;
-        - `git diff --exit-code refs/remotes/origin/main -- docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/page.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/focus.baseline.json docs/planning/roadmap-reviews/reader-mode-separation-2/fixtures/flow.baseline.json` exits 0;
-        - `git diff --name-only refs/remotes/origin/main -- src/reader/modes/page src/reader/modes/focus src/reader/modes/flow` prints exactly `src/reader/modes/flow/ModeRuntime.ts`, `src/reader/modes/focus/ModeRuntime.ts` and `src/reader/modes/page/ModeRuntime.ts`, in that order, each changed only at its *Edit sites* anchors.
-    13. **No dangling references (G1, G5, LL-131), checking resolved imports, not identifiers:**
-        - `npm run typecheck` exits 0;
-        - the *Closure check* exits 0 with `--self-test` (7 of 7 missing-import forms reported, and its five lookalikes ignored: a commented and a quoted `vi.mock`, a commented CSS `@import`, a quoted `require` and a commented `import`), and exits 0 on `.` with `dangling relative imports: 0`.
-
-        It uses TypeScript's own import scanner and syntax tree, so string assertions such as `tests/fileHashesCleanup.test.ts:296` and the synthetic negative-control paths in `tests/readerModeBoundaries.test.ts` (for example the edge to `src/hooks/useNarration.ts` at line 232) are not imports. Those tests stay unchanged.
-
-        Main-process JavaScript is outside `typecheck`. An unbound identifier there, such as a missing `require` destructure, is caught by Done-when 7's tests (which `require` and call the edited modules) and by its wiring checks.
-    14. **Gate:** `npm test` exits 0, `npm run build` exits 0, and `git diff --check <base>` exits 0, where `<base>` is the sha in C1's `NARRATE-REMOVE-1-Base:` trailer. `tests/perf-baseline-results.json` is never staged.
-    15. **Diff fence:** every path in `git diff --name-status refs/remotes/origin/main...HEAD` is one of these:
-        - a `D` of a path in *Delete list*;
-        - an `M` of a path in *Edit sites*;
-        - an `A` of `tests/settingsMigrationV13.test.js` or `tests/settingsNarrateNormalization.test.js`;
-        - the sprint's staging memo or `docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl` (LL-136 exemption).
-
-        Any other path passes only when an `Exception:` line of the staging memo names it (*Failure handling*); the close-out lists each with its reason.
-    16. **Owner smoke** (SRL-053, SRL-058, LL-141): after `npm run build` exits 0, the owner starts the app from the worktree under test with `npm run dev`, never the installed Blurby.exe (`npm start` alone loads the dev-server URL). No other Blurby dev server may be running: the window always loads `http://localhost:5173`, and Vite is pinned to port 5173 (strictPort), so a second dev server fails to start while wait-on connects to the one already running, and the window would show that checkout. The owner records pass or fail per check in the staging memo (Wave C); the close-out copies it:
-        - (a) the bottom bar shows Page, Focus and Flow only;
-        - (b) N does nothing in any mode;
-        - (c) Settings has no Narration page, and Ctrl+K has no narration entries;
-        - (d) Page, Focus and Flow open, play and switch as before on *Meditations*;
-        - (e) **with a profile whose `settings.json` has `lastReadingMode: "narrate"` and a book saved at a nonzero word:** the book opens in Page, the bar marks Flow as the last mode, clicking Flow opens it paused at that saved word, and Play starts there (G2, as decided). Prepare it before the smoke: with Blurby closed, the owner sets `lastReadingMode` to `"narrate"` in the live profile's `settings.json`. On the first smoke the app migrates that file to schema 13 and keeps the pre-upgrade `settings.json.bak` (D13); record this in the staging memo. On a repeated smoke the file is already at schema 13: set `lastReadingMode` to `"narrate"` again. `loadSettingsData` normalizes it on load, and no new backup is expected.
-        - (f) **mode cycle (D15):** in Page, note which of Focus or Flow is outlined as the last mode (`rbb-mode-btn--last`), then press Shift+Space twice. Page stays the active mode and no other mode opens, while the outline moves to the other of the two and then back; it never lands on a Narrate button. Then click Focus and press Shift+Space: Flow opens. Press it again: Focus opens. If Shift+Space in Page opens a mode, record a fail: the `useReaderKeys(` arguments in `ReaderContainer.tsx` are shifted after D8. Judge this check by this text, not by the in-app shortcuts overlay, whose Page Shift+Space line is stale (UX-POLISH-1).
-- **Effort:** high (cross-cutting; shared-core freeze set; about 30k source lines and 103 test files removed). Pre-split into 3 waves (LL-091, standing rule 10).
-- **Owners:**
-  - implementation agent;
-  - reviewer for spec compliance and code quality, run in parallel (standing rule 7, SRL-012);
-  - repository operator, who merges;
-  - owner for Done-when 16.
-- **Source:**
-  - The held entry's alignment record: frames F1 (as corrected) and F6, assumptions A3–A5, and decisions "Removal depth", "Removal placement", "Saved Narrate preference" and "Rollback".
-  - The adversarial review of 2026-10-11 (G1–G8, each verified here against source).
-  - The resolved-import census of `45d45473`.
-  - Code read directly:
-    - `src/utils/narrateDiagnostics.ts` imports (lines 7–9) and exports;
-    - `src/utils/ttsEvalTrace.ts` imports (`../types/eval` only);
-    - `src/reader/modes/page/ModeRuntime.ts` `togglePlay` (line 260, a no-op);
-    - `src/components/ReaderBottomBar.tsx` Play disabled in Page (line 302);
-    - `src/reader/useReaderModeOrchestrator.ts` `getNextSelectableMode` (lines 91–95);
-    - `main/sync-engine.js` `mergeSettings` (line 371; it skips `schemaVersion`) and its apply paths (`Object.assign(settings, …)` then `ctx.saveSettings()` at lines 814–815 and 1059–1060), with `mergeSettings` exported at line 1138;
-    - `main/migrations.js` `runMigrations` (line 259, `while (version < currentVersion)`);
-    - `main.js` `loadState` (lines 289–292, which backs up only on upgrade);
-    - `src/components/FoliatePageView.tsx` imports (lines 64–66) and `src/hooks/useFlowScrollSync.ts` (line 11);
-    - `tests/readerModeBoundaries.test.ts` negative control (lines 224–251);
-    - `tests/fileHashesCleanup.test.ts` line 296.
-
-    Line numbers are grep-verified against `main` @ `45d45473` on 2026-10-11 (standing rule 36); anchors govern.
-- **Path:** dispatch (3 waves).
-- **Origin:** held plan — 2026-10-11-narrate-rebuild (HB-1), absorbed by the 2026-10-11 roadmap review as NARRATE-REMOVE-1.
-- **Review focus:**
-  1. **A stale `"narrate"` from cloud sync, an already-current file or the settings IPC.** Covered by Done-when 7.
-  2. **G4 baseline byte stability.** `fixtureReplay.tsx` must keep emitting the same `isNarrating`/`audio` observation fields. Covered by Done-when 12.
-  3. **A leftover renderer path to Kokoro.** Covered by Done-when 9.
-  4. **Startup disk side effects.** Covered by Done-when 8.
-  5. **The Flow surface guard after removing `narrate` (LL-104).** Covered by Done-when 12 (`flow.behavior`) and the updated `foliate-bridge` assertion.
-  6. **Shift+Space slot alignment after D8.** In the `ReaderContainer.tsx` `useReaderKeys(` call, `handleCycleMode` must sit in the `cycleMode` slot and `handleCycleAndStart` in the `cycleAndStart` slot of the edited signature; typecheck cannot tell them apart (D15). Covered by Done-when 16(f).
-
-##### Design decisions (planner, 2026-10-11; revision 4 after OutsideAudit.10)
-
-- **D1 (G1) — `src/utils/narrateDiagnostics.ts` keeps its event and snapshot store; the provider-dependent bundle goes.**
-  - **Keep, unchanged:** `NarrateDiagSnapshot`, `NarrateDiagEvent`, `recordSnapshot`, `recordDiagEvent`, `getLatestSnapshot`, `getDiagEvents`, `getSnapshots` and `clearDiagnostics`. `recordDiagEvent` is imported by `ReaderContainer`, behind the diagnostics port that Page, Focus and Flow call through `ports.diagnostics.record`, and typed in `ReaderPorts`; `getLatestSnapshot`/`getDiagEvents` by `LibraryContainer`; and the tests `bugReportDiag` and `tts7j`/`k`/`l`/`m`.
-  - **Delete** (no retained reader, by `git grep -w` on 2026-10-11):
-    - the imports of `../types/ttsProvider` and `./ttsProviderRegistry`;
-    - the bundle section from `TTS_DIAGNOSTICS_SCHEMA_VERSION` through `validateNarrationDiagnosticsBundle`;
-    - `GlideDiagSummary`/`getGlideDiagSummary`, `checkBucketInvariant`, `checkCursorInvariant` and `checkExtractionHandoff`.
-  - `LibraryContainer`, `bugReportState` and `BugReportModal` do not change.
-- **D2 (G1) — The in-app eval-trace plumbing stays, including `src/utils/ttsEvalTrace.ts` and its test.** That file imports only `../types/eval`. The plumbing also covers `src/types/eval.ts`, `diagnostics.trace` in the ports, `main.js` `setupTtsEvalTraceCapture`, and the `preload.js` bridge at lines 3–31. It is opt-in (LL-096) and is used by Flow and the G6 live harness. A4 retires only the TTS eval *scripts* and the CI job.
-- **D3 — "Dormant" means not started.** Remove `runKokoroWarmup` and the startup `ttsCache.init` and cleanup scheduling from `main.js`, so nothing loads the model or touches `userData` (A3). The Kokoro, marathon and cache IPC handlers stay registered, unreachable.
-- **D4 (G4) — The legacy dead cluster is deleted in Wave A**, because it imports Wave A's deletions:
-  - `src/components/FoliatePageView.tsx`;
-  - `src/hooks/useReaderMode.ts`, `useFlowScrollSync.ts`, `useFoliateSync.ts`, `useReadingModeInstance.ts`, `useDocumentLifecycle.ts`.
-
-  Their path strings **stay** in `boundary-policy.json` → `legacy`; that list is forbidden targets, and G1's synthetic negative control reads it. `src/modes/index.ts`, `PageMode.ts`, `FocusMode.ts` and `FlowMode.ts` stay for CLEANUP-MODE-BARREL-1; only `src/modes/ModeInterface.ts` is edited.
-- **D5 — Every settings key and type stays.** That covers `tts*`, `isNarrating`, `narrationProfiles`, `pronunciationOverrides`, `PronunciationOverride`, `TtsEngine`, `NarrationProfile`, and `DEFAULT_SETTINGS` (A3). Focus and Flow keep `isNarrating: false` in their `settings.update` patches, so the G4 baselines stay byte-identical.
-- **D6 — Drop `"narrate"` from the types.** It goes from `ReaderMode`, `ReaderLastMode` and `ReaderModeId`. Saved values are normalized only at the data ingress (D12), never by an alias in a runtime hook (LL-121).
-- **D7 — `ReaderPortAccessError` and `infrastructureResources` stay.**
-- **D8 — `useReaderKeys` loses its `toggleNarration` and `enterNarrate` parameters.** Both callers are updated: `ReaderContainer.tsx` `useReaderKeys(` and `tests/readerKeyboard.test.tsx`.
-- **D9 — `extract-epub-words` stays in `main/ipc/tts.js`.**
-- **D10 — F6 read precisely.** Page, Focus and Flow assertions are unchanged, and so are the three committed baselines. Narrate rows, cases and count shares are removed. For example, `readerModeIsolation` `crossings` becomes `toBeGreaterThanOrEqual(3)` if the router-to-index edges drop to 3.
-- **D11 (G2, owner) — A saved Narrate preference becomes Flow, and Page is unchanged.** Books open in Page (`LibraryContainer.tsx:255`), and Play and Space do nothing there (`page/ModeRuntime.ts:260`, `ReaderBottomBar.tsx:302`). The bar marks Flow as the last mode; clicking Flow opens it paused at the saved word, and Play starts it. Entering the remembered mode straight from Page is UX-POLISH-1's job.
-- **D12 (G3; revision 3; OutsideAudit.10 F4) — Normalization happens at every settings ingress that can set a mode field, through three testable seams.** `normalizeReaderModes(data)` in `main/migrations.js` maps `readingMode`/`lastReadingMode` from `"narrate"` to `"flow"` and returns whether it changed anything. It is reached by:
-  - migration v13;
-  - `loadSettingsData(raw)` (`main/migrations.js`: run the migrations, then normalize), which `main.js` `loadState` calls. It then submits the result to `saveSettingsFn()`, which covers an already-current schema-13 file;
-  - `applyCloudSettings(ctx, data)` (`main/sync-engine.js`: assign, normalize, save), which both cloud apply paths call instead of a bare `Object.assign`;
-  - the registered `save-settings` IPC handler (`main/ipc/state.js`: assign, normalize, then the existing 500 ms debounced save and `update-settings` sync enqueue), so `get-state`, the save and the queued sync op all see `"flow"`.
-
-  Done-when 7 tests all three directly and proves that removing the normalize call from any one fails. TypeScript does not check an IPC payload at runtime, so the handler normalizes even though no retained renderer write produces `"narrate"`: every retained mode write is a literal or D15's focus/flow cycle. The handler does not rewrite the renderer's optimistic copy of the patch (`src/contexts/SettingsContext.tsx:33`); with no typed producer left, that is accepted. Other payload keys stay unvalidated, as today (out of scope). Known, harmless and out of scope: the download apply in `startSync` (`sync-engine.js:814`, action `downloaded`) and the forced-download path (`sync-engine.js:1059`) also copy the cloud's `schemaVersion`, so a v12 cloud file makes the next launch re-run v13 and re-take the pre-upgrade backup.
-
-  **Durability boundary (OutsideAudit.10 F7).** The seams guarantee the normalized value in memory and the value handed to the settings save. They do not guarantee that it reached disk. `saveSettingsFn` (`main.js:130`) drops the promise of the async `writeJSON` (`main.js:55-60`), so every settings save returns before the temp write and rename finish. `await saveSettingsFn();` in `loadState` (`main.js:293`) therefore waits for nothing, and a failed write surfaces only as an unhandled rejection. This is existing behaviour (BUG-185), and this sprint does not change it: do not edit `writeJSON` or `saveSettingsFn`, and do not change whether any caller awaits a settings save. Making the writer awaitable needs a startup failure policy, because `app.whenReady().then(...)` at `main.js:611-731` has no catch; that work belongs to BUG-185. The removal does not depend on durability. The only reader of the local `settings.json` is `loadState` (`main.js:290`), which normalizes through `loadSettingsData` on every launch, and every other settings ingress seam normalizes before it saves. A lost or failed write therefore cannot put `"narrate"` back in memory.
-- **D13 (G6, owner) — Rollback keeps "flow".** `git revert -m 1 <merge sha>` restores the code. Migrated and normalized preferences stay `"flow"` once a settings save has completed after the upgrade, and the reverted code accepts that value. If no save completed (D12 durability boundary), the file keeps its pre-upgrade value, possibly `"narrate"`, which the reverted code also supports. A schema-13 file is read unchanged by the reverted code's runner (`while (13 < 12)` does not run; Done-when 6e). The pre-upgrade copy that `loadState` writes through `backupFile` is **not** restored, so later settings changes are kept.
-- **D14 (G7; revision 3) — Ownership comes from the register status and the owner, and position comes from the repository.**
-  - Prerequisites are read before the item moves In Flight (OutsideAudit.10 GOV-1). The executing session is served the register read-only (`allowedWriters` does not name `virtuoso`), so `/next-pointer` made the move at dispatch on 2026-10-12, after reading all three prerequisites as `completed`, through the mutation handshake (standing rule 40; owner decision 2026-10-12). The run still runs the recipe's read-only step 2 first and never writes the register. It stops on an item already In Flight until the owner confirms the run is the 2026-10-12 dispatch or their own interrupted one. That is the single ownership authority.
-  - Every commit subject starts `NARRATE-REMOVE-1 C<n>:`. C1's body holds the base measurement, and its message ends with a trailer block that contains `NARRATE-REMOVE-1-Base: <sha>` (attribution trailers such as `Co-Authored-By:` may follow in the same block). The recipe's step 3 takes the base from C1's trailer, never from `git merge-base` against `origin/main`, which returns the branch tip once the merge is pushed. It checks the C1…C<n> chain from that base and chooses between start, resume at C<n+1>, already published (all five commits on `origin/main` through exactly one `--no-ff` merge → `/pointer-closeout`), or conflict (OutsideAudit.10 F6).
-  - On any mismatch, everything is preserved.
-- **D15 (revision 4; OutsideAudit.10 F5c) — The mode cycle shrinks to Focus and Flow.** `getNextSelectableMode` becomes focus → flow → focus. Shift+Space keeps its two existing routes; this sprint changes neither:
-  - **Page:** `useKeyboardShortcuts.ts:249` calls `cycleMode` → `handleCycleMode` (`useReaderModeOrchestrator.ts:150-154`), which only writes `lastReadingMode` and opens no mode. The remembered mode, shown by the bar's `rbb-mode-btn--last` outline, now alternates Flow ↔ Focus, where it used to step Flow → Narrate → Focus.
-  - **Focus or Flow:** `useKeyboardShortcuts.ts:265` calls `cycleAndStart` → `handleCycleAndStart` (`:156-161`), which switches Focus ↔ Flow.
-
-  Both follow from narrowing the cycle; neither is a Page behaviour change. Do not reroute Page Shift+Space: making it enter a mode is UX-POLISH-1's call. D8's removal of `toggleNarration` (slot 13 of `useReaderKeys`) moves `cycleMode` and `cycleAndStart` up one slot. The slots around them (`openChapterList` through `sentenceNext`) are all optional `() => void`, so a misplaced or swapped cycle handler in the `ReaderContainer.tsx` `useReaderKeys(` call still type-checks; Done-when 16(f) catches it.
-- **D16 (OutsideAudit.10 F2) — The kept kokoro-js patch is inert, and nothing in this sprint cites it as exact timing.** The installed `onnx-community/Kokoro-82M-v1.0-ONNX` `onnx/model_q4.onnx` (sha256 `04cf570c…`, re-hashed in `remediation/d4-evidence/units/model-hashes.txt`) has one graph output, `waveform`, so the patch's `{waveform, durations:_dur}` read gets no durations and its production timing branch (`_alignWordsToTimestamps`) does not run: on the installed artifacts, 10 of 10 control generations returned `wordTimestamps: null` (the planner's OutsideAudit.10 verification probes, `remediation/F2-producer-probe/`). Its `generate()` also reads `_audio.data.length`, a field that transformers 3.8.1's `RawAudio` does not have (`node_modules/@huggingface/transformers/src/utils/audio.js:802-805`). The current code path then labels the segmenter's weighted fallback `word-native` and trusts it (9 of 9 trusted word advances in the saved missing-table control, `remediation/F2-consumer-trust/F2-consumer__run2.log.txt`). That every Kokoro word table Narrate scheduled was this fallback is an inference, assuming the same model file was installed throughout; no historical artifact chain was kept. This sprint changes nothing for it: the patch stays as dormant packaging (Out of scope), and `main/tts-worker.js`, `main/tts-engine.js` and `main/tts-cache.js` stay byte-identical (Done-when 8). The consumers (`src/utils/audio/`, `src/utils/audioScheduler.ts`, `src/hooks/narration/`) and `tests/narrTiming.test.ts` are already in the *Delete list*.
-
-##### Implementation detail
-
-- **Edit sites:**
-  - **Delete list** (a `git rm` of exact paths, with `-r` for a directory):
-    - **Wave A, renderer:**
-      - **Narrate mode:** `src/reader/modes/narrate/` (all files, including `mode.css`, `index.ts` and `helpers/*`), `src/reader/modes/NarrateModeAdapter.ts`.
-      - **Hooks:** `src/hooks/useNarration.ts`, `src/hooks/narration/` (6 strategies), `src/hooks/useNarrationCaching.ts`, `src/hooks/useNarrationSync.ts`, `src/hooks/useQwenPrototypeStatus.ts`.
-      - **Utils:**
-        - `src/utils/` `audioScheduler.ts`, `generationPipeline.ts`, `segmentNormalizer.ts`, `narrationPlanner.ts`, `backgroundCacher.ts`, `streamAccumulator.ts`, `ttsCache.ts`, `timingMetadataStore.ts`, `spokenWordFilter.ts`, `voiceSelection.ts`, `narratePerf.ts`, `narrationContinuity.ts`;
-        - `ttsCacheIdentity.ts`, `qwenStatus.ts`, `ttsProviderRegistry.ts`, `narrationPortability.ts`, `audioPlayer.ts`, `kokoroStatus.ts`, `mediaSessionBridge.ts`, `highlightSyncController.ts`, `kokoroRatePlan.ts`, `pronunciationOverrides.ts`, `silenceAwareCursor.ts`;
-        - `src/utils/audio/`.
-
-        `ttsEvalTrace.ts` and `narrateDiagnostics.ts` are **not** deleted (D1, D2).
-      - **Settings UI:** `src/components/settings/` `TTSSettings.tsx`, `CacheSizeDisplay.tsx`, `KokoroStatusSection.tsx`, `MossNanoStatusSection.tsx`, `NarrationDataSection.tsx`, `PauseSettingsSection.tsx`, `PocketTtsStatusSection.tsx`, `PronunciationOverridesEditor.tsx`, `QwenRuntimeSetupSection.tsx`, `QwenStatusSection.tsx`, `TtsEngineSelector.tsx`, `qwenStatusPresentation.ts`, `ttsPreview.ts`, `useKokoroSettingsStatus.ts`, `useMossNanoSettingsStatus.ts`, `usePocketTtsSettingsStatus.ts`; and `src/styles/tts-settings.css`.
-      - **Types and harness:** `src/types/qwenStreaming.ts`, `src/types/ttsCache.ts`, `src/types/ttsProvider.ts`, `src/test-harness/mock-kokoro.ts`.
-      - **Legacy cluster (D4):** `src/components/FoliatePageView.tsx`, `src/hooks/useReaderMode.ts`, `src/hooks/useFlowScrollSync.ts`, `src/hooks/useFoliateSync.ts`, `src/hooks/useReadingModeInstance.ts`, `src/hooks/useDocumentLifecycle.ts`.
-    - **Wave B, main, scripts, fixtures and tests:**
-      - **Main:** `main/moss-nano-engine.js`, `main/moss-nano-sidecar.js`, `main/pocket-tts-engine.js`, `main/pocket-tts-sidecar.js`, `main/python-sidecar-adapter.js`, `main/python-sidecar-engine.js`, `main/sidecar-paths.js`, `main/qwen-engine.js`, `main/qwen-streaming-engine.js`.
-      - **Scripts:**
-        - `scripts/moss_nano_app_sidecar.py`, `scripts/moss_nano_electron_live_driver.mjs`, `scripts/moss_nano_live_capture.mjs`, `scripts/moss_nano_probe.mjs`, `scripts/moss_nano_probe.py`, `scripts/moss_nano_resident_probe.py`, `scripts/moss_preflight.mjs`, `scripts/moss_runtime_shape_probe.mjs`;
-        - `scripts/pocket_tts_sidecar.py`, `scripts/qwen_preflight.mjs`, `scripts/qwen_streaming_sidecar.py`;
-        - `scripts/tts_engine_scan_index.mjs`, `scripts/tts_eval_gate.mjs`, `scripts/tts_eval_metrics.mjs`, `scripts/tts_eval_profiles.mjs`, `scripts/tts_eval_runner.mjs`.
-      - **Fixtures:** `tests/fixtures/narration/` (35 files), `tests/fixtures/tts-normalization/` (1 file).
-      - **Tests (103 files, full paths, each resolved against `45d45473`):**
-        - **Audio and Kokoro:** `tests/audioGlide.test.ts`, `tests/audioPlayer.test.ts`, `tests/audioScheduler.test.ts`, `tests/audioSchedulerTempo.test.ts`, `tests/audioSchedulerUnderrun.test.ts`, `tests/calmNarrationBand.test.ts`, `tests/collapsingCursor.test.ts`, `tests/cursorNarrationSync.test.ts`, `tests/cursorSyncPauseBacklog.test.ts`, `tests/generationPipeline.test.ts`, `tests/heteronymDisambiguation.test.ts`, `tests/highlightSyncController.test.ts`, `tests/kokoroRateBuckets.test.ts`, `tests/kokoroRatePlan.test.ts`, `tests/kokoroStartupRecovery.test.ts`, `tests/kokoroStrategy.test.ts`, `tests/kokoroStrategyRateContinuity.test.ts`, `tests/mediaSessionBridge.test.ts`.
-        - **MOSS:** `tests/mossNanoElectronLiveDriver.test.js`, `tests/mossNanoEngine.test.js`, `tests/mossNanoIpc.test.js`, `tests/mossNanoLiveCapture.test.js`, `tests/mossNanoProbe.test.js`, `tests/mossNanoStrategy.test.ts`, `tests/mossProvisioning.test.js`, `tests/mossRuntimeShapeProbe.test.js`.
-        - **Narrate and narration:** `tests/namedPause.test.ts`, `tests/narrTiming.test.ts`, `tests/narrateA5RateReseed.test.ts`, `tests/narrateModeAdapter.test.ts`, `tests/narratePauseResumeUnify.test.ts`, `tests/narratePerf.test.ts`, `tests/narrateRuntime.test.ts`, `tests/narrationContinuity.test.ts`, `tests/narrationControlsPolish.test.ts`, `tests/narrationCursorPolish.test.ts`, `tests/narrationCursorTrackingDiag.test.ts`, `tests/narrationIntegration.test.ts`, `tests/narrationPipelineIntegration.test.ts`, `tests/narrationPlanner.test.ts`, `tests/narrationPortability.test.ts`, `tests/narrationProfiles.test.ts`, `tests/narrationReducer.test.ts`, `tests/narrLayer1bConsolidation.test.ts`, `tests/perBookOverrides.test.ts`.
-        - **Pocket and sidecars:** `tests/pocketTtsEngine.test.js`, `tests/pocketTtsIpc.test.js`, `tests/pocketTtsStrategy.test.ts`, `tests/pronunciationOverrides.test.ts`, `tests/pythonSidecarAdapter.test.js`, `tests/pythonSidecarEngine.test.js`.
-        - **Qwen:** `tests/qwenDefaultSettings.test.ts`, `tests/qwenEngine.test.js`, `tests/qwenPlaybackReliability.test.tsx`, `tests/qwenProvisioning.test.js`, `tests/qwenRuntimeHardening.test.js`, `tests/qwenStatusUi.test.tsx`, `tests/qwenStrategy.test.ts`, `tests/qwenStreaming.test.js`, `tests/qwenStreamingHardening.test.ts`, `tests/qwenStreamingStrategy.test.ts`, `tests/qwenStreamingTypeContract.test.ts`.
-        - **Segments and cursor:** `tests/segmentKokoroChunk.test.ts`, `tests/segmentNormalizer.test.ts`, `tests/silenceAwareCursor.test.ts`, `tests/spokenWordFilter.test.ts`.
-        - **TTS sprints:** `tests/tts-integration.test.ts`, `tests/tts7a-cacheCorrectness.test.ts`, `tests/tts7b-cursorContract.test.ts`, `tests/tts7c-throughput.test.ts`, `tests/tts7e-coldStart.test.ts`, `tests/tts7f-entryCacheCruiseWarm.test.ts`, `tests/tts7n-pause-semantics.test.ts`, `tests/tts7o-audible-pauses-smooth-cursor.test.ts`.
-        - **TTS eval and settings:** `tests/ttsContinuityReadiness.test.ts`, `tests/ttsDiagnosticsBundle.test.ts`, `tests/ttsEngineScanCorpus.test.ts`, `tests/ttsEngineScanIndex.test.ts`, `tests/ttsEvalDiagnosticsBundle.test.ts`, `tests/ttsEvalGate.test.ts`, `tests/ttsEvalLifecycle.test.ts`, `tests/ttsEvalMatrixRunner.test.ts`, `tests/ttsParity.test.ts`, `tests/ttsPreviewTruth.test.ts`, `tests/ttsProviderRegistry.test.ts`, `tests/ttsSettingsDiagnosticsExport.test.tsx`, `tests/ttsSettingsKokoroTruth.test.tsx`, `tests/ttsSettingsMossNano.test.tsx`, `tests/ttsSettingsPocketTts.test.tsx`, `tests/ttsSettingsQwenPrototype.test.tsx`.
-        - **useNarration:** `tests/useNarration.test.ts`, `tests/useNarrationCaching.test.tsx`, `tests/useNarrationMossNano.test.tsx`, `tests/useNarrationMount.test.tsx`, `tests/useNarrationQwen.test.tsx`, `tests/useNarrationRateUpdate.test.tsx`, `tests/webSpeechStrategy.test.ts`, `tests/wordTimingHeuristic.test.ts`.
-        - **Legacy:** `tests/readerDecomposition.test.ts`, `tests/useReaderMode.test.ts`.
-        - **Reader modes:** `tests/readerModes/narrate.behavior.test.tsx`, `tests/readerModes/narrate.contract.test.ts`, `tests/readerModes/narrateChunkCache.test.ts`.
-
-        `tests/ttsEvalTrace.test.ts` is kept (D2). `tests/narrateDiagnostics.test.ts` is kept and edited (D1, revision 3).
-      - **CI:** the `quality-gate:` job in `.github/workflows/ci.yml`.
-  - **Edit sites** (anchors from the census of `45d45473`):
-    - **Wave A:**
-      - **`src/reader/useReaderModeOrchestrator.ts`:**
-        - drop `import { narrateMode }` and `narrate: narrateMode` from `READER_MODE_MODULES`;
-        - narrow the unions in `getNextSelectableMode` (the cycle becomes focus → flow → focus), `handleSelectMode` and `ReaderModeRouter.select`;
-        - delete `handleEnterNarrate` and `handleToggleNarration`, and remove them from the returned object.
-      - **`src/reader/modes/ReaderModeAdapter.ts`:** `ReaderModeId` drops `"narrate"`; the `{ kind: "rate" }` member of the speed union (`// Narrate`) is removed.
-      - **`src/reader/ports/ReaderPorts.ts`:** remove the imports of `audioScheduler`, `highlightSyncController`, `mediaSessionBridge` and the narration types, the `ReaderAudio*` types, and `readonly audio: ReaderAudioPort;`. Keep `diagnostics.trace` (D2).
-      - **`src/reader/ports/createReaderPorts.ts`:**
-        - remove the audio entries of `READER_PORT_RELEASE_CALLS`, `PORT_METHODS.audio`, the audio keys in `CALLBACK_ARG`, `"audio.readState"` in `CACHED_READS`, the `audio.*` branches in `call()`, `throwingAudioPort`, the `key.mode === "narrate"` read-state seed, and the `audio:` group;
-        - keep `ReaderPortAccessError` (D7) and `"trace"` (D2);
-        - keep `"settings.update{isNarrating}"` in `READER_PORT_RELEASE_CALLS` (the key stays, D5); its remaining caller is the release-class test in `tests/readerModeIsolation.test.ts` (see *Tests (mixed)*).
-      - **`src/components/ReaderContainer.tsx`** (shared-core freeze set):
-        - remove the imports of `useNarration`, `createBackgroundCacher`, `resolveKokoroRatePlan`, `mergeOverrides`/`overrideHash` and `ReaderAudioConfig`;
-        - remove the "TTS infrastructure (DD-3)" block (`readingModeRef`, `narration`, `narrationRef`, `backgroundCacherRef`), `mediaSessionRequestRef`, and the infrastructure `audio: { … }` group;
-        - remove `handleEnterNarrate`/`handleToggleNarration` from the destructure and from the `useReaderKeys(` call (D8), the `isNarrating` local, and `|| readingMode === "narrate"` in `isScrolledSurfaceMode`;
-        - `modePlaying` becomes `toolbar?.playing ?? false`;
-        - remove the `kokoroPreload` delayed prewarm along with its `clearTimeout(prewarmTimer)`, the "TTS infrastructure (useNarrationCaching effects 1–4)" region, the `kokoro-loading-toast` JSX, the bottom-bar props `isNarrating=`/`onToggleNarration=`/`ttsRate=`/`narrationWordIndex=`, and `!narration.speaking` in the `ReturnToReadingPill` condition;
-        - keep `recordDiagEvent` (D1), `createWindowEvalTraceSink`, `evalTraceSink` and `evalTrace:` (D2), the "TTS-6O pre-extraction" effect, and every e-ink line `tests/einkFoundation.test.ts` reads.
-      - **`src/utils/narrateDiagnostics.ts`:** per D1.
-      - **`src/reader/modes/page/ModeRuntime.ts`:** remove the `KOKORO_UI_RATE_*`/`TTS_*_RATE` imports, `function stepKokoroUiSpeed`, the `if (settings.lastReadingMode === "narrate") { … }` branch in `adjustSpeed`, and `ttsRate`/`ttsEngine`/`ttsVoiceName` in `buildEngineConfig`.
-      - **`src/reader/modes/focus/ModeRuntime.ts` and `src/reader/modes/flow/ModeRuntime.ts`:** remove `ttsRate:`/`ttsEngine:`/`ttsVoiceName:` in `startEngine`'s `ModeConfig`. Nothing else changes; the `isNarrating: false` patches stay (D5).
-      - **`src/modes/ModeInterface.ts`:** remove the `ttsRate?`/`ttsEngine?`/`ttsVoiceName?` fields.
-      - **`src/components/ReaderBottomBar.tsx`:**
-        - remove the `TTS_RATE_BASELINE_WPM` import; the props `isNarrating`, `onToggleNarration`, `ttsRate` and `narrationWordIndex`; and `"narrate"` from the `lastReadingMode` union;
-        - remove `"N narrate"` from the flow key hint;
-        - `surfaceMode` uses `readingMode` directly;
-        - remove the narration branches of `isNarrationSelected`/`effectiveWpm`, so `narrationWordIndex ?? wordIndex` becomes `wordIndex`;
-        - remove the Narrate `<button>`, the `Narrating` span and the `"Narrating · "` prefix.
-      - **`src/components/ReaderSpeedDialog.tsx`:** remove the `NARRATE_SPEED_*` imports, `"narrate"` from `SpeedDialogMode`, the rate branch of `range()`/`speedAt`/`speedHundredths`/`formatSpeedValueText`, and `MODE_LABEL.narrate`.
-      - **`src/hooks/useKeyboardShortcuts.ts`:** remove `toggleNarration?`/`enterNarrate?` from the interface, `case "narrate":` in `getReaderKeyboardModeSurface`, both parameters and their `stateRef` copies (D8), the KeyN `enterNarrate` binding, and the `readerMode === "narrate"` block.
-      - **Settings and palette:**
-        - `src/components/CommandPalette.tsx`: remove the `"Narration (TTS)"` entry and the four `onOpenSettings("tts")` entries after the `TTS-7N (BUG-137)` comment, **and that comment line itself**: `// TTS-7N (BUG-137): TTS entries route to dedicated "tts" page, not "speed-reading"` contains `"tts"`, which Done-when 5's `git grep` would match.
-        - `src/components/SettingsMenu.tsx`: remove `import { TTSSettings }`, the `{ id: "tts", … }` item and the `activeSubPage === "tts"` block.
-        - `src/components/MenuFlap.tsx`: remove `tts: "Narration (TTS)",` in `TITLES`.
-        - `src/components/settings/HotkeyMapSettings.tsx`: remove the `"Toggle narration"` rows.
-        - `src/components/HotkeyCoach.tsx`: remove the `narration:` entry.
-      - **`src/styles/index.css`:** remove `@import "./tts-settings.css";`. Also remove `.kokoro-loading-toast` in `src/styles/page-reader.css`, now orphaned.
-      - **`src/types.ts`:**
-        - delete the Kokoro/Qwen/MossNano/PocketTts status, preflight and response types (from `export type KokoroEngineStatus` through the `PocketTts*` types);
-        - delete the imports from `./types/qwenStreaming` and `./types/ttsCache`, and the `ElectronAPI` members from `kokoroPreload` through `ttsCacheInfo`; keep `extractEpubWords?`;
-        - drop `"narrate"` from `ReaderMode`/`ReaderLastMode`;
-        - keep every settings field and type (D5).
-      - **`src/constants.ts`:**
-        - **Keep:** `TTS_PAUSE_*`, `TTS_DIALOGUE_SENTENCE_THRESHOLD`, `TTS_FOOTNOTE_MODE`, `TTS_DEFAULT_ENGINE`, `TTS_DEFAULT_VOICE_NAME`.
-        - **Delete:**
-          - `NARRATE_SPEED_*`;
-          - `TTS_CHUNK_SIZE`, `TTS_MAX_RATE`, `TTS_MIN_RATE`, `TTS_RATE_BASELINE_WPM`, `TTS_WPM_CAP`, `TTS_RATE_STEP`, `TTS_QUEUE_DEPTH`, `ENTRY_COVERAGE_TARGET_MS`, `TTS_COLD_START_CHUNK_WORDS`, `TTS_CRUISE_CHUNK_WORDS`, `TTS_CROSSFADE_MS`, `TTS_CURSOR_TRUTH_SYNC_INTERVAL`, `TTS_FORWARD_WORDS`, `TTS_PLANNER_*`;
-          - `NARRATION_BAND_MIN_WIDTH_PX`, `NARRATION_CURSOR_LAG_MS`, `TTS_TRUSTED_CURSOR_LAG_MS`, `TTS_SILENCE_HOLD_THRESHOLD_MS`;
-          - `QWEN_*`, `TTS_STREAM_*`, `NARRATE_*_BUDGET_MS`, `NARRATE_STEADY_STATE_BLOCK_MS`, `NARRATE_BG_EXTRACT_DELAY_MS`, `MAX_PRONUNCIATION_OVERRIDES`, `TTS_NORMALIZER_VERSION`, `TTS_CACHE_SCHEMA_VERSION`, `TTS_TIMING_SIDECAR_EXTENSION`, `MAX_NARRATION_PROFILES`;
-          - `normalizeSelectableTtsEngine`, `createDefaultNarrationProfile`, `profileFromSettings`, `resolveNarrationProfile`;
-          - `KOKORO_UI_RATE_*`, `KOKORO_RATE_BUCKETS`, `KokoroRateBucket`, `KOKORO_DEFAULT_RATE_BUCKET`, `KOKORO_LIVE_RATE_*`, `resolveKokoroBucket`, `stepKokoroBucket`, `KOKORO_MODEL_ID`, `KOKORO_MODEL_DTYPE`, `KOKORO_DEFAULT_VOICE`, `KOKORO_SAMPLE_RATE`, `KOKORO_VOICE_NAMES`;
-          - `NARRATION_RENDER_WAIT_MS`, `TTS_RATE_RESTART_DEBOUNCE_MS`, `TTS_RATE_CONFIRMING_MS`, `TTS_RATE_SET_DISPLAY_MS`.
-
-          Delete a name only when `git grep -n -w '<NAME>' -- src tests` shows no retained reader; otherwise keep it and list it in the close-out. Substitute one concrete name per run. First expand each `*` family with `git grep -h -o -w -P '<the family with each * written as \w+>' -- src/constants.ts`: a literal `NARRATE_SPEED_*` matches nothing (exit 1), yet `src/components/ReaderSpeedDialog.tsx:8-9` imports two of its names. Exit 0 or 1 is a result; any other exit code is an error. A hit is not a retained reader when its file is in *Delete list*; when it sits in a Narrate part this sprint removes from a mixed test (`tests/perf-baseline.test.ts` `test("TTS constants are within valid ranges")`, the Narrate cases of `tests/readerSpeedDialog.test.tsx`, the `checkBucketInvariant` cases of `tests/narrateDiagnostics.test.ts`); or when it is another module's identifier (`tests/tts-engine.test.js` mocks `main/constants.js`).
-      - **`src/types/narration.ts`:** keep `SectionBoundary` only.
-      - **`src/test-harness/electron-api-stub.ts`:** remove the `mock-kokoro` import, `stubTtsCache`, the Kokoro, Qwen and TTS-cache sections, and the `onKokoro*`/`onQwen*` listeners, in step with `ElectronAPI` (LL-106).
-    - **Wave B:**
-      - **`main.js`:**
-        - delete `function scheduleBackgroundStartupTasks` (lines 443–493; it holds only `runKokoroWarmup` and `runCacheCleanup`) and its call `scheduleBackgroundStartupTasks({ mainWindow, settings });` at line 644, and remove the startup `ttsCache.init(…)` (D3);
-        - in the destructure at lines 10–11 that ends `settingsMigrations, libraryMigrations, runMigrations } = require("./main/migrations");`, add `loadSettingsData` (keep `runMigrations`, which the library load at line 297 still uses);
-        - in `loadState`, replace `settings = runMigrations(rawSettings, settingsMigrations, CURRENT_SETTINGS_SCHEMA);` with `settings = loadSettingsData(rawSettings);`, and keep the `await saveSettingsFn();` on the next line unchanged. It submits the normalized result to the writer and does not wait for the write (D12 durability boundary);
-        - keep the eval-trace capture (D2).
-      - **`preload.js`:** delete everything from `// Kokoro TTS` through `ttsCacheOpeningCoverage`. Keep `extractEpubWords` and the eval-trace bridge at lines 3–31.
-      - **`main/ipc/tts.js`:** delete `QWEN_DISABLED_*`, `ENGINE_DORMANT_REASON`, `NANO_DORMANT_DETAIL`, `POCKET_DORMANT_DETAIL`, `qwenDisabled*`, `dormantStatus`/`dormantError`, `toNanoErrorResponse`/`toPocketErrorResponse`, and the `tts-nano-*`, `tts-pocket-*` and `tts-qwen-*` handlers. Keep the Kokoro, marathon, `tts-cache-*` and `extract-epub-words` handlers.
-      - **`main/migrations.js`:**
-        - `CURRENT_SETTINGS_SCHEMA` goes from `12` to `13`;
-        - add an exported `normalizeReaderModes(data)`: for each of `readingMode` and `lastReadingMode` equal to `"narrate"`, set `"flow"`; return `true` if changed;
-        - append after the `// v11 → v12` entry `// v12 → v13: Narrate removed (NARRATE-REMOVE-1) — a saved narrate mode becomes flow` with `(data) => { normalizeReaderModes(data); data.schemaVersion = 13; return data; }`;
-        - add an exported `loadSettingsData(raw)`: `const s = runMigrations(raw, settingsMigrations, CURRENT_SETTINGS_SCHEMA); normalizeReaderModes(s); return s;`. It covers an already-current schema-13 file that still holds `"narrate"`, because the runner skips current files;
-        - export `normalizeReaderModes` and `loadSettingsData` alongside the existing exports;
-        - `isNarrating` is untouched.
-      - **`main/sync-engine.js`:**
-        - add `const { normalizeReaderModes } = require("./migrations");`;
-        - add `function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); normalizeReaderModes(settings); ctx.saveSettings(); return settings; }` and export it in `module.exports`, next to `mergeSettings`;
-        - replace lines 814–815 (`Object.assign(settings, settingsResult.data); ctx.saveSettings();`) with `applyCloudSettings(ctx, settingsResult.data);`. `settings` there is the same `ctx.getSettings()` object from line 804;
-        - replace lines 1058–1060 (`const settings = ctx.getSettings(); Object.assign(settings, cloudSettings); ctx.saveSettings();`) with `applyCloudSettings(ctx, cloudSettings);`;
-        - no other change. This submits the normalized value to the existing settings save. It does not wait for the write (D12 durability boundary), and it does not refresh an already-mounted settings UI; neither is in scope. Keep `applyCloudSettings` synchronous and do not await `ctx.saveSettings()`, because a settings write failure must not abort `startSync`'s library and history sync.
-      - **`main/ipc/state.js`:**
-        - after `const fsPromises = require("fs/promises");` add `const { normalizeReaderModes } = require("../migrations");`;
-        - in the `save-settings` handler, directly after `Object.assign(settings, newSettings);` add `normalizeReaderModes(settings); // D12: the settings IPC is an ingress (NARRATE-REBUILD-1 revisits)`. It must come before the `theme` check and the debounce, so `get-state`, the debounced `ctx.saveSettings()` and the queued `update-settings` op all see the normalized value;
-        - no other change. The source-text assertions in `tests/perfAudit.test.ts:430-438` (`save-settings`, `setTimeout`, `}, 500)`) still hold, so that file needs no edit for this.
-      - **`package.json`:**
-        - remove `scripts/moss_nano_app_sidecar.py` and `scripts/pocket_tts_sidecar.py` from `build.files` and `build.asarUnpack`;
-        - remove the scripts `moss:preflight`, `moss:nano:resident`, `tts:eval`, `tts:eval:matrix`, `tts:eval:matrix:gated`, `test:quality`, `tts:eval:soak:short`, `tts:eval:gates`, `tts:scan:index`, `tts:scan:validate`;
-        - change no dependency.
-      - **Census (`docs/planning/roadmap-reviews/reader-mode-separation-2/census/`):**
-        - `boundary-policy.json`:
-          - remove `"narrate"` from `modes`;
-          - remove every `privateCopyMap` entry with `"mode": "narrate"`;
-          - remove `src/reader/modes/narrate/helpers/foliateHelpers.ts` from `allowedModuleSingletons` and `src/reader/modes/NarrateModeAdapter.ts` from `legacyRetainedFiles`;
-          - remove from `shellInfrastructure` every deleted file (`useNarration.ts`, the 6 strategies, `audioScheduler.ts`), **and `src/types/narration.ts`**. After the edits it holds only the `SectionBoundary` type, every remaining edge to it is type-only, and G1's runtime closure (`tests/readerModeBoundaries.test.ts:96`) skips type-only edges, so the exact-closure check would reject a stale declaration. Keep `ReaderContainer.tsx`, `ReaderBottomBar.tsx`, `useKeyboardShortcuts.ts`, `dualSourceDiag.ts` and `narrateDiagnostics.ts`, which `ReaderContainer` still reaches at runtime;
-          - keep `legacy` unchanged (D4).
-        - `docs/planning/roadmap-reviews/reader-mode-separation-2/ownership.json`: drop `"narrate"` from `privateCopiesFor`. This file is at the folder root, not under `census/`; `tests/readerModeOwnership.test.ts:16` reads it.
-      - **Tests (mixed):** edit only the Narrate parts.
-        - **Reader-mode suites:** `tests/readerModeIsolation.test.ts`, `tests/readerModeOwnership.test.ts`, `tests/readerModes/harness/fixtureReplay.tsx` (observation output byte-stable), `tests/readerModes/harness/fakePorts.ts`, `tests/readerModes/harness/contractAssertions.ts`, `tests/readerModes/flow.behavior.test.tsx`, `tests/readerModes/chunkVisualParity.test.tsx`, `tests/readerModes/foliateViewTeardown.test.tsx`, `tests/readerModes/arrivalCursor.test.ts`, `tests/readerModeAdapterContract.test.ts`. Two of these need exact instructions:
-          - `tests/readerModeIsolation.test.ts`: re-point the generic broker tests (lines 43–187), which use `"narrate"` only as a session id, to `"flow"`. Delete the audio-port tests (`it("issues audio only to narrate…")` and the other `audio.*` cases). The exception is `it("lets teardown run only release-class calls, then closes the key")`: re-point it to `"flow"`, remove its `audio.*` calls and its `toContain("audio.stop")`, and keep `settings.update({ isNarrating: false })` and `diagnostics.record`.
-          - `tests/readerModes/harness/contractAssertions.ts` lines 143 and 227: change `runtime.setSpeed({ kind: "rate", rate: 1.05 })` to `runtime.setSpeed({ kind: "rate", rate: 1.05 } as unknown as ReaderModeSpeed)`. This keeps the wrong-kind rejection check, so no Page/Focus/Flow assertion changes (D10).
-        - **Foliate helpers:** `tests/foliateAnchorNavigation.test.ts`, `tests/foliateChunkHighlight.test.ts`, `tests/foliateWordHighlight.test.ts`, `tests/persistentReadingAnchor.test.ts`.
-        - **Controls and shortcuts:** `tests/readerSpeedDialog.test.tsx`, `tests/readerBottomBarControls.test.tsx`, `tests/readerModeControls.test.tsx`, `tests/useKeyboardShortcuts.test.ts`, `tests/readerKeyboard.test.tsx`, `tests/wordAnchor.test.ts`.
-        - **Source-text and structural suites:**
-          - `tests/foliate-bridge.test.ts`: drop the top-level `FoliatePageView` read; the expected `isScrolledSurfaceMode` string drops `|| readingMode === "narrate"` and becomes `readingMode === "focus" || readingMode === "flow"`, matching `ReaderContainer.tsx:515` after the edit.
-          - `tests/phase0Stabilization.test.ts`.
-          - `tests/componentStyleCleanup.test.ts`.
-          - `tests/perfAudit.test.ts`: `it("keeps Kokoro warm-up in a delayed background startup scheduler")` (lines 261–271) becomes `it("starts no Kokoro warm-up at app launch")`, asserting `expect(src).not.toContain("scheduleBackgroundStartupTasks")`, `expect(src).not.toContain("runKokoroWarmup")` and `expect(src).not.toMatch(/ttsEngine\.downloadModel/)`. The "voice sync useEffect" describe goes.
-          - `tests/startupStabilization.test.ts`, `tests/packageReleaseTruth.test.js`, `tests/perf-baseline.test.ts`.
-        - **Diagnostics and legacy:**
-          - `tests/bugReportDiag.test.ts` (D1-kept parts stay);
-          - `tests/tts7j-foliate-section-sync.test.ts`, `tests/tts7k-global-word-source.test.ts`, `tests/tts7l-exact-selection-mapping.test.ts`, `tests/tts7m-resume-anchor.test.ts` (only Narrate-specific describes go; the D1 store calls stay);
-          - `tests/documentLifecycleModeRestore.test.ts` and `tests/useReadingModeInstance.test.ts` (drop the legacy describe; in `useReadingModeInstance.test.ts`, also drop the top-level `SRC`/`src` `readFileSync` of the deleted hook at lines 5–6, which would otherwise crash the file);
-          - `tests/currentWordAnchor.test.ts` (drop `setActiveMode("narrate")`);
-          - `tests/electronApiStubGoals.test.ts` (drop the Qwen compatibility test).
-
-        `tests/readerModeBoundaries.test.ts` is **not** edited; its synthetic negative-control paths stay.
-  - **Kept on purpose:**
-    - `main/tts-engine.js`, `tts-worker.js`, `sharp-stub.js`, `tts-engine-marathon.js`, `tts-cache.js`, `tts-opus.js`, and the Kokoro constants in `main/constants.js`;
-    - `scripts/kokoro_voice_mix_probe.mjs` and its test;
-    - `scripts/check_reader_mode_evidence.mjs` and `fixtures/narrate.baseline.json`;
-    - `vite.config.js`;
-    - `src/utils/narrateDiagnostics.ts` (store), `src/utils/ttsEvalTrace.ts`, `src/utils/dualSourceDiag.ts`, `src/types/eval.ts`, `src/utils/pauseDetection.ts`, `src/utils/naturalChunks.ts`;
-    - `tests/ttsEvalTrace.test.ts`;
-    - `docs/testing/tts_*.json`.
-  - **Closure check** (revision 3, checker v3 after OutsideAudit.10; the dangling-import gate for Done-when 13 and reconciliation step 4). Save this block outside the repository as `closure-check.mjs`, then run it from the worktree root: `node <file> --self-test` (negative controls) and `node <file> .` (the gate). It finds imports with TypeScript's own scanner (`ts.preProcessFile`: static, side-effect, type-only, dynamic `import()` and `require()`), literal `vi.mock(...)` calls on TypeScript's syntax tree, and CSS `@import` after stripping CSS comments (CSS strings are not parsed). The self-test carries five lookalikes as negative controls (a commented and a quoted `vi.mock`, a commented CSS `@import`, a quoted `require` and a commented `import`), and the checker ignores those five; that is the extent of the claim, not a guarantee that no string or comment anywhere can count (OutsideAudit.10 GOV-3). `vi.doMock` and `vi.importActual` are not matched; the only relative `vi.doMock` (`tests/ttsContinuityReadiness.test.ts:66`, undone by `vi.doUnmock` at `:119`) is deleted by this sprint. It exits 1 on any dangling import. The baseline on `45d45473` and on the `b4335606` working tree is **0**, and the self-test reports 7 of 7 forms (the `b4335606` run is saved in `docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/out/closure-check.txt`).
-    ```js
-    // NARRATE-REMOVE-1 closure check v3: every relative import must resolve to an existing file. Exit 1 on any finding.
-    // Usage: node closure-check.mjs <repoRoot> | node closure-check.mjs --self-test
-    // Imports are found by TypeScript's own scanner (ts.preProcessFile: static, side-effect, type-only, dynamic import(),
-    // require()), which skips strings and comments for these forms; vi.mock() calls come from the syntax tree; CSS @import is
-    // matched after CSS comments (not strings) are stripped. The self-test's five lookalikes must stay unreported.
-    import fs from "node:fs"; import os from "node:os"; import path from "node:path"; import { createRequire } from "node:module";
-    // TypeScript is loaded once, resolved from the directory the check runs in (the repository root).
-    const ts = createRequire(path.join(process.cwd(), "package.json"))("typescript");
-    // shortcut: only vi.mock is matched, not vi.doMock/importActual; none survives the removal (tests/ttsContinuityReadiness.test.ts is deleted).
-    const mocks = (f, text, out = []) => { const visit = (n) => { if (ts.isCallExpression(n) && n.expression.getText() === "vi.mock" && n.arguments[0] && ts.isStringLiteralLike(n.arguments[0])) out.push(n.arguments[0].text); ts.forEachChild(n, visit); }; visit(ts.createSourceFile(f, text, ts.ScriptTarget.Latest, true)); return out; };
-    const check = (root) => {
-      const rel = (p) => path.relative(root, p).replaceAll(path.sep, "/");
-      const walk = (d, o = []) => { if (!fs.existsSync(d)) return o; for (const e of fs.readdirSync(d, { withFileTypes: true })) { if (e.name === "node_modules" || e.name.startsWith(".")) continue; const p = path.join(d, e.name); e.isDirectory() ? walk(p, o) : o.push(rel(p)); } return o; };
-      const files = [...["src", "tests", "main", "scripts"].flatMap((d) => walk(path.join(root, d))), "main.js", "preload.js", "vite.config.js"]
-        .filter((f) => fs.existsSync(path.join(root, f)) && /\.(m?[jt]sx?|cjs|css)$/.test(f));
-      const exts = ["", ".ts", ".tsx", ".js", ".mjs", ".cjs", ".css", ".json", "/index.ts", "/index.tsx", "/index.js"];
-      const exists = (base) => exts.some((x) => { const p = path.join(root, base + x); return fs.existsSync(p) && fs.statSync(p).isFile(); });
-      const bad = [];
-      for (const f of files) {
-        const text = fs.readFileSync(path.join(root, f), "utf8");
-        const specs = f.endsWith(".css")
-          ? [...text.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/@import\s+(?:url\()?\s*['"]([^'"]+)['"]/g)].map((m) => m[1])
-          : [...ts.preProcessFile(text, true, true).importedFiles.map((i) => i.fileName), ...mocks(f, text)];
-        for (const s of specs) if (s.startsWith(".") && !exists(path.posix.normalize(path.posix.join(path.posix.dirname(f), s)))) bad.push(`${f}: "${s}"`);
-      }
-      return bad;
-    };
-    if (process.argv[2] === "--self-test") { // negative controls: each missing-import form must be reported; a lookalike must not
-      const dir = fs.mkdtempSync(path.join(os.tmpdir(), "hb1-closure-"));
-      try {
-        fs.mkdirSync(path.join(dir, "src")); fs.mkdirSync(path.join(dir, "tests"));
-        const w = (f, t) => fs.writeFileSync(path.join(dir, f), t);
-        w("src/ok.ts", "export const ok = 1;\n");
-        w("src/named.ts", 'import { a } from "./missing-named";\n');
-        w("src/req.js", 'const x = require("./missing-require");\n');
-        w("src/side.tsx", 'import "./missing-side.css";\n');
-        w("src/dyn.ts", 'export const l = () => import("./missing-dynamic");\n');
-        w("src/type.ts", 'import type { T } from "./missing-type";\n');
-        w("src/style.css", '@import "./missing-at-import.css";\n');
-        w("tests/mock.test.ts", 'vi.mock("../src/missing-mock");\n');
-        w("tests/lookalike.test.ts", '// vi.mock("../src/missing-mock-in-comment")\nconst m = \'vi.mock("../src/missing-mock-in-string")\';\n');
-        w("src/commented.css", '/* @import "./missing-in-css-comment.css"; */\n');
-        w("src/string.ts", 'const s = "require(\'./missing-in-string\')"; // import "./missing-in-comment"\nimport { ok } from "./ok";\n');
-        const got = check(dir).map((b) => b.split('"')[1]).sort();
-        const want = ["../src/missing-mock", "./missing-at-import.css", "./missing-dynamic", "./missing-named", "./missing-require", "./missing-side.css", "./missing-type"].sort();
-        const pass = JSON.stringify(got) === JSON.stringify(want);
-        console.log(pass ? "self-test: 7/7 missing-import forms reported; its 5 lookalikes ignored" : `self-test FAILED: got ${JSON.stringify(got)}`);
-        fs.rmSync(dir, { recursive: true, force: true }); process.exit(pass ? 0 : 1); // process.exit skips finally
-      } finally { fs.rmSync(dir, { recursive: true, force: true }); }
-    }
-    const bad = check(path.resolve(process.argv[2] ?? "."));
-    console.log(`dangling relative imports: ${bad.length}`); bad.forEach((b) => console.log("  " + b));
-    process.exit(bad.length ? 1 : 0);
-    ```
-- **Tests:**
-  - **New:**
-    - `tests/settingsMigrationV13.test.js` (Done-when 6);
-    - `tests/settingsNarrateNormalization.test.js` (Done-when 7).
-
-    Both follow the `require("../main/migrations.js")` pattern of `tests/ttsEngineDeactivation.test.js`. The second also loads `../main/sync-engine.js` for `mergeSettings` and `applyCloudSettings`, exactly as `tests/sync-hardening.test.js` does: the same mocks set up before it, then `await import("../main/sync-engine.js")` at its line 51. It drives `loadSettingsData` and `applyCloudSettings` directly. It drives the registered `save-settings` handler through a `Module._load` hook on the real `main/ipc/state.js`: the hook pattern of `tests/documentsOpenSource.test.js:14-49`, combined with `vi.useFakeTimers()` as `tests/tts-engine.test.js:113,358` does (Done-when 7, case (e)).
-  - **New assertions** in `tests/readerBottomBarControls.test.tsx` (Done-when 3) and in the registry test of `tests/readerModeIsolation.test.ts` (Done-when 2).
-  - **Modified:**
-    - `tests/perfAudit.test.ts`: the four `toContain`/`toMatch` assertions of `it("keeps Kokoro warm-up in a delayed background startup scheduler")` (lines 267–270) are replaced by `not.toContain("scheduleBackgroundStartupTasks")`, `not.toContain("runKokoroWarmup")` and `not.toMatch(/ttsEngine\.downloadModel/)`, and the test is renamed `it("starts no Kokoro warm-up at app launch")`.
-    - `tests/foliate-bridge.test.ts`: line 96's expected string drops `|| readingMode === "narrate"`.
-- **Constants:** none added. `CURRENT_SETTINGS_SCHEMA` goes from 12 to 13.
-- **Branch:** `eb/narrate-remove-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\narrate-remove-1`.
-- **Staging plan:** exact paths only. Use `git rm <path>` for a deleted file and `git rm -r <path>` for a deleted directory, and `git add <path>` for edits; never `git add -A`. Never stage `tests/perf-baseline-results.json`. Every commit subject starts `NARRATE-REMOVE-1 C<n>:` (D14). Before each commit, run `git diff --cached --stat` and check for unexpected shrinkage in edited files (LL-068). Commit only while the branch worktree's `symbolic-ref` check holds (*Repository reconciliation*, preamble); otherwise go to reconciliation (C). Every sha written into the staging memo (the base measurement, a C4 correction, the smoke record, the integration record) is the full 40-character sha that `git rev-parse` prints, and resume compares it as an exact string.
-  - **Wave A:**
-    - C1: `tests/settingsMigrationV13.test.js` and `tests/settingsNarrateNormalization.test.js` (positive controls, failing).
-    - C2: every Wave A deletion and edit. **Gate before committing C2:** `npm run typecheck` has no error outside `tests/`, and the *Closure check* lists no file outside `tests/`.
-  - **Wave B:**
-    - C3: main, preload, `main/migrations.js`, `main/sync-engine.js`, `main/ipc/state.js`, `package.json`, CI, scripts and the census JSON. Gate: both new tests pass.
-    - C4: the test and fixture deletions (`tests/fixtures/narration/`, `tests/fixtures/tts-normalization/`) and the test edits. Gate: Done-when 1–14.
-    - Corrections after C4 (Task 6 findings, or any Done-when 1–15 failure once C4 is committed, including a rerun after an amend) are folded into C4 with `git commit --amend` while C4 is the unpublished branch tip, keeping its subject. No commit is added between C4 and C5.
-      - Before editing, write one line into the staging memo: `C4 correction: <current C4 sha> — <finding>`. While that sha is still C4's, the correction is unfinished, and an interrupted run resumes it (step 3 (B)).
-      - Every corrected path must be one that Done-when 15's diff fence permits or that an `Exception:` line of the memo names (*Failure handling*), or be returned to its content at `<base>` (or removed, if `<base>` lacks it) so that it leaves the diff (the fix for a failed Done-when 15).
-      - After the amend, Done-when 1–15 and the Task 6 reviews run again. Any smoke recorded on an older C4 sha is void.
-  - **Wave C:**
-    - Owner smoke (Done-when 16) on the final C4 tree, after its `npm run build` exits 0. Record each check as one memo line, `Smoke: <full C4 sha> 16(<a–f>) <pass|fail>`; a passing smoke on a sha means that, for each of (a)–(f), the last such line for that sha reads pass. If C4 is amended after the smoke, repeat the smoke. A resumed run whose memo already records a passing smoke on the current C4 sha does not repeat it. Any fail stops here: write an issue file and use `/mid-dispatch-decision`.
-    - C5: the staging memo with its fold-ins and the smoke record, and the time log as it stands then (`docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl`, standing rule 41).
-    - Integration (Rule 5b), in PowerShell 7 (`pwsh`): from `C:\Projects\Blurby`, run `git fetch origin --prune`, the commit check below and the merge worktree's existence check and creation; run every other command below in the merge worktree `C:\Projects\Blurby\.worktrees\narrate-remove-1-merge`:
-      - Step 3 (B)'s commit check must give n = 5 on `refs/heads/eb/narrate-remove-1`; otherwise go to reconciliation (C).
-      - If the merge worktree's directory is missing and `git worktree list` does not list it, create it: `git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-merge refs/remotes/origin/main`. If it is listed but its directory is missing, go to reconciliation (C); do not prune. If its directory exists, it must be a run worktree (*Repository reconciliation*, preamble), or go to reconciliation (C); then `git status --porcelain` in it must print nothing other than `tests/perf-baseline-results.json`, which the integration-tree check's `npm test` rewrites and which is never staged; otherwise go to reconciliation (C).
-      - After the clean check, classify the merge worktree's `HEAD`, running each command in it (OutsideAudit.10 D4-01):
-        - **Valid earlier merge** (an earlier run merged, then stopped before its push): `git rev-list --parents -n 1 HEAD` prints exactly three shas (the commit and its two parents); the second parent equals `git rev-parse refs/heads/eb/narrate-remove-1`; the first parent equals `git rev-parse refs/remotes/origin/main`; and `git log -1 --format=%s HEAD` prints exactly `Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)`. Reuse it and go to the integration-tree check, which runs again.
-        - **No merge yet:** `git merge-base --is-ancestor HEAD refs/remotes/origin/main` exits 0 (a fresh worktree, or one left on an older `main`). Run `git switch --detach refs/remotes/origin/main`, then `git merge --no-ff -m "Merge eb/narrate-remove-1: NARRATE-REMOVE-1 (Narrate removed, Kokoro dormant)" refs/heads/eb/narrate-remove-1` there.
-        - **Anything else** (`HEAD` is the branch tip, an unrelated commit, or a merge whose first parent is not the current `origin/main`): change nothing and go to reconciliation (C).
-      - Integration-tree check (OutsideAudit.10 G6, D4-04), in the merge worktree: run `git diff --quiet refs/heads/eb/narrate-remove-1 HEAD`.
-        - Exit 0: the trees are identical, and the branch evidence covers them (Done-when 12–16).
-        - Exit 1 (`main` moved during the run): run `npm ci`, `npm run typecheck`, the *Closure check* on `.`, `npm test` and `npm run build` there, and push only if all five exit 0. If `git diff --name-only refs/heads/eb/narrate-remove-1 HEAD` lists any path that is not under `docs/` or `tests/` and is not a root-level `*.md` file, the owner also repeats Done-when 16 (a)–(f) in the merge worktree before the push, and every check must pass.
-        - Any other exit code: go to reconciliation (C).
-
-        As each finishes, write the integration merge sha, each check's exit code and any renewed smoke result (one `Smoke: <full merge sha> 16(<a–f>) <pass|fail>` line per check, as in the C4 smoke) into the staging memo in the branch worktree. These lines stay uncommitted after C5 (step 3 ignores the memo), and the close-out copies them.
-      - If the merge or any integration-tree check fails (a non-zero exit other than the comparison's exit 1, or a renewed smoke check that fails), do not push and change nothing in the merge worktree (no abort, reset or clean): go to reconciliation (C). A Page, Focus or Flow failure there is never corrected or rebaselined (*Failure handling*). A KF-2 failure follows *Failure handling* first.
-      - In the merge worktree, push with `git push origin HEAD:refs/heads/main`; then run `git fetch origin` and `git merge-base --is-ancestor <merge sha> refs/remotes/origin/main`, with `<merge sha>` the integration merge sha the staging memo records; it must exit 0, or go to reconciliation (C). It names the merge, not `HEAD`, so its answer does not depend on the folder it runs in. A rejected push goes to reconciliation (C); the merge stays in the worktree.
-- **Failure handling:**
-  - **A typecheck or test error in a file outside *Edit sites* that only references a deleted module:** before editing the file, write `Exception: <path> — <reason>` into the staging memo; then remove the reference and list the file in the close-out. If the error is in Page, Focus or Flow runtime logic beyond the named lines, **stop**: open an issue and use `/mid-dispatch-decision`.
-  - **Any byte change to `page`, `focus` or `flow.baseline.json`, or a G4 replay diff:** **stop**, never rebaseline.
-  - **A full-suite failure:** if it is only KF-2 (the `tests/sync-queue.test.js` Windows `EPERM` rename, separation Decision #25) and that test passes alone, re-run the suite once on a quiet machine. KF-3 is retired by TEST-TIMEOUT-HEADROOM-1; a timeout in its three tests is a BLOCKER(USER), as that item rules. KF-1's `tests/qwenStreaming.test.js` is deleted here. If a failure persists, raise a BLOCKER(USER) with the evidence. No self-waiver.
-  - **A build failure from a dangling CSS `@import` or dynamic import:** fix that reference only.
-  - **Interrupted run:** resume only through reconciliation step 3's verified-resumption branch. Otherwise stop and preserve everything.
-  - **Retry ceiling:** two corrections per task, then BLOCKER(USER).
-  - **Rollback (D13):** `git revert -m 1 <merge sha>` restores the code. Settings migrated or normalized to `"flow"` stay `"flow"` by owner decision once a settings save has completed after the upgrade; if none completed, the file keeps its pre-upgrade value, which the reverted code also supports (D12 durability boundary). The reverted code reads a schema-13 file unchanged (Done-when 6e). The pre-upgrade settings backup is not restored.
-- **Lane ownership (parallel run):**
-  - **Owned surfaces:** A, B, C and D. It owns B because it deletes evaluation-harness assets: the `tts_eval_*` and `tts_engine_scan_index` scripts, `tests/fixtures/narration/`, `tests/fixtures/tts-normalization/` and the CI `quality-gate` job.
-  - **Shared-core freeze set:** owned for the duration; this sprint edits `ReaderContainer.tsx` and `types.ts`, and deletes `useNarration.ts` and `useFlowScrollSync.ts`.
-  - **Forbidden during a parallel run:** nothing else may edit the freeze set, `src/reader/**`, `main/migrations.js`, `main/sync-engine.js`, `main/ipc/state.js`, any path in *Delete list*, the kept Kokoro files `main/tts-engine.js`, `main/tts-worker.js`, `main/tts-engine-marathon.js`, `main/tts-cache.js` and `main/tts-opus.js`, `patches/kokoro-js+1.2.1.patch`, `package.json` or `.github/workflows/ci.yml`. (Done-when 8 compares the Kokoro files with `refs/remotes/origin/main`, so an edit that lands on `main` during the run fails it.) No other code-changing item is scheduled alongside this one: its three code prerequisites must read completed first (step 2). Docs-only planning work that touches no path in Done-when 15's fence may proceed.
-  - **Merge order:** after the test-timeout fix, the e-ink hover fix and the command-palette settings fix.
-
-##### Repository reconciliation — run this FIRST
-
-For the `virtuoso` skill. `policy.git` = `push`, network operations allowed, remote `origin`, default branch `main`, and the template `eb/{item-id}`. Run the commands in PowerShell 7 (`pwsh`) from `C:\Projects\Blurby` unless noted, and write refs in full, because a `main/` directory exists. Step 2's `&` call and every backslash worktree path (the preamble's `symbolic-ref` check, steps 3 and 4, and Wave C's integration) do not work in bash. Text in `<angle brackets>` is a placeholder.
-
-**Run worktrees** are `C:\Projects\Blurby\.worktrees\narrate-remove-1`, `narrate-remove-1-merge` and `narrate-remove-1-base`. One exists only when `git worktree list --porcelain` lists its path and `git -C <path> rev-parse --show-toplevel` prints that same path (both print it as `C:/Projects/Blurby/.worktrees/<name>`). For `narrate-remove-1`, `git -C C:\Projects\Blurby\.worktrees\narrate-remove-1 symbolic-ref -q HEAD` must also print `refs/heads/eb/narrate-remove-1`. `.worktrees/` is ignored inside the primary checkout, so git run in a stray, unregistered directory there acts on `C:\Projects\Blurby` itself. A directory at one of these paths that fails any of these checks goes to (C); do not delete it. This applies wherever this recipe or Wave C's integration says one of these worktrees or its directory exists.
-
-**Where this recipe sits (roadmap path; adapted by the 2026-10-11 review; gate order corrected after OutsideAudit.10; In Flight move made at dispatch, 2026-10-12).** `/next-pointer` prints this recipe into the dispatch (LL-135). The executing session is served the register read-only, so it never writes the register: `/next-pointer` read the three prerequisites as `completed`, then moved NARRATE-REMOVE-1 to In Flight through the mutation handshake (standing rule 40) at dispatch, with a dispatch note on the card (owner decision 2026-10-12). Before running the recipe, the executing session runs step 2, which only reads the register; if step 2 stops, the session writes nothing and reports. After step 2 passes it runs steps 1, 3 and 4 in order (step 2 is not repeated). Because the item already reads In Flight, the session asks the owner whether this run is the 2026-10-12 dispatch or its own interrupted run; the owner's confirmation is the only ownership authority. The recipe then decides only *where in the work* the run is.
-
-1. `git fetch origin --prune`.
-2. **Read-only gate. STOP unless** all of these read `completed` in `& "$HOME/.virtuoso/bin/virtuoso.ps1" virtuoso_registry --root . items --all --json`: TEST-TIMEOUT-HEADROOM-1, LIBRARY-SETTINGS-FIX-1 and EINK-HOVER-FIX-1. Rule 5a and standing rule 8 are waived for this dispatch (Prerequisites). The queue depth was read at dispatch, before the In Flight move: 1 queued item, NARRATE-REMOVE-1 itself (`/next-pointer`, snapshot 2026-10-12T17:38:12Z). The first run writes that count into the staging memo once the worktree exists, and the close-out copies it. A resumed run whose memo lacks it writes the same count.
-3. **Classify by repository state.** Check `git branch -a --list "*narrate-remove-1*"` and `git worktree list`: (that pattern also lists `eb/spec-narrate-remove-1`, local and on `origin`, and `git worktree list` shows `.worktrees\spec-narrate-remove-1` and `.worktrees\spec-narrate-remove-1-merge`: they hold the 2026-10-12 dispatch preparation, already merged, and are not run branches or run worktrees)
-   - **(A) Start:** there is no `eb/narrate-remove-1` branch (local or remote), no `narrate-remove-1` worktree (this includes `narrate-remove-1-merge` and `narrate-remove-1-base`), no directory at a run worktree path, and `git log -1 --format=%H --grep='^NARRATE-REMOVE-1 C[1-5]:' refs/remotes/origin/main` prints nothing. This covers a fresh run *and* a run interrupted before its branch was created.
-     - Run `git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 -b eb/narrate-remove-1 refs/remotes/origin/main`.
-     - The base is that `refs/remotes/origin/main` sha. Go to step 4.
-   - **(B) Resume:** `eb/narrate-remove-1` exists locally, and all of these hold. Never take the base from `git merge-base … refs/remotes/origin/main`: once the merge is pushed, it returns the branch tip.
-     - **C1 and base:** `git log --format=%H --grep='^NARRATE-REMOVE-1 C1:' refs/heads/eb/narrate-remove-1` prints at most one sha.
-       - One sha (C1): `base` is the sha in the `NARRATE-REMOVE-1-Base:` trailer of C1's message (`git log -1 --format='%(trailers:key=NARRATE-REMOVE-1-Base,valueonly)' <C1 sha>`), and `git rev-parse <C1 sha>^` prints the same sha as `git rev-parse <base>`.
-       - None: `git rev-list refs/heads/eb/narrate-remove-1 ^refs/remotes/origin/main` prints nothing, and `base` = `git rev-parse refs/heads/eb/narrate-remove-1` (n = 0).
-     - Every commit in `git log --reverse --format=%s <base>..refs/heads/eb/narrate-remove-1` starts with `NARRATE-REMOVE-1 C<n>:`, numbered from 1 with no gaps. n is their count (0–5).
-     - **Already published:** with n = 5, if `git merge-base --is-ancestor refs/heads/eb/narrate-remove-1 refs/remotes/origin/main` succeeds, then exactly one line of `git log --merges --ancestry-path --format="%H %P" refs/heads/eb/narrate-remove-1..refs/remotes/origin/main` must end with the branch tip (`git rev-parse refs/heads/eb/narrate-remove-1`), and that line must have exactly three fields (the merge and its two parents, as in Wave C's valid-merge check); its first field is the publication merge. Skip the checks below and step 4, and go to `/pointer-closeout` with that merge sha. List any `git status --porcelain` output of the branch worktree in the close-out, and remove nothing. With 1 ≤ n ≤ 4, the same ancestor check must fail. With n = 0, skip it: an unstarted branch is always an ancestor of `origin/main`.
-     - If the directory `C:\Projects\Blurby\.worktrees\narrate-remove-1` is missing and `git worktree list` no longer lists it, re-attach it with `git worktree add C:\Projects\Blurby\.worktrees\narrate-remove-1 eb/narrate-remove-1` (no `-b`; name the branch, not the full ref: given `refs/heads/eb/narrate-remove-1`, the command exits 0 and leaves a detached `HEAD`). If that command exits non-zero (for example, because the branch is checked out in another worktree), go to (C). After a re-attach, run `npm ci` in the worktree before any gate. If git still lists it with its directory missing (prunable), go to (C); do not prune. If its directory exists but is not a run worktree (preamble), go to (C).
-     - Its `git status --porcelain --untracked-files=all` lists only paths that belong to the next commit, C<n+1>, in *Staging plan* (`--untracked-files=all` lists each untracked file, never a whole directory as one entry). It ignores `tests/perf-baseline-results.json`, which every `npm test` rewrites and which is never staged, and the run's own `docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl` and staging memo (`docs/governance/close-outs/Memo.NARRATE-REMOVE-1.GovernanceStaging.<date>.md`), which the run writes throughout and lists in the close-out. `<date>` is the date the run first creates the memo (step 2); exactly one memo exists for the sprint, and a resumed run reuses it. A dirty path named on an `Exception:` line of the memo (*Failure handling*) is also accepted.
-     - **Unfinished C4 correction (D4-02), an exception to the dirt rule above:** with n = 4, when the staging memo's last `C4 correction:` line names the current C4 sha (`git rev-parse refs/heads/eb/narrate-remove-1`), that correction is unfinished. Its dirt is also accepted when every dirty path is one that Done-when 15's fence permits, is named on an `Exception:` line of the memo, or already matches `<base>`, checked in the branch worktree: if `git cat-file -e <base>:<path>` exits 0, the file exists and `git hash-object -- <path>` prints the same sha as `git rev-parse <base>:<path>`; if it exits non-zero, the path does not exist in the working tree. The run then finishes that correction (amend C4, then Done-when 1–15 and the Task 6 reviews) before the smoke and C5. Any other n = 4 dirt outside C5's paths → (C).
-
-     Then resume at C<n+1> in that worktree. If n = 0 (the branch was created but C1 was never committed), do step 4 first; it never measures in the branch worktree, whose unfinished C1 test files stay untouched. With n ≥ 1 the base worktree is not consulted. If n = 4, finish any unfinished C4 correction first; then, unless the memo records a passing smoke on the current C4 sha, run Done-when 1–15 and the Task 6 reviews again before the smoke, because an interruption may have fallen between an amend and its reruns. If n = 5 and the work is not yet on `origin/main`, the next step is Wave C's integration (*Staging plan*), but only when C5's staging memo records a passing smoke (*Staging plan*, Wave C) on the sha that `git rev-parse <C5 sha>^` prints; otherwise go to (C). Integration reuses an existing merge only when the worktree's `HEAD` is a valid earlier merge (a worktree on an older `main` is switched and merged afresh), so a merge made before an interrupted push is checked again and pushed, not repeated.
-   - **(C) Conflict:** anything else. Examples: a remote-only `eb/narrate-remove-1`; `NARRATE-REMOVE-1 C<n>:` commits on `origin/main` with no local branch (published, then the branch was removed); two C1 commits, or a C1 whose parent is not its trailer sha; a commit after the base without the `NARRATE-REMOVE-1 C<n>:` prefix (including a merge of `main` into the branch); 1–4 commits already on `origin/main`; all five on `origin/main` without exactly one `--no-ff` publication merge; a dirty merge worktree; an existing merge worktree whose `HEAD` is the branch tip, an unrelated commit or a merge onto an older `main`; a failed integration merge, integration-tree check or renewed smoke, or a rejected integration push; with n = 0, a base worktree (`narrate-remove-1-base`) that is listed without its directory, sits at another sha or is dirty; a directory at a run worktree path that git does not list as that worktree; or dirt outside C<n+1> that is neither an unfinished C4 correction's nor named on an `Exception:` line. **STOP.** Preserve every branch, worktree and file (no reset, clean, stash or delete), write an issue file, and use `/mid-dispatch-decision`.
-
-   **Scenario walk-through:**
-   - **Fresh start:** step 2 passes; the item already reads In Flight from the dispatch, and the owner confirms this is the 2026-10-12 dispatch → (A).
-   - **Gate not met:** step 2 stops, and the session writes nothing and reports. (All three prerequisites read `completed` at dispatch, and a completed item stays terminal.)
-   - **Interrupted before branch creation:** the next session finds the item In Flight and asks; the owner confirms → (A).
-   - **Interrupted while writing C1's tests** (no C1 commit): n = 0 → (B); reuse the memo's base measurement, or measure in the base worktree; finish C1.
-   - **Interrupted after C2:** the owner confirms; the branch has C1 and C2, and the trailer matches → (B), resume at C3.
-   - **Interrupted after C2 while `main` moved on:** the trailer base does not move → (B), resume at C3.
-   - **Interrupted mid-correction after C4** (files changed, C4 not yet amended): n = 4, the memo names the current C4 sha → (B), finish the correction, amend C4, re-run its gates.
-   - **Interrupted after a C4 amend, before its reruns:** n = 4, no unfinished correction and no smoke on the current C4 sha → (B); Done-when 1–15 and the Task 6 reviews run again, then the smoke.
-   - **Interrupted between the integration merge and its push:** n = 5, not on `origin/main` → (B). Integration classifies the merge worktree's `HEAD` as a valid earlier merge, runs the integration-tree check again and pushes it. If `origin/main` moved meanwhile, the merge's first parent no longer matches → (C).
-   - **Interrupted after the push, before `/pointer-closeout` finished** (whether or not `main` moved since or part of the close-out landed): n = 5, on `origin/main` through one merge → (B) already published → `/pointer-closeout`.
-   - **Branch removed after publication:** (A)'s `origin/main` check finds the C commits → (C).
-   - **Conflicting ownership:** the owner does not confirm, so the run stops before step 3; or the repository state fits neither (A) nor (B) → (C).
-4. **Start only** ((A), or (B) with n = 0). The branch worktree is `C:\Projects\Blurby\.worktrees\narrate-remove-1`, and the staging memo lives there.
-   - For (A), `git status --porcelain` in the branch worktree must print nothing other than the run's `docs/governance/close-outs/Timing.NARRATE-REMOVE-1.jsonl` and staging memo, which step 3 (B) also ignores; otherwise go to (C). Both are kept in the branch worktree; a time log opened in the primary checkout before (A) is moved there first. (A) measures in the branch worktree, which still holds the untouched base.
-   - For (B) with n = 0 (OutsideAudit.10 D4-03): if the memo already holds a `Base measurement:` line for this base sha, reuse it, do not re-measure, and go to C1's own gate below. Otherwise measure in a separate detached base worktree, `C:\Projects\Blurby\.worktrees\narrate-remove-1-base`, never in the branch worktree, whose unfinished C1 test files stay untouched. If its directory is missing and `git worktree list` does not list it, create it: `git worktree add --detach C:\Projects\Blurby\.worktrees\narrate-remove-1-base <base sha>`. If it is listed but its directory is missing, go to (C); do not prune. If its directory exists, it must be a run worktree (preamble), `git rev-parse HEAD` in it must print the base sha, and `git status --porcelain` in it must print nothing other than `tests/perf-baseline-results.json`; otherwise go to (C).
-   - In the measuring worktree (the branch worktree for (A), the base worktree for (B)), run `npm ci`, then the measurements below.
-   - **Base measurement** (red-base rule): record the exit codes of `npm run typecheck`, `npm test` and `npm run build`, and any failing node IDs.
-   - Run the *Closure check* with `--self-test` (exit 0) and on `.` (it must print `dangling relative imports: 0` and exit 0).
-   - **Gate positive controls** (LL-138, applied to searches): on the base, run Done-when 1's `git ls-files`, Done-when 5's `git grep`, Done-when 8's `git grep`, both `git grep`s of Done-when 9, Done-when 10's `git ls-files` and `git grep`, and Done-when 11's `git grep`. Each must exit 0 and print at least one line (for reference, on `b4335606`: 35, 9, 11, 51, 68, 9, 18 and 12 lines, saved in `docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/out/positive-controls.result.txt`). Record the counts. A gate that prints nothing on the base is itself broken: write an issue file and stop.
-   - As soon as these finish, write them into the staging memo as one line, `Base measurement: <base sha> — <results>`, so they survive an interruption; C1's commit body copies them later. C1's message ends with a trailer block that contains `NARRATE-REMOVE-1-Base: <base sha>`; attribution trailers such as `Co-Authored-By:` may follow in the same block.
-   - **C1's own gate,** in the branch worktree before C1 is committed (for (B), run `npm ci` there first): `npm test -- tests/settingsMigrationV13.test.js tests/settingsNarrateNormalization.test.js` exits 1, and each new test fails (Done-when 6 and 7). These are C1's positive controls, not a red base.
-   - A red base goes to an issue file, not into this sprint.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Base measured; migration and normalization positive-control tests committed and failing | calculable | positive control | mechanical | low | 40m (npm ci + base gate + two test files) | — | — |
-| 2 | Renderer and legacy cluster free of Narrate (Wave A): deletions done; router, ports, container, diagnostics store, bottom bar, speed dialog, shortcuts and palette updated; typecheck clean outside tests | calculable | renderer removal | cross-cutting | high | 3h30m (about 26k lines deleted, 21 files edited) | — | — |
-| 3 | Main process, preload, packaging, CI and census cleaned; Kokoro dormant; v13 migration and ingestion normalization green | calculable | main-process removal | bounded | medium | 1h45m (9 deletions, 16 scripts, 8 edits, 2 JSON) | — | — |
-| 4 | Tests reconciled: 103 narration-only tests deleted, mixed tests edited, G1–G4 green with baselines byte-identical | calculable | test reconciliation | cross-cutting | high | 3h (103 deletions, about 31 edits) | — | — |
-| 5 | Full gate and closure check green (typecheck, test, build, dangling imports, diff fence) | calculable | verify gate | mechanical | low | 45m (3 full runs plus the closure check) | — | — |
-| 6 | Spec compliance and code quality reviewed | calculable | review | bounded | medium | 40m (two read-only reviews in parallel) | — | R |
-| 7 | Owner smoke on the rebuilt app recorded | calculable | owner smoke | mechanical | low | 15m (6 live checks) | — | — |
-| 8 | Staging fold-ins written; merged to main and pushed | calculable | merge and docs | mechanical | low | 40m (fold-ins plus one --no-ff merge) | — | — |
-
-**Total:** chain 11h15m · sum 11h15m; 0 of 8 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-
-- **LL-131** — the gates check resolved imports, registrations and packaging, not identifiers (Done-when 10, 13). Historical engine names in migrations and synthetic negative-control paths are explicitly allowed.
-- **LL-139** — the delete and edit lists come from a resolved-import census of `45d45473`. The revision 2 closure run shows every retained importer is an edit site, and that each wave's source side is self-contained.
-- **LL-128** — every delete path was verified to exist on `45d45473`, and every test path was resolved to its real filename (no short names).
-- **LL-117** — the forbidden scope (Page, Focus and Flow runtime logic, the three G4 baselines, separation evidence) and the *Kept on purpose* list are decided up front.
-- **LL-106** — the TTS IPC removal is three-way and in step: the `main/ipc/tts.js` handlers, the `preload.js` methods, and the `ElectronAPI` members plus the test stub.
-- **LL-104** — the Flow surface guard `isScrolledSurfaceMode` is narrowed explicitly, and Flow follow behaviour is guarded by G4 (Done-when 12).
-- **LL-121** — `narrate` is normalized at the data ingress (migration, load, sync apply, settings IPC), never by an alias in a runtime hook (D6, D12).
-- **LL-138** — both new tests are positive controls that fail on the base (Done-when 6, 7).
-- **LL-068** — large edits to `types.ts`, `constants.ts` and `ReaderContainer.tsx` are checked with `git diff --cached --stat` before each commit.
-- **LL-091** — the sprint is pre-split into three waves, and each wave's gate is achievable (D4 moved the legacy cluster into Wave A).
-- **LL-135** — the pointer carries the reconciliation recipe through a committed path (this file on `main`).
-- **Standing rule 41 (LL-136)** — the diff fence (Done-when 15) names the timing-log and staging-memo exemptions, and the registry lets the executing session write both in `closeOuts` (applied 2026-10-12, owner decision).
-- **LL-141** — the owner's live smoke check (Done-when 16) covers what automation cannot reach.
-- **LL-142** — the dormant patch is never cited as a working timing producer (D16); its inertness was shown by executing it against the installed model.
-- **LL-143** — every gate names its shell and passing exit code (Done-when header rule). The final search gates were replayed in `pwsh` 7, Windows PowerShell 5.1 and bash: step 4's positive controls on the base, and Done-when 7's wiring gates on the base, the prescribed edits and eight wrong variants (the Done-when 7 dry-run paragraph; `docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/`). The `npm` commands and the smoke were parsed and argv-checked only, and the recipe's git branching was replayed in bash with those steps stubbed (`remediation/d4-evidence/recipe-final/`).
-- **LL-144** — the resume base comes from C1's trailer, never from `git merge-base` against `origin/main` (step 3, D14).
-- **LL-006** — the v13 migration, the sync-apply normalization and the settings-IPC normalization submit to the existing atomic settings writer, which this sprint leaves unchanged. That writer is not awaited, so a write is submitted, not confirmed (D12 durability boundary; BUG-185).
-- **LL-146** — the *Closure check* is saved outside the repository, and no control or evidence script is committed under a `*.test.*` name; recorded outputs go into the staging memo.
-- **LL-147** — this run executes in a local session on the owner's Windows machine, never a cloud session: the recipe uses `pwsh` and backslash worktree paths, Done-when 14 runs the full suite there, and Done-when 16 is the owner's live smoke.
-- **LL-148** — no committed file names the merge that lands it: the integration merge sha goes into uncommitted staging-memo lines and the close-out (Wave C).
-- **LL-149** — the Done-when list restates the standing gates: `npm run typecheck` (13), `npm test` and `npm run build` (14).
-
-##### Rubric walk (v1.2; no project extensions; revision 4)
-
-U1 scope ✓ · U2 edit sites ✓ (resolved-import census and closure run on `45d45473`; every retained importer named) · U3 tests ✓ (full paths; new tests' assertions concrete) · U4 acceptance ✓ (16 rows, each with its command; the closure gate is parser-based with a self-test and exits 1 on findings; ingestion is proven at production seams with omission controls) · U5 prerequisites: all three read `completed` at dispatch (2026-10-12), before the In Flight move, and step 2 re-reads them; Rule 5a and standing rule 8 waived for this dispatch by owner ruling R1 · U6 failure handling ✓ (cases, interrupted-run resumption, retry ceiling, migration-aware rollback) · U7 source ✓ (no deferred decisions; review findings cited) · U8 repository plan ✓ (aligned with the `virtuoso` intake: start, resume, already published and conflict decided from repository state after owner-confirmed ownership) · U9 lessons ✓ (`lessons --check`) · U10 task list ✓ (`timing --rows-from-spec`) · **Re-confirmed by `/next-pointer` on 2026-10-12:** no edit site changed since `45d45473`, apart from `tests/readerModeBoundaries.test.ts`, which this sprint does not edit; its line 222 change leaves lines 96 and 224–251 in place. On `0bd2bbbf`, step 4's eight search gates print 35, 9, 11, 51, 68, 9, 18 and 12 lines, the same as on `b4335606`, and the *Closure check* passes its self-test (7 of 7) with a baseline of 0.
+**Completed 2026-10-12:** NARRATE-REMOVE-1 — the Narrate mode, its hooks, strategies, renderer UI, and the dormant MOSS-Nano, Pocket and Qwen engines are deleted; Kokoro stays dormant in the main process with no UI path; a v13 migration and three ingestion points turn a saved `narrate` reading mode into `flow`; the Page, Focus and Flow baselines are byte-identical (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md); specification archived to `docs/planning/.Archive/ROADMAP_legacy.md`). <a id="narrate-remove-1"></a>
 
 <a id="narrate-rebuild-1"></a>
 
@@ -820,7 +255,7 @@ U1 scope ✓ · U2 edit sites ✓ (resolved-import census and closure run on `45
     - section and chapter crossing;
     - failure states F4 (timing missing, unverified or not engine-native: pause on the last exactly-timed word, and never substitute an estimated table) and F5 (voice loading).
 - **Why:** The owner's requirement that the cursor be "literally attached" to the word being spoken, plus reliability. On the baseline the owner heard the cursor lead the voice, the highlight freeze after gaps, 15–35 s stalls and distorted speed changes (`g0-owner-observations.json` H1–H6). The present pinned path produces estimates: on the installed artifacts, `model_q4.onnx` exports only `waveform` and 10 of 10 control generations returned no word table, and the current code path substitutes a weighted estimate that carries the requester's `word-native` label and the scheduler trusts (9 of 9 trusted word advances in the saved missing-table control; OutsideAudit.10 F2). That H1–H6 were heard on such estimates is an inference, assuming the same model file was installed throughout; no historical artifact chain was kept. If so, they describe the old estimator and scheduler, not Kokoro's native timing; either way, no single mechanism is proved responsible for H1–H6 (OutsideAudit.10 A10). Past `WORD-NATIVE` console logs (Step 3.5 QA; SpecRetro.Lessons_Learned.md line 517) are not evidence of native timing, because the scheduler prints that line for any structurally valid table, including the weighted fallback (`audioScheduler.ts:478-498`; `F2-consumer__run2.log.txt`).
-- **Prerequisites:** NARRATE-REMOVE-1.
+- **Prerequisites:** NARRATE-REMOVE-1 (completed 2026-10-12; merge `386651fc`).
 - **Done when (draft; `/epic` sharpens it into the charter's DoD):**
     1. Storyboard frames F2–F6 hold.
     2. Assumptions A1 (latency) and A2 (speed) hold.
@@ -833,6 +268,12 @@ U1 scope ✓ · U2 edit sites ✓ (resolved-import census and closure run on `45
     **Acceptance-command convention (OutsideAudit.10 F5b; LL-143):** every command in the charter names its shell and parses in it, and passes only on an exact exit code (any other code, or any stderr text, fails). Searches use single-quoted `git grep -P` patterns with no embedded double quote (`\x22`), never `rg`. Every no-match gate is first shown to find hits on its base. Phase 0's commands follow this too.
 - **Out of scope (day one):** pronunciation overrides, narration profiles, audio export, media keys, named pauses and footnote modes, voice preview, MOSS-Nano, Pocket and Qwen, next-book continuation, device-delay modelling.
 - **Charter carry-over (OutsideAudit.10 F6; LL-144):** every phase that commits and publishes takes its resume base from its own first commit's base trailer, never from `git merge-base` against `origin/main` (after each publication that returns the branch tip). It recognizes "already published" only for that phase's complete trailer-validated commit chain on `origin/main` through exactly one `--no-ff` merge, and never for an empty branch. Reuse NARRATE-REMOVE-1's step 3 and integration rules, keyed per phase. The charter copies those rules in, because at the removal's close-out its specification moves to `docs/planning/.Archive/ROADMAP_legacy.md`.
+- **Charter inputs from the NARRATE-REMOVE-1 run (2026-10-12; `/epic` turns each into a charter requirement with a test):**
+  1. **Fixture recovery.** The Phase 0 corpus is copied from the removal base: `git show 612d03f5bdadf861a875d76c6260fd8d3a7520aa:tests/fixtures/narration/<file>`. Two fixture directories and 139 test files were deleted in C4.
+  2. **Initialize the cache before use.** `main.js` no longer calls `ttsCache.init` at launch, while the `tts-cache-*` IPC handlers stay registered in `main/ipc/tts.js`. The rebuild must call `ttsCache.init` before it reads or writes the cache (and, per rule R10, never plays the old cache).
+  3. **Nothing starts Kokoro at launch.** The five Kokoro main-process files (`main/tts-engine.js`, `main/tts-engine-marathon.js`, `main/tts-worker.js`, `main/tts-cache.js`, `main/tts-opus.js`) are byte-identical to the base; the handlers (`tts-kokoro-*`, marathon, `extract-epub-words`, `tts-cache-*`) are registered but unreachable, and `preload.js` exposes none of them except `extractEpubWords` and the eval-trace bridge. The rebuild adds its own preload surface.
+  4. **Leftovers to retire.** The kept per-mode helpers carry a local `"narrate"` style-hint literal that is now untested (`src/utils/foliateWordHighlight.ts`, `startWordIndex.ts`, `persistentReadingAnchor.ts`, `chunkReadingVisualState.ts`, the three per-mode copies, `src/types/eval.ts`, `src/types/chunkReading.ts`), and `src/reader/modes/ReaderModeAdapter.ts` keeps an `"audio-truth"` `clockOwner` member with no producer (`tests/readerModeAdapterContract.test.ts` still lists it). CLEANUP-MODE-BARREL-1 or the rebuild retires them; if the rebuild uses either value, it re-adds it with tests.
+  5. **Runtime normalization.** `normalizeReaderModes` is called in `loadSettingsData` (`main/migrations.js`), `applyCloudSettings` (`main/sync-engine.js`) and the `save-settings` handler (`main/ipc/state.js`); the Then-list item above retires these calls only if the rebuilt mode's id is `"narrate"`. The run proved by omission controls that removing the call at each site fails its test.
 - **Charter inputs (OutsideAudit.10 SEC-rebuild-facts; re-verified on `main` @ `b4335606`; the old code is deleted by NARRATE-REMOVE-1 unless marked kept). Each item gives the corrected facts behind one rule; `/epic` turns each rule into a charter requirement with a test:**
   1. **No fixed lag.** The old cursor compared word boundaries with `currentTime` minus a constant 450 ms (`src/constants.ts:136`; `src/utils/audioScheduler.ts:587,619,631`), or minus 350 ms for untrusted tables (`constants.ts:130`), and read no output-latency value. Rule: no hand-tuned lag constant. The cursor shows the word at the playback clock's sample; per-device delay calibration stays out of scope (owner, reconfirmed by ruling R5). Phase 0 documents its output route and records the reported output latency with a one-off probe outside the offline harness (`AudioContext.baseLatency` and `outputLatency` in an Electron renderer on the owner's default device); no Phase 0 pass rule depends on it. Revisit only if the owner's listening sign-off hears the cursor lead.
   2. **Provenance, not a trusted flag.** When a chunk had no table, `src/utils/audio/segmentKokoroChunk.ts:170-189` built one from word-length weights, and the scheduler marked every structurally valid table trusted (`audioScheduler.ts:478-488`). On the installed model, kokoro-js `generate()` returned no `wordTimestamps` in every control generation (see Why), so `main/tts-worker.js:164` passes `null` (code reading), and in the current code path the old cursor ran on a weighted estimate under the 450 ms "trusted" lag. Rule: the provenance bullet in Core.
@@ -870,13 +311,14 @@ This is a stub; `/epic` applies the full set in the charter.
 
 <a id="ux-polish-1"></a>
 
-#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 11 — blocked stub)*
+#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 11 — unblocked stub)*
 
 - **Lane:** UX polish; calls only the reader router's public mode-entry contract.
-- **Prerequisite:** NARRATE-REMOVE-1 (its v13 migration turns a saved `narrate` mode into `flow`, so this item only ever sees Page, Focus or Flow).
+- **Prerequisite:** none open. NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`); its v13 migration turns a saved `narrate` mode into `flow`, so this item only ever sees Page, Focus or Flow.
 - **Scope:** Page-mode Space enters the saved last mode (Focus or Flow) with Flow fallback. The current Page Space route is a no-op. Preserve input guards, modifiers and both Shift+Space routes (decision D15: in Page it only moves the remembered mode; in Focus or Flow it switches modes). No Narrate references remain.
 - **Spec:** Re-author against the router after NARRATE-REMOVE-1 lands. It may not access another mode's internal state.
 - **Re-authoring note (OutsideAudit.10 F5c):** in Page, Shift+Space only moves the remembered mode (D15). The in-app shortcut help (`ShortcutsOverlay.tsx` Page rows, `HotkeyCoach.tsx`) and two replica tests (`tests/three-mode-reader.test.js`, `tests/notes-reading-log.test.js`) still describe the behaviour before 2026-03-27 (`92d6b220`, from `git log -L` on the repository; not in the audit package); weigh them when this item is re-authored.
+- **Re-authoring note (NARRATE-REMOVE-1 run, 2026-10-12):** `src/components/settings/HotkeyMapSettings.tsx` still shows `] / N` for Next chapter, though bare `N` is unbound after the removal; fix the hint when this item re-authors the shortcut help. The owner's live smoke on the removal (Done-when 16(f)) saw Shift+Space open no mode from Page and switch modes from Flow, consistent with D15.
 
 ---
 
@@ -886,10 +328,10 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 
 <a id="cleanup-mode-barrel-1"></a>
 
-#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and update structural tests *(position 10 — blocked stub)*
+#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and update structural tests *(position 10 — unblocked stub)*
 
 - **Lane:** Reader Engine.
-- **Prerequisites:** NARRATE-REMOVE-1, which deletes `src/hooks/useReadingModeInstance.ts`, the barrel's only importer (READER-MODE-SEPARATION-2 completed 2026-10-11).
+- **Prerequisites:** none open. NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`) and deleted `src/hooks/useReadingModeInstance.ts`, the barrel's only importer; READER-MODE-SEPARATION-2 completed 2026-10-11. Re-author against the post-removal tree: the two structural suites named below may already have been edited or deleted by the removal (re-check with `git ls-files tests`). The kept helpers' local `"narrate"` style-hint literals and the `"audio-truth"` `clockOwner` member are candidates for this item (NARRATE-REBUILD-1 charter inputs, item 4).
 - **Scope:** Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.
 - **Constraints / evidence:** Production searches found no barrel import, but tests/narrLayer1bConsolidation.test.ts ('removes NarrateMode export from modes barrel') and tests/tts7b-cursorContract.test.ts ('mode exports no longer include NarrateMode') read it directly and assert absence of NarrateMode. Replace file-content reads with meaningful absence/direct-import checks suited to the separated graph; do not drop regression intent. This file is already in the separation edit-site inventory: reconcile that outcome first and close as already achieved only with evidence if the parent removed it.
 - **Verification to specify:** The two named structural suites, TypeScript checking, build and production dependency/import census. No re-merging reading-mode runtimes or introducing a shared behavior base.
@@ -941,8 +383,8 @@ finish_line: "Narration rebuilt"
 roadmap_doc: ROADMAP.md
 work_register: monday:board/18432450217
 buffer_target: 5
-buffer_actual_full_specs: 1
-buffer_dispatch_readiness: 1 dispatch-ready (NARRATE-REMOVE-1, under the R1 waiver) + 1 epic (excluded from buffer)
+buffer_actual_full_specs: 0
+buffer_dispatch_readiness: 0 dispatch-ready (NARRATE-REMOVE-1 completed 2026-10-12; below the dispatchBuffer, so /roadmap-review backfills before the next dispatch) + 1 epic (NARRATE-REBUILD-1, unblocked, excluded from buffer) + 2 unblocked stubs awaiting re-authoring (CLEANUP-MODE-BARREL-1, UX-POLISH-1)
 buffer_actual_stubs: 6
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->
