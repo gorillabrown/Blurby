@@ -1,0 +1,41 @@
+{
+  "id": "20261013T000441Z-external-set-status-CLEANUP-MODE-BARREL-1",
+  "operation": "external-set-status",
+  "item_id": "CLEANUP-MODE-BARREL-1",
+  "created": "2026-10-13T00:04:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "status": "Queued",
+      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)."
+    },
+    "expectedRevision": "7cc7ac51cf3c88423d273a06a6baa930d00976a3165687c4702a18d6b8a0d72a",
+    "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md).\"), ('status', 'Queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CLEANUP-MODE-BARREL-1",
+      "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md).\"), ('status', 'Queued')]",
+      "actualRevision": "2026-10-13T00:04:49Z",
+      "recoveryId": "20261013T000441Z-external-set-status-CLEANUP-MODE-BARREL-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "status",
+          "notes"
+        ]
+      }
+    }
+  },
+  "resolved": "2026-10-13T00:05:02Z",
+  "outcome": "succeeded"
+}

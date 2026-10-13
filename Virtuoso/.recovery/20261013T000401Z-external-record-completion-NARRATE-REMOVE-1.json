@@ -1,0 +1,47 @@
+{
+  "id": "20261013T000401Z-external-record-completion-NARRATE-REMOVE-1",
+  "operation": "external-record-completion",
+  "item_id": "NARRATE-REMOVE-1",
+  "created": "2026-10-13T00:04:01Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "record-completion",
+    "fields": {
+      "status": "Completed",
+      "completed": "2026-10-12",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md",
+      "sequence": "",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147). Completed 2026-10-12: merge 386651fc (C1 238e12e6 .. C5 bfbe5dba, base 612d03f5); Done-when 1-16 pass, 16(f) on an owner-approved static basis and reading-goals.css as an owner-approved fence exception; suite 1,955 passed / 1 skipped / 0 failed. Estimate 11h15m, actual 58m. Ledger TR-065. Close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md (merge d65b3168)."
+    },
+    "expectedRevision": "8afacf5d8f7a62535f0e2b6867080c59f1ad533b57d09f722539231648358cb2",
+    "idempotencyKey": "record-completion:NARRATE-REMOVE-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md'), ('notes', 'origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147). Completed 2026-10-12: merge 386651fc (C1 238e12e6 .. C5 bfbe5dba, base 612d03f5); Done-when 1-16 pass, 16(f) on an owner-approved static basis and reading-goals.css as an owner-approved fence exception; suite 1,955 passed / 1 skipped / 0 failed. Estimate 11h15m, actual 58m. Ledger TR-065. Close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md (merge d65b3168).'), ('sequence', ''), ('status', 'Completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "NARRATE-REMOVE-1",
+      "idempotencyKey": "record-completion:NARRATE-REMOVE-1:[('completed', '2026-10-12'), ('evidence', 'docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md'), ('notes', 'origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147). Completed 2026-10-12: merge 386651fc (C1 238e12e6 .. C5 bfbe5dba, base 612d03f5); Done-when 1-16 pass, 16(f) on an owner-approved static basis and reading-goals.css as an owner-approved fence exception; suite 1,955 passed / 1 skipped / 0 failed. Estimate 11h15m, actual 58m. Ledger TR-065. Close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md (merge d65b3168).'), ('sequence', ''), ('status', 'Completed')]",
+      "actualRevision": "2026-10-13T00:04:06Z",
+      "recoveryId": "20261013T000401Z-external-record-completion-NARRATE-REMOVE-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "status",
+          "completed",
+          "evidence",
+          "sequence"
+        ],
+        "notesVerifiedBy": "connector write response"
+      }
+    }
+  },
+  "resolved": "2026-10-13T00:04:23Z",
+  "outcome": "succeeded"
+}

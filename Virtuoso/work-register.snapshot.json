@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-13T00:00:08Z",
+  "takenAt": "2026-10-13T00:05:19Z",
   "provider": "snapshot",
   "source": "monday:board/18432450217",
   "fields": [
@@ -127,8 +127,8 @@
       "id": "UX-POLISH-1",
       "title": "Space-bar resumes last-used reading mode",
       "sequence": 11,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "status": "queued",
+      "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -143,12 +143,12 @@
       "completed": "",
       "evidence": "",
       "description": "Rescoped 2026-07-02: 3 of 4 original UX-POLISH features already shipped (3-line cards, New-dot+auto-clear, Ctrl+K palette). Remaining: page-mode Space enters settings.lastReadingMode.",
-      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references.",
-      "revision": "f4b202f1ac83dc5a1496c0d020dc34f733817b24c44f3ee76ec1f22eb48b0353",
+      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md).",
+      "revision": "ff10693df05561b9df876c6cb5c5efabd1ee30b24e9516560bc40da50d3022bf",
       "extra": {
         "id": "13118847895",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13118847895",
-        "updated_at": "2026-10-11T22:58:39Z",
+        "updated_at": "2026-10-13T00:04:51Z",
         "group": "group_mm7femyn",
         "person": "",
         "date4": ""
@@ -273,9 +273,9 @@
     {
       "id": "NARRATE-REMOVE-1",
       "title": "Remove Narrate, keeping Kokoro dormant",
-      "sequence": 8,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -289,15 +289,15 @@
       "spec_link": "ROADMAP.md#narrate-remove-1",
       "branch": "eb/narrate-remove-1",
       "started": "2026-10-12",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-12",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md",
       "description": "Delete the Narrate mode and all narration logic (hooks, strategies, scheduler, TTS settings UI, dormant MOSS/Pocket/Qwen engines, eval harness, CI quality-gate), keeping the Kokoro engine dormant with no renderer or preload path; v13 migration turns a saved narrate mode into flow. 3 waves; touches the shared-core freeze set, so it runs alone.",
-      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147).",
-      "revision": "8afacf5d8f7a62535f0e2b6867080c59f1ad533b57d09f722539231648358cb2",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass. Dispatched by /next-pointer 2026-10-12: spec revision 4 (OutsideAudit.10, authorized by D4b) at main 19e9459a. Prerequisites read completed (snapshot 2026-10-12T17:38:12Z); queue depth at dispatch 1, waived by R1. In Flight set at dispatch because the executing session is served the register read-only (owner decision 2026-10-12); run in a local session (LL-147). Completed 2026-10-12: merge 386651fc (C1 238e12e6 .. C5 bfbe5dba, base 612d03f5); Done-when 1-16 pass, 16(f) on an owner-approved static basis and reading-goals.css as an owner-approved fence exception; suite 1,955 passed / 1 skipped / 0 failed. Estimate 11h15m, actual 58m. Ledger TR-065. Close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md (merge d65b3168).",
+      "revision": "5cc932ca45d74f3400e8de40f857e6de86522644d19a0a24ef13729159637366",
       "extra": {
         "id": "13261071931",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261071931",
-        "updated_at": "2026-10-12T19:15:18Z",
+        "updated_at": "2026-10-13T00:04:06Z",
         "group": "group_mm7femyn",
         "person": "",
         "date4": ""
@@ -307,8 +307,8 @@
       "id": "NARRATE-REBUILD-1",
       "title": "Rebuild Narrate with the cursor attached to the playing word",
       "sequence": 9,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "status": "queued",
+      "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -323,12 +323,12 @@
       "completed": "",
       "evidence": "",
       "description": "Path: epic. Phase 0 proves Kokoro (word table exact vs its own audio; start and speed change within 2 s), then a deterministic core: per-chunk exact word table + playback clock, cursor = word at the current playback sample, no estimated timing, no stretching. Finish line: Narration rebuilt.",
-      "notes": "origin: held plan 2026-10-11-narrate-rebuild (rebuild draft stub). Absorbed by roadmap review 2026-10-11 as Path: epic; /epic charters it when it reaches the head.",
-      "revision": "14bd14f2123f0a1d22d4c79018703d068a94f80b2264d78e3c4ecb2d4cba8890",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (rebuild draft stub). Absorbed by roadmap review 2026-10-11 as Path: epic; /epic charters it when it reaches the head. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md).",
+      "revision": "2e21316cc076f8bb0641d8349123c349da5402d3eeb6bd2578ea880672e35876",
       "extra": {
         "id": "13261025969",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13261025969",
-        "updated_at": "2026-10-11T22:59:24Z",
+        "updated_at": "2026-10-13T00:04:28Z",
         "group": "group_mm7femyn",
         "person": "",
         "date4": ""
@@ -461,8 +461,8 @@
       "id": "CLEANUP-MODE-BARREL-1",
       "title": "Remove the unused mode barrel and update structural tests",
       "sequence": 10,
-      "status": "blocked",
-      "raw_status": "Blocked",
+      "status": "queued",
+      "raw_status": "Queued",
       "written_status": "stub",
       "raw_written_status": "Stub",
       "prerequisites": [
@@ -477,12 +477,12 @@
       "completed": "",
       "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md",
       "description": "Remove src/modes/index.ts if it still exists after mode separation and production consumers continue importing mode files directly. Update structural test readers while retaining the no-legacy-NarrateMode guarantee.",
-      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer.",
-      "revision": "7cc7ac51cf3c88423d273a06a6baa930d00976a3165687c4702a18d6b8a0d72a",
+      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md).",
+      "revision": "90f0c1f7ae374000d3f2a986e0082cac62ab44c8112f5b6b019853bf7ef823e3",
       "extra": {
         "id": "13122892318",
         "url": "https://estrattbrown.monday.com/boards/18432450217/pulses/13122892318",
-        "updated_at": "2026-10-11T22:58:40Z",
+        "updated_at": "2026-10-13T00:04:49Z",
         "group": "group_mm7fb4db",
         "person": "",
         "date4": ""
