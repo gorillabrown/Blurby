@@ -19,14 +19,21 @@
 {"event": "wait", "row": 9, "reason": "owner", "at": "2026-10-13T02:26:54Z"}
 {"event": "resume", "row": 9, "at": "2026-10-13T05:00:46Z"}
 {"event": "start", "row": 10, "at": "2026-10-13T05:52:21Z"}
-{"event": "end", "row": 9, "evidence": null, "result": "done", "at": "2026-10-13T05:53:55Z"}
-{"event": "end", "row": 10, "evidence": null, "result": "done", "at": "2026-10-13T05:53:56Z"}
+{"event": "end", "row": 9, "evidence": "run 2 of the matrix: 500 chunks, 0 unreconciled; p0-summary.mjs exit 0 (514/514 checks, P0-1/P0-2/P0-4 PASS both voices); --break exit 1; run 1 vs run 2: 500/500 chunks identical in audio sha256, phonemes, durations and spans", "result": "done", "at": "2026-10-13T05:53:55Z"}
+{"event": "end", "row": 10, "evidence": "checkpoints 4ec72642 (evidence fix + records) and bd831b66 (4 tables + summary.json) pushed to eb/narrate-rebuild-1-p1", "result": "done", "at": "2026-10-13T05:53:56Z"}
 {"event": "start", "row": 11, "at": "2026-10-13T05:53:57Z"}
-{"event": "end", "row": 11, "evidence": null, "result": "done", "at": "2026-10-13T05:59:12Z"}
+{"event": "end", "row": 11, "evidence": "p1-gate.ps1 11/11 PASS (typecheck 0; npm test 1,955 passed / 1 skipped / 0 failed), -SelfTest exit 1 with its FAIL recorded; merge 7bbf6b20 pushed to main, merge-base --is-ancestor exit 0", "result": "done", "at": "2026-10-13T05:59:12Z"}
 {"event": "start", "row": 12, "at": "2026-10-13T05:59:13Z"}
-{"event": "end", "row": 12, "evidence": null, "result": "done", "at": "2026-10-13T06:05:08Z"}
+{"event": "end", "row": 12, "evidence": "eb/narrate-rebuild-1-p2 cut from origin/main at 7bbf6b20, worktree .worktrees/narrate-rebuild-1-p2, npm ci exit 0, first commit carries NARRATE-REBUILD-1-P2-Base: 7bbf6b20...", "result": "done", "at": "2026-10-13T06:05:08Z"}
 {"event": "start", "row": 13, "at": "2026-10-13T06:05:09Z"}
-{"event": "end", "row": 13, "evidence": null, "result": "done", "at": "2026-10-13T06:05:11Z"}
+{"event": "end", "row": 13, "evidence": "scripts/narrate-rebuild/p0-acoustic.mjs committed on P2 (built as the P1 prototype; T4 association and the offset side report are its two reference repairs)", "result": "done", "at": "2026-10-13T06:05:11Z"}
 {"event": "start", "row": 14, "at": "2026-10-13T06:05:11Z"}
-{"event": "end", "row": 14, "evidence": null, "result": "done", "at": "2026-10-13T06:05:12Z"}
+{"event": "end", "row": 14, "evidence": "p0-acoustic.mjs exit 1 over 16 runs: 5 FAIL, 11 INCONCLUSIVE, 40 ms control caught (17 -> 57 ms); phase0/acoustic/*.json committed", "result": "done", "at": "2026-10-13T06:05:12Z"}
 {"event": "start", "row": 15, "at": "2026-10-13T06:05:14Z"}
+{"event": "end", "row": 15, "evidence": "p0-latency.mjs --threads 4 exit 0: 160 warm trials worst 1940 ms, 20 cold worst 3032 ms, RTF 1.39 at 2.00x; sweep default/1/2/4/8/12 threads in latency.sweep.threads-*.json (default worst warm 4507 ms)", "result": "done", "at": "2026-10-13T06:15:32Z"}
+{"event": "start", "row": 16, "at": "2026-10-13T06:15:33Z"}
+{"event": "end", "row": 16, "evidence": "docs/studies/narrate-rebuild-1/phase0/VERDICT.md: Summary, Part i construction, Part ii acoustic (16-run table, chunk-start vs interior split, control), Part iii unresolved interiors, P0-5 section with sweep and T7 tables, classifications, two reference repairs stated, G1 decision slots", "result": "done", "at": "2026-10-13T06:16:58Z"}
+{"event": "start", "row": 17, "at": "2026-10-13T06:16:58Z"}
+{"event": "end", "row": 17, "evidence": "G1 BLOCKER(USER) raised in state.md (four questions with Answer slots); journal S1 01:35; staging memo Memo.NARRATE-REBUILD-1-S1.GovernanceStaging.2026-10-13.md; the P2 merge waits for the owner's answers (plan.md P2 exit gate)", "result": "blocked", "at": "2026-10-13T06:18:16Z"}
+{"event": "start", "row": 18, "at": "2026-10-13T06:18:16Z"}
+{"event": "end", "row": 18, "evidence": "artifacts-exist: 14 P1 paths present on origin/main 7bbf6b20, one first-parent merge for P1, base trailer = parent 25ba145d; close-out CloseOut.NARRATE-REBUILD-1-S1.2026-10-13.md written; timing --check clean", "result": "done", "at": "2026-10-13T06:18:17Z"}

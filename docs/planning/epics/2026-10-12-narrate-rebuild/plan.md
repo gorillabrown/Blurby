@@ -55,4 +55,5 @@ Every phase runs on its own branch `eb/narrate-rebuild-1-p<n>` cut from `origin/
 <!-- Owned by the executor. Regenerate when a phase opens. -->
 
 - [x] P1 opened 2026-10-12, gate passed and merged `7bbf6b20` 2026-10-13.
-- [ ] P2: first commit with the base trailer → P0-3 run → P0-5 thread sweep and full run → VERDICT.md → gate → G1 BLOCKER(USER).
+- [x] P2: base trailer commit, P0-3 run, P0-5 sweep and T7 run, VERDICT.md, G1 BLOCKER(USER) raised 2026-10-13 01:35.
+- [ ] G1 answers adopted → P2 gate (p0-acoustic exit 1 with classification, p0-latency --threads 4 exit 0, VERDICT.md three parts) → merge → Gate log → route per answer 1.

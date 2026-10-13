@@ -1,0 +1,461 @@
+{
+ "schema": "narrate-rebuild-1/phase0/latency@1",
+ "recordedAt": "2026-10-13T06:03:51.527Z",
+ "voice": "af_bella",
+ "threads": 4,
+ "host": {
+  "platform": "win32",
+  "release": "10.0.26200",
+  "arch": "arm64",
+  "cpus": 12,
+  "cpuModel": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+  "totalMemGB": 63.5
+ },
+ "runtime": {
+  "node": "v24.14.0",
+  "kokoro-js": "1.2.1",
+  "@huggingface/transformers": "3.8.1",
+  "onnxruntime-node": "1.24.3",
+  "phonemizer": "1.2.1"
+ },
+ "budgets": {
+  "warmMs": 2000,
+  "coldMs": 8000,
+  "voicedThreshold": 0.01
+ },
+ "requests": {
+  "play": "Of my grandfather Verus I have learned to be gentle and meek,",
+  "resume": "Of my mother I have learned to be religious, and bountiful;",
+  "word-click": "not only to do, but to intend any evil;",
+  "speed-change": "and to fly all such excess as is incidental to great wealth."
+ },
+ "parentLoadMs": 926.6,
+ "warm": [
+  {
+   "type": "play",
+   "rate": 1,
+   "genMs": 1338.8,
+   "leadMs": 433,
+   "totalMs": 1771.8,
+   "audioMs": 4450,
+   "tokens": 66,
+   "hostBusyPct": 40.4,
+   "trial": 0
+  },
+  {
+   "type": "play",
+   "rate": 1,
+   "genMs": 1581,
+   "leadMs": 433,
+   "totalMs": 2014,
+   "audioMs": 4450,
+   "tokens": 66,
+   "hostBusyPct": 46.2,
+   "trial": 1
+  },
+  {
+   "type": "play",
+   "rate": 1,
+   "genMs": 1199.8,
+   "leadMs": 433,
+   "totalMs": 1632.8,
+   "audioMs": 4450,
+   "tokens": 66,
+   "hostBusyPct": 35.5,
+   "trial": 2
+  },
+  {
+   "type": "play",
+   "rate": 2,
+   "genMs": 682.1,
+   "leadMs": 366,
+   "totalMs": 1048.1,
+   "audioMs": 2450,
+   "tokens": 66,
+   "hostBusyPct": 34.7,
+   "trial": 0
+  },
+  {
+   "type": "play",
+   "rate": 2,
+   "genMs": 706.9,
+   "leadMs": 366,
+   "totalMs": 1072.9,
+   "audioMs": 2450,
+   "tokens": 66,
+   "hostBusyPct": 38.8,
+   "trial": 1
+  },
+  {
+   "type": "play",
+   "rate": 2,
+   "genMs": 684.2,
+   "leadMs": 366,
+   "totalMs": 1050.2,
+   "audioMs": 2450,
+   "tokens": 66,
+   "hostBusyPct": 35,
+   "trial": 2
+  },
+  {
+   "type": "resume",
+   "rate": 1,
+   "genMs": 1134.8,
+   "leadMs": 433,
+   "totalMs": 1567.8,
+   "audioMs": 4225,
+   "tokens": 61,
+   "hostBusyPct": 35.3,
+   "trial": 0
+  },
+  {
+   "type": "resume",
+   "rate": 1,
+   "genMs": 1178.7,
+   "leadMs": 433,
+   "totalMs": 1611.7,
+   "audioMs": 4225,
+   "tokens": 61,
+   "hostBusyPct": 37.5,
+   "trial": 1
+  },
+  {
+   "type": "resume",
+   "rate": 1,
+   "genMs": 1188.2,
+   "leadMs": 433,
+   "totalMs": 1621.2,
+   "audioMs": 4225,
+   "tokens": 61,
+   "hostBusyPct": 35.8,
+   "trial": 2
+  },
+  {
+   "type": "resume",
+   "rate": 2,
+   "genMs": 638.9,
+   "leadMs": 335,
+   "totalMs": 973.9,
+   "audioMs": 2250,
+   "tokens": 61,
+   "hostBusyPct": 35.2,
+   "trial": 0
+  },
+  {
+   "type": "resume",
+   "rate": 2,
+   "genMs": 636.9,
+   "leadMs": 335,
+   "totalMs": 971.9,
+   "audioMs": 2250,
+   "tokens": 61,
+   "hostBusyPct": 35.3,
+   "trial": 1
+  },
+  {
+   "type": "resume",
+   "rate": 2,
+   "genMs": 628.9,
+   "leadMs": 335,
+   "totalMs": 963.9,
+   "audioMs": 2250,
+   "tokens": 61,
+   "hostBusyPct": 34.9,
+   "trial": 2
+  },
+  {
+   "type": "word-click",
+   "rate": 1,
+   "genMs": 973,
+   "leadMs": 427,
+   "totalMs": 1400,
+   "audioMs": 3475,
+   "tokens": 52,
+   "hostBusyPct": 36.8,
+   "trial": 0
+  },
+  {
+   "type": "word-click",
+   "rate": 1,
+   "genMs": 975,
+   "leadMs": 427,
+   "totalMs": 1402,
+   "audioMs": 3475,
+   "tokens": 52,
+   "hostBusyPct": 34.1,
+   "trial": 1
+  },
+  {
+   "type": "word-click",
+   "rate": 1,
+   "genMs": 980.7,
+   "leadMs": 427,
+   "totalMs": 1407.7,
+   "audioMs": 3475,
+   "tokens": 52,
+   "hostBusyPct": 35.3,
+   "trial": 2
+  },
+  {
+   "type": "word-click",
+   "rate": 2,
+   "genMs": 564.4,
+   "leadMs": 287,
+   "totalMs": 851.4,
+   "audioMs": 1975,
+   "tokens": 52,
+   "hostBusyPct": 37.5,
+   "trial": 0
+  },
+  {
+   "type": "word-click",
+   "rate": 2,
+   "genMs": 561.3,
+   "leadMs": 287,
+   "totalMs": 848.3,
+   "audioMs": 1975,
+   "tokens": 52,
+   "hostBusyPct": 38.8,
+   "trial": 1
+  },
+  {
+   "type": "word-click",
+   "rate": 2,
+   "genMs": 563,
+   "leadMs": 287,
+   "totalMs": 850,
+   "audioMs": 1975,
+   "tokens": 52,
+   "hostBusyPct": 39.7,
+   "trial": 2
+  },
+  {
+   "type": "speed-change",
+   "rate": 1,
+   "genMs": 1365.3,
+   "leadMs": 436,
+   "totalMs": 1801.3,
+   "audioMs": 4625,
+   "tokens": 69,
+   "hostBusyPct": 41.5,
+   "trial": 0
+  },
+  {
+   "type": "speed-change",
+   "rate": 1,
+   "genMs": 1295.8,
+   "leadMs": 436,
+   "totalMs": 1731.8,
+   "audioMs": 4625,
+   "tokens": 69,
+   "hostBusyPct": 34.3,
+   "trial": 1
+  },
+  {
+   "type": "speed-change",
+   "rate": 1,
+   "genMs": 1301.9,
+   "leadMs": 436,
+   "totalMs": 1737.9,
+   "audioMs": 4625,
+   "tokens": 69,
+   "hostBusyPct": 34.2,
+   "trial": 2
+  },
+  {
+   "type": "speed-change",
+   "rate": 2,
+   "genMs": 743.8,
+   "leadMs": 286,
+   "totalMs": 1029.8,
+   "audioMs": 2575,
+   "tokens": 69,
+   "hostBusyPct": 35.2,
+   "trial": 0
+  },
+  {
+   "type": "speed-change",
+   "rate": 2,
+   "genMs": 738,
+   "leadMs": 286,
+   "totalMs": 1024,
+   "audioMs": 2575,
+   "tokens": 69,
+   "hostBusyPct": 34.4,
+   "trial": 1
+  },
+  {
+   "type": "speed-change",
+   "rate": 2,
+   "genMs": 757.1,
+   "leadMs": 286,
+   "totalMs": 1043.1,
+   "audioMs": 2575,
+   "tokens": 69,
+   "hostBusyPct": 39.2,
+   "trial": 2
+  }
+ ],
+ "cold": [
+  {
+   "type": "play",
+   "rate": 1,
+   "genMs": 1373.2,
+   "leadMs": 433,
+   "totalMs": 1806.2,
+   "audioMs": 4450,
+   "tokens": 66,
+   "hostBusyPct": 33.1,
+   "loadMs": 696.6,
+   "processToFirstVoicedMs": 2606.1,
+   "trial": 0,
+   "wallMs": 2317.5,
+   "coldTotalMs": 2502.8
+  },
+  {
+   "type": "resume",
+   "rate": 1,
+   "genMs": 1270.9,
+   "leadMs": 433,
+   "totalMs": 1703.9,
+   "audioMs": 4225,
+   "tokens": 61,
+   "hostBusyPct": 35.7,
+   "loadMs": 1161.3,
+   "processToFirstVoicedMs": 2964,
+   "trial": 0,
+   "wallMs": 2669,
+   "coldTotalMs": 2865.2
+  },
+  {
+   "type": "word-click",
+   "rate": 1,
+   "genMs": 1069.5,
+   "leadMs": 427,
+   "totalMs": 1496.5,
+   "audioMs": 3475,
+   "tokens": 52,
+   "hostBusyPct": 36.2,
+   "loadMs": 704.9,
+   "processToFirstVoicedMs": 2300.5,
+   "trial": 0,
+   "wallMs": 2017.8,
+   "coldTotalMs": 2201.4
+  },
+  {
+   "type": "speed-change",
+   "rate": 1,
+   "genMs": 1378.5,
+   "leadMs": 436,
+   "totalMs": 1814.5,
+   "audioMs": 4625,
+   "tokens": 69,
+   "hostBusyPct": 32.1,
+   "loadMs": 1082.6,
+   "processToFirstVoicedMs": 3006.4,
+   "trial": 0,
+   "wallMs": 2713.3,
+   "coldTotalMs": 2897.1
+  }
+ ],
+ "rtf": {
+  "0.80": {
+   "audioSec": 252.6,
+   "genSec": 139,
+   "audioPerGenSecond": 1.82
+  },
+  "1.00": {
+   "audioSec": 210.9,
+   "genSec": 121.9,
+   "audioPerGenSecond": 1.73
+  },
+  "1.40": {
+   "audioSec": 142.6,
+   "genSec": 95.2,
+   "audioPerGenSecond": 1.5
+  },
+  "2.00": {
+   "audioSec": 117,
+   "genSec": 84.2,
+   "audioPerGenSecond": 1.39
+  }
+ },
+ "checks": {
+  "everyWarmUnderBudget": false,
+  "everyColdUnderBudget": true,
+  "generationOutpacesPlaybackAt2x": true,
+  "worstWarm": {
+   "type": "play",
+   "rate": 1,
+   "genMs": 1581,
+   "leadMs": 433,
+   "totalMs": 2014,
+   "audioMs": 4450,
+   "tokens": 66,
+   "hostBusyPct": 46.2,
+   "trial": 1
+  },
+  "worstCold": {
+   "type": "speed-change",
+   "rate": 1,
+   "genMs": 1378.5,
+   "leadMs": 436,
+   "totalMs": 1814.5,
+   "audioMs": 4625,
+   "tokens": 69,
+   "hostBusyPct": 32.1,
+   "loadMs": 1082.6,
+   "processToFirstVoicedMs": 3006.4,
+   "trial": 0,
+   "wallMs": 2713.3,
+   "coldTotalMs": 2897.1
+  },
+  "worstWarmByType": {
+   "play": {
+    "type": "play",
+    "rate": 1,
+    "genMs": 1581,
+    "leadMs": 433,
+    "totalMs": 2014,
+    "audioMs": 4450,
+    "tokens": 66,
+    "hostBusyPct": 46.2,
+    "trial": 1
+   },
+   "resume": {
+    "type": "resume",
+    "rate": 1,
+    "genMs": 1188.2,
+    "leadMs": 433,
+    "totalMs": 1621.2,
+    "audioMs": 4225,
+    "tokens": 61,
+    "hostBusyPct": 35.8,
+    "trial": 2
+   },
+   "word-click": {
+    "type": "word-click",
+    "rate": 1,
+    "genMs": 980.7,
+    "leadMs": 427,
+    "totalMs": 1407.7,
+    "audioMs": 3475,
+    "tokens": 52,
+    "hostBusyPct": 35.3,
+    "trial": 2
+   },
+   "speed-change": {
+    "type": "speed-change",
+    "rate": 1,
+    "genMs": 1365.3,
+    "leadMs": 436,
+    "totalMs": 1801.3,
+    "audioMs": 4625,
+    "tokens": 69,
+    "hostBusyPct": 41.5,
+    "trial": 0
+   }
+  }
+ },
+ "pass": false
+}

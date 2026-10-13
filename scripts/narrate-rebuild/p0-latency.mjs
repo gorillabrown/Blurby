@@ -7,6 +7,8 @@
 // every cold trial < 8000 ms and generation outpaces playback at 2.00x; 1 otherwise.
 // Never run while npm test or npm run build runs. Run from pwsh in the phase worktree:
 //   node scripts/narrate-rebuild/p0-latency.mjs [--warm 20] [--cold 5] [--threads N] [--voice af_bella]
+// --threads N sets onnxruntime's intra-op thread count (default: onnxruntime-node's own). Fewer trials than T7's
+// 20/5 is a thread sweep and writes latency.sweep.threads-<N|default>.json instead of latency.json.
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -101,6 +103,8 @@ result.checks = {
   worstWarmByType: Object.fromEntries(Object.keys(REQUESTS).map((ty) => [ty, result.warm.filter((t) => t.type === ty).reduce((w, t) => (t.totalMs > (w?.totalMs ?? -1) ? t : w), null)])),
 };
 result.pass = result.checks.everyWarmUnderBudget && result.checks.everyColdUnderBudget && result.checks.generationOutpacesPlaybackAt2x;
-fs.writeFileSync(path.join(PHASE0_DIR, THREADS ? `latency.threads-${THREADS}.json` : "latency.json"), JSON.stringify(result, null, 1) + "\n");
+// T7's counts (20 warm, 5 cold) are the measurement and own latency.json; anything smaller is a sweep over thread settings.
+const SWEEP = WARM < 20 || COLD < 5;
+fs.writeFileSync(path.join(PHASE0_DIR, SWEEP ? `latency.sweep.threads-${THREADS ?? "default"}.json` : "latency.json"), JSON.stringify(result, null, 1) + "\n");
 console.log(JSON.stringify({ pass: result.pass, checks: { ...result.checks, worstWarm: worstWarm?.totalMs, worstCold: worstCold?.coldTotalMs }, rtf: result.rtf }));
 process.exit(result.pass ? 0 : 1);
