@@ -50,6 +50,33 @@ const rateLabel = (r) => r.toFixed(2);
 function cpuSnapshot() { let idle = 0, total = 0; for (const c of os.cpus()) { idle += c.times.idle; for (const v of Object.values(c.times)) total += v; } return { idle, total }; }
 const busyPct = (a, b) => +(100 * (1 - (b.idle - a.idle) / Math.max(1, b.total - a.total))).toFixed(1);
 
+// CPU while a launch runs (Decision #18): every 500 ms, the host's busy and idle time (os.cpus) and the app's own
+// processor time (every electron.exe started from this worktree, read by one long-lived PowerShell loop), so each
+// trial carries narration's own CPU share apart from the foreign load. The sampler's own cost is foreign, and small.
+const CPU_SAMPLE_MS = 500;
+function startCpuSampler() {
+  const host = [];
+  const app = [];
+  const hostTimer = setInterval(() => { const s = cpuSnapshot(); host.push({ t: Date.now(), ...s }); }, CPU_SAMPLE_MS);
+  const ps = `$root = '${ROOT.replace(/'/g, "''")}'; while ($true) { $s = 0; Get-Process electron -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $s += $_.TotalProcessorTime.TotalSeconds }; [Console]::Out.WriteLine(([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()).ToString() + ' ' + $s.ToString([Globalization.CultureInfo]::InvariantCulture)); Start-Sleep -Milliseconds ${CPU_SAMPLE_MS} }`;
+  const child = spawn("pwsh", ["-NoProfile", "-NonInteractive", "-Command", ps], { stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
+  let buf = "";
+  child.stdout.on("data", (d) => { buf += d; let i; while ((i = buf.indexOf("\n")) >= 0) { const [t, sec] = buf.slice(0, i).trim().split(" ").map(Number); buf = buf.slice(i + 1); if (Number.isFinite(t) && Number.isFinite(sec)) app.push({ t, sec }); } });
+  return { stop() { clearInterval(hostTimer); child.kill(); return { cores: os.cpus().length, host, app }; } };
+}
+
+/** Over [t0, t1] (epoch ms, widened to at least 1 s): host busy %, the app's share % of all cores, foreign = host − app. */
+export function cpuShare(series, t0, t1) {
+  if (!series || !series.host?.length || !series.app?.length) return null;
+  if (t1 - t0 < 1000) { const mid = (t0 + t1) / 2; t0 = mid - 500; t1 = mid + 500; }
+  const near = (arr, t) => arr.reduce((best, x) => (Math.abs(x.t - t) < Math.abs(best.t - t) ? x : best), arr[0]);
+  const h0 = near(series.host, t0), h1 = near(series.host, t1), a0 = near(series.app, t0), a1 = near(series.app, t1);
+  if (h1.t <= h0.t || a1.t <= a0.t) return null;
+  const hostPct = 100 * (1 - (h1.idle - h0.idle) / Math.max(1, h1.total - h0.total));
+  const appPct = (100 * (a1.sec - a0.sec)) / (((a1.t - a0.t) / 1000) * series.cores);
+  return { hostPct: +hostPct.toFixed(1), appPct: +appPct.toFixed(1), foreignPct: +Math.max(0, hostPct - appPct).toFixed(1) };
+}
+
 const traceDir = path.join(OUT, "traces");
 const tracePathFor = (label) => path.join(traceDir, `${slug(label)}.trace.json`);
 
@@ -69,6 +96,7 @@ async function launch(label, trial) {
     NARRATE_MODELS_ROOT: MODELS_ROOT,
   };
   const before = cpuSnapshot();
+  const sampler = startCpuSampler();
   const t0 = Date.now();
   const limitMs = ((trial.minutes ?? 0) + 15) * 60000;
   const code = await new Promise((resolve) => {
@@ -79,7 +107,10 @@ async function launch(label, trial) {
     const timer = setTimeout(() => { out += "\n[launcher] timeout, killing\n"; p.kill(); }, limitMs);
     p.on("exit", (c) => { clearTimeout(timer); fs.writeFileSync(path.join(OUT, "logs", `${slug(label)}.log`), out); resolve(c); });
   });
-  const result = { label, code, wallMs: Date.now() - t0, hostBusyPct: busyPct(before, cpuSnapshot()), tracePath: tracePathFor(label), traceExists: fs.existsSync(tracePathFor(label)) };
+  const cpu = sampler.stop();
+  fs.writeFileSync(path.join(OUT, "logs", `${slug(label)}.cpu.json`), JSON.stringify(cpu));
+  const share = cpuShare(cpu, t0, Date.now());
+  const result = { label, code, wallMs: Date.now() - t0, hostBusyPct: busyPct(before, cpuSnapshot()), appCpuPct: share?.appPct ?? null, foreignCpuPct: share?.foreignPct ?? null, tracePath: tracePathFor(label), traceExists: fs.existsSync(tracePathFor(label)) };
   console.log(JSON.stringify(result));
   return result;
 }
@@ -91,13 +122,17 @@ async function launch(label, trial) {
 function firstVoiced(tracePath) {
   if (!fs.existsSync(tracePath)) return [];
   const ev = readTraceEvents(tracePath);
+  const cpuPath = path.join(OUT, "logs", path.basename(tracePath).replace(/\.trace\.json$/, ".cpu.json"));
+  const series = fs.existsSync(cpuPath) ? JSON.parse(fs.readFileSync(cpuPath, "utf8")) : null;
   const out = [];
   ev.forEach((e, i) => {
     if (e.kind !== "narrate-first-voiced") return;
     const pair = ev.slice(i + 1).find((c) => c.kind === "narrate-commit" && c.otsPerf > 0 && typeof c.otsCtx === "number");
     let latencyMs = pair ? +(pair.otsPerf + (e.startAt - pair.otsCtx) * 1000 - e.requestT).toFixed(0) : null;
     if (BREAK && !breakPlanted && latencyMs !== null) { latencyMs += 2500; breakPlanted = true; }
-    out.push({ cause: e.cause, speed: e.speed, word: e.word, latencyMs, ctxLatencyMs: +(e.latencyS * 1000).toFixed(0), scheduledWallMs: e.latencyWallMs == null ? null : +e.latencyWallMs.toFixed(0), leadMs: +(e.leadS * 1000).toFixed(0), trimMs: +((e.trimSamples / 24000) * 1000).toFixed(0) });
+    const requestEpoch = typeof e.ts === "number" ? e.ts - (e.t - e.requestT) : null;
+    const cpu = requestEpoch !== null && latencyMs !== null ? cpuShare(series, requestEpoch, requestEpoch + latencyMs) : null;
+    out.push({ cause: e.cause, speed: e.speed, word: e.word, latencyMs, cpu, ctxLatencyMs: +(e.latencyS * 1000).toFixed(0), scheduledWallMs: e.latencyWallMs == null ? null : +e.latencyWallMs.toFixed(0), leadMs: +(e.leadS * 1000).toFixed(0), trimMs: +((e.trimSamples / 24000) * 1000).toFixed(0) });
   });
   return out;
 }
@@ -152,6 +187,7 @@ if (want("cold")) {
         rows.push({ trial: i + 1, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null });
         if (!first) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no first voiced sample recorded`);
         else if (first.latencyMs === null) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: no output-timestamp pair`);
+        else if (type === "click" && first.cause !== "click") failures.push(`cold click ${rateLabel(rate)} trial ${i + 1}: the first voiced sample answered ${first.cause}, not the click`);
         else if (first.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${rateLabel(rate)} trial ${i + 1}: ${first.latencyMs} ms >= ${COLD_BUDGET_MS}`);
       }
       report.cold[rateLabel(rate)][type] = { n: rows.length, worstMs: rows.some((r) => r.latencyMs !== null) ? Math.max(...rows.filter((r) => r.latencyMs !== null).map((r) => r.latencyMs)) : null, trials: rows };

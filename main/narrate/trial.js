@@ -280,7 +280,10 @@ async function run(ctx) {
       const b = await count(null);
       await press(".rbb-play-btn");
       if (type === "resume") { await sleep(60); await press(".rbb-play-btn"); await sleep(400); await press(".rbb-play-btn"); }
-      if (type === "click") { await sleep(60); await press(".rbb-play-btn"); await waitWords(); const clicked = await clickWord(60); step("clicked while paused", clicked); await sleep(300); await press(".rbb-play-btn"); }
+      // click: the view can open on a near-empty section (a cover page) and moves on only while playing, so wait for the
+      // section's word spans before pausing; then click a word and Play. The launcher flags a trial whose first voiced
+      // sample came from the Play instead of the click.
+      if (type === "click") { await waitWords(); await press(".rbb-play-btn"); const clicked = await clickWord(60); step("clicked while paused", clicked); await sleep(300); await press(".rbb-play-btn"); }
       await waitFor(async () => (await count(null)) > b, { what: `the first voiced sample (cold ${type})`, timeoutMs: 60000, everyMs: 50 });
       await sleep(1500);
       await press(".rbb-play-btn");

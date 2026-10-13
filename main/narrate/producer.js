@@ -118,7 +118,8 @@ function startWorker(modelsRoot, primary) {
       switch (msg.type) {
         case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); dispatch(); break;
         case "load-error": clearTimeout(timer); reject(new Error(msg.error)); lost(`load error: ${msg.error}`); break;
-        case "result": { const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign, stages: { queued: p.queued, posted: p.posted, ...(msg.stages ?? {}), received: performance.timeOrigin + performance.now() } }); dispatch(); break; }
+        case "lag": plog("lag", `w${slot.index}`, msg.ms, "ms", "inflight", msg.inflight, msg.mem); break;
+        case "result": { plog("result", msg.id, `w${slot.index}`, msg.error ? "error " + msg.error : `gen ${msg.genMs}`); const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign, stages: { queued: p.queued, posted: p.posted, ...(msg.stages ?? {}), received: performance.timeOrigin + performance.now() } }); dispatch(); break; }
         default: break;
       }
     });
@@ -133,6 +134,8 @@ function startWorker(modelsRoot, primary) {
 // jobs, so nothing ever queues inside a worker behind work that cannot be aborted.
 const queue = [];
 const epochNow = () => performance.timeOrigin + performance.now();
+// Diagnostics (NARRATE_PRODUCER_LOG=1 only): every post and result per worker, stale ones included, and worker stalls.
+const plog = process.env.NARRATE_PRODUCER_LOG === "1" ? (...a) => console.log("[narrate-producer]", Math.round(epochNow()), ...a) : () => {};
 
 /**
  * Post queued jobs to idle workers. A request takes any idle worker; a prefetch takes one only while
@@ -152,6 +155,7 @@ function dispatch() {
     slot.busy += 1;
     const posted = epochNow();
     pending.set(job.id, { resolve: job.resolve, reject: job.reject, slot, busyAtAssign, posted, queued: job.queued });
+    plog("post", job.id, `w${slot.index}`, job.priority, job.group, job.text.split(" ").length, "words", `busy ${JSON.stringify(busyAtAssign)}`);
     slot.w.postMessage({ type: "generate", id: job.id, text: job.text, voice: job.voice, speed: job.speed });
   }
 }

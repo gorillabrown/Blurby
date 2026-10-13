@@ -121,6 +121,20 @@ async function generate(id, text, voice, speed, recv = epochNow()) {
 const inflight = new Set();
 let stopping = false;
 
+// Diagnostics (NARRATE_PRODUCER_LOG=1 only): report any stall of this worker's event loop over 200 ms.
+if (process.env.NARRATE_PRODUCER_LOG === "1") {
+  let last = epochNow();
+  setInterval(() => {
+    const now = epochNow();
+    if (now - last > 250) {
+      const m = process.memoryUsage();
+      const mb = (b) => Math.round(b / 1048576);
+      parentPort.postMessage({ type: "lag", ms: Math.round(now - last - 50), at: now, inflight: inflight.size, mem: `heap ${mb(m.heapUsed)}/${mb(m.heapTotal)} ext ${mb(m.external)} ab ${mb(m.arrayBuffers)} rss ${mb(m.rss)}` });
+    }
+    last = now;
+  }, 50).unref();
+}
+
 parentPort.on("message", async (msg) => {
   switch (msg.type) {
     case "stop":
