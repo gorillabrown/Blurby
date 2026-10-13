@@ -118,7 +118,7 @@ Reactivation checklist (required as a set):
 ### Engine reactivation conditions
 
 - Nano/Pocket: run the full dormancy reactivation checklist in this document.
-- Qwen: separate approved post-v2 sprint only (`QWEN_SUPPORTED_HOST_POLICY.md`).
+- Qwen: separate approved post-v2 sprint only (`docs/planning/.Archive/QWEN_SUPPORTED_HOST_POLICY.md`).
 
 ### Deferred architecture lanes
 
@@ -200,7 +200,7 @@ This table accounts for every P1/P2 item from:
 
 ## 11. AD-1 Through AD-4 Migration (Verbatim)
 
-The following AD blocks are migrated verbatim from `ROADMAP_SPECS.md` ("Architecture Decisions (Resolved)") and are now governed here as the standing architecture-decision reference.
+The following AD blocks are migrated verbatim from `ROADMAP_SPECS.md` (archived 2026-10-13 to `docs/planning/.Archive/ROADMAP_SPECS.md`) ("Architecture Decisions (Resolved)") and are now governed here as the standing architecture-decision reference.
 
 #### AD-1: Segment Identity vs Cache Identity
 

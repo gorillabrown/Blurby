@@ -34,3 +34,8 @@
 {"event": "start", "row": 17, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:27:16Z"}
 {"event": "end", "row": 17, "evidence": "commit c09821dd", "result": "done", "at": "2026-10-13T17:27:19Z"}
 {"event": "start", "row": 18, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:27:20Z"}
+{"event": "end", "row": 18, "evidence": "commit 2a8a28da", "result": "done", "at": "2026-10-13T17:27:23Z"}
+{"event": "start", "row": 19, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:27:36Z"}
+{"event": "end", "row": 19, "evidence": "0 fixed strings left; CLAUDE 34,976 chars; preflight valid; 2 archived-path refs found -> row +29", "result": "done", "at": "2026-10-13T17:27:59Z"}
+{"event": "add", "rows": [{"title": "Remediate 2 archived-path refs in TTS_ARCHITECTURE_DECISIONS (found by D11)", "owner": "Zeus", "tier": "mechanical", "effort": "low", "class": "calculable", "estimate": 3, "id": 29, "predicted": 0, "basis": "median of 21 runs"}], "origin": "review", "at": "2026-10-13T17:28:00Z"}
+{"event": "start", "row": 29, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-13T17:28:01Z"}
