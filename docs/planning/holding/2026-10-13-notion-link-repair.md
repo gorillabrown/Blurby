@@ -19,6 +19,7 @@
 | 2026-10-13 | planned | write-plan | HB-3 planned; rubric v1.2 U1-U10 pass; GoG write recipe (decision 3) |
 | 2026-10-13 | in-flight | virtuoso | executing: eb/hb-3 |
 | 2026-10-13 | executed | pointer-closeout | HB-3: docs/governance/close-outs/CloseOut.HB-3.2026-10-13.md, completed, 2026-10-13, estimate 22m, actual 6m |
+| 2026-10-13 | absorbed | roadmap-review | as GOV-NOTION-LINKS-1 (completed) |
 
 ## Storyboard
 

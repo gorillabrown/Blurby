@@ -1,0 +1,36 @@
+{
+  "id": "20261013T215152Z-external-set-status-NARRATE-REBUILD-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-REBUILD-1",
+  "created": "2026-10-13T21:51:52Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-12",
+      "branch": "eb/narrate-rebuild-1-p5"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-REBUILD-1:[('branch', 'eb/narrate-rebuild-1-p5'), ('started', '2026-10-12'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-REBUILD-1",
+      "idempotencyKey": "set-status:NARRATE-REBUILD-1:[('branch', 'eb/narrate-rebuild-1-p5'), ('started', '2026-10-12'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-13T21:53:00Z",
+      "recoveryId": "20261013T215152Z-external-set-status-NARRATE-REBUILD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-13T21:52:21Z",
+  "outcome": "succeeded"
+}

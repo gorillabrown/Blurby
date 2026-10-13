@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-12 (roadmap review: buffer refilled to 5 full specifications from real defects, NARRATE-REBUILD-1 stays the head, LL-135/138/143/141 promoted to standing rules 42–45; see the [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
+**Last updated**: 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head; chartered 2026-10-12, [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → TEST-BUDGET-WORDINDEX-1 (10) → SETTINGS-WRITE-DURABLE-1 (11, before the epic's Core phase) → READER-VISUAL-DIAG-1 (12, read-only) → CLEANUP-MODE-BARREL-1 (13) → UX-POLISH-1 (14; not during the epic's Core phase) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5.
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight** since 2026-10-12: P1–P4 merged, P5 open on `eb/narrate-rebuild-1-p5`, P6 is owner gate G2; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → TEST-BUDGET-WORDINDEX-1 (10, run now) → SETTINGS-WRITE-DURABLE-1 (11, build now, merge after P5 and before P6's build) → READER-VISUAL-DIAG-1 (12, read-only, live sessions outside measurement windows) → CLEANUP-MODE-BARREL-1 (13, run now) → UX-POLISH-1 (14, after P5 merges) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5. See [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -93,6 +93,8 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | TEST-TIMEOUT-HEADROOM-1 | 2026-10-12 | 30 s per-test timeouts for the three load-sensitive tests (KF-3 retired) and the `seenBatcher` mock typed (mid-dispatch amendment); full suite 3,410 passed / 133 skipped twice on the owner's machine; typecheck exit 0 (merge `072a65f3`) | `CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md` |
 | EINK-HOVER-FIX-1 | 2026-10-12 | E-ink hover suppression limited to interactive leaves, so overlays stay opaque; BUG-184 resolved in source, open until the owner's smoke (merge `61bad595`) | `CloseOut.EINK-HOVER-FIX-1.2026-10-12.md` |
 | LIBRARY-SETTINGS-FIX-1 | 2026-10-12 | Every Ctrl+K settings entry opens a titled page (Reading Goals added); the library "New" dot clears live through `seenBatcher` (merge `8c41095e`) | `CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md` |
+| GOV-NOTION-VIEWS-1 | 2026-10-13 | Six named views on Blurby.Roadmap and a phase layer (11 phase pages, completion rollup, Phase link drift check) (merge `48cf6a3e`; ad hoc, held plan `2026-10-13-notion-phase-views` HB-2, absorbed 2026-10-13) | `CloseOut.HB-2.2026-10-13.md` |
+| GOV-NOTION-LINKS-1 | 2026-10-13 | 94 auto-generated links repaired in 91 register text values; the Notion register text rule recorded (merge `003c08e4`; ad hoc, held plan `2026-10-13-notion-link-repair` HB-3, absorbed 2026-10-13) | `CloseOut.HB-3.2026-10-13.md` |
 
 **Superseded work:**
 - `NARRATE-HEARD-CURSOR-1`, `NARRATE-APPLYRATECHANGE-COLLAPSE-1`, `NARRATE-SUBSCRIBER-CURSOR-1` — superseded 2026-10-11 by the Narrate rebuild (NARRATE-REBUILD-1; owner ruling #31). Stubs archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [review](docs/planning/roadmap-reviews/2026-10-11-plan.md).
@@ -169,6 +171,8 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 
 45. **LL-141 — Live UI gates keep an owner-observed route.** A specification with live UI checks names up front which behaviours need a human (real input, perceptual checks) and keeps a short owner checklist for them; unattended live runs include a throttle or visibility check that voids results taken while the window was throttled. **Why:** held in READER-MODE-SEPARATION-2 and NARRATE-REMOVE-1 (whose Done-when 16 was owner-observed). (Promoted at the 2026-10-12 roadmap review.)
 
+46. **LL-153 — A dispatch settles what the executing session may write to the register.** The dispatch names the register fields the run may write (if any); status moves, Seq and completion stay with the ceremonies (`/roadmap-review`, `/pointer-closeout`). **Why:** applied and held in HB-2 and HB-3 (2026-10-13): each run wrote only its stated text fields, and the mapped-column hash was unchanged. (Promoted at the 2026-10-13 roadmap review.)
+
 **Rule provenance:** Existing numbered rules above retain their historical source labels; registry policy.standingRules.ids declares no additional IDs. Ref ownership in SRL-074 was an intermediate extraction boundary: this approved stage moves the refs together with the owning implementation. User-mandated complete mode separation governs the target architecture.
 
 Deviation protocol: a skeleton may override a standing rule only by naming the rule and justifying the waiver in its spec.
@@ -205,7 +209,7 @@ NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`), so NARRATE-REBUILD-1 h
 
 <a id="narrate-rebuild-1"></a>
 
-#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word *(position 9 — epic, chartered 2026-10-12: [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md))*
+#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word *(position 9 — epic, in flight since 2026-10-12: [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md); P1–P4 merged `7bbf6b20`, `d81aeb4b`, `ef245815`, `331f8313`; P5 open on `eb/narrate-rebuild-1-p5`; live state in that branch's `state.md`)*
 
 - **Path:** epic — outcome-stated, multi-phase (Phase 0 proves Kokoro, then the core, the mode, speed, crossings and failure states), with owner gates; it cannot be one dispatch. `/next-pointer` routes it to `/epic` when it reaches the head.
 - **What:** A new Narrate, built from scratch on the separation's mode contract.
@@ -319,84 +323,91 @@ This is a stub; `/epic` applies the full set in the charter.
 
 <a id="ux-polish-1"></a>
 
-#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 14 — Full Spec)*
+#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 14 — Full Spec; re-authored 2026-10-13 after the rebuilt Narrate's P4)*
 
-- **What:** In Page view, Space enters the remembered mode (`lastReadingMode`, Focus or Flow; Flow when unset), **paused**, exactly as clicking that mode's button does. Correct the shortcut help that still describes the behaviour before 2026-03-27, and replace the stale replica tests with tests of the real keyboard hook.
+- **What:** In Page view, Space enters the remembered mode (`lastReadingMode`: Focus, Flow or Narrate; Flow when unset), **paused**, exactly as clicking that mode's button does. Correct the shortcut help that still describes the behaviour before 2026-03-27, add the N (Narrate) key to it, and replace the stale replica tests with tests of the real keyboard hook.
 - **Why:**
-  - Page Space is a no-op today: `src/hooks/useKeyboardShortcuts.ts:239` calls `s.togglePlay()`, which ends at Page's no-op `togglePlay` (`src/reader/modes/page/ModeRuntime.ts:240-243`). The comment on `:238` still says "start the selected mode".
-  - The bottom bar already outlines the mode Space should enter (`rbb-mode-btn--last`, `src/components/ReaderBottomBar.tsx:317`, `:325`).
-  - The help surfaces describe old behaviour: `src/components/ShortcutsOverlay.tsx:74-75` (Space enters Focus, Shift+Space enters Flow), `:98` and `:125` (Space "returns to Page view"), the Flow arrows (`:126-127`, `:134-137`); `src/components/HotkeyCoach.tsx:23-24`; `src/components/settings/HotkeyMapSettings.tsx:82`, `:90-91`, `:98-101` and `:104` (including `] / N`, though bare N is unbound since NARRATE-REMOVE-1).
-- **Owner decision (2026-10-12):** Space from Page enters the remembered mode **paused**, matching the buttons and the 2026-05-22 change that stopped modes auto-playing on entry (`6e370639`). The next Space plays.
-- **Design decisions (planner, 2026-10-12):**
-  - Route at the keyboard layer through the router's existing public entry: Page Space calls the `enterFocus` or `enterFlow` handler the container already passes (`ReaderContainer.tsx:709`, slots 10 and 15, which the handler stores but never reads). Those are `handleSelectMode("focus" | "flow")` (`src/reader/useReaderModeOrchestrator.ts:92-109`), the same path as the buttons. Page's `togglePlay` and `router.togglePlay` stay untouched, so `tests/readerSpeedDialog.test.tsx:178` ("Space (togglePlay) stays a no-op") keeps holding, and no mode reaches into another's state.
-  - The hook learns the remembered mode through one **new last parameter**, `lastReadingMode?: ReaderLastMode`, appended after `sentenceNext`. Appending, not inserting, moves no existing slot; the one call site appends `settings.lastReadingMode`. (A misplaced positional argument still type-checks; Done-when 2 and the smoke catch it.)
-  - Keep every guard and modifier exactly as today: the `view` and typing guards (`useKeyboardShortcuts.ts:182-189`), and both Shift+Space routes (`:241` Page, `:257` Focus/Flow).
-- **Out of scope:** auto-play on entry; modifier handling for Ctrl/Alt+Space (unchanged); a full audit of every help row against the handler beyond the rows named here; the `flowZonePosition` setting.
-- **Prerequisites:** none (NARRATE-REMOVE-1 completed 2026-10-12).
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `a0e09189` are noted.
-    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerKeyboard.test.tsx` exits 1, and exactly the three new Page-Space tests fail (each sees `togglePlay` called and no enter handler); record the output in the staging memo.
-    2. After C2, `npx vitest run tests/readerKeyboard.test.tsx tests/useKeyboardShortcuts.test.ts tests/readerSpeedDialog.test.tsx tests/readerBottomBarControls.test.tsx tests/three-mode-reader.test.js tests/notes-reading-log.test.js` exits 0.
-    3. `git grep -n -E 'Enter Focus mode at highlighted word|Enter Flow mode at highlighted word|Pause and return to Page view' -- src` prints nothing (dry-run: four lines in `src/components/ShortcutsOverlay.tsx`).
+  - Page Space is a no-op today: `src/hooks/useKeyboardShortcuts.ts:244` calls `s.togglePlay()`, which ends at Page's no-op `togglePlay` (`src/reader/modes/page/ModeRuntime.ts:240-243`). The comment on `:243` still says "start the selected mode".
+  - The bottom bar already outlines the mode Space should enter, Narrate included (`rbb-mode-btn--last`, `src/components/ReaderBottomBar.tsx:320`, `:328`, `:336`).
+  - The help surfaces describe old behaviour: `src/components/ShortcutsOverlay.tsx:74-75` (Space enters Focus, Shift+Space enters Flow), `:98` and `:125` (Space "returns to Page view"), the Flow arrows (`:126-127`, `:134-137`); `src/components/HotkeyCoach.tsx:23-24`; `src/components/settings/HotkeyMapSettings.tsx:82`, `:90-91`, `:98-101` and `:104` (`] / N` lists N as next chapter, but since NARRATE-REBUILD-1 P4 bare N enters Narrate on every surface, `useKeyboardShortcuts.ts:217`). No help surface mentions N → Narrate.
+- **Owner decisions:**
+  - 2026-10-12: Space from Page enters the remembered mode **paused**, matching the buttons and the 2026-05-22 change that stopped modes auto-playing on entry (`6e370639`). The next Space plays.
+  - 2026-10-13: the remembered mode includes **Narrate** (`ReaderLastMode` is `"focus" | "flow" | "narrate"`, `src/types.ts:137`; the Narrate runtime writes `lastReadingMode: "narrate"`, `src/reader/modes/narrate/ModeRuntime.ts:236`, `:281`). One rule for all three modes.
+- **Design decisions (planner, 2026-10-12, revised 2026-10-13):**
+  - Route at the keyboard layer through the router's existing public entries: Page Space calls the `enterFocus`, `enterFlow` or `enterNarrate` handler the container already passes (`ReaderContainer.tsx:709`, slots 10, 15 and 28). Those are `handleSelectMode("focus" | "flow" | "narrate")` (`src/reader/useReaderModeOrchestrator.ts:97-115`), the same path as the buttons. Page's `togglePlay` and `router.togglePlay` stay untouched, so `tests/readerSpeedDialog.test.tsx:178` ("Space (togglePlay) stays a no-op") keeps holding, and no mode reaches into another's state.
+  - If the remembered mode's handler is unbound (for example `"narrate"` with no `enterNarrate`), Space falls back to `enterFlow`, the unset default.
+  - The hook learns the remembered mode through one **new last parameter**, `lastReadingMode?: ReaderLastMode`, appended after `enterNarrate` (the 29th argument). Appending moves no existing slot; the one call site appends `settings.lastReadingMode`. (A misplaced positional argument still type-checks; Done-when 2 and the smoke catch it.)
+  - Keep every guard and modifier exactly as today: the `view` and typing guards, the N handler (`:217`) and both Shift+Space routes (`:246` Page, `:262` Focus/Flow).
+- **Out of scope:** auto-play on entry; Shift+Space cycling (it still toggles Focus ↔ Flow, `getNextSelectableMode`, and from a remembered Narrate moves the outline to Focus); a Narrate section in the shortcuts overlay beyond the N row (the epic owns Narrate's own keys); modifier handling for Ctrl/Alt+Space; a full audit of every help row beyond those named; the `flowZonePosition` setting; `docs/governance/TECHNICAL_REFERENCE.md`'s `normalizeReaderModes` paragraph (`:228`), which the epic's close-out corrects.
+- **Prerequisites:** NARRATE-REBUILD-1 P5 merged to `main` (shared-core freeze: P5 edits `src/types.ts`, this item edits `src/components/ReaderContainer.tsx`). Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `d21ad58e` (2026-10-13) are noted.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerKeyboard.test.tsx` exits 1, and exactly the five new Page-Space enter tests (a)–(e) fail (each sees `togglePlay` called and no enter handler); (f) and (g) pass. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/readerKeyboard.test.tsx tests/useKeyboardShortcuts.test.ts tests/readerSpeedDialog.test.tsx tests/readerBottomBarControls.test.tsx tests/three-mode-reader.test.js tests/notes-reading-log.test.js tests/narrate/narrate.mode.test.ts` exits 0.
+    3. `git grep -n -E 'Enter Focus mode at highlighted word|Enter Flow mode at highlighted word|Pause and return to Page view' -- src` prints nothing (dry-run: four lines in `src/components/ShortcutsOverlay.tsx`, `:74`, `:75`, `:98`, `:125`).
     4. `git grep -n -F '] / N' -- src` prints nothing (dry-run: `HotkeyMapSettings.tsx:82` and `:104`).
     5. `git grep -n -F '"Shift+Space" }' -- src/components/HotkeyCoach.tsx` prints nothing (dry-run: `:23`).
-    6. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149).
-    7. **Owner smoke** (standing rule 45), on a production build where possible (LL-152), recorded per check in the staging memo: (a) open a book (it opens in Page); with Flow outlined, press Space: Flow opens paused at the saved word, and Space again plays; (b) back in Page, press Shift+Space: the outline moves to Focus and no mode opens; press Space: Focus opens paused; (c) in Focus, Shift+Space switches to Flow; (d) with the cursor in a text field (for example the note popover), Space types a space; (e) the shortcuts overlay (`?`) shows the corrected Page, Focus and Flow rows.
-    8. `git diff --name-status refs/remotes/origin/main` lists exactly the `M` paths in *Edit sites* and *Tests* below, plus the time log and staging memo if kept (standing rule 41).
+    6. `git grep -c -F 'description: "Enter Narrate"' -- src/components/ShortcutsOverlay.tsx` prints `src/components/ShortcutsOverlay.tsx:3` and exits 0 (dry-run: exits 1, no output).
+    7. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149), outside the epic's measurement windows if it is still running.
+    8. **Owner smoke** (standing rule 45), on a production build where possible (LL-152; P6's G2 build if it is taken after this merges), recorded per check in the staging memo: (a) open a book (it opens in Page); with Flow outlined, press Space: Flow opens paused at the saved word, and Space again plays; (b) back in Page, press Shift+Space: the outline moves to Focus and no mode opens; press Space: Focus opens paused; (c) enter Narrate with N, return to Page, press Space: Narrate opens paused with Narrate outlined beforehand; (d) in Focus, Shift+Space switches to Flow; (e) with the cursor in a text field (for example the note popover), Space types a space; (f) the shortcuts overlay (`?`) shows the corrected Page, Focus and Flow rows and the N row.
+    9. `git diff --name-status refs/remotes/origin/main` lists exactly the `M` paths in *Edit sites* and *Tests* below, plus the time log and staging memo if kept (standing rule 41).
 - **Effort:** S.
-- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 7.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 8.
 - **Lane:** UX polish. Execution surface C, with one appended argument in `src/components/ReaderContainer.tsx` (shared-core freeze set).
-- **Source:** the read-only census of 2026-10-12 for this review (keyboard, router, help surfaces, tests); NARRATE-REMOVE-1 D15 (`docs/planning/.Archive/ROADMAP_legacy.md`); OutsideAudit.10 F5c; owner decision 2026-10-12.
+- **Source:** the read-only census of 2026-10-12 (keyboard, router, help surfaces, tests), re-audited on `d21ad58e` on 2026-10-13 after P4 (`331f8313`: `enterNarrate` as the 28th argument, bare N on every surface, `ReaderLastMode` with `"narrate"`); NARRATE-REMOVE-1 D15 (`docs/planning/.Archive/ROADMAP_legacy.md`); OutsideAudit.10 F5c; owner decisions 2026-10-12 and 2026-10-13.
 - **Path:** dispatch.
 
 ##### Implementation detail
-- **Edit sites** (on `main` @ `a0e09189`):
+- **Edit sites** (on `main` @ `d21ad58e`; re-grep after P5 merges):
   - **`src/hooks/useKeyboardShortcuts.ts`:**
-    - add `lastReadingMode?: ReaderLastMode;` to `ReaderKeysState` (`:47-80`), importing `ReaderLastMode` from `../types` as a type;
-    - append the parameter `lastReadingMode?: ReaderLastMode` after `sentenceNext?: () => void` (`:155`), and add `lastReadingMode` to both `stateRef` objects (`:157-166`, `:168-177`);
-    - `:238-239` become `// Space → enter the remembered mode (Flow when unset), paused` and `if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); (s.lastReadingMode === "focus" ? s.enterFocus : s.enterFlow)?.(); return; }`.
-  - **`src/components/ReaderContainer.tsx:709`:** append `, settings.lastReadingMode` as the last argument of the `useReaderKeys(` call. Nothing else in this file changes.
+    - add `lastReadingMode?: ReaderLastMode;` to `ReaderKeysState` after `enterNarrate?` (`:81`), importing `ReaderLastMode` from `../types` as a type;
+    - append the parameter `lastReadingMode?: ReaderLastMode` after `enterNarrate?: () => void` (`:158`), and add `lastReadingMode` to both `stateRef` objects (`:160-169`, `:171-180`);
+    - `:243-244` become `// Space → enter the remembered mode (Flow when unset or unbound), paused` and `if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); const enter = s.lastReadingMode === "focus" ? s.enterFocus : s.lastReadingMode === "narrate" ? s.enterNarrate : undefined; (enter ?? s.enterFlow)?.(); return; }`.
+  - **`src/components/ReaderContainer.tsx:709`:** append `, settings.lastReadingMode` as the last argument of the `useReaderKeys(` call (after `handleEnterNarrate`). Nothing else in this file changes.
   - **`src/components/ShortcutsOverlay.tsx`:**
-    - Page `:74` → `{ keys: ["Space"], description: "Enter your last mode (Focus or Flow), paused" }`; `:75` → `{ keys: ["Shift", "Space"], description: "Switch the remembered mode (Focus ↔ Flow)" }`;
-    - Focus `:98` and Flow `:125` → `{ keys: ["Space"], description: "Play / pause" }`, each followed by a new row `{ keys: ["Shift", "Space"], description: "Switch to the other mode" }`;
-    - Flow `:126` → `{ keys: ["←"], description: "Adjust WPM (-25)" }`, `:127` → `{ keys: ["→"], description: "Adjust WPM (+25)" }`, `:134` → `{ keys: ["Shift", "↑"], description: "Previous paragraph" }`, `:135` → `{ keys: ["Shift", "↓"], description: "Next paragraph" }`, `:136` → `{ keys: ["↑"], description: "Previous line" }`, `:137` → `{ keys: ["↓"], description: "Next line" }` (per `useKeyboardShortcuts.ts:264-271`).
+    - Page `:74` → `{ keys: ["Space"], description: "Enter your last mode (Focus, Flow or Narrate), paused" }`; `:75` → `{ keys: ["Shift", "Space"], description: "Switch the remembered mode (Focus ↔ Flow)" }`; a new row after it, `{ keys: ["N"], description: "Enter Narrate" }`;
+    - Focus `:98` and Flow `:125` → `{ keys: ["Space"], description: "Play / pause" }`, each followed by `{ keys: ["Shift", "Space"], description: "Switch to the other mode" }` and `{ keys: ["N"], description: "Enter Narrate" }`;
+    - Flow `:126` → `{ keys: ["←"], description: "Adjust WPM (-25)" }`, `:127` → `{ keys: ["→"], description: "Adjust WPM (+25)" }`, `:134` → `{ keys: ["Shift", "↑"], description: "Previous paragraph" }`, `:135` → `{ keys: ["Shift", "↓"], description: "Next paragraph" }`, `:136` → `{ keys: ["↑"], description: "Previous line" }`, `:137` → `{ keys: ["↓"], description: "Next line" }` (per `useKeyboardShortcuts.ts:266-276`).
   - **`src/components/HotkeyCoach.tsx:23-24`:** `enterFocus` and `enterFlow` both become `{ action: "enter your last mode from Page", hotkey: "Space" }`.
-  - **`src/components/settings/HotkeyMapSettings.tsx`:** `:82` and `:104` → `{ action: "Next chapter", key: "]" }`; Flow `:90` → `{ action: "Previous line", key: "Up Arrow" }`, `:91` → `{ action: "Next line", key: "Down Arrow" }`, `:98` → `{ action: "Previous paragraph", key: "Shift + Up" }`, `:99` → `{ action: "Next paragraph", key: "Shift + Down" }`, `:100` → `{ action: "Speed up", key: "Right Arrow" }`, `:101` → `{ action: "Slow down", key: "Left Arrow" }`.
-  - **`docs/governance/TECHNICAL_REFERENCE.md:218`:** the `lastReadingMode` row's text becomes `Space bar enters this mode, paused, from Page view: "focus" or "flow" (a saved "narrate" is normalized to "flow")`.
+  - **`src/components/settings/HotkeyMapSettings.tsx`:** `:82` and `:104` → `{ action: "Next chapter", key: "]" }`, each followed by `{ action: "Enter Narrate", key: "N" }`; Flow `:90` → `{ action: "Previous line", key: "Up Arrow" }`, `:91` → `{ action: "Next line", key: "Down Arrow" }`, `:98` → `{ action: "Previous paragraph", key: "Shift + Up" }`, `:99` → `{ action: "Next paragraph", key: "Shift + Down" }`, `:100` → `{ action: "Speed up", key: "Right Arrow" }`, `:101` → `{ action: "Slow down", key: "Left Arrow" }`.
+  - **`docs/governance/TECHNICAL_REFERENCE.md:218`:** the `lastReadingMode` row's text becomes `Space bar enters this mode, paused, from Page view ("flow" when unset)`.
 - **Tests:**
-  - **`tests/readerKeyboard.test.tsx`** (the real hook, jsdom): extend `KeyboardHarness` with a `startMode` prop and `lastReadingMode`, passing `enterFocus` (slot 10), `enterFlow` (slot 15), `cycleMode` (24) and `cycleAndStart` (25) spies and `lastReadingMode` last (fill slots 16–23 with `undefined`; see the slot comment at `:10-11`). New tests (C1): (a) Page + Space with `lastReadingMode: "focus"` calls `enterFocus` once and neither `enterFlow` nor `togglePlay`; (b) with `"flow"` calls `enterFlow` once; (c) with `undefined` calls `enterFlow` once. Also (d) Page + Shift+Space calls `cycleMode` once and no enter handler; (e) Space with an `<input>` focused calls nothing.
-  - **`tests/three-mode-reader.test.js:133-200`:** delete the replica block (comment, `transitionMode` and its tests, the three-mode `cycleMode`); it imports no source and asserts the pre-2026-03-27 behaviour. Keep the rest of the file.
-  - **`tests/notes-reading-log.test.js`:** update the `COACH_HINTS` replica (`:58-74`) to match `HotkeyCoach.tsx` after the edit (drop the `narration` entry; `enterFocus`/`enterFlow` as above) and its assertions in "reader coaching hints" (`:285`).
-  - **`tests/useKeyboardShortcuts.test.ts`:** in the replica `resolveReaderKey` Page branch (`:74`), Space returns `"enterLastMode"`; add the matching assertion. The Focus/Flow Space tests stay.
+  - **`tests/readerKeyboard.test.tsx`** (the real hook, jsdom): add a `PageSpaceHarness` beside the existing `KeyboardHarness` (keep that one and its four tests unchanged). It renders `useReaderKeys("reader", "page", togglePlay, …)` passing spies for `enterFocus` (slot 10), `enterFlow` (15), `cycleMode` (24) and `enterNarrate` (28, unless a `bindNarrate={false}` prop), `undefined` for the other optional slots, and `lastReadingMode` as the 29th argument (extend the slot comment at `:10-11`). New tests (C1): (a) Space with `"focus"` calls `enterFocus` once and no other enter handler or `togglePlay`; (b) `"flow"` → `enterFlow` once; (c) `"narrate"` → `enterNarrate` once; (d) `undefined` → `enterFlow` once; (e) `"narrate"` with `enterNarrate` unbound → `enterFlow` once; (f) Shift+Space calls `cycleMode` once and no enter handler; (g) Space with an `<input>` focused calls nothing.
+  - **`tests/three-mode-reader.test.js:133-200`:** delete the replica block (comment, `transitionMode` and its tests, the three-mode `cycleMode`); it imports no source and asserts the pre-2026-03-27 behaviour. Keep the rest of the file (`// ── Position Mapping` onward).
+  - **`tests/notes-reading-log.test.js`:** update the `COACH_HINTS` replica (`:58-74`) to match `HotkeyCoach.tsx` after the edit (drop the `narration` entry, which the source no longer has; `enterFocus`/`enterFlow` as above) and its assertions in "reader coaching hints" (`:285-287`).
+  - **`tests/useKeyboardShortcuts.test.ts`:** in the replica `resolveReaderKey` Page branch (`:79`), Space returns `"enterLastMode"`; add the matching assertion. The Focus/Flow Space tests and the N tests stay.
 - **Constants:** none.
-- **Branch:** `eb/ux-polish-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\ux-polish-1`. Write refs in full (a `main/` directory exists).
-- **Staging plan:** C1: `tests/readerKeyboard.test.tsx` only (gate: Done-when 1). C2: every other path (gate: Done-when 2–6 and 8). Owner smoke (Done-when 7) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Branch:** `eb/ux-polish-1` from `refs/remotes/origin/main` after P5 merges, in worktree `C:\Projects\Blurby\.worktrees\ux-polish-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:** C1: `tests/readerKeyboard.test.tsx` only (gate: Done-when 1). C2: every other path (gate: Done-when 2–7 and 9). Owner smoke (Done-when 8) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
 - **Failure handling:**
-  - If the positive control fails in a different way (for example `enterFlow` already called on the base), stop: the hook changed since this spec.
-  - If any existing keyboard, bottom-bar or speed-dialog test fails, report the exact test and stop; do not weaken it.
-  - If smoke (a) opens the mode playing, or (b) opens a mode, record a fail: a slot is misplaced or the wrong handler is wired.
+  - If the positive control fails in a different way (for example an enter handler already called on the base), stop: the hook changed since this spec.
+  - If any existing keyboard, bottom-bar, speed-dialog or Narrate mode test fails, report the exact test and stop; do not weaken it.
+  - If the base's `useReaderKeys` has gained arguments after `enterNarrate` (P5 or P6 changed it), append `lastReadingMode` after the last one and record the new slot in the staging memo; any other drift in the cited lines stops the run.
+  - If smoke (a) or (c) opens the mode playing, or (b) opens a mode, record a fail: a slot is misplaced or the wrong handler is wired.
   - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
 - **Lane ownership (parallel run):** surface C plus the one appended argument in `ReaderContainer.tsx`.
-  - **Forbidden:** every file not named above; `src/reader/**`; any other line of `ReaderContainer.tsx`.
-  - **Shared-core touches:** `src/components/ReaderContainer.tsx:709`, one appended argument. It must not run while another item edits that file; NARRATE-REBUILD-1's Core phase is expected to (it adds the rebuilt mode), so this item runs before the Core phase or after it merges.
-  - **Merge order:** after CLEANUP-MODE-BARREL-1 is fine either way (no shared file); before or after the rebuild's Core, never during.
+  - **Forbidden:** every file not named above; `src/reader/**`; any other line of `ReaderContainer.tsx`; every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** `src/components/ReaderContainer.tsx:709`, one appended argument. It runs only after P5 merges (P5 edits `src/types.ts`); P6 is expected to touch no shared-core file, so it may run during P6 if the epic's `state.md` confirms that.
+  - **Merge order:** after NARRATE-REBUILD-1 P5; independent of CLEANUP-MODE-BARREL-1 and SETTINGS-WRITE-DURABLE-1 (no shared file).
 
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Real-hook Page-Space tests committed and failing on the current handler | calculable | positive control | bounded | low | 20m (harness extension and five tests) | — | — |
-| 2 | Page Space enters the remembered mode paused; help surfaces and replica tests corrected | calculable | ui fix | bounded | medium | 35m (one handler line, one parameter, one appended argument, about 20 help rows, three test files) | — | — |
+| 1 | Real-hook Page-Space tests committed and failing on the current handler | calculable | positive control | bounded | low | 20m (one harness and seven tests) | — | — |
+| 2 | Page Space enters the remembered mode paused; help surfaces and replica tests corrected | calculable | ui fix | bounded | medium | 35m (one handler line, one parameter, one appended argument, about 25 help rows, three test files) | — | — |
 | 3 | Suites, typecheck and build green; owner smoke recorded; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + smoke + one --no-ff merge) | — | — |
 
-**Total:** chain 26m · sum 26m; 2 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+**Total:** chain 21m · sum 21m; 2 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
 
 ##### Lessons applied
 - **Standing rule 43 (LL-138)** — the real-hook tests fail on the current handler before it changes (Done-when 1).
-- **Standing rule 44 (LL-143)** — every gate names its shell and exit code; the search gates were dry-run on the base.
+- **Standing rule 44 (LL-143)** — every gate names its shell and exit code; the search gates were dry-run on `d21ad58e`, including the new N-row gate.
 - **Standing rule 45 (LL-141)** and **LL-152** — live keyboard behaviour is owner-observed, preferably on a production build, because dev mode is slow (BUG-189).
-- **Standing rule 37 (SRL-089)** — the one shared-core edit forbids running beside the rebuild's Core phase.
+- **Standing rule 37 (SRL-089)** and the shared-core freeze — the one `ReaderContainer.tsx` edit waits for the epic's P5, which edits `src/types.ts`.
+- **SRL-086/087 (standing rule 36)** — every line reference was re-grepped on `d21ad58e` after P4 moved the hook signature; the failure handling covers further drift.
 - **LL-149** and **LL-147** — typecheck and build are listed; the suite runs on the owner's machine.
 - **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
 
 ---
 
@@ -422,8 +433,8 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 - **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `a0e09189` are noted.
     1. `git ls-files src/modes` prints exactly `src/modes/ModeInterface.ts` (dry-run: five files).
     2. `git grep -n -E 'src/modes/(index|PageMode|FocusMode|FlowMode)' -- tests vite.config.js` prints nothing (dry-run: `tests/perf-baseline.test.ts:27` and `:28`).
-    3. `git grep -n -F 'NarrateMode' -- src scripts vite.config.js` prints nothing (dry-run: `vite.config.js:49`).
-    4. **Positive control (standing rule 43):** at C1, `npx vitest run tests/modeLegacyRetired.test.ts` exits 1, failing on the four legacy files and the `NarrateMode` rule; record the output in the staging memo. After C2 it exits 0.
+    3. `git grep -n -F 'src/modes/NarrateMode' -- src scripts vite.config.js` prints nothing (dry-run on `d21ad58e`, 2026-10-13: `vite.config.js:49` only). *Amended 2026-10-13: the bare identifier `NarrateMode` now matches the rebuilt mode's `NarrateModeRuntime` and `NarrateModeState` (`src/reader/modes/narrate/`, P4 `331f8313`), so the gate names the legacy path.*
+    4. **Positive control (standing rule 43):** at C1, `npx vitest run tests/modeLegacyRetired.test.ts` exits 1, failing on the four legacy files and the `src/modes/NarrateMode` rule; record the output in the staging memo. After C2 it exits 0.
     5. `npx vitest run tests/perf-baseline.test.ts tests/modes.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/perfAudit.test.ts` exits 0.
     6. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149).
     7. `git diff --name-status refs/remotes/origin/main` lists exactly: `D src/modes/index.ts`, `D src/modes/PageMode.ts`, `D src/modes/FocusMode.ts`, `D src/modes/FlowMode.ts`, `M tests/perf-baseline.test.ts`, `M vite.config.js`, `A tests/modeLegacyRetired.test.ts`, plus the time log and staging memo if kept (standing rule 41).
@@ -441,7 +452,7 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 - **Tests:** **new `tests/modeLegacyRetired.test.ts`** (reads files as UTF-8 with `node:fs`, as `tests/einkFoundation.test.ts` does):
   - (a) the entries of `src/modes/` are exactly `["ModeInterface.ts"]`;
   - (b) `vite.config.js` does not contain `src/modes/NarrateMode`;
-  - (c) no file under `src/` contains the identifier `NarrateMode` (walk `src/`, read each `.ts`/`.tsx`; build the needle as `"Narrate" + "Mode"` so this test file does not match gate 3).
+  - (c) no file under `src/` imports from a legacy `src/modes/` engine path: walk `src/`, read each `.ts`/`.tsx`, and fail on any import specifier ending in `modes/index`, `modes/PageMode`, `modes/FocusMode`, `modes/FlowMode` or `modes/NarrateMode` (build each needle by concatenation so this test file does not match gates 2–3). *Amended 2026-10-13: the rebuilt Narrate's `NarrateModeRuntime`/`NarrateModeState` are legitimate and must not fail this test.* Imports of `src/modes/ModeInterface` pass.
 - **Constants:** none.
 - **Branch:** `eb/cleanup-mode-barrel-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\cleanup-mode-barrel-1`. Write refs in full (a `main/` directory exists).
 - **Staging plan:** C1: `tests/modeLegacyRetired.test.ts` alone (gate: Done-when 4's failing control). C2: the four deletions (`git rm`), `tests/perf-baseline.test.ts` and `vite.config.js` (gate: Done-when 1–3 and 5–7). Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
@@ -452,7 +463,8 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 - **Lane ownership (parallel run):** surfaces A (the four deleted files only) and B.
   - **Forbidden:** every file not named above; `src/modes/ModeInterface.ts`; `src/reader/**`; the shared-core freeze set; the census JSON; any file the rebuild epic's current phase owns.
   - **Shared-core touches:** none.
-  - **Merge order:** independent of the other buffer items; if NARRATE-REBUILD-1's Core adds a mode under `src/reader/modes/`, this item still merges cleanly (no shared file).
+  - **Merge order:** independent of the other buffer items and of the epic's P5 (re-checked 2026-10-13: P5 touches none of `src/modes/`, `vite.config.js` or `tests/perf-baseline.test.ts`; on P5 `src/modes/` still holds the same five files). Run now under the [parallel run plan](#parallel-run-plan-2026-10-13); its full suite and build respect the measurement windows.
+  - **Re-audit (2026-10-13, `d21ad58e`):** gates 1, 2, 5 and 7 dry-run as written; gate 3 and test (c) amended above.
 
 ##### Task list
 
@@ -485,7 +497,16 @@ Added by the second 2026-10-10 roadmap review. The owner asked for work that can
 
 #### Stage 7 — Platform health and reader polish (roadmap review 2026-10-12)
 
-Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real defects while the Narrate rebuild epic runs (owner decision: the epic first, these as the buffer). Each item states its lane ownership; it may run beside the epic only when its files are disjoint from the epic's current phase. SETTINGS-WRITE-DURABLE-1 must merge before the epic's Core phase writes state to disk. See the [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real defects while the Narrate rebuild epic runs (owner decision: the epic first, these as the buffer). Each item states its lane ownership; it may run beside the epic only when its files are disjoint from the epic's current phase. See the [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+
+<a id="parallel-run-plan-2026-10-13"></a>**Parallel run plan (roadmap review 2026-10-13; owner rulings the same day).** The epic is in P5 (Decision #18 latency repair round, then T7 trials and the P5 gate), then P6 (production build, owner gate G2). P5's branch owns `main.js`, `preload.js`, `src/types.ts` (shared-core), `src/constants.ts`, `main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, `tests/narrate/**`, `patches/kokoro-js+1.2.1.patch`, `scripts/narrate-rebuild/**` and the separation census `boundary-policy.json` (diff `331f8313..eb/narrate-rebuild-1-p5`, read 2026-10-13).
+
+- **Measurement windows (owner, 2026-10-13).** File-disjoint items are implemented in parallel, but their heavy gates — full `npm test`, `npm run build`, `npm run dev` or production-app sessions — run only while the epic is not measuring. The epic's measurement windows are its D3 recorded-output runs and its D6/T7 latency trials. Before a heavy gate, the parallel run reads the epic's `state.md` *Where we are* block on `eb/narrate-rebuild-1-p5` (`git show refs/heads/eb/narrate-rebuild-1-p5:docs/planning/epics/2026-10-12-narrate-rebuild/state.md`) and asks the owner whether a trial is running; it waits while one is. The charter is unchanged. A heavy gate that overlapped a trial is reported to the owner, because that trial is then suspect. Targeted `npx vitest run <file>` runs and code edits are allowed at any time.
+- **Run now:** TEST-BUDGET-WORDINDEX-1 and CLEANUP-MODE-BARREL-1 (both file-disjoint; CLEANUP amended below for the P4 `NarrateMode*` identifiers).
+- **Run now, live sessions outside windows:** READER-VISUAL-DIAG-1 (docs only; its owner sessions and profiling load the machine).
+- **Build now, merge after P5:** SETTINGS-WRITE-DURABLE-1 shares `main.js` with P5 (different hunks; see its amendment). It merges after P5 merges and before P6's production build, so G2 is heard on durable settings and P5's gate evidence is undisturbed.
+- **After P5 merges:** UX-POLISH-1 edits `src/components/ReaderContainer.tsx` while P5 edits `src/types.ts` (one shared-core sprint at a time). Re-authored below for the rebuilt Narrate.
+- **Owner time:** P6's G2 listening session can carry UX-POLISH-1's and SETTINGS-WRITE-DURABLE-1's owner smokes on the same production build if both have merged by then.
 
 <a id="test-budget-wordindex-1"></a>
 
@@ -527,7 +548,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 - **Lane ownership (parallel run):** surface B only.
   - **Forbidden:** every file except the two above; the shared-core freeze set; every file the rebuild epic's current phase owns.
   - **Shared-core touches:** none.
-  - **Merge order:** independent of every other item.
+  - **Merge order:** independent of every other item. Run now under the [parallel run plan](#parallel-run-plan-2026-10-13) (re-audit 2026-10-13 on `d21ad58e`: both gates dry-run as written; the file is untouched by the epic); its full suite respects the measurement windows.
 
 ##### Task list
 
@@ -556,7 +577,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
   - `saveSettingsFn` (`main.js:130`), `saveHistory` (`:153`) and `saveSiteCookies` (`:154`) drop the promise, so a failure is an unhandled rejection and `await saveSettingsFn()` in `loadState` (`:293`) waits for nothing.
   - `main/sync-queue.js:52-57` `saveQueue` has its own copy of the same fixed-name pattern; its callers fire `enqueue` without awaiting it (`main/ipc/library.js:41`, `:97`; `main/ipc/documents.js:30`, `:47`; `main/ipc/state.js:40`).
   - `will-quit` (`main.js:678-695`) flushes the library but not settings, so a change still inside the renderer IPC's 500 ms debounce is lost at quit.
-  - The OutsideAudit.10 decisions require this before any rebuild state must reach disk (NARRATE-REBUILD-1 charter input).
+  - The OutsideAudit.10 decisions require this before any rebuild state must reach disk (NARRATE-REBUILD-1 charter input; the epic's state still records settings writes as fire-and-forget until this is on `main`, A5).
 - **Design decisions (planner, 2026-10-12):**
   - **Serialize per file, keep the `.tmp` name.** Each write to a path waits for the previous write to that path; the payload is serialized when the call is made, so later calls carry later data and the last call's data lands last. This fixes both the ENOENT and the stale-snapshot race without changing the write-then-rename pattern, so standing rule 3 (PR-10) and LL-006's guardrail hold as written. A unique temporary name alone would fix ENOENT but not the ordering.
   - **Failure policy: log and continue.** The save wrappers resolve `true` on success and `false` on failure, logging one line with the label and error; they never reject. Startup therefore proceeds when a settings write fails (as `readJSON` already proceeds with a fallback), no caller needs a new `catch`, and `applyCloudSettings` stays synchronous and non-blocking (NARRATE-REMOVE-1 D12). `writeJSON` itself still rejects, for the awaited library path.
@@ -608,7 +629,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 - **Staging plan:**
   - C1: `main/json-store.js` with `readJSON` and `writeJSON` moved verbatim from `main.js` (no serialization, no `saveJSON` yet), `main.js` requiring them, `tests/jsonStore.test.js` and the `tests/sync-queue.test.js` addition. Gate: Done-when 1 (the controls fail as stated) and `npm run typecheck` exits 0.
   - C2: the serialized writer, `saveJSON`, the three wrappers, the quit flush, `main/sync-queue.js`, and the two docs. Gate: Done-when 2–6 and 8–9.
-  - Owner smoke (Done-when 7) on C2; then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+  - Owner smoke (Done-when 7) on C2; then, once NARRATE-REBUILD-1's P5 is on `main`, merge `refs/remotes/origin/main` into the branch, re-run Done-when 2–6 (and the smoke if `main.js`'s `will-quit` changed), merge to `main` with `--no-ff` and push (Rule 5b). If P6's production build has already been taken, stop and ask the owner instead of merging. Never stage `tests/perf-baseline-results.json`.
 - **Failure handling:**
   - If the C1 controls pass on the unchanged writer (the race did not trigger), raise the rounds to 50 once; if they still pass, stop with BLOCKER(USER): the test cannot see the defect.
   - If an existing test fails because a save now returns a promise or because `sync-queue.json` is written through `json-store`, report the exact test and stop; do not weaken it.
@@ -617,7 +638,9 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 - **Lane ownership (parallel run):** surface D only.
   - **Forbidden:** every file not named above; the shared-core freeze set; `main/ipc/state.js`, `main/sync-engine.js` and `main/migrations.js` (the NARRATE-REMOVE-1 normalization seams stay as they are); any file the rebuild epic's current phase owns.
   - **Shared-core touches:** none.
-  - **Merge order:** before NARRATE-REBUILD-1's Core phase; independent of the other buffer items.
+  - **Merge order (amended 2026-10-13, owner):** build and verify now; merge **after** NARRATE-REBUILD-1's P5 merges to `main` and **before** P6's production build, so the G2 listening build has durable settings and P5's gate evidence is undisturbed. (The original "before the Core phase" order is moot: P3 and P4 merged without writing durable state, under the charter's A5 caveat.) Independent of the other buffer items.
+  - **Shared file with P5 (re-audit 2026-10-13):** `eb/narrate-rebuild-1-p5` also edits `main.js`: run-isolation env levers after the requires (`:22-27`), the Narrate trial driver in `app.whenReady()` (`:590-597`) and a producer shutdown at the top of `will-quit` that calls `event.preventDefault()`, awaits `require("./main/narrate/producer").shutdown()`, calls `app.quit()` and returns, so the original body (including `await saveLibraryNow();`) runs on the second `will-quit`. This item's hunks (`:15`, `:48-60`, `:130`, `:153-154`, the line after `await saveLibraryNow();`) are disjoint; the settings flush lands in the second pass and Done-when 4's count stays `main.js:2`. Before merging, `git merge refs/remotes/origin/main` into this branch (P5 merged), re-run Done-when 2–6, and re-grep the edit-site line numbers, which shift by about +5 after P5.
+  - **Measurement windows:** full suite, build and the `npm run dev` smoke follow the [parallel run plan](#parallel-run-plan-2026-10-13).
 
 ##### Task list
 
@@ -685,6 +708,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
   - **Forbidden:** committing any path outside the two documents; the live user profile's settings (use a copied profile or the test profile for sessions).
   - **Shared-core touches:** none.
   - **Merge order:** independent; may run beside any item.
+  - **Measurement windows (2026-10-13):** every live session, dev or production, and the production build follow the [parallel run plan](#parallel-run-plan-2026-10-13); they never overlap the epic's D3 or D6/T7 trials. Re-audit on `d21ad58e`: the cited Focus and Flow files are unchanged since `a0e09189`, and `preload.js:122` is still `logError`.
 
 ##### Task list
 
@@ -742,14 +766,14 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-10-12
+last_review: 2026-10-13
 review_status: complete-with-recorded-buffer-and-governance-gaps
 finish_line: "Narration rebuilt"
 roadmap_doc: ROADMAP.md
 work_register: notion:database/3f87c96cc31e800580cfe019c89a56ca
 buffer_target: 5
 buffer_actual_full_specs: 5
-buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1, READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1, UX-POLISH-1) + 1 epic (NARRATE-REBUILD-1, head, chartered 2026-10-12, excluded from buffer)
+buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1 [merge after epic P5], READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1 [amended 2026-10-13], UX-POLISH-1 [re-authored 2026-10-13; after epic P5]) + 1 epic (NARRATE-REBUILD-1, head, in flight at P5, excluded from buffer)
 buffer_actual_stubs: 1 (DEV-PERF-MEASURE-1)
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->

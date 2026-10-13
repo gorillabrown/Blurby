@@ -19,6 +19,7 @@
 | 2026-10-13 | planned | write-plan | HB-2 planned; rubric v1.2 U1-U10 pass; owner trash step gated at Task 1 |
 | 2026-10-13 | in-flight | virtuoso | executing: eb/hb-2 |
 | 2026-10-13 | executed | pointer-closeout | HB-2: docs/governance/close-outs/CloseOut.HB-2.2026-10-13.md, complete, 2026-10-13, estimate 33m, actual 5m |
+| 2026-10-13 | absorbed | roadmap-review | as GOV-NOTION-VIEWS-1 (completed) |
 
 ## Storyboard
 
