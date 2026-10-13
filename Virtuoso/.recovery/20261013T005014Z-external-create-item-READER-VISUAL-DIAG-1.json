@@ -1,0 +1,62 @@
+{
+  "id": "20261013T005014Z-external-create-item-READER-VISUAL-DIAG-1",
+  "operation": "external-create-item",
+  "item_id": "READER-VISUAL-DIAG-1",
+  "created": "2026-10-13T00:50:14Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "title": "Diagnose the Focus/Flow reading band and the ResizeObserver flood",
+      "sequence": 12,
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#reader-visual-diag-1",
+      "branch": "eb/reader-visual-diag-1",
+      "prerequisites": [],
+      "description": "Read-only live diagnosis of BUG-188 (reading-zone mask sized from a 24 px fallback, not tied to the word cursor; two clocks in Flow) and BUG-187 (observer loop flooding error.log), ending in two fix specifications. No product code committed.",
+      "notes": "Created by roadmap review 2026-10-12 (BUG-187, BUG-188). Full Spec: U9/U10 pass.",
+      "id": "READER-VISUAL-DIAG-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-13T00:49:29Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:READER-VISUAL-DIAG-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "READER-VISUAL-DIAG-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:READER-VISUAL-DIAG-1",
+      "actualRevision": "2026-10-13T00:50:21Z",
+      "recoveryId": "20261013T005014Z-external-create-item-READER-VISUAL-DIAG-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "id",
+          "sequence",
+          "status",
+          "written_status",
+          "effort",
+          "spec_link",
+          "branch",
+          "group"
+        ]
+      },
+      "providerItemId": "13271954728",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-13T00:50:38Z",
+  "outcome": "succeeded"
+}

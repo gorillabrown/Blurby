@@ -1,0 +1,62 @@
+{
+  "id": "20261013T004955Z-external-create-item-SETTINGS-WRITE-DURABLE-1",
+  "operation": "external-create-item",
+  "item_id": "SETTINGS-WRITE-DURABLE-1",
+  "created": "2026-10-13T00:49:55Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "title": "Make settings writes durable and race-free",
+      "sequence": 11,
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#settings-write-durable-1",
+      "branch": "eb/settings-write-durable-1",
+      "prerequisites": [],
+      "description": "Serialize JSON writes per file (main/json-store.js), make the settings/history/site-cookie saves report failure without rejecting, give sync-queue.json the same writer, and flush settings at quit. Fixes BUG-185; must merge before NARRATE-REBUILD-1 Core writes state.",
+      "notes": "Created by roadmap review 2026-10-12 (BUG-185, OutsideAudit.10 F7). Full Spec: U9/U10 pass.",
+      "id": "SETTINGS-WRITE-DURABLE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-13T00:49:29Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:SETTINGS-WRITE-DURABLE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "SETTINGS-WRITE-DURABLE-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:SETTINGS-WRITE-DURABLE-1",
+      "actualRevision": "2026-10-13T00:49:59Z",
+      "recoveryId": "20261013T004955Z-external-create-item-SETTINGS-WRITE-DURABLE-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedFields": [
+          "id",
+          "sequence",
+          "status",
+          "written_status",
+          "effort",
+          "spec_link",
+          "branch",
+          "group"
+        ]
+      },
+      "providerItemId": "13271913697",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-13T00:50:14Z",
+  "outcome": "succeeded"
+}
