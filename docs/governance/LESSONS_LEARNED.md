@@ -2910,3 +2910,17 @@ Related: LL-153.
 
 ### LL-137 — status (HB-2, 2026-10-13)
 **Status:** Observation — held: the register reads were hashed as UTF-8 canonical JSON and the CLAUDE.md size was counted with the file opened as UTF-8; no code-page artefact appeared.
+
+### LL-155 — Verify a Notion text rewrite against the SQL plain text; rows mode is not a faithful echo of the markdown written (HB-3, 2026-10-13)
+**Verdict:** A text property written through the connector with backticked dotted names and backslash escapes stores exactly the intended plain text, but a rows-mode read gives back a normalized markdown form, not the string written: an escaped `\#` returns as `#` and a real newline as `<br>`. The plain text is only provable from a SQL read.
+**Evidence:** HB-3 (2026-10-13): 91 values on 61 items rewritten; the Q1 SHA-256 of the 16 mapped columns stayed `9729d554…` after every batch and at the end, and SQL equality returned `ok=1` for 23/23 batch-1 values (0 for a tampered and a backticked expected value), yet 4 rewritten values read back in rows mode differing from the written markdown (CLEANUP-LEGACY-PARSERS-1, READER-MODE-SEPARATION-2: `\#` shown as `#`; HYG-XLSX-DASHBOARD-RESTORE, NARRATE-CURSOR-TRACKING-DIAG-1: newlines as `<br>`).
+**Recommendation:** Verify any Notion register text rewrite by SQL: a full-table hash of the mapped columns after each batch of writes (one read covers every value), or SQL equality against the expected plain text with bound parameters. Use rows mode only to find or count links and formatting, never as the equality check for what was written.
+**Applies to:** Specifications and runs that write text into the Notion work register through the connector (register repairs, ceremony writes of Spec Reference, Evidence and Notes), and their verification steps.
+**Status:** Observation
+Related: LL-153, LL-154.
+
+### LL-153 — status (HB-3, 2026-10-13)
+**Status:** Observation — held: the executing session wrote only text properties of items carrying an auto-link, moved no item status, and the SHA-256 of the 16 mapped columns over 72 rows was identical before and after (`9729d554…`).
+
+### LL-154 — status (HB-3, 2026-10-13)
+**Status:** Observation — held: verification used SQL and rows-mode reads only, never a view-mode query, and the Phase link drift view was not touched.

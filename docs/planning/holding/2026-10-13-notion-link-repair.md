@@ -18,6 +18,7 @@
 | 2026-10-13 | storyboarded | storyboard | reopened by write-plan; decision 3 (GoG write recipe), A2/A5 corrected, A7 no import loss; re-approved |
 | 2026-10-13 | planned | write-plan | HB-3 planned; rubric v1.2 U1-U10 pass; GoG write recipe (decision 3) |
 | 2026-10-13 | in-flight | virtuoso | executing: eb/hb-3 |
+| 2026-10-13 | executed | pointer-closeout | HB-3: docs/governance/close-outs/CloseOut.HB-3.2026-10-13.md, completed, 2026-10-13, estimate 22m, actual 6m |
 
 ## Storyboard
 
