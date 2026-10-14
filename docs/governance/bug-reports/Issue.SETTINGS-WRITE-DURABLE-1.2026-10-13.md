@@ -20,3 +20,7 @@
    - **C:** keep everything, accept a flaky test, and re-run the suite until it is green. Not recommended (identity-not-counts).
 
 6. **Confidence in cause and solution identification (1–10):** 7. The EPERM-on-busy-target mechanism is well known on Windows and matches KF-2. One occurrence, not yet re-measured.
+
+## Decision (planner, 2026-10-13)
+
+**Option A, Type 1b.** A bounded rename retry in `main/json-store.js` (EPERM/EBUSY/EACCES; 20/40/80 ms delays from `JSON_RENAME_RETRY_DELAYS_MS` in `main/constants.js`), plus tests (d) and (e) as a positive control. KF-2 is in scope for this writer only, and the KF-2 waiver no longer applies to it. Full amendment: `docs/governance/close-outs/Memo.SETTINGS-WRITE-DURABLE-1.GovernanceStaging.2026-10-13.md` fold-in 1. Lesson: SRL-095.

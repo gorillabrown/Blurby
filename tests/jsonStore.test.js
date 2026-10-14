@@ -6,8 +6,15 @@ import { describe, it, expect, vi, beforeAll, afterAll } from "vitest";
 import os from "os";
 import path from "path";
 import fs from "fs/promises";
+import { createRequire } from "module";
 
 const { writeJSON, saveJSON } = await import("../main/json-store.js");
+// The same CommonJS fs/promises object json-store.js requires and calls through.
+const cjsFs = createRequire(import.meta.url)("fs/promises");
+
+function epermError() {
+  return Object.assign(new Error("EPERM: operation not permitted, rename"), { code: "EPERM" });
+}
 
 const TEST_DIR = path.join(os.tmpdir(), "blurby-test-json-store-" + Date.now());
 beforeAll(async () => { await fs.mkdir(TEST_DIR, { recursive: true }); });
@@ -21,6 +28,37 @@ describe("writeJSON — concurrent writes to one path", () => {
       await Promise.all(payloads.map((p) => writeJSON(file, p)));
       expect(JSON.parse(await fs.readFile(file, "utf-8"))).toEqual(payloads[payloads.length - 1]);
       expect((await fs.readdir(TEST_DIR)).filter((n) => n.endsWith(".tmp"))).toEqual([]);
+    }
+  });
+});
+
+describe("writeJSON — transient rename locks (Windows EPERM/EBUSY/EACCES)", () => {
+  it("(d) rename fails with EPERM twice, then succeeds: resolves, file holds the payload, 3 rename calls", async () => {
+    const file = path.join(TEST_DIR, "retry-ok.json");
+    const realRename = cjsFs.rename;
+    let calls = 0;
+    const spy = vi.spyOn(cjsFs, "rename").mockImplementation(async (...args) => {
+      calls++;
+      if (calls <= 2) throw epermError();
+      return realRename.apply(cjsFs, args);
+    });
+    try {
+      await expect(writeJSON(file, { retried: true })).resolves.toBeUndefined();
+      expect(spy).toHaveBeenCalledTimes(3);
+    } finally {
+      spy.mockRestore();
+    }
+    expect(JSON.parse(await fs.readFile(file, "utf-8"))).toEqual({ retried: true });
+  });
+
+  it("(e) rename fails with EPERM every time: rejects with code EPERM after 4 rename calls", async () => {
+    const file = path.join(TEST_DIR, "retry-fail.json");
+    const spy = vi.spyOn(cjsFs, "rename").mockImplementation(async () => { throw epermError(); });
+    try {
+      await expect(writeJSON(file, { never: true })).rejects.toMatchObject({ code: "EPERM" });
+      expect(spy).toHaveBeenCalledTimes(4);
+    } finally {
+      spy.mockRestore();
     }
   });
 });
