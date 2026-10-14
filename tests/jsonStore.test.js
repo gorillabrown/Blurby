@@ -8,7 +8,7 @@ import path from "path";
 import fs from "fs/promises";
 import { createRequire } from "module";
 
-const { writeJSON, saveJSON } = await import("../main/json-store.js");
+const { writeJSON, saveJSON, whenWritesSettled } = await import("../main/json-store.js");
 // The same CommonJS fs/promises object json-store.js requires and calls through.
 const cjsFs = createRequire(import.meta.url)("fs/promises");
 
@@ -88,5 +88,34 @@ describe("saveJSON — failure policy", () => {
     await fs.mkdir(dir, { recursive: true });
     await expect(saveJSON(file, { attempt: 2 }, "settings")).resolves.toBe(true);
     expect(JSON.parse(await fs.readFile(file, "utf-8"))).toEqual({ attempt: 2 });
+  });
+});
+
+describe("whenWritesSettled", () => {
+  it("(g) resolves once unawaited writes settle, even when one fails: the last payloads landed and no .tmp remains", async () => {
+    const dir = path.join(TEST_DIR, "settled");
+    await fs.mkdir(dir, { recursive: true });
+    const a = path.join(dir, "a.json");
+    const b = path.join(dir, "b.json");
+    const notDir = path.join(dir, "not-a-dir");
+    await fs.writeFile(notDir, "plain file", "utf-8");
+    const bad = path.join(notDir, "x.json"); // its parent is a regular file, so this write fails
+
+    // Not awaited: the quit flush sees these writes only through the per-path write chain.
+    const writes = [
+      writeJSON(a, { n: 1 }),
+      writeJSON(a, { n: 2 }),
+      writeJSON(b, { n: 3 }),
+      writeJSON(bad, { n: 4 }),
+    ];
+    writes[3].catch(() => {}); // expected rejection, handled here so it is not reported as unhandled
+    try {
+      await whenWritesSettled(); // must resolve, not reject
+      expect(JSON.parse(await fs.readFile(a, "utf-8"))).toEqual({ n: 2 });
+      expect(JSON.parse(await fs.readFile(b, "utf-8"))).toEqual({ n: 3 });
+      expect((await fs.readdir(dir)).filter((n) => n.endsWith(".tmp"))).toEqual([]);
+    } finally {
+      await Promise.allSettled(writes); // keep in-flight writes from outliving the test directory
+    }
   });
 });

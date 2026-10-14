@@ -13,7 +13,8 @@ const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = r
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
-const { readJSON, writeJSON, saveJSON } = require("./main/json-store");
+const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
+const { createWillQuitHandler } = require("./main/quit-sequence");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -676,35 +677,28 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-let narrateProducerStopped = false;
-app.on("will-quit", async (event) => {
-  // Stop the Narrate producer workers before the process exits: a worker ended under a live onnxruntime run takes
-  // the process down with 0xC0000409. Quit waits once for them, then quits again.
-  if (!narrateProducerStopped) {
-    narrateProducerStopped = true;
-    event.preventDefault();
-    try { await require("./main/narrate/producer").shutdown(); } catch { /* ignore */ }
-    app.quit();
-    return;
-  }
-  if (watcher) watcher.close();
-  // Stop WebSocket server
-  try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
-  await flushTtsEvalTraceCaptures();
-  await saveLibraryNow();
-  await saveSettingsFn();
-  // Final cloud sync before quit
-  try {
-    const syncEngine = require("./main/sync-engine");
-    syncEngine.stopAutoSync();
-    const auth = require("./main/auth");
-    if (auth.getAuthState()) {
-      await syncEngine.startSync();
-    }
-  } catch (err) {
-    console.log("[cloud] Quit sync failed:", err.message);
-  }
-});
+// The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
+// local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
+app.on("will-quit", createWillQuitHandler({
+  app,
+  stopNewWork: () => {
+    if (watcher) watcher.close();
+    try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+    try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
+  },
+  // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
+  shutdownProducer: () => require("./main/narrate/producer").shutdown(),
+  steps: [
+    ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
+    ["library", saveLibraryNow],
+    ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
+    ["settings", saveSettingsFn],
+    ["pending writes", whenWritesSettled],
+    ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+    ["library after sync", () => (_libraryDirty ? saveLibraryNow() : undefined)], // startSync's merge arms the debounced library save (main/sync-engine.js); flush it
+    ["writes after sync", whenWritesSettled],
+  ],
+}));
 
 } // end single-instance else block
 

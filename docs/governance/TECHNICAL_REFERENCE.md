@@ -232,7 +232,7 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 | Cloud apply | `applyCloudSettings` in `main/sync-engine.js` | Normalizes after the merge and before the settings save |
 | Renderer write | the `save-settings` handler in `main/ipc/state.js` | Normalizes before `get-state`, before the debounced save and before the sync enqueue |
 
-Each site has an omission control in `tests/` (removing the call fails its test). NARRATE-REBUILD-1 retires these calls only if the rebuilt mode's id is `"narrate"`. Settings writes are serialized per file and report failure without rejecting (SETTINGS-WRITE-DURABLE-1).
+Each site has an omission control in `tests/` (removing the call fails its test). NARRATE-REBUILD-1 retires these calls only if the rebuilt mode's id is `"narrate"`. Settings writes are serialized per file and report failure without rejecting (SETTINGS-WRITE-DURABLE-1). At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).
 
 ### EPUB CFI Position Tracking
 
