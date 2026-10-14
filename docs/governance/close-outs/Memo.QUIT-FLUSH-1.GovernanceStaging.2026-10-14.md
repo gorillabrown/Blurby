@@ -44,3 +44,15 @@ in the branch, as the specification and its diff fence (Done-when 12) require.
 - Done-when 10: BUG-192's **Status** line is the specified text verbatim.
 - Done-when 11: `docs/governance/TECHNICAL_REFERENCE.md:235` ends with the specified sentence verbatim.
 - `npm run typecheck` (implementation agent): exit 0.
+
+### Done-when 8 — full suite, typecheck, build (owner's machine, orchestrator, HEAD `00dbba06`, tree `3f56d7dc541dd1e64322d83c9edb1d5b732ddf22`)
+- `npm ci`: exit 0 (reconciliation recipe, 2026-10-14).
+- `npm test`: `Test Files 153 passed (153)`, `Tests 2076 passed | 1 skipped (2077)`, no failures, no unhandled errors; **exit 0**. Against the base (2,068 passed / 1 skipped in 152 files): +8 tests (seven in `tests/quitSequence.test.js`, one in `tests/jsonStore.test.js`) and +1 file.
+- `npm run typecheck`: **exit 0**.
+- `npm run build`: `✓ built in 2.11s`; **exit 0**.
+- Run while Blurby.Brain had cleared the measurement window (no epic trial or G2 session running).
+
+### Done-when 9 — owner smoke on a production build
+- Build: `npx electron-builder --win --x64 --dir --publish never` → **exit 0**; `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe` (223,001,088 bytes, 2026-10-14 17:39:26), from `00dbba06` (`npm run build` exit 0 first, Done-when 8).
+- Shipped-artifact check: `main.js`, `main/quit-sequence.js`, `main/ipc/state.js`, `main/json-store.js` and `main/constants.js` extracted from `resources/app.asar` are byte-identical (`cmp`) to `00dbba06`.
+- Checklist sent to Blurby.Brain for the owner (2026-10-14); results: (pending)
