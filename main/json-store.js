@@ -14,7 +14,7 @@ async function readJSON(filepath, fallback) {
 // file, so overlapping writes never share the .tmp file and the last call's data lands last.
 const writeTails = new Map();
 
-function writeJSON(filepath, data) {
+async function writeJSON(filepath, data) {
   // Serialize now, so a later call always carries later data.
   const text = JSON.stringify(data, null, 2);
   const tmp = filepath + ".tmp";
