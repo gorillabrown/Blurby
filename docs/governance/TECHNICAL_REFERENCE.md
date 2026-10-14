@@ -48,7 +48,7 @@ Blurby is an Electron application with a clear three-layer architecture.
 │  main/window-manager.js ─── BrowserWindow, tray, menu        │
 │  main/migrations.js ─── schema migrations with backup        │
 │  main/ws-server.js ─── WebSocket for Chrome extension        │
-│  main/folder-watcher.js ─── chokidar folder watching         │
+│  main/folder-watcher.js ─── fs.watch folder watching         │
 │  main/tts-engine.js ─── Kokoro TTS worker wrapper (dormant)  │
 │  main/tts-worker.js ─── Kokoro inference (dormant)           │
 │  main/cloud-storage.js ─── provider factory                  │
@@ -133,7 +133,6 @@ Main process event
 | `@azure/msal-node` | Microsoft OAuth2/PKCE authentication |
 | `googleapis` | Google OAuth2 and Drive API |
 | `electron-updater` | Auto-update checking and installation |
-| `chokidar` | File system watching for folder sync (lazy-loaded) |
 | `@mozilla/readability` | Article extraction from URLs (lazy-loaded) |
 | `jsdom` | DOM parsing for URL extraction (lazy-loaded) |
 | `pdf-parse` | PDF text extraction (lazy-loaded) |
@@ -156,7 +155,7 @@ Main process event
 
 ### Lazy-Loading Strategy
 
-Heavy dependencies are lazy-loaded on first use to keep startup fast: `chokidar`, `@mozilla/readability`, `jsdom`, `pdf-parse`, `adm-zip`, `cheerio`. This saves ~13MB from initial load.
+Heavy dependencies are lazy-loaded on first use to keep startup fast: `@mozilla/readability`, `jsdom`, `pdf-parse`, `adm-zip`, `cheerio`. This saves ~13MB from initial load.
 
 ---
 
@@ -709,7 +708,7 @@ Documents enter the library through four paths:
 |------|-------------|---------|
 | Manual add | "Paste text" UI | `addManualDoc` IPC |
 | File drag-and-drop | Drop zone anywhere in app | `importDroppedFiles` IPC |
-| Folder watch | `chokidar` watcher on configured folder | `main/folder-watcher.js` |
+| Folder watch | native recursive `fs.watch` on configured folder (startup start deferred until the main window loads) | `main/folder-watcher.js` |
 | URL import | Paste URL or Chrome extension | `addDocFromUrl` IPC via `main/url-extractor.js` |
 
 Folder-sourced documents do NOT store content in `library.json`. Content is loaded on-demand via the `load-doc-content` IPC channel.

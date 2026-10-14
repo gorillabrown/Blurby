@@ -31,7 +31,7 @@ if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-feat
 const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
         FOLDER_SYNC_BATCH_SIZE, MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
         MS_PER_DAY, AUTO_UPDATE_DELAY_MS, BROWSER_FETCH_TIMEOUT_MS,
-        BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS } = require('./main/constants');
+        BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS, FOLDER_SYNC_STARTUP_DELAY_MS } = require('./main/constants');
 
 // ── Paths (initialized once at startup) ────────────────────────────────────
 let _dataPath = null;
@@ -650,10 +650,11 @@ app.whenReady().then(async () => {
     })();
   }
 
-  // Folder watcher + sync — non-blocking (fire-and-forget, watcher starts first)
+  // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
   if (settings.sourceFolder) {
-    startWatcherFn();
-    syncLibraryWithFolder();
+    const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+    if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
+    else startFolderWork();
   }
 
   // Start cloud sync if signed in (auth is initialized by now)

@@ -317,6 +317,24 @@ describe("folder watcher starts before sync completes", () => {
     expect(order[0]).toBe("startWatcher");
   });
 
+  it("c2: main.js starts the folder watcher and sync only after the main window has loaded", () => {
+    // BUG-193: a large source folder stalled every launch because the watcher crawl and the
+    // folder scan began as soon as auth finished, before the library was shown.
+    const src = fs.readFileSync(path.resolve(__dirname, "../main.js"), "utf-8");
+    const start = src.indexOf("// Folder watcher + sync");
+    const end = src.indexOf("// Start cloud sync");
+    expect(start).toBeGreaterThanOrEqual(0);
+    expect(end).toBeGreaterThan(start);
+    const slice = src.slice(start, end);
+
+    expect.soft(slice).toContain('once("did-finish-load", startFolderWork)');
+    expect.soft(slice).toContain(
+      "setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS)"
+    );
+    // No bare, immediate startWatcherFn(); call line.
+    expect.soft(slice).not.toMatch(/^\s*startWatcherFn\(\);\s*$/m);
+  });
+
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
