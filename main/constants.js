@@ -141,6 +141,8 @@ const TTS_GENERATION_MAX_RETRIES = 1;
 // ── Main Process Lifecycle ───────────────────────────────────────────────────
 /** Debounce delay for saving library.json to disk (ms) */
 const LIBRARY_SAVE_DEBOUNCE_MS = 500;
+/** Delays before each retry of a JSON .tmp rename that hit a transient Windows lock (EPERM/EBUSY/EACCES) (ms) */
+const JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80];
 /** Debounce delay for broadcasting library updates to renderer (ms) */
 const BROADCAST_DEBOUNCE_MS = 200;
 /** Debounce delay for triggering folder sync after watcher events (ms) */
@@ -255,6 +257,7 @@ module.exports = {
   TTS_GENERATION_MAX_RETRIES,
   // Main Process Lifecycle
   LIBRARY_SAVE_DEBOUNCE_MS,
+  JSON_RENAME_RETRY_DELAYS_MS,
   BROADCAST_DEBOUNCE_MS,
   FOLDER_SYNC_DEBOUNCE_MS,
   FOLDER_SYNC_BATCH_SIZE,

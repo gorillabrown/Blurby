@@ -8,6 +8,7 @@ const crypto = require("crypto");
 const fsPromises = require("fs/promises");
 const path = require("path");
 const os = require("os");
+const { writeJSON } = require("./json-store");
 
 // ── State ─────────────────────────────────────────────────────────────────
 
@@ -51,9 +52,7 @@ async function loadQueue() {
 
 async function saveQueue() {
   if (!queuePath) return;
-  const tmp = queuePath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(queue, null, 2), "utf-8");
-  await fsPromises.rename(tmp, queuePath);
+  await writeJSON(queuePath, queue);
 }
 
 // ── Operation helpers ─────────────────────────────────────────────────────
