@@ -32,6 +32,13 @@ Base `05a5480a` (P5 merged). Branch `eb/settings-write-durable-1`. No register w
 - × (d) rename fails with EPERM twice, then succeeds… — `promise rejected "Error: EPERM: operation not permitted, rename" { code: 'EPERM' } instead of resolving`
 - × (e) rename fails with EPERM every time… — `expected "rename" to be called 4 times, but got 1 times` (the spy is seen: 1 call, not 0)
 
+### Amendment 1 — after the retry (`0d97ea43`)
+
+- Done-when 2 (now 41 tests, with (d) and (e)): exit 0. `tsc --noEmit` exit 0.
+- `npm ci` in the worktree (owner-approved), then Done-when 6: `npm test` exit 0, 150 files, 2,054 passed, 1 skipped, 0 failed, with no EPERM/EBUSY/EACCES anywhere in the log (the sync-queue test included); `npm run typecheck` exit 0; `npm run build` exit 0.
+- Done-when 9 fence, amended: the spec's 7 paths plus `M main/constants.js`, plus the memo, time log and issue file.
+- **Remaining before merge: Done-when 7 (owner smoke), deferred by the owner.** `origin/main` moved to `e942e3fd` (the UX-POLISH-1 merge, an allowed move; no shared file). Before merging, re-run Done-when 2–5 on the combined tree.
+
 ## Mid-Dispatch Decisions Registry — SETTINGS-WRITE-DURABLE-1
 
 | # | Date | Pause point | Decision type | Disposition |
