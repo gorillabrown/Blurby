@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T22:12:37Z",
+  "takenAt": "2026-10-14T22:29:35Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -517,13 +517,15 @@
     },
     {
       "id": "LARGE-FOLDER-SYNC-1",
-      "title": "Live folder sync that scales to very large folders",
+      "title": "Live folder sync that scales to very large folders (technical half)",
       "sequence": 15,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
-      "prerequisites": [],
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "QUIT-FLUSH-1"
+      ],
       "effort": "M",
       "lane": "Library & Content",
       "group": "Platform Health",
@@ -532,9 +534,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "FOLDER-SCAN-PERF-1 Done-when 9(d), waived: on the owner's 120,190-file Drive folder a copied EPUB never reached the library, because every watcher event runs a full rescan and imports every file the library lacks, with one save at the end. Technical half: per-file add, remove and change without a rescan; a re-entry guard on syncLibraryWithFolder; batched saves that keep non-folder documents; a watcher closed flag and a cancellable startup timer (Fold-in 2a). Design half (owner): import everything, cap the import, or ask the user to choose subfolders.",
-      "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14 (owner ruling; placement Seq 15 by planner ruling). Stub. The technical half does not depend on the owner's large-folder answer and may be spec'd and dispatched first, split from the design half. The owner keeps sourceFolder cleared until this lands. Evidence: docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md.",
-      "revision": "d6cfbd50d5a75307932f687e721dea9a9a2ac41b20092beeca9e7cf742da2bef",
+      "description": "Technical half: a watcher event adds, removes or refreshes one book without a rescan; one full sync at a time, merged into the live library (positions and deletions survive); progress saved every 30 s; no callback after the watcher closes, and the startup folder work stops at quit (Fold-in 2a). Full sync moves to main/folder-sync.js. Design half (very large folders: import all, cap, or choose subfolders) is an open owner decision.",
+      "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14. Technical half specified 2026-10-14 on main b2dd36f0 (Blurby Brain ruling, Rule 11 tier 1): Full Spec, gates dry-run on the base and the prescribed edit. Merges after QUIT-FLUSH-1 (edits its stopNewWork) and before FOLDER-UNREACHABLE-GUARD-1. Owner check runs in a copy of the owner profile on the real Drive folder, inside the startup scan, with no import. The owner keeps sourceFolder cleared until this lands.",
+      "revision": "cc438cd20a08178d1b6957860814b7eec8c9703e3e92c2deb212e9194fcc1915",
       "extra": {}
     },
     {

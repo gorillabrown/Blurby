@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
+**Last updated**: 2026-10-14 (LARGE-FOLDER-SYNC-1 technical half specified: Full Spec at 15, dispatch-ready depth back to 5; the design half stays an open owner decision; FOLDER-UNREACHABLE-GUARD-1 restated against `main/folder-sync.js`). Before it, 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, read-only) → PACKAGING-FIX-1 (12) → UX-POLISH-1 (13, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (14) → stubs LARGE-FOLDER-SYNC-1 (15), FOLDER-UNREACHABLE-GUARD-1 (16), PDF-IMPORT-DIAG-1 (17), OVERLAY-THEME-SWEEP-1 (18), EINK-CONTROLS-1 (19), KF2-WAIVER-RETIRE-1 (20), NARRATE-YEARS-1 (21, blocked on the epic). Dispatch-ready depth is 4 (10, 11, 12, 14), below the buffer target of 5. FOLDER-SCAN-PERF-1 completed 2026-10-14 (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, read-only) → PACKAGING-FIX-1 (12) → UX-POLISH-1 (13, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (14) → LARGE-FOLDER-SYNC-1 (15, technical half; after QUIT-FLUSH-1) → stubs FOLDER-UNREACHABLE-GUARD-1 (16), PDF-IMPORT-DIAG-1 (17), OVERLAY-THEME-SWEEP-1 (18), EINK-CONTROLS-1 (19), KF2-WAIVER-RETIRE-1 (20), NARRATE-YEARS-1 (21, blocked on the epic). Dispatch-ready depth is 5 (10, 11, 12, 14, 15), at the buffer target of 5. The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. FOLDER-SCAN-PERF-1 completed 2026-10-14 (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: FOLDER-SCAN-PERF-1, completed 2026-10-14 (merge `534b43d2`; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -23,7 +23,7 @@ The owner requested product lanes on 2026-09-23. Each Notion record has one prim
 | TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
 | Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 13 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs; close-out 2026-10-14: READER-VISUAL-DIAG-1 → 11 |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
-| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190); close-out 2026-10-14: FOLDER-SCAN-PERF-1 completed (BUG-193, merge `534b43d2`), LARGE-FOLDER-SYNC-1 (15, stub) |
+| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190); close-out 2026-10-14: FOLDER-SCAN-PERF-1 completed (BUG-193, merge `534b43d2`), LARGE-FOLDER-SYNC-1 (15, stub; technical half Full Spec 2026-10-14, design half open with the owner) |
 | Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185); roadmap review 2026-10-14: QUIT-FLUSH-1 (11, BUG-192), PACKAGING-FIX-1 (13), KF2-WAIVER-RETIRE-1 (20, stub); DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; close-out 2026-10-14: QUIT-FLUSH-1 → 10, PACKAGING-FIX-1 → 12 |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
@@ -529,7 +529,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparation and the owner smokes surfaced. The finish line is still the epic; these are sideways fixes that make the G2 build and daily use sound. See the [plan](docs/planning/roadmap-reviews/2026-10-14-plan.md).
 
-**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, Stage 7) → PACKAGING-FIX-1 (12) → UX-POLISH-2 (14) → LARGE-FOLDER-SYNC-1 (15, stub). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
+**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, Stage 7) → PACKAGING-FIX-1 (12) → UX-POLISH-2 (14) → LARGE-FOLDER-SYNC-1 (15, technical half, Full Spec; merges after QUIT-FLUSH-1, whose `stopNewWork` it edits, and before FOLDER-UNREACHABLE-GUARD-1). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
 <a id="quit-flush-1"></a>
 
@@ -1271,12 +1271,394 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 - **LL-156:** the out-of-scope lines were re-read against the edit sites. The Narrate forwarder, the sibling overlays and the other `--color-bg` panels are not edited by this item, so no waiver silently covers its own code.
 - **LL-150 (for CSS edits):** values change only; no selector is removed or moved.
 
+<a id="large-folder-sync-1"></a>
+
+#### LARGE-FOLDER-SYNC-1 — Live folder sync that scales to very large folders (technical half) *(position 15 — Full Spec; drafted 2026-10-14 on `main` @ `b2dd36f0`)*
+
+- **What:** A watcher event adds, removes or refreshes one book in the library without rescanning the folder. Only one full sync runs at a time. A long import saves its progress every `FOLDER_SYNC_SAVE_INTERVAL_MS` and never drops books it did not scan. The watcher fires nothing after `close()`, and the startup folder work can be stopped at quit (Fold-in 2a, moved here from QUIT-FLUSH-1). The full-sync logic moves out of `main.js` into a new, unit-testable `main/folder-sync.js`.
+- **Why:**
+  - **FOLDER-SCAN-PERF-1 Done-when 9(d) failed on the owner's profile (waived, 2026-10-14).** Two EPUBs copied into `G:\My Drive\Personal\Readings` never reached `library.json` in more than 3 minutes. Drive delivered the events (a bare recursive `fs.watch` saw them). The folder holds 120,190 supported files (120,166 EPUBs, mostly under `Books\` and `Books\Books\`) against 131 folder books in the library, and one `scanFolderAsync` took 93.6 s.
+  - **The path a watcher event takes today (LL-158, traced end to end on `b2dd36f0`):**
+    1. `main/folder-watcher.js` `settle` (`:88-106`) calls `onAdd(full)` for a new file (and `onChange(full)`), or `onUnlink()` with no path (`:92`).
+    2. `main.js` `startWatcherFn` (`:401-434`) maps `onAdd` and `onUnlink` to `debouncedSyncLibraryWithFolder` (`:303-306`), 1 s later `syncLibraryWithFolder` (`:333-398`).
+    3. That function rescans the whole tree (93.6 s on this folder), extracts every file the library lacks (about 120,000, four at a time, `FOLDER_SYNC_BATCH_SIZE`) and calls `setLibrary` and `saveLibrary` once, at the very end (`:394-395`). On this folder the end is hours away, so a copied book never appears.
+  - **No re-entry guard.** Each call resets `syncCancelled = false` (`:335`). The startup sync (`:655`) and every debounced watcher sync run side by side, each with its own 93.6 s scan and its own import of the same files.
+  - **Two latent data-loss paths in the same function:**
+    - The library is rebuilt from copies taken when the extraction phase starts (`synced.push({ ...prev, … })`, `:349`) and replaces the live array at the end (`:394`). A reading position written meanwhile (`main/ipc/documents.js:23` mutates the live doc in place) is lost, and a book deleted meanwhile comes back. On this folder the extraction phase lasts hours.
+    - A cancelled sync (`:373-381`) saves `synced` before the non-folder and Saved Articles books are appended (`:383-392`), so it drops them. Nothing in the renderer calls `cancelSync` today (`preload.js:65` exposes it), so this is latent.
+  - **Fold-in 2a (from QUIT-FLUSH-1's out-of-scope list):** `startWatcher`'s `close()` (`:135-140`) clears pending timers but not a `settle` already past its timer and awaiting `lstat`; that `settle` still calls `onAdd`/`onChange` after close. The startup `setTimeout` (`main.js:655`) is not kept, so a quit inside its 3 s window starts the watcher and a full sync during the quit flush.
+- **Ruling:** Blurby Brain, CLAUDE.md Rule 11 tier 1 (technical back-end), 2026-10-14: per-file live sync, a re-entry guard, batched saves, Fold-in 2a. The design half is split off below and stays the owner's.
+- **Design decisions (planner, 2026-10-14):**
+  - **New `main/folder-sync.js`** (CommonJS, `"use strict"`, no I/O of its own). `createFolderSync(deps)` returns `{ syncAll, cancel, stop, applyAdd, applyUnlink, applyChange }`. Every library and I/O step is injected, as `main/quit-sequence.js` does for QUIT-FLUSH-1, because `main.js` cannot be loaded by a test (`app.requestSingleInstanceLock()` at load).
+  - **The full sync merges into the live library; it never replaces it.** Existing books are updated in place (`Object.assign`), new books are added one batch at a time with `addDocToLibrary`, and the prune at the end filters the live array. A position or deletion written during the sync survives.
+  - **Prune rule, unchanged in substance:** at the end of a sync that was not cancelled, stopped or overtaken by a folder switch, remove folder-sourced books whose path the scan did not return, except books under `<root>\Saved Articles` and books a per-file add brought in during this run (their files appeared after the scan). A cancelled or stale run prunes nothing.
+  - **Re-entry guard:** `syncAll()` for the folder already being synced returns the running promise. For a different folder (`select-folder` / `switch-folder` during a sync) it cancels the running sync, waits for it, then starts the new one. Every `await` in the sync is followed by a staleness check (cancelled, stopped, or `settings.sourceFolder` changed).
+  - **Batched saves are time-based:** after a batch, if `FOLDER_SYNC_SAVE_INTERVAL_MS` (30,000 ms) has passed since the last save, `await saveLibraryNow()` and `broadcastLibrary()`. Time, not a book count, bounds the cost: a 120k-book `library.json` is tens of MB, and a write every few books would be quadratic. A cut import loses at most 30 s of work. A cancelled or stale run saves what it added (unless stopped for quit, where the quit flush saves).
+  - **Per-file add (`applyAdd(p)`):** stat the path; a directory (a folder moved in) is scanned with `scanFolderAsync(dir)` and each file is added in turn, with no prune; a file is extracted with the existing `extractNewFileDoc` and added unless the library already holds a book with the same directory and lower-cased stem (any format; mirrors `scanFolderAsync`'s format dedupe), the path is in `failedExtractions`, or another add of it is in flight. It does not call `scanFolderAsync` on the root and does not wait for a running full sync.
+  - **Per-file remove (`applyUnlink(p)`):** removes folder books whose path is `p` or under `p + path.sep`, but only if the root is reachable and `p` is really gone now (both by `stat`). A transient `lstat` failure on Drive, or an unreachable root, removes nothing (the BUG-195 hazard in the per-file path).
+  - **Per-file change (`applyChange(p)`):** today's `onChange` body (`main.js:408-418`), moved unchanged.
+  - **The watcher passes the path to `onUnlink`,** and gets a `closed` flag: `close()` sets it, `onEvent` returns when it is set, and `settle` checks it after each `await`.
+  - **Quit:** `stopFolderWork()` in `main.js` clears the startup timer, refuses a later `did-finish-load` start, and calls `folderSync.stop()` (cancel the running sync, refuse further per-file applies). QUIT-FLUSH-1's `stopNewWork` calls it first.
+  - **`FOLDER_SYNC_DEBOUNCE_MS` is deleted:** no caller remains (the watcher's own 500 ms per-path stability window already coalesces events). `tests/fileHashesCleanup.test.ts` drops its three assertions on it.
+  - **Kept literals:** the startup line keeps the exact text `setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS)` and `once("did-finish-load", startFolderWork)` for `tests/perfAudit.test.ts:330-333`; `syncLibraryWithFolder` stays as a one-line wrapper so `ctx.syncLibraryWithFolder` (`main/ipc/state.js:68`, `:79`) is unchanged.
+  - **Array order of `library.json` changes** (new books are prepended). Every library view sorts explicitly (`src/components/LibraryView.tsx:257-276`, `LibraryContainer.tsx:305`), so nothing renders differently.
+- **Out of scope:**
+  - **The design half (owner's decision, open):** what Blurby does with a very large source folder (import everything, cap the import, or ask the user to choose subfolders). With this item the startup sync still imports every file the library lacks, now safely and with progress saved; how much it should import is not decided here. See the open decision under the stubs.
+  - BUG-195 (an unreachable root prunes every folder book): FOLDER-UNREACHABLE-GUARD-1, which merges after this item and is restated against `main/folder-sync.js` (LL-156). This item only keeps the new per-file remove from adding a second path to the same loss.
+  - `rescan-folder` (`main/ipc/library.js:310`), a separate full rescan the renderer triggers; it can still run beside `syncAll` (follow-up note for FOLDER-UNREACHABLE-GUARD-1, which edits it).
+  - Format upgrades by a per-file add (a new `book.epub` beside an imported `book.pdf` is skipped until the next full sync, as the scan's dedupe would keep the EPUB).
+  - The cost of `broadcastLibrary` sending a 120k-book library to the renderer every 30 s: part of the design half.
+  - Any renderer, preload or IPC contract change.
+- **Prerequisites:**
+  - **QUIT-FLUSH-1 merged** (it replaces the `will-quit` listener with `createWillQuitHandler({ … stopNewWork … })`; this item adds one line to that `stopNewWork`). Branch from `refs/remotes/origin/main` after it lands, and re-grep every line number below.
+  - The owner check (Done-when 9) needs a production build and the owner at the machine (standing rules 45, 47; LL-152). It reads, never writes, the owner's real profile.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr; any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44). Dry-runs on `b2dd36f0` (2026-10-14) are noted in parentheses; the after-edit dry-runs were run against the prescribed C2 text.
+  1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/folderSync.test.js tests/folderWatcher.test.js` exits 1, and exactly these tests fail, for these reasons:
+     - **(a)** `scanFolderAsync` was called by a per-file add / the book is not in the library when `applyAdd` resolves.
+     - **(b)** the per-file add's book is not in the library while the full sync's scan is pending.
+     - **(c)** the removed book is still in the library / `scanFolderAsync` was called.
+     - **(c2)** a book was removed while its file still exists.
+     - **(d)** `scanFolderAsync` was called twice for two concurrent `syncAll()` on one folder.
+     - **(e)** `saveLibraryNow` was not called before `syncAll` resolved.
+     - **(f)** the non-folder or Saved Articles book is missing after a cancelled sync.
+     - **(g)** the position written during extraction is lost.
+     - **(j)** `stop is not a function`.
+     - **(k)** the `main.js` wiring assertions.
+     - **(w1)** `onUnlink` was not called with the deleted path.
+     - **(w2)** `onAdd` was called after `close()`.
+
+     **(h)**, **(i)** and every existing `folderWatcher` test pass. Record the output in the staging memo.
+  2. After C2, `npx vitest run tests/folderSync.test.js tests/folderWatcher.test.js tests/perfAudit.test.ts tests/fileHashesCleanup.test.ts tests/einkFoundation.test.ts` exits 0.
+  3. `git grep -n -F 'debouncedSyncLibraryWithFolder' -- main.js` prints nothing (dry-run: 3 lines, `:303`, `:406`, `:407`).
+  4. `git grep -n -F 'async function syncLibraryWithFolder' -- main.js` prints nothing (dry-run: `main.js:333:async function syncLibraryWithFolder() {`).
+  5. `git grep -c -P 'folderSync\.apply(Add|Unlink|Change)\(filepath\)' -- main.js` prints `main.js:3` and exits 0 (dry-run: exit 1, no output).
+  6. `git grep -c -F 'stopFolderWork();' -- main.js` prints `main.js:1` and exits 0 (dry-run: exit 1, no output).
+  7. `git grep -c -F 'if (closed) return;' -- main/folder-watcher.js` prints `main/folder-watcher.js:3`, and `git grep -n -F 'onUnlink();' -- main/folder-watcher.js` prints nothing (dry-runs: exit 1 no output; `main/folder-watcher.js:92:…catch { onUnlink(); return; }`).
+  8. `git grep -n -F 'FOLDER_SYNC_DEBOUNCE_MS' -- main.js main` prints nothing (dry-run: `main.js:31`, `main.js:305`, `main/constants.js:149`, `main/constants.js:266`), and `git grep -c -F 'FOLDER_SYNC_SAVE_INTERVAL_MS' -- main/constants.js` prints `main/constants.js:2` (dry-run: exit 1).
+  9. **Owner check on the owner's data, in a copy of the owner's profile, on a production build** (standing rules 45 and 47, LL-152, LL-158). This is the check FOLDER-SCAN-PERF-1 Done-when 9(d) failed; it needs no import of the 120k books, because the add and the delete finish while the 93.6 s startup scan is still running and the app quits before the extraction phase. Record every value and pass/fail in the staging memo.
+     - **Build:** in the worktree, `npm run build` exits 0, then `npx electron-builder --win --x64 --dir --publish never` exits 0 (`<worktree>\release\win-unpacked\Blurby.exe`). Never overwrite the G2 build.
+     - **Setup (executor, every Blurby closed; `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing):**
+       - `$real = "$env:APPDATA\blurby\blurby-data"; $h0 = (Get-FileHash "$real\library.json").Hash, (Get-FileHash "$real\settings.json").Hash`.
+       - `$prof = "$env:TEMP\blurby-lfs1-" + (Get-Date -Format yyyyMMddHHmmss)`; `New-Item -ItemType Directory "$prof\blurby-data" | Out-Null`; `Copy-Item "$real\library.json", "$real\settings.json" "$prof\blurby-data\"`. Copy nothing else: `auth-tokens.json` stays behind, so the copy is signed out of cloud sync.
+       - `$s = Get-Content "$prof\blurby-data\settings.json" -Raw | ConvertFrom-Json; $s | Add-Member -Force -NotePropertyName sourceFolder -NotePropertyValue 'G:\My Drive\Personal\Readings'; $s | ConvertTo-Json -Depth 32 | Set-Content "$prof\blurby-data\settings.json" -Encoding utf8`.
+       - `$orig = @((Get-Content "$prof\blurby-data\library.json" -Raw | ConvertFrom-Json).docs | Where-Object source -eq 'folder' | ForEach-Object id)`; record `$orig.Count` (131 on 2026-10-14).
+       - `$probe = 'G:\My Drive\Personal\Readings\LFS1-probe-' + (Get-Date -Format yyyyMMddHHmmss) + '.epub'`; `Test-Path $probe` prints `False`.
+       - `$lib = { try { @((Get-Content "$prof\blurby-data\library.json" -Raw | ConvertFrom-Json).docs) } catch { $null } }` (a read during a rename returns `$null`; poll again).
+     - **Run:**
+       - **(a)** `$env:BLURBY_USER_DATA_DIR = $prof; $t0 = Get-Date; Start-Process "<worktree>\release\win-unpacked\Blurby.exe"`. The owner confirms the library shows and the Settings cloud panel shows signed out (if signed in: stop, fail). Wait 15 s after the library appears (the watcher starts 3 s after load).
+       - **(b) Add:** `Copy-Item "<worktree>\resources\sample-meditations.epub" $probe; $t1 = Get-Date`. Poll each second for up to 30 s until `& $lib | Where-Object filepath -eq $probe` returns a doc. Pass: found within 30 s, and the owner sees the new *Meditations* entry in the library. Record seconds from `$t1` and from `$t0`.
+       - **(c) Delete:** `Remove-Item $probe; $t2 = Get-Date`. Poll each second for up to 30 s until no doc has `filepath -eq $probe`. Pass: gone within 30 s, and the owner sees the entry leave. Record seconds from `$t2` and from `$t0`.
+       - **(d) Quit:** the owner presses Alt+F4 at once. Pass: within 5 s `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
+     - **After exit:**
+       - **(e)** Every id in `$orig` is still a folder doc in `& $lib`, and no doc has `filepath -eq $probe`. Record the folder-doc count; above `$orig.Count` means the extraction phase began (record how many, not a fail).
+       - **(f)** `Get-ChildItem "$prof\blurby-data" -Filter *.tmp | Where-Object LastWriteTime -gt $t0` prints nothing.
+       - **(g)** `Select-String -Path "$prof\blurby-data\error.log" -Pattern '\[folder-sync\]|\[watcher\]' -ErrorAction SilentlyContinue` prints nothing.
+       - **(h)** The owner's real profile is untouched: both hashes equal `$h0`.
+       - **(i)** `Test-Path $probe` prints `False` (nothing left in the Drive folder).
+  10. Typecheck, build and the full suite: `npm ci` exits 0 in the worktree; then, on the owner's machine (standing rule 47), `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 (standing rule 48).
+  11. `docs/governance/TECHNICAL_REFERENCE.md:711`'s description cell ends with `; a watcher event adds, removes or refreshes one book without a rescan, and one full sync runs at a time, saving every FOLDER_SYNC_SAVE_INTERVAL_MS (main/folder-sync.js, LARGE-FOLDER-SYNC-1)`.
+  12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log and staging memo if kept (standing rule 41):
+      - `A main/folder-sync.js`
+      - `A tests/folderSync.test.js`
+      - `M main.js`
+      - `M main/constants.js`
+      - `M main/folder-watcher.js`
+      - `M tests/folderWatcher.test.js`
+      - `M tests/fileHashesCleanup.test.ts`
+      - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** M.
+- **Owners:** the implementation agent (one module and its wiring: Hercules tier); reviewers for spec compliance and code quality, in parallel; the repository operator, who merges; the owner, for Done-when 9.
+- **Lane:** Library & Content. Execution surface D (main process).
+- **Source:** FOLDER-SCAN-PERF-1 close-out and staging memo (`docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`, `Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`); LL-158; QUIT-FLUSH-1's out-of-scope list (Fold-in 2a); the Blurby Brain ruling of 2026-10-14.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified on `main` @ `b2dd36f0`, 2026-10-14; QUIT-FLUSH-1 lands first, so re-grep):
+  - **New `main/folder-sync.js`, C2 content:**
+    ```js
+    // main/folder-sync.js — Library sync with the source folder: one full sync at a time, merged into the live library,
+    // and per-file add, remove and change from watcher events (LARGE-FOLDER-SYNC-1). Steps are injected, so it is unit-tested.
+    // CommonJS only — Electron main process
+    "use strict";
+    const path = require("path");
+    const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS } = require("./constants");
+
+    function createFolderSync(deps) {
+      const { getSourceFolder, getLibrary, setLibrary, addDoc, removeDoc, scanFolderAsync, statFile,
+        extractNewFileDoc, extractContent, countWords, isFailed, saveLibrary, saveLibraryNow, broadcastLibrary,
+        emitProgress, now = Date.now } = deps;
+      let running = null; // { folder, promise } of the one full sync allowed at a time
+      let cancelled = false;
+      let stopped = false; // set at quit: nothing more is applied or saved
+      const inFlight = new Set(); // paths a per-file add is extracting
+      const addedDuringRun = new Set(); // per-file adds since the running sync's scan; its prune keeps them
+
+      const findByPath = (p) => getLibrary().find((d) => d.filepath === p);
+      const bookKey = (p) => path.dirname(p) + "\0" + path.basename(p, path.extname(p)).toLowerCase();
+      const hasBook = (p) => { const key = bookKey(p); return getLibrary().some((d) => d.filepath && bookKey(d.filepath) === key); };
+      const exists = (p) => statFile(p).then(() => true, () => false);
+
+      async function runFullSync(folder) {
+        cancelled = false;
+        addedDuringRun.clear();
+        const stale = () => cancelled || stopped || getSourceFolder() !== folder;
+        emitProgress(0, 0, "scanning");
+        const files = await scanFolderAsync(folder);
+        if (stale()) return;
+
+        const byPath = new Map(getLibrary().map((d) => [d.filepath, d]));
+        const onDisk = new Set();
+        const newFiles = [];
+        for (const file of files) {
+          onDisk.add(file.filepath);
+          const prev = byPath.get(file.filepath);
+          if (prev) Object.assign(prev, { filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
+          else if (!isFailed(file.filepath)) newFiles.push(file);
+        }
+        emitProgress(0, newFiles.length, "extracting");
+
+        let added = 0;
+        let lastSave = now();
+        for (let i = 0; i < newFiles.length && !stale(); i += FOLDER_SYNC_BATCH_SIZE) {
+          const results = await Promise.all(newFiles.slice(i, i + FOLDER_SYNC_BATCH_SIZE).map(extractNewFileDoc));
+          if (stale()) break; // a folder switch makes these results another folder's
+          for (const doc of results) if (doc && !findByPath(doc.filepath)) { addDoc(doc); added++; }
+          emitProgress(Math.min(i + FOLDER_SYNC_BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
+          if (now() - lastSave >= FOLDER_SYNC_SAVE_INTERVAL_MS) {
+            await saveLibraryNow();
+            broadcastLibrary();
+            lastSave = now();
+          } else {
+            await new Promise((resolve) => setImmediate(resolve)); // keep the UI responsive between batches
+          }
+        }
+
+        if (stale()) {
+          if (!stopped && added > 0) { await saveLibraryNow(); broadcastLibrary(); } // the quit flush saves when stopped
+          return;
+        }
+        const savedArticles = path.join(path.resolve(folder), "Saved Articles");
+        setLibrary(getLibrary().filter((d) => d.source !== "folder" || onDisk.has(d.filepath)
+          || addedDuringRun.has(d.filepath) || (d.filepath && path.resolve(d.filepath).startsWith(savedArticles))));
+        saveLibrary();
+        broadcastLibrary();
+        emitProgress(newFiles.length, newFiles.length, "done");
+      }
+
+      async function syncAll() {
+        const folder = getSourceFolder();
+        if (!folder || stopped) return;
+        while (running) {
+          if (running.folder === folder) return running.promise;
+          cancelled = true; // a folder switch: let the old sync stop, then start the new one
+          await running.promise.catch(() => {});
+        }
+        const promise = runFullSync(folder).finally(() => { running = null; });
+        running = { folder, promise };
+        return promise;
+      }
+
+      async function addOne(p) {
+        let st;
+        try { st = await statFile(p); } catch { return; }
+        if (stopped) return;
+        if (st.isDirectory()) {
+          for (const file of await scanFolderAsync(p)) await addOne(file.filepath); // a folder moved in
+          return;
+        }
+        if (inFlight.has(p) || isFailed(p) || hasBook(p)) return;
+        const folder = getSourceFolder();
+        inFlight.add(p);
+        try {
+          const doc = await extractNewFileDoc({ filepath: p, filename: path.basename(p), ext: path.extname(p).toLowerCase(), size: st.size, modified: st.mtimeMs });
+          if (!doc || stopped || getSourceFolder() !== folder || findByPath(p)) return;
+          addDoc(doc);
+          addedDuringRun.add(p);
+          saveLibrary();
+          broadcastLibrary();
+        } finally {
+          inFlight.delete(p);
+        }
+      }
+
+      async function removeUnder(p) {
+        const folder = getSourceFolder();
+        // Only a path that is really gone, under a root that is reachable: a Drive hiccup or an unplugged root removes nothing.
+        if (stopped || !folder || !(await exists(folder)) || await exists(p) || stopped) return;
+        const prefix = p + path.sep;
+        const gone = getLibrary().filter((d) => d.source === "folder" && d.filepath && (d.filepath === p || d.filepath.startsWith(prefix)));
+        if (!gone.length) return;
+        for (const d of gone) removeDoc(d.id);
+        saveLibrary();
+        broadcastLibrary();
+      }
+
+      async function refresh(p) {
+        const doc = findByPath(p); // a path not yet in the library is ignored
+        if (stopped || !doc) return;
+        const content = await extractContent(p);
+        if (stopped || !content || typeof content !== "string") return;
+        doc.wordCount = countWords(content);
+        saveLibrary();
+        broadcastLibrary();
+      }
+
+      const guarded = (name, fn) => (p) => fn(p).catch((err) => console.error("[folder-sync] " + name + " failed:", err && err.message));
+      return {
+        syncAll,
+        cancel() { cancelled = true; },
+        stop() { stopped = true; cancelled = true; },
+        applyAdd: guarded("add", addOne),
+        applyUnlink: guarded("remove", removeUnder),
+        applyChange: guarded("change", refresh),
+      };
+    }
+
+    module.exports = { createFolderSync };
+    ```
+    **At C1** the module has the same signature and `module.exports`, but the **current behaviour verbatim**:
+    - `syncAll` is the body of `main.js:333-398` with `settings.sourceFolder` → `getSourceFolder()`, `syncCancelled` → a module `let cancelled`, `failedExtractions.has` → `isFailed`, `emitSyncProgress` → `emitProgress`, `FOLDER_SYNC_BATCH_SIZE` from `./constants`; no guard, no `running`.
+    - `cancel()` sets `cancelled = true`. There is **no `stop`**.
+    - `applyAdd` and `applyUnlink` are `() => syncAll()` (C1's `main.js` does not call them).
+    - `applyChange(p)` is the body of `main.js:408-418`.
+  - **`main/folder-watcher.js` (C2 only):**
+    - **`:85`** after `const pending = …;` add `let closed = false; // set by close(): no callback fires after it`.
+    - **`:88-106`** (`settle`) become:
+      ```js
+        async function settle(rel, renamed) {
+          pending.delete(rel);
+          if (closed) return;
+          const full = path.join(sourceFolder, rel);
+          let st;
+          try { st = await fsPromises.lstat(full); } catch { if (!closed) onUnlink(full); return; }
+          if (closed) return;
+          if (st.isDirectory()) {
+            // A folder moved in raises one event; the caller imports the files under it.
+            if (renamed) onAdd(full);
+            return;
+          }
+          if (!SUPPORTED_EXT.includes(path.extname(full).toLowerCase())) return;
+          if (st.isSymbolicLink()) {
+            const root = await realRoot;
+            if (closed) return;
+            const inside = await isPathWithinFolder(full, sourceFolder, root);
+            if (closed || !inside) return;
+          } else if (!st.isFile()) {
+            return;
+          }
+          if (renamed) onAdd(full); // a new file, or one replaced by an atomic save
+          onChange(full); // main.js ignores a path not yet in the library
+        }
+      ```
+    - **`:109`** becomes `if (closed || !rel) return;`.
+    - **`:136`** (first line of the `watcher.close` override body) gains `closed = true;` before the `for`.
+  - **`main/constants.js`:**
+    - **C1:** after `:153` (`FOLDER_SYNC_STARTUP_DELAY_MS`) add `/** During a long folder import, save and broadcast the library at most this often (ms) */` and `const FOLDER_SYNC_SAVE_INTERVAL_MS = 30000;`; after `FOLDER_SYNC_STARTUP_DELAY_MS,` in the export list (`:268`) add `FOLDER_SYNC_SAVE_INTERVAL_MS,`.
+    - **C2:** delete `:148-149` (`FOLDER_SYNC_DEBOUNCE_MS` and its comment) and its export line (`:266`).
+  - **`main.js`:**
+    - **`:3` imports (C1):** after `:15` add `const { createFolderSync } = require("./main/folder-sync");`.
+    - **`:31` (C2):** drop `FOLDER_SYNC_DEBOUNCE_MS, ` from the destructure.
+    - **`:65` (C2):** `let syncDebounceTimer = null;` becomes `let folderWorkTimer = null; // the startup folder work, until it runs or quit stops it` and add `let folderWorkStopped = false;`.
+    - **`:302-306` (C2):** delete `debouncedSyncLibraryWithFolder` (keep the `// ── Folder sync` heading).
+    - **`:323-398` (C1 and C2):** replace the cancellation flag, `cancelSync` and `syncLibraryWithFolder` with (keep `extractNewFileDoc` `:308-321` and `emitSyncProgress` `:327-331` where they are, before this block):
+      ```js
+      const folderSync = createFolderSync({
+        getSourceFolder: () => settings.sourceFolder,
+        getLibrary, setLibrary, addDoc: addDocToLibrary, removeDoc: removeDocFromLibrary,
+        scanFolderAsync, statFile: (p) => fsPromises.stat(p),
+        extractNewFileDoc, extractContent, countWords,
+        isFailed: (p) => failedExtractions.has(p),
+        saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
+      });
+      function syncLibraryWithFolder() { return folderSync.syncAll(); }
+      function cancelSync() { folderSync.cancel(); }
+      ```
+      **C2 adds** after it:
+      ```js
+      // Quit (Fold-in 2a): the startup folder work never starts, and a running sync or per-file add stops writing.
+      function stopFolderWork() {
+        folderWorkStopped = true;
+        clearTimeout(folderWorkTimer);
+        folderWorkTimer = null;
+        folderSync.stop();
+      }
+      ```
+    - **`:405-418` (C2):** the three callbacks become
+      ```js
+          onAdd: (filepath) => folderSync.applyAdd(filepath),
+          onUnlink: (filepath) => folderSync.applyUnlink(filepath),
+          onChange: (filepath) => folderSync.applyChange(filepath),
+      ```
+      (C1 keeps them, with `onChange` calling `folderSync.applyChange(filepath)`.)
+    - **`:655` (C2):** becomes `const startFolderWork = () => { if (folderWorkStopped) return; folderWorkTimer = setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS); };`.
+    - **QUIT-FLUSH-1's `stopNewWork` (C2):** its first statement becomes `stopFolderWork();`, before `if (watcher) watcher.close();`.
+  - **`tests/fileHashesCleanup.test.ts` (C2):** remove `"FOLDER_SYNC_DEBOUNCE_MS",` from `expectedKeys` (`:219`), the `(g) FOLDER_SYNC_DEBOUNCE_MS is 1000` test (`:255-257`) and the `(h) … FOLDER_SYNC_DEBOUNCE_MS` test (`:307-309`); change "11" to "10" in the describe and test titles at `:212` and `:230`.
+  - **Docs (C2):** Done-when 11.
+- **Tests:**
+  - **New `tests/folderSync.test.js`** (ESM, `const { createFolderSync } = await import("../main/folder-sync.js")`). A `makeDeps()` helper builds fakes: `lib` is a plain array; `getLibrary: () => lib`, `setLibrary: (d) => { lib = d; }`, `addDoc: (d) => lib.unshift(d)`, `removeDoc: (id) => { lib = lib.filter((d) => d.id !== id); }`; `scanFolderAsync` a `vi.fn` returning a controllable deferred; `statFile` resolves `{ isDirectory: () => false, size: 1, mtimeMs: 1 }` for paths in a `disk` Set and rejects otherwise; `extractNewFileDoc` resolves `{ id, filepath, source: "folder", position: 0 }` (controllable deferred where noted); `isFailed` reads a Set; `saveLibrary`, `saveLibraryNow`, `broadcastLibrary`, `emitProgress` spies (`saveLibraryNow` records `lib.length` per call); `now` a counter the test advances. Paths use `path.join(root, …)`.
+    - **(a) A per-file add imports one book without a rescan:** `await applyAdd(p)` → `scanFolderAsync` not called; exactly one doc with `filepath === p`; `saveLibrary` and `broadcastLibrary` called. Variants: `p` in `isFailed` → no extract; a library doc `book.pdf` in the same directory → `applyAdd(book.epub)` adds nothing.
+    - **(b) A per-file add lands during a long full sync, and the sync neither duplicates nor prunes it:** start `syncAll()` with the scan pending; `await applyAdd(p)` → the doc is in `lib`; resolve the scan with files that do not include `p`; `await` the sync → exactly one doc with `filepath === p`. Second case: the scan includes `p` → still exactly one.
+    - **(c) A per-file remove removes only that book:** lib holds folder docs at `p`, at `dir\x.epub` and at `dirX\y.epub`, plus a non-folder doc; `p` and `dir` are not in `disk`, the root is. `await applyUnlink(p)` removes only `p`; `await applyUnlink(dir)` removes only `dir\x.epub`; `scanFolderAsync` never called.
+    - **(c2) A remove that is not real removes nothing:** `p` still in `disk` → nothing removed; the root not in `disk` → nothing removed.
+    - **(d) One full sync at a time:** two `syncAll()` calls on one folder before the scan resolves → `scanFolderAsync` called once, both resolve. Then: start a sync on folder A (scan pending), switch `getSourceFolder` to B and call `syncAll()` → after A's scan resolves, A adds and prunes nothing, and the scan is called with B.
+    - **(e) A long import saves as it goes:** 12 new files, `extractNewFileDoc` immediate, `now` advancing `FOLDER_SYNC_SAVE_INTERVAL_MS` per call → `saveLibraryNow` called at least twice before `syncAll` resolves, with strictly increasing recorded lengths, the first below the final count.
+    - **(f) A cancelled sync keeps every book:** lib holds a non-folder doc, a doc under `<root>\Saved Articles` and an existing folder doc; 8 new files, extraction of the second batch held; `cancel()` while held, then release → all three original docs remain, the first batch's docs are present, and `saveLibraryNow` was called.
+    - **(g) A position written during the import survives:** existing folder doc `X` (position 0) and 4 new files with extraction held; set `X.position = 500` on the object from `lib` (as `main/ipc/documents.js:23` does); release → after the sync, the doc with `X.id` has position 500.
+    - **(h) The end-of-sync prune (characterization, passes at C1 and C2):** a folder doc whose file the scan does not return is removed; the non-folder and Saved Articles docs stay; an existing doc's `size` and `modified` take the scan's values.
+    - **(i) `applyChange` (characterization):** a known path gets `wordCount` from `countWords(extractContent(p))`; an unknown path changes nothing.
+    - **(j) `stop()` ends all writes:** after `stop()`, `await applyAdd(p)` extracts nothing; a sync whose extraction is held, stopped, then released, calls neither `saveLibraryNow` nor `setLibrary`.
+    - **(k) `main.js` wiring (source text, `expect.soft`):** the file contains `onAdd: (filepath) => folderSync.applyAdd(filepath)`, `onUnlink: (filepath) => folderSync.applyUnlink(filepath)`, `function stopFolderWork()` and, inside the `app.on("will-quit"` call, `stopFolderWork();`; it does not contain `debouncedSyncLibraryWithFolder`.
+  - **`tests/folderWatcher.test.js`:** add a `describe("startWatcher — per-file events and close (LARGE-FOLDER-SYNC-1)")`:
+    - **(w1)** as the existing contract test (`:151-186`): after `fs.unlink(newFile)`, `calledWith(cb.onUnlink, newFile)` becomes true within 4 s.
+    - **(w2)** `vi.spyOn(cjsFs, "lstat")` holds every call from `inWatcher()` until released (others pass through); write `a.epub`; wait until the held `lstat` was called; `await w.close()`; release; wait 1 s → `onAdd`, `onChange` and `onUnlink` were never called. Restore the spy in `finally`.
+- **Constants:** `FOLDER_SYNC_SAVE_INTERVAL_MS = 30000` added; `FOLDER_SYNC_DEBOUNCE_MS` deleted.
+- **Branch:** `eb/large-folder-sync-1` from `refs/remotes/origin/main` after QUIT-FLUSH-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\large-folder-sync-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - **C1 (failing tests, no behaviour change):** `main/folder-sync.js` with the current behaviour; `main.js` delegating to it; `FOLDER_SYNC_SAVE_INTERVAL_MS`; `tests/folderSync.test.js`; the `tests/folderWatcher.test.js` additions. Gate: Done-when 1 and `npm run typecheck` exits 0.
+  - **C2 (the fix):** the module above, the watcher's closed flag and `onUnlink(full)`, the `main.js` wiring and `stopFolderWork`, the constant deletion and `tests/fileHashesCleanup.test.ts`, the doc. Gate: Done-when 2–8 and 10–12.
+  - **Merge:** run the owner check (Done-when 9) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If (h) or (i) fails at C1, the move was not verbatim: fix the move, not the test.
+  - If another C1 control fails for a reason other than the stated one, fix the test and re-record. If (w2) passes at C1, stop with BLOCKER(USER): the `lstat` hold did not catch the in-flight `settle`.
+  - If an existing test fails, report it exactly and stop; do not weaken it. At risk: `tests/perfAudit.test.ts` c2 (the startup literal), `tests/fileHashesCleanup.test.ts` (h), `tests/einkFoundation.test.ts` (reads `main.js`).
+  - If Done-when 9(b) or (c) times out: record the elapsed time, the `[watcher]`/`[folder-sync]` lines of `$prof\blurby-data\error.log`, and whether a plain recursive `fs.watch` on the Drive folder still sees the copy (the staging memo of FOLDER-SCAN-PERF-1 has the probe); stop.
+  - If 9(e) finds an original id missing: stop at once, BLOCKER(USER); it is a data-loss defect.
+  - If the full suite fails only in `tests/onnxruntime-patch.test.js` with ENOENT under `node_modules`, run `npm ci` and rerun.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`; file formats are unchanged.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:** every file not named above; the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`); in `main.js`, everything outside the folder-sync block, `startWatcherFn`, the startup folder-work lines, the state lines named above and one line in `stopNewWork`; `main/ipc/**`, `preload.js` and every renderer file; `main/quit-sequence.js` (QUIT-FLUSH-1's); any file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** QUIT-FLUSH-1 first (prerequisite; this item edits its `stopNewWork`). PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may merge in either order. FOLDER-UNREACHABLE-GUARD-1 merges after this item and puts its prune guard in `main/folder-sync.js`'s `runFullSync`, not in `main.js` (LL-156). The live check (Done-when 9) stays out of the epic's measurement windows (Stage 7, Parallel run plan).
+- **Open questions for Blurby Brain (none blocks dispatch; the spec takes the recommended answer):**
+  1. A per-file add skips a file whose directory and stem match a book already in the library, so a new `book.epub` beside an imported `book.pdf` waits for the next full sync. Recommended: accept (it is the scan's own dedupe; a format upgrade that keeps the position is a separate change).
+  2. During a long import, books now appear in the library every 30 s instead of all at the end. Recommended: accept (it is what "saves progress in batches" means to the user).
+
+##### Task list
+| # | Task | Tier | Depends on |
+|---|------|------|------------|
+| 1 | C1: move the sync into `main/folder-sync.js` verbatim, wire `main.js`, add the constant and the tests; record the failing controls | Hercules | QUIT-FLUSH-1 merged |
+| 2 | C2: the per-file sync, guard, batched saves, watcher closed flag, `stopFolderWork`, constant deletion and test edit | Hercules | 1 |
+| 3 | Targeted tests, grep gates, `npm ci`, full suite, typecheck, build (Done-when 2–8, 10) | Hippocrates | 2 |
+| 4 | Spec compliance and code quality, in parallel | Solon ∥ Plato | 3 |
+| 5 | Production build and owner check (Done-when 9) | executor + owner | 4 |
+| 6 | Doc line, diff fence, merge `--no-ff`, push (Done-when 11–12) | MarcusAurelius, Hermes | 5 |
+
+##### Lessons applied
+- **LL-158** — the live row was traced through every step a watcher event sets off, at the owner's real size (120,190 files, 93.6 s scan, 131 books), and is timed to finish inside the scan so it needs no import.
+- **Standing rule 43 (LL-138)** — C1 moves the code verbatim and commits controls that fail on it for stated reasons.
+- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code; each was dry-run on `b2dd36f0` and against the prescribed C2 text.
+- **Standing rules 45 and 47, LL-152** — owner-observed check on a production build, on the owner's machine.
+- **Standing rule 48 (LL-149)** — typecheck and build are in Done-when 10.
+- **Standing rule 41 (LL-136)** — the diff fence exempts the time log and staging memo.
+- **LL-156** — BUG-195's location moves with the code; FOLDER-UNREACHABLE-GUARD-1's stub is restated against `main/folder-sync.js`.
+- **LL-157** — the quit-time stop runs in QUIT-FLUSH-1's cancelled first pass, before its saves.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- <a id="large-folder-sync-1"></a>**LARGE-FOLDER-SYNC-1 — Live folder sync that scales to very large folders** *(position 15 — stub; filed by FOLDER-SCAN-PERF-1's close-out 2026-10-14, owner ruling)*. FOLDER-SCAN-PERF-1 Done-when 9(d) (waived): on the owner's 120,190-file Drive folder (120,166 EPUBs, mostly under `Books\` and `Books\Books\`; a full scan took 93.6 s), a copied EPUB never reached the library. Every watcher add or unlink runs `syncLibraryWithFolder` (`main.js:333-398`), which rescans the whole tree, extracts every file the library lacks (about 120k) and saves once at the end, with no re-entry guard. **Technical half (planner ruling):** a watcher event applies a single-file add, remove or change without a full rescan; `syncLibraryWithFolder` gets a re-entry guard; a long import saves progress in batches and keeps non-folder and Saved Articles documents (today a cancelled sync, `main.js:373-381`, saves before appending them; nothing in the renderer calls `cancelSync`); the watcher gets a closed flag checked in `onEvent` and after each `await` in `settle`, and `startFolderWork`'s startup timer becomes cancellable in `will-quit` (Fold-in 2a, re-routed from QUIT-FLUSH-1). The technical half (per-file sync, re-entry guard, batched saves, Fold-in 2a) does not depend on the owner's large-folder answer and may be spec'd and dispatched first, split from the design half. **Design half (owner's call, open):** what Blurby does with a very large source folder: import everything, cap the import, or ask the user to choose subfolders. The owner keeps `sourceFolder` cleared until this lands. Coordinate with FOLDER-UNREACHABLE-GUARD-1 (same `main.js` sync and `main/folder-watcher.js`). Evidence: `docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`. Lane: Library & Content.
-- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 16 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both `syncLibraryWithFolder` (`main.js`) and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. Merges after FOLDER-SCAN-PERF-1 (same `main/folder-watcher.js` and `main.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
+- **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 15 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
+- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 16 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
 - <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 21 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
 - <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 17 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
 - <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 20 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
