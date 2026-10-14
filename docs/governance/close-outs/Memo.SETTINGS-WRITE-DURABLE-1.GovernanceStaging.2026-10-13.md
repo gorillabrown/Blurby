@@ -39,6 +39,20 @@ Base `05a5480a` (P5 merged). Branch `eb/settings-write-durable-1`. No register w
 - Done-when 9 fence, amended: the spec's 7 paths plus `M main/constants.js`, plus the memo, time log and issue file.
 - **Remaining before merge: Done-when 7 (owner smoke), deferred by the owner.** `origin/main` moved to `e942e3fd` (the UX-POLISH-1 merge, an allowed move; no shared file). Before merging, re-run Done-when 2–5 on the combined tree.
 
+### Done-when 7 — owner smoke: (a) pass; (b) quit-flush half deferred to BUG-192 by the owner
+
+Recorded 2026-10-13, dev build of `5abdd405`, owner-observed with planner checks of the profile files (verbatim):
+
+  (a) No ENOENT for settings.json.tmp or sync-queue.json.tmp at startup, quit or relaunch, in either terminal: PASS.
+  (b) "Change a setting, quit within 1 s, restart: the change is kept": NOT MET AS WRITTEN.
+      - Theme dark → kept. It was saved by the debounced save ~10 s before quit, because dev mode was too slow to quit within 1 s.
+      - Accent changed to pink just before quit → LOST. settings.json.tmp held accentColor #FF5B7F, written at quit and
+        never renamed; sync-queue.json.tmp was 0 bytes. A second quit left library.json.tmp unrenamed.
+      Cause: the async will-quit second pass is not awaited by Electron. This was there before this item (the library
+      flush has the same flaw) and is filed as BUG-192 (main @ 205d91c8).
+Owner decision (standing, restated): merge anyway; BUG-192 is fixed separately. This item's fixes (serialized writer,
+non-rejecting saves, rename retry, no ENOENT) are verified.
+
 ## Mid-Dispatch Decisions Registry — SETTINGS-WRITE-DURABLE-1
 
 | # | Date | Pause point | Decision type | Disposition |
