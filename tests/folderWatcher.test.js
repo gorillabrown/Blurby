@@ -236,6 +236,27 @@ describe("startWatcher — contract (BUG-193)", () => {
       await w?.close();
     }
   }, 20000);
+
+  it("reports a change when a supported file is atomically replaced (temp file renamed over it)", async () => {
+    // An editor's atomic save writes a temp file, then renames it over the book. The library's
+    // word count refreshes only on onChange, so a rename-only report would leave it stale.
+    const root = path.join(await makeBase(), "root");
+    await fs.mkdir(path.join(root, "a"), { recursive: true });
+    const book = path.join(root, "a", "old.epub");
+    await fs.writeFile(book, "old content");
+
+    const cb = makeCallbacks();
+    const w = startWatcher(root, cb);
+    try {
+      await settle(w);
+      const tmp = `${book}.tmp`;
+      await fs.writeFile(tmp, "new content, longer than the old content");
+      await fs.rename(tmp, book);
+      await vi.waitFor(() => expect(calledWith(cb.onChange, book)).toBe(true), { timeout: 4000 });
+    } finally {
+      await w?.close();
+    }
+  }, 20000);
 });
 
 describe("startWatcher — does not starve the main process (BUG-193)", () => {

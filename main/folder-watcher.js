@@ -101,7 +101,8 @@ function startWatcher(sourceFolder, callbacks) {
     } else if (!st.isFile()) {
       return;
     }
-    (renamed ? onAdd : onChange)(full);
+    if (renamed) onAdd(full); // a new file, or one replaced by an atomic save
+    onChange(full); // main.js ignores a path not yet in the library
   }
 
   function onEvent(eventType, rel) {
