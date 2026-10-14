@@ -1,0 +1,50 @@
+{
+  "id": "20261014T221159Z-external-create-item-LARGE-FOLDER-SYNC-1",
+  "operation": "external-create-item",
+  "item_id": "LARGE-FOLDER-SYNC-1",
+  "created": "2026-10-14T22:11:59Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "id": "LARGE-FOLDER-SYNC-1",
+      "title": "Live folder sync that scales to very large folders",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "M",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#large-folder-sync-1",
+      "branch": "eb/large-folder-sync-1",
+      "sequence": 15,
+      "prerequisites": [],
+      "description": "FOLDER-SCAN-PERF-1 Done-when 9(d), waived: on the owner's 120,190-file Drive folder a copied EPUB never reached the library, because every watcher event runs a full rescan and imports every file the library lacks, with one save at the end. Technical half: per-file add, remove and change without a rescan; a re-entry guard on `syncLibraryWithFolder`; batched saves that keep non-folder documents; a watcher closed flag and a cancellable startup timer (Fold-in 2a). Design half (owner): import everything, cap the import, or ask the user to choose subfolders.",
+      "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14 (owner ruling; placement Seq 15 by planner ruling). Stub. The technical half does not depend on the owner's large-folder answer and may be spec'd and dispatched first, split from the design half. The owner keeps sourceFolder cleared until this lands. Evidence: `docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`."
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T21:52:05Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LARGE-FOLDER-SYNC-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LARGE-FOLDER-SYNC-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LARGE-FOLDER-SYNC-1",
+      "actualRevision": "",
+      "recoveryId": "20261014T221159Z-external-create-item-LARGE-FOLDER-SYNC-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-814f-bf38-e0d61a0b90f1",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T22:12:22Z",
+  "outcome": "succeeded"
+}
