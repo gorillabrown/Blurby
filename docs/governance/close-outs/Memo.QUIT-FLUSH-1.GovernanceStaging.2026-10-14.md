@@ -126,4 +126,24 @@ Content:
 - Done-when 8: `npm test` 153 files, 2,080 passed / 1 skipped / 0 failed (base 2,068 + 12 new: (a)–(f), (h), (i), (i2), (j) in `tests/quitSequence.test.js`; (g) in `tests/jsonStore.test.js`), **exit 0**; `npm run typecheck` **exit 0**; `npm run build` **exit 0**.
 - Done-when 12: unchanged file set (fix round touched only `main.js`, `main/quit-sequence.js`, `tests/quitSequence.test.js` and this memo) plus the issue file (Fold-in 2).
 - Smoke build: `npx electron-builder --win --x64 --dir --publish never` **exit 0** → `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`, 223,001,088 bytes, 2026-10-14 17:50:53. `main.js`, `main/quit-sequence.js`, `main/ipc/state.js`, `main/json-store.js`, `main/constants.js` in `resources/app.asar` are byte-identical (`cmp`) to `bd1216fc`.
-- Checklist sent to Blurby.Brain for the owner (2026-10-14); results: (pending)
+- Checklist sent to Blurby.Brain for the owner (2026-10-14).
+
+### Done-when 9 — results (run by Blurby Brain on the owner's profile, with the owner's go in that session; relayed 2026-10-14)
+- Setup: no Blurby running. `*.tmp` listing before: empty. `sourceFolder` cleared. Not signed in to cloud sync (`sync-state.json` `lastSync` 0, revision 0). Profile backup: `blurby-data\qf1-backup-20261014`. Launches: 17:52:28.937, 17:53:24.318, 17:54:23.648 (control).
+- **(a) PASS.** Settings → Theme → blue preset, then Alt+F4 in the same input batch (well under 1 s).
+- **(b) PASS.** No Blurby process at the first check, about 2 s after Alt+F4.
+- **(c) PASS.** `accentColor` `#FF5B7F` → `#2F8FD8`.
+- **(d) PASS.** `*.tmp` listing after the quit: empty.
+- **(e) PASS.** The relaunch showed the blue accent.
+- **(f) NOT TESTABLE as written; quit side PASS.**
+  - After page turns and Alt+F4, the process exited at once and the `*.tmp` listing stayed empty.
+  - The book did not reopen at a new position, but the control shows the quit is not the cause. On the sample *Meditations* (saved position 26672, cfi `epubcfi(/6/18!/4/2[pgepubid00011],/2,/10/104/1:9)`), 5 page turns in Page mode and then Alt+F4 left the position, cfi and `lastReadAt` unchanged.
+  - Control, launch 3, with no quit: 3 page turns (screenshots show paragraph I → XI and a "Jump back" button), then 10 s with the app open. `library.json` was not written, and the position was unchanged.
+  - So Page-mode page turns do not save a reading position at all, quit or no quit, and (f) cannot exercise the quit flush.
+  - A folder book on Drive (*Why Nations Fail*) would not open ("Could not read EPUB file") while `sourceFolder` is cleared. Out of scope; Blurby Brain is filing it.
+- Files written during the run: `library.json`, `settings.json`, `sync-queue.json` (17:53:50, while running; none a `.tmp`).
+- Profile restored after the run: `settings.json` and `library.json` copied back from the backup and verified byte-identical (accent `#FF5B7F`, `readingMode` narrate, `sourceFolder` cleared).
+
+## Findings for the close-out (from the smoke; no action in this run)
+- **Done-when 9(f) spec gap.** Page-mode page turns do not commit a reading position (Brain's control above), so (f) as written cannot test the quit flush. A future quit smoke needs an action that does commit a position before the quit.
+- **Page mode does not save the reading position on page turns** (observed on the sample *Meditations*, production build `bd1216fc`). This may be a separate defect for the planner to triage. It is not caused by this item: the base quit path was not involved, and the position was unchanged with no quit.
