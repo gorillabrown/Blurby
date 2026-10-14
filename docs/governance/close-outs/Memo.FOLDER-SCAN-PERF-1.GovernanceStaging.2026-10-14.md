@@ -24,6 +24,23 @@ Decision: Owner chose option A (2026-10-14).
 - The failure-handling load contingency becomes: "If (h) fails after C2 only under full-suite load, record both runs and raise its read budget once, to 100 ms. That is still below the base's lowest observed read of 149 ms. Any further raise is BLOCKER(USER)."
 Rationale: At 50 ms, the base fails by 3× or more and `fs.watch` passes by about 25×. The gap margin (36–71 ms against 17–19 ms) is too thin to serve as a timing control.
 
+### Fold-in 1b — Mid-Dispatch Amendment (D2(b): an atomic save reports a change)
+Section: §FOLDER-SCAN-PERF-1 (inline full spec), Design decisions → Watcher → Settle, and Tests
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+##### Mid-Dispatch Amendment — 2026-10-14 — D2(b): a renamed supported file reports onAdd then onChange
+Decision Type: Hybrid (CLAUDE.md rule 11). A technical change with a user-visible effect, against the owner's "no feature change" ruling. The owner decided.
+Context: The code-quality review (nit 6) found that an editor's atomic save settled as `onAdd` only. An atomic save writes a temp file and renames it over the book, and the prescribed rule counts any rename in the window as a rename. `main.js`'s `onAdd` debounces a sync that keeps the existing `wordCount`, so the word count went stale. Chokidar's `atomic` option reported `change`.
+Decision: The owner's words: "D2: fix it now in FOLDER-SCAN-PERF-1 (option b), one test, re-run Done-when 2, 7 and 10."
+- The prescribed `settle` ending `(renamed ? onAdd : onChange)(full)` becomes `if (renamed) onAdd(full);` followed by `onChange(full);`.
+- A non-renamed file still calls `onChange` only.
+- A new file now fires both callbacks. `main.js`'s `onChange` ignores a path not yet in the library, so new books behave as before.
+- New test (j) in `tests/folderWatcher.test.js`: "reports a change when a supported file is atomically replaced (temp file renamed over it)". It failed first on `ac8485f9`'s watcher (`onChange` never called with the replaced path, after the 4 s wait) and passes after the fix.
+- Commit: `234a12b9`.
+Rationale: This restores chokidar parity for atomic saves, as the owner's "no feature change" ruling requires. It costs two lines and one test, and it lands before Done-when 9 runs, so no measurement is wasted. Both files are already inside Done-when 10's fence.
+
 ### Fold-in 2 — Diff fence covers the issue file
 Section: §FOLDER-SCAN-PERF-1, Done-when 10
 Action: Replace
@@ -75,7 +92,7 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
 ## Planner rulings (Blurby.Brain, 2026-10-14)
 
 - **D1:** (b). The two quit-time items go to QUIT-FLUSH-1 (Fold-in 2a). No change on this branch.
-- **D2:** held for the owner, as a hybrid. The atomic save settles as `onAdd`, so the word count is not refreshed. This is a user-visible difference against the owner's "no feature change" ruling. The planner recommends (b): map a rename onto an existing supported file to `onChange` as well, with one test. Until the owner answers, apply nothing and write no close-out note for (a).
+- **D2:** a hybrid, so it was held for the owner. The owner answered (b): "fix it now in FOLDER-SCAN-PERF-1 (option b), one test, re-run Done-when 2, 7 and 10". Applied in `234a12b9` (Fold-in 1b).
 - **D3:** confirmed.
   - Done-when 9 runs after G2, on the owner's real profile.
   - The fix build is the branch tip (`96cc6de8` is docs on top of `ac8485f9`), or a later commit if D2(b) is chosen.
@@ -94,7 +111,7 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
 - **Nit 3, handed to QUIT-FLUSH-1.** The startup `setTimeout` in `startFolderWork` cannot be cancelled. A quit within `FOLDER_SYNC_STARTUP_DELAY_MS` of `did-finish-load` starts a watcher and a sync after `will-quit` has closed the watcher. Fix there by keeping the timer handle and calling `clearTimeout` on it in `will-quit`.
 - **Nit 4, accepted by the specification.** A folder picked during the 3 s window, or during the deferred sync, runs one extra concurrent sync. The specification calls this "one more sync". A re-entrancy guard in `syncLibraryWithFolder` would be a later item.
 - **Nit 5.** `did-finish-load` never fires if the load fails, so folder work waits until a folder is picked. This affects dev only, when the dev server is down. Adding `did-fail-load` as a trigger is optional.
-- **Nit 6, a planner note, possibly a follow-up.** An editor's atomic save (write a temp file, then rename it over the target) now settles as `onAdd` (sticky `renamed`) where chokidar's `atomic` option reported `change`. `main.js`'s `onAdd` debounces a sync that keeps the existing `wordCount`, so the word count is not refreshed after an atomic save. This follows the specification's own rule, "if any event in the window was `rename`, the settled event counts as a rename". It is the one observable difference from chokidar found so far. Done-when 9(d) does not cover it.
+- **Nit 6. RESOLVED by D2(b) in `234a12b9` (Fold-in 1b).** The original finding follows. An editor's atomic save (write a temp file, then rename it over the target) now settles as `onAdd` (sticky `renamed`) where chokidar's `atomic` option reported `change`. `main.js`'s `onAdd` debounces a sync that keeps the existing `wordCount`, so the word count is not refreshed after an atomic save. This follows the specification's own rule, "if any event in the window was `rename`, the settled event counts as a rename". It is the one observable difference from chokidar found so far. Done-when 9(d) does not cover it.
 - **Nit 7, parity.** A burst of events gives a burst of `lstat` calls, one per path. Chokidar did the same; Done-when 9(d) observes it.
 
 ## Downstream (flag for the review, not this run's to edit)
@@ -104,7 +121,7 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
 
 ## Done-when 9: owner re-measure (pending; waits for G2 to finish)
 
-Run it as specified, on the fix build of this branch (`ac8485f9` or later). Record (a) through (e) here: the setup counts, base and fix click-to-first-render times (cap 180 s, pass ≤ 10 s), live add and delete times (≤ 30 s each), the folder-document count against (a), any `error.log` lines, and dev-mode library and book times. The rest of the close-out follows the specification's failure handling.
+Run it as specified, on the fix build of this branch (`234a12b9` or later, which carries D2(b)). Record (a) through (e) here: the setup counts, base and fix click-to-first-render times (cap 180 s, pass ≤ 10 s), live add and delete times (≤ 30 s each), the folder-document count against (a), any `error.log` lines, and dev-mode library and book times. The rest of the close-out follows the specification's failure handling.
 
 ## Gate evidence
 
@@ -127,4 +144,14 @@ Run it as specified, on the fix build of this branch (`ac8485f9` or later). Reco
   - `npx vitest run` exits 0: 152 files, 2,067 passed and 1 skipped. The skip is the base's `tests/pdf-export.test.js` `it.skip`, and the diff adds no skip. The failing set is empty, the same as the base. Control (h) passed under full-suite load, so the 100 ms load contingency was not used.
   - `npm run typecheck` exits 0, and `npm run build` exits 0.
 - **Done-when 10:** `git diff --name-status 978b5fa6..HEAD` lists exactly the 8 specified paths (`A tests/folderWatcher.test.js`, the rest `M`). Run against the working tree, it also lists `tests/perf-baseline-results.json`, which `npm test` rewrites. The staging plan says never to stage that file, and it was not staged. The time log, this memo and the issue file are added by the governance commit (Fold-in 2).
+- **D2(b) re-run (row R10; orchestrator; tree `234a12b9`; pwsh):**
+  - **Done-when 2:** exits 0, 74/74, including new test (j). (j) failed first on `ac8485f9`'s watcher with `expected false to be true` (`onChange` never called with `a/old.epub`).
+  - **Done-when 7:**
+    - `npx vitest run --reporter=default` exits 0: 152 files, 2,068 passed, 1 skipped. The skip is `tests/pdf-export.test.js (8 tests | 1 skipped)`, the base's `it.skip`. The failing set is empty.
+    - `npm run typecheck` exits 0, and `npm run build` exits 0.
+  - **Done-when 5c:** unchanged (`main.js:2`, `main/constants.js:4`, `main/folder-watcher.js:2`).
+  - **Done-when 10:** `git diff --name-status refs/remotes/origin/main...HEAD` lists exactly the 8 specified paths plus the time log, this memo and the issue file (Fold-in 2).
+    - `origin/main` moved during the run to `7cf39fd9`: the CLAUDE.md trim and Rule 11 / Constitution docs, with no overlap with this branch's files. A two-tree diff therefore also lists `CLAUDE.md`, `docs/planning/Blurby_Project_Constitution.md` and `docs/planning/CLAUDE_md_archive_session1.md`; those are origin's changes, not this branch's.
+    - At merge, take `refs/remotes/origin/main` in first and re-run the gates.
+  - `npm ci` (Done-when 6) was not re-run, because the dependencies are unchanged since `ac8485f9`.
 - **Spec-compliance review (row 7):** every edit site and every test (a)–(i) PASS, with quoted anchors. Done-when 3, 4, 5, 8 and 10 PASS. The one unprescribed addition, `settle(rel, renamed).catch(…)` (it logs `[watcher] settle error:`), was ruled compliant: it logs only and prevents an unhandled rejection in the main process.
