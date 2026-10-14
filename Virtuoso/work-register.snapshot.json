@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T15:58:05Z",
+  "takenAt": "2026-10-14T16:26:13Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -251,8 +251,8 @@
       "id": "FOLDER-SCAN-PERF-1",
       "title": "Stop a large source folder stalling every launch",
       "sequence": 10,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -261,12 +261,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#folder-scan-perf-1",
       "branch": "eb/folder-scan-perf-1",
-      "started": "",
+      "started": "2026-10-14",
       "completed": "",
       "evidence": "",
       "description": "Folder watcher on native recursive fs.watch instead of chokidar, no per-file realpath in the folder scan, yields every N entries, folder work starts after the window loads; chokidar removed. Fixes BUG-193; closes BUG-189 if dev mode measures normal.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass.",
-      "revision": "c2cefe47ba87db178b6df4adbf1fe4a1438d4af2b189d1253405c9af25833fb7",
+      "notes": "Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888).",
+      "revision": "79f7d65c90a14bdbaed350a68cd2d32bd7d4dbaf7d74dd76741ed897704ec4c5",
       "extra": {}
     },
     {
