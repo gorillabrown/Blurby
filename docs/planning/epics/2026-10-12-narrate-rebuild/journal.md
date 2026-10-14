@@ -186,6 +186,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
 - **Next:** row 54 (Hippocrates) → `npm run build` → one launcher run (sessions + T7) → the decision table → gate.
 
+## S3 — 2026-10-13 20:05 — final run: D5 holds; D3 and D6 fail on long stalls → BLOCKER(USER); session stops
+
+- **Did:** row 54 green on `b1dc43ff` (the first dispatch stopped correctly on a stale expected hash and was re-sent). Final launcher run 19:24–19:52 in the owner's quiet window, then the serial checks (all green). Records kept as `.final-1`; the committed D3 record restored. Analysed the failures from the traces, the producer log and the CPU samples; raised the BLOCKER(USER) with the pre-committed options and a recommendation.
+- **Learned:** the catch-up publish removed every drop (0 at both rates, including word 8736). Both D3 failures are frames over 1 s right after a section load, at fixed words; the final sessions loaded sections 17 times, like launch 3, against 5–6 in earlier runs. The two D6 misses are one 27 s stall in which both workers slowed 10–50× while the host was two thirds idle and the CPU sampler lost readings: the foreign-CPU ceiling cannot see a stall that does not use CPU.
+- **Decisions:** none new; the blocker awaits the owner.
+- **Gate/DoD movement:** D5 in-app met; D10 met; D3 and D6 FAIL (blocker); serial checks green.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (written by the suite, never committed).
+- **Next:** the owner's answer in state.md → Blockers. The session stops here.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

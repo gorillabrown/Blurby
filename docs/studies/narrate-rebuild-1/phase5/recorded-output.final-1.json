@@ -1,0 +1,131 @@
+{
+  "generatedAt": "2026-10-14T00:24:15.818Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "minutes": 5,
+  "sessions": {
+    "1.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-final\\traces\\session-1-00.trace.json",
+      "verdict": "FAIL",
+      "failures": [
+        "1 commits outside one display frame (worst 107.89 ms, refresh limit 17.7)"
+      ],
+      "holds": [],
+      "stats": {
+        "commits": 800,
+        "schedules": 40,
+        "stops": 2,
+        "requests": 1,
+        "minutes": 5.02,
+        "speeds": [
+          1
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.76,
+        "outside": 1,
+        "worstLateMs": 107.89,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 38,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 30
+        }
+      },
+      "outside": [
+        {
+          "word": 8958,
+          "lateMs": 66.77,
+          "frameMs": 0
+        }
+      ]
+    },
+    "2.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-final\\traces\\session-2-00.trace.json",
+      "verdict": "FAIL",
+      "failures": [
+        "5 commits outside one display frame (worst 770.22 ms, refresh limit 17.7)"
+      ],
+      "holds": [],
+      "stats": {
+        "commits": 1512,
+        "schedules": 75,
+        "stops": 4,
+        "requests": 1,
+        "minutes": 5.03,
+        "speeds": [
+          2
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.71,
+        "outside": 5,
+        "worstLateMs": 770.22,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 71,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 30
+        }
+      },
+      "outside": [
+        {
+          "word": 9046,
+          "lateMs": 770.22,
+          "frameMs": 0
+        },
+        {
+          "word": 9047,
+          "lateMs": 695.22,
+          "frameMs": 0
+        },
+        {
+          "word": 9048,
+          "lateMs": 520.22,
+          "frameMs": 0
+        },
+        {
+          "word": 9049,
+          "lateMs": 245.22,
+          "frameMs": 0
+        },
+        {
+          "word": 9050,
+          "lateMs": 145.22,
+          "frameMs": 0
+        }
+      ]
+    }
+  },
+  "runs": [
+    {
+      "label": "session-1.00",
+      "code": 0,
+      "wallMs": 307444,
+      "hostBusyPct": 16.9,
+      "appCpuPct": 9.3,
+      "foreignCpuPct": 7.5,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-final\\traces\\session-1-00.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "session-2.00",
+      "code": 0,
+      "wallMs": 308034,
+      "hostBusyPct": 16.3,
+      "appCpuPct": 10.4,
+      "foreignCpuPct": 5.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-final\\traces\\session-2-00.trace.json",
+      "traceExists": true
+    }
+  ]
+}
