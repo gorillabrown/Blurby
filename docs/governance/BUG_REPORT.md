@@ -8,6 +8,17 @@
 
 ## Incomplete
 
+### BUG-193 — A large source folder stalls the app at every launch: books take about 2 minutes to open
+**Reported:** 2026-10-14 (NARRATE-REBUILD-1 P6 G2 preparation; owner's profile on the production build `release\win-unpacked\Blurby.exe`, main `ab5cead4`)
+**Severity:** HIGH (with a large source folder every book opens about 2 minutes after launch; to a user the reader looks broken)
+**Status:** OPEN. Lane: Library & Content. Predates the Narrate rebuild (the folder watcher's last change is `c8dc141f`, the startup sync `87295ecc`, both 2026-04). Diagnosed by the P6 executor on a copy of the owner's settings (state.md, `c6400477` on `eb/narrate-rebuild-1-p6`); confirmed on the owner's real profile by the planner.
+**Location:** `main.js:654-657` (startup: `startWatcherFn()` then `syncLibraryWithFolder()` whenever `settings.sourceFolder` is set); `main/folder-watcher.js:27-69` (`scanFolderAsync`: two `realpath` calls and one `stat` per file, over the whole tree); the chokidar watcher, which also crawls the whole tree.
+**Description:** The owner's source folder is `G:\My Drive\Personal\Readings` (Google Drive), about 120,000 files (`Readings/Books` alone has 38,173 entries). At launch the scan and the watcher flood the main process; `readBookBytes` queues behind them, so any book shows a blank page with "Loading book…" for about 2 minutes before the first section renders. Foliate's paginator then logs `Cannot destructure property 'style' of 'r' as it is null`, a side effect, not the cause.
+**Evidence (executor, scratch profile with a copy of the owner's settings):** fresh profile renders in 1 s; owner settings stuck past a 120 s cap, cover at 130 s with a 300 s cap; `sourceFolder` deleted renders at once; a 12-file Drive folder renders in 6.7 s. **(Planner, owner's real profile, 2026-10-14):** with the folder set, a Drive EPUB and a local EPUB (`converted9591611769k92w18.epub`) both stayed on "Loading book…" for 38+ s; with `sourceFolder` cleared, the local EPUB rendered at once.
+**Interactions:** (1) `syncLibraryWithFolder` (`main.js:333-397`) drops every folder-sourced document not found in the new scan, so pointing the source folder at a smaller folder from the app (`select-folder`, `switch-folder` in `main/ipc/state.js`) removes those books and their reading positions from the library. (2) Book reads are restricted to allowed directories derived from the source folder (`read-file-buffer blocked — path outside allowed directories`), so clearing `sourceFolder` makes every folder-sourced book unreadable.
+**Workaround (in use for G2, 2026-10-14):** with the app closed, `sourceFolder` set to `""` in `settings.json` (backup in `blurby-data\g2-backup-20261014\`). Books in the app's data folder render; folder-sourced books cannot be opened until it is restored.
+**Fix path (executor's outline, to be specified):** no per-file `realpath`; scan off the startup path or in a worker, with yields; watcher depth limits or a file-count cap with a notice to the user; a cap on new-file extraction per sync. Needs a positive control that fails today (a scan of a large synthetic tree that blocks a concurrent book read past a time budget).
+
 ### BUG-192 — Saves at quit are abandoned: the last change before quitting is lost
 **Reported:** 2026-10-13 (owner smoke of SETTINGS-WRITE-DURABLE-1, dev build of `eb/settings-write-durable-1` @ `5abdd405`)
 **Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
