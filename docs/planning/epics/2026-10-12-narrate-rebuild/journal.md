@@ -222,6 +222,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
 - **Next:** merge per GIT WORK; open P6 with the records; P6 starts with the production build for G2.
 
+## S3 — 2026-10-13 21:12 — P5 merged; P6 opened; the run stops before G2's build
+
+- **Did:** merged P5 per GIT WORK (`05a5480a`, parents `69d00047` + `ea432c70`, pushed, ancestor check exit 0); opened P6 from `origin/main` at the merge (branch `eb/narrate-rebuild-1-p6`); this commit holds the P5 merge records (plan.md Gate log and worklist, state.md, journal, staging memo bug status) and closes time-log row 66.
+- **Learned:** —
+- **Decisions:** none new.
+- **Gate/DoD movement:** P5 passed and merged.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit, trailer NARRATE-REBUILD-1-P6-Base); uncommitted: none. The P5 worktree keeps only `tests/perf-baseline-results.json` (suite output).
+- **Next:** P6 — `npm ci`, the production build for the owner, then G2 (always stops).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
