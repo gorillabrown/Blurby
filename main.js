@@ -13,7 +13,7 @@ const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = r
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
-const { readJSON, writeJSON, saveJSON } = require("./main/json-store");
+const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
@@ -677,6 +677,8 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
+// The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
+// local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
 app.on("will-quit", createWillQuitHandler({
   app,
   stopNewWork: () => {
@@ -684,18 +686,16 @@ app.on("will-quit", createWillQuitHandler({
     try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
     try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
   },
+  // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
   shutdownProducer: () => require("./main/narrate/producer").shutdown(),
   steps: [
-    ["eval traces", () => flushTtsEvalTraceCaptures()],
+    ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
     ["library", saveLibraryNow],
+    ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
     ["settings", saveSettingsFn],
-    ["cloud sync", async () => {
-      try {
-        if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync();
-      } catch (err) {
-        console.log("[cloud] Quit sync failed:", err.message);
-      }
-    }],
+    ["pending writes", whenWritesSettled],
+    ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+    ["writes after sync", whenWritesSettled],
   ],
 }));
 

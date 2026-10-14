@@ -9,6 +9,7 @@ const {
 const fsPromises = require("fs/promises");
 
 let saveSettingsTimeout = null;
+let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it
 
 function register(ctx) {
   ipcMain.handle("get-state", () => ({
@@ -27,16 +28,18 @@ function register(ctx) {
 
     // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write
     clearTimeout(saveSettingsTimeout);
-    saveSettingsTimeout = setTimeout(() => {
-      ctx.saveSettings();
-
+    flushSettingsSave = async () => {
+      clearTimeout(saveSettingsTimeout);
+      saveSettingsTimeout = null;
+      flushSettingsSave = null;
+      const saved = ctx.saveSettings();
       // Enqueue update-settings for sync
       const syncEngine = require("../sync-engine");
       const syncQueue = require("../sync-queue");
-      const syncStatus = syncEngine.getSyncStatus();
-      const revision = syncStatus.revision || 0;
-      syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message));
-    }, 500);
+      const revision = syncEngine.getSyncStatus().revision || 0;
+      await Promise.all([saved, syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message))]);
+    };
+    saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
   });
 
   ipcMain.handle("get-launch-at-login", () => {
@@ -82,4 +85,7 @@ function register(ctx) {
   });
 }
 
-module.exports = { register };
+/** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
+function flushPendingSettingsSave() { return flushSettingsSave ? flushSettingsSave() : Promise.resolve(); }
+
+module.exports = { register, flushPendingSettingsSave };

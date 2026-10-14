@@ -33,3 +33,14 @@ in the branch, as the specification and its diff fence (Done-when 12) require.
 - `npm run typecheck` (orchestrator): exit 0.
 - Companion run (implementation agent): `npx vitest run tests/einkFoundation.test.ts tests/perfAudit.test.ts tests/settingsNarrateNormalization.test.js` exit 0 (3 files, 55 tests).
 - Deviations: `tests/jsonStore.test.js`'s import destructure was at line 11, not 10 (edited in place). `QUIT_FLUSH_TIMEOUT_MS` is read in the test through `createRequire`.
+
+### Done-when 2–7, 10–11 — at C2 (re-run by the orchestrator, pwsh, worktree root)
+- Done-when 2: `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` → `Test Files 6 passed (6)`, `Tests 89 passed (89)`, no unhandled errors; **exit 0**. (The implementation agent also ran the two new test files five more times: 13 of 13 each time.)
+- Done-when 3: `git grep -n -F 'app.on("will-quit", async' -- main.js` → empty stdout and stderr; **exit 1**.
+- Done-when 4: → `main.js:682:app.on("will-quit", createWillQuitHandler({`; **exit 0**.
+- Done-when 5: → `main.js:1`; **exit 0**.
+- Done-when 6: → `main/constants.js:2`; **exit 0**.
+- Done-when 7: → `main/ipc/state.js:42:    saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);`; **exit 0**.
+- Done-when 10: BUG-192's **Status** line is the specified text verbatim.
+- Done-when 11: `docs/governance/TECHNICAL_REFERENCE.md:235` ends with the specified sentence verbatim.
+- `npm run typecheck` (implementation agent): exit 0.
