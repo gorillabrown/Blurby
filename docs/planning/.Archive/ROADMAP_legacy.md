@@ -7348,3 +7348,220 @@ Content:
 **Rationale:** The exclusion assumed the EPERM lived in `main/sync-queue.js`'s own writer, but C2 moved that writer into `main/json-store.js`. Without a retry the new test cannot pass reliably, and real settings saves (including the quit flush) are dropped on a transient AV or indexer lock.
 **Scope change:** (1) `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` in `main/constants.js`. (2) In `main/json-store.js`'s serialized write, retry the rename on EPERM/EBUSY/EACCES after each delay, then rethrow the last error; rethrow other codes at once; never retry writeFile. (3) `tests/jsonStore.test.js` (d): transient EPERM ×2, then success, 3 rename calls. (e): persistent EPERM rejects after 4 calls. Both spy on the CommonJS `fs/promises` object and must fail before the retry lands (standing rule 43). (4) Done-when 9's fence adds `M main/constants.js`. (5) The KF-2 waiver does not apply: any EPERM/EBUSY/EACCES escaping `json-store.js` after the retries is BLOCKER(USER), and the delays are not lengthened.
 **Follow-up items:** This completes READER-MODE-SEPARATION-2 follow-up 4 (KF-2, Decision #25). Propose retiring the KF-2 waiver at the next /roadmap-review after clean full runs. Separate: Electron does not await an async `will-quit` listener (Plato). If Done-when 7's quit check fails, file it as a new issue; do not fix it in this sprint.
+
+<!-- Archived 2026-10-14 by /pointer-closeout FOLDER-SCAN-PERF-1; close-out docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md. The specification as it stood at 534b43d2, with staging Fold-in 2 (the Done-when 10 fence) applied; Fold-ins 1 and 1b (control (h) budget, D2(b)) migrated to the close-out's Mid-Dispatch Decisions. -->
+
+
+#### FOLDER-SCAN-PERF-1 — Stop a large source folder stalling every launch *(position 10 — Full Spec; authored 2026-10-14; fixes BUG-193, and closes BUG-189 if the measurement shows it)*
+
+- **What:** With a large source folder (the owner's is about 120,000 files on Google Drive), a book opens about 2 minutes after launch. Make the folder work cheap and keep it off the startup path, without changing any feature: (1) the folder watcher (`startWatcher`) uses Node's native recursive `fs.watch` (one OS handle on Windows) instead of chokidar's whole-tree crawl, with the same callbacks and filters; (2) the folder scan (`scanFolderAsync`) makes no `realpath` call per file and yields to the event loop every `FOLDER_SCAN_YIELD_EVERY` entries; (3) the startup watcher and folder sync start after the main window has loaded, plus `FOLDER_SYNC_STARTUP_DELAY_MS`; (4) chokidar is removed from the dependencies (its only importer is `main/folder-watcher.js`).
+- **Why:**
+  - **The startup path** (`main.js:653-657`, on `66f15981`): whenever `settings.sourceFolder` is set, Phase 4 calls `startWatcherFn()` (`main.js:401-434`, which calls `startWatcher`) and then `syncLibraryWithFolder()` (`main.js:333-398`, which calls `scanFolderAsync`), as soon as auth and sync init finish (`main.js:588-593`).
+  - **The watcher** (`main/folder-watcher.js:78-108`): `getChokidar().watch(sourceFolder, …)` (`:82-86`) crawls and stats the whole tree, even with `ignoreInitial: true`, and opens a watch per directory. Each `add` and `change` then calls `isPathWithinFolder` (`:90`, `:98`).
+  - **The scan** (`main/folder-watcher.js:27-74`): for each supported file, `isPathWithinFolder(fullPath, folderPath)` (`:43`) makes two `fsPromises.realpath` calls (`:17-18`; it resolves the root folder again every time), plus one `stat` (`:44`).
+  - **The read that waits:** the renderer's `api.readFileBuffer` (`src/components/ReaderContainer.tsx:332-337`) reaches the `read-file-buffer` handler (`main/ipc/library.js:160-182`), which shares the main process's event loop and libuv threadpool with the scan and the watcher.
+  - **Planner probe** (2026-10-14; plain Node 24.14.0, which is Electron 41.1.0's Node, checked with `ELECTRON_RUN_AS_NODE`; local NTFS synthetic trees; scripts kept in the session scratchpad `scanprobe/`, not committed). On 40,000 files in 4,000 directories:
+    - `startWatcher` (chokidar): 46.4 s to `ready`. The longest event-loop stall was 10,970 ms, concurrent 2 MB reads took up to 25.7 s, and one read still took 1.4 s after `ready`.
+    - `scanFolderAsync`: 1.37 s, with a longest stall of 16 ms and concurrent reads of 2–3 ms. It made 4,000 `realpath` calls for 2,000 supported files.
+    - `fs.watch(root, { recursive: true })`: set up in 64 ms, with a longest stall of 7 ms.
+
+    On 3,000 files in 300 directories (three runs each), a 1 MB read started 20 ms after `startWatcher` took 607–814 ms, with stalls of 405–575 ms. The same read after a recursive `fs.watch` took 2 ms, with stalls of 16–17 ms. **So on local disk the watcher is the blocker, and the scan is not.** On Drive, every `realpath` and `stat` goes through the Drive filesystem, so the scan's 2 `realpath` calls per file also add up there. That was not measured on Drive; Done-when 9 measures the whole effect.
+  - **Symlinks never reach the scan's file branch:** `readdir(…, { withFileTypes: true })` reports a junction or symlink as a link (probe: `isDirectory=false isFile=false isSymbolicLink=true`). `walkDir` only recurses into `isDirectory()` and only collects `isFile()` (`:39`, `:42`), so every file it collects is inside the root by construction. The check at `:43` has never excluded anything that the walk would otherwise collect.
+  - **Evidence for BUG-193:**
+    - Executor (scratch profile with a copy of the owner's settings): a fresh profile renders in 1 s. With the owner's settings it was still stuck at a 120 s cap. With `sourceFolder` deleted it renders at once, and with a 12-file Drive folder it renders in 6.7 s.
+    - Planner (owner's real profile): both a Drive EPUB and a local EPUB stayed on "Loading book…" for 38+ s.
+    - LL-152's status line (2026-10-14) records a dev build that took 2.5–4 min to load during SETTINGS-WRITE-DURABLE-1's smoke, on the same profile. This is why BUG-189 (dev-mode slowness) may share the cause.
+- **Owner decisions (2026-10-14):**
+  - "Cheap scan, off the critical path. No feature change." This binds the design: resolve the root once, take a per-file `realpath` only for a symbolic link, yield every N entries, start the startup sync after the library is shown, replace chokidar's crawl with native recursive `fs.watch` under the same `startWatcher` contract, and leave the `read-file-buffer` allowed-roots check and the sync's pruning unchanged.
+  - DEV-PERF-MEASURE-1 is dissolved into this item. If Done-when 9(e) shows dev mode back to normal, BUG-189 closes here.
+- **Planner resolutions (roadmap review 2026-10-14):** `FOLDER_SYNC_STARTUP_DELAY_MS = 3000`; unlink keeps chokidar parity (any vanished path rescans); BUG-189 closes on the library within 30 s and a book within 10 s in dev, plus the owner's judgment, otherwise a fresh measurement item is filed; Done-when 9 waits for G2 and sets only `sourceFolder` (settings changed since the G2 backup survive); if 9(d) shows no Drive events, stop for an owner decision (manual rescans or a polling item). The unreachable-folder prune is filed as BUG-195 (High) and fixed by FOLDER-UNREACHABLE-GUARD-1, not here. Until that item merges, the owner keeps a `library.json` backup and checks that the Drive is mounted before launching with `sourceFolder` set.
+- **Design decisions (planner, 2026-10-14):**
+  - **Scan:** delete the per-file `isPathWithinFolder` call (`:43`) and give no replacement. Dirents never report a link as a file or directory (see Why), so the walk makes zero per-file `realpath` calls, and the scan needs no root `realpath` either. This keeps today's behaviour exactly (symlinked files and folders are skipped today and stay skipped). Following symlinks would be a feature change and stays out.
+  - **Yield:** one counter across the whole walk. On every `FOLDER_SCAN_YIELD_EVERY`-th entry, `await new Promise((resolve) => setImmediate(resolve))`. The counter covers unsupported entries, because a directory of tens of thousands of non-book files (`Readings/Books` holds 38,173 entries) is otherwise walked in one synchronous loop.
+  - **Watcher:** `fs.watch(sourceFolder, { recursive: true }, listener)`. The listener receives `(eventType, relativeName)`, and the rules below map it onto the existing contract:
+    - **Ignore:** any path segment starting with `.` (the regex `(^|[\/\\])\.` today), and a first segment equal to `"Saved Articles"` (the root-level folder only, as today).
+    - **Stability:** each path's callback waits until that path has had no event for `FOLDER_WATCHER_STABILITY_MS`. This is a per-path debounce, the `awaitWriteFinish`-like rule. If any event in the window was `rename`, the settled event counts as a rename.
+    - **Settle:** `lstat` the path.
+      - It is gone: `onUnlink()`, for any path. This is parity: chokidar's `unlink` handler (`:94`) has no extension filter.
+      - A directory that arrived by rename: `onAdd(dirPath)`. A folder moved in raises one event on Windows. Chokidar reported its files, and `main.js:406` ignores the argument and debounces a sync.
+      - A supported-extension file, or a symlink whose `realpath` lies inside the root: `onAdd(path)` when renamed, `onChange(path)` otherwise.
+      - Anything else is ignored.
+    - **Root `realpath`:** resolved once per `startWatcher` call (`fsPromises.realpath(sourceFolder)`, kept as a promise) and used only for symlinks. For that, `isPathWithinFolder` gains an optional third argument, `realFolder`, which is used instead of resolving the folder again.
+    - **Start failure:** a synchronous `fs.watch` throw (ENOENT, EPERM) is caught: log it, call `onError(err, sourceFolder)` (the existing user toast, `main.js:419-432`) and return `null`. `startWatcherFn` assigns `watcher = null`, and every `watcher.close()` call site is already guarded (`main.js:402`, `:689`).
+    - **`close()`:** clears the pending timers, then closes the handle. It is synchronous; chokidar's returned a promise that no caller awaited.
+  - **Startup hook:** replace `main.js:653-657` with a deferred start. `const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);`. If `mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()`, attach it with `mainWindow.webContents.once("did-finish-load", startFolderWork)`; otherwise call it now.
+    - Why `did-finish-load` and not `ready-to-show`: `main/window-manager.js:85` already uses `ready-to-show` to show the window, and by `main.js:654` the page may have loaded already (Phase 3 awaits auth at `:588`). `isLoading()` can be queried, but `ready-to-show` cannot be re-checked once it has fired.
+    - The listener is synchronous and fire-and-forget, so nothing depends on Electron awaiting it (LL-157).
+    - The watcher still starts before the sync, as `tests/perfAudit.test.ts` "c" (`:290-318`) describes.
+    - Both functions read `settings` when they fire, so a folder chosen in the meantime (`select-folder` and `switch-folder`, `main/ipc/state.js:69`, `:80`) is honoured. The second start only restarts the watcher and runs one more sync.
+  - **Dependency:** `npm uninstall chokidar --package-lock-only` removes `package.json:102`, plus chokidar's lockfile entries (`package-lock.json:16`, `:4392-4406`) and its only dependency `readdirp` (`:8997`). `git grep -i chokidar` finds no other importer in `main/`, `main.js`, `src/`, `preload.js` or `tests/`; outside documentation, its only other mention is the `main/constants.js:162` comment, which this item edits. `--package-lock-only` leaves `node_modules` alone; `npm ci` (Done-when 6) proves that the lockfile and manifest agree.
+  - **Platforms:** recursive `fs.watch` is native on Windows (ReadDirectoryChangesW) and macOS (FSEvents), and has been supported on Linux since Node 20 (Electron 41.1.0 ships Node 24.14.0). On Linux, Node implements it by watching each directory, so it is not cheap on a huge tree; no Linux user has such a tree today (see Out of scope).
+- **Out of scope:**
+  - **The sync's pruning** (`main.js:383-394`). It drops every folder-sourced document that the new scan does not find. This includes a scan that returns `[]` because the folder cannot be reached (`main/folder-watcher.js:29`), for example Drive not yet mounted at launch. That behaviour is unchanged, and this item keeps the `access` → `[]` line as it is (LL-156: the waiver names lines this item does not move). Filed as BUG-195; fixed by FOLDER-UNREACHABLE-GUARD-1.
+  - **The `read-file-buffer` allowed-roots check** (`main/ipc/library.js:163-170`).
+  - **The executor's other outline items** (BUG-193 Fix path): a file-count cap with a notice, watcher depth limits, a cap on new-file extraction per sync, and a worker-thread scan. These are feature changes, or not needed once the probe numbers hold.
+  - **The cost of a full rescan after each watcher event** on a 120,000-file Drive tree. It is the same as today (debounced by `FOLDER_SYNC_DEBOUNCE_MS`).
+  - **The cost of recursive `fs.watch` on Linux.**
+  - **P6 build findings C** (`assets/` not packaged) **and D** (`app-update.yml` ENOENT on `--dir` builds).
+- **Prerequisites:**
+  - No code prerequisite. This item touches no shared-core file and nothing that NARRATE-REBUILD-1 P6 owns.
+  - Done-when 9 runs on the owner's real profile. That profile is in use for P6's G2 with `sourceFolder` cleared, so Done-when 9 runs after G2 finishes (or when the owner releases the profile).
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Each gate was dry-run on `66f15981` (2026-10-14), and the result is in parentheses.
+    1. **Positive controls (standing rule 43):** at C1, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts` exits 1, and exactly the controls (a), (b), (g), (h) and (i) fail, each for the stated reason:
+       - (a) sees about 100 `realpath` calls;
+       - (b) sees 0 yields;
+       - (g) sees 6 or more `realpath` calls;
+       - (h) times the read or the event-loop gap over 250 ms;
+       - (i) finds the bare `startWatcherFn();` line.
+
+       The characterization tests (c), (d), (e) and (f), and every existing `perfAudit` test, pass. Record the output in the staging memo. (Probe dry-run of (h) on the base: a 607–814 ms read and 405–575 ms gaps; on the prescribed `fs.watch`, a 2 ms read and 16–17 ms gaps.)
+    2. After C2, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts tests/fileHashesCleanup.test.ts tests/jsonStore.test.js` exits 0.
+    3. `git grep -n -i -F 'chokidar' -- main main.js package.json` prints nothing. (Dry-run: 7 lines: `main/constants.js:162`, `main/folder-watcher.js:1`, `:7`, `:8`, `:82`, `:103`, `package.json:102`.)
+    4. `git grep -n -E '"node_modules/(chokidar|readdirp)"' -- package-lock.json` prints nothing. (Dry-run: `:4392`, `:8997`.)
+    5. `git grep -n -F 'isPathWithinFolder(fullPath' -- main` prints nothing (dry-run: `main/folder-watcher.js:43`). `git grep -n -E '^    startWatcherFn\(\);$' -- main.js` prints nothing (dry-run: `main.js:655`). `git grep -c -E 'FOLDER_SYNC_STARTUP_DELAY_MS|FOLDER_SCAN_YIELD_EVERY' -- main.js main/constants.js main/folder-watcher.js` prints exactly `main.js:2`, `main/constants.js:4`, `main/folder-watcher.js:2` and exits 0. (Dry-run: exits 1, no output.)
+    6. `npm ci` exits 0 (the lockfile matches `package.json` without chokidar).
+    7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; the packaged main process changes).
+    8. `git grep -n -i -F 'chokidar' -- docs/governance/TECHNICAL_REFERENCE.md` prints nothing. (Dry-run: `:51`, `:136`, `:159`, `:712`.)
+    9. **Owner re-measure** (standing rule 45; LL-152). Run it on the owner's **real** profile, after G2, recorded per step in the staging memo:
+       - (a) **Setup:** with the app closed, copy `%APPDATA%\blurby\blurby-data\library.json` and `settings.json` to a new `blurby-data\fsp1-backup-<date>\`. Record the number of `"source": "folder"` documents. Confirm that `G:\My Drive\Personal\Readings` is reachable (`Test-Path` returns `True`; see Out of scope, pruning). Set only the `sourceFolder` field of `settings.json` to `G:\\My Drive\\Personal\\Readings`; every other field stays as it is.
+       - (b) **Base:** run the base production build (P6's `release\win-unpacked\Blurby.exe`, which includes main `ab5cead4`). Launch, wait 15 s (the scan is running), then open the Drive *Meditations* (`pg2680-images-3.epub`). Time from the click to the first rendered section (stopwatch), with a 180 s cap. Quit.
+       - (c) **Fix:** build this branch with `npm run build`, then `npx electron-builder --win --x64 --dir --publish never` (each exits 0), which produces `release\win-unpacked\Blurby.exe` in this worktree. Repeat (b) exactly on this build: same book, same 15 s wait, same actions. Then repeat it for the local EPUB `converted9591611769k92w18.epub`. **Pass:** each first section renders within 10 s of the click.
+       - (d) **Live and data checks,** on the fix build:
+         - Copy any small EPUB into `G:\My Drive\Personal\Readings\` while the app is open. It appears in the library within 30 s. Delete it, and it leaves within 30 s.
+         - After the scan finishes, the `"source": "folder"` count equals (a)'s, give or take the file added and deleted above.
+         - No `read-file-buffer blocked` or `[watcher]` line appears in `error.log`.
+       - (e) **Dev mode:** run `npm run dev` in this worktree on the same profile. Time from the Electron window appearing to the library being shown, and the (c) book-open time. If the library shows within 30 s, the book renders within 10 s, and the owner judges dev mode back to normal, BUG-189 closes with this item. Otherwise BUG-189 stays open with these numbers recorded, and a fresh measurement item is filed.
+    10. `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.FOLDER-SCAN-PERF-1.2026-10-14.md` (the C1 stop) if kept (standing rule 41):
+        - `M main/folder-watcher.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M package.json`
+        - `M package-lock.json`
+        - `A tests/folderWatcher.test.js`
+        - `M tests/perfAudit.test.ts`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** M.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 9.
+- **Lane:** Library & Content. Execution surface D (main process: `main/`, `main.js`, dependencies).
+- **Source:** BUG-193 (filed `5d4da6e3`, main `66f15981`); the P6 G2 diagnosis (`c6400477` on `eb/narrate-rebuild-1-p6`, `state.md` "G2 finding A"); BUG-189 and the DEV-PERF-MEASURE-1 stub (dissolved here); the planner probe of 2026-10-14; owner decision 2026-10-14.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `66f15981`):
+  - **`main/folder-watcher.js`:**
+    - `:1`: the header becomes `// main/folder-watcher.js — native recursive fs.watch folder watching and library sync`.
+    - `:4-8`: add `const fs = require("fs");`. `:6` becomes `const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY } = require("./constants");`. Delete `:7-8` (the chokidar loader).
+    - `:15-23`: the signature becomes `isPathWithinFolder(filepath, folderPath, realFolder)`, and `:18` becomes `const realFolderPath = realFolder || await fsPromises.realpath(folderPath);`; the comparison at `:19` uses `realFolderPath`. Its behaviour is unchanged when the third argument is omitted. Keep the export.
+    - `:34-57`:
+      - before `async function walkDir`, add `let walked = 0;`;
+      - as the first statement inside `for (const entry of entries) {` (`:37`), add `if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));`;
+      - delete `:43`, and put one comment in its place: `// readdir reports a symlink as a link, never a file or directory, so every file reached here is inside folderPath`.
+    - `:78-108`: replace the body of `startWatcher` with the native watcher in the design decisions, keeping the signature `startWatcher(sourceFolder, callbacks)` and the return value (the watcher, or `null` on a start failure). Prescribed shape:
+      - `const realRoot = fsPromises.realpath(sourceFolder).catch(() => null);`
+      - `const pending = new Map();` maps the relative path to `{ timer, renamed }`;
+      - `try { watcher = fs.watch(sourceFolder, { recursive: true }, (eventType, rel) => { … }) } catch (err) { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); return null; }`;
+      - the listener returns on an empty `rel`. It splits `rel` on `/[\\/]/` and returns if any segment starts with `.` or if `parts[0] === "Saved Articles"`. Otherwise it clears that path's timer, sets `renamed = (prev && prev.renamed) || eventType === "rename"`, and schedules `settle(rel, renamed)` after `FOLDER_WATCHER_STABILITY_MS`;
+      - `settle` deletes the entry and runs `lstat(path.join(sourceFolder, rel))`:
+        - if `lstat` throws: `onUnlink()`;
+        - a directory: `onAdd(full)` if renamed, then return;
+        - an unsupported extension: return;
+        - a symlink: return unless `await isPathWithinFolder(full, sourceFolder, await realRoot)`;
+        - not a file and not a symlink: return;
+        - otherwise `(renamed ? onAdd : onChange)(full)`;
+      - `watcher.on("error", (err) => { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); });`;
+      - wrap `watcher.close` so that it clears every pending timer before closing.
+
+      The planner ran this shape as a prototype on Windows (`scanprobe/proto.js`). A nested add gave `onAdd`, an append gave `onChange` and a delete gave `onUnlink`; writes under `Saved Articles/`, `.hidden/` and a `.jpg` produced no callback.
+  - **`main/constants.js`:**
+    - after `FOLDER_SYNC_BATCH_SIZE` (`:149-150`), add `/** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */ const FOLDER_SYNC_STARTUP_DELAY_MS = 3000;`;
+    - `:161-163` become `// ── Folder Watcher`, then `/** Watcher stability window — a path must see no further event this long before its callback fires (ms) */ const FOLDER_WATCHER_STABILITY_MS = 500;` and `/** Directory entries walked between event-loop yields in scanFolderAsync */ const FOLDER_SCAN_YIELD_EVERY = 500;`;
+    - export `FOLDER_SYNC_STARTUP_DELAY_MS` after `FOLDER_SYNC_BATCH_SIZE,` (`:263`) and `FOLDER_SCAN_YIELD_EVERY` after `FOLDER_WATCHER_STABILITY_MS,` (`:269`).
+  - **`main.js`:**
+    - `:31-34`: add `FOLDER_SYNC_STARTUP_DELAY_MS` to the destructured `require('./main/constants')`.
+    - `:653-657` become:
+
+      ```js
+        // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
+        if (settings.sourceFolder) {
+          const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
+          else startFolderWork();
+        }
+      ```
+
+      Nothing else in `main.js` changes. In particular, the `will-quit` handler (`:679-706`; `watcher.close()` at `:689` works on an `fs.FSWatcher` or `null`) belongs to QUIT-FLUSH-1.
+  - **`package.json:102`** and **`package-lock.json`:** `npm uninstall chokidar --package-lock-only`. Make no other dependency change.
+  - **`docs/governance/TECHNICAL_REFERENCE.md`:**
+    - `:51`: `chokidar folder watching` becomes `fs.watch folder watching` (same width; the box stays aligned);
+    - `:136`: delete the `chokidar` row;
+    - `:159`: drop `` `chokidar`, `` from the lazy-loaded list;
+    - `:712`: `` `chokidar` watcher on configured folder `` becomes `` native recursive `fs.watch` on configured folder (startup start deferred until the main window loads) ``.
+  - **At close-out (not in this diff):** `CLAUDE.md:383` drops chokidar from the dependency list. BUG_REPORT's BUG-193 status line becomes `RESOLVED (FOLDER-SCAN-PERF-1)` (LL-148: the merge sha goes in the close-out), and so does BUG-189's if Done-when 9(e) closes it. The DEV-PERF-MEASURE-1 stub (`ROADMAP.md:521-527`) is removed as dissolved.
+- **Tests:**
+  - **`tests/folderWatcher.test.js`** (new; no file of this name exists, and no current test imports `main/folder-watcher.js`). Follow `tests/jsonStore.test.js`'s pattern: `await import("../main/folder-watcher.js")`, then `createRequire(import.meta.url)("fs/promises")` to get the same CommonJS object the module calls through. Real trees go under `fs.mkdtemp(path.join(os.tmpdir(), "blurby-folder-watcher-"))`, removed in `afterEach`, and every watcher is closed in `finally` (`await w?.close()` works for both implementations). Count `realpath` calls and yields **only when the call stack includes `folder-watcher.js`** (`new Error().stack`), so that vitest's own calls cannot pass or fail a control. Wait for callbacks with `vi.waitFor(…, { timeout: 4000 })`.
+    - `describe("scanFolderAsync — cost (BUG-193)")`:
+      - **(a) control:** "makes at most one realpath call for 50 supported files". Build 5 dirs × 10 `.epub` and spy on `realpath`. Expect ≤ 1 (base: 100).
+      - **(b) control:** "yields to the event loop every FOLDER_SCAN_YIELD_EVERY entries". One dir holds 2,000 `.jpg` and 1 `.epub`; spy on `globalThis.setImmediate`. Expect ≥ `Math.floor(2002 / (FOLDER_SCAN_YIELD_EVERY || 500))`; the `|| 500` keeps C1 failing on the yield count and not on the constant that is still missing (base: 0, from a plain-Node dry-run).
+      - **(c) characterization:** "returns the same files". The tree holds `a/book.epub` + `a/book.pdf` (one result, `.epub` kept), `b/notes.txt`, `Saved Articles/s.epub` at the root (skipped), `x/Saved Articles/t.epub` (kept: only the root level is skipped), `pic.jpg` (skipped), and a junction `link` (`fs.symlink(target, link, "junction")`) to an outside folder holding `o.epub` (skipped). Expect the exact filenames, sorted.
+    - `describe("startWatcher — contract (BUG-193)")`:
+      - **(d) characterization:** "reports add, change and unlink for supported files and ignores dotfiles, Saved Articles and unsupported files". Write `a/b/new.epub` and expect `onAdd` with that path. Append to an existing `a/b/old.epub` and expect `onChange` with its path. Write `Saved Articles/s.epub`, `.hidden/h.epub` and `a/pic.jpg`, wait 1,500 ms, and expect no new call. Delete `new.epub` and expect `onUnlink`.
+      - **(e) characterization:** "reports an add when a folder is moved into the tree". `fs.rename` an outside folder containing `m.epub` into the root, and expect `onAdd` called at least once.
+      - **(f) characterization:** "does not throw when the folder does not exist". `startWatcher(missing, callbacks)` returns without throwing, and closing its result (if any) does not throw.
+      - **(g) control:** "resolves the root realpath at most once, not per event". Add 3 `.epub` files, wait for 3 `onAdd` calls, and count `realpath` calls from `folder-watcher.js`. Expect ≤ 1 (base: 6 or more, two per `isPathWithinFolder`).
+    - `describe("startWatcher — does not starve the main process (BUG-193)")`:
+      - **(h) control:** "a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 250 ms, and no event-loop gap exceeds 250 ms in the next second". Build 300 dirs × 10 files (one `.epub` per dir), and sample the gap with `setInterval(…, 5)`. Probe: 607–814 ms and 405–575 ms on the base; 2 ms and 16–17 ms on `fs.watch`.
+  - **`tests/perfAudit.test.ts`:** add inside `describe("folder watcher starts before sync completes")`, after the existing "c" test (`:290-318`):
+    - **(i) control:** "c2: main.js starts the folder watcher and sync only after the main window has loaded". Read `main.js` and slice from `// Folder watcher + sync` to `// Start cloud sync`. Expect the slice to contain `once("did-finish-load", startFolderWork)` and `setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS)`, and not to match `/^\s*startWatcherFn\(\);\s*$/m`. On the base the bare line at `:655` matches, and both expected strings are missing.
+    - The existing replica test "c" stays unchanged.
+- **Constants:** `FOLDER_SCAN_YIELD_EVERY = 500` (entries) and `FOLDER_SYNC_STARTUP_DELAY_MS = 3000` (ms), both new in `main/constants.js` (Constants Separation Rule). `FOLDER_WATCHER_STABILITY_MS = 500` keeps its value; only its comment changes.
+- **Branch:** `eb/folder-scan-perf-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\folder-scan-perf-1`. Write refs in full (a `main/` directory exists). Run `npm ci` before C1, because the worktree has no `node_modules`.
+- **Staging plan:**
+  - C1: `tests/folderWatcher.test.js` and `tests/perfAudit.test.ts` only (gate: Done-when 1).
+  - C2: every other path in Done-when 10 (gates: Done-when 2–8).
+  - Owner re-measure (Done-when 9) on C2's build, then merge to `main` with `--no-ff` and push (Rule 5b).
+  - Never stage `tests/perf-baseline-results.json` or anything under `release/`.
+- **Failure handling:**
+  - If a control passes at C1 or fails for another reason, stop: the base has changed since this spec. Examples: (h) under its budget on the base, or (a) failing on a missing export.
+  - If (h) fails after C2 only under full-suite load, record both runs and raise its budget once, to 350 ms. That is still below the base's lowest observed gap of 405 ms. Any further raise is BLOCKER(USER).
+  - If (d) or (e) fails after C2, the `fs.watch` mapping is wrong; do not weaken the test.
+  - If Done-when 9(d)'s add or delete is not reported on G: (DriveFS may not deliver `ReadDirectoryChangesW` events), record it and stop for an owner decision before merging: accept manual rescans, or file a polling item.
+  - If 9(c) misses 10 s, record the times and stop: the remaining cost is elsewhere, and the next step is a measurement, not a guess (Pike rule 1).
+  - If 9(a) finds G: unreachable, do not launch: the existing pruning would drop the folder-sourced books.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D. The files are `main/folder-watcher.js`, `main/constants.js`, `main.js:31-34` and `:653-657` only, `package.json`, `package-lock.json`, the two test files and the four `TECHNICAL_REFERENCE.md` lines.
+  - **Forbidden:**
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js`'s `will-quit` handler (`:678-706`, owned by QUIT-FLUSH-1), and every other `main.js` line;
+    - `main/ipc/library.js` and `main/ipc/state.js`;
+    - `src/**`;
+    - every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none expected.
+  - **Merge order:** this item merges first. QUIT-FLUSH-1 also edits `main.js` (different hunks: `will-quit`), and it merges `refs/remotes/origin/main` in before its own merge. The order is independent of NARRATE-REBUILD-1 P6, which edits no file here; P6's G2 must finish before Done-when 9 uses the owner's profile.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Scan-cost, watcher-starvation and startup-order controls committed and failing on the current code; watcher contract characterized | calculable | positive control | bounded | medium | 45m (one new test file with eight tests on real temp trees, one source-inspection test) | — | — |
+| 2 | Scan cheap and yielding, watcher on native recursive `fs.watch` with the same contract, startup folder work after the window loads, chokidar gone | calculable | main-process fix | bounded | high | 60m (one watcher rewrite of about 40 lines, two scan edits, one startup hunk, two constants, one dependency removal, four doc lines) | — | — |
+| 3 | `npm ci`, suites, typecheck and build green on the owner's machine | calculable | merge and verify | mechanical | low | 30m (`npm ci` + full `npm test` + typecheck + build + grep gates) | — | — |
+| 4 | Owner re-measure on base and fixed production builds and on dev, recorded; merged and pushed | calculable | owner gate | mechanical | low | 45m (one packaged dir build, two timed sessions per build, one dev session, one --no-ff merge) | — | — |
+
+**Total:** chain 1m · sum 1m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** five controls fail on the current code for a stated reason before the fix: (a) and (g) on `realpath` counts, (b) on yields, (h) on read latency and event-loop gap, and (i) on the startup line. Their failing output is recorded (Done-when 1).
+- **Standing rule 39 (LL-112):** the watcher is replaced, so (c)–(f) characterize today's contract on the chokidar implementation, and the native watcher must pass them unchanged.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exit code, and each search gate was dry-run on `66f15981` with its hits recorded. The control (h) was dry-run as a plain-Node probe on both the base and the prescribed watcher.
+- **LL-152 and Pike rule 1:** the cause was measured before the design was fixed. The probe showed that the watcher, not the scan, starves the event loop on local disk. That moved the main control onto `startWatcher`, where the BUG-193 outline had pointed at the scan. Done-when 9 is a like-for-like A/B (same book, same 15 s wait, base build against fixed build) on production builds, with dev mode measured separately.
+- **LL-142:** "fixed" is claimed only from results read back: the owner's timed first render, the library's folder-document count compared with the backup, and `error.log` checked for blocks. The probe's Drive behaviour is stated as unmeasured, not assumed.
+- **LL-157:** the startup hook is a synchronous `did-finish-load` listener that schedules work; nothing relies on Electron awaiting a listener. The `will-quit` handler is left to QUIT-FLUSH-1.
+- **LL-156:** the pruning and allowed-roots waivers name lines that this item does not move. The scan's `access` → `[]` line (`:29`), which feeds the pruning, is kept verbatim, and the hazard is restated and filed as BUG-195.
+- **SRL-086/087 (standing rule 36):** every line number was read on `66f15981`; the probe ran against this worktree's `main/folder-watcher.js` and Electron 41.1.0's own Node.
+- **Standing rule 47 (LL-147):** the full suite and the re-measure run on the owner's machine, in a local session.
+- **Standing rule 48 (LL-149):** typecheck and build are listed (Done-when 7), next to `npm ci` for the dependency change.
+- **Standing rule 45 (LL-141):** the timing and the live Drive add/delete are owner-observed.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register; status moves stay with the ceremonies.
+- **LL-148:** status lines name the item; the merge sha goes in the close-out.

@@ -59,3 +59,47 @@ The C1 tests are written and match the specification. Four of the five controls 
 - `tests/folderWatcher.test.js` (new) and `tests/perfAudit.test.ts` (test (i) added) are in the worktree, uncommitted. C1 is not committed because its gate is not met.
 - No source file is changed. `tests/perf-baseline-results.json` is dirty from the base suite run and will not be staged (staging plan).
 - Time log: `docs/governance/close-outs/Timing.FOLDER-SCAN-PERF-1.jsonl`. Row 1 is waiting on the owner.
+
+## Decision (owner, 2026-10-14)
+
+**Option A, specification correction.**
+- (h)'s read budget is 50 ms, and its title reads "resolves within 50 ms". The event-loop-gap assertion keeps 250 ms as a non-control guard.
+- The load contingency becomes: raise the budget once to 100 ms, and any further raise is BLOCKER(USER).
+- C1 was then committed as `f43bf0c0`, with exactly (a), (b), (g), (h) and (i) failing.
+- The 100 ms contingency was never used: (h) passed under full-suite load.
+- Full amendment: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md` Fold-in 1. Lesson: LL-143 status (2026-10-14).
+
+---
+
+# Issue — FOLDER-SCAN-PERF-1 — Done-when 9(d) — 2026-10-14
+
+**Task:** 4 (owner re-measure, then merge), at Done-when 9(d).
+**Trigger:** 9(d) failed on the owner's profile. Its own stop rule (no Drive add or delete event) did not apply, so the planner raised it to the owner.
+
+## 1. tl;dr
+
+A new EPUB copied into the Drive source folder never reached the library, not even after 3 minutes. Drive delivers the events. The cause is that every watcher event runs a full rescan of the 120,190-file folder, then an import of about 120k files the library lacks, with a single save at the end.
+
+## 2. Evidence of issue
+
+- Two EPUBs were copied into the folder root: a 3 KB fixture and a known-good 280 KB file. Neither reached `library.json`, and `library.json` was not written after 16:35:38.
+- `error.log` gained 0 `[watcher]` lines.
+- A bare Node recursive `fs.watch` on `G:\My Drive\Personal\Readings` saw rename and change events, as it did on a local control folder.
+- The folder holds 120,190 supported files (120,166 `.epub`), against 131 in the library. `scanFolderAsync` took 93.6 s on it.
+- The full results are in the staging memo, under "Done-when 9".
+
+## 3. Cause
+
+`syncLibraryWithFolder` (`main.js:333-398`), which runs on every watcher add or unlink event:
+- rescans the whole tree;
+- extracts every file not yet in the library;
+- calls `saveLibrary` once, at the end.
+
+It has no re-entry guard. The base has the same shape; its launch stall kept the import from progressing.
+
+## Decision (owner, 2026-10-14; given in the Blurby.Brain session)
+
+"Merge FOLDER-SCAN-PERF-1 with Done-when 9(d) waived. Keep sourceFolder cleared, and file a new item for per-file live sync and a policy for very large folders."
+- 9(d) is an authorized exclusion.
+- LARGE-FOLDER-SYNC-1 is filed at Seq 15. It carries the per-file sync, the re-entry guard, batched saves, Fold-in 2a and the owner's large-folder policy question.
+- Merged as `534b43d2`. Lesson: LL-158.

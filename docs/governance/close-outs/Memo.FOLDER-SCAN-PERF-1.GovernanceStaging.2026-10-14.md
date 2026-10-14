@@ -47,14 +47,15 @@ Action: Replace
 Old: `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log and staging memo if kept (standing rule 41):
 New: `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.FOLDER-SCAN-PERF-1.2026-10-14.md` (the C1 stop) if kept (standing rule 41):
 
-### Fold-in 2a — QUIT-FLUSH-1 inherits two quit-time items (planner ruling D1(b), 2026-10-14)
-Section: §QUIT-FLUSH-1 (inline full spec): edit sites and Done-when
-Action: Insert after (the spec's `will-quit` edit-site list)
+### Fold-in 2a — two quit-time items go to LARGE-FOLDER-SYNC-1 (planner ruling D1, re-routed 2026-10-14)
+**Re-routed:** "D1 re-routed 2026-10-14 by Blurby Brain: 2a moves from QUIT-FLUSH-1 to LARGE-FOLDER-SYNC-1, because QUIT-FLUSH-1's spec forbids main/folder-watcher.js and main.js:640-665." QUIT-FLUSH-1's specification is not edited.
+Section: §LARGE-FOLDER-SYNC-1 (stub), technical half
+Action: Insert (as part of Fold-in 6)
 Content:
 - **Watcher closed flag (from FOLDER-SCAN-PERF-1's review).** `main/folder-watcher.js` `startWatcher`: add `let closed = false;` and set it in the `close` wrapper. Check `if (closed) return;` at the top of `onEvent`, and again after each `await` in `settle` (after `lstat`, and after `await realRoot` / `isPathWithinFolder`). Then no `onAdd`, `onChange` or `onUnlink` fires after `close()`. Today, a `settle` suspended at `await lstat` when `close()` runs still calls back. At quit, that is a late `debouncedSyncLibraryWithFolder` during the final flush. The base had the same gap: chokidar's async handlers awaited `realpath`, then called back.
 - **Cancellable startup timer.** `main.js` `startFolderWork` (the "Folder watcher + sync" block): keep the `setTimeout` handle, and `clearTimeout` it in `will-quit`. Then a quit within `FOLDER_SYNC_STARTUP_DELAY_MS` of `did-finish-load` starts neither a watcher nor a sync.
 
-Rationale: QUIT-FLUSH-1 owns `will-quit` and the library-save debounce race, and it is the next item to merge. Keeping FOLDER-SCAN-PERF-1 on its prescribed shape keeps its green gates valid.
+Rationale: LARGE-FOLDER-SYNC-1 owns `main/folder-watcher.js` and the folder startup and sync code in `main.js`, which is where both items live, and they sit beside the sync re-entry guard. The gap predates this item and is low severity, and the owner's profile keeps `sourceFolder` cleared. Keeping FOLDER-SCAN-PERF-1 on its prescribed shape keeps its green gates valid.
 
 ### Fold-in 2b — remove the dissolved item's leftover anchor (planner ruling D4, 2026-10-14)
 Section: ROADMAP.md, the line directly above `#### Stage 8 — Launch, quit and packaging defects found at G2`
@@ -88,7 +89,9 @@ Action: Append
 Content: Done-when 9(e) was not run on 2026-10-14; it was held with 9(d). BUG-189 stays open, and the dev-mode re-measure is still owed.
 
 ### Fold-in 6 — new stub item LARGE-FOLDER-SYNC-1 (owner ruling 2026-10-14)
-Targets: the ROADMAP.md stub list and the Notion register (create-item). Lane: Library & Content. Placed after QUIT-FLUSH-1. This is a stub, not dispatch-ready: the design question below must be answered before it is specified.
+Targets: the ROADMAP.md stub list and the Notion register (create-item). Lane: Library & Content.
+- **Placement (planner ruling 2026-10-14):** Seq 15, at the head of the stubs, so the dispatch-ready items each move up one: QUIT-FLUSH-1 10, READER-VISUAL-DIAG-1 11, PACKAGING-FIX-1 12, UX-POLISH-1 13, UX-POLISH-2 14. Stubs 16–21 are unchanged. A stub at Seq 11 would have stalled `/next-pointer`'s FIFO.
+- This is a stub, not dispatch-ready. "The technical half (per-file sync, re-entry guard, batched saves, Fold-in 2a) does not depend on the owner's large-folder answer and may be spec'd and dispatched first, split from the design half."
 - **Technical (already ruled by the planner):**
   - A watcher event applies a single-file add, remove or change to the library, with no full rescan.
   - `syncLibraryWithFolder` gets a re-entry guard, so a second sync cannot run alongside the first.
@@ -115,6 +118,10 @@ Targets: the ROADMAP.md stub list and the Notion register (create-item). Lane: L
   - Of this item and PACKAGING-FIX-1, the second to merge takes `refs/remotes/origin/main` in first.
 - **D4:** remove the anchor (Fold-in 2b).
 - **D5 (owner ruling, relayed by the planner):** merge with Done-when 9(d) waived, keep `sourceFolder` cleared, and file LARGE-FOLDER-SYNC-1 (Fold-in 6). BUG-193 is resolved by this merge (Fold-in 4); BUG-189 stays open (Fold-in 5).
+  - **Merge authority:** the owner's instruction, typed by the owner in the Blurby.Brain session on 2026-10-14: "Merge FOLDER-SCAN-PERF-1 with Done-when 9(d) waived. Keep sourceFolder cleared, and file a new item for per-file live sync and a policy for very large folders."
+  - The confirm dialog in the implementation session was not the authority. The owner then said, "I did not approve. Send those questions to Blurby.Brain for decision." The planner read that as a routing correction, not a withdrawal: the merge (`534b43d2`) stands, and every later decision is routed to the planner.
+- **D1 re-routed (planner, 2026-10-14):** Fold-in 2a moves from QUIT-FLUSH-1 to LARGE-FOLDER-SYNC-1, and QUIT-FLUSH-1's specification is not edited.
+- **D6 (planner, close-out):** time-log row 1 is confirmed as real work. It covered the eight controls and the (h) probe behind the C1 stop. LARGE-FOLDER-SYNC-1 is placed at Seq 15 (Fold-in 6).
 
 ## Code-quality review findings (row 8): no blockers; recommendation MINOR_FIXES
 
@@ -132,7 +139,7 @@ Targets: the ROADMAP.md stub list and the Notion register (create-item). Lane: L
 
 ## Downstream (flag for the review, not this run's to edit)
 
-- **QUIT-FLUSH-1** edits `main.js` after this item merges. Re-grep its edit sites, since this item shifted `main.js` by one line below the startup hunk. Also consider findings 2 and 3 above.
+- **QUIT-FLUSH-1** edits `main.js` after this item merges. Re-grep its edit sites, since this item shifted `main.js` by one line below the startup hunk. Findings 2 and 3 above went to LARGE-FOLDER-SYNC-1, not QUIT-FLUSH-1 (D1 re-routed).
 - **PACKAGING-FIX-1** also edits `package.json`. Whichever item merges second merges `refs/remotes/origin/main` in first.
 
 ## Done-when 9: owner re-measure (run 2026-10-14 by the planner, Blurby.Brain, on the owner's profile)
