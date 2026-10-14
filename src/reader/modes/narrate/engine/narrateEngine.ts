@@ -167,6 +167,8 @@ export class NarrateEngine {
   private speedChangeAt: number | null = null;
   /** performance.now() of the previous tick, for the commit record's frame interval. */
   private lastTickPerf: number | null = null;
+  /** The last unit published by tick (catch-up after a long frame starts after it); cleared by reset, kept across pause/resume. */
+  private lastPublished: { readonly chunk: Chunk; readonly unit: number } | null = null;
   /** The request whose first voiced sample has not been scheduled yet (D6). */
   private pendingRequest: { readonly cause: EngineRequestCause; readonly t: number; readonly ctx: number; readonly word: number } | null = null;
 
@@ -317,12 +319,20 @@ export class NarrateEngine {
     const pos = this.position(now);
     if (!pos || pos.unit < 0) return; // silence holds the last word (R6)
     const c = this.chunks[pos.index];
-    const word = c.entry.startWord + c.unitWord[pos.unit];
+    // A long display frame can carry the sample past whole units: publish each unit this chunk sounded since the last publish, in order (D5).
+    const from = this.lastPublished?.chunk === c ? this.lastPublished.unit + 1 : Math.max(0, lookupUnit(c.table.units, c.offset));
+    for (let u = Math.min(from, pos.unit); u <= pos.unit; u++) this.commitUnit(c, u, now, t, frameDt);
+    this.lastPublished = { chunk: c, unit: pos.unit };
+  }
+
+  /** Publish one unit's word (skipped when it is already the cursor) and record its commit. */
+  private commitUnit(c: Chunk, u: number, now: number, t: number, frameDt: number | null): void {
+    const word = c.entry.startWord + c.unitWord[u];
     if (this.publish(word) && this.events.onTrace) {
       const ots = this.output.outputTimestamp();
       this.events.onTrace({
-        kind: "narrate-commit", t, word, chunkStart: c.entry.startWord, unit: pos.unit,
-        boundaryCtx: c.startAt + (c.table.units[pos.unit].sampleStart - c.offset) / this.output.sampleRate,
+        kind: "narrate-commit", t, word, chunkStart: c.entry.startWord, unit: u,
+        boundaryCtx: c.startAt + (c.table.units[u].sampleStart - c.offset) / this.output.sampleRate,
         nowCtx: now, headCtx: this.output.now(), otsCtx: ots?.contextTime ?? null, otsPerf: ots?.performanceTime ?? null, frameDt, speed: this.speed, epoch: this.epoch,
       });
     }
@@ -493,6 +503,7 @@ export class NarrateEngine {
     this.speedChangeAt = null;
     this.pendingRequest = null;
     this.lastTickPerf = null;
+    this.lastPublished = null;
     this.chunkSeq = 0;
   }
 

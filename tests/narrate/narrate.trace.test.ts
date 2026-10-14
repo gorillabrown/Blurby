@@ -156,6 +156,44 @@ describe("narrate recorded output (D3 at the engine seam)", () => {
     for (let i = 1; i < cursor.length; i++) expect(cursor[i]).toBeGreaterThan(cursor[i - 1]);
   });
 
+  it("a long display frame that passes whole units publishes each one in order, each with its own commit record at that tick", async () => {
+    const h = harness();
+    h.engine.play(0);
+    await flush();
+    run(h, LEAD + WORD_S * 2 + 0.01);
+    expect(h.cursor).toEqual([0, 1, 2]);
+    h.output.advance(WORD_S * 3); // one frame passes units 3 and 4 and lands in 5
+    h.engine.tick();
+    expect(h.cursor).toEqual([0, 1, 2, 3, 4, 5]);
+    const last = h.of("narrate-commit").slice(-3);
+    expect(last.map((c) => c.word)).toEqual([3, 4, 5]);
+    expect(last.map((c) => c.unit)).toEqual([3, 4, 5]);
+    expect(new Set(last.map((c) => c.t)).size).toBe(1);
+    expect(new Set(last.map((c) => c.frameDt)).size).toBe(1);
+    for (let i = 0; i < last.length; i++) {
+      const c = last[i];
+      expect(c.boundaryCtx).toBeLessThanOrEqual(c.nowCtx + 1e-9);
+      expect(c.boundaryCtx).toBeGreaterThan(c.nowCtx - WORD_S * 3 - 1e-9);
+      if (i > 0) expect(c.boundaryCtx).toBeGreaterThan(last[i - 1].boundaryCtx);
+    }
+    run(h, WORD_S * 2);
+    expect(h.cursor).toEqual([...Array(8).keys()]); // no repeats
+  });
+
+  it("a click whose first frame lands past the new chunk's first unit publishes from the clicked word, never a unit of the old epoch", async () => {
+    const h = harness();
+    h.engine.play(0);
+    await flush();
+    run(h, LEAD + WORD_S * 2 + 0.01);
+    expect(h.cursor).toEqual([0, 1, 2]);
+    const before = h.cursor.length;
+    h.engine.play(6, "click");
+    await flush();
+    h.output.advance(LEAD + WORD_S * 2 + 0.01);
+    h.engine.tick();
+    expect(h.cursor.slice(before)).toEqual([6, 7, 8]);
+  });
+
   it("without a trace listener the engine plays the same and builds no record", async () => {
     const h = harness({ trace: false });
     h.engine.play(0);
