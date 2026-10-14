@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 
 import { useReaderKeys } from "../src/hooks/useKeyboardShortcuts";
 
@@ -185,7 +185,7 @@ function PageSpaceHarness({ spies, lastReadingMode, bindNarrate = true }: {
 describe("reader keyboard - Page Space enters the remembered mode (UX-POLISH-1)", () => {
   let container: HTMLDivElement;
   let root: Root;
-  let spies: { [K in keyof PageSpaceSpies]: ReturnType<typeof vi.fn> };
+  let spies: { [K in keyof PageSpaceSpies]: Mock<() => void> };
 
   beforeEach(() => {
     container = document.createElement("div");
