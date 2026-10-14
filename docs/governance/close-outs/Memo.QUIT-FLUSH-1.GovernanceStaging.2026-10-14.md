@@ -144,9 +144,39 @@ Content:
 - Files written during the run: `library.json`, `settings.json`, `sync-queue.json` (17:53:50, while running; none a `.tmp`).
 - Profile restored after the run: `settings.json` and `library.json` copied back from the backup and verified byte-identical (accent `#FF5B7F`, `readingMode` narrate, `sourceFolder` cleared).
 
+- **Recorded disposition (Blurby Brain, 2026-10-14):** Done-when 9(f) is "not testable as written; quit side verified clean (process exit, no *.tmp); reopen-at-position cannot be exercised because Page-mode page turns never commit a reading position, shown by a no-quit control on the bd1216fc build". Brain: "This is not a waiver of the quit guarantee. The library save path at quit is covered by tests (a)-(j) and by (c)/(d) live for settings. I am taking no owner waiver for it, because this sprint changed nothing the user sees."
+
 ## Findings for the close-out (from the smoke; no action in this run)
-- **Done-when 9(f) spec gap.** Page-mode page turns do not commit a reading position (Brain's control above), so (f) as written cannot test the quit flush. A future quit smoke needs an action that does commit a position before the quit.
-- **Page mode does not save the reading position on page turns** (observed on the sample *Meditations*, production build `bd1216fc`). This may be a separate defect for the planner to triage. It is not caused by this item: the base quit path was not involved, and the position was unchanged with no quit.
+- **Done-when 9(f) spec gap → a lesson** (Brain's ruling: fold it into LL-158 if it fits, otherwise a new entry). See "Target: LESSONS_LEARNED.md" below.
+- **Handed to Blurby Brain, not filed by this run** (Brain's ruling: "Both are user-visible, so I am taking them to the owner myself"). Two defects were found during the Done-when 9 smoke:
+  1. Page-mode page turns do not save a reading position (sample *Meditations*, build `bd1216fc`, no-quit control).
+  2. A folder book on Drive will not open ("Could not read EPUB file") while `sourceFolder` is cleared.
+
+## Close-out dispositions (Blurby Brain, merge go, 2026-10-14)
+- Merge go: "QUIT-FLUSH-1: merge go … CLAUDE.md Rule 11 tier 1 (Rule 5b merge go)." W1 stays tier 1, and nothing goes to the owner.
+- Fold-in 3 (S2 → PACKAGING-FIX-1's specification): as staged.
+- S1 → a note on LARGE-FOLDER-SYNC-1 (Fold-in 4), not a new stub.
+- Plato N-a to N-d: recorded in the close-out only; no follow-up item.
+- Queue: QUIT-FLUSH-1 Completed, its Seq cleared, and the queue renumbered through the register flow. LARGE-FOLDER-SYNC-1 becomes dispatchable once this merges.
+
+## Target: ROADMAP.md §LARGE-FOLDER-SYNC-1 (planner ruling, 2026-10-14: "file it as a note on LARGE-FOLDER-SYNC-1 (it already edits stopNewWork and the quit path), not as a new stub")
+
+### Fold-in 4 — note S1 for LARGE-FOLDER-SYNC-1's specification
+Section: §LARGE-FOLDER-SYNC-1 (Full Spec, technical half), notes or planner resolutions
+Action: Insert after
+Content:
+- **From QUIT-FLUSH-1's review (S1, 2026-10-14):** the quit flush (`main/quit-sequence.js`, the steps in `main.js`'s `will-quit` block) runs its local saves one after another, library first, under `QUIT_FLUSH_TIMEOUT_MS` (3 s).
+  - The risk: on a very large library, a library write slower than the cap is cut, and it starves the steps after it. Those are the pending settings save and its sync enqueue, the settings save and the write drain.
+  - A possible fix: run the local saves in parallel under the cap (they touch distinct files, each with its own write chain), with the cloud sync last.
+  - Measure the library write time on the owner's large-folder data before choosing.
+
+## Target: LESSONS_LEARNED.md (planner ruling: "add a lesson … Fold it into LL-158 if it fits, otherwise a new entry")
+
+### Fold-in 5 — live smoke rows must use an action shown to commit the state they check
+Section: LL-158 ("Trace what a live-behaviour acceptance row triggers, end to end, at the real data size"). It fits: both are acceptance rows that cannot pass for reasons in code the item does not change.
+Action: Insert after (as a dated status or rider under LL-158; the planner assigns the number if a new entry is preferred)
+Content:
+**Rider (QUIT-FLUSH-1, 2026-10-14):** a live smoke row that checks state persisted across an action (here, the quit) must name a trigger that is shown to commit that state, with a no-action control. QUIT-FLUSH-1 Done-when 9(f) paged forward in Page mode and expected the book to reopen at the new position after Alt+F4. Blurby Brain's control with no quit showed that Page-mode page turns never write a reading position: `library.json` was unchanged after 10 s with the app open. So the row could not test the quit flush. Before writing such a row, run the trigger without the action under test and confirm that the state is written.
 
 ### Fix-round review (code quality + ruling compliance, Plato, on `7f47006a..bd1216fc`)
 - Verdict **READY**; no confirmed defects. W2, N1 (with the producer awaited first in `finally`) and W1 match the ruling. Tests (h), (i), (i2) and (j) each fail if their fix is reverted. `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js`: 17 of 17 pass.
