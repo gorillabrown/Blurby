@@ -215,7 +215,7 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 | `wpm` | 300 | Reading speed (words per minute) |
 | `theme` | `"dark"` | `"dark" | "light" | "blurby" | "eink" | "system"` |
 | `readingMode` | `"focus"` | Active mode type: `"page"`, `"focus"` or `"flow"` (a saved `"narrate"` is normalized to `"flow"`) |
-| `lastReadingMode` | `"flow"` | Space bar starts this mode from Page view; same three values, same normalization |
+| `lastReadingMode` | `"flow"` | Space bar enters this mode, paused, from Page view ("flow" when unset) |
 | `ttsEngine` | `"web"` | `"web" | "kokoro"`; the MOSS-Nano, Pocket and Qwen engines and their values were deleted by NARRATE-REMOVE-1 (2026-10-12). Kokoro is dormant: no UI path selects or starts it until NARRATE-REBUILD-1. |
 | `ttsRate` | 1.0 | TTS speech rate (0.5-2.0) |
 | `rhythmPauses` | object | Comma, sentence, paragraph, number, long-word pauses |
@@ -233,7 +233,7 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 | Cloud apply | `applyCloudSettings` in `main/sync-engine.js` | Normalizes after the merge and before the settings save |
 | Renderer write | the `save-settings` handler in `main/ipc/state.js` | Normalizes before `get-state`, before the debounced save and before the sync enqueue |
 
-Each site has an omission control in `tests/` (removing the call fails its test). NARRATE-REBUILD-1 retires these calls only if the rebuilt mode's id is `"narrate"`. Settings durability is unchanged: writes stay fire-and-forget with a shared `.tmp` path (BUG-185).
+Each site has an omission control in `tests/` (removing the call fails its test). NARRATE-REBUILD-1 retires these calls only if the rebuilt mode's id is `"narrate"`. Settings writes are serialized per file and report failure without rejecting (SETTINGS-WRITE-DURABLE-1).
 
 ### EPUB CFI Position Tracking
 

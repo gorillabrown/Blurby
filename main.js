@@ -13,6 +13,7 @@ const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = r
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
+const { readJSON, writeJSON, saveJSON } = require("./main/json-store");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -50,19 +51,6 @@ function getHistoryPath() { return path.join(getDataPath(), "history.json"); }
 function getSiteCookiesPath() { return path.join(getDataPath(), "site-cookies.json"); }
 
 // ── Persistent JSON helpers (async) ────────────────────────────────────────
-async function readJSON(filepath, fallback) {
-  try {
-    const data = await fsPromises.readFile(filepath, "utf-8");
-    return JSON.parse(data);
-  } catch { /* Expected: file may not exist on first launch */ }
-  return fallback;
-}
-async function writeJSON(filepath, data) {
-  // Atomic write: write to temp file first, then rename (rename is atomic on most filesystems)
-  const tmp = filepath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(data, null, 2), "utf-8");
-  await fsPromises.rename(tmp, filepath);
-}
 async function backupFile(filepath) {
   try { await fsPromises.copyFile(filepath, filepath + ".bak"); } catch (err) {
     console.error(`Backup failed for ${filepath}:`, err.message);
@@ -132,7 +120,7 @@ function removeDocFromLibrary(id) {
   libraryData.docs = libraryData.docs.filter((d) => d.id !== id);
   libraryIndex.delete(id);
 }
-function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }
+function saveSettingsFn() { return saveJSON(getSettingsPath(), settings, "settings"); }
 
 // ── Debounced library persistence ──────────────────────────────────────────
 let _saveLibraryTimer = null;
@@ -155,8 +143,8 @@ async function saveLibraryNow() {
   await writeJSON(getLibraryPath(), libraryData);
 }
 
-function saveHistory() { writeJSON(getHistoryPath(), history); }
-function saveSiteCookies() { writeJSON(getSiteCookiesPath(), siteCookies); }
+function saveHistory() { return saveJSON(getHistoryPath(), history, "history"); }
+function saveSiteCookies() { return saveJSON(getSiteCookiesPath(), siteCookies, "site-cookies"); }
 
 function safeTraceSlug(value, fallback = "trace") {
   return String(value || fallback)
@@ -703,6 +691,7 @@ app.on("will-quit", async (event) => {
   try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
   await flushTtsEvalTraceCaptures();
   await saveLibraryNow();
+  await saveSettingsFn();
   // Final cloud sync before quit
   try {
     const syncEngine = require("./main/sync-engine");

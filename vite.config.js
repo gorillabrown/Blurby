@@ -46,7 +46,6 @@ export default defineConfig({
             id.includes("src/utils/pauseDetection") ||
             id.includes("src/utils/pronunciationOverrides") ||
             id.includes("src/utils/voiceSelection") ||
-            id.includes("src/modes/NarrateMode") ||
             id.includes("src/types/narration")
           ) {
             return "tts";

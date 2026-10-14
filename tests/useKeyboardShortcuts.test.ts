@@ -48,6 +48,7 @@ type Action =
   | "fontDown"
   | "exit"
   | "enterNarrate"
+  | "enterLastMode"
   | "none";
 
 function resolveReaderKey(
@@ -74,7 +75,7 @@ function resolveReaderKey(
   if (e.code === "KeyN" && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) return "enterNarrate";
   // Page-mode only keys
   if (surface === "page") {
-    if (e.code === "Space" && !e.shiftKey) return "togglePlay";
+    if (e.code === "Space" && !e.shiftKey) return "enterLastMode";
     if (e.code === "ArrowUp" && !e.shiftKey && !e.ctrlKey) return "wpmUp";
     if (e.code === "ArrowDown" && !e.shiftKey && !e.ctrlKey) return "wpmDown";
     return e.code === "Escape" ? "exit" : "none";
@@ -127,6 +128,10 @@ describe("useKeyboardShortcuts — key binding resolution (any mode)", () => {
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "focus")).toBe("none");
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "flow")).toBe("none");
     expect(resolveReaderKey(makeKeyEvent({ code: "KeyT" }), "page")).toBe("none");
+  });
+
+  it("Space in Page enters the remembered mode (UX-POLISH-1)", () => {
+    expect(resolveReaderKey(makeKeyEvent({ code: "Space" }), "page")).toBe("enterLastMode");
   });
 
   it("[ goes to previous chapter", () => {

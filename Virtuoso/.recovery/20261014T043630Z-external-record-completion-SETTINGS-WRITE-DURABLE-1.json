@@ -1,0 +1,37 @@
+{
+  "id": "20261014T043630Z-external-record-completion-SETTINGS-WRITE-DURABLE-1",
+  "operation": "external-record-completion",
+  "item_id": "SETTINGS-WRITE-DURABLE-1",
+  "created": "2026-10-14T04:36:30Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-13",
+      "evidence": "docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "record-completion:SETTINGS-WRITE-DURABLE-1:[('completed', '2026-10-13'), ('evidence', 'docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md'), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "SETTINGS-WRITE-DURABLE-1",
+      "idempotencyKey": "record-completion:SETTINGS-WRITE-DURABLE-1:[('completed', '2026-10-13'), ('evidence', 'docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md'), ('status', 'completed')]",
+      "actualRevision": "2026-10-14T04:36:50Z",
+      "recoveryId": "20261014T043630Z-external-record-completion-SETTINGS-WRITE-DURABLE-1",
+      "detail": {},
+      "providerItemId": "3f87c96c-c31e-817a-96d2-d4046af9a02a"
+    }
+  },
+  "resolved": "2026-10-14T04:36:52Z",
+  "outcome": "succeeded"
+}

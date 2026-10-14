@@ -1,8 +1,8 @@
 import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from "vitest";
 
 // sync-queue.js is CommonJS and uses fs/promises + crypto + path + os.
-// We test the pure, exported logic directly. File I/O is mocked so no disk
-// access occurs during the test run.
+// We test the pure, exported logic directly; the persistence tests use a real
+// temporary directory.
 
 import os from "os";
 import path from "path";
@@ -254,5 +254,12 @@ describe("enqueue and getPendingOps", () => {
     await enqueue("add-doc", { docId: "doc-4", revision: 1, timestamp: 1000 });
     await clearQueue();
     expect(getPendingOps()).toHaveLength(0);
+  });
+
+  it("concurrent enqueues all persist", async () => {
+    const docIds = Array.from({ length: 8 }, (_, i) => `doc-c${i}`);
+    await Promise.all(docIds.map((docId, i) => enqueue("add-doc", { docId, revision: 100 + i, timestamp: 1000 + i })));
+    const saved = JSON.parse(await fs.readFile(path.join(TEST_DIR, "sync-queue.json"), "utf-8"));
+    expect(saved.map((o) => o.docId).sort()).toEqual([...docIds].sort());
   });
 });
