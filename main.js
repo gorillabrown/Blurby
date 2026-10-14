@@ -14,6 +14,7 @@ const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
 const { readJSON, writeJSON, saveJSON } = require("./main/json-store");
+const { createWillQuitHandler } = require("./main/quit-sequence");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -676,35 +677,27 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-let narrateProducerStopped = false;
-app.on("will-quit", async (event) => {
-  // Stop the Narrate producer workers before the process exits: a worker ended under a live onnxruntime run takes
-  // the process down with 0xC0000409. Quit waits once for them, then quits again.
-  if (!narrateProducerStopped) {
-    narrateProducerStopped = true;
-    event.preventDefault();
-    try { await require("./main/narrate/producer").shutdown(); } catch { /* ignore */ }
-    app.quit();
-    return;
-  }
-  if (watcher) watcher.close();
-  // Stop WebSocket server
-  try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
-  await flushTtsEvalTraceCaptures();
-  await saveLibraryNow();
-  await saveSettingsFn();
-  // Final cloud sync before quit
-  try {
-    const syncEngine = require("./main/sync-engine");
-    syncEngine.stopAutoSync();
-    const auth = require("./main/auth");
-    if (auth.getAuthState()) {
-      await syncEngine.startSync();
-    }
-  } catch (err) {
-    console.log("[cloud] Quit sync failed:", err.message);
-  }
-});
+app.on("will-quit", createWillQuitHandler({
+  app,
+  stopNewWork: () => {
+    if (watcher) watcher.close();
+    try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+    try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
+  },
+  shutdownProducer: () => require("./main/narrate/producer").shutdown(),
+  steps: [
+    ["eval traces", () => flushTtsEvalTraceCaptures()],
+    ["library", saveLibraryNow],
+    ["settings", saveSettingsFn],
+    ["cloud sync", async () => {
+      try {
+        if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync();
+      } catch (err) {
+        console.log("[cloud] Quit sync failed:", err.message);
+      }
+    }],
+  ],
+}));
 
 } // end single-instance else block
 

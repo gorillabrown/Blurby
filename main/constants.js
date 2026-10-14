@@ -143,6 +143,8 @@ const TTS_GENERATION_MAX_RETRIES = 1;
 const LIBRARY_SAVE_DEBOUNCE_MS = 500;
 /** Delays before each retry of a JSON .tmp rename that hit a transient Windows lock (EPERM/EBUSY/EACCES) (ms) */
 const JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80];
+/** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
+const QUIT_FLUSH_TIMEOUT_MS = 3000;
 /** Debounce delay for broadcasting library updates to renderer (ms) */
 const BROADCAST_DEBOUNCE_MS = 200;
 /** Debounce delay for triggering folder sync after watcher events (ms) */
@@ -262,6 +264,7 @@ module.exports = {
   // Main Process Lifecycle
   LIBRARY_SAVE_DEBOUNCE_MS,
   JSON_RENAME_RETRY_DELAYS_MS,
+  QUIT_FLUSH_TIMEOUT_MS,
   BROADCAST_DEBOUNCE_MS,
   FOLDER_SYNC_DEBOUNCE_MS,
   FOLDER_SYNC_BATCH_SIZE,
