@@ -533,11 +533,11 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 <a id="quit-flush-1"></a>
 
-#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 10 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`)*
+#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 10 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`; line numbers re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged)*
 
 - **What:** Do the quit-time saves in the cancelled first `will-quit` pass. Cancel the first quit, stop new work, and run the saves in order: eval traces, library, the pending debounced settings save, settings, any pending JSON writes, then the final cloud sync. Each save is guarded, and all of them share one 3-second cap. The Narrate producer shutdown runs alongside them and is never cut. Then quit. The second pass does nothing. A change made just before quitting is kept, and no `*.tmp` file is left behind. Fixes BUG-192.
 - **Why:**
-  - **The cause:** `main.js:678-706` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
+  - **The cause:** `main.js:679-707` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
   - **Owner evidence, 2026-10-13 (BUG-192):**
     - The accent colour changed just before quitting was lost. `settings.json.tmp` held the new value and was never renamed.
     - `sync-queue.json.tmp` was 0 bytes.
@@ -561,9 +561,9 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
   - **The producer cannot share the 3 s cap.**
     - `shutdown()` asks each worker to finish its generation in progress (`main/narrate/producer.js:52-58`, `:193`).
     - It terminates a worker only after `NARRATE_STOP_TIMEOUT_MS` = 30,000 ms (`main/narrate/constants.js:31`).
-    - The comment at `main.js:680-681` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+    - The comment at `main.js:681-682` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
     - Quitting at a 3 s cap while that wait is open would bring the crash back.
-  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:674-676`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
+  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:675-677`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
 - **Owner decision (2026-10-14, binding): "Local saves, cloud best-effort."**
   - Cancel the first quit.
   - Await, in order:
@@ -578,6 +578,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
   - Then `app.quit()`. The second pass does only what is genuinely fire-and-forget.
   - Anything not synced to the cloud stays in the sync queue for the next launch.
   - Keep the Narrate producer shutdown guarantee.
+- **Owner ruling (2026-10-14, Rule 11 tier 2, at dispatch): "Cap the saves only."** The 3 s cap covers the saves and the final cloud sync; the Narrate producer shutdown runs alongside them and is awaited uncapped.
 - **Planner resolutions (roadmap review 2026-10-14):** the producer shutdown runs alongside the capped saves and is awaited uncapped (the 3 s cap applies to the saves; cutting the producer brings back 0xC0000409); one cap over sequential steps, library first; the watcher, WebSocket and auto-sync stops move to the start of the first pass, leaving the second pass empty; a `sync-*.tmp` written after launch while signed in and online is accepted under "cloud best-effort" (smoke (d)).
 - **Design decisions (planner, 2026-10-14):**
   - **Extract the quit sequence into `main/quit-sequence.js`** (CommonJS, no file I/O of its own). Its steps are injected, so it can be unit-tested against an Electron-faithful fake `app`.
@@ -608,12 +609,12 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
     - Steps run in sequence, so a hang starves the steps after it. Local saves come first and the slow, best-effort cloud sync comes last.
   - **Guards.** Each step is `try { await step() } catch { log }`, so a step that throws or rejects is logged with its name and the next step runs. The runner never rejects.
   - **Constant.** `QUIT_FLUSH_TIMEOUT_MS = 3000` goes in `main/constants.js` under "Main Process Lifecycle" (CLAUDE.md Constants Separation Rule). `main/quit-sequence.js` reads it there.
-  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:429-438` asserts that the source contains `}, 500)`.
+  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:447-456` asserts that the source contains `}, 500)`.
 - **Out of scope:**
   - Per-step timeouts (one overall cap, per the owner).
   - Cancelling a cloud sync already in progress when the quit starts. `startSync` returns `"already-syncing"` (`main/sync-engine.js:782`), and the in-flight auto-sync may be cut at exit.
-  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:583`, `main/narrate/trial.js:329-331`).
-  - The folder-sync debounce timer (`main.js:303-305`), which can schedule a library save during the flush when `sourceFolder` is set: FOLDER-SCAN-PERF-1's area.
+  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:584`, `main/narrate/trial.js:329-331`).
+  - The folder-sync debounce timer (`main.js:302-305`), which can schedule a library save during the flush when `sourceFolder` is set, and the deferred startup folder timer (FOLDER-SCAN-PERF-1, `FOLDER_SYNC_STARTUP_DELAY_MS`) can start the watcher and a sync during a flush that begins within 3 s of load: both are LARGE-FOLDER-SYNC-1's area (its watcher closed flag and cancellable startup timer). The owner's `sourceFolder` is cleared, so neither runs in this item's smoke.
   - Cleaning stale `*.tmp` files left by earlier quits.
   - The BUG-192 **Location** line, which still cites `:691` on `15e9c2f1` (the close-out updates it).
   - Any renderer change.
@@ -636,7 +637,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
        **(e)** and every existing `jsonStore` test pass. Vitest may also report the unhandled rejection from (c); record it. Record the output in the staging memo.
     2. After C2, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` exits 0.
-    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:679:app.on("will-quit", async (event) => {`).
+    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:680:app.on("will-quit", async (event) => {`).
     4. `git grep -n -F 'app.on("will-quit", createWillQuitHandler(' -- main.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
     5. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:1` and exits 0. Only `loadState` (`:286`) remains; the quit step passes the function by reference (dry-run: `main.js:2`).
     6. `git grep -c -F 'QUIT_FLUSH_TIMEOUT_MS' -- main/constants.js` prints `main/constants.js:2` (the definition and the export) and exits 0 (dry-run: exit 1, no output).
@@ -657,7 +658,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
          - **(e)** Relaunch: the new accent is shown.
          - **(f)** Open a book, page forward several pages, and press Alt+F4 within 1 s. Then repeat (b) and (d), and relaunch: the book reopens at the new position.
     10. `docs/governance/BUG_REPORT.md` BUG-192's **Status** line reads `RESOLVED in source (QUIT-FLUSH-1): the quit saves run in the cancelled first will-quit under QUIT_FLUSH_TIMEOUT_MS; closes after the owner's production-build smoke.`
-    11. `docs/governance/TECHNICAL_REFERENCE.md:236` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
+    11. `docs/governance/TECHNICAL_REFERENCE.md:235` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
     12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log and staging memo if kept (standing rule 41):
         - `A main/quit-sequence.js`
         - `A tests/quitSequence.test.js`
@@ -751,7 +752,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
   - **`main.js`:**
     - **`:16`** becomes `const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");`. At C1 it stays as is.
     - **After `:16`**, add `const { createWillQuitHandler } = require("./main/quit-sequence");`.
-    - **`:678-706`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:707-708` as is.**
+    - **`:679-707`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:708-709` as is.**
       ```js
       // The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
       // local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
@@ -799,7 +800,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
           };
           saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
       ```
-      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:437`.
+      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:455`.
     - **Before `:85`**, add:
       ```js
       /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
@@ -819,8 +820,8 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
       /** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
       const QUIT_FLUSH_TIMEOUT_MS = 3000;
       ```
-    - **After `:260`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
-  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:236`, per Done-when 10–11.
+    - **After `:264`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
+  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:235`, per Done-when 10–11.
 - **Tests:**
   - **New `tests/quitSequence.test.js`** (ESM, `await import("../main/quit-sequence.js")`, as `tests/jsonStore.test.js:10` does). It runs against a fake `app` that models Electron:
     ```js
@@ -900,11 +901,11 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
   - **Forbidden:**
     - every file not named above;
     - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
-    - `main.js:640-665` (startup recent-folders, watcher and cloud-sync start) and `main/folder-watcher.js`, which FOLDER-SCAN-PERF-1 owns;
+    - `main.js:640-666` (startup recent-folders, the deferred folder work and cloud-sync start) and `main/folder-watcher.js` (FOLDER-SCAN-PERF-1, merged `534b43d2`; next edited by LARGE-FOLDER-SYNC-1);
     - `main/sync-engine.js`, `main/sync-queue.js` and `main/narrate/**` (called, not edited);
     - any file NARRATE-REBUILD-1's open phase owns.
   - **Shared-core touches:** none.
-  - **Merge order:** after FOLDER-SCAN-PERF-1 if both are in flight. Both edit `main.js`, at disjoint hunks (`:16-17` and `:678-706` here; `:640-665` there). Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
+  - **Merge order:** FOLDER-SCAN-PERF-1 merged first (`534b43d2`, 2026-10-14); the line numbers here were re-read on `8a38d6fb`. Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
 
 ##### Task list
 
@@ -929,7 +930,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 - **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
 - **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
 - **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
-- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981`. The merge-order step re-greps after FOLDER-SCAN-PERF-1.
+- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981` and re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged; the merge-order step re-greps again before merging.
 
 
 <a id="packaging-fix-1"></a>
