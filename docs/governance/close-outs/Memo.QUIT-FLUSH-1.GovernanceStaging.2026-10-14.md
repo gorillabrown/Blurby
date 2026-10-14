@@ -64,9 +64,59 @@ in the branch, as the specification and its diff fence (Done-when 12) require.
 
 ### Reviews
 - Spec compliance (Solon): APPROVED_WITH_CONCERNS — no deviation in code, tests or docs; concerns were process items (origin/main moved; memo uncommitted), both resolved above.
-- Code quality (Plato): MINOR_FIXES — W1 and W2 confirmed by the orchestrator; routed to Blurby.Brain with `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (recommendation A: fix round, one smoke on the fixed build). Ruling: (pending)
+- Code quality (Plato): MINOR_FIXES — W1 and W2 confirmed by the orchestrator; routed to Blurby.Brain with `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (recommendation A: fix round, one smoke on the fixed build). Ruling: **W1/W2/N1 ruled by Blurby Brain 2026-10-14, option A + N1** (see Fold-in 1).
 
 ## Planner items for the close-out (from the code-quality review; no action in this run)
 - **S1 — sequential, library-first order.** A library write slower than `QUIT_FLUSH_TIMEOUT_MS` (very large libraries) is cut and starves the settings flush after it. Running the local saves in parallel under the cap (distinct files, per-path chains), cloud sync last, would avoid it.
 - **S2 — `autoUpdater.quitAndInstall`.** electron-updater spawns the installer and then calls `app.quit()` (`BaseUpdater.js` `doInstall`, then `setImmediate(app.quit)`), so the installer starts while the flush runs (up to 3 s; 30 s when the Narrate producer is stopping). Unverified whether the NSIS running-app check can kill the app mid-flush; the update path is not smoke-tested.
 - **N2 — test gaps.** The real `save-settings` debounce path has no behavioural regression test (perfAudit "e" copies the logic and greps the literal); test (e) would pass if the producer started after the steps.
+
+## Target: ROADMAP.md
+
+### Fold-in 1 — Mid-Dispatch Amendment (review findings W1, W2, N1: one fix round)
+Section: §QUIT-FLUSH-1 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+##### Mid-Dispatch Amendment — 2026-10-14 — W1/W2/N1 ruled by Blurby Brain, option A + N1
+Decision Type: Technical, back-end (CLAUDE.md Rule 11, tier 1), ruled by the planner (Blurby Brain).
+Context: Code-quality review of C2 (`00dbba06`), MINOR_FIXES; issue `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md`.
+- W1: the quit's cloud sync arms the debounced library save (`ctx.saveLibrary()`, `main/sync-engine.js` "GC expired tombstones" branch). "writes after sync" (`whenWritesSettled`) cannot see it, so a merged library was dropped at quit.
+- W2: `runQuitSteps` had no cut state, so a step finishing after the cap let later saves start during exit.
+- N1: a throw outside the step guards could leave the handler in "flushing", cancelling every later quit.
+The owner smoke on `00dbba06` had not been run.
+Decision: Brain's words: "option A, plus N1. Fix W1, W2 and N1 in one round, then smoke the fixed build only."
+- W2: a `cut` flag set in the cap callback, and `if (cut) break;` first in the step loop. Test (h).
+- N1: the flush body in try/catch/finally; `finally` sets `state = "done"` and calls `app.quit()`. Test (i).
+- W1: `["library after sync", () => (_libraryDirty ? saveLibraryNow() : undefined)]` between "cloud sync" and "writes after sync". Source-text test (j).
+- Each new test is shown failing on the unfixed code first. Done-when 2–8 are re-run, a new `--dir` build is made, and only that build is smoked (Done-when 9).
+Rationale (Brain): all three are back-end and the planner's to rule. "Their ruling was that the quit awaits the final cloud sync. A local save, only when that sync re-dirtied the library and under the same cap, carries out that ruling and changes nothing the user sees except that merged data survives."
+
+### Fold-in 2 — Diff fence covers the issue file
+Section: §QUIT-FLUSH-1, Done-when 12
+Action: Replace
+Old: `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log and staging memo if kept (standing rule 41):
+New: `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (the review-findings stop) if kept (standing rule 41):
+
+## Target: ROADMAP.md §PACKAGING-FIX-1 (planner ruling, 2026-10-14: "S2 belongs with PACKAGING-FIX-1's updater work, so note it for that item's spec rather than filing a new stub")
+
+### Fold-in 3 — note S2 for PACKAGING-FIX-1's specification
+Section: §PACKAGING-FIX-1 (inline full spec), Planner resolutions or equivalent notes
+Action: Insert after
+Content:
+- **From QUIT-FLUSH-1's review (S2, 2026-10-14):** `autoUpdater.quitAndInstall` (`main/ipc/misc.js`) reaches the QUIT-FLUSH-1 `will-quit` flush. electron-updater spawns the installer first and then calls `app.quit()` (`node_modules/electron-updater/out/BaseUpdater.js`, `doInstall` then `setImmediate(app.quit)`). So the installer starts while the flush runs: up to `QUIT_FLUSH_TIMEOUT_MS` (3 s), or up to `NARRATE_STOP_TIMEOUT_MS` (30 s) while the Narrate producer is stopping. It has not been verified whether the NSIS running-app check can kill the app mid-flush. Atomic writes keep the files intact, but a `*.tmp` may be left. The update path is not smoke-tested.
+
+## Follow-ups for the close-out (planner ruling: "file them as follow-ups in the close-out, not this run")
+- S1 — see "Planner items for the close-out" above.
+
+### Fix round (Fold-in 1 ruling) — positive controls and the producer-path correction
+- Tests first, run against the unfixed C2 code (`npx vitest run tests/quitSequence.test.js`): exit 1, with 3 failed and 7 passed.
+  - (h): `expected "vi.fn()" to not be called at all, but actually been called 1 times` (step 3 started after the cap).
+  - (i): `expected +0 to be 1` (no exit; stuck in "flushing"). Unhandled rejection recorded: `TypeError: .for is not iterable` at `main/quit-sequence.js:13`.
+  - (j): `expected -1 to be greater than 806` ("library after sync" absent).
+- **Producer-path correction** (implementation agent's finding, accepted by the orchestrator as within the N1 ruling and the owner decision "Keep the Narrate producer shutdown guarantee").
+  - The problem: as first prescribed, N1's `finally` skipped `await producer` whenever `runQuitSteps` threw, and so quit without waiting for the shutdown (0xC0000409 risk).
+  - The fix: the producer now starts before the `try`, and `await producer` is the first line of the `finally`.
+  - Test first: (i2) failed on the uncorrected code with `expected 1 to be +0` (the app exited while the producer was pending). It passes now.
+- After the fix (implementation agent), all exit 0: Done-when 2 (6 files, 93 tests, no unhandled errors); Done-when 3 exit 1 with empty output; Done-when 4–7 with unchanged output; typecheck. `tests/quitSequence.test.js` gave 11 of 11 on five repeat runs.

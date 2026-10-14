@@ -8,9 +8,11 @@ const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
 async function runQuitSteps(steps) {
   let current = null;
   let timer;
-  const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), QUIT_FLUSH_TIMEOUT_MS); });
+  let cut = false;
+  const cap = new Promise((resolve) => { timer = setTimeout(() => { cut = true; resolve("timeout"); }, QUIT_FLUSH_TIMEOUT_MS); });
   const run = (async () => {
     for (const [name, step] of steps) {
+      if (cut) break; // past the cap the app is quitting: start nothing new
       current = name;
       try { await step(); } catch (err) { console.error("[quit] " + name + " failed:", err && err.message); }
     }
@@ -32,10 +34,15 @@ function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
     try { stopNewWork(); } catch (err) { console.error("[quit] stop failed:", err && err.message); }
     // Never cut at the cap: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
     const producer = Promise.resolve().then(shutdownProducer).catch(() => {});
-    await runQuitSteps(steps);
-    await producer;
-    state = "done";
-    app.quit();
+    try {
+      await runQuitSteps(steps);
+    } catch (err) {
+      console.error("[quit] flush failed:", err && err.message);
+    } finally {
+      await producer; // never rejects: awaited on every path, uncapped
+      state = "done";
+      app.quit();
+    }
   };
 }
 

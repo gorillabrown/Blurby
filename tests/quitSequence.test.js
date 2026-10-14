@@ -12,6 +12,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { createRequire } from "module";
+import { fileURLToPath } from "url";
 
 const { createWillQuitHandler } = await import("../main/quit-sequence.js");
 const { writeJSON, saveJSON } = await import("../main/json-store.js");
@@ -246,6 +247,93 @@ describe("(e) the producer shutdown is never cut", () => {
   });
 });
 
+describe("(h) a step that finishes after the cap", () => {
+  it("(h) a step that finishes after the cap does not let the next step start", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const step1 = vi.fn(async () => {});
+    const step2 = vi.fn(() => new Promise((r) => setTimeout(r, QUIT_FLUSH_TIMEOUT_MS + 100)));
+    const step3 = vi.fn();
+    const app = makeApp();
+    app.handler = createWillQuitHandler({
+      app,
+      stopNewWork: vi.fn(),
+      shutdownProducer: vi.fn(async () => {}),
+      steps: [["first", step1], ["slow", step2], ["third", step3]],
+    });
+
+    app.quit();
+    await flush();
+    await vi.advanceTimersByTimeAsync(QUIT_FLUSH_TIMEOUT_MS);
+    await flush();
+    expect(app.exits).toBe(1);
+    expect(step2).toHaveBeenCalledTimes(1);
+
+    // The slow step settles 100 ms after the cap, while the app is exiting: nothing new may start.
+    await vi.advanceTimersByTimeAsync(200);
+    await flush();
+    expect(step3).not.toHaveBeenCalled();
+  });
+});
+
+describe("(i) a throw outside the step guards", () => {
+  it("(i) a throw outside the step guards still ends the flush: one exit, a later quit is not held, the failure is logged", async () => {
+    vi.useFakeTimers();
+    const errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const app = makeApp();
+    app.handler = createWillQuitHandler({
+      app,
+      stopNewWork: vi.fn(),
+      shutdownProducer: vi.fn(async () => {}),
+      // A null entry makes the loop header's destructuring throw, outside the per-step try/catch.
+      steps: [["one", vi.fn()], null],
+    });
+
+    app.quit();
+    await flush();
+    expect(app.exits).toBe(1);
+
+    const fresh = makeEvent();
+    await app.handler(fresh);
+    expect(fresh.defaultPrevented).toBe(false);
+    expect(app.exits).toBe(1);
+    expect(errSpy.mock.calls.some((c) => c.join(" ").includes("[quit] flush failed"))).toBe(true);
+  });
+});
+
+describe("(i2) a throw outside the step guards and the producer shutdown", () => {
+  it("(i2) a throw outside the step guards still waits for the producer shutdown", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    let release = () => {};
+    const shutdownProducer = vi.fn(() => new Promise((r) => { release = r; }));
+    const app = makeApp();
+    app.handler = createWillQuitHandler({
+      app,
+      stopNewWork: vi.fn(),
+      shutdownProducer,
+      // A null entry makes the loop header's destructuring throw, outside the per-step try/catch.
+      steps: [["one", vi.fn()], null],
+    });
+
+    try {
+      app.quit();
+      await flush();
+      // The producer shutdown is never cut and never skipped: no exit while it is pending, even though the flush threw.
+      expect(app.exits).toBe(0);
+
+      release();
+      await flush();
+      expect(app.exits).toBe(1);
+    } finally {
+      release();
+    }
+  });
+});
+
 describe("(f) flushPendingSettingsSave (main/ipc/state.js)", () => {
   function clearStateModule() {
     try { delete require.cache[require.resolve("../main/ipc/state.js")]; } catch {}
@@ -307,5 +395,27 @@ describe("(f) flushPendingSettingsSave (main/ipc/state.js)", () => {
     await flushPendingSettingsSave();
     expect(saveSettings).toHaveBeenCalledTimes(1);
     expect(enqueue).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("(j) main.js quit step list", () => {
+  it("(j) main.js flushes the cloud sync's library save before the final write drain", () => {
+    // main.js is not unit-testable (it takes the single-instance lock at load), so read its source, as tests/einkFoundation.test.ts does.
+    const src = fs.readFileSync(fileURLToPath(new URL("../main.js", import.meta.url)), "utf-8");
+    const start = src.indexOf('app.on("will-quit", createWillQuitHandler(');
+    expect(start).toBeGreaterThan(-1);
+    const end = src.indexOf("\n}));", start);
+    expect(end).toBeGreaterThan(start);
+    const block = src.slice(start, end);
+
+    const cloud = block.indexOf('"cloud sync"');
+    const lib = block.indexOf('"library after sync"');
+    const drain = block.indexOf('"writes after sync"');
+    expect(cloud).toBeGreaterThan(-1);
+    expect(drain).toBeGreaterThan(-1);
+    expect(lib).toBeGreaterThan(cloud);
+    expect(drain).toBeGreaterThan(lib);
+    // startSync's library merge only arms the debounced library save (saveLibrary); flush it when it is armed.
+    expect(block).toContain("_libraryDirty ? saveLibraryNow() : undefined");
   });
 });

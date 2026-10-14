@@ -695,6 +695,7 @@ app.on("will-quit", createWillQuitHandler({
     ["settings", saveSettingsFn],
     ["pending writes", whenWritesSettled],
     ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+    ["library after sync", () => (_libraryDirty ? saveLibraryNow() : undefined)], // startSync's merge arms the debounced library save (main/sync-engine.js); flush it
     ["writes after sync", whenWritesSettled],
   ],
 }));
