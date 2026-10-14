@@ -77,13 +77,28 @@ New: (delete the fragment; folder watching is native recursive `fs.watch`)
 ### Fold-in 4 — BUG-193 resolved
 Section: §BUG-193, Status line
 Action: Replace
-Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`. Add the merge sha at close-out (LL-148), plus Done-when 9's timed results.
-Condition: Done-when 9(c) passes. This is pending: the owner gate after G2.
+Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the merge sha (LL-148) and Done-when 9's timed results. *Meditations* on Drive went from 140–150 s on the base to about 2 s on the fix, and the local book opens in under 1 s.
+- The live-sync gap does not stay on BUG-193; it moves to LARGE-FOLDER-SYNC-1 (Fold-in 6).
+- The owner's workaround stands: `sourceFolder` stays cleared until that item lands.
+Condition: met. Done-when 9(c) passed, and the owner waived 9(d).
 
-### Fold-in 5 — BUG-189 (conditional)
+### Fold-in 5 — BUG-189 stays open
 Section: §BUG-189, Status line
-Action: Replace, only if Done-when 9(e) closes it
-Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode times. Otherwise record the 9(e) numbers on the open status, and the planner files a fresh measurement item.
+Action: Append
+Content: Done-when 9(e) was not run on 2026-10-14; it was held with 9(d). BUG-189 stays open, and the dev-mode re-measure is still owed.
+
+### Fold-in 6 — new stub item LARGE-FOLDER-SYNC-1 (owner ruling 2026-10-14)
+Targets: the ROADMAP.md stub list and the Notion register (create-item). Lane: Library & Content. Placed after QUIT-FLUSH-1. This is a stub, not dispatch-ready: the design question below must be answered before it is specified.
+- **Technical (already ruled by the planner):**
+  - A watcher event applies a single-file add, remove or change to the library, with no full rescan.
+  - `syncLibraryWithFolder` gets a re-entry guard, so a second sync cannot run alongside the first.
+  - A long import saves progress in batches, not once at the end.
+  - Also a latent defect on the same path (`main.js:373-381`): a cancelled sync saves `synced` before non-folder and Saved Articles documents are appended, so a cancel with partial progress would drop them. Nothing in the renderer calls `cancelSync` today; only the `cancel-sync` IPC and its preload method reach it. The batched save must keep those documents.
+- **Design (owner's call, open):** what Blurby does with a very large source folder. The owner's folder has 120,190 supported files (120,166 EPUBs), mostly under `Books\` and `Books\Books\`, and a full scan took 93.6 s. The options to put to the owner:
+  - import everything;
+  - cap the import;
+  - ask the user to choose subfolders.
+- **Evidence:** FOLDER-SCAN-PERF-1 Done-when 9(d), 2026-10-14 (this memo).
 
 ## Note for the close-out
 
@@ -99,6 +114,7 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
   - QUIT-FLUSH-1 does not dispatch until this item merges.
   - Of this item and PACKAGING-FIX-1, the second to merge takes `refs/remotes/origin/main` in first.
 - **D4:** remove the anchor (Fold-in 2b).
+- **D5 (owner ruling, relayed by the planner):** merge with Done-when 9(d) waived, keep `sourceFolder` cleared, and file LARGE-FOLDER-SYNC-1 (Fold-in 6). BUG-193 is resolved by this merge (Fold-in 4); BUG-189 stays open (Fold-in 5).
 
 ## Code-quality review findings (row 8): no blockers; recommendation MINOR_FIXES
 
@@ -119,9 +135,38 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
 - **QUIT-FLUSH-1** edits `main.js` after this item merges. Re-grep its edit sites, since this item shifted `main.js` by one line below the startup hunk. Also consider findings 2 and 3 above.
 - **PACKAGING-FIX-1** also edits `package.json`. Whichever item merges second merges `refs/remotes/origin/main` in first.
 
-## Done-when 9: owner re-measure (pending; waits for G2 to finish)
+## Done-when 9: owner re-measure (run 2026-10-14 by the planner, Blurby.Brain, on the owner's profile)
 
-Run it as specified, on the fix build of this branch (`234a12b9` or later, which carries D2(b)). Record (a) through (e) here: the setup counts, base and fix click-to-first-render times (cap 180 s, pass ≤ 10 s), live add and delete times (≤ 30 s each), the folder-document count against (a), any `error.log` lines, and dev-mode library and book times. The rest of the close-out follows the specification's failure handling.
+G2 was finished first: the owner approved D12, D2 and D7 F5 in the planner's session before the run. Result: (b) and (c) pass; (d) fails and is **waived by the owner**; (e) was not run.
+
+- **(a) Setup.**
+  - Backup: `%APPDATA%\blurby\blurby-data\fsp1-backup-20261014\` (`library.json` 92,744 B, `settings.json` 1,486 B).
+  - 131 folder documents; `G:` reachable; only `sourceFolder` was set.
+  - `error.log` baseline: 26,971,867 B, 205,551 lines.
+- **(b) Base build** (`narrate-rebuild-1-p6`, `f677353f`): *Meditations* on Drive (`pg2680-images-3.epub`) rendered 140–150 s after the click, with a spinner from about 8 s. That is under the 180 s cap. Window-focus problems forced two relaunches, so this number comes from the third launch, with the book opened about 25 s after start.
+- **(c) Fix build** (tree `6d2be87c`): **PASS.** *Meditations* on Drive rendered in about 2 s, and the local book in under 1 s.
+  - The local book is "The Raven", at `converted\1779591611769k92w18.epub`.
+  - The specification's `converted9591611769k92w18.epub` is the same path with `\177` lost when the specification was written.
+- **(d) Live checks: FAIL, waived.**
+  - Two EPUBs were copied into the Drive folder root: a 3 KB fixture, then a known-good 280 KB file. Neither reached `library.json` within 30 s, nor after more than 3 minutes. `library.json` was not written after 16:35:38.
+  - The delete check could not be run, and the folder count stayed at 131.
+  - `error.log` since the baseline: 924 new lines, all ResizeObserver-loop noise. There were 0 `[watcher]` lines and 0 `read-file-buffer blocked` lines.
+- **(d) Root cause** (traced by the planner and confirmed against `main.js:303-398`):
+  1. Drive is not the cause. A bare Node `fs.watch` (recursive) on `G:\My Drive\Personal\Readings` saw rename and change events, exactly as on a local control folder. The Drive stop rule does not apply.
+  2. The folder holds 120,190 supported files (120,166 `.epub`), mostly under `Books\` and `Books\Books\`, against 131 in the library. `scanFolderAsync` took 93.6 s on it.
+  3. Every watcher event runs `syncLibraryWithFolder`. That rescans the whole tree, then extracts every file not already in the library (about 120k here), then calls `saveLibrary` once at the end. So an add or delete waits behind a ~94 s scan and a ~120k-book import. A sync that completed would add about 120k books.
+  4. `syncLibraryWithFolder` has no re-entry guard. The debounced sync resets `syncCancelled` and runs alongside the startup sync.
+
+  The base has the same sync shape. The change for this sprint: launch and opens no longer stall, so on this folder the startup import now actually proceeds.
+- **(e) Dev mode: not run.** It was held with (d). BUG-189 stays open (Fold-in 5).
+- **Profile restored:** `sourceFolder` cleared; `readingMode` put back to `narrate` (the test builds had left it on `page`).
+  - `settings.json` is byte-identical to the backup.
+  - `library.json` differs from the backup only by the reading positions from the two opens.
+  - Both test EPUBs were deleted from the Drive folder, and Blurby is not running.
+
+### Owner ruling (relayed by the planner, 2026-10-14)
+
+"Merge FOLDER-SCAN-PERF-1 with Done-when 9(d) waived. Keep sourceFolder cleared, and file a new item for per-file live sync and a policy for very large folders."
 
 ## Gate evidence
 
@@ -154,4 +199,13 @@ Run it as specified, on the fix build of this branch (`234a12b9` or later, which
     - `origin/main` moved during the run to `7cf39fd9`: the CLAUDE.md trim and Rule 11 / Constitution docs, with no overlap with this branch's files. A two-tree diff therefore also lists `CLAUDE.md`, `docs/planning/Blurby_Project_Constitution.md` and `docs/planning/CLAUDE_md_archive_session1.md`; those are origin's changes, not this branch's.
     - At merge, take `refs/remotes/origin/main` in first and re-run the gates.
   - `npm ci` (Done-when 6) was not re-run, because the dependencies are unchanged since `ac8485f9`.
+- **Pre-merge re-run (row 4; orchestrator; pwsh).** Run on tree `6d5a849f`, which is `6d2be87c` with `refs/remotes/origin/main` (`7cf39fd9`) merged in, with no conflicts:
+  - **Done-when 6:** `npm ci` exits 0.
+  - **Done-when 2:** exits 0, 74/74.
+  - **Done-when 3, 4, 5a, 5b and 8:** each exits 1 with empty output.
+  - **Done-when 5c:** prints `main.js:2`, `main/constants.js:4` and `main/folder-watcher.js:2`, and exits 0.
+  - **Done-when 7:**
+    - `npm test` exits 0: 152 files, 2,068 passed and 1 skipped (the base's `tests/pdf-export.test.js` `it.skip`).
+    - `npm run typecheck` exits 0, and `npm run build` exits 0.
+  - **Done-when 10:** the two-dot and three-dot diffs against `refs/remotes/origin/main` now agree. Each lists exactly the 8 specified paths, plus the time log, this memo and the issue file.
 - **Spec-compliance review (row 7):** every edit site and every test (a)–(i) PASS, with quoted anchors. Done-when 3, 4, 5, 8 and 10 PASS. The one unprescribed addition, `settle(rel, renamed).catch(…)` (it logs `[watcher] settle error:`), was ruled compliant: it logs only and prevents an unhandled rejection in the main process.
