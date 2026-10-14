@@ -4,3 +4,4 @@
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:48:37Z"}
 {"event": "end", "row": 2, "evidence": "C2 c66d9c9d; DW2-6,9 pass; tsc 0", "result": "done", "at": "2026-10-14T02:54:33Z"}
 {"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:54:34Z"}
+{"event": "end", "row": 3, "evidence": "npm test exit 0 (2049 pass), build exit 0, tsc 0; reviews in; smoke deferred to P6 (owner); merged --no-ff to main", "result": "done", "at": "2026-10-14T02:54:48Z"}
