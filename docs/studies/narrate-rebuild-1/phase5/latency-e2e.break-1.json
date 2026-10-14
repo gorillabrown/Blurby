@@ -1,0 +1,163 @@
+{
+  "generatedAt": "2026-10-14T00:08:44.690Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "electron": null,
+  "budgets": {
+    "warmMs": 2000,
+    "coldMs": 8000,
+    "foreignCeilingPct": 25,
+    "cycleCap": 40
+  },
+  "rates": [
+    1
+  ],
+  "runs": [
+    {
+      "label": "warm-1.00",
+      "code": 0,
+      "wallMs": 23097,
+      "hostBusyPct": 47.3,
+      "appCpuPct": 25.6,
+      "foreignCpuPct": 21,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-break\\traces\\warm-1-00.trace.json",
+      "traceExists": true,
+      "cycles": 1
+    }
+  ],
+  "warm": {
+    "1.00": {
+      "play": {
+        "n": 1,
+        "counting": 1,
+        "worstMs": 3923,
+        "over": 1,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "play",
+            "speed": 1,
+            "word": 8723,
+            "latencyMs": 3923,
+            "cpu": {
+              "hostPct": 55,
+              "appPct": 31.8,
+              "foreignPct": 23.1
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 720,
+            "leadMs": 30,
+            "trimMs": 406,
+            "run": "warm-1.00"
+          }
+        ]
+      },
+      "resume": {
+        "n": 1,
+        "counting": 1,
+        "worstMs": 81,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "resume",
+            "speed": 1,
+            "word": 8732,
+            "latencyMs": 81,
+            "cpu": {
+              "hostPct": 16.6,
+              "appPct": 1.4,
+              "foreignPct": 15.2
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 31,
+            "leadMs": 30,
+            "trimMs": 1066,
+            "run": "warm-1.00"
+          }
+        ]
+      },
+      "click": {
+        "n": 1,
+        "counting": 1,
+        "worstMs": 751,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "click",
+            "speed": 1,
+            "word": 227,
+            "latencyMs": 751,
+            "cpu": {
+              "hostPct": 35.9,
+              "appPct": 32.9,
+              "foreignPct": 3
+            },
+            "ctxLatencyMs": 697,
+            "scheduledWallMs": 704,
+            "leadMs": 30,
+            "trimMs": 431,
+            "run": "warm-1.00"
+          }
+        ]
+      },
+      "speed": {
+        "n": 2,
+        "counting": 2,
+        "worstMs": 905,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "speed",
+            "speed": 1.05,
+            "word": 235,
+            "latencyMs": 905,
+            "cpu": {
+              "hostPct": 69.9,
+              "appPct": 54.4,
+              "foreignPct": 15.5
+            },
+            "ctxLatencyMs": 857,
+            "scheduledWallMs": 854,
+            "leadMs": 30,
+            "trimMs": 414,
+            "run": "warm-1.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1,
+            "word": 241,
+            "latencyMs": 847,
+            "cpu": {
+              "hostPct": 67.6,
+              "appPct": 53.1,
+              "foreignPct": 14.5
+            },
+            "ctxLatencyMs": 798,
+            "scheduledWallMs": 794,
+            "leadMs": 30,
+            "trimMs": 413,
+            "run": "warm-1.00"
+          }
+        ]
+      }
+    }
+  },
+  "cold": {},
+  "sessions": {},
+  "verdict": "FAIL",
+  "failures": [
+    "warm 1.00 play: 1 counting trials at or over 2000 ms (worst 3923)"
+  ]
+}
