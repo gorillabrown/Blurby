@@ -149,6 +149,8 @@ const BROADCAST_DEBOUNCE_MS = 200;
 const FOLDER_SYNC_DEBOUNCE_MS = 1000;
 /** Maximum files processed per folder sync batch */
 const FOLDER_SYNC_BATCH_SIZE = 4;
+/** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */
+const FOLDER_SYNC_STARTUP_DELAY_MS = 3000;
 /** Delay before starting auto-updater check at launch (ms) */
 const AUTO_UPDATE_DELAY_MS = 5000;
 /** Timeout for browser-based URL fetch via BrowserWindow (ms) */
@@ -159,8 +161,10 @@ const BROWSER_CONTENT_SETTLE_MS = 3000;
 const URL_FETCH_TIMEOUT_MS = 15000;
 
 // ── Folder Watcher ──────────────────────────────────────────────────────
-/** Chokidar write-finish stability threshold — file must be stable this long (ms) */
+/** Watcher stability window — a path must see no further event this long before its callback fires (ms) */
 const FOLDER_WATCHER_STABILITY_MS = 500;
+/** Directory entries walked between event-loop yields in scanFolderAsync */
+const FOLDER_SCAN_YIELD_EVERY = 500;
 
 // ── Window Dimensions ───────────────────────────────────────────────────
 /** Default main window width (px) */
@@ -261,12 +265,14 @@ module.exports = {
   BROADCAST_DEBOUNCE_MS,
   FOLDER_SYNC_DEBOUNCE_MS,
   FOLDER_SYNC_BATCH_SIZE,
+  FOLDER_SYNC_STARTUP_DELAY_MS,
   AUTO_UPDATE_DELAY_MS,
   BROWSER_FETCH_TIMEOUT_MS,
   BROWSER_CONTENT_SETTLE_MS,
   URL_FETCH_TIMEOUT_MS,
   // Folder Watcher
   FOLDER_WATCHER_STABILITY_MS,
+  FOLDER_SCAN_YIELD_EVERY,
   // Window Dimensions
   MAIN_WINDOW_WIDTH,
   MAIN_WINDOW_HEIGHT,

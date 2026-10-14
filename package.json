@@ -99,7 +99,6 @@
     "@mozilla/readability": "^0.6.0",
     "adm-zip": "^0.5.16",
     "cheerio": "^1.2.0",
-    "chokidar": "^4.0.3",
     "docx": "^9.6.1",
     "electron-updater": "^6.8.3",
     "exceljs": "^4.4.0",
