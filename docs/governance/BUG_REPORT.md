@@ -8,6 +8,16 @@
 
 ## Incomplete
 
+### BUG-192 — Saves at quit are abandoned: the last change before quitting is lost
+**Reported:** 2026-10-13 (owner smoke of SETTINGS-WRITE-DURABLE-1, dev build of `eb/settings-write-durable-1` @ `5abdd405`)
+**Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
+**Status:** OPEN — filed separately from SETTINGS-WRITE-DURABLE-1 by the owner's decision; that item merges without fixing it. Lane: Platform & Maintenance.
+**Location:** `main.js` `app.on("will-quit", async (event) => …)` (`:691` on `main` @ `15e9c2f1`).
+**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%lurbylurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
+**Root cause:** Electron does not wait for an async `will-quit` listener. The handler cancels only the first quit (`event.preventDefault()`) to stop the Narrate producer, then calls `app.quit()`; on the second pass every `await` — `flushTtsEvalTraceCaptures()`, `saveLibraryNow()`, SETTINGS-WRITE-DURABLE-1's `saveSettingsFn()`, and the final cloud sync — runs after Electron has already decided to exit, so the process ends mid-write. The library flush had the same flaw before SETTINGS-WRITE-DURABLE-1; that item's quit flush inherits it.
+**Evidence:** owner smoke 2026-10-13 (planner session): file listing and diff of `settings.json` against `settings.json.tmp` (only `accentColor` differs); 0-byte `sync-queue.json.tmp`; 92,712-byte `library.json.tmp` after the second quit; no `ENOENT` in either terminal.
+**Fix path:** do the flushes inside the cancelled first pass: `event.preventDefault()`, then await the producer shutdown, the eval-trace flush, `saveLibraryNow()`, `saveSettingsFn()` and the sync-queue writer (each guarded so one failure does not block the rest, with an overall timeout), then `app.quit()`; the second pass only closes the watcher and the WebSocket server. Whether the final cloud sync belongs in the awaited pass (it can be slow) is a design decision for the spec. Needs a positive control that fails today: a main-process test (or the F7 harness) that quits during a pending write and finds the file unwritten.
+
 ### BUG-191 — Narration reads four-digit years as cardinal numbers
 **Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
