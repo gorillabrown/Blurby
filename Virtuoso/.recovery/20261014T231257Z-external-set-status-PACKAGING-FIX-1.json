@@ -1,0 +1,34 @@
+{
+  "id": "20261014T231257Z-external-set-status-PACKAGING-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "PACKAGING-FIX-1",
+  "created": "2026-10-14T23:12:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 11
+    },
+    "expectedRevision": "68f0e252317666c3e434d5768ce3707f1c246e2f6e2c73d0be655a26ead33d67",
+    "idempotencyKey": "set-status:PACKAGING-FIX-1:[('sequence', 11)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PACKAGING-FIX-1",
+      "idempotencyKey": "set-status:PACKAGING-FIX-1:[('sequence', 11)]",
+      "actualRevision": "",
+      "recoveryId": "20261014T231257Z-external-set-status-PACKAGING-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T23:13:42Z",
+  "outcome": "succeeded"
+}

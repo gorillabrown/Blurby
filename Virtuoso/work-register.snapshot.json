@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T22:29:35Z",
+  "takenAt": "2026-10-14T23:15:19Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -140,7 +140,7 @@
     {
       "id": "EINK-CONTROLS-1",
       "title": "One E-ink control, not two",
-      "sequence": 19,
+      "sequence": 18,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -156,7 +156,7 @@
       "evidence": "",
       "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
       "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
-      "revision": "3b5d915717b3fc07445541dac6b5f97592f3cb0533a98a067f70e8cf06d3cb6c",
+      "revision": "cbb2df56f062d7f2b945d43bf0d8a48424fc66228f4a4744a61d786554e79174",
       "extra": {}
     },
     {
@@ -272,7 +272,7 @@
     {
       "id": "FOLDER-UNREACHABLE-GUARD-1",
       "title": "Keep folder books when the source folder cannot be reached",
-      "sequence": 16,
+      "sequence": 15,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -288,7 +288,7 @@
       "evidence": "",
       "description": "An unreachable source folder makes the scan return nothing and both sync paths prune every folder book. Report unreachable distinctly and skip the prune. Fixes BUG-195.",
       "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use.",
-      "revision": "b0426093ff28e3fc1e323d51dd441a6205fb218f1fff7386a1aa38595c27e133",
+      "revision": "9bd3f6bb3fdec730164d146722fcf378940ee4e07cf4622a9bef9c29f601556f",
       "extra": {}
     },
     {
@@ -406,7 +406,7 @@
     {
       "id": "KF2-WAIVER-RETIRE-1",
       "title": "Retire the KF-2 rename waiver",
-      "sequence": 20,
+      "sequence": 19,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -422,7 +422,7 @@
       "evidence": "",
       "description": "The bounded rename retry from SETTINGS-WRITE-DURABLE-1 removes the Windows rename failure KF-2 waived. Retire the waiver after two clean full runs on the owner's machine.",
       "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out.",
-      "revision": "2e579ec92332896b40a41a8d618e36401bf46092726f3273b34f742b5eefae67",
+      "revision": "997ca93ea7825814381bc8eb3666f1e6f67c879d6717a8ba4b53d034668e9460",
       "extra": {}
     },
     {
@@ -518,7 +518,7 @@
     {
       "id": "LARGE-FOLDER-SYNC-1",
       "title": "Live folder sync that scales to very large folders (technical half)",
-      "sequence": 15,
+      "sequence": 14,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -536,7 +536,7 @@
       "evidence": "",
       "description": "Technical half: a watcher event adds, removes or refreshes one book without a rescan; one full sync at a time, merged into the live library (positions and deletions survive); progress saved every 30 s; no callback after the watcher closes, and the startup folder work stops at quit (Fold-in 2a). Full sync moves to main/folder-sync.js. Design half (very large folders: import all, cap, or choose subfolders) is an open owner decision.",
       "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14. Technical half specified 2026-10-14 on main b2dd36f0 (Blurby Brain ruling, Rule 11 tier 1): Full Spec, gates dry-run on the base and the prescribed edit. Merges after QUIT-FLUSH-1 (edits its stopNewWork) and before FOLDER-UNREACHABLE-GUARD-1. Owner check runs in a copy of the owner profile on the real Drive folder, inside the startup scan, with no import. The owner keeps sourceFolder cleared until this lands.",
-      "revision": "cc438cd20a08178d1b6957860814b7eec8c9703e3e92c2deb212e9194fcc1915",
+      "revision": "ef7b5fb6d09188a416774bfe69f9bca54811dbffa8494d3b1030648c70049d61",
       "extra": {}
     },
     {
@@ -979,7 +979,7 @@
     {
       "id": "NARRATE-YEARS-1",
       "title": "Read four-digit years as years in Narrate",
-      "sequence": 21,
+      "sequence": 20,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -997,7 +997,7 @@
       "evidence": "",
       "description": "BUG-191: years such as 1974 are spoken as cardinal numbers. Fix in the rebuilt Narrate's text normalization with a regression fixture.",
       "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "12c9bec165fef0569d717c50f4052e7f15abb9203949bcc0e6cbf337df1c9dba",
+      "revision": "dadabca8ccbe667f930ea04a38c8b134b337630b73caaab7e0b95430a5ea638d",
       "extra": {}
     },
     {
@@ -1027,7 +1027,7 @@
     {
       "id": "OVERLAY-THEME-SWEEP-1",
       "title": "Other overlays: Escape and undefined theme tokens",
-      "sequence": 18,
+      "sequence": 17,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1043,13 +1043,13 @@
       "evidence": "",
       "description": "Two overlays likely share the Escape-leaves-reader defect and five panels read an undefined background token. Verify live, then specify on UX-POLISH-2's pattern.",
       "notes": "Created by roadmap review 2026-10-14. Found while specifying UX-POLISH-2; after UX-POLISH-2.",
-      "revision": "f63c0288a18b9f0773043844e7ba59c8a4e47cd512d249ad3d618e604b35921c",
+      "revision": "986a19bc97e1867993ff43e6e6dc1087e32c9e28dc4b6199d59bf03b06122bf0",
       "extra": {}
     },
     {
       "id": "PACKAGING-FIX-1",
       "title": "Ship the icons, quiet the updater in unpacked builds, relink stale sample books",
-      "sequence": 12,
+      "sequence": 11,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1065,13 +1065,13 @@
       "evidence": "",
       "description": "Package the two runtime icon files, guard the auto-update check when an unpacked build has no update manifest, and relink a sample book whose bundled path is gone. From the P6 G2 build findings.",
       "notes": "Created by roadmap review 2026-10-14. NARRATE-REBUILD-1 P6 G2 findings B, C, D. Full Spec: U9/U10 pass.",
-      "revision": "68f0e252317666c3e434d5768ce3707f1c246e2f6e2c73d0be655a26ead33d67",
+      "revision": "2934628a99ced4ff80fd4c8c58186309c437b68d0410c9a88dc3dfbee3fe2e9a",
       "extra": {}
     },
     {
       "id": "PDF-IMPORT-DIAG-1",
       "title": "Reproduce the PDF that cannot be converted",
-      "sequence": 17,
+      "sequence": 16,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1087,15 +1087,15 @@
       "evidence": "",
       "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
       "notes": "Created by roadmap review 2026-10-14. BUG-190.",
-      "revision": "40817d8b9ee770c8f3ea051c21896079ec46d8f87cae7630c4e11d941d7ba89d",
+      "revision": "dd1c41e7fff4fcda845deb870286d296edaf227264961d065c10abb9f0c11cb4",
       "extra": {}
     },
     {
       "id": "QUIT-FLUSH-1",
       "title": "Finish every save before the app quits",
-      "sequence": 10,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1105,11 +1105,11 @@
       "spec_link": "ROADMAP.md#quit-flush-1",
       "branch": "eb/quit-flush-1",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-14",
+      "evidence": "docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md",
       "description": "Cancel the first quit, run the library, settings, pending-write and best-effort cloud saves in order under a 3 s cap, keep the Narrate producer shutdown uncapped, then quit. Fixes BUG-192.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass.",
-      "revision": "61d0009d36c979341492ab03aa88dbdeb4c8a80b0d44abd9323ebfcb14f7ab99",
+      "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer (branch eb/quit-flush-1 from main 80c71c70). Completed 2026-10-14: merge d21009b3, close-out merge a63048c2; ledger TR-073. Owner smoke (a)-(e) pass on the production build; (f) not testable as written (Page-mode page turns do not commit a position). Review fixes W1, W2 and N1 ruled by Blurby Brain (option A + N1); LL-159; BUG-192 resolved.",
+      "revision": "98d2eeeb72046ec6b432a1b4cece2ea3cef00f672ed97cc1d6aa960b4c834f22",
       "extra": {}
     },
     {
@@ -1308,7 +1308,7 @@
     {
       "id": "READER-VISUAL-DIAG-1",
       "title": "Diagnose the Focus/Flow reading band and the ResizeObserver flood",
-      "sequence": 11,
+      "sequence": 10,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1324,7 +1324,7 @@
       "evidence": "",
       "description": "Read-only live diagnosis of BUG-188 (reading-zone mask sized from a 24 px fallback, not tied to the word cursor; two clocks in Flow) and BUG-187 (observer loop flooding error.log), ending in two fix specifications. No product code committed.",
       "notes": "Created by roadmap review 2026-10-12 (BUG-187, BUG-188). Full Spec: U9/U10 pass.",
-      "revision": "eb827c8daecc0f573072c9e8c692ee0c9e6480c05ae38c00acc2e5d1d9654f6d",
+      "revision": "16c15e4e09ac8c08216bd1b7369fd16b32f9c55ebb2a1ef0523a2cf0a3d835df",
       "extra": {}
     },
     {
@@ -1947,7 +1947,7 @@
     {
       "id": "UX-POLISH-1",
       "title": "Space-bar resumes last-used reading mode",
-      "sequence": 13,
+      "sequence": 12,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -1965,13 +1965,13 @@
       "evidence": "",
       "description": "In Page, Space enters the remembered mode (Focus or Flow; Flow when unset) paused, like the buttons (owner decision 2026-10-12); shortcut help and replica tests corrected.",
       "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.",
-      "revision": "d2962643e7eae378416635bab422109cb07083a92df8b9a0d2aaeda7d21096ef",
+      "revision": "10c977d0c188ce79eb1a6693266cf30f554fba9473b95a12e9d88bfed7f357d3",
       "extra": {}
     },
     {
       "id": "UX-POLISH-2",
       "title": "Keyboard and help-surface follow-ups after UX-POLISH-1",
-      "sequence": 14,
+      "sequence": 13,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1987,7 +1987,7 @@
       "evidence": "",
       "description": "Held Space acts once, unique hotkey-map keys, current hint line and help text, shortcuts overlay readable and mode outline correct in every theme, Escape closes the overlay without leaving the reader.",
       "notes": "Created by roadmap review 2026-10-14. UX-POLISH-1 follow-ups and G2 E-ink findings. Shared core: one comment line in src/types.ts. Full Spec: U9/U10 pass.",
-      "revision": "3821adc32e1e6bdeb34db680d1f3b85c2d17138bcd1a2ad4ac304ef0e7f7d054",
+      "revision": "03f52d00b03da4e778fe6f83e3f0d96d36dde627b4835ce19635b3797ba74579",
       "extra": {}
     }
   ],
