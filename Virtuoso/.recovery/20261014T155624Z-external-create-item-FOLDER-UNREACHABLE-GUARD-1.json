@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155624Z-external-create-item-FOLDER-UNREACHABLE-GUARD-1",
+  "operation": "external-create-item",
+  "item_id": "FOLDER-UNREACHABLE-GUARD-1",
+  "created": "2026-10-14T15:56:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Keep folder books when the source folder cannot be reached",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#folder-unreachable-guard-1",
+      "branch": "eb/folder-unreachable-guard-1",
+      "description": "An unreachable source folder makes the scan return nothing and both sync paths prune every folder book. Report unreachable distinctly and skip the prune. Fixes BUG-195.",
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use.",
+      "sequence": 16,
+      "prerequisites": [],
+      "id": "FOLDER-UNREACHABLE-GUARD-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-UNREACHABLE-GUARD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-UNREACHABLE-GUARD-1",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155624Z-external-create-item-FOLDER-UNREACHABLE-GUARD-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-8158-aa44-f96bb5329479",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:30Z",
+  "outcome": "succeeded"
+}

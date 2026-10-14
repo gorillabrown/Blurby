@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155627Z-external-create-item-EINK-CONTROLS-1",
+  "operation": "external-create-item",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-14T15:56:27Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "One E-ink control, not two",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "UX polish",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#eink-controls-1",
+      "branch": "eb/eink-controls-1",
+      "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
+      "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
+      "sequence": 19,
+      "prerequisites": [],
+      "id": "EINK-CONTROLS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:EINK-CONTROLS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:EINK-CONTROLS-1",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155627Z-external-create-item-EINK-CONTROLS-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-815c-bbc0-e3312a78958d",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:32Z",
+  "outcome": "succeeded"
+}

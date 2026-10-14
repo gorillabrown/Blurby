@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155622Z-external-create-item-PACKAGING-FIX-1",
+  "operation": "external-create-item",
+  "item_id": "PACKAGING-FIX-1",
+  "created": "2026-10-14T15:56:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Ship the icons, quiet the updater in unpacked builds, relink stale sample books",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#packaging-fix-1",
+      "branch": "eb/packaging-fix-1",
+      "description": "Package the two runtime icon files, guard the auto-update check when an unpacked build has no update manifest, and relink a sample book whose bundled path is gone. From the P6 G2 build findings.",
+      "notes": "Created by roadmap review 2026-10-14. NARRATE-REBUILD-1 P6 G2 findings B, C, D. Full Spec: U9/U10 pass.",
+      "sequence": 13,
+      "prerequisites": [],
+      "id": "PACKAGING-FIX-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PACKAGING-FIX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PACKAGING-FIX-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PACKAGING-FIX-1",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155622Z-external-create-item-PACKAGING-FIX-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-8133-84be-e8fbc0e0cb49",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:28Z",
+  "outcome": "succeeded"
+}
