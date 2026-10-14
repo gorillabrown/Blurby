@@ -24,8 +24,8 @@ import { join } from "path";
 // ── Source imports (actual TypeScript, not re-implementations) ────────────────
 import { tokenize, tokenizeWithMeta, countWords, focusChar } from "../src/utils/text";
 import { calculatePauseMs } from "../src/utils/rhythm";
-import { FocusMode } from "../src/modes/FocusMode";
-import { FlowMode } from "../src/modes/FlowMode";
+import { FocusMode } from "../src/reader/modes/focus/ModeRuntime";
+import { FlowMode } from "../src/reader/modes/flow/ModeRuntime";
 import {
   DEFAULT_WPM, MIN_WPM, MAX_WPM, WPM_STEP,
   PUNCTUATION_PAUSE_MS, INITIAL_PAUSE_MS,
