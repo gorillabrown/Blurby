@@ -2971,3 +2971,18 @@ Related: LL-152, LL-142, LL-156.
 
 ### LL-143 — status (FOLDER-SCAN-PERF-1, 2026-10-14)
 **Status:** Observation — did not hold for one control: FOLDER-SCAN-PERF-1's timing control (h) was dry-run as the planner's plain-Node probe, not as the committed vitest control. On the base, the committed control read 149–243 ms, under its 250 ms budget (the probe's reads were 607–814 ms). Standing rule 43's C1 stop caught it before any fix was written, and the owner amended the budget to 50 ms. The search-gate dry runs held exactly.
+
+### LL-159 — A flush at exit must drain timer-armed writes, not only writes already in flight (QUIT-FLUSH-1, 2026-10-14)
+**Verdict:** The specified quit flush awaited every JSON write already in the per-file write chain (`whenWritesSettled`) after the final cloud sync, and counted that as the sync's writes. The sync's library merge only armed the 500 ms debounced library save (`saveLibrary`), so no write existed yet when the drain ran, and the merged library was dropped at exit. Only the code review found it (W1); no test or gate in the specification could.
+**Evidence:**
+- `main/sync-engine.js` `startSync`, "GC expired tombstones" branch: `ctx.saveLibrary()` after a downloaded or merged library.
+- `main.js` "Debounced library persistence": `saveLibrary` arms `_saveLibraryTimer` and starts no write.
+- `main/json-store.js` `whenWritesSettled` awaits a snapshot of `writeTails`, which holds no entry for a write not yet started.
+- Fixed by the step `["library after sync", () => (_libraryDirty ? saveLibraryNow() : undefined)]` (`bd1216fc`, source-text test (j)). The same review found that a step finishing after the cap let later saves start (W2). The implementation agent found that the prescribed `finally` skipped the producer wait (test (i2)).
+**Recommendation:** When a specification writes a "flush everything" step list (quit, sign-out, account switch, update install), list every deferred writer the steps can trigger: debounce timers, `setTimeout`-scheduled saves and fire-and-forget enqueues, not only promises already in flight. Give each one a flush call, or a dirty-flag check, after the step that arms it, and pin the list with a test or a source-text check.
+**Applies to:** Quit and shutdown paths; sync and merge code that persists through debounced saves; any specification that claims data is on disk at exit (with LL-157); the LARGE-FOLDER-SYNC-1 batched-save work, which adds new deferred library writes that the quit list must cover.
+**Status:** Observation
+Related: LL-157, LL-006, LL-142.
+
+### LL-158 — status (QUIT-FLUSH-1, 2026-10-14)
+**Status:** Observation — recurred in a second form (planner ruling: fold it here). QUIT-FLUSH-1 Done-when 9(f) paged forward in Page mode and expected the book to reopen at the new position after Alt+F4. Page-mode page turns never write a reading position: Blurby Brain's no-quit control on build `bd1216fc` left `library.json` unchanged after 10 s with the app open. So the row could not test the quit flush. Rider: a live smoke row that checks state persisted across an action must name a trigger shown to commit that state, with a no-action control run before the row is written. This is the second occurrence of "an acceptance row unreachable for reasons in code the item does not change", and a candidate for promotion at the next roadmap review.

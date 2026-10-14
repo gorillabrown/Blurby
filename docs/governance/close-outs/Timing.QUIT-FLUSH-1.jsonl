@@ -14,3 +14,5 @@
 {"event": "start", "row": 6, "model": "claude-sonnet-5-5", "host": "claude-code", "at": "2026-10-14T22:45:44Z"}
 {"event": "end", "row": 6, "evidence": "commit bd1216fc; tests h,i,j,i2 failed first then pass; orchestrator: DW2 93/93, DW3-7 ok, npm test 2080/1/0, typecheck 0, build 0, --dir build exit 0, asar == bd1216fc", "tokens": 403499, "result": "done", "at": "2026-10-14T22:51:35Z"}
 {"event": "resume", "row": 3, "at": "2026-10-14T22:59:53Z"}
+{"event": "end", "row": 3, "evidence": "DW8 on tree 5bda58ad: npm test 2080/1/0, typecheck 0, build 0; DW9 (a)-(e) PASS, (f) not testable (Brain disposition); merge go Blurby Brain; --no-ff merge d21009b3 pushed to origin/main, merge tree == tested branch tree 714de752; artifacts-exist on origin/main", "result": "done", "at": "2026-10-14T23:00:32Z"}
+{"event": "confirm", "row": 1, "at": "2026-10-14T23:05:48Z"}

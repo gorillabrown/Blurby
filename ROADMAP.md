@@ -1,10 +1,10 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-14 (LARGE-FOLDER-SYNC-1 technical half specified: Full Spec at 15, dispatch-ready depth back to 5; the design half stays an open owner decision; FOLDER-UNREACHABLE-GUARD-1 restated against `main/folder-sync.js`). Before it, 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
+**Last updated**: 2026-10-14 (QUIT-FLUSH-1 completed, merge `d21009b3`: BUG-192 resolved; the quit saves run in the cancelled first `will-quit` under a 3 s cap; review fixes W1, W2 and N1 ruled by Blurby Brain; LL-159; READER-VISUAL-DIAG-1 moves to 10 and dispatch-ready depth falls to 4; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, 2026-10-14 (LARGE-FOLDER-SYNC-1 technical half specified: Full Spec at 15, dispatch-ready depth back to 5; the design half stays an open owner decision; FOLDER-UNREACHABLE-GUARD-1 restated against `main/folder-sync.js`). Before it, 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, read-only) → PACKAGING-FIX-1 (12) → UX-POLISH-1 (13, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (14) → LARGE-FOLDER-SYNC-1 (15, technical half; after QUIT-FLUSH-1) → stubs FOLDER-UNREACHABLE-GUARD-1 (16), PDF-IMPORT-DIAG-1 (17), OVERLAY-THEME-SWEEP-1 (18), EINK-CONTROLS-1 (19), KF2-WAIVER-RETIRE-1 (20), NARRATE-YEARS-1 (21, blocked on the epic). Dispatch-ready depth is 5 (10, 11, 12, 14, 15), at the buffer target of 5. The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. FOLDER-SCAN-PERF-1 completed 2026-10-14 (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
-**Last sprint**: FOLDER-SCAN-PERF-1, completed 2026-10-14 (merge `534b43d2`; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (10, read-only) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half; its prerequisite QUIT-FLUSH-1 is met) → stubs FOLDER-UNREACHABLE-GUARD-1 (15), PDF-IMPORT-DIAG-1 (16), OVERLAY-THEME-SWEEP-1 (17), EINK-CONTROLS-1 (18), KF2-WAIVER-RETIRE-1 (19), NARRATE-YEARS-1 (20, blocked on the epic). Dispatch-ready depth is 4 (10, 11, 13, 14), below the buffer target of 5. The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. QUIT-FLUSH-1 completed 2026-10-14 (merge `d21009b3`); FOLDER-SCAN-PERF-1 before it (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Last sprint**: QUIT-FLUSH-1, completed 2026-10-14 (merge `d21009b3`; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, FOLDER-SCAN-PERF-1, completed 2026-10-14 (merge `534b43d2`; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
 > **Archives:** Completed sprint full specs across `docs/planning/.Archive/ROADMAP_legacy.md` (Phases 1-6), `docs/planning/.Archive/ROADMAP_2026-05-02.md`, `docs/planning/.Archive/ROADMAP_2026-05-14.md`, `docs/planning/.Archive/ROADMAP_2026-05-17.md` (TTS Architecture Completion phase + SK-HYG-2), and `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` (completed phase summaries, Track B Chrome Extension, Track C Android APK, Idea Themes). Closeouts in `docs/governance/close-outs/`. Roadmap review artifacts in `docs/planning/roadmap-reviews/`.
@@ -19,12 +19,12 @@ The owner requested product lanes on 2026-09-23. Each Notion record has one prim
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
-| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is merged (14, in flight until its G2 checks); roadmap review 2026-10-14: UX-POLISH-2 (15), OVERLAY-THEME-SWEEP-1 (18, stub), EINK-CONTROLS-1 (19, stub, owner decision); close-out 2026-10-14: UX-POLISH-1 → 13, UX-POLISH-2 → 14 |
+| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is merged (14, in flight until its G2 checks); roadmap review 2026-10-14: UX-POLISH-2 (15), OVERLAY-THEME-SWEEP-1 (18, stub), EINK-CONTROLS-1 (19, stub, owner decision); close-out 2026-10-14: UX-POLISH-1 → 13, UX-POLISH-2 → 14; close-out 2026-10-14 (QUIT-FLUSH-1): UX-POLISH-1 → 12, UX-POLISH-2 → 13, OVERLAY-THEME-SWEEP-1 → 17, EINK-CONTROLS-1 → 18 |
 | TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
-| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 13 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs; close-out 2026-10-14: READER-VISUAL-DIAG-1 → 11 |
+| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 13 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs; close-out 2026-10-14: READER-VISUAL-DIAG-1 → 11; close-out 2026-10-14 (QUIT-FLUSH-1): READER-VISUAL-DIAG-1 → 10 |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
-| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190); close-out 2026-10-14: FOLDER-SCAN-PERF-1 completed (BUG-193, merge `534b43d2`), LARGE-FOLDER-SYNC-1 (15, stub; technical half Full Spec 2026-10-14, design half open with the owner) |
-| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185); roadmap review 2026-10-14: QUIT-FLUSH-1 (11, BUG-192), PACKAGING-FIX-1 (13), KF2-WAIVER-RETIRE-1 (20, stub); DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; close-out 2026-10-14: QUIT-FLUSH-1 → 10, PACKAGING-FIX-1 → 12 |
+| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190); close-out 2026-10-14: FOLDER-SCAN-PERF-1 completed (BUG-193, merge `534b43d2`), LARGE-FOLDER-SYNC-1 (15, stub; technical half Full Spec 2026-10-14, design half open with the owner); close-out 2026-10-14 (QUIT-FLUSH-1): LARGE-FOLDER-SYNC-1 → 14 (prerequisite met), FOLDER-UNREACHABLE-GUARD-1 → 15, PDF-IMPORT-DIAG-1 → 16 |
+| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185); roadmap review 2026-10-14: QUIT-FLUSH-1 (11, BUG-192), PACKAGING-FIX-1 (13), KF2-WAIVER-RETIRE-1 (20, stub); DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; close-out 2026-10-14: QUIT-FLUSH-1 → 10, PACKAGING-FIX-1 → 12; close-out 2026-10-14 (QUIT-FLUSH-1): QUIT-FLUSH-1 completed (BUG-192, merge `d21009b3`), PACKAGING-FIX-1 → 11, KF2-WAIVER-RETIRE-1 → 19 |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
 
@@ -99,6 +99,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` |
 | FOLDER-SCAN-PERF-1 | 2026-10-14 | Native recursive `fs.watch` replaces chokidar; the folder scan drops per-file `realpath` and yields every 500 entries; startup folder work waits for the window. *Meditations* on Drive opens in ~2 s (was 140–150 s); BUG-193 resolved. Live sync on very large folders (Done-when 9(d)) waived by the owner and moved to LARGE-FOLDER-SYNC-1 (merge `534b43d2`) | `CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md` |
+| QUIT-FLUSH-1 | 2026-10-14 | The quit saves run in the cancelled first `will-quit` under a 3 s cap, each guarded; the Narrate producer shutdown is awaited uncapped; review fixes W1 (the quit cloud sync's library merge is flushed), W2 (no step starts after the cap) and N1. BUG-192 resolved; owner smoke (a)–(e) pass on the production build (merge `d21009b3`) | `CloseOut.QUIT-FLUSH-1.2026-10-14.md` |
 
 **Superseded work:**
 - `NARRATE-HEARD-CURSOR-1`, `NARRATE-APPLYRATECHANGE-COLLAPSE-1`, `NARRATE-SUBSCRIBER-CURSOR-1` — superseded 2026-10-11 by the Narrate rebuild (NARRATE-REBUILD-1; owner ruling #31). Stubs archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [review](docs/planning/roadmap-reviews/2026-10-11-plan.md).
@@ -332,7 +333,7 @@ This is a stub; `/epic` applies the full set in the charter.
 
 <a id="ux-polish-1"></a>
 
-#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 13 — Full Spec; re-authored 2026-10-13 after the rebuilt Narrate's P4)*
+#### UX-POLISH-1 — Space resumes the last-used reading mode *(position 12 — Full Spec; re-authored 2026-10-13 after the rebuilt Narrate's P4)*
 
 - **What:** In Page view, Space enters the remembered mode (`lastReadingMode`: Focus, Flow or Narrate; Flow when unset), **paused**, exactly as clicking that mode's button does. Correct the shortcut help that still describes the behaviour before 2026-03-27, add the N (Narrate) key to it, and replace the stale replica tests with tests of the real keyboard hook.
 - **Why:**
@@ -461,7 +462,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 <a id="reader-visual-diag-1"></a>
 
-#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 11 — Full Spec)*
+#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 10 — Full Spec)*
 
 - **What:** A read-only diagnosis, measured live, of two pre-existing reader defects. It confirms or refutes the static findings below and ends with a diagnosis report and a fix specification for each bug. No product code is committed.
   - **BUG-188:** the Focus/Flow "band" sits apart from the word cursor.
@@ -529,413 +530,17 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparation and the owner smokes surfaced. The finish line is still the epic; these are sideways fixes that make the G2 build and daily use sound. See the [plan](docs/planning/roadmap-reviews/2026-10-14-plan.md).
 
-**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (10) → READER-VISUAL-DIAG-1 (11, Stage 7) → PACKAGING-FIX-1 (12) → UX-POLISH-2 (14) → LARGE-FOLDER-SYNC-1 (15, technical half, Full Spec; merges after QUIT-FLUSH-1, whose `stopNewWork` it edits, and before FOLDER-UNREACHABLE-GUARD-1). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
+**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
 <a id="quit-flush-1"></a>
 
-#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 10 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`; line numbers re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged)*
+#### QUIT-FLUSH-1 — Finish every save before the app quits ✅ COMPLETED 2026-10-14
 
-- **What:** Do the quit-time saves in the cancelled first `will-quit` pass. Cancel the first quit, stop new work, and run the saves in order: eval traces, library, the pending debounced settings save, settings, any pending JSON writes, then the final cloud sync. Each save is guarded, and all of them share one 3-second cap. The Narrate producer shutdown runs alongside them and is never cut. Then quit. The second pass does nothing. A change made just before quitting is kept, and no `*.tmp` file is left behind. Fixes BUG-192.
-- **Why:**
-  - **The cause:** `main.js:679-707` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
-  - **Owner evidence, 2026-10-13 (BUG-192):**
-    - The accent colour changed just before quitting was lost. `settings.json.tmp` held the new value and was never renamed.
-    - `sync-queue.json.tmp` was 0 bytes.
-    - A second quit left `library.json.tmp` unrenamed.
-    - Production-build quits on 2026-10-14 repeatedly left `library.json.tmp` unrenamed.
-  - **Does a change made under 500 ms before quitting reach main? Yes. It is in scope.**
-    - The renderer has no settings debounce. `updateSettings` calls `api.saveSettings(updates)` at once (`src/contexts/SettingsContext.tsx:32`), which is `ipcRenderer.invoke("save-settings", …)` (`preload.js:44`).
-    - Main applies the change to the in-memory settings at once (`main/ipc/state.js:25`).
-    - The 500 ms debounce is in main. It delays only the file write and the `update-settings` sync enqueue (`main/ipc/state.js:29-39`).
-    - So a flush at quit that writes the in-memory settings keeps the change.
-    - A timer still pending at quit has two failure modes:
-      - Its sync enqueue is lost.
-      - It fires during or after the flush. Its write and its `sync-queue.json` write then race the exit and leave a `.tmp` behind.
-    - So the flush must run that pending timer's work itself.
-  - **Pending sync-queue writes.**
-    - `main/sync-queue.js` has no debounce of its own. `saveQueue` (`:53-56`) awaits `writeJSON` directly, but every caller fires `enqueue` without awaiting it (`main/ipc/state.js:38`, `main/ipc/library.js:41`, `:97`, `main/ipc/documents.js:30`, `:47`).
-    - An in-flight queue write is visible only as a tail in `main/json-store.js`'s per-file write chain (`writeTails`, `:30`).
-    - History and site-cookie saves are fire-and-forget too.
-    - The final cloud sync also starts a settings write without awaiting it (`applyCloudSettings`, `main/sync-engine.js:392`).
-    - So the flush must wait for every write already in that chain, once before the cloud sync and once after it.
-  - **The producer cannot share the 3 s cap.**
-    - `shutdown()` asks each worker to finish its generation in progress (`main/narrate/producer.js:52-58`, `:193`).
-    - It terminates a worker only after `NARRATE_STOP_TIMEOUT_MS` = 30,000 ms (`main/narrate/constants.js:31`).
-    - The comment at `main.js:681-682` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
-    - Quitting at a 3 s cap while that wait is open would bring the crash back.
-  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:675-677`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
-- **Owner decision (2026-10-14, binding): "Local saves, cloud best-effort."**
-  - Cancel the first quit.
-  - Await, in order:
-    1. the Narrate producer shutdown
-    2. the eval-trace flush
-    3. `saveLibraryNow()`
-    4. `saveSettingsFn()`
-    5. any pending sync-queue write
-    6. the final cloud sync, when signed in
-  - All of it runs under one overall cap of 3 s, a named constant in `main/constants.js`.
-  - Each step is guarded, so one failure does not block the rest.
-  - Then `app.quit()`. The second pass does only what is genuinely fire-and-forget.
-  - Anything not synced to the cloud stays in the sync queue for the next launch.
-  - Keep the Narrate producer shutdown guarantee.
-- **Owner ruling (2026-10-14, Rule 11 tier 2, at dispatch): "Cap the saves only."** The 3 s cap covers the saves and the final cloud sync; the Narrate producer shutdown runs alongside them and is awaited uncapped.
-- **Planner resolutions (roadmap review 2026-10-14):** the producer shutdown runs alongside the capped saves and is awaited uncapped (the 3 s cap applies to the saves; cutting the producer brings back 0xC0000409); one cap over sequential steps, library first; the watcher, WebSocket and auto-sync stops move to the start of the first pass, leaving the second pass empty; a `sync-*.tmp` written after launch while signed in and online is accepted under "cloud best-effort" (smoke (d)).
-- **Design decisions (planner, 2026-10-14):**
-  - **Extract the quit sequence into `main/quit-sequence.js`** (CommonJS, no file I/O of its own). Its steps are injected, so it can be unit-tested against an Electron-faithful fake `app`.
-    - `main.js` is not unit-testable. It calls `app.requestSingleInstanceLock()` and registers the app lifecycle at load (`:539-708`). Its only test reads its source as text (`tests/einkFoundation.test.ts:34`).
-    - The module holds the ordering, guards, cap and pass state. `main.js` holds only the wiring.
-  - **The producer shutdown starts first and runs alongside the capped saves.** The handler awaits it before `app.quit()` and never cuts it at the cap (the 0xC0000409 guarantee).
-    - This applies the owner's "ALL under one cap" to the saves, which can be safely abandoned. It does not apply it to the producer, which cannot.
-    - The producer is still started first. Running it alongside the saves means a long generation in progress does not delay or starve them.
-    - In the usual case, with no Narrate workers, the shutdown resolves at once. See Open question 1.
-  - **Stop new work at the start of the first pass, not in the second.** Stop the folder watcher, stop the WebSocket server and stop auto-sync before the saves start, so none of them can queue a write during the flush.
-    - The second pass then returns at once and saves nothing.
-    - This is the decision's "whatever is genuinely fire-and-forget", moved earlier so it protects the flush.
-  - **Pass states `idle` → `flushing` → `done`:**
-    - A `will-quit` that arrives while flushing (for example a tray Quit click during the flush) is also cancelled and waits for the flush.
-    - Only the handler's own final `app.quit()`, issued in state `done`, is allowed through.
-  - **Step order** (one overall cap of `QUIT_FLUSH_TIMEOUT_MS`):
-    1. eval traces (`() => flushTtsEvalTraceCaptures()`, a closure because `main.js:228` reassigns that variable after the listener is registered)
-    2. `saveLibraryNow`
-    3. the pending settings save (`flushPendingSettingsSave`, new in `main/ipc/state.js`: it runs the debounced write and `update-settings` enqueue now and clears the timer)
-    4. `saveSettingsFn`
-    5. pending JSON writes (`whenWritesSettled`, new in `main/json-store.js`)
-    6. the cloud sync, when signed in
-    7. pending JSON writes again, for the cloud sync's own settings, sync-state and queue writes
-  - **What the cap does and does not do.**
-    - At the cap the runner stops waiting, logs which step it was in, and the handler quits.
-    - A hanging step is abandoned, not cancelled. Its I/O may be cut by the exit.
-    - Every JSON write is write-then-rename (LL-006), so a cut write leaves the previous file intact plus a stale `.tmp`. The next write to that file reuses the stale `.tmp`.
-    - Steps run in sequence, so a hang starves the steps after it. Local saves come first and the slow, best-effort cloud sync comes last.
-  - **Guards.** Each step is `try { await step() } catch { log }`, so a step that throws or rejects is logged with its name and the next step runs. The runner never rejects.
-  - **Constant.** `QUIT_FLUSH_TIMEOUT_MS = 3000` goes in `main/constants.js` under "Main Process Lifecycle" (CLAUDE.md Constants Separation Rule). `main/quit-sequence.js` reads it there.
-  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:447-456` asserts that the source contains `}, 500)`.
-- **Out of scope:**
-  - Per-step timeouts (one overall cap, per the owner).
-  - Cancelling a cloud sync already in progress when the quit starts. `startSync` returns `"already-syncing"` (`main/sync-engine.js:782`), and the in-flight auto-sync may be cut at exit.
-  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:584`, `main/narrate/trial.js:329-331`).
-  - The folder-sync debounce timer (`main.js:302-305`), which can schedule a library save during the flush when `sourceFolder` is set, and the deferred startup folder timer (FOLDER-SCAN-PERF-1, `FOLDER_SYNC_STARTUP_DELAY_MS`) can start the watcher and a sync during a flush that begins within 3 s of load: both are LARGE-FOLDER-SYNC-1's area (its watcher closed flag and cancellable startup timer). The owner's `sourceFolder` is cleared, so neither runs in this item's smoke.
-  - Cleaning stale `*.tmp` files left by earlier quits.
-  - The BUG-192 **Location** line, which still cites `:691` on `15e9c2f1` (the close-out updates it).
-  - Any renderer change.
-  - **LL-156 check:** SETTINGS-WRITE-DURABLE-1 put "flushing the debounced sync enqueue at quit" out of scope and forbade `main/ipc/state.js`. This item explicitly brings both into scope.
-- **Prerequisites:** none in code.
-  - The production build for the owner smoke is made in this item's own worktree (`<worktree>\release\win-unpacked`). It does not overwrite the G2 build in the P6 worktree.
-  - Close every running Blurby before each smoke launch. The single-instance lock (`main.js:539-541`) quits a second instance.
-  - Re-grep every line number below on the base before dispatch.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-  - A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr. Any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
-  - Dry-runs on `66f15981` (2026-10-14) are noted in parentheses.
-    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js` exits 1, and exactly these tests fail:
-       - **(a):** at the fake exit, `library.json` and `settings.json` are missing or stale.
-       - **(b):** the fake exits at about 0 ms, not at `QUIT_FLUSH_TIMEOUT_MS`.
-       - **(c):** steps 2–3 had not run at exit; the thrown step is unguarded.
-       - **(d):** the second pass runs the steps again.
-       - **(d2):** a `will-quit` during the producer shutdown is not cancelled.
-       - **(f):** `flushPendingSettingsSave is not a function`.
-       - **(g):** `whenWritesSettled is not a function`.
-
-       **(e)** and every existing `jsonStore` test pass. Vitest may also report the unhandled rejection from (c); record it. Record the output in the staging memo.
-    2. After C2, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` exits 0.
-    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:680:app.on("will-quit", async (event) => {`).
-    4. `git grep -n -F 'app.on("will-quit", createWillQuitHandler(' -- main.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
-    5. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:1` and exits 0. Only `loadState` (`:286`) remains; the quit step passes the function by reference (dry-run: `main.js:2`).
-    6. `git grep -c -F 'QUIT_FLUSH_TIMEOUT_MS' -- main/constants.js` prints `main/constants.js:2` (the definition and the export) and exits 0 (dry-run: exit 1, no output).
-    7. `git grep -n -F '}, 500)' -- main/ipc/state.js` prints exactly one line and exits 0, so the perfAudit literal stays (dry-run: `main/ipc/state.js:39:    }, 500);`).
-    8. Typecheck, build and the full suite: `npm ci` exits 0 in the worktree; then, on the owner's machine (LL-147), `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
-    9. **Owner smoke on a production build** (standing rule 45, LL-152; dev mode cannot quit within 1 s). Record each check as pass or fail in the staging memo.
-       - **Build:** in the worktree, `npm run build` exits 0, then `npx electron-builder --win --x64 --dir --publish never` exits 0. This produces `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`.
-       - **Setup:**
-         - Close every Blurby process.
-         - Record `Get-ChildItem "$env:APPDATA\blurby\blurby-data" -Filter *.tmp | Select-Object Name, Length, LastWriteTime` (stale files from earlier quits may exist; leave them).
-         - Record the launch time.
-         - Record the `sourceFolder` value and whether you are signed in to cloud sync. Neither is required.
-       - **Checks:**
-         - **(a)** Launch that `Blurby.exe`. Open Settings, then Theme, and pick a different accent preset. Press Alt+F4 within 1 s.
-         - **(b)** Within 5 s, `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
-         - **(c)** `(Get-Content "$env:APPDATA\blurby\blurby-data\settings.json" -Raw | ConvertFrom-Json).accentColor` prints the new colour.
-         - **(d)** The `*.tmp` listing shows no file whose `LastWriteTime` is later than the launch time. If signed in to cloud sync and online, a `sync-state.json.tmp` or `sync-queue.json.tmp` is recorded as accepted (cloud best-effort), not as a fail; `library.json.tmp` and `settings.json.tmp` always fail.
-         - **(e)** Relaunch: the new accent is shown.
-         - **(f)** Open a book, page forward several pages, and press Alt+F4 within 1 s. Then repeat (b) and (d), and relaunch: the book reopens at the new position.
-    10. `docs/governance/BUG_REPORT.md` BUG-192's **Status** line reads `RESOLVED in source (QUIT-FLUSH-1): the quit saves run in the cancelled first will-quit under QUIT_FLUSH_TIMEOUT_MS; closes after the owner's production-build smoke.`
-    11. `docs/governance/TECHNICAL_REFERENCE.md:235` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
-    12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log and staging memo if kept (standing rule 41):
-        - `A main/quit-sequence.js`
-        - `A tests/quitSequence.test.js`
-        - `M main.js`
-        - `M main/constants.js`
-        - `M main/json-store.js`
-        - `M main/ipc/state.js`
-        - `M tests/jsonStore.test.js`
-        - `M docs/governance/BUG_REPORT.md`
-        - `M docs/governance/TECHNICAL_REFERENCE.md`
-- **Effort:** S.
-- **Owners:**
-  - the implementation agent
-  - reviewers for spec compliance and code quality, in parallel
-  - the repository operator, who merges
-  - the owner, for Done-when 9
-- **Lane:** Platform & Maintenance. Execution surface D (main process).
-- **Source:**
-  - [BUG_REPORT.md BUG-192](docs/governance/BUG_REPORT.md)
-  - LL-157
-  - the SETTINGS-WRITE-DURABLE-1 close-out (`docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`, finding at Done-when 7(b))
-  - the P6 build record in `docs/planning/epics/2026-10-12-narrate-rebuild/state.md` (the `electron-builder --dir` command)
-  - the owner decision of 2026-10-14
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites** (verified on `main` @ `66f15981`, 2026-10-14):
-  - **New `main/quit-sequence.js`** (CommonJS, `"use strict"`, no file I/O). The C2 content:
-    ```js
-    // main/quit-sequence.js — The will-quit flush. Electron does not await an async quit listener (LL-157), so the
-    // first quit is cancelled, the work is awaited, then the app quits again.
-    // CommonJS only — Electron main process
-    "use strict";
-    const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
-
-    /** Run [name, fn] steps in order, each guarded. Resolves "done", or "timeout" if QUIT_FLUSH_TIMEOUT_MS passes first. Never rejects. */
-    async function runQuitSteps(steps) {
-      let current = null;
-      let timer;
-      const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), QUIT_FLUSH_TIMEOUT_MS); });
-      const run = (async () => {
-        for (const [name, step] of steps) {
-          current = name;
-          try { await step(); } catch (err) { console.error("[quit] " + name + " failed:", err && err.message); }
-        }
-        return "done";
-      })();
-      const outcome = await Promise.race([run, cap]);
-      clearTimeout(timer);
-      if (outcome === "timeout") console.warn("[quit] flush cut at " + QUIT_FLUSH_TIMEOUT_MS + " ms during: " + current);
-      return outcome;
-    }
-
-    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
-      let state = "idle"; // idle → flushing → done
-      return async function onWillQuit(event) {
-        if (state === "done") return; // the handler's own final quit: everything already ran
-        event.preventDefault();
-        if (state === "flushing") return; // a quit during the flush waits for it
-        state = "flushing";
-        try { stopNewWork(); } catch (err) { console.error("[quit] stop failed:", err && err.message); }
-        // Never cut at the cap: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
-        const producer = Promise.resolve().then(shutdownProducer).catch(() => {});
-        await runQuitSteps(steps);
-        await producer;
-        state = "done";
-        app.quit();
-      };
-    }
-
-    module.exports = { createWillQuitHandler, runQuitSteps };
-    ```
-    At **C1** the module has the same exports and signature but the **current behaviour verbatim**, with no cap and no guards:
-    ```js
-    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
-      let producerStopped = false;
-      return async function onWillQuit(event) {
-        if (!producerStopped) {
-          producerStopped = true;
-          event.preventDefault();
-          try { await shutdownProducer(); } catch { /* ignore */ }
-          app.quit();
-          return;
-        }
-        stopNewWork();
-        for (const [, step] of steps) await step();
-      };
-    }
-    ```
-    C1 also exports `runQuitSteps` as `async (steps) => { for (const [, s] of steps) await s(); return "done"; }`.
-  - **`main.js`:**
-    - **`:16`** becomes `const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");`. At C1 it stays as is.
-    - **After `:16`**, add `const { createWillQuitHandler } = require("./main/quit-sequence");`.
-    - **`:679-707`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:708-709` as is.**
-      ```js
-      // The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
-      // local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
-      app.on("will-quit", createWillQuitHandler({
-        app,
-        stopNewWork: () => {
-          if (watcher) watcher.close();
-          try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
-          try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
-        },
-        // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
-        shutdownProducer: () => require("./main/narrate/producer").shutdown(),
-        steps: [
-          ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
-          ["library", saveLibraryNow],
-          ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
-          ["settings", saveSettingsFn],
-          ["pending writes", whenWritesSettled],
-          ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
-          ["writes after sync", whenWritesSettled],
-        ],
-      }));
-      ```
-      **At C1** the same block has no comment lines and three differences:
-      - `steps` holds only `["eval traces", …]`, `["library", saveLibraryNow]`, `["settings", saveSettingsFn]` and the cloud step;
-      - the cloud step keeps today's `try { … } catch (err) { console.log("[cloud] Quit sync failed:", err.message); }` around its body;
-      - `stopNewWork` is the same as in C2.
-
-      The behaviour is unchanged except that `stopAutoSync` now runs before the eval-trace flush rather than before the cloud sync.
-  - **`main/ipc/state.js`** (C2):
-    - **After `:11`**, add `let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it`.
-    - **`:29-39`** become:
-      ```js
-          clearTimeout(saveSettingsTimeout);
-          flushSettingsSave = async () => {
-            clearTimeout(saveSettingsTimeout);
-            saveSettingsTimeout = null;
-            flushSettingsSave = null;
-            const saved = ctx.saveSettings();
-            // Enqueue update-settings for sync
-            const syncEngine = require("../sync-engine");
-            const syncQueue = require("../sync-queue");
-            const revision = syncEngine.getSyncStatus().revision || 0;
-            await Promise.all([saved, syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message))]);
-          };
-          saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
-      ```
-      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:455`.
-    - **Before `:85`**, add:
-      ```js
-      /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
-      function flushPendingSettingsSave() { return flushSettingsSave ? flushSettingsSave() : Promise.resolve(); }
-      ```
-    - **`:85`** becomes `module.exports = { register, flushPendingSettingsSave };`.
-  - **`main/json-store.js`** (C2):
-    - **After `:57`** (the end of `saveJSON`), add:
-      ```js
-      /** Resolves once every write started so far has settled; never rejects (the tails swallow errors). For the quit flush. */
-      function whenWritesSettled() { return Promise.all([...writeTails.values()]); }
-      ```
-    - **`:59`** becomes `module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled };`.
-  - **`main/constants.js`** (C1, so the tests can import it):
-    - **After `:145`**, add:
-      ```js
-      /** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
-      const QUIT_FLUSH_TIMEOUT_MS = 3000;
-      ```
-    - **After `:264`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
-  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:235`, per Done-when 10–11.
-- **Tests:**
-  - **New `tests/quitSequence.test.js`** (ESM, `await import("../main/quit-sequence.js")`, as `tests/jsonStore.test.js:10` does). It runs against a fake `app` that models Electron:
-    ```js
-    function makeApp() {
-      const app = { exits: 0, onExit: () => {}, handler: null, quit: vi.fn(() => {
-        const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
-        app.handler(event);                    // Electron does not await the listener's promise
-        if (!event.defaultPrevented) { app.exits++; app.onExit(); }
-      }) };
-      return app;
-    }
-    ```
-    Each test sets `app.handler = createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps })` and then calls `app.quit()`. `onExit` snapshots state synchronously (sync `fs` is fine in a test).
-    - **(a) Saves are on disk at exit** (real temporary directory under `os.tmpdir()`; real timers).
-      - Steps: `["library", () => writeJSON(lib, L)]`, `["settings", () => saveJSON(set, S, "settings")]`, `["queue", () => writeJSON(q, Q)]`.
-      - `onExit` reads the three files back and lists the directory.
-      - Wait (poll, up to 2 s) for `app.exits === 1`.
-      - Pass: all three files parse to their payloads at exit, no `*.tmp` existed at exit, and the steps ran in declared order.
-    - **(b) A hanging step is abandoned at the cap** (`vi.useFakeTimers()`).
-      - Steps: 1 resolves at once; 2 never settles; 3 is a spy.
-      - After `await vi.advanceTimersByTimeAsync(QUIT_FLUSH_TIMEOUT_MS - 1)`: `app.exits === 0`.
-      - After 1 ms more: `app.exits === 1`, step 1 ran, step 3 was not called, and `console.warn` was called once with text containing step 2's name.
-    - **(c) A failing step does not block the rest.**
-      - Step 1 throws synchronously; step 2 returns a rejected promise; step 3 is a spy.
-      - At exit, step 3 has run, and `console.error` was called with each failed step's name.
-    - **(d) The second pass saves nothing.**
-      - After the flush and exit, call `app.handler(freshEvent)` once more.
-      - Pass: `freshEvent.defaultPrevented === false`, no step or `shutdownProducer` spy count changed, and `app.quit` was not called again.
-    - **(d2) A quit during the flush waits.**
-      - `shutdownProducer` resolves only when released.
-      - While it is pending, call `app.handler(e2)`.
-      - Pass: `e2.defaultPrevented === true`, `app.exits === 0`; after release, `app.exits === 1`, with exactly one exit.
-    - **(e) The producer shutdown is never cut** (fake timers; all steps instant).
-      - `shutdownProducer` resolves at 5,000 ms.
-      - At 4,999 ms: `app.exits === 0`; at 5,000 ms: `app.exits === 1`. `shutdownProducer` was called exactly once.
-      - This passes at C1 and C2: it characterizes the guarantee.
-    - **(f) `flushPendingSettingsSave`** (`main/ipc/state.js` under fake timers). Use the `Module._load` fakes pattern of `tests/settingsNarrateNormalization.test.js:51-54` and `:161-200`: `electron.ipcMain.handle`, `../window-manager`, `../sync-engine` with `getSyncStatus: () => ({ revision: 7 })`, and `../sync-queue` with an `enqueue` spy.
-      - Call `handlers.get("save-settings")({}, { accentColor: "#FF5B7F" })`, then `await flushPendingSettingsSave()`.
-      - Pass: `ctx.saveSettings` was called once and `enqueue` once with `("update-settings", { revision: 7 })`; after `advanceTimersByTime(500)`, neither count changed.
-      - A second `await flushPendingSettingsSave()` with nothing pending calls neither.
-  - **`tests/jsonStore.test.js`:** add **(g)** in a new `describe("whenWritesSettled")`, importing `whenWritesSettled` alongside the existing imports at `:10`.
-    - Start three `writeJSON` calls to two paths without awaiting them, plus one write whose parent is a regular file (it fails).
-    - `await whenWritesSettled()` resolves (does not reject).
-    - Both good paths then hold their last payloads, and no `*.tmp` remains.
-- **Constants:** `QUIT_FLUSH_TIMEOUT_MS = 3000` in `main/constants.js` (above).
-- **Branch:** `eb/quit-flush-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\quit-flush-1`. Write refs in full (a `main/` directory exists).
-- **Staging plan:**
-  - **C1 (failing tests, no behaviour change):**
-    - `main/quit-sequence.js` with the current behaviour verbatim;
-    - `main.js` wired to it;
-    - `QUIT_FLUSH_TIMEOUT_MS` in `main/constants.js`;
-    - `tests/quitSequence.test.js` and the `tests/jsonStore.test.js` addition.
-
-    Gate: Done-when 1 and `npm run typecheck` exits 0.
-  - **C2 (the fix):**
-    - the capped, guarded, stateful handler;
-    - the full step list;
-    - `flushPendingSettingsSave`;
-    - `whenWritesSettled`;
-    - the two docs.
-
-    Gate: Done-when 2–8 and 10–12.
-  - **Merge:** run the owner smoke (Done-when 9) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
-- **Failure handling:**
-  - If (a) passes at C1 (the fake exit somehow saw the files written), stop with BLOCKER(USER): the fake does not model Electron's non-awaiting `quit`, and the control proves nothing.
-  - If any other C1 control fails for a different reason than stated, fix the test, not the module, and re-record.
-  - If an existing test fails, report the exact test and stop; do not weaken it. Three are at risk:
-    - `tests/settingsNarrateNormalization.test.js` (e), which drives the 500 ms timer;
-    - `tests/perfAudit.test.ts` e;
-    - `tests/einkFoundation.test.ts`, which reads `main.js`.
-  - If smoke (b) fails (the process is still alive after 5 s), record the `[quit]` lines from `%APPDATA%\blurby\blurby-data` logs or the console if available, and stop: either the producer wait or `app.quit()` re-entry is wrong.
-  - If (c)–(f) fail, record a fail with the `*.tmp` listing.
-  - If the full suite fails only in `tests/onnxruntime-patch.test.js` with ENOENT under `node_modules`, run `npm ci` in the worktree and rerun (environmental, as in SETTINGS-WRITE-DURABLE-1).
-  - Retry ceiling: two corrections per task, then BLOCKER(USER).
-  - Rollback: `git revert -m 1 <merge>`. File formats are unchanged, so no data migration is involved.
-- **Lane ownership (parallel run):** surface D only.
-  - **Forbidden:**
-    - every file not named above;
-    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
-    - `main.js:640-666` (startup recent-folders, the deferred folder work and cloud-sync start) and `main/folder-watcher.js` (FOLDER-SCAN-PERF-1, merged `534b43d2`; next edited by LARGE-FOLDER-SYNC-1);
-    - `main/sync-engine.js`, `main/sync-queue.js` and `main/narrate/**` (called, not edited);
-    - any file NARRATE-REBUILD-1's open phase owns.
-  - **Shared-core touches:** none.
-  - **Merge order:** FOLDER-SCAN-PERF-1 merged first (`534b43d2`, 2026-10-14); the line numbers here were re-read on `8a38d6fb`. Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Quit handler extracted verbatim into its own module; quit, settings-flush and write-drain tests committed and failing on the unchanged behaviour | calculable | positive control | bounded | medium | 40m (one small module, one wiring block, one constant, one new test file with seven cases, one added test) | — | — |
-| 2 | Cancelled-first-quit flush in place: capped, guarded, producer never cut; pending settings save and pending writes flushed; docs updated | calculable | main-process fix | bounded | medium | 35m (one module body, one step list, two small exports, two doc lines) | — | — |
-| 3 | Full suite, typecheck and build green; production `--dir` build smoked by the owner; merged and pushed | calculable | merge and verify | mechanical | low | 45m (full `npm test` + typecheck + build + electron-builder dir build + smoke + one --no-ff merge) | — | — |
-
-**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **LL-157 (the core lesson)** — the saves move into the cancelled first quit with an overall time limit. Done-when 1(a) is the LL-157 test: it quits during pending writes and reads the files back at the moment of exit.
-- **Standing rule 43 (LL-138)** — C1 extracts the handler verbatim and commits the tests failing on the unchanged behaviour (Done-when 1). (e) characterizes the producer guarantee and must pass at both C1 and C2 (standing rule 39, LL-112: characterize before extracting).
-- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code. Each search gate was dry-run on `66f15981`, and a gate with no hit on the base was not used.
-- **Standing rule 45 (LL-141)** and **LL-152** — the 1-second quit is owner-observed on a production `--dir` build. Dev mode takes minutes to load and cannot be quit within 1 s (LL-152 status record, 2026-10-14).
-- **LL-006 / standing rule 3 (PR-10)** — write-then-rename is untouched. A write cut at the cap leaves the previous file intact.
-- **LL-142** — durability is judged by files read back at exit, never by a call having been made.
-- **LL-156** — SETTINGS-WRITE-DURABLE-1's waiver ("the debounced sync enqueue at quit is out of scope"; `main/ipc/state.js` forbidden) named code this item edits, so it is explicitly brought into scope.
-- **Standing rule 47 (LL-147)** — the full suite runs on the owner's machine (Done-when 8).
-- **Standing rule 48 (LL-149)** — typecheck and build are in Done-when 8.
-- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
-- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
-- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
-- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981` and re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged; the merge-order step re-greps again before merging.
-
+Completed 2026-10-14 (merge `d21009b3`). The quit saves run in the cancelled first `will-quit` under `QUIT_FLUSH_TIMEOUT_MS` (3 s), each guarded, the Narrate producer shutdown is awaited uncapped (`main/quit-sequence.js`), and BUG-192 is resolved. The specification is archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md).
 
 <a id="packaging-fix-1"></a>
 
-#### PACKAGING-FIX-1 — Ship the app's icons, quiet the updater in unpacked builds, and relink stale sample books *(position 12 — Full Spec; authored 2026-10-14 from P6 G2 findings B, C and D)*
+#### PACKAGING-FIX-1 — Ship the app's icons, quiet the updater in unpacked builds, and relink stale sample books *(position 11 — Full Spec; authored 2026-10-14 from P6 G2 findings B, C and D)*
 
 - **What:** Three defects seen on the P6 production build (`release\win-unpacked\Blurby.exe`, built from `main` `ab5cead4` with `npx electron-builder --win --x64 --dir --publish never`), fixed in the main process and the packaging config:
   - **(A)** The packaged app ships the window icon and the tray image (`assets/icon.ico`, `assets/tray-icon.png`), so the window shows Blurby's icon and the tray icon appears.
@@ -947,6 +552,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
   - **(C)** The first-run block stores the **bundled** file's absolute path as the entry's `filepath` (`main.js:598-618`: `sampleEpubPath` is `<repo>\resources\sample-meditations.epub` in dev and `process.resourcesPath\resources\sample-meditations.epub` packaged, `:601-605`; `filepath: sampleEpubPath`, `:614`), with no `ext`. That path goes stale when the repo or the install moves. The owner's entry (backup `%APPDATA%\blurby\blurby-data\g2-backup-20261014\library.json`, read 2026-10-14) had `filepath` `C:\Users\estra\Projects\Blurby\resources\sample-meditations.epub` (gone since the repo moved), a valid `convertedEpubPath` in the data folder, `ext: ".epub"` and `position: 26672`. `main/ipc/library.js:183-194` (`get-doc-chapters`, `:186-191`) reads `doc.filepath` directly through `extractContent`, whose ZIP open fails on a missing file (`main/file-parsers.js:389-395`, "EPUB ZIP open failed for …", ADM-ZIP "Invalid filename"); `delete-doc` (`:48-59`) and reveal-in-folder (`main/ipc/documents.js:113-114`) also use `doc.filepath`.
   - **(C) and the read roots:** `read-file-buffer` (`main/ipc/library.js:160-181`) reads only under `ctx.getDataPath()` and `settings.sourceFolder` (`:164-167`). The bundled sample (repo or install `resources\`) is outside both, so the renderer can read the sample only through a copy in the data folder: today that is the copy `load-doc-content`'s conversion branch makes (`:131-145`, reached because first-run sets no `ext`; it copies to `<dataPath>\converted\converted\sample-meditations.epub` because `main/epub-converter.js:997-1001` joins `EPUB_CONVERTED_DIR` a second time). A relink to the bundled location would therefore not be readable once `ext` is `.epub` and `convertedEpubPath` is absent (`:126-127` returns `doc.filepath`, then `read-file-buffer` blocks it). The planner's G2 workaround (epic `state.md`, "G2 ready", 2026-10-14) copied the bundled sample to `blurby-data\sample-meditations.epub` and rewrote the path; on the P6 build the sample then opened at its saved position within 6 s. This item makes that workaround the code path.
 - **Planner resolutions (roadmap review 2026-10-14):** the item relinks the sample; it does not claim the sample was unopenable (the G2 open was confounded by BUG-193, and `convertedEpubPath` is served first). The three defects stand on the epic's G2 findings and this review's audit; no BUG numbers are filed for them. `delete-doc` on the sample is filed as BUG-194 and left out. Siblings: FOLDER-SCAN-PERF-1 and QUIT-FLUSH-1 do not edit `main/window-manager.js` or `main/ipc/library.js`; see Merge order for `package.json`.
+- **From QUIT-FLUSH-1's review (S2, 2026-10-14):** `autoUpdater.quitAndInstall` (`main/ipc/misc.js`) reaches the QUIT-FLUSH-1 `will-quit` flush. electron-updater spawns the installer first and then calls `app.quit()` (`node_modules/electron-updater/out/BaseUpdater.js`, `doInstall` then `setImmediate(app.quit)`), so the installer starts while the flush runs: up to `QUIT_FLUSH_TIMEOUT_MS` (3 s), or up to `NARRATE_STOP_TIMEOUT_MS` (30 s) while the Narrate producer is stopping. Whether the NSIS running-app check can kill the app mid-flush is unverified; atomic writes keep the files intact, but a `*.tmp` may be left. The update path is not smoke-tested.
 - **Design decisions (planner, 2026-10-14):**
   - **(A)** Add the two runtime files to `build.files` by exact path, not `assets/**/*`: the asar gets what the runtime loads and not the 1.4 MB `icon.png` or the installer bitmaps. No path change: the files land at `app.asar\assets\…`, exactly where `window-manager.js` already looks, and Electron reads images from inside the asar. Not `extraResources`, which would need a `process.resourcesPath` branch at three call sites. The CI workflow (`.github/workflows/ci.yml`, the only workflow) runs `npm ci`, `npm audit`, `npm test` and `npm run build` and no electron-builder step, so the fix lives entirely in `package.json` and holds for every electron-builder invocation.
   - **(B)** Guard inside `setupAutoUpdater`'s timer, not at the `main.js:578` call site: the event wiring (`update-available`, `update-downloaded`) stays as today, `main.js` is not edited, and the guard reads the same file electron-updater would read (`path.join(process.resourcesPath, "app-update.yml")`, async `fs.promises.access`, standing rule on async main-process I/O). A missing file returns silently (no log line: it is the expected state of every `--dir` build). Present file: `await autoUpdater.checkForUpdates()` inside `try`/`catch`, logging `Auto-update check failed:` as today, so the timer's promise never rejects. Installer builds (`nsis-web`, which writes `app-update.yml` from the `publish` block at `package.json:31-35`) take the same check as before.
@@ -1083,7 +689,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 <a id="ux-polish-2"></a>
 
-#### UX-POLISH-2 — Keyboard and help-surface follow-ups after UX-POLISH-1 *(position 14 — Full Spec; authored 2026-10-14 on `66f15981`)*
+#### UX-POLISH-2 — Keyboard and help-surface follow-ups after UX-POLISH-1 *(position 13 — Full Spec; authored 2026-10-14 on `66f15981`)*
 
 - **What:** Fix the eight keyboard, help-text and theme defects found after UX-POLISH-1 (merge `e942e3fd`). (1) Holding Space acts once per press. (2) The hotkey map renders with unique React keys. (3) The Page hint line under the bottom bar matches UX-POLISH-1. (4) The Technical Reference no longer says `] / N`. (5) The `lastReadingMode` comment says "enters … paused". (6) The shortcuts overlay is readable in the E-ink theme. (7) The E-ink bottom bar outlines the remembered mode. (8) Escape with the shortcuts overlay open closes only the overlay.
 - **Why** (every line verified on `main` @ `66f15981`, 2026-10-14):
@@ -1274,7 +880,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 
 <a id="large-folder-sync-1"></a>
 
-#### LARGE-FOLDER-SYNC-1 — Live folder sync that scales to very large folders (technical half) *(position 15 — Full Spec; drafted 2026-10-14 on `main` @ `b2dd36f0`)*
+#### LARGE-FOLDER-SYNC-1 — Live folder sync that scales to very large folders (technical half) *(position 14 — Full Spec; drafted 2026-10-14 on `main` @ `b2dd36f0`)*
 
 - **What:** A watcher event adds, removes or refreshes one book in the library without rescanning the folder. Only one full sync runs at a time. A long import saves its progress every `FOLDER_SYNC_SAVE_INTERVAL_MS` and never drops books it did not scan. The watcher fires nothing after `close()`, and the startup folder work can be stopped at quit (Fold-in 2a, moved here from QUIT-FLUSH-1). The full-sync logic moves out of `main.js` into a new, unit-testable `main/folder-sync.js`.
 - **Why:**
@@ -1289,6 +895,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     - A cancelled sync (`:373-381`) saves `synced` before the non-folder and Saved Articles books are appended (`:383-392`), so it drops them. Nothing in the renderer calls `cancelSync` today (`preload.js:65` exposes it), so this is latent.
   - **Fold-in 2a (from QUIT-FLUSH-1's out-of-scope list):** `startWatcher`'s `close()` (`:135-140`) clears pending timers but not a `settle` already past its timer and awaiting `lstat`; that `settle` still calls `onAdd`/`onChange` after close. The startup `setTimeout` (`main.js:655`) is not kept, so a quit inside its 3 s window starts the watcher and a full sync during the quit flush.
 - **Ruling:** Blurby Brain, CLAUDE.md Rule 11 tier 1 (technical back-end), 2026-10-14: per-file live sync, a re-entry guard, batched saves, Fold-in 2a. The design half is split off below and stays the owner's.
+- **From QUIT-FLUSH-1's review (S1, 2026-10-14):** the quit flush (`main/quit-sequence.js`, the steps in `main.js`'s `will-quit` block) runs its local saves one after another, library first, under `QUIT_FLUSH_TIMEOUT_MS` (3 s). On a very large library, a library write slower than the cap is cut and starves the steps after it (the pending settings save and its sync enqueue, the settings save and the write drain). Running the local saves in parallel under the cap (distinct files, each with its own write chain), cloud sync last, would avoid it; measure the library write time on the owner's large-folder data before choosing. The batched library saves this item adds are deferred writes the quit step list must cover (LL-159).
 - **Design decisions (planner, 2026-10-14):**
   - **New `main/folder-sync.js`** (CommonJS, `"use strict"`, no I/O of its own). `createFolderSync(deps)` returns `{ syncAll, cancel, stop, applyAdd, applyUnlink, applyChange }`. Every library and I/O step is injected, as `main/quit-sequence.js` does for QUIT-FLUSH-1, because `main.js` cannot be loaded by a test (`app.requestSingleInstanceLock()` at load).
   - **The full sync merges into the live library; it never replaces it.** Existing books are updated in place (`Object.assign`), new books are added one batch at a time with `addDocToLibrary`, and the prune at the end filters the live array. A position or deletion written during the sync survives.
@@ -1658,13 +1265,13 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 15 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 16 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 21 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 17 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 20 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 18 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 19 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
+- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 15 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 20 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 16 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 19 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 17 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 18 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes
@@ -1698,13 +1305,13 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 <!-- Frontmatter:
 loe_unit: t-shirt
 last_review: 2026-10-14
-review_status: complete; buffer back at target after LARGE-FOLDER-SYNC-1 (technical half) was specified (2026-10-14)
+review_status: complete; buffer at 4 after QUIT-FLUSH-1 completed (2026-10-14), below the target of 5
 finish_line: "Narration rebuilt"
 roadmap_doc: ROADMAP.md
 work_register: notion:database/3f87c96cc31e800580cfe019c89a56ca
 buffer_target: 5
-buffer_actual_full_specs: 5
-buffer_dispatch_readiness: 5 dispatch-ready (QUIT-FLUSH-1, READER-VISUAL-DIAG-1, PACKAGING-FIX-1, UX-POLISH-2, LARGE-FOLDER-SYNC-1 technical half, after QUIT-FLUSH-1), at the target of 5; NARRATE-REBUILD-1 (epic, P6 at G2) and UX-POLISH-1 (merged, close-out after the G2 checks) are in flight and excluded
+buffer_actual_full_specs: 4
+buffer_dispatch_readiness: 4 dispatch-ready (READER-VISUAL-DIAG-1, PACKAGING-FIX-1, UX-POLISH-2, LARGE-FOLDER-SYNC-1 technical half), below the target of 5; NARRATE-REBUILD-1 (epic, P6 at G2) and UX-POLISH-1 (merged, close-out after the G2 checks) are in flight and excluded
 buffer_actual_stubs: 6 (FOLDER-UNREACHABLE-GUARD-1, PDF-IMPORT-DIAG-1, OVERLAY-THEME-SWEEP-1, EINK-CONTROLS-1, KF2-WAIVER-RETIRE-1, NARRATE-YEARS-1 [blocked on the epic])
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->
