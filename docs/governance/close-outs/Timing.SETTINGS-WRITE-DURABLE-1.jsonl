@@ -3,3 +3,5 @@
 {"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:30:53Z"}
 {"event": "end", "row": 4, "evidence": "conflict check clean: P6 branch touches none of the edit sites; edit sites verified at main.js:62/135/158/159/298/705", "result": "done", "at": "2026-10-14T02:30:53Z"}
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:30:54Z"}
+{"event": "end", "row": 1, "evidence": "C1 committed; control exit 1 with 4 named failures (memo); tsc exit 0", "result": "done", "at": "2026-10-14T02:32:10Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:32:11Z"}

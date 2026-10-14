@@ -10,11 +10,35 @@ async function readJSON(filepath, fallback) {
   } catch { /* Expected: file may not exist on first launch */ }
   return fallback;
 }
-async function writeJSON(filepath, data) {
-  // Atomic write: write to temp file first, then rename (rename is atomic on most filesystems)
+// Tail of the write chain per path: each write waits for the previous write to the same
+// file, so overlapping writes never share the .tmp file and the last call's data lands last.
+const writeTails = new Map();
+
+function writeJSON(filepath, data) {
+  // Serialize now, so a later call always carries later data.
+  const text = JSON.stringify(data, null, 2);
   const tmp = filepath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(data, null, 2), "utf-8");
-  await fsPromises.rename(tmp, filepath);
+  const prev = writeTails.get(filepath) || Promise.resolve();
+  // Atomic write: write to temp file first, then rename (rename is atomic on most filesystems)
+  const write = prev.catch(() => {}).then(async () => {
+    await fsPromises.writeFile(tmp, text, "utf-8");
+    await fsPromises.rename(tmp, filepath);
+  });
+  const tail = write.catch(() => {});
+  writeTails.set(filepath, tail);
+  tail.then(() => { if (writeTails.get(filepath) === tail) writeTails.delete(filepath); });
+  return write;
 }
 
-module.exports = { readJSON, writeJSON };
+// For saves whose callers do not await: resolves true on success, false on failure (logged once).
+async function saveJSON(filepath, data, label) {
+  try {
+    await writeJSON(filepath, data);
+    return true;
+  } catch (err) {
+    console.error("[json-store] " + label + " write failed:", err.message);
+    return false;
+  }
+}
+
+module.exports = { readJSON, writeJSON, saveJSON };

@@ -13,7 +13,7 @@ const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = r
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
-const { readJSON, writeJSON } = require("./main/json-store");
+const { readJSON, writeJSON, saveJSON } = require("./main/json-store");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -120,7 +120,7 @@ function removeDocFromLibrary(id) {
   libraryData.docs = libraryData.docs.filter((d) => d.id !== id);
   libraryIndex.delete(id);
 }
-function saveSettingsFn() { writeJSON(getSettingsPath(), settings); }
+function saveSettingsFn() { return saveJSON(getSettingsPath(), settings, "settings"); }
 
 // ── Debounced library persistence ──────────────────────────────────────────
 let _saveLibraryTimer = null;
@@ -143,8 +143,8 @@ async function saveLibraryNow() {
   await writeJSON(getLibraryPath(), libraryData);
 }
 
-function saveHistory() { writeJSON(getHistoryPath(), history); }
-function saveSiteCookies() { writeJSON(getSiteCookiesPath(), siteCookies); }
+function saveHistory() { return saveJSON(getHistoryPath(), history, "history"); }
+function saveSiteCookies() { return saveJSON(getSiteCookiesPath(), siteCookies, "site-cookies"); }
 
 function safeTraceSlug(value, fallback = "trace") {
   return String(value || fallback)
@@ -691,6 +691,7 @@ app.on("will-quit", async (event) => {
   try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
   await flushTtsEvalTraceCaptures();
   await saveLibraryNow();
+  await saveSettingsFn();
   // Final cloud sync before quit
   try {
     const syncEngine = require("./main/sync-engine");

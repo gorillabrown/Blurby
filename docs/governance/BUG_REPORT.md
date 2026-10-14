@@ -69,7 +69,7 @@
 ### BUG-185 — Settings writes are fire-and-forget and share one .tmp path
 **Reported:** 2026-10-11 (OutsideAudit.10 F7 remediation)
 **Severity:** LOW (durability; a failed or overlapping settings write can be lost silently)
-**Status:** OPEN — scheduled as SETTINGS-WRITE-DURABLE-1 (roadmap position 11; roadmap review 2026-10-12). Lane: Platform & Maintenance.
+**Status:** RESOLVED in source (SETTINGS-WRITE-DURABLE-1): per-file serialized writes, non-rejecting saves, settings flushed at quit.
 **Location:** `main.js` lines 55-60 (`writeJSON`, fixed temp name `filepath + ".tmp"`), line 130 (`saveSettingsFn` drops the writer's promise), line 293 (`await saveSettingsFn();` in `loadState` waits for nothing), lines 737-754 (`will-quit` awaits `saveLibraryNow()` but flushes no pending settings save); `main/ipc/state.js` lines 29-31 (500 ms debounced settings save)
 **Description:** Every settings save is fire-and-forget. `saveSettingsFn` calls the async `writeJSON` without returning its promise, so no caller can wait for the temp write and rename, and a failed write surfaces only as an unhandled rejection. Overlapping writes to one file share one `settings.json.tmp`. At quit, a settings save still inside the IPC handler's 500 ms debounce is not flushed. History and site-cookie writes (`main.js:153-154`) follow the same pattern; not verified.
 **Root cause:** `writeJSON` uses a fixed temp name per file, and its wrappers drop the promise. The writer predates NARRATE-REMOVE-1, which leaves it unchanged on purpose (its D12 durability boundary).
