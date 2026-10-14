@@ -7172,3 +7172,179 @@ Close-out checks (2026-10-12): sprint_guards artifacts-exist 2/2 present on orig
 - **Standing rule 44 (LL-143)** — every gate names its shell and exit code and was dry-run on the base.
 - **LL-149** and **LL-147** — typecheck and build are in the Done-when list, and the full suite runs on the owner's machine.
 - **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+
+---
+
+<!-- Archived 2026-10-13 by /pointer-closeout SETTINGS-WRITE-DURABLE-1; close-out docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md. The specification as it stood at b728a3e8. -->
+
+#### SETTINGS-WRITE-DURABLE-1 — Make settings writes durable and race-free *(position 11 — Full Spec)*
+
+- **What:** Serialize JSON writes per file, make the settings, history and site-cookie saves return a promise that reports failure without rejecting, give `sync-queue.json` the same serialized writer, and flush settings at quit. Fixes BUG-185.
+- **Why:**
+  - `writeJSON` (`main.js:55-60`) uses one fixed temporary file, `<file>.tmp`. Two overlapping writes to the same file share it: one rename moves the other's temporary file away, so the second rename fails with ENOENT, or an older snapshot lands last. OutsideAudit.10 F7 reproduced it on NTFS (ENOENT in 46 of 400 two-way calls and 96 of 160 eight-way calls; an older snapshot in 4 of 30 eight-way rounds). The NARRATE-REMOVE-1 smoke saw it live at startup on both `settings.json` and `sync-queue.json`.
+  - `saveSettingsFn` (`main.js:130`), `saveHistory` (`:153`) and `saveSiteCookies` (`:154`) drop the promise, so a failure is an unhandled rejection and `await saveSettingsFn()` in `loadState` (`:293`) waits for nothing.
+  - `main/sync-queue.js:52-57` `saveQueue` has its own copy of the same fixed-name pattern; its callers fire `enqueue` without awaiting it (`main/ipc/library.js:41`, `:97`; `main/ipc/documents.js:30`, `:47`; `main/ipc/state.js:40`).
+  - `will-quit` (`main.js:678-695`) flushes the library but not settings, so a change still inside the renderer IPC's 500 ms debounce is lost at quit.
+  - The OutsideAudit.10 decisions require this before any rebuild state must reach disk (NARRATE-REBUILD-1 charter input; the epic's state still records settings writes as fire-and-forget until this is on `main`, A5).
+- **Design decisions (planner, 2026-10-12):**
+  - **Serialize per file, keep the `.tmp` name.** Each write to a path waits for the previous write to that path; the payload is serialized when the call is made, so later calls carry later data and the last call's data lands last. This fixes both the ENOENT and the stale-snapshot race without changing the write-then-rename pattern, so standing rule 3 (PR-10) and LL-006's guardrail hold as written. A unique temporary name alone would fix ENOENT but not the ordering.
+  - **Failure policy: log and continue.** The save wrappers resolve `true` on success and `false` on failure, logging one line with the label and error; they never reject. Startup therefore proceeds when a settings write fails (as `readJSON` already proceeds with a fallback), no caller needs a new `catch`, and `applyCloudSettings` stays synchronous and non-blocking (NARRATE-REMOVE-1 D12). `writeJSON` itself still rejects, for the awaited library path.
+  - **Quit flush:** `will-quit` awaits one settings save after the library flush. In-memory settings are already current (the IPC handler assigns before its debounce), so this writes the latest state; the debounced `update-settings` sync enqueue is not flushed (out of scope).
+- **Out of scope:**
+  - The other fixed-name writers, each awaited by its single caller and not seen racing: `main/auth.js:108-110`, `main/sync-engine.js:94-99`, `main/ipc/reader.js:185-187` and `:242-244`, `main/ipc/stats.js:204-206`.
+  - The Windows `EPERM` rename seen in full-suite runs (separation KF-2); `app.whenReady()`'s missing `.catch` for failures other than settings writes; flushing the debounced sync enqueue at quit; the hardcoded 500 ms debounce literal (asserted by `tests/perfAudit.test.ts`).
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr; any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44). Dry-runs on `a0e09189` are noted.
+    1. **Positive control (standing rule 43):** at C1 (tests added, writer moved verbatim, no behaviour change), `npx vitest run tests/jsonStore.test.js tests/sync-queue.test.js` exits 1; the concurrent-write test in each file fails (ENOENT, or the final file is not the last payload), and the two `saveJSON` tests fail because `saveJSON` is not exported. Record the failing names and messages in the staging memo.
+    2. `npx vitest run tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/settingsMigrationV13.test.js` exits 0 after C2.
+    3. `git grep -n -F 'const tmp = filepath + ".tmp";' -- main.js` prints nothing (dry-run: prints `main.js:57`), and `git grep -n -F 'const tmp = queuePath + ".tmp";' -- main/sync-queue.js` prints nothing (dry-run: prints `main/sync-queue.js:54`).
+    4. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:2` (`loadState` and `will-quit`; dry-run: `main.js:1`).
+    5. `git grep -c -F 'return saveJSON(' -- main.js` prints `main.js:3` (settings, history, site cookies).
+    6. `npm test` exits 0 on the owner's machine (LL-147), `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
+    7. **Owner smoke** (standing rule 45): start the app with `npm run dev` from the worktree; the terminal shows no `ENOENT` for `settings.json.tmp` or `sync-queue.json.tmp`. Change a setting (for example the theme) and quit within one second; start again: the change is kept. Record pass or fail per check in the staging memo.
+    8. `docs/governance/BUG_REPORT.md` BUG-185 **Status** reads `RESOLVED in source (SETTINGS-WRITE-DURABLE-1): per-file serialized writes, non-rejecting saves, settings flushed at quit.` and `docs/governance/TECHNICAL_REFERENCE.md:236`'s last sentence reads `Settings writes are serialized per file and report failure without rejecting (SETTINGS-WRITE-DURABLE-1).`
+    9. `git diff --name-status refs/remotes/origin/main` lists exactly: `A main/json-store.js`, `A tests/jsonStore.test.js`, `M main.js`, `M main/sync-queue.js`, `M tests/sync-queue.test.js`, `M docs/governance/BUG_REPORT.md`, `M docs/governance/TECHNICAL_REFERENCE.md`, plus the time log and staging memo if kept (standing rule 41).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 7.
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:** [BUG_REPORT.md BUG-185](docs/governance/BUG_REPORT.md); OutsideAudit.10 F7 and its scripts (`docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/F7-settings-writer/`); the NARRATE-REMOVE-1 smoke record; [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `a0e09189`):
+  - **New `main/json-store.js`** (CommonJS, async I/O only):
+    - `readJSON(filepath, fallback)`: moved verbatim from `main.js:48-54`.
+    - `writeJSON(filepath, data)`: serializes `data` with `JSON.stringify(data, null, 2)` at call time; chains the write onto the previous write for the same `filepath` (a `Map` of tail promises, entry removed when its tail settles); each write is `writeFile(filepath + ".tmp", text, "utf-8")` then `rename(filepath + ".tmp", filepath)`; resolves when its own rename completes, rejects with its own error, and a failure never blocks later writes to that path.
+    - `saveJSON(filepath, data, label)`: `writeJSON(...)` then `true`; on error, `console.error("[json-store] " + label + " write failed:", err.message)` and `false`.
+    - `module.exports = { readJSON, writeJSON, saveJSON };`
+  - **`main.js`:**
+    - delete `readJSON` and `writeJSON` (`:48-60`; keep `backupFile` at `:61-65`) and add `const { readJSON, writeJSON, saveJSON } = require("./main/json-store");` beside the other `./main/` requires (after `:15`);
+    - `:130` becomes `function saveSettingsFn() { return saveJSON(getSettingsPath(), settings, "settings"); }`;
+    - `:153` becomes `function saveHistory() { return saveJSON(getHistoryPath(), history, "history"); }`;
+    - `:154` becomes `function saveSiteCookies() { return saveJSON(getSiteCookiesPath(), siteCookies, "site-cookies"); }`;
+    - in `will-quit` (`:678-695`), add `await saveSettingsFn();` on the line after `await saveLibraryNow();`.
+    - `saveLibrary`, `saveLibraryNow` and the eval-trace writer keep using `writeJSON` unchanged.
+  - **`main/sync-queue.js`:** `saveQueue` (`:52-57`) becomes `if (!queuePath) return; await writeJSON(queuePath, queue);` with `const { writeJSON } = require("./json-store");` at the top. The file format is unchanged (`JSON.stringify(queue, null, 2)`).
+  - **Docs:** BUG-185's Status line and `TECHNICAL_REFERENCE.md:236`, per Done-when 8.
+- **Tests:**
+  - **New `tests/jsonStore.test.js`** (real temporary directory under `os.tmpdir()`, as `tests/sync-queue.test.js` does; `await import("../main/json-store.js")`):
+    - (a) 20 rounds of 8 concurrent `writeJSON` calls to one path, each with a distinct payload: none rejects; after each round the file parses to the round's last payload; no `*.tmp` file remains.
+    - (b) `saveJSON` to a path whose parent is a regular file resolves `false`, does not reject, and logs once (spy on `console.error`).
+    - (c) after a failed write to a path, a later write to the same path succeeds.
+  - **`tests/sync-queue.test.js`:** add "concurrent enqueues all persist": after `initSyncQueue(TEST_DIR, …)`, 8 concurrent `enqueue` calls with distinct ops resolve; `sync-queue.json` parses and holds all 8. Also correct the stale header comment ("File I/O is mocked"): the file uses a real temporary directory.
+- **Constants:** none.
+- **Branch:** `eb/settings-write-durable-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\settings-write-durable-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - C1: `main/json-store.js` with `readJSON` and `writeJSON` moved verbatim from `main.js` (no serialization, no `saveJSON` yet), `main.js` requiring them, `tests/jsonStore.test.js` and the `tests/sync-queue.test.js` addition. Gate: Done-when 1 (the controls fail as stated) and `npm run typecheck` exits 0.
+  - C2: the serialized writer, `saveJSON`, the three wrappers, the quit flush, `main/sync-queue.js`, and the two docs. Gate: Done-when 2–6 and 8–9.
+  - Owner smoke (Done-when 7) on C2; then, once NARRATE-REBUILD-1's P5 is on `main`, merge `refs/remotes/origin/main` into the branch, re-run Done-when 2–6 (and the smoke if `main.js`'s `will-quit` changed), merge to `main` with `--no-ff` and push (Rule 5b). If P6's production build has already been taken, stop and ask the owner instead of merging. Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If the C1 controls pass on the unchanged writer (the race did not trigger), raise the rounds to 50 once; if they still pass, stop with BLOCKER(USER): the test cannot see the defect.
+  - If an existing test fails because a save now returns a promise or because `sync-queue.json` is written through `json-store`, report the exact test and stop; do not weaken it.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`; the file formats are unchanged, so no data migration is involved.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:** every file not named above; the shared-core freeze set; `main/ipc/state.js`, `main/sync-engine.js` and `main/migrations.js` (the NARRATE-REMOVE-1 normalization seams stay as they are); any file the rebuild epic's current phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order (amended 2026-10-13, owner):** build and verify now; merge **after** NARRATE-REBUILD-1's P5 merges to `main` and **before** P6's production build, so the G2 listening build has durable settings and P5's gate evidence is undisturbed. (The original "before the Core phase" order is moot: P3 and P4 merged without writing durable state, under the charter's A5 caveat.) Independent of the other buffer items.
+  - **Shared file with P5 (re-audit 2026-10-13):** `eb/narrate-rebuild-1-p5` also edits `main.js`: run-isolation env levers after the requires (`:22-27`), the Narrate trial driver in `app.whenReady()` (`:590-597`) and a producer shutdown at the top of `will-quit` that calls `event.preventDefault()`, awaits `require("./main/narrate/producer").shutdown()`, calls `app.quit()` and returns, so the original body (including `await saveLibraryNow();`) runs on the second `will-quit`. This item's hunks (`:15`, `:48-60`, `:130`, `:153-154`, the line after `await saveLibraryNow();`) are disjoint; the settings flush lands in the second pass and Done-when 4's count stays `main.js:2`. Before merging, `git merge refs/remotes/origin/main` into this branch (P5 merged), re-run Done-when 2–6, and re-grep the edit-site line numbers, which shift by about +5 after P5.
+  - **Measurement windows:** full suite, build and the `npm run dev` smoke follow the [parallel run plan](#parallel-run-plan-2026-10-13).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Writer moved to its own module; concurrency and failure tests committed and failing on the unchanged writer | calculable | positive control | bounded | medium | 30m (one module move, two test files, the control run) | — | — |
+| 2 | Serialized writer, non-rejecting saves, quit flush and sync-queue writer in place; docs updated | calculable | main-process fix | bounded | medium | 35m (one small module, five call-site edits, two doc lines) | — | — |
+| 3 | Full suite, typecheck and build green; owner smoke recorded; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 11m · sum 11m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138)** — C1 commits the tests against the unchanged writer and records them failing (Done-when 1).
+- **Standing rule 44 (LL-143)** — every gate names its shell and exit code; the search gates were dry-run on the base.
+- **LL-006 / standing rule 3 (PR-10)** — the write-then-rename pattern is kept; only the ordering changes.
+- **LL-142** — durability claims are about completed writes: the tests read the file back rather than trusting a call.
+- **Standing rule 45 (LL-141)** and **LL-147** — the startup and quit checks need the owner's machine and eyes (Done-when 7).
+- **LL-149** — the Done-when list carries typecheck and build.
+- **LL-148** — the bug's status line names the item, not a merge sha.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
+
+#### Governance staging memo — SETTINGS-WRITE-DURABLE-1 (verbatim; fold-in 1 migrated to the close-out report)
+
+Sprint Close-Out Governance Staging — SETTINGS-WRITE-DURABLE-1
+
+Base `05a5480a` (P5 merged). Branch `eb/settings-write-durable-1`. No register writes during the run (standing rule 46).
+
+## Evidence
+
+### Done-when 1 — positive control at C1 (writer moved verbatim, no behaviour change)
+
+`node ..\..\node_modules\vitest\vitest.mjs run tests/jsonStore.test.js tests/sync-queue.test.js` (the main checkout's `node_modules`, resolved by walking up the tree; `package.json` and `package-lock.json` are identical between `69d00047` and `05a5480a`) → exit 1, 4 failed / 20 passed:
+
+- `jsonStore.test.js > writeJSON — concurrent writes to one path > 20 rounds of 8 concurrent writes…` — `ENOENT: no such file or directory, rename '…\concurrent.json.tmp' -> '…\concurrent.json'`
+- `jsonStore.test.js > saveJSON — failure policy > resolves false, does not reject, and logs once…` — `TypeError: saveJSON is not a function`
+- `jsonStore.test.js > saveJSON — failure policy > a later write to a path succeeds after a failed write to it` — `TypeError: saveJSON is not a function`
+- `sync-queue.test.js > enqueue and getPendingOps > concurrent enqueues all persist` — `ENOENT … rename '…\sync-queue.json.tmp' -> '…\sync-queue.json'` (at `saveQueue main/sync-queue.js:56`)
+
+`tsc --noEmit` at C1 → exit 0.
+
+### C2 (`ec0ef419`, review fix `c4471608`)
+
+- Done-when 2: exit 0 (4 files, 39 tests). Done-when 3: both greps exit 1, empty. Done-when 4: `main.js:2`. Done-when 5: `main.js:3`. Done-when 8: both doc lines exact. Done-when 9: fence exact (plus memo, time log). `tsc --noEmit` exit 0.
+- Reviews: spec compliance APPROVED_WITH_CONCERNS (11 pass, DW6/DW7 pending); code quality MINOR_FIXES. Fixed: `writeJSON` made `async` so a serialization error rejects instead of throwing. Not fixed (out of the dispatch's bounds): (1) Electron does not await an `async` `will-quit` listener, so the quit-time library and settings flushes may not finish before exit (pre-existing for the library). Done-when 7's "quit within 1 s, restart, change kept" check measures exactly this. (2) No EPERM/EBUSY retry on rename (see below).
+- Done-when 6, first full `npm test` (worktree without local `node_modules`): exit 1, 4 failed / 2048 passed / 1 skipped in 150 files. Failing IDs:
+  - `tests/onnxruntime-patch.test.js` × 3: ENOENT on `<worktree>\node_modules\onnxruntime-node\dist\backend.js`. Environmental; `npm ci` in the worktree is approved by the owner.
+  - `tests/jsonStore.test.js > writeJSON — concurrent writes to one path > 20 rounds…`: `EPERM: operation not permitted, rename …concurrent.json.tmp -> …concurrent.json` (`main/json-store.js:25`). This is the Windows rename-over-busy-target case the spec puts out of scope (KF-2).
+- **HOLD (owner, 2026-10-13):** routed to the planner via `docs/governance/bug-reports/Issue.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` (options A bounded retry, B lighter test, C hold). Not merged.
+- Done-when 7 (owner smoke): deferred by the owner. Required before the merge.
+
+### Amendment 1 — positive control for the rename retry (writer as at `c4471608`, branch head `83805cf4`)
+
+`node ..\..\node_modules\vitest\vitest.mjs run tests/jsonStore.test.js -t "transient rename"` → exit 1, 2 failed (3 skipped):
+
+- × (d) rename fails with EPERM twice, then succeeds… — `promise rejected "Error: EPERM: operation not permitted, rename" { code: 'EPERM' } instead of resolving`
+- × (e) rename fails with EPERM every time… — `expected "rename" to be called 4 times, but got 1 times` (the spy is seen: 1 call, not 0)
+
+### Amendment 1 — after the retry (`0d97ea43`)
+
+- Done-when 2 (now 41 tests, with (d) and (e)): exit 0. `tsc --noEmit` exit 0.
+- `npm ci` in the worktree (owner-approved), then Done-when 6: `npm test` exit 0, 150 files, 2,054 passed, 1 skipped, 0 failed, with no EPERM/EBUSY/EACCES anywhere in the log (the sync-queue test included); `npm run typecheck` exit 0; `npm run build` exit 0.
+- Done-when 9 fence, amended: the spec's 7 paths plus `M main/constants.js`, plus the memo, time log and issue file.
+- **Remaining before merge: Done-when 7 (owner smoke), deferred by the owner.** `origin/main` moved to `e942e3fd` (the UX-POLISH-1 merge, an allowed move; no shared file). Before merging, re-run Done-when 2–5 on the combined tree.
+
+### Done-when 7 — owner smoke: (a) pass; (b) quit-flush half deferred to BUG-192 by the owner
+
+Recorded 2026-10-13, dev build of `5abdd405`, owner-observed with planner checks of the profile files (verbatim):
+
+  (a) No ENOENT for settings.json.tmp or sync-queue.json.tmp at startup, quit or relaunch, in either terminal: PASS.
+  (b) "Change a setting, quit within 1 s, restart: the change is kept": NOT MET AS WRITTEN.
+      - Theme dark → kept. It was saved by the debounced save ~10 s before quit, because dev mode was too slow to quit within 1 s.
+      - Accent changed to pink just before quit → LOST. settings.json.tmp held accentColor #FF5B7F, written at quit and
+        never renamed; sync-queue.json.tmp was 0 bytes. A second quit left library.json.tmp unrenamed.
+      Cause: the async will-quit second pass is not awaited by Electron. This was there before this item (the library
+      flush has the same flaw) and is filed as BUG-192 (main @ 205d91c8).
+Owner decision (standing, restated): merge anyway; BUG-192 is fixed separately. This item's fixes (serialized writer,
+non-rejecting saves, rename retry, no ENOENT) are verified.
+
+## Mid-Dispatch Decisions Registry — SETTINGS-WRITE-DURABLE-1
+
+| # | Date | Pause point | Decision type | Disposition |
+|---|------|-------------|---------------|-------------|
+| 1 | 2026-10-13 | The new concurrency test hit a Windows EPERM rename under full-suite load, a case the spec put out of scope | Type 1b | Resolved: bounded rename retry in `main/json-store.js` (Option A); KF-2 moved into scope for this writer only |
+
+## Target: ROADMAP.md
+
+### Fold-in 1 — Mid-Dispatch Amendment (bounded rename retry)
+Section: §SETTINGS-WRITE-DURABLE-1 (inline full spec)
+Action: Migrate
+Source: This amendment block (below)
+Destination: Close-out memo §Mid-Dispatch Decisions
+Content:
+#### Mid-Dispatch Amendment — 2026-10-13
+**Pause point:** The first full `npm test` on C2 (`c4471608`) failed `tests/jsonStore.test.js` (a) once with `EPERM … rename concurrent.json.tmp -> concurrent.json` at `main/json-store.js:25`. The spec's Out of scope excluded the Windows EPERM rename (separation KF-2).
+**Decision:** Type 1b — Advance (Cowork-originated), Option A of `docs/governance/bug-reports/Issue.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`.
+**Rationale:** The exclusion assumed the EPERM lived in `main/sync-queue.js`'s own writer, but C2 moved that writer into `main/json-store.js`. Without a retry the new test cannot pass reliably, and real settings saves (including the quit flush) are dropped on a transient AV or indexer lock.
+**Scope change:** (1) `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` in `main/constants.js`. (2) In `main/json-store.js`'s serialized write, retry the rename on EPERM/EBUSY/EACCES after each delay, then rethrow the last error; rethrow other codes at once; never retry writeFile. (3) `tests/jsonStore.test.js` (d): transient EPERM ×2, then success, 3 rename calls. (e): persistent EPERM rejects after 4 calls. Both spy on the CommonJS `fs/promises` object and must fail before the retry lands (standing rule 43). (4) Done-when 9's fence adds `M main/constants.js`. (5) The KF-2 waiver does not apply: any EPERM/EBUSY/EACCES escaping `json-store.js` after the retries is BLOCKER(USER), and the delays are not lengthened.
+**Follow-up items:** This completes READER-MODE-SEPARATION-2 follow-up 4 (KF-2, Decision #25). Propose retiring the KF-2 waiver at the next /roadmap-review after clean full runs. Separate: Electron does not await an async `will-quit` listener (Plato). If Done-when 7's quit check fails, file it as a new issue; do not fix it in this sprint.
