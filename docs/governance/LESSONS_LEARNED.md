@@ -2927,3 +2927,6 @@ Related: LL-153, LL-154.
 
 ### LL-153 — status (2026-10-13, 2026-10-13)
 **Status:** Promoted -> standing rule 46
+
+### LL-131 — status (CLEANUP-MODE-BARREL-1, 2026-10-14)
+**Status:** Observation — recurred at spec stage: CLEANUP-MODE-BARREL-1's 2026-10-12 gate 3 keyed on the bare identifier NarrateMode, which the rebuilt Narrate reused; caught at the 2026-10-13 roadmap-review re-audit; held in execution

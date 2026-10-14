@@ -56,16 +56,6 @@
 **Evidence:** The staging memo's smoke note and observation (counts, timestamps).
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) reproduces it with equal-length sessions on the base, the branch and a production build, names the oscillating observer (hypothesis H4) and writes the fix specification.
 
-### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
-**Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
-**Severity:** LOW (test flake; the product code is not implicated)
-**Status:** RESOLVED in source (TEST-BUDGET-WORDINDEX-1): budget raised to 1,000 ms.
-**Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
-**Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
-**Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
-**Evidence:** The staging memo's full-suite note.
-**Fix path:** Widen or relax the budget (assert a generous multiple, or compare against a same-run baseline) and keep the coverage assertions strict.
-
 ### BUG-185 — Settings writes are fire-and-forget and share one .tmp path
 **Reported:** 2026-10-11 (OutsideAudit.10 F7 remediation)
 **Severity:** LOW (durability; a failed or overlapping settings write can be lost silently)
@@ -1024,6 +1014,17 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 ---
 
 ## Complete
+
+### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
+**Severity:** LOW (test flake; the product code is not implicated)
+**Status:** RESOLVED in source (TEST-BUDGET-WORDINDEX-1): budget raised to 1,000 ms.
+**Fixed:** 2026-10-13 — RESOLVED (TEST-BUDGET-WORDINDEX-1, merge `76956729`): a test-only change, so no rebuild gate applies (standing rule 35); full suite 2,048 passed on the owner's machine.
+**Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
+**Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
+**Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
+**Evidence:** The staging memo's full-suite note.
+**Fix path:** Widen or relax the budget (assert a generous multiple, or compare against a same-run baseline) and keep the coverage assertions strict.
 
 ### BUG-092: EPUB Focus mode starts from wrong position
 **Reported:** 2026-03-26 | **Fixed:** 2026-03-27
