@@ -2930,3 +2930,22 @@ Related: LL-153, LL-154.
 
 ### LL-131 — status (CLEANUP-MODE-BARREL-1, 2026-10-14)
 **Status:** Observation — recurred at spec stage: CLEANUP-MODE-BARREL-1's 2026-10-12 gate 3 keyed on the bare identifier NarrateMode, which the rebuilt Narrate reused; caught at the 2026-10-13 roadmap-review re-audit; held in execution
+
+### LL-156 — An out-of-scope waiver tied to a code location moves with the code (SETTINGS-WRITE-DURABLE-1, 2026-10-13)
+**Verdict:** The specification excluded the Windows EPERM rename (KF-2) as a defect of `main/sync-queue.js`'s own writer, then moved that writer into the new `main/json-store.js`. The exclusion silently became an exclusion of the item's own new code: its concurrency test hit EPERM under full-suite load and the run paused for a Type 1b decision (Option A, a bounded rename retry).
+**Evidence:** `docs/governance/bug-reports/Issue.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` (first full run: `EPERM … rename concurrent.json.tmp -> concurrent.json` at `main/json-store.js:25`); the amendment in `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`.
+**Recommendation:** Before dispatch, re-read every Out-of-scope line, waiver and known-failure (KF) entry against the specification's own edit sites. A waiver whose code the specification moves, merges or replaces is either brought into scope or restated against the new location.
+**Applies to:** Specifications that move, merge or replace a module while carrying an out-of-scope waiver or known-failure entry that names that module or its behaviour.
+**Status:** Observation
+Related: LL-131, LL-139.
+
+### LL-157 — Electron does not wait for an async quit listener (SETTINGS-WRITE-DURABLE-1, 2026-10-13)
+**Verdict:** The specification assumed that `await saveSettingsFn()` inside an `async` `will-quit` listener finishes before exit. Electron does not wait for the listener's promise: the process exited mid-write, `settings.json.tmp` was left unrenamed and the owner's last change before quitting was lost. The library flush on the same handler had the same flaw before this item (BUG-192).
+**Evidence:** Owner smoke 2026-10-13: `settings.json.tmp` held `accentColor #FF5B7F` (the change made just before quit) and `settings.json` kept the earlier value; `sync-queue.json.tmp` was 0 bytes; a second quit left `library.json.tmp` unrenamed. Filed as BUG-192 (`205d91c8`).
+**Recommendation:** Work that must finish before the app exits (flushes, shutdowns, final syncs) runs in a cancelled quit: `event.preventDefault()`, await the work with an overall time limit, then `app.quit()`. A specification that claims such work completes needs a test that quits during a pending write and reads the file back.
+**Applies to:** Specifications and fixes that touch `will-quit`, `before-quit` or `window-all-closed`, or claim data is persisted at exit.
+**Status:** Observation
+Related: LL-142, LL-006.
+
+### LL-152 — status (SETTINGS-WRITE-DURABLE-1, 2026-10-14)
+**Status:** Observation — did not hold at spec stage: SETTINGS-WRITE-DURABLE-1 Done-when 7 prescribed npm run dev for a 1-second quit check; the dev build took 2.5-4 min to load and could not be quit within 1 s, so the timing half was untestable as written
