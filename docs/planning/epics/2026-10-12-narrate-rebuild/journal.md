@@ -195,6 +195,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (written by the suite, never committed).
 - **Next:** the owner's answer in state.md → Blockers. The session stops here.
 
+## S3 — 2026-10-13 20:17 — the owner answers the final-run blocker (Decision #21); work resumes
+
+- **Did:** asked the owner three bounded questions (the slow requests, the screen freezes, the quiet window); the owner chose the recommended option of each: diagnose the stall then re-run the 2.00x warm block once; fix the section reloads in this epic with one fix; the machine is idle now. Recorded Decision #21 and the Answer line; moved Decision #20 below #19 (S3 had inserted it above, out of order); pre-registered the final re-run's decision table in Next actions 4; time-log rows 59–66 added, row 56 closed blocked (its serial checks stand as evidence; the gate is row 66).
+- **Learned:** —
+- **Decisions:** #21.
+- **Gate/DoD movement:** none.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
+- **Next:** rows 59 ∥ 60, then 61–66.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
