@@ -177,6 +177,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
 - **Next:** Aristotle's report → Hercules fix (row 58, failing-first test) → row 54 (`npx vitest run tests/narrate` + typecheck) → one launcher run on the final tree (sessions 5 min at 1.00x and 2.00x + T7 warm/cold under the amended D6) → P5 gate.
 
+## S3 — 2026-10-13 19:55 — rows 57-58: the drop's cause and fix; the long frames are section loads
+
+- **Did:** Aristotle (row 57, read-only, 40-min timebox, done in 11 min of agent time): the engine publishes only the unit at the current sample (shown in all three traces); every long frame lines up with a foliate section load (iframe creation + `wrapWordsInSpans`) at the same words each run; lead (b) IPC arrival refuted by schedule times, (c) tick path too cheap; launch 3 reloaded sections 17× vs 5× in the clean runs — trigger NOT RESOLVED (three untraced `next()` callers named), and the 1.29 s cost unexplained. Re-derived the reload counts from the logs (34 / 10 / 12 warning lines) before acting. Report kept as `phase5/drop-root-cause.md` (`5aa623ee`). Hercules (row 58): T1/T2 written first and seen failing with the predicted outputs, then the engine change (+14/-3), 7/7, `npx vitest run tests/narrate` 14 files / 97 passed, typecheck 0; diff reviewed: publish logic only (`cc77f7d8`). Staging memo: L10, L11, BUG-190 (the freeze) and BUG-191 (section reloads) (`752479ef`, `5aa623ee`). Positive control of the amended D6 recorder: `--break` one warm trial → exit 1, play 3,923 ms counted (`latency-e2e.break-1.json`, `d08e6740`). Pre-registered the gate decision table in state.md Next actions 5 before the measurement runs.
+- **Learned:** two agents reached the same pre-fix outputs independently — Aristotle from the code, Hercules from running the tests — which is the cheapest positive control available when the orchestrator cannot revert a worktree. A frame ≥ 1 s is never a display frame to the check, so no engine change can pass D3 under one; the view's section reloads are the planner's bug.
+- **Decisions:** none new (Decision #20 executed).
+- **Gate/DoD movement:** D5 in-app engine cause fixed; D3 at risk only under a frame ≥ 1 s (BUG-191); D6 pending the final run.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** row 54 (Hippocrates) → `npm run build` → one launcher run (sessions + T7) → the decision table → gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
