@@ -147,3 +147,11 @@ Content:
 ## Findings for the close-out (from the smoke; no action in this run)
 - **Done-when 9(f) spec gap.** Page-mode page turns do not commit a reading position (Brain's control above), so (f) as written cannot test the quit flush. A future quit smoke needs an action that does commit a position before the quit.
 - **Page mode does not save the reading position on page turns** (observed on the sample *Meditations*, production build `bd1216fc`). This may be a separate defect for the planner to triage. It is not caused by this item: the base quit path was not involved, and the position was unchanged with no quit.
+
+### Fix-round review (code quality + ruling compliance, Plato, on `7f47006a..bd1216fc`)
+- Verdict **READY**; no confirmed defects. W2, N1 (with the producer awaited first in `finally`) and W1 match the ruling. Tests (h), (i), (i2) and (j) each fail if their fix is reverted. `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js`: 17 of 17 pass.
+- Non-blocking notes, left for the close-out. No code change after the smoke.
+  - N-a: `runQuitSteps`'s JSDoc says "Never rejects", which is untrue for a malformed `steps` entry. On that path the cap timer is not cleared. This is harmless, because the app quits.
+  - N-b: test (j) is a source-text check; `main.js` cannot be loaded in a unit test.
+  - N-c: the header comment of `tests/quitSequence.test.js` lists the controls only through (g).
+  - N-d: if the cloud sync is still running at the cap, "library after sync" does not start. That is by design, because the merge is re-derived from the cloud at the next launch.
