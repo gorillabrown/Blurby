@@ -130,6 +130,14 @@ The Menu Flap provides access to all settings without leaving the current contex
 
 **Claude Code CLI** = all execution. Agents dispatched via Sprint Dispatch Template (WHAT/WHERE/HOW/WHEN/DONE WHEN).
 
+### Decision Authority (owner ruling 2026-10-14, CLAUDE.md §11)
+
+Claude and the owner split decisions in three tiers:
+
+1. **Fully technical back-end** — Claude decides unilaterally, for the best version of Blurby.
+2. **Hybrid** — a technical change with a user-visible effect, or one that touches an owner ruling. Claude elevates for discussion, with a recommendation.
+3. **Design and functionality** (front of house) — Claude elevates for the owner's decision.
+
 ### Standing Rules
 - After any code change → `npm test` before proceeding
 - After any UI/build change → `npm run build` verification
