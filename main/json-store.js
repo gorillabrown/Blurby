@@ -2,6 +2,21 @@
 // CommonJS only — Electron main process
 
 const fsPromises = require("fs/promises");
+const { JSON_RENAME_RETRY_DELAYS_MS } = require("./constants");
+
+// Windows refuses a rename while another process (AV, indexer) briefly holds the target.
+const TRANSIENT_RENAME_CODES = new Set(["EPERM", "EBUSY", "EACCES"]);
+
+async function renameWithRetry(tmp, filepath) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await fsPromises.rename(tmp, filepath);
+    } catch (err) {
+      if (!TRANSIENT_RENAME_CODES.has(err.code) || attempt >= JSON_RENAME_RETRY_DELAYS_MS.length) throw err;
+      await new Promise((resolve) => setTimeout(resolve, JSON_RENAME_RETRY_DELAYS_MS[attempt]));
+    }
+  }
+}
 
 async function readJSON(filepath, fallback) {
   try {
@@ -22,7 +37,7 @@ async function writeJSON(filepath, data) {
   // Atomic write: write to temp file first, then rename (rename is atomic on most filesystems)
   const write = prev.catch(() => {}).then(async () => {
     await fsPromises.writeFile(tmp, text, "utf-8");
-    await fsPromises.rename(tmp, filepath);
+    await renameWithRetry(tmp, filepath);
   });
   const tail = write.catch(() => {});
   writeTails.set(filepath, tail);
