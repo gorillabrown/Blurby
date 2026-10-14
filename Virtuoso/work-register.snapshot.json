@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T04:34:16Z",
+  "takenAt": "2026-10-14T04:36:50Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1106,9 +1106,9 @@
     {
       "id": "SETTINGS-WRITE-DURABLE-1",
       "title": "Make settings writes durable and race-free",
-      "sequence": 11,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1118,11 +1118,11 @@
       "spec_link": "ROADMAP.md#settings-write-durable-1",
       "branch": "eb/settings-write-durable-1",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-13",
+      "evidence": "docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md",
       "description": "Serialize JSON writes per file (main/json-store.js), make the settings/history/site-cookie saves report failure without rejecting, give sync-queue.json the same writer, and flush settings at quit. Fixes BUG-185; must merge before NARRATE-REBUILD-1 Core writes state.",
       "notes": "Created by roadmap review 2026-10-12 (BUG-185, OutsideAudit.10 F7). Full Spec: U9/U10 pass.",
-      "revision": "262b0239104ed718afa18ad28a08b48528fc7d3bc15f35c3b114ef0c597ac100",
+      "revision": "0d8612989cc2c8b316930fa1ac0df1a50d3010c1af63ff6efb506f1aff7f12c5",
       "extra": {}
     },
     {
