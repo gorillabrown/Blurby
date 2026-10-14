@@ -1,0 +1,37 @@
+{
+  "id": "20261014T040832Z-external-record-completion-CLEANUP-MODE-BARREL-1",
+  "operation": "external-record-completion",
+  "item_id": "CLEANUP-MODE-BARREL-1",
+  "created": "2026-10-14T04:08:32Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-13",
+      "evidence": "docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "record-completion:CLEANUP-MODE-BARREL-1:[('completed', '2026-10-13'), ('evidence', 'docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md'), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "CLEANUP-MODE-BARREL-1",
+      "idempotencyKey": "record-completion:CLEANUP-MODE-BARREL-1:[('completed', '2026-10-13'), ('evidence', 'docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md'), ('status', 'completed')]",
+      "actualRevision": "2026-10-14T04:09:00Z",
+      "recoveryId": "20261014T040832Z-external-record-completion-CLEANUP-MODE-BARREL-1",
+      "detail": {},
+      "providerItemId": "3f87c96c-c31e-8130-96dd-f65b76aa7b8a"
+    }
+  },
+  "resolved": "2026-10-14T04:09:01Z",
+  "outcome": "succeeded"
+}
