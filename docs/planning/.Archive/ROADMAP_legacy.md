@@ -7565,3 +7565,404 @@ Content:
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register; status moves stay with the ceremonies.
 - **LL-148:** status lines name the item; the merge sha goes in the close-out.
+
+#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 10 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`; line numbers re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged)*
+
+*Completed 2026-10-14 (merge `d21009b3`; BUG-192 resolved; close-out `docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md`; ledger TR-073). Archived with Fold-in 2 (the diff fence covers the issue file) applied. The review-findings amendment (W1, W2, N1; Blurby Brain, option A + N1) is recorded in the close-out's Mid-Dispatch Decisions.*
+
+- **What:** Do the quit-time saves in the cancelled first `will-quit` pass. Cancel the first quit, stop new work, and run the saves in order: eval traces, library, the pending debounced settings save, settings, any pending JSON writes, then the final cloud sync. Each save is guarded, and all of them share one 3-second cap. The Narrate producer shutdown runs alongside them and is never cut. Then quit. The second pass does nothing. A change made just before quitting is kept, and no `*.tmp` file is left behind. Fixes BUG-192.
+- **Why:**
+  - **The cause:** `main.js:679-707` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
+  - **Owner evidence, 2026-10-13 (BUG-192):**
+    - The accent colour changed just before quitting was lost. `settings.json.tmp` held the new value and was never renamed.
+    - `sync-queue.json.tmp` was 0 bytes.
+    - A second quit left `library.json.tmp` unrenamed.
+    - Production-build quits on 2026-10-14 repeatedly left `library.json.tmp` unrenamed.
+  - **Does a change made under 500 ms before quitting reach main? Yes. It is in scope.**
+    - The renderer has no settings debounce. `updateSettings` calls `api.saveSettings(updates)` at once (`src/contexts/SettingsContext.tsx:32`), which is `ipcRenderer.invoke("save-settings", …)` (`preload.js:44`).
+    - Main applies the change to the in-memory settings at once (`main/ipc/state.js:25`).
+    - The 500 ms debounce is in main. It delays only the file write and the `update-settings` sync enqueue (`main/ipc/state.js:29-39`).
+    - So a flush at quit that writes the in-memory settings keeps the change.
+    - A timer still pending at quit has two failure modes:
+      - Its sync enqueue is lost.
+      - It fires during or after the flush. Its write and its `sync-queue.json` write then race the exit and leave a `.tmp` behind.
+    - So the flush must run that pending timer's work itself.
+  - **Pending sync-queue writes.**
+    - `main/sync-queue.js` has no debounce of its own. `saveQueue` (`:53-56`) awaits `writeJSON` directly, but every caller fires `enqueue` without awaiting it (`main/ipc/state.js:38`, `main/ipc/library.js:41`, `:97`, `main/ipc/documents.js:30`, `:47`).
+    - An in-flight queue write is visible only as a tail in `main/json-store.js`'s per-file write chain (`writeTails`, `:30`).
+    - History and site-cookie saves are fire-and-forget too.
+    - The final cloud sync also starts a settings write without awaiting it (`applyCloudSettings`, `main/sync-engine.js:392`).
+    - So the flush must wait for every write already in that chain, once before the cloud sync and once after it.
+  - **The producer cannot share the 3 s cap.**
+    - `shutdown()` asks each worker to finish its generation in progress (`main/narrate/producer.js:52-58`, `:193`).
+    - It terminates a worker only after `NARRATE_STOP_TIMEOUT_MS` = 30,000 ms (`main/narrate/constants.js:31`).
+    - The comment at `main.js:681-682` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+    - Quitting at a 3 s cap while that wait is open would bring the crash back.
+  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:675-677`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
+- **Owner decision (2026-10-14, binding): "Local saves, cloud best-effort."**
+  - Cancel the first quit.
+  - Await, in order:
+    1. the Narrate producer shutdown
+    2. the eval-trace flush
+    3. `saveLibraryNow()`
+    4. `saveSettingsFn()`
+    5. any pending sync-queue write
+    6. the final cloud sync, when signed in
+  - All of it runs under one overall cap of 3 s, a named constant in `main/constants.js`.
+  - Each step is guarded, so one failure does not block the rest.
+  - Then `app.quit()`. The second pass does only what is genuinely fire-and-forget.
+  - Anything not synced to the cloud stays in the sync queue for the next launch.
+  - Keep the Narrate producer shutdown guarantee.
+- **Owner ruling (2026-10-14, Rule 11 tier 2, at dispatch): "Cap the saves only."** The 3 s cap covers the saves and the final cloud sync; the Narrate producer shutdown runs alongside them and is awaited uncapped.
+- **Planner resolutions (roadmap review 2026-10-14):** the producer shutdown runs alongside the capped saves and is awaited uncapped (the 3 s cap applies to the saves; cutting the producer brings back 0xC0000409); one cap over sequential steps, library first; the watcher, WebSocket and auto-sync stops move to the start of the first pass, leaving the second pass empty; a `sync-*.tmp` written after launch while signed in and online is accepted under "cloud best-effort" (smoke (d)).
+- **Design decisions (planner, 2026-10-14):**
+  - **Extract the quit sequence into `main/quit-sequence.js`** (CommonJS, no file I/O of its own). Its steps are injected, so it can be unit-tested against an Electron-faithful fake `app`.
+    - `main.js` is not unit-testable. It calls `app.requestSingleInstanceLock()` and registers the app lifecycle at load (`:539-708`). Its only test reads its source as text (`tests/einkFoundation.test.ts:34`).
+    - The module holds the ordering, guards, cap and pass state. `main.js` holds only the wiring.
+  - **The producer shutdown starts first and runs alongside the capped saves.** The handler awaits it before `app.quit()` and never cuts it at the cap (the 0xC0000409 guarantee).
+    - This applies the owner's "ALL under one cap" to the saves, which can be safely abandoned. It does not apply it to the producer, which cannot.
+    - The producer is still started first. Running it alongside the saves means a long generation in progress does not delay or starve them.
+    - In the usual case, with no Narrate workers, the shutdown resolves at once. See Open question 1.
+  - **Stop new work at the start of the first pass, not in the second.** Stop the folder watcher, stop the WebSocket server and stop auto-sync before the saves start, so none of them can queue a write during the flush.
+    - The second pass then returns at once and saves nothing.
+    - This is the decision's "whatever is genuinely fire-and-forget", moved earlier so it protects the flush.
+  - **Pass states `idle` → `flushing` → `done`:**
+    - A `will-quit` that arrives while flushing (for example a tray Quit click during the flush) is also cancelled and waits for the flush.
+    - Only the handler's own final `app.quit()`, issued in state `done`, is allowed through.
+  - **Step order** (one overall cap of `QUIT_FLUSH_TIMEOUT_MS`):
+    1. eval traces (`() => flushTtsEvalTraceCaptures()`, a closure because `main.js:228` reassigns that variable after the listener is registered)
+    2. `saveLibraryNow`
+    3. the pending settings save (`flushPendingSettingsSave`, new in `main/ipc/state.js`: it runs the debounced write and `update-settings` enqueue now and clears the timer)
+    4. `saveSettingsFn`
+    5. pending JSON writes (`whenWritesSettled`, new in `main/json-store.js`)
+    6. the cloud sync, when signed in
+    7. pending JSON writes again, for the cloud sync's own settings, sync-state and queue writes
+  - **What the cap does and does not do.**
+    - At the cap the runner stops waiting, logs which step it was in, and the handler quits.
+    - A hanging step is abandoned, not cancelled. Its I/O may be cut by the exit.
+    - Every JSON write is write-then-rename (LL-006), so a cut write leaves the previous file intact plus a stale `.tmp`. The next write to that file reuses the stale `.tmp`.
+    - Steps run in sequence, so a hang starves the steps after it. Local saves come first and the slow, best-effort cloud sync comes last.
+  - **Guards.** Each step is `try { await step() } catch { log }`, so a step that throws or rejects is logged with its name and the next step runs. The runner never rejects.
+  - **Constant.** `QUIT_FLUSH_TIMEOUT_MS = 3000` goes in `main/constants.js` under "Main Process Lifecycle" (CLAUDE.md Constants Separation Rule). `main/quit-sequence.js` reads it there.
+  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:447-456` asserts that the source contains `}, 500)`.
+- **Out of scope:**
+  - Per-step timeouts (one overall cap, per the owner).
+  - Cancelling a cloud sync already in progress when the quit starts. `startSync` returns `"already-syncing"` (`main/sync-engine.js:782`), and the in-flight auto-sync may be cut at exit.
+  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:584`, `main/narrate/trial.js:329-331`).
+  - The folder-sync debounce timer (`main.js:302-305`), which can schedule a library save during the flush when `sourceFolder` is set, and the deferred startup folder timer (FOLDER-SCAN-PERF-1, `FOLDER_SYNC_STARTUP_DELAY_MS`) can start the watcher and a sync during a flush that begins within 3 s of load: both are LARGE-FOLDER-SYNC-1's area (its watcher closed flag and cancellable startup timer). The owner's `sourceFolder` is cleared, so neither runs in this item's smoke.
+  - Cleaning stale `*.tmp` files left by earlier quits.
+  - The BUG-192 **Location** line, which still cites `:691` on `15e9c2f1` (the close-out updates it).
+  - Any renderer change.
+  - **LL-156 check:** SETTINGS-WRITE-DURABLE-1 put "flushing the debounced sync enqueue at quit" out of scope and forbade `main/ipc/state.js`. This item explicitly brings both into scope.
+- **Prerequisites:** none in code.
+  - The production build for the owner smoke is made in this item's own worktree (`<worktree>\release\win-unpacked`). It does not overwrite the G2 build in the P6 worktree.
+  - Close every running Blurby before each smoke launch. The single-instance lock (`main.js:539-541`) quits a second instance.
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+  - A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr. Any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
+  - Dry-runs on `66f15981` (2026-10-14) are noted in parentheses.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js` exits 1, and exactly these tests fail:
+       - **(a):** at the fake exit, `library.json` and `settings.json` are missing or stale.
+       - **(b):** the fake exits at about 0 ms, not at `QUIT_FLUSH_TIMEOUT_MS`.
+       - **(c):** steps 2–3 had not run at exit; the thrown step is unguarded.
+       - **(d):** the second pass runs the steps again.
+       - **(d2):** a `will-quit` during the producer shutdown is not cancelled.
+       - **(f):** `flushPendingSettingsSave is not a function`.
+       - **(g):** `whenWritesSettled is not a function`.
+
+       **(e)** and every existing `jsonStore` test pass. Vitest may also report the unhandled rejection from (c); record it. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` exits 0.
+    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:680:app.on("will-quit", async (event) => {`).
+    4. `git grep -n -F 'app.on("will-quit", createWillQuitHandler(' -- main.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
+    5. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:1` and exits 0. Only `loadState` (`:286`) remains; the quit step passes the function by reference (dry-run: `main.js:2`).
+    6. `git grep -c -F 'QUIT_FLUSH_TIMEOUT_MS' -- main/constants.js` prints `main/constants.js:2` (the definition and the export) and exits 0 (dry-run: exit 1, no output).
+    7. `git grep -n -F '}, 500)' -- main/ipc/state.js` prints exactly one line and exits 0, so the perfAudit literal stays (dry-run: `main/ipc/state.js:39:    }, 500);`).
+    8. Typecheck, build and the full suite: `npm ci` exits 0 in the worktree; then, on the owner's machine (LL-147), `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
+    9. **Owner smoke on a production build** (standing rule 45, LL-152; dev mode cannot quit within 1 s). Record each check as pass or fail in the staging memo.
+       - **Build:** in the worktree, `npm run build` exits 0, then `npx electron-builder --win --x64 --dir --publish never` exits 0. This produces `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`.
+       - **Setup:**
+         - Close every Blurby process.
+         - Record `Get-ChildItem "$env:APPDATA\blurby\blurby-data" -Filter *.tmp | Select-Object Name, Length, LastWriteTime` (stale files from earlier quits may exist; leave them).
+         - Record the launch time.
+         - Record the `sourceFolder` value and whether you are signed in to cloud sync. Neither is required.
+       - **Checks:**
+         - **(a)** Launch that `Blurby.exe`. Open Settings, then Theme, and pick a different accent preset. Press Alt+F4 within 1 s.
+         - **(b)** Within 5 s, `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
+         - **(c)** `(Get-Content "$env:APPDATA\blurby\blurby-data\settings.json" -Raw | ConvertFrom-Json).accentColor` prints the new colour.
+         - **(d)** The `*.tmp` listing shows no file whose `LastWriteTime` is later than the launch time. If signed in to cloud sync and online, a `sync-state.json.tmp` or `sync-queue.json.tmp` is recorded as accepted (cloud best-effort), not as a fail; `library.json.tmp` and `settings.json.tmp` always fail.
+         - **(e)** Relaunch: the new accent is shown.
+         - **(f)** Open a book, page forward several pages, and press Alt+F4 within 1 s. Then repeat (b) and (d), and relaunch: the book reopens at the new position.
+    10. `docs/governance/BUG_REPORT.md` BUG-192's **Status** line reads `RESOLVED in source (QUIT-FLUSH-1): the quit saves run in the cancelled first will-quit under QUIT_FLUSH_TIMEOUT_MS; closes after the owner's production-build smoke.`
+    11. `docs/governance/TECHNICAL_REFERENCE.md:235` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
+    12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (the review-findings stop) if kept (standing rule 41):
+        - `A main/quit-sequence.js`
+        - `A tests/quitSequence.test.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M main/json-store.js`
+        - `M main/ipc/state.js`
+        - `M tests/jsonStore.test.js`
+        - `M docs/governance/BUG_REPORT.md`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** S.
+- **Owners:**
+  - the implementation agent
+  - reviewers for spec compliance and code quality, in parallel
+  - the repository operator, who merges
+  - the owner, for Done-when 9
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:**
+  - [BUG_REPORT.md BUG-192](docs/governance/BUG_REPORT.md)
+  - LL-157
+  - the SETTINGS-WRITE-DURABLE-1 close-out (`docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`, finding at Done-when 7(b))
+  - the P6 build record in `docs/planning/epics/2026-10-12-narrate-rebuild/state.md` (the `electron-builder --dir` command)
+  - the owner decision of 2026-10-14
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified on `main` @ `66f15981`, 2026-10-14):
+  - **New `main/quit-sequence.js`** (CommonJS, `"use strict"`, no file I/O). The C2 content:
+    ```js
+    // main/quit-sequence.js — The will-quit flush. Electron does not await an async quit listener (LL-157), so the
+    // first quit is cancelled, the work is awaited, then the app quits again.
+    // CommonJS only — Electron main process
+    "use strict";
+    const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
+
+    /** Run [name, fn] steps in order, each guarded. Resolves "done", or "timeout" if QUIT_FLUSH_TIMEOUT_MS passes first. Never rejects. */
+    async function runQuitSteps(steps) {
+      let current = null;
+      let timer;
+      const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), QUIT_FLUSH_TIMEOUT_MS); });
+      const run = (async () => {
+        for (const [name, step] of steps) {
+          current = name;
+          try { await step(); } catch (err) { console.error("[quit] " + name + " failed:", err && err.message); }
+        }
+        return "done";
+      })();
+      const outcome = await Promise.race([run, cap]);
+      clearTimeout(timer);
+      if (outcome === "timeout") console.warn("[quit] flush cut at " + QUIT_FLUSH_TIMEOUT_MS + " ms during: " + current);
+      return outcome;
+    }
+
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let state = "idle"; // idle → flushing → done
+      return async function onWillQuit(event) {
+        if (state === "done") return; // the handler's own final quit: everything already ran
+        event.preventDefault();
+        if (state === "flushing") return; // a quit during the flush waits for it
+        state = "flushing";
+        try { stopNewWork(); } catch (err) { console.error("[quit] stop failed:", err && err.message); }
+        // Never cut at the cap: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+        const producer = Promise.resolve().then(shutdownProducer).catch(() => {});
+        await runQuitSteps(steps);
+        await producer;
+        state = "done";
+        app.quit();
+      };
+    }
+
+    module.exports = { createWillQuitHandler, runQuitSteps };
+    ```
+    At **C1** the module has the same exports and signature but the **current behaviour verbatim**, with no cap and no guards:
+    ```js
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let producerStopped = false;
+      return async function onWillQuit(event) {
+        if (!producerStopped) {
+          producerStopped = true;
+          event.preventDefault();
+          try { await shutdownProducer(); } catch { /* ignore */ }
+          app.quit();
+          return;
+        }
+        stopNewWork();
+        for (const [, step] of steps) await step();
+      };
+    }
+    ```
+    C1 also exports `runQuitSteps` as `async (steps) => { for (const [, s] of steps) await s(); return "done"; }`.
+  - **`main.js`:**
+    - **`:16`** becomes `const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");`. At C1 it stays as is.
+    - **After `:16`**, add `const { createWillQuitHandler } = require("./main/quit-sequence");`.
+    - **`:679-707`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:708-709` as is.**
+      ```js
+      // The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
+      // local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
+      app.on("will-quit", createWillQuitHandler({
+        app,
+        stopNewWork: () => {
+          if (watcher) watcher.close();
+          try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+          try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
+        },
+        // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
+        shutdownProducer: () => require("./main/narrate/producer").shutdown(),
+        steps: [
+          ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
+          ["library", saveLibraryNow],
+          ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
+          ["settings", saveSettingsFn],
+          ["pending writes", whenWritesSettled],
+          ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+          ["writes after sync", whenWritesSettled],
+        ],
+      }));
+      ```
+      **At C1** the same block has no comment lines and three differences:
+      - `steps` holds only `["eval traces", …]`, `["library", saveLibraryNow]`, `["settings", saveSettingsFn]` and the cloud step;
+      - the cloud step keeps today's `try { … } catch (err) { console.log("[cloud] Quit sync failed:", err.message); }` around its body;
+      - `stopNewWork` is the same as in C2.
+
+      The behaviour is unchanged except that `stopAutoSync` now runs before the eval-trace flush rather than before the cloud sync.
+  - **`main/ipc/state.js`** (C2):
+    - **After `:11`**, add `let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it`.
+    - **`:29-39`** become:
+      ```js
+          clearTimeout(saveSettingsTimeout);
+          flushSettingsSave = async () => {
+            clearTimeout(saveSettingsTimeout);
+            saveSettingsTimeout = null;
+            flushSettingsSave = null;
+            const saved = ctx.saveSettings();
+            // Enqueue update-settings for sync
+            const syncEngine = require("../sync-engine");
+            const syncQueue = require("../sync-queue");
+            const revision = syncEngine.getSyncStatus().revision || 0;
+            await Promise.all([saved, syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message))]);
+          };
+          saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
+      ```
+      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:455`.
+    - **Before `:85`**, add:
+      ```js
+      /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
+      function flushPendingSettingsSave() { return flushSettingsSave ? flushSettingsSave() : Promise.resolve(); }
+      ```
+    - **`:85`** becomes `module.exports = { register, flushPendingSettingsSave };`.
+  - **`main/json-store.js`** (C2):
+    - **After `:57`** (the end of `saveJSON`), add:
+      ```js
+      /** Resolves once every write started so far has settled; never rejects (the tails swallow errors). For the quit flush. */
+      function whenWritesSettled() { return Promise.all([...writeTails.values()]); }
+      ```
+    - **`:59`** becomes `module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled };`.
+  - **`main/constants.js`** (C1, so the tests can import it):
+    - **After `:145`**, add:
+      ```js
+      /** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
+      const QUIT_FLUSH_TIMEOUT_MS = 3000;
+      ```
+    - **After `:264`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
+  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:235`, per Done-when 10–11.
+- **Tests:**
+  - **New `tests/quitSequence.test.js`** (ESM, `await import("../main/quit-sequence.js")`, as `tests/jsonStore.test.js:10` does). It runs against a fake `app` that models Electron:
+    ```js
+    function makeApp() {
+      const app = { exits: 0, onExit: () => {}, handler: null, quit: vi.fn(() => {
+        const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
+        app.handler(event);                    // Electron does not await the listener's promise
+        if (!event.defaultPrevented) { app.exits++; app.onExit(); }
+      }) };
+      return app;
+    }
+    ```
+    Each test sets `app.handler = createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps })` and then calls `app.quit()`. `onExit` snapshots state synchronously (sync `fs` is fine in a test).
+    - **(a) Saves are on disk at exit** (real temporary directory under `os.tmpdir()`; real timers).
+      - Steps: `["library", () => writeJSON(lib, L)]`, `["settings", () => saveJSON(set, S, "settings")]`, `["queue", () => writeJSON(q, Q)]`.
+      - `onExit` reads the three files back and lists the directory.
+      - Wait (poll, up to 2 s) for `app.exits === 1`.
+      - Pass: all three files parse to their payloads at exit, no `*.tmp` existed at exit, and the steps ran in declared order.
+    - **(b) A hanging step is abandoned at the cap** (`vi.useFakeTimers()`).
+      - Steps: 1 resolves at once; 2 never settles; 3 is a spy.
+      - After `await vi.advanceTimersByTimeAsync(QUIT_FLUSH_TIMEOUT_MS - 1)`: `app.exits === 0`.
+      - After 1 ms more: `app.exits === 1`, step 1 ran, step 3 was not called, and `console.warn` was called once with text containing step 2's name.
+    - **(c) A failing step does not block the rest.**
+      - Step 1 throws synchronously; step 2 returns a rejected promise; step 3 is a spy.
+      - At exit, step 3 has run, and `console.error` was called with each failed step's name.
+    - **(d) The second pass saves nothing.**
+      - After the flush and exit, call `app.handler(freshEvent)` once more.
+      - Pass: `freshEvent.defaultPrevented === false`, no step or `shutdownProducer` spy count changed, and `app.quit` was not called again.
+    - **(d2) A quit during the flush waits.**
+      - `shutdownProducer` resolves only when released.
+      - While it is pending, call `app.handler(e2)`.
+      - Pass: `e2.defaultPrevented === true`, `app.exits === 0`; after release, `app.exits === 1`, with exactly one exit.
+    - **(e) The producer shutdown is never cut** (fake timers; all steps instant).
+      - `shutdownProducer` resolves at 5,000 ms.
+      - At 4,999 ms: `app.exits === 0`; at 5,000 ms: `app.exits === 1`. `shutdownProducer` was called exactly once.
+      - This passes at C1 and C2: it characterizes the guarantee.
+    - **(f) `flushPendingSettingsSave`** (`main/ipc/state.js` under fake timers). Use the `Module._load` fakes pattern of `tests/settingsNarrateNormalization.test.js:51-54` and `:161-200`: `electron.ipcMain.handle`, `../window-manager`, `../sync-engine` with `getSyncStatus: () => ({ revision: 7 })`, and `../sync-queue` with an `enqueue` spy.
+      - Call `handlers.get("save-settings")({}, { accentColor: "#FF5B7F" })`, then `await flushPendingSettingsSave()`.
+      - Pass: `ctx.saveSettings` was called once and `enqueue` once with `("update-settings", { revision: 7 })`; after `advanceTimersByTime(500)`, neither count changed.
+      - A second `await flushPendingSettingsSave()` with nothing pending calls neither.
+  - **`tests/jsonStore.test.js`:** add **(g)** in a new `describe("whenWritesSettled")`, importing `whenWritesSettled` alongside the existing imports at `:10`.
+    - Start three `writeJSON` calls to two paths without awaiting them, plus one write whose parent is a regular file (it fails).
+    - `await whenWritesSettled()` resolves (does not reject).
+    - Both good paths then hold their last payloads, and no `*.tmp` remains.
+- **Constants:** `QUIT_FLUSH_TIMEOUT_MS = 3000` in `main/constants.js` (above).
+- **Branch:** `eb/quit-flush-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\quit-flush-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - **C1 (failing tests, no behaviour change):**
+    - `main/quit-sequence.js` with the current behaviour verbatim;
+    - `main.js` wired to it;
+    - `QUIT_FLUSH_TIMEOUT_MS` in `main/constants.js`;
+    - `tests/quitSequence.test.js` and the `tests/jsonStore.test.js` addition.
+
+    Gate: Done-when 1 and `npm run typecheck` exits 0.
+  - **C2 (the fix):**
+    - the capped, guarded, stateful handler;
+    - the full step list;
+    - `flushPendingSettingsSave`;
+    - `whenWritesSettled`;
+    - the two docs.
+
+    Gate: Done-when 2–8 and 10–12.
+  - **Merge:** run the owner smoke (Done-when 9) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If (a) passes at C1 (the fake exit somehow saw the files written), stop with BLOCKER(USER): the fake does not model Electron's non-awaiting `quit`, and the control proves nothing.
+  - If any other C1 control fails for a different reason than stated, fix the test, not the module, and re-record.
+  - If an existing test fails, report the exact test and stop; do not weaken it. Three are at risk:
+    - `tests/settingsNarrateNormalization.test.js` (e), which drives the 500 ms timer;
+    - `tests/perfAudit.test.ts` e;
+    - `tests/einkFoundation.test.ts`, which reads `main.js`.
+  - If smoke (b) fails (the process is still alive after 5 s), record the `[quit]` lines from `%APPDATA%\blurby\blurby-data` logs or the console if available, and stop: either the producer wait or `app.quit()` re-entry is wrong.
+  - If (c)–(f) fail, record a fail with the `*.tmp` listing.
+  - If the full suite fails only in `tests/onnxruntime-patch.test.js` with ENOENT under `node_modules`, run `npm ci` in the worktree and rerun (environmental, as in SETTINGS-WRITE-DURABLE-1).
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`. File formats are unchanged, so no data migration is involved.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:**
+    - every file not named above;
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js:640-666` (startup recent-folders, the deferred folder work and cloud-sync start) and `main/folder-watcher.js` (FOLDER-SCAN-PERF-1, merged `534b43d2`; next edited by LARGE-FOLDER-SYNC-1);
+    - `main/sync-engine.js`, `main/sync-queue.js` and `main/narrate/**` (called, not edited);
+    - any file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** FOLDER-SCAN-PERF-1 merged first (`534b43d2`, 2026-10-14); the line numbers here were re-read on `8a38d6fb`. Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Quit handler extracted verbatim into its own module; quit, settings-flush and write-drain tests committed and failing on the unchanged behaviour | calculable | positive control | bounded | medium | 40m (one small module, one wiring block, one constant, one new test file with seven cases, one added test) | — | — |
+| 2 | Cancelled-first-quit flush in place: capped, guarded, producer never cut; pending settings save and pending writes flushed; docs updated | calculable | main-process fix | bounded | medium | 35m (one module body, one step list, two small exports, two doc lines) | — | — |
+| 3 | Full suite, typecheck and build green; production `--dir` build smoked by the owner; merged and pushed | calculable | merge and verify | mechanical | low | 45m (full `npm test` + typecheck + build + electron-builder dir build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-157 (the core lesson)** — the saves move into the cancelled first quit with an overall time limit. Done-when 1(a) is the LL-157 test: it quits during pending writes and reads the files back at the moment of exit.
+- **Standing rule 43 (LL-138)** — C1 extracts the handler verbatim and commits the tests failing on the unchanged behaviour (Done-when 1). (e) characterizes the producer guarantee and must pass at both C1 and C2 (standing rule 39, LL-112: characterize before extracting).
+- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code. Each search gate was dry-run on `66f15981`, and a gate with no hit on the base was not used.
+- **Standing rule 45 (LL-141)** and **LL-152** — the 1-second quit is owner-observed on a production `--dir` build. Dev mode takes minutes to load and cannot be quit within 1 s (LL-152 status record, 2026-10-14).
+- **LL-006 / standing rule 3 (PR-10)** — write-then-rename is untouched. A write cut at the cap leaves the previous file intact.
+- **LL-142** — durability is judged by files read back at exit, never by a call having been made.
+- **LL-156** — SETTINGS-WRITE-DURABLE-1's waiver ("the debounced sync enqueue at quit is out of scope"; `main/ipc/state.js` forbidden) named code this item edits, so it is explicitly brought into scope.
+- **Standing rule 47 (LL-147)** — the full suite runs on the owner's machine (Done-when 8).
+- **Standing rule 48 (LL-149)** — typecheck and build are in Done-when 8.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
+- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
+- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981` and re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged; the merge-order step re-greps again before merging.

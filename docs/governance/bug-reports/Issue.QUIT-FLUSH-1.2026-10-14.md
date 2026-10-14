@@ -31,3 +31,15 @@ Both fixes depart from the prescribed code, and W1 extends the owner's step list
   - S2: `autoUpdater.quitAndInstall` spawns the installer before `app.quit()`, so the installer starts while the flush runs (up to 3 s, or 30 s when the producer is stopping).
 
 **Confidence in cause and solution identification (1–10):** 9 — both defects are confirmed by reading the code paths end to end. The fixes are a few lines each, with a test that fails without them.
+
+## Decision
+
+**Ruled by:** Blurby Brain (planner), 2026-10-14. CLAUDE.md Rule 11, tier 1 (technical, back-end).
+**Decision:** "option A, plus N1. Fix W1, W2 and N1 in one round, then smoke the fixed build only."
+- **W2:** a `cut` flag set in the cap callback, and `if (cut) break;` first in the `runQuitSteps` loop. Test (h).
+- **N1:** the flush body in try/catch/finally, so a throw outside the guards cannot leave the state at "flushing". Tests (i) and (i2). Within the ruling, the producer shutdown starts before the `try` and is awaited first in the `finally`, so it stays uncapped on every path.
+- **W1:** `["library after sync", () => (_libraryDirty ? saveLibraryNow() : undefined)]` between "cloud sync" and "writes after sync". Source-text test (j).
+- The diff fence gains only this issue file.
+- S1 and S2 go to the close-out: S1 as a note on LARGE-FOLDER-SYNC-1, and S2 as a note on PACKAGING-FIX-1's specification.
+**Rationale (Brain):** "Their ruling was that the quit awaits the final cloud sync. A local save, only when that sync re-dirtied the library and under the same cap, carries out that ruling and changes nothing the user sees except that merged data survives."
+**Outcome:** fix round `bd1216fc`. Each new test failed first on the unfixed code. Done-when 2–8 passed again. The owner smoke on the fixed build passed (a)–(e). Merged as `d21009b3`.
