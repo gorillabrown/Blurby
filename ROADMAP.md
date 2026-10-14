@@ -1314,14 +1314,14 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 
 <!-- Frontmatter:
 loe_unit: t-shirt
-last_review: 2026-10-13
-review_status: complete-with-recorded-buffer-and-governance-gaps
+last_review: 2026-10-14
+review_status: complete; buffer below target after FOLDER-SCAN-PERF-1 closed (2026-10-14)
 finish_line: "Narration rebuilt"
 roadmap_doc: ROADMAP.md
 work_register: notion:database/3f87c96cc31e800580cfe019c89a56ca
 buffer_target: 5
-buffer_actual_full_specs: 5
-buffer_dispatch_readiness: 5 dispatch-ready (TEST-BUDGET-WORDINDEX-1, SETTINGS-WRITE-DURABLE-1 [merge after epic P5], READER-VISUAL-DIAG-1, CLEANUP-MODE-BARREL-1 [amended 2026-10-13], UX-POLISH-1 [re-authored 2026-10-13; after epic P5]) + 1 epic (NARRATE-REBUILD-1, head, in flight at P5, excluded from buffer)
-buffer_actual_stubs: 1 (DEV-PERF-MEASURE-1)
+buffer_actual_full_specs: 4
+buffer_dispatch_readiness: 4 dispatch-ready (QUIT-FLUSH-1, READER-VISUAL-DIAG-1, PACKAGING-FIX-1, UX-POLISH-2), below the target of 5; NARRATE-REBUILD-1 (epic, P6 at G2) and UX-POLISH-1 (merged, close-out after the G2 checks) are in flight and excluded
+buffer_actual_stubs: 7 (LARGE-FOLDER-SYNC-1, FOLDER-UNREACHABLE-GUARD-1, PDF-IMPORT-DIAG-1, OVERLAY-THEME-SWEEP-1, EINK-CONTROLS-1, KF2-WAIVER-RETIRE-1, NARRATE-YEARS-1 [blocked on the epic])
 ultrathink_artifact: docs/studies/investigations/NARRATE-DUAL-SOURCE-ULTRATHINK-2026-05-29.md
 -->
