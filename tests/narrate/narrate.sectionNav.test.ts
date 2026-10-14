@@ -32,6 +32,8 @@ function open(withSink: boolean) {
     next: vi.fn(() => { log.push("next"); }),
     getWords: vi.fn(() => [{ word: "w7", sectionIndex: 2 }]),
     getSectionForWordIndex: vi.fn(() => 2),
+    getDisplayedSectionIndex: vi.fn(() => 1),
+    goToSection: vi.fn(async (i: number) => { log.push(`goToSection:${i}`); }),
   } as unknown as NarrateFoliateViewAPI;
   runtime.viewApiRef.current = api;
   return { runtime, api, log, events };
@@ -42,34 +44,37 @@ describe("narrate-section-nav (P5 diagnostic)", () => {
   const opened: NarrateModeRuntime[] = [];
   afterEach(() => { for (const r of opened.splice(0)) r.destroy(); });
 
-  it("cursor-miss: a highlight miss on the cursor word emits the event before surface.next()", () => {
+  it("cursor-miss: a highlight miss on the cursor word emits the event before surface.goToSection()", () => {
     const { runtime, api, log, events } = open(true);
     opened.push(runtime);
     (runtime as unknown as { onEngineCursor(w: number): void }).onEngineCursor(7);
-    expect(api.next).toHaveBeenCalledTimes(1);
+    expect(api.next).not.toHaveBeenCalled();
+    expect(api.goToSection).toHaveBeenCalledWith(2);
     expect(nav(events)).toEqual([expect.objectContaining({ kind: "narrate-section-nav", caller: "cursor-miss", word: 7, t: expect.any(Number) })]);
-    expect(log.indexOf("trace:narrate-section-nav")).toBeLessThan(log.indexOf("next"));
+    expect(log.indexOf("trace:narrate-section-nav")).toBeLessThan(log.indexOf("goToSection:2"));
   });
 
-  it("pending-resume: the retry after a words re-extraction emits the event before surface.next()", async () => {
+  it("pending-resume: the retry after a words re-extraction emits the event before surface.goToSection()", async () => {
     const { runtime, api, log, events } = open(true);
     opened.push(runtime);
     (runtime as unknown as { onEngineCursor(w: number): void }).onEngineCursor(7);
     runtime.onWordsReextracted();
     await wait(60);
-    expect(api.next).toHaveBeenCalledTimes(2);
+    expect(api.next).not.toHaveBeenCalled();
+    expect(api.goToSection).toHaveBeenCalledTimes(2); // the first navigation resolved before the frame, so the retry may go
     expect(nav(events).map((e) => e.caller)).toEqual(["cursor-miss", "pending-resume"]);
     expect(nav(events)[1]).toMatchObject({ word: 7 });
-    expect(log.lastIndexOf("trace:narrate-section-nav")).toBeLessThan(log.lastIndexOf("next"));
+    expect(log.lastIndexOf("trace:narrate-section-nav")).toBeLessThan(log.lastIndexOf("goToSection:2"));
   });
 
-  it("no sink: the same actions still call surface.next() exactly as before and emit nothing", async () => {
+  it("no sink: the same actions still navigate exactly as before and emit nothing", async () => {
     const { runtime, api, events } = open(false);
     opened.push(runtime);
     (runtime as unknown as { onEngineCursor(w: number): void }).onEngineCursor(7);
     runtime.onWordsReextracted();
     await wait(60);
-    expect(api.next).toHaveBeenCalledTimes(2);
+    expect(api.next).not.toHaveBeenCalled();
+    expect(api.goToSection).toHaveBeenCalledTimes(2);
     expect(events).toEqual([]);
   });
 });

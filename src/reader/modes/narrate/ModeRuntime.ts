@@ -69,7 +69,6 @@ import type { ChunkTable } from "./engine/wordTable";
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const NARRATE_SURFACE_LOAD_DELAY_MS = 200;
 /** Legacy useFoliateSync effect 3 goToSection throttle. */
-const NARRATE_SECTION_SYNC_THROTTLE_MS = 200;
 const NARRATE_SAMPLE_RATE = 24000;
 
 /** Frozen inputs are kept as-is; anything else is deep-copied and frozen first. */
@@ -339,6 +338,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     const s = this.state;
     s.pendingStartOnLoad = false;
     s.pendingResume = null;
+    s.sectionNavInFlight = null;
     s.playing = false;
     s.loading = false;
     s.selected = false;
@@ -520,8 +520,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       this.requestFrame(() => {
         if (!this.surface.highlight(pending, "narrate")) {
           s.pendingResume = pending;
-          this.traceSectionNav("pending-resume", pending);
-          this.surface.next();
+          this.followSpokenSection(pending, "pending-resume");
         }
       });
     }
@@ -555,19 +554,23 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Follow the spoken word across sections (legacy useFoliateSync effect 3, throttled). */
   syncSection = (): void => {
     if (!this.alive || !this.document.useFoliate || !this.document.bookWords) return;
-    const s = this.state;
-    const sections = this.document.bookWords.sections as readonly Readonly<SectionBoundary>[];
-    const sec = sections.find((c) => s.publishedHighlightedWordIndex >= c.startWordIdx && s.publishedHighlightedWordIndex < c.endWordIdx);
-    if (!sec || sec.sectionIndex === s.currentSection) return;
-    const now = Date.now();
-    if (now - s.lastGoToSectionTime < NARRATE_SECTION_SYNC_THROTTLE_MS) return;
-    const from = s.currentSection;
-    s.currentSection = sec.sectionIndex;
-    s.lastGoToSectionTime = now;
-    this.ports.diagnostics.trace({ kind: "transition", transition: "section", from, to: sec.sectionIndex, context: `word ${s.publishedHighlightedWordIndex}` });
-    this.traceSectionNav("section-sync", s.publishedHighlightedWordIndex, sec.sectionIndex, from);
-    this.surface.goToSection(sec.sectionIndex).catch(() => {});
+    this.followSpokenSection(this.state.publishedHighlightedWordIndex, "section-sync");
   };
+
+  /** A miss goes to the spoken word's own section, one navigation at a time; it never pages blindly (BUG-191 runaway). */
+  private followSpokenSection(word: number, caller: string): void {
+    const s = this.state;
+    const target = this.surface.getSectionForWordIndex(word);
+    if (target == null) { this.traceSectionNav(caller, word); this.surface.next(); return; } // no section map: legacy forward step
+    const shown = this.surface.getDisplayedSectionIndex();
+    if (target === shown || s.sectionNavInFlight != null) return;
+    s.sectionNavInFlight = target;
+    s.currentSection = target;
+    this.ports.diagnostics.trace({ kind: "transition", transition: "section", from: shown ?? -1, to: target, context: `word ${word}` });
+    this.traceSectionNav(caller, word, target, shown ?? -1);
+    // foliate drops a goTo while a page turn holds its lock and resolves anyway: clearing in-flight lets the next cursor retry.
+    this.surface.goToSection(target).catch(() => {}).finally(() => { if (this.state.sectionNavInFlight === target) this.state.sectionNavInFlight = null; });
+  }
 
   /** One display frame: the engine publishes the unit at the current playback sample. */
   tick = (): void => {
@@ -586,7 +589,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** P5 diagnostic (BUG-191): a caller is about to change the displayed section. The port's trace is a no-op without the eval-trace sink. */
   traceSectionNav = (caller: string, word: number | null, targetSection?: number | null, displayed?: number): void => {
     if (!this.alive) return;
-    const shown = displayed ?? this.state.currentSection;
+    const shown = displayed ?? this.surface.getDisplayedSectionIndex() ?? this.state.currentSection;
     this.ports.diagnostics.trace({
       kind: "narrate-section-nav", t: performance.now(), caller, word,
       sectionIndex: shown >= 0 ? shown : null,
@@ -670,8 +673,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (this.document.useFoliate && this.surface.isReady()) {
       if (!this.surface.highlight(word, "narrate", { allowMotion: false })) {
         s.pendingResume = word;
-        this.traceSectionNav("cursor-miss", word);
-        this.surface.next();
+        this.followSpokenSection(word, "cursor-miss");
       }
     }
     this.ports.diagnostics.trace({ kind: "word", source: "audio", wordIndex: word });

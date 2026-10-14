@@ -81,6 +81,7 @@ describe("narrate crossings (D5)", () => {
       prev: () => { loaded = Math.max(0, loaded - 1); },
       highlightWordByIndex: (w) => { calls.push(`highlight:${w}`); return w >= SECTIONS[loaded].startWordIdx && w < SECTIONS[loaded].endWordIdx; },
       resolveWordState: () => ({ kind: "unknown" } as unknown as ReturnType<NarrateFoliateViewAPI["resolveWordState"]>),
+      getDisplayedSectionIndex: () => loaded,
       getSectionForWordIndex: (w) => SECTIONS.find((s) => w >= s.startWordIdx && w < s.endWordIdx)?.sectionIndex ?? null,
       findFirstVisibleWordIndex: () => SECTIONS[loaded].startWordIdx,
       isUserBrowsing: () => false,
@@ -115,12 +116,12 @@ describe("narrate crossings (D5)", () => {
     expect(seen).toContain(BOUNDARY);
     expect(seen.slice(seen.indexOf(BOUNDARY - 3))).toEqual(seen.slice(seen.indexOf(BOUNDARY - 3)).map((_, i) => BOUNDARY - 3 + i)); // in order, none dropped or repeated
 
-    // The view was asked for the next section when the first word past the boundary could not be painted,
-    // and paints it once that section's words are in (the pending-resume path).
-    expect(calls).toContain("next");
+    // The view was sent to the next section (goToSection, never a blind next()) when the first word past the boundary
+    // could not be painted, and paints it once that section's words are in (the pending-resume path).
+    expect(calls).not.toContain("next");
     const firstMiss = calls.indexOf(`highlight:${BOUNDARY}`);
     expect(firstMiss).toBeGreaterThan(-1);
-    expect(calls[firstMiss + 1]).toBe("next");
+    expect(calls[firstMiss + 1]).toBe("goToSection:1");
     runtime.onWordsReextracted();
     await frame();
     expect(calls.slice(firstMiss + 2)).toContain(`highlight:${BOUNDARY}`);

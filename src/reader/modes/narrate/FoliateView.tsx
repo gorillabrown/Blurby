@@ -64,7 +64,6 @@ const NARRATE_HIGHLIGHT_MODE = "narrate";
 /** Legacy narrate scroll-follow tuning (FoliatePageView, copied values). */
 const NARRATE_SCROLL_FOLLOW_THROTTLE_MS = 500;
 const NARRATE_DISPLACEMENT_VIEWPORT_FRACTION = 0.3;
-const NARRATE_PAGE_TURN_COOLDOWN_MS = 300;
 
 /**
  * A rendered section root (structurally the legacy FlowRenderedWordRootDescriptor type, declared here
@@ -255,6 +254,7 @@ export interface NarrateFoliateViewAPI {
   highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: NarrateFoliateHighlightOptions) => boolean;
   resolveWordState: (wordIndex: number) => NarrateWordState;
   getSectionForWordIndex: (wordIndex: number) => number | null;
+  getDisplayedSectionIndex: () => number | null;
   findFirstVisibleWordIndex: () => number;
   isUserBrowsing: () => boolean;
   goToSection: (sectionIndex: number) => Promise<void>;
@@ -384,8 +384,6 @@ export default function NarrateFoliateView({
   // and the page-turn cooldown (with its timer, cleared on unmount).
   const lastScrollFollowPosRef = useRef<number | null>(null);
   const narrateScrollThrottleRef = useRef(0);
-  const narratePageTurnCooldownRef = useRef(false);
-  const narratePageTurnCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const liveSections = () => bookWordSectionsRef.current as SectionBoundary[] | undefined;
 
@@ -1106,6 +1104,7 @@ export default function NarrateFoliateView({
         };
 
         viewApiRef.current = {
+          getDisplayedSectionIndex: () => lastLoadedSectionIndexRef.current,
           getWords: () => {
             if (foliateWordsRef.current.length > 0) return foliateWordsRef.current;
             const extracted = extractWordsFromView(view);
@@ -1213,7 +1212,6 @@ export default function NarrateFoliateView({
       clearWordPositionRebuildTimer();
       invalidateWordPositionIndex();
       viewApiRef.current = null;
-      if (narratePageTurnCooldownTimerRef.current) clearTimeout(narratePageTurnCooldownTimerRef.current);
       if (viewRef.current) {
         // S1 G6: every section load makes foliate's paginator queue a frame callback (setStyles →
         // requestAnimationFrame → this.#view.docBackground), and its destroy() nulls #view without
@@ -1383,16 +1381,9 @@ export default function NarrateFoliateView({
     }
 
     const state = viewApiRef.current.resolveWordState(narrationWordIndex);
-    if (!state.found && !narratePageTurnCooldownRef.current) {
-      // Word is not in the current section's DOM — advance to the next section.
-      narratePageTurnCooldownRef.current = true;
-      traceSectionNavRef.current?.("scroll-follow", narrationWordIndex, undefined, lastLoadedSectionIndexRef.current ?? undefined);
-      view.renderer.next();
-      narratePageTurnCooldownTimerRef.current = setTimeout(() => {
-        narratePageTurnCooldownTimerRef.current = null;
-        narratePageTurnCooldownRef.current = false;
-      }, NARRATE_PAGE_TURN_COOLDOWN_MS);
-    } else if (state.found && state.span && state.doc) {
+    // Not in the displayed section's DOM: the runtime's miss handler navigates to the word's own section (BUG-191); never page blindly here.
+    if (!state.found) return;
+    if (state.span && state.doc) {
       // Throttle scrollToAnchor calls to avoid jitter.
       const now = Date.now();
       if (now - narrateScrollThrottleRef.current < NARRATE_SCROLL_FOLLOW_THROTTLE_MS) return;

@@ -37,7 +37,8 @@ export class NarrateModeState implements PersistentReadingAnchorState {
   pendingStartOnLoad = false;
   /** Legacy useFoliateSync effect 3 refs (currentNarrationSectionRef starts at -1). */
   currentSection = -1;
-  lastGoToSectionTime = 0;
+  /** BUG-191: the section a navigation is heading to; at most one in flight, cleared when its goToSection settles. */
+  sectionNavInFlight: number | null = null;
   /** Bumped on every notify; the React binding subscribes to it. */
   version = 0;
   private readonly listeners = new Set<() => void>();
