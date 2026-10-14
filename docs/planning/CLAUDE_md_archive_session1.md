@@ -121,3 +121,12 @@ Archived from `Current System State` section of CLAUDE.md. These are completed s
 ## Archived 2026-10-13 (HB-2; CLAUDE.md size rule)
 
 - NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`; close-out `docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md`; OutsideAudit.10 D4b): the Narrate mode, its hooks and strategies, its renderer UI, the dormant MOSS-Nano, Pocket and Qwen engines and 139 test files are deleted (diff against the base: 247 deleted, 66 modified, 3 added); a v13 settings migration plus three ingestion points (`loadSettingsData`, `applyCloudSettings`, the `save-settings` handler) normalize `narrate` to `flow`; the Reading Goals styles moved to `src/styles/reading-goals.css` by owner decision; the Page, Focus and Flow baselines are byte-identical. Suite 1,955 passed / 1 skipped in 134 files.
+
+## Archived 2026-10-14 (Rule 7 trim; CLAUDE.md reached 35,514 chars)
+
+Removed from "Current System State" and "Sprint Lifecycle in Docs" so CLAUDE.md returns under the ~35k ceiling. Text is verbatim as it stood in CLAUDE.md.
+
+- Queue bullet, trailing sentence: "Completed 2026-10-13: TEST-BUDGET-WORDINDEX-1 (`76956729`), CLEANUP-MODE-BARREL-1 (`03e218bd`), SETTINGS-WRITE-DURABLE-1 (`b728a3e8`); close-outs in `docs/governance/close-outs/`."
+- Most-recent-implementation bullet, older tail (the head, NARRATE-REBUILD-1 P4 `331f8313` and P3 `ef245815`, stays in CLAUDE.md): "Before it, NARRATE-REMOVE-1 (merge `386651fc`, 2026-10-12): Narrate and the dormant non-Kokoro engines removed, Kokoro kept dormant, settings schema 13. Before it, TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`)."
+- Pointer bullet dropped as redundant (CLAUDE.md's Codebase section still points to this file): "Completions of 2026-10-10 to 2026-10-12 (EPIC-MAIN-PROCESS-CLEANUP, TTS-ENGINE-SHARED-1, TERMINAL-BACKFILL-1, READER-MODE-SEPARATION-2, NARRATE-REMOVE-1): archived to `docs/planning/CLAUDE_md_archive_session1.md`."
+- Sprint Lifecycle in Docs, former step 1 (near-duplicate of the former step 2; its "then refresh the snapshot" clause was folded into the surviving step 1, and the steps are now 1-6): "Notion work register — Record completion, date and evidence through the provider/connector flow, then refresh the snapshot."
