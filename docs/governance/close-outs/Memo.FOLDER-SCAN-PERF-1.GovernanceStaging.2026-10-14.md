@@ -30,6 +30,23 @@ Action: Replace
 Old: `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log and staging memo if kept (standing rule 41):
 New: `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.FOLDER-SCAN-PERF-1.2026-10-14.md` (the C1 stop) if kept (standing rule 41):
 
+### Fold-in 2a — QUIT-FLUSH-1 inherits two quit-time items (planner ruling D1(b), 2026-10-14)
+Section: §QUIT-FLUSH-1 (inline full spec): edit sites and Done-when
+Action: Insert after (the spec's `will-quit` edit-site list)
+Content:
+- **Watcher closed flag (from FOLDER-SCAN-PERF-1's review).** `main/folder-watcher.js` `startWatcher`: add `let closed = false;` and set it in the `close` wrapper. Check `if (closed) return;` at the top of `onEvent`, and again after each `await` in `settle` (after `lstat`, and after `await realRoot` / `isPathWithinFolder`). Then no `onAdd`, `onChange` or `onUnlink` fires after `close()`. Today, a `settle` suspended at `await lstat` when `close()` runs still calls back. At quit, that is a late `debouncedSyncLibraryWithFolder` during the final flush. The base had the same gap: chokidar's async handlers awaited `realpath`, then called back.
+- **Cancellable startup timer.** `main.js` `startFolderWork` (the "Folder watcher + sync" block): keep the `setTimeout` handle, and `clearTimeout` it in `will-quit`. Then a quit within `FOLDER_SYNC_STARTUP_DELAY_MS` of `did-finish-load` starts neither a watcher nor a sync.
+
+Rationale: QUIT-FLUSH-1 owns `will-quit` and the library-save debounce race, and it is the next item to merge. Keeping FOLDER-SCAN-PERF-1 on its prescribed shape keeps its green gates valid.
+
+### Fold-in 2b — remove the dissolved item's leftover anchor (planner ruling D4, 2026-10-14)
+Section: ROADMAP.md, the line directly above `#### Stage 8 — Launch, quit and packaging defects found at G2`
+Action: Remove
+Content:
+<a id="dev-perf-measure-1"></a>
+
+Nothing links to it. The only other hit is a backup snapshot under `Virtuoso/.backups`, which is not a live link. Apply this with the close-out's ROADMAP edit.
+
 ## Target: CLAUDE.md
 
 ### Fold-in 3 — chokidar leaves the dependency list
@@ -53,7 +70,18 @@ Content: `**Status:** RESOLVED (FOLDER-SCAN-PERF-1)`, with the 9(e) dev-mode tim
 
 ## Note for the close-out
 
-- The specification's "DEV-PERF-MEASURE-1 stub (`ROADMAP.md:521-527`) is removed as dissolved" is already done on `978b5fa6`. Only the anchor `<a id="dev-perf-measure-1"></a>` remains, placed directly before the "Stage 8" heading. Decide whether to keep it as a redirect or remove it.
+- The specification's "DEV-PERF-MEASURE-1 stub (`ROADMAP.md:521-527`) is removed as dissolved" is already done on `978b5fa6`, apart from the anchor. Fold-in 2b removes the anchor (planner ruling D4).
+
+## Planner rulings (Blurby.Brain, 2026-10-14)
+
+- **D1:** (b). The two quit-time items go to QUIT-FLUSH-1 (Fold-in 2a). No change on this branch.
+- **D2:** held for the owner, as a hybrid. The atomic save settles as `onAdd`, so the word count is not refreshed. This is a user-visible difference against the owner's "no feature change" ruling. The planner recommends (b): map a rename onto an existing supported file to `onChange` as well, with one test. Until the owner answers, apply nothing and write no close-out note for (a).
+- **D3:** confirmed.
+  - Done-when 9 runs after G2, on the owner's real profile.
+  - The fix build is the branch tip (`96cc6de8` is docs on top of `ac8485f9`), or a later commit if D2(b) is chosen.
+  - QUIT-FLUSH-1 does not dispatch until this item merges.
+  - Of this item and PACKAGING-FIX-1, the second to merge takes `refs/remotes/origin/main` in first.
+- **D4:** remove the anchor (Fold-in 2b).
 
 ## Code-quality review findings (row 8): no blockers; recommendation MINOR_FIXES
 
