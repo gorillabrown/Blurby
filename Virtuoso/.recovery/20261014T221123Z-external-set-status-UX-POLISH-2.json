@@ -1,0 +1,34 @@
+{
+  "id": "20261014T221123Z-external-set-status-UX-POLISH-2",
+  "operation": "external-set-status",
+  "item_id": "UX-POLISH-2",
+  "created": "2026-10-14T22:11:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 14
+    },
+    "expectedRevision": "ab10aa3d84463c9602af492a38ad0a80f62b9552cd93632f0a6904aac04f5556",
+    "idempotencyKey": "set-status:UX-POLISH-2:[('sequence', 14)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "UX-POLISH-2",
+      "idempotencyKey": "set-status:UX-POLISH-2:[('sequence', 14)]",
+      "actualRevision": "",
+      "recoveryId": "20261014T221123Z-external-set-status-UX-POLISH-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T22:11:45Z",
+  "outcome": "succeeded"
+}

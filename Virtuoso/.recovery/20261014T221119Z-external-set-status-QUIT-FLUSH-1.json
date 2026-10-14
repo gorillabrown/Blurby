@@ -1,0 +1,34 @@
+{
+  "id": "20261014T221119Z-external-set-status-QUIT-FLUSH-1",
+  "operation": "external-set-status",
+  "item_id": "QUIT-FLUSH-1",
+  "created": "2026-10-14T22:11:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 10
+    },
+    "expectedRevision": "b3b3ae2dbeb02946cef23bb4aaff56a42a9415889fd3f22a44bba7b4038e065c",
+    "idempotencyKey": "set-status:QUIT-FLUSH-1:[('sequence', 10)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "QUIT-FLUSH-1",
+      "idempotencyKey": "set-status:QUIT-FLUSH-1:[('sequence', 10)]",
+      "actualRevision": "",
+      "recoveryId": "20261014T221119Z-external-set-status-QUIT-FLUSH-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T22:11:41Z",
+  "outcome": "succeeded"
+}

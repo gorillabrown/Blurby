@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T21:52:05Z",
+  "takenAt": "2026-10-14T22:12:37Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -250,9 +250,9 @@
     {
       "id": "FOLDER-SCAN-PERF-1",
       "title": "Stop a large source folder stalling every launch",
-      "sequence": 10,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -262,11 +262,11 @@
       "spec_link": "ROADMAP.md#folder-scan-perf-1",
       "branch": "eb/folder-scan-perf-1",
       "started": "2026-10-14",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-14",
+      "evidence": "docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md",
       "description": "Folder watcher on native recursive fs.watch instead of chokidar, no per-file realpath in the folder scan, yields every N entries, folder work starts after the window loads; chokidar removed. Fixes BUG-193; closes BUG-189 if dev mode measures normal.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888).",
-      "revision": "79f7d65c90a14bdbaed350a68cd2d32bd7d4dbaf7d74dd76741ed897704ec4c5",
+      "notes": "Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888). Completed 2026-10-14: merge 534b43d2, close-out merge 287ce690; ledger TR-072. Done-when 9(c): Meditations on Drive about 2 s against 140-150 s on base; BUG-193 resolved. 9(d) live sync waived by the owner and moved to LARGE-FOLDER-SYNC-1; 9(e) not run, so BUG-189 stays open.",
+      "revision": "2a39408c89b0b24d5cb52a6a781392a2b068a15d6991f5ca60530c870a94e42a",
       "extra": {}
     },
     {
@@ -513,6 +513,28 @@
       "description": "Long-form audio export from Kokoro",
       "notes": "Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061.",
       "revision": "275a55ad7ad1cfb7cf25fe1538d12d43a687398ee03ac6435becdf70b17b4fba",
+      "extra": {}
+    },
+    {
+      "id": "LARGE-FOLDER-SYNC-1",
+      "title": "Live folder sync that scales to very large folders",
+      "sequence": 15,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "M",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#large-folder-sync-1",
+      "branch": "eb/large-folder-sync-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "FOLDER-SCAN-PERF-1 Done-when 9(d), waived: on the owner's 120,190-file Drive folder a copied EPUB never reached the library, because every watcher event runs a full rescan and imports every file the library lacks, with one save at the end. Technical half: per-file add, remove and change without a rescan; a re-entry guard on syncLibraryWithFolder; batched saves that keep non-folder documents; a watcher closed flag and a cancellable startup timer (Fold-in 2a). Design half (owner): import everything, cap the import, or ask the user to choose subfolders.",
+      "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14 (owner ruling; placement Seq 15 by planner ruling). Stub. The technical half does not depend on the owner's large-folder answer and may be spec'd and dispatched first, split from the design half. The owner keeps sourceFolder cleared until this lands. Evidence: docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md.",
+      "revision": "d6cfbd50d5a75307932f687e721dea9a9a2ac41b20092beeca9e7cf742da2bef",
       "extra": {}
     },
     {
@@ -1025,7 +1047,7 @@
     {
       "id": "PACKAGING-FIX-1",
       "title": "Ship the icons, quiet the updater in unpacked builds, relink stale sample books",
-      "sequence": 13,
+      "sequence": 12,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1041,7 +1063,7 @@
       "evidence": "",
       "description": "Package the two runtime icon files, guard the auto-update check when an unpacked build has no update manifest, and relink a sample book whose bundled path is gone. From the P6 G2 build findings.",
       "notes": "Created by roadmap review 2026-10-14. NARRATE-REBUILD-1 P6 G2 findings B, C, D. Full Spec: U9/U10 pass.",
-      "revision": "d8039f79728e8661c1b369b0d4acdee31418d5e5d6a5c2b69307c075bc50c210",
+      "revision": "68f0e252317666c3e434d5768ce3707f1c246e2f6e2c73d0be655a26ead33d67",
       "extra": {}
     },
     {
@@ -1069,7 +1091,7 @@
     {
       "id": "QUIT-FLUSH-1",
       "title": "Finish every save before the app quits",
-      "sequence": 11,
+      "sequence": 10,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1085,7 +1107,7 @@
       "evidence": "",
       "description": "Cancel the first quit, run the library, settings, pending-write and best-effort cloud saves in order under a 3 s cap, keep the Narrate producer shutdown uncapped, then quit. Fixes BUG-192.",
       "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass.",
-      "revision": "b3b3ae2dbeb02946cef23bb4aaff56a42a9415889fd3f22a44bba7b4038e065c",
+      "revision": "61d0009d36c979341492ab03aa88dbdeb4c8a80b0d44abd9323ebfcb14f7ab99",
       "extra": {}
     },
     {
@@ -1284,7 +1306,7 @@
     {
       "id": "READER-VISUAL-DIAG-1",
       "title": "Diagnose the Focus/Flow reading band and the ResizeObserver flood",
-      "sequence": 12,
+      "sequence": 11,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1300,7 +1322,7 @@
       "evidence": "",
       "description": "Read-only live diagnosis of BUG-188 (reading-zone mask sized from a 24 px fallback, not tied to the word cursor; two clocks in Flow) and BUG-187 (observer loop flooding error.log), ending in two fix specifications. No product code committed.",
       "notes": "Created by roadmap review 2026-10-12 (BUG-187, BUG-188). Full Spec: U9/U10 pass.",
-      "revision": "d83c9f372923a2874f162a3f71799e050aa2c4661bb8f4a1ebcc8a1c265696ac",
+      "revision": "eb827c8daecc0f573072c9e8c692ee0c9e6480c05ae38c00acc2e5d1d9654f6d",
       "extra": {}
     },
     {
@@ -1923,7 +1945,7 @@
     {
       "id": "UX-POLISH-1",
       "title": "Space-bar resumes last-used reading mode",
-      "sequence": 14,
+      "sequence": 13,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -1941,13 +1963,13 @@
       "evidence": "",
       "description": "In Page, Space enters the remembered mode (Focus or Flow; Flow when unset) paused, like the buttons (owner decision 2026-10-12); shortcut help and replica tests corrected.",
       "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.",
-      "revision": "28a983676aa9fd740ba0703e64a6526cd52257fa152c3fece295f5a30ec48817",
+      "revision": "d2962643e7eae378416635bab422109cb07083a92df8b9a0d2aaeda7d21096ef",
       "extra": {}
     },
     {
       "id": "UX-POLISH-2",
       "title": "Keyboard and help-surface follow-ups after UX-POLISH-1",
-      "sequence": 15,
+      "sequence": 14,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1963,7 +1985,7 @@
       "evidence": "",
       "description": "Held Space acts once, unique hotkey-map keys, current hint line and help text, shortcuts overlay readable and mode outline correct in every theme, Escape closes the overlay without leaving the reader.",
       "notes": "Created by roadmap review 2026-10-14. UX-POLISH-1 follow-ups and G2 E-ink findings. Shared core: one comment line in src/types.ts. Full Spec: U9/U10 pass.",
-      "revision": "ab10aa3d84463c9602af492a38ad0a80f62b9552cd93632f0a6904aac04f5556",
+      "revision": "3821adc32e1e6bdeb34db680d1f3b85c2d17138bcd1a2ad4ac304ef0e7f7d054",
       "extra": {}
     }
   ],

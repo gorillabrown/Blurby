@@ -1,0 +1,38 @@
+{
+  "id": "20261014T221054Z-external-record-completion-FOLDER-SCAN-PERF-1",
+  "operation": "external-record-completion",
+  "item_id": "FOLDER-SCAN-PERF-1",
+  "created": "2026-10-14T22:10:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-14",
+      "sequence": null,
+      "evidence": "`docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`",
+      "notes": "Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888). Completed 2026-10-14: merge 534b43d2, close-out merge 287ce690; ledger TR-072. Done-when 9(c): Meditations on Drive about 2 s against 140-150 s on base; BUG-193 resolved. 9(d) live sync waived by the owner and moved to LARGE-FOLDER-SYNC-1; 9(e) not run, so BUG-189 stays open."
+    },
+    "expectedRevision": "79f7d65c90a14bdbaed350a68cd2d32bd7d4dbaf7d74dd76741ed897704ec4c5",
+    "idempotencyKey": "record-completion:FOLDER-SCAN-PERF-1:[('completed', '2026-10-14'), ('evidence', '`docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`'), ('notes', 'Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888). Completed 2026-10-14: merge 534b43d2, close-out merge 287ce690; ledger TR-072. Done-when 9(c): Meditations on Drive about 2 s against 140-150 s on base; BUG-193 resolved. 9(d) live sync waived by the owner and moved to LARGE-FOLDER-SYNC-1; 9(e) not run, so BUG-189 stays open.'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "FOLDER-SCAN-PERF-1",
+      "idempotencyKey": "record-completion:FOLDER-SCAN-PERF-1:[('completed', '2026-10-14'), ('evidence', '`docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md`'), ('notes', 'Created by roadmap review 2026-10-14. BUG-193; absorbs dissolved DEV-PERF-MEASURE-1 (BUG-189). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-30 (branch eb/folder-scan-perf-1 from main 5cd38888). Completed 2026-10-14: merge 534b43d2, close-out merge 287ce690; ledger TR-072. Done-when 9(c): Meditations on Drive about 2 s against 140-150 s on base; BUG-193 resolved. 9(d) live sync waived by the owner and moved to LARGE-FOLDER-SYNC-1; 9(e) not run, so BUG-189 stays open.'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261014T221054Z-external-record-completion-FOLDER-SCAN-PERF-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T22:11:12Z",
+  "outcome": "succeeded"
+}

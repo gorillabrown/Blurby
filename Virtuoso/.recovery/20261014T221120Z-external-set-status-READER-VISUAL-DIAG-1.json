@@ -1,0 +1,34 @@
+{
+  "id": "20261014T221120Z-external-set-status-READER-VISUAL-DIAG-1",
+  "operation": "external-set-status",
+  "item_id": "READER-VISUAL-DIAG-1",
+  "created": "2026-10-14T22:11:20Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 11
+    },
+    "expectedRevision": "d83c9f372923a2874f162a3f71799e050aa2c4661bb8f4a1ebcc8a1c265696ac",
+    "idempotencyKey": "set-status:READER-VISUAL-DIAG-1:[('sequence', 11)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "READER-VISUAL-DIAG-1",
+      "idempotencyKey": "set-status:READER-VISUAL-DIAG-1:[('sequence', 11)]",
+      "actualRevision": "",
+      "recoveryId": "20261014T221120Z-external-set-status-READER-VISUAL-DIAG-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T22:11:42Z",
+  "outcome": "succeeded"
+}
