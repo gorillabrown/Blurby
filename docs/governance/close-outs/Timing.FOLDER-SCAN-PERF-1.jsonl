@@ -24,3 +24,5 @@
 {"event": "start", "row": 10, "model": "claude-sonnet-5-5", "host": "claude-code", "at": "2026-10-14T17:20:00Z"}
 {"event": "end", "row": 10, "evidence": "234a12b9: (j) failed first on ac8485f9 watcher then passes; Done-when 2 exit 0 74/74; full suite exit 0 152 files 2068 passed 1 skipped (pdf-export it.skip), failing set empty; typecheck 0; build 0; Done-when 10 three-dot = 8 paths + 3 exempted governance files", "result": "done", "at": "2026-10-14T17:23:15Z"}
 {"event": "resume", "row": 4, "at": "2026-10-14T21:47:50Z"}
+{"event": "end", "row": 4, "evidence": "Done-when 9 run by the planner on the owner's profile after G2: (c) PASS Meditations on Drive ~2 s (base 140-150 s), The Raven <1 s; (d) FAIL waived by owner (full rescan+import of a 120,190-file folder per watcher event; LARGE-FOLDER-SYNC-1); (e) not run, BUG-189 open. Pre-merge gates on 6d5a849f all pass (npm ci, DW2 74/74, npm test 2068/1 skipped, typecheck, build, DW10). Merged 534b43d2 --no-ff, pushed.", "result": "done", "at": "2026-10-14T21:51:10Z"}
+{"event": "confirm", "row": 1, "at": "2026-10-14T22:04:31Z"}

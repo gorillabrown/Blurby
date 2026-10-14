@@ -2955,3 +2955,19 @@ Related: LL-142, LL-006.
 
 ### LL-149 — status (2026-10-14, 2026-10-14)
 **Status:** Promoted -> standing rule 48
+
+### LL-158 — Trace what a live-behaviour acceptance row triggers, end to end, at the real data size (FOLDER-SCAN-PERF-1, 2026-10-14)
+**Verdict:** The specification knew the owner's source folder held about 120,000 files. It specified a live add/delete row (Done-when 9(d): a copied EPUB appears in 30 s or less) without tracing what a watcher event sets off on that data. Every event runs `syncLibraryWithFolder`, which rescans the whole tree and imports every file the library lacks, so the row could not pass on that folder, whatever the watcher did. The fix was right; the acceptance row was unreachable.
+**Evidence:**
+- Done-when 9(d), owner's profile, 2026-10-14: two EPUBs copied into the Drive folder never reached `library.json` (more than 3 minutes).
+- Drive delivered the events: a bare `fs.watch` saw them.
+- The folder held 120,190 supported files against 131 in the library, and `scanFolderAsync` took 93.6 s.
+- `main.js:333-398` rescans, extracts every unimported file and saves once at the end, with no re-entry guard.
+- The owner waived 9(d), and the gap became LARGE-FOLDER-SYNC-1.
+**Recommendation:** For every acceptance row that exercises live behaviour, follow the whole path the event takes through code the item does not change, and size each step against the real data before writing the threshold. Compare what the data holds with what the app holds: a library of 131 against a folder of 120,190 meant the sync had never completed. Either bring the downstream path into scope or write the row against data the unchanged path can handle.
+**Applies to:** Specifications with a live smoke or owner re-measure row on a path partly outside the item's edit sites: folder sync, import, watchers, cloud sync, and any row run on the owner's real profile.
+**Status:** Observation
+Related: LL-152, LL-142, LL-156.
+
+### LL-143 — status (FOLDER-SCAN-PERF-1, 2026-10-14)
+**Status:** Observation — did not hold for one control: FOLDER-SCAN-PERF-1's timing control (h) was dry-run as the planner's plain-Node probe, not as the committed vitest control. On the base, the committed control read 149–243 ms, under its 250 ms budget (the probe's reads were 607–814 ms). Standing rule 43's C1 stop caught it before any fix was written, and the owner amended the budget to 50 ms. The search-gate dry runs held exactly.
