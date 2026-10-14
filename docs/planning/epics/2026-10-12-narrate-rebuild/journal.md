@@ -204,6 +204,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
 - **Next:** rows 59 ∥ 60, then 61–66.
 
+## S3 — 2026-10-13 20:47 — rows 59–62: the stall was an undock; the long frames are a view runaway
+
+- **Did:** row 59 (Aristotle, read-only): the D6 stall started with the laptop leaving its dock and AC at 19:42:48; nothing inside Blurby. Cross-checked the power and display events myself. Row 60 (Hercules): section-load trace through the diagnostics port, reviewed (refs, stable callback, bound runtime methods). Row 61: build and two traced 5-minute sessions on `b9462dbd`, with the machine undocked on AC: every cursor update a highlight miss and the view paging from section 4 to 18 while narration read section 3. Row 62 (Aristotle): three faults together (wrong opening section, direction-blind `next()`, a dropped and unretried `goToSection`); fix spec. Staging memo: L12, O10, O11, BUG-191 updated.
+- **Learned:** D3 and D5 read engine commits only, so a session where the view never paints the spoken word passes D5; it failed D3 only because the runaway's page loads made long frames. The section-load counts in the main log (iframe warnings, 10 vs 34 lines) were the runaway's footprint all along. Undocking mid-run removes CPU capacity that the foreign-CPU ceiling cannot see.
+- **Decisions:** none new.
+- **Gate/DoD movement:** none; row 63 running.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: Hercules's row 63 work in progress, `tests/perf-baseline-results.json`.
+- **Next:** row 63 → 64 → 65 (final re-run, machine as it is: AC, internal panel) → 66.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
