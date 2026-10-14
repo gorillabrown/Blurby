@@ -118,7 +118,7 @@ function startWorker(modelsRoot, primary) {
       switch (msg.type) {
         case "model-ready": clearTimeout(timer); slot.ready = true; resolve(msg.runtime); dispatch(); break;
         case "load-error": clearTimeout(timer); reject(new Error(msg.error)); lost(`load error: ${msg.error}`); break;
-        case "lag": plog("lag", `w${slot.index}`, msg.ms, "ms", "inflight", msg.inflight, msg.mem); break;
+        case "lag": plog("lag", `w${slot.index}`, msg.ms, "ms", "gen", msg.genMs, "free", msg.freeMs, msg.mem); break;
         case "result": { plog("result", msg.id, `w${slot.index}`, msg.error ? "error " + msg.error : `gen ${msg.genMs}`); const p = pending.get(msg.id); if (!p) break; pending.delete(msg.id); slot.busy -= 1; if (msg.error) p.reject(new Error(msg.error)); else p.resolve({ table: msg.table, pcm: msg.pcm, sampleRate: msg.sampleRate, genMs: msg.genMs, worker: slot.index, busyAtAssign: p.busyAtAssign, stages: { queued: p.queued, posted: p.posted, ...(msg.stages ?? {}), received: performance.timeOrigin + performance.now() } }); dispatch(); break; }
         default: break;
       }

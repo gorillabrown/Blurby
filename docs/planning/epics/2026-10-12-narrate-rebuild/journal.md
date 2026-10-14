@@ -158,6 +158,25 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
 - **Next:** the owner's (c) or (d). Every front waits on D6 (P5's merge gates P6).
 
+
+## S3 — 2026-10-13 18:55 — session start: resume on row 53 (the freeze fix) after S2 ended mid-launch
+
+- **Did:** read charter, plan, state, the S2 journal tail, the time log and the P5 worktree. Reality against memory: Decision #19 is recorded with the charter D6 amendment and the planner memo fold-in 2 (`0e4e207f`), the D6 launcher counts trials under the amended row (`0f972e73`), step 2 is in (`a6ce898c`); step 3's fix is drafted and uncommitted (`main/narrate/local-file-cache.js`, its wiring and the gen/free split of the worker stall log in `producer-worker.js` and `producer.js`, `tests/narrate/narrate.localFileCache.test.js`; 3 tests pass). S2 ran one in-app session with the fixed worker on a fresh build (18:13:37 to 18:17:17, 3.55 min at 1.00x, foreign CPU 17.3 %, D3 analysis PASS): it is launch 1 of 3 — 32 worker stall lines, the longest free (non-generating) stall 622 ms, the longest generation-inclusive 3,495 ms, the main thread 299 ms. A second launch started at 18:17:17 and died with the session (no log, no electron process left); its start erased launch 1's trace file, so launch 1's record is its log, CPU sample, trial summary and analysis, preserved under `C:\Projects\Blurby-artifacts\narrate-rebuild-1\p5-freeze\launch-1` and `phase5/recorded-output.freeze-launch-1.json`. Launches 2 (2.00x) and 3 (1.00x), 3.5 min each, started in the background with their own `--out`. Time log: row 44 (T7 under the ordinary-desktop definition) ended blocked, superseded by row 55; row 45 parked as a duplicate of row 56.
+- **Learned:** the launcher removes the session trace at launch start, so a second launch under the same `--out` erases the first one's trace: one `--out` per launch.
+- **Decisions:** none new.
+- **Gate/DoD movement:** none yet.
+- **Git:** eb/narrate-rebuild-1-p5 @ a6ce898c; uncommitted: the four fix files above, the time log, `recorded-output.json` (launch 1's 3.5-minute analysis over the committed 5-minute D3 record; the record is restored at the checkpoint, the copy kept).
+- **Next:** read the launch 2 and 3 logs; no free stall > 1 s in all three → checkpoint row 53, then row 54 (targeted narrate suites + typecheck), row 55 (T7 under the amended D6, quiet window), row 56 (P5 gate).
+
+## S3 — 2026-10-13 19:10 — freeze fix verified (row 53); the 2.00x drop recurs and a 1.29 s renderer frame appears; Aristotle on both
+
+- **Did:** launches 2 (2.00x, 18:53–18:57) and 3 (1.00x, 18:57–19:00), 3.5 min each, own `--out` per launch, producer stall log on. Freeze criterion met 3/3: longest free (non-generating) worker stall 622 / 562 / 685 ms, 0 over 1 s, every stall over 1 s a generation run; main thread ≤ 328 ms; external memory 315 → 21 MB without a stall. Record `phase5/freeze-fix.launches.md` (generated from the logs and analyses, never typed); the committed 5-minute D3 record `recorded-output.json` restored after copying the three launch analyses beside it. The launches' D3/D5 analyses: launch 1 PASS; launch 2 FAIL — 1 drop, chunk 8730-8748 unit 6, word 8736, a 125 ms unit under one 190.7 ms frame — the same unit S2's T7 2.00x session dropped under a 246.9 ms frame; launch 3 FAIL — one 1,292 ms renderer frame at t≈88.7–90.0 s swallowed words 8955 (200 ms) and 8956 (150 ms) and left 8957 764.9 ms late (the check treats a frame ≥ 1 s as no frame), while launch 1 passed the same words. Aristotle dispatched read-only on both (row 57, timebox 40 min); rows 57-58 added; Decision #20 (executor) records the route.
+- **Learned:** the engine publishes only the word at the current sample, so any renderer frame longer than a unit leaves that unit unpublished — a 125 ms unit at 2.00x needs only a 190 ms frame. The 2.00x long frame is positional (same word twice); the 1.29 s frame at 1.00x is not (1 of 4 sessions through that word). The check's frame tolerance stops at 1,000 ms by design.
+- **Decisions:** #20.
+- **Gate/DoD movement:** D7 freeze fixed and verified in the app (Decision #19 step 3 done); D5 in-app and D3 open on the two long-frame findings (rows 57-58); D6 pending T7 under the amended row.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** Aristotle's report → Hercules fix (row 58, failing-first test) → row 54 (`npx vitest run tests/narrate` + typecheck) → one launcher run on the final tree (sessions 5 min at 1.00x and 2.00x + T7 warm/cold under the amended D6) → P5 gate.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
