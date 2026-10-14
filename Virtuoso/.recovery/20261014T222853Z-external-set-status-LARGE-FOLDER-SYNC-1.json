@@ -1,0 +1,40 @@
+{
+  "id": "20261014T222853Z-external-set-status-LARGE-FOLDER-SYNC-1",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-1",
+  "created": "2026-10-14T22:28:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Live folder sync that scales to very large folders (technical half)",
+      "written_status": "full-spec",
+      "prerequisites": [
+        "QUIT-FLUSH-1"
+      ],
+      "description": "Technical half: a watcher event adds, removes or refreshes one book without a rescan; one full sync at a time, merged into the live library (positions and deletions survive); progress saved every 30 s; no callback after the watcher closes, and the startup folder work stops at quit (Fold-in 2a). Full sync moves to `main/folder-sync.js`. Design half (very large folders: import all, cap, or choose subfolders) is an open owner decision.",
+      "notes": "Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14. Technical half specified 2026-10-14 on main `b2dd36f0` (Blurby Brain ruling, Rule 11 tier 1): Full Spec, gates dry-run on the base and the prescribed edit. Merges after QUIT-FLUSH-1 (edits its `stopNewWork`) and before FOLDER-UNREACHABLE-GUARD-1. Owner check runs in a copy of the owner profile on the real Drive folder, inside the startup scan, with no import. The owner keeps sourceFolder cleared until this lands."
+    },
+    "expectedRevision": "d6cfbd50d5a75307932f687e721dea9a9a2ac41b20092beeca9e7cf742da2bef",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-1:[('description', 'Technical half: a watcher event adds, removes or refreshes one book without a rescan; one full sync at a time, merged into the live library (positions and deletions survive); progress saved every 30 s; no callback after the watcher closes, and the startup folder work stops at quit (Fold-in 2a). Full sync moves to `main/folder-sync.js`. Design half (very large folders: import all, cap, or choose subfolders) is an open owner decision.'), ('notes', 'Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14. Technical half specified 2026-10-14 on main `b2dd36f0` (Blurby Brain ruling, Rule 11 tier 1): Full Spec, gates dry-run on the base and the prescribed edit. Merges after QUIT-FLUSH-1 (edits its `stopNewWork`) and before FOLDER-UNREACHABLE-GUARD-1. Owner check runs in a copy of the owner profile on the real Drive folder, inside the startup scan, with no import. The owner keeps sourceFolder cleared until this lands.'), ('prerequisites', ['QUIT-FLUSH-1']), ('title', 'Live folder sync that scales to very large folders (technical half)'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-1",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-1:[('description', 'Technical half: a watcher event adds, removes or refreshes one book without a rescan; one full sync at a time, merged into the live library (positions and deletions survive); progress saved every 30 s; no callback after the watcher closes, and the startup folder work stops at quit (Fold-in 2a). Full sync moves to `main/folder-sync.js`. Design half (very large folders: import all, cap, or choose subfolders) is an open owner decision.'), ('notes', 'Created by the FOLDER-SCAN-PERF-1 close-out 2026-10-14. Technical half specified 2026-10-14 on main `b2dd36f0` (Blurby Brain ruling, Rule 11 tier 1): Full Spec, gates dry-run on the base and the prescribed edit. Merges after QUIT-FLUSH-1 (edits its `stopNewWork`) and before FOLDER-UNREACHABLE-GUARD-1. Owner check runs in a copy of the owner profile on the real Drive folder, inside the startup scan, with no import. The owner keeps sourceFolder cleared until this lands.'), ('prerequisites', ['QUIT-FLUSH-1']), ('title', 'Live folder sync that scales to very large folders (technical half)'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261014T222853Z-external-set-status-LARGE-FOLDER-SYNC-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T22:29:09Z",
+  "outcome": "succeeded"
+}
