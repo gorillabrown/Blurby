@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
+**Last updated**: 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight** since 2026-10-12: P1–P4 merged, P5 open on `eb/narrate-rebuild-1-p5`, P6 is owner gate G2; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (12, read-only) → UX-POLISH-1 (14, merged `e942e3fd`, close-out waits for the owner's keyboard smoke at G2) → DEV-PERF-MEASURE-1 (15, stub). TEST-BUDGET-WORDINDEX-1, CLEANUP-MODE-BARREL-1 and SETTINGS-WRITE-DURABLE-1 completed 2026-10-13. Dispatch-ready depth is 1 (READER-VISUAL-DIAG-1): a `/roadmap-review` is due (Rule 5a). See [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → FOLDER-SCAN-PERF-1 (10) → QUIT-FLUSH-1 (11, merges after 10) → READER-VISUAL-DIAG-1 (12, read-only) → PACKAGING-FIX-1 (13) → UX-POLISH-1 (14, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (15) → stubs FOLDER-UNREACHABLE-GUARD-1 (16), PDF-IMPORT-DIAG-1 (17), OVERLAY-THEME-SWEEP-1 (18), EINK-CONTROLS-1 (19), KF2-WAIVER-RETIRE-1 (20), NARRATE-YEARS-1 (21, blocked on the epic). Dispatch-ready depth is 5 (10, 11, 12, 13, 15). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -19,12 +19,12 @@ The owner requested product lanes on 2026-09-23. Each Notion record has one prim
 
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
-| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is a Full Spec (14; Space enters the remembered mode paused, owner 2026-10-12) |
+| UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is merged (14, in flight until its G2 checks); roadmap review 2026-10-14: UX-POLISH-2 (15), OVERLAY-THEME-SWEEP-1 (18, stub), EINK-CONTROLS-1 (19, stub, owner decision) |
 | TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
 | Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 13 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
-| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6 |
-| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185), DEV-PERF-MEASURE-1 (15, stub, BUG-189) |
+| Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190) |
+| Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185); roadmap review 2026-10-14: QUIT-FLUSH-1 (11, BUG-192), PACKAGING-FIX-1 (13), KF2-WAIVER-RETIRE-1 (20, stub); DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1 |
 
 **Boundary:** TTS owns the audio/timing contract; Reader owns its visual and navigation consumers. The narration cursor/window work belongs primarily to TTS and requires Reader integration. UX owns presentation and command entry; Library owns the underlying content/data behavior. Tests stay with their feature lane; shared build/test tooling belongs to Platform & Maintenance.
 
@@ -104,6 +104,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 - `HYG-XLSX-DASHBOARD-RESTORE` — superseded 2026-09-23 by the owner's decision to use monday.com; no Excel restoration was performed. [Retained full specification](docs/planning/roadmap-reviews/2026-09-23-retired-specs.md); [migration evidence](docs/planning/roadmap-reviews/2026-09-23-monday-migration.md).
 
 **Dissolved sprints:**
+- `DEV-PERF-MEASURE-1` — dissolved 2026-10-14 into FOLDER-SCAN-PERF-1 (owner decision, roadmap review 2026-10-14): BUG-189's dev-mode slowness was measured on the owner's profile with the 120,000-file source folder that BUG-193 shows stalls every launch; FOLDER-SCAN-PERF-1 re-measures dev and production and closes BUG-189 if the slowness is gone. Terminal record TR-071.
 - `KOKORO-EXPORT-1` — dissolved 2026-10-11: long-form export is outside the Narrate rebuild's day-one scope and returns later as a new item. Entry archived to `docs/planning/.Archive/ROADMAP_legacy.md`.
 - `NARR-PAUSE-STATE-1` — historical reason-aware pause/resume design superseded by the TTS Quality + Reading Experience v2 conveyor on 2026-05-17; source disposition retained, exact terminal date unrecorded. Summary reconciled by owner approval 2026-09-23.
 - `LEGACY-NARR-MEDIA-1-DISSOLVED` — historical duplicate proposal dissolved in favor of completed `NARR-MEDIA-1`; original duplicate Sprint Code retained in the register's Notes. Exact terminal date unrecorded. Summary reconciled by owner approval 2026-09-23.
@@ -175,6 +176,10 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 45. **LL-141 — Live UI gates keep an owner-observed route.** A specification with live UI checks names up front which behaviours need a human (real input, perceptual checks) and keeps a short owner checklist for them; unattended live runs include a throttle or visibility check that voids results taken while the window was throttled. **Why:** held in READER-MODE-SEPARATION-2 and NARRATE-REMOVE-1 (whose Done-when 16 was owner-observed). (Promoted at the 2026-10-12 roadmap review.)
 
 46. **LL-153 — A dispatch settles what the executing session may write to the register.** The dispatch names the register fields the run may write (if any); status moves, Seq and completion stay with the ceremonies (`/roadmap-review`, `/pointer-closeout`). **Why:** applied and held in HB-2 and HB-3 (2026-10-13): each run wrote only its stated text fields, and the mapped-column hash was unchanged. (Promoted at the 2026-10-13 roadmap review.)
+
+47. **LL-147 — A gate defined on the owner's machine runs in a local session.** An item whose Done-when names the owner's machine (the full suite, load-dependent timeouts, live smoke, Windows paths) is dispatched to a local session on that machine, and the dispatch says so; a cloud session is used only when every gate is platform-neutral. **Why:** applied and held in four close-outs (TEST-TIMEOUT-HEADROOM-1 introduced it after two cloud runs could not meet their gates). (Promoted at the 2026-10-14 roadmap review.)
+
+48. **LL-149 — Every Done-when list restates the type and build gates.** Every item that adds or edits TypeScript, test files included, lists "`npm run typecheck` exits 0" in its Done-when, and "`npm run build` exits 0" for any UI, styling or packaging change, next to `npm test`. A run gates on its Done-when, not on the standing rules it was told to read. **Why:** applied and held in four close-outs after LIBRARY-SETTINGS-FIX-1 merged with a type error its Done-when never checked. (Promoted at the 2026-10-14 roadmap review.)
 
 **Rule provenance:** Existing numbered rules above retain their historical source labels; registry policy.standingRules.ids declares no additional IDs. Ref ownership in SRL-074 was an intermediate extraction boundary: this approved stage moves the refs together with the owning implementation. User-mandated complete mode separation governs the target architecture.
 
@@ -499,6 +504,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
   - **Shared-core touches:** none.
   - **Merge order:** independent; may run beside any item.
   - **Measurement windows (2026-10-13):** every live session, dev or production, and the production build follow the [parallel run plan](#parallel-run-plan-2026-10-13); they never overlap the epic's D3 or D6/T7 trials. Re-audit on `d21ad58e`: the cited Focus and Flow files are unchanged since `a0e09189`, and `preload.js:122` is still `logError`.
+  - **BUG-193 confound (roadmap review 2026-10-14):** every live session runs with the profile's `sourceFolder` empty (the owner's G2 setting, backed up in `%APPDATA%\blurby\blurby-data\g2-backup-20261014\`) or after FOLDER-SCAN-PERF-1 has merged. With the 120,000-file source folder set, each launch floods the main process for about 2 minutes (BUG-193), which would distort H3's timer sampling and H4's per-minute counts and make the base-against-branch comparison meaningless. Record the `sourceFolder` value in the report for every session. Re-audit on `66f15981`: the cited files are unchanged since `a0e09189` apart from `preload.js` (+5 lines, `logError` still at `:122`), and `main/ipc/misc.js:334` is still the `log-error` handler; the lessons check passes.
 
 ##### Task list
 
@@ -520,11 +526,980 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 <a id="dev-perf-measure-1"></a>
 
-#### DEV-PERF-MEASURE-1 — Measure dev-mode slowness against a production build *(position 15 — stub)*
+#### Stage 8 — Launch, quit and packaging defects found at G2 (roadmap review 2026-10-14)
 
-- **Lane:** Platform & Maintenance.
-- **Source:** BUG-189 (whole-app dev-mode slowness, equal on the base); LL-152.
-- **Scope:** measure the same actions (library open, book open, mode switch, 1 minute of Flow) on `npm run dev` and on the production build, with renderer profiles, before naming any cause (Pike rule 1). Output: a measurement report and, if warranted, a fix specification. Specified at a later review.
+Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparation and the owner smokes surfaced. The finish line is still the epic; these are sideways fixes that make the G2 build and daily use sound. See the [plan](docs/planning/roadmap-reviews/2026-10-14-plan.md).
+
+**Order and parallel run.** FOLDER-SCAN-PERF-1 (10) → QUIT-FLUSH-1 (11) → READER-VISUAL-DIAG-1 (12, Stage 7) → PACKAGING-FIX-1 (13) → UX-POLISH-2 (15). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
+
+<a id="folder-scan-perf-1"></a>
+
+#### FOLDER-SCAN-PERF-1 — Stop a large source folder stalling every launch *(position 10 — Full Spec; authored 2026-10-14; fixes BUG-193, and closes BUG-189 if the measurement shows it)*
+
+- **What:** With a large source folder (the owner's is about 120,000 files on Google Drive), a book opens about 2 minutes after launch. Make the folder work cheap and keep it off the startup path, without changing any feature: (1) the folder watcher (`startWatcher`) uses Node's native recursive `fs.watch` (one OS handle on Windows) instead of chokidar's whole-tree crawl, with the same callbacks and filters; (2) the folder scan (`scanFolderAsync`) makes no `realpath` call per file and yields to the event loop every `FOLDER_SCAN_YIELD_EVERY` entries; (3) the startup watcher and folder sync start after the main window has loaded, plus `FOLDER_SYNC_STARTUP_DELAY_MS`; (4) chokidar is removed from the dependencies (its only importer is `main/folder-watcher.js`).
+- **Why:**
+  - **The startup path** (`main.js:653-657`, on `66f15981`): whenever `settings.sourceFolder` is set, Phase 4 calls `startWatcherFn()` (`main.js:401-434`, which calls `startWatcher`) and then `syncLibraryWithFolder()` (`main.js:333-398`, which calls `scanFolderAsync`), as soon as auth and sync init finish (`main.js:588-593`).
+  - **The watcher** (`main/folder-watcher.js:78-108`): `getChokidar().watch(sourceFolder, …)` (`:82-86`) crawls and stats the whole tree, even with `ignoreInitial: true`, and opens a watch per directory. Each `add` and `change` then calls `isPathWithinFolder` (`:90`, `:98`).
+  - **The scan** (`main/folder-watcher.js:27-74`): for each supported file, `isPathWithinFolder(fullPath, folderPath)` (`:43`) makes two `fsPromises.realpath` calls (`:17-18`; it resolves the root folder again every time), plus one `stat` (`:44`).
+  - **The read that waits:** the renderer's `api.readFileBuffer` (`src/components/ReaderContainer.tsx:332-337`) reaches the `read-file-buffer` handler (`main/ipc/library.js:160-182`), which shares the main process's event loop and libuv threadpool with the scan and the watcher.
+  - **Planner probe** (2026-10-14; plain Node 24.14.0, which is Electron 41.1.0's Node, checked with `ELECTRON_RUN_AS_NODE`; local NTFS synthetic trees; scripts kept in the session scratchpad `scanprobe/`, not committed). On 40,000 files in 4,000 directories:
+    - `startWatcher` (chokidar): 46.4 s to `ready`. The longest event-loop stall was 10,970 ms, concurrent 2 MB reads took up to 25.7 s, and one read still took 1.4 s after `ready`.
+    - `scanFolderAsync`: 1.37 s, with a longest stall of 16 ms and concurrent reads of 2–3 ms. It made 4,000 `realpath` calls for 2,000 supported files.
+    - `fs.watch(root, { recursive: true })`: set up in 64 ms, with a longest stall of 7 ms.
+
+    On 3,000 files in 300 directories (three runs each), a 1 MB read started 20 ms after `startWatcher` took 607–814 ms, with stalls of 405–575 ms. The same read after a recursive `fs.watch` took 2 ms, with stalls of 16–17 ms. **So on local disk the watcher is the blocker, and the scan is not.** On Drive, every `realpath` and `stat` goes through the Drive filesystem, so the scan's 2 `realpath` calls per file also add up there. That was not measured on Drive; Done-when 9 measures the whole effect.
+  - **Symlinks never reach the scan's file branch:** `readdir(…, { withFileTypes: true })` reports a junction or symlink as a link (probe: `isDirectory=false isFile=false isSymbolicLink=true`). `walkDir` only recurses into `isDirectory()` and only collects `isFile()` (`:39`, `:42`), so every file it collects is inside the root by construction. The check at `:43` has never excluded anything that the walk would otherwise collect.
+  - **Evidence for BUG-193:**
+    - Executor (scratch profile with a copy of the owner's settings): a fresh profile renders in 1 s. With the owner's settings it was still stuck at a 120 s cap. With `sourceFolder` deleted it renders at once, and with a 12-file Drive folder it renders in 6.7 s.
+    - Planner (owner's real profile): both a Drive EPUB and a local EPUB stayed on "Loading book…" for 38+ s.
+    - LL-152's status line (2026-10-14) records a dev build that took 2.5–4 min to load during SETTINGS-WRITE-DURABLE-1's smoke, on the same profile. This is why BUG-189 (dev-mode slowness) may share the cause.
+- **Owner decisions (2026-10-14):**
+  - "Cheap scan, off the critical path. No feature change." This binds the design: resolve the root once, take a per-file `realpath` only for a symbolic link, yield every N entries, start the startup sync after the library is shown, replace chokidar's crawl with native recursive `fs.watch` under the same `startWatcher` contract, and leave the `read-file-buffer` allowed-roots check and the sync's pruning unchanged.
+  - DEV-PERF-MEASURE-1 is dissolved into this item. If Done-when 9(e) shows dev mode back to normal, BUG-189 closes here.
+- **Planner resolutions (roadmap review 2026-10-14):** `FOLDER_SYNC_STARTUP_DELAY_MS = 3000`; unlink keeps chokidar parity (any vanished path rescans); BUG-189 closes on the library within 30 s and a book within 10 s in dev, plus the owner's judgment, otherwise a fresh measurement item is filed; Done-when 9 waits for G2 and sets only `sourceFolder` (settings changed since the G2 backup survive); if 9(d) shows no Drive events, stop for an owner decision (manual rescans or a polling item). The unreachable-folder prune is filed as BUG-195 (High) and fixed by FOLDER-UNREACHABLE-GUARD-1, not here. Until that item merges, the owner keeps a `library.json` backup and checks that the Drive is mounted before launching with `sourceFolder` set.
+- **Design decisions (planner, 2026-10-14):**
+  - **Scan:** delete the per-file `isPathWithinFolder` call (`:43`) and give no replacement. Dirents never report a link as a file or directory (see Why), so the walk makes zero per-file `realpath` calls, and the scan needs no root `realpath` either. This keeps today's behaviour exactly (symlinked files and folders are skipped today and stay skipped). Following symlinks would be a feature change and stays out.
+  - **Yield:** one counter across the whole walk. On every `FOLDER_SCAN_YIELD_EVERY`-th entry, `await new Promise((resolve) => setImmediate(resolve))`. The counter covers unsupported entries, because a directory of tens of thousands of non-book files (`Readings/Books` holds 38,173 entries) is otherwise walked in one synchronous loop.
+  - **Watcher:** `fs.watch(sourceFolder, { recursive: true }, listener)`. The listener receives `(eventType, relativeName)`, and the rules below map it onto the existing contract:
+    - **Ignore:** any path segment starting with `.` (the regex `(^|[\/\\])\.` today), and a first segment equal to `"Saved Articles"` (the root-level folder only, as today).
+    - **Stability:** each path's callback waits until that path has had no event for `FOLDER_WATCHER_STABILITY_MS`. This is a per-path debounce, the `awaitWriteFinish`-like rule. If any event in the window was `rename`, the settled event counts as a rename.
+    - **Settle:** `lstat` the path.
+      - It is gone: `onUnlink()`, for any path. This is parity: chokidar's `unlink` handler (`:94`) has no extension filter.
+      - A directory that arrived by rename: `onAdd(dirPath)`. A folder moved in raises one event on Windows. Chokidar reported its files, and `main.js:406` ignores the argument and debounces a sync.
+      - A supported-extension file, or a symlink whose `realpath` lies inside the root: `onAdd(path)` when renamed, `onChange(path)` otherwise.
+      - Anything else is ignored.
+    - **Root `realpath`:** resolved once per `startWatcher` call (`fsPromises.realpath(sourceFolder)`, kept as a promise) and used only for symlinks. For that, `isPathWithinFolder` gains an optional third argument, `realFolder`, which is used instead of resolving the folder again.
+    - **Start failure:** a synchronous `fs.watch` throw (ENOENT, EPERM) is caught: log it, call `onError(err, sourceFolder)` (the existing user toast, `main.js:419-432`) and return `null`. `startWatcherFn` assigns `watcher = null`, and every `watcher.close()` call site is already guarded (`main.js:402`, `:689`).
+    - **`close()`:** clears the pending timers, then closes the handle. It is synchronous; chokidar's returned a promise that no caller awaited.
+  - **Startup hook:** replace `main.js:653-657` with a deferred start. `const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);`. If `mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()`, attach it with `mainWindow.webContents.once("did-finish-load", startFolderWork)`; otherwise call it now.
+    - Why `did-finish-load` and not `ready-to-show`: `main/window-manager.js:85` already uses `ready-to-show` to show the window, and by `main.js:654` the page may have loaded already (Phase 3 awaits auth at `:588`). `isLoading()` can be queried, but `ready-to-show` cannot be re-checked once it has fired.
+    - The listener is synchronous and fire-and-forget, so nothing depends on Electron awaiting it (LL-157).
+    - The watcher still starts before the sync, as `tests/perfAudit.test.ts` "c" (`:290-318`) describes.
+    - Both functions read `settings` when they fire, so a folder chosen in the meantime (`select-folder` and `switch-folder`, `main/ipc/state.js:69`, `:80`) is honoured. The second start only restarts the watcher and runs one more sync.
+  - **Dependency:** `npm uninstall chokidar --package-lock-only` removes `package.json:102`, plus chokidar's lockfile entries (`package-lock.json:16`, `:4392-4406`) and its only dependency `readdirp` (`:8997`). `git grep -i chokidar` finds no other importer in `main/`, `main.js`, `src/`, `preload.js` or `tests/`; outside documentation, its only other mention is the `main/constants.js:162` comment, which this item edits. `--package-lock-only` leaves `node_modules` alone; `npm ci` (Done-when 6) proves that the lockfile and manifest agree.
+  - **Platforms:** recursive `fs.watch` is native on Windows (ReadDirectoryChangesW) and macOS (FSEvents), and has been supported on Linux since Node 20 (Electron 41.1.0 ships Node 24.14.0). On Linux, Node implements it by watching each directory, so it is not cheap on a huge tree; no Linux user has such a tree today (see Out of scope).
+- **Out of scope:**
+  - **The sync's pruning** (`main.js:383-394`). It drops every folder-sourced document that the new scan does not find. This includes a scan that returns `[]` because the folder cannot be reached (`main/folder-watcher.js:29`), for example Drive not yet mounted at launch. That behaviour is unchanged, and this item keeps the `access` → `[]` line as it is (LL-156: the waiver names lines this item does not move). Filed as BUG-195; fixed by FOLDER-UNREACHABLE-GUARD-1.
+  - **The `read-file-buffer` allowed-roots check** (`main/ipc/library.js:163-170`).
+  - **The executor's other outline items** (BUG-193 Fix path): a file-count cap with a notice, watcher depth limits, a cap on new-file extraction per sync, and a worker-thread scan. These are feature changes, or not needed once the probe numbers hold.
+  - **The cost of a full rescan after each watcher event** on a 120,000-file Drive tree. It is the same as today (debounced by `FOLDER_SYNC_DEBOUNCE_MS`).
+  - **The cost of recursive `fs.watch` on Linux.**
+  - **P6 build findings C** (`assets/` not packaged) **and D** (`app-update.yml` ENOENT on `--dir` builds).
+- **Prerequisites:**
+  - No code prerequisite. This item touches no shared-core file and nothing that NARRATE-REBUILD-1 P6 owns.
+  - Done-when 9 runs on the owner's real profile. That profile is in use for P6's G2 with `sourceFolder` cleared, so Done-when 9 runs after G2 finishes (or when the owner releases the profile).
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Each gate was dry-run on `66f15981` (2026-10-14), and the result is in parentheses.
+    1. **Positive controls (standing rule 43):** at C1, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts` exits 1, and exactly the controls (a), (b), (g), (h) and (i) fail, each for the stated reason:
+       - (a) sees about 100 `realpath` calls;
+       - (b) sees 0 yields;
+       - (g) sees 6 or more `realpath` calls;
+       - (h) times the read or the event-loop gap over 250 ms;
+       - (i) finds the bare `startWatcherFn();` line.
+
+       The characterization tests (c), (d), (e) and (f), and every existing `perfAudit` test, pass. Record the output in the staging memo. (Probe dry-run of (h) on the base: a 607–814 ms read and 405–575 ms gaps; on the prescribed `fs.watch`, a 2 ms read and 16–17 ms gaps.)
+    2. After C2, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts tests/fileHashesCleanup.test.ts tests/jsonStore.test.js` exits 0.
+    3. `git grep -n -i -F 'chokidar' -- main main.js package.json` prints nothing. (Dry-run: 7 lines: `main/constants.js:162`, `main/folder-watcher.js:1`, `:7`, `:8`, `:82`, `:103`, `package.json:102`.)
+    4. `git grep -n -E '"node_modules/(chokidar|readdirp)"' -- package-lock.json` prints nothing. (Dry-run: `:4392`, `:8997`.)
+    5. `git grep -n -F 'isPathWithinFolder(fullPath' -- main` prints nothing (dry-run: `main/folder-watcher.js:43`). `git grep -n -E '^    startWatcherFn\(\);$' -- main.js` prints nothing (dry-run: `main.js:655`). `git grep -c -E 'FOLDER_SYNC_STARTUP_DELAY_MS|FOLDER_SCAN_YIELD_EVERY' -- main.js main/constants.js main/folder-watcher.js` prints exactly `main.js:2`, `main/constants.js:4`, `main/folder-watcher.js:2` and exits 0. (Dry-run: exits 1, no output.)
+    6. `npm ci` exits 0 (the lockfile matches `package.json` without chokidar).
+    7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; the packaged main process changes).
+    8. `git grep -n -i -F 'chokidar' -- docs/governance/TECHNICAL_REFERENCE.md` prints nothing. (Dry-run: `:51`, `:136`, `:159`, `:712`.)
+    9. **Owner re-measure** (standing rule 45; LL-152). Run it on the owner's **real** profile, after G2, recorded per step in the staging memo:
+       - (a) **Setup:** with the app closed, copy `%APPDATA%\blurby\blurby-data\library.json` and `settings.json` to a new `blurby-data\fsp1-backup-<date>\`. Record the number of `"source": "folder"` documents. Confirm that `G:\My Drive\Personal\Readings` is reachable (`Test-Path` returns `True`; see Out of scope, pruning). Set only the `sourceFolder` field of `settings.json` to `G:\\My Drive\\Personal\\Readings`; every other field stays as it is.
+       - (b) **Base:** run the base production build (P6's `release\win-unpacked\Blurby.exe`, which includes main `ab5cead4`). Launch, wait 15 s (the scan is running), then open the Drive *Meditations* (`pg2680-images-3.epub`). Time from the click to the first rendered section (stopwatch), with a 180 s cap. Quit.
+       - (c) **Fix:** build this branch with `npm run build`, then `npx electron-builder --win --x64 --dir --publish never` (each exits 0), which produces `release\win-unpacked\Blurby.exe` in this worktree. Repeat (b) exactly on this build: same book, same 15 s wait, same actions. Then repeat it for the local EPUB `converted9591611769k92w18.epub`. **Pass:** each first section renders within 10 s of the click.
+       - (d) **Live and data checks,** on the fix build:
+         - Copy any small EPUB into `G:\My Drive\Personal\Readings\` while the app is open. It appears in the library within 30 s. Delete it, and it leaves within 30 s.
+         - After the scan finishes, the `"source": "folder"` count equals (a)'s, give or take the file added and deleted above.
+         - No `read-file-buffer blocked` or `[watcher]` line appears in `error.log`.
+       - (e) **Dev mode:** run `npm run dev` in this worktree on the same profile. Time from the Electron window appearing to the library being shown, and the (c) book-open time. If the library shows within 30 s, the book renders within 10 s, and the owner judges dev mode back to normal, BUG-189 closes with this item. Otherwise BUG-189 stays open with these numbers recorded, and a fresh measurement item is filed.
+    10. `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log and staging memo if kept (standing rule 41):
+        - `M main/folder-watcher.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M package.json`
+        - `M package-lock.json`
+        - `A tests/folderWatcher.test.js`
+        - `M tests/perfAudit.test.ts`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** M.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 9.
+- **Lane:** Library & Content. Execution surface D (main process: `main/`, `main.js`, dependencies).
+- **Source:** BUG-193 (filed `5d4da6e3`, main `66f15981`); the P6 G2 diagnosis (`c6400477` on `eb/narrate-rebuild-1-p6`, `state.md` "G2 finding A"); BUG-189 and the DEV-PERF-MEASURE-1 stub (dissolved here); the planner probe of 2026-10-14; owner decision 2026-10-14.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `66f15981`):
+  - **`main/folder-watcher.js`:**
+    - `:1`: the header becomes `// main/folder-watcher.js — native recursive fs.watch folder watching and library sync`.
+    - `:4-8`: add `const fs = require("fs");`. `:6` becomes `const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY } = require("./constants");`. Delete `:7-8` (the chokidar loader).
+    - `:15-23`: the signature becomes `isPathWithinFolder(filepath, folderPath, realFolder)`, and `:18` becomes `const realFolderPath = realFolder || await fsPromises.realpath(folderPath);`; the comparison at `:19` uses `realFolderPath`. Its behaviour is unchanged when the third argument is omitted. Keep the export.
+    - `:34-57`:
+      - before `async function walkDir`, add `let walked = 0;`;
+      - as the first statement inside `for (const entry of entries) {` (`:37`), add `if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));`;
+      - delete `:43`, and put one comment in its place: `// readdir reports a symlink as a link, never a file or directory, so every file reached here is inside folderPath`.
+    - `:78-108`: replace the body of `startWatcher` with the native watcher in the design decisions, keeping the signature `startWatcher(sourceFolder, callbacks)` and the return value (the watcher, or `null` on a start failure). Prescribed shape:
+      - `const realRoot = fsPromises.realpath(sourceFolder).catch(() => null);`
+      - `const pending = new Map();` maps the relative path to `{ timer, renamed }`;
+      - `try { watcher = fs.watch(sourceFolder, { recursive: true }, (eventType, rel) => { … }) } catch (err) { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); return null; }`;
+      - the listener returns on an empty `rel`. It splits `rel` on `/[\\/]/` and returns if any segment starts with `.` or if `parts[0] === "Saved Articles"`. Otherwise it clears that path's timer, sets `renamed = (prev && prev.renamed) || eventType === "rename"`, and schedules `settle(rel, renamed)` after `FOLDER_WATCHER_STABILITY_MS`;
+      - `settle` deletes the entry and runs `lstat(path.join(sourceFolder, rel))`:
+        - if `lstat` throws: `onUnlink()`;
+        - a directory: `onAdd(full)` if renamed, then return;
+        - an unsupported extension: return;
+        - a symlink: return unless `await isPathWithinFolder(full, sourceFolder, await realRoot)`;
+        - not a file and not a symlink: return;
+        - otherwise `(renamed ? onAdd : onChange)(full)`;
+      - `watcher.on("error", (err) => { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); });`;
+      - wrap `watcher.close` so that it clears every pending timer before closing.
+
+      The planner ran this shape as a prototype on Windows (`scanprobe/proto.js`). A nested add gave `onAdd`, an append gave `onChange` and a delete gave `onUnlink`; writes under `Saved Articles/`, `.hidden/` and a `.jpg` produced no callback.
+  - **`main/constants.js`:**
+    - after `FOLDER_SYNC_BATCH_SIZE` (`:149-150`), add `/** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */ const FOLDER_SYNC_STARTUP_DELAY_MS = 3000;`;
+    - `:161-163` become `// ── Folder Watcher`, then `/** Watcher stability window — a path must see no further event this long before its callback fires (ms) */ const FOLDER_WATCHER_STABILITY_MS = 500;` and `/** Directory entries walked between event-loop yields in scanFolderAsync */ const FOLDER_SCAN_YIELD_EVERY = 500;`;
+    - export `FOLDER_SYNC_STARTUP_DELAY_MS` after `FOLDER_SYNC_BATCH_SIZE,` (`:263`) and `FOLDER_SCAN_YIELD_EVERY` after `FOLDER_WATCHER_STABILITY_MS,` (`:269`).
+  - **`main.js`:**
+    - `:31-34`: add `FOLDER_SYNC_STARTUP_DELAY_MS` to the destructured `require('./main/constants')`.
+    - `:653-657` become:
+
+      ```js
+        // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
+        if (settings.sourceFolder) {
+          const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
+          else startFolderWork();
+        }
+      ```
+
+      Nothing else in `main.js` changes. In particular, the `will-quit` handler (`:679-706`; `watcher.close()` at `:689` works on an `fs.FSWatcher` or `null`) belongs to QUIT-FLUSH-1.
+  - **`package.json:102`** and **`package-lock.json`:** `npm uninstall chokidar --package-lock-only`. Make no other dependency change.
+  - **`docs/governance/TECHNICAL_REFERENCE.md`:**
+    - `:51`: `chokidar folder watching` becomes `fs.watch folder watching` (same width; the box stays aligned);
+    - `:136`: delete the `chokidar` row;
+    - `:159`: drop `` `chokidar`, `` from the lazy-loaded list;
+    - `:712`: `` `chokidar` watcher on configured folder `` becomes `` native recursive `fs.watch` on configured folder (startup start deferred until the main window loads) ``.
+  - **At close-out (not in this diff):** `CLAUDE.md:383` drops chokidar from the dependency list. BUG_REPORT's BUG-193 status line becomes `RESOLVED (FOLDER-SCAN-PERF-1)` (LL-148: the merge sha goes in the close-out), and so does BUG-189's if Done-when 9(e) closes it. The DEV-PERF-MEASURE-1 stub (`ROADMAP.md:521-527`) is removed as dissolved.
+- **Tests:**
+  - **`tests/folderWatcher.test.js`** (new; no file of this name exists, and no current test imports `main/folder-watcher.js`). Follow `tests/jsonStore.test.js`'s pattern: `await import("../main/folder-watcher.js")`, then `createRequire(import.meta.url)("fs/promises")` to get the same CommonJS object the module calls through. Real trees go under `fs.mkdtemp(path.join(os.tmpdir(), "blurby-folder-watcher-"))`, removed in `afterEach`, and every watcher is closed in `finally` (`await w?.close()` works for both implementations). Count `realpath` calls and yields **only when the call stack includes `folder-watcher.js`** (`new Error().stack`), so that vitest's own calls cannot pass or fail a control. Wait for callbacks with `vi.waitFor(…, { timeout: 4000 })`.
+    - `describe("scanFolderAsync — cost (BUG-193)")`:
+      - **(a) control:** "makes at most one realpath call for 50 supported files". Build 5 dirs × 10 `.epub` and spy on `realpath`. Expect ≤ 1 (base: 100).
+      - **(b) control:** "yields to the event loop every FOLDER_SCAN_YIELD_EVERY entries". One dir holds 2,000 `.jpg` and 1 `.epub`; spy on `globalThis.setImmediate`. Expect ≥ `Math.floor(2002 / (FOLDER_SCAN_YIELD_EVERY || 500))`; the `|| 500` keeps C1 failing on the yield count and not on the constant that is still missing (base: 0, from a plain-Node dry-run).
+      - **(c) characterization:** "returns the same files". The tree holds `a/book.epub` + `a/book.pdf` (one result, `.epub` kept), `b/notes.txt`, `Saved Articles/s.epub` at the root (skipped), `x/Saved Articles/t.epub` (kept: only the root level is skipped), `pic.jpg` (skipped), and a junction `link` (`fs.symlink(target, link, "junction")`) to an outside folder holding `o.epub` (skipped). Expect the exact filenames, sorted.
+    - `describe("startWatcher — contract (BUG-193)")`:
+      - **(d) characterization:** "reports add, change and unlink for supported files and ignores dotfiles, Saved Articles and unsupported files". Write `a/b/new.epub` and expect `onAdd` with that path. Append to an existing `a/b/old.epub` and expect `onChange` with its path. Write `Saved Articles/s.epub`, `.hidden/h.epub` and `a/pic.jpg`, wait 1,500 ms, and expect no new call. Delete `new.epub` and expect `onUnlink`.
+      - **(e) characterization:** "reports an add when a folder is moved into the tree". `fs.rename` an outside folder containing `m.epub` into the root, and expect `onAdd` called at least once.
+      - **(f) characterization:** "does not throw when the folder does not exist". `startWatcher(missing, callbacks)` returns without throwing, and closing its result (if any) does not throw.
+      - **(g) control:** "resolves the root realpath at most once, not per event". Add 3 `.epub` files, wait for 3 `onAdd` calls, and count `realpath` calls from `folder-watcher.js`. Expect ≤ 1 (base: 6 or more, two per `isPathWithinFolder`).
+    - `describe("startWatcher — does not starve the main process (BUG-193)")`:
+      - **(h) control:** "a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 250 ms, and no event-loop gap exceeds 250 ms in the next second". Build 300 dirs × 10 files (one `.epub` per dir), and sample the gap with `setInterval(…, 5)`. Probe: 607–814 ms and 405–575 ms on the base; 2 ms and 16–17 ms on `fs.watch`.
+  - **`tests/perfAudit.test.ts`:** add inside `describe("folder watcher starts before sync completes")`, after the existing "c" test (`:290-318`):
+    - **(i) control:** "c2: main.js starts the folder watcher and sync only after the main window has loaded". Read `main.js` and slice from `// Folder watcher + sync` to `// Start cloud sync`. Expect the slice to contain `once("did-finish-load", startFolderWork)` and `setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS)`, and not to match `/^\s*startWatcherFn\(\);\s*$/m`. On the base the bare line at `:655` matches, and both expected strings are missing.
+    - The existing replica test "c" stays unchanged.
+- **Constants:** `FOLDER_SCAN_YIELD_EVERY = 500` (entries) and `FOLDER_SYNC_STARTUP_DELAY_MS = 3000` (ms), both new in `main/constants.js` (Constants Separation Rule). `FOLDER_WATCHER_STABILITY_MS = 500` keeps its value; only its comment changes.
+- **Branch:** `eb/folder-scan-perf-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\folder-scan-perf-1`. Write refs in full (a `main/` directory exists). Run `npm ci` before C1, because the worktree has no `node_modules`.
+- **Staging plan:**
+  - C1: `tests/folderWatcher.test.js` and `tests/perfAudit.test.ts` only (gate: Done-when 1).
+  - C2: every other path in Done-when 10 (gates: Done-when 2–8).
+  - Owner re-measure (Done-when 9) on C2's build, then merge to `main` with `--no-ff` and push (Rule 5b).
+  - Never stage `tests/perf-baseline-results.json` or anything under `release/`.
+- **Failure handling:**
+  - If a control passes at C1 or fails for another reason, stop: the base has changed since this spec. Examples: (h) under its budget on the base, or (a) failing on a missing export.
+  - If (h) fails after C2 only under full-suite load, record both runs and raise its budget once, to 350 ms. That is still below the base's lowest observed gap of 405 ms. Any further raise is BLOCKER(USER).
+  - If (d) or (e) fails after C2, the `fs.watch` mapping is wrong; do not weaken the test.
+  - If Done-when 9(d)'s add or delete is not reported on G: (DriveFS may not deliver `ReadDirectoryChangesW` events), record it and stop for an owner decision before merging: accept manual rescans, or file a polling item.
+  - If 9(c) misses 10 s, record the times and stop: the remaining cost is elsewhere, and the next step is a measurement, not a guess (Pike rule 1).
+  - If 9(a) finds G: unreachable, do not launch: the existing pruning would drop the folder-sourced books.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D. The files are `main/folder-watcher.js`, `main/constants.js`, `main.js:31-34` and `:653-657` only, `package.json`, `package-lock.json`, the two test files and the four `TECHNICAL_REFERENCE.md` lines.
+  - **Forbidden:**
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js`'s `will-quit` handler (`:678-706`, owned by QUIT-FLUSH-1), and every other `main.js` line;
+    - `main/ipc/library.js` and `main/ipc/state.js`;
+    - `src/**`;
+    - every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none expected.
+  - **Merge order:** this item merges first. QUIT-FLUSH-1 also edits `main.js` (different hunks: `will-quit`), and it merges `refs/remotes/origin/main` in before its own merge. The order is independent of NARRATE-REBUILD-1 P6, which edits no file here; P6's G2 must finish before Done-when 9 uses the owner's profile.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Scan-cost, watcher-starvation and startup-order controls committed and failing on the current code; watcher contract characterized | calculable | positive control | bounded | medium | 45m (one new test file with eight tests on real temp trees, one source-inspection test) | — | — |
+| 2 | Scan cheap and yielding, watcher on native recursive `fs.watch` with the same contract, startup folder work after the window loads, chokidar gone | calculable | main-process fix | bounded | high | 60m (one watcher rewrite of about 40 lines, two scan edits, one startup hunk, two constants, one dependency removal, four doc lines) | — | — |
+| 3 | `npm ci`, suites, typecheck and build green on the owner's machine | calculable | merge and verify | mechanical | low | 30m (`npm ci` + full `npm test` + typecheck + build + grep gates) | — | — |
+| 4 | Owner re-measure on base and fixed production builds and on dev, recorded; merged and pushed | calculable | owner gate | mechanical | low | 45m (one packaged dir build, two timed sessions per build, one dev session, one --no-ff merge) | — | — |
+
+**Total:** chain 1m · sum 1m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** five controls fail on the current code for a stated reason before the fix: (a) and (g) on `realpath` counts, (b) on yields, (h) on read latency and event-loop gap, and (i) on the startup line. Their failing output is recorded (Done-when 1).
+- **Standing rule 39 (LL-112):** the watcher is replaced, so (c)–(f) characterize today's contract on the chokidar implementation, and the native watcher must pass them unchanged.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exit code, and each search gate was dry-run on `66f15981` with its hits recorded. The control (h) was dry-run as a plain-Node probe on both the base and the prescribed watcher.
+- **LL-152 and Pike rule 1:** the cause was measured before the design was fixed. The probe showed that the watcher, not the scan, starves the event loop on local disk. That moved the main control onto `startWatcher`, where the BUG-193 outline had pointed at the scan. Done-when 9 is a like-for-like A/B (same book, same 15 s wait, base build against fixed build) on production builds, with dev mode measured separately.
+- **LL-142:** "fixed" is claimed only from results read back: the owner's timed first render, the library's folder-document count compared with the backup, and `error.log` checked for blocks. The probe's Drive behaviour is stated as unmeasured, not assumed.
+- **LL-157:** the startup hook is a synchronous `did-finish-load` listener that schedules work; nothing relies on Electron awaiting a listener. The `will-quit` handler is left to QUIT-FLUSH-1.
+- **LL-156:** the pruning and allowed-roots waivers name lines that this item does not move. The scan's `access` → `[]` line (`:29`), which feeds the pruning, is kept verbatim, and the hazard is restated and filed as BUG-195.
+- **SRL-086/087 (standing rule 36):** every line number was read on `66f15981`; the probe ran against this worktree's `main/folder-watcher.js` and Electron 41.1.0's own Node.
+- **Standing rule 47 (LL-147):** the full suite and the re-measure run on the owner's machine, in a local session.
+- **Standing rule 48 (LL-149):** typecheck and build are listed (Done-when 7), next to `npm ci` for the dependency change.
+- **Standing rule 45 (LL-141):** the timing and the live Drive add/delete are owner-observed.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register; status moves stay with the ceremonies.
+- **LL-148:** status lines name the item; the merge sha goes in the close-out.
+
+
+<a id="quit-flush-1"></a>
+
+#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 11 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`)*
+
+- **What:** Do the quit-time saves in the cancelled first `will-quit` pass. Cancel the first quit, stop new work, and run the saves in order: eval traces, library, the pending debounced settings save, settings, any pending JSON writes, then the final cloud sync. Each save is guarded, and all of them share one 3-second cap. The Narrate producer shutdown runs alongside them and is never cut. Then quit. The second pass does nothing. A change made just before quitting is kept, and no `*.tmp` file is left behind. Fixes BUG-192.
+- **Why:**
+  - **The cause:** `main.js:678-706` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
+  - **Owner evidence, 2026-10-13 (BUG-192):**
+    - The accent colour changed just before quitting was lost. `settings.json.tmp` held the new value and was never renamed.
+    - `sync-queue.json.tmp` was 0 bytes.
+    - A second quit left `library.json.tmp` unrenamed.
+    - Production-build quits on 2026-10-14 repeatedly left `library.json.tmp` unrenamed.
+  - **Does a change made under 500 ms before quitting reach main? Yes. It is in scope.**
+    - The renderer has no settings debounce. `updateSettings` calls `api.saveSettings(updates)` at once (`src/contexts/SettingsContext.tsx:32`), which is `ipcRenderer.invoke("save-settings", …)` (`preload.js:44`).
+    - Main applies the change to the in-memory settings at once (`main/ipc/state.js:25`).
+    - The 500 ms debounce is in main. It delays only the file write and the `update-settings` sync enqueue (`main/ipc/state.js:29-39`).
+    - So a flush at quit that writes the in-memory settings keeps the change.
+    - A timer still pending at quit has two failure modes:
+      - Its sync enqueue is lost.
+      - It fires during or after the flush. Its write and its `sync-queue.json` write then race the exit and leave a `.tmp` behind.
+    - So the flush must run that pending timer's work itself.
+  - **Pending sync-queue writes.**
+    - `main/sync-queue.js` has no debounce of its own. `saveQueue` (`:53-56`) awaits `writeJSON` directly, but every caller fires `enqueue` without awaiting it (`main/ipc/state.js:38`, `main/ipc/library.js:41`, `:97`, `main/ipc/documents.js:30`, `:47`).
+    - An in-flight queue write is visible only as a tail in `main/json-store.js`'s per-file write chain (`writeTails`, `:30`).
+    - History and site-cookie saves are fire-and-forget too.
+    - The final cloud sync also starts a settings write without awaiting it (`applyCloudSettings`, `main/sync-engine.js:392`).
+    - So the flush must wait for every write already in that chain, once before the cloud sync and once after it.
+  - **The producer cannot share the 3 s cap.**
+    - `shutdown()` asks each worker to finish its generation in progress (`main/narrate/producer.js:52-58`, `:193`).
+    - It terminates a worker only after `NARRATE_STOP_TIMEOUT_MS` = 30,000 ms (`main/narrate/constants.js:31`).
+    - The comment at `main.js:680-681` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+    - Quitting at a 3 s cap while that wait is open would bring the crash back.
+  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:674-676`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
+- **Owner decision (2026-10-14, binding): "Local saves, cloud best-effort."**
+  - Cancel the first quit.
+  - Await, in order:
+    1. the Narrate producer shutdown
+    2. the eval-trace flush
+    3. `saveLibraryNow()`
+    4. `saveSettingsFn()`
+    5. any pending sync-queue write
+    6. the final cloud sync, when signed in
+  - All of it runs under one overall cap of 3 s, a named constant in `main/constants.js`.
+  - Each step is guarded, so one failure does not block the rest.
+  - Then `app.quit()`. The second pass does only what is genuinely fire-and-forget.
+  - Anything not synced to the cloud stays in the sync queue for the next launch.
+  - Keep the Narrate producer shutdown guarantee.
+- **Planner resolutions (roadmap review 2026-10-14):** the producer shutdown runs alongside the capped saves and is awaited uncapped (the 3 s cap applies to the saves; cutting the producer brings back 0xC0000409); one cap over sequential steps, library first; the watcher, WebSocket and auto-sync stops move to the start of the first pass, leaving the second pass empty; a `sync-*.tmp` written after launch while signed in and online is accepted under "cloud best-effort" (smoke (d)).
+- **Design decisions (planner, 2026-10-14):**
+  - **Extract the quit sequence into `main/quit-sequence.js`** (CommonJS, no file I/O of its own). Its steps are injected, so it can be unit-tested against an Electron-faithful fake `app`.
+    - `main.js` is not unit-testable. It calls `app.requestSingleInstanceLock()` and registers the app lifecycle at load (`:539-708`). Its only test reads its source as text (`tests/einkFoundation.test.ts:34`).
+    - The module holds the ordering, guards, cap and pass state. `main.js` holds only the wiring.
+  - **The producer shutdown starts first and runs alongside the capped saves.** The handler awaits it before `app.quit()` and never cuts it at the cap (the 0xC0000409 guarantee).
+    - This applies the owner's "ALL under one cap" to the saves, which can be safely abandoned. It does not apply it to the producer, which cannot.
+    - The producer is still started first. Running it alongside the saves means a long generation in progress does not delay or starve them.
+    - In the usual case, with no Narrate workers, the shutdown resolves at once. See Open question 1.
+  - **Stop new work at the start of the first pass, not in the second.** Stop the folder watcher, stop the WebSocket server and stop auto-sync before the saves start, so none of them can queue a write during the flush.
+    - The second pass then returns at once and saves nothing.
+    - This is the decision's "whatever is genuinely fire-and-forget", moved earlier so it protects the flush.
+  - **Pass states `idle` → `flushing` → `done`:**
+    - A `will-quit` that arrives while flushing (for example a tray Quit click during the flush) is also cancelled and waits for the flush.
+    - Only the handler's own final `app.quit()`, issued in state `done`, is allowed through.
+  - **Step order** (one overall cap of `QUIT_FLUSH_TIMEOUT_MS`):
+    1. eval traces (`() => flushTtsEvalTraceCaptures()`, a closure because `main.js:228` reassigns that variable after the listener is registered)
+    2. `saveLibraryNow`
+    3. the pending settings save (`flushPendingSettingsSave`, new in `main/ipc/state.js`: it runs the debounced write and `update-settings` enqueue now and clears the timer)
+    4. `saveSettingsFn`
+    5. pending JSON writes (`whenWritesSettled`, new in `main/json-store.js`)
+    6. the cloud sync, when signed in
+    7. pending JSON writes again, for the cloud sync's own settings, sync-state and queue writes
+  - **What the cap does and does not do.**
+    - At the cap the runner stops waiting, logs which step it was in, and the handler quits.
+    - A hanging step is abandoned, not cancelled. Its I/O may be cut by the exit.
+    - Every JSON write is write-then-rename (LL-006), so a cut write leaves the previous file intact plus a stale `.tmp`. The next write to that file reuses the stale `.tmp`.
+    - Steps run in sequence, so a hang starves the steps after it. Local saves come first and the slow, best-effort cloud sync comes last.
+  - **Guards.** Each step is `try { await step() } catch { log }`, so a step that throws or rejects is logged with its name and the next step runs. The runner never rejects.
+  - **Constant.** `QUIT_FLUSH_TIMEOUT_MS = 3000` goes in `main/constants.js` under "Main Process Lifecycle" (CLAUDE.md Constants Separation Rule). `main/quit-sequence.js` reads it there.
+  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:429-438` asserts that the source contains `}, 500)`.
+- **Out of scope:**
+  - Per-step timeouts (one overall cap, per the owner).
+  - Cancelling a cloud sync already in progress when the quit starts. `startSync` returns `"already-syncing"` (`main/sync-engine.js:782`), and the in-flight auto-sync may be cut at exit.
+  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:583`, `main/narrate/trial.js:329-331`).
+  - The folder-sync debounce timer (`main.js:303-305`), which can schedule a library save during the flush when `sourceFolder` is set: FOLDER-SCAN-PERF-1's area.
+  - Cleaning stale `*.tmp` files left by earlier quits.
+  - The BUG-192 **Location** line, which still cites `:691` on `15e9c2f1` (the close-out updates it).
+  - Any renderer change.
+  - **LL-156 check:** SETTINGS-WRITE-DURABLE-1 put "flushing the debounced sync enqueue at quit" out of scope and forbade `main/ipc/state.js`. This item explicitly brings both into scope.
+- **Prerequisites:** none in code.
+  - The production build for the owner smoke is made in this item's own worktree (`<worktree>\release\win-unpacked`). It does not overwrite the G2 build in the P6 worktree.
+  - Close every running Blurby before each smoke launch. The single-instance lock (`main.js:539-541`) quits a second instance.
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+  - A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr. Any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
+  - Dry-runs on `66f15981` (2026-10-14) are noted in parentheses.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js` exits 1, and exactly these tests fail:
+       - **(a):** at the fake exit, `library.json` and `settings.json` are missing or stale.
+       - **(b):** the fake exits at about 0 ms, not at `QUIT_FLUSH_TIMEOUT_MS`.
+       - **(c):** steps 2–3 had not run at exit; the thrown step is unguarded.
+       - **(d):** the second pass runs the steps again.
+       - **(d2):** a `will-quit` during the producer shutdown is not cancelled.
+       - **(f):** `flushPendingSettingsSave is not a function`.
+       - **(g):** `whenWritesSettled is not a function`.
+
+       **(e)** and every existing `jsonStore` test pass. Vitest may also report the unhandled rejection from (c); record it. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` exits 0.
+    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:679:app.on("will-quit", async (event) => {`).
+    4. `git grep -n -F 'app.on("will-quit", createWillQuitHandler(' -- main.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
+    5. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:1` and exits 0. Only `loadState` (`:286`) remains; the quit step passes the function by reference (dry-run: `main.js:2`).
+    6. `git grep -c -F 'QUIT_FLUSH_TIMEOUT_MS' -- main/constants.js` prints `main/constants.js:2` (the definition and the export) and exits 0 (dry-run: exit 1, no output).
+    7. `git grep -n -F '}, 500)' -- main/ipc/state.js` prints exactly one line and exits 0, so the perfAudit literal stays (dry-run: `main/ipc/state.js:39:    }, 500);`).
+    8. Typecheck, build and the full suite: `npm ci` exits 0 in the worktree; then, on the owner's machine (LL-147), `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
+    9. **Owner smoke on a production build** (standing rule 45, LL-152; dev mode cannot quit within 1 s). Record each check as pass or fail in the staging memo.
+       - **Build:** in the worktree, `npm run build` exits 0, then `npx electron-builder --win --x64 --dir --publish never` exits 0. This produces `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`.
+       - **Setup:**
+         - Close every Blurby process.
+         - Record `Get-ChildItem "$env:APPDATA\blurby\blurby-data" -Filter *.tmp | Select-Object Name, Length, LastWriteTime` (stale files from earlier quits may exist; leave them).
+         - Record the launch time.
+         - Record the `sourceFolder` value and whether you are signed in to cloud sync. Neither is required.
+       - **Checks:**
+         - **(a)** Launch that `Blurby.exe`. Open Settings, then Theme, and pick a different accent preset. Press Alt+F4 within 1 s.
+         - **(b)** Within 5 s, `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
+         - **(c)** `(Get-Content "$env:APPDATA\blurby\blurby-data\settings.json" -Raw | ConvertFrom-Json).accentColor` prints the new colour.
+         - **(d)** The `*.tmp` listing shows no file whose `LastWriteTime` is later than the launch time. If signed in to cloud sync and online, a `sync-state.json.tmp` or `sync-queue.json.tmp` is recorded as accepted (cloud best-effort), not as a fail; `library.json.tmp` and `settings.json.tmp` always fail.
+         - **(e)** Relaunch: the new accent is shown.
+         - **(f)** Open a book, page forward several pages, and press Alt+F4 within 1 s. Then repeat (b) and (d), and relaunch: the book reopens at the new position.
+    10. `docs/governance/BUG_REPORT.md` BUG-192's **Status** line reads `RESOLVED in source (QUIT-FLUSH-1): the quit saves run in the cancelled first will-quit under QUIT_FLUSH_TIMEOUT_MS; closes after the owner's production-build smoke.`
+    11. `docs/governance/TECHNICAL_REFERENCE.md:236` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
+    12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log and staging memo if kept (standing rule 41):
+        - `A main/quit-sequence.js`
+        - `A tests/quitSequence.test.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M main/json-store.js`
+        - `M main/ipc/state.js`
+        - `M tests/jsonStore.test.js`
+        - `M docs/governance/BUG_REPORT.md`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** S.
+- **Owners:**
+  - the implementation agent
+  - reviewers for spec compliance and code quality, in parallel
+  - the repository operator, who merges
+  - the owner, for Done-when 9
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:**
+  - [BUG_REPORT.md BUG-192](docs/governance/BUG_REPORT.md)
+  - LL-157
+  - the SETTINGS-WRITE-DURABLE-1 close-out (`docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`, finding at Done-when 7(b))
+  - the P6 build record in `docs/planning/epics/2026-10-12-narrate-rebuild/state.md` (the `electron-builder --dir` command)
+  - the owner decision of 2026-10-14
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified on `main` @ `66f15981`, 2026-10-14):
+  - **New `main/quit-sequence.js`** (CommonJS, `"use strict"`, no file I/O). The C2 content:
+    ```js
+    // main/quit-sequence.js — The will-quit flush. Electron does not await an async quit listener (LL-157), so the
+    // first quit is cancelled, the work is awaited, then the app quits again.
+    // CommonJS only — Electron main process
+    "use strict";
+    const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
+
+    /** Run [name, fn] steps in order, each guarded. Resolves "done", or "timeout" if QUIT_FLUSH_TIMEOUT_MS passes first. Never rejects. */
+    async function runQuitSteps(steps) {
+      let current = null;
+      let timer;
+      const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), QUIT_FLUSH_TIMEOUT_MS); });
+      const run = (async () => {
+        for (const [name, step] of steps) {
+          current = name;
+          try { await step(); } catch (err) { console.error("[quit] " + name + " failed:", err && err.message); }
+        }
+        return "done";
+      })();
+      const outcome = await Promise.race([run, cap]);
+      clearTimeout(timer);
+      if (outcome === "timeout") console.warn("[quit] flush cut at " + QUIT_FLUSH_TIMEOUT_MS + " ms during: " + current);
+      return outcome;
+    }
+
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let state = "idle"; // idle → flushing → done
+      return async function onWillQuit(event) {
+        if (state === "done") return; // the handler's own final quit: everything already ran
+        event.preventDefault();
+        if (state === "flushing") return; // a quit during the flush waits for it
+        state = "flushing";
+        try { stopNewWork(); } catch (err) { console.error("[quit] stop failed:", err && err.message); }
+        // Never cut at the cap: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+        const producer = Promise.resolve().then(shutdownProducer).catch(() => {});
+        await runQuitSteps(steps);
+        await producer;
+        state = "done";
+        app.quit();
+      };
+    }
+
+    module.exports = { createWillQuitHandler, runQuitSteps };
+    ```
+    At **C1** the module has the same exports and signature but the **current behaviour verbatim**, with no cap and no guards:
+    ```js
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let producerStopped = false;
+      return async function onWillQuit(event) {
+        if (!producerStopped) {
+          producerStopped = true;
+          event.preventDefault();
+          try { await shutdownProducer(); } catch { /* ignore */ }
+          app.quit();
+          return;
+        }
+        stopNewWork();
+        for (const [, step] of steps) await step();
+      };
+    }
+    ```
+    C1 also exports `runQuitSteps` as `async (steps) => { for (const [, s] of steps) await s(); return "done"; }`.
+  - **`main.js`:**
+    - **`:16`** becomes `const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");`. At C1 it stays as is.
+    - **After `:16`**, add `const { createWillQuitHandler } = require("./main/quit-sequence");`.
+    - **`:678-706`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:707-708` as is.**
+      ```js
+      // The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
+      // local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
+      app.on("will-quit", createWillQuitHandler({
+        app,
+        stopNewWork: () => {
+          if (watcher) watcher.close();
+          try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+          try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
+        },
+        // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
+        shutdownProducer: () => require("./main/narrate/producer").shutdown(),
+        steps: [
+          ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
+          ["library", saveLibraryNow],
+          ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
+          ["settings", saveSettingsFn],
+          ["pending writes", whenWritesSettled],
+          ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+          ["writes after sync", whenWritesSettled],
+        ],
+      }));
+      ```
+      **At C1** the same block has no comment lines and three differences:
+      - `steps` holds only `["eval traces", …]`, `["library", saveLibraryNow]`, `["settings", saveSettingsFn]` and the cloud step;
+      - the cloud step keeps today's `try { … } catch (err) { console.log("[cloud] Quit sync failed:", err.message); }` around its body;
+      - `stopNewWork` is the same as in C2.
+
+      The behaviour is unchanged except that `stopAutoSync` now runs before the eval-trace flush rather than before the cloud sync.
+  - **`main/ipc/state.js`** (C2):
+    - **After `:11`**, add `let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it`.
+    - **`:29-39`** become:
+      ```js
+          clearTimeout(saveSettingsTimeout);
+          flushSettingsSave = async () => {
+            clearTimeout(saveSettingsTimeout);
+            saveSettingsTimeout = null;
+            flushSettingsSave = null;
+            const saved = ctx.saveSettings();
+            // Enqueue update-settings for sync
+            const syncEngine = require("../sync-engine");
+            const syncQueue = require("../sync-queue");
+            const revision = syncEngine.getSyncStatus().revision || 0;
+            await Promise.all([saved, syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message))]);
+          };
+          saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
+      ```
+      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:437`.
+    - **Before `:85`**, add:
+      ```js
+      /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
+      function flushPendingSettingsSave() { return flushSettingsSave ? flushSettingsSave() : Promise.resolve(); }
+      ```
+    - **`:85`** becomes `module.exports = { register, flushPendingSettingsSave };`.
+  - **`main/json-store.js`** (C2):
+    - **After `:57`** (the end of `saveJSON`), add:
+      ```js
+      /** Resolves once every write started so far has settled; never rejects (the tails swallow errors). For the quit flush. */
+      function whenWritesSettled() { return Promise.all([...writeTails.values()]); }
+      ```
+    - **`:59`** becomes `module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled };`.
+  - **`main/constants.js`** (C1, so the tests can import it):
+    - **After `:145`**, add:
+      ```js
+      /** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
+      const QUIT_FLUSH_TIMEOUT_MS = 3000;
+      ```
+    - **After `:260`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
+  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:236`, per Done-when 10–11.
+- **Tests:**
+  - **New `tests/quitSequence.test.js`** (ESM, `await import("../main/quit-sequence.js")`, as `tests/jsonStore.test.js:10` does). It runs against a fake `app` that models Electron:
+    ```js
+    function makeApp() {
+      const app = { exits: 0, onExit: () => {}, handler: null, quit: vi.fn(() => {
+        const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
+        app.handler(event);                    // Electron does not await the listener's promise
+        if (!event.defaultPrevented) { app.exits++; app.onExit(); }
+      }) };
+      return app;
+    }
+    ```
+    Each test sets `app.handler = createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps })` and then calls `app.quit()`. `onExit` snapshots state synchronously (sync `fs` is fine in a test).
+    - **(a) Saves are on disk at exit** (real temporary directory under `os.tmpdir()`; real timers).
+      - Steps: `["library", () => writeJSON(lib, L)]`, `["settings", () => saveJSON(set, S, "settings")]`, `["queue", () => writeJSON(q, Q)]`.
+      - `onExit` reads the three files back and lists the directory.
+      - Wait (poll, up to 2 s) for `app.exits === 1`.
+      - Pass: all three files parse to their payloads at exit, no `*.tmp` existed at exit, and the steps ran in declared order.
+    - **(b) A hanging step is abandoned at the cap** (`vi.useFakeTimers()`).
+      - Steps: 1 resolves at once; 2 never settles; 3 is a spy.
+      - After `await vi.advanceTimersByTimeAsync(QUIT_FLUSH_TIMEOUT_MS - 1)`: `app.exits === 0`.
+      - After 1 ms more: `app.exits === 1`, step 1 ran, step 3 was not called, and `console.warn` was called once with text containing step 2's name.
+    - **(c) A failing step does not block the rest.**
+      - Step 1 throws synchronously; step 2 returns a rejected promise; step 3 is a spy.
+      - At exit, step 3 has run, and `console.error` was called with each failed step's name.
+    - **(d) The second pass saves nothing.**
+      - After the flush and exit, call `app.handler(freshEvent)` once more.
+      - Pass: `freshEvent.defaultPrevented === false`, no step or `shutdownProducer` spy count changed, and `app.quit` was not called again.
+    - **(d2) A quit during the flush waits.**
+      - `shutdownProducer` resolves only when released.
+      - While it is pending, call `app.handler(e2)`.
+      - Pass: `e2.defaultPrevented === true`, `app.exits === 0`; after release, `app.exits === 1`, with exactly one exit.
+    - **(e) The producer shutdown is never cut** (fake timers; all steps instant).
+      - `shutdownProducer` resolves at 5,000 ms.
+      - At 4,999 ms: `app.exits === 0`; at 5,000 ms: `app.exits === 1`. `shutdownProducer` was called exactly once.
+      - This passes at C1 and C2: it characterizes the guarantee.
+    - **(f) `flushPendingSettingsSave`** (`main/ipc/state.js` under fake timers). Use the `Module._load` fakes pattern of `tests/settingsNarrateNormalization.test.js:51-54` and `:161-200`: `electron.ipcMain.handle`, `../window-manager`, `../sync-engine` with `getSyncStatus: () => ({ revision: 7 })`, and `../sync-queue` with an `enqueue` spy.
+      - Call `handlers.get("save-settings")({}, { accentColor: "#FF5B7F" })`, then `await flushPendingSettingsSave()`.
+      - Pass: `ctx.saveSettings` was called once and `enqueue` once with `("update-settings", { revision: 7 })`; after `advanceTimersByTime(500)`, neither count changed.
+      - A second `await flushPendingSettingsSave()` with nothing pending calls neither.
+  - **`tests/jsonStore.test.js`:** add **(g)** in a new `describe("whenWritesSettled")`, importing `whenWritesSettled` alongside the existing imports at `:10`.
+    - Start three `writeJSON` calls to two paths without awaiting them, plus one write whose parent is a regular file (it fails).
+    - `await whenWritesSettled()` resolves (does not reject).
+    - Both good paths then hold their last payloads, and no `*.tmp` remains.
+- **Constants:** `QUIT_FLUSH_TIMEOUT_MS = 3000` in `main/constants.js` (above).
+- **Branch:** `eb/quit-flush-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\quit-flush-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - **C1 (failing tests, no behaviour change):**
+    - `main/quit-sequence.js` with the current behaviour verbatim;
+    - `main.js` wired to it;
+    - `QUIT_FLUSH_TIMEOUT_MS` in `main/constants.js`;
+    - `tests/quitSequence.test.js` and the `tests/jsonStore.test.js` addition.
+
+    Gate: Done-when 1 and `npm run typecheck` exits 0.
+  - **C2 (the fix):**
+    - the capped, guarded, stateful handler;
+    - the full step list;
+    - `flushPendingSettingsSave`;
+    - `whenWritesSettled`;
+    - the two docs.
+
+    Gate: Done-when 2–8 and 10–12.
+  - **Merge:** run the owner smoke (Done-when 9) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If (a) passes at C1 (the fake exit somehow saw the files written), stop with BLOCKER(USER): the fake does not model Electron's non-awaiting `quit`, and the control proves nothing.
+  - If any other C1 control fails for a different reason than stated, fix the test, not the module, and re-record.
+  - If an existing test fails, report the exact test and stop; do not weaken it. Three are at risk:
+    - `tests/settingsNarrateNormalization.test.js` (e), which drives the 500 ms timer;
+    - `tests/perfAudit.test.ts` e;
+    - `tests/einkFoundation.test.ts`, which reads `main.js`.
+  - If smoke (b) fails (the process is still alive after 5 s), record the `[quit]` lines from `%APPDATA%\blurby\blurby-data` logs or the console if available, and stop: either the producer wait or `app.quit()` re-entry is wrong.
+  - If (c)–(f) fail, record a fail with the `*.tmp` listing.
+  - If the full suite fails only in `tests/onnxruntime-patch.test.js` with ENOENT under `node_modules`, run `npm ci` in the worktree and rerun (environmental, as in SETTINGS-WRITE-DURABLE-1).
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`. File formats are unchanged, so no data migration is involved.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:**
+    - every file not named above;
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js:640-665` (startup recent-folders, watcher and cloud-sync start) and `main/folder-watcher.js`, which FOLDER-SCAN-PERF-1 owns;
+    - `main/sync-engine.js`, `main/sync-queue.js` and `main/narrate/**` (called, not edited);
+    - any file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** after FOLDER-SCAN-PERF-1 if both are in flight. Both edit `main.js`, at disjoint hunks (`:16-17` and `:678-706` here; `:640-665` there). Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Quit handler extracted verbatim into its own module; quit, settings-flush and write-drain tests committed and failing on the unchanged behaviour | calculable | positive control | bounded | medium | 40m (one small module, one wiring block, one constant, one new test file with seven cases, one added test) | — | — |
+| 2 | Cancelled-first-quit flush in place: capped, guarded, producer never cut; pending settings save and pending writes flushed; docs updated | calculable | main-process fix | bounded | medium | 35m (one module body, one step list, two small exports, two doc lines) | — | — |
+| 3 | Full suite, typecheck and build green; production `--dir` build smoked by the owner; merged and pushed | calculable | merge and verify | mechanical | low | 45m (full `npm test` + typecheck + build + electron-builder dir build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-157 (the core lesson)** — the saves move into the cancelled first quit with an overall time limit. Done-when 1(a) is the LL-157 test: it quits during pending writes and reads the files back at the moment of exit.
+- **Standing rule 43 (LL-138)** — C1 extracts the handler verbatim and commits the tests failing on the unchanged behaviour (Done-when 1). (e) characterizes the producer guarantee and must pass at both C1 and C2 (standing rule 39, LL-112: characterize before extracting).
+- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code. Each search gate was dry-run on `66f15981`, and a gate with no hit on the base was not used.
+- **Standing rule 45 (LL-141)** and **LL-152** — the 1-second quit is owner-observed on a production `--dir` build. Dev mode takes minutes to load and cannot be quit within 1 s (LL-152 status record, 2026-10-14).
+- **LL-006 / standing rule 3 (PR-10)** — write-then-rename is untouched. A write cut at the cap leaves the previous file intact.
+- **LL-142** — durability is judged by files read back at exit, never by a call having been made.
+- **LL-156** — SETTINGS-WRITE-DURABLE-1's waiver ("the debounced sync enqueue at quit is out of scope"; `main/ipc/state.js` forbidden) named code this item edits, so it is explicitly brought into scope.
+- **Standing rule 47 (LL-147)** — the full suite runs on the owner's machine (Done-when 8).
+- **Standing rule 48 (LL-149)** — typecheck and build are in Done-when 8.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
+- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
+- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981`. The merge-order step re-greps after FOLDER-SCAN-PERF-1.
+
+
+<a id="packaging-fix-1"></a>
+
+#### PACKAGING-FIX-1 — Ship the app's icons, quiet the updater in unpacked builds, and relink stale sample books *(position 13 — Full Spec; authored 2026-10-14 from P6 G2 findings B, C and D)*
+
+- **What:** Three defects seen on the P6 production build (`release\win-unpacked\Blurby.exe`, built from `main` `ab5cead4` with `npx electron-builder --win --x64 --dir --publish never`), fixed in the main process and the packaging config:
+  - **(A)** The packaged app ships the window icon and the tray image (`assets/icon.ico`, `assets/tray-icon.png`), so the window shows Blurby's icon and the tray icon appears.
+  - **(B)** A build without `app-update.yml` (every `--dir` build) skips the automatic update check silently, and the check can never end in an unhandled rejection. Installer builds check exactly as today.
+  - **(C)** Opening a library entry with `source: "sample"` whose `filepath` no longer exists copies the bundled sample into the data folder, points the entry at that copy and saves the library. The id, reading position and every other field are kept.
+- **Why:**
+  - **(A)** `package.json:36-41` (`build.files`) lists `main.js`, `preload.js`, `main/**/*` and `dist/**/*` only; `assets/` has never been in it. The runtime loads both images from inside the asar: `main/window-manager.js:64` and `:111` (`icon: path.join(__dirname, "..", "assets", "icon.ico")`) and `:150` (`new Tray(path.join(__dirname, "..", "assets", "tray-icon.png"))`; the `catch` on the same line prints `[window-manager] Tray creation failed:`). `__dirname` is `app.asar\main`, so the path is `app.asar\assets\…`, which is not in the archive: `npx --no-install asar list` on the P6 build's `resources\app.asar` lists neither file (dry-run 2026-10-14: count 0). Census: these two files are the only runtime references to `assets/` in `main/`, `main.js`, `preload.js` and `src/` (`src/assets/blurby-icon.png` is a separate, Vite-bundled file). `assets/icon.png` and `assets/installer/*.bmp` are build-time inputs only (`package.json:55`, `:61-62`, `:71`, `:76`).
+  - **(B)** `main/window-manager.js:181-183`: `setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {…} }, 10000)`. `checkForUpdates()` returns a promise; the `try` catches only a synchronous throw, so its rejection is unhandled. A `--dir` build writes no `resources\app-update.yml` (the P6 build's `resources\` holds `app.asar`, `app.asar.unpacked` and `resources` only; `Test-Path …\resources\app-update.yml` is `False`), so electron-updater rejects with `ENOENT … resources\app-update.yml` on every launch, logs it through its own `error` listener and Node prints `UnhandledPromiseRejectionWarning`. The caller is `main.js:578` (`if (!isDev && !process.env.BLURBY_USE_DIST) setupAutoUpdater(mainWindow);`), so only packaged builds reach it.
+  - **(C)** The first-run block stores the **bundled** file's absolute path as the entry's `filepath` (`main.js:598-618`: `sampleEpubPath` is `<repo>\resources\sample-meditations.epub` in dev and `process.resourcesPath\resources\sample-meditations.epub` packaged, `:601-605`; `filepath: sampleEpubPath`, `:614`), with no `ext`. That path goes stale when the repo or the install moves. The owner's entry (backup `%APPDATA%\blurby\blurby-data\g2-backup-20261014\library.json`, read 2026-10-14) had `filepath` `C:\Users\estra\Projects\Blurby\resources\sample-meditations.epub` (gone since the repo moved), a valid `convertedEpubPath` in the data folder, `ext: ".epub"` and `position: 26672`. `main/ipc/library.js:183-194` (`get-doc-chapters`, `:186-191`) reads `doc.filepath` directly through `extractContent`, whose ZIP open fails on a missing file (`main/file-parsers.js:389-395`, "EPUB ZIP open failed for …", ADM-ZIP "Invalid filename"); `delete-doc` (`:48-59`) and reveal-in-folder (`main/ipc/documents.js:113-114`) also use `doc.filepath`.
+  - **(C) and the read roots:** `read-file-buffer` (`main/ipc/library.js:160-181`) reads only under `ctx.getDataPath()` and `settings.sourceFolder` (`:164-167`). The bundled sample (repo or install `resources\`) is outside both, so the renderer can read the sample only through a copy in the data folder: today that is the copy `load-doc-content`'s conversion branch makes (`:131-145`, reached because first-run sets no `ext`; it copies to `<dataPath>\converted\converted\sample-meditations.epub` because `main/epub-converter.js:997-1001` joins `EPUB_CONVERTED_DIR` a second time). A relink to the bundled location would therefore not be readable once `ext` is `.epub` and `convertedEpubPath` is absent (`:126-127` returns `doc.filepath`, then `read-file-buffer` blocks it). The planner's G2 workaround (epic `state.md`, "G2 ready", 2026-10-14) copied the bundled sample to `blurby-data\sample-meditations.epub` and rewrote the path; on the P6 build the sample then opened at its saved position within 6 s. This item makes that workaround the code path.
+- **Planner resolutions (roadmap review 2026-10-14):** the item relinks the sample; it does not claim the sample was unopenable (the G2 open was confounded by BUG-193, and `convertedEpubPath` is served first). The three defects stand on the epic's G2 findings and this review's audit; no BUG numbers are filed for them. `delete-doc` on the sample is filed as BUG-194 and left out. Siblings: FOLDER-SCAN-PERF-1 and QUIT-FLUSH-1 do not edit `main/window-manager.js` or `main/ipc/library.js`; see Merge order for `package.json`.
+- **Design decisions (planner, 2026-10-14):**
+  - **(A)** Add the two runtime files to `build.files` by exact path, not `assets/**/*`: the asar gets what the runtime loads and not the 1.4 MB `icon.png` or the installer bitmaps. No path change: the files land at `app.asar\assets\…`, exactly where `window-manager.js` already looks, and Electron reads images from inside the asar. Not `extraResources`, which would need a `process.resourcesPath` branch at three call sites. The CI workflow (`.github/workflows/ci.yml`, the only workflow) runs `npm ci`, `npm audit`, `npm test` and `npm run build` and no electron-builder step, so the fix lives entirely in `package.json` and holds for every electron-builder invocation.
+  - **(B)** Guard inside `setupAutoUpdater`'s timer, not at the `main.js:578` call site: the event wiring (`update-available`, `update-downloaded`) stays as today, `main.js` is not edited, and the guard reads the same file electron-updater would read (`path.join(process.resourcesPath, "app-update.yml")`, async `fs.promises.access`, standing rule on async main-process I/O). A missing file returns silently (no log line: it is the expected state of every `--dir` build). Present file: `await autoUpdater.checkForUpdates()` inside `try`/`catch`, logging `Auto-update check failed:` as today, so the timer's promise never rejects. Installer builds (`nsis-web`, which writes `app-update.yml` from the `publish` block at `package.json:31-35`) take the same check as before.
+  - **(C)** Relink on load, in `load-doc-content` before any branch, so every later consumer (`get-doc-chapters`, `extract-epub-words`, delete, reveal) sees a live path. The copy goes to `<dataPath>\sample-meditations.epub` (the same file name the G2 workaround used; it already exists on the owner's machine and is inside `read-file-buffer`'s roots). `fs.promises.copyFile` overwrites an existing copy (the content is the bundled sample either way). Only `filepath` changes; `id`, `position`, `cfi`, `convertedEpubPath`, `ext` and the rest are untouched. A failed relink (for example the bundled file is also missing) is logged to `error.log` and the load continues exactly as today. The bundled location is computed as `main.js:601-605` computes it; `main.js` is not edited.
+  - **(C) persistence:** `ctx.saveLibrary()` is debounced 500 ms (`main.js:128-139`, `LIBRARY_SAVE_DEBOUNCE_MS`). A quit inside that window can lose the new path (LL-157, BUG-192); the next open relinks again, so the loss is harmless.
+- **Out of scope:**
+  - First-run itself (`main.js:597-630`): new installs keep storing the bundled path; the relink covers it the day that path goes stale.
+  - `delete-doc` unlinking `doc.filepath` (`main/ipc/library.js:53-59`): on a fresh install, deleting the sample would try to delete the bundled file in the install folder (in dev, the tracked `resources/sample-meditations.epub`). Not changed here; filed as BUG-194 (Low) by the 2026-10-14 review.
+  - The manual `check-for-updates` IPC (`main/ipc/misc.js:420-438`): user-triggered, already caught, returns an error message on a `--dir` build. Unchanged (it does not run at launch).
+  - A stale `convertedEpubPath`; the doubled `converted\converted` folder; non-sample entries with missing files.
+  - The tray image's size (1.4 MB PNG), macOS/Linux icon formats, code signing, the installer's own icons.
+  - BUG-192 (quit flush, QUIT-FLUSH-1) and BUG-193 (folder scan, FOLDER-SCAN-PERF-1).
+- **Prerequisites:** none in code. File-disjoint from NARRATE-REBUILD-1 P6 (`git diff --stat refs/heads/main...refs/heads/eb/narrate-rebuild-1-p6 -- package.json main/window-manager.js main/ipc/library.js main.js` prints nothing, 2026-10-14). Heavy gates (full suite, build, launches) stay out of the epic's measurement windows (ROADMAP.md Stage 7, Parallel run plan). Every live launch runs with the owner profile's `sourceFolder` empty (the G2 setting) or uses the scratch profile below (BUG-193).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `66f15981` (2026-10-14) are noted.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/packagingFix.test.js` exits 1, and exactly tests (a), (b), (d) and (e) fail, each for its stated reason: (a) `build.files` lacks the two entries; (b) `checkForUpdates` was called once with no `app-update.yml`; (d) one `unhandledRejection` was emitted (Vitest may also print an "Unhandled Rejection" block for it: that is the defect); (e) `doc.filepath` is still the missing path and `saveLibrary` was not called. (c), (f) and (g) pass. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/packagingFix.test.js tests/packageReleaseTruth.test.js tests/epub-2b-pipeline.test.js tests/documentsOpenSource.test.js` exits 0.
+    3. `git grep -n -E '^\s+"assets/(icon\.ico|tray-icon\.png)",?$' -- package.json` prints exactly two lines and exits 0 (dry-run: exits 1, no output).
+    4. `git grep -n -F 'try { autoUpdater.checkForUpdates(); }' -- main/window-manager.js` prints nothing (dry-run: one line, `main/window-manager.js:181`).
+    5. `git grep -c -F 'app-update.yml' -- main/window-manager.js` prints `main/window-manager.js:2` and exits 0 (dry-run: exits 1, no output).
+    6. `git grep -c -F 'relinkSampleIfMissing' -- main/ipc/library.js` prints `main/ipc/library.js:2` and exits 0 (dry-run: exits 1, no output).
+    7. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (standing rules 47 and 48).
+    8. **Built artifact (LL-142):** `npx electron-builder --win --x64 --dir --publish never` exits 0 (after `npm run build` exits 0 on the same tree). Then
+       `$l = npx --no-install asar list release\win-unpacked\resources\app.asar; @($l | Where-Object { $_ -ceq '\assets\icon.ico' -or $_ -ceq '\assets\tray-icon.png' }).Count`
+       prints `2` (dry-run on the P6 build, `C:\Projects\Blurby\.worktrees\narrate-rebuild-1-p6\release\win-unpacked\resources\app.asar`: prints `0`; `asar` 3.4.1 resolves through `node_modules\.bin`).
+    9. **Launch log, with an instrument control (LL-151).** The check, for an executable `$exe`, in a fresh scratch profile (never the owner's):
+       ```
+       $prof = Join-Path $env:TEMP ("blurby-pf1-" + [guid]::NewGuid()); $env:ELECTRON_ENABLE_LOGGING = "1"; $env:BLURBY_USER_DATA_DIR = $prof
+       $p = Start-Process -FilePath $exe -RedirectStandardOutput "$prof-out.txt" -RedirectStandardError "$prof-err.txt" -PassThru
+       Start-Sleep -Seconds 25; $alive = -not $p.HasExited; taskkill /PID $p.Id /T /F | Out-Null
+       $pats = 'Failed to load image','Tray creation failed','app-update.yml','UnhandledPromiseRejectionWarning'
+       "alive=$alive"; foreach ($t in $pats) { "$t=" + @(Select-String -Path "$prof-out.txt","$prof-err.txt" -SimpleMatch -Pattern $t).Count }
+       ```
+       (`BLURBY_USER_DATA_DIR` is honoured in packaged builds, `main.js:26`; 25 s covers the update check's 10 s timer.) (a) **Control:** with `$exe` the P6 build (`C:\Projects\Blurby\.worktrees\narrate-rebuild-1-p6\release\win-unpacked\Blurby.exe`), or, if it no longer exists, a build of the C1 commit made with the Done-when 8 command: `alive=True` and each of the four counts is at least 1. If any count is 0, the recorder cannot see the defect: stop. (b) With `$exe` = `release\win-unpacked\Blurby.exe` from C2: `alive=True` and all four counts are 0. Record both outputs and `$prof` in the staging memo. Not dry-run by the planner (it launches the app); the four messages were observed on the P6 build at G2 (epic `state.md`, "G2 partial", findings C and D).
+    10. **Owner smoke** (standing rule 45, LL-152), on the C2 `release\win-unpacked\Blurby.exe`, recorded per check in the staging memo: (a) on the owner's profile (`sourceFolder` empty), the Blurby tray icon appears in the notification area and its menu opens; (b) the window's taskbar icon is Blurby's, not Electron's default; (c) the sample *Meditations* opens from the library and renders at its saved position; (d) **relink:** in the scratch profile `$prof` from Done-when 9(b) (it holds the first-run sample; confirm `library.json` has an entry with id `sample-meditations`), the executor sets that entry's `filepath` to `C:\Users\estra\Projects\Blurby\resources\sample-meditations.epub` (missing) and its `position` to `1000`, with the app closed; the owner launches with `$env:BLURBY_USER_DATA_DIR = $prof` and opens *Meditations*: it renders; with the app still open, after 5 s, the executor reads `$prof\blurby-data\library.json`: the entry's id is `sample-meditations`, its `filepath` is `$prof\blurby-data\sample-meditations.epub`, and that file's SHA-256 is `8be2ab1e681bbde194ded5ba05ffcad218533fd98abfefa8a3af7d699a6c2beb` (`Get-FileHash`). The position is checked by test (e), not live (reading can move it).
+    11. `git diff --name-status refs/remotes/origin/main` lists exactly `M package.json`, `M main/window-manager.js`, `M main/ipc/library.js` and `A tests/packagingFix.test.js`, plus the time log and staging memo if kept (standing rule 41).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 10.
+- **Lane:** Platform & Maintenance. Execution surface D (main process and packaging config).
+- **Source:** NARRATE-REBUILD-1 P6 G2 findings B, C and D (epic `state.md` on `eb/narrate-rebuild-1-p6`, "G2 partial", "G2 workaround", "G2 ready", 2026-10-14); the planner's read-only census on `66f15981` (2026-10-14) of `package.json`, `main/window-manager.js`, `main.js`, `main/ipc/library.js`, `main/epub-converter.js`, `main/file-parsers.js`, the CI workflow, the P6 build's `resources\` folder and asar listing, and the owner's library entry and its G2 backup.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `66f15981`):
+  - **`package.json:36-41`** (`build.files`): after `"dist/**/*"` (`:40`, add a trailing comma) append `"assets/icon.ico",` and `"assets/tray-icon.png"`, one per line at the same indentation. Nothing else in the file changes.
+  - **`main/window-manager.js`:**
+    - after `:5` (`const path = require("path");`) add `const fsPromises = require("fs/promises");`;
+    - replace `:181-183` with:
+      ```js
+          setTimeout(async () => {
+            // An unpacked (--dir) build ships no app-update.yml; checking without it rejects on every launch.
+            try { await fsPromises.access(path.join(process.resourcesPath, "app-update.yml")); } catch { return; }
+            try { await autoUpdater.checkForUpdates(); } catch (err) {
+              console.log("Auto-update check failed:", err.message);
+            }
+          }, 10000);
+      ```
+      `:163-180` and `:184-185` are unchanged.
+  - **`main/ipc/library.js`:**
+    - `:4` becomes `const { ipcMain, dialog, app } = require("electron");`;
+    - after `logToFile` (`:15-20`), before `function register(ctx)` (`:22`), add:
+      ```js
+      // The first-run sample stores the bundled file's absolute path (main.js), which goes stale when the repo or install moves.
+      function bundledSamplePath() {
+        return app.isPackaged
+          ? path.join(process.resourcesPath, "resources", "sample-meditations.epub")
+          : path.join(__dirname, "..", "..", "resources", "sample-meditations.epub");
+      }
+
+      async function relinkSampleIfMissing(doc, dataPath) {
+        if (doc.source !== "sample" || !doc.filepath) return false;
+        if (await fsPromises.access(doc.filepath).then(() => true, () => false)) return false;
+        const target = path.join(dataPath, "sample-meditations.epub");
+        await fsPromises.copyFile(bundledSamplePath(), target);
+        doc.filepath = target;
+        return true;
+      }
+      ```
+    - in `load-doc-content`, after `if (!doc) return null;` (`:118`) add:
+      ```js
+          try { if (await relinkSampleIfMissing(doc, ctx.getDataPath())) ctx.saveLibrary(); }
+          catch (err) { logToFile(`sample relink failed for "${doc.id}": ${err.message}`, ctx.getErrorLogPath()); }
+      ```
+      `module.exports` (`:692`) is unchanged.
+- **Tests** (one new file, **`tests/packagingFix.test.js`**, Vitest, node environment, CommonJS modules loaded with the `Module._load` patch pattern of `tests/documentsOpenSource.test.js:1-60`, real files under `os.tmpdir()` per test, removed in `afterEach`; restore `Module._load`, `process.resourcesPath` and timers after each test):
+  - **(a)** `package.json`'s `build.files` contains `"assets/icon.ico"` and `"assets/tray-icon.png"`, and both files exist in the repo (read as in `tests/packageReleaseTruth.test.js:5-9`).
+  - **Updater harness** for (b)–(d): `electron` → `{ BrowserWindow: class {}, Tray: class {}, Menu: {}, nativeTheme: {}, session: {} }`; `electron-updater` → `{ autoUpdater: fake }` with `fake = { on: vi.fn(), checkForUpdates: vi.fn(…) }`; fresh `require("../main/window-manager.js")` (delete its cache entry first); `process.resourcesPath` = the test's temp dir. `vi.useFakeTimers({ toFake: ["setTimeout"] })`, call `setupAutoUpdater({ isDestroyed: () => false, webContents: { send: vi.fn() } })`, `vi.advanceTimersByTime(10000)`, `vi.useRealTimers()`, then wait 100 ms of real time before asserting.
+    - **(b)** no `app-update.yml` in the temp dir: `checkForUpdates` is not called.
+    - **(c)** `app-update.yml` present (any content): `checkForUpdates` (resolving `null`) is called once. Passes on the base (control).
+    - **(d)** `app-update.yml` present, `checkForUpdates` returns `Promise.reject(new Error("net::ERR_FAILED"))`: a `process.on("unhandledRejection", …)` listener added for the test (removed after) counts 0 events.
+  - **Sample harness** for (e)–(g): `electron` → `{ ipcMain: { handle: (ch, fn) => handlers.set(ch, fn) }, dialog: {}, app: { isPackaged: false } }`; fresh `require("../main/ipc/library.js")`; `register(ctx)` with `getDocById: () => doc`, `getDataPath: () => tmpDir`, `getErrorLogPath: () => path.join(tmpDir, "error.log")`, `getSettings: () => ({})`, `saveLibrary: vi.fn()`; call `handlers.get("load-doc-content")(null, doc.id)`.
+    - **(e)** `doc = { id: "sample-meditations", source: "sample", filepath: path.join(tmpDir, "gone", "sample-meditations.epub"), ext: ".epub", position: 26672, cfi: "epubcfi(/6/18!/4/2)" }`: the result is `{ filepath: path.join(tmpDir, "sample-meditations.epub"), ext: ".epub" }`; `doc.filepath` equals that path; the copy's bytes equal `resources/sample-meditations.epub` (279,837 bytes, blob `ffa27199`); `saveLibrary` was called once; `id`, `position` and `cfi` are unchanged.
+    - **(f)** same `source: "sample"`, but `filepath` an existing file in `tmpDir`: `filepath` unchanged, `saveLibrary` not called. Passes on the base (control).
+    - **(g)** `source: "folder"` with a missing `filepath`: `filepath` unchanged, no file created in `tmpDir`, `saveLibrary` not called. Passes on the base (control).
+- **Constants:** none (the two names are file names, not tunables).
+- **Branch:** `eb/packaging-fix-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\packaging-fix-1`. Write refs in full (a `main/` directory exists). Dispatch to a local session on the owner's machine (standing rule 47: Windows build, launch and owner smoke).
+- **Staging plan:** C1: `tests/packagingFix.test.js` only (gate: Done-when 1; if the P6 build is gone, build C1 here for Done-when 9(a)). C2: `package.json`, `main/window-manager.js`, `main/ipc/library.js` (gate: Done-when 2–9 and 11). Owner smoke (Done-when 10) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - If the positive control fails differently (for example (b) passes on the base), stop: the code changed since this spec.
+  - If Done-when 8 shows the files in the asar but 9(b) still prints `Failed to load image` or `Tray creation failed`, stop and report (BLOCKER(USER)): the asar route is wrong for this Electron version and the fallback (`extraResources` plus a `process.resourcesPath` branch at `window-manager.js:64`, `:111`, `:150`) needs a planner decision.
+  - If 9(b) shows `app-update.yml` in an electron-updater line, the guard is not reached: check `process.resourcesPath` in the packaged app before changing anything else.
+  - If any existing test in Done-when 2 fails, report the exact test and stop; do not weaken it.
+  - If any cited line has drifted on the base, re-grep; drift outside the edit sites' content stops the run.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D: `package.json` (`build.files` only), `main/window-manager.js` (`:5` and `:181-183` only), `main/ipc/library.js` (`:4`, the two new functions before `:22`, and the two lines after `:118`), and the new test file.
+  - **Forbidden:** every other file and every other line of these three; the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`); all of `main.js` (startup `:640-665` and `main/folder-watcher.js` belong to FOLDER-SCAN-PERF-1; the `will-quit` handler belongs to QUIT-FLUSH-1; this item needs no `main.js` edit); every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** independent of FOLDER-SCAN-PERF-1 and QUIT-FLUSH-1 (no shared file: neither is expected to touch `package.json`, `main/window-manager.js` or `main/ipc/library.js`; confirm against their final specs). If either lands first, rebase is not needed; re-run Done-when 2 and 7 on the merge result. Merge before the next production build the owner is asked to smoke, so that build carries the icons.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Packaging, updater and sample-relink tests committed and failing on the current code for their stated reasons | calculable | positive control | bounded | low | 25m (one file, two harnesses, seven tests) | — | — |
+| 2 | The icons are packaged, the update check is guarded and a stale sample entry relinks on open | calculable | platform fix | bounded | low | 20m (two `build.files` entries, one timer body, one helper pair and two call lines) | — | — |
+| 3 | The built app carries both images and launches with a clean log, against a control that shows the defects | calculable | packaging verify | mechanical | low | 35m (one or two `--dir` builds, asar listing, two scripted launches) | — | — |
+| 4 | Suites, typecheck and build green; owner smoke recorded; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 2m · sum 2m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138)** — the seven tests are committed first; four fail on the current code for named reasons and three are controls that pass (Done-when 1).
+- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code; the four search gates and the asar count were dry-run on `66f15981` and the P6 build, with results in parentheses.
+- **LL-151** — the launch-log scan is first run on a build that has the defects and must find all four messages, so a clean result on the fix is evidence (Done-when 9(a)).
+- **LL-142** — the fix is proven on the built artifact (asar listing and a launched exe), not on `package.json` alone.
+- **Standing rule 45 (LL-141)** and **LL-152** — the tray, taskbar icon and sample opening are owner-observed on the production build; the relink smoke uses a scratch profile so the owner's library is not edited.
+- **LL-150** — an asset census was taken: only `assets/icon.ico` and `assets/tray-icon.png` are loaded at runtime, so only they are packaged; nothing is deleted.
+- **LL-156** — the out-of-scope lines (first-run, `delete-doc`, the manual update IPC) were re-read against the edit sites: none of them is moved or rewritten by this item.
+- **LL-157** — the relink is saved through the debounced library save; a quit inside 500 ms can lose it, and the next open repeats it harmlessly.
+- **Standing rules 47 (LL-147) and 48 (LL-149)** — the full suite runs on the owner's machine in a local session; typecheck and build are in Done-when 7.
+- **Standing rule 41 (LL-136)** — the diff fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the filled reconciliation recipe.
+- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
+
+
+<a id="ux-polish-2"></a>
+
+#### UX-POLISH-2 — Keyboard and help-surface follow-ups after UX-POLISH-1 *(position 15 — Full Spec; authored 2026-10-14 on `66f15981`)*
+
+- **What:** Fix the eight keyboard, help-text and theme defects found after UX-POLISH-1 (merge `e942e3fd`). (1) Holding Space acts once per press. (2) The hotkey map renders with unique React keys. (3) The Page hint line under the bottom bar matches UX-POLISH-1. (4) The Technical Reference no longer says `] / N`. (5) The `lastReadingMode` comment says "enters … paused". (6) The shortcuts overlay is readable in the E-ink theme. (7) The E-ink bottom bar outlines the remembered mode. (8) Escape with the shortcuts overlay open closes only the overlay.
+- **Why** (every line verified on `main` @ `66f15981`, 2026-10-14):
+  1. **Key repeat.** A held key auto-repeats `keydown`. The reader hook never checks `e.repeat` (`git grep -n -F 'e.repeat' -- src/hooks/useKeyboardShortcuts.ts` exits 1). So a held Space in Page runs the remembered-mode entry (`src/hooks/useKeyboardShortcuts.ts:246`); every repeat after that lands on the new mode's Space and toggles play (`:266`, `s.togglePlay()`), and Shift+Space re-cycles the mode on every repeat (`:248`, `:264`). Each mode's EPUB iframe forwards its keydowns to the window with a new `KeyboardEvent` that copies `key`, `code`, `keyCode` and the four modifiers but not `repeat`. A held key inside the book text therefore arrives as a series of fresh presses, and even a `.repeat` guard could not see them: `src/reader/modes/page/FoliateView.tsx:677-682` (fields `:679-680`), `focus/FoliateView.tsx:802-807` (`:804-805`) and `flow/FoliateView.tsx:877-882` (`:879-880`). The UX-POLISH-1 staging memo (finding 1) reported this.
+  2. **Duplicate React keys.** `src/components/settings/HotkeyMapSettings.tsx:130` renders `key={s.action}`. The Focus section repeats "Previous chapter" (`:76` Shift + Up, `:81` [ / P) and "Next chapter" (`:77`, `:82`). The Flow section repeats "Previous paragraph" (`:97`, `:99`) and "Next paragraph" (`:98`, `:100`). React 19 logs "Encountered two children with the same key" in dev and test builds; this was checked with React 19.2.4 and jsdom. Within each section, every action + key pair is unique.
+  3. **Stale hint line.** `src/components/ReaderBottomBar.tsx:55`: `page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu"`, rendered by `:439` (`.rbb-info-hint`). In Page, Space now enters the remembered mode paused (`useKeyboardShortcuts.ts:246`), Shift+Space switches the remembered mode (`:248`) and N enters Narrate (`:219`). The planner's G2 partial smoke found this line (finding G, epic `state.md`, commit `76983bed`).
+  4. **Technical Reference.** `docs/governance/TECHNICAL_REFERENCE.md:785` still says "`HotkeyMapSettings.tsx` still shows `] / N` for Next chapter although bare `N` is unbound (to be fixed with UX-POLISH-1)". Both halves are now false: UX-POLISH-1 changed the rows to `]` and `N` → Enter Narrate (`HotkeyMapSettings.tsx:82-83`, `:105-106`), and bare N enters Narrate (`useKeyboardShortcuts.ts:219`). This line is the only `] / N` in the file (there is no separate shortcut table).
+  5. **Type comment.** `src/types.ts:188`: `// Last-used reading mode (Space bar starts this mode from Page view)`. Since UX-POLISH-1, Space enters the mode paused.
+  6. **Overlay unreadable in E-ink.** `.shortcuts-container` (`src/styles/keyboard.css:268-276`) uses `background: var(--color-bg, #1a1a2e)` (`:269`) and `border: 1px solid var(--color-border, #333)` (`:270`). `.shortcuts-key` (`:295-303`) uses `background: var(--color-border, #333)` (`:297`). Nothing defines `--color-bg` or `--color-border`: no CSS rule (`src/styles/base.css:2-43`, `themes.css:22-37`) and no ThemeProvider map (`src/components/ThemeProvider.tsx:25-134`). So the panel is always the fallback navy `#1a1a2e` and the key chips are always `#333`. The panel sets no `color`, so its text inherits `body { color: var(--text) }` (`base.css:51`). ThemeProvider writes each theme's variables as inline styles on `<html>` (`ThemeProvider.tsx:189-191`), which override the `[data-theme="eink"]` block in `themes.css`. E-ink's `--text` is therefore `#1a1a1a` and its `--accent` (the section titles, `keyboard.css:283`) is `#333333` (`ThemeProvider.tsx:114`, `:118`): dark text on a dark navy panel. The light theme (`--text #1a1a1a`) has the same defect; nobody has reported it.
+  7. **E-ink remembered-mode outline reversed.** Every `.rbb-mode-btn` draws `border: 1px solid var(--color-border, #444)` (`src/styles/page-reader.css:463`, `--color-border` undefined, so `#444`). The remembered one, `.rbb-mode-btn--last` (`:488-492`, applied by `ReaderBottomBar.tsx:320`, `:328`, `:336`), switches to `border-color: var(--border, …)` (`:490`). That is each theme's quiet divider colour. In E-ink it is `#b8b4a8` on a `#e8e4d9` bar (`ThemeProvider.tsx:112`, `:108`; the bar is `background: var(--bg)`, `src/styles/reader.css:160`), so the remembered button is the faint one and the others carry the `#444` outline. In the default Blurby theme `--border` is `#2d4a6e` on a `#1a2a4a` bar, a shade lighter than `#444` there, so it reads as outlined. The light (`#d4d0ca`) and dark (`#2a2a2a`) themes have E-ink's reversal.
+  8. **Escape leaves the reader.** The overlay listens on `window` in the bubble phase (`src/components/ShortcutsOverlay.tsx:177-190`; `:179-181` closes it on Escape and does not stop the event). The reader hook also listens on `window` in the bubble phase and registered first, when the reader mounted (`useKeyboardShortcuts.ts:290`). It runs `s.exitReader()` on Escape (`:241`), so one Escape closes the overlay and exits to the library. The overlay is mounted over the reader as a global overlay (`src/components/LibraryContainer.tsx:562`, `:583-593`). The house pattern for an overlay that owns Escape is a capture-phase window listener that stops propagation (`src/components/MenuFlap.tsx:72-89`, `ReaderBottomBar.tsx:173-201`).
+- **Planner resolutions (roadmap review 2026-10-14):** fixes 6 and 7 use the theme tokens in all four themes (light is fixed too); Narrate's forwarder is a finding for the epic, not an edit here; the sibling overlays' Escape and the other `--color-bg` panels go to stub OVERLAY-THEME-SWEEP-1; three waves (A tests, B fixes, C verify and merge), because one wave for C1 and C2 is about 50 tool uses.
+- **Design decisions (planner, 2026-10-14):**
+  - **(1) One guard in the hook, plus a faithful forwarder per mode.** Add `if (e.code === "Space" && e.repeat) { e.preventDefault(); return; }` to the reader hook. It goes after the typing guard (`:194`), so a Space held in a text field still types, and before the Page and Focus/Flow branches (LL-105), so it covers Space and Shift+Space on every surface. Repeats are still claimed, so the page does not scroll. Each of the three forwarders adds `repeat: ke.repeat` on its own line `:680` / `:805` / `:880`, in its own file, with no shared helper (reading-mode separation, CLAUDE.md). The edit is in place, so no other line number in those files moves. Narrate uses the Focus keyboard surface (`getReaderKeyboardModeSurface`, `:88-101`), so its Space play/pause gets the same guard through the hook. Narrate's own forwarder (`narrate/FoliateView.tsx:931-936`) is not touched (see Out of scope).
+  - **(2) The row key is `${s.action}|${s.key}`**, unique within every section. No row text changes.
+  - **(3) The Page hint line becomes** `"← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu"`. "narrate" stays lowercase: `tests/readerBottomBarControls.test.tsx:131-142` requires the Narrate button to be the only element whose text contains "Narrat". The Focus, Flow and Narrate hint lines are unchanged.
+  - **(6) and (7) Use defined theme tokens, not E-ink-only overrides.** The two defects have one cause: the rules read `--color-bg` and `--color-border`, which no theme defines, so every theme gets the same fallback colour. The fix uses tokens that all four ThemeProvider maps define.
+    - **Overlay:** the panel gets `background: var(--bg-raised)`, `border: 1px solid var(--border)` and `color: var(--text)`; the key chips get `background: var(--border)`.
+    - **Mode buttons:** the default border is quiet (`var(--border)`) and the remembered one strong (`var(--text-dim)`), in every theme.
+    - **Rejected alternative:** `[data-theme="eink"]` overrides. Specificity would force them past `.rbb-mode-btn--active` (it would need a `:not(.rbb-mode-btn--active)` guard), and they would leave the light theme broken.
+    - **Visible effect:** the overlay panel and the quiet mode-button borders change slightly in the Blurby, dark and light themes. Accepted by the planner (light has the same defects; one rule fixes all four themes).
+  - **(8) The overlay consumes its own keys.** Its listener moves to the capture phase and calls `e.stopPropagation()` for Escape and `?`, following the MenuFlap pattern. The reader hook does not learn about overlays (LL-080: never gate the global handler on modal state). Checked in jsdom: a `stopPropagation()` in a window capture listener stops the window bubble listener both for an event dispatched on a button and for one dispatched on `window` itself. `?` still closes the overlay through `onClose`, so dropping `useGlobalKeys`' toggle (`useKeyboardShortcuts.ts:356-359`) changes nothing for the user.
+  - **(4), (5)** are text-only. (5) is a comment-only edit to `src/types.ts`, which is in the shared-core freeze set.
+- **Out of scope:**
+  - Narrate's keys and its iframe forwarder (`src/reader/modes/narrate/FoliateView.tsx:933-934`, which also drops `repeat`): the epic owns that file. Passed to the epic as a one-line finding (roadmap review 2026-10-14).
+  - The E-ink theme button versus the E-Ink Display Mode switch duplication (owner decision pending, stub EINK-CONTROLS-1).
+  - Other overlays that may share defect 8 (`HighlightsOverlay.tsx:113`, `QuickSettingsPopover.tsx:67`, both window bubble listeners; not verified live). Other panels that read the undefined `--color-bg` (`keyboard.css:141`, `:316`, `:370`, `:418`, `:461`). Stub OVERLAY-THEME-SWEEP-1.
+  - The other `--color-border` fallbacks in `page-reader.css` (`:437`, `:446`, `:473`, `:628`, `:653`, `:745`) and elsewhere (23 uses in `src`).
+  - The `[data-theme="eink"]` variable block in `themes.css:22-37`, which ThemeProvider's inline variables partly override (`tests/einkFoundation.test.ts` pins it).
+  - The UX-POLISH-1 memo's finding 2 (`lastReadingMode` can lag one IPC round trip after Shift+Space).
+  - The Focus, Flow and Narrate hint lines, and any help row not named here.
+- **Prerequisites:** UX-POLISH-1 does not have to be closed out first.
+  - **Exclusive files:** this item must not run while another item edits `src/types.ts` (shared-core freeze) or any file under *Edit sites*.
+  - **The epic's open phase:** before dispatch, confirm in NARRATE-REBUILD-1's `state.md` that its open phase (P6: production build, G2) edits none of these paths.
+  - **Measurement windows:** keep the heavy gates (full suite, build, packaged build) out of the epic's measurement windows (ROADMAP.md Stage 7, Parallel run plan).
+  - **Base check:** re-grep the cited lines on the base before dispatch (failure handling covers drift).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other code, any stderr text, or a command that did not run fails it (standing rule 44). A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr. Dry-runs were taken on `66f15981` (2026-10-14) and are noted.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerKeyboard.test.tsx tests/foliate-bridge.test.ts tests/readerBottomBarControls.test.tsx tests/helpSurfaces.test.tsx` exits 1. Exactly the 11 new tests below fail, each for the stated reason, and everything else passes, including control (q) and every existing test in those files. Record the output in the staging memo.
+        - (h) a repeated Space in Page calls `enterFlow`;
+        - (i) a repeated Space in Flow calls `togglePlay`;
+        - (j) a repeated Shift+Space in Page calls `cycleMode`;
+        - (k) page, focus and flow (three cases) do not contain `repeat: ke.repeat`;
+        - (l) the Page hint text is the old string;
+        - (m) `console.error` logs "Encountered two children with the same key";
+        - (n) Escape on the open overlay also calls `exitReader`;
+        - (o) `--color-bg` is defined in 0 theme maps;
+        - (p) the `.rbb-mode-btn {` border reads `--color-border`.
+    2. After C2, `npx vitest run tests/readerKeyboard.test.tsx tests/foliate-bridge.test.ts tests/readerBottomBarControls.test.tsx tests/helpSurfaces.test.tsx tests/useKeyboardShortcuts.test.ts tests/readerSpeedDialog.test.tsx tests/einkFoundation.test.ts tests/componentStyleCleanup.test.ts tests/readerModeBoundaries.test.ts tests/readerModes tests/narrate/narrate.mode.test.ts` exits 0.
+    3. `git grep -n -E 'page: ".*space play' -- src/components/ReaderBottomBar.tsx` prints nothing (dry-run: `:55`, exit 0).
+    4. `git grep -n -F 'key={s.action}' -- src/components/settings/HotkeyMapSettings.tsx` prints nothing (dry-run: `:130`, exit 0).
+    5. `git grep -n -F '] / N' -- docs/governance/TECHNICAL_REFERENCE.md` prints nothing (dry-run: `:785`, exit 0).
+    6. `git grep -n -F 'Space bar starts this mode' -- src/types.ts` prints nothing (dry-run: `:188`, exit 0). `git diff --numstat refs/remotes/origin/main...HEAD -- src/types.ts` prints exactly `1<TAB>1<TAB>src/types.ts` and exits 0 (dry-run: empty, exit 0).
+    7. `git grep -c -F 'repeat: ke.repeat' -- src/reader/modes/page/FoliateView.tsx src/reader/modes/focus/FoliateView.tsx src/reader/modes/flow/FoliateView.tsx` prints exactly three lines, each ending `:1`, and exits 0 (dry-run: exit 1, no output). `git diff --numstat refs/remotes/origin/main...HEAD -- src/reader` prints exactly three lines, `1<TAB>1<TAB>` followed by each of those three paths, and exits 0. `git grep -c -F 'repeat: ke.repeat' -- src/reader/modes/narrate/FoliateView.tsx` prints nothing (dry-run: exit 1, empty).
+    8. `git grep -n -F 'if (e.code === "Space" && e.repeat)' -- src/hooks/useKeyboardShortcuts.ts` prints exactly one line and exits 0 (dry-run: exit 1, empty).
+    9. `git grep -n -F 'window.addEventListener("keydown", handleKeyDown, true)' -- src/components/ShortcutsOverlay.tsx` prints exactly one line and exits 0 (dry-run: exit 1, empty).
+    10. `git grep -c -F -e '--color-bg' -- src/styles/keyboard.css` prints `src/styles/keyboard.css:5` and exits 0 (dry-run: `:6`). `git grep -n -F 'border-color: var(--border, rgba(196,168,130,0.3));' -- src/styles/page-reader.css` prints nothing (dry-run: `:490`, exit 0).
+    11. On the owner's machine (standing rules 47 and 48): `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0. Run them outside the epic's measurement windows if the epic is still running.
+    12. **Owner smoke** (standing rule 45, LL-152) on a production build of C2: `npm run build`, then `npx electron-builder --win --dir`, then run `release\win-*-unpacked\Blurby.exe`. Use a book that opens on the current profile; The Raven did on 2026-10-14, and BUG-193 blocks folder-sourced books while `sourceFolder` is cleared. Do not enter Narrate (it warms the model). Run the checks in the E-ink theme and in the Blurby theme, and record each one in the staging memo:
+        - (a) In Page with Flow outlined, click into the book text, then hold Space for about 2 s. Flow opens paused, once, with no play/pause flicker. Release, then press Space once: Flow plays. Repeat once without clicking into the text first.
+        - (b) With Flow playing, hold Space: it pauses once, with no flicker. Do the same in Focus.
+        - (c) In Page, hold Shift+Space: the outline moves once.
+        - (d) Press `?`: the panel, its text, section titles and key chips are readable.
+        - (e) With the overlay open, press Escape: only the overlay closes and the book stays open. Press Escape again: the reader exits to the library (control).
+        - (f) In Page, the remembered mode's button has the strongest outline in the group. E-ink is the case to check most closely.
+        - (g) The Page hint line reads `← → page ↑ ↓ speed space last mode ⇧space switch mode N narrate tab menu` in full, not cut off.
+    13. `git diff --name-status refs/remotes/origin/main...HEAD` lists exactly:
+        - `M` for every path in *Edit sites* and *Tests*;
+        - `A tests/helpSurfaces.test.tsx`;
+        - the time log `docs/governance/close-outs/Timing.UX-POLISH-2.jsonl` and the staging memo `docs/governance/close-outs/Memo.UX-POLISH-2.GovernanceStaging.<date>.md`, if kept (standing rule 41).
+
+        It uses three dots so that later merges to `main` do not show up as this item's paths.
+- **Effort:** M. Eight one-line fixes; most of the effort is the positive controls and the owner smoke.
+- **Owners:** implementation agent; spec-compliance and code-quality reviewers, in parallel; repository operator merges; owner for Done-when 12.
+- **Lane:** UX polish. Execution surface C. Touches one shared-core file, `src/types.ts`, with a comment only, and one line in each of the three mode `FoliateView.tsx` forwarders.
+- **Source:**
+  - the UX-POLISH-1 staging memo, findings 1, 3 and 4 (`docs/governance/close-outs/Memo.UX-POLISH-1.GovernanceStaging.2026-10-13.md`);
+  - the NARRATE-REBUILD-1 G2 partial smoke and UX smoke of 2026-10-14 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md`, commit `76983bed`): finding G (hint line), overlay unreadable in E-ink, E-ink remembered-mode button without a border, and Escape closing the overlay and leaving the reader;
+  - the read-only census for this item on `66f15981` (2026-10-14), including a jsdom probe of React 19.2.4's duplicate-key warning, `KeyboardEvent` `repeat`, and capture-phase `stopPropagation`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `66f15981`; line numbers are the base's):
+  - **`src/hooks/useKeyboardShortcuts.ts`:** after `:241` (the Escape line), insert
+    ```
+          // A held Space auto-repeats: claim the repeats so entering, switching and play/pause fire once per press
+          if (e.code === "Space" && e.repeat) { e.preventDefault(); return; }
+    ```
+    Nothing else changes in this file.
+  - **`src/reader/modes/page/FoliateView.tsx:680`**, **`src/reader/modes/focus/FoliateView.tsx:805`**, **`src/reader/modes/flow/FoliateView.tsx:880`:** each line `ctrlKey: ke.ctrlKey, shiftKey: ke.shiftKey, altKey: ke.altKey, metaKey: ke.metaKey,` becomes `ctrlKey: ke.ctrlKey, shiftKey: ke.shiftKey, altKey: ke.altKey, metaKey: ke.metaKey, repeat: ke.repeat,` (same indentation). Make it an in-place, one-line edit in each file, with no shared helper. Nothing else in `src/reader/**` changes.
+  - **`src/components/ShortcutsOverlay.tsx`:**
+    - after `:180` (`e.preventDefault();`), insert `e.stopPropagation(); // the reader's Escape (exit) must not also run`;
+    - `:188` becomes `window.addEventListener("keydown", handleKeyDown, true); // capture: before the reader's window listener (MenuFlap pattern)`;
+    - `:189` becomes `return () => window.removeEventListener("keydown", handleKeyDown, true);`.
+  - **`src/components/settings/HotkeyMapSettings.tsx:130`:** `<div key={s.action} className="hotkey-row">` becomes ``<div key={`${s.action}|${s.key}`} className="hotkey-row">``.
+  - **`src/components/ReaderBottomBar.tsx:55`:** `page: "← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu",` (two spaces between groups, as now; "narrate" lowercase).
+  - **`src/types.ts:188`:** `// Last-used reading mode (Space bar enters this mode, paused, from Page view)`. This is a comment-only change and the only edit to this file.
+  - **`docs/governance/TECHNICAL_REFERENCE.md:785`:** the last sentence becomes ``HotkeyMapSettings.tsx` lists `]` for Next chapter and `N` for Enter Narrate (UX-POLISH-1).`` The rest of the paragraph is unchanged.
+  - **`src/styles/keyboard.css`:**
+    - in `.shortcuts-container`, `:269` becomes `background: var(--bg-raised);` and `:270` becomes `border: 1px solid var(--border);`, followed by a new line `color: var(--text);`;
+    - in `.shortcuts-key`, `:297` (`:298` after that insertion) becomes `background: var(--border);`.
+  - **`src/styles/page-reader.css`:** in `.rbb-mode-btn`, `:463` becomes `border: 1px solid var(--border);`. In `.rbb-mode-btn--last`, `:490` becomes `border-color: var(--text-dim);`. Leave the hover rule (`:473`) and every other line unchanged.
+- **Tests** (C1; all fail on the base for the stated reason, except control (q)):
+  - **`tests/readerKeyboard.test.tsx`:**
+    - Add (i) to the Flow describe, before its closing `});` at `:135`. It renders `KeyboardHarness` (Flow) and dispatches `new KeyboardEvent("keydown", { code: "Space", key: " ", repeat: true, bubbles: true, cancelable: true })`. Expect `togglePlay` not called, `dispatchEvent` returning `false` (the repeat is claimed), and mode still `flow`.
+    - Add (h) and (j) to the Page-Space describe, before its closing `});` at `:259`, using its existing `renderAndPress` and `expectOnly`:
+      - (h) `renderAndPress({ lastReadingMode: "flow" }, { repeat: true })` → `expectOnly(null)`;
+      - (j) `renderAndPress({ lastReadingMode: "flow" }, { shiftKey: true, repeat: true })` → `expectOnly(null)`.
+    - Tests (a)–(g) and the four Flow/N tests stay unchanged; they are the non-repeat controls.
+  - **`tests/foliate-bridge.test.ts`:** add (k) inside the describe, before `:40`: `it.each(READER_MODES)("%s FoliateView forwards the iframe keydown's repeat flag (UX-POLISH-2)", (mode) => { expect(readModeFile(mode, "FoliateView.tsx")).toContain("repeat: ke.repeat"); });`. That is three cases (page, focus, flow; `READER_MODES` at `:10` excludes Narrate).
+  - **`tests/readerBottomBarControls.test.tsx`:** add (l) inside the last describe, before its closing `});` at `:272`. Render `<ReaderBottomBar {...baseProps} readingMode="page" />` and expect `container.querySelector(".rbb-info-hint")?.textContent` to equal the new Page string exactly.
+  - **`tests/helpSurfaces.test.tsx`** (new, `// @vitest-environment jsdom`, `react-dom/client` + `act` as in `tests/readerKeyboard.test.tsx:1-8`). It uses a local `extractCssBlock` copied from `tests/einkFoundation.test.ts:8-21` and a local `definedInEveryTheme(name)`, which reads `src/components/ThemeProvider.tsx` as text and returns the count of `"${name}":` (it must be 4).
+    - (m) Render `<HotkeyMapSettings />` with `vi.spyOn(console, "error")`. Expect no call whose first argument contains `same key`. As a non-vacuous check, expect 83 `.hotkey-row` elements.
+    - (n) A harness calls `useReaderKeys("reader", "page", noop, noop, noop, exitReader, noop)` and renders `<ShortcutsOverlay onClose={onClose} context="reader-page" />` only when an `open` prop is true. Render with `open=false`, then re-render with `open=true`, so the reader's listener registers first, as in the app. Dispatch `new KeyboardEvent("keydown", { key: "Escape", code: "Escape", bubbles: true, cancelable: true })` on the `.shortcuts-close` button. Expect `onClose` called once and `exitReader` not called.
+    - (q) Control, which passes on the base: the same harness with `open=false`, Escape dispatched on `window`. Expect `exitReader` called once.
+    - (o) Read `src/styles/keyboard.css`. For the `.shortcuts-container {` and `.shortcuts-key {` blocks, every `var(--name` they reference satisfies `definedInEveryTheme(name) === 4`, and the container block sets `color: var(--text)`.
+    - (p) Read `src/styles/page-reader.css`. The `.rbb-mode-btn {` block has `border: 1px solid var(--border)`, the `.rbb-mode-btn--last {` block has `border-color: var(--text-dim)`, and both tokens satisfy `definedInEveryTheme`.
+- **Constants:** none.
+- **Branch:** `eb/ux-polish-2` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\ux-polish-2`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:**
+  - **C1:** the four test paths only (gate: Done-when 1).
+  - **C2:** every edit site (gates: Done-when 2–10, then 11 and 13).
+  - **Then:** the owner smoke (Done-when 12) on C2's production build, then merge to `main` with `--no-ff` and push (Rule 5b).
+  - **Never stage** `tests/perf-baseline-results.json` or anything under `release/`.
+  - **Register:** the run writes nothing to the register (standing rule 46).
+- **Failure handling:**
+  - **C1 control mismatch:** if a C1 test fails for a reason other than the one stated, or passes on the base, stop. For example, if (m) logs no duplicate-key error, or (n) does not call `exitReader`, the base or React changed since this spec.
+  - **Existing test fails:** if any existing test fails, report the exact test and stop; do not weaken it. Watch in particular `readerBottomBarControls` 1b ("Narrat"), `einkFoundation`, `componentStyleCleanup`, `readerModeBoundaries` and `readerModes/foliateViewTeardown`.
+  - **Line drift:** if any cited line differs on the base (a forwarder's field line, the hook's Escape line `:241`, the overlay's `:177-190`), re-grep. Proceed only if the content is identical and only the number moved; record the new number in the staging memo. Any change in content stops the run.
+  - **Smoke failures:** record each as a fail.
+    - (a) flickers only after clicking into the text: a forwarder is not carrying `repeat`.
+    - (a) flickers both ways: the guard is misplaced.
+    - (d) still dark in E-ink: check the inline variables on `<html>` in DevTools.
+    - (e) still exits: the capture flag is missing from the add or the remove call.
+  - **Retry ceiling and rollback:** two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C. Exceptions: one comment line in `src/types.ts` (shared core) and one line in each of the three named `FoliateView.tsx` forwarders.
+  - **Forbidden:**
+    - every file not named in *Edit sites* or *Tests*;
+    - `src/reader/**`, except the three forwarder lines named;
+    - `src/reader/modes/narrate/**` entirely;
+    - `src/utils/FlowScrollEngine.ts` and `src/components/ReaderContainer.tsx`;
+    - `main/**` and `preload.js`;
+    - `src/components/ThemeProvider.tsx` and `src/styles/themes.css`;
+    - every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** `src/types.ts:188`, comment only. No other active item may edit `src/types.ts` while this runs; confirm the epic's open phase does not. `ReaderContainer.tsx` and `FlowScrollEngine.ts` stay untouched.
+  - **Merge order:**
+    - **READER-VISUAL-DIAG-1:** independent; it commits no code. The forwarder edits change no line numbers, so its census citations in `focus/` and `flow/FoliateView.tsx` stay valid.
+    - **NARRATE-REBUILD-1 P6:** independent, as long as P6 edits none of these paths. P6's G2 build is already taken (`f677353f`), so this item's smoke runs on its own production build.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Failing tests (h)–(p) and control (q) committed; output recorded | calculable | positive control | bounded | low | 35m (eleven failing tests and one control across four files, one of them new) | — | Wave A |
+| 2 | A held Space acts once per press: hook repeat guard and three forwarders carry `repeat` | calculable | ui fix | bounded | low | 10m (one guard line, three one-field edits) | — | Wave B (parallel-eligible, write-disjoint) |
+| 3 | Escape with the shortcuts overlay open closes only the overlay | calculable | ui fix | mechanical | low | 10m (one inserted line, two listener lines) | — | Wave B (parallel-eligible, write-disjoint) |
+| 4 | Help text corrected: Page hint line, hotkey row keys, Technical Reference line, `types.ts` comment | calculable | ui fix | mechanical | low | 10m (four one-line edits) | — | Wave B (parallel-eligible, write-disjoint) |
+| 5 | Theme tokens: overlay panel and key chips, remembered-mode outline | calculable | ui fix | bounded | low | 15m (five CSS values, one added declaration) | — | Wave B (parallel-eligible, write-disjoint) |
+| 6 | Targeted suites, gates, typecheck, full suite and build green; reviews; owner smoke on a production build; merged and pushed | calculable | merge and verify | mechanical | low | 45m (full `npm test` + typecheck + build + packaged `--dir` build + smoke + one --no-ff merge) | — | Wave C |
+
+**Total:** chain 2m · sum 3m; 6 of 6 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+**Wave split (CLAUDE.md "Sprints with 5+ implementation tasks MUST be pre-split into waves"; standing rule 10):** five implementation tasks (1–5) and about 55 tool uses in one pass (≈ 17 reads, ≈ 17 writes, ≈ 10 runs and commits, two reviewer spawns), so the work is split into three dispatches.
+- **Wave A (C1, ≈ 20 tool uses):** task 1, ending at Done-when 1.
+- **Wave B (C2, ≈ 30):** tasks 2–5, then Done-when 2–10 and `npm run typecheck`.
+- **Wave C (≈ 20):** the full suite and build (Done-when 11), the spec-compliance and code-quality reviews in parallel (standing rules 7 and 9), the staging memo, the owner smoke (Done-when 12), the fence (Done-when 13), then merge and push.
+
+The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and may run in parallel on one tree (standing rule 37: write-disjoint, none depends on another's output).
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** eleven new tests fail on the base for named reasons before any fix (Done-when 1), and control (q) passes there.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Each search gate was dry-run on `66f15981`, with its result noted, including the count, numstat and absence gates.
+- **Standing rule 45 (LL-141) and LL-152:** held keys, readability and outline strength are perceptual, so they are owner-observed. The smoke runs on a packaged production build because dev mode is slow (BUG-189), and in two themes.
+- **Standing rule 47 (LL-147):** the full suite and the smoke are defined on the owner's machine, so this item is dispatched to a local session.
+- **Standing rule 48 (LL-149):** `npm run typecheck` and `npm run build` are in Done-when 11, beside `npm test`. The new test files are TypeScript.
+- **Standing rule 41 (LL-136):** the fence (Done-when 13) exempts the time log and staging memo.
+- **Standing rule 42 (LL-135):** the dispatch carries the filled reconciliation recipe or a committed path to it.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 36 (SRL-086/087):** every line was read on `66f15981` on 2026-10-14. The failure handling covers drift.
+- **Standing rule 37 (SRL-089) and the shared-core freeze:** the `src/types.ts` comment edit is declared, and the item runs only while no other item edits that file. Wave B's parallel tasks are write-disjoint.
+- **Standing rule 2 (PR-7) and CLAUDE.md theming:** fixes 6 and 7 change only CSS custom-property references in `src/styles/`. They add no inline style and use only tokens all four theme maps define; tests (o) and (p) enforce that.
+- **Standing rules 15 and 20 (SRL-053, SRL-058):** the forwarders are Foliate reader-mode code, so the smoke exercises Page, Flow and Focus separately (12a, 12b).
+- **Reading-mode separation (CLAUDE.md):** each mode's forwarder is edited in its own file, with no shared helper or sibling import.
+- **LL-105:** the repeat guard sits before the surface-gated blocks, so it covers every surface.
+- **LL-080:** the overlay consumes Escape itself (capture phase); the reader's global handler is not gated on modal state.
+- **LL-012:** the key × surface matrix for held Space (Page enter, Page Shift switch, Focus/Flow toggle, and Narrate through the Focus surface) is stated in the design decisions and tested in (h), (i) and (j).
+- **LL-156:** the out-of-scope lines were re-read against the edit sites. The Narrate forwarder, the sibling overlays and the other `--color-bg` panels are not edited by this item, so no waiver silently covers its own code.
+- **LL-150 (for CSS edits):** values change only; no selector is removed or moved.
+
+#### Stubs beyond the buffer (roadmap review 2026-10-14)
+
+Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
+
+- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 16 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both `syncLibraryWithFolder` (`main.js`) and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. Merges after FOLDER-SCAN-PERF-1 (same `main/folder-watcher.js` and `main.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 21 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 17 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 20 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 18 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 19 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+
 
 ## Deferred Lanes
 

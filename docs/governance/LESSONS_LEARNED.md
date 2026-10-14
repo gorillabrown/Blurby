@@ -2949,3 +2949,9 @@ Related: LL-142, LL-006.
 
 ### LL-152 — status (SETTINGS-WRITE-DURABLE-1, 2026-10-14)
 **Status:** Observation — did not hold at spec stage: SETTINGS-WRITE-DURABLE-1 Done-when 7 prescribed npm run dev for a 1-second quit check; the dev build took 2.5-4 min to load and could not be quit within 1 s, so the timing half was untestable as written
+
+### LL-147 — status (2026-10-14, 2026-10-14)
+**Status:** Promoted -> standing rule 47
+
+### LL-149 — status (2026-10-14, 2026-10-14)
+**Status:** Promoted -> standing rule 48

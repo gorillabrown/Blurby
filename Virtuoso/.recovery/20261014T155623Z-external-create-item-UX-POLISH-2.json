@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155623Z-external-create-item-UX-POLISH-2",
+  "operation": "external-create-item",
+  "item_id": "UX-POLISH-2",
+  "created": "2026-10-14T15:56:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Keyboard and help-surface follow-ups after UX-POLISH-1",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "M",
+      "lane": "UX polish",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#ux-polish-2",
+      "branch": "eb/ux-polish-2",
+      "description": "Held Space acts once, unique hotkey-map keys, current hint line and help text, shortcuts overlay readable and mode outline correct in every theme, Escape closes the overlay without leaving the reader.",
+      "notes": "Created by roadmap review 2026-10-14. UX-POLISH-1 follow-ups and G2 E-ink findings. Shared core: one comment line in `src/types.ts`. Full Spec: U9/U10 pass.",
+      "sequence": 15,
+      "prerequisites": [],
+      "id": "UX-POLISH-2"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UX-POLISH-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "UX-POLISH-2",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UX-POLISH-2",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155623Z-external-create-item-UX-POLISH-2",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-817e-8ec8-f16167adca12",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:29Z",
+  "outcome": "succeeded"
+}

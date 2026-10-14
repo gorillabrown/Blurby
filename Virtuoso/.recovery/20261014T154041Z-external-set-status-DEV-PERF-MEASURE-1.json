@@ -1,0 +1,37 @@
+{
+  "id": "20261014T154041Z-external-set-status-DEV-PERF-MEASURE-1",
+  "operation": "external-set-status",
+  "item_id": "DEV-PERF-MEASURE-1",
+  "created": "2026-10-14T15:40:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "dissolved",
+      "completed": "2026-10-14",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-14-audit.md",
+      "notes": "Dissolved 2026-10-14 into FOLDER-SCAN-PERF-1 (owner decision, roadmap review 2026-10-14): BUG-189 was measured on a profile with the 120,000-file source folder (BUG-193)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:DEV-PERF-MEASURE-1:[('completed', '2026-10-14'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-14-audit.md'), ('notes', 'Dissolved 2026-10-14 into FOLDER-SCAN-PERF-1 (owner decision, roadmap review 2026-10-14): BUG-189 was measured on a profile with the 120,000-file source folder (BUG-193).'), ('status', 'dissolved')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "DEV-PERF-MEASURE-1",
+      "idempotencyKey": "set-status:DEV-PERF-MEASURE-1:[('completed', '2026-10-14'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-14-audit.md'), ('notes', 'Dissolved 2026-10-14 into FOLDER-SCAN-PERF-1 (owner decision, roadmap review 2026-10-14): BUG-189 was measured on a profile with the 120,000-file source folder (BUG-193).'), ('status', 'dissolved')]",
+      "actualRevision": "2026-10-14T15:41:01Z",
+      "recoveryId": "20261014T154041Z-external-set-status-DEV-PERF-MEASURE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T15:41:02Z",
+  "outcome": "succeeded"
+}

@@ -2,16 +2,32 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-13
+**Last updated:** 2026-10-14
 
 ---
 
 ## Incomplete
 
+### BUG-195 — An unreachable source folder empties the library of its folder books
+**Reported:** 2026-10-14 (roadmap review 2026-10-14, while specifying FOLDER-SCAN-PERF-1; found by reading the code, not observed)
+**Severity:** HIGH (user data: every folder-sourced book and its reading position is removed from `library.json`)
+**Status:** OPEN — scheduled as FOLDER-UNREACHABLE-GUARD-1 (stub). Lane: Library & Content.
+**Location:** `main/folder-watcher.js:29` (`scanFolderAsync` returns `[]` when `access` fails); the prune in `syncLibraryWithFolder` (`main.js:333-398`) and in `rescan-folder` (`main/ipc/library.js:310` onward), which keep only documents the scan found.
+**Description:** If the source folder cannot be reached when a sync runs (Google Drive not yet mounted at launch, a removed USB disk, a network share offline), the scan returns an empty list and the sync treats every folder-sourced book as deleted. FOLDER-SCAN-PERF-1's 3 s startup delay narrows the window at launch but does not close it.
+**Fix path:** distinguish "unreachable" from "empty": the scan reports an unreachable root (for example `null`), and both callers skip the prune and leave the library unchanged. A test drives each caller with an unreachable folder and asserts the folder books survive.
+
+### BUG-194 — Deleting the sample book deletes the bundled sample file
+**Reported:** 2026-10-14 (roadmap review 2026-10-14, while specifying PACKAGING-FIX-1; found by reading the code, not observed)
+**Severity:** LOW (a fresh install's sample file in the install folder, or the tracked `resources/sample-meditations.epub` in dev, is deleted; reinstalling or `git restore` brings it back)
+**Status:** OPEN — unscheduled (left out of PACKAGING-FIX-1). Lane: Library & Content.
+**Location:** `main/ipc/library.js:53-59` (`delete-doc` unlinks `doc.filepath`); the first-run sample stores the bundled file's absolute path (`main.js:601-614`).
+**Description:** First run adds the sample *Meditations* with `filepath` set to the bundled file itself. Deleting that book from the library unlinks `doc.filepath`, so the bundled file is deleted too. PACKAGING-FIX-1 relinks the sample to a copy in the data folder only when the bundled path is missing, so a fresh install is still exposed until its first relink.
+**Fix path:** copy the sample into the data folder at first run (so `filepath` never points at the bundle), or skip the unlink for `source: "sample"`.
+
 ### BUG-193 — A large source folder stalls the app at every launch: books take about 2 minutes to open
 **Reported:** 2026-10-14 (NARRATE-REBUILD-1 P6 G2 preparation; owner's profile on the production build `release\win-unpacked\Blurby.exe`, main `ab5cead4`)
 **Severity:** HIGH (with a large source folder every book opens about 2 minutes after launch; to a user the reader looks broken)
-**Status:** OPEN. Lane: Library & Content. Predates the Narrate rebuild (the folder watcher's last change is `c8dc141f`, the startup sync `87295ecc`, both 2026-04). Diagnosed by the P6 executor on a copy of the owner's settings (state.md, `c6400477` on `eb/narrate-rebuild-1-p6`); confirmed on the owner's real profile by the planner.
+**Status:** OPEN — scheduled as FOLDER-SCAN-PERF-1 (roadmap review 2026-10-14). Lane: Library & Content. Predates the Narrate rebuild (the folder watcher's last change is `c8dc141f`, the startup sync `87295ecc`, both 2026-04). Diagnosed by the P6 executor on a copy of the owner's settings (state.md, `c6400477` on `eb/narrate-rebuild-1-p6`); confirmed on the owner's real profile by the planner.
 **Location:** `main.js:654-657` (startup: `startWatcherFn()` then `syncLibraryWithFolder()` whenever `settings.sourceFolder` is set); `main/folder-watcher.js:27-69` (`scanFolderAsync`: two `realpath` calls and one `stat` per file, over the whole tree); the chokidar watcher, which also crawls the whole tree.
 **Description:** The owner's source folder is `G:\My Drive\Personal\Readings` (Google Drive), about 120,000 files (`Readings/Books` alone has 38,173 entries). At launch the scan and the watcher flood the main process; `readBookBytes` queues behind them, so any book shows a blank page with "Loading book…" for about 2 minutes before the first section renders. Foliate's paginator then logs `Cannot destructure property 'style' of 'r' as it is null`, a side effect, not the cause.
 **Evidence (executor, scratch profile with a copy of the owner's settings):** fresh profile renders in 1 s; owner settings stuck past a 120 s cap, cover at 130 s with a 300 s cap; `sourceFolder` deleted renders at once; a 12-file Drive folder renders in 6.7 s. **(Planner, owner's real profile, 2026-10-14):** with the folder set, a Drive EPUB and a local EPUB (`converted9591611769k92w18.epub`) both stayed on "Loading book…" for 38+ s; with `sourceFolder` cleared, the local EPUB rendered at once.
@@ -22,7 +38,7 @@
 ### BUG-192 — Saves at quit are abandoned: the last change before quitting is lost
 **Reported:** 2026-10-13 (owner smoke of SETTINGS-WRITE-DURABLE-1, dev build of `eb/settings-write-durable-1` @ `5abdd405`)
 **Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
-**Status:** OPEN — filed separately from SETTINGS-WRITE-DURABLE-1 by the owner's decision; that item merges without fixing it. Lane: Platform & Maintenance.
+**Status:** OPEN — scheduled as QUIT-FLUSH-1 (roadmap review 2026-10-14). Filed separately from SETTINGS-WRITE-DURABLE-1 by the owner's decision; that item merged without fixing it. Lane: Platform & Maintenance.
 **Location:** `main.js` `app.on("will-quit", async (event) => …)` (`:691` on `main` @ `15e9c2f1`).
 **Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%lurbylurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
 **Root cause:** Electron does not wait for an async `will-quit` listener. The handler cancels only the first quit (`event.preventDefault()`) to stop the Narrate producer, then calls `app.quit()`; on the second pass every `await` — `flushTtsEvalTraceCaptures()`, `saveLibraryNow()`, SETTINGS-WRITE-DURABLE-1's `saveSettingsFn()`, and the final cloud sync — runs after Electron has already decided to exit, so the process ends mid-write. The library flush had the same flaw before SETTINGS-WRITE-DURABLE-1; that item's quit flush inherits it.
@@ -32,7 +48,7 @@
 ### BUG-191 — Narration reads four-digit years as cardinal numbers
 **Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
-**Status:** OPEN — carry into NARRATE-REBUILD-1 text normalization. Lane: TTS / Narration Engine.
+**Status:** OPEN — stub NARRATE-YEARS-1, after NARRATE-REBUILD-1 closes (roadmap review 2026-10-14). Lane: TTS / Narration Engine.
 **Location:** the removed Narrate pipeline's spoken-text normalization (Kokoro, voice `am_adam`, 1.2x); no live code path until NARRATE-REBUILD-1.
 **Description:** "Years are read like one thousand and seventy four instead of the standard nineteen seventy four." A year such as 1974 is spoken as a cardinal number instead of in paired-digit year form.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-20T21-03-25Z.json` and `.png` (gitignored, local to the owner's machine).
@@ -41,7 +57,7 @@
 ### BUG-190 — A PDF import fails with "The original file could not be converted"
 **Reported:** 2026-05-21 (in-app report `bug-2026-05-21T14-56-19Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** MEDIUM (reporter marked it Broken; the document cannot be read)
-**Status:** OPEN — not reproduced since 2026-05-21; needs a live reproduction on the current build. Lane: Library & Content.
+**Status:** OPEN — not reproduced since 2026-05-21; stub PDF-IMPORT-DIAG-1 reproduces it on the current build (roadmap review 2026-10-14). Lane: Library & Content.
 **Location:** PDF-to-EPUB conversion on import (`convertToEpub()` path, `main/` file parsers); exact site undetermined.
 **Description:** A 223-page PDF ("Dnc. May-20-2026") shows in the library, but opening it shows the toast "This document needs to be re-imported. The original file could not be converted." with a Remove action.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-21T14-56-19Z.json` and `.png` (gitignored, local); the report's console log holds no conversion error.
@@ -50,7 +66,7 @@
 ### BUG-189 — Dev-mode (`npm run dev`) is slow across the whole app
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (development and owner-smoke friction; the production build was not measured)
-**Status:** OPEN — measurement stub DEV-PERF-MEASURE-1 (roadmap position 15; roadmap review 2026-10-12). Lane: Platform & Maintenance.
+**Status:** OPEN — DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1 (roadmap review 2026-10-14): the slowness was measured on the BUG-193 profile; FOLDER-SCAN-PERF-1's Done-when 9(e) re-measures dev mode and closes this bug if it is back to normal. Lane: Platform & Maintenance.
 **Location:** the dev server and Electron dev build on the owner's machine; no source location identified.
 **Description:** The whole app, the library included, is too slow in dev mode to drive timing-sensitive live checks. The owner could not judge the Shift+Space sequence (Done-when 16(f)), which was accepted from static verification instead.
 **Root cause:** Undetermined. An A/B on 2026-10-12 ran the base (`main` @ `612d03f5`, same profile, same actions) and the owner reported it equally slow, so the cause is pre-existing and not the removal.

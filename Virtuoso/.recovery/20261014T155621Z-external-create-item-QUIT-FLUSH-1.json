@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155621Z-external-create-item-QUIT-FLUSH-1",
+  "operation": "external-create-item",
+  "item_id": "QUIT-FLUSH-1",
+  "created": "2026-10-14T15:56:21Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Finish every save before the app quits",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#quit-flush-1",
+      "branch": "eb/quit-flush-1",
+      "description": "Cancel the first quit, run the library, settings, pending-write and best-effort cloud saves in order under a 3 s cap, keep the Narrate producer shutdown uncapped, then quit. Fixes BUG-192.",
+      "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass.",
+      "sequence": 11,
+      "prerequisites": [],
+      "id": "QUIT-FLUSH-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:QUIT-FLUSH-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "QUIT-FLUSH-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:QUIT-FLUSH-1",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155621Z-external-create-item-QUIT-FLUSH-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-8157-bb2e-d9f1e2108d29",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:28Z",
+  "outcome": "succeeded"
+}
