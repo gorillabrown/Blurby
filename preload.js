@@ -164,7 +164,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   extractEpubWords: (bookId) => ipcRenderer.invoke("extract-epub-words", bookId),
 
   // Rebuilt Narrate (NARRATE-REBUILD-1 P4): the producer's narrow surface, nothing else of Kokoro is reachable
-  narrateGenerate: (text, voice, speed) => ipcRenderer.invoke("narrate-generate", text, voice, speed),
+  narrateGenerate: (text, voice, speed, options) => ipcRenderer.invoke("narrate-generate", text, voice, speed, options),
   narratePreload: () => ipcRenderer.invoke("narrate-preload"),
   narrateStatus: () => ipcRenderer.invoke("narrate-status"),
 

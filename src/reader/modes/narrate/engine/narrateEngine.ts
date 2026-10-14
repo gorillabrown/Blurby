@@ -13,15 +13,60 @@
 import { planChunks, type ChunkPlanEntry } from "./chunkPlan";
 import { lookupUnit, verifyTable, type ChunkTable, type TableRejection } from "./wordTable";
 import { firstVoicedSample, type AudioOutput, type ScheduledSource } from "./playbackClock";
+import type {
+  TtsEvalNarrateCommitEvent,
+  TtsEvalNarrateFailureEvent,
+  TtsEvalNarrateFirstVoicedEvent,
+  TtsEvalNarrateRequestCause,
+  TtsEvalNarrateRequestEvent,
+  TtsEvalNarrateScheduleEvent,
+  TtsEvalNarrateStopEvent,
+} from "../../../../types/eval";
+
+export type EngineRequestCause = TtsEvalNarrateRequestCause;
+
+/**
+ * The leading silence skipped at playback (T6, the P3 latency lever): up to the first voiced sample, but never into
+ * the last duration frame of the first unit, so the chunk's first word always sounds under the cursor for at least
+ * one table frame. At >= 1.40x the table's first unit can end before the first voiced sample (VERDICT P0-3); trimming
+ * past it would skip that word's highlight (D5: a drop). Both bounds are exact sample counts; nothing is estimated.
+ */
+export function leadingTrim(pcm: Float32Array, sampleRate: number, table: ChunkTable): number {
+  const voiced = firstVoicedSample(pcm, sampleRate);
+  const first = table.units[0];
+  if (!first) return voiced;
+  return Math.max(0, Math.min(voiced, first.sampleEnd - table.samplesPerFrame));
+}
+
+/** D3/D5/D6 recorded output (the sink stamps `ts`): every record names a clock field by its clock, nothing is estimated. */
+export type EngineTraceEvent =
+  | Omit<TtsEvalNarrateCommitEvent, "ts">
+  | Omit<TtsEvalNarrateRequestEvent, "ts">
+  | Omit<TtsEvalNarrateFirstVoicedEvent, "ts">
+  | Omit<TtsEvalNarrateScheduleEvent, "ts">
+  | Omit<TtsEvalNarrateStopEvent, "ts">
+  | Omit<TtsEvalNarrateFailureEvent, "ts">;
+
+const perfNow = (): number => (typeof performance !== "undefined" ? performance.now() : Date.now());
+/** A performance.now() reading as epoch ms (trace only: compares with main-process stamps). */
+const epochOf = (t: number): number => (typeof performance !== "undefined" && performance.timeOrigin ? performance.timeOrigin + t : t);
 
 export interface ProducerResult {
   readonly table: ChunkTable | null;
   readonly pcm: Float32Array;
   readonly sampleRate: number;
+  /** The producer's generation time (worker-side), when it reports one, and its worker and load at assignment (trace only). */
+  readonly genMs?: number;
+  readonly worker?: number;
+  readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
+  readonly ipc?: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> };
 }
 
 export interface ProducerPort {
-  generate(request: { readonly text: string; readonly voice: string; readonly speed: number }): Promise<ProducerResult>;
+  /** priority: the first chunk after a request, or prefetch; group: the engine epoch (Decision #18). */
+  generate(request: { readonly text: string; readonly voice: string; readonly speed: number; readonly priority?: "request" | "prefetch"; readonly group?: string }): Promise<ProducerResult>;
+  /** Load and warm the voice ahead of the first request (the mode calls it on entry); never required. */
+  preload?(): Promise<void>;
 }
 
 export type EngineState = "idle" | "playing" | "paused" | "stopped";
@@ -42,6 +87,8 @@ export interface EngineEvents {
   /** Reached the end of the words. */
   onComplete(): void;
   onDiagnostic?(kind: string, detail: string): void;
+  /** Recorded output (D3): commits, requests, first voiced samples, schedules and stops. Absent = nothing is built. */
+  onTrace?(event: EngineTraceEvent): void;
 }
 
 export interface EngineOptions {
@@ -57,6 +104,12 @@ export interface EngineOptions {
   readonly prefetch?: number;
   /** Seconds between "now" and the first scheduled sample (default 0.03). */
   readonly leadSeconds?: number;
+  /** Decision #18: keep at least this many seconds of audio scheduled ahead (the prefetch measured in audio, not chunks). */
+  readonly prefetchSeconds?: number;
+  /** Decision #18: the steady-state chunk's word cap (chunkPlan maxWords). Default: none. */
+  readonly chunkMaxWords?: number;
+  /** Word caps for the first chunks of every epoch (chunkPlan ramp; the P5 latency lever). Default: none (T2's first chunk, then token packing). */
+  readonly chunkRamp?: readonly number[];
 }
 
 interface Chunk {
@@ -67,6 +120,13 @@ interface Chunk {
   readonly trim: number;
   /** First book-word offset of each unit within the chunk. */
   readonly unitWord: readonly number[];
+  /** performance.now() at the request and at the result, and the producer's generation time (trace only). */
+  readonly requestedT: number;
+  readonly resultT: number;
+  readonly genMs: number | null;
+  readonly worker: number | null;
+  readonly busyAtAssign: { readonly worker: number; readonly pool: number; readonly workers: number } | null;
+  readonly ipc: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> } | null;
   /** Current scheduling: the sample playback began at, and the context time it began. */
   offset: number;
   startAt: number;
@@ -82,19 +142,35 @@ export class NarrateEngine {
   private readonly events: EngineEvents;
   private readonly prefetch: number;
   private readonly lead: number;
+  private readonly ramp: readonly number[];
+  private readonly prefetchSeconds: number | null;
+  private readonly chunkMaxWords: number | undefined;
   private voice: string;
   private speed: number;
 
   private state: EngineState = "idle";
+  /** Distinguishes this engine's epochs from another engine's in the producer's queue groups. */
+  private readonly id = Math.random().toString(36).slice(2, 10);
   private epoch = 0;
+  /** Chunks planned since the epoch began (the ramp step). */
+  private chunkSeq = 0;
   private chunks: Chunk[] = [];
   private nextWord = 0;
   private inFlight = 0;
+  /** The generation in flight (at most one; read only while inFlight > 0): its first word, and whether it is a request's first chunk. */
+  private inFlightStart = 0;
+  private inFlightIsRequest = false;
   private cursor = -1;
   private failure: EngineFailure | null = null;
   private pausedAt: { readonly index: number; readonly sample: number } | null = null;
   /** R7: the context time the unit in progress ends and the next word starts at the new speed. */
   private speedChangeAt: number | null = null;
+  /** performance.now() of the previous tick, for the commit record's frame interval. */
+  private lastTickPerf: number | null = null;
+  /** The last unit published by tick (catch-up after a long frame starts after it); cleared by reset, kept across pause/resume. */
+  private lastPublished: { readonly chunk: Chunk; readonly unit: number } | null = null;
+  /** The request whose first voiced sample has not been scheduled yet (D6). */
+  private pendingRequest: { readonly cause: EngineRequestCause; readonly t: number; readonly ctx: number; readonly word: number } | null = null;
 
   constructor(options: EngineOptions) {
     this.words = options.words;
@@ -104,6 +180,9 @@ export class NarrateEngine {
     this.events = options.events;
     this.prefetch = options.prefetch ?? 1;
     this.lead = options.leadSeconds ?? 0.03;
+    this.ramp = options.chunkRamp ?? [];
+    this.prefetchSeconds = options.prefetchSeconds ?? null;
+    this.chunkMaxWords = options.chunkMaxWords;
     this.voice = options.voice;
     this.speed = options.speed;
   }
@@ -114,31 +193,42 @@ export class NarrateEngine {
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
   /** Start (or restart) from a book word: a new epoch, nothing from before it survives. */
-  play(fromWord: number): void {
+  play(fromWord: number, cause: EngineRequestCause = "play"): void {
     this.reset();
     if (fromWord < 0 || fromWord >= this.words.length) { this.setState("stopped"); this.events.onComplete(); return; }
     this.nextWord = fromWord;
+    this.request(cause, fromWord);
     this.setState("playing");
     this.fill();
   }
 
   pause(): void {
     if (this.state !== "playing") return;
-    const pos = this.position(this.output.now());
+    const now = this.output.playbackPosition(); // the heard sample: nothing heard is repeated, nothing unheard is dropped
+    const pos = this.position(now);
     this.pausedAt = pos ? { index: pos.index, sample: pos.sample } : this.nextScheduledPause();
-    for (const c of this.chunks) { c.source?.cancel(); c.source = null; }
+    for (const c of this.chunks) this.stopSource(c, now, "pause");
     this.speedChangeAt = null;
+    this.pendingRequest = null;
+    this.lastTickPerf = null;
     this.setState("paused");
   }
 
   /** Resume at the exact sample the pause stopped at: no word is dropped or repeated. */
-  resume(): void {
+  resume(cause: EngineRequestCause = "resume"): void {
     if (this.state !== "paused") return;
     if (this.failure && !this.pausedAt) return;
     this.setState("playing");
-    const at = this.pausedAt;
+    // A pause in a gap has no paused sample; a chunk that arrived during the pause is where speech continues.
+    const at = this.pausedAt ?? this.firstUnscheduled();
     this.pausedAt = null;
-    if (!at) { this.fill(); return; }
+    // Nothing to replay: speech restarts like a Play, with the ramp's short first chunk as a request. A prefetch still
+    // generating from before the pause (long, and no one is waiting on it) is abandoned: its epoch is stale, so it is
+    // dropped on arrival and the producer drops what of it is still queued. A first chunk still generating is already
+    // that request and is kept.
+    if (!at && this.inFlight > 0 && !this.inFlightIsRequest) { this.epoch += 1; this.inFlight = 0; this.nextWord = this.inFlightStart; }
+    this.request(cause, at ? this.chunks[at.index].entry.startWord + this.chunks[at.index].unitWord[Math.max(0, lookupUnit(this.chunks[at.index].table.units, at.sample))] : this.nextWord);
+    if (!at) { if (this.inFlight === 0) this.chunkSeq = 0; this.fill(); return; } // the next chunk planned answers the request
     let startAt = this.output.now() + this.lead;
     for (let i = at.index; i < this.chunks.length; i++) {
       const c = this.chunks[i];
@@ -155,22 +245,26 @@ export class NarrateEngine {
   }
 
   /** R7: the unit in progress finishes at the old speed; the next word starts at the new one. Rapid changes coalesce. */
-  setSpeed(rate: number): void {
+  setSpeed(rate: number, cause: EngineRequestCause = "speed"): void {
     if (!(rate > 0)) return;
     this.speed = rate;
     if (this.state !== "playing") return;
     if (this.speedChangeAt !== null) return; // coalesce: the pending regeneration reads this.speed when it is requested
-    const now = this.output.now();
+    const now = this.output.playbackPosition(); // the unit in progress is the heard one
     const pos = this.position(now);
+    // The chunk still generating (at the old speed) is abandoned below; its words are the next unplayed ones.
+    const generatingFrom = this.inFlight > 0 ? this.inFlightStart : null;
     this.epoch += 1; // every in-flight generation at the old speed is stale
     this.inFlight = 0;
     if (!pos) {
       // In a gap or before the first chunk: nothing voiced is in progress; regenerate from the next unplayed word.
       const first = this.chunks.find((c) => c.startAt > now);
-      const from = first ? first.entry.startWord : this.nextWord;
+      const from = first ? first.entry.startWord : generatingFrom ?? this.nextWord;
       this.dropFrom(first ? this.chunks.indexOf(first) : this.chunks.length);
       this.nextWord = from;
       this.speedChangeAt = now;
+      this.chunkSeq = 0;
+      this.request(cause, from);
       this.fill();
       return;
     }
@@ -178,11 +272,13 @@ export class NarrateEngine {
     const u = pos.unit >= 0 ? pos.unit : 0;
     const unit = c.table.units[u];
     const endAt = c.startAt + (unit.sampleEnd - c.offset) / this.output.sampleRate;
-    c.source?.stop(endAt);
+    this.stopSource(c, endAt, "speed");
     c.endAt = endAt;
     this.dropFrom(pos.index + 1);
     this.nextWord = c.entry.startWord + c.unitWord[u] + unit.words.length;
     this.speedChangeAt = endAt;
+    this.chunkSeq = 0;
+    this.request(cause, this.nextWord);
     this.fill();
   }
 
@@ -190,15 +286,20 @@ export class NarrateEngine {
     this.voice = voice;
   }
 
-  /** Publish the cursor for the current playback sample. Called once per display frame by the binding. */
-  tick(): void {
+  /**
+   * Upkeep that must not wait for display frames — a hidden, minimized or covered window gets none, and narration
+   * would stop once the prefetched audio ran out: drop long-finished chunks, keep the prefetch window full, and at the
+   * end of the scheduled audio finish (or pause on a failure). The binding runs it on a timer as well as every tick.
+   */
+  pump(): void {
     if (this.state !== "playing") return;
-    const now = this.output.now();
-    const pos = this.position(now);
-    if (pos) {
-      if (pos.unit >= 0) this.publish(this.chunks[pos.index].entry.startWord + this.chunks[pos.index].unitWord[pos.unit]);
-      return;
-    }
+    const now = this.output.playbackPosition();
+    // Chunk indices are referenced only within a call; a pause's resume index is taken fresh at the pause.
+    const gone = this.chunks.findIndex((c) => c.endAt > now - 2);
+    if (gone > 0) this.chunks.splice(0, gone);
+    else if (gone < 0 && this.chunks.length > 1) this.chunks.splice(0, this.chunks.length - 1);
+    this.fill();
+    if (this.position(now)) return;
     // Past the last scheduled sample: hold the last word (R6) until the next chunk starts, or finish.
     const last = this.chunks.at(-1);
     if (last && now >= last.endAt && this.inFlight === 0 && this.speedChangeAt === null) {
@@ -207,26 +308,66 @@ export class NarrateEngine {
     }
   }
 
+  /** Publish the cursor for the current playback sample. Called once per display frame by the binding. */
+  tick(): void {
+    this.pump();
+    if (this.state !== "playing") return;
+    const now = this.output.playbackPosition(); // the cursor is the unit at the heard sample (D3)
+    const t = perfNow();
+    const frameDt = this.lastTickPerf === null ? null : t - this.lastTickPerf;
+    this.lastTickPerf = t;
+    const pos = this.position(now);
+    if (!pos || pos.unit < 0) return; // silence holds the last word (R6)
+    const c = this.chunks[pos.index];
+    // A long display frame can carry the sample past whole units: publish each unit this chunk sounded since the last publish, in order (D5).
+    const from = this.lastPublished?.chunk === c ? this.lastPublished.unit + 1 : Math.max(0, lookupUnit(c.table.units, c.offset));
+    for (let u = Math.min(from, pos.unit); u <= pos.unit; u++) this.commitUnit(c, u, now, t, frameDt);
+    this.lastPublished = { chunk: c, unit: pos.unit };
+  }
+
+  /** Publish one unit's word (skipped when it is already the cursor) and record its commit. */
+  private commitUnit(c: Chunk, u: number, now: number, t: number, frameDt: number | null): void {
+    const word = c.entry.startWord + c.unitWord[u];
+    if (this.publish(word) && this.events.onTrace) {
+      const ots = this.output.outputTimestamp();
+      this.events.onTrace({
+        kind: "narrate-commit", t, word, chunkStart: c.entry.startWord, unit: u,
+        boundaryCtx: c.startAt + (c.table.units[u].sampleStart - c.offset) / this.output.sampleRate,
+        nowCtx: now, headCtx: this.output.now(), otsCtx: ots?.contextTime ?? null, otsPerf: ots?.performanceTime ?? null, frameDt, speed: this.speed, epoch: this.epoch,
+      });
+    }
+  }
+
+
   // ── Generation and scheduling ─────────────────────────────────────────────
   private fill(): void {
     if (this.state !== "playing" || this.failure || this.inFlight > 0) return;
     if (this.nextWord >= this.words.length) return;
     const now = this.output.now();
-    const ahead = this.chunks.filter((c) => c.endAt > now).length;
-    if (ahead > this.prefetch) return;
-    const [entry] = planChunks(this.words, this.nextWord, { maxChunks: 1, breaks: this.breaks });
+    if (this.prefetchSeconds !== null) {
+      // By audio: one-word heading chunks no longer leave a gap a pause can fall into (Decision #18).
+      const scheduledEnd = this.chunks.reduce((end, c) => Math.max(end, c.endAt), 0);
+      if (scheduledEnd - now >= this.prefetchSeconds) return;
+    } else if (this.chunks.filter((c) => c.endAt > now).length > this.prefetch) return;
+    const [entry] = planChunks(this.words, this.nextWord, { maxChunks: 1, breaks: this.breaks, ramp: this.ramp, rampIndex: this.chunkSeq, maxWords: this.chunkMaxWords });
     if (!entry) return;
+    this.chunkSeq += 1;
     this.nextWord = entry.endWord;
     const epoch = this.epoch;
     const speed = this.speed;
+    const priority = this.chunkSeq === 1 ? "request" : "prefetch"; // the first chunk planned since the request
     this.inFlight += 1;
-    this.producer.generate({ text: entry.text, voice: this.voice, speed }).then(
-      (result) => this.onResult(entry, result, epoch, speed),
+    this.inFlightStart = entry.startWord;
+    this.inFlightIsRequest = priority === "request";
+    const requestedT = perfNow();
+    this.producer.generate({ text: entry.text, voice: this.voice, speed, priority, group: `${this.id}:${epoch}` }).then(
+      (result) => this.onResult(entry, result, epoch, speed, requestedT),
       (error: unknown) => this.onError(entry, error, epoch),
     );
   }
 
-  private onResult(entry: ChunkPlanEntry, result: ProducerResult, epoch: number, speed: number): void {
+  private onResult(entry: ChunkPlanEntry, result: ProducerResult, epoch: number, speed: number, requestedT = perfNow()): void {
+    const resultT = perfNow();
     if (epoch !== this.epoch) { this.diag("narrate:stale-result", `epoch ${epoch} < ${this.epoch}: ${entry.startWord}-${entry.endWord}`); return; }
     this.inFlight -= 1;
     if (this.state === "stopped" || this.state === "idle") return;
@@ -245,7 +386,7 @@ export class NarrateEngine {
     const unitWord: number[] = [];
     let w = 0;
     for (const u of table.units) { unitWord.push(w); w += u.words.length; }
-    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: firstVoicedSample(result.pcm, result.sampleRate), unitWord, offset: 0, startAt: 0, endAt: 0, source: null };
+    const chunk: Chunk = { entry, table, pcm: result.pcm, trim: leadingTrim(result.pcm, result.sampleRate, table), unitWord, requestedT, resultT, genMs: result.genMs ?? null, worker: result.worker ?? null, busyAtAssign: result.busyAtAssign ?? null, ipc: result.ipc ?? null, offset: 0, startAt: 0, endAt: 0, source: null };
     this.chunks.push(chunk);
     if (this.state === "playing") {
       const prev = this.chunks.at(-2);
@@ -269,12 +410,53 @@ export class NarrateEngine {
     c.startAt = startAt;
     c.endAt = startAt + (c.pcm.length - offset) / this.output.sampleRate;
     c.source = this.output.schedule(c.pcm, startAt, offset);
+    const trace = this.events.onTrace;
+    if (!trace) { this.pendingRequest = null; return; }
+    const sr = this.output.sampleRate;
+    trace({
+      kind: "narrate-schedule", t: perfNow(), epoch: this.epoch, chunkStart: c.entry.startWord, chunkEnd: c.entry.endWord, startAt, endAt: c.endAt, offset,
+      unitStarts: c.unitWord.map((w) => c.entry.startWord + w),
+      unitBoundaryCtx: c.table.units.map((u) => startAt + (u.sampleStart - offset) / sr),
+      requestedT: c.requestedT, resultT: c.resultT, genMs: c.genMs, worker: c.worker, busyAtAssign: c.busyAtAssign ? { ...c.busyAtAssign } : null,
+      hops: { requested: epochOf(c.requestedT), mainRecv: c.ipc?.recvEpoch ?? null, mainReply: c.ipc?.replyEpoch ?? null, result: epochOf(c.resultT), stages: c.ipc?.stages ? { ...c.ipc.stages } : null },
+    });
+    const req = this.pendingRequest;
+    if (!req) return;
+    this.pendingRequest = null;
+    const t = perfNow();
+    const head = this.output.now();
+    trace({
+      kind: "narrate-first-voiced", t, cause: req.cause, requestT: req.t, word: req.word, speed: this.speed, ctxAtRequest: req.ctx, startAt,
+      latencyS: startAt - req.ctx, latencyWallMs: (t - req.t) + Math.max(0, startAt - head) * 1000, leadS: this.lead, trimSamples: offset,
+    });
+  }
+
+  /** D6: a request that leads to voiced samples; its first scheduled chunk closes it (scheduleChunk). */
+  private request(cause: EngineRequestCause, word: number): void {
+    const t = perfNow();
+    const ctx = this.output.now();
+    this.pendingRequest = { cause, t, ctx, word };
+    const trace = this.events.onTrace;
+    if (!trace) return;
+    const ots = this.output.outputTimestamp();
+    trace({ kind: "narrate-request", t, cause, word, speed: this.speed, ctxAtRequest: ctx, otsCtx: ots?.contextTime ?? null, otsPerf: ots?.performanceTime ?? null });
+  }
+
+  /** Stop a scheduled source: at a pause or a drop now (cancel), at a speed change at the unit's end (R7, kept until then). */
+  private stopSource(c: Chunk, at: number, reason: "pause" | "speed" | "drop"): void {
+    if (!c.source) return;
+    if (reason === "speed") c.source.stop(at);
+    else { c.source.cancel(); c.source = null; }
+    this.events.onTrace?.({ kind: "narrate-stop", t: perfNow(), epoch: this.epoch, chunkStart: c.entry.startWord, at, reason });
   }
 
   /** F4: the chunk is never scheduled; what is already scheduled plays out, then the engine pauses on the last timed word. */
   private fail(failure: EngineFailure): void {
     this.failure = failure;
     this.speedChangeAt = null;
+    this.pendingRequest = null; // no voiced sample will answer the request
+    this.events.onTrace?.({ kind: "narrate-failure", t: perfNow(), reason: failure.reason, atWord: failure.atWord, detail: failure.detail ?? null, epoch: this.epoch });
+
     this.diag("narrate:table-rejected", `${failure.reason} at word ${failure.atWord}${failure.detail ? ": " + failure.detail : ""}`);
     this.events.onFailure(failure);
     const now = this.output.now();
@@ -295,6 +477,12 @@ export class NarrateEngine {
   }
 
   /** Paused in a gap: resume from the first chunk not yet started, at its trim. */
+  /** The first chunk that arrived while paused and was never scheduled (endAt is set only by scheduling). */
+  private firstUnscheduled(): { readonly index: number; readonly sample: number } | null {
+    const i = this.chunks.findIndex((c) => c.endAt === 0);
+    return i >= 0 ? { index: i, sample: this.chunks[i].trim } : null;
+  }
+
   private nextScheduledPause(): { readonly index: number; readonly sample: number } | null {
     const now = this.output.now();
     const i = this.chunks.findIndex((c) => c.startAt >= now || c.source === null);
@@ -302,7 +490,8 @@ export class NarrateEngine {
   }
 
   private dropFrom(index: number): void {
-    for (const c of this.chunks.splice(index)) { c.source?.cancel(); c.source = null; }
+    const now = this.output.now();
+    for (const c of this.chunks.splice(index)) this.stopSource(c, now, "drop");
   }
 
   private reset(): void {
@@ -312,12 +501,18 @@ export class NarrateEngine {
     this.failure = null;
     this.pausedAt = null;
     this.speedChangeAt = null;
+    this.pendingRequest = null;
+    this.lastTickPerf = null;
+    this.lastPublished = null;
+    this.chunkSeq = 0;
   }
 
-  private publish(word: number): void {
-    if (word === this.cursor) return;
+  /** True when the cursor moved. */
+  private publish(word: number): boolean {
+    if (word === this.cursor) return false;
     this.cursor = word;
     this.events.onCursor(word);
+    return true;
   }
 
   private setState(state: EngineState): void {

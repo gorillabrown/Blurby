@@ -1,0 +1,57 @@
+{
+  "generatedAt": "2026-10-13T23:53:23.161Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "minutes": 3.5,
+  "sessions": {
+    "2.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-freeze\\launch-2\\traces\\session-2-00.trace.json",
+      "verdict": "FAIL",
+      "failures": [
+        "1 units never committed inside a fully played chunk (drop)"
+      ],
+      "holds": [],
+      "stats": {
+        "commits": 1046,
+        "schedules": 52,
+        "stops": 3,
+        "requests": 1,
+        "minutes": 3.55,
+        "speeds": [
+          2
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.77,
+        "outside": 0,
+        "worstLateMs": 70.81,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 49,
+        "drops": 1,
+        "repeats": 0,
+        "latency": {
+          "play": 30
+        }
+      },
+      "outside": []
+    }
+  },
+  "runs": [
+    {
+      "label": "session-2.00",
+      "code": 0,
+      "wallMs": 220458,
+      "hostBusyPct": 26.7,
+      "appCpuPct": 11.6,
+      "foreignCpuPct": 15.1,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-freeze\\launch-2\\traces\\session-2-00.trace.json",
+      "traceExists": true
+    }
+  ]
+}

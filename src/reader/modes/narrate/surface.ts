@@ -24,6 +24,8 @@ export interface NarrateSurface {
   /** Legacy foliateApiRef.current.next() (empty-words retry, section-end fallback). */
   next(): void;
   getSectionForWordIndex(wordIndex: number): number | null;
+  /** The section the view last loaded and wrapped (BUG-191); null when unknown. */
+  getDisplayedSectionIndex(): number | null;
   goToSection(sectionIndex: number): Promise<void>;
   waitForSectionReady(sectionIndex?: number | null): Promise<number | null>;
   findFirstVisibleWordIndex(): number;
@@ -47,6 +49,7 @@ export function createNarrateSurface(viewApiRef: MutableRefObject<NarrateFoliate
     highlight: (wordIndex, kind, options) => api()?.highlightWordByIndex(wordIndex, kind, options) ?? false,
     next: () => api()?.next(),
     getSectionForWordIndex: (wordIndex) => api()?.getSectionForWordIndex(wordIndex) ?? null,
+    getDisplayedSectionIndex: () => api()?.getDisplayedSectionIndex?.() ?? null,
     goToSection: (sectionIndex) => Promise.resolve(api()?.goToSection(sectionIndex)),
     waitForSectionReady: (sectionIndex) => Promise.resolve(api()?.waitForSectionReady(sectionIndex) ?? null),
     findFirstVisibleWordIndex: () => api()?.findFirstVisibleWordIndex() ?? -1,

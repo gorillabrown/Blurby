@@ -17,10 +17,16 @@ module.exports = {
   /** Decision #7: onnxruntime intra-op threads for Kokoro on this host class; the default was the slowest setting. */
   NARRATE_INTRA_OP_THREADS: 4,
   NARRATE_INTER_OP_THREADS: 1,
+  /** Decision #17: producer workers, so a request never queues behind a stale generation (each holds one model session). */
+  NARRATE_PRODUCER_WORKERS: 2,
+  /** Decision #18: workers a prefetch must leave idle for the next request (a request never waits behind stale work). */
+  NARRATE_RESERVED_WORKERS: 1,
   /** Environment override of the models root (this epic's runs point it at the artifacts folder; Decision #15). */
   NARRATE_MODELS_ROOT_ENV: "NARRATE_MODELS_ROOT",
   NARRATE_DEFAULT_VOICE: "af_bella",
   NARRATE_WARMUP_TEXT: "Hello.",
   NARRATE_LOAD_TIMEOUT_MS: 120000,
   NARRATE_IDLE_UNLOAD_MS: 10 * 60 * 1000,
+  /** How long a stopping worker may take to finish its generation in progress before it is terminated. */
+  NARRATE_STOP_TIMEOUT_MS: 30000,
 };

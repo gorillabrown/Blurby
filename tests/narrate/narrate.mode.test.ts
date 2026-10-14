@@ -118,6 +118,22 @@ describe("narrate mode (P4)", () => {
     expect(runtime.getSnapshot().speed).toEqual({ kind: "rate", rate: 0.8 });
   });
 
+  it("D3: the engine's recorded output reaches the diagnostics port (the eval-trace sink), never the window", async () => {
+    const { fake, runtime, output } = open();
+    opened.push(runtime);
+    runtime.select(7);
+    runtime.start({ cause: "play-button" });
+    await flush();
+    output.advance(INTO_FIRST_WORD_S);
+    runtime.tick();
+    const traced = fake.diagnostics.filter((c) => c.method === "diagnostics.trace").map((c) => c.args[0] as Record<string, unknown>);
+    expect(traced.map((e) => e.kind)).toEqual(expect.arrayContaining(["narrate-request", "narrate-schedule", "narrate-first-voiced", "narrate-commit", "word"]));
+    expect(traced.find((e) => e.kind === "narrate-request")).toMatchObject({ cause: "play", word: 7, speed: 1 });
+    expect(traced.find((e) => e.kind === "narrate-first-voiced")).toMatchObject({ cause: "play", word: 7, latencyS: 0.03 });
+    expect(traced.find((e) => e.kind === "narrate-commit")).toMatchObject({ word: 7, speed: 1, unit: 0 });
+    expect(traced.find((e) => e.kind === "word")).toMatchObject({ source: "audio", wordIndex: 7 });
+  });
+
   it("the generated speed is the selected rate: a chunk requested after a change carries it", async () => {
     const { runtime, producer } = open();
     opened.push(runtime);

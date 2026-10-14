@@ -23,6 +23,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import type { MutableRefObject } from "react";
 import type { BlurbySettings } from "../../../types";
 import type { SectionBoundary } from "../../../types/narration";
+import type { TtsEvalTraceInputEvent } from "../../../types/eval";
 import type { DeepReadonly, ReaderDocumentSnapshot } from "../../document/ReaderDocumentSnapshot";
 import {
   getSectionGlobalOffset,
@@ -63,7 +64,6 @@ const NARRATE_HIGHLIGHT_MODE = "narrate";
 /** Legacy narrate scroll-follow tuning (FoliatePageView, copied values). */
 const NARRATE_SCROLL_FOLLOW_THROTTLE_MS = 500;
 const NARRATE_DISPLACEMENT_VIEWPORT_FRACTION = 0.3;
-const NARRATE_PAGE_TURN_COOLDOWN_MS = 300;
 
 /**
  * A rendered section root (structurally the legacy FlowRenderedWordRootDescriptor type, declared here
@@ -254,6 +254,7 @@ export interface NarrateFoliateViewAPI {
   highlightWordByIndex: (wordIndex: number, styleHint?: "flow" | "narrate", options?: NarrateFoliateHighlightOptions) => boolean;
   resolveWordState: (wordIndex: number) => NarrateWordState;
   getSectionForWordIndex: (wordIndex: number) => number | null;
+  getDisplayedSectionIndex: () => number | null;
   findFirstVisibleWordIndex: () => number;
   isUserBrowsing: () => boolean;
   goToSection: (sectionIndex: number) => Promise<void>;
@@ -271,6 +272,10 @@ export interface NarrateFoliateViewProps {
   readBookBytes: () => Promise<ArrayBuffer>;
   /** Diagnostics port (legacy recordDiagEvent). */
   recordDiagnostic: (kind: string, detail: string) => void;
+  /** P5 diagnostic (BUG-191): section-load and layout records, via the diagnostics port's trace. */
+  traceEvent?: (event: TtsEvalTraceInputEvent) => void;
+  /** P5 diagnostic: a view caller is about to change the displayed section. */
+  traceSectionNav?: (caller: string, word: number | null, targetSection?: number | null, displayed?: number) => void;
   onRelocate: (detail: { cfi: string; fraction: number }) => void;
   onTocReady: (toc: unknown[], sectionCount: number) => void;
   onWordClick: (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number) => void;
@@ -300,6 +305,8 @@ export default function NarrateFoliateView({
   initialCfi,
   readBookBytes,
   recordDiagnostic,
+  traceEvent,
+  traceSectionNav,
   onRelocate,
   onTocReady,
   onWordClick,
@@ -347,6 +354,23 @@ export default function NarrateFoliateView({
   onTocReadyRef.current = onTocReady;
   const recordDiagnosticRef = useRef(recordDiagnostic);
   recordDiagnosticRef.current = recordDiagnostic;
+  const traceEventRef = useRef(traceEvent);
+  traceEventRef.current = traceEvent;
+  const traceSectionNavRef = useRef(traceSectionNav);
+  traceSectionNavRef.current = traceSectionNav;
+  const narrationWordIndexRef = useRef(narrationWordIndex);
+  narrationWordIndexRef.current = narrationWordIndex;
+  // P5 diagnostic: the view's layout (first section load, every resize). Reads refs only.
+  const layoutTracedRef = useRef(false);
+  const traceLayout = useCallback(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const cols = viewRef.current?.renderer?.columnCount;
+    traceEventRef.current?.({
+      kind: "narrate-view-layout", t: performance.now(), width: el.clientWidth, height: el.clientHeight,
+      columns: typeof cols === "number" ? cols : null, dpr: window.devicePixelRatio,
+    });
+  }, []);
   const bookWordSectionsRef = useRef(bookWordSections);
   bookWordSectionsRef.current = bookWordSections;
   const getCanonicalSectionWordsRef = useRef(getCanonicalSectionWords);
@@ -360,8 +384,6 @@ export default function NarrateFoliateView({
   // and the page-turn cooldown (with its timer, cleared on unmount).
   const lastScrollFollowPosRef = useRef<number | null>(null);
   const narrateScrollThrottleRef = useRef(0);
-  const narratePageTurnCooldownRef = useRef(false);
-  const narratePageTurnCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const liveSections = () => bookWordSectionsRef.current as SectionBoundary[] | undefined;
 
@@ -746,6 +768,9 @@ export default function NarrateFoliateView({
           });
           invalidateWordPositionIndex();
 
+          // P5 diagnostic: span count and wrap time for the narrate-section-load record.
+          let tracedWords = 0;
+          let tracedWrapMs: number | null = null;
           // Extract words and wrap in spans
           const v2 = viewRef.current;
           if (v2) {
@@ -764,7 +789,10 @@ export default function NarrateFoliateView({
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
+              const wrapT0 = performance.now();
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              tracedWrapMs = performance.now() - wrapT0;
+              tracedWords = sectionWords.length;
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -788,12 +816,17 @@ export default function NarrateFoliateView({
               if (sectionStart >= 0) {
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
                 const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                const wrapT0 = performance.now();
                 await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                tracedWrapMs = performance.now() - wrapT0;
+                tracedWords = sectionWords.length;
               }
             }
           }
 
           lastLoadedSectionIndexRef.current = index;
+          traceEventRef.current?.({ kind: "narrate-section-load", t: performance.now(), sectionIndex: index, words: tracedWords, wrapMs: tracedWrapMs });
+          if (!layoutTracedRef.current) { layoutTracedRef.current = true; traceLayout(); }
           scheduleWordPositionIndexRebuild(`section-load:${index}`, 0);
 
           // Delegated click handler on the injected word spans
@@ -964,8 +997,10 @@ export default function NarrateFoliateView({
           const wordCount = doc0.wordCount || 1;
           if (savedPos > 0 && wordCount > 0) {
             const fraction = Math.min(savedPos / wordCount, 1);
+            traceSectionNavRef.current?.("initial-open", savedPos);
             await view.goToFraction(fraction);
           } else {
+            traceSectionNavRef.current?.("initial-open", null);
             await view.goToFraction(0);
           }
         }
@@ -1069,6 +1104,7 @@ export default function NarrateFoliateView({
         };
 
         viewApiRef.current = {
+          getDisplayedSectionIndex: () => lastLoadedSectionIndexRef.current,
           getWords: () => {
             if (foliateWordsRef.current.length > 0) return foliateWordsRef.current;
             const extracted = extractWordsFromView(view);
@@ -1176,7 +1212,6 @@ export default function NarrateFoliateView({
       clearWordPositionRebuildTimer();
       invalidateWordPositionIndex();
       viewApiRef.current = null;
-      if (narratePageTurnCooldownTimerRef.current) clearTimeout(narratePageTurnCooldownTimerRef.current);
       if (viewRef.current) {
         // S1 G6: every section load makes foliate's paginator queue a frame callback (setStyles →
         // requestAnimationFrame → this.#view.docBackground), and its destroy() nulls #view without
@@ -1311,10 +1346,11 @@ export default function NarrateFoliateView({
       view.renderer.setAttribute("max-column-count", getFoliateMaxColumnCount(true, container.clientWidth));
       invalidateWordPositionIndex();
       scheduleWordPositionIndexRebuild("container-resize");
+      traceLayout();
     });
     observer.observe(container);
     return () => observer.disconnect();
-  }, [invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
+  }, [invalidateWordPositionIndex, scheduleWordPositionIndexRebuild, traceLayout]);
 
   // Narration highlight: the spoken word gets the narrate cursor (no motion; scroll-follow moves).
   useEffect(() => {
@@ -1345,15 +1381,9 @@ export default function NarrateFoliateView({
     }
 
     const state = viewApiRef.current.resolveWordState(narrationWordIndex);
-    if (!state.found && !narratePageTurnCooldownRef.current) {
-      // Word is not in the current section's DOM — advance to the next section.
-      narratePageTurnCooldownRef.current = true;
-      view.renderer.next();
-      narratePageTurnCooldownTimerRef.current = setTimeout(() => {
-        narratePageTurnCooldownTimerRef.current = null;
-        narratePageTurnCooldownRef.current = false;
-      }, NARRATE_PAGE_TURN_COOLDOWN_MS);
-    } else if (state.found && state.span && state.doc) {
+    // Not in the displayed section's DOM: the runtime's miss handler navigates to the word's own section (BUG-191); never page blindly here.
+    if (!state.found) return;
+    if (state.span && state.doc) {
       // Throttle scrollToAnchor calls to avoid jitter.
       const now = Date.now();
       if (now - narrateScrollThrottleRef.current < NARRATE_SCROLL_FOLLOW_THROTTLE_MS) return;
@@ -1396,8 +1426,10 @@ export default function NarrateFoliateView({
         // Navigate the Foliate renderer so the user sees different content.
         // The iframe's native handler won't see this window-level event.
         if (e.key === "ArrowRight" || e.key === "PageDown") {
+          traceSectionNavRef.current?.("key-next", narrationWordIndexRef.current ?? null);
           view.renderer.next();
         } else {
+          traceSectionNavRef.current?.("key-prev", narrationWordIndexRef.current ?? null);
           view.renderer.prev();
         }
       }

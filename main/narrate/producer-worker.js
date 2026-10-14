@@ -11,6 +11,8 @@ const path = require("path");
 const Module = require("module");
 const { attachCapture, synthesize } = require("./capture");
 const { buildWordMap } = require("./wordmap");
+const { mapUnitsToSourceWords } = require("./normalize");
+const { localFileCache } = require("./local-file-cache");
 const C = require("./constants");
 
 const OPTIONAL_PACKAGED_MODULE_STUBS = new Map([["sharp", path.join(__dirname, "..", "sharp-stub.js")]]);
@@ -56,6 +58,8 @@ async function load({ modelsRoot, modulePath, threads }) {
   if (!loaded) {
     const { kokoro, tf, ph } = await loadModules(modulePath);
     Object.assign(tf.env, { allowRemoteModels: false, allowLocalModels: true, localModelPath: modelsRoot.replace(/[\\/]*$/, "/"), useFSCache: false, useBrowserCache: false });
+    // Decision #19: read local files once (see local-file-cache.js; transformers' own path left 291 MB of garbage).
+    Object.assign(tf.env, { useCustomCache: true, customCache: localFileCache() });
     const t0 = performance.now();
     // threads: a number sets onnxruntime's intra-op count (Decision #7); null keeps onnxruntime's own default.
     const model = await tf.StyleTextToSpeech2Model.from_pretrained(C.NARRATE_EXPOSED_MODEL_ID, {
@@ -78,18 +82,32 @@ async function load({ modelsRoot, modulePath, threads }) {
   parentPort.postMessage({ type: "model-ready", runtime });
 }
 
-async function generate(id, text, voice, speed) {
+const epochNow = () => performance.timeOrigin + performance.now();
+
+// Generation intervals (epoch ms), so the stall monitor can tell a freeze from this worker's own generation: an
+// onnxruntime run blocks the worker's event loop for its whole duration.
+const genIntervals = [];
+let genStartedAt = null;
+
+async function generate(id, text, voice, speed, recv = epochNow()) {
+  const start = epochNow();
+  genStartedAt = start;
   try {
     if (!ready) { parentPort.postMessage({ type: "result", id, error: "producer not ready" }); return; }
     const rec = await synthesize(tts, capture, text, { voice, speed });
+    const synthDone = epochNow();
     const wm = await buildWordMap(rec, capture.phonemizeIsolated);
+    const mapDone = epochNow();
+    // The units' words are the spoken (normalized, punctuation-free) words; the engine needs the chunk's source words
+    // (NARRATE-REBUILD-1 P5). mapUnitsToSourceWords is exact and verified against the capture; it throws (F4) otherwise.
+    const units = wm.reconciled ? mapUnitsToSourceWords(text, rec.segments, wm.units) : wm.units;
     const table = {
       provenance: rec.provenance,
       durations: rec.durations,
       durationsType: rec.durationsType,
       samplesPerFrame: wm.law.factor,
       sampleRate: rec.sampleRate,
-      units: wm.units.map((u) => ({ words: u.words, kind: u.kind, frameStart: u.frameStart, frameEnd: u.frameEnd, sampleStart: u.sampleStart, sampleEnd: u.sampleEnd })),
+      units: units.map((u) => ({ words: u.words, spoken: u.spoken ?? u.words, kind: u.kind, frameStart: u.frameStart, frameEnd: u.frameEnd, sampleStart: u.sampleStart, sampleEnd: u.sampleEnd })),
       reconciled: wm.reconciled,
       failures: wm.failures,
       identity: wm.identity.ok,
@@ -99,20 +117,59 @@ async function generate(id, text, voice, speed) {
       tailFrames: wm.tailFrames,
     };
     const pcm = rec.pcm;
-    parentPort.postMessage({ type: "result", id, table, pcm, sampleRate: rec.sampleRate, genMs: Math.round(rec.genMs) }, [pcm.buffer]);
+    // D6 analysis: epoch ms at receipt, the start of synthesis, its end, the word map's end, the post.
+    const stages = { recv, start, synthDone, mapDone, post: epochNow() };
+    parentPort.postMessage({ type: "result", id, table, pcm, sampleRate: rec.sampleRate, genMs: Math.round(rec.genMs), stages }, [pcm.buffer]);
   } catch (err) {
     parentPort.postMessage({ type: "result", id, error: err?.message || String(err) });
+  } finally {
+    genIntervals.push({ start, end: epochNow() });
+    if (genIntervals.length > 16) genIntervals.shift();
+    genStartedAt = null;
   }
+}
+
+// Stop (P5): no new generation starts; the ones in progress finish (onnxruntime cannot abort a run, and a thread
+// ended under a live native run takes the process down with 0xC0000409); then the thread exits.
+const inflight = new Set();
+let stopping = false;
+
+// Diagnostics (NARRATE_PRODUCER_LOG=1 only): report any stall of this worker's event loop over 200 ms.
+if (process.env.NARRATE_PRODUCER_LOG === "1") {
+  let last = epochNow();
+  setInterval(() => {
+    const now = epochNow();
+    if (now - last > 250) {
+      const m = process.memoryUsage();
+      const mb = (b) => Math.round(b / 1048576);
+      // The part of the stall this worker spent generating, and the rest (a freeze: the D7 gate reads "free").
+      const spans = genStartedAt === null ? genIntervals : [...genIntervals, { start: genStartedAt, end: now }];
+      const gen = spans.reduce((sum, g) => sum + Math.max(0, Math.min(now, g.end) - Math.max(last, g.start)), 0);
+      const lag = Math.round(now - last - 50);
+      parentPort.postMessage({ type: "lag", ms: lag, genMs: Math.round(gen), freeMs: Math.max(0, Math.round(lag - gen)), at: now, inflight: inflight.size, mem: `heap ${mb(m.heapUsed)}/${mb(m.heapTotal)} ext ${mb(m.external)} ab ${mb(m.arrayBuffers)} rss ${mb(m.rss)}` });
+    }
+    last = now;
+  }, 50).unref();
 }
 
 parentPort.on("message", async (msg) => {
   switch (msg.type) {
+    case "stop":
+      stopping = true;
+      await Promise.allSettled([...inflight]);
+      process.exit(0);
+      break;
     case "load":
       try { await load(msg); } catch (err) { parentPort.postMessage({ type: "load-error", error: err?.message || String(err), stack: err?.stack }); }
       break;
-    case "generate":
-      await generate(msg.id, msg.text, msg.voice, msg.speed);
+    case "generate": {
+      if (stopping) { parentPort.postMessage({ type: "result", id: msg.id, error: "producer stopping" }); break; }
+      const run = generate(msg.id, msg.text, msg.voice, msg.speed, epochNow());
+      inflight.add(run);
+      await run;
+      inflight.delete(run);
       break;
+    }
     case "status":
       parentPort.postMessage({ type: "status", id: msg.id, loaded, ready, runtime });
       break;

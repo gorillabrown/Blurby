@@ -113,6 +113,115 @@
 - **Git:** eb/narrate-rebuild-1-p4 @ 09455064; uncommitted at writing, committed as the next checkpoint: the 22 modified paths of the P4 diff, the nine untracked `src/reader/modes/narrate/` entries (with `helpers/`), `tests/narrate/harness/fakeNarrateHost.ts`, `tests/narrate/narrate.mode.test.ts`, `tests/readerModes/narrate.contract.test.ts`, the time log, `state.md`, `plan.md`, `journal.md`.
 - **Next:** checkpoint → P4 gate fresh at that commit → merge per GIT WORK → open P5 with the records.
 
+## S1 — 2026-10-13 12:35 — P4 gate passed; P4 merged 331f8313; P5 opened
+
+- **Did:** checkpoint `5edbea58` on P4 (49 exact paths; `tests/perf-baseline-results.json` left out; the restored display files byte-identical to `612d03f5` once staged), pushed. P4 gate fresh at that commit, 12:24–12:26: the D7/D8/D9 suites exit 0 (26 files, 207 tests), the three G4 baselines byte-identical against `ef245815`, typecheck 0, `npm test` 141 files / 2,004 passed / 1 skipped, build 0. Merged per GIT WORK from the detached worktree `.worktrees/narrate-rebuild-1-merge-p4`: `origin/main` was `49a84a55` (the planner's "chartered" marking had landed after `ef245815`), `merge --no-ff eb/narrate-rebuild-1-p4` → `331f8313` "Merge eb/narrate-rebuild-1-p4: The mode", pushed, `merge-base --is-ancestor` exit 0. P5 opened at 12:27: `eb/narrate-rebuild-1-p5` from `origin/main` at `331f8313`, worktree `.worktrees/narrate-rebuild-1-p5`, `npm ci` started; the time log is on `main` through the checkpoint, so P5 continues it in place (row 39 closed here, rows 40–45 added for P5). Gate log row for P4 and Evidence rows written here (LL-148); P5 worklist in plan.md from the charter's D3, D5, D6 and D10 rows.
+- **Learned:** the previous entry's heading (12:30) and the "12:25" stamps were written ahead of the machine clock, which read 12:20–12:22; corrected in state.md's P4 build row, left as written here. `origin/main` can move between a phase's base and its merge (the planner's docs commit did); the recipe's detached worktree at `origin/main` absorbs that without a rebase, and the base trailer still names the phase's own base.
+- **Decisions:** none new.
+- **Gate/DoD movement:** P4 gate PASS (plan.md Gate log); D7's tests, D8 and D9 on `main`; D13 holds for P1–P4 (four `--no-ff` merges, one per phase, trailers valid).
+- **Git:** eb/narrate-rebuild-1-p5 @ 331f8313 (base; the first phase commit follows this entry with the trailer `NARRATE-REBUILD-1-P5-Base: 331f8313…`); uncommitted at writing: `state.md`, `plan.md`, `journal.md`, the close-out, the memo, the time log.
+- **Next:** P5 census, then D10, the D3 log and check script, the crossings, the D6 end-to-end latency, the P5 gate.
+
+## S2 — 2026-10-13 14:05 — session start after an unclean end of S1 (machine restart ≈ 13:50)
+
+- **Did:** resume protocol. S1 ended without a journal entry after 12:35: the machine restarted ≈ 13:49 (every process started 13:49–13:56). Reality on `eb/narrate-rebuild-1-p5` @ `84d35933` (= origin, 0/0): the census (row 40) and D10 (row 41) are done and recorded in plan.md and the time log; row 42 onward is uncommitted work in the tree — the D3 trace kinds (`src/types/eval.ts`), engine/runtime trace emission, `main/narrate/normalize.js` (units → source words), `main/narrate/trial.js` + the three Decision #16 levers in `main.js`, `p5-recorded-output-check.mjs`, `p5-latency-e2e.mjs`, four new suites, and a half-wired chunk ramp (`narrateEngine.ts` declares `ramp` but never assigns it: typecheck fails TS2564). The narrate + readerModes suites pass (23 files, 110 tests); the D10 grep exits 1. Smoke outputs (13:33–13:34, `docs/studies/narrate-rebuild-1/phase5/`): D3 0.45-min session INCONCLUSIVE (too short; 0 outside, 0 overlap/drop/repeat), D6 warm 1.00x × 1 FAIL — play 4,931 ms, click 3,598, speed 2,483/2,889, resume 30. Row 42 recorded `--wait session-ended` / `--resume`.
+- **Learned:** the smoke play trial was the process's first generation (the mode never calls `narratePreload`, so the first Play pays the load and the first inference: a cold trial labelled warm); click and speed waited behind the stale prefetch generation the single producer worker was still running. Electron exit `0xC0000409` on both trial runs: nothing calls `producer.shutdown()` before `app.exit`. Generation scaling measured on the host now (scratch, 4 threads, 100 % host load — the IDE at ≈ 5 cores after the restart): 4 words ≈ 0.8–1.4 s, 8 ≈ 1.0–2.9 s, 12 ≈ 1.7–3.8 s, 60 ≈ 8.5–29 s; not representative and not evidence, but it says the first chunk must be short.
+- **Decisions:** none new yet.
+- **Gate/DoD movement:** none.
+- **Git:** eb/narrate-rebuild-1-p5 @ 84d35933; uncommitted: the S1 P5 tree above.
+- **Next:** wire the ramp (row 46 with the preload, the quit shutdown and the trial warm-up), checkpoint, crossings (row 43), then D3/D6 trials once the host is not saturated.
+
+## S2 — 2026-10-13 14:44 — D6 repair, crossings fix, three D3 runs and what each one found
+
+- **Did:** `238f47ec` recovery checkpoint + D6 repair (Decision #17). `573706ea` crossings: the runtime's `chunkBreaks` matched the engine words to `bookWords.words` by identity, but `start()` passes a copy, so in the product no chunk ever broke at a section end; the crossing test only passed because a sentence ended at its boundary (made non-vacuous, seen failing on the old code). D3 run 1 (14:15–14:26; the owner asked about the audio, then approved): 1.00x PASS (803 commits, 0 outside, mapping 0.8 ms), 2.00x FAIL (30 outside, 6 drops). Cause: at 2.00x the leading trim (first voiced sample) passed the whole first table unit in 12 of 35 chunks (the VERDICT's early first word at ≥ 1.40x), losing that word's highlight, and the check timed a unit that starts inside the trimmed silence from before its chunk sounded. Fixes `f25b8660`: `leadingTrim` never passes the first unit's last table frame; the check takes a unit's boundary no earlier than its chunk's `startAt` (from the raw schedule record); graceful producer stop (the worker finishes the run in progress, then exits) awaited on `will-quit` and before the trial's `app.exit` — the 0xC0000409 exits are gone (both run-2 exits 0). D3 run 2 (14:29–14:41): both INCONCLUSIVE (2.19 and 3.16 min of commits): the engine's upkeep ran only on rAF, which stops when the window gets no frames, so narration went silent after the prefetched audio once the window was covered — a product defect (listening with Blurby minimized). Fixes `0b7db8ca`: `pump()` (prefetch, end of audio) on a 250 ms timer as well as every frame; the trial's rate is set from the rate the bar shows and checked (run 2's "1.00x" session ran at 2.00x from the profile). `5875b858`: trial runs only, native window occlusion off.
+- **Learned:** rAF is not a clock for anything but painting. A trial's scratch profile carries settings between runs. `worker.terminate()` does not stop a native onnxruntime run; the process exit under it is the 0xC0000409. Frame stalls of 111–1,458 ms occur at 2.00x on this host and are excused by the check only up to a 1 s frame.
+- **Decisions:** #17 (state.md).
+- **Gate/DoD movement:** D5 crossings suite passes (`573706ea`); D3 1.00x PASS on run 1 (pre-fix engine, superseded by run 3).
+- **Git:** eb/narrate-rebuild-1-p5 @ 5875b858; uncommitted: this entry, `phase5/recorded-output.json` (run 2, to be overwritten by run 3).
+- **Next:** D3 run 3 → D6 warm and cold → P5 gate.
+
+## S2 — 2026-10-13 15:33 — D3 PASS; D6 warm FAIL after the one repair → BLOCKER(USER); cold under budget
+
+- **Did:** D3 run 3 (14:44–14:56) PASS at both rates: 1.00x 798 commits, 2.00x 1,413, 0 outside one frame, mapping 0.77–0.78 ms, 0 overlap/drop/repeat, exits 0 (`28c21e40`). D6 metric corrected to request → first voiced sample *heard* (the context clock does not run before the first audio, so startAt − ctxAtRequest read 30 ms for a first Play whose sample was heard at 1,433 ms); `--break` added. D6 warm (14:58–15:06): 1.00x FAIL — worst Play 1,750, resume 4,286, click 2,860, speed 9,228 ms (4, 8 and 13 trials ≥ 2 s), host 88 % busy; 2.00x ended after one cycle on a 405-id chunk (packed to the 400 estimate) failing closed. Fixed: packing target 360; one fresh scratch profile per launch (the reused one carried the anchor to word 77,554 and the rate). BLOCKER(USER) raised 15:07 with the measured causes and four options (`7fd74fd5`). D6 cold for information (15:10–15:31): every measured trial under 8 s (worst 1,524 ms); 5 click trials lost to a driver timing defect.
+- **Learned:** stale generations cannot be cancelled, so requests 2 s apart pile work onto both workers on a loaded host; prefetch counted in chunks leaves gaps when chunks are one-word headings; a trial profile is state and must be fresh per launch; the playback clock does not start before the first audio, so latency has to be read where the sample is heard.
+- **Decisions:** none new (the D6 route is the owner's).
+- **Gate/DoD movement:** D3 met on the branch; D5's in-app analysis passes; D6 FAIL (blocker); cold within budget.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** the owner's answer. On (a): stale-work bypass (spare worker), prefetch by seconds ahead, short steady chunks, the cold-click driver fix, then T7 in full (warm then cold), then the P5 gate. Every other front waits on D6 (P5's merge gates P6).
+
+## S2 — 2026-10-13 17:35 — Decision #18 round: levers in, T7 FAIL → BLOCKER(USER) (c)/(d); session stops
+
+- **Did:** recorded the owner's answer (Decision #18) with the planner's staging memo (`4d65aa60`). Lever 1 (`e71f8924`): prefetch by seconds ahead (8 s); found and fixed a drop — a resume after a pause in a gap skipped the chunk that arrived during the pause. Lever 2 (`25ee0e23`): steady chunk cap 30 words (renderer constant: chunks are planned in the renderer, not main). Instrumentation: per-chunk request/result/queue/post/receive/synthesis/map stamps, worker and pool load. Lever 3 (`e3e97983`): the producer posts only to idle workers from a queue in main; a prefetch leaves one worker idle for requests; a request drops queued prefetch of older epochs. Harness (`d5eb4893`): per-trial CPU split, cold-click driver change, env-gated stall logs. Three workers measured (same freeze, more memory) and reverted; a forced collection at load tried and reverted. T7 in full 15:58–17:30: FAIL (7 warm trials ≥ 2 s; cold all < 8 s); evidence `phase5/latency-e2e.t7-1.json`, `recorded-output.t7-1.json`. BLOCKER(USER) raised with only (c) and (d).
+- **Learned:** after the levers, requests never wait in a queue (queued → posted 0 ms in every T7 trial). What remains: (1) a once-per-process freeze of both producer workers (6–35 s, ≈ 30 s after load, when each releases ≈ 291 MiB external memory; Electron only; main thread unaffected); (2) synthesis of a request chunk at 2.1–2.2 s under contention plus ≈ 49 % foreign load; (3) a rare resume that must generate. The owner's machine ran at 61–93 % host busy, narration's own share 16–31 %. Cold-click trials need a different driver (the Play's audio arrives before the click).
+- **Decisions:** #18 recorded.
+- **Gate/DoD movement:** D6 FAIL (blocker); D3 2.00x showed one drop in the T7 run (P5 gate re-runs D3/D5).
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** the owner's (c) or (d). Every front waits on D6 (P5's merge gates P6).
+
+
+## S3 — 2026-10-13 18:55 — session start: resume on row 53 (the freeze fix) after S2 ended mid-launch
+
+- **Did:** read charter, plan, state, the S2 journal tail, the time log and the P5 worktree. Reality against memory: Decision #19 is recorded with the charter D6 amendment and the planner memo fold-in 2 (`0e4e207f`), the D6 launcher counts trials under the amended row (`0f972e73`), step 2 is in (`a6ce898c`); step 3's fix is drafted and uncommitted (`main/narrate/local-file-cache.js`, its wiring and the gen/free split of the worker stall log in `producer-worker.js` and `producer.js`, `tests/narrate/narrate.localFileCache.test.js`; 3 tests pass). S2 ran one in-app session with the fixed worker on a fresh build (18:13:37 to 18:17:17, 3.55 min at 1.00x, foreign CPU 17.3 %, D3 analysis PASS): it is launch 1 of 3 — 32 worker stall lines, the longest free (non-generating) stall 622 ms, the longest generation-inclusive 3,495 ms, the main thread 299 ms. A second launch started at 18:17:17 and died with the session (no log, no electron process left); its start erased launch 1's trace file, so launch 1's record is its log, CPU sample, trial summary and analysis, preserved under `C:\Projects\Blurby-artifacts\narrate-rebuild-1\p5-freeze\launch-1` and `phase5/recorded-output.freeze-launch-1.json`. Launches 2 (2.00x) and 3 (1.00x), 3.5 min each, started in the background with their own `--out`. Time log: row 44 (T7 under the ordinary-desktop definition) ended blocked, superseded by row 55; row 45 parked as a duplicate of row 56.
+- **Learned:** the launcher removes the session trace at launch start, so a second launch under the same `--out` erases the first one's trace: one `--out` per launch.
+- **Decisions:** none new.
+- **Gate/DoD movement:** none yet.
+- **Git:** eb/narrate-rebuild-1-p5 @ a6ce898c; uncommitted: the four fix files above, the time log, `recorded-output.json` (launch 1's 3.5-minute analysis over the committed 5-minute D3 record; the record is restored at the checkpoint, the copy kept).
+- **Next:** read the launch 2 and 3 logs; no free stall > 1 s in all three → checkpoint row 53, then row 54 (targeted narrate suites + typecheck), row 55 (T7 under the amended D6, quiet window), row 56 (P5 gate).
+
+## S3 — 2026-10-13 19:10 — freeze fix verified (row 53); the 2.00x drop recurs and a 1.29 s renderer frame appears; Aristotle on both
+
+- **Did:** launches 2 (2.00x, 18:53–18:57) and 3 (1.00x, 18:57–19:00), 3.5 min each, own `--out` per launch, producer stall log on. Freeze criterion met 3/3: longest free (non-generating) worker stall 622 / 562 / 685 ms, 0 over 1 s, every stall over 1 s a generation run; main thread ≤ 328 ms; external memory 315 → 21 MB without a stall. Record `phase5/freeze-fix.launches.md` (generated from the logs and analyses, never typed); the committed 5-minute D3 record `recorded-output.json` restored after copying the three launch analyses beside it. The launches' D3/D5 analyses: launch 1 PASS; launch 2 FAIL — 1 drop, chunk 8730-8748 unit 6, word 8736, a 125 ms unit under one 190.7 ms frame — the same unit S2's T7 2.00x session dropped under a 246.9 ms frame; launch 3 FAIL — one 1,292 ms renderer frame at t≈88.7–90.0 s swallowed words 8955 (200 ms) and 8956 (150 ms) and left 8957 764.9 ms late (the check treats a frame ≥ 1 s as no frame), while launch 1 passed the same words. Aristotle dispatched read-only on both (row 57, timebox 40 min); rows 57-58 added; Decision #20 (executor) records the route.
+- **Learned:** the engine publishes only the word at the current sample, so any renderer frame longer than a unit leaves that unit unpublished — a 125 ms unit at 2.00x needs only a 190 ms frame. The 2.00x long frame is positional (same word twice); the 1.29 s frame at 1.00x is not (1 of 4 sessions through that word). The check's frame tolerance stops at 1,000 ms by design.
+- **Decisions:** #20.
+- **Gate/DoD movement:** D7 freeze fixed and verified in the app (Decision #19 step 3 done); D5 in-app and D3 open on the two long-frame findings (rows 57-58); D6 pending T7 under the amended row.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** Aristotle's report → Hercules fix (row 58, failing-first test) → row 54 (`npx vitest run tests/narrate` + typecheck) → one launcher run on the final tree (sessions 5 min at 1.00x and 2.00x + T7 warm/cold under the amended D6) → P5 gate.
+
+## S3 — 2026-10-13 19:55 — rows 57-58: the drop's cause and fix; the long frames are section loads
+
+- **Did:** Aristotle (row 57, read-only, 40-min timebox, done in 11 min of agent time): the engine publishes only the unit at the current sample (shown in all three traces); every long frame lines up with a foliate section load (iframe creation + `wrapWordsInSpans`) at the same words each run; lead (b) IPC arrival refuted by schedule times, (c) tick path too cheap; launch 3 reloaded sections 17× vs 5× in the clean runs — trigger NOT RESOLVED (three untraced `next()` callers named), and the 1.29 s cost unexplained. Re-derived the reload counts from the logs (34 / 10 / 12 warning lines) before acting. Report kept as `phase5/drop-root-cause.md` (`5aa623ee`). Hercules (row 58): T1/T2 written first and seen failing with the predicted outputs, then the engine change (+14/-3), 7/7, `npx vitest run tests/narrate` 14 files / 97 passed, typecheck 0; diff reviewed: publish logic only (`cc77f7d8`). Staging memo: L10, L11, BUG-190 (the freeze) and BUG-191 (section reloads) (`752479ef`, `5aa623ee`). Positive control of the amended D6 recorder: `--break` one warm trial → exit 1, play 3,923 ms counted (`latency-e2e.break-1.json`, `d08e6740`). Pre-registered the gate decision table in state.md Next actions 5 before the measurement runs.
+- **Learned:** two agents reached the same pre-fix outputs independently — Aristotle from the code, Hercules from running the tests — which is the cheapest positive control available when the orchestrator cannot revert a worktree. A frame ≥ 1 s is never a display frame to the check, so no engine change can pass D3 under one; the view's section reloads are the planner's bug.
+- **Decisions:** none new (Decision #20 executed).
+- **Gate/DoD movement:** D5 in-app engine cause fixed; D3 at risk only under a frame ≥ 1 s (BUG-191); D6 pending the final run.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: none.
+- **Next:** row 54 (Hippocrates) → `npm run build` → one launcher run (sessions + T7) → the decision table → gate.
+
+## S3 — 2026-10-13 20:05 — final run: D5 holds; D3 and D6 fail on long stalls → BLOCKER(USER); session stops
+
+- **Did:** row 54 green on `b1dc43ff` (the first dispatch stopped correctly on a stale expected hash and was re-sent). Final launcher run 19:24–19:52 in the owner's quiet window, then the serial checks (all green). Records kept as `.final-1`; the committed D3 record restored. Analysed the failures from the traces, the producer log and the CPU samples; raised the BLOCKER(USER) with the pre-committed options and a recommendation.
+- **Learned:** the catch-up publish removed every drop (0 at both rates, including word 8736). Both D3 failures are frames over 1 s right after a section load, at fixed words; the final sessions loaded sections 17 times, like launch 3, against 5–6 in earlier runs. The two D6 misses are one 27 s stall in which both workers slowed 10–50× while the host was two thirds idle and the CPU sampler lost readings: the foreign-CPU ceiling cannot see a stall that does not use CPU.
+- **Decisions:** none new; the blocker awaits the owner.
+- **Gate/DoD movement:** D5 in-app met; D10 met; D3 and D6 FAIL (blocker); serial checks green.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (written by the suite, never committed).
+- **Next:** the owner's answer in state.md → Blockers. The session stops here.
+
+## S3 — 2026-10-13 20:17 — the owner answers the final-run blocker (Decision #21); work resumes
+
+- **Did:** asked the owner three bounded questions (the slow requests, the screen freezes, the quiet window); the owner chose the recommended option of each: diagnose the stall then re-run the 2.00x warm block once; fix the section reloads in this epic with one fix; the machine is idle now. Recorded Decision #21 and the Answer line; moved Decision #20 below #19 (S3 had inserted it above, out of order); pre-registered the final re-run's decision table in Next actions 4; time-log rows 59–66 added, row 56 closed blocked (its serial checks stand as evidence; the gate is row 66).
+- **Learned:** —
+- **Decisions:** #21.
+- **Gate/DoD movement:** none.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
+- **Next:** rows 59 ∥ 60, then 61–66.
+
+## S3 — 2026-10-13 20:47 — rows 59–62: the stall was an undock; the long frames are a view runaway
+
+- **Did:** row 59 (Aristotle, read-only): the D6 stall started with the laptop leaving its dock and AC at 19:42:48; nothing inside Blurby. Cross-checked the power and display events myself. Row 60 (Hercules): section-load trace through the diagnostics port, reviewed (refs, stable callback, bound runtime methods). Row 61: build and two traced 5-minute sessions on `b9462dbd`, with the machine undocked on AC: every cursor update a highlight miss and the view paging from section 4 to 18 while narration read section 3. Row 62 (Aristotle): three faults together (wrong opening section, direction-blind `next()`, a dropped and unretried `goToSection`); fix spec. Staging memo: L12, O10, O11, BUG-191 updated.
+- **Learned:** D3 and D5 read engine commits only, so a session where the view never paints the spoken word passes D5; it failed D3 only because the runaway's page loads made long frames. The section-load counts in the main log (iframe warnings, 10 vs 34 lines) were the runaway's footprint all along. Undocking mid-run removes CPU capacity that the foreign-CPU ceiling cannot see.
+- **Decisions:** none new.
+- **Gate/DoD movement:** none; row 63 running.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: Hercules's row 63 work in progress, `tests/perf-baseline-results.json`.
+- **Next:** row 63 → 64 → 65 (final re-run, machine as it is: AC, internal panel) → 66.
+
+## S3 — 2026-10-13 21:11 — runaway fixed, final re-run passes, P5 gate green
+
+- **Did:** row 63 (Hercules): the view goes to the spoken word's section on a miss and never pages blindly (`769ae0ce`); stopped a stray spinning python the agent's shell had left (started 20:47, after the traced sessions). Row 64 green. Row 65: final re-run on AC, every pre-registered rule passed — both 5-minute sessions PASS with 0 late commits, and the 2.00x warm block PASS (worst 698 ms). Row 66: the gate's serial checks green at `821857b9` (2,048 passed).
+- **Learned:** with the fix, the view still opens on section 4 (the opening-position race is untouched) but reaches the spoken section on the first miss in 157 ms; one session now loads 3 sections, not 17, and has no frame over 100 ms — the runaway was the whole of the D3 problem in these runs.
+- **Decisions:** none new.
+- **Gate/DoD movement:** D3, D5, D6 (Decision #21), D10 met; P5 gate passed.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
+- **Next:** merge per GIT WORK; open P6 with the records; P6 starts with the production build for G2.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

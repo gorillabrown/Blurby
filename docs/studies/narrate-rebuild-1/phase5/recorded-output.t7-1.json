@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-10-13T21:57:41.134Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "minutes": 5,
+  "sessions": {
+    "1.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-1-00.trace.json",
+      "verdict": "PASS",
+      "failures": [],
+      "holds": [],
+      "stats": {
+        "commits": 795,
+        "schedules": 40,
+        "stops": 3,
+        "requests": 1,
+        "minutes": 5.05,
+        "speeds": [
+          1
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.76,
+        "outside": 0,
+        "worstLateMs": 91.8,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 37,
+        "drops": 0,
+        "repeats": 0,
+        "latency": {
+          "play": 510
+        }
+      },
+      "outside": []
+    },
+    "2.00": {
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-2-00.trace.json",
+      "verdict": "FAIL",
+      "failures": [
+        "1 units never committed inside a fully played chunk (drop)"
+      ],
+      "holds": [],
+      "stats": {
+        "commits": 1489,
+        "schedules": 73,
+        "stops": 3,
+        "requests": 1,
+        "minutes": 5.05,
+        "speeds": [
+          2
+        ],
+        "refreshMs": 16.7,
+        "mappingSpreadMs": 0.77,
+        "outside": 0,
+        "worstLateMs": 115.18,
+        "limitMs": 17.7,
+        "failures": [],
+        "overlaps": 0,
+        "fullChunks": 70,
+        "drops": 1,
+        "repeats": 0,
+        "latency": {
+          "play": 473
+        }
+      },
+      "outside": []
+    }
+  },
+  "runs": [
+    {
+      "label": "session-1.00",
+      "code": 0,
+      "wallMs": 310537,
+      "hostBusyPct": 93.2,
+      "appCpuPct": 16.4,
+      "foreignCpuPct": 76.8,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-1-00.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "session-2.00",
+      "code": 0,
+      "wallMs": 310412,
+      "hostBusyPct": 90.9,
+      "appCpuPct": 18.6,
+      "foreignCpuPct": 72.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\session-2-00.trace.json",
+      "traceExists": true
+    }
+  ]
+}

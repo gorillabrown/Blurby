@@ -13,6 +13,9 @@ import type { MutableRefObject } from "react";
 import {
   FOLIATE_SECTION_LOAD_WAIT_MS,
   KOKORO_DEFAULT_VOICE,
+  NARRATE_CHUNK_RAMP,
+  NARRATE_PREFETCH_AHEAD_S,
+  NARRATE_STEADY_CHUNK_MAX_WORDS,
   KOKORO_UI_RATE_MAX,
   KOKORO_UI_RATE_MIN,
   KOKORO_UI_RATE_STEP,
@@ -42,6 +45,7 @@ import {
 } from "../../document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../../ports/ReaderPorts";
 import type { SectionBoundary } from "../../../types/narration";
+import type { TtsEvalTraceInputEvent } from "../../../types/eval";
 import type { NarrateFoliateViewAPI } from "./FoliateView";
 import { NarrateModeState } from "./ModeState";
 import { createNarrateSurface, type NarrateSurface } from "./surface";
@@ -65,7 +69,6 @@ import type { ChunkTable } from "./engine/wordTable";
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const NARRATE_SURFACE_LOAD_DELAY_MS = 200;
 /** Legacy useFoliateSync effect 3 goToSection throttle. */
-const NARRATE_SECTION_SYNC_THROTTLE_MS = 200;
 const NARRATE_SAMPLE_RATE = 24000;
 
 /** Frozen inputs are kept as-is; anything else is deep-copied and frozen first. */
@@ -91,18 +94,26 @@ interface NarrateIpcResult {
   readonly table?: unknown;
   readonly pcm?: Float32Array;
   readonly sampleRate?: number;
+  readonly genMs?: number;
+  readonly worker?: number;
+  readonly busyAtAssign?: { readonly worker: number; readonly pool: number; readonly workers: number };
+  readonly ipc?: { readonly recvEpoch: number; readonly replyEpoch: number; readonly stages?: Readonly<Record<string, number>> };
   readonly error?: string;
 }
 
 function preloadProducer(): ProducerPort {
   return {
     async generate(request): Promise<ProducerResult> {
-      const api = (globalThis as { electronAPI?: { narrateGenerate?: (text: string, voice: string, speed: number) => Promise<NarrateIpcResult> } }).electronAPI;
+      const api = (globalThis as { electronAPI?: { narrateGenerate?: (text: string, voice: string, speed: number, options?: { priority: "request" | "prefetch"; group: string }) => Promise<NarrateIpcResult> } }).electronAPI;
       if (!api?.narrateGenerate) throw new Error("narrate producer unavailable (no preload surface)");
-      const r = await api.narrateGenerate(request.text, request.voice, request.speed);
+      const r = await api.narrateGenerate(request.text, request.voice, request.speed, { priority: request.priority ?? "request", group: request.group ?? "" });
       if (!r || r.error) throw new Error(r?.error ?? "narrate producer returned nothing");
       if (!(r.pcm instanceof Float32Array)) throw new Error("narrate producer returned no PCM");
-      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r) };
+      return { table: (r.table ?? null) as ChunkTable | null, pcm: r.pcm, sampleRate: r.sampleRate ?? NarrateIpcSampleRate(r), genMs: r.genMs, worker: r.worker, busyAtAssign: r.busyAtAssign, ipc: r.ipc };
+    },
+    async preload(): Promise<void> {
+      const api = (globalThis as { electronAPI?: { narratePreload?: () => Promise<unknown> } }).electronAPI;
+      await api?.narratePreload?.();
     },
   };
 }
@@ -162,6 +173,9 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       diagnostics: this.ports.diagnostics,
     };
     this.anchor = createPersistentReadingAnchor(this.state, this.anchorDeps);
+    // D6: load and warm the voice on entering the mode, so the first Play does not pay the model load (F5 still
+    // covers a Play that arrives first). A failure here surfaces again, fail-closed, on the first generate.
+    this.deps.producer.preload?.().catch(() => {});
   }
 
   // ── Store ──────────────────────────────────────────────────────────────────
@@ -257,6 +271,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }
     const effectiveWords = [...this.effectiveWords()];
     if (this.document.useFoliate && effectiveWords.length === 0 && this.surface.isReady()) {
+      this.traceSectionNav("empty-words-retry", this.state.currentWordIndex);
       this.surface.next();
       this.setTimer(() => {
         this.surface.extractWords();
@@ -323,6 +338,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     const s = this.state;
     s.pendingStartOnLoad = false;
     s.pendingResume = null;
+    s.sectionNavInFlight = null;
     s.playing = false;
     s.loading = false;
     s.selected = false;
@@ -341,7 +357,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
 
   jumpToWord(wordIndex: number, _cause: ReaderModeJumpCause): void {
     if (!this.alive) return;
-    if (this.state.playing && this.engine) { this.engine.play(wordIndex); return; }
+    if (this.state.playing && this.engine) { this.engine.play(wordIndex, "navigate"); return; }
     this.state.currentWordIndex = wordIndex;
     this.state.notify();
   }
@@ -407,7 +423,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
       s.explicitSelectionAnchor = resolved;
       const anchored = this.commitShared(resolved, "hard-selection", input.cfi);
       // F2: a click while playing restarts speech at the clicked word; while paused it sets where Play starts.
-      if (s.playing && this.engine) { s.failure = null; s.loading = true; this.engine.play(anchored); }
+      if (s.playing && this.engine) { s.failure = null; s.loading = true; this.engine.play(anchored, "click"); }
       if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchored })) {
         this.surface.clearUserBrowsing();
         s.isBrowsedAway = false;
@@ -424,7 +440,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   navigateTo(wordIndex: number): void {
     if (!this.alive) return;
     this.commitShared(wordIndex, "explicit-navigation", undefined);
-    if (this.state.playing && this.engine) this.engine.play(this.state.currentWordIndex);
+    if (this.state.playing && this.engine) this.engine.play(this.state.currentWordIndex, "navigate");
     this.state.notify();
   }
 
@@ -432,7 +448,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (!this.alive) return;
     const anchor = this.state.canonicalWordIndex;
     this.anchor.syncVisualToPersistentWord({ navigate: true });
-    if (this.document.useFoliate) void this.surface.jumpToWordAnchor(anchor);
+    if (this.document.useFoliate) {
+      this.traceSectionNav("jump-back", anchor);
+      void this.surface.jumpToWordAnchor(anchor);
+    }
     this.surface.clearUserBrowsing();
     this.state.isBrowsedAway = false;
     this.state.notify();
@@ -443,6 +462,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (command.kind !== "go-to-href") return;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
+    this.traceSectionNav("toc-goto", null);
     this.surface.goTo(command.href);
     this.state.notify();
   }
@@ -498,7 +518,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (pending != null) {
       s.pendingResume = null;
       this.requestFrame(() => {
-        if (!this.surface.highlight(pending, "narrate")) { s.pendingResume = pending; this.surface.next(); }
+        if (!this.surface.highlight(pending, "narrate")) {
+          s.pendingResume = pending;
+          this.followSpokenSection(pending, "pending-resume");
+        }
       });
     }
     s.notify();
@@ -531,16 +554,23 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   /** Follow the spoken word across sections (legacy useFoliateSync effect 3, throttled). */
   syncSection = (): void => {
     if (!this.alive || !this.document.useFoliate || !this.document.bookWords) return;
-    const s = this.state;
-    const sections = this.document.bookWords.sections as readonly Readonly<SectionBoundary>[];
-    const sec = sections.find((c) => s.publishedHighlightedWordIndex >= c.startWordIdx && s.publishedHighlightedWordIndex < c.endWordIdx);
-    if (!sec || sec.sectionIndex === s.currentSection) return;
-    const now = Date.now();
-    if (now - s.lastGoToSectionTime < NARRATE_SECTION_SYNC_THROTTLE_MS) return;
-    s.currentSection = sec.sectionIndex;
-    s.lastGoToSectionTime = now;
-    this.surface.goToSection(sec.sectionIndex).catch(() => {});
+    this.followSpokenSection(this.state.publishedHighlightedWordIndex, "section-sync");
   };
+
+  /** A miss goes to the spoken word's own section, one navigation at a time; it never pages blindly (BUG-191 runaway). */
+  private followSpokenSection(word: number, caller: string): void {
+    const s = this.state;
+    const target = this.surface.getSectionForWordIndex(word);
+    if (target == null) { this.traceSectionNav(caller, word); this.surface.next(); return; } // no section map: legacy forward step
+    const shown = this.surface.getDisplayedSectionIndex();
+    if (target === shown || s.sectionNavInFlight != null) return;
+    s.sectionNavInFlight = target;
+    s.currentSection = target;
+    this.ports.diagnostics.trace({ kind: "transition", transition: "section", from: shown ?? -1, to: target, context: `word ${word}` });
+    this.traceSectionNav(caller, word, target, shown ?? -1);
+    // foliate drops a goTo while a page turn holds its lock and resolves anyway: clearing in-flight lets the next cursor retry.
+    this.surface.goToSection(target).catch(() => {}).finally(() => { if (this.state.sectionNavInFlight === target) this.state.sectionNavInFlight = null; });
+  }
 
   /** One display frame: the engine publishes the unit at the current playback sample. */
   tick = (): void => {
@@ -548,7 +578,29 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.engine?.tick();
   };
 
+  /** Timer-driven upkeep (prefetch, end of audio) that keeps narration going while the window gets no frames. */
+  pump = (): void => {
+    if (!this.alive || !this.state.playing) return;
+    this.engine?.pump();
+  };
+
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();
+
+  /** P5 diagnostic (BUG-191): a caller is about to change the displayed section. The port's trace is a no-op without the eval-trace sink. */
+  traceSectionNav = (caller: string, word: number | null, targetSection?: number | null, displayed?: number): void => {
+    if (!this.alive) return;
+    const shown = displayed ?? this.surface.getDisplayedSectionIndex() ?? this.state.currentSection;
+    this.ports.diagnostics.trace({
+      kind: "narrate-section-nav", t: performance.now(), caller, word,
+      sectionIndex: shown >= 0 ? shown : null,
+      targetSection: targetSection ?? (word == null ? null : this.surface.getSectionForWordIndex(word)),
+    });
+  };
+
+  /** P5 diagnostic: the view's section-load and layout records go to the same port. */
+  traceViewEvent = (event: TtsEvalTraceInputEvent): void => {
+    if (this.alive) this.ports.diagnostics.trace(event);
+  };
 
   recordDiagnostic = (kind: string, detail: string): void => {
     if (this.alive) this.ports.diagnostics.record(kind, detail);
@@ -569,7 +621,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.output ??= this.deps.createOutput(NARRATE_SAMPLE_RATE);
     this.engine = new NarrateEngine({
       words,
-      breaks: numberArrayToSet(this.document.paragraphBreaks),
+      breaks: this.chunkBreaks(words),
+      chunkRamp: NARRATE_CHUNK_RAMP,
+      prefetchSeconds: NARRATE_PREFETCH_AHEAD_S,
+      chunkMaxWords: NARRATE_STEADY_CHUNK_MAX_WORDS,
       producer: this.deps.producer,
       output: this.output,
       voice: this.voice,
@@ -580,9 +635,26 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
         onFailure: (failure) => this.onEngineFailure(failure),
         onComplete: () => this.onEngineComplete(),
         onDiagnostic: (kind, detail) => { if (this.alive) this.ports.diagnostics.record(kind, detail); },
+        // D3 recorded output: the engine's records go to the diagnostics port (the eval-trace sink when enabled).
+        onTrace: (event) => { if (this.alive) this.ports.diagnostics.trace(event); },
       },
     });
     return this.engine;
+  }
+
+  /**
+   * Where a chunk may never cross (D5 crossings): the book's section ends when the engine speaks the book words
+   * (the tokenized content's paragraph breaks index tokenWords, not bookWords), else the paragraph breaks.
+   */
+  private chunkBreaks(words: readonly string[]): ReadonlySet<number> {
+    const bookWords = this.document.bookWords;
+    // By content: start() hands the engine a copy of the words, never the snapshot's own array.
+    if (bookWords && words.length === bookWords.words.length && words.every((w, i) => w === bookWords.words[i])) {
+      const ends = new Set<number>();
+      for (const section of bookWords.sections) if (section.endWordIdx > 0) ends.add(section.endWordIdx - 1);
+      return ends;
+    }
+    return numberArrayToSet(this.document.paragraphBreaks);
   }
 
   private onEngineCursor(word: number): void {
@@ -599,9 +671,12 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.publishHighlight(word);
     s.currentWordIndex = word;
     if (this.document.useFoliate && this.surface.isReady()) {
-      if (!this.surface.highlight(word, "narrate", { allowMotion: false })) { s.pendingResume = word; this.surface.next(); }
+      if (!this.surface.highlight(word, "narrate", { allowMotion: false })) {
+        s.pendingResume = word;
+        this.followSpokenSection(word, "cursor-miss");
+      }
     }
-    this.ports.diagnostics.trace({ kind: "word", source: "narrate", wordIndex: word } as never);
+    this.ports.diagnostics.trace({ kind: "word", source: "audio", wordIndex: word });
     s.notify();
   }
 

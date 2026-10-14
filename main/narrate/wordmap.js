@@ -120,9 +120,12 @@ async function buildWordMap(rec, isolated) {
   // Segment reconciliation: the phonemizer's per-segment groups, post-processed as kokoro does, must equal the final groups in order.
   const expected = [];
   const lang = rec.segments[0]?.lang === "en" ? "b" : "a";
+  // Characters the tokenizer has no id for were dropped from rec.phonemes (capture.js); drop them here too.
+  const dropped = new Set(rec.droppedChars ?? []);
+  const keep = (s) => (dropped.size ? [...s].filter((ch) => !dropped.has(ch)).join("") : s);
   for (const seg of rec.segments) {
     const segWords = seg.text.trim().split(/\s+/).filter(Boolean);
-    const segGroups = kokoroPost(seg.out.join(" "), lang).split(" ").filter(Boolean);
+    const segGroups = kokoroPost(seg.out.join(" "), lang).split(" ").map(keep).filter(Boolean);
     expected.push({ text: seg.text, words: segWords, groups: segGroups });
   }
   const expectedFlat = expected.flatMap((e) => e.groups);
@@ -135,7 +138,7 @@ async function buildWordMap(rec, isolated) {
     for (const seg of expected) {
       const W = seg.words.length, G = seg.groups.length;
       const iso = [];
-      for (const w of seg.words) iso.push(kokoroPost((await isolated(w, rec.segments[0].lang)).join(" "), lang).replace(/ /g, ""));
+      for (const w of seg.words) iso.push(keep(kokoroPost((await isolated(w, rec.segments[0].lang)).join(" "), lang).replace(/ /g, "")));
       const groupTexts = seg.groups;
       let plan;
       if (W === G) plan = { cost: 0, units: seg.words.map((_, i) => ({ i, j: i, k: 1, g: 1, c: relCost([iso[i]], [groupTexts[i]], lang), diagonal: true })) };

@@ -36,10 +36,12 @@ function attachCapture(tts, ph) {
     return out;
   };
   const vocab = origTok.model.tokens_to_ids ?? origTok.model.vocab;
-  const spaceId = vocab instanceof Map ? vocab.get(" ") : vocab[" "];
+  const idOf = (ch) => (vocab instanceof Map ? vocab.get(ch) : Object.prototype.hasOwnProperty.call(vocab, ch) ? vocab[ch] : undefined);
+  const spaceId = idOf(" ");
   return {
     phonemizeIsolated: origPh, // identification evidence only (see MAPPING_POLICY.md)
     spaceId,
+    idOf,
     take() { const t = { ph: cap.ph, tok: cap.tok, model: cap.model }; cap.ph = []; cap.tok = []; cap.model = []; return t; },
   };
 }
@@ -56,12 +58,22 @@ async function synthesize(tts, capture, text, { voice, speed }) {
   if (!m.durations) throw new Error("producer returned no durations output (fail closed)");
   if (m.idsSent.length !== tok.ids.length || m.idsSent.some((v, i) => v !== tok.ids[i])) throw new Error("ids sent to the model differ from the tokenizer output");
   if (m.durations.length !== tok.ids.length) throw new Error(`durations length ${m.durations.length} != input_ids length ${tok.ids.length}`);
+  // Tokenizer identity, character by character (NARRATE-REBUILD-1 P5): kokoro's tokenizer silently drops characters
+  // outside its vocabulary (the normalizer's « » for parentheses, for one). The durations belong to the ids actually
+  // sent, so the phoneme string the table is built on is the kept characters, each verified against its id.
+  const rawChars = [...tok.text];
+  const kept = rawChars.filter((ch) => capture.idOf(ch) !== undefined);
+  const droppedChars = [...new Set(rawChars.filter((ch) => capture.idOf(ch) === undefined))];
+  if (tok.ids.length !== kept.length + 2) throw new Error(`tokenizer identity: ${tok.ids.length} ids for ${kept.length} known characters (+2)`);
+  for (let i = 0; i < kept.length; i++) if (tok.ids[i + 1] !== capture.idOf(kept[i])) throw new Error(`tokenizer identity: id ${tok.ids[i + 1]} at ${i} is not the id of "${kept[i]}"`);
   if (m.speedSent !== Math.fround(speed)) throw new Error(`speed sent ${m.speedSent} != requested ${speed} (float32 ${Math.fround(speed)})`); // the speed tensor is float32
   const pcm = audio.audio;
   if (!(pcm instanceof Float32Array)) throw new Error("RawAudio.audio is not a Float32Array");
   return {
     text, voice, speed,
-    phonemes: tok.text,
+    phonemes: kept.join(""),
+    phonemesRaw: tok.text,
+    droppedChars,
     ids: tok.ids,
     durations: m.durations,
     durationsType: m.durationsType,

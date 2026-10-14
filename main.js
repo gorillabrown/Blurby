@@ -19,7 +19,12 @@ const { extractContent, extractDocMetadata, countWords,
         extractAuthorFromFilename, extractTitleFromFilename,
         palmDocDecompress } = require("./main/file-parsers");
 
-const isDev = !app.isPackaged;
+// Run-isolation levers (NARRATE-REBUILD-1 P5, Decision #16): unset, nothing below changes. BLURBY_USE_DIST loads the
+// built renderer unpackaged; BLURBY_USER_DATA_DIR keeps a trial's profile out of the real one (set before any path is read).
+const isDev = !app.isPackaged && !process.env.BLURBY_USE_DIST;
+if (process.env.BLURBY_USER_DATA_DIR) app.setPath("userData", path.resolve(process.env.BLURBY_USER_DATA_DIR));
+// A Narrate trial measures the highlight on display frames: keep painting while another window covers this one.
+if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
@@ -582,7 +587,14 @@ app.whenReady().then(async () => {
     mainWindow.on("closed", () => { mainWindow = null; });
   });
   updateWindowTheme(mainWindow, settings);
-  if (!isDev) setupAutoUpdater(mainWindow);
+  if (!isDev && !process.env.BLURBY_USE_DIST) setupAutoUpdater(mainWindow);
+  // The in-app Narrate trial driver (NARRATE-REBUILD-1 P5, Decision #16): required only when the variable is set.
+  if (process.env.BLURBY_NARRATE_TRIAL) {
+    require("./main/narrate/trial").run(ipcContext).catch((err) => {
+      console.error("[narrate-trial] failed:", err && err.stack ? err.stack : err);
+      app.exit(1);
+    });
+  }
 
   // ── Phase 3: Auth + sync init in parallel (window already visible) ───────
   await Promise.all([
@@ -675,7 +687,17 @@ app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
 
-app.on("will-quit", async () => {
+let narrateProducerStopped = false;
+app.on("will-quit", async (event) => {
+  // Stop the Narrate producer workers before the process exits: a worker ended under a live onnxruntime run takes
+  // the process down with 0xC0000409. Quit waits once for them, then quits again.
+  if (!narrateProducerStopped) {
+    narrateProducerStopped = true;
+    event.preventDefault();
+    try { await require("./main/narrate/producer").shutdown(); } catch { /* ignore */ }
+    app.quit();
+    return;
+  }
   if (watcher) watcher.close();
   // Stop WebSocket server
   try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }

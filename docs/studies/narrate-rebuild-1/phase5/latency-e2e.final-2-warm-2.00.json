@@ -1,0 +1,1692 @@
+{
+  "generatedAt": "2026-10-14T02:03:01.740Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "electron": null,
+  "budgets": {
+    "warmMs": 2000,
+    "coldMs": 8000,
+    "foreignCeilingPct": 25,
+    "cycleCap": 40
+  },
+  "rates": [
+    2
+  ],
+  "runs": [
+    {
+      "label": "warm-2.00",
+      "code": 0,
+      "wallMs": 301101,
+      "hostBusyPct": 36.8,
+      "appCpuPct": 28.6,
+      "foreignCpuPct": 8.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5-final-2\\warm\\traces\\warm-2-00.trace.json",
+      "traceExists": true,
+      "cycles": 20
+    }
+  ],
+  "warm": {
+    "2.00": {
+      "play": {
+        "n": 20,
+        "counting": 20,
+        "worstMs": 698,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 8723,
+            "latencyMs": 607,
+            "cpu": {
+              "hostPct": 43.3,
+              "appPct": 39.7,
+              "foreignPct": 3.6
+            },
+            "ctxLatencyMs": 393,
+            "scheduledWallMs": 550,
+            "leadMs": 30,
+            "trimMs": 258,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5545,
+            "latencyMs": 488,
+            "cpu": {
+              "hostPct": 32.6,
+              "appPct": 26.3,
+              "foreignPct": 6.3
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 431,
+            "leadMs": 30,
+            "trimMs": 311,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5583,
+            "latencyMs": 358,
+            "cpu": {
+              "hostPct": 29.1,
+              "appPct": 25.6,
+              "foreignPct": 3.4
+            },
+            "ctxLatencyMs": 323,
+            "scheduledWallMs": 302,
+            "leadMs": 30,
+            "trimMs": 257,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5620,
+            "latencyMs": 418,
+            "cpu": {
+              "hostPct": 39,
+              "appPct": 29,
+              "foreignPct": 10.1
+            },
+            "ctxLatencyMs": 382,
+            "scheduledWallMs": 366,
+            "leadMs": 30,
+            "trimMs": 269,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5656,
+            "latencyMs": 568,
+            "cpu": {
+              "hostPct": 37,
+              "appPct": 21.9,
+              "foreignPct": 15.2
+            },
+            "ctxLatencyMs": 531,
+            "scheduledWallMs": 515,
+            "leadMs": 30,
+            "trimMs": 309,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5570,
+            "latencyMs": 659,
+            "cpu": {
+              "hostPct": 27.2,
+              "appPct": 27.6,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 622,
+            "scheduledWallMs": 600,
+            "leadMs": 30,
+            "trimMs": 334,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5612,
+            "latencyMs": 293,
+            "cpu": {
+              "hostPct": 41.5,
+              "appPct": 27.7,
+              "foreignPct": 13.8
+            },
+            "ctxLatencyMs": 243,
+            "scheduledWallMs": 232,
+            "leadMs": 30,
+            "trimMs": 236,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5649,
+            "latencyMs": 396,
+            "cpu": {
+              "hostPct": 25.6,
+              "appPct": 16.4,
+              "foreignPct": 9.2
+            },
+            "ctxLatencyMs": 361,
+            "scheduledWallMs": 340,
+            "leadMs": 30,
+            "trimMs": 261,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5569,
+            "latencyMs": 600,
+            "cpu": {
+              "hostPct": 31.2,
+              "appPct": 19.4,
+              "foreignPct": 11.8
+            },
+            "ctxLatencyMs": 563,
+            "scheduledWallMs": 545,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5602,
+            "latencyMs": 461,
+            "cpu": {
+              "hostPct": 44.7,
+              "appPct": 23.3,
+              "foreignPct": 21.4
+            },
+            "ctxLatencyMs": 425,
+            "scheduledWallMs": 399,
+            "leadMs": 30,
+            "trimMs": 282,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5641,
+            "latencyMs": 488,
+            "cpu": {
+              "hostPct": 27.1,
+              "appPct": 24.1,
+              "foreignPct": 3
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 425,
+            "leadMs": 30,
+            "trimMs": 265,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5554,
+            "latencyMs": 412,
+            "cpu": {
+              "hostPct": 32.1,
+              "appPct": 23.2,
+              "foreignPct": 8.9
+            },
+            "ctxLatencyMs": 371,
+            "scheduledWallMs": 356,
+            "leadMs": 30,
+            "trimMs": 261,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5588,
+            "latencyMs": 476,
+            "cpu": {
+              "hostPct": 32.7,
+              "appPct": 34.9,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 441,
+            "scheduledWallMs": 415,
+            "leadMs": 30,
+            "trimMs": 287,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5630,
+            "latencyMs": 396,
+            "cpu": {
+              "hostPct": 30.4,
+              "appPct": 29.5,
+              "foreignPct": 0.9
+            },
+            "ctxLatencyMs": 361,
+            "scheduledWallMs": 345,
+            "leadMs": 30,
+            "trimMs": 260,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5545,
+            "latencyMs": 489,
+            "cpu": {
+              "hostPct": 32.9,
+              "appPct": 18.3,
+              "foreignPct": 14.6
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 432,
+            "leadMs": 30,
+            "trimMs": 311,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5583,
+            "latencyMs": 359,
+            "cpu": {
+              "hostPct": 24.4,
+              "appPct": 28.9,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 323,
+            "scheduledWallMs": 302,
+            "leadMs": 30,
+            "trimMs": 257,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5622,
+            "latencyMs": 387,
+            "cpu": {
+              "hostPct": 40.5,
+              "appPct": 16.8,
+              "foreignPct": 23.7
+            },
+            "ctxLatencyMs": 345,
+            "scheduledWallMs": 330,
+            "leadMs": 30,
+            "trimMs": 211,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5661,
+            "latencyMs": 489,
+            "cpu": {
+              "hostPct": 22.1,
+              "appPct": 20.9,
+              "foreignPct": 1.2
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 437,
+            "leadMs": 30,
+            "trimMs": 278,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5570,
+            "latencyMs": 698,
+            "cpu": {
+              "hostPct": 35,
+              "appPct": 35.5,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 654,
+            "scheduledWallMs": 640,
+            "leadMs": 30,
+            "trimMs": 334,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "play",
+            "speed": 2,
+            "word": 5612,
+            "latencyMs": 297,
+            "cpu": {
+              "hostPct": 34.9,
+              "appPct": 20.8,
+              "foreignPct": 14.1
+            },
+            "ctxLatencyMs": 254,
+            "scheduledWallMs": 234,
+            "leadMs": 30,
+            "trimMs": 236,
+            "run": "warm-2.00"
+          }
+        ]
+      },
+      "resume": {
+        "n": 20,
+        "counting": 20,
+        "worstMs": 94,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 8732,
+            "latencyMs": 88,
+            "cpu": {
+              "hostPct": 33,
+              "appPct": 21.7,
+              "foreignPct": 11.3
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 663,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5554,
+            "latencyMs": 92,
+            "cpu": {
+              "hostPct": 34.7,
+              "appPct": 22.7,
+              "foreignPct": 12
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1136,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5593,
+            "latencyMs": 85,
+            "cpu": {
+              "hostPct": 26.3,
+              "appPct": 22.2,
+              "foreignPct": 4
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1571,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5632,
+            "latencyMs": 91,
+            "cpu": {
+              "hostPct": 40,
+              "appPct": 23.3,
+              "foreignPct": 16.7
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1376,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5665,
+            "latencyMs": 91,
+            "cpu": {
+              "hostPct": 25.4,
+              "appPct": 20.6,
+              "foreignPct": 4.8
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 868,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5577,
+            "latencyMs": 94,
+            "cpu": {
+              "hostPct": 40.5,
+              "appPct": 17.9,
+              "foreignPct": 22.6
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 645,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5619,
+            "latencyMs": 84,
+            "cpu": {
+              "hostPct": 22.6,
+              "appPct": 21.8,
+              "foreignPct": 0.8
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 20,
+            "leadMs": 30,
+            "trimMs": 1474,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5659,
+            "latencyMs": 87,
+            "cpu": {
+              "hostPct": 27.1,
+              "appPct": 23,
+              "foreignPct": 4.1
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1416,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5575,
+            "latencyMs": 81,
+            "cpu": {
+              "hostPct": 29.4,
+              "appPct": 21.7,
+              "foreignPct": 7.7
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 744,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5612,
+            "latencyMs": 82,
+            "cpu": {
+              "hostPct": 28.5,
+              "appPct": 19.1,
+              "foreignPct": 9.4
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1295,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5650,
+            "latencyMs": 85,
+            "cpu": {
+              "hostPct": 20.2,
+              "appPct": 5.6,
+              "foreignPct": 14.6
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1178,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5562,
+            "latencyMs": 86,
+            "cpu": {
+              "hostPct": 29,
+              "appPct": 24.7,
+              "foreignPct": 4.3
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 391,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5598,
+            "latencyMs": 90,
+            "cpu": {
+              "hostPct": 18,
+              "appPct": 21.5,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1212,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5641,
+            "latencyMs": 88,
+            "cpu": {
+              "hostPct": 22.7,
+              "appPct": 20.8,
+              "foreignPct": 1.9
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1463,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5554,
+            "latencyMs": 88,
+            "cpu": {
+              "hostPct": 24.6,
+              "appPct": 15,
+              "foreignPct": 9.6
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1115,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5593,
+            "latencyMs": 88,
+            "cpu": {
+              "hostPct": 34,
+              "appPct": 28.7,
+              "foreignPct": 5.2
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1533,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5632,
+            "latencyMs": 86,
+            "cpu": {
+              "hostPct": 31.6,
+              "appPct": 20.7,
+              "foreignPct": 10.8
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1452,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5671,
+            "latencyMs": 87,
+            "cpu": {
+              "hostPct": 28.6,
+              "appPct": 19.6,
+              "foreignPct": 9.1
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1153,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5577,
+            "latencyMs": 86,
+            "cpu": {
+              "hostPct": 35.9,
+              "appPct": 16.5,
+              "foreignPct": 19.4
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 667,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "resume",
+            "speed": 2,
+            "word": 5620,
+            "latencyMs": 86,
+            "cpu": {
+              "hostPct": 20.9,
+              "appPct": 12.6,
+              "foreignPct": 8.2
+            },
+            "ctxLatencyMs": 30,
+            "scheduledWallMs": 30,
+            "leadMs": 30,
+            "trimMs": 1484,
+            "run": "warm-2.00"
+          }
+        ]
+      },
+      "click": {
+        "n": 20,
+        "counting": 20,
+        "worstMs": 544,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [],
+        "trials": [
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5520,
+            "latencyMs": 458,
+            "cpu": {
+              "hostPct": 31.2,
+              "appPct": 26.1,
+              "foreignPct": 5.1
+            },
+            "ctxLatencyMs": 409,
+            "scheduledWallMs": 402,
+            "leadMs": 30,
+            "trimMs": 283,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5557,
+            "latencyMs": 428,
+            "cpu": {
+              "hostPct": 55.5,
+              "appPct": 45.6,
+              "foreignPct": 10
+            },
+            "ctxLatencyMs": 371,
+            "scheduledWallMs": 365,
+            "leadMs": 30,
+            "trimMs": 259,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5594,
+            "latencyMs": 536,
+            "cpu": {
+              "hostPct": 37.2,
+              "appPct": 34.8,
+              "foreignPct": 2.4
+            },
+            "ctxLatencyMs": 483,
+            "scheduledWallMs": 477,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5631,
+            "latencyMs": 393,
+            "cpu": {
+              "hostPct": 56,
+              "appPct": 33.8,
+              "foreignPct": 22.2
+            },
+            "ctxLatencyMs": 334,
+            "scheduledWallMs": 330,
+            "leadMs": 30,
+            "trimMs": 243,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5548,
+            "latencyMs": 501,
+            "cpu": {
+              "hostPct": 33.5,
+              "appPct": 26,
+              "foreignPct": 7.5
+            },
+            "ctxLatencyMs": 441,
+            "scheduledWallMs": 442,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5585,
+            "latencyMs": 544,
+            "cpu": {
+              "hostPct": 52.9,
+              "appPct": 29.5,
+              "foreignPct": 23.4
+            },
+            "ctxLatencyMs": 483,
+            "scheduledWallMs": 482,
+            "leadMs": 30,
+            "trimMs": 362,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5622,
+            "latencyMs": 400,
+            "cpu": {
+              "hostPct": 32.3,
+              "appPct": 24.8,
+              "foreignPct": 7.4
+            },
+            "ctxLatencyMs": 334,
+            "scheduledWallMs": 326,
+            "leadMs": 30,
+            "trimMs": 211,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5539,
+            "latencyMs": 440,
+            "cpu": {
+              "hostPct": 30.1,
+              "appPct": 27.7,
+              "foreignPct": 2.4
+            },
+            "ctxLatencyMs": 377,
+            "scheduledWallMs": 379,
+            "leadMs": 30,
+            "trimMs": 286,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5576,
+            "latencyMs": 533,
+            "cpu": {
+              "hostPct": 30,
+              "appPct": 25,
+              "foreignPct": 5
+            },
+            "ctxLatencyMs": 478,
+            "scheduledWallMs": 487,
+            "leadMs": 30,
+            "trimMs": 299,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5613,
+            "latencyMs": 506,
+            "cpu": {
+              "hostPct": 29.7,
+              "appPct": 31.9,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 445,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5530,
+            "latencyMs": 443,
+            "cpu": {
+              "hostPct": 40.8,
+              "appPct": 36.1,
+              "foreignPct": 4.7
+            },
+            "ctxLatencyMs": 387,
+            "scheduledWallMs": 389,
+            "leadMs": 30,
+            "trimMs": 259,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5567,
+            "latencyMs": 281,
+            "cpu": {
+              "hostPct": 33.7,
+              "appPct": 29.8,
+              "foreignPct": 3.9
+            },
+            "ctxLatencyMs": 217,
+            "scheduledWallMs": 226,
+            "leadMs": 30,
+            "trimMs": 221,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5604,
+            "latencyMs": 480,
+            "cpu": {
+              "hostPct": 41.1,
+              "appPct": 25.4,
+              "foreignPct": 15.7
+            },
+            "ctxLatencyMs": 419,
+            "scheduledWallMs": 418,
+            "leadMs": 30,
+            "trimMs": 289,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5521,
+            "latencyMs": 437,
+            "cpu": {
+              "hostPct": 36.2,
+              "appPct": 21.7,
+              "foreignPct": 14.5
+            },
+            "ctxLatencyMs": 377,
+            "scheduledWallMs": 376,
+            "leadMs": 30,
+            "trimMs": 271,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5558,
+            "latencyMs": 382,
+            "cpu": {
+              "hostPct": 51.6,
+              "appPct": 41.6,
+              "foreignPct": 10
+            },
+            "ctxLatencyMs": 329,
+            "scheduledWallMs": 329,
+            "leadMs": 30,
+            "trimMs": 213,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5595,
+            "latencyMs": 496,
+            "cpu": {
+              "hostPct": 28.9,
+              "appPct": 24.8,
+              "foreignPct": 4.1
+            },
+            "ctxLatencyMs": 441,
+            "scheduledWallMs": 442,
+            "leadMs": 30,
+            "trimMs": 294,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5632,
+            "latencyMs": 352,
+            "cpu": {
+              "hostPct": 52.2,
+              "appPct": 43.7,
+              "foreignPct": 8.5
+            },
+            "ctxLatencyMs": 291,
+            "scheduledWallMs": 297,
+            "leadMs": 30,
+            "trimMs": 223,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5549,
+            "latencyMs": 532,
+            "cpu": {
+              "hostPct": 40.4,
+              "appPct": 43.6,
+              "foreignPct": 0
+            },
+            "ctxLatencyMs": 473,
+            "scheduledWallMs": 471,
+            "leadMs": 30,
+            "trimMs": 287,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5586,
+            "latencyMs": 479,
+            "cpu": {
+              "hostPct": 41.8,
+              "appPct": 20.1,
+              "foreignPct": 21.7
+            },
+            "ctxLatencyMs": 425,
+            "scheduledWallMs": 419,
+            "leadMs": 30,
+            "trimMs": 234,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "click",
+            "speed": 2,
+            "word": 5623,
+            "latencyMs": 317,
+            "cpu": {
+              "hostPct": 31.3,
+              "appPct": 26.1,
+              "foreignPct": 5.2
+            },
+            "ctxLatencyMs": 259,
+            "scheduledWallMs": 265,
+            "leadMs": 30,
+            "trimMs": 235,
+            "run": "warm-2.00"
+          }
+        ]
+      },
+      "speed": {
+        "n": 40,
+        "counting": 39,
+        "worstMs": 637,
+        "over": 0,
+        "unmeasured": 0,
+        "overCeiling": [
+          {
+            "latencyMs": 485,
+            "cause": "speed",
+            "cpu": {
+              "hostPct": 73.5,
+              "appPct": 47.4,
+              "foreignPct": 26.1
+            },
+            "run": "warm-2.00"
+          }
+        ],
+        "trials": [
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5531,
+            "latencyMs": 412,
+            "cpu": {
+              "hostPct": 42.6,
+              "appPct": 35.6,
+              "foreignPct": 7
+            },
+            "ctxLatencyMs": 361,
+            "scheduledWallMs": 359,
+            "leadMs": 30,
+            "trimMs": 263,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5542,
+            "latencyMs": 414,
+            "cpu": {
+              "hostPct": 51.2,
+              "appPct": 41.6,
+              "foreignPct": 9.6
+            },
+            "ctxLatencyMs": 361,
+            "scheduledWallMs": 357,
+            "leadMs": 30,
+            "trimMs": 237,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5568,
+            "latencyMs": 625,
+            "cpu": {
+              "hostPct": 56.6,
+              "appPct": 49.8,
+              "foreignPct": 6.9
+            },
+            "ctxLatencyMs": 569,
+            "scheduledWallMs": 566,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5576,
+            "latencyMs": 606,
+            "cpu": {
+              "hostPct": 55.8,
+              "appPct": 49.6,
+              "foreignPct": 6.2
+            },
+            "ctxLatencyMs": 553,
+            "scheduledWallMs": 548,
+            "leadMs": 30,
+            "trimMs": 299,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5603,
+            "latencyMs": 543,
+            "cpu": {
+              "hostPct": 55.4,
+              "appPct": 46.4,
+              "foreignPct": 9.1
+            },
+            "ctxLatencyMs": 483,
+            "scheduledWallMs": 487,
+            "leadMs": 30,
+            "trimMs": 288,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5613,
+            "latencyMs": 541,
+            "cpu": {
+              "hostPct": 55,
+              "appPct": 46.7,
+              "foreignPct": 8.4
+            },
+            "ctxLatencyMs": 489,
+            "scheduledWallMs": 481,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5641,
+            "latencyMs": 537,
+            "cpu": {
+              "hostPct": 54.2,
+              "appPct": 48.3,
+              "foreignPct": 5.9
+            },
+            "ctxLatencyMs": 483,
+            "scheduledWallMs": 475,
+            "leadMs": 30,
+            "trimMs": 265,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5650,
+            "latencyMs": 345,
+            "cpu": {
+              "hostPct": 47,
+              "appPct": 42,
+              "foreignPct": 5
+            },
+            "ctxLatencyMs": 291,
+            "scheduledWallMs": 291,
+            "leadMs": 30,
+            "trimMs": 218,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5556,
+            "latencyMs": 509,
+            "cpu": {
+              "hostPct": 52,
+              "appPct": 46.1,
+              "foreignPct": 6
+            },
+            "ctxLatencyMs": 451,
+            "scheduledWallMs": 450,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5567,
+            "latencyMs": 305,
+            "cpu": {
+              "hostPct": 49.8,
+              "appPct": 40,
+              "foreignPct": 9.9
+            },
+            "ctxLatencyMs": 249,
+            "scheduledWallMs": 248,
+            "leadMs": 30,
+            "trimMs": 221,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5596,
+            "latencyMs": 456,
+            "cpu": {
+              "hostPct": 60.5,
+              "appPct": 44.3,
+              "foreignPct": 16.2
+            },
+            "ctxLatencyMs": 398,
+            "scheduledWallMs": 405,
+            "leadMs": 30,
+            "trimMs": 261,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5606,
+            "latencyMs": 362,
+            "cpu": {
+              "hostPct": 48.4,
+              "appPct": 36.1,
+              "foreignPct": 12.3
+            },
+            "ctxLatencyMs": 307,
+            "scheduledWallMs": 303,
+            "leadMs": 30,
+            "trimMs": 244,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5633,
+            "latencyMs": 533,
+            "cpu": {
+              "hostPct": 56.5,
+              "appPct": 47.6,
+              "foreignPct": 8.8
+            },
+            "ctxLatencyMs": 467,
+            "scheduledWallMs": 463,
+            "leadMs": 30,
+            "trimMs": 303,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5642,
+            "latencyMs": 613,
+            "cpu": {
+              "hostPct": 54.4,
+              "appPct": 49,
+              "foreignPct": 5.5
+            },
+            "ctxLatencyMs": 547,
+            "scheduledWallMs": 546,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5553,
+            "latencyMs": 502,
+            "cpu": {
+              "hostPct": 52.1,
+              "appPct": 43.2,
+              "foreignPct": 8.9
+            },
+            "ctxLatencyMs": 441,
+            "scheduledWallMs": 440,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5561,
+            "latencyMs": 544,
+            "cpu": {
+              "hostPct": 49,
+              "appPct": 38.2,
+              "foreignPct": 10.9
+            },
+            "ctxLatencyMs": 483,
+            "scheduledWallMs": 488,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5587,
+            "latencyMs": 416,
+            "cpu": {
+              "hostPct": 50.3,
+              "appPct": 43.1,
+              "foreignPct": 7.2
+            },
+            "ctxLatencyMs": 371,
+            "scheduledWallMs": 365,
+            "leadMs": 30,
+            "trimMs": 258,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5596,
+            "latencyMs": 405,
+            "cpu": {
+              "hostPct": 41,
+              "appPct": 36.1,
+              "foreignPct": 4.8
+            },
+            "ctxLatencyMs": 355,
+            "scheduledWallMs": 361,
+            "leadMs": 30,
+            "trimMs": 261,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5625,
+            "latencyMs": 546,
+            "cpu": {
+              "hostPct": 54.6,
+              "appPct": 45.5,
+              "foreignPct": 9.1
+            },
+            "ctxLatencyMs": 489,
+            "scheduledWallMs": 487,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5633,
+            "latencyMs": 536,
+            "cpu": {
+              "hostPct": 61.7,
+              "appPct": 58.8,
+              "foreignPct": 2.9
+            },
+            "ctxLatencyMs": 478,
+            "scheduledWallMs": 476,
+            "leadMs": 30,
+            "trimMs": 303,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5542,
+            "latencyMs": 441,
+            "cpu": {
+              "hostPct": 50.6,
+              "appPct": 46,
+              "foreignPct": 4.5
+            },
+            "ctxLatencyMs": 382,
+            "scheduledWallMs": 381,
+            "leadMs": 30,
+            "trimMs": 237,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5547,
+            "latencyMs": 619,
+            "cpu": {
+              "hostPct": 49.9,
+              "appPct": 43.7,
+              "foreignPct": 6.2
+            },
+            "ctxLatencyMs": 563,
+            "scheduledWallMs": 560,
+            "leadMs": 30,
+            "trimMs": 284,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5575,
+            "latencyMs": 376,
+            "cpu": {
+              "hostPct": 48.6,
+              "appPct": 42.3,
+              "foreignPct": 6.3
+            },
+            "ctxLatencyMs": 318,
+            "scheduledWallMs": 317,
+            "leadMs": 30,
+            "trimMs": 244,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5580,
+            "latencyMs": 513,
+            "cpu": {
+              "hostPct": 58.8,
+              "appPct": 46.7,
+              "foreignPct": 12.1
+            },
+            "ctxLatencyMs": 457,
+            "scheduledWallMs": 455,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5615,
+            "latencyMs": 631,
+            "cpu": {
+              "hostPct": 57.6,
+              "appPct": 50.2,
+              "foreignPct": 7.4
+            },
+            "ctxLatencyMs": 574,
+            "scheduledWallMs": 573,
+            "leadMs": 30,
+            "trimMs": 320,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5625,
+            "latencyMs": 570,
+            "cpu": {
+              "hostPct": 59.5,
+              "appPct": 49.2,
+              "foreignPct": 10.4
+            },
+            "ctxLatencyMs": 510,
+            "scheduledWallMs": 508,
+            "leadMs": 30,
+            "trimMs": 275,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5531,
+            "latencyMs": 416,
+            "cpu": {
+              "hostPct": 38.5,
+              "appPct": 33.9,
+              "foreignPct": 4.5
+            },
+            "ctxLatencyMs": 361,
+            "scheduledWallMs": 356,
+            "leadMs": 30,
+            "trimMs": 263,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5542,
+            "latencyMs": 485,
+            "cpu": {
+              "hostPct": 73.5,
+              "appPct": 47.4,
+              "foreignPct": 26.1
+            },
+            "ctxLatencyMs": 430,
+            "scheduledWallMs": 429,
+            "leadMs": 30,
+            "trimMs": 237,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5568,
+            "latencyMs": 637,
+            "cpu": {
+              "hostPct": 56.9,
+              "appPct": 50.9,
+              "foreignPct": 6
+            },
+            "ctxLatencyMs": 579,
+            "scheduledWallMs": 581,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5576,
+            "latencyMs": 621,
+            "cpu": {
+              "hostPct": 56.9,
+              "appPct": 51.1,
+              "foreignPct": 5.8
+            },
+            "ctxLatencyMs": 569,
+            "scheduledWallMs": 563,
+            "leadMs": 30,
+            "trimMs": 299,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5605,
+            "latencyMs": 496,
+            "cpu": {
+              "hostPct": 50.9,
+              "appPct": 45.6,
+              "foreignPct": 5.3
+            },
+            "ctxLatencyMs": 435,
+            "scheduledWallMs": 437,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5613,
+            "latencyMs": 559,
+            "cpu": {
+              "hostPct": 54.4,
+              "appPct": 41.3,
+              "foreignPct": 13.2
+            },
+            "ctxLatencyMs": 499,
+            "scheduledWallMs": 501,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5642,
+            "latencyMs": 635,
+            "cpu": {
+              "hostPct": 57.7,
+              "appPct": 51.1,
+              "foreignPct": 6.6
+            },
+            "ctxLatencyMs": 579,
+            "scheduledWallMs": 580,
+            "leadMs": 30,
+            "trimMs": 300,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5651,
+            "latencyMs": 482,
+            "cpu": {
+              "hostPct": 47.3,
+              "appPct": 42.7,
+              "foreignPct": 4.7
+            },
+            "ctxLatencyMs": 430,
+            "scheduledWallMs": 427,
+            "leadMs": 30,
+            "trimMs": 250,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5557,
+            "latencyMs": 457,
+            "cpu": {
+              "hostPct": 49.7,
+              "appPct": 45.7,
+              "foreignPct": 3.9
+            },
+            "ctxLatencyMs": 398,
+            "scheduledWallMs": 406,
+            "leadMs": 30,
+            "trimMs": 263,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5565,
+            "latencyMs": 487,
+            "cpu": {
+              "hostPct": 60,
+              "appPct": 43.8,
+              "foreignPct": 16.2
+            },
+            "ctxLatencyMs": 430,
+            "scheduledWallMs": 425,
+            "leadMs": 30,
+            "trimMs": 239,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5597,
+            "latencyMs": 411,
+            "cpu": {
+              "hostPct": 50.4,
+              "appPct": 45,
+              "foreignPct": 5.4
+            },
+            "ctxLatencyMs": 350,
+            "scheduledWallMs": 353,
+            "leadMs": 30,
+            "trimMs": 237,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5606,
+            "latencyMs": 425,
+            "cpu": {
+              "hostPct": 49.3,
+              "appPct": 43.6,
+              "foreignPct": 5.8
+            },
+            "ctxLatencyMs": 371,
+            "scheduledWallMs": 367,
+            "leadMs": 30,
+            "trimMs": 244,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 1.95,
+            "word": 5633,
+            "latencyMs": 532,
+            "cpu": {
+              "hostPct": 51.6,
+              "appPct": 47.9,
+              "foreignPct": 3.7
+            },
+            "ctxLatencyMs": 473,
+            "scheduledWallMs": 470,
+            "leadMs": 30,
+            "trimMs": 303,
+            "run": "warm-2.00"
+          },
+          {
+            "cause": "speed",
+            "speed": 2,
+            "word": 5641,
+            "latencyMs": 550,
+            "cpu": {
+              "hostPct": 54.5,
+              "appPct": 49.2,
+              "foreignPct": 5.4
+            },
+            "ctxLatencyMs": 489,
+            "scheduledWallMs": 494,
+            "leadMs": 30,
+            "trimMs": 265,
+            "run": "warm-2.00"
+          }
+        ]
+      }
+    }
+  },
+  "cold": {},
+  "sessions": {},
+  "verdict": "PASS",
+  "failures": []
+}

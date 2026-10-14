@@ -1,0 +1,685 @@
+{
+  "generatedAt": "2026-10-13T20:07:31.275Z",
+  "host": {
+    "platform": "win32",
+    "release": "10.0.26200",
+    "cpus": 12,
+    "model": "Snapdragon(R) X 12-core X1E80100 @ 3.40 GHz",
+    "totalMemGb": 63.5
+  },
+  "electron": null,
+  "budgets": {
+    "warmMs": 2000,
+    "coldMs": 8000
+  },
+  "rates": [
+    1,
+    2
+  ],
+  "runs": [
+    {
+      "label": "cold-play-1.00-1",
+      "code": 0,
+      "wallMs": 46797,
+      "hostBusyPct": 51.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-1-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-1.00-2",
+      "code": 0,
+      "wallMs": 15821,
+      "hostBusyPct": 59.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-1-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-1.00-3",
+      "code": 0,
+      "wallMs": 22251,
+      "hostBusyPct": 51.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-1-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-1.00-4",
+      "code": 0,
+      "wallMs": 15361,
+      "hostBusyPct": 55.7,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-1-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-1.00-5",
+      "code": 0,
+      "wallMs": 19609,
+      "hostBusyPct": 56.5,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-1-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-1.00-1",
+      "code": 0,
+      "wallMs": 20123,
+      "hostBusyPct": 71,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-1-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-1.00-2",
+      "code": 0,
+      "wallMs": 44324,
+      "hostBusyPct": 46.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-1-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-1.00-3",
+      "code": 0,
+      "wallMs": 21432,
+      "hostBusyPct": 49.8,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-1-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-1.00-4",
+      "code": 0,
+      "wallMs": 25106,
+      "hostBusyPct": 51.5,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-1-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-1.00-5",
+      "code": 0,
+      "wallMs": 18525,
+      "hostBusyPct": 43,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-1-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-1.00-1",
+      "code": 0,
+      "wallMs": 17858,
+      "hostBusyPct": 46.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-1-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-1.00-2",
+      "code": 1,
+      "wallMs": 124212,
+      "hostBusyPct": 41.8,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-1-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-1.00-3",
+      "code": 1,
+      "wallMs": 124254,
+      "hostBusyPct": 34.4,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-1-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-1.00-4",
+      "code": 1,
+      "wallMs": 124815,
+      "hostBusyPct": 36.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-1-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-1.00-5",
+      "code": 0,
+      "wallMs": 53087,
+      "hostBusyPct": 66.4,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-1-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-1.00-1",
+      "code": 0,
+      "wallMs": 23584,
+      "hostBusyPct": 39.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-1-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-1.00-2",
+      "code": 0,
+      "wallMs": 19246,
+      "hostBusyPct": 48,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-1-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-1.00-3",
+      "code": 0,
+      "wallMs": 27009,
+      "hostBusyPct": 53.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-1-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-1.00-4",
+      "code": 0,
+      "wallMs": 20363,
+      "hostBusyPct": 40,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-1-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-1.00-5",
+      "code": 0,
+      "wallMs": 18336,
+      "hostBusyPct": 46,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-1-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-2.00-1",
+      "code": 0,
+      "wallMs": 27161,
+      "hostBusyPct": 55.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-2-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-2.00-2",
+      "code": 0,
+      "wallMs": 28305,
+      "hostBusyPct": 43.1,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-2-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-2.00-3",
+      "code": 0,
+      "wallMs": 22970,
+      "hostBusyPct": 37.7,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-2-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-2.00-4",
+      "code": 0,
+      "wallMs": 22282,
+      "hostBusyPct": 53.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-2-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-play-2.00-5",
+      "code": 0,
+      "wallMs": 25985,
+      "hostBusyPct": 50,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-play-2-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-2.00-1",
+      "code": 0,
+      "wallMs": 20478,
+      "hostBusyPct": 40.4,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-2-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-2.00-2",
+      "code": 0,
+      "wallMs": 16822,
+      "hostBusyPct": 39.7,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-2-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-2.00-3",
+      "code": 0,
+      "wallMs": 19005,
+      "hostBusyPct": 59.8,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-2-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-2.00-4",
+      "code": 0,
+      "wallMs": 24803,
+      "hostBusyPct": 40.7,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-2-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-resume-2.00-5",
+      "code": 0,
+      "wallMs": 22766,
+      "hostBusyPct": 42.8,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-resume-2-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-2.00-1",
+      "code": 0,
+      "wallMs": 19418,
+      "hostBusyPct": 47.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-2-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-2.00-2",
+      "code": 0,
+      "wallMs": 20316,
+      "hostBusyPct": 60.3,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-2-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-2.00-3",
+      "code": 1,
+      "wallMs": 125206,
+      "hostBusyPct": 27.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-2-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-2.00-4",
+      "code": 0,
+      "wallMs": 32218,
+      "hostBusyPct": 52.2,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-2-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-click-2.00-5",
+      "code": 1,
+      "wallMs": 125179,
+      "hostBusyPct": 39,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-click-2-00-5.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-2.00-1",
+      "code": 0,
+      "wallMs": 24864,
+      "hostBusyPct": 68.5,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-2-00-1.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-2.00-2",
+      "code": 0,
+      "wallMs": 31433,
+      "hostBusyPct": 52.1,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-2-00-2.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-2.00-3",
+      "code": 0,
+      "wallMs": 22903,
+      "hostBusyPct": 52.9,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-2-00-3.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-2.00-4",
+      "code": 0,
+      "wallMs": 28156,
+      "hostBusyPct": 62.1,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-2-00-4.trace.json",
+      "traceExists": true
+    },
+    {
+      "label": "cold-speed-2.00-5",
+      "code": 0,
+      "wallMs": 31341,
+      "hostBusyPct": 43.7,
+      "tracePath": "C:\\Projects\\Blurby-artifacts\\narrate-rebuild-1\\p5\\traces\\cold-speed-2-00-5.trace.json",
+      "traceExists": true
+    }
+  ],
+  "warm": {},
+  "cold": {
+    "1.00": {
+      "play": {
+        "n": 5,
+        "worstMs": 1524,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 1384,
+            "cause": "play",
+            "hostBusyPct": 51.3,
+            "wallMs": 46797
+          },
+          {
+            "trial": 2,
+            "latencyMs": 1524,
+            "cause": "play",
+            "hostBusyPct": 59.9,
+            "wallMs": 15821
+          },
+          {
+            "trial": 3,
+            "latencyMs": 989,
+            "cause": "play",
+            "hostBusyPct": 51.2,
+            "wallMs": 22251
+          },
+          {
+            "trial": 4,
+            "latencyMs": 774,
+            "cause": "play",
+            "hostBusyPct": 55.7,
+            "wallMs": 15361
+          },
+          {
+            "trial": 5,
+            "latencyMs": 943,
+            "cause": "play",
+            "hostBusyPct": 56.5,
+            "wallMs": 19609
+          }
+        ]
+      },
+      "resume": {
+        "n": 5,
+        "worstMs": 984,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 885,
+            "cause": "resume",
+            "hostBusyPct": 71,
+            "wallMs": 20123
+          },
+          {
+            "trial": 2,
+            "latencyMs": 984,
+            "cause": "resume",
+            "hostBusyPct": 46.9,
+            "wallMs": 44324
+          },
+          {
+            "trial": 3,
+            "latencyMs": 230,
+            "cause": "resume",
+            "hostBusyPct": 49.8,
+            "wallMs": 21432
+          },
+          {
+            "trial": 4,
+            "latencyMs": 535,
+            "cause": "resume",
+            "hostBusyPct": 51.5,
+            "wallMs": 25106
+          },
+          {
+            "trial": 5,
+            "latencyMs": 267,
+            "cause": "resume",
+            "hostBusyPct": 43,
+            "wallMs": 18525
+          }
+        ]
+      },
+      "click": {
+        "n": 5,
+        "worstMs": 1002,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 399,
+            "cause": "resume",
+            "hostBusyPct": 46.9,
+            "wallMs": 17858
+          },
+          {
+            "trial": 2,
+            "latencyMs": null,
+            "cause": null,
+            "hostBusyPct": 41.8,
+            "wallMs": 124212
+          },
+          {
+            "trial": 3,
+            "latencyMs": null,
+            "cause": null,
+            "hostBusyPct": 34.4,
+            "wallMs": 124254
+          },
+          {
+            "trial": 4,
+            "latencyMs": null,
+            "cause": null,
+            "hostBusyPct": 36.3,
+            "wallMs": 124815
+          },
+          {
+            "trial": 5,
+            "latencyMs": 1002,
+            "cause": "resume",
+            "hostBusyPct": 66.4,
+            "wallMs": 53087
+          }
+        ]
+      },
+      "speed": {
+        "n": 5,
+        "worstMs": 799,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 799,
+            "cause": "play",
+            "hostBusyPct": 39.2,
+            "wallMs": 23584
+          },
+          {
+            "trial": 2,
+            "latencyMs": 745,
+            "cause": "play",
+            "hostBusyPct": 48,
+            "wallMs": 19246
+          },
+          {
+            "trial": 3,
+            "latencyMs": 764,
+            "cause": "play",
+            "hostBusyPct": 53.2,
+            "wallMs": 27009
+          },
+          {
+            "trial": 4,
+            "latencyMs": 742,
+            "cause": "play",
+            "hostBusyPct": 40,
+            "wallMs": 20363
+          },
+          {
+            "trial": 5,
+            "latencyMs": 770,
+            "cause": "play",
+            "hostBusyPct": 46,
+            "wallMs": 18336
+          }
+        ]
+      }
+    },
+    "2.00": {
+      "play": {
+        "n": 5,
+        "worstMs": 729,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 729,
+            "cause": "play",
+            "hostBusyPct": 55.3,
+            "wallMs": 27161
+          },
+          {
+            "trial": 2,
+            "latencyMs": 631,
+            "cause": "play",
+            "hostBusyPct": 43.1,
+            "wallMs": 28305
+          },
+          {
+            "trial": 3,
+            "latencyMs": 629,
+            "cause": "play",
+            "hostBusyPct": 37.7,
+            "wallMs": 22970
+          },
+          {
+            "trial": 4,
+            "latencyMs": 631,
+            "cause": "play",
+            "hostBusyPct": 53.3,
+            "wallMs": 22282
+          },
+          {
+            "trial": 5,
+            "latencyMs": 637,
+            "cause": "play",
+            "hostBusyPct": 50,
+            "wallMs": 25985
+          }
+        ]
+      },
+      "resume": {
+        "n": 5,
+        "worstMs": 550,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 486,
+            "cause": "resume",
+            "hostBusyPct": 40.4,
+            "wallMs": 20478
+          },
+          {
+            "trial": 2,
+            "latencyMs": 471,
+            "cause": "resume",
+            "hostBusyPct": 39.7,
+            "wallMs": 16822
+          },
+          {
+            "trial": 3,
+            "latencyMs": 498,
+            "cause": "resume",
+            "hostBusyPct": 59.8,
+            "wallMs": 19005
+          },
+          {
+            "trial": 4,
+            "latencyMs": 550,
+            "cause": "resume",
+            "hostBusyPct": 40.7,
+            "wallMs": 24803
+          },
+          {
+            "trial": 5,
+            "latencyMs": 531,
+            "cause": "resume",
+            "hostBusyPct": 42.8,
+            "wallMs": 22766
+          }
+        ]
+      },
+      "click": {
+        "n": 5,
+        "worstMs": 927,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 477,
+            "cause": "resume",
+            "hostBusyPct": 47.3,
+            "wallMs": 19418
+          },
+          {
+            "trial": 2,
+            "latencyMs": 238,
+            "cause": "resume",
+            "hostBusyPct": 60.3,
+            "wallMs": 20316
+          },
+          {
+            "trial": 3,
+            "latencyMs": null,
+            "cause": null,
+            "hostBusyPct": 27.2,
+            "wallMs": 125206
+          },
+          {
+            "trial": 4,
+            "latencyMs": 927,
+            "cause": "resume",
+            "hostBusyPct": 52.2,
+            "wallMs": 32218
+          },
+          {
+            "trial": 5,
+            "latencyMs": null,
+            "cause": null,
+            "hostBusyPct": 39,
+            "wallMs": 125179
+          }
+        ]
+      },
+      "speed": {
+        "n": 5,
+        "worstMs": 1369,
+        "trials": [
+          {
+            "trial": 1,
+            "latencyMs": 1369,
+            "cause": "play",
+            "hostBusyPct": 68.5,
+            "wallMs": 24864
+          },
+          {
+            "trial": 2,
+            "latencyMs": 638,
+            "cause": "play",
+            "hostBusyPct": 52.1,
+            "wallMs": 31433
+          },
+          {
+            "trial": 3,
+            "latencyMs": 632,
+            "cause": "play",
+            "hostBusyPct": 52.9,
+            "wallMs": 22903
+          },
+          {
+            "trial": 4,
+            "latencyMs": 636,
+            "cause": "play",
+            "hostBusyPct": 62.1,
+            "wallMs": 28156
+          },
+          {
+            "trial": 5,
+            "latencyMs": 631,
+            "cause": "play",
+            "hostBusyPct": 43.7,
+            "wallMs": 31341
+          }
+        ]
+      }
+    }
+  },
+  "sessions": {},
+  "verdict": "FAIL",
+  "failures": [
+    "cold click 1.00 trial 2: no first voiced sample recorded",
+    "cold click 1.00 trial 3: no first voiced sample recorded",
+    "cold click 1.00 trial 4: no first voiced sample recorded",
+    "cold click 2.00 trial 3: no first voiced sample recorded",
+    "cold click 2.00 trial 5: no first voiced sample recorded"
+  ]
+}

@@ -57,7 +57,8 @@ async function run(label, threadsEnv) {
     durations: same(r.table.durations, ref.durations),
     factor: r.table.samplesPerFrame === ref.law.factor && r.table.law.ok === true,
     pcmLength: r.pcm.length === ref.pcmSamples && r.pcm.length === wav.pcm.length,
-    units: same(r.table.units, refUnits),
+    // The producer's units name the source words (P5) beside the spoken words the Phase 0 tables hold.
+    units: same(r.table.units.map((u) => ({ words: u.spoken ?? u.words, kind: u.kind, frameStart: u.frameStart, frameEnd: u.frameEnd, sampleStart: u.sampleStart, sampleEnd: u.sampleEnd })), refUnits),
     reconciled: r.table.reconciled === true && r.table.failures.length === 0,
     provenance: r.table.provenance.source === "model-output" && same(r.table.provenance.outputNames, ref.provenance.outputNames),
   };
