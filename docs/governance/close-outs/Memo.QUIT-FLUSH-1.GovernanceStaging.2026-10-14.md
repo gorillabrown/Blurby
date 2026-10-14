@@ -56,3 +56,17 @@ in the branch, as the specification and its diff fence (Done-when 12) require.
 - Build: `npx electron-builder --win --x64 --dir --publish never` → **exit 0**; `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe` (223,001,088 bytes, 2026-10-14 17:39:26), from `00dbba06` (`npm run build` exit 0 first, Done-when 8).
 - Shipped-artifact check: `main.js`, `main/quit-sequence.js`, `main/ipc/state.js`, `main/json-store.js` and `main/constants.js` extracted from `resources/app.asar` are byte-identical (`cmp`) to `00dbba06`.
 - Checklist sent to Blurby.Brain for the owner (2026-10-14); results: (pending)
+
+### Merge-order step — origin/main merged into the branch (spec, Lane ownership → Merge order)
+- `git merge refs/remotes/origin/main` (35e1e6eb: three planning commits, `CLAUDE.md`, `ROADMAP.md`, two `Virtuoso/` register files; no edit-site overlap) → `cfd07f9d`, tree `07915e21701b576ed557df54d625a04dbcf35c6c`. Edit-site anchors re-grepped: `main.js:682`, `main/constants.js:147`, `main/ipc/state.js:11`, `main/json-store.js:60`.
+- Done-when 2–8 re-run on `cfd07f9d`: DW2 6 files / 89 tests, exit 0; DW3 exit 1, empty; DW4 `main.js:682:…`, exit 0; DW5 `main.js:1`; DW6 `main/constants.js:2`; DW7 one line (`main/ipc/state.js:42`); `npm test` 153 files, 2,076 passed / 1 skipped / 0 failed, exit 0; typecheck exit 0; build exit 0.
+- Done-when 12 (two-dot against origin/main): exactly the nine specified paths plus this memo.
+
+### Reviews
+- Spec compliance (Solon): APPROVED_WITH_CONCERNS — no deviation in code, tests or docs; concerns were process items (origin/main moved; memo uncommitted), both resolved above.
+- Code quality (Plato): MINOR_FIXES — W1 and W2 confirmed by the orchestrator; routed to Blurby.Brain with `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (recommendation A: fix round, one smoke on the fixed build). Ruling: (pending)
+
+## Planner items for the close-out (from the code-quality review; no action in this run)
+- **S1 — sequential, library-first order.** A library write slower than `QUIT_FLUSH_TIMEOUT_MS` (very large libraries) is cut and starves the settings flush after it. Running the local saves in parallel under the cap (distinct files, per-path chains), cloud sync last, would avoid it.
+- **S2 — `autoUpdater.quitAndInstall`.** electron-updater spawns the installer and then calls `app.quit()` (`BaseUpdater.js` `doInstall`, then `setImmediate(app.quit)`), so the installer starts while the flush runs (up to 3 s; 30 s when the Narrate producer is stopping). Unverified whether the NSIS running-app check can kill the app mid-flush; the update path is not smoke-tested.
+- **N2 — test gaps.** The real `save-settings` debounce path has no behavioural regression test (perfAudit "e" copies the logic and greps the literal); test (e) would pass if the producer started after the steps.
