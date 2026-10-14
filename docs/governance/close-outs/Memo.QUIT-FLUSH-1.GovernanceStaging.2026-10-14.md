@@ -55,7 +55,7 @@ in the branch, as the specification and its diff fence (Done-when 12) require.
 ### Done-when 9 — owner smoke on a production build
 - Build: `npx electron-builder --win --x64 --dir --publish never` → **exit 0**; `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe` (223,001,088 bytes, 2026-10-14 17:39:26), from `00dbba06` (`npm run build` exit 0 first, Done-when 8).
 - Shipped-artifact check: `main.js`, `main/quit-sequence.js`, `main/ipc/state.js`, `main/json-store.js` and `main/constants.js` extracted from `resources/app.asar` are byte-identical (`cmp`) to `00dbba06`.
-- Checklist sent to Blurby.Brain for the owner (2026-10-14); results: (pending)
+- That first checklist (for the `00dbba06` build) was held by Blurby Brain and never run; superseded by the fix-round build below.
 
 ### Merge-order step — origin/main merged into the branch (spec, Lane ownership → Merge order)
 - `git merge refs/remotes/origin/main` (35e1e6eb: three planning commits, `CLAUDE.md`, `ROADMAP.md`, two `Virtuoso/` register files; no edit-site overlap) → `cfd07f9d`, tree `07915e21701b576ed557df54d625a04dbcf35c6c`. Edit-site anchors re-grepped: `main.js:682`, `main/constants.js:147`, `main/ipc/state.js:11`, `main/json-store.js:60`.
@@ -120,3 +120,10 @@ Content:
   - The fix: the producer now starts before the `try`, and `await producer` is the first line of the `finally`.
   - Test first: (i2) failed on the uncorrected code with `expected 1 to be +0` (the app exited while the producer was pending). It passes now.
 - After the fix (implementation agent), all exit 0: Done-when 2 (6 files, 93 tests, no unhandled errors); Done-when 3 exit 1 with empty output; Done-when 4–7 with unchanged output; typecheck. `tests/quitSequence.test.js` gave 11 of 11 on five repeat runs.
+
+### Done-when 2–8 and the smoke build — on the fix round (orchestrator, HEAD `bd1216fc`, tree `5bda58ad5e3d66247debeeb372ec766f9307dc13`; origin/main `35e1e6eb` contained)
+- Done-when 2: 6 files / 93 tests, no unhandled errors, **exit 0**. Done-when 3: exit 1, empty. Done-when 4: `main.js:682:app.on("will-quit", createWillQuitHandler({`. Done-when 5: `main.js:1`. Done-when 6: `main/constants.js:2`. Done-when 7: `main/ipc/state.js:42:…}, 500);` (all exit 0).
+- Done-when 8: `npm test` 153 files, 2,080 passed / 1 skipped / 0 failed (base 2,068 + 12 new: (a)–(f), (h), (i), (i2), (j) in `tests/quitSequence.test.js`; (g) in `tests/jsonStore.test.js`), **exit 0**; `npm run typecheck` **exit 0**; `npm run build` **exit 0**.
+- Done-when 12: unchanged file set (fix round touched only `main.js`, `main/quit-sequence.js`, `tests/quitSequence.test.js` and this memo) plus the issue file (Fold-in 2).
+- Smoke build: `npx electron-builder --win --x64 --dir --publish never` **exit 0** → `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`, 223,001,088 bytes, 2026-10-14 17:50:53. `main.js`, `main/quit-sequence.js`, `main/ipc/state.js`, `main/json-store.js`, `main/constants.js` in `resources/app.asar` are byte-identical (`cmp`) to `bd1216fc`.
+- Checklist sent to Blurby.Brain for the owner (2026-10-14); results: (pending)
