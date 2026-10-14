@@ -151,6 +151,36 @@ export interface TtsEvalNarrateFailureEvent extends TtsEvalTraceBaseEvent {
   epoch: number;
 }
 
+// ── Section-load path diagnostics (NARRATE-REBUILD-1 P5, BUG-191): tracing only, no behaviour ───────────
+/** A caller is about to change the displayed section (emitted BEFORE the call). `sectionIndex`/`targetSection` null when unknown. */
+export interface TtsEvalNarrateSectionNavEvent extends TtsEvalTraceBaseEvent {
+  kind: "narrate-section-nav";
+  t: number;
+  caller: string;
+  word: number | null;
+  sectionIndex: number | null;
+  targetSection: number | null;
+}
+
+/** The view finished loading a section and wrapping its words. `wrapMs` null when no wrap call was measured. */
+export interface TtsEvalNarrateSectionLoadEvent extends TtsEvalTraceBaseEvent {
+  kind: "narrate-section-load";
+  t: number;
+  sectionIndex: number;
+  words: number;
+  wrapMs: number | null;
+}
+
+/** The view's layout, once at the first section and again on every container resize. */
+export interface TtsEvalNarrateViewLayoutEvent extends TtsEvalTraceBaseEvent {
+  kind: "narrate-view-layout";
+  t: number;
+  width: number;
+  height: number;
+  columns: number | null;
+  dpr: number;
+}
+
 /** A chunk scheduled on the clock, with every unit's start word and table boundary. */
 export interface TtsEvalNarrateScheduleEvent extends TtsEvalTraceBaseEvent {
   kind: "narrate-schedule";
@@ -199,7 +229,10 @@ export type TtsEvalTraceEvent =
   | TtsEvalNarrateFirstVoicedEvent
   | TtsEvalNarrateScheduleEvent
   | TtsEvalNarrateStopEvent
-  | TtsEvalNarrateFailureEvent;
+  | TtsEvalNarrateFailureEvent
+  | TtsEvalNarrateSectionNavEvent
+  | TtsEvalNarrateSectionLoadEvent
+  | TtsEvalNarrateViewLayoutEvent;
 
 export type TtsEvalTraceInputEvent = TtsEvalTraceEvent extends infer E
   ? E extends TtsEvalTraceEvent

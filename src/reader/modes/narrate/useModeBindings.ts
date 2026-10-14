@@ -52,6 +52,8 @@ export function useNarrateModeBindings(runtime: NarrateModeRuntime): {
       initialCfi: runtime.initialCfi,
       readBookBytes: runtime.readBookBytes,
       recordDiagnostic: runtime.recordDiagnostic,
+      traceEvent: runtime.traceViewEvent,
+      traceSectionNav: runtime.traceSectionNav,
       onRelocate: runtime.onRelocate,
       onTocReady: runtime.onTocReady,
       onWordClick: runtime.onWordClick,

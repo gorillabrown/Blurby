@@ -45,6 +45,7 @@ import {
 } from "../../document/ReaderDocumentSnapshot";
 import type { ReaderPorts } from "../../ports/ReaderPorts";
 import type { SectionBoundary } from "../../../types/narration";
+import type { TtsEvalTraceInputEvent } from "../../../types/eval";
 import type { NarrateFoliateViewAPI } from "./FoliateView";
 import { NarrateModeState } from "./ModeState";
 import { createNarrateSurface, type NarrateSurface } from "./surface";
@@ -271,6 +272,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     }
     const effectiveWords = [...this.effectiveWords()];
     if (this.document.useFoliate && effectiveWords.length === 0 && this.surface.isReady()) {
+      this.traceSectionNav("empty-words-retry", this.state.currentWordIndex);
       this.surface.next();
       this.setTimer(() => {
         this.surface.extractWords();
@@ -446,7 +448,10 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (!this.alive) return;
     const anchor = this.state.canonicalWordIndex;
     this.anchor.syncVisualToPersistentWord({ navigate: true });
-    if (this.document.useFoliate) void this.surface.jumpToWordAnchor(anchor);
+    if (this.document.useFoliate) {
+      this.traceSectionNav("jump-back", anchor);
+      void this.surface.jumpToWordAnchor(anchor);
+    }
     this.surface.clearUserBrowsing();
     this.state.isBrowsedAway = false;
     this.state.notify();
@@ -457,6 +462,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (command.kind !== "go-to-href") return;
     this.markEngaged();
     this.ports.persistence.markPageActivity();
+    this.traceSectionNav("toc-goto", null);
     this.surface.goTo(command.href);
     this.state.notify();
   }
@@ -512,7 +518,11 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     if (pending != null) {
       s.pendingResume = null;
       this.requestFrame(() => {
-        if (!this.surface.highlight(pending, "narrate")) { s.pendingResume = pending; this.surface.next(); }
+        if (!this.surface.highlight(pending, "narrate")) {
+          s.pendingResume = pending;
+          this.traceSectionNav("pending-resume", pending);
+          this.surface.next();
+        }
       });
     }
     s.notify();
@@ -555,6 +565,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     s.currentSection = sec.sectionIndex;
     s.lastGoToSectionTime = now;
     this.ports.diagnostics.trace({ kind: "transition", transition: "section", from, to: sec.sectionIndex, context: `word ${s.publishedHighlightedWordIndex}` });
+    this.traceSectionNav("section-sync", s.publishedHighlightedWordIndex, sec.sectionIndex, from);
     this.surface.goToSection(sec.sectionIndex).catch(() => {});
   };
 
@@ -571,6 +582,22 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
   };
 
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();
+
+  /** P5 diagnostic (BUG-191): a caller is about to change the displayed section. The port's trace is a no-op without the eval-trace sink. */
+  traceSectionNav = (caller: string, word: number | null, targetSection?: number | null, displayed?: number): void => {
+    if (!this.alive) return;
+    const shown = displayed ?? this.state.currentSection;
+    this.ports.diagnostics.trace({
+      kind: "narrate-section-nav", t: performance.now(), caller, word,
+      sectionIndex: shown >= 0 ? shown : null,
+      targetSection: targetSection ?? (word == null ? null : this.surface.getSectionForWordIndex(word)),
+    });
+  };
+
+  /** P5 diagnostic: the view's section-load and layout records go to the same port. */
+  traceViewEvent = (event: TtsEvalTraceInputEvent): void => {
+    if (this.alive) this.ports.diagnostics.trace(event);
+  };
 
   recordDiagnostic = (kind: string, detail: string): void => {
     if (this.alive) this.ports.diagnostics.record(kind, detail);
@@ -641,7 +668,11 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.publishHighlight(word);
     s.currentWordIndex = word;
     if (this.document.useFoliate && this.surface.isReady()) {
-      if (!this.surface.highlight(word, "narrate", { allowMotion: false })) { s.pendingResume = word; this.surface.next(); }
+      if (!this.surface.highlight(word, "narrate", { allowMotion: false })) {
+        s.pendingResume = word;
+        this.traceSectionNav("cursor-miss", word);
+        this.surface.next();
+      }
     }
     this.ports.diagnostics.trace({ kind: "word", source: "audio", wordIndex: word });
     s.notify();
