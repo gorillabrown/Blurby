@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { WPM_STEP, REWIND_WORDS, FOCUS_TEXT_SIZE_STEP, G_SEQUENCE_TIMEOUT_MS } from "../constants";
-import type { ReaderMode } from "../types";
+import type { ReaderMode, ReaderLastMode } from "../types";
 
 const URL_REGEX = /^https?:\/\/[^\s]+$/;
 
@@ -79,6 +79,7 @@ interface ReaderKeysState {
   sentenceNext?: () => void;
   // Narrate (N, all reader surfaces)
   enterNarrate?: () => void;
+  lastReadingMode?: ReaderLastMode;
 }
 
 export type ReaderKeyboardMode = ReaderMode | "speed" | "scroll";
@@ -155,7 +156,8 @@ export function useReaderKeys(
   cycleAndStart?: () => void,
   sentencePrev?: () => void,
   sentenceNext?: () => void,
-  enterNarrate?: () => void
+  enterNarrate?: () => void,
+  lastReadingMode?: ReaderLastMode
 ) {
   const stateRef = useRef<ReaderKeysState>({
     view, readerMode, togglePlay, seekWords, adjustWpm, exitReader,
@@ -165,7 +167,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
-    sentencePrev, sentenceNext, enterNarrate,
+    sentencePrev, sentenceNext, enterNarrate, lastReadingMode,
   });
 
   stateRef.current = {
@@ -176,7 +178,7 @@ export function useReaderKeys(
     paragraphPrev, paragraphNext,
     flowPrevLine, flowNextLine, openChapterList,
     cycleMode, cycleAndStart,
-    sentencePrev, sentenceNext, enterNarrate,
+    sentencePrev, sentenceNext, enterNarrate, lastReadingMode,
   };
 
   useEffect(() => {
@@ -240,8 +242,8 @@ export function useReaderKeys(
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {
-        // Space → start the selected mode (Flow by default)
-        if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); s.togglePlay(); return; }
+        // Space → enter the remembered mode (Flow when unset or unbound), paused
+        if (e.code === "Space" && !e.shiftKey) { e.preventDefault(); const enter = s.lastReadingMode === "focus" ? s.enterFocus : s.lastReadingMode === "narrate" ? s.enterNarrate : undefined; (enter ?? s.enterFlow)?.(); return; }
         // Shift+Space → cycle selected mode without auto-starting it
         if (e.code === "Space" && e.shiftKey) { e.preventDefault(); s.cycleMode?.(); return; }
         // ←/→ flip pages

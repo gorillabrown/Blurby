@@ -20,8 +20,8 @@ const COACH_HINTS: Record<string, CoachHint> = {
   settings: { action: "open settings", hotkey: "Ctrl+," },
   // Reader hints
   play: { action: "play/pause", hotkey: "Space" },
-  enterFocus: { action: "enter Focus mode", hotkey: "Shift+Space" },
-  enterFlow: { action: "enter Flow mode", hotkey: "Space" },
+  enterFocus: { action: "enter your last mode from Page", hotkey: "Space" },
+  enterFlow: { action: "enter your last mode from Page", hotkey: "Space" },
   fontSize: { action: "adjust font size", hotkey: "Ctrl+=/\u2212" },
   prevChapter: { action: "go to previous chapter", hotkey: "[" },
   nextChapter: { action: "go to next chapter", hotkey: "]" },
