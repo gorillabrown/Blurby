@@ -8,6 +8,16 @@
 
 ## Incomplete
 
+### BUG-192 — Saves at quit are abandoned: the last change before quitting is lost
+**Reported:** 2026-10-13 (owner smoke of SETTINGS-WRITE-DURABLE-1, dev build of `eb/settings-write-durable-1` @ `5abdd405`)
+**Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
+**Status:** OPEN — filed separately from SETTINGS-WRITE-DURABLE-1 by the owner's decision; that item merges without fixing it. Lane: Platform & Maintenance.
+**Location:** `main.js` `app.on("will-quit", async (event) => …)` (`:691` on `main` @ `15e9c2f1`).
+**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%lurbylurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
+**Root cause:** Electron does not wait for an async `will-quit` listener. The handler cancels only the first quit (`event.preventDefault()`) to stop the Narrate producer, then calls `app.quit()`; on the second pass every `await` — `flushTtsEvalTraceCaptures()`, `saveLibraryNow()`, SETTINGS-WRITE-DURABLE-1's `saveSettingsFn()`, and the final cloud sync — runs after Electron has already decided to exit, so the process ends mid-write. The library flush had the same flaw before SETTINGS-WRITE-DURABLE-1; that item's quit flush inherits it.
+**Evidence:** owner smoke 2026-10-13 (planner session): file listing and diff of `settings.json` against `settings.json.tmp` (only `accentColor` differs); 0-byte `sync-queue.json.tmp`; 92,712-byte `library.json.tmp` after the second quit; no `ENOENT` in either terminal.
+**Fix path:** do the flushes inside the cancelled first pass: `event.preventDefault()`, then await the producer shutdown, the eval-trace flush, `saveLibraryNow()`, `saveSettingsFn()` and the sync-queue writer (each guarded so one failure does not block the rest, with an overall timeout), then `app.quit()`; the second pass only closes the watcher and the WebSocket server. Whether the final cloud sync belongs in the awaited pass (it can be slow) is a design decision for the spec. Needs a positive control that fails today: a main-process test (or the F7 harness) that quits during a pending write and finds the file unwritten.
+
 ### BUG-191 — Narration reads four-digit years as cardinal numbers
 **Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
@@ -55,16 +65,6 @@
 **Root cause:** Undetermined. A base session of about one minute the same day logged none, but the sessions differ in length and actions, so a pre-existing pattern and a change of this sprint are both still open.
 **Evidence:** The staging memo's smoke note and observation (counts, timestamps).
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) reproduces it with equal-length sessions on the base, the branch and a production build, names the oscillating observer (hypothesis H4) and writes the fix specification.
-
-### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
-**Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
-**Severity:** LOW (test flake; the product code is not implicated)
-**Status:** OPEN — scheduled as TEST-BUDGET-WORDINDEX-1 (roadmap position 10; roadmap review 2026-10-12). Lane: Platform & Maintenance.
-**Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
-**Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
-**Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
-**Evidence:** The staging memo's full-suite note.
-**Fix path:** Widen or relax the budget (assert a generous multiple, or compare against a same-run baseline) and keep the coverage assertions strict.
 
 ### BUG-185 — Settings writes are fire-and-forget and share one .tmp path
 **Reported:** 2026-10-11 (OutsideAudit.10 F7 remediation)
@@ -1024,6 +1024,17 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 ---
 
 ## Complete
+
+### BUG-186 — `wordPositionIndex` 5,000-span test asserts a 200 ms build time and fails under load
+**Reported:** 2026-10-12 (NARRATE-REMOVE-1 full-suite run)
+**Severity:** LOW (test flake; the product code is not implicated)
+**Status:** RESOLVED in source (TEST-BUDGET-WORDINDEX-1): budget raised to 1,000 ms.
+**Fixed:** 2026-10-13 — RESOLVED (TEST-BUDGET-WORDINDEX-1, merge `76956729`): a test-only change, so no rebuild gate applies (standing rule 35); full suite 2,048 passed on the owner's machine.
+**Location:** `tests/wordPositionIndex.test.ts`, test "builds a 5,000-span section and keeps lookup coverage intact", the `buildTimeMs` budget at line 148.
+**Description:** The first full run on the C4 working tree failed this test only (`AssertionError: expected 218.2757999999999 to be less than 200`). It passed alone (5/5, 726 ms) and in the second full run (134 files; 1,955 passed, 1 skipped, 0 failed; 22 s).
+**Root cause:** A hard wall-clock assertion on a machine under full-suite load; the same family as the three tests TEST-TIMEOUT-HEADROOM-1 gave 30 s timeouts.
+**Evidence:** The staging memo's full-suite note.
+**Fix path:** Widen or relax the budget (assert a generous multiple, or compare against a same-run baseline) and keep the coverage assertions strict.
 
 ### BUG-092: EPUB Focus mode starts from wrong position
 **Reported:** 2026-03-26 | **Fixed:** 2026-03-27

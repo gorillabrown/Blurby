@@ -64,9 +64,8 @@ const COACH_HINTS = {
   queue: { action: "queue", hotkey: "Q" },
   settings: { action: "open settings", hotkey: "Ctrl+," },
   play: { action: "play/pause", hotkey: "Space" },
-  enterFocus: { action: "enter Focus mode", hotkey: "Shift+Space" },
-  enterFlow: { action: "enter Flow mode", hotkey: "Space" },
-  narration: { action: "toggle narration", hotkey: "N" },
+  enterFocus: { action: "enter your last mode from Page", hotkey: "Space" },
+  enterFlow: { action: "enter your last mode from Page", hotkey: "Space" },
   fontSize: { action: "adjust font size", hotkey: "Ctrl+=/\u2212" },
   prevChapter: { action: "go to previous chapter", hotkey: "[" },
   nextChapter: { action: "go to next chapter", hotkey: "]" },
@@ -284,8 +283,9 @@ describe("getCoachHint (HotkeyCoach)", () => {
 
   it("reader coaching hints", () => {
     expect(getCoachHint("play")).toEqual({ action: "play/pause", hotkey: "Space" });
-    expect(getCoachHint("narration")).toEqual({ action: "toggle narration", hotkey: "N" });
-    expect(getCoachHint("enterFocus")).toEqual({ action: "enter Focus mode", hotkey: "Shift+Space" });
+    expect(getCoachHint("narration")).toBeUndefined();
+    expect(getCoachHint("enterFocus")).toEqual({ action: "enter your last mode from Page", hotkey: "Space" });
+    expect(getCoachHint("enterFlow")).toEqual({ action: "enter your last mode from Page", hotkey: "Space" });
     expect(getCoachHint("prevChapter")).toEqual({ action: "go to previous chapter", hotkey: "[" });
   });
 });

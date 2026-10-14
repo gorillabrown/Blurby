@@ -215,7 +215,7 @@ Defined in `src/types.ts`. Defaults in `src/constants.ts` (`DEFAULT_SETTINGS`). 
 | `wpm` | 300 | Reading speed (words per minute) |
 | `theme` | `"dark"` | `"dark" | "light" | "blurby" | "eink" | "system"` |
 | `readingMode` | `"focus"` | Active mode type: `"page"`, `"focus"` or `"flow"` (a saved `"narrate"` is normalized to `"flow"`) |
-| `lastReadingMode` | `"flow"` | Space bar starts this mode from Page view; same three values, same normalization |
+| `lastReadingMode` | `"flow"` | Space bar enters this mode, paused, from Page view ("flow" when unset) |
 | `ttsEngine` | `"web"` | `"web" | "kokoro"`; the MOSS-Nano, Pocket and Qwen engines and their values were deleted by NARRATE-REMOVE-1 (2026-10-12). Kokoro is dormant: no UI path selects or starts it until NARRATE-REBUILD-1. |
 | `ttsRate` | 1.0 | TTS speech rate (0.5-2.0) |
 | `rhythmPauses` | object | Comma, sentence, paragraph, number, long-word pauses |

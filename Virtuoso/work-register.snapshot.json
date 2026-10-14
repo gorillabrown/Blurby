@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-13T21:56:00Z",
+  "takenAt": "2026-10-14T04:10:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -72,9 +72,9 @@
     {
       "id": "CLEANUP-MODE-BARREL-1",
       "title": "Remove the unused mode barrel and the legacy mode engines",
-      "sequence": 13,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -86,11 +86,11 @@
       "spec_link": "ROADMAP.md#cleanup-mode-barrel-1",
       "branch": "eb/cleanup-mode-barrel-1",
       "started": "",
-      "completed": "",
-      "evidence": "docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md",
+      "completed": "2026-10-13",
+      "evidence": "docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md",
       "description": "Delete src/modes/index.ts and the dead PageMode/FocusMode/FlowMode engines, re-point tests/perf-baseline.test.ts to the per-mode copies, drop the dead NarrateMode chunk rule, and add a structural test; ModeInterface.ts stays.",
       "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.",
-      "revision": "92e8c72d03a60a55f86d337cb264e18777e06abdbc22c01cd7689c6065f364d3",
+      "revision": "f650f3e5f46ac5c34fee1f65158926a6cb1839738403b2b556d848a188227e95",
       "extra": {}
     },
     {
@@ -1194,9 +1194,9 @@
     {
       "id": "TEST-BUDGET-WORDINDEX-1",
       "title": "Give the word-index build-time test headroom under load",
-      "sequence": 10,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1206,11 +1206,11 @@
       "spec_link": "ROADMAP.md#test-budget-wordindex-1",
       "branch": "eb/test-budget-wordindex-1",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-13",
+      "evidence": "docs/governance/close-outs/CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md",
       "description": "Raise the 5,000-span word-index build-time budget in tests/wordPositionIndex.test.ts from 200 ms to 1,000 ms (it failed once under full-suite load at 218 ms); keep every coverage assertion; BUG-186 resolved in source.",
       "notes": "Created by roadmap review 2026-10-12 (BUG-186). Full Spec: U9/U10 pass.",
-      "revision": "4c9a3ef389b634d25e0a078abe3b983d8d8b32c03ce15a222953996b19629fe1",
+      "revision": "e856349a99ef46b0b653fa1ba71cc8ef9f806124e707c68db66ff18ce8636440",
       "extra": {}
     },
     {

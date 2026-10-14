@@ -3,7 +3,7 @@
 **Last updated**: 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (1,955 passed / 1 skipped in 134 files, 0 failed, 2026-10-12; the base had 3,410 passed / 133 skipped in 235 files), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight** since 2026-10-12: P1–P4 merged, P5 open on `eb/narrate-rebuild-1-p5`, P6 is owner gate G2; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → TEST-BUDGET-WORDINDEX-1 (10, run now) → SETTINGS-WRITE-DURABLE-1 (11, build now, merge after P5 and before P6's build) → READER-VISUAL-DIAG-1 (12, read-only, live sessions outside measurement windows) → CLEANUP-MODE-BARREL-1 (13, run now) → UX-POLISH-1 (14, after P5 merges) → DEV-PERF-MEASURE-1 (15, stub). Positions 10–14 are Full Specs: the buffer is 5 of 5. See [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight** since 2026-10-12: P1–P4 merged, P5 open on `eb/narrate-rebuild-1-p5`, P6 is owner gate G2; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → SETTINGS-WRITE-DURABLE-1 (11, green on its branch, merges after the owner's smoke at G2) → READER-VISUAL-DIAG-1 (12, read-only) → UX-POLISH-1 (14, merged `e942e3fd`, close-out waits for the owner's keyboard smoke at G2) → DEV-PERF-MEASURE-1 (15, stub). TEST-BUDGET-WORDINDEX-1 and CLEANUP-MODE-BARREL-1 completed 2026-10-13. After SETTINGS and UX-POLISH close, dispatch-ready depth is 1: a `/roadmap-review` is due (Rule 5a). See [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -95,6 +95,8 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | LIBRARY-SETTINGS-FIX-1 | 2026-10-12 | Every Ctrl+K settings entry opens a titled page (Reading Goals added); the library "New" dot clears live through `seenBatcher` (merge `8c41095e`) | `CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md` |
 | GOV-NOTION-VIEWS-1 | 2026-10-13 | Six named views on Blurby.Roadmap and a phase layer (11 phase pages, completion rollup, Phase link drift check) (merge `48cf6a3e`; ad hoc, held plan `2026-10-13-notion-phase-views` HB-2, absorbed 2026-10-13) | `CloseOut.HB-2.2026-10-13.md` |
 | GOV-NOTION-LINKS-1 | 2026-10-13 | 94 auto-generated links repaired in 91 register text values; the Notion register text rule recorded (merge `003c08e4`; ad hoc, held plan `2026-10-13-notion-link-repair` HB-3, absorbed 2026-10-13) | `CloseOut.HB-3.2026-10-13.md` |
+| TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 → 1,000 ms; BUG-186 resolved (merge `76956729`) | `CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md` |
+| CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 
 **Superseded work:**
 - `NARRATE-HEARD-CURSOR-1`, `NARRATE-APPLYRATECHANGE-COLLAPSE-1`, `NARRATE-SUBSCRIBER-CURSOR-1` — superseded 2026-10-11 by the Narrate rebuild (NARRATE-REBUILD-1; owner ruling #31). Stubs archived to `docs/planning/.Archive/ROADMAP_legacy.md`; [review](docs/planning/roadmap-reviews/2026-10-11-plan.md).
@@ -417,73 +419,7 @@ Five additions requested on 2026-09-23. **Completed 2026-10-10:** CLOUD-RETRY-SH
 
 <a id="cleanup-mode-barrel-1"></a>
 
-#### CLEANUP-MODE-BARREL-1 — Remove the unused mode barrel and the legacy mode engines *(position 13 — Full Spec)*
-
-- **What:** Delete the unused barrel `src/modes/index.ts` and the three legacy engine files `src/modes/PageMode.ts`, `FocusMode.ts` and `FlowMode.ts`; point the one test that still imports two of them at the per-mode copies; drop the dead `NarrateMode` chunk rule from `vite.config.js`; and add a structural test that keeps `src/modes/` down to its shared type contract.
-- **Why:**
-  - Nothing imports `src/modes/index.ts` (verified on `a0e09189`): its last importer, `src/hooks/useReadingModeInstance.ts`, went with NARRATE-REMOVE-1.
-  - The engines were copied into the per-mode runtimes during separation (`src/reader/modes/page/ModeRuntime.ts:55`, `focus/ModeRuntime.ts:72`, `flow/ModeRuntime.ts:83`, each "Relocated from src/modes/…"). No production file imports `src/modes/PageMode.ts`, `FocusMode.ts` or `FlowMode.ts`; only `tests/perf-baseline.test.ts:27-28` imports the last two, while `tests/modes.test.ts:2-4` already uses the copies.
-  - The two structural suites the old stub named (`tests/narrLayer1bConsolidation.test.ts`, `tests/tts7b-cursorContract.test.ts`) were deleted with Narrate, so no test now guards against a legacy `NarrateMode` coming back. The only remaining mention is a dead build rule, `vite.config.js:49`.
-- **Design decision (planner, 2026-10-12):** keep `src/modes/ModeInterface.ts`. All three mode runtimes import its types (`page/ModeRuntime.ts:11`, `focus/ModeRuntime.ts:15`, `flow/ModeRuntime.ts:18`), and the separation boundary policy lists it as the one allowed shared type contract (`census/boundary-policy.json` `allowedShared`, which `tests/readerModeBoundaries.test.ts` requires to be reached). Moving it would touch the boundary test for no gain.
-- **Out of scope:**
-  - The leftover `"narrate"` literals and the unproduced `"audio-truth"` and `"flow-engine"` `clockOwner` members (NARRATE-REBUILD-1 charter input 4). The rebuild runs first and may reuse them; it retires or re-adds them with tests. Several are still tested (`tests/chunkReadingVisualState.test.ts`, `tests/narrateIntentCursor.test.ts:76`, `tests/readerModeAdapterContract.test.ts:188-199`).
-  - The legacy `src/utils/` helpers that each mode now carries as a private copy (for example `src/utils/wordPositionIndex.ts`, byte-identical to its three per-mode copies and imported only by its test). A follow-up candidate for the next review, after the rebuild.
-  - The other dead `tts` chunk entries in `vite.config.js` (for files NARRATE-REMOVE-1 deleted), and the census JSON lists that name the deleted files (`legacy` and `deadViews` tolerate absent files; the census is a historical record).
-- **Prerequisites:** none (NARRATE-REMOVE-1 completed 2026-10-12).
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root; a `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `a0e09189` are noted.
-    1. `git ls-files src/modes` prints exactly `src/modes/ModeInterface.ts` (dry-run: five files).
-    2. `git grep -n -E 'src/modes/(index|PageMode|FocusMode|FlowMode)' -- tests vite.config.js` prints nothing (dry-run: `tests/perf-baseline.test.ts:27` and `:28`).
-    3. `git grep -n -F 'src/modes/NarrateMode' -- src scripts vite.config.js` prints nothing (dry-run on `d21ad58e`, 2026-10-13: `vite.config.js:49` only). *Amended 2026-10-13: the bare identifier `NarrateMode` now matches the rebuilt mode's `NarrateModeRuntime` and `NarrateModeState` (`src/reader/modes/narrate/`, P4 `331f8313`), so the gate names the legacy path.*
-    4. **Positive control (standing rule 43):** at C1, `npx vitest run tests/modeLegacyRetired.test.ts` exits 1, failing on the four legacy files and the `src/modes/NarrateMode` rule; record the output in the staging memo. After C2 it exits 0.
-    5. `npx vitest run tests/perf-baseline.test.ts tests/modes.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/perfAudit.test.ts` exits 0.
-    6. `npm test` exits 0 on the owner's machine, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-147, LL-149).
-    7. `git diff --name-status refs/remotes/origin/main` lists exactly: `D src/modes/index.ts`, `D src/modes/PageMode.ts`, `D src/modes/FocusMode.ts`, `D src/modes/FlowMode.ts`, `M tests/perf-baseline.test.ts`, `M vite.config.js`, `A tests/modeLegacyRetired.test.ts`, plus the time log and staging memo if kept (standing rule 41).
-- **Effort:** XS.
-- **Owners:** implementation agent; reviewer; repository operator merges.
-- **Lane:** Reader Engine. Execution surface A (dead runtime files only) and B (tests).
-- **Source:** the read-only census of 2026-10-12 for this review (importers, census policy, typecheck coverage); [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md); [cleanup review 2026-09-23](docs/planning/roadmap-reviews/2026-09-23-cleanup-addendum.md).
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites** (on `main` @ `a0e09189`):
-  - `git rm src/modes/index.ts src/modes/PageMode.ts src/modes/FocusMode.ts src/modes/FlowMode.ts`.
-  - `tests/perf-baseline.test.ts:27-28`: `import { FocusMode } from "../src/modes/FocusMode";` becomes `import { FocusMode } from "../src/reader/modes/focus/ModeRuntime";`, and `import { FlowMode } from "../src/modes/FlowMode";` becomes `import { FlowMode } from "../src/reader/modes/flow/ModeRuntime";` (the pattern of `tests/modes.test.ts:2-3`). Line 36's `import type { ModeConfig } from "../src/modes/ModeInterface";` stays.
-  - `vite.config.js:49`: delete the line `            id.includes("src/modes/NarrateMode") ||`. Keep the `tts` chunk itself; `tests/perfAudit.test.ts:645-647` asserts it.
-- **Tests:** **new `tests/modeLegacyRetired.test.ts`** (reads files as UTF-8 with `node:fs`, as `tests/einkFoundation.test.ts` does):
-  - (a) the entries of `src/modes/` are exactly `["ModeInterface.ts"]`;
-  - (b) `vite.config.js` does not contain `src/modes/NarrateMode`;
-  - (c) no file under `src/` imports from a legacy `src/modes/` engine path: walk `src/`, read each `.ts`/`.tsx`, and fail on any import specifier ending in `modes/index`, `modes/PageMode`, `modes/FocusMode`, `modes/FlowMode` or `modes/NarrateMode` (build each needle by concatenation so this test file does not match gates 2–3). *Amended 2026-10-13: the rebuilt Narrate's `NarrateModeRuntime`/`NarrateModeState` are legitimate and must not fail this test.* Imports of `src/modes/ModeInterface` pass.
-- **Constants:** none.
-- **Branch:** `eb/cleanup-mode-barrel-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\cleanup-mode-barrel-1`. Write refs in full (a `main/` directory exists).
-- **Staging plan:** C1: `tests/modeLegacyRetired.test.ts` alone (gate: Done-when 4's failing control). C2: the four deletions (`git rm`), `tests/perf-baseline.test.ts` and `vite.config.js` (gate: Done-when 1–3 and 5–7). Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
-- **Failure handling:**
-  - If `tests/perf-baseline.test.ts` fails after the re-point (the per-mode copies differ in timing or constructor), report the exact test and stop; do not loosen its thresholds.
-  - If typecheck finds any other importer of the deleted files, stop and report it: the census missed it.
-  - Rollback: `git revert -m 1 <merge>`.
-- **Lane ownership (parallel run):** surfaces A (the four deleted files only) and B.
-  - **Forbidden:** every file not named above; `src/modes/ModeInterface.ts`; `src/reader/**`; the shared-core freeze set; the census JSON; any file the rebuild epic's current phase owns.
-  - **Shared-core touches:** none.
-  - **Merge order:** independent of the other buffer items and of the epic's P5 (re-checked 2026-10-13: P5 touches none of `src/modes/`, `vite.config.js` or `tests/perf-baseline.test.ts`; on P5 `src/modes/` still holds the same five files). Run now under the [parallel run plan](#parallel-run-plan-2026-10-13); its full suite and build respect the measurement windows.
-  - **Re-audit (2026-10-13, `d21ad58e`):** gates 1, 2, 5 and 7 dry-run as written; gate 3 and test (c) amended above.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Structural test committed and failing on the legacy files | calculable | positive control | mechanical | low | 10m (one small test file and its failing run) | — | — |
-| 2 | Legacy barrel and engines deleted; perf test re-pointed; dead build rule removed | calculable | dead-code removal | mechanical | low | 10m (four deletions, two import edits, one config line) | — | — |
-| 3 | Suites, typecheck and build green; merged and pushed | calculable | merge and verify | mechanical | low | 20m (targeted suites + full `npm test` + typecheck + build + one --no-ff merge) | — | — |
-
-**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **LL-131** — the census matched references (imports, re-exports, config strings, census JSON), not identifiers; the comments that mention the old paths are not importers.
-- **LL-139** — the deletion list comes from an import census of `a0e09189`, and every remaining importer is an edit site.
-- **LL-150** — no stylesheet or asset is deleted; the deleted files are TypeScript only.
-- **Standing rule 43 (LL-138)** — the structural test fails on the legacy files before they are deleted.
-- **Standing rule 44 (LL-143)** — every gate names its shell and exit code and was dry-run on the base.
-- **LL-149** and **LL-147** — typecheck and build are in the Done-when list, and the full suite runs on the owner's machine.
-- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+**Completed 2026-10-13:** CLEANUP-MODE-BARREL-1 — `src/modes/` holds only `ModeInterface.ts`; the legacy barrel and engines are deleted, `tests/perf-baseline.test.ts` imports the per-mode runtimes, the dead `NarrateMode` build rule is gone, and `tests/modeLegacyRetired.test.ts` guards their return (merge `03e218bd`; [close-out](docs/governance/close-outs/CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md); specification archived to `docs/planning/.Archive/ROADMAP_legacy.md`). Stage 4 is done.
 
 #### Stage 6 — Parallel polish (outside the separation fence)
 
@@ -510,62 +446,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 <a id="test-budget-wordindex-1"></a>
 
-#### TEST-BUDGET-WORDINDEX-1 — Give the word-index build-time test headroom under load *(position 10 — Full Spec)*
-
-- **What:** Raise the wall-clock budget in `tests/wordPositionIndex.test.ts` "builds a 5,000-span section and keeps lookup coverage intact" from 200 ms to 1,000 ms, keep every coverage assertion, and mark BUG-186 resolved in source.
-- **Why:** BUG-186. The first full run of NARRATE-REMOVE-1's suite failed only this test (`expected 218.2757999999999 to be less than 200`, `tests/wordPositionIndex.test.ts:148`); it passed alone and on the rerun. A wall-clock assertion with no headroom fails any full-suite gate on a loaded machine, including the rebuild epic's. It is the same family as the three tests TEST-TIMEOUT-HEADROOM-1 fixed.
-- **Design decision (planner, 2026-10-12):** 1,000 ms is about 4.6 times the worst observed time under load. It still fails a gross regression, such as a quadratic build over 5,000 spans, which is what the budget is for; it is not a micro-benchmark. The value stays inline with a one-line comment: it is a test-harness budget, not product behaviour, so the constants rule does not apply (precedent: TEST-TIMEOUT-HEADROOM-1).
-- **Out of scope:**
-  - The four other wall-clock assertions (`tests/tts7j-foliate-section-sync.test.ts:315`, `tests/tts7k-global-word-source.test.ts:217`, `tests/tts7l-exact-selection-mapping.test.ts:297`, `tests/stress.test.ts:53`/`:156`): none has been seen failing.
-  - The tested module itself: `src/utils/wordPositionIndex.ts` has no production importer; Page, Focus and Flow each use a byte-identical private copy under `src/reader/modes/*/helpers/` (all four blobs `d9ff280f21`). Retiring the orphan is a cleanup question (see CLEANUP-MODE-BARREL-1's follow-up note), not this fix.
-- **Prerequisites:** none.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr; any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
-    1. `git grep -c -F 'toBeLessThan(1000)' -- tests/wordPositionIndex.test.ts` prints `tests/wordPositionIndex.test.ts:1` and exits 0, and `git grep -c -F 'toBeLessThan(200)' -- tests/wordPositionIndex.test.ts` prints nothing and exits 1. (Dry-run on `a0e09189`: the first exits 1 with no output; the second prints `tests/wordPositionIndex.test.ts:1`.)
-    2. `npx vitest run tests/wordPositionIndex.test.ts` exits 0, with all five tests passing.
-    3. `npm test` exits 0 on the owner's machine (LL-147), and `npm run typecheck` exits 0 (LL-149).
-    4. `docs/governance/BUG_REPORT.md` BUG-186 **Status** reads `RESOLVED in source (TEST-BUDGET-WORDINDEX-1): budget raised to 1,000 ms.` (no merge sha in the change, LL-148).
-    5. `git diff --name-only refs/remotes/origin/main` lists exactly `docs/governance/BUG_REPORT.md` and `tests/wordPositionIndex.test.ts`, plus `docs/governance/close-outs/Timing.TEST-BUDGET-WORDINDEX-1.jsonl` and the run's staging memo if kept (standing rule 41).
-- **Effort:** XS.
-- **Owners:** implementation agent; reviewer re-reads the full-suite summary; repository operator merges.
-- **Lane:** Platform & Maintenance. Execution surface B (evaluation harness).
-- **Source:** [BUG_REPORT.md BUG-186](docs/governance/BUG_REPORT.md); the NARRATE-REMOVE-1 close-out (full-suite note); [2026-10-12 plan](docs/planning/roadmap-reviews/2026-10-12-plan.md).
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites** (on `main` @ `a0e09189`):
-  - `tests/wordPositionIndex.test.ts:147-148`:
-    - `    // Non-flaky budget guard for mocked DOM builds.` becomes `    // Gross-regression guard, not a micro-benchmark: 200 ms failed under full-suite load at 218 ms (BUG-186).`
-    - `    expect(build.buildTimeMs).toBeLessThan(200);` becomes `    expect(build.buildTimeMs).toBeLessThan(1000);`
-  - `docs/governance/BUG_REPORT.md`, BUG-186's `**Status:**` line, per Done-when 4.
-- **Tests:** no new test. Every other assertion in the file is unchanged.
-- **Constants:** none.
-- **Branch:** `eb/test-budget-wordindex-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\test-budget-wordindex-1`. Write refs in full (a `main/` directory exists).
-- **Staging plan:** one commit with exactly `tests/wordPositionIndex.test.ts` and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
-- **Failure handling:**
-  - If the full suite fails on any other test, stop and report it as a new finding; do not change that test.
-  - If this test fails at 1,000 ms, stop with BLOCKER(USER): that is real slowness, not missing headroom.
-  - Rollback: `git revert -m 1 <merge>`.
-- **Lane ownership (parallel run):** surface B only.
-  - **Forbidden:** every file except the two above; the shared-core freeze set; every file the rebuild epic's current phase owns.
-  - **Shared-core touches:** none.
-  - **Merge order:** independent of every other item. Run now under the [parallel run plan](#parallel-run-plan-2026-10-13) (re-audit 2026-10-13 on `d21ad58e`: both gates dry-run as written; the file is untouched by the epic); its full suite respects the measurement windows.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Budget raised and bug status updated | calculable | test edit | mechanical | low | 10m (one assertion, one comment, one status line) | — | — |
-| 2 | Full suite and typecheck green, merged and pushed | calculable | merge and verify | mechanical | low | 20m (one full `npm test` + typecheck + one --no-ff merge) | — | — |
-
-**Total:** chain 2m · sum 2m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **Standing rule 44 (LL-143)** — every gate names its shell and exact exit code, and both search gates were dry-run on the base.
-- **LL-147** — the full-suite row is defined on the owner's machine, so the run is a local session.
-- **LL-149** — the Done-when list carries `npm run typecheck`.
-- **LL-148** — the bug's status line names the item, not a merge sha.
-- **Standing rule 41 (LL-136)** — the exact-path fence exempts the time log and staging memo.
-- **Standing rule 43 (LL-138)** — considered: no behaviour change needs a positive control; the failing state is already recorded (BUG-186).
+**Completed 2026-10-13:** TEST-BUDGET-WORDINDEX-1 — the 5,000-span word-index test's budget is 1,000 ms with its coverage assertions kept; BUG-186 resolved (merge `76956729`; [close-out](docs/governance/close-outs/CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md); specification archived to `docs/planning/.Archive/ROADMAP_legacy.md`).
 
 <a id="settings-write-durable-1"></a>
 
