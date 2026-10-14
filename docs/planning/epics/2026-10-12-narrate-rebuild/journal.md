@@ -213,6 +213,15 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: Hercules's row 63 work in progress, `tests/perf-baseline-results.json`.
 - **Next:** row 63 → 64 → 65 (final re-run, machine as it is: AC, internal panel) → 66.
 
+## S3 — 2026-10-13 21:11 — runaway fixed, final re-run passes, P5 gate green
+
+- **Did:** row 63 (Hercules): the view goes to the spoken word's section on a miss and never pages blindly (`769ae0ce`); stopped a stray spinning python the agent's shell had left (started 20:47, after the traced sessions). Row 64 green. Row 65: final re-run on AC, every pre-registered rule passed — both 5-minute sessions PASS with 0 late commits, and the 2.00x warm block PASS (worst 698 ms). Row 66: the gate's serial checks green at `821857b9` (2,048 passed).
+- **Learned:** with the fix, the view still opens on section 4 (the opening-position race is untouched) but reaches the spoken section on the first miss in 157 ms; one session now loads 3 sections, not 17, and has no frame over 100 ms — the runaway was the whole of the D3 problem in these runs.
+- **Decisions:** none new.
+- **Gate/DoD movement:** D3, D5, D6 (Decision #21), D10 met; P5 gate passed.
+- **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
+- **Next:** merge per GIT WORK; open P6 with the records; P6 starts with the production build for G2.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
