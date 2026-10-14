@@ -6,3 +6,5 @@
 {"event": "end", "row": 1, "evidence": "C1 committed; control exit 1 with 4 named failures (memo); tsc exit 0", "result": "done", "at": "2026-10-14T02:32:10Z"}
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:32:11Z"}
 {"event": "end", "row": 2, "evidence": "C2 committed; DW2 exit 0 (39 tests); DW3 exit1 empty x2; DW4 main.js:2; DW5 main.js:3; tsc 0; fence exact", "result": "done", "at": "2026-10-14T02:33:04Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:47:12Z"}
+{"event": "end", "row": 3, "evidence": "full suite exit 1: EPERM in jsonStore (a) + 3 env onnx failures; routed to planner (issue file); smoke deferred", "result": "blocked", "at": "2026-10-14T02:47:12Z"}
