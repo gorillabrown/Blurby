@@ -8,7 +8,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useReaderKeys } from "../src/hooks/useKeyboardShortcuts";
 
 // useReaderKeys positional surface: enterFlow is the 15th argument (after seven optional ones) and enterNarrate the
-// 28th, the last (NARRATE-REBUILD-1 P4). `onOther` stands in for the four required handlers after togglePlay.
+// 28th (NARRATE-REBUILD-1 P4). lastReadingMode is the 29th, the last (UX-POLISH-1); enterFocus is the 10th and
+// cycleMode the 24th. `onOther` stands in for the four required handlers after togglePlay.
 function KeyboardHarness({ onTogglePlay, onOther = () => {}, bindNarrate = true }: { onTogglePlay: () => void; onOther?: () => void; bindNarrate?: boolean }) {
   const [mode, setMode] = useState<"flow" | "page" | "narrate">("flow");
 
@@ -130,5 +131,129 @@ describe("reader keyboard - Flow playback separation", () => {
     });
 
     expect(container.querySelector("[data-testid='mode']")?.textContent).toBe("flow");
+  });
+});
+
+type PageSpaceSpies = {
+  togglePlay: () => void;
+  enterFocus: () => void;
+  enterFlow: () => void;
+  cycleMode: () => void;
+  enterNarrate: () => void;
+};
+
+function PageSpaceHarness({ spies, lastReadingMode, bindNarrate = true }: {
+  spies: PageSpaceSpies;
+  lastReadingMode?: "focus" | "flow" | "narrate";
+  bindNarrate?: boolean;
+}) {
+  const noop = () => {};
+  useReaderKeys(
+    "reader",
+    "page",
+    spies.togglePlay,
+    noop,
+    noop,
+    noop,
+    noop,
+    undefined,
+    undefined,
+    spies.enterFocus,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    spies.enterFlow,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    spies.cycleMode,
+    undefined,
+    undefined,
+    undefined,
+    bindNarrate ? spies.enterNarrate : undefined,
+    lastReadingMode,
+  );
+  return <input data-testid="field" />;
+}
+
+describe("reader keyboard - Page Space enters the remembered mode (UX-POLISH-1)", () => {
+  let container: HTMLDivElement;
+  let root: Root;
+  let spies: { [K in keyof PageSpaceSpies]: ReturnType<typeof vi.fn> };
+
+  beforeEach(() => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+    spies = { togglePlay: vi.fn(), enterFocus: vi.fn(), enterFlow: vi.fn(), cycleMode: vi.fn(), enterNarrate: vi.fn() };
+  });
+
+  afterEach(async () => {
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  async function renderAndPress(props: { lastReadingMode?: "focus" | "flow" | "narrate"; bindNarrate?: boolean }, init: KeyboardEventInit = {}) {
+    await act(async () => {
+      root.render(<PageSpaceHarness spies={spies} {...props} />);
+    });
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true, cancelable: true, ...init }));
+    });
+  }
+
+  function expectOnly(called: keyof PageSpaceSpies | null) {
+    for (const name of Object.keys(spies) as (keyof PageSpaceSpies)[]) {
+      expect(spies[name], name).toHaveBeenCalledTimes(name === called ? 1 : 0);
+    }
+  }
+
+  it("(a) Space with lastReadingMode focus enters Focus only", async () => {
+    await renderAndPress({ lastReadingMode: "focus" });
+    expectOnly("enterFocus");
+  });
+
+  it("(b) Space with lastReadingMode flow enters Flow only", async () => {
+    await renderAndPress({ lastReadingMode: "flow" });
+    expectOnly("enterFlow");
+  });
+
+  it("(c) Space with lastReadingMode narrate enters Narrate only", async () => {
+    await renderAndPress({ lastReadingMode: "narrate" });
+    expectOnly("enterNarrate");
+  });
+
+  it("(d) Space with lastReadingMode unset enters Flow", async () => {
+    await renderAndPress({ lastReadingMode: undefined });
+    expectOnly("enterFlow");
+  });
+
+  it("(e) Space with lastReadingMode narrate but no enterNarrate bound falls back to Flow", async () => {
+    await renderAndPress({ lastReadingMode: "narrate", bindNarrate: false });
+    expectOnly("enterFlow");
+  });
+
+  it("(f) Shift+Space cycles the remembered mode and enters nothing", async () => {
+    await renderAndPress({ lastReadingMode: "flow" }, { shiftKey: true });
+    expectOnly("cycleMode");
+  });
+
+  it("(g) Space typed in an input calls no handler", async () => {
+    await act(async () => {
+      root.render(<PageSpaceHarness spies={spies} lastReadingMode="focus" />);
+    });
+    const field = container.querySelector("[data-testid='field']") as HTMLInputElement;
+    await act(async () => {
+      field.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true, cancelable: true }));
+    });
+    expectOnly(null);
   });
 });
