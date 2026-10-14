@@ -2,3 +2,5 @@
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:47:27Z"}
 {"event": "end", "row": 1, "evidence": "C1 committed; control exit 1, exactly (a)-(e) fail on togglePlay; (f)(g) pass", "result": "done", "at": "2026-10-14T02:48:36Z"}
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:48:37Z"}
+{"event": "end", "row": 2, "evidence": "C2 c66d9c9d; DW2-6,9 pass; tsc 0", "result": "done", "at": "2026-10-14T02:54:33Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:54:34Z"}
