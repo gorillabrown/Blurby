@@ -144,8 +144,8 @@ describe("WordPositionIndex", () => {
     const index = new WordPositionIndex();
     const build = index.build([{ doc, index: 9 }]);
     expect(build.wordCount).toBe(5000);
-    // Non-flaky budget guard for mocked DOM builds.
-    expect(build.buildTimeMs).toBeLessThan(200);
+    // Gross-regression guard, not a micro-benchmark: 200 ms failed under full-suite load at 218 ms (BUG-186).
+    expect(build.buildTimeMs).toBeLessThan(1000);
 
     for (let i = 0; i < 5000; i += 250) {
       const entry = index.get(i);
