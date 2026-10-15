@@ -11,3 +11,8 @@
 {"event": "end", "row": 4, "outcome": "done", "note": "typecheck 0; npm test 2363 passed / 1 skipped (170 files) exit 0; build 0", "at": "2026-10-15T14:04:00Z"}
 {"event": "resume", "row": 3, "note": "C2 build and live control (run twice: the first run discarded its probe output)", "at": "2026-10-15T14:04:00Z"}
 {"event": "end", "row": 3, "outcome": "done", "note": "control and (a)-(g) pass", "at": "2026-10-15T14:10:27Z"}
+{"event": "add", "rows": [{"id": 5, "title": "Review fix round fr1-fr4: four positive controls, fixes, gates, full suite, typecheck, build, live (e) on a rebuilt C2", "owner": "implementation agent", "tier": "bounded", "effort": "low", "kind": "feature", "class": "repeat"}], "origin": "added", "at": "2026-10-15T14:12:00Z"}
+{"event": "start", "row": 5, "at": "2026-10-15T14:12:00Z"}
+{"event": "pause", "row": 5, "note": "network error (ENOTFOUND) cut the session; fixes uncommitted, last recorded result 276/276 and gates 48/48", "at": "2026-10-15T14:20:00Z"}
+{"event": "resume", "row": 5, "note": "merged origin/main @ 1ea2e1dc", "at": "2026-10-15T14:22:00Z"}
+{"event": "end", "row": 5, "outcome": "done", "note": "npm test 2367 passed / 1 skipped exit 0; gates 48/48; live (e) cleared in 1.1 s", "at": "2026-10-15T15:02:06Z"}
