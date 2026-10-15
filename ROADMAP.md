@@ -3,7 +3,7 @@
 **Last updated**: 2026-10-14 (QUIT-FLUSH-1 completed, merge `d21009b3`: BUG-192 resolved; the quit saves run in the cancelled first `will-quit` under a 3 s cap; review fixes W1, W2 and N1 ruled by Blurby Brain; LL-159; READER-VISUAL-DIAG-1 moves to 10 and dispatch-ready depth falls to 4; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, 2026-10-14 (LARGE-FOLDER-SYNC-1 technical half specified: Full Spec at 15, dispatch-ready depth back to 5; the design half stays an open owner decision; FOLDER-UNREACHABLE-GUARD-1 restated against `main/folder-sync.js`). Before it, 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (10, read-only) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half; its prerequisite QUIT-FLUSH-1 is met) → LIBRARY-READ-ALLOW-1 (15, BUG-196, Full Spec) → stubs FOLDER-UNREACHABLE-GUARD-1 (16), PDF-IMPORT-DIAG-1 (17), OVERLAY-THEME-SWEEP-1 (18), EINK-CONTROLS-1 (19), KF2-WAIVER-RETIRE-1 (20), NARRATE-YEARS-1 (21, blocked on the epic). Dispatch-ready depth is 5 (10, 11, 13, 14, 15). The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. QUIT-FLUSH-1 completed 2026-10-14 (merge `d21009b3`); FOLDER-SCAN-PERF-1 before it (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (10, read-only) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half; its prerequisite QUIT-FLUSH-1 is met) → LIBRARY-READ-ALLOW-1 (15, BUG-196, Full Spec) → PAGE-POSITION-SAVE-1 (16, BUG-197, Full Spec) → stubs FOLDER-UNREACHABLE-GUARD-1 (17), PDF-IMPORT-DIAG-1 (18), OVERLAY-THEME-SWEEP-1 (19), EINK-CONTROLS-1 (20), KF2-WAIVER-RETIRE-1 (21), NARRATE-YEARS-1 (22, blocked on the epic). Dispatch-ready depth is 5 (10, 13, 14, 15, 16). The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. QUIT-FLUSH-1 completed 2026-10-14 (merge `d21009b3`); FOLDER-SCAN-PERF-1 before it (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: QUIT-FLUSH-1, completed 2026-10-14 (merge `d21009b3`; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, FOLDER-SCAN-PERF-1, completed 2026-10-14 (merge `534b43d2`; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -530,7 +530,7 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparation and the owner smokes surfaced. The finish line is still the epic; these are sideways fixes that make the G2 build and daily use sound. See the [plan](docs/planning/roadmap-reviews/2026-10-14-plan.md).
 
-**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
+**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
 <a id="quit-flush-1"></a>
 
@@ -1351,17 +1351,355 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 - **Standing rule 46 (LL-153)** — the run writes nothing to the register.
 - **Standing rule 36 (SRL-086/087)** — every line was read on `249f12ae`, and the run re-greps after PACKAGING-FIX-1 merges.
 
+<a id="page-position-save-1"></a>
+
+#### PAGE-POSITION-SAVE-1 — Page turns in Page mode save the first word of the page *(position 16 — Full Spec; authored 2026-10-14 on main @ 112ea45d; fixes BUG-197)*
+
+- **What:** In Page mode (`src/reader/modes/page/**`), every page turn by key (ArrowRight, PageDown, ArrowLeft, PageUp), by the ‹ › page buttons or by a touch swipe saves the reading position at once. The saved `position` is the word index of the first word shown on the new page, and `cfi` is that word's CFI. The persistent anchor, the toolbar position and the next mode's start word all move to that word. Turning a page no longer shows "Jump back". The main-process progress handler also stamps `lastReadAt`. Fixes BUG-197, and makes QUIT-FLUSH-1's untestable Done-when 9(f) testable.
+- **Why** (every line read on `main` @ `112ea45d`, 2026-10-14):
+  - **How each mode commits a position today.** Every mode commits through its private anchor copy: `commitPersistentWordIndex(…, { persist: true })` calls `persistence.updateDocProgress` at once (`src/reader/modes/page/helpers/usePersistentReadingAnchor.ts:97-102`). That fires only for a hard selection or explicit navigation (Page `ModeRuntime.ts:633-642`, Focus `:1061-1063`, Flow `:1411-1413`). Passive progress goes through `onRelocate` → `shouldPersistRelocateProgress` (`helpers/persistentReadingAnchor.ts:82-93`: `hasEngaged && !hasResumeAnchor && !userBrowsing`) → `persistence.scheduleRelocateSave`, which is a 2000 ms renderer-side debounce (`src/components/ReaderContainer.tsx:315-327`, `FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS`, `src/constants.ts:170`). Focus and Flow open that gate by consuming the one-shot resume anchor once playback moves past it (Focus `ModeRuntime.ts:946-947`, Flow `:1185-1186`), and their relocate gate then saves (`:793`, `:958`). Page has no playback, so nothing opens it. This is a two-path bug.
+  - **Three independent blocks stop the save on a Page turn**, all in Page's `onRelocate` (`src/reader/modes/page/ModeRuntime.ts:426-477`):
+    1. **Browse-away.** Each page turn calls `markUserBrowsingAway()` before `renderer.next()`/`prev()` (`src/reader/modes/page/FoliateView.tsx:1044`, `:1048` keys; `:1058`, `:1062` buttons). That sets `userBrowsingRef` (`:401-404`), so the relocate it fires reads `isUserBrowsing() === true` (`ModeRuntime.ts:432`). `shouldWriteRelocateCfi` then refuses even the in-memory CFI (`:433-436`), and `shouldPersistRelocateProgress` refuses the save (`:461-467`). The same call runs `onUserBrowseAway` → `isBrowsedAway = true` (`ModeRuntime.ts:559-563`) → `showJumpBackToAnchor` (`useModeBindings.ts:37`) → the "Jump back" button (`FoliateView.tsx:1079-1088`). This is the button seen in the smoke.
+    2. **Resume anchor never clears.** Book open seeds `resumeAnchor` with the saved position (`src/reader/document/ReaderDocumentSnapshot.ts:162`), and so does a mode arrival (`page/ModeState.ts:40`). Every anchor write re-arms it (`helpers/usePersistentReadingAnchor.ts:63-64`). Nothing in Page nulls it except a click that resolves no index (`ModeRuntime.ts:329`), so `hasResumeAnchor` is true for the whole session.
+    3. **Not engaged.** `hasEngaged` starts false (`ReaderDocumentSnapshot.ts:165`), and page turns never call `markEngaged` (only `hardSelect`, `move-selection` and `go-to-href` do, `ModeRuntime.ts:303`, `:375`, `:414`).
+  - **Exit would overwrite a fix that only saves.** Exit and the backtrack check use `canonicalWordAnchor = toolbar.currentWordIndex` (`ReaderContainer.tsx:428`, `:604-617`), and `_persistAndLog` writes it with `activeDoc.cfi` (`src/hooks/useProgressTracker.ts:221-231`). A page-turn save must also move Page's `currentWordIndex` and canonical anchor, or leaving the reader writes the old word back.
+  - **The existing "first visible word" helper cannot find the page's first word.** foliate's paginator sizes the iframe to every page of the section (`node_modules/foliate-js/paginator.js:366-371`, `iframe.style[side] = expandedSize`). The in-iframe visibility test (`page/helpers/wordPositionIndex.ts:46-55`, and the fallback at `FoliateView.tsx:882-883`) therefore accepts every laid-out word, and `findFirstVisibleWordIndex` returns the first word of the section. The reliable source is foliate's own visible range: `relocate`'s `detail.range` (`node_modules/foliate-js/view.js:316-324`), built by `getVisibleRange` for exactly the current page (`paginator.js:980-986`, `:86-140`).
+  - **Section crossings relocate before every word is stamped.** A turn across a section boundary loads the next section (`paginator.js:1095-1105` → `#goTo` → `#display` → `scrollToAnchor`) and fires `relocate` with reason `anchor`, not `page` (`:956-966`), so the relocate reason cannot identify a turn. Page's `onSectionLoad` stamps `data-word-index` spans in batches of 50 blocks that yield with `setTimeout(0)` (`page/helpers/foliateWordWrapping.ts:11`, `:143-145`). On a backward turn into a long section, the last page can relocate before its spans exist. Wrapping keeps the text unchanged (`page/helpers/foliateHelpers.ts:197-225`), so a text offset taken at relocate still names the same word afterwards.
+  - **Fast quit.** A save sent as IPC at turn time reaches `update-doc-progress` (`preload.js:52` → `main/ipc/documents.js:15-32`). That sets `position` and `cfi` and arms the 500 ms `saveLibrary` debounce (`main.js:129-140`), which the quit step `["library", saveLibraryNow]` drains (`main.js:693`; `main/quit-sequence.js:8-25`). The renderer's 2000 ms `pageSaveTimer` is not drained at quit, so the fix must not route through `scheduleRelocateSave`.
+  - **Swipes never reach the view.** foliate's paginator handles touch itself (`paginator.js:558` onward). A swipe ends in `snap()`, which scrolls with reason `"snap"` and, from a blank edge page, crosses into the adjacent section (`paginator.js:831-848`). Page's view never sees the gesture. The renderer's own `relocate` carries `{ reason, range, index }` (`paginator.js:996-1004`), but view.js re-emits it without `reason` (`view.js:249`, `:316-324`).
+  - **Jump back in Page has one trigger.** On this base only `markUserBrowsingAway` (from a page turn) sets Page's browse-away flag (`FoliateView.tsx:401-404` → `ModeRuntime.ts:559-563`; `pollBrowsing` only mirrors that ref, `:566-572`). A chapter-list jump goes through `handleJumpToChapter` → `handleNavigateTo` (an explicit-navigation commit that moves and saves the anchor) and the `go-to-href` command (`ReaderContainer.tsx:658-677`; `ModeRuntime.ts:342-346`, `:412-417`). Neither marks browse-away, so a chapter jump does not show Jump back today. Page has no search or go-to that does. The Return-to-reading pill is for the scrolled modes only (`ReaderContainer.tsx:810-814`).
+  - **`lastReadAt`.** `update-doc-progress` never writes `lastReadAt` (`main/ipc/documents.js:23-26`). Only opening a book does, through a renderer full-library save (`src/components/LibraryContainer.tsx:262-264`). The test stub's `updateDocProgress` does set it (`src/test-harness/electron-api-stub.ts:327-334`). So the smoke's unchanged `lastReadAt` is a second path diverging from the contract the stub encodes.
+- **Owner decisions (2026-10-14, final, verbatim):**
+  - Page turns save the position: "yes".
+  - The saved position is the "First word of that page".
+- **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1):**
+  - **Q1 (a):** a full anchor commit under a new `"page-turn"` `PersistentAnchorCause`, with the main highlight moving to the page's first word. The saved word and the anchor must never disagree, or exit writes the old word back. Test (b) asserts that after a page turn the saved index equals the anchor's index.
+  - **Q2 (a):** page turns stop marking browse-away, so Jump back no longer appears from page turns. The button code and its existing triggers stay for genuine jumps (chapter list, search, go-to). Brain asked for a control showing that a chapter-list jump still shows Jump back. **Planner finding:** on `112ea45d` no chapter-list, search or go-to path in Page shows Jump back (see Why), so that control would fail at C1. Control (l) instead proves that the kept Jump back path still works. Making a chapter jump show Jump back would be new behaviour and needs its own ruling.
+  - **Q3 (a):** stamp `lastReadAt` on every progress write, the one line in `main/ipc/documents.js`. Test (m) covers a write shaped like each mode's at the IPC boundary. `lastReadAt` stays in the live check.
+  - **Q4:**
+    - Swipes are included. A swipe is a page turn and goes through the same report path in the same `FoliateView` (edit sites below; tests (e) and (f), control (i)). There is no live check for swipes.
+    - A cross-section save lost on a quit before the section's words are stamped is out of scope, recorded as a known limit (LL-159).
+  - **Merge order:** after UX-POLISH-2 and LIBRARY-READ-ALLOW-1; position 16.
+- **Design decisions (planner, 2026-10-14, within the rulings):**
+  - **A turn is the user's page turn, nothing else.** A counter in Page's view (`pageTurnsInFlightRef`) is incremented when a key or page button calls `renderer.next()`/`prev()`, and decremented when that promise settles. foliate fires the turn's `relocate` inside that promise for both in-section and cross-section turns (`paginator.js:927-948`, `:1095-1105`). Book open, resize, TOC and click-centring relocates stay passive (LL-073). A counter, not a boolean, keeps a second key press during a locked turn (`paginator.js:1096`) from clearing the first.
+  - **A swipe is identified by foliate's own reason.** A second listener, on `view.renderer`'s `relocate`, acts only when `reason === "snap"`. If the snap lands on a text page, it reports that page through the same `reportTurn`. If it lands on the blank edge page (`renderer.page <= 0 || renderer.page >= renderer.pages - 1`, the same test `snap()` uses before crossing, `paginator.js:843`), it arms `swipeCrossingRef`, and the next view-level relocate (the new section's) is treated as the turn's. view.js's own renderer listener is registered first (`view.js:249`), so for one snap the view-level handler runs before this one. At the book's first or last page, an armed flag can linger until the next relocate; that relocate then saves the page on screen, which is harmless.
+  - **First word from foliate's visible range, by text offset.** At the turn's relocate, the view converts `detail.range`'s start and end into character offsets in the section body. The first stamped `[data-word-index]` span with text in `[start, end)` is the first word. Its global index comes through the existing `resolveRenderedWordIndexToGlobal` (as at `FoliateView.tsx:886`), and its CFI through `view.getCFI(index, rangeOverSpan)` (as clicks do, `:601-604`). If no span is stamped there yet, the offsets are held, and the save happens when that section's `wrapWordsInSpans` resolves; a `page-turn-deferred` diagnostic is recorded (LL-142 rec. 5). A page with no words (a full-page image) saves nothing.
+  - **The save is a full anchor commit, cause `"page-turn"`** (ruling Q1). It uses Page's private `PersistentAnchorCause`, with `persist: true, publishState: true, navigate: false`. The commit moves canonical, published, highlight, soft and resume anchors to the word, writes `updateDocProgress(docId, wordIndex, cfi)` at once (no debounce), and leaves `explicitSelectionAnchor` alone. The runtime also sets `currentWordIndex`, `cfi`/`recordCfi`, `hasEngaged`, page activity and `isBrowsedAway = false`. The position stays a plain word index, which Narrate's restart follow-up can use.
+  - **Page turns stop marking browse-away** (ruling Q2). `markUserBrowsingAway` is deleted; its four call sites become `turnPage(±1)`. The Jump back button, the `showJumpBackToAnchor` and `onUserBrowseAway` props, `pollBrowsing` and `jumpBack` stay in place, unchanged. On this base the page-turn mark was the only trigger, so after this item no Page path shows the button until a genuine-jump trigger is ruled on.
+  - **`lastReadAt` on every progress write** (ruling Q3). One line in `main/ipc/documents.js`, matching the test stub. Every mode's progress write reaches that one handler through `api.updateDocProgress` (`preload.js:52`), so the per-mode check runs at the IPC boundary:
+    - Page and Focus/Flow anchor commits: `(docId, index, cfi)` (`page|focus|flow/helpers/usePersistentReadingAnchor.ts:100`).
+    - The Focus/Flow relocate save: `(docId, index, cfi)` (`ReaderContainer.tsx:324`).
+    - The non-EPUB save: `(docId, index)`, no cfi (`useProgressTracker.ts:213`).
+  - **Shared code untouched.** The relocate predicates (`helpers/persistentReadingAnchor.ts`), the shared-core freeze set, `preload.js`, the ports and Focus, Flow and Narrate are not edited. The Page fix lives in Page's own files.
+- **Out of scope:**
+  - **Known limit (ruling Q4, LL-159):** a cross-section turn whose words are not yet stamped saves when that section's wrap finishes. If the app quits first, that save is lost and the previous page's position stays. A live check for swipes is also out of scope.
+  - Wheel input and other relocates (resize, TOC, click centring) do not save.
+  - A Jump back trigger for chapter-list, search or go-to jumps in Page: none exists on the base (Why), and adding one needs a ruling.
+  - Page's pages-read goal and high-water mark: `scheduleRelocateSave` never runs in Page (block 2 above), so `recordPages` and `furthestPositionRef` never advance there. This item does not change that; a follow-up is needed.
+  - The wrong paginated `findFirstVisibleWordIndex` (used by soft selection and `onSurfaceLoad`'s fallback, `ModeRuntime.ts:451`, `:507`, `:520`): flagged, not fixed.
+  - A renderer full-library save (`LibraryContainer.tsx:264`, `:355`, `:426`, `:436`, `:449`) can write back a stale `cfi`, because the renderer's copy updates `position` only (`src/hooks/useLibrary.ts:146-148`). Reopen still lands on the saved word (`ModeRuntime.ts:500-504`). This predates the item and also affects clicks.
+  - Narrate restarting at the start of the saved word's sentence (separate follow-up), and Focus, Flow and Narrate commits.
+  - Deleting Page's Jump back code (kept by ruling Q2).
+  - **LL-156 check:** QUIT-FLUSH-1 recorded Done-when 9(f) as "not testable as written"; Done-when 8(d) here covers it. LARGE-FOLDER-SYNC-1 cites `main/ipc/documents.js:23` (its test (g)); this item adds a line after `:25` and leaves `:23` unchanged. No other waiver names an edit site.
+- **Prerequisites:**
+  - **Merge after UX-POLISH-2 (position 13):** both edit `src/reader/modes/page/FoliateView.tsx`, UX-POLISH-2 at its key forwarder `:680` and this item from `:688` (four unchanged lines apart; different hunks).
+  - **Merge after LIBRARY-READ-ALLOW-1 (position 15):** Done-when 8 reads the first-run sample *Meditations*, whose `filepath` is the bundled file (`main.js:602-615`), outside the allowed roots on this base (`main/ipc/library.js:164-173`). LIBRARY-READ-ALLOW-1 makes it readable. This item does not edit `main/ipc/library.js`.
+  - Re-grep every line number below after both merge (standing rule 36).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `112ea45d` (2026-10-14) are noted.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/updateDocProgressLastRead.test.js` exits 1. Exactly these 8 tests fail, each for its stated reason: (a), (b), (c), (d), (e), (f), (g) and (m). Exactly these 6 controls pass: (h), (i), (j), (k), (l) and (n). Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/updateDocProgressLastRead.test.js tests/readerModes/page.behavior.test.tsx tests/readerModes/page.contract.test.ts tests/readerModes/foliateViewTeardown.test.tsx tests/persistentReadingAnchor.test.ts tests/wordAnchor.test.ts tests/foliate-bridge.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/documentsOpenSource.test.js` exits 0.
+    3. `git grep -n -F 'markUserBrowsingAway' -- src/reader/modes/page/FoliateView.tsx` prints nothing (dry-run: exit 0, 8 lines, `:401`, `:1044`, `:1048`, `:1055`, `:1058`, `:1060`, `:1062`, `:1064`).
+    4. `git grep -c -F '"page-turn"' -- src/reader/modes/page` prints exactly `src/reader/modes/page/ModeRuntime.ts:1` and `src/reader/modes/page/helpers/usePersistentReadingAnchor.ts:1`, and exits 0 (dry-run: exit 1, no output).
+    5. `git grep -l -F 'onPageTurned' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx`, `src/reader/modes/page/ModeRuntime.ts` and `src/reader/modes/page/useModeBindings.ts`, and exits 0 (dry-run: exit 1, no output). `git grep -c -F 'reason !== "snap"' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:1` and exits 0 (the swipe listener; dry-run: exit 1, no output).
+    6. `git grep -n -F 'doc.lastReadAt = Date.now();' -- main/ipc/documents.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
+    7. `npm test` exits 0 on the owner's machine (standing rule 47); `npm run typecheck` exits 0; `npm run build` exits 0 (standing rule 48).
+    8. **Live check on a production `--dir` build, scratch profile.** The executor may drive the app. The owner's profile and Drive are never touched.
+        - **Setup:** `$prof = Join-Path $env:TEMP ("blurby-pps1-" + [guid]::NewGuid())`; `npm run build`, then `npx electron-builder --win --x64 --dir --publish never` (each exits 0); `$env:BLURBY_USER_DATA_DIR = $prof`; launch `release\win-unpacked\Blurby.exe --remote-debugging-port=9335`. Open the first-run sample *Meditations* from its library card; it opens in Page mode. Wait 15 s (full-book words land). Do not move or resize the window between launches. Read state with `$d = ((Get-Content "$prof\blurby-data\library.json" -Raw | ConvertFrom-Json).docs | Where-Object id -eq 'sample-meditations')`. Read the page with the **probe** (Implementation detail), a CDP `Runtime.evaluate` on the reader page target from `http://127.0.0.1:9335/json/list` (pattern: `docs/planning/roadmap-reviews/reader-mode-separation-2/admission/a1r-run.ps1:55`). A probe that returns `visible` other than `"visible"` voids that step; rerun it (standing rule 45).
+        - **(a) Control on the C1 build (the defect is visible):** on a build of the C1 commit, record `$d.position`, `$d.cfi`, `$d.lastReadAt`. Press PageDown 3 times, wait 10 s, read again: all three unchanged, and the Jump back button is shown. If they changed, stop (LL-151).
+        - **(b) Idle control on the C2 build:** open the book in a fresh `$prof` and wait 10 s without turning: `position` and `cfi` unchanged.
+        - **(c) Turns:** press PageDown 3 times. Run the probe and note its `text` against the first word visible on screen (a screenshot); they match. Wait 10 s without quitting. Then `$d.position -eq` the probe's `wordIndex`, `$d.cfi -eq` the probe's `cfi`, and `$d.lastReadAt` is greater than its value read just before the first turn. No Jump back button is shown.
+        - **(d) Fast quit (covers QUIT-FLUSH-1 Done-when 9(f)):** press PageDown once more, run the probe, then Alt+F4 within 1 s of that turn (sent through the OS). Wait for the process to exit. `position` and `cfi` equal that probe's values, and no `library.json.tmp` is left. Relaunch with the same `$prof` and open *Meditations*: it opens on that page, and the probe's `wordIndex` equals `$d.position`.
+        - Record every value in the staging memo. Record "Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away)". Merging gates on the automated rows (Blurby.Brain, 2026-10-14). Owner batched-smoke checklist: turn three pages in a book, wait, reopen it, and it opens on the page you left.
+    9. `git diff --name-status refs/remotes/origin/main` lists exactly `M docs/governance/BUG_REPORT.md`, `M main/ipc/documents.js`, `M src/reader/modes/page/FoliateView.tsx`, `M src/reader/modes/page/ModeRuntime.ts`, `M src/reader/modes/page/helpers/foliateHelpers.ts`, `M src/reader/modes/page/helpers/usePersistentReadingAnchor.ts`, `M src/reader/modes/page/useModeBindings.ts`, `A tests/readerModes/pagePositionSave.test.tsx`, `A tests/updateDocProgressLastRead.test.js`. Also allowed: the time log `docs/governance/close-outs/Timing.PAGE-POSITION-SAVE-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.PAGE-POSITION-SAVE-1.GovernanceStaging.<date>.md` (standing rule 41). BUG-197's **Status** line reads `RESOLVED in source (PAGE-POSITION-SAVE-1): a Page-mode page turn saves the first word of the new page (position and its cfi) at once; closes after the batched owner smoke.`
+- **Effort:** M. A small fix in Page's own files and one main-process line. Most of the effort goes into the view-level positive controls and the CDP-driven live check.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke.
+- **Lane:** Reader Engine. Execution surface A (Page runtime and view), plus one line on surface D (`main/ipc/documents.js`).
+- **Source:** [BUG_REPORT.md BUG-197](docs/governance/BUG_REPORT.md); `docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md` (Done-when 9(f), LL-158 status); the owner decisions of 2026-10-14; Blurby.Brain's Done-when rows of 2026-10-14.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `112ea45d`; re-grep after UX-POLISH-2 and LIBRARY-READ-ALLOW-1 merge):
+  - **`src/reader/modes/page/helpers/foliateHelpers.ts`, after `queryWordSpans` (`:27-30`)**, add:
+    ```ts
+    /** Characters of body's text before the boundary point (node, offset) (PAGE-POSITION-SAVE-1). */
+    export function textOffsetBefore(body: HTMLElement, node: Node, offset: number): number {
+      const range = body.ownerDocument.createRange();
+      range.setStart(body, 0);
+      range.setEnd(node, offset);
+      return range.toString().length;
+    }
+
+    /** The first stamped word span with text in [start, end) of body's text, or null (wrapping keeps the text). */
+    export function findWordSpanInTextRange(body: HTMLElement, start: number, end: number): HTMLElement | null {
+      const walker = body.ownerDocument.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+      let seen = 0;
+      for (let node = walker.nextNode(); node && seen < end; node = walker.nextNode()) {
+        seen += node.nodeValue?.length ?? 0;
+        if (seen <= start) continue;
+        const span = node.parentElement?.closest<HTMLElement>("[data-word-index]");
+        if (span) return span;
+      }
+      return null;
+    }
+    ```
+  - **`src/reader/modes/page/helpers/usePersistentReadingAnchor.ts:9-14`**: add `| "page-turn"` after `| "jump-back"` (before `;`). Nothing else in the file changes.
+  - **`src/reader/modes/page/FoliateView.tsx`:**
+    - **Imports `:31-36`**: add `findWordSpanInTextRange,` and `textOffsetBefore,` to the `./helpers/foliateHelpers` import.
+    - **Props `:247`**: after `onUserBrowseAway: () => void;` add
+      ```ts
+        /** PAGE-POSITION-SAVE-1: a page turn landed; the first word on the new page and that word's CFI. */
+        onPageTurned: (first: { wordIndex: number; cfi: string }) => void;
+      ```
+      and in the destructuring after `onUserBrowseAway,` (`:269`) add `onPageTurned,`.
+    - **Refs, after `:294`** (`onUserBrowseAwayRef.current = onUserBrowseAway;`):
+      ```ts
+        const onPageTurnedRef = useRef(onPageTurned);
+        onPageTurnedRef.current = onPageTurned;
+        // PAGE-POSITION-SAVE-1: page turns in flight (a relocate while > 0 is a turn's) and a turn not yet stamped.
+        const pageTurnsInFlightRef = useRef(0);
+        const pendingTurnRef = useRef<{ doc: Document; start: number; end: number } | null>(null);
+        // A swipe that snapped onto the blank edge page: the next relocate (the adjacent section's) is the turn's.
+        const swipeCrossingRef = useRef(false);
+      ```
+    - **Delete `:401-404`** (`const markUserBrowsingAway = useCallback(() => { … }, []);`) and the blank line after it.
+    - **After `:547`** (`viewRef.current = view;`), add:
+      ```ts
+              // PAGE-POSITION-SAVE-1: report the first word on the page a turn landed on; false while it is not stamped.
+              const reportFirstWordOnPage = (doc: Document, start: number, end: number): boolean => {
+                const span = findWordSpanInTextRange(doc.body, start, end);
+                const rendered = parseWordIndexAttribute(span?.getAttribute("data-word-index"));
+                const match = (view.renderer?.getContents?.() ?? []).find((c: any) => c.doc === doc);
+                if (!span || rendered == null || typeof match?.index !== "number") return false;
+                const wordRange = doc.createRange();
+                wordRange.selectNodeContents(span);
+                onPageTurnedRef.current?.({
+                  wordIndex: resolveRenderedWordIndexToGlobal(match.index, rendered, foliateWordsRef.current, liveSections()),
+                  cfi: view.getCFI(match.index, wordRange),
+                });
+                return true;
+              };
+              // PAGE-POSITION-SAVE-1: a turn (key, button or swipe) landed on the page `range` shows; save it or hold it.
+              const reportTurn = (range: Range | undefined): void => {
+                const turnedDoc = range?.startContainer.ownerDocument;
+                if (!range || !turnedDoc?.body) return;
+                const start = textOffsetBefore(turnedDoc.body, range.startContainer, range.startOffset);
+                const end = textOffsetBefore(turnedDoc.body, range.endContainer, range.endOffset);
+                const saved = reportFirstWordOnPage(turnedDoc, start, end);
+                pendingTurnRef.current = saved ? null : { doc: turnedDoc, start, end };
+                if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
+              };
+      ```
+    - **In `onSectionLoad`, between `:573` (the `}` closing `if (v2) {`) and `:575`** (`lastLoadedSectionIndexRef.current = index;`), add:
+      ```ts
+                // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+                const pendingTurn = pendingTurnRef.current;
+                if (pendingTurn?.doc === doc) {
+                  pendingTurnRef.current = null;
+                  reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end);
+                }
+      ```
+    - **Relocate listener `:688-694`.** Current:
+      ```ts
+              view.addEventListener("relocate", (e: any) => {
+                if (cancelled) return;
+                const { cfi } = e.detail;
+                const fraction = e.detail.fraction ?? 0;
+                onRelocateRef.current?.({ cfi, fraction });
+                scheduleWordPositionIndexRebuild("relocate");
+              });
+      ```
+      Required (the first five body lines unchanged, then):
+      ```ts
+                scheduleWordPositionIndexRebuild("relocate");
+                // PAGE-POSITION-SAVE-1: a relocate during a key/button turn, or right after a swipe left its section, is the turn's.
+                if (pageTurnsInFlightRef.current > 0 || swipeCrossingRef.current) {
+                  swipeCrossingRef.current = false;
+                  reportTurn(e.detail.range);
+                }
+              });
+      ```
+    - **Swipe listener, after `:697-698`** (`await view.open(file);` / `if (cancelled) return;`, where `view.renderer` first exists), add:
+      ```ts
+              // PAGE-POSITION-SAVE-1: a touch swipe is a page turn. foliate snaps with reason "snap" (paginator.js:831-848);
+              // a snap onto the blank edge page crosses into the adjacent section, whose relocate is then the turn's.
+              view.renderer.addEventListener("relocate", (e: any) => {
+                if (cancelled || e.detail?.reason !== "snap") return;
+                const r = view.renderer;
+                if (r.page <= 0 || r.page >= r.pages - 1) swipeCrossingRef.current = true;
+                else reportTurn(e.detail.range);
+              });
+      ```
+    - **Keyboard turn and buttons `:1037-1064`.** Current: `handleKey` calls `markUserBrowsingAway(); view.renderer.next();` / `…prev();` (deps `[markUserBrowsingAway]`), and `goNext`/`goPrev` call `markUserBrowsingAway()` then `viewRef.current?.renderer?.next()`/`prev()`. Required:
+      ```ts
+        // PAGE-POSITION-SAVE-1: a key or button page turn saves its new page's first word (the relocate it fires, above).
+        const turnPage = useCallback((dir: 1 | -1) => {
+          const renderer = viewRef.current?.renderer;
+          if (!renderer) return;
+          pageTurnsInFlightRef.current += 1;
+          void Promise.resolve(dir > 0 ? renderer.next() : renderer.prev())
+            .finally(() => { pageTurnsInFlightRef.current -= 1; });
+        }, []);
+
+        // Keyboard page turn
+        useEffect(() => {
+          const handleKey = (e: KeyboardEvent) => {
+            if (!viewRef.current?.renderer) return;
+            if (e.key === "ArrowRight" || e.key === "PageDown") {
+              e.preventDefault();
+              turnPage(1);
+            } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
+              e.preventDefault();
+              turnPage(-1);
+            }
+          };
+
+          window.addEventListener("keydown", handleKey);
+          return () => window.removeEventListener("keydown", handleKey);
+        }, [turnPage]);
+
+        const goNext = useCallback(() => turnPage(1), [turnPage]);
+        const goPrev = useCallback(() => turnPage(-1), [turnPage]);
+      ```
+  - **`src/reader/modes/page/ModeRuntime.ts`, after `onUserBrowseAway` (`:558-563`)**, add:
+    ```ts
+      /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
+      onPageTurned = (first: { readonly wordIndex: number; readonly cfi: string }): void => {
+        if (!this.alive) return;
+        const s = this.state;
+        this.markEngaged();
+        this.ports.persistence.markPageActivity();
+        s.userExplicitSelection = false;
+        s.cfi = first.cfi;
+        this.ports.persistence.recordCfi(first.cfi);
+        s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
+          cfi: first.cfi,
+          persist: true,
+          publishState: true,
+          navigate: false,
+        });
+        s.isBrowsedAway = false;
+        s.notify();
+      };
+    ```
+  - **`src/reader/modes/page/useModeBindings.ts:39`**: after `onUserBrowseAway: runtime.onUserBrowseAway,` add `onPageTurned: runtime.onPageTurned,`.
+  - **`main/ipc/documents.js:25`**: after `doc.modified = Date.now();` add `doc.lastReadAt = Date.now();` (same indentation).
+  - **`docs/governance/BUG_REPORT.md`, BUG-197 Status line (`:14`)**: the text in Done-when 9.
+- **Probe** (Done-when 8; an LTR paginated book; it reads foliate's live layout directly, without the item's text-offset path):
+  ```js
+  (() => {
+    const v = document.querySelector("foliate-view");
+    const r = v.renderer;
+    const { doc, index } = r.getContents()[0];
+    const lo = r.start - r.size, hi = r.end - r.size; // the current page in iframe coordinates (paginator.js:980-986, :911-917)
+    const span = [...doc.querySelectorAll("[data-word-index]")].find((s) => {
+      const b = s.getBoundingClientRect();
+      return b.width > 0 && b.right > lo && b.left < hi;
+    });
+    const range = doc.createRange();
+    range.selectNodeContents(span);
+    return JSON.stringify({ wordIndex: Number(span.dataset.wordIndex), text: span.textContent, cfi: v.getCFI(index, range), visible: document.visibilityState });
+  })()
+  ```
+- **Tests** (committed first at C1):
+  - **New `tests/readerModes/pagePositionSave.test.tsx`** (Vitest, `// @vitest-environment jsdom`). It reuses `tests/readerModes/foliateViewTeardown.test.tsx:17-43` (`vi.mock("foliate-js/view.js", () => ({}))`, and a `FakeFoliateView` custom element guarded by `customElements.get`) with these changes:
+    - The fake paginator `extends EventTarget` and has plain fields `page = 2` and `pages = 6`. Its `getContents()` returns the test's `[{ doc, index: 0 }]`. `next()`/`prev()` dispatch `new CustomEvent("relocate", { detail })` on the host view (as view.js re-emits), with the test's `detail = { cfi: "range-cfi", fraction: 0.5, range }`, and return a resolved promise.
+    - The fake view has `getCFI(index, range) => \`cfi:${index}:${range.toString()}\``.
+    - The runtime comes from `pageMode.createRuntime` (`src/reader/modes/page/index.ts`) behind the real broker, as in `tests/readerModes/harness/contractAssertions.ts:53-70`. It uses `createFakeInfrastructure()` (document `doc-1`, 25 words, position 7) and `createInitialHandoff`.
+    - The view is mounted with `createRoot` and `act`, with the teardown test's props. The overrides are `onRelocate: runtime.onRelocate`, `onUserBrowseAway: runtime.onUserBrowseAway`, `onPageTurned: (runtime as any).onPageTurned`, `onLoad: runtime.onSurfaceLoad`, `onWordsReextracted: runtime.onWordsReextracted`, `viewApiRef: runtime.viewApiRef`, `showJumpBackToAnchor: runtime.getSnapshot().isBrowsedAway` (re-rendered after each step) and `onJumpBackToAnchor: () => runtime.jumpBack()`. Wait until `runtime.viewApiRef.current` is set.
+    - **"Stamped doc":** `document.implementation.createHTMLDocument()` whose body is `<p><span data-word-index="10">Ten</span> <span data-word-index="11">eleven</span> <span data-word-index="12">twelve</span> <span data-word-index="13">thirteen</span></p>`. Its range runs from span 12's text node at 0 to span 13's text node at 8.
+    - **(a) [required assertion]** Click the "Next page" button. `fake.effects` then contains `persistence.updateDocProgress` with args `["doc-1", 12, "cfi:0:twelve"]`: the saved position equals the first visible word's index. *Fails at C1: no `updateDocProgress` call, because a page turn marks browse-away and reports no word (`FoliateView.tsx:1058-1059`).*
+    - **(b) Saved word equals the anchor (ruling Q1).** After the click in (a), the saved index (args[1] of the last `updateDocProgress`) equals `getSnapshot().canonicalWordIndex`, `.currentWordIndex` and `.highlightedWordIndex`, and `exportHandoff("persistent").canonicalWordIndex`, all 12. *Fails at C1: there is no save, and the anchor stays at 7.*
+    - **(c)** `(runtime as any).onPageTurned({ wordIndex: 12, cfi: "c12" })` records `persistence.updateDocProgress ["doc-1", 12, "c12"]`, `persistence.updateProgress ["doc-1", 12]` and `persistence.recordCfi ["c12"]`. `exportHandoff("persistent")` has `resumeAnchor` 12 and `explicitSelectionAnchor` null. *Fails at C1: `TypeError: runtime.onPageTurned is not a function`.*
+    - **(d) Deferred section crossing.** The contents doc's body is the raw `<p>Alpha beta gamma delta</p>` (no spans), and the range starts at offset 11 and ends at 22 of its text node. Click "Next page": no `updateDocProgress`. Then dispatch `new CustomEvent("load", { detail: { doc, index: 0 } })` on the `foliate-view` element. The real `onSectionLoad` stamps spans 0–3, and `updateDocProgress ["doc-1", 2, "cfi:0:gamma"]` follows. *Fails at C1: no call.*
+    - **(e) Swipe (ruling Q4).** With the stamped doc, dispatch on `view.renderer` a `relocate` with `detail { reason: "snap", range, index: 0, fraction: 0.5 }` (`page = 2`). `updateDocProgress ["doc-1", 12, "cfi:0:twelve"]` is recorded, and `isBrowsedAway` stays false. *Fails at C1: nothing listens to the renderer's relocate.*
+    - **(f) Section-crossing swipe.** Set the fake's `page = 0`. Dispatch a renderer `relocate` with `reason: "snap"` (the blank edge page): no save. Then dispatch a view-level `relocate` with the stamped range (the new section's `anchor` relocate): `updateDocProgress ["doc-1", 12, "cfi:0:twelve"]`. *Fails at C1: no call.*
+    - **(g)** After the click in (a), `runtime.getSnapshot().isBrowsedAway` is `false`, and no "Jump back" button is rendered. *Fails at C1: `true`, set by `markUserBrowsingAway` → `onUserBrowseAway`.*
+    - **(h) control** A view-level `relocate` dispatched directly (no turn in flight, as at book open) with the stamped range records no `updateDocProgress`. Passes at C1 and C2.
+    - **(i) control** A renderer `relocate` with `reason: "page"` (what a key turn's renderer event carries) and no turn in flight records no `updateDocProgress`, so a key turn is never saved twice by the swipe listener. Passes at C1 and C2.
+    - **(j) control** `runtime.hardSelect({ cfi: "c4", word: "w4", globalWordIndex: 4 })` records `updateDocProgress ["doc-1", 4, "c4"]`. Passes at C1 and C2.
+    - **(k) control** After `runtime.stop("teardown")`, `(runtime as any).onPageTurned?.({ wordIndex: 3, cfi: "c3" })` adds no effect. Passes at C1 and C2.
+    - **(l) control: the kept Jump back path still works (ruling Q2).** `runtime.onUserBrowseAway()` (the view's genuine browse-away hook) sets `isBrowsedAway` true, and the re-rendered view shows the "Jump back" button. Clicking it runs `runtime.jumpBack()`; `isBrowsedAway` is false and the button is gone. Passes at C1 and C2. *Not a chapter-list jump:* on `112ea45d` a chapter-list jump does not show Jump back in Page (Technical rulings, Q2 finding), so a chapter-jump control would fail at C1.
+  - **New `tests/updateDocProgressLastRead.test.js`** (Vitest, node environment), using the `Module._load` harness of `tests/documentsOpenSource.test.js:1-58`. It also returns fakes for `../sync-engine` (`getSyncStatus: () => ({ revision: 3 })`) and `../sync-queue` (`enqueue: vi.fn(async () => {})`), which the handler requires at call time (`main/ipc/documents.js:18-19`).
+    - **(m) Each mode's write stamps `lastReadAt` (ruling Q3).** Every mode's progress write is the same `update-doc-progress` IPC (`preload.js:52`) and `lastReadAt` exists only in main, so the per-mode check runs at the IPC boundary. Start with `{ id: "doc-1", lastReadAt: 5 }` and `vi.useFakeTimers({ now: 1_000 })`. Make three calls, each shaped like one mode's write, advancing fake time by 1000 ms before each:
+      - **Page** (the page-turn anchor commit, `page/helpers/usePersistentReadingAnchor.ts:100`): `("doc-1", 12, "epubcfi(/6/4!/4/2/1:0)")` → `lastReadAt === 2000`.
+      - **Focus** (the relocate save its runtime schedules, `ReaderContainer.tsx:324`): `("doc-1", 40, "epubcfi(/6/4!/4/8/1:0)")` → `3000`.
+      - **Flow** on a non-EPUB document (the non-Foliate save, `useProgressTracker.ts:213`): `("doc-1", 60)`, no cfi → `4000`.
+      - *Fails at C1: `lastReadAt` stays `5`.*
+    - **(n) control** The same three calls set `position` to 12, 40 and 60. `cfi` becomes the Focus value and is kept after the cfi-less Flow call (`documents.js:24`). `saveLibrary` is called three times. Passes at C1 and C2.
+- **Constants:** none. There is no new timer or tunable; the turn counter, the pending turn and the swipe-crossing flag are state.
+- **Branch:** `eb/page-position-save-1` from `refs/remotes/origin/main` after UX-POLISH-2 and LIBRARY-READ-ALLOW-1 merge, in worktree `C:\Projects\Blurby\.worktrees\page-position-save-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:**
+  - **C1:** the two test files only (gate: Done-when 1). Then build C1 and run Done-when 8(a).
+  - **C2:** the seven source and doc edits (gates: Done-when 2–9).
+  - Then merge to `main` with `--no-ff` on Blurby.Brain's go, and push (Rule 5b). Stage files by name; never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - At C1, any of (h), (i), (j), (k), (l) or (n) failing is a harness fault: fix the test, not the code. Any of (a)–(g) or (m) passing means the test cannot see the defect: fix the test.
+  - If (d) cannot run the real `onSectionLoad` under jsdom, report the exact error and stop for Blurby.Brain. Do not stub the wrap.
+  - If an existing test in Done-when 2 fails at C2, report it exactly and stop; do not weaken it.
+  - In Done-when 8(c) or (d), a probe `wordIndex` that differs from `position` is recorded with both values and the section index, and the run stops for Blurby.Brain (a rendered-versus-global index question, `foliateWordOffsets.ts:60-100`).
+  - If 8(a) shows the position changing on C1, stop (LL-151).
+  - **Line drift:** if a cited line differs after the prerequisites merge, proceed only when the content is identical; record the new number in the staging memo.
+  - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`. There is no data-format change; `lastReadAt` already exists in the schema (`main/migrations.js:197-205`).
+- **Lane ownership (parallel run):** surface A: the five `src/reader/modes/page/**` files named in Done-when 9, at the sites above only. Surface D: one line in `main/ipc/documents.js`. Also the two new tests and the BUG-197 line.
+  - **Forbidden:** every other file. That includes `src/reader/modes/page/helpers/persistentReadingAnchor.ts`, `src/reader/modes/{focus,flow,narrate}/**`, `src/reader/ports/**`, `src/hooks/**`, `preload.js`, `main/ipc/library.js`, every other line of `main/ipc/documents.js`, the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`), and every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** after UX-POLISH-2 (same `page/FoliateView.tsx`, different hunks) and after LIBRARY-READ-ALLOW-1 (Done-when 8 needs the sample readable). Independent of LARGE-FOLDER-SYNC-1, which forbids `main/ipc/**`, and of PACKAGING-FIX-1. Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–7 and 9.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Page-turn, swipe, anchor-agreement, Jump back and `lastReadAt` tests committed; 8 fail on today's code, 6 controls pass; C1 build control run | calculable | positive control | bounded | medium | 70m (two new test files, a fake foliate view and an `EventTarget` paginator with stamped and raw section docs, fourteen cases, one `--dir` build and launch) | — | — |
+| 2 | Key, button and swipe turns commit the first word of the page; browse-away mark removed; `lastReadAt` stamped; BUG-197 line | calculable | reader fix | bounded | medium | 40m (two small helpers, six view sites including the swipe listener, one runtime handler, one cause, one binding line, one main line, one doc line) | — | — |
+| 3 | Gates, suites, typecheck, build, CDP-driven live check with fast quit and relaunch; reviews; merged and pushed | calculable | merge and verify | mechanical | low | 60m (full `npm test` + typecheck + build + `--dir` build + three launches + probe reads + one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `112ea45d`. The run re-greps after UX-POLISH-2 and LIBRARY-READ-ALLOW-1 merge, and stops on any content drift.
+- **Standing rule 41 (LL-136):** the fence (Done-when 9) exempts the time log and staging memo.
+- **Standing rule 43 (LL-138):**
+  - (a)–(g) and (m) fail at C1 for named reasons.
+  - The controls (h)–(l) and (n) prove the change did not widen saving: no save on a passive relocate, none on a non-snap renderer relocate, and none after stop. The click path still saves, Jump back still works, and `position` and `cfi` writes are unchanged.
+  - Done-when 8(a) shows the defect on a C1 build before the fix is judged.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Each `git grep` gate was dry-run on `112ea45d`. The one "prints nothing" gate (Done-when 3) has 8 hits on the base. The presence gates (4–6, including the swipe gate) exit 1 there.
+- **Standing rule 45 (LL-141):** whether the saved word is the one the reader sees is perceptual, so 8(c) checks the probe's text against a screenshot, and the owner keeps a three-step batched-smoke checklist. Every probe returns `visibilityState`, and a hidden sample voids the step. Swipes have no live row (ruling Q4).
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite and the live check run in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** `npm run typecheck` and `npm run build` are in Done-when 7, next to `npm test`.
+- **LL-142:** the fix is judged by `library.json` on a launched production build, read against a probe of foliate's live layout that uses neither the item's text-offset path nor its unit tests. The deferred-save fallback is visible as a `page-turn-deferred` diagnostic.
+- **LL-152:** the live route is a production `--dir` build, not `npm run dev` (BUG-189). The C1 build serves as the like-for-like A/B.
+- **LL-156:** every out-of-scope line and waiver was re-read against this item's edit sites (the LL-156 check under Out of scope). QUIT-FLUSH-1's 9(f) is brought into scope as 8(d). Brain's chapter-jump control was checked against the base and does not hold there (Q2 finding).
+- **LL-157:** the quit path is not changed. 8(d) exercises the existing cancelled-quit flush with a position written about a second before Alt+F4.
+- **LL-158 and its QUIT-FLUSH-1 rider:** the live row was traced end to end through code this item does not change. A key or button press runs `turnPage`, then foliate `relocate`, then `onPageTurned`, then `update-doc-progress` (`main/ipc/documents.js:15-32`). Main arms the 500 ms `saveLibrary`, and the quit step drains it (`main.js:693`). On reopen, `initialCfi` reaches `view.init({ lastLocation })` (`FoliateView.tsx:737-738`), and `onSurfaceLoad` jumps to the saved word (`ModeRuntime.ts:500-504`). The trigger is shown to commit by (a) and (d), with an idle control (8(b)) and a defect control (8(a)). The fresh-profile book's readability is a named prerequisite (LIBRARY-READ-ALLOW-1).
+- **LL-159:** the save does not use the renderer's 2000 ms `pageSaveTimer` (`ReaderContainer.tsx:322-327`), a deferred writer the quit list cannot drain. It sends the IPC at turn time. Main's only deferred writer is the `saveLibrary` timer, which the quit step `["library", saveLibraryNow]` already flushes unconditionally. **Known limit (ruling Q4, out of scope):** the held cross-section save (`pendingTurnRef`, written only when that section's wrap finishes) is a renderer-side deferred writer that no quit step drains. A quit before the wrap finishes loses it.
+- **LL-073 (resume anchor persistent; passive page events are visual-only):** only a user page turn replaces the anchor: a key or button turn (the in-flight counter) or a swipe (foliate's `snap` reason). Book-open, resize, TOC and click-centring relocates stay passive.
+- **LL-108 (one mode-aware canonical anchor; 0 is valid):** the commit moves `currentWordIndex` and the canonical anchor, so progress, exit, backtrack and the next mode's start all read the same word. Test (b) pins that agreement. Every check uses `== null` or `typeof`, so word 0 saves.
+- **LL-083 (visual indicators via refs, not state):** no new React state. The highlight goes through the existing published highlight index, and the turn bookkeeping lives in refs.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 16 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 21 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 17 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 20 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 18 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 19 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 17 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 22 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 23 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 18 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 21 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 19 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 20 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes

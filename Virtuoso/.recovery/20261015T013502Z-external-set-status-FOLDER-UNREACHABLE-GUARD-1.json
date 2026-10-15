@@ -1,0 +1,34 @@
+{
+  "id": "20261015T013502Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-UNREACHABLE-GUARD-1",
+  "created": "2026-10-15T01:35:02Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 17
+    },
+    "expectedRevision": "b0426093ff28e3fc1e323d51dd441a6205fb218f1fff7386a1aa38595c27e133",
+    "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('sequence', 17)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+      "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('sequence', 17)]",
+      "actualRevision": "2026-10-15T01:36:04Z",
+      "recoveryId": "20261015T013502Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T01:36:10Z",
+  "outcome": "succeeded"
+}
