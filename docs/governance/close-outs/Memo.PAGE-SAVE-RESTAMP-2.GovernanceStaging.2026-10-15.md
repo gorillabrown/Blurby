@@ -200,3 +200,48 @@ Blurby.Brain's rulings: (1) re-time the driver so the link fires only after the 
 - **DW3–DW6:** the counts are unchanged (6; 5; 5/1/1; 3; 8; 1; 1; 2; 3), each exit 0.
 - `npm test` exits **0**: 2,382 passed, 1 skipped, 0 failed, in 170 files. `npm run typecheck` exits **0**. `npm run build` exits **0**.
 - Done-when 1 at C1 now counts 14 failing tests with WC4, which was shown against the base code separately (above).
+
+## Review fix round (Blurby.Roadmap's "Review fix round" block on main @ `689edd46`, Rule 11 tier 1)
+`git merge refs/remotes/origin/main` (`689edd46`, which includes the NARRATE-REBUILD-1 merge `f27c7def`) was clean. No file is shared with this item. The file list gains `src/test-harness/electron-api-stub.ts` (fr4).
+
+### Positive controls on the `c345c584` code (the tests added first, the source unchanged)
+`npx vitest run tests/readerModes/pagePositionSave.test.tsx` exits **1**: 4 failed, 32 passed (36). Each fails for its stated reason:
+- **(FR1)** `expected [ 1, 1, 1 ] to deeply equal [ 21, 21, 21 ]`. After the re-stamp saves 21, the handoff's `canonicalWordIndex`, `explicitSelectionAnchor` and `resumeAnchor` still hold the provisional 1.
+- **(WC1)**, whose new anchor check (fr1) runs after the re-stamp: `expected 1 to be 21`.
+- **(FR3)** `expected [ { …(2) } ] to deeply equal []`. A held save with no resolved click behind it saved `["doc-1", 21, "cfi:3:beta"]`.
+- **(FR4)** `expected [ -1, 'c13' ] to deeply equal [ 12, 'c13' ]`. The stub stored `-1`.
+- **(fr2), a test-only change.** `mount()` now wires `onWordClick: runtime.onWordClick` and `onHeldClickSave: runtime.onHeldClickSave`. (y)'s word-click row now expects the click's own save, `[["doc-1", 21, "cfi:3:beta"]]`, and no save of the held turn.
+  - It passes on `c345c584`, because the behaviour was already right; only the row was blind.
+  - **Mutation control instead.** I removed the click's hold (`pendingTurnRef.current = { doc, start, end, click: true }`) and the centring cancel (`:500`) in the working tree. The row then fails with `[["doc-1", 22, "cfi:3:gamma"]]`, the held turn saved over the click. WC1 and WC4 fail too.
+  - The file was restored with `git checkout HEAD -- src/reader/modes/page/FoliateView.tsx`.
+- **WC4's anchor check is unchanged** (still 1). With no re-stamp there is no corrected index; fr1 applies only when the save carries one.
+
+### The fixes
+- **(fr1)** `ModeRuntime.ts`: a private `heldClickAnchor` records the provisional anchor that `hardSelect` committed for a held click. `onHeldClickSave` saves as before. When the save has an index, and `explicitSelectionAnchor` still equals that provisional anchor, it re-commits the anchor with `commitShared(index, "hard-selection", cfi, false)` (no save) and notifies.
+- **(fr3)** In two places:
+  - `holdWordClick` takes the click's `exactIdx` and `wordOffsetInSection`, and holds only when `hardSelect` would resolve it: an exact index, or an offset of 0 or more.
+  - In the runtime, an unresolved click clears `heldClickAnchor`, and `onHeldClickSave` does nothing without one.
+  - In practice the view cannot produce an unresolved click: `resolveRenderedToken` returns null for an unparseable index before either handler runs. So (FR3) tests the runtime side.
+- **(fr4)** `electron-api-stub.ts` `updateDocProgress`: `hasPosition = Number.isFinite(position) && position >= 0`. The position, and the `furthestPosition` raise, happen only when it holds.
+- **Gate counts:** unchanged in `src/reader/modes/page` (6; 5; 5/1/1; 3; 8; 1; 1; 2) and `main/ipc/documents.js` (3). `git grep -c -F hasPosition -- src/test-harness/electron-api-stub.ts` is `:3`, exit 0.
+
+### Gates (the merged tree with `689edd46`, plus the fix round)
+- **DW2 + the stub's suites:** the 18 Done-when 2 files plus `tests/electronApiStubGoals.test.ts` and `tests/einkFoundation.test.ts`: 20 files, 225/225, exit 0.
+- `npm test` exits **0**: 2,409 passed, 1 skipped, 0 failed, in 174 files.
+- `npm run typecheck` exits **0**. `npm run build` exits **0**.
+- C2 was rebuilt: `npx electron-builder --win --x64 --dir --publish never` exit 0, moved to `scratchpad\psr2-app\c2fr`.
+
+### Live rows L4 and L10 on the rebuilt C2 (record `psr2-live-c2-1792081116701.json`, profile `blurby-psr2-…`)
+- **Deep:** 63171, equal to the probe. Pass.
+- **L4, reject + 1 turn:** pass.
+  - The turn ran at +319 ms, within 400.
+  - `__saves` holds exactly one entry, `{ position: -1, cfi: …/16,/384,/384 }`.
+  - `$d` is `{ 63171, …/16,/384,/384 }`: the position is kept, and the cfi is the probe's (page 3, "reprove"), which differs from `$before.cfi` (`…/10,/2,/2`).
+  - `__extracts` has 2 entries.
+- **L10, ok + 1 turn:** pass.
+  - The turn ran at +192 ms.
+  - One save: 63664, cfi `…/22,/238,/238`, equal to the probe's `wordIndex` (at least 63019) and cfi.
+  - `extractEpubWords(...).words[63664]` is `"Demostratus,"`, the probe's text.
+
+### Review notes moved to PAGE-SAVE-RESTAMP-3 (from the block)
+W2, W4, N2 and N4, as the block lists them.

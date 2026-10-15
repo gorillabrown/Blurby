@@ -12,6 +12,7 @@ import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { pageMode } from "../../src/reader/modes/page";
 import PageFoliateView from "../../src/reader/modes/page/FoliateView";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
+import { electronAPIStub, stubControl } from "../../src/test-harness/electron-api-stub";
 
 vi.mock("foliate-js/view.js", () => ({}));
 
@@ -84,11 +85,12 @@ const BOOK_VALUE = {
 };
 const EMPTY_VALUE = { ...BOOK_VALUE, sections: [] };
 /** Every way Page moves its view without a page turn (PAGE-SAVE-RESTAMP-2, D6). */
-const JUMPS: Array<{ name: string; jump: (m: { runtime: any; view: any; doc: Document }) => unknown }> = [
+const JUMPS: Array<{ name: string; jump: (m: { runtime: any; view: any; doc: Document }) => unknown; saved?: unknown[] }> = [
   { name: "TOC (go-to-href)", jump: ({ runtime }) => runtime.handleCommand({ kind: "go-to-href", href: "ch2.xhtml" }) },
   { name: "goToSection (jump back, restore)", jump: ({ runtime, view }) => { view.book.sections.push({ id: "s0" }); return runtime.viewApiRef.current.goToSection(0); } },
   { name: "highlight with motion (jump back, restore)", jump: ({ runtime }) => runtime.viewApiRef.current.highlightWordByIndex(1, undefined, { allowMotion: true, forceMotion: true }) },
-  { name: "word click", jump: ({ doc }) => (doc.querySelector('[data-word-index="1"]') as HTMLElement).click() },
+  // The click replaces the held turn and saves its own word once the numbers apply (review fr2).
+  { name: "word click", jump: ({ doc }) => (doc.querySelector('[data-word-index="1"]') as HTMLElement).click(), saved: [["doc-1", 21, "cfi:3:beta"]] },
   { name: "internal link", jump: ({ view }) => view.dispatchEvent(new CustomEvent("link", { detail: { href: "#fn-1" }, cancelable: true })) },
 ];
 /** From the start of span `from` to the end of span `to`, once the view has stamped the spans. */
@@ -135,7 +137,8 @@ async function mount(extra: Record<string, unknown> = {}) {
         recordDiagnostic: runtime.recordDiagnostic,
         onRelocate: runtime.onRelocate,
         onTocReady: () => {},
-        onWordClick: () => {},
+        onWordClick: runtime.onWordClick, // review fr2: the click path is wired, so (y)'s word-click row sees the click's save
+        onHeldClickSave: runtime.onHeldClickSave,
         onLoad: runtime.onSurfaceLoad,
         onWordsReextracted: runtime.onWordsReextracted,
         viewApiRef: runtime.viewApiRef,
@@ -466,7 +469,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
   });
 
-  it.each(JUMPS)("(y) a held turn is not saved over a jump: $name", async ({ jump }) => {
+  it.each(JUMPS)("(y) a held turn is not saved over a jump: $name", async ({ jump, saved = [] }) => {
     const { fake, runtime, view, renderer, render } = await mount();
     (renderer as any).scrollToAnchor = vi.fn(async () => {});
     const { doc } = rawDoc();
@@ -477,7 +480,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await act(async () => { await jump({ runtime, view, doc }); });
     await render(BOOK_WORDS);
     await settle();
-    expect(saves(fake)).toEqual([]);
+    expect(saves(fake).map((e) => e.args)).toEqual(saved);
   });
 
   it("(z) control: with the port wired, a normal re-stamp still saves the held turn", async () => {
@@ -533,6 +536,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await render({ ...wired, ...BOOK_WORDS });
     await settle();
     expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 21, "cfi:3:beta"]]);
+    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(21); // corrected with the save (review fr1)
   });
 
   it("(WC2) a word click then a turn, before the numbers apply, saves only the turn", async () => {
@@ -560,6 +564,29 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await settle();
     expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"]]);
     expect(fake.effects.filter((e) => e.method === "persistence.updateProgress")).toEqual([]);
-    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1); // the click's anchor is unchanged in memory
+    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1); // no re-stamp: the click's anchor is unchanged
+  });
+
+  it("(FR1) once a held click's save lands, the anchor a mode handoff starts from is the re-stamped index", async () => {
+    const { runtime, render, wired, doc } = await mountWiredClicks();
+    await clickWord(doc, 1);
+    await render({ ...wired, ...BOOK_WORDS });
+    await settle();
+    const handoff = runtime.exportHandoff("persistent");
+    expect([handoff.canonicalWordIndex, handoff.explicitSelectionAnchor, handoff.resumeAnchor]).toEqual([21, 21, 21]);
+  });
+
+  it("(FR3) a held save with no resolved click behind it saves nothing", async () => {
+    const { fake, runtime } = await mount();
+    runtime.onWordClick("cfi:3:beta", "beta", undefined, undefined, undefined, true); // no index: hardSelect resolves nothing
+    runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" });
+    expect(saves(fake)).toEqual([]);
+  });
+
+  it("(FR4) the browser harness stub keeps the stored position on a cfi-only save (-1)", async () => {
+    await electronAPIStub.updateDocProgress("sample-meditations", 12, "c12");
+    await electronAPIStub.updateDocProgress("sample-meditations", -1, "c13");
+    const doc = stubControl.getLibrary().find((d) => d.id === "sample-meditations")!;
+    expect([doc.position, doc.cfi]).toEqual([12, "c13"]);
   });
 });

@@ -622,9 +622,10 @@ export default function PageFoliateView({
           if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
         };
         // PAGE-SAVE-RESTAMP-2 (ruling): a word click on renderer-numbered spans holds its save like a turn, in the same slot
-        // (the latest held action wins; a jump cancels it). Returns true when the click's index is provisional.
-        const holdWordClick = (doc: Document, range: Range): boolean => {
-          if (!rendererNumberedDocsRef.current.has(doc)) return false;
+        // (the latest held action wins; a jump cancels it). Returns true when the click's index is provisional. Only a
+        // click hardSelect resolves is held (review fr3): an exact index, or a section offset of 0 or more.
+        const holdWordClick = (doc: Document, range: Range, exactIdx: number | null, wordOffsetInSection: number): boolean => {
+          if (!rendererNumberedDocsRef.current.has(doc) || !(exactIdx != null || wordOffsetInSection >= 0)) return false;
           const start = textOffsetBefore(doc.body, range.startContainer, range.startOffset);
           const end = textOffsetBefore(doc.body, range.endContainer, range.endOffset);
           if (bookWordsFailedRef.current) {
@@ -721,7 +722,7 @@ export default function PageFoliateView({
                 const wordOffsetInSection = exactIdx != null && sectionBase >= 0
                   ? exactIdx - sectionBase
                   : Math.max(0, resolvedToken.renderedWordIndex);
-                const holdSave = holdWordClick(doc, tokenRange ?? fallbackRange); // PAGE-SAVE-RESTAMP-2
+                const holdSave = holdWordClick(doc, tokenRange ?? fallbackRange, exactIdx, wordOffsetInSection); // PAGE-SAVE-RESTAMP-2
                 onWordClickRef.current?.(
                   cfi,
                   resolvedToken.canonicalWord,
@@ -772,7 +773,7 @@ export default function PageFoliateView({
                   ? exactIdx - sectionBase
                   : Math.max(0, resolvedToken.renderedWordIndex);
                 const canonicalWord = resolvedToken.canonicalWord || word;
-                const holdSave = holdWordClick(doc, tokenRange ?? range); // PAGE-SAVE-RESTAMP-2
+                const holdSave = holdWordClick(doc, tokenRange ?? range, exactIdx, wordOffsetInSection); // PAGE-SAVE-RESTAMP-2
                 onWordClickRef.current?.(
                   cfi,
                   canonicalWord,

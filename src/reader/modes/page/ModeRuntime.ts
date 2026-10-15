@@ -141,6 +141,8 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** Legacy useReader wpmRef: the latest value this runtime asked the shell to store. */
   private wpm: number;
   private engine: PageMode | null = null;
+  /** PAGE-SAVE-RESTAMP-2 (review fr1/fr3): the provisional anchor of the word click whose save the view holds. */
+  private heldClickAnchor: number | null = null;
   private readonly loadTimers = new Set<ReturnType<typeof setTimeout>>();
   private alive = true;
   private destroyed = false;
@@ -324,6 +326,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
       const anchored = holdSave
         ? this.commitShared(resolved, "hard-selection", input.cfi, false)
         : this.commitShared(resolved, "hard-selection", input.cfi);
+      this.heldClickAnchor = holdSave ? anchored : null; // review fr1/fr3: the provisional index the held save will correct
       // retargetActiveModeToWord: Page has no running engine to retarget.
       if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchored })) {
         this.surface.clearUserBrowsing();
@@ -332,6 +335,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
       s.notify();
       return;
     }
+    this.heldClickAnchor = null; // review fr3: an unresolved click holds nothing
     s.resumeAnchor = null; // TTS-7M: explicit selection with no index clears stale anchors
     this.ports.diagnostics.transition("resumeAnchor:consumed", () => ({
       resumeAnchor: null,
@@ -610,9 +614,18 @@ export class PageModeRuntime implements ReaderModeRuntime {
 
   /** PAGE-SAVE-RESTAMP-2 (ruling): a word click held on provisional numbering saves now; the click already set the anchor. */
   onHeldClickSave = (click: { readonly wordIndex: number | null; readonly cfi: string }): void => {
-    if (!this.alive) return;
+    const provisional = this.heldClickAnchor;
+    if (!this.alive || provisional == null) return; // review fr3: no resolved click is held
+    this.heldClickAnchor = null;
     this.ports.persistence.updateDocProgress(this.document.documentId, click.wordIndex ?? KEEP_STORED_POSITION, click.cfi);
-    if (click.wordIndex != null) this.ports.persistence.updateProgress(this.document.documentId, click.wordIndex);
+    if (click.wordIndex == null) return;
+    this.ports.persistence.updateProgress(this.document.documentId, click.wordIndex);
+    // Review fr1: move the click's anchor to the re-stamped index too, unless the reader has made a new selection since,
+    // so a Focus or Narrate handoff starts at that word and cannot save the provisional index over this save.
+    if (this.state.explicitSelectionAnchor === provisional) {
+      this.commitShared(click.wordIndex, "hard-selection", click.cfi, false);
+      this.state.notify();
+    }
   };
 
   /** Canonical extractor words for a section, when full-book words exist (SRL-067). */
