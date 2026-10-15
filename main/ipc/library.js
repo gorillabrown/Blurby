@@ -43,23 +43,26 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
-// The renderer may edit a document's fields, never where its file or cover is or how it is converted (filepath,
-// convertedEpubPath, ext, needsEpubConversion and coverPath are main's), and cannot add documents
-// (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
-function keepMainPaths(newDocs, library) {
-  const held = new Map((library || []).map((doc) => [doc.id, doc]));
-  return newDocs
-    .filter((doc) => doc && held.has(doc.id))
-    .map((doc) => {
-      const h = held.get(doc.id);
-      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion, coverPath: h.coverPath };
-    });
+// The only fields a renderer library save may set; every other field is main's (SAVE-LIBRARY-MERGE-1).
+const RENDERER_FIELDS = ["unread", "seenAt", "tags", "collection"];
+
+// A renderer save edits main's records in place. It never adds, removes, reorders or replaces one, so tombstones,
+// main-side adds and main's fields survive a stale copy (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1).
+function mergeRendererEdits(newDocs, library) {
+  const sent = new Map(newDocs.filter((doc) => doc && typeof doc === "object").map((doc) => [doc.id, doc]));
+  for (const held of library || []) {
+    const doc = sent.get(held.id);
+    if (!doc || held.deleted) continue;
+    for (const key of RENDERER_FIELDS) if (key in doc) held[key] = doc[key];
+    // Both are Date.now() on this machine, so the later open wins (PAGE-POSITION-SAVE-1 N5).
+    if (Number.isFinite(doc.lastReadAt) && doc.lastReadAt > (held.lastReadAt || 0)) held.lastReadAt = doc.lastReadAt;
+  }
 }
 
 function register(ctx) {
   ipcMain.handle("save-library", (_, newDocs) => {
     if (!Array.isArray(newDocs)) return;
-    ctx.setLibrary(keepMainPaths(newDocs, ctx.getLibrary()));
+    mergeRendererEdits(newDocs, ctx.getLibrary());
     ctx.saveLibrary();
   });
 

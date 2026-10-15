@@ -2,3 +2,4 @@
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-15T05:39:24Z"}
 {"event": "end", "row": 1, "evidence": "C1 control exit 1, 13 failed / 17 passed; the spec's 12 named failures plus merge (i)'s non-number half (deviation, recorded in the staging memo)", "result": "done", "at": "2026-10-15T05:44:21Z"}
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-15T05:44:21Z"}
+{"event": "end", "row": 2, "evidence": "C2: Done-when 2 exit 0 (7 files, 91 tests); typecheck exit 0; Done-when 3-10 gates pass on exact exit codes", "result": "done", "at": "2026-10-15T05:45:32Z"}

@@ -42,3 +42,24 @@ Worktree-resident run (`eb/save-library-merge-1`, `C:\Projects\Blurby\.worktrees
 - Passing at C1, as specified: merge (h), (j1)–(j5), (k); trust (a)–(h), (k), (l).
 - Test-file note: in (b) and (e), the leading assertions use `expect.soft`, so every half of each test runs and is
   recorded at C1 (the test still fails on any half).
+
+### Done-when 2 — after C2
+`npx vitest run tests/saveLibraryMerge.test.js tests/saveLibraryTrust.test.js tests/ipcPathTrust.test.js
+tests/readFileBufferLibrary.test.js tests/documentsOpenSource.test.js tests/sync-hardening.test.js tests/quitSequence.test.js`
+(pwsh): **exit 0**; `Test Files 7 passed (7)`, `Tests 91 passed (91)`.
+
+### Done-when 3–10 (pwsh, `git grep`, worktree root, on the C2 tree)
+- 3: exit 1, no output. 4: `main/ipc/library.js:2`, exit 0. 5: `:47`, exit 0. 6: `:65`, exit 0; `main/ipc/library.js:1`, exit 0.
+- 7: `main/ipc/library.js:1` and `main/ipc/library.js:1`, exit 0 each.
+- 8: exit 1 (no output); `tests/saveLibraryTrust.test.js:240`, exit 0; exit 1; exit 1.
+- 9: exit 1 (no output); `src/components/LibraryView.tsx:293`, exit 0.
+- 10: `docs/governance/BUG_REPORT.md:1`, exit 0. The Status line reads exactly the Done-when 10 text (the base line's
+  trailing "Lane: Library & Content." is not part of that text and went with the old line).
+
+### Done-when 11 (partial)
+`npm run typecheck` (pwsh): **exit 0**. The full `npm test` and `npm run build` are not run in wave A.
+
+### Remaining (wave B, on Blurby.Roadmap's go)
+- Done-when 11: full `npm test` on the owner's machine (standing rule 47) and `npm run build`.
+- Before merging: `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–11.
+- Done-when 13: the Stage 8 batched owner smoke (a) and (b).
