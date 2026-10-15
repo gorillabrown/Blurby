@@ -1,0 +1,35 @@
+{
+  "id": "20261015T152934Z-external-set-status-NARRATE-TRACE-LABELS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TRACE-LABELS-1",
+  "created": "2026-10-15T15:29:34Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Narrate harness hygiene: legacy trace labels and rate validation",
+      "description": "Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching."
+    },
+    "expectedRevision": "fd2bddc0b9259d08d904bbd7d0a876c66c978934e35543b2995813e94ff16abc",
+    "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('description', 'Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching.'), ('title', 'Narrate harness hygiene: legacy trace labels and rate validation')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TRACE-LABELS-1",
+      "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('description', 'Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching.'), ('title', 'Narrate harness hygiene: legacy trace labels and rate validation')]",
+      "actualRevision": "538d886c051dc6690c07d930d034a9aef1543c843adc5ad17ec7966af4d484a4",
+      "recoveryId": "20261015T152934Z-external-set-status-NARRATE-TRACE-LABELS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T15:30:05Z",
+  "outcome": "succeeded"
+}
