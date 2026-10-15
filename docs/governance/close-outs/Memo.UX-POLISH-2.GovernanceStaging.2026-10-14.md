@@ -42,3 +42,14 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 
 ### Wave C (after the NARRATE-REBUILD-1 completion merges)
 Full suite, typecheck and build (DW11), the `--dir` build, the merge-order step, the DW13 fence, then Brain's merge go. DW12 is deferred to the batched smoke (see above).
+
+### Wave C — merge-order step and heavy gates (under load, per Blurby Brain's ruling of 2026-10-14)
+- `git merge refs/remotes/origin/main` (`d9469a81`: governance and register commits; no edit-site overlap) → `bff2e60f`, tree `d30afb99adb2670987bcf10c7d9c30080152082b`.
+- DW2 on the merged tree: 21 files, 177 passed, **exit 0**.
+- **DW11:**
+  - `npm test`: 155 files, **2,099 passed / 1 skipped / 0 failed, exit 0**. The loaded run had no failing set, so no isolated re-runs were needed.
+  - `npm run typecheck`: **exit 0**.
+  - `npm run build`: **exit 0**.
+- Packaged build: `npx electron-builder --win --x64 --dir --publish never` **exit 0**.
+- **DW13** (three-dot, on `bff2e60f`): exactly the 11 edit sites (M), the 3 modified tests (M), `A tests/helpSurfaces.test.tsx`, and this memo. The time log is added in the merge commit set.
+- DW12: deferred to the batched owner smoke (above).
