@@ -37,7 +37,9 @@
       "main.js",
       "preload.js",
       "main/**/*",
-      "dist/**/*"
+      "dist/**/*",
+      "assets/icon.ico",
+      "assets/tray-icon.png"
     ],
     "asarUnpack": [
       "node_modules/onnxruntime-node/**",

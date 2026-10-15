@@ -1,7 +1,7 @@
 "use strict";
 // main/ipc/library.js — Library CRUD, file import, folder operations
 
-const { ipcMain, dialog } = require("electron");
+const { ipcMain, dialog, app } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
 
@@ -17,6 +17,22 @@ async function logToFile(message, errorLogPath) {
     const timestamp = new Date().toISOString();
     await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
   } catch { /* Intentional: error logging should never crash the app */ }
+}
+
+// The first-run sample stores the bundled file's absolute path (main.js), which goes stale when the repo or install moves.
+function bundledSamplePath() {
+  return app.isPackaged
+    ? path.join(process.resourcesPath, "resources", "sample-meditations.epub")
+    : path.join(__dirname, "..", "..", "resources", "sample-meditations.epub");
+}
+
+async function relinkSampleIfMissing(doc, dataPath) {
+  if (doc.source !== "sample" || !doc.filepath) return false;
+  if (await fsPromises.access(doc.filepath).then(() => true, () => false)) return false;
+  const target = path.join(dataPath, "sample-meditations.epub");
+  await fsPromises.copyFile(bundledSamplePath(), target);
+  doc.filepath = target;
+  return true;
 }
 
 function register(ctx) {
@@ -116,6 +132,8 @@ function register(ctx) {
   ipcMain.handle("load-doc-content", async (_, docId) => {
     const doc = ctx.getDocById(docId);
     if (!doc) return null;
+    try { if (await relinkSampleIfMissing(doc, ctx.getDataPath())) ctx.saveLibrary(); }
+    catch (err) { logToFile(`sample relink failed for "${doc.id}": ${err.message}`, ctx.getErrorLogPath()); }
 
     // If doc already has an EPUB path, use it
     if (doc.convertedEpubPath) {

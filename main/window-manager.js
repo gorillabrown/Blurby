@@ -3,6 +3,7 @@
 
 const { BrowserWindow, Tray, Menu, nativeTheme, session } = require("electron");
 const path = require("path");
+const fsPromises = require("fs/promises");
 const { MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, MAIN_WINDOW_MIN_WIDTH, MAIN_WINDOW_MIN_HEIGHT } = require("./constants");
 
 function getThemeColors(settings) {
@@ -178,9 +179,13 @@ function setupAutoUpdater(mainWindow) {
       }
     });
 
-    setTimeout(() => { try { autoUpdater.checkForUpdates(); } catch (err) {
-      console.log("Auto-update check failed:", err.message);
-    } }, 10000);
+    setTimeout(async () => {
+      // An unpacked (--dir) build ships no app-update.yml; checking without it rejects on every launch.
+      try { await fsPromises.access(path.join(process.resourcesPath, "app-update.yml")); } catch { return; }
+      try { await autoUpdater.checkForUpdates(); } catch (err) {
+        console.log("Auto-update check failed:", err.message);
+      }
+    }, 10000);
   } catch { /* Expected: electron-updater may not be available in dev */ }
 }
 
