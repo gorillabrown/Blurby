@@ -12,6 +12,7 @@
 let _cheerio, _admZip;
 function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
 function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
+const { createEntryReader } = require("./zip-read");
 
 /** Trailing punctuation regex — must match FoliatePageView.tsx line 72 exactly */
 const TRAILING_PUNCT_RE = /^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/;
@@ -173,12 +174,13 @@ async function extractWords(epubPath) {
   }
 
   const entries = zip.getEntries();
+  const readEntry = createEntryReader();
 
   // ── Find OPF path via container.xml ────────────────────────────────────
   const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
   let opfPath = "";
   if (containerEntry) {
-    const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+    const $ = cheerio.load(readEntry(containerEntry).toString("utf-8"), { xmlMode: true });
     opfPath = $("rootfile").attr("full-path") || "";
   }
 
@@ -192,7 +194,7 @@ async function extractWords(epubPath) {
   const spineIds = [];
   const manifestMap = new Map();
   const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
-  const $opf = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+  const $opf = cheerio.load(readEntry(opfEntry).toString("utf-8"), { xmlMode: true });
 
   $opf("manifest item").each((_, el) => {
     const id = $opf(el).attr("id");
@@ -225,7 +227,7 @@ async function extractWords(epubPath) {
     const entry = entries.find((e) => e.entryName === href);
     if (!entry) continue;
 
-    const $ = cheerio.load(entry.getData().toString("utf-8"));
+    const $ = cheerio.load(readEntry(entry).toString("utf-8"));
     $("script, style").remove();
 
     const startWordIdx = allWords.length;
