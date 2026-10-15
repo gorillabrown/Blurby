@@ -1,0 +1,34 @@
+{
+  "id": "20261015T161654Z-external-set-status-NARRATE-CPU-PROFILE-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-CPU-PROFILE-1",
+  "created": "2026-10-15T16:16:54Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued"
+    },
+    "expectedRevision": "8fc4c790931624e0d5f4fdd9b1c817ebf1a32799a2d977ed10e19c05ef2f07b6",
+    "idempotencyKey": "set-status:NARRATE-CPU-PROFILE-1:[('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-CPU-PROFILE-1",
+      "idempotencyKey": "set-status:NARRATE-CPU-PROFILE-1:[('status', 'queued')]",
+      "actualRevision": "bb635bcf97a5c65f8af1ef4bb95e950b25ac69acaf9344dc191d9de11f723da4",
+      "recoveryId": "20261015T161654Z-external-set-status-NARRATE-CPU-PROFILE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:40Z",
+  "outcome": "succeeded"
+}

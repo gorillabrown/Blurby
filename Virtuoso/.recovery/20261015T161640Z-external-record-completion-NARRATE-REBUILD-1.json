@@ -1,0 +1,37 @@
+{
+  "id": "20261015T161640Z-external-record-completion-NARRATE-REBUILD-1",
+  "operation": "external-record-completion",
+  "item_id": "NARRATE-REBUILD-1",
+  "created": "2026-10-15T16:16:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-15",
+      "evidence": "docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md",
+      "sequence": null
+    },
+    "expectedRevision": "3cc186c02d2fbcce15d1613edb0de467613555341841e20e4e7c80dfd61dfbd6",
+    "idempotencyKey": "record-completion:NARRATE-REBUILD-1:[('completed', '2026-10-15'), ('evidence', 'docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "NARRATE-REBUILD-1",
+      "idempotencyKey": "record-completion:NARRATE-REBUILD-1:[('completed', '2026-10-15'), ('evidence', 'docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "545240adb1446b6c926467521e42e94997d74f39fd87cdba2e673f45232366bf",
+      "recoveryId": "20261015T161640Z-external-record-completion-NARRATE-REBUILD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:38Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261015T161703Z-external-set-status-NARRATE-EXIT-CRASH-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-EXIT-CRASH-1",
+  "created": "2026-10-15T16:17:03Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued"
+    },
+    "expectedRevision": "8f2045671aeccb06152cea3114efcbee69f601403a06dedc7ced939d1d709840",
+    "idempotencyKey": "set-status:NARRATE-EXIT-CRASH-1:[('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-EXIT-CRASH-1",
+      "idempotencyKey": "set-status:NARRATE-EXIT-CRASH-1:[('status', 'queued')]",
+      "actualRevision": "773b0e96bbe31fe0b4f3c5dff17564ec33e4a1f4e38bb8b588a3f8182361f0dc",
+      "recoveryId": "20261015T161703Z-external-set-status-NARRATE-EXIT-CRASH-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:45Z",
+  "outcome": "succeeded"
+}
