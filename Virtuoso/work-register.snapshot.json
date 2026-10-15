@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T05:37:48Z",
+  "takenAt": "2026-10-15T06:00:17Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2308,8 +2308,8 @@
       "id": "SETTINGS-KEY-TRUST-1",
       "title": "The renderer and cloud sync can only set real user settings",
       "sequence": 21,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2318,12 +2318,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#settings-key-trust-1",
       "branch": "eb/settings-key-trust-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "save-settings copies only whitelisted keys derived from main's settings defaults (no sourceFolder, recentFolders, schemaVersion, underscore keys or prototype keys); cloud apply and upload use the same filter minus device-local keys and the upload replaces the cloud copy; typeof guard on held coverPath.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate. After SAVE-LIBRARY-MERGE-1. Full Spec on eb/ipc-path-trust-1. U9/U10 pass.",
-      "revision": "c04f985728d6377135a90818634105755952bd2c3e44d33bdee58a738627a36e",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate. After SAVE-LIBRARY-MERGE-1. Full Spec on eb/ipc-path-trust-1. U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/settings-key-trust-1 from main 682676b1).",
+      "revision": "3d6c64fd3d70bb5ec7c69891bd5b43410ab55ced49ed321ff559587bd9be96db",
       "extra": {}
     },
     {
