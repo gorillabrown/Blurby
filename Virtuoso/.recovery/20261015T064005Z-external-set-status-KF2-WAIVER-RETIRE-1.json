@@ -1,0 +1,34 @@
+{
+  "id": "20261015T064005Z-external-set-status-KF2-WAIVER-RETIRE-1",
+  "operation": "external-set-status",
+  "item_id": "KF2-WAIVER-RETIRE-1",
+  "created": "2026-10-15T06:40:05Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 26
+    },
+    "expectedRevision": "689ce0d82de5a3fe2fb4d3f1d6df242ee1a22b0c9b8145959ca00295eb952d14",
+    "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('sequence', 26)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "KF2-WAIVER-RETIRE-1",
+      "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('sequence', 26)]",
+      "actualRevision": "77fed2113038042d14d1b35f0bf94fd98e3a7d1509ac2418eb06ee6c81e2873f",
+      "recoveryId": "20261015T064005Z-external-set-status-KF2-WAIVER-RETIRE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T06:41:45Z",
+  "outcome": "succeeded"
+}

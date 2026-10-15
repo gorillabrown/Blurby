@@ -1,0 +1,34 @@
+{
+  "id": "20261015T064003Z-external-set-status-PAGE-POSITION-SAVE-2",
+  "operation": "external-set-status",
+  "item_id": "PAGE-POSITION-SAVE-2",
+  "created": "2026-10-15T06:40:03Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 25
+    },
+    "expectedRevision": "878bbe975abde77e64c7ce0cf6bc731d5ca1b62fcd6b7f9044daf89a1254122c",
+    "idempotencyKey": "set-status:PAGE-POSITION-SAVE-2:[('sequence', 25)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-POSITION-SAVE-2",
+      "idempotencyKey": "set-status:PAGE-POSITION-SAVE-2:[('sequence', 25)]",
+      "actualRevision": "24ecda7d2a666d0e72267dfe2cce4ad3e2a70c31501ed9672423c0ea692c6d9b",
+      "recoveryId": "20261015T064003Z-external-set-status-PAGE-POSITION-SAVE-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T06:41:44Z",
+  "outcome": "succeeded"
+}
