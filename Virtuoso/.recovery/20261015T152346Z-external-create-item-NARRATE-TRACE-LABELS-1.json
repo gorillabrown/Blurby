@@ -1,0 +1,52 @@
+{
+  "id": "20261015T152346Z-external-create-item-NARRATE-TRACE-LABELS-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-TRACE-LABELS-1",
+  "created": "2026-10-15T15:23:46Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Rename the legacy MOSS-Nano labels in Narrate traces",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "XS",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-trace-labels-1",
+      "branch": "eb/narrate-trace-labels-1",
+      "description": "p5-latency-e2e traces still say moss-nano and real-app-selected-nano from before NARRATE-REMOVE-1; rename them so no reader thinks MOSS-Nano ran.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate.",
+      "sequence": 56,
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "id": "NARRATE-TRACE-LABELS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T15:14:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-TRACE-LABELS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-TRACE-LABELS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-TRACE-LABELS-1",
+      "actualRevision": "fd2bddc0b9259d08d904bbd7d0a876c66c978934e35543b2995813e94ff16abc",
+      "recoveryId": "20261015T152346Z-external-create-item-NARRATE-TRACE-LABELS-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81fb-b4c1-dfcc782dc4fc",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T15:24:22Z",
+  "outcome": "succeeded"
+}
