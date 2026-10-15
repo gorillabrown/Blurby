@@ -35,6 +35,14 @@ async function relinkSampleIfMissing(doc, dataPath) {
   return true;
 }
 
+// A document already in the library may be read from its own file, wherever it lives (BUG-196).
+function isLibraryDocPath(resolved, library) {
+  const norm = (p) => (process.platform === "win32" ? p.toLowerCase() : p);
+  const target = norm(resolved);
+  return (library || []).some((doc) => [doc.filepath, doc.convertedEpubPath]
+    .some((p) => p && norm(path.resolve(p)) === target));
+}
+
 function register(ctx) {
   ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
 
@@ -184,7 +192,7 @@ function register(ctx) {
         settings.sourceFolder,
       ].filter(Boolean).map(r => path.resolve(r));
       const allowed = allowedRoots.some(root => resolved.startsWith(root + path.sep) || resolved === root);
-      if (!allowed) {
+      if (!allowed && !isLibraryDocPath(resolved, ctx.getLibrary())) {
         console.error("read-file-buffer blocked — path outside allowed directories:", resolved);
         logToFile(`read-file-buffer BLOCKED: "${resolved}" not within allowed roots`, ctx.getErrorLogPath());
         return null;
