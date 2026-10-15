@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(virtuoso)",
+      "Skill(virtuoso:*)",
+      "Bash(npm run *)",
+      "Bash(npx vitest *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "PowerShell(Get-Process -Name \"electron\" -ErrorAction SilentlyContinue)",
+      "PowerShell($env:ELECTRON_ENABLE_LOGGING = \"1\"; Start-Process -FilePath \"npm\" -ArgumentList \"run\",\"dev\" -WorkingDirectory \"C:\\\\Users\\\\estra\\\\Projects\\\\Blurby\" -PassThru | Select-Object Id)"
+    ]
+  }
+}

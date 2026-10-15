@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4.2026">
+    <list default="true" id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="4.4">
       <changelist_data name="Evan Brown" email="estrattbrown@gmail.com" automatic="false" />
-      <change afterPath="$PROJECT_DIR$/docs/governance/sprint-queue.xlsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.claude/skills/virtuoso/SKILL.md" beforeDir="false" afterPath="$PROJECT_DIR$/.claude/skills/virtuoso/SKILL.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/tests/perf-baseline-results.json" beforeDir="false" afterPath="$PROJECT_DIR$/tests/perf-baseline-results.json" afterDir="false" />
     </list>
@@ -28,14 +26,13 @@
     &quot;assignee&quot;: &quot;gorillabrown&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/gorillabrown/Blurby.git&quot;,
-    &quot;accountId&quot;: &quot;16b8c511-9493-44da-87b7-fc616c175f96&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/gorillabrown/Blurby.git",
+    "accountId": "080883d6-c90b-4b33-a0e1-6f68f1ab9649"
   }
-}</component>
+}]]></component>
   <component name="PackageJsonUpdateNotifier">
-    <dismissed value="$PROJECT_DIR$/.claude/worktrees/musing-meninsky-b32220/package.json" />
     <dismissed value="$PROJECT_DIR$/package.json" />
   </component>
   <component name="ProjectColorInfo">{
@@ -47,22 +44,22 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "main",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/estra/Projects/Blurby",
-    "nodejs_package_manager_path": "npm",
-    "ts.external.directory.path": "C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/estra/Projects/Blurby&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;C:\\Users\\estra\\Projects\\Blurby\\node_modules\\typescript\\lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="4482a42e-71ee-4059-85d4-d4c6c606b393" name="Changes" comment="" />
