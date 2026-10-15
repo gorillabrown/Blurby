@@ -1,0 +1,50 @@
+{
+  "id": "20261015T071208Z-external-create-item-WS-TOKEN-REGEN-1",
+  "operation": "external-create-item",
+  "item_id": "WS-TOKEN-REGEN-1",
+  "created": "2026-10-15T07:12:08Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Regenerating the pairing code stores one encrypted token",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#ws-token-regen-1",
+      "branch": "eb/ws-token-regen-1",
+      "description": "regenerate-ws-pairing-token stores the new token through startServer's encrypt path, so one token exists and plaintext never reaches settings.json when safeStorage is available; schemaVersion optional in BlurbySettings; every BlurbySettings key in SETTINGS_DEFAULTS.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate.",
+      "sequence": 40,
+      "prerequisites": [],
+      "id": "WS-TOKEN-REGEN-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T07:04:43Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WS-TOKEN-REGEN-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "WS-TOKEN-REGEN-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WS-TOKEN-REGEN-1",
+      "actualRevision": "3b07e2195fdf373201a76dc1b8d2c0e3bbfcf36a5cbb90ba7fd2b0dbe8f867ec",
+      "recoveryId": "20261015T071208Z-external-create-item-WS-TOKEN-REGEN-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8136-9c13-c312db80896f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T07:12:51Z",
+  "outcome": "succeeded"
+}
