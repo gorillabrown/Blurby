@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T04:26:44Z",
+  "takenAt": "2026-10-15T05:22:34Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1791,7 +1791,7 @@
     {
       "id": "PDF-IMPORT-DIAG-1",
       "title": "Reproduce the PDF that cannot be converted",
-      "sequence": 26,
+      "sequence": 27,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1807,7 +1807,7 @@
       "evidence": "",
       "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
       "notes": "Created by roadmap review 2026-10-14. BUG-190.",
-      "revision": "dea9951219eb04d6bc26f06aec89201bf49c844f32794e4ba9f91ea1e970a018",
+      "revision": "1e449659fa3394114b63cc5da8b877d438e50bc0534dd9be453ce45df29ae7eb",
       "extra": {}
     },
     {
@@ -1828,14 +1828,14 @@
       "completed": "",
       "evidence": "",
       "description": "An unreachable source folder makes the scan return nothing and both sync paths prune every folder book. Report unreachable distinctly and skip the prune. Fixes BUG-195.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass.",
-      "revision": "268009120d08f74ca0c2764b57efb173e3077af0fd4b6003ee774894f3bc0eff",
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode.",
+      "revision": "a74851880a20f437f0b4aee7532dad3d0c3fa2c22e1c836b226014e100c10261",
       "extra": {}
     },
     {
       "id": "EINK-CONTROLS-1",
       "title": "One E-ink control, not two",
-      "sequence": 28,
+      "sequence": 29,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1851,13 +1851,13 @@
       "evidence": "",
       "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
       "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
-      "revision": "c70428d3235d963c876c5e1d2a54ff4fbdfa3e41590532b7da40328d11df857b",
+      "revision": "4d15af8d979e572b0fcf28f8645fb0c03b663803174fc16a6791cae847f0dc5a",
       "extra": {}
     },
     {
       "id": "NARRATE-YEARS-1",
       "title": "Read four-digit years as years in Narrate",
-      "sequence": 35,
+      "sequence": 36,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -1875,7 +1875,7 @@
       "evidence": "",
       "description": "BUG-191: years such as 1974 are spoken as cardinal numbers. Fix in the rebuilt Narrate's text normalization with a regression fixture.",
       "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "a14fb35bccf40e05aae5facfae9f07ca4ab6bae43007ac14e01b114121327c7f",
+      "revision": "24a37675c97cd4e3c1de4fdec4848ddee39da823f72832bbb15366dc8e3cf49a",
       "extra": {}
     },
     {
@@ -1925,7 +1925,7 @@
     {
       "id": "OVERLAY-THEME-SWEEP-1",
       "title": "Other overlays: Escape and undefined theme tokens",
-      "sequence": 27,
+      "sequence": 28,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1941,7 +1941,7 @@
       "evidence": "",
       "description": "Two overlays likely share the Escape-leaves-reader defect and five panels read an undefined background token. Verify live, then specify on UX-POLISH-2's pattern.",
       "notes": "Created by roadmap review 2026-10-14. Found while specifying UX-POLISH-2; after UX-POLISH-2.",
-      "revision": "4595b35a741f03919a3d3a5fc15238518f258411c5c8dd652a7714100655b26b",
+      "revision": "ba50d3fcffa5b9be80d0e7d65af1fcf563be045a63878826bf10d71e2570964c",
       "extra": {}
     },
     {
@@ -2037,7 +2037,7 @@
     {
       "id": "NARRATE-SENTENCE-RESUME-1",
       "title": "Narrate restarts at the beginning of the current sentence",
-      "sequence": 36,
+      "sequence": 37,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2055,7 +2055,7 @@
       "evidence": "",
       "description": "When Narrate starts from a position that is not a sentence start (resume, reopen, after a page turn), playback, cursor and saved position rewind to the first word of that sentence. Owner decision 2026-10-14.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "e6eb8edc45575746f3bae13ee7125a1c9f8315de1b4a824f8a3bc26d807f6e05",
+      "revision": "19ac2153bac6d6e3f8b32bc53063ba4879e1526d95788c590bd090289472092b",
       "extra": {}
     },
     {
@@ -2076,8 +2076,8 @@
       "completed": "",
       "evidence": "",
       "description": "Cancel then re-sync, per-file saves during a full sync, path normalization, refresh cost, watcher-before-sync on switch, a user-visible scan-failure signal, and a duplicate-filepath test.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice is the owner decision pending. U9/U10 pass.",
-      "revision": "35e51cd30579625513459ec49cce6693d90496859c00c5f0eb24a42a158c40ee",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass.",
+      "revision": "f4fbf765f51d2e81f6b8729771ebcbc74180806ddb8f7413e2632a0d3a17ce21",
       "extra": {}
     },
     {
@@ -2193,7 +2193,7 @@
     {
       "id": "LIBRARY-WRITE-RACE-1",
       "title": "Library writers that mutate a document across an await",
-      "sequence": 32,
+      "sequence": 33,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2209,13 +2209,13 @@
       "evidence": "",
       "description": "Remaining main-side writers in the save-race class, orphaned converted files, payload id dedupe and malformed-element tests.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1.",
-      "revision": "dbde014f18b3cc3f22cfc4693642866dbda63c01254106279dfecedeb2e02792",
+      "revision": "4eb4fb9d19c363ec8a86129309443eb9452d1421863a6da2472d1be83b4c846f",
       "extra": {}
     },
     {
       "id": "ZIP-READ-FOLLOWUPS-1",
       "title": "Follow-ups from DEPS-AUDIT-1's capped zip reader",
-      "sequence": 31,
+      "sequence": 32,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2231,13 +2231,13 @@
       "evidence": "",
       "description": "Import file-size check, a lying STORED-header test, and a parser-level operation-cap test.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews.",
-      "revision": "4f7d2779bafec0f908996db65c9bfb9e78a011c4235d485bd581bccc41b77336",
+      "revision": "15f7226be748f86e9ba011ebb834cee49bf7a9b0dcbf5b50986089b7ac59e2f8",
       "extra": {}
     },
     {
       "id": "RENAME-RETRY-1",
       "title": "Every JSON rename retries a transient Windows lock",
-      "sequence": 29,
+      "sequence": 30,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2253,13 +2253,13 @@
       "evidence": "",
       "description": "Reuse json-store's retry helper for six raw renames outside json-store, sync-engine sync state first.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace.",
-      "revision": "1272e512691e4ce9882c9a621fa99cc1ad60560b87e45918a71c4b3c7917045d",
+      "revision": "3c62bb1803b0159b019eb67afb8948fac675587e5ee1d91670dd29c0f14fc459",
       "extra": {}
     },
     {
       "id": "NARRATE-HARNESS-COLDCLICK-1",
       "title": "Measure cold click on mainstream hardware",
-      "sequence": 33,
+      "sequence": 34,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2277,13 +2277,13 @@
       "evidence": "",
       "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate.",
-      "revision": "12660e194f9287f077f15f5fcb99112b40131bb707f1a5cddd38221aa0613257",
+      "revision": "460bbdb2495bcad6115623603facf80b53e7a27ab34fb47cab582120396ce6e0",
       "extra": {}
     },
     {
       "id": "NARRATE-CPU-PROFILE-1",
       "title": "Narrate saturates a 4-core CPU during warm requests",
-      "sequence": 34,
+      "sequence": 35,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2301,7 +2301,7 @@
       "evidence": "",
       "description": "A profile pass on producer and worker time, and whether chunk ramp or worker count should adapt to core count.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the quiet-machine run. Not a release gate.",
-      "revision": "98989e73dc077f137802c25ba0bce3dc0cec2c1e66479a3a4b999d1000c39cb5",
+      "revision": "737d18f70a085fc386123f6de1d34aa3793a7edc3606e0f512fb6123c6a0b34c",
       "extra": {}
     },
     {
@@ -2329,7 +2329,7 @@
     {
       "id": "JSONSTORE-TIMEOUT-1",
       "title": "Give the jsonStore concurrency test real headroom",
-      "sequence": 30,
+      "sequence": 31,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2345,7 +2345,32 @@
       "evidence": "",
       "description": "A 30 s timeout for jsonStore test (a) and isolation of (d)/(e); then jsonStore leaves the closed list.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only.",
-      "revision": "3e1489d13dfa0428a195b222a8011cb9d6d7a8fc4518206931ac71e9568f2884",
+      "revision": "56db9c9b50bfae16dda5e1f8ad35cfac44164ae7d38e715ed7899ad6f8808333",
+      "extra": {}
+    },
+    {
+      "id": "FOLDER-NOTICE-1",
+      "title": "Show when the source folder cannot be reached, with a one-press Retry",
+      "sequence": 26,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "FOLDER-UNREACHABLE-GUARD-1",
+        "LARGE-FOLDER-SYNC-2"
+      ],
+      "effort": "M",
+      "lane": "UX polish",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#folder-notice-1",
+      "branch": "eb/folder-notice-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.",
+      "revision": "b91ce7d7701f5a7bdbc306022d25af4f1874bbb3b5a8bc4f29c91783a0f46585",
       "extra": {}
     }
   ],

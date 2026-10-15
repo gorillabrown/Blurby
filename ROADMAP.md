@@ -532,7 +532,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 **Session routing (owner, 2026-10-14; corrected the same day by the owner to Blurby.Roadmap: "you coordinate all work but brain will stay coordinating the other machine").** Blurby.Roadmap coordinates all work: it dispatches, sequences and gives the merge go for items built on this machine (the implementation session blurby-05), and runs governance (ROADMAP.md, specifications, BUG_REPORT.md, LESSONS_LEARNED.md, the Notion register, `/pointer-closeout`). Blurby.Brain coordinates the second machine ("Quiet blurby test machine") and its run queue, and stays the channel for technical rulings (Rule 11) and for design and functionality questions to the owner.
 
-**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
+**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
 
 **Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1) → DEPS-AUDIT-1 (17, release gate; moves Electron to 41.10.7) → SAVE-LIBRARY-TRUST-1 (18, release gate; BUG-198) → IPC-PATH-TRUST-1 (19, release gate; after SAVE-LIBRARY-TRUST-1, same `keepMainPaths` line). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
@@ -3629,7 +3629,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 
 <a id="folder-unreachable-guard-1"></a>
 
-#### FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached *(position 22 — Full Spec; authored 2026-10-14 on main @ `0f285836`; fixes BUG-195 and the per-file remove's read-error exposure new since LARGE-FOLDER-SYNC-1)*
+#### FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached *(position 22 — Full Spec; authored 2026-10-14 on main @ `0f285836`; fixes BUG-195 and the per-file remove's read-error exposure new since LARGE-FOLDER-SYNC-1; amended 2026-10-15 with the owner's notice decision: the toast's text)*
 
 - **What:** A folder sync, a rescan and a per-file remove stop treating "I could not see the folder" or "I could not read a file" as "the books are gone":
   - The folder scan (`scanFolderAsync`) returns `null` when the source folder itself cannot be listed. That covers a missing path (Drive not mounted, USB removed, share offline), permission denied, and any failed listing. Today it returns `[]` in each case. The scan also reports every subfolder or file below the root that it could not read.
@@ -3637,7 +3637,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - `rescan-folder` keeps every book in two cases, and says why in its return value: the folder cannot be listed, or it is readable but lists no book while folder books are held under it. A rescan that finds some files and misses others removes the missing ones, as today. Books under unreadable paths are kept.
   - The per-file remove (watcher unlink) removes a book only when its file is really gone (ENOENT), and only while the root still lists a subfolder or a supported file. EIO, EACCES, EPERM and every other read error keep the book. This closes BUG-195's per-file form, and also the exposure that LARGE-FOLDER-SYNC-1 added: its per-file remove (`main/folder-sync.js:66`, `:160`) deletes a book on any read error.
   - Switching to a readable folder still prunes the previous folder's books, by design.
-  - **Nothing user-visible changes.** The existing toast text and the renderer are untouched. A marked hook records a reason code for each case (`root-unlistable`, `root-empty-suspect`, `partial-read`). The code rides on the existing `watcher-error` payload, and the rescan returns it, so the owner's notice decision (with LARGE-FOLDER-SYNC-2's scan-failure signal) has something to attach to.
+  - **One user-visible change: the toast's text** (owner decision 2026-10-14, relayed by Blurby.Brain). The watcher error's toast reads "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." in place of "Folder watching encountered an error — try re-selecting the folder.", whose advice (pick another folder) prunes the books. It shows at most once per failure episode. The renderer is untouched. A marked hook records a reason code for each case (`root-unlistable`, `root-empty-suspect`, `partial-read`). The code rides on the existing `watcher-error` payload, and the rescan returns it, so FOLDER-NOTICE-1's library banner with Retry (the owner's option C, together with LARGE-FOLDER-SYNC-2's scan-failure signal) has something to attach to.
   - **Release gate.** Added to the Stage 8 release gate by Blurby.Brain (2026-10-14); Blurby.Roadmap gives it a condition number when it folds in. A shipped build reaches every user with a source folder. On such a build, an unmounted drive at launch empties the library of its folder books and their reading positions, and the per-file remove deletes a book on any read error.
 - **Why:** every path that can prune folder-sourced documents, traced on `main` @ `0f285836` (fetched 2026-10-14):
   - **The scan** (`main/folder-watcher.js:26-75`):
@@ -3670,9 +3670,10 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     - it removes documents only through tombstone garbage collection (`gcTombstones` `:228-243`, applied at `:838`) and the cloud-wins first-sync replace (`:1070`);
     - so an unreachable root cannot trigger a cloud prune.
     - **Indirect exposure:** `applyCloudSettings` (`:393`) does `Object.assign(settings, data)` with the cloud's settings, including another device's `sourceFolder`. This item covers the unreachable case, and SETTINGS-KEY-TRUST-1 covers a cloud-set `sourceFolder` or `recentFolders` (technical ruling Q4).
-  - **What a user sees today:** when the root is missing at startup, `fs.watch` throws, and the watcher's `onError` (`main.js:354-368`) sends `watcher-error` (`:365`). `LibraryContainer.tsx:145-147` shows `data.message` as a 7 s toast: "Folder watching encountered an error — try re-selecting the folder." Re-selecting a *different* folder prunes the old folder's books by design. That wording is the owner's decision with the notice (ruling Q1).
+  - **What a user sees today:** when the root is missing at startup, `fs.watch` throws, and the watcher's `onError` (`main.js:354-368`) sends `watcher-error` (`:365`). `LibraryContainer.tsx:145-147` shows `data.message` as a 7 s toast: "Folder watching encountered an error — try re-selecting the folder." Re-selecting a *different* folder prunes the old folder's books by design. This item replaces that wording (ruling Q1, amended).
 - **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1):**
-  - **Q1:** no user-visible change in this item. The owner is deciding the notice, together with LARGE-FOLDER-SYNC-2's scan-failure signal. This item leaves a clearly marked hook: a reason code on the existing `watcher-error` channel, with the codes `root-unlistable`, `root-empty-suspect` and `partial-read`. The existing toast text and the renderer are unchanged.
+  - **Q1 (amended 2026-10-15 on the owner's notice decision):** the one user-visible change is the toast's text, sent at most once per failure episode. The owner chose option (C): the toast on the first failure, plus a persistent library banner with a one-press Retry. The banner is FOLDER-NOTICE-1 (after this item and LARGE-FOLDER-SYNC-2; not a release gate), so this release gate is not held by renderer work. The corrected text ships here because the old advice causes data loss. This item leaves a clearly marked hook: a reason code on the existing `watcher-error` channel, with the codes `root-unlistable`, `root-empty-suspect` and `partial-read`. The renderer is unchanged.
+  - **Once per episode (Blurby.Brain, 2026-10-15):** `main.js` holds `let folderToastShown = false;`. The watcher's `onError` logs as today, then returns before the send when the flag is set, and sets it before sending. `startWatcherFn` clears it when `startWatcher` returns a watcher, so the next failure after a working watcher (a folder switch, or FOLDER-NOTICE-1's successful Retry) toasts again. A relaunch is a new episode. The permission message ("Can't watch this folder — check permissions.") keeps its text and follows the same rule.
   - **Q2:** an explicit rescan is (a), with one exception.
     - A rescan of a readable folder that finds **zero** books while folder books exist under that root keeps every book, and reports the empty result in its return value. Google Drive for desktop can list a mounted folder as empty while it starts.
     - Partial removals (some files gone, others found) proceed as today.
@@ -3723,9 +3724,9 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - **The guard changes nothing on the keep path:** no `setLibrary`, no save, no broadcast.
   - **Rejected: a mass-deletion threshold** (for example "skip the prune if it removes more than half the folder books"). It needs a tunable, it blocks a legitimate bulk delete, and it still loses books below the threshold. The readability rules above cover the failure modes that were traced.
   - **Known limit, accepted:** if a skipped file has a same-stem sibling in another format (`book.epub` unreadable, `book.pdf` listed), the scan's format dedupe (`:62-72`) lists the sibling. The library can then hold both until the file reads again. Today that book is replaced, and its position is lost.
-  - **No change to `select-folder`, `switch-folder`, `preload.js`, the renderer, `src/types.ts`, `main/sync-engine.js`, or the toast text.** The rescan's extra `empty` and `reason` fields are plain JS. The renderer ignores the result, and `src/types.ts:323` (shared core) is not edited.
+  - **No change to `select-folder`, `switch-folder`, `preload.js`, the renderer, `src/types.ts` or `main/sync-engine.js`.** The rescan's extra `empty` and `reason` fields are plain JS. The renderer ignores the result, and `src/types.ts:323` (shared core) is not edited.
 - **Out of scope:**
-  - Any user-visible notice, and the toast's "try re-selecting the folder" wording. The owner is deciding them together with LARGE-FOLDER-SYNC-2's scan-failure signal (ruling Q1); this item only leaves the hook.
+  - The library banner with Retry: FOLDER-NOTICE-1 (ruling Q1, amended). This item ships only the toast's text and its once-per-episode rule, and leaves the hook.
   - A timeout on a hung listing (no prune happens; the full-sync slot stays held). That is LARGE-FOLDER-SYNC-2's area.
   - `rescan-folder` running beside `syncAll` (LARGE-FOLDER-SYNC-1's note, `ROADMAP.md:920`). It is unchanged; LL-156 restates it here.
   - A cloud-set `sourceFolder` or `recentFolders`: SETTINGS-KEY-TRUST-1 (ruling Q4).
@@ -3768,11 +3769,15 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         - `git grep -n -F 'new Map(docs.map((d) => [d.filepath, d]))' -- main/ipc/library.js` prints nothing (exit 1). Dry-run: exit 0, `main/ipc/library.js:345:      const existing = new Map(docs.map((d) => [d.filepath, d]));`.
         - `git grep -n -E '(function pathKey|const pathKey =)' -- main main.js` prints exactly one line, in `main/folder-sync.js`, and exits 0. Dry-run: exit 1, no output.
         - `git grep -c -F 'pathKey' -- main/folder-sync.js main/ipc/library.js` prints exactly `main/folder-sync.js:4` and `main/ipc/library.js:7`, and exits 0. In `main/folder-sync.js`: the definition, `underAny`, the skipped keys and the export. In `main/ipc/library.js`: the require, `root`, the `underRoot` line, the skipped keys, the map, the lookup and the keep chain. No comment uses the name. Dry-run: exit 1, no output.
+    11b. **The toast (owner decision, ruling Q1 amended):**
+        - `git grep -n -F 'Folder watching encountered an error — try re-selecting the folder.' -- main.js` prints nothing (exit 1). Dry-run: exit 0, `main.js:362:`.
+        - `git grep -c -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js` prints `main.js:1` and exits 0. Dry-run: exit 1, no output.
+        - `git grep -c -F 'folderToastShown' -- main.js` prints `main.js:4` and exits 0: the declaration, the check, the set and the reset. No comment uses the name. Dry-run: exit 1, no output.
+        - `git grep -n -F "Can't watch this folder — check permissions." -- main.js` still prints one line and exits 0. Dry-run: the same, `main.js:361:`, exit 0.
     12. **These stay untouched:**
         - `git grep -c -F 'Saved Articles' -- main/folder-sync.js main/folder-watcher.js main/ipc/library.js` still prints `main/folder-sync.js:1`, `main/folder-watcher.js:2` and `main/ipc/library.js:1`, and exits 0. Dry-run: the same, exit 0.
         - `git grep -c -F 'await ctx.syncLibraryWithFolder();' -- main/ipc/state.js` still prints `main/ipc/state.js:2` and exits 0, so both folder switches still run the full sync. Dry-run: the same, exit 0.
         - `git grep -n -F 'showToast(data.message, 7000);' -- src/components/LibraryContainer.tsx` still prints `src/components/LibraryContainer.tsx:146:      showToast(data.message, 7000);` and exits 0. The toast is unchanged. Dry-run: the same, exit 0.
-        - `git grep -n -F '"Folder watching encountered an error — try re-selecting the folder."' -- main.js` still prints one line and exits 0. Dry-run: `main.js:362:`, exit 0.
     13. **BUG-195's Status line** (`docs/governance/BUG_REPORT.md:38`) reads exactly `**Status:** RESOLVED in source (FOLDER-UNREACHABLE-GUARD-1): a folder, subfolder or file that cannot be read removes no book, and a readable folder that lists no book keeps the books held under it; closes after the batched owner smoke. Lane: Library & Content.`
         - `git grep -c -F 'RESOLVED in source (FOLDER-UNREACHABLE-GUARD-1)' -- docs/governance/BUG_REPORT.md` prints `docs/governance/BUG_REPORT.md:1` and exits 0. Dry-run: exit 1, no output.
         - `git grep -n -F '**Status:** OPEN — scheduled as FOLDER-UNREACHABLE-GUARD-1' -- docs/governance/BUG_REPORT.md` prints nothing (exit 1). Dry-run: exit 0, `docs/governance/BUG_REPORT.md:38:`.
@@ -3791,7 +3796,8 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     15. **Owner check on the real Drive, deferred to the Stage 8 batched owner smoke** (ruling Q6; standing rules 45 and 47; LL-152, LL-158). It runs on the batched production build, on a **copy** of the owner's profile, never the live one. The exact PowerShell is in Implementation detail, Owner Drive check. Pass:
         - (A) with Google Drive for desktop quit, every folder book under the Drive path is still in the copy's library after launch and quit, and the log holds `source folder problem: root-unlistable`;
         - (B) with Drive started, every one of those books is still there after a launch quit within 60 s, and the owner opens one Drive book and sees it render;
-        - (C) the owner's live profile hashes are unchanged.
+        - (C) the owner's live profile hashes are unchanged;
+        - (D) at (A)'s launch the toast reads "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." and appears once, and the old "try re-selecting the folder" text never appears.
 
         Blurby.Roadmap adds "FOLDER-UNREACHABLE-GUARD-1 Done-when 15" to the batched smoke list when this specification folds in.
     16. On the owner's machine (standing rule 47), `npm ci` exits 0 in the worktree. Then `npm test` exits 0 (Stage 8's closed-list rule governs load-timing failures), `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
@@ -3967,7 +3973,12 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     ```
   - **`main.js:330`**. Before: `  scanFolderAsync, statFile: (p) => fsPromises.stat(p),`. After: `  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),`.
   - **`main.js:332`**. Before: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,`. After: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,`.
-  - **`main.js:365`**. Before: `        mainWindow.webContents.send("watcher-error", { message: userMessage });`. After: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`. The renderer reads only `data.message` (`LibraryContainer.tsx:146`), so the toast is unchanged.
+  - **`main.js:365`**. Before: `        mainWindow.webContents.send("watcher-error", { message: userMessage });`. After: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`. The renderer reads only `data.message` (`LibraryContainer.tsx:146`), so the payload change shows nothing new.
+  - **`main.js:362`** (owner decision). Before: `        : "Folder watching encountered an error — try re-selecting the folder.";`. After: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";`.
+  - **Once per episode** (ruling Q1, amended):
+    - in the hook block, after `let lastFolderProblem = null;`, add `let folderToastShown = false; // one watcher-error toast per failure episode`;
+    - in `onError`, after `      console.error("[watcher] Error:", err.message);` (`:363`), add `      if (folderToastShown) return;` and `      folderToastShown = true;`;
+    - in `startWatcherFn`, after the `startWatcher` call's closing `  });` (`:368`), add `  if (watcher) folderToastShown = false;`. `startWatcher` calls `onError` synchronously and returns `null` when `fs.watch` throws, so a failed start keeps the flag set.
   - **`main/ipc/library.js:13`** (after `require("../author-normalize")`), add `const { pathKey } = require("../folder-sync");`. `main/folder-sync.js` requires only `path` and `./constants`, so there is no cycle, and the library test harnesses load it unstubbed.
   - **`main/ipc/library.js:342-345`** (`rescan-folder`). Before:
     ```js
@@ -4020,9 +4031,10 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - **`docs/governance/BUG_REPORT.md:38`** and **`docs/governance/TECHNICAL_REFERENCE.md:711`**: the Done-when 13 texts.
   - Nothing else changes.
 - **Tests:**
-  - **`tests/folderSync.test.js`, `makeDeps` (C1, two lines).** These are fakes only; no assertion changes.
+  - **`tests/folderSync.test.js`, `makeDeps` (C1, two lines).** These are fakes only.
     - After `scanFolderAsync: vi.fn(async () => []),` (`:42`), add `rootHasContent: async (p) => (state.disk.has(p) ? true : null), // the old exists(root) rule; tests/folderUnreachableGuard.test.js drives the real one`.
     - In `statFile`, give the rejection its code: `: Promise.reject(Object.assign(new Error("ENOENT"), { code: "ENOENT" }))),`.
+  - **`tests/folderSync.test.js:160`, test (d) (C2, one assertion; a hidden caller found 2026-10-15 while specifying FOLDER-NOTICE-1).** `runFullSync` now passes the report object, so `toHaveBeenCalledWith(rootB)` no longer matches. Before: `    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB);`. After: `    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB, expect.any(Object));`. The assertion keeps its meaning (folder B was scanned). This is the only existing assertion that changes.
 
     `reportFolderProblem` defaults to a no-op, so `makeDeps` needs no third line. Every existing test then behaves as on the base:
     - every `applyUnlink` test seeds `ROOT` (or its own root) in `disk`, or expects nothing removed;
@@ -4077,8 +4089,11 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         - `  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),`
         - `emitProgress: emitSyncProgress, reportFolderProblem,`
         - `reason: lastFolderProblem || "watch-failed"`
+        - `Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.`
+        - `if (folderToastShown) return;`
+        - `if (watcher) folderToastShown = false;`
 
-        It still contains `{ message: userMessage`. *C1: the first four are absent.*
+        It still contains `{ message: userMessage` and `Can't watch this folder`, and no longer contains `try re-selecting the folder`. *C1: the first seven are absent and the old text is present.*
       - **(s)** Rescan of a readable folder that lists no book while folder books are held under it (ruling Q2; Drive starting). `root` exists and is empty. Library `[A (root/a.txt), manual]`. The result has `empty: true` and `reason: "root-empty-suspect"`; A and `m` are kept; and `saveLibrary` was not called. *C1: A is pruned.*
       - **(t)** Rescan, path case (second ruling; `it.runIf(process.platform === "win32")`).
         - On disk: `root/Sub/Book.txt`.
@@ -4205,12 +4220,12 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 - **Lane ownership (parallel run):** surface D. The owned lines are:
   - `main/folder-watcher.js`: `scanFolderAsync` through `await walkDir(folderPath);` and its return, the new function after it, and one export line;
   - `main/folder-sync.js`: the new `pathKey` after `:6`, `:9-11`, `:66`, `:73-74`, `:107-109`, `:138`, `:159-160` and the export at `:214`;
-  - `main.js`: `:15`, the new hook block before `:327`, `:330`, `:332` and `:365`;
+  - `main.js`: `:15`, the new hook block before `:327`, `:330`, `:332`, `:362`, the two new `onError` lines after `:363`, `:365`, and the reset after `:368`;
   - `main/ipc/library.js`: the new require after `:13`, `rescan-folder`'s scan lines and map (`:342-345`), its lookup (`:349`), its keep chain (`:445-449`) and its return (`:455`);
-  - the two fake lines in `tests/folderSync.test.js`, and the new test file;
+  - the two fake lines and the test (d) assertion (`:160`) in `tests/folderSync.test.js`, and the new test file;
   - the BUG-195 Status line and the technical reference row.
   - **Forbidden:**
-    - every other file, and every other line of those files, including the toast text (`main.js:360-362`);
+    - every other file, and every other line of those files, including the permission toast's text (`main.js:361`);
     - `main/ipc/state.js` (the folder switches stay by design; IPC-PATH-TRUST-1 edits its heads);
     - `keepMainPaths`, `save-library` and `ALLOWED_FIELDS` in `main/ipc/library.js` (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1 and SAVE-LIBRARY-MERGE-1);
     - `main/sync-engine.js` (SETTINGS-KEY-TRUST-1), `main/constants.js` (DEPS-AUDIT-1's branch edits it), `preload.js` and every renderer file;
@@ -4283,7 +4298,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   6. Picking or switching a folder starts the watcher before the sync.
   7. A test pins the fast-path duplicate-filepath edge, and its known limit is recorded.
 
-  The user sees no change on a normal library. The fixes show only on a folder whose path changes case (no re-import), on a long first sync (fewer full-library writes), and on files copied in while a sync of a newly picked folder is running (they are picked up). The user-visible scan-failure signal is **not** built here: the owner is deciding the notice (below), and today's behaviour (log only) is kept.
+  The user sees no change on a normal library. The fixes show only on a folder whose path changes case (no re-import), on a long first sync (fewer full-library writes), and on files copied in while a sync of a newly picked folder is running (they are picked up). The user-visible scan-failure signal is **not** built here: the owner chose the notice (below), it is FOLDER-NOTICE-1, and this item keeps today's behaviour (log only).
 - **Why** (every line read on `main` @ `0f285836`, fetched 2026-10-14):
   - **N2.** `syncAll` (`main/folder-sync.js:115-130`) returns the running promise whenever the running folder matches (`:119`), even after `cancel()` (`:206`) has set `cancelled`. The cancelled run stops at its next `stale()` check (`:71`, `:89`, `:103`) without pruning (`:103-106`). So a `cancel()` followed at once by `syncAll()` on the same folder returns a run that is already giving up, and no new sync happens. Nothing in the renderer calls `cancel-sync` today (`main/ipc/library.js:610-613`, `preload.js:65`, no `src/` caller), so this is latent. It is still a wrong answer from the module's contract.
   - **N3.** Each per-file path calls `saveLibrary()` directly: `addOne` (`:149`), `removeUnder` (`:189`) and `refresh` (`:199`). `saveLibrary` (`main.js:131-142`) writes the whole `library.json` after `LIBRARY_SAVE_DEBOUNCE_MS` = 500 ms (`main/constants.js:143`). During a full sync, which saves only every `FOLDER_SYNC_SAVE_INTERVAL_MS` = 30 s (`:94-97`, `main/constants.js:155`), a stream of watcher events therefore writes the 120,000-book library about twice a second. That defeats the batching. Starting the watcher first (below) makes this stream more likely on a new folder.
@@ -4302,13 +4317,13 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - On a folder switch, start the watcher before the sync.
   - Add a test for the fast-path duplicate-filepath edge.
   - Record the known limit: a second book at the same filepath survives a single-file removal until the next full sync.
-  - The user-visible scan-failure signal is tier 2 (pick-folder and switch-folder resolve on a failed scan and only log it). It is not specified here: the owner is deciding the notice, and today's behaviour is kept.
+  - The user-visible scan-failure signal is tier 2 (pick-folder and switch-folder resolve on a failed scan and only log it). It is not specified here: the owner chose the notice, FOLDER-NOTICE-1 builds it, and this item keeps today's behaviour.
   - The owner's real-folder check runs in the batched owner smoke (Stage 8).
 - **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1, all as recommended):**
   - **Q1:** `rescan-folder`'s raw map (`main/ipc/library.js:345`) moves into FOLDER-UNREACHABLE-GUARD-1 and uses the same `pathKey`. Whichever item merges first defines `pathKey` once, in `main/folder-sync.js`, exported; the other reuses it. There is no second implementation. FOLDER-UNREACHABLE-GUARD-1 merges first (it is a release gate), so this item **reuses its `pathKey`**. If FOLDER-UNREACHABLE-GUARD-1 has not defined it, define it here. This item makes no change to `main/ipc/library.js`.
   - **Q2:** keep the per-file view updates (broadcasts) during a full sync. Only the saves are batched.
   - **Q3:** the Saved Articles fix is a bug fix. Match the folder as a path segment, not a string prefix. Test (sa) uses a "Saved Articles Old" folder.
-  - **Scan-failure notice:** the owner is deciding it (below). This item keeps today's behaviour and FOLDER-UNREACHABLE-GUARD-1's reason-code hook.
+  - **Scan-failure notice:** decided (below); FOLDER-NOTICE-1 builds it. This item keeps today's behaviour and FOLDER-UNREACHABLE-GUARD-1's reason-code hook.
 - **Design decisions (planner, 2026-10-14):**
   - **One key, `pathKey`, defined once (ruling Q1).** FOLDER-UNREACHABLE-GUARD-1 defines it at module level in `main/folder-sync.js` and exports it. This item reuses it. If it is absent at dispatch, this item defines it with the definition below and exports it. It is `path.normalize(p)`, lowercased when `process.platform === "win32"`, and `""` for a missing path. That is `underFolder`'s case rule (`:56`) and `isLibraryDocPath`'s (`main/ipc/library.js:40`). It uses `normalize`, not `resolve`: library and watcher paths are absolute, and `resolve` costs more on a 120,000-book index build. `process.platform` is read at call time, as `underFolder` does, so the F2 tests' platform override still works.
   - **`bookKey` takes a key, not a path.** It is `path.dirname(k) + "\0" + stem(k).toLowerCase()`. Each index build or add computes `pathKey` once per book and derives both keys from it, so the rebuild does one normalization per book, not two.
@@ -4323,9 +4338,9 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - **The Saved Articles test matches the folder as a path segment** (ruling Q3, a bug fix). The key must start with `pathKey(<root>\Saved Articles) + path.sep`. A gone book under `Saved Articles Old` is now pruned like any other folder book. Positive control (sa) covers it.
   - **Watcher first: two line swaps in `main/ipc/state.js`.** `ctx.startWatcher()` moves above `await ctx.syncLibraryWithFolder()` in both handlers. `startWatcherFn` closes the old watcher first (`main.js:347`), so the old folder's late events also stop at once. That is a second guard beside `underFolder` (W3). The new folder's events during its first sync go through `addOne`. That function already records them in `addedDuringRun`, so the prune keeps them, and N3 keeps them from writing the library per event. The handlers still await the sync before they return.
   - **Known limit, recorded, not fixed (ruling).** When two books share one file path, removing that file through the fast path removes the indexed one. The other stays until the next full sync prunes it. Until then the index has no entry for it, so a change event does not refresh its word count. A `Map` of lists would fix it at the cost of more index code. The case needs another module to add a second book at a path already in the library, so it is not worth that code. The code comment, the Technical Reference row and test (dup) record it.
-  - **Scan-failure signal: today's behaviour is kept.** `syncAll`'s catch (`:123-127`) is unchanged. It logs, resolves `undefined`, and both IPC handlers return as on a successful sync. FOLDER-UNREACHABLE-GUARD-1's reason-code hook is kept as that item leaves it: this item neither removes nor rewires it. See "Owner decision pending" below.
+  - **Scan-failure signal: today's behaviour is kept.** `syncAll`'s catch (`:123-127`) is unchanged. It logs, resolves `undefined`, and both IPC handlers return as on a successful sync. FOLDER-UNREACHABLE-GUARD-1's reason-code hook is kept as that item leaves it: this item neither removes nor rewires it. See "Owner decision: the scan-failure notice" below.
 - **Out of scope:**
-  - **The scan-failure notice** (owner decision pending, below). Whichever form the owner chooses becomes its own item or an amendment.
+  - **The scan-failure notice** (owner decision, below): FOLDER-NOTICE-1.
   - **`rescan-folder`'s raw `filepath` map** (`main/ipc/library.js:345`), the only other raw library-path comparison in `main/`. Ruling Q1 moves it into FOLDER-UNREACHABLE-GUARD-1, with the same `pathKey`.
   - **`failedExtractions`** (`main.js:332`, `:467`), a skip cache keyed by raw path. A case variant is extracted once more and then cached. That is harmless, and `main.js` is outside this item's fence.
   - **`isLibraryDocPath`** (`main/ipc/library.js:39-44`): already case-folded on win32. It is a security check, and it is not edited.
@@ -4681,9 +4696,9 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     - SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1 edit `main/ipc/library.js`; DEPS-AUDIT-1 edits dependencies; PAGE-POSITION-SAVE-2 edits Page files. All are file-disjoint from this item, so either may land first.
     - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2 and 4–12. The live checks stay out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
 
-##### Owner decision pending: the scan-failure notice
+##### Owner decision: the scan-failure notice
 
-The owner is deciding the notice: either a corrected short message, or a banner with Retry. The current "try re-selecting the folder" text goes away either way. This item keeps today's behaviour and the reason-code hook from FOLDER-UNREACHABLE-GUARD-1.
+Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the first failure, with corrected text that FOLDER-UNREACHABLE-GUARD-1 ships, plus a persistent library banner whose Retry button makes exactly one guarded sync attempt per press (owner: "button tries only once. No infinite loop"). The banner is FOLDER-NOTICE-1, after this item. This item keeps today's behaviour and the reason-code hook from FOLDER-UNREACHABLE-GUARD-1, and changes no line FOLDER-NOTICE-1 builds on.
 
 ##### Task list
 
@@ -5336,24 +5351,900 @@ The owner is deciding the notice: either a corrected short message, or a banner 
 - **LL-136:** the time log is named `Timing.KF2-WAIVER-RETIRE-1.jsonl`, as the fence expects.
 - **LL-143:** anchor and gate patterns are line-start (`^(- )?<a id="`, `^\*\*Release gate`), so this specification's own quoted text and code blocks cannot satisfy or break them once folded in.
 
+<a id="folder-notice-1"></a>
+
+#### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(position 26 — Full Spec; authored 2026-10-15 on main @ `d0720ce0`; not a release gate)*
+
+- **What:** While Blurby cannot reach the source folder, the library shows a persistent banner with a Retry button. It stays until the folder is shown reachable again. The owner chose option (C), described below.
+  - **The toast is not this item's.** FOLDER-UNREACHABLE-GUARD-1 (position 22) ships the corrected toast text, sent once per failure episode (`folderToastShown`). This item adds the banner beside it.
+  - **Banner text:** the same as the toast: "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." **Button:** "Retry". The banner never offers "choose another folder".
+  - **One press, one attempt** (owner: "button tries only once. No infinite loop"; refined by Blurby.Brain, 2026-10-15). Each press of Retry makes exactly one root check and at most one sync call:
+    - **(a)** one `rootHasContent` check of the source folder, raced against `FOLDER_RETRY_LIST_TIMEOUT_MS` (30 s);
+    - **(b)** on `true`: the banner clears, a watcher that failed this episode restarts with no toast, and one `syncLibraryWithFolder()` starts without being awaited;
+    - **(c)** on `false`, `null` or the timeout: the banner stays, Retry is enabled again, and no toast fires.
+  - **Retry returns after (a) and (b),** so on the owner's 120,000-file folder the banner clears within seconds. The full sync carries on as usual.
+  - **Nothing retries from the banner:** no polling, no background loop, and no timer other than the one root-check cap, which is cleared when the check settles.
+  - **The button is disabled while its root check runs,** so presses cannot queue.
+  - **The banner clears whenever the folder is shown reachable,** whatever showed it:
+    - Retry;
+    - a full sync at launch, after a folder pick or switch, or after Retry;
+    - a Rescan that lists books;
+    - a watcher add.
+  - **A different folder starts over** (Blurby.Brain, 2026-10-15). When the user picks or switches to a different source folder, the banner state clears and `folderToastShown` resets, before the new folder's watcher start and sync. The banner was about the old folder.
+    - The new folder gets its own check. If its root fails, that check raises the banner again, and the first failure toasts again, because it is a new episode.
+    - Re-selecting the same folder (compared by FOLDER-UNREACHABLE-GUARD-1's `pathKey`) is not a switch.
+  - **What counts as a problem:** exactly four codes.
+    - FOLDER-UNREACHABLE-GUARD-1's `root-unlistable` and `root-empty-suspect`.
+    - The watcher's failure, `watch-failed`.
+    - LARGE-FOLDER-SYNC-2's scan-failure signal: `syncAll`'s catch logs and resolves, and pick-folder and switch-folder then resolve as if the sync had run. Here that catch reports `sync-failed`.
+  - **`partial-read` does not show the banner** (Blurby.Brain, 2026-10-15, Rule 11 tier 1). The root was listed, so "can't reach your source folder" would be false. Drive placeholder read errors (EIO) on the owner's 120,000-file folder would also make the banner noisy. It stays log-only, through FOLDER-UNREACHABLE-GUARD-1's `source folder problem:` line.
+  - **Styling:** the library's existing update-banner strip, reused as it is:
+    - classes `.update-banner` and `.btn-fill update-banner-restart-btn`;
+    - `src/components/LibraryView.tsx:373-378`, `src/styles/base.css:387-398`, `src/styles/library.css:1858-1861`.
+
+    There is no new CSS, no inline style and no new visual design.
+- **Why** (every line read on `main` @ `d0720ce0`, fetched 2026-10-15; FOLDER-UNREACHABLE-GUARD-1 as amended at `ed05868a`, which changes only `ROADMAP.md`):
+  - **Today nothing persists.**
+    - When the root is missing at launch, `fs.watch` throws, and `startWatcher` calls `onError` synchronously and returns `null` (`main/folder-watcher.js:128-134`).
+    - `main.js:354-367` sends one `watcher-error`, and `LibraryContainer.tsx:145-147` shows it as a 7 s toast.
+    - After FOLDER-UNREACHABLE-GUARD-1 the text is corrected and is sent once per episode. But once the toast is gone, the user has no sign that the folder is still unreachable.
+  - **Nothing restarts the watcher.** `watcher` stays `null` (`main.js:350`) until a folder pick or switch (`main/ipc/state.js:75-76`, `:90-91`) or a relaunch (`main.js:590`). So when Drive comes back mid-session, live sync does not resume, and the toast's promise ("Blurby will pick it up") does not hold without a relaunch.
+  - **The sync's failure is invisible.** `syncAll`'s catch (`main/folder-sync.js:126`) logs and resolves `undefined`. `select-folder` and `switch-folder` then return as on success (LARGE-FOLDER-SYNC-2, ruling "tier 2").
+  - **A full sync learns late that the folder is reachable.** The scan walks the whole tree before it returns (93.6 s on the owner's folder, LL-158). The import that follows runs for as long as the library lacks files (LARGE-FOLDER-SYNC-1's design half is open). FOLDER-UNREACHABLE-GUARD-1's `rootHasContent` (one `readdir` of the root) answers the same question at once.
+  - **A listing can hang.** There is no timeout anywhere in the scan (FOLDER-UNREACHABLE-GUARD-1, Out of scope). A Retry that waited on a hung listing would keep its button disabled indefinitely.
+  - **FOLDER-UNREACHABLE-GUARD-1 leaves a hook and no state.**
+    - Its `lastFolderProblem` is written by `reportFolderProblem` and never cleared. It is read only by the `watcher-error` payload's `reason`, which the renderer ignores.
+    - Its hook comment says "Nothing new is sent: each send is a toast". This item adds a separate push channel that is not a toast (LL-156, restated below).
+  - **Where the banner goes.**
+    - The library view is rendered only on `LibraryContainer`'s library branch (`:648-700`).
+    - `LibraryView` holds the library's only notice strip (`:373-378`), above `.library-scroll`.
+    - The reader branch unmounts both. So the banner must fetch the state when it mounts, and must not keep it in component memory.
+- **Owner decision (2026-10-14/15, relayed by Blurby.Brain; fixed):** option (C). FOLDER-UNREACHABLE-GUARD-1's toast on the first failure, plus a persistent library banner with Retry that stays until the folder is reachable. The text, the label and the one-press rule are quoted above. Styling: existing custom properties and notice styles only.
+- **Technical rulings (Blurby.Brain, 2026-10-15, Rule 11 tier 1):**
+  - **R1:** `partial-read` is log-only (confirmed).
+  - **R2:** the banner clears when the root is shown reachable, not after the full scan or sync.
+    - "Reachable" means `rootHasContent(folder)` returns `true`. `false` keeps `root-empty-suspect`, and `null` keeps `root-unlistable`.
+    - `reportFolderOk` is emitted once the root lists with content, before the walk.
+    - Retry is (a) one root check raced against a timeout, (b) on `true`, clear, quiet watcher restart and one un-awaited sync, (c) otherwise, nothing more. It returns after (a) and (b).
+    - Pinned by tests: one root check and at most one sync call per press.
+    - Owner check: the banner clears within about 10 s of pressing Retry with Drive running.
+  - **R3:** a successful Rescan clears the banner too, with a one-line emit in `rescan-folder` where it has listed the root with content. `reportFolderOk` reaches the library IPC handlers through the IPC context, like the other `main.js` dependencies.
+  - **R4:** a hung listing is capped by `FOLDER_RETRY_LIST_TIMEOUT_MS = 30000` in `main/constants.js`.
+    - If the root check has not settled by then, the attempt fails: Retry is enabled again, the banner stays, no toast fires, and nothing retries in the background.
+    - It uses one timer, cleared when the check settles.
+  - **R5 (at approval, `79061f65`; replaces the empty-readable-folder known limit):** `select-folder` and `switch-folder` reset the banner state and set `folderToastShown = false` when the chosen folder differs from the current one by `pathKey`, before the new folder's watcher start and sync.
+    - It is one `main.js` function, `resetFolderNotice()`, which reaches `ctx` the way `reportFolderOk` does.
+    - Test: the banner is up for folder A; a switch to an empty readable folder B clears it; a switch to an unlistable folder C raises it again, with one `watcher-error` send for C.
+- **Design decisions (planner, 2026-10-15, Rule 11 tier 1):**
+  - **Main owns the folder's state.** A new CommonJS module, `main/folder-notice.js`, holds `problem`: `null`, or the last code that means unreachable.
+    - `set(code)` pushes each change, and only a change, on one new channel, `folder-problem`.
+    - `set` ignores every code outside one explicit set of four (`root-unlistable`, `root-empty-suspect`, `watch-failed`, `sync-failed`), with a comment giving the reason (R1). So a `partial-read` report leaves `problem` as it is, and pushes nothing.
+    - It replaces FOLDER-UNREACHABLE-GUARD-1's `lastFolderProblem`, so there is one source of truth.
+    - `reportFolderProblem` keeps its name, its log line and its two call sites in `main.js`; only its body changes, to `folderNotice.set(code)`.
+    - It is a module, not code in `main.js`, because the owner's required tests (one press, one check; no timers) need a unit under test, and `main.js` cannot be loaded by a test (`tests/folderSync.test.js:3-4`).
+  - **Set by:**
+    - every `reportFolderProblem` call carrying `root-unlistable` or `root-empty-suspect`, from FOLDER-UNREACHABLE-GUARD-1's full sync and per-file remove;
+    - the watcher's `onError`, as `folderNotice.get() || "watch-failed"`. This runs before FOLDER-UNREACHABLE-GUARD-1's `if (folderToastShown) return;`, so the banner shows even when the toast is not sent;
+    - `syncAll`'s catch, as `sync-failed` (LARGE-FOLDER-SYNC-2's signal; one line in `main/folder-sync.js`).
+  - **Cleared by `reportFolderOk`.** In `main.js` it is one function, `function reportFolderOk() { folderNotice.set(null); }`. It reaches `createFolderSync` as an optional dependency (default a no-op, like `reportFolderProblem`) and the IPC handlers as a `ctx` member (R3). It is called at three sites, each where reachability is first known:
+    - **The full sync, before the walk (R2).**
+      - `runFullSync` makes one `rootHasContent(folder)` call right after its `"scanning"` progress, before `scanFolderAsync`, and clears on `true` unless the run is already stale.
+      - This is the earliest point the sync can learn it. It uses the same function as FOLDER-UNREACHABLE-GUARD-1's per-file remove and as Retry, so "reachable" has one definition.
+      - It leaves the scan (`main/folder-watcher.js`, FOLDER-UNREACHABLE-GUARD-1's file) untouched. A callback from inside the walk would edit that file and add a second copy of the "lists a subfolder or a supported file" rule.
+      - The cost is one more `readdir` of the root per full sync.
+      - The run does not return early on a stale result there. It continues to the scan as today, so LARGE-FOLDER-SYNC-2's (n2) still sees two scans after a cancel.
+    - **A Rescan that lists books (R3).** In `rescan-folder`, after FOLDER-UNREACHABLE-GUARD-1's `root-unlistable` and `root-empty-suspect` returns, `if (files.length) ctx.reportFolderOk();`. A scan that returned at least one book has listed the root with content, so this needs no extra `readdir`, and the handler's `../folder-watcher` require is unchanged. The test stubs of SAVE-LIBRARY-TRUST-1 and IPC-PATH-TRUST-1 then keep working, and their Proxy `ctx` supplies `reportFolderOk` as a `vi.fn()`.
+    - **A watcher add.** In `addOne`, after the file's `stat` succeeds under the folder (`underFolder(p)`, `:133`). A supported file under the root means the root lists that file or the subfolder holding it, which is exactly what `rootHasContent` returns `true` for. That avoids a second `readdir` per event. These are "the folder watcher's normal events".
+      - The watcher's `onUnlink` fires on a failed `lstat` (`main/folder-watcher.js:94`), so it is not evidence and does not clear.
+      - `main.js`'s watcher callbacks stay unchanged; `tests/folderSync.test.js` (k) pins them.
+  - **A clear restarts a watcher that failed this episode, quietly.** When the problem goes to `null`, `set` calls the injected `resumeWatcher`. In `main.js`, `resumeWatcher` does nothing at quit (`folderWorkStopped`), and nothing while a watcher exists that has not failed this episode (`watcher && !folderToastShown`). Otherwise it sets `folderToastShown = true` and calls `startWatcherFn()`.
+    - FOLDER-UNREACHABLE-GUARD-1's reset (`if (watcher) folderToastShown = false;`) clears the flag when the restart succeeds.
+    - A restart that fails leaves the flag set. Its `onError` therefore sets the banner again and sends no toast.
+    - It cannot loop. Only a clear calls `resumeWatcher`. A failed restart sets a problem, never `null`, and nothing scheduled follows it.
+  - **A folder switch resets without resuming** (R5). The module gets a third mutator, `reset()`, which sets `problem` to `null` and pushes `null` (when it was not already `null`), without calling `resumeWatcher`.
+    - `set(null)` would call `resumeWatcher`. That could start a watcher on the new folder with `folderToastShown` already set to `true`, which would swallow the new folder's first toast, and the handler then starts the watcher again.
+    - `main.js`'s `resetFolderNotice()` is `folderToastShown = false; folderNotice.reset();`. Both handlers call `ctx.resetFolderNotice()` after their checks and before `settings.sourceFolder = folder;`, and only when `pathKey(folder) !== pathKey(settings.sourceFolder)`.
+    - After LARGE-FOLDER-SYNC-2's swap, the handler's order is: reset, set the folder, save, start the watcher, sync. So the new folder's watcher failure toasts once (a new episode), and its root check alone decides the banner.
+    - `main/ipc/state.js` requires `pathKey` from `../folder-sync`, as `main/ipc/library.js` does after FOLDER-UNREACHABLE-GUARD-1. `main/folder-sync.js` requires only `path` and `./constants`, so there is no cycle.
+  - **Retry, in the module** (R2, R4):
+    - `retry()` reads the folder, starts one `setTimeout` for `FOLDER_RETRY_LIST_TIMEOUT_MS`, and races it against `checkRoot(folder)` (`rootHasContent`, injected). It clears the timer in a `finally`, whichever settles first. It logs one line, `[folder-notice] Retry: one root check: <result>`, where the result is `true`, `false`, `null` or `timeout`.
+    - On `true`, it calls `set(null)`, which clears and restarts the watcher, then calls `sync()` once without awaiting it.
+    - It returns `problem` (`null` or a code), the same shape the getter and the push carry.
+    - A check that settles after the timeout is ignored. Node cannot cancel a `readdir`, so it runs to its end, does nothing, and starts nothing.
+    - With no source folder, it returns `problem` at once, with no check and no timer.
+  - **A Retry during a running sync** starts no second scan. Its one sync call reaches `syncAll`, which returns the running run's promise for the same folder (`main/folder-sync.js:119`; after LARGE-FOLDER-SYNC-2, only when that run is not cancelled). Retry does not await it either way.
+  - **The renderer fetches once on mount and listens.** `FolderNoticeBanner` subscribes to `onFolderProblem`, then calls `getFolderProblem()` once, and ignores the getter's answer if a push has already arrived (the push is newer). This shows the banner when the startup sync failed before the library mounted, and again after the reader unmounts and remounts the library. The component has no timer.
+  - **Presses cannot queue.** The button is `disabled` while its call runs, which is 30 s at most; React does not dispatch `onClick` to a disabled button. A call that rejects leaves the banner up and enables Retry again.
+  - **Preload stays minimal** (it is the security boundary): one getter, one invoke and one listener, in the existing `onWatcherError` pattern (`preload.js:207-211`). There is no argument, so there is nothing to validate.
+  - **`src/types.ts`: three optional members.** They are optional, like `onWatcherError?` (`:371`), and every call uses `?.`. The two mocks that implement `ElectronAPI` without these methods therefore need no change: the browser stub `src/test-harness/electron-api-stub.ts:263`, typed `ElectronAPI`, and `tests/updateInstallGating.test.tsx`'s mock, which renders `LibraryContainer`.
+  - **The handlers go in `main/ipc/state.js`**, beside `select-folder` and `switch-folder`, the folder handlers that already call `ctx.syncLibraryWithFolder`. They are reached through two new `ctx` members, `getFolderProblem` and `retrySourceFolder`.
+  - **The banner's text is a literal in `FolderNoticeBanner.tsx`.** A test checks that the toast in `main.js` holds the identical string, so the two cannot drift apart.
+  - **Constants (R4):** one, `FOLDER_RETRY_LIST_TIMEOUT_MS = 30000`, in `main/constants.js`'s Folder Watcher section. It has a `/** … (ms) */` comment like its neighbours, and is exported beside them. The module reads it; the tests use fake timers, so nothing injects it.
+- **Out of scope:**
+  - The toast's text and its once-per-episode rule (FOLDER-UNREACHABLE-GUARD-1).
+  - `partial-read` in the banner (R1). Known limit: a subfolder or file that cannot be read shows nothing in the UI. Its books are kept (FOLDER-UNREACHABLE-GUARD-1), and the log line names the case.
+  - A timeout on the full scan's own listing (FOLDER-UNREACHABLE-GUARD-1's out of scope, unchanged). Only Retry's root check is capped.
+  - A per-file remove whose root check passed (`rootHasContent === true`) is also evidence of reachability. It is not wired: adds and full syncs cover a returning folder, and FOLDER-UNREACHABLE-GUARD-1's remove path is not this item's.
+  - The browser test stub's comment counting preload methods (`electron-api-stub.ts:2`). The optional members need no stub entry, so the banner never shows in the browser harness.
+  - LARGE-FOLDER-SYNC-1's design half: what the first sync of a very large folder imports.
+- **Prerequisites:**
+  - **FOLDER-UNREACHABLE-GUARD-1 (22) and LARGE-FOLDER-SYNC-2 (23) merged.** This item builds on these lines of theirs. After both merge, re-grep each anchor in `main.js`, `main/folder-sync.js`, `main/ipc/library.js` and `main/ipc/state.js`. Record the line numbers in the staging memo, and stop on any content drift (standing rule 36).
+    - **`main.js`:**
+      - `:15`: `const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");`.
+      - FOLDER-UNREACHABLE-GUARD-1's hook block, as its Implementation detail and "Once per episode" ruling leave it. That is the two-line `// HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): …` comment, then `let lastFolderProblem = null;`, `let folderToastShown = false; // one watcher-error toast per failure episode`, and `function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }`.
+      - `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,` (FOLDER-UNREACHABLE-GUARD-1's `:332`).
+      - `onError`: `      console.error("[watcher] Error:", err.message);`, then `      if (folderToastShown) return;` and `      folderToastShown = true;`.
+      - `onError`: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`.
+      - `startWatcherFn`: `  if (watcher) folderToastShown = false;`, after the `startWatcher` call.
+      - The toast text `"Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up."` (one line).
+    - **`main/folder-sync.js`:**
+      - The destructure: `rootHasContent` is in its first line, and its last line is `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`.
+      - `runFullSync`: `    emitProgress(0, 0, "scanning");` (`:72` on the base), directly followed by FOLDER-UNREACHABLE-GUARD-1's `    const report = {};` and `    const files = await scanFolderAsync(folder, report);`.
+      - `runFullSync`: `    if (skipped.length) reportFolderProblem("partial-read", folder);`. This item does not edit it.
+      - `syncAll`: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`. LARGE-FOLDER-SYNC-2 keeps it unchanged.
+      - `addOne`: `    try { st = await statFile(p); } catch { return; }`, followed by `    if (stopped) return;` (`:135-136` on the base; LARGE-FOLDER-SYNC-2's edits start at `:141`).
+    - **`main/ipc/library.js`**, `rescan-folder`, FOLDER-UNREACHABLE-GUARD-1's guard. Its `if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {` block, which returns `{ count: docs.length, empty: true, reason: "root-empty-suspect" }`, is followed by `      const skipped = (report.skipped || []).map(pathKey);`.
+    - **`main/ipc/state.js`:**
+      - `:9`: `const fsPromises = require("fs/promises");`.
+      - `select-folder`: `    const folder = result.filePaths[0];`, directly followed by `    settings.sourceFolder = folder;` (`:71-72` on the base).
+      - `switch-folder`: IPC-PATH-TRUST-1's recent-folder check (`:83-85`, merged), then `    try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }`, directly followed by `    settings.sourceFolder = folder;` (`:86-87`).
+      - The tail of `switch-folder`, after LARGE-FOLDER-SYNC-2's swap: `    ctx.startWatcher(); …`, `    await ctx.syncLibraryWithFolder();`, `    return { folder };`, `  });`, then the `}` closing `register`.
+      - SETTINGS-KEY-TRUST-1 replaces IPC-PATH-TRUST-1's `save-settings` head (`:25-28`), a different handler. Re-grep both handler heads after each merges (standing rule 36).
+    - **`main/folder-sync.js` exports `pathKey`** (FOLDER-UNREACHABLE-GUARD-1): `module.exports = { createFolderSync, pathKey };`.
+    - **`tests/folderUnreachableGuard.test.js`** (n): the expected string `reason: lastFolderProblem || "watch-failed"`.
+
+    If the hook block, the `folderToastShown` lines, the payload line or the rescan guard differ from the above, stop for Blurby.Brain: the edits below would no longer apply as written.
+  - **Queue items that edit this item's files in other hunks.** Re-grep after each merges.
+    - SAVE-LIBRARY-TRUST-1 and IPC-PATH-TRUST-1 (merged): `main/ipc/library.js` `keepMainPaths`, `save-library` and `ALLOWED_FIELDS`.
+    - SAVE-LIBRARY-MERGE-1: `save-library`, and `LibraryView.tsx:286-297` (the Edit form).
+    - SETTINGS-KEY-TRUST-1: `main/ipc/state.js:25-28` (the `save-settings` head), and `src/types.ts` (`sortBy`, after `:201`).
+    - UX-POLISH-2: `src/types.ts:188`, a comment.
+    - DEPS-AUDIT-1 (merged, `a6383286`): `main/constants.js`, at `@@ -65,6 +65,10 @@` (the ZIP caps) and in `module.exports` at `@@ -225,6 +229,8 @@`. This item edits the Folder Watcher section (`:169-174`) and its export lines (`:282-284`), which are different hunks.
+  - **Shared-core:** `src/types.ts` is edited only while no other active item edits it. Confirm at dispatch that UX-POLISH-2, SETTINGS-KEY-TRUST-1 and NARRATE-REBUILD-1's open phase are not editing it.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other exit code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44).
+  - **About the dry-runs:** they were run on `d0720ce0` (2026-10-15) as `git grep … d0720ce0 -- <path>`, so their output carries the `d0720ce0:` prefix. They are noted with each gate.
+  - **Names from FOLDER-UNREACHABLE-GUARD-1.** Gates on names it introduces (`lastFolderProblem`, `folderToastShown`, `reportFolderProblem`, `rootHasContent`) are empty on `d0720ce0`. They become live on the merged base. The prerequisite re-grep (Done-when 3) must find those lines there before any edit, so each such gate can fail.
+    1. **Positive control (standing rule 43):** at C1, on the owner's Windows machine, `npx vitest run tests/folderNotice.test.js tests/folderNoticeBanner.test.tsx tests/folderSync.test.js` exits 1.
+       - Exactly these 23 fail, each for its named reason (Implementation detail, Tests): (fn-a)–(fn-s), (fn-v), (fn-x), (fn-z) and (fn-sw).
+       - These pass: the controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same), and every existing test in `tests/folderSync.test.js`.
+       - Record the output in the staging memo.
+    2. At C1, `npx vitest run tests/updateInstallGating.test.tsx tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js` exits 0.
+    3. **Prerequisite anchors (standing rule 36):** on the merged base, before any C2 edit, each anchor listed under Prerequisites is found once with the content shown. Record the lines in the staging memo. Any drift stops the run.
+    4. After C2, `npx vitest run tests/folderNotice.test.js tests/folderNoticeBanner.test.tsx tests/folderSync.test.js tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js tests/folderWatcher.test.js tests/updateInstallGating.test.tsx tests/ipcPathTrust.test.js tests/readFileBufferLibrary.test.js tests/perfAudit.test.ts` exits 0. Add `tests/settingsKeyTrust.test.js` and `tests/saveLibraryTrust.test.js` if they exist on the merged base.
+    5. `git grep -n -F 'lastFolderProblem' -- main.js main` prints nothing (exit 1): one state, not two.
+       - Dry-run on `d0720ce0`: exit 1, no output. The name is FOLDER-UNREACHABLE-GUARD-1's. Done-when 3 must find its three lines (declaration, `reportFolderProblem`, payload) on the merged base.
+    6. `git grep -c -F 'folderNotice.' -- main.js` prints `main.js:7` and exits 0. The seven lines are the bodies of `reportFolderProblem`, `reportFolderOk` and `resetFolderNotice`, the `onError` set, the payload, and the two `ctx` members `getFolderProblem` and `retrySourceFolder`. No comment uses the name.
+       - Dry-run: exit 1, no output.
+    7. `git grep -c -F 'folderToastShown' -- main.js` prints `main.js:6` and exits 0: FOLDER-UNREACHABLE-GUARD-1's four lines, plus the one `resumeWatcher` line and the one `resetFolderNotice` line. No comment uses the name.
+       - Dry-run: exit 1, no output. It is `main.js:4` on the merged base (FOLDER-UNREACHABLE-GUARD-1's gate).
+    8. `git grep -n -F '"folder-problem"' -- main.js preload.js` prints exactly three lines and exits 0: one in `main.js` (the send) and two in `preload.js` (`on` and `removeListener`).
+       - Dry-run: exit 1, no output.
+    9. **The clear sites.**
+       - `git grep -c -F 'reportFolderOk' -- main.js main/folder-sync.js main/ipc/library.js` prints exactly `main.js:3`, `main/folder-sync.js:3` and `main/ipc/library.js:1`, and exits 0. No comment uses the name.
+         - In `main.js`: the function, the `createFolderSync` dependency and the `ctx` member.
+         - In `main/folder-sync.js`: the destructure, the root-check line and `addOne`'s call.
+         - In `main/ipc/library.js`: the Rescan line.
+       - `git grep -n -F 'if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder);' -- main/folder-sync.js` prints one line and exits 0.
+       - `git grep -n -F 'if (files.length) ctx.reportFolderOk();' -- main/ipc/library.js` prints one line and exits 0.
+       - `git grep -c -F 'rootHasContent' -- main.js main/folder-sync.js` prints exactly `main.js:3` and `main/folder-sync.js:3`, and exits 0. Each is FOLDER-UNREACHABLE-GUARD-1's two lines, plus `checkRoot: rootHasContent,` and the root-check line respectively.
+       - Dry-runs: each exits 1, no output.
+    9a. **Four banner codes; `partial-read` is log-only** (R1):
+        - `git grep -n -F 'const BANNER_CODES = new Set(["root-unlistable", "root-empty-suspect", "watch-failed", "sync-failed"]);' -- main/folder-notice.js` prints one line and exits 0.
+        - `git grep -n -F 'partial-read' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). Neither file names the code; the module's comment says "a partial read".
+        - `git grep -c -E '"(root-unlistable|root-empty-suspect|partial-read)"' -- main/folder-sync.js` still prints `main/folder-sync.js:5` and exits 0, so FOLDER-UNREACHABLE-GUARD-1's reports, its `partial-read` log line included, are unchanged.
+        - Dry-runs on `d0720ce0`: each exits 1, no output. The third is FOLDER-UNREACHABLE-GUARD-1's gate 11 count, which Done-when 3 must see on the merged base.
+    9b. **A different folder starts over** (R5):
+        - `git grep -c -F 'resetFolderNotice' -- main.js main/ipc/state.js` prints exactly `main.js:2` (the function and the `ctx` member) and `main/ipc/state.js:2` (one call in each handler), and exits 0. No comment uses the name.
+        - `git grep -c -F 'if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice();' -- main/ipc/state.js` prints `main/ipc/state.js:2` and exits 0.
+        - `git grep -n -F 'const { pathKey } = require("../folder-sync");' -- main/ipc/state.js` prints one line and exits 0.
+        - `git grep -n -F 'function reset() {' -- main/folder-notice.js` prints one line and exits 0.
+        - Dry-runs: each exits 1, no output. On the base, `git grep -n -F '    settings.sourceFolder = folder;' -- main/ipc/state.js` prints `d0720ce0:main/ipc/state.js:72:` and `:87:`, exit 0: the two lines the calls go before.
+    10. **`syncAll`'s catch reports.**
+        - `git grep -n -F 'err && err.message); })' -- main/folder-sync.js` prints nothing (exit 1). Dry-run: exit 0, `d0720ce0:main/folder-sync.js:126:      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
+        - `git grep -n -F 'reportFolderProblem("sync-failed", folder)' -- main/folder-sync.js` prints one line and exits 0. Dry-run: exit 1, no output.
+    11. **Two new handlers.** `git grep -c -F 'ipcMain.handle(' -- main/ipc/state.js` prints `main/ipc/state.js:10` and exits 0.
+        - Dry-run: exit 0, `d0720ce0:main/ipc/state.js:8`.
+        - `git grep -n -E 'ipcMain\.handle\("(get-folder-problem|retry-source-folder)"' -- main/ipc/state.js` prints two lines and exits 0. Dry-run: exit 1, no output.
+    12. **One timer, no loop, no inline style** (R4):
+        - `git grep -c -F 'FOLDER_RETRY_LIST_TIMEOUT_MS' -- main/constants.js main/folder-notice.js` prints exactly `main/constants.js:2` (the definition and the export) and `main/folder-notice.js:2` (the require and the timer), and exits 0. `git grep -n -F 'const FOLDER_RETRY_LIST_TIMEOUT_MS = 30000;' -- main/constants.js` prints one line and exits 0.
+        - `git grep -c -F 'setTimeout(' -- main/folder-notice.js` prints `main/folder-notice.js:1`, and `git grep -c -F 'clearTimeout(timer)' -- main/folder-notice.js` prints `main/folder-notice.js:1`; each exits 0.
+        - `git grep -n -E 'setInterval|requestAnimationFrame' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). `git grep -n -E 'setTimeout|setInterval|requestAnimationFrame' -- src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). `git grep -n -F 'style=' -- src/components/FolderNoticeBanner.tsx` prints nothing (exit 1).
+        - Dry-runs: each exits 1, no output. The new files do not exist on the base, so the "prints nothing" checks are vacuous there; tests (fn-b), (fn-z) and (fn-p) are their positive controls. On the base, `git grep -c -F 'FOLDER_' -- main/constants.js` prints `d0720ce0:main/constants.js:10`, and this item makes it 12.
+    13. **One text, two places.** `git grep -c -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js src/components/FolderNoticeBanner.tsx` prints exactly `main.js:1` and `src/components/FolderNoticeBanner.tsx:1`, and exits 0.
+        - Dry-run: exit 1, no output. On the merged base it prints `main.js:1`.
+    14. **Shared core:** `git diff --numstat refs/remotes/origin/main -- src/types.ts` prints exactly `3	0	src/types.ts` and exits 0. `git grep -n -E '(getFolderProblem|retrySourceFolder|onFolderProblem)\?:' -- src/types.ts` prints three lines and exits 0.
+        - Dry-run of the second: exit 1, no output.
+    15. **These stay untouched:**
+        - `git grep -n -F 'showToast(data.message, 7000);' -- src/components/LibraryContainer.tsx` still prints one line and exits 0. Dry-run: `d0720ce0:src/components/LibraryContainer.tsx:146:`, exit 0.
+        - `git grep -n -F 'onAdd: (filepath) => folderSync.applyAdd(filepath),' -- main.js` still prints one line and exits 0, and so does `onChange: (filepath) => folderSync.applyChange(filepath),`. Dry-runs: `d0720ce0:main.js:351:` and `:353:`, exit 0.
+        - `git diff --numstat refs/remotes/origin/main -- main/ipc/library.js` prints exactly `1	0	main/ipc/library.js` and exits 0: one added line.
+        - `git diff --quiet refs/remotes/origin/main -- src/styles src/components/LibraryContainer.tsx main/folder-watcher.js src/test-harness` exits 0.
+    16. **Technical Reference.** `docs/governance/TECHNICAL_REFERENCE.md:711`, the "Folder watch" row: its description cell ends with `; while the folder cannot be reached, the library shows a banner whose Retry makes one root check per press, capped at FOLDER_RETRY_LIST_TIMEOUT_MS, and starts one sync when the folder lists (main/folder-notice.js, FOLDER-NOTICE-1)`, directly before ` | \`main/folder-watcher.js\` |`.
+        - `git grep -c -F 'FOLDER-NOTICE-1' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0. Dry-run: exit 1, no output.
+    17. **Scratch-profile live control, with an instrument control (LL-151, LL-152), production builds, a LOCAL temp folder.**
+        - Never the owner's profile, and never Google Drive. The executor runs it unattended; every probe checks `document.visibilityState` (standing rule 45). Not dry-run by the planner (it launches the app). The full recipe is in Implementation detail, Live control.
+        - **(control, C1 build)** With the folder renamed away before launch, the probe reports `banner: false` after 15 s, and the toast counter's self-test reads `self-test 1`. A probe that reads `banner: true` here, or a self-test that does not read `self-test 1`, means the instrument is wrong: stop.
+        - **(C2 build)**, same profile:
+          - (a) a launch with the folder away shows the banner, with Retry enabled;
+          - (b) one press makes exactly one root check: one `Retry: one root check: null` line, and no new `source folder problem:` line (no sync runs on a failed check). There is no toast; the banner stays, and Retry is enabled again;
+          - (c) 60 s with no input add no root-check line, no problem line and no toast;
+          - (d) the folder restored with no press leaves the banner up, and adds no root-check line;
+          - (e) one press clears the banner within 10 s, with a `Retry: one root check: true` line and no toast;
+          - (f) a file copied in afterwards reaches `library.json` within 15 s (the watcher resumed quietly);
+          - (g) a relaunch with the folder present shows no banner.
+        - The three seeded ids and the marked position 42 are kept throughout. No new `*.tmp` is left in the profile. The owner's real profile hashes are unchanged.
+    18. **Owner check on the real Drive, deferred to the Stage 8 batched owner smoke** (standing rules 45 and 47; LL-152, LL-158). It runs on the batched production build, on a **copy** of the owner's profile with Google Drive for desktop quit, never the live profile. The exact PowerShell is in Implementation detail, Owner Drive check. Pass:
+        - (A) the toast appears once; the banner persists past the toast;
+        - (B) pressing Retry once makes exactly one root check: the log shows one `[folder-notice] Retry: one root check: null` line, and after 60 s still one, with no second toast;
+        - (C) with Drive started and no press, the banner is still shown after 30 s. One press of Retry then clears it within about 10 s, with one `Retry: one root check: true` line;
+        - (D) every folder book under the Drive path is still in the copy's library;
+        - (E) the owner's live profile hashes are unchanged.
+
+        Blurby.Roadmap adds "FOLDER-NOTICE-1 Done-when 18" to the batched smoke list when this specification folds in. The release-gate clause already names "FOLDER-NOTICE-1's banner and one-press Retry check when it has merged" (`ROADMAP.md:535`).
+    19. On the owner's machine (standing rule 47), `npm ci` exits 0 in the worktree. Then `npm test` exits 0 (Stage 8's closed-list rule governs load-timing failures), `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48: TypeScript and a `.tsx` file change, and the builds are needed for Done-when 17).
+    20. `git diff --name-status refs/remotes/origin/main` (after `git merge refs/remotes/origin/main`) lists exactly the following, plus the time log `docs/governance/close-outs/Timing.FOLDER-NOTICE-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.FOLDER-NOTICE-1.GovernanceStaging.<date>.md` if kept (standing rule 41):
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+        - `M main.js`
+        - `M main/constants.js`
+        - `A main/folder-notice.js`
+        - `M main/folder-sync.js`
+        - `M main/ipc/library.js`
+        - `M main/ipc/state.js`
+        - `M preload.js`
+        - `A src/components/FolderNoticeBanner.tsx`
+        - `M src/components/LibraryView.tsx`
+        - `M src/types.ts`
+        - `A tests/folderNotice.test.js`
+        - `A tests/folderNoticeBanner.test.tsx`
+        - `M tests/folderSwitchWatcherFirst.test.js`
+        - `M tests/folderSync.test.js`
+        - `M tests/folderUnreachableGuard.test.js`
+
+        Absent: every `src/styles/**` file, `src/components/LibraryContainer.tsx`, `main/folder-watcher.js` and `src/test-harness/**`.
+- **Effort:** M. The code is small: one 30-line module, one 40-line component, one constant, and one-line edits elsewhere. Most of the effort is twenty-eight tests (fake timers, the real folder sync, the rescan handler, a jsdom library render), a scripted live control with an instrument control, and an owner check.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; the repository operator merges on Blurby.Roadmap's go (Stage 8 session routing); technical questions go to Blurby.Brain; the owner runs Done-when 18 in the batched smoke.
+- **Lane:** UX polish. Execution surfaces C (the library banner) and D (main-process state, IPC, preload and one constant). Cross-lane: it builds on two Library & Content items, FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2.
+- **Source:**
+  - The owner's decision (option C, 2026-10-14/15, relayed by Blurby.Brain), with the refinement "button tries only once. No infinite loop".
+  - Blurby.Brain's rulings R1–R4 of 2026-10-15.
+  - FOLDER-UNREACHABLE-GUARD-1's ruling Q1 (amended) and its "Once per episode" ruling (`ed05868a`).
+  - LARGE-FOLDER-SYNC-2's "Owner decision: the scan-failure notice".
+  - This trace on `d0720ce0`.
+- **Path:** dispatch.
+- **Branch:** `eb/folder-notice-1` from `refs/remotes/origin/main` after FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2 merge, in worktree `C:\Projects\Blurby\.worktrees\folder-notice-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Merge order:** after FOLDER-UNREACHABLE-GUARD-1 (22), which also edits `rescan-folder`, and LARGE-FOLDER-SYNC-2 (23). It is not a release gate: the release does not wait for it, but if it merges first, the batched smoke covers it.
+
+##### Implementation detail
+- **Edit sites.** Line numbers are on `d0720ce0`; the anchors are on the merged base (Prerequisites). Re-grep before each edit.
+  - **`main/constants.js:173`**, in the Folder Watcher section, after `const FOLDER_SCAN_YIELD_EVERY = 500;`, add:
+    ```js
+    /** Retry's check that the source folder lists gives up after this long; the banner stays and Retry can be pressed again (ms) */
+    const FOLDER_RETRY_LIST_TIMEOUT_MS = 30000;
+    ```
+    In `module.exports`, after `  FOLDER_SCAN_YIELD_EVERY,` (`:284`), add `  FOLDER_RETRY_LIST_TIMEOUT_MS,`.
+  - **New `main/folder-notice.js`:**
+    ```js
+    // main/folder-notice.js: the source folder's problem for the library banner (FOLDER-NOTICE-1): null, or the last code
+    // that means unreachable. Each change is pushed. Retry makes one root check per press and at most one sync call.
+    // CommonJS only — Electron main process
+    "use strict";
+    const { FOLDER_RETRY_LIST_TIMEOUT_MS } = require("./constants");
+
+    // Only these codes mean the folder cannot be reached. A partial read stays log-only: the root was listed, so "can't
+    // reach your source folder" would be false, and Drive placeholder read errors on a large folder would make the banner noisy.
+    const BANNER_CODES = new Set(["root-unlistable", "root-empty-suspect", "watch-failed", "sync-failed"]);
+
+    function createFolderNotice({ send, getFolder, checkRoot, sync, resumeWatcher }) {
+      let problem = null;
+      function set(code) {
+        if (code !== null && !BANNER_CODES.has(code)) return;
+        if (code === problem) return;
+        problem = code;
+        send(code);
+        if (code === null) resumeWatcher(); // reachable again: a watcher that failed this episode restarts, with no toast
+      }
+      // A different folder was chosen: the old folder's banner goes, and nothing is restarted (the handler starts the new watcher).
+      function reset() {
+        if (problem === null) return;
+        problem = null;
+        send(null);
+      }
+      // One root check, capped by one timer that is always cleared; on true, clear and start one sync without waiting for it.
+      // A check that settles after the cap is ignored. Nothing is scheduled after this returns.
+      async function retry() {
+        const folder = getFolder();
+        if (!folder) return problem;
+        let timer;
+        const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), FOLDER_RETRY_LIST_TIMEOUT_MS); });
+        const root = await Promise.race([checkRoot(folder), cap]).finally(() => clearTimeout(timer));
+        console.log("[folder-notice] Retry: one root check:", root);
+        if (root === true) {
+          set(null);
+          sync(); // one full sync, not awaited: syncAll joins a running one and never rejects
+        }
+        return problem;
+      }
+      return { get: () => problem, set, reset, retry };
+    }
+
+    module.exports = { createFolderNotice };
+    ```
+  - **`main.js:18`**, after `const { createFolderSync } = require("./main/folder-sync");`, add `const { createFolderNotice } = require("./main/folder-notice");`.
+  - **`main.js`, FOLDER-UNREACHABLE-GUARD-1's hook block** (between `emitSyncProgress`, `:321-325`, and `const folderSync = createFolderSync({`, `:327`). Before (as amended at `ed05868a`):
+    ```js
+    // HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): the last folder problem's code ("root-unlistable",
+    // "root-empty-suspect" or "partial-read") rides on the existing watcher-error payload. Nothing new is sent: each send is a toast.
+    let lastFolderProblem = null;
+    let folderToastShown = false; // one watcher-error toast per failure episode
+    function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }
+    ```
+    After:
+    ```js
+    // The source folder's problem (FOLDER-NOTICE-1; BUG-195's hook): null, or the last code that means unreachable (the set in
+    // main/folder-notice.js; a partial read is only logged here). Each change goes to the library banner, not a toast.
+    let folderToastShown = false; // one watcher-error toast per failure episode
+    const folderNotice = createFolderNotice({
+      send: (code) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("folder-problem", code); },
+      getFolder: () => settings.sourceFolder,
+      checkRoot: rootHasContent,
+      sync: () => syncLibraryWithFolder(),
+      // On a clear: restart a watcher that failed this episode; the flag keeps a failed restart from toasting (the banner shows).
+      resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },
+    });
+    function reportFolderProblem(code, folder) { folderNotice.set(code); console.warn("[folder-sync] source folder problem:", code, folder); }
+    function reportFolderOk() { folderNotice.set(null); }
+    function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); } // a different folder: a new episode (R5)
+    ```
+    `syncLibraryWithFolder` and `startWatcherFn` are hoisted function declarations. `rootHasContent` comes from FOLDER-UNREACHABLE-GUARD-1's import at `:15`. `watcher`, `folderWorkStopped`, `settings` and `mainWindow` are module-level `let`s (`main.js:63-68`, `:89`). Each is read only when a callback runs, after app ready.
+  - **`main.js`, the `createFolderSync` dependencies** (FOLDER-UNREACHABLE-GUARD-1's `:332`).
+    - Before: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,`.
+    - After: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,`.
+    - The substring that FOLDER-UNREACHABLE-GUARD-1's test (n) pins, `emitProgress: emitSyncProgress, reportFolderProblem,`, is kept.
+  - **`main.js`, `onError`.** Directly before `      if (folderToastShown) return;`, add:
+    ```js
+          folderNotice.set(folderNotice.get() || "watch-failed"); // the banner shows even when this episode's toast was sent
+    ```
+  - **`main.js`, the payload.**
+    - Before: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`.
+    - After: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: folderNotice.get() });`.
+    - The line above has just set a non-null code, so the value is unchanged. The renderer reads only `data.message`.
+  - **`main.js:463`**, the `ipcContext`. After `  startWatcher: startWatcherFn,`, add:
+    ```js
+      reportFolderOk,
+      resetFolderNotice,
+      getFolderProblem: () => folderNotice.get(),
+      retrySourceFolder: () => folderNotice.retry(),
+    ```
+  - **`main/folder-sync.js`, the destructure.** Before: `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`. After: `    emitProgress, now = Date.now, reportFolderProblem = () => {}, reportFolderOk = () => {} } = deps;`.
+  - **`main/folder-sync.js:72`**, `runFullSync`. Directly after `    emitProgress(0, 0, "scanning");` (before FOLDER-UNREACHABLE-GUARD-1's `const report = {};`), add:
+    ```js
+        if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder); // reachable, known before the walk (FOLDER-NOTICE-1)
+    ```
+    The run then continues to the scan exactly as before. A stale run is not returned from here, so the scan-call counts of existing tests (d), (n2) and (n3) are unchanged.
+  - **`main/folder-sync.js:126`**, `syncAll`'s catch.
+    - Before: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
+    - After: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); reportFolderProblem("sync-failed", folder); })`.
+    - The F3 log line that `tests/folderSync.test.js:403` pins is unchanged.
+  - **`main/folder-sync.js:135-136`**, `addOne`. After `    try { st = await statFile(p); } catch { return; }` and its `    if (stopped) return;`, add:
+    ```js
+        reportFolderOk(getSourceFolder()); // a watcher add read a file under the folder, so the root lists content
+    ```
+    `underFolder(p)` (`:133`) has already checked that the path is under the source folder.
+  - **`main/ipc/library.js`, `rescan-folder`** (R3). After FOLDER-UNREACHABLE-GUARD-1's `root-empty-suspect` block closes, and before `      const skipped = (report.skipped || []).map(pathKey);`, add:
+    ```js
+          if (files.length) ctx.reportFolderOk(); // the rescan listed books, so the root is reachable (FOLDER-NOTICE-1)
+    ```
+  - **`main/ipc/state.js:9`**, after `const fsPromises = require("fs/promises");`, add `const { pathKey } = require("../folder-sync");`.
+  - **`main/ipc/state.js:72`** (`select-folder`) and **`:87`** (`switch-folder`) (R5). Directly before each `    settings.sourceFolder = folder;`, add:
+    ```js
+        if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice(); // a different folder: the banner was the old one's
+    ```
+    In `switch-folder`, this lands after IPC-PATH-TRUST-1's recent-folder check and the `access` check, so a refused switch resets nothing. Re-selecting the same folder (the same `pathKey`) resets nothing.
+  - **`main/ipc/state.js`**, inside `register`, after `switch-folder`'s closing `  });` and before the `}` that closes `register` (`:93-94` on the base):
+    ```js
+
+      // The library banner (FOLDER-NOTICE-1): main owns the folder's problem; Retry is one root check per call, never repeated.
+      ipcMain.handle("get-folder-problem", () => ctx.getFolderProblem());
+      ipcMain.handle("retry-source-folder", () => ctx.retrySourceFolder());
+    ```
+  - **`preload.js:41`**, after `  switchFolder: (folder) => ipcRenderer.invoke("switch-folder", folder),`, add:
+    ```js
+      getFolderProblem: () => ipcRenderer.invoke("get-folder-problem"),
+      retrySourceFolder: () => ipcRenderer.invoke("retry-source-folder"),
+    ```
+  - **`preload.js:211`**, after `onWatcherError`'s closing `  },`, add:
+    ```js
+      onFolderProblem: (callback) => {
+        const handler = (_event, code) => callback(code);
+        ipcRenderer.on("folder-problem", handler);
+        return () => ipcRenderer.removeListener("folder-problem", handler);
+      },
+    ```
+  - **`src/types.ts:371`** (shared core), after `  onWatcherError?: (callback: (data: { message: string }) => void) => () => void;`, add exactly:
+    ```ts
+      getFolderProblem?: () => Promise<string | null>; // FOLDER-NOTICE-1: null, or the source folder's reason code
+      retrySourceFolder?: () => Promise<string | null>;
+      onFolderProblem?: (callback: (code: string | null) => void) => () => void;
+    ```
+  - **New `src/components/FolderNoticeBanner.tsx`:**
+    ```tsx
+    // FolderNoticeBanner: the library banner shown while Blurby cannot reach the source folder (FOLDER-NOTICE-1).
+    // Main owns the state. Retry asks main for one root check and is disabled while it runs; nothing here retries.
+    import { useEffect, useState } from "react";
+
+    const api = window.electronAPI;
+    const TEXT = "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";
+
+    export default function FolderNoticeBanner() {
+      const [problem, setProblem] = useState<string | null>(null);
+      const [busy, setBusy] = useState(false);
+
+      useEffect(() => {
+        let pushed = false; // a push is newer than the getter's answer
+        const off = api.onFolderProblem?.((code) => { pushed = true; setProblem(code); });
+        api.getFolderProblem?.().then((code) => { if (!pushed) setProblem(code); }, () => {});
+        return off;
+      }, []);
+
+      if (!problem) return null;
+
+      const retry = async () => {
+        setBusy(true);
+        try {
+          const code = await api.retrySourceFolder?.();
+          if (code !== undefined) setProblem(code);
+        } catch {
+          // the banner stays; Retry can be pressed again
+        } finally {
+          setBusy(false);
+        }
+      };
+
+      // The library's update-banner strip, reused as is: no new visual design (owner decision, 2026-10-15).
+      return (
+        <div className="update-banner" role="alert">
+          <span>{TEXT}</span>
+          <button onClick={retry} disabled={busy} className="btn-fill update-banner-restart-btn">Retry</button>
+        </div>
+      );
+    }
+    ```
+  - **`src/components/LibraryView.tsx:15`**, after `import GoalProgressWidget from "./GoalProgressWidget";`, add `import FolderNoticeBanner from "./FolderNoticeBanner";`.
+  - **`src/components/LibraryView.tsx:378`**, after the `{updateReady && ( … )}` block's closing `      )}`, add:
+    ```tsx
+
+          <FolderNoticeBanner />
+    ```
+    It sits directly under the update banner, above `.library-scroll`.
+  - **`tests/folderSwitchWatcherFirst.test.js`** (LARGE-FOLDER-SYNC-2's), its plain `ctx` (C2, with the `main/ipc/state.js` edit). Add `resetFolderNotice: vi.fn(),`.
+    - Its (ws-select) and (ws-switch) cases pick a folder that differs from `sourceFolder`, so the handler now calls `ctx.resetFolderNotice()`. On a plain object without it, that throws.
+    - Nothing else changes, and its `order` assertions are unaffected. `tests/ipcPathTrust.test.js` and SETTINGS-KEY-TRUST-1's harness use a `Proxy` `ctx` whose unlisted members are `vi.fn()`, so they need no edit.
+  - **`tests/folderUnreachableGuard.test.js`, test (n)** (C2, with the `main.js` edit). Replace the expected string `reason: lastFolderProblem || "watch-failed"` with `reason: folderNotice.get()`. Nothing else in that file changes. FOLDER-UNREACHABLE-GUARD-1's pin moves with the code it pins (LL-156).
+  - **`docs/governance/TECHNICAL_REFERENCE.md:711`:** the Done-when 16 text.
+  - Nothing else changes. In particular, these stay as they are:
+    - `main.js`'s watcher callbacks;
+    - the toast text and its once-per-episode lines;
+    - `LibraryContainer.tsx` and every stylesheet;
+    - the scan (`main/folder-watcher.js`);
+    - every other line of `rescan-folder` and `main/ipc/library.js`;
+    - FOLDER-UNREACHABLE-GUARD-1's `partial-read` reports.
+- **Tests** (all committed at C1, except the one-string edit to (n) above):
+  - **New `tests/folderNotice.test.js`** (Vitest, node environment; `const require = createRequire(import.meta.url)`).
+    - **Shared setup:**
+      - `loadNotice()` returns `require("../main/folder-notice.js").createFolderNotice`, and is called inside each test. At C1 each module test then fails alone, with `Cannot find module '../main/folder-notice.js'`, and the rest of the file still runs.
+      - `make({ root, sync })` builds `n = createFolderNotice({ send, getFolder, checkRoot, sync, resumeWatcher })`, where:
+        - `send = vi.fn()`, `resumeWatcher = vi.fn()` and `getFolder = () => ROOT`;
+        - `checkRoot = vi.fn(root)`, where `root` defaults to `async () => null`;
+        - `sync = vi.fn(sync)`, where `sync` defaults to `async () => {}`.
+      - `const { FOLDER_RETRY_LIST_TIMEOUT_MS } = require("../main/constants.js")`. The value is read, not hard-coded, except in (fn-z)'s check that it is 30000.
+      - `afterEach`: `vi.useRealTimers()`, `vi.restoreAllMocks()`, `Module._load = originalLoad`, and clear `../main/ipc/state.js` and `../main/ipc/library.js` from `require.cache`.
+    - **The state IPC harness:**
+      - It uses the `Module._load` pattern of `tests/folderSwitchWatcherFirst.test.js` (LARGE-FOLDER-SYNC-2): a fake `electron` whose `ipcMain.handle` captures handlers into a `Map`, with `dialog: {}` and `app: {}`; and `../window-manager` as `{ getSystemTheme: vi.fn(), updateWindowTheme: vi.fn() }`. `../constants` is the real module.
+      - It calls `require("../main/ipc/state.js").register(ctx)` with `ctx = { getSettings: () => ({ recentFolders: [] }), getMainWindow: () => null, saveSettings: vi.fn(), getLibrary: () => [], syncLibraryWithFolder: vi.fn(), startWatcher: vi.fn(), getFolderProblem: vi.fn(() => "root-unlistable"), retrySourceFolder: vi.fn(async () => "root-unlistable") }`.
+    - **The rescan harness:** FOLDER-UNREACHABLE-GUARD-1's (its Tests, "Rescan harness"), which is the `Module._load` pattern of `tests/readFileBufferLibrary.test.js:31-57`, with these parts:
+      - `../folder-watcher` is not stubbed;
+      - a temp tree under `os.tmpdir()`, with `.txt` fixtures;
+      - `ctx` is a `Proxy` whose unlisted members are `vi.fn()`, and whose listed members are `getSettings: () => ({ sourceFolder: root })`, `getLibrary`, `setLibrary`, a data folder in the temp tree, and `reportFolderOk: vi.fn()`.
+    - **Fail at C1** (module cases: `Cannot find module`; the others for the reason shown):
+      - **(fn-a) One press, one root check; a failed check makes no sync call.** `make()` (the check resolves `null`), then `n.set("root-unlistable")`. `await n.retry()` returns `"root-unlistable"`.
+        - `checkRoot` was called exactly once, with `ROOT`.
+        - `sync` was not called.
+        - `send` was called exactly once (by the first `set`).
+        - `resumeWatcher` was not called.
+        - A `console.log` spy saw `"[folder-notice] Retry: one root check:"` exactly once, with `null`.
+        - The same holds with the check resolving `false`.
+      - **(fn-b) A failed attempt schedules nothing.** `vi.useFakeTimers()`, then (fn-a)'s setup and `await n.retry()`.
+        - `vi.getTimerCount()` is 0 (the cap was cleared).
+        - After `vi.advanceTimersByTime(60 * 60 * 1000)`, `checkRoot` is still called once, `sync` never, and `send` has gained no call.
+      - **(fn-c) A clear from any source pushes once and resumes the watcher once.**
+        - `n.set("watch-failed")`, then `n.set(null)`: `send` was last called with `null`, and `resumeWatcher` once.
+        - `n.set(null)` again: no new `send`, and `resumeWatcher` still once.
+        - `n.set("root-empty-suspect")`: `send` is called with that code, and `resumeWatcher` is still once (a problem never restarts anything).
+      - **(fn-d) A successful Retry clears, restarts the watcher, then starts one sync, and returns without waiting for it.**
+        - Setup: `make({ root: async () => true, sync: () => new Promise(() => {}) })`, a sync that never settles, then `n.set("root-unlistable")`.
+        - `await n.retry()` resolves `null`.
+        - `checkRoot` was called once and `sync` once.
+        - `resumeWatcher` was called once, and before `sync`: `resumeWatcher.mock.invocationCallOrder[0] < sync.mock.invocationCallOrder[0]`.
+        - With fake timers, `vi.getTimerCount()` is 0.
+      - **(fn-e) End to end with the real folder sync: the banner clears before the scan ends; a second press starts no second scan.**
+        - `createFolderSync` (real) gets fakes in the shape of `tests/folderSync.test.js`'s `makeDeps`:
+          - `getSourceFolder: () => ROOT` and an empty library;
+          - `scanFolderAsync: vi.fn(() => d.promise)` (deferred);
+          - `rootHasContent: async () => true`;
+          - `statFile` rejecting with code `ENOENT`;
+          - `saveLibrary`, `saveLibraryNow`, `broadcastLibrary` and `emitProgress` as `vi.fn()`;
+          - `reportFolderProblem: (c) => n.set(c)` and `reportFolderOk: () => n.set(null)`.
+        - `n` is built with `root: async () => true` and `sync: () => fs.syncAll()`. Then `n.set("root-unlistable")`.
+        - `await n.retry()` resolves `null` while `d` is still pending.
+        - Then a second `await n.retry()` (the renderer would have blocked it, but main must not double up): `checkRoot` has 2 calls in total (one per press), `sync` has 2, and `scanFolderAsync` was called once (the second call joined the running run).
+        - Then `d.resolve([])` and flush. `n.get()` is `null`, and `resumeWatcher` was called once.
+      - **(fn-f) A failed real attempt makes no sync and restarts nothing.** As (fn-e), with `root: async () => null`. `await n.retry()` returns `"root-unlistable"`; `scanFolderAsync` and `resumeWatcher` were not called; every `send` call carried a string or `null`. `send` is the module's only outlet, and main wires it to `folder-problem`, never `watcher-error`.
+      - **(fn-k) `get-folder-problem`.** The handler exists and returns `"root-unlistable"` from `ctx.getFolderProblem`. *C1: no handler is registered (`expected undefined to be a function`).*
+      - **(fn-l) `retry-source-folder`.** Two invocations make exactly two `ctx.retrySourceFolder` calls, one each, and each returns `"root-unlistable"`. Main neither queues nor repeats a call. *C1: no handler.*
+      - **(fn-m) Wiring (source text).**
+        - `main.js` contains:
+          - `const { createFolderNotice } = require("./main/folder-notice");`
+          - `mainWindow.webContents.send("folder-problem", code)`
+          - `getFolder: () => settings.sourceFolder,`
+          - `checkRoot: rootHasContent,`
+          - `function reportFolderOk() { folderNotice.set(null); }`
+          - `function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); }`
+          - `  resetFolderNotice,`
+          - `emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,`
+          - `getFolderProblem: () => folderNotice.get(),`
+          - `retrySourceFolder: () => folderNotice.retry(),`
+          - `resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },`
+          - `reason: folderNotice.get()`
+        - The index of `folderNotice.set(folderNotice.get() || "watch-failed");` is greater than `-1` and less than the index of `if (folderToastShown) return;`.
+        - `main.js` has at least three matches of `/\breportFolderOk\b/g`.
+        - It does not contain `lastFolderProblem`.
+        - It still contains `if (watcher) folderToastShown = false;` and the toast text.
+        - `preload.js` contains `getFolderProblem: () => ipcRenderer.invoke("get-folder-problem"),`, `retrySourceFolder: () => ipcRenderer.invoke("retry-source-folder"),` and `ipcRenderer.on("folder-problem", handler);`.
+        - *C1: the listed `main.js` and `preload.js` strings are absent, and `lastFolderProblem` is present.*
+      - **(fn-s) `partial-read` is log-only** (R1).
+        - From a fresh `n`: `n.set("partial-read")` leaves `n.get()` `null`, and `send` and `resumeWatcher` are not called.
+        - After `n.set("root-unlistable")` (one `send`): `n.set("partial-read")` leaves `n.get()` `"root-unlistable"`, with no new `send`.
+        - An unknown code such as `n.set("other")` is also ignored.
+      - **(fn-x) A Rescan that lists books clears** (R3). On disk: `root/a.txt`. Library: `[folderDoc("A", root/a.txt)]`. After `rescan-folder`, `ctx.reportFolderOk` was called exactly once. *C1: not called.*
+      - **(fn-z) A hung root check fails after the cap, with no sync and no pending timer** (R4).
+        - `FOLDER_RETRY_LIST_TIMEOUT_MS` is 30000.
+        - `vi.useFakeTimers()`; `make({ root: () => new Promise(() => {}) })`, a check that never settles; `n.set("root-unlistable")`.
+        - `const p = n.retry()`. After `await vi.advanceTimersByTimeAsync(FOLDER_RETRY_LIST_TIMEOUT_MS - 1)`, `p` has not settled (a flag set in `.then`).
+        - After `await vi.advanceTimersByTimeAsync(1)`, `await p` is `"root-unlistable"`.
+        - `checkRoot` was called once, `sync` never, `resumeWatcher` never, and `send` gained no call. `vi.getTimerCount()` is 0.
+        - The log line carried `"timeout"`.
+      - **(fn-sw) A different folder clears the banner and starts a new toast episode** (R5). This uses the state harness with real temp folders `A`, `B` (empty, readable) and `C`, and the real `createFolderNotice`.
+        - **`ctx`:**
+          - `settings = { sourceFolder: A, recentFolders: [A, B, C] }`.
+          - `ctx.resetFolderNotice` replays `main.js`'s one line (pinned by (fn-m)): `toastShown = false; n.reset();`.
+          - `ctx.startWatcher` replays `startWatcherFn`'s rule. For `C` it fails, as `fs.watch` throws on an unlistable root: it runs `n.set(n.get() || "watch-failed")`, then, if `!toastShown`, sets `toastShown = true` and pushes `C` to `watcherErrors`. For any other folder it succeeds and sets `toastShown = false` (FOLDER-UNREACHABLE-GUARD-1's reset).
+          - `ctx.syncLibraryWithFolder`: for `C` it calls `n.set("root-unlistable")`. For `B` it does nothing, because an empty readable root has `rootHasContent` `false`, so nothing clears and nothing is reported.
+        - **Run 1** (A → B → C). Start with `n.set("root-unlistable")` and `toastShown = true`: A's banner and toast.
+          - `switch-folder` with `B`: `n.get()` is `null`, `send` was last called with `null`, and `resumeWatcher` was not called.
+          - `switch-folder` with `C`: `n.get()` is `"root-unlistable"` (the banner is up again), and `watcherErrors` is exactly `[C]`.
+        - **Run 2** (A → C directly), with the same starting state. `switch-folder` with `C`: `watcherErrors` is exactly `[C]`. Without the reset, A's flag would have swallowed C's first toast.
+        - *C1: the handlers never call `resetFolderNotice`. After run 1's switch to `B` the banner is still `"root-unlistable"`, and run 2's `watcherErrors` is empty.*
+    - **Controls, passing at C1 and C2:**
+      - **(fn-same) Re-selecting the same folder is not a switch** (R5). Same harness, starting state as (fn-sw), with `ctx.resetFolderNotice` as a spy. `switch-folder` with `A`: the spy was not called, and `n.get()` is still `"root-unlistable"`.
+      - **(fn-t)** The state harness still registers `select-folder` and `switch-folder`, and `get-state` returns `{ settings, library }`.
+      - **(fn-y)** A Rescan of a missing root does not clear. `root` is never created. `rescan-folder` returns FOLDER-UNREACHABLE-GUARD-1's `error` with `reason: "root-unlistable"`, and `ctx.reportFolderOk` was not called.
+  - **`tests/folderSync.test.js`:** append to the outer `describe`, after (k).
+    - Each test takes `const { state, deps } = makeDeps(…)`, sets `deps.reportFolderOk = vi.fn()` and `deps.reportFolderProblem = vi.fn()`, then calls `const sync = createFolderSync(deps)`. `createFolderSync` destructures its dependencies when it is created.
+    - `makeDeps`'s `rootHasContent` fake is FOLDER-UNREACHABLE-GUARD-1's: `true` for a path in `disk` (ROOT by default), otherwise `null`.
+    - **Fail at C1** (the C1 module never calls `reportFolderOk`):
+      - **(fn-g) A full sync whose root lists clears.** Disk: ROOT and `a.epub`. The scan returns `[file(a)]`; the library is `[folderDoc("A", a)]`. After `syncAll()`: `reportFolderOk` was called once with ROOT, and `reportFolderProblem` was not called.
+      - **(fn-h) The clear comes before the walk.** `scanFolderAsync` returns a deferred promise. Start `const run = sync.syncAll()`, then `await new Promise((r) => setImmediate(r))`.
+        - While the scan is pending, `reportFolderOk` has been called with ROOT, and its call order is below `scanFolderAsync`'s.
+        - Then resolve the scan with `[]` and `await run`.
+      - **(fn-i) A thrown scan reports `sync-failed` after the clear.** `scanFolderAsync.mockRejectedValue(new Error("EIO"))`, with `console.error` mocked. `reportFolderProblem` was called with `("sync-failed", ROOT)`, and after `reportFolderOk` (call order), so the last state is the problem.
+      - **(fn-j) A watcher add under the folder clears.** Disk: ROOT and `p = ROOT/n.epub`. After `applyAdd(p)`: `reportFolderOk` was called with ROOT.
+      - **(fn-v) A partial read still counts as reachable** (R1). The scan sets `report.skipped = [path.join(ROOT, "sub")]` on its second argument and returns `[file(a)]`. `reportFolderProblem` was called with `("partial-read", ROOT)` (the log line is kept), and `reportFolderOk` was called with ROOT.
+    - **Control, passing at C1 and C2:**
+      - **(fn-u) A root that does not list content does not clear.** Two runs:
+        - `deps.rootHasContent = async () => null`, with the scan resolving `null`: `reportFolderProblem` was called with `("root-unlistable", ROOT)`.
+        - `deps.rootHasContent = async () => false`, with the scan resolving `[]` and a held book under ROOT: `reportFolderProblem` was called with `("root-empty-suspect", ROOT)`.
+        - In both runs, `reportFolderOk` was not called.
+  - **New `tests/folderNoticeBanner.test.tsx`** (`// @vitest-environment jsdom`). It renders the real parent, so a C1 failure shows the banner missing from the library and not only a missing file.
+    - Copy `tests/updateInstallGating.test.tsx`'s `createElectronApiMock`, `flushPromises` and `beforeEach`/`afterEach`, and add three members:
+      - `getFolderProblem: vi.fn().mockResolvedValue(initial)`;
+      - `retrySourceFolder: vi.fn(() => gate.promise)`, where `gate` is a deferred promise;
+      - `onFolderProblem: vi.fn((cb) => { push = cb; return () => { push = null; }; })`.
+    - Render `LibraryContainer` (`vi.resetModules()`, then `await import("../src/components/LibraryContainer")`) inside `act`, then flush promises.
+    - `TEXT` is the banner text. `banner()` finds `[role="alert"]` whose text includes `TEXT`. `retryBtn()` finds the button inside it whose text is `"Retry"`.
+    - **Fail at C1** (no banner in the library):
+      - **(fn-n) It shows on mount when main already holds a problem.** `initial = "root-unlistable"`.
+        - `banner()` exists, and `retryBtn()` exists and is not disabled.
+        - The `main.js` source contains `TEXT` exactly: the toast and the banner say the same thing.
+        - *C1: `banner()` is null.*
+      - **(fn-o) One press, one call; a press during the attempt is ignored.**
+        - Click Retry inside `act`: `retrySourceFolder` called once, and `retryBtn().disabled` is `true`.
+        - Click again: still once.
+        - *C1: no Retry button.*
+      - **(fn-p) A failed attempt keeps the banner, re-enables Retry, and nothing retries on its own.**
+        - After (fn-o)'s two clicks, `gate.resolve("root-unlistable")` and flush.
+        - `banner()` exists, and `retryBtn().disabled` is `false`.
+        - After `await new Promise((r) => setTimeout(r, 300))` and a flush, `retrySourceFolder` is still called once, and no `.toast` element contains `TEXT`.
+        - The source of `src/components/FolderNoticeBanner.tsx` contains no `setTimeout`, `setInterval` or `requestAnimationFrame`.
+        - *C1: no Retry button, and no source file.*
+      - **(fn-q) It clears on a success from any source.** `initial = "root-unlistable"`.
+        - `act(() => push(null))`: `banner()` is null.
+        - `act(() => push("watch-failed"))`: the banner is back.
+        - `act(() => push(null))`: it is gone.
+        - *C1: no banner at the start.*
+      - **(fn-r) A successful Retry clears it.** Click Retry, `gate.resolve(null)`, and flush: `banner()` is null. *C1: no Retry button.*
+    - **Control, passing at C1 and C2:**
+      - **(fn-w)** `initial = null`: no element contains `TEXT`, and `.library-header` is rendered.
+  - `tests/updateInstallGating.test.tsx` is unchanged, and stays green at C2 (Done-when 4). Its mock has none of the three new members, so it proves the optional calls.
+- **Live control (Done-when 17):**
+  - **Builds:**
+    - At C1 (tests only, so the source is the merged base), run `npm run build` (exit 0) and `npx electron-builder --win --x64 --dir --publish never` (exit 0). Then `Copy-Item -Recurse release\win-unpacked "$env:TEMP\blurby-fn1-c1-build"`; `$exe1 = "$env:TEMP\blurby-fn1-c1-build\Blurby.exe"`.
+    - After C2, the same two commands; `$exe2 = "<worktree>\release\win-unpacked\Blurby.exe"`.
+    - Never overwrite the G2 build.
+  - **Setup** (executor; every Blurby closed, so `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing):
+    ```
+    $real = "$env:APPDATA\blurby\blurby-data"; $h0 = (Get-FileHash "$real\library.json").Hash, (Get-FileHash "$real\settings.json").Hash
+    $prof = Join-Path $env:TEMP ("blurby-fn1-" + [guid]::NewGuid()); $src = "$prof\books"; $away = "$prof\books-away"
+    New-Item -ItemType Directory "$src\sub" -Force | Out-Null
+    foreach ($f in "$src\a.epub","$src\c.epub","$src\sub\b.epub") { Copy-Item "<worktree>\resources\sample-meditations.epub" $f }
+    $env:BLURBY_USER_DATA_DIR = $prof; $env:ELECTRON_ENABLE_LOGGING = "1"
+    $lib = { try { @((Get-Content "$prof\blurby-data\library.json" -Raw | ConvertFrom-Json).docs | Where-Object source -eq 'folder') } catch { $null } }
+    $launch = { param($exe, $tag) Start-Process -FilePath $exe -ArgumentList '--remote-debugging-port=9338' -RedirectStandardOutput "$prof-$tag-out.txt" -RedirectStandardError "$prof-$tag-err.txt" -PassThru }
+    $cdpJs = "const expr=process.argv[1];fetch('http://127.0.0.1:9338/json/list').then(r=>r.json()).then(l=>{const t=l.find(x=>x.type==='page'&&!x.url.startsWith('devtools'));const s=new WebSocket(t.webSocketDebuggerUrl);s.onopen=()=>s.send(JSON.stringify({id:1,method:'Runtime.evaluate',params:{expression:expr,awaitPromise:true,returnByValue:true}}));s.onmessage=(m)=>{const d=JSON.parse(m.data);if(d.id===1){console.log(d.result.result.value);process.exit(0)}};s.onerror=()=>process.exit(1)}).catch(e=>{console.error(e.message);process.exit(1)})"
+    $cdp = { param($expr) & node -e $cdpJs $expr }
+    $probe = "JSON.stringify({vis:document.visibilityState,banner:[...document.querySelectorAll('.update-banner')].some(b=>b.textContent.includes('reach your source folder')),disabled:([...document.querySelectorAll('.update-banner button')].find(b=>b.textContent==='Retry')||{disabled:null}).disabled,toasts:window.__fnT})"
+    $observe = "(()=>{window.__fnT=0;let was=false;new MutationObserver(()=>{const on=[...document.querySelectorAll('.toast')].some(t=>t.textContent.includes('reach your source folder'));if(on&&!was)window.__fnT++;was=on;}).observe(document.body,{childList:true,subtree:true,characterData:true});const d=document.createElement('div');d.className='toast';d.textContent='reach your source folder';document.body.appendChild(d);return new Promise(r=>setTimeout(()=>{d.remove();setTimeout(()=>{const n=window.__fnT;window.__fnT=0;r('self-test '+n)},50)},50));})()"
+    $press = "(()=>{const b=[...document.querySelectorAll('.update-banner button')].find(b=>b.textContent==='Retry');if(!b)return 'no button';b.click();return 'pressed'})()"
+    $quitJs = "fetch('http://127.0.0.1:9338/json/version').then(r=>r.json()).then(v=>{const s=new WebSocket(v.webSocketDebuggerUrl);s.onopen=()=>s.send(JSON.stringify({id:1,method:'Browser.close'}));s.onclose=()=>process.exit(0);s.onerror=()=>process.exit(1)}).catch(e=>{console.error(e.message);process.exit(1)})"
+    $quit = { param($p) & node -e $quitJs | Out-Null; try { Wait-Process -Id $p.Id -Timeout 20 -ErrorAction Stop } catch { taskkill /PID $p.Id /T /F | Out-Null; "forced quit" } }
+    $logCount = { param($tag, $text) @(Select-String -Path "$prof-$tag-out.txt","$prof-$tag-err.txt" -SimpleMatch -Pattern $text).Count }
+    ```
+    - The helpers follow FOLDER-UNREACHABLE-GUARD-1's live control: Node 24's global `WebSocket`, the CDP `Browser.close` quit, and `$lib` returning `$null` mid-rename (poll again).
+    - The probe and the press use single-quoted JS inside double-quoted PowerShell strings, with no `$` and no apostrophe, so nothing is expanded.
+    - **The probe is void unless it reports `"vis":"visible"`;** rerun that step (standing rule 45).
+    - `$observe` counts each new appearance of a toast holding the banner's words. It first proves it can count, by inserting and removing a fake `.toast` node: it must print `self-test 1`. Then it resets to 0 (LL-151).
+  - **Seed** (with `$exe2`), as in FOLDER-UNREACHABLE-GUARD-1:
+    - (s1) launch, wait for `settings.json`, quit;
+    - (s2) with the app closed, set `sourceFolder` to `$src` in `settings.json` (`ConvertTo-Json -Depth 32`, `-Encoding utf8`);
+    - (s3) launch, poll until `(& $lib).Count -eq 3`, quit.
+    - Record `$ids = @((& $lib).id | Sort-Object)`. Set `position` 42 on the `a.epub` document. Back the library up to `$prof\seed-library.json`.
+    - `$ok = { $d = & $lib; $d -and ((@($d.id | Sort-Object)) -join ',') -eq ($ids -join ',') -and ($d | Where-Object filepath -eq "$src\a.epub").position -eq 42 }`.
+  - **Instrument control, C1 build (LL-151):**
+    - With the app closed, `Rename-Item $src $away`.
+    - `$p = & $launch $exe1 c1`; wait 15 s.
+    - `& $cdp $observe` prints `self-test 1`.
+    - `& $cdp $probe` reports `"vis":"visible"` and `"banner":false` (the C1 build has no banner).
+    - `& $quit $p`; `Rename-Item $away $src`; `Copy-Item "$prof\seed-library.json" "$prof\blurby-data\library.json" -Force`.
+    - If the probe reads `banner:true`, or the self-test does not print `self-test 1`, stop.
+  - **Run, C2 build:**
+    - **(a)** With the app closed, `Rename-Item $src $away`.
+      - `$p = & $launch $exe2 a`; wait 15 s. The startup toast has come and gone: the delay is 3 s and the toast lasts 7 s.
+      - `& $cdp $observe` prints `self-test 1`.
+      - `& $cdp $probe`: `"banner":true`, `"disabled":false`, `"toasts":0`.
+      - Record `$P0 = & $logCount a 'source folder problem:'`, which is 1 or more.
+    - **(b)** `& $cdp $press` prints `pressed`; wait 10 s.
+      - `& $logCount a '[folder-notice] Retry: one root check: null'` is 1.
+      - `& $logCount a 'source folder problem:'` is still `$P0`: no sync ran.
+      - `& $cdp $probe`: `"banner":true`, `"disabled":false`, `"toasts":0`.
+      - `& $ok` is `True`.
+    - **(c)** Wait 60 s with no input.
+      - `& $logCount a '[folder-notice] Retry: one root check'` is still 1, and the problem count is still `$P0`.
+      - The probe still reads `"toasts":0` and `"banner":true`.
+    - **(d)** `Rename-Item $away $src` with the app running; wait 10 s.
+      - The probe still reads `"banner":true`: nothing retried on its own, and there is no watcher to report the folder.
+      - The root-check count is still 1.
+    - **(e)** `& $cdp $press`, then poll the probe each second, for 10 s at most, until `"banner":false`.
+      - Pass: it clears within 10 s.
+      - `& $logCount a '[folder-notice] Retry: one root check: true'` is 1.
+      - The probe reads `"toasts":0`.
+      - `& $ok` is `True`.
+      - The `a` logs hold no new `[watcher] Error:` line after the press.
+    - **(f)** `Copy-Item "<worktree>\resources\sample-meditations.epub" "$src\d.epub"`. Poll each second, for 15 s at most, until a document has `filepath -eq "$src\d.epub"`. Pass: it arrives (the watcher resumed with no relaunch), and the probe still reads `"toasts":0`. Then `& $quit $p`.
+    - **(g)** `$p = & $launch $exe2 g`; wait 15 s. The probe reads `"banner":false`; the root-check count in the `g` logs is 0. Then `& $quit $p`.
+  - The hung-listing cap (R4) is not driven live: a local folder cannot be made to hang on demand. Test (fn-z) covers it on fake timers.
+  - **After:**
+    - `Get-ChildItem "$prof\blurby-data" -Filter *.tmp` prints nothing.
+    - `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
+    - Both hashes equal `$h0`.
+    - `Remove-Item Env:BLURBY_USER_DATA_DIR, Env:ELECTRON_ENABLE_LOGGING`.
+    - Record every probe output, every count, `$prof`, and any forced-quit lines in the staging memo.
+- **Owner Drive check (Done-when 18; Stage 8 batched owner smoke).** Brain or the owner can run this as written. It uses FOLDER-UNREACHABLE-GUARD-1's copy recipe (Owner Drive check: `robocopy` without `auth-tokens.json` or the `*-backup-*` folders, and `sourceFolder` set to the Drive path), and can run in the same session right after that item's (A).
+  ```
+  # 0. Every Blurby closed; the live profile is only read from here on.
+  if (Get-Process Blurby -ErrorAction SilentlyContinue) { throw "Close Blurby first" }
+  $real = "$env:APPDATA\blurby\blurby-data"
+  $hash = { Get-ChildItem $real -File | Sort-Object Name | ForEach-Object { "$($_.Name)=$((Get-FileHash $_.FullName).Hash)" } }
+  $h0 = & $hash
+  $prof = "$env:TEMP\blurby-fn1-owner-" + (Get-Date -Format yyyyMMddHHmmss)
+  robocopy $real "$prof\blurby-data" /E /XF auth-tokens.json /XD *-backup-* /NFL /NDL /NJH /NJS /NP | Out-Null
+  if ($LASTEXITCODE -ge 8) { throw "robocopy failed with exit code $LASTEXITCODE" }   # 0-7 are success codes
+  $drive = 'G:\My Drive\Personal\Readings'
+  $s = Get-Content "$prof\blurby-data\settings.json" -Raw | ConvertFrom-Json
+  $s | Add-Member -Force -NotePropertyName sourceFolder -NotePropertyValue $drive
+  $s | ConvertTo-Json -Depth 32 | Set-Content "$prof\blurby-data\settings.json" -Encoding utf8
+  $lib = { try { @((Get-Content "$prof\blurby-data\library.json" -Raw | ConvertFrom-Json).docs) } catch { $null } }
+  $orig = @(& $lib | Where-Object { $_.source -eq 'folder' -and $_.filepath -and $_.filepath.StartsWith("$drive\", 'OrdinalIgnoreCase') } | ForEach-Object id)
+  "folder books under the Drive path: $($orig.Count)"   # must be above 0, or stop
+  $missing = { $now = @(& $lib | Where-Object source -eq 'folder' | ForEach-Object id); @($orig | Where-Object { $_ -notin $now }).Count }
+  $exe = '<build>\Blurby.exe'
+  $env:BLURBY_USER_DATA_DIR = $prof; $env:ELECTRON_ENABLE_LOGGING = '1'
+  $count = { param($text) @(Select-String -Path "$prof-N-out.txt","$prof-N-err.txt" -SimpleMatch -Pattern $text).Count }
+
+  # A. Owner: quit Google Drive for desktop (tray icon > gear > Quit). Both lines must hold:
+  if (Get-Process GoogleDriveFS -ErrorAction SilentlyContinue) { throw "Google Drive is still running" }
+  if (Test-Path $drive) { throw "The Drive path is still reachable" }
+  $p = Start-Process -FilePath $exe -RedirectStandardOutput "$prof-N-out.txt" -RedirectStandardError "$prof-N-err.txt" -PassThru
+  # Owner: the library opens; the toast "Blurby can't reach your source folder. ..." appears once and goes;
+  # the banner with the same words and a Retry button stays. Wait 20 s and confirm it is still there.
+
+  # B. Owner: press Retry once. Then:
+  Start-Sleep -Seconds 5
+  "B root checks: $(& $count '[folder-notice] Retry: one root check: null')"           # pass: 1
+  Start-Sleep -Seconds 60                                                                # owner: no second toast; the banner stays
+  "B root checks after 60 s: $(& $count '[folder-notice] Retry: one root check')"      # pass: 1
+
+  # C. Owner: start Google Drive for desktop from the Start menu.
+  while (-not (Test-Path $drive)) { Start-Sleep -Seconds 2 }
+  Start-Sleep -Seconds 30                                                                # owner: the banner is still shown (nothing retries on its own)
+  # Owner: press Retry once. The banner goes within about 10 s. Then quit Blurby at once (Alt+F4, or the tray menu's
+  # Quit): the full sync that Retry started scans and then imports files the library lacks (LL-158).
+  Wait-Process -Id $p.Id -Timeout 300
+  "C root checks that listed: $(& $count '[folder-notice] Retry: one root check: true')"  # pass: 1
+
+  # D, E.
+  "missing: $(& $missing)"                                                               # pass: 0
+  "live profile unchanged: " + ((& $hash) -join '|' -eq ($h0 -join '|'))                 # pass: True
+  Remove-Item Env:BLURBY_USER_DATA_DIR, Env:ELECTRON_ENABLE_LOGGING
+  ```
+  - **Why about 10 s (R2, LL-158):** Retry's root check is one `readdir` of the Drive folder's root, and it returns before the full sync's 93.6 s scan. Quitting at once keeps the import that follows short. The copy's library may gain a few books, which is expected, and no original is lost.
+  - The copy stays in `TEMP` for the record. Deleting it is the owner's call (Rule 10).
+- **Staging plan:**
+  - **C1:** `tests/folderNotice.test.js`, `tests/folderNoticeBanner.test.tsx` and the six cases in `tests/folderSync.test.js` (gates: Done-when 1 and 2). Then make the C1 control build (Live control, Builds).
+  - **C2:** the code and docs edits (gates: Done-when 3–17, 19 and 20). They are:
+    - `main/constants.js` and `main/folder-notice.js`;
+    - `main.js`, `main/folder-sync.js`, `main/ipc/library.js` and `main/ipc/state.js`;
+    - `preload.js` and `src/types.ts`;
+    - `src/components/FolderNoticeBanner.tsx` and `src/components/LibraryView.tsx`;
+    - test (n)'s one string, and the `resetFolderNotice: vi.fn(),` fixture line in `tests/folderSwitchWatcherFirst.test.js`;
+    - the Technical Reference line.
+  - Then merge to `main` with `--no-ff` on Blurby.Roadmap's go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass, including Done-when 18.
+  - Stage files by name. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - **A positive control passes at C1:** the test is not reaching the real path. Fix the test, not the code. For example:
+    - the banner test rendered a component directly instead of `LibraryContainer`;
+    - a folder-sync case created the sync before adding the fakes;
+    - (fn-e) stubbed `syncAll`;
+    - (fn-z) used real timers.
+  - **A control fails:** if (fn-t), (fn-u), (fn-w) or (fn-y) fails at C1, the harness is wrong: fix it. If one fails at C2, stop and send it to Blurby.Brain.
+  - **An existing test fails at C2:** report it exactly and stop; do not weaken it. Watch these in particular:
+    - `tests/folderSync.test.js` (k), which pins the watcher callbacks;
+    - (F3), which pins the catch's log line;
+    - (d), (n2) and (n3), which count scans and saves around the new root-check `await`;
+    - (e2), which counts saves;
+    - `tests/perfAudit.test.ts`, which pins `main.js:590`;
+    - `tests/updateInstallGating.test.tsx`;
+    - the rescan tests in `tests/folderUnreachableGuard.test.js`, `tests/saveLibraryTrust.test.js` and `tests/ipcPathTrust.test.js`;
+    - the folder-handler tests in `tests/folderSwitchWatcherFirst.test.js` (its (ws-select), (ws-switch) and (ws-wait) order), `tests/ipcPathTrust.test.js` ((h), (l)) and SETTINGS-KEY-TRUST-1's harness. Any other `main/ipc/state.js` harness with a plain `ctx` that switches folders gets the same one fixture line, and is listed in the staging memo.
+  - **A `createFolderSync` harness lacks `rootHasContent`:** give it FOLDER-UNREACHABLE-GUARD-1's `makeDeps` fake. Do not default the dependency in the module.
+  - **A prerequisite anchor drifted** (Done-when 3): stop for Blurby.Brain before any C2 edit.
+  - **The live control:** if the instrument control fails, stop before the C2 run. If (c) or (d) shows a root-check line or a problem line that no press caused, the one-press rule is broken: stop, and send the logs to Blurby.Brain.
+  - **The owner check:** if Done-when 18 finds a second root-check line for one press, a second toast, a banner still up 10 s after a press with Drive running, or a book missing, stop. Send it to Blurby.Brain with the copy's `library.json` and the log pair.
+  - **Retry ceiling:** two corrections per task, then BLOCKER to Blurby.Brain.
+  - **Rollback:** `git revert -m 1 <merge>`. No data format changes. The `watcher-error` payload keeps its fields, and `folder-problem` is a new, additive channel.
+- **Lane ownership (parallel run):** surfaces C and D.
+  - **Owned lines:**
+    - `main/folder-notice.js` and `src/components/FolderNoticeBanner.tsx` (new);
+    - `main/constants.js`: two lines after `:173`, and one export after `:284`;
+    - `main.js`: the require after `:18`; FOLDER-UNREACHABLE-GUARD-1's hook block (replaced); the `reportFolderProblem,` dependency line; one line in `onError`; the payload line; and three `ipcContext` lines after `:463`;
+    - `main/folder-sync.js`: the destructure's last line; one line after `:72`; the catch at `:126`; and one line in `addOne` after `:136`;
+    - `main/ipc/library.js`: one line in `rescan-folder`, after FOLDER-UNREACHABLE-GUARD-1's `root-empty-suspect` block;
+    - `main/ipc/state.js`: one `pathKey` require after `:9`; one line in `select-folder` before `:72` and one in `switch-folder` before `:87`; and the two handlers after `switch-folder`;
+    - `preload.js`: two lines after `:41`, and five after `:211`;
+    - `src/types.ts`: three lines after `:371`;
+    - `src/components/LibraryView.tsx`: one import after `:15`, and one element after `:378`;
+    - the two new test files, the six cases in `tests/folderSync.test.js`, the one string in `tests/folderUnreachableGuard.test.js`, the one fixture line in `tests/folderSwitchWatcherFirst.test.js`, and the Technical Reference line.
+  - **Forbidden:**
+    - every other file, and every other line of those files;
+    - in particular: the toast text and its `folderToastShown` check, set and reset; `main.js`'s watcher callbacks; FOLDER-UNREACHABLE-GUARD-1's `partial-read` reports; and every other line of `rescan-folder`;
+    - in `main/ipc/library.js`, `keepMainPaths`, `save-library` and `ALLOWED_FIELDS` (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1 and SAVE-LIBRARY-MERGE-1);
+    - in `main/ipc/state.js`, every other line of `select-folder` and `switch-folder`. IPC-PATH-TRUST-1 edited their heads (`:83-85`, merged), and LARGE-FOLDER-SYNC-2 swaps their tails. Re-grep both handlers after each merges (standing rule 36), and do not touch the `save-settings` head (IPC-PATH-TRUST-1, then SETTINGS-KEY-TRUST-1);
+    - in `main/constants.js`, the ZIP caps (DEPS-AUDIT-1);
+    - `src/components/LibraryContainer.tsx`, every stylesheet, `main/folder-watcher.js` and `src/test-harness/**`;
+    - the other shared-core files (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`);
+    - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
+  - **Shared-core touches:** `src/types.ts`, three added lines directly after `onWatcherError?` (`:371`): the getter, Retry and the listener, as given under Edit sites.
+    - No other line of the file changes (Done-when 14).
+    - The run starts this edit only while no other active item edits `src/types.ts`. UX-POLISH-2 (`:188`) and SETTINGS-KEY-TRUST-1 (`sortBy`, after `:201`) are other hunks. Confirm at dispatch that neither of them, nor NARRATE-REBUILD-1's open phase, has the file open.
+  - **Merge order:**
+    - **After FOLDER-UNREACHABLE-GUARD-1 (22):** this item replaces its hook block, edits lines it adds, and adds one line after its `rescan-folder` guard. It is the release gate; this item is not.
+    - **After LARGE-FOLDER-SYNC-2 (23):** it edits `runFullSync` and `addOne` next to this item's lines, and swaps the `switch-folder` tail where the new handlers follow.
+    - **Other hunks of this item's files** (if still open, they land first):
+      - SAVE-LIBRARY-MERGE-1: `save-library`, and the `LibraryView.tsx` Edit form;
+      - SETTINGS-KEY-TRUST-1: the `main/ipc/state.js` head, and `src/types.ts`;
+      - UX-POLISH-2: `src/types.ts:188`.
+    - DEPS-AUDIT-1 is merged; its `main/constants.js` edit is in other hunks.
+    - **Before merging,** `git merge refs/remotes/origin/main` into this branch and re-run Done-when 4–16 and 20. The live control stays out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Banner and Retry tests committed; 23 cases fail on the merged base (no module, no handlers, no `reportFolderOk`, no Rescan clear, no switch reset, no banner in the library); controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same) and the existing suites pass | calculable | positive control | bounded | low | 75m (two new test files: the module on fake timers including the hung-check cap, IPC on fakes, the real folder sync end to end, the rescan handler on a real temp tree, a jsdom render of `LibraryContainer`; six cases in an existing file) | — | — |
+| 2 | Prerequisite anchors re-grepped; one constant; `main/folder-notice.js` with the capped root check; hook block replaced; the switch reset in `select-folder` and `switch-folder`; one-line edits in `main.js`, `main/folder-sync.js`, `main/ipc/library.js`, `main/ipc/state.js`, `preload.js`; three `src/types.ts` lines; `FolderNoticeBanner` under the update banner; test (n) string; one test fixture line; Technical Reference line | calculable | feature | bounded | medium | 50m (one 30-line module with one timer, one 40-line component, one constant, about twenty one-line edits across eight files, one fixture line, one doc line) | — | — |
+| 3 | C1 and C2 `--dir` builds; scratch-profile live control with the local folder renamed away and restored, against the C1 instrument control | calculable | packaging verify | mechanical | low | 40m (two `--dir` builds, seed, four launches, CDP probes, presses and quits, log counts) | — | — |
+| 4 | Suites, typecheck, build; reviews; merged and pushed; the owner Drive check queued for the batched smoke | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + two parallel reviews + one `--no-ff` merge) | — | — |
+
+**Total:** chain 5m · sum 5m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):**
+  - Every line was read on `main` @ `d0720ce0` (fetched 2026-10-15).
+  - FOLDER-UNREACHABLE-GUARD-1's amended hook, "Once per episode" ruling, `main.js` edits and `rescan-folder` guard were read at `ed05868a`.
+  - DEPS-AUDIT-1's `main/constants.js` hunks were read at `a6383286`.
+  - The `select-folder` and `switch-folder` heads (IPC-PATH-TRUST-1, merged) and lines `:71-72` and `:86-87` were read on `d0720ce0`. They are re-grepped after LARGE-FOLDER-SYNC-2 and SETTINGS-KEY-TRUST-1 merge.
+  - The anchors this item builds on are listed under Prerequisites. The run re-greps them after both prerequisites merge (Done-when 3), and stops on any content drift.
+- **Standing rule 41 (LL-136):** the Done-when 20 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):** 23 cases fail on the merged base for named reasons.
+  - (fn-s) and (fn-v) pin R1: `partial-read` is log-only, and still counts as reachable.
+  - (fn-a), (fn-d) and (fn-e) pin R2's counts: one root check per press, and at most one sync call.
+  - (fn-x) pins R3.
+  - (fn-z) pins R4's cap: no sync, no pending timer.
+  - The renderer cases render the real `LibraryContainer`, so they fail because the library has no banner, not only because a file is missing.
+  - The new-module cases load the module inside each test, so each fails on its own and the controls in the same file still run.
+  - (fn-sw) pins R5: a different folder clears the banner and starts a new toast episode.
+  - Controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same) prove that these behave as on the base: the folder handlers, an unreachable or empty root, an empty problem state, a failed Rescan, and re-selecting the same folder.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 5–16 were dry-run on `d0720ce0`.
+  - Gate 9b's anchor lines (`state.js:72`, `:87`), gate 10's first check, gate 11's count and gate 12's `FOLDER_` baseline find their lines there, so they can fail. Gate 9b's new names are empty there. Gate 15's lines match the base.
+  - Gates 5, 7, 9's `rootHasContent` count and 9a's third check are empty there, by design: they become live once FOLDER-UNREACHABLE-GUARD-1 merges, and Done-when 3 must see their lines on the merged base first.
+  - Gate 12's "prints nothing" checks are vacuous on the base (no files); tests (fn-b), (fn-z) and (fn-p) are their controls.
+- **Standing rule 45 (LL-141):** the live control is unattended. It reads the DOM over CDP with a visibility check that voids the step, and counts log lines. The real press, the real Drive and seeing the toast once need the owner: Done-when 18, a short owner checklist in the batched smoke.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite, the live control and the owner check run on the owner's machine (Windows paths, production builds, the real Drive).
+- **Standing rule 48 (LL-149):** Done-when 19 lists typecheck and build: `src/types.ts` and a new `.tsx` file change.
+- **LL-151:**
+  - The C1 build must show `banner:false` before the C2 `banner:true` is trusted.
+  - The toast counter proves it can count a toast (`self-test 1`) before its zeros are trusted.
+  - The root-check log line, which carries the result, makes each press countable.
+- **LL-152:** both live checks run on production `--dir` builds, not `npm run dev`. The C1 build is the like-for-like A/B.
+- **LL-156:**
+  - FOLDER-UNREACHABLE-GUARD-1's hook comment ("Nothing new is sent: each send is a toast") is restated: the new `folder-problem` channel is not a toast, and the comment is rewritten with the block.
+  - That item's test (n) pins `reason: lastFolderProblem || "watch-failed"`. The pin moves with the code to `reason: folderNotice.get()`, and nothing else in its tests changes.
+  - Its out-of-scope "no timeout on a hung listing" now has one exception in this item's own code, Retry's capped root check (R4). The full scan stays uncapped, as that item left it.
+  - LARGE-FOLDER-SYNC-2's statement that it "changes no line FOLDER-NOTICE-1 builds on" was checked: `:72`, the catch at `:126` and `addOne`'s `:135-136` are outside its edits.
+  - `tests/folderSync.test.js` (k) pins `main.js`'s watcher callbacks, so the watcher-add clear lives in `addOne`, not in `main.js`.
+  - R5 adds a `ctx` call to `select-folder` and `switch-folder`. LARGE-FOLDER-SYNC-2's `tests/folderSwitchWatcherFirst.test.js` builds a plain `ctx` for those handlers, so the fixture gains one `resetFolderNotice: vi.fn()` line. The Proxy-`ctx` harnesses need none.
+- **LL-158:** every live row was traced through code this item does not change, at the size it runs at.
+  - Startup: `did-finish-load`, then 3 s, then `startWatcherFn`, whose `onError` is synchronous, then `syncAll`, its root check and the scan's `null`.
+  - The getter covers a library that mounts after that.
+  - On the owner's 120,190-file folder, the full scan takes 93.6 s, and the import that follows is unbounded. So both the sync's clear and Retry's answer come from one `readdir` of the root before the walk (R2), Retry does not await the sync, and the owner check allows about 10 s and then quits at once.
+  - Rider: each persisted-state row has a trigger shown to commit state. Live (f) is a watcher add that reaches `library.json`, and (g) is the no-problem baseline.
+- **LL-159:** no deferred writer is added.
+  - The module stores a string, sends an IPC message, and arms one timer that is cleared in a `finally`.
+  - The un-awaited sync is the existing `syncAll`, whose writes the quit step list already covers.
+  - `resumeWatcher` does nothing once `folderWorkStopped` is set.
+- **LL-063:** the scripted live control uses a local folder under `%TEMP%`, never a cloud-synced folder. The owner check reads the Drive and writes nothing to it.
+- **LL-031 (stale async results):**
+  - The sync's clear is guarded by `!stale()`, so a folder switched during the root check clears nothing.
+  - Retry ignores a root check that settles after its cap.
+  - In the banner, a push that lands before the getter's answer wins (`pushed`).
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 29 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
-- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 30 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
-- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 31 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
-- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 32 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. Lane: Library & Content.
-- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 33 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
-- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 34 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
+- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 30 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
+- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 31 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
+- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 32 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
+- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 33 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. Lane: Library & Content.
+- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 34 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
+- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 35 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 35 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 36 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 26 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 27 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 28 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 36 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 37 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 27 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 28 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 29 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes

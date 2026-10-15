@@ -1,0 +1,34 @@
+{
+  "id": "20261015T050753Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-UNREACHABLE-GUARD-1",
+  "created": "2026-10-15T05:07:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode."
+    },
+    "expectedRevision": "268009120d08f74ca0c2764b57efb173e3077af0fd4b6003ee774894f3bc0eff",
+    "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+      "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode.')]",
+      "actualRevision": "a74851880a20f437f0b4aee7532dad3d0c3fa2c22e1c836b226014e100c10261",
+      "recoveryId": "20261015T050753Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T05:08:56Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,53 @@
+{
+  "id": "20261015T050607Z-external-create-item-FOLDER-NOTICE-1",
+  "operation": "external-create-item",
+  "item_id": "FOLDER-NOTICE-1",
+  "created": "2026-10-15T05:06:07Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Show when the source folder cannot be reached, with a one-press Retry",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "M",
+      "lane": "UX polish",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#folder-notice-1",
+      "branch": "eb/folder-notice-1",
+      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails; each Retry press makes exactly one guarded sync attempt, no background retry; clears on any successful reachable sync and restarts the watcher without a toast. partial-read stays log-only.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings. After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.",
+      "sequence": 26,
+      "prerequisites": [
+        "FOLDER-UNREACHABLE-GUARD-1",
+        "LARGE-FOLDER-SYNC-2"
+      ],
+      "id": "FOLDER-NOTICE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T04:26:44Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-NOTICE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLDER-NOTICE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-NOTICE-1",
+      "actualRevision": "82d191990d3a69e1041f40dab1dc67c581b4ad2b3820b32ffd0c4175bc83f2f7",
+      "recoveryId": "20261015T050607Z-external-create-item-FOLDER-NOTICE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81d9-8a71-f06c2ef1de43",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T05:08:39Z",
+  "outcome": "succeeded"
+}

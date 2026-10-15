@@ -1,0 +1,34 @@
+{
+  "id": "20261015T050622Z-external-set-status-LIBRARY-WRITE-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-1",
+  "created": "2026-10-15T05:06:22Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 33
+    },
+    "expectedRevision": "dbde014f18b3cc3f22cfc4693642866dbda63c01254106279dfecedeb2e02792",
+    "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('sequence', 33)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-1",
+      "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('sequence', 33)]",
+      "actualRevision": "4eb4fb9d19c363ec8a86129309443eb9452d1421863a6da2472d1be83b4c846f",
+      "recoveryId": "20261015T050622Z-external-set-status-LIBRARY-WRITE-RACE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T05:08:49Z",
+  "outcome": "succeeded"
+}
