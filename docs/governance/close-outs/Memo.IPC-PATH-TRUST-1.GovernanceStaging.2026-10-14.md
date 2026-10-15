@@ -97,3 +97,10 @@ SAVE-LIBRARY-TRUST-1 was amended on its own branch (now `dbd159c3`). `keepMainPa
 - **Mutation check:** with `coverPath: h.coverPath` removed, (c) fails; restored.
 - DW2 on the merge: 6 files, 57 tests, exit 0 (SAVE-LIBRARY-TRUST-1's (l) and (m) included).
 - Heavy run on the merge, at `2d5d239d` (tree `7ae42a23`), under load: `npm test` exits 0 (161 files, 2,172 passed / 1 skipped / 0 failed). `npm run typecheck`: exit 0.
+
+## Re-gate on main after SAVE-LIBRARY-TRUST-1, and the merge go (Blurby.Roadmap, 2026-10-14)
+- Main (`fd1d266d`, which includes DEPS-AUDIT-1 and SAVE-LIBRARY-TRUST-1) was merged in as `874f1d57` (tree `c4a5e20a`) with no conflict. DW10 against `refs/remotes/origin/main` now lists exactly the four specification files and this memo.
+- `npm ci`: exit 0. DW2: 6 files, 57 tests, exit 0.
+- `npm test` under load: **exit 0**, 163 files, 2,187 passed / 1 skipped / 0 failed. No failing set.
+- `npm run typecheck`: exit 0.
+- **Merge go:** Blurby.Roadmap's conditional go, met. The item stays In Flight with its close-out held for the batched owner smoke: no tag, no upload.
