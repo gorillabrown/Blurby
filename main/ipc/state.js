@@ -6,6 +6,7 @@ const { getSystemTheme, updateWindowTheme } = require("../window-manager");
 const {
   MAX_RECENT_FOLDERS,
 } = require("../constants");
+const { pickUserSettings } = require("../migrations");
 const fsPromises = require("fs/promises");
 
 let saveSettingsTimeout = null;
@@ -22,10 +23,9 @@ function register(ctx) {
 
   ipcMain.handle("save-settings", (_, newSettings) => {
     const settings = ctx.getSettings();
-    // The folder and its recent list are main's: only select-folder and switch-folder set them (IPC-PATH-TRUST-1).
-    const safe = { ...newSettings };
-    delete safe.sourceFolder;
-    delete safe.recentFolders;
+    // Only real user settings: never the folder or its recent list (select-folder and switch-folder set them,
+    // IPC-PATH-TRUST-1), schemaVersion, an _-prefixed secret or a prototype key (SETTINGS-KEY-TRUST-1).
+    const safe = pickUserSettings(newSettings);
     // Update in-memory state immediately so all readers see the new value
     Object.assign(settings, safe);
     if (safe.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
