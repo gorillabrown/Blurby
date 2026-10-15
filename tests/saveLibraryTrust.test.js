@@ -207,11 +207,15 @@ describe("save-library cannot change where a book's file is", () => {
     await call("save-library", [{ ...R, ...libraryUpdates, seenAt: 1 }]);
 
     expect(library[0].filepath).toBe(bookPath);
-    expect(library[0].ext).toBe(".txt");
+    // the conversion sets ext ".epub" by design; it is safe only because convertedEpubPath comes with it
+    expect(library[0].ext).toBe(".epub");
     expect(library[0].convertedEpubPath).toBe(converted);
+    expect(library[0].needsEpubConversion).toBeUndefined();
 
+    convertStarted = false;
     const reopen = await call("load-doc-content", "f1");
     expect(reopen).toEqual({ filepath: converted, ext: ".epub" });
+    expect(convertStarted).toBe(false); // served the stored conversion, did not reconvert
   });
 
   it("(i) control: edits and order are saved", async () => {
