@@ -77,7 +77,7 @@ git diff --exit-code 05a5480a -- docs/planning/roadmap-reviews/reader-mode-separ
 # D9
 npx vitest run tests/settingsNarrateNormalization.test.js tests/settingsMigrationV13.test.js *> (Join-Path $OutDir 'd9-suites.txt'); Note "D9 suites exit=$LASTEXITCODE"
 # D10
-git grep -n -l -P '_alignWordsToTimestamps|computeWordTimestamps' -- src main scripts patches *> (Join-Path $OutDir 'd10-grep.txt'); Note "D10 grep exit=$LASTEXITCODE (expect 1: no match is the absence check passing)"
+git grep -n -l -P '_alignWordsToTimestamps|computeWordTimestamps' -- src main scripts patches ':!scripts/narrate-rebuild/epic-window.ps1' *> (Join-Path $OutDir 'd10-grep.txt'); Note "D10 grep exit=$LASTEXITCODE (expect 1: no match is the absence check passing; this runner is excluded because it contains the pattern)"
 # D3 recorder positive control (offline), on a produced session trace
 $rec = Get-ChildItem $out -Recurse -Filter '*.trace.json' | Where-Object { $_.FullName -match 'session' } | Select-Object -First 1
 if ($rec) { node scripts/narrate-rebuild/p5-recorded-output-check.mjs $rec.FullName --min-minutes 0 --break *> (Join-Path $OutDir 'd3-break.txt'); Note "D3 check --break exit=$LASTEXITCODE (expect 1) on $($rec.Name)" }
