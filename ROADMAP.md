@@ -6574,10 +6574,9 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - the reason code clears on a reachable sync;
     - the episode's toast counts only once it lands;
     - a replaced watcher's late error is ignored.
-  - **Banner and toast text: pending owner decision** (Brain relaying: "…then press Retry" recommended). Call it `FINAL_TEXT`.
+  - **Banner and toast text (owner decision, 2026-10-15, relayed verbatim by Blurby.Brain):** "Yes. Change the wording to: Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry." The same string is used for the toast and the banner. Option (b), an automatic re-check, is not taken.
     - The banner and the toast use the same string.
-    - The toast's string shipped at `main.js:356` ("Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.") changes to `FINAL_TEXT` in this item, once the wording is decided.
-    - Blurby.Roadmap writes `FINAL_TEXT` in at fold-in (Done-when 13).
+    - The toast's string shipped at `main.js:356` ("Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.") changes to the owner's wording in this item.
     - **Button:** "Retry". The banner never offers "choose another folder".
   - **One press, one attempt** (owner: "button tries only once. No infinite loop"; refined by Blurby.Brain, 2026-10-15). Each press of Retry makes exactly one root check and at most one sync call:
     - **(a)** one `rootHasContent` check of the source folder. After LARGE-FOLDER-SYNC-2, that check bounds itself: a listing that has not answered within `FOLDER_LIST_TIMEOUT_MS` (30 s) returns `null`;
@@ -6703,10 +6702,10 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - **Preload stays minimal** (it is the security boundary): one getter, one invoke and one listener, in the existing `onWatcherError` pattern (`preload.js:207-211`). There is no argument, so there is nothing to validate.
   - **`src/types.ts`: three optional members.** They are optional, like `onWatcherError?` (`:373`), and every call uses `?.`. The two mocks that implement `ElectronAPI` without these methods therefore need no change: the browser stub `src/test-harness/electron-api-stub.ts:263`, typed `ElectronAPI`, and `tests/updateInstallGating.test.tsx`'s mock, which renders `LibraryContainer`.
   - **The handlers go in `main/ipc/state.js`**, beside `select-folder` and `switch-folder`, the folder handlers that already call `ctx.syncLibraryWithFolder`. They are reached through two new `ctx` members, `getFolderProblem` and `retrySourceFolder`.
-  - **The banner's text is a literal in `FolderNoticeBanner.tsx`** (`FINAL_TEXT`). A test checks that the toast in `main.js` holds the identical string, so the two cannot drift apart.
+  - **The banner's text is a literal in `FolderNoticeBanner.tsx`** (the owner's wording). A test checks that the toast in `main.js` holds the identical string, so the two cannot drift apart.
   - **Constants (R4):** none of its own. It requires LARGE-FOLDER-SYNC-2's `FOLDER_LIST_TIMEOUT_MS = 30000` in `main/constants.js` (Done-when 12). Only test (fn-z) reads it. Its comment and placement are LARGE-FOLDER-SYNC-2's.
 - **Out of scope:**
-  - The wording itself (pending owner decision; `FINAL_TEXT`). The once-per-episode rule stays as FOLDER-UNREACHABLE-GUARD-1 shipped it, apart from R7's delivery guard.
+  - Any other wording. The once-per-episode rule stays as FOLDER-UNREACHABLE-GUARD-1 shipped it, apart from R7's delivery guard.
   - `partial-read` in the banner (R1). Known limit: a subfolder or file that cannot be read shows nothing in the UI. Its books are kept (FOLDER-UNREACHABLE-GUARD-1), and the log line names the case.
   - The listing bound itself (LARGE-FOLDER-SYNC-2's (C)): this item relies on it, and does not edit `main/folder-watcher.js`'s `timeLimit`, the scan or `rootHasContent`.
   - A per-file remove whose root check passed (`rootHasContent === true`) is also evidence of reachability. It is not wired: adds and full syncs cover a returning folder, and FOLDER-UNREACHABLE-GUARD-1's remove path is not this item's.
@@ -6832,9 +6831,9 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
           - The two "present" checks exit 1, with no output: LARGE-FOLDER-SYNC-2 adds them, so they become live once it merges.
           - `FOLDER_RETRY_LIST_TIMEOUT_MS` exits 1.
           - The new files do not exist on the base, so their "prints nothing" checks are vacuous there. Tests (fn-b), (fn-z) and (fn-p) are their positive controls.
-    13. **One text, two places — PLACEHOLDER until the owner decides the wording** (Brain relaying: "…then press Retry" recommended). Blurby.Roadmap writes `FINAL_TEXT` into this gate, the Edit sites and the tests at fold-in. The item does not dispatch while this gate still reads `FINAL_TEXT`.
-        - `git grep -c -F "FINAL_TEXT" -- main.js src/components/FolderNoticeBanner.tsx` prints exactly `main.js:1` and `src/components/FolderNoticeBanner.tsx:1`, and exits 0.
-        - If `FINAL_TEXT` differs from the shipped string, `git grep -n -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js src` prints nothing (exit 1).
+    13. **One text, two places (the owner's wording, decided 2026-10-15).**
+        - `git grep -c -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry." -- main.js src/components/FolderNoticeBanner.tsx` prints exactly `main.js:1` and `src/components/FolderNoticeBanner.tsx:1`, and exits 0.
+        - If `Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.` differs from the shipped string, `git grep -n -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js src` prints nothing (exit 1).
         - Dry-run of the shipped string: exit 0, `refs/remotes/origin/main:main.js:356:`, so that check can fail.
     14. **Shared core:** `git diff --numstat refs/remotes/origin/main -- src/types.ts` prints exactly `3	0	src/types.ts` and exits 0. `git grep -n -E '(getFolderProblem|retrySourceFolder|onFolderProblem)\?:' -- src/types.ts` prints three lines and exits 0.
         - Dry-run of the second: exit 1, no output.
@@ -6975,7 +6974,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - Before: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,`.
     - After: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,`.
     - The substring that FOLDER-UNREACHABLE-GUARD-1's test (n) pins, `emitProgress: emitSyncProgress, reportFolderProblem,`, is kept.
-  - **`main.js:356`, the toast text** (wording pending; Done-when 13). Before: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";`. After: `        : "FINAL_TEXT";`, written in at fold-in. The permission branch (`:355`, "Can't watch this folder — check permissions.") is unchanged.
+  - **`main.js:356`, the toast text** (owner's wording; Done-when 13). Before: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";`. After: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.";`. The permission branch (`:355`, "Can't watch this folder — check permissions.") is unchanged.
   - **`main.js:357-362`, `onError`'s tail** (R6, R7). Before:
     ```js
           console.error("[watcher] Error:", err.message);
@@ -7062,7 +7061,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     import { useEffect, useState } from "react";
 
     const api = window.electronAPI;
-    const TEXT = "FINAL_TEXT"; // pending owner decision; the same string as the toast in main.js (Done-when 13)
+    const TEXT = "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry."; // the owner's wording (2026-10-15); the same string as the toast in main.js (Done-when 13)
 
     export default function FolderNoticeBanner() {
       const [problem, setProblem] = useState<string | null>(null);
@@ -7111,7 +7110,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - **`tests/folderUnreachableGuard.test.js`, test (n)** (`:297-311`; C2, with the `main.js` edit). Three expected strings move with the code they pin (LL-156). Nothing else in that file changes.
     - `reason: lastFolderProblem || "watch-failed"` becomes `reason: folderNotice.get()`.
     - `if (folderToastShown) return;` becomes `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`.
-    - The shipped toast text becomes `FINAL_TEXT`, at fold-in.
+    - The shipped toast text becomes the owner's wording.
     - Its `Can't watch this folder` and `try re-selecting the folder` checks stay as they are.
   - **`docs/governance/TECHNICAL_REFERENCE.md:711`:** the Done-when 16 text.
   - Nothing else changes. In particular, these stay as they are:
@@ -7191,7 +7190,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         - The index of `folderNotice.set(folderNotice.get() || "watch-failed");` is greater than `-1`, and less than the index of `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`.
         - `main.js` has at least three matches of `/\breportFolderOk\b/g`.
         - It does not contain `lastFolderProblem`.
-        - It still contains `if (watcher) folderToastShown = false;` and `FINAL_TEXT`.
+        - It still contains `if (watcher) folderToastShown = false;` and `Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.`.
         - `preload.js` contains `getFolderProblem: () => ipcRenderer.invoke("get-folder-problem"),`, `retrySourceFolder: () => ipcRenderer.invoke("retry-source-folder"),` and `ipcRenderer.on("folder-problem", handler);`.
         - *C1: the listed `main.js` and `preload.js` strings are absent, and `lastFolderProblem` is present.*
       - **(fn-s) `partial-read` is log-only** (R1).
@@ -7263,7 +7262,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
       - `retrySourceFolder: vi.fn(() => gate.promise)`, where `gate` is a deferred promise;
       - `onFolderProblem: vi.fn((cb) => { push = cb; return () => { push = null; }; })`.
     - Render `LibraryContainer` (`vi.resetModules()`, then `await import("../src/components/LibraryContainer")`) inside `act`, then flush promises.
-    - `TEXT` is `FINAL_TEXT` (written in at fold-in). `banner()` finds `[role="alert"]` whose text includes `TEXT`. `retryBtn()` finds the button inside it whose text is `"Retry"`.
+    - `TEXT` is the owner's wording. `banner()` finds `[role="alert"]` whose text includes `TEXT`. `retryBtn()` finds the button inside it whose text is `"Retry"`.
     - **Fail at C1** (no banner in the library):
       - **(fn-n) It shows on mount when main already holds a problem.** `initial = "root-unlistable"`.
         - `banner()` exists, and `retryBtn()` exists and is not disabled.
@@ -7312,7 +7311,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     $quit = { param($p) & node -e $quitJs | Out-Null; try { Wait-Process -Id $p.Id -Timeout 20 -ErrorAction Stop } catch { taskkill /PID $p.Id /T /F | Out-Null; "forced quit" } }
     $logCount = { param($tag, $text) @(Select-String -Path "$prof-$tag-out.txt","$prof-$tag-err.txt" -SimpleMatch -Pattern $text).Count }
     ```
-    - The probe and the toast counter match the fragment `source folder`. Blurby.Roadmap confirms at fold-in that it is a fragment of `FINAL_TEXT`, and picks another fragment if it is not.
+    - The probe and the toast counter match the fragment `source folder`. It is a fragment of the owner's wording (confirmed at fold-in).
     - The helpers follow FOLDER-UNREACHABLE-GUARD-1's live control: Node 24's global `WebSocket`, the CDP `Browser.close` quit, and `$lib` returning `$null` mid-rename (poll again).
     - The probe and the press use single-quoted JS inside double-quoted PowerShell strings, with no `$` and no apostrophe, so nothing is expanded.
     - **The probe is void unless it reports `"vis":"visible"`;** rerun that step (standing rule 45).
@@ -7388,7 +7387,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   if (Get-Process GoogleDriveFS -ErrorAction SilentlyContinue) { throw "Google Drive is still running" }
   if (Test-Path $drive) { throw "The Drive path is still reachable" }
   $p = Start-Process -FilePath $exe -RedirectStandardOutput "$prof-N-out.txt" -RedirectStandardError "$prof-N-err.txt" -PassThru
-  # Owner: the library opens; the toast (FINAL_TEXT) appears once and goes;
+  # Owner: the library opens; the toast (Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.) appears once and goes;
   # the banner with the same words and a Retry button stays. Wait 20 s and confirm it is still there.
 
   # B. Owner: press Retry once. Then:
@@ -7533,7 +7532,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 - **LL-152:** both live checks run on production `--dir` builds, not `npm run dev`. The C1 build is the like-for-like A/B.
 - **LL-156:**
   - FOLDER-UNREACHABLE-GUARD-1's hook comment ("Nothing new is sent: each send is a toast") is restated: the new `folder-problem` channel is not a toast, and the comment is rewritten with the block.
-  - That item's test (n) pins `reason: lastFolderProblem || "watch-failed"`, `if (folderToastShown) return;` and the shipped toast text. Each pin moves with the code (to `reason: folderNotice.get()`, the delivery guard, and `FINAL_TEXT`), and nothing else in its tests changes.
+  - That item's test (n) pins `reason: lastFolderProblem || "watch-failed"`, `if (folderToastShown) return;` and the shipped toast text. Each pin moves with the code (to `reason: folderNotice.get()`, the delivery guard, and `Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.`), and nothing else in its tests changes.
   - Its out-of-scope "no timeout on a hung listing" is now LARGE-FOLDER-SYNC-2's (C). This item first planned its own race, under `FOLDER_RETRY_LIST_TIMEOUT_MS`. It dropped both, because the bound moved into `rootHasContent` with one shared constant. (fn-z) now runs against that bound, so a regression there fails this item's test too.
   - LARGE-FOLDER-SYNC-2's statement that it "changes no line FOLDER-NOTICE-1 builds on" was checked against `89a5a95c`: `:77`, the catch at `:143` and `addOne`'s `:152-153` are outside its edits.
   - `tests/folderSync.test.js` (k) pins `main.js`'s watcher callbacks, so the watcher-add clear lives in `addOne`, not in `main.js`.

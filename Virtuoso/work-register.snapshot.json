@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T08:03:04Z",
+  "takenAt": "2026-10-15T13:42:18Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2352,8 +2352,8 @@
       "id": "FOLDER-NOTICE-1",
       "title": "Show when the source folder cannot be reached, with a one-press Retry",
       "sequence": 28,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2365,12 +2365,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#folder-notice-1",
       "branch": "eb/folder-notice-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.",
-      "revision": "46229142c860595552e74f9a36f8201c0cfbe7d3fc4aeaa56372f81f557aaccd",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15: Reconnect the drive, then press Retry. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1).",
+      "revision": "5242eb8e9c64bae747c7c81c621fe18cf6f112ddee1630ae0164dfd544bfdf2c",
       "extra": {}
     },
     {
