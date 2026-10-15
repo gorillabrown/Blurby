@@ -19,16 +19,16 @@ function register(ctx) {
       const syncQueue = require("../sync-queue");
       const syncStatus = syncEngine.getSyncStatus();
       const revision = syncStatus.revision || 0;
-
-      doc.position = position;
+      const hasPosition = Number.isFinite(position) && position >= 0; // PAGE-SAVE-RESTAMP-2: Page sends -1 for a cfi-only save
+      if (hasPosition) doc.position = position;
       if (cfi) doc.cfi = cfi;
       doc.modified = Date.now();
       doc.lastReadAt = Date.now();
       doc.revision = revision;
       ctx.saveLibrary();
 
-      // Enqueue update-progress for sync
-      syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(err => console.error("[sync-queue] update-progress enqueue failed:", err.message));
+      // Enqueue update-progress for sync (a cfi-only save has no progress to send)
+      if (hasPosition) syncQueue.enqueue("update-progress", { docId, value: position, revision }).catch(err => console.error("[sync-queue] update-progress enqueue failed:", err.message));
     }
   });
 

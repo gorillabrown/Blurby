@@ -113,6 +113,9 @@ export class PageMode implements ReadingMode {
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const PAGE_SURFACE_LOAD_DELAY_MS = 200;
 
+/** update-doc-progress keeps the stored word index for a negative position: a cfi-only save (PAGE-SAVE-RESTAMP-2). */
+const KEEP_STORED_POSITION = -1;
+
 /** Frozen inputs are kept as-is; anything else is deep-copied and frozen first. */
 function own<T>(value: T) {
   return Object.isFrozen(value) ? value : freezeValue(value);
@@ -297,7 +300,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
 
   // ── User intents ──────────────────────────────────────────────────────────
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths). */
-  hardSelect(input: ReaderHardSelectInput): void {
+  hardSelect(input: ReaderHardSelectInput, holdSave = false): void {
     if (!this.alive) return;
     const s = this.state;
     this.markEngaged();
@@ -317,7 +320,10 @@ export class PageModeRuntime implements ReaderModeRuntime {
       }));
       s.explicitSelectionAnchor = resolved;
       // commitSharedWordAnchor(resolved, "hard-selection", cfi, { skipNarrationResync: true })
-      const anchored = this.commitShared(resolved, "hard-selection", input.cfi);
+      // PAGE-SAVE-RESTAMP-2: a click on provisional numbering keeps all of this but the save; the view saves it later.
+      const anchored = holdSave
+        ? this.commitShared(resolved, "hard-selection", input.cfi, false)
+        : this.commitShared(resolved, "hard-selection", input.cfi);
       // retargetActiveModeToWord: Page has no running engine to retarget.
       if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchored })) {
         this.surface.clearUserBrowsing();
@@ -545,8 +551,8 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   };
 
-  onWordClick = (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number): void => {
-    this.hardSelect({ cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex });
+  onWordClick = (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number, holdSave?: boolean): void => {
+    this.hardSelect({ cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex }, holdSave);
   };
 
   onTocReady = (toc: unknown[], sectionCount: number): void => {
@@ -563,7 +569,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
   };
 
   /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
-  onPageTurned = (first: { readonly wordIndex: number; readonly cfi: string }): void => {
+  onPageTurned = (first: { readonly wordIndex: number | null; readonly cfi: string }): void => {
     if (!this.alive) return;
     const s = this.state;
     this.markEngaged();
@@ -572,7 +578,9 @@ export class PageModeRuntime implements ReaderModeRuntime {
     s.explicitSelectionAnchor = null;
     s.cfi = first.cfi;
     this.ports.persistence.recordCfi(first.cfi);
-    s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
+    // PAGE-SAVE-RESTAMP-2: no index (the book's words cannot arrive): save the page and keep the stored word index.
+    if (first.wordIndex == null) this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, first.cfi);
+    else s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
       cfi: first.cfi,
       persist: true,
       publishState: true,
@@ -595,6 +603,16 @@ export class PageModeRuntime implements ReaderModeRuntime {
 
   recordDiagnostic = (kind: string, detail: string): void => {
     if (this.alive) this.ports.diagnostics.record(kind, detail);
+  };
+
+  /** PAGE-SAVE-RESTAMP-2: the view asks this, on a held turn, whether the book's words can arrive. */
+  ensureBookWords = () => this.ports.document.ensureBookWords();
+
+  /** PAGE-SAVE-RESTAMP-2 (ruling): a word click held on provisional numbering saves now; the click already set the anchor. */
+  onHeldClickSave = (click: { readonly wordIndex: number | null; readonly cfi: string }): void => {
+    if (!this.alive) return;
+    this.ports.persistence.updateDocProgress(this.document.documentId, click.wordIndex ?? KEEP_STORED_POSITION, click.cfi);
+    if (click.wordIndex != null) this.ports.persistence.updateProgress(this.document.documentId, click.wordIndex);
   };
 
   /** Canonical extractor words for a section, when full-book words exist (SRL-067). */
@@ -650,10 +668,10 @@ export class PageModeRuntime implements ReaderModeRuntime {
   }
 
   /** Legacy commitSharedWordAnchor (Page never narrates, so the resync branch cannot fire). */
-  private commitShared(wordIndex: number, cause: "hard-selection" | "explicit-navigation", cfi: string | null | undefined): number {
+  private commitShared(wordIndex: number, cause: "hard-selection" | "explicit-navigation", cfi: string | null | undefined, persist = true): number {
     const clamped = this.anchor.commitPersistentWordIndex(wordIndex, cause, {
       cfi,
-      persist: true,
+      persist,
       publishState: true,
       navigate: true,
     });
