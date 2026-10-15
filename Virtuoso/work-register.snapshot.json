@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-14T23:15:19Z",
+  "takenAt": "2026-10-15T00:50:04Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -140,7 +140,7 @@
     {
       "id": "EINK-CONTROLS-1",
       "title": "One E-ink control, not two",
-      "sequence": 18,
+      "sequence": 19,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -156,7 +156,7 @@
       "evidence": "",
       "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
       "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
-      "revision": "cbb2df56f062d7f2b945d43bf0d8a48424fc66228f4a4744a61d786554e79174",
+      "revision": "3b5d915717b3fc07445541dac6b5f97592f3cb0533a98a067f70e8cf06d3cb6c",
       "extra": {}
     },
     {
@@ -272,7 +272,7 @@
     {
       "id": "FOLDER-UNREACHABLE-GUARD-1",
       "title": "Keep folder books when the source folder cannot be reached",
-      "sequence": 15,
+      "sequence": 16,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -288,7 +288,7 @@
       "evidence": "",
       "description": "An unreachable source folder makes the scan return nothing and both sync paths prune every folder book. Report unreachable distinctly and skip the prune. Fixes BUG-195.",
       "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use.",
-      "revision": "9bd3f6bb3fdec730164d146722fcf378940ee4e07cf4622a9bef9c29f601556f",
+      "revision": "b0426093ff28e3fc1e323d51dd441a6205fb218f1fff7386a1aa38595c27e133",
       "extra": {}
     },
     {
@@ -406,7 +406,7 @@
     {
       "id": "KF2-WAIVER-RETIRE-1",
       "title": "Retire the KF-2 rename waiver",
-      "sequence": 19,
+      "sequence": 20,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -422,7 +422,7 @@
       "evidence": "",
       "description": "The bounded rename retry from SETTINGS-WRITE-DURABLE-1 removes the Windows rename failure KF-2 waived. Retire the waiver after two clean full runs on the owner's machine.",
       "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out.",
-      "revision": "997ca93ea7825814381bc8eb3666f1e6f67c879d6717a8ba4b53d034668e9460",
+      "revision": "2e579ec92332896b40a41a8d618e36401bf46092726f3273b34f742b5eefae67",
       "extra": {}
     },
     {
@@ -561,6 +561,28 @@
       "description": "OS media transport controls for active narration",
       "notes": "Dissolved — duplicate of completed NARR-MEDIA-1 in TTS Quality phase\n\nMigration 2026-09-23: historical dissolved variant used original Sprint Code NARR-MEDIA-1, also used by the separately completed MediaSession Integration item. Unique legacy identifier assigned to preserve both source records. Source Catalog data row 22; not new planned work.",
       "revision": "6317977db1e69425682505efd8f831037fb106f875c331010a15ca35ade2f0cb",
+      "extra": {}
+    },
+    {
+      "id": "LIBRARY-READ-ALLOW-1",
+      "title": "Let a library book open from its own file wherever it lives",
+      "sequence": 15,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#library-read-allow-1",
+      "branch": "eb/library-read-allow-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "A document already in the library may be read from its own file (exact path match) regardless of the source folder; every other path keeps the allowed-roots check. Fixes BUG-196.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's ruling (BUG-196, found in the QUIT-FLUSH-1 smoke). Merges after PACKAGING-FIX-1 (same file). Full Spec: U9/U10 pass.",
+      "revision": "6ca3cb36a8d1593aa66791c84ea7bd04c7c6efd5b39d39020ee29c0a4529861c",
       "extra": {}
     },
     {
@@ -979,7 +1001,7 @@
     {
       "id": "NARRATE-YEARS-1",
       "title": "Read four-digit years as years in Narrate",
-      "sequence": 20,
+      "sequence": 21,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -997,7 +1019,7 @@
       "evidence": "",
       "description": "BUG-191: years such as 1974 are spoken as cardinal numbers. Fix in the rebuilt Narrate's text normalization with a regression fixture.",
       "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "dadabca8ccbe667f930ea04a38c8b134b337630b73caaab7e0b95430a5ea638d",
+      "revision": "12c9bec165fef0569d717c50f4052e7f15abb9203949bcc0e6cbf337df1c9dba",
       "extra": {}
     },
     {
@@ -1027,7 +1049,7 @@
     {
       "id": "OVERLAY-THEME-SWEEP-1",
       "title": "Other overlays: Escape and undefined theme tokens",
-      "sequence": 17,
+      "sequence": 18,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1043,15 +1065,15 @@
       "evidence": "",
       "description": "Two overlays likely share the Escape-leaves-reader defect and five panels read an undefined background token. Verify live, then specify on UX-POLISH-2's pattern.",
       "notes": "Created by roadmap review 2026-10-14. Found while specifying UX-POLISH-2; after UX-POLISH-2.",
-      "revision": "986a19bc97e1867993ff43e6e6dc1087e32c9e28dc4b6199d59bf03b06122bf0",
+      "revision": "f63c0288a18b9f0773043844e7ba59c8a4e47cd512d249ad3d618e604b35921c",
       "extra": {}
     },
     {
       "id": "PACKAGING-FIX-1",
       "title": "Ship the icons, quiet the updater in unpacked builds, relink stale sample books",
       "sequence": 11,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1060,18 +1082,18 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#packaging-fix-1",
       "branch": "eb/packaging-fix-1",
-      "started": "",
+      "started": "2026-10-14",
       "completed": "",
       "evidence": "",
       "description": "Package the two runtime icon files, guard the auto-update check when an unpacked build has no update manifest, and relink a sample book whose bundled path is gone. From the P6 G2 build findings.",
-      "notes": "Created by roadmap review 2026-10-14. NARRATE-REBUILD-1 P6 G2 findings B, C, D. Full Spec: U9/U10 pass.",
-      "revision": "2934628a99ced4ff80fd4c8c58186309c437b68d0410c9a88dc3dfbee3fe2e9a",
+      "notes": "Created by roadmap review 2026-10-14. NARRATE-REBUILD-1 P6 G2 findings B, C, D. Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer to local session blurby-05 (branch eb/packaging-fix-1 from main 249f12ae).",
+      "revision": "fd7f18c84c890cb56dafb54286928490fab5d3975e5e77cdabf2412f4962fffc",
       "extra": {}
     },
     {
       "id": "PDF-IMPORT-DIAG-1",
       "title": "Reproduce the PDF that cannot be converted",
-      "sequence": 16,
+      "sequence": 17,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1087,7 +1109,7 @@
       "evidence": "",
       "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
       "notes": "Created by roadmap review 2026-10-14. BUG-190.",
-      "revision": "dd1c41e7fff4fcda845deb870286d296edaf227264961d065c10abb9f0c11cb4",
+      "revision": "40817d8b9ee770c8f3ea051c21896079ec46d8f87cae7630c4e11d941d7ba89d",
       "extra": {}
     },
     {

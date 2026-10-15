@@ -1,0 +1,34 @@
+{
+  "id": "20261015T004827Z-external-set-status-LIBRARY-READ-ALLOW-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-READ-ALLOW-1",
+  "created": "2026-10-15T00:48:27Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 15
+    },
+    "expectedRevision": "f466447dfb90bdc71c39896448afea4d23cd7b9421f561816d381ed6a05bc1a8",
+    "idempotencyKey": "set-status:LIBRARY-READ-ALLOW-1:[('sequence', 15)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-READ-ALLOW-1",
+      "idempotencyKey": "set-status:LIBRARY-READ-ALLOW-1:[('sequence', 15)]",
+      "actualRevision": "2026-10-15T00:49:10Z",
+      "recoveryId": "20261015T004827Z-external-set-status-LIBRARY-READ-ALLOW-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T00:49:13Z",
+  "outcome": "succeeded"
+}
