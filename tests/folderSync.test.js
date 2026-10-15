@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 
 // LARGE-FOLDER-SYNC-1 C1: positive controls for main/folder-sync.js.
 // Every library and I/O step is injected, so the tests run on fakes (main.js cannot be loaded by a test).
@@ -329,6 +329,80 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     // index and library agree: every path is present exactly once
     for (const p of [a, b, c, d]) expect(countPath(state.lib, p)).toBe(1);
     expect(state.lib).toHaveLength(5);
+  });
+
+  describe("folder check (F2) and index (F1), fix round 2", () => {
+    const realPlatform = Object.getOwnPropertyDescriptor(process, "platform");
+    const setPlatform = (v) => Object.defineProperty(process, "platform", { value: v });
+    afterEach(() => Object.defineProperty(process, "platform", realPlatform));
+    // The module uses the host path module; these cases are Windows paths, so they run only where path is win32.
+    const winIt = path.sep === "\\" ? it : it.skip;
+
+    winIt("(F2) a drive root as the source folder accepts files under it", async () => {
+      setPlatform("win32");
+      for (const [root, p] of [[path.win32.join("E:", "/"), path.win32.join("E:", "/", "a.epub")], [path.win32.join("C:", "/"), path.win32.join("C:", "/", "sub", "b.epub")]]) {
+        const { state, deps, sync } = makeDeps({ disk: [root, p] });
+        state.folder = root;
+        await sync.applyAdd(p);
+        expect(countPath(state.lib, p), "a file under the drive root " + root + " was rejected").toBe(1);
+      }
+    });
+
+    winIt("(F2) win32 compares case-insensitively; a sibling prefix is rejected", async () => {
+      setPlatform("win32");
+      const mixed = path.win32.join("c:", "/", "books", "x.epub");
+      const sib = path.win32.join("C:", "/", "Books2", "y.epub");
+      const root = path.win32.join("C:", "/", "Books");
+      const { state, deps, sync } = makeDeps({ disk: [root, mixed, sib] });
+      state.folder = root;
+      await sync.applyAdd(mixed);
+      expect(countPath(state.lib, mixed), "mixed-case path was rejected on win32").toBe(1);
+      await sync.applyAdd(sib);
+      expect(countPath(state.lib, sib), "sibling prefix Books2 was accepted").toBe(0);
+    });
+
+    it("(F1) after a removal the index still counts the other book of a shared key, and a full removal allows a re-add", async () => {
+      const ep = path.join(ROOT, "a.epub");
+      const pdf = path.join(ROOT, "a.pdf");
+      const mobi = path.join(ROOT, "a.mobi");
+      const { state, deps, sync } = makeDeps({ disk: [ROOT, pdf, mobi], lib: [folderDoc("e", ep), folderDoc("p", pdf)] });
+      await sync.applyUnlink(ep); // a.epub is gone from disk; a.pdf remains
+      await sync.applyAdd(mobi);
+      expect(deps.extractNewFileDoc, "a.pdf no longer counted after a.epub was removed").not.toHaveBeenCalled();
+      state.disk.delete(pdf);
+      await sync.applyUnlink(pdf);
+      state.disk.add(mobi);
+      await sync.applyAdd(mobi);
+      expect(deps.extractNewFileDoc, "a.mobi was not imported after both a.epub and a.pdf were removed").toHaveBeenCalledTimes(1);
+    });
+
+    it("(F1) a removal does not make the next add rebuild the index", async () => {
+      const gone = path.join(ROOT, "gone.epub");
+      const n1 = path.join(ROOT, "n1.epub");
+      const bystander = folderDoc("by", path.join(ROOT, "by.epub"));
+      let reads = 0;
+      const fp = bystander.filepath;
+      Object.defineProperty(bystander, "filepath", { get() { reads++; return fp; }, enumerable: true });
+      const { state, sync } = makeDeps({ disk: [ROOT, n1], lib: [bystander, folderDoc("g", gone)] });
+      await sync.applyAdd(n1); // builds the index
+      await sync.applyUnlink(gone);
+      reads = 0;
+      await sync.applyAdd(path.join(ROOT, "n2.epub")); // not on disk: stat fails first
+      state.disk.add(path.join(ROOT, "n3.epub"));
+      await sync.applyAdd(path.join(ROOT, "n3.epub"));
+      expect(reads, "the add after a removal re-read every library book (index rebuilt)").toBe(0);
+    });
+  });
+
+  it("(F3) a scan rejection from syncAll does not escape; it is logged", async () => {
+    const { deps, sync } = makeDeps();
+    deps.scanFolderAsync.mockRejectedValue(new Error("EIO"));
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await expect(sync.syncAll(), "syncAll rejected on a scan failure").resolves.toBeUndefined();
+      expect(log).toHaveBeenCalledWith("[folder-sync] full sync failed:", "EIO");
+      await expect(sync.syncAll()).resolves.toBeUndefined(); // the running slot was released
+    } finally { log.mockRestore(); }
   });
 
   it("(k) main.js wiring", () => {

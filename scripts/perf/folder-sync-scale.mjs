@@ -13,6 +13,7 @@ const ROOT = "G:\\My Drive\\Personal\\Readings";
 const N = 120000;
 const RUNS = 50;
 const REMOVE_COUNT = 1000;
+const PAIRS = 1000;
 
 const doc = (id, p) => ({ id, filepath: p, filename: path.basename(p), ext: ".epub", size: 1, modified: 1, source: "folder", position: 0 });
 
@@ -27,7 +28,6 @@ const sync = createFolderSync({
   getLibrary: () => lib,
   setLibrary: (d) => { lib = d; },
   addDoc: (d) => { lib.unshift(d); },
-  removeDoc: (id) => { lib = lib.filter((d) => d.id !== id); },
   scanFolderAsync: async () => [],
   statFile: (p) => (disk.has(p) ? Promise.resolve({ isDirectory: () => false, size: 1, mtimeMs: 1 }) : Promise.reject(new Error("ENOENT"))),
   extractNewFileDoc: async (f) => doc("new-" + f.filepath, f.filepath),
@@ -66,8 +66,24 @@ for (let r = 0; r < RUNS; r++) {
   for (let i = 0; i < REMOVE_COUNT; i++) lib.push(doc("big" + i, `${bigDir}\\Item ${i}.epub`)); // untimed: restore
 }
 
+// Alternating pairs (F1): a watcher rename is an unlink then an add. Unlink an existing book, add a new file, 1,000 times.
+const pairTimes = [];
+const tAll = performance.now();
+for (let r = 0; r < PAIRS; r++) {
+  const victim = lib[lib.length - 1 - r]; // an existing book,
+  const np = path.win32.join(ROOT, "Books", "Moved", `Moved ${r}.epub`);
+  disk.add(np);
+  const t0 = performance.now();
+  await sync.applyUnlink(victim.filepath);
+  await sync.applyAdd(np);
+  pairTimes.push(performance.now() - t0);
+  if (lib[0].filepath !== np) throw new Error("pair add did not land: " + np);
+}
+const pairTotal = performance.now() - tAll;
+
 console.log(`library ${N} docs, ${RUNS} runs each`);
 console.log(`one per-file add:          ${fmt(addTimes)}  (threshold: median > 16 ms)`);
 console.log(`remove ${REMOVE_COUNT} books (dir):    ${fmt(removeTimes)}  (threshold: > 2000 ms)`);
-const over = median(addTimes) > 16 || median(removeTimes) > 2000;
+console.log(`${PAIRS} unlink+add pairs:  ${fmt(pairTimes)}, total ${(pairTotal / 1000).toFixed(2)} s  (threshold: median > 16 ms or total > 20 s)`);
+const over = median(addTimes) > 16 || median(removeTimes) > 2000 || median(pairTimes) > 16 || pairTotal > 20000;
 console.log(over ? "OVER THRESHOLD" : "within thresholds");

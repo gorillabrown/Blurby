@@ -18,16 +18,19 @@ function createFolderSync(deps) {
   const bookKey = (p) => path.dirname(p) + "\0" + path.basename(p, path.extname(p)).toLowerCase();
   // Path index over the library (W1): one pass, not a scan of 120,000 books per watcher event. It is rebuilt whenever the
   // library array or its length differs from what the index last saw (another module added or removed a book, or a sync
-  // pruned), and kept in step by trackAdd on every add here. Removal goes through setLibrary, which rebuilds it.
-  let idx = null; // { lib, len, byPath: Map<filepath, doc>, byBook: Set<bookKey> }
+  // pruned), and kept in step by trackAdd on every add and removeUnder on every removal here.
+  // INVARIANT: the index is trusted while the array identity and length are unchanged, so no writer may edit a doc's
+  // filepath in place on the same array, and no writer may swap one book for another without changing the array or length.
+  let idx = null; // { lib, len, byPath: Map<filepath, doc>, byBook: Map<bookKey, count of books with that key> }
+  const bump = (m, k, n) => { const c = (m.get(k) || 0) + n; if (c > 0) m.set(k, c); else m.delete(k); };
   function index() {
     const lib = getLibrary();
     if (idx && idx.lib === lib && idx.len === lib.length) return idx;
-    idx = { lib, len: lib.length, byPath: new Map(), byBook: new Set() };
+    idx = { lib, len: lib.length, byPath: new Map(), byBook: new Map() };
     for (const d of lib) {
       if (!d.filepath) continue;
       if (!idx.byPath.has(d.filepath)) idx.byPath.set(d.filepath, d);
-      idx.byBook.add(bookKey(d.filepath));
+      bump(idx.byBook, bookKey(d.filepath), 1);
     }
     return idx;
   }
@@ -39,18 +42,20 @@ function createFolderSync(deps) {
     i.len = lib.length;
     if (doc.filepath) {
       if (!i.byPath.has(doc.filepath)) i.byPath.set(doc.filepath, doc);
-      i.byBook.add(bookKey(doc.filepath));
+      bump(i.byBook, bookKey(doc.filepath), 1);
     }
   }
   const findByPath = (p) => index().byPath.get(p);
-  const hasBook = (p) => index().byBook.has(bookKey(p));
+  const hasBook = (p) => index().byBook.has(bookKey(p)); // counts are kept above 0, so has() is count > 0
   // Only paths under the CURRENT source folder: a late event from a replaced watcher must not touch another folder.
   const underFolder = (p) => {
     const folder = getSourceFolder();
     if (!folder) return false;
-    const root = path.resolve(folder);
-    const full = path.resolve(p);
-    return full === root || full.startsWith(root + path.sep);
+    let root = path.resolve(folder);
+    let full = path.resolve(p);
+    if (process.platform === "win32") { root = root.toLowerCase(); full = full.toLowerCase(); }
+    const rel = path.relative(root, full); // a drive root "C:\\" already ends in a separator, so no prefix test
+    return rel === "" || (rel !== ".." && !rel.startsWith(".." + path.sep) && !path.isAbsolute(rel));
   };
   // One bad file is skipped and recorded, never fails the batch.
   const extractGuarded = (file) => Promise.resolve().then(() => extractNewFileDoc(file)).catch((err) => {
@@ -115,7 +120,11 @@ function createFolderSync(deps) {
       cancelled = true; // a folder switch: let the old sync stop, then start the new one
       await running.promise.catch(() => {});
     }
-    const promise = runFullSync(folder).finally(() => { running = null; });
+    // A failed scan, save or prune is logged here, so the fire-and-forget startup call (main.js) cannot leave an unhandled
+    // rejection. The IPC callers (main/ipc/state.js) then go on to startWatcher, as they do after any sync that ends early.
+    const promise = runFullSync(folder)
+      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })
+      .finally(() => { running = null; });
     running = { folder, promise };
     return promise;
   }
@@ -150,11 +159,33 @@ function createFolderSync(deps) {
     // Only a path that is really gone, under a root that is reachable: a Drive hiccup or an unplugged root removes nothing.
     if (stopped || !folder || !(await exists(folder)) || await exists(p) || stopped) return;
     const prefix = p + path.sep;
-    const gone = getLibrary().filter((d) => d.source === "folder" && d.filepath && (d.filepath === p || d.filepath.startsWith(prefix)));
+    // One pass over the library, splitting kept from gone (removeDoc is O(library) per book); setLibrary also rebuilds main.js's id index.
+    const i = index(); // before setLibrary: it is valid for the current array
+    let gone = [];
+    let kept = [];
+    const lib0 = getLibrary();
+    const hit = i.byPath.get(p);
+    const at = hit && hit.source === "folder" ? lib0.indexOf(hit) : -1;
+    if (at >= 0) {
+      // A single file (a path that is a book is not also a folder): two array copies, no per-book test. Add paths never
+      // duplicate a filepath (findByPath guards them), so a second copy from another module is left for the next sync's prune.
+      gone = [hit];
+      kept = lib0.slice(0, at).concat(lib0.slice(at + 1));
+    } else {
+      for (const d of lib0) {
+        if (d.source === "folder" && d.filepath && (d.filepath === p || d.filepath.startsWith(prefix))) gone.push(d);
+        else kept.push(d);
+      }
+    }
     if (!gone.length) return;
-    // One pass, not a filter per book (removeDoc is O(library)); setLibrary also rebuilds the id index in main.js.
-    const goneIds = new Set(gone.map((d) => d.id));
-    setLibrary(getLibrary().filter((d) => !goneIds.has(d.id)));
+    setLibrary(kept);
+    for (const d of gone) {
+      if (i.byPath.get(d.filepath) === d) i.byPath.delete(d.filepath);
+      bump(i.byBook, bookKey(d.filepath), -1);
+    }
+    const lib = getLibrary();
+    i.lib = lib;
+    i.len = lib.length;
     saveLibrary();
     broadcastLibrary();
   }
