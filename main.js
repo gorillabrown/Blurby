@@ -31,7 +31,7 @@ if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-feat
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS,
-        FOLDER_SYNC_BATCH_SIZE, MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
+        MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
         MS_PER_DAY, AUTO_UPDATE_DELAY_MS, BROWSER_FETCH_TIMEOUT_MS,
         BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS, FOLDER_SYNC_STARTUP_DELAY_MS } = require('./main/constants');
 
@@ -326,10 +326,10 @@ function emitSyncProgress(current, total, phase) {
 
 const folderSync = createFolderSync({
   getSourceFolder: () => settings.sourceFolder,
-  getLibrary, setLibrary, addDoc: addDocToLibrary, removeDoc: removeDocFromLibrary,
+  getLibrary, setLibrary, addDoc: addDocToLibrary,
   scanFolderAsync, statFile: (p) => fsPromises.stat(p),
   extractNewFileDoc, extractContent, countWords,
-  isFailed: (p) => failedExtractions.has(p),
+  isFailed: (p) => failedExtractions.has(p), addFailed: addFailedExtraction,
   saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
 });
 function syncLibraryWithFolder() { return folderSync.syncAll(); }

@@ -50,6 +50,7 @@ function makeDeps(init = {}) {
     extractContent: vi.fn(async () => "one two three"),
     countWords: vi.fn(() => 3),
     isFailed: (p) => state.failed.has(p),
+    addFailed: vi.fn((p) => { state.failed.add(p); }),
     saveLibrary: vi.fn(),
     saveLibraryNow: vi.fn(async () => { state.saveLens.push(state.lib.length); }),
     broadcastLibrary: vi.fn(),
@@ -252,6 +253,82 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     expect(m.deps.saveLibraryNow).not.toHaveBeenCalled();
     expect(m.deps.setLibrary).not.toHaveBeenCalled();
     expect(state.lib).toHaveLength(0);
+  });
+
+  it("(e2) no intermediate save while less than FOLDER_SYNC_SAVE_INTERVAL_MS has passed", async () => {
+    const files = Array.from({ length: 12 }, (_, i) => file(path.join(ROOT, `n${i}.epub`)));
+    const { state, deps } = makeDeps();
+    let t = 0;
+    deps.now = () => (t += 1000); // 12 files = 3 batches, far below the 30 s interval
+    const timed = createFolderSync(deps);
+    deps.scanFolderAsync.mockImplementation(async () => files);
+    await timed.syncAll();
+    expect(state.lib).toHaveLength(12);
+    expect(deps.saveLibraryNow, "a batch save ran before the interval passed").not.toHaveBeenCalled();
+    expect(deps.saveLibrary).toHaveBeenCalledTimes(1); // the one save at the end
+  });
+
+  it("(W2) one file whose extraction throws is skipped and recorded; the good ones land", async () => {
+    const files = ["g0", "g1", "bad", "g2", "g3"].map((n) => file(path.join(ROOT, `${n}.epub`)));
+    const badPath = path.join(ROOT, "bad.epub");
+    const { state, deps, sync } = makeDeps();
+    deps.scanFolderAsync.mockImplementation(async () => files);
+    const real = deps.extractNewFileDoc.getMockImplementation();
+    deps.extractNewFileDoc.mockImplementation(async (f) => {
+      if (f.filepath === badPath) throw new Error("corrupt epub");
+      return real(f);
+    });
+    await expect(sync.syncAll(), "syncAll rejected because one extraction threw").resolves.toBeUndefined();
+    expect(state.lib.map((d) => d.id).sort()).toEqual(["id-g0.epub", "id-g1.epub", "id-g2.epub", "id-g3.epub"]);
+    expect(deps.addFailed).toHaveBeenCalledWith(badPath);
+  });
+
+  it("(W3) a per-file event for a path under the old folder is ignored after a folder switch", async () => {
+    const rootA = path.join(os.tmpdir(), "lfs-A");
+    const rootB = path.join(os.tmpdir(), "lfs-B");
+    const addP = path.join(rootA, "late.epub");
+    const oldBook = path.join(rootA, "old.epub");
+    const sibling = path.join(os.tmpdir(), "lfs-Bx", "s.epub"); // starts with rootB but is not under it
+    const inB = path.join(rootB, "new.epub");
+    const { state, deps, sync } = makeDeps({
+      disk: [rootB, addP, sibling, inB],
+      lib: [folderDoc("old", oldBook)],
+    });
+    state.folder = rootB; // the folder was switched; the old watcher's event arrives late
+    await sync.applyAdd(addP);
+    await sync.applyAdd(sibling);
+    expect(deps.extractNewFileDoc, "a path outside the current folder was imported").not.toHaveBeenCalled();
+    await sync.applyUnlink(oldBook);
+    expect(state.lib.map((d) => d.id), "a book of the old folder was removed by a late event").toEqual(["old"]);
+    await sync.applyAdd(inB); // the current folder still works
+    expect(countPath(state.lib, inB)).toBe(1);
+  });
+
+  it("(idx) the path index agrees with the library after a mixed add, remove and external-change sequence", async () => {
+    const [a, b, c, d] = ["a", "b", "c", "d"].map((n) => path.join(ROOT, `${n}.epub`));
+    const { state, deps, sync } = makeDeps({ disk: [ROOT, a, b, c, d], lib: [folderDoc("seed", path.join(ROOT, "seed.epub"))] });
+    const adds = () => deps.extractNewFileDoc.mock.calls.length;
+    await sync.applyAdd(a);
+    await sync.applyAdd(b);
+    await sync.applyAdd(a); // already indexed: skipped
+    expect(adds()).toBe(2);
+    state.disk.delete(a);
+    await sync.applyUnlink(a); // removed, so the index must forget it
+    expect(countPath(state.lib, a)).toBe(0);
+    state.disk.add(a);
+    await sync.applyAdd(a); // re-added after the removal
+    expect(adds()).toBe(3);
+    expect(countPath(state.lib, a)).toBe(1);
+    state.lib.push(folderDoc("ext", c)); // another module adds a book
+    await sync.applyAdd(c);
+    expect(adds()).toBe(3);
+    state.lib = state.lib.filter((x) => x.filepath !== b); // another module deletes one
+    await sync.applyAdd(b);
+    expect(adds()).toBe(4);
+    await sync.applyAdd(d);
+    // index and library agree: every path is present exactly once
+    for (const p of [a, b, c, d]) expect(countPath(state.lib, p)).toBe(1);
+    expect(state.lib).toHaveLength(5);
   });
 
   it("(k) main.js wiring", () => {
