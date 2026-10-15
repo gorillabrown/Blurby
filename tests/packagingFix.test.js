@@ -42,7 +42,7 @@ afterEach(() => {
   else delete process.resourcesPath;
   clearModule("../main/window-manager.js");
   clearModule("../main/ipc/library.js");
-  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 describe("PACKAGING-FIX-1 (A) icons are packaged", () => {
