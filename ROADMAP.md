@@ -219,7 +219,7 @@ NARRATE-REMOVE-1 completed 2026-10-12 (merge `386651fc`), so NARRATE-REBUILD-1 h
 
 <a id="narrate-rebuild-1"></a>
 
-#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word *(position 9 — epic, in flight since 2026-10-12: [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md); P1–P4 merged `7bbf6b20`, `d81aeb4b`, `ef245815`, `331f8313`; P5 open on `eb/narrate-rebuild-1-p5`; live state in that branch's `state.md`)*
+#### NARRATE-REBUILD-1 — Rebuild Narrate with the cursor attached to the playing word ✅ COMPLETED 2026-10-15 (P6 merge `f27c7def`, record `689edd46`; close-out `docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md`) *(was position 9 — epic, in flight since 2026-10-12: [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md); P1–P4 merged `7bbf6b20`, `d81aeb4b`, `ef245815`, `331f8313`; P5 open on `eb/narrate-rebuild-1-p5`; live state in that branch's `state.md`)*
 
 - **Path:** epic — outcome-stated, multi-phase (Phase 0 proves Kokoro, then the core, the mode, speed, crossings and failure states), with owner gates; it cannot be one dispatch. `/next-pointer` routes it to `/epic` when it reaches the head.
 - **What:** A new Narrate, built from scratch on the separation's mode contract.
