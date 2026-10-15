@@ -1,0 +1,35 @@
+{
+  "id": "20261015T020430Z-external-set-status-LIBRARY-READ-ALLOW-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-READ-ALLOW-1",
+  "created": "2026-10-15T02:04:30Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-14"
+    },
+    "expectedRevision": "6ca3cb36a8d1593aa66791c84ea7bd04c7c6efd5b39d39020ee29c0a4529861c",
+    "idempotencyKey": "set-status:LIBRARY-READ-ALLOW-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-READ-ALLOW-1",
+      "idempotencyKey": "set-status:LIBRARY-READ-ALLOW-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-15T02:05:02Z",
+      "recoveryId": "20261015T020430Z-external-set-status-LIBRARY-READ-ALLOW-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T02:05:04Z",
+  "outcome": "succeeded"
+}

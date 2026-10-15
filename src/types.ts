@@ -185,7 +185,7 @@ export interface BlurbySettings {
   ttsPauseParagraphMs?: number;
   ttsDialogueSentenceThreshold?: number;
   ttsFootnoteMode?: "skip" | "read";
-  // Last-used reading mode (Space bar starts this mode from Page view)
+  // Last-used reading mode (Space bar enters this mode, paused, from Page view)
   lastReadingMode: ReaderLastMode;
   // Flow-layer narration state (NARR-LAYER-1B)
   isNarrating: boolean;
