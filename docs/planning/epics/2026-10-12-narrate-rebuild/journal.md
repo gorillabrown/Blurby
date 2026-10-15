@@ -240,6 +240,16 @@
 - **Git:** eb/narrate-rebuild-1-p6 @ 0f19c66c; uncommitted: state.md, journal.md.
 - **Next:** `npm ci`; once the host is quiet: the main full suite, then D1–D13 fresh in one session; done.md; completion merge.
 
+## S4 — 2026-10-14 — parked: the timed rows wait for a second machine
+
+- **Did:** prepared the completion window. `npm ci` in P6 and in a clean worktree at main `e476aed1`. Staged a serial runner: step 0 the main full suite; the P6 build; one `p5-latency-e2e.mjs --minutes 5 --warm 20 --cold 5 --rates 1.0,2.0` run for D3, D5 and D6 into `C:ProjectsBlurby-artifacts
+arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4, D5 and D7 suites (`tests/narrate`, `tests/readerModes/narrate.contract.test.ts`); the D8 suites and baselines against `05a5480a`; the D9 suites; the D10 grep; the D3 recorder `--break`.
+- **Learned:** the shared quiet window was cancelled. The owner is arranging a second computer for Blurby, and GOG resumes heavy work on this one. Records written by the launcher (`latency-e2e.json`, `recorded-output.json`) must be renamed `*.completion-1.json` after the run, and the committed `recorded-output.json` restored.
+- **Decisions:** none (parking is Blurby.Roadmap's order).
+- **Gate/DoD movement:** none. D2, D12 and D7 F5 hold from G2.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** on the second machine: step 0, then every DoD row fresh in one session, done.md, and the completion merge.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
