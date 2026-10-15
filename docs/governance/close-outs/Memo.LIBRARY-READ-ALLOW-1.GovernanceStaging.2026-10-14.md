@@ -50,3 +50,6 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 - Code quality (Plato): **READY**, with no required fixes.
   - Optional: a `convertedEpubPath` match test.
   - **Follow-up for Blurby Brain (Rule 11 tier 2, trust boundary):** `save-library` (`main/ipc/library.js:47`) takes the renderer's library wholesale. A compromised renderer could set any `filepath` and then read it through `read-file-buffer`. That capability already existed through the id-based handlers (`load-doc-content`, `get-doc-chapters`), which read `doc.filepath` with no roots check, so this item opens no new class of access. Proposed follow-up: `save-library` keeps `filepath` and `convertedEpubPath` from the existing library, or the id-based handlers get a path check.
+
+### Merge go
+Blurby Brain, 2026-10-14, Rule 11 tier 1: merge go on `fb31805b`. The DW6 seed deviation is accepted and the fold-in stands. The item stays In Flight with its close-out held for the batched smoke: no tag, no upload. The trust-boundary follow-up is ruled tier 1 and goes to Blurby.Roadmap to file as SAVE-LIBRARY-TRUST-1, right after DEPS-AUDIT-1.
