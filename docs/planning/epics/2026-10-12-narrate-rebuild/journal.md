@@ -231,6 +231,15 @@
 - **Git:** eb/narrate-rebuild-1-p6 @ (this commit, trailer NARRATE-REBUILD-1-P6-Base); uncommitted: none. The P5 worktree keeps only `tests/perf-baseline-results.json` (suite output).
 - **Next:** P6 — `npm ci`, the production build for the owner, then G2 (always stops).
 
+## S4 — 2026-10-14 — session start: completion protocol after G2
+
+- **Did:** resumed by a new session (blurby-05) on Blurby.Roadmap's dispatch. Resume protocol: branch `eb/narrate-rebuild-1-p6` @ `f677353f`, clean, 0/0 against origin. Recorded G2 (owner, 2026-10-14, verbatim in state.md → Evidence). Merged `origin/main` `e476aed1` into P6 as `0f19c66c`. Main changed since `ab5cead4` only in quit, packaging and folder code (`main.js`, `main/{constants,folder-watcher,json-store,quit-sequence,window-manager}.js`, `main/ipc/{library,state}.js`, `package.json`, five tests); no epic path was touched; no conflicts.
+- **Learned:** the machine is busy with another project's long pytest run (CPU 49–63 %). The quiet-machine full suite on main (Blurby Brain's follow-up from PACKAGING-FIX-1) and every measurement row wait for an idle host.
+- **Decisions:** none.
+- **Gate/DoD movement:** D12, D2 (owner half) and D7 F5 (owner half) approved at G2.
+- **Git:** eb/narrate-rebuild-1-p6 @ 0f19c66c; uncommitted: state.md, journal.md.
+- **Next:** `npm ci`; once the host is quiet: the main full suite, then D1–D13 fresh in one session; done.md; completion merge.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
