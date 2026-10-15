@@ -13,6 +13,7 @@ import RecentFolders from "./RecentFolders";
 import CloudSyncIndicator from "./CloudSyncIndicator";
 import blurbyIcon from "../assets/blurby-icon.png";
 import GoalProgressWidget from "./GoalProgressWidget";
+import FolderNoticeBanner from "./FolderNoticeBanner";
 
 const api = window.electronAPI;
 
@@ -376,6 +377,8 @@ export default function LibraryView({
           <button onClick={() => api.installUpdate()} className="btn-fill update-banner-restart-btn">restart</button>
         </div>
       )}
+
+      <FolderNoticeBanner />
 
       <div className="library-scroll">
         {/* Sticky top section: header + filter tabs + divider line */}

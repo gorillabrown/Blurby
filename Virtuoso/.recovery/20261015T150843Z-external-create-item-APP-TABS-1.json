@@ -1,0 +1,53 @@
+{
+  "id": "20261015T150843Z-external-create-item-APP-TABS-1",
+  "operation": "external-create-item",
+  "item_id": "APP-TABS-1",
+  "created": "2026-10-15T15:08:43Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Four tabs: Library, Newsroom, Podcasts, Marketplace",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "L",
+      "lane": "UX polish",
+      "group": "Product Expansion",
+      "spec_link": "ROADMAP.md#app-tabs-1",
+      "branch": "eb/app-tabs-1",
+      "description": "The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a \"Coming Soon\" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highli",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 48,
+      "prerequisites": [],
+      "id": "APP-TABS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:APP-TABS-1",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "failed",
+      "operation": "create-item",
+      "itemId": "APP-TABS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:APP-TABS-1",
+      "actualRevision": "",
+      "recoveryId": "20261015T150843Z-external-create-item-APP-TABS-1",
+      "detail": {
+        "reason": "Notion rejected Phase \"Product Expansion\" (not a select option); re-planned with an existing phase"
+      },
+      "providerItemId": ""
+    },
+    "supersededBy": "20261015T151007Z-external-create-item-APP-TABS-1"
+  },
+  "resolved": "2026-10-15T15:10:07Z",
+  "outcome": "superseded",
+  "reason": "superseded by 20261015T151007Z-external-create-item-APP-TABS-1"
+}

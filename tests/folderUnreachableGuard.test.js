@@ -304,9 +304,9 @@ describe("scan contract and wiring (BUG-195)", () => {
       'const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");',
       "  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),",
       "emitProgress: emitSyncProgress, reportFolderProblem,",
-      'reason: lastFolderProblem || "watch-failed"',
-      "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.",
-      "if (folderToastShown) return;",
+      "reason: folderNotice.get()",
+      "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.",
+      "if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;",
       "if (watcher) folderToastShown = false;",
     ]) expect(src.includes(text), "main.js lacks: " + text).toBe(true);
     expect(src.includes("{ message: userMessage")).toBe(true);

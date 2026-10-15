@@ -1,0 +1,50 @@
+{
+  "id": "20261015T155124Z-external-create-item-TOC-JUMP-SAVE-1",
+  "operation": "external-create-item",
+  "item_id": "TOC-JUMP-SAVE-1",
+  "created": "2026-10-15T15:51:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A contents-list jump in Page mode reopens on the old page",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#toc-jump-save-1",
+      "branch": "eb/toc-jump-save-1",
+      "description": "handleJumpToChapter saves the chapter's word index with the old page's cfi before navigating, and the new page's save is skipped; the book reopens on the old page. Pre-existing.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from PAGE-SAVE-RESTAMP-2's live check (Blurby.Brain ruling: pre-existing, stub). Not a release gate.",
+      "sequence": 57,
+      "prerequisites": [],
+      "id": "TOC-JUMP-SAVE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T15:30:03Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:TOC-JUMP-SAVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "TOC-JUMP-SAVE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:TOC-JUMP-SAVE-1",
+      "actualRevision": "eaa9459a5e45e8684b494b50afd7b4942732603e890a105ca3695a1aa1b74f37",
+      "recoveryId": "20261015T155124Z-external-create-item-TOC-JUMP-SAVE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8128-a2f0-e5c5f867783b",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T15:51:53Z",
+  "outcome": "succeeded"
+}

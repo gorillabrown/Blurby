@@ -169,7 +169,7 @@ function startWatcher(sourceFolder, callbacks) {
 
   watcher.on("error", (err) => {
     console.error("[watcher] fs.watch error:", err.message);
-    if (onError) onError(err, sourceFolder);
+    if (onError && !closed) onError(err, sourceFolder); // a replaced watcher's late error belongs to no episode
   });
 
   const closeHandle = watcher.close.bind(watcher);
