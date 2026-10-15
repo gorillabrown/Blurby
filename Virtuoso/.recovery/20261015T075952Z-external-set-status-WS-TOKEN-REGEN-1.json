@@ -1,0 +1,34 @@
+{
+  "id": "20261015T075952Z-external-set-status-WS-TOKEN-REGEN-1",
+  "operation": "external-set-status",
+  "item_id": "WS-TOKEN-REGEN-1",
+  "created": "2026-10-15T07:59:52Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 41
+    },
+    "expectedRevision": "3b07e2195fdf373201a76dc1b8d2c0e3bbfcf36a5cbb90ba7fd2b0dbe8f867ec",
+    "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('sequence', 41)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WS-TOKEN-REGEN-1",
+      "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('sequence', 41)]",
+      "actualRevision": "1ccf2bd59124aa83a7bcd3d519ca9b71954a36fca4247c7f7b3b60b42fcbe632",
+      "recoveryId": "20261015T075952Z-external-set-status-WS-TOKEN-REGEN-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T08:01:47Z",
+  "outcome": "succeeded"
+}
