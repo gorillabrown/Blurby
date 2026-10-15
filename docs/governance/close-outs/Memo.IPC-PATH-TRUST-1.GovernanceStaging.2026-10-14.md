@@ -88,3 +88,11 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
   - A `typeof === "string"` guard on a held doc's `coverPath` (`misc.js:156`), so a corrupt or imported library cannot throw there.
   - `save-settings`'s `Object.assign` should filter `__proto__` or use a key whitelist (`state.js:30`). The renderer can still overwrite `_wsPairingToken` through `save-settings`.
   - Symlink containment inside the covers folders, and the cloud `applyCloudSettings` setting `sourceFolder` (`sync-engine.js:393`). The specification puts both out of scope.
+
+## Blurby.Brain amendment 2026-10-14 (conversion regression found by the SAVE-LIBRARY-MERGE-1 trace)
+
+SAVE-LIBRARY-TRUST-1 was amended on its own branch (now `dbd159c3`). `keepMainPaths` also pins `ext` and `needsEpubConversion`, and `load-doc-content`'s conversion writes through the current library record. The dispatch said to rebase this branch onto the amended tip. Standing rules forbid rebase, so the amended tip was **merged** into `eb/ipc-path-trust-1` instead, which gives the same content.
+- **Conflict, resolved by hand in `keepMainPaths`:** the comment and the `.map` now pin all five fields from main's held record: `filepath`, `convertedEpubPath`, `ext`, `needsEpubConversion` and `coverPath`.
+- **Done-when 7 text deviation:** the specification's literal `coverPath: held.get(doc.id).coverPath` became `coverPath: h.coverPath` in the amendment's block form (`h = held.get(doc.id)`). It means the same thing. The equivalent check `git grep -n -F 'coverPath: h.coverPath' -- main/ipc/library.js` prints one line (`:55`) and exits 0.
+- **Mutation check:** with `coverPath: h.coverPath` removed, (c) fails; restored.
+- DW2 on the merge: 6 files, 57 tests, exit 0 (SAVE-LIBRARY-TRUST-1's (l) and (m) included).

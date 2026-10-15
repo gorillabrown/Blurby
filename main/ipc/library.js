@@ -43,12 +43,17 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
-// The renderer may edit a document's fields, never where its file or cover is, and cannot add documents (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
+// The renderer may edit a document's fields, never where its file or cover is or how it is converted (filepath,
+// convertedEpubPath, ext, needsEpubConversion and coverPath are main's), and cannot add documents
+// (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
 function keepMainPaths(newDocs, library) {
   const held = new Map((library || []).map((doc) => [doc.id, doc]));
   return newDocs
     .filter((doc) => doc && held.has(doc.id))
-    .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath, coverPath: held.get(doc.id).coverPath }));
+    .map((doc) => {
+      const h = held.get(doc.id);
+      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion, coverPath: h.coverPath };
+    });
 }
 
 function register(ctx) {
@@ -175,10 +180,11 @@ function register(ctx) {
           title: doc.title,
           author: doc.author || "Unknown",
         });
-        // Update doc record with EPUB path
-        doc.convertedEpubPath = convResult.epubPath;
-        doc.ext = ".epub";
-        if (doc.needsEpubConversion) delete doc.needsEpubConversion;
+        // Update the CURRENT record: a concurrent save-library may have replaced `doc` during the await
+        const current = ctx.getLibrary().find((d) => d.id === docId) || doc;
+        current.convertedEpubPath = convResult.epubPath;
+        current.ext = ".epub";
+        if (current.needsEpubConversion) delete current.needsEpubConversion;
         ctx.saveLibrary();
         return { filepath: convResult.epubPath, ext: ".epub" };
       } catch (convErr) {
