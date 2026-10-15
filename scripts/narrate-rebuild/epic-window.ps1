@@ -22,6 +22,11 @@ function Note($m) { "$((Get-Date).ToUniversalTime().ToString('yyyy-MM-dd HH:mm:s
 function Cpu { (Get-CimInstance Win32_Processor | Measure-Object -Property LoadPercentage -Average).Average }
 function Counts($file) { (Select-String -Path $file -Pattern 'Test Files|Tests ' | ForEach-Object { $_.Line.Trim() }) -join ' / ' }
 
+$cores = (Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfCores -Sum).Sum
+$threads = (Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+# D6 class (charter, Decision #22): reference = 8+ physical cores, mainstream = 4 physical cores / 8 threads.
+$d6class = if ($cores -ge 8) { "reference" } elseif ($cores -ge 4) { "mainstream" } else { "below-mainstream" }
+Note "HARDWARE physicalCores=$cores logicalProcessors=$threads d6class=$d6class cpu=$((Get-CimInstance Win32_Processor | Select-Object -First 1).Name)"
 Note "START cpu=$(Cpu) main=$MainWorktree p6=$P6Worktree artifacts=$ArtifactsRoot models=$ModelsRoot out=$OutDir"
 
 # Step 0: full suite on main in a clean checkout (needs no assets).

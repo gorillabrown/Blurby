@@ -19,7 +19,7 @@ pwsh -File scripts\narrate-rebuild\epic-window.ps1 -MainWorktree $MAIN `
      -P6Worktree $P6 -ArtifactsRoot $ART -ModelsRoot "$ART\models"
 ```
 
-It prints `TIMED ROWS AND FULL SUITE DONE` after D11. Never run anything else heavy meanwhile (foreign-CPU rule, section 3). `-OutDir` overrides the log folder. Exit 10 means step 0 failed: stop and report to Blurby.Brain, do not run the epic.
+Its first `window.log` lines include `HARDWARE physicalCores=<n> logicalProcessors=<n> d6class=<reference|mainstream|below-mainstream>`. D6 is hardware-tiered (charter, Decision #22): the reference class (8+ physical cores) must keep warm under 2,000 ms, and the mainstream class (4 physical cores / 8 threads) under 2,500 ms. Cold stays under 8,000 ms on both, and cold click is judged on a reference-class run only until NARRATE-HARNESS-COLDCLICK-1. It prints `TIMED ROWS AND FULL SUITE DONE` after D11. Never run anything else heavy meanwhile (foreign-CPU rule, section 3). `-OutDir` overrides the log folder. Exit 10 means step 0 failed: stop and report to Blurby.Brain, do not run the epic.
 
 | # | Row / step | Command (cwd) | Expected exit | Evidence written |
 |---|-----------|---------------|---------------|------------------|
