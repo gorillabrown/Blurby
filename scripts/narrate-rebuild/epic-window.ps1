@@ -62,6 +62,12 @@ Note "TIMED ROWS AND FULL SUITE DONE cpu=$(Cpu)"
 
 # D1
 node scripts/narrate-rebuild/p0-summary.mjs --quiet *> (Join-Path $OutDir 'd1-summary.txt'); Note "D1 p0-summary exit=$LASTEXITCODE (expect 0)"
+# p0-summary rewrites the tracked phase0/summary.json (new recordedAt): keep that copy as evidence, then restore the tracked
+# file from HEAD so the run leaves no tracked file changed (git show through cmd keeps the bytes; launch.md forbids checkout/reset).
+$sum = 'docs/studies/narrate-rebuild-1/phase0/summary.json'
+Copy-Item $sum (Join-Path $OutDir 'd1-summary.json')
+cmd /c "git show HEAD:$sum > docs\studies\narrate-rebuild-1\phase0\summary.json"
+git diff --quiet HEAD -- $sum; Note "D1 summary.json saved to OutDir and restored from HEAD, git diff exit=$LASTEXITCODE (expect 0)"
 node scripts/narrate-rebuild/p0-summary.mjs --break --quiet *> (Join-Path $OutDir 'd1-summary-break.txt'); Note "D1 p0-summary --break exit=$LASTEXITCODE (expect 1)"
 # D4 + D5 engine/crossings/trace + D7 suites
 npx vitest run tests/narrate tests/readerModes/narrate.contract.test.ts *> (Join-Path $OutDir 'd4-d5-d7-suites.txt'); Note "D4/D5/D7 narrate suites exit=$LASTEXITCODE :: $(Counts (Join-Path $OutDir 'd4-d5-d7-suites.txt'))"
@@ -71,7 +77,7 @@ git diff --exit-code 05a5480a -- docs/planning/roadmap-reviews/reader-mode-separ
 # D9
 npx vitest run tests/settingsNarrateNormalization.test.js tests/settingsMigrationV13.test.js *> (Join-Path $OutDir 'd9-suites.txt'); Note "D9 suites exit=$LASTEXITCODE"
 # D10
-git grep -n -l -P '_alignWordsToTimestamps|computeWordTimestamps' -- src main scripts patches *> (Join-Path $OutDir 'd10-grep.txt'); Note "D10 grep exit=$LASTEXITCODE (expect 1)"
+git grep -n -l -P '_alignWordsToTimestamps|computeWordTimestamps' -- src main scripts patches *> (Join-Path $OutDir 'd10-grep.txt'); Note "D10 grep exit=$LASTEXITCODE (expect 1: no match is the absence check passing)"
 # D3 recorder positive control (offline), on a produced session trace
 $rec = Get-ChildItem $out -Recurse -Filter '*.trace.json' | Where-Object { $_.FullName -match 'session' } | Select-Object -First 1
 if ($rec) { node scripts/narrate-rebuild/p5-recorded-output-check.mjs $rec.FullName --min-minutes 0 --break *> (Join-Path $OutDir 'd3-break.txt'); Note "D3 check --break exit=$LASTEXITCODE (expect 1) on $($rec.Name)" }
