@@ -382,9 +382,7 @@ function mergeSettings(local, cloud, fieldTimestamps) {
     }
   }
 
-  if (cloud.schemaVersion > merged.schemaVersion) {
-    merged.schemaVersion = cloud.schemaVersion;
-  }
+  // No schemaVersion step: startSync keeps only shared user settings from this output, so it is dropped (GET-STATE-SECRET-1).
 
   return merged;
 }

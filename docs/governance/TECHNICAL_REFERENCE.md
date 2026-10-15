@@ -749,6 +749,8 @@ Blurby hosts a localhost WebSocket server on port 48924 for the Chrome extension
 
 **Pairing flow:** 6-digit short code with 5-minute TTL. Long-lived token stored in safeStorage (server) and `chrome.storage.local` (extension). Token survives app restart. Extension reconnects with exponential backoff (1s→30s, ±25% jitter). Pending articles persisted in `chrome.storage.local` and replayed on reconnect with delivery confirmation (article-ack).
 
+**Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer or a library backup. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code, which the pairing banner fetches with `get-ws-short-code` after the `ws-connection-attempt` push. `export-library` writes only real user settings (no `_`-prefixed or main-owned key), and `import-library` restores no settings.
+
 **Push event channels (EXT-ENR-B, v1.43.0):** Server emits two push events to the renderer via `mainWindow.webContents.send()`:
 
 | Channel | When | Payload |

@@ -562,11 +562,10 @@ export const electronAPIStub: ElectronAPI = {
   openReadingNotes: async (docId?: string) => trace("openReadingNotes", [docId], { ok: true }),
 
   // ── WebSocket server (Chrome extension) ─────────────────────────────────
-  startWsServer: async () => trace("startWsServer", [], { port: 48924, token: "mock-token-12345" }),
+  startWsServer: async () => trace("startWsServer", [], { port: 48924 }),
   stopWsServer: async () => trace("stopWsServer", [], { ok: true }),
-  getWsStatus: async () => trace("getWsStatus", [], { running: false, port: 48924, clients: 0, token: null }),
-  getWsPairingToken: async () => trace("getWsPairingToken", [], "mock-token-12345"),
-  regenerateWsPairingToken: async () => trace("regenerateWsPairingToken", [], { port: 48924, token: "mock-token-new-67890" }),
+  getWsStatus: async () => trace("getWsStatus", [], { running: false, port: 48924, clients: 0 }),
+  regenerateWsPairingToken: async () => trace("regenerateWsPairingToken", [], { port: 48924 }),
   getWsShortCode: async () => trace("getWsShortCode", [], { code: "123456", expiresAt: Date.now() + 300000, connected: false }),
   regenerateWsShortCode: async () => trace("regenerateWsShortCode", [], { code: "654321", expiresAt: Date.now() + 300000 }),
 

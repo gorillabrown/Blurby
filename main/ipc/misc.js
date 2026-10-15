@@ -382,8 +382,10 @@ function register(ctx) {
 
   const wsServer = require("../ws-server");
 
+  // The long-lived pairing token stays in main: no handler returns it to the renderer (GET-STATE-SECRET-1).
   ipcMain.handle("start-ws-server", () => {
-    return wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx);
+    return { port };
   });
 
   ipcMain.handle("stop-ws-server", () => {
@@ -392,12 +394,8 @@ function register(ctx) {
   });
 
   ipcMain.handle("get-ws-status", () => {
-    return wsServer.getStatus();
-  });
-
-  ipcMain.handle("get-ws-pairing-token", () => {
-    const status = wsServer.getStatus();
-    return status.token || null;
+    const { running, port, clients } = wsServer.getStatus();
+    return { running, port, clients };
   });
 
   ipcMain.handle("get-ws-short-code", () => {
@@ -421,7 +419,8 @@ function register(ctx) {
     ctx.saveSettings();
     // Restart server with new token
     wsServer.stopServer();
-    return wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx);
+    return { port };
   });
 
   // ── Auto-updater ─────────────────────────────────────────────────────────

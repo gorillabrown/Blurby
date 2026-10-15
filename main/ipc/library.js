@@ -12,6 +12,7 @@ const { extractContent, extractDocMetadata, countWords,
 const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
 const { pathKey } = require("../folder-sync");
+const { pickUserSettings } = require("../migrations");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -545,7 +546,8 @@ function register(ctx) {
     if (result.canceled) return null;
     const exportData = {
       exportedAt: new Date().toISOString(),
-      settings: { ...settings },
+      // Real user settings only: a backup holds no _-prefixed secret and no main-owned key (GET-STATE-SECRET-1).
+      settings: pickUserSettings(settings),
       library: ctx.getLibrary(),
       history: ctx.getHistory(),
     };
