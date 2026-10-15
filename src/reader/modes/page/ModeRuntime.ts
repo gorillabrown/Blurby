@@ -582,6 +582,15 @@ export class PageModeRuntime implements ReaderModeRuntime {
     s.notify();
   };
 
+  /** Legacy useFoliateSync effect 1 tick (setIsBrowsedAway(isUserBrowsing())). */
+  pollBrowsing = (): void => {
+    if (!this.alive) return;
+    const browsing = this.surface.isUserBrowsing();
+    if (browsing === this.state.isBrowsedAway) return;
+    this.state.isBrowsedAway = browsing;
+    this.state.notify();
+  };
+
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();
 
   recordDiagnostic = (kind: string, detail: string): void => {
