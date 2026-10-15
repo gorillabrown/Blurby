@@ -48,3 +48,40 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
   - **IPC-PATH-TRUST-1:** `coverPath` is renderer-writable through `save-library` and `apply-metadata-updates`, and `get-cover-image` (`main/ipc/misc.js:312-332`) reads any path it is given. Add `coverPath` to `keepMainPaths` only if covers are made to depend on main's record.
   - **SAVE-LIBRARY-MERGE-1:** a stale save can still drop main's newer docs and overwrite tombstone fields (unchanged; ruled out of scope here).
   - Optional, in scope: deduplicate repeated ids in a payload, and add a test for malformed array elements (`null`, primitives, a missing `id`). The `doc &&` guard already handles the first two.
+
+## Blurby.Brain amendment 2026-10-14 (conversion regression found by the SAVE-LIBRARY-MERGE-1 trace)
+
+**Regression:** opening a non-EPUB folder book (`.txt`) runs `load-doc-content`'s lazy conversion. If a renderer `save-library` replaced main's doc objects during that await:
+- the conversion wrote `convertedEpubPath` onto the stale object, so the conversion was lost;
+- the renderer's copy then put `ext: ".epub"` on the source record, and the next open served the `.txt` as an EPUB.
+
+Ruled by Brain (Rule 11 tier 1): pin `ext` and `needsEpubConversion` too, with a failing-first test. If the pin alone does not recover `convertedEpubPath`, the conversion writes through the current library record.
+
+**Commits:**
+- `3abcc40a`: test (l), failing at `0df26183`: `AssertionError: expected '.epub' to be '.txt'` (main's source record took the renderer's `.epub`).
+- `faeba9dc`: the fix in `main/ipc/library.js`:
+  - `keepMainPaths` pins `ext` and `needsEpubConversion`.
+  - `load-doc-content` writes `convertedEpubPath`, `ext` and `needsEpubConversion` through `ctx.getLibrary().find(d => d.id === docId) || doc` after the await.
+  - **Both parts were needed.** With the pin alone, (l) failed on `expected undefined to be '…\data\converted\f1.epub'`: the conversion had written to the replaced object. With the write-through line reverted, (l) fails again.
+- `6a714b6e`: (l)'s ext assertion revised (deviation from Brain's brief, accepted by spec compliance).
+  - The conversion sets `ext: ".epub"` by design, which is also the unraced outcome. That state is safe because `convertedEpubPath` comes with it: `load-doc-content` serves `convertedEpubPath` first (`library.js:163`), before the native-EPUB branch.
+  - Spec compliance checked every reader of `doc.ext` in `main/` and `src/` and found each safe.
+  - (l) asserts the source `filepath`, `ext` `.epub`, `convertedEpubPath` the converted file, `needsEpubConversion` undefined, and a reopen that serves the converted file without reconverting.
+- `b8e47a26`: merge of `refs/remotes/origin/main` (governance only: ROADMAP routing records and two `Virtuoso/.recovery` files).
+- Test (m), added after both reviews noted the `ext` pin was unproven: a renderer save that sends `ext: ".epub"` and drops `needsEpubConversion` before any conversion leaves main's `.txt` and `true`, while the title edit applies. Mutation check: with the `ext`/`needsEpubConversion` pin removed, (l) and (m) both fail; `library.js` restored identical to HEAD.
+
+**Gates (amended):**
+- DW2: 4 files, 27 tests, exit 0, after (m).
+- DW3–DW6 and DW8: exact (DW4 still `library.js:2`; DW5 roots line `:209`/`:256`; DW6 `:156`/`:226`).
+- DW9 (committed): `BUG_REPORT.md`, `main/ipc/library.js`, `tests/saveLibraryTrust.test.js` and this memo.
+- Heavy run at `b8e47a26` (tree `c0a82a02`), under load: `npm test` 160 files, 2,154 passed / 1 skipped / 0 failed; typecheck 0; build 0. (m) touches one test file only, so the targeted suites were re-run after it.
+
+**Re-reviews of the delta:**
+- Spec compliance: **APPROVED_WITH_CONCERNS** (the `ext` pin was untested; closed by (m)).
+- Code quality: **MINOR_FIXES**, with the same test gap, closed by (m). The orphan case (the doc removed during the conversion) is harmless: nothing persists and nothing is resurrected.
+- **Follow-ups for Blurby.Roadmap:**
+  - In that orphan case the converted file is left in `converted/` with no record (a small disk leak).
+  - **For SAVE-LIBRARY-MERGE-1, the same race class (mutating a doc across an await):**
+    - `relinkSampleIfMissing` (`library.js:29-36`), self-healing.
+    - `folder-sync.js` `refresh()` (`:194-198`), a lost word count.
+    - The import and URL conversion paths (`library.js:~280-340`, `~428-440`), unverified.
