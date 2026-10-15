@@ -147,8 +147,6 @@ const JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80];
 const QUIT_FLUSH_TIMEOUT_MS = 3000;
 /** Debounce delay for broadcasting library updates to renderer (ms) */
 const BROADCAST_DEBOUNCE_MS = 200;
-/** Debounce delay for triggering folder sync after watcher events (ms) */
-const FOLDER_SYNC_DEBOUNCE_MS = 1000;
 /** Maximum files processed per folder sync batch */
 const FOLDER_SYNC_BATCH_SIZE = 4;
 /** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */
@@ -268,7 +266,6 @@ module.exports = {
   JSON_RENAME_RETRY_DELAYS_MS,
   QUIT_FLUSH_TIMEOUT_MS,
   BROADCAST_DEBOUNCE_MS,
-  FOLDER_SYNC_DEBOUNCE_MS,
   FOLDER_SYNC_BATCH_SIZE,
   FOLDER_SYNC_STARTUP_DELAY_MS,
   FOLDER_SYNC_SAVE_INTERVAL_MS,

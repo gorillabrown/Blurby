@@ -30,7 +30,7 @@ if (process.env.BLURBY_USER_DATA_DIR) app.setPath("userData", path.resolve(proce
 if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
+const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS,
         FOLDER_SYNC_BATCH_SIZE, MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
         MS_PER_DAY, AUTO_UPDATE_DELAY_MS, BROWSER_FETCH_TIMEOUT_MS,
         BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS, FOLDER_SYNC_STARTUP_DELAY_MS } = require('./main/constants');
@@ -64,7 +64,8 @@ let mainWindow = null;
 let readerWindows = new Map();
 let tray = null;
 let watcher = null;
-let syncDebounceTimer = null;
+let folderWorkTimer = null; // the startup folder work, until it runs or quit stops it
+let folderWorkStopped = false;
 // failedExtractions: Map<filepath, timestamp> — bounded, auto-cleans
 const FAILED_EXTRACTIONS_MAX = 500;
 const failedExtractions = new Map();
@@ -302,11 +303,6 @@ async function loadState() {
 }
 
 // ── Folder sync ────────────────────────────────────────────────────────────
-function debouncedSyncLibraryWithFolder() {
-  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
-  syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, FOLDER_SYNC_DEBOUNCE_MS);
-}
-
 async function extractNewFileDoc(file) {
   const content = await extractContent(file.filepath);
   if (!content) { addFailedExtraction(file.filepath); return null; }
@@ -330,13 +326,21 @@ function emitSyncProgress(current, total, phase) {
 
 const folderSync = createFolderSync({
   getSourceFolder: () => settings.sourceFolder,
-  getLibrary, setLibrary, scanFolderAsync,
+  getLibrary, setLibrary, addDoc: addDocToLibrary, removeDoc: removeDocFromLibrary,
+  scanFolderAsync, statFile: (p) => fsPromises.stat(p),
   extractNewFileDoc, extractContent, countWords,
   isFailed: (p) => failedExtractions.has(p),
   saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
 });
 function syncLibraryWithFolder() { return folderSync.syncAll(); }
 function cancelSync() { folderSync.cancel(); }
+// Quit (Fold-in 2a): the startup folder work never starts, and a running sync or per-file add stops writing.
+function stopFolderWork() {
+  folderWorkStopped = true;
+  clearTimeout(folderWorkTimer);
+  folderWorkTimer = null;
+  folderSync.stop();
+}
 
 // ── Watcher management ─────────────────────────────────────────────────────
 function startWatcherFn() {
@@ -344,8 +348,8 @@ function startWatcherFn() {
   if (!settings.sourceFolder) return;
 
   watcher = startWatcher(settings.sourceFolder, {
-    onAdd: () => debouncedSyncLibraryWithFolder(),
-    onUnlink: () => debouncedSyncLibraryWithFolder(),
+    onAdd: (filepath) => folderSync.applyAdd(filepath),
+    onUnlink: (filepath) => folderSync.applyUnlink(filepath),
     onChange: (filepath) => folderSync.applyChange(filepath),
     onError: (err, folderPath) => {
       const isPermission = err.message && (
@@ -583,7 +587,7 @@ app.whenReady().then(async () => {
 
   // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
   if (settings.sourceFolder) {
-    const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+    const startFolderWork = () => { if (folderWorkStopped) return; folderWorkTimer = setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS); };
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
     else startFolderWork();
   }
@@ -612,6 +616,7 @@ app.on("window-all-closed", () => {
 app.on("will-quit", createWillQuitHandler({
   app,
   stopNewWork: () => {
+    stopFolderWork();
     if (watcher) watcher.close();
     try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
     try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }

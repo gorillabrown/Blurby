@@ -23,3 +23,15 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 - Implementation agent: `perfAudit`, `fileHashesCleanup` and `einkFoundation` pass, 72 tests; typecheck exit 0.
 - The C1 extraction is verbatim apart from the specification's renames (`getSourceFolder`, `cancelled`, `isFailed`, `emitProgress`). `savedArticlesPath` reads `getSourceFolder()` once into a local, where the old code read `settings.sourceFolder` twice.
 - The `FOLDER_SYNC_BATCH_SIZE` destructure in `main.js` is now unused; the specification drops identifiers in C2.
+
+### Done-when 2–8, 11 — at C2 (re-run by the orchestrator)
+- DW2: 5 files, 93 tests, **exit 0**.
+- DW3, DW4: exit 1, empty. DW5: `main.js:3`. DW6: `main.js:1`.
+- DW7: `folder-watcher.js:3`; `onUnlink();` exits 1, empty.
+- DW8: `FOLDER_SYNC_DEBOUNCE_MS` exits 1, empty; `FOLDER_SYNC_SAVE_INTERVAL_MS` gives `main/constants.js:2`.
+- DW11: the Technical Reference sentence is present once (implementation agent). Typecheck (implementation agent): exit 0.
+- **LL-159 check** (the specification names the batched saves as deferred writes the quit list must cover, but gives no edit). Orchestrator reading:
+  - `stopNewWork` now runs `stopFolderWork()` first, which clears the startup timer and calls `folderSync.stop()`, ending a sync's writes.
+  - The quit list's `library` step is `saveLibraryNow`, which clears `_saveLibraryTimer` and the dirty flag and writes the whole live library.
+  - So the batched and the debounced per-file saves are both covered without a new step. The quit list is unchanged.
+- `main.js` still imports `FOLDER_SYNC_BATCH_SIZE`, now unused; the specification's C2 does not drop it. Left for review.
