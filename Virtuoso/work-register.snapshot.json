@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T13:42:18Z",
+  "takenAt": "2026-10-15T14:19:49Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1791,7 +1791,7 @@
     {
       "id": "PDF-IMPORT-DIAG-1",
       "title": "Reproduce the PDF that cannot be converted",
-      "sequence": 29,
+      "sequence": 30,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1807,7 +1807,7 @@
       "evidence": "",
       "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
       "notes": "Created by roadmap review 2026-10-14. BUG-190.",
-      "revision": "df20e399433e4fd024e9377f1b4bac14a4e623453d8f296b519f50d73961cd77",
+      "revision": "e77ebcbfe99c8c62d72b61c202bccc71a162fbf111f2378be5afed081ab8c2eb",
       "extra": {}
     },
     {
@@ -1835,7 +1835,7 @@
     {
       "id": "EINK-CONTROLS-1",
       "title": "One E-ink control, not two",
-      "sequence": 31,
+      "sequence": 32,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1851,13 +1851,13 @@
       "evidence": "",
       "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
       "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
-      "revision": "e44db693191b9d377d21be9f03787d22a26a263fad3676693ef1abd35a883cde",
+      "revision": "6797f3bbe10cf80a350ed715e88e6eae0b9e59d3a4114b590d7cc1e9af218af9",
       "extra": {}
     },
     {
       "id": "NARRATE-YEARS-1",
       "title": "Read four-digit years as years in Narrate",
-      "sequence": 38,
+      "sequence": 39,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -1875,13 +1875,13 @@
       "evidence": "",
       "description": "BUG-191: years such as 1974 are spoken as cardinal numbers. Fix in the rebuilt Narrate's text normalization with a regression fixture.",
       "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "0ce1dece8f5c216aeba6602a65c48c393208071769d1791bd4bc539f14d8c160",
+      "revision": "ca0596a5d2e701d4a5e2abcaa61b20230fa80bb1db3e38a5497ccadb91413c1b",
       "extra": {}
     },
     {
       "id": "KF2-WAIVER-RETIRE-1",
       "title": "Retire the KF-2 rename waiver",
-      "sequence": 27,
+      "sequence": 28,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -1897,7 +1897,7 @@
       "evidence": "",
       "description": "The bounded rename retry from SETTINGS-WRITE-DURABLE-1 removes the Windows rename failure KF-2 waived. Retire the waiver after two clean full runs on the owner's machine.",
       "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass.",
-      "revision": "28a55ea8244209023db579c4337d93f950111e38510923ea9d3b536d79f60678",
+      "revision": "ec6b86ea9046958e57e166b6cbb1f0606cec27e409860c82874675bfa33f1c80",
       "extra": {}
     },
     {
@@ -1925,7 +1925,7 @@
     {
       "id": "OVERLAY-THEME-SWEEP-1",
       "title": "Other overlays: Escape and undefined theme tokens",
-      "sequence": 30,
+      "sequence": 31,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1941,7 +1941,7 @@
       "evidence": "",
       "description": "Two overlays likely share the Escape-leaves-reader defect and five panels read an undefined background token. Verify live, then specify on UX-POLISH-2's pattern.",
       "notes": "Created by roadmap review 2026-10-14. Found while specifying UX-POLISH-2; after UX-POLISH-2.",
-      "revision": "4dc887fc02da7f73a6f9563d1fdcd8df36af1529feaf6dfb32d142c2b90eaad4",
+      "revision": "3630423571e06733f44642dff270fd2588e9b048c9089b231c45ce703566933d",
       "extra": {}
     },
     {
@@ -2037,7 +2037,7 @@
     {
       "id": "NARRATE-SENTENCE-RESUME-1",
       "title": "Narrate restarts at the beginning of the current sentence",
-      "sequence": 39,
+      "sequence": 40,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2055,7 +2055,7 @@
       "evidence": "",
       "description": "When Narrate starts from a position that is not a sentence start (resume, reopen, after a page turn), playback, cursor and saved position rewind to the first word of that sentence. Owner decision 2026-10-14.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "4d734a6a19fdeb0fc649302a08f1f63463e7e7f75707ae7de00cd8501d37800c",
+      "revision": "50fc0d855cdb6a48ad44227b6e4bba62af62de08c548ba2eb09de5f8e0ed30e2",
       "extra": {}
     },
     {
@@ -2127,7 +2127,7 @@
     {
       "id": "PAGE-POSITION-SAVE-2",
       "title": "Follow-ups from PAGE-POSITION-SAVE-1",
-      "sequence": 26,
+      "sequence": 27,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -2143,7 +2143,7 @@
       "evidence": "",
       "description": "A live swipe-crossing check, a diagnostic for a lost deferred page-turn save, and removal of Page's dead browse-away code with its two ownership-manifest entries.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at PAGE-POSITION-SAVE-1's merge. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14). U9/U10 pass.",
-      "revision": "bdc351a5e1b0ffd57fdff4523d9ff72bee6dcbaab54644440dc73817b7caa01a",
+      "revision": "ac62bd5d3fedfadfb53d0e27605288d76654ed7c8a255b01ad22c8691e12891a",
       "extra": {}
     },
     {
@@ -2193,7 +2193,7 @@
     {
       "id": "LIBRARY-WRITE-RACE-1",
       "title": "Library writers that mutate a document across an await",
-      "sequence": 35,
+      "sequence": 36,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2209,13 +2209,13 @@
       "evidence": "",
       "description": "Remaining main-side writers in the save-race class, orphaned converted files, payload id dedupe and malformed-element tests.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub.",
-      "revision": "5508a4894b1a23712ab78c078e2f5c09323abd3d530939e86eefea284391518d",
+      "revision": "b36e47d7210c3c175eceec7b5328ffb4d3d17066050576db1ec72042047957d8",
       "extra": {}
     },
     {
       "id": "ZIP-READ-FOLLOWUPS-1",
       "title": "Follow-ups from DEPS-AUDIT-1's capped zip reader",
-      "sequence": 34,
+      "sequence": 35,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2231,13 +2231,13 @@
       "evidence": "",
       "description": "Import file-size check, a lying STORED-header test, and a parser-level operation-cap test.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews.",
-      "revision": "86cbcaf2ba3895d736fa8495c1ae4ec3b393b76bac8f5439f19a8a99641be5bf",
+      "revision": "cb3ade451b4b0aeb909203d3a2ab5ad53a533ff9840d34487d178e2bbf7cf0ce",
       "extra": {}
     },
     {
       "id": "RENAME-RETRY-1",
       "title": "Every JSON rename retries a transient Windows lock",
-      "sequence": 32,
+      "sequence": 33,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2253,13 +2253,13 @@
       "evidence": "",
       "description": "Reuse json-store's retry helper for six raw renames outside json-store, sync-engine sync state first.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace.",
-      "revision": "3d8d5e3ae1778b0b76ffbc15effe62e6937c995e5d7f8d72b0431aa1758cd21c",
+      "revision": "9ad3d1bd81bfb9bc5c706774833eecd3384f6700e75d4636d75238353616dbbc",
       "extra": {}
     },
     {
       "id": "NARRATE-HARNESS-COLDCLICK-1",
       "title": "Measure cold click on mainstream hardware",
-      "sequence": 36,
+      "sequence": 37,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2277,13 +2277,13 @@
       "evidence": "",
       "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate.",
-      "revision": "f38a466bb1d8528fff5bca35cebc00cb7b21513505b9c54bfb7ac12c47683ec0",
+      "revision": "271e5d64a92d38a14f8574e3e5b09c242654c85f2fe41afe2dd7ea31d4472eed",
       "extra": {}
     },
     {
       "id": "NARRATE-CPU-PROFILE-1",
       "title": "Narrate saturates a 4-core CPU during warm requests",
-      "sequence": 37,
+      "sequence": 38,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2301,7 +2301,7 @@
       "evidence": "",
       "description": "A profile pass on producer and worker time, and whether chunk ramp or worker count should adapt to core count.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the quiet-machine run. Not a release gate.",
-      "revision": "ac331d51435657988c2948c0e58624a0e8d2631d50c95f20130aaa056581db83",
+      "revision": "8fc4c790931624e0d5f4fdd9b1c817ebf1a32799a2d977ed10e19c05ef2f07b6",
       "extra": {}
     },
     {
@@ -2329,7 +2329,7 @@
     {
       "id": "JSONSTORE-TIMEOUT-1",
       "title": "Give the jsonStore concurrency test real headroom",
-      "sequence": 33,
+      "sequence": 34,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2345,13 +2345,13 @@
       "evidence": "",
       "description": "A 30 s timeout for jsonStore test (a) and isolation of (d)/(e); then jsonStore leaves the closed list.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only.",
-      "revision": "ba30f5e17d43738d6db85c3ed86ae5c4a325beae6a24009a98a00eca8ee50958",
+      "revision": "13da5c2e9624e36786e761fa9f34a1d919d3a86446d6ed2449aead5553ffc384",
       "extra": {}
     },
     {
       "id": "FOLDER-NOTICE-1",
       "title": "Show when the source folder cannot be reached, with a one-press Retry",
-      "sequence": 28,
+      "sequence": 29,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -2370,7 +2370,7 @@
       "evidence": "",
       "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15: Reconnect the drive, then press Retry. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1).",
-      "revision": "5242eb8e9c64bae747c7c81c621fe18cf6f112ddee1630ae0164dfd544bfdf2c",
+      "revision": "2101d6e9ebdee00d89cddc04e2cec9da1fdfee72288e69c115fedec36c425ece",
       "extra": {}
     },
     {
@@ -2398,7 +2398,7 @@
     {
       "id": "NARRATE-TOKEN-CAP-1",
       "title": "Narrate passages that exceed the 400-id token cap",
-      "sequence": 40,
+      "sequence": 41,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2416,13 +2416,13 @@
       "evidence": "",
       "description": "A few chunks in the owner's books exceed Kokoro's 400-id token cap and pause with F4's notice; fix the chunk planner's token estimate (changes chunk timing).",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate.",
-      "revision": "7dc221d43fe7153c5a719cd4791dbf4c528f03c860a557053282289df5650497",
+      "revision": "e75bc664bb17182a727ca61982437b842a107a6d9d9a0def3f12dd54072ba779",
       "extra": {}
     },
     {
       "id": "WS-TOKEN-REGEN-1",
       "title": "Regenerating the pairing code stores one encrypted token",
-      "sequence": 41,
+      "sequence": 42,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2438,13 +2438,13 @@
       "evidence": "",
       "description": "regenerate-ws-pairing-token stores the new token through startServer's encrypt path, so one token exists and plaintext never reaches settings.json when safeStorage is available; schemaVersion optional in BlurbySettings; every BlurbySettings key in SETTINGS_DEFAULTS.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate.",
-      "revision": "1ccf2bd59124aa83a7bcd3d519ca9b71954a36fca4247c7f7b3b60b42fcbe632",
+      "revision": "fcd157372fa03a7ab43398c4abc73a5006dc2faec4c7a6266f94a7a9588e30bc",
       "extra": {}
     },
     {
       "id": "WORD-INDEX-UNIFY-1",
       "title": "One word numbering in every runtime",
-      "sequence": 42,
+      "sequence": 43,
       "status": "blocked",
       "raw_status": "Blocked",
       "written_status": "stub",
@@ -2462,13 +2462,13 @@
       "evidence": "",
       "description": "The main extractor joins adjacent word segments through one ICU-independent function shared with segmentWordSpans, segments whole blocks, and guards against an Electron ICU change; saved positions remapped once through their cfi, word text unchanged.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "c78720223202fbccb49bb44ba63723e48752a6b17bc859973b1f2bcf1e5c2bff",
+      "revision": "5a0e65f1476fab7418c6d595cc76ff033682f94aa3ef80ec38c10be1199a48c6",
       "extra": {}
     },
     {
       "id": "LARGE-FOLDER-SYNC-3",
       "title": "Follow-ups from LARGE-FOLDER-SYNC-2",
-      "sequence": 43,
+      "sequence": 44,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2484,7 +2484,7 @@
       "evidence": "",
       "description": "Watcher skips system folders (no recycle-bin ghost books); rescan's Saved Articles check by path key; switch-folder access and per-file stat bounded with a breaker; test gaps; stale comment; scale benchmark under 2x.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From LARGE-FOLDER-SYNC-2's quality review. Not a release gate.",
-      "revision": "8f7cad3753867dd81ba454bdc54916564dc1bd877810ac525cd069f537fef67d",
+      "revision": "76aca5004fd694c665789e73e7fb121787617ff3f7b788a7e029a479d2335b2c",
       "extra": {}
     },
     {
@@ -2507,6 +2507,96 @@
       "description": "A Page turn in the 0.5-0.9 s before bookWords re-stamps the spans saves a section-local index (63,020 words off in Meditations section 15); hold such turns and save the latest once the section's re-stamp lands.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate (10). Measured on a scratch profile: every in-window turn saved a section-local index; cfi was right. Before PAGE-POSITION-SAVE-2. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/page-save-restamp-guard-1 from main 28824768).",
       "revision": "8438e2d83bdc00c274d0c076baa1e001112a24178f1c9470d4f315ef8c998745",
+      "extra": {}
+    },
+    {
+      "id": "PAGE-SAVE-RESTAMP-2",
+      "title": "A failed word count or a jump never loses or overwrites the reader's page",
+      "sequence": 26,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-save-restamp-2",
+      "branch": "eb/page-save-restamp-2",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "When bookWords cannot arrive, a held Page turn saves its cfi with the stored position kept (update-doc-progress keeps position on -1); every jump (TOC, Jump back, restore, word click, internal link, open without cfi) cancels a held turn; failed-replay diagnostic.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate (10). From PAGE-SAVE-RESTAMP-GUARD-1's quality review (findings 1, 3, 4). Before PAGE-POSITION-SAVE-2. Full Spec: U9/U10 pass.",
+      "revision": "0f0c8ec9388bd68b16e7cf68bdcde998e17878a688525567dd7f17fc4bf27f8e",
+      "extra": {}
+    },
+    {
+      "id": "PAGE-SAVE-RESTAMP-3",
+      "title": "Rare page-save edge cases after the restamp guard",
+      "sequence": 45,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-save-restamp-3",
+      "branch": "eb/page-save-restamp-3",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "The double-wrap race in long sections, and any failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate.",
+      "revision": "3457da30dbe0db8114efbd9cd404bf3be72b683f4e04823f94993182600eb0cd",
+      "extra": {}
+    },
+    {
+      "id": "NARRATE-RECONCILE-RESIDUAL-1",
+      "title": "A capitalised two-word name that espeak voices differently alone",
+      "sequence": 46,
+      "status": "blocked",
+      "raw_status": "Blocked",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "effort": "S",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-reconcile-residual-1",
+      "branch": "eb/narrate-reconcile-residual-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "One owner-book chunk (hash 4e7915ce2410e10e) fails closed on a name espeak voices differently alone; reconcile it without loosening the cost check.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. After NARRATE-REBUILD-1; not a release gate.",
+      "revision": "40b8247a4b6145ce7b88c809c13348208f80a94068ce0192818358592bb3037e",
+      "extra": {}
+    },
+    {
+      "id": "FOLDER-NOTICE-2",
+      "title": "Follow-ups from FOLDER-NOTICE-1",
+      "sequence": 47,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "UX polish",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#folder-notice-2",
+      "branch": "eb/folder-notice-2",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Banner follows the scan's verdict; in-main Retry in-flight guard; same-folder re-select keeps the toast flag; banner focus and failed-Retry announcement.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from FOLDER-NOTICE-1's quality review. Not a release gate.",
+      "revision": "a7708f83723868170a3a481bce43e7e0f65083d94100b391fa6e645453e903be",
       "extra": {}
     }
   ],

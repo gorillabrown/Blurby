@@ -1,0 +1,50 @@
+{
+  "id": "20261015T141716Z-external-create-item-FOLDER-NOTICE-2",
+  "operation": "external-create-item",
+  "item_id": "FOLDER-NOTICE-2",
+  "created": "2026-10-15T14:17:16Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Follow-ups from FOLDER-NOTICE-1",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "UX polish",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#folder-notice-2",
+      "branch": "eb/folder-notice-2",
+      "description": "Banner follows the scan's verdict; in-main Retry in-flight guard; same-folder re-select keeps the toast flag; banner focus and failed-Retry announcement.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from FOLDER-NOTICE-1's quality review. Not a release gate.",
+      "sequence": 47,
+      "prerequisites": [],
+      "id": "FOLDER-NOTICE-2"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T13:42:18Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-NOTICE-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLDER-NOTICE-2",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLDER-NOTICE-2",
+      "actualRevision": "a7708f83723868170a3a481bce43e7e0f65083d94100b391fa6e645453e903be",
+      "recoveryId": "20261015T141716Z-external-create-item-FOLDER-NOTICE-2",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8135-b8f5-f45fe5b9d373",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T14:20:13Z",
+  "outcome": "succeeded"
+}

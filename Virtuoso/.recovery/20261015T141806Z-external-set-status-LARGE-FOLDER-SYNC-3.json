@@ -1,0 +1,34 @@
+{
+  "id": "20261015T141806Z-external-set-status-LARGE-FOLDER-SYNC-3",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-15T14:18:06Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 44
+    },
+    "expectedRevision": "8f7cad3753867dd81ba454bdc54916564dc1bd877810ac525cd069f537fef67d",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('sequence', 44)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-3",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('sequence', 44)]",
+      "actualRevision": "76aca5004fd694c665789e73e7fb121787617ff3f7b788a7e029a479d2335b2c",
+      "recoveryId": "20261015T141806Z-external-set-status-LARGE-FOLDER-SYNC-3",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T14:20:52Z",
+  "outcome": "succeeded"
+}
