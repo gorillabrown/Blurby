@@ -68,7 +68,12 @@ function setup() {
     "../window-manager": { getSystemTheme: vi.fn(), updateWindowTheme, createReaderWindow: vi.fn() },
     "../file-parsers": anything(),
     "../url-extractor": anything(),
-    "../ws-server": new Proxy({ generatePairingToken: () => "new-token" }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
+    // startServer and getStatus return what the real server's do: the live token included (GET-STATE-SECRET-1).
+    "../ws-server": new Proxy({
+      generatePairingToken: () => "new-token",
+      startServer: () => ({ port: 48924, token: "live-token" }),
+      getStatus: () => ({ running: true, port: 48924, clients: 0, token: "live-token" }),
+    }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
     "../epub-converter": { htmlToEpub: vi.fn(), convertToEpub: vi.fn(), imageMediaType: vi.fn() },
     "../author-normalize": { normalizeAuthor: (a) => a },
     "../sync-engine": { getSyncStatus: () => ({ revision: 0 }), clearDocHashes: vi.fn() },
@@ -137,9 +142,9 @@ function seedCloud() {
 }
 
 // Real timers and real sync-state.json I/O; the fresh reconcile time keeps the weekly reconciliation from starting.
-async function initSync() {
+async function initSync(extraState = {}) {
   vi.useRealTimers();
-  fs.writeFileSync(path.join(dataDir, "sync-state.json"), JSON.stringify({ deviceId: "dev-1", lastReconcile: Date.now() }));
+  fs.writeFileSync(path.join(dataDir, "sync-state.json"), JSON.stringify({ deviceId: "dev-1", lastReconcile: Date.now(), ...extraState }));
   await syncEngine.initSyncEngine(ctx);
 }
 
@@ -330,5 +335,73 @@ describe("SETTINGS-KEY-TRUST-1 controls", () => {
     await call("regenerate-ws-pairing-token");
     expect(settings._wsPairingToken).toBe("new-token");
     expect(ctx.saveSettings).toHaveBeenCalled();
+  });
+});
+
+// GET-STATE-SECRET-1: no secret reaches the renderer through state or settings reads.
+describe("GET-STATE-SECRET-1 renderer reads", () => {
+  // The two stored forms of the pairing token (main/ws-server.js startServer): safeStorage ciphertext as base64,
+  // or the 32-hex plaintext token when OS encryption is unavailable.
+  it.each([
+    ["encrypted", Buffer.from("safeStorage-ciphertext-bytes").toString("base64")],
+    ["plaintext", "0123456789abcdef0123456789abcdef"],
+  ])("(p) get-state returns no _-prefixed key, with the %s token form", async (_form, token) => {
+    settings._wsPairingToken = token;
+    settings._future = "x";
+    const shown = (await call("get-state")).settings;
+    expect(Object.keys(shown).filter((k) => k.startsWith("_"))).toEqual([]);
+    expect(JSON.stringify(shown)).not.toContain(token);
+    expect(Object.hasOwn(shown, "schemaVersion")).toBe(false);
+  });
+
+  it("(q) get-state returns a copy, never main's live settings object", async () => {
+    const shown = (await call("get-state")).settings;
+    expect(shown).not.toBe(settings);
+    shown.wpm = 1;
+    shown._wsPairingToken = "renderer";
+    expect(settings.wpm).toBe(300);
+    expect(settings._wsPairingToken).toBe("main-secret");
+  });
+
+  it("(u) control: get-state still returns every key the renderer reads", async () => {
+    const { SETTINGS_DEFAULTS } = require("../main/migrations.js");
+    // Traced: the renderer reads only SETTINGS_DEFAULTS keys from get-state, and no renderer code reads schemaVersion.
+    const read = Object.keys(SETTINGS_DEFAULTS).filter((k) => k !== "schemaVersion");
+    expect(read.length).toBe(57);
+    for (const k of read) if (!Object.hasOwn(settings, k)) settings[k] = `value-${k}`;
+    const shown = (await call("get-state")).settings;
+    for (const k of read) expect(shown[k]).toEqual(settings[k]);
+    expect(shown.sourceFolder).toBe(books);
+    expect(shown.recentFolders).toEqual([books]);
+  });
+
+  it.each(["start-ws-server", "get-ws-status", "regenerate-ws-pairing-token"])(
+    "(v) %s returns no pairing token", async (channel) => {
+      const result = await call(channel);
+      expect(Object.hasOwn(result, "token")).toBe(false);
+      expect(JSON.stringify(result)).not.toContain("live-token");
+      expect(result.port).toBe(48924);
+    });
+
+  it("(v4) get-ws-pairing-token is not a channel", () => {
+    expect(handlers.has("get-ws-pairing-token")).toBe(false);
+  });
+});
+
+describe("GET-STATE-SECRET-1 sync-engine follow-ups", () => {
+  it("(w) when stored timestamps let the cloud win secret and folder keys, the merge uploads none of them", async () => {
+    seedCloud();
+    await initSync({ fieldTimestamps: { settings: {
+      "cloud:_wsPairingToken": 9, "cloud:sourceFolder": 9, "cloud:recentFolders": 9, "cloud:launchAtLogin": 9,
+    } } });
+    const result = await syncEngine.startSync();
+    expect(result.results.settings).toBe("merged");
+    expectNoForbiddenKey();
+    expect(settings._wsPairingToken).toBe("main-secret");
+    expect(settings.sourceFolder).toBe(books);
+  });
+
+  it("(x) mergeSettings keeps the local schemaVersion over a higher cloud one", () => {
+    expect(syncEngine.mergeSettings({ schemaVersion: 13, wpm: 300 }, { schemaVersion: 99 }, {}).schemaVersion).toBe(13);
   });
 });
