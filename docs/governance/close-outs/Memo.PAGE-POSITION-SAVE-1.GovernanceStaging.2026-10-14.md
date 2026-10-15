@@ -73,3 +73,6 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 - `npm ci`: exit 0. `npm test`: **exit 0**, 159 files, 2,142 passed / 1 skipped / 0 failed. `npm run typecheck`: exit 0. `npm run build`: exit 0.
 - The earlier loaded run on `b0df620a` (2,120 passed / 1 failed: readerModeOwnership, caused by N6, above) is superseded.
 - The live check (Done-when 8) ran on `45bec2fb`. The fix round changes only the mode handoff (W2) and empty ranges (N1); Brain ruled no re-run.
+
+### Merge go
+Blurby Brain, 2026-10-14, Rule 11 tier 1: merge go on `fbb90e1a` (tested tree `874d9bf6`). The item stays In Flight with its close-out held for the batched smoke: no tag, no upload. Follow-ups go to Blurby.Roadmap: N2, N4, N5 (to the SAVE-LIBRARY-MERGE-1 stub), and Page's dead browse-away code with its two ownership-manifest entries.
