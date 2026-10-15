@@ -7,4 +7,4 @@
 {"id":"844e92e6","words":1111,"chunks":52,"failed":0,"byClass":{}}
 {"id":"9015cc65","words":80493,"chunks":3588,"failed":0,"byClass":{}}
 OWNER: 21 fail-closed chunks of 11030 in 8 books; 18 class E, 3 ruled residual, 0 other
-# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --owner C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\bbe4b04a-f097-4f3e-ba25-221d3dcf13e9\scratchpad\owner-epub-copy | exit 0 | 483 s | stderr bytes 0 | 2026-10-15 09:10
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --owner C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\bbe4b04a-f097-4f3e-ba25-221d3dcf13e9\scratchpad\owner-epub-copy | exit 0 | 462 s | stderr bytes 0 | 2026-10-15 10:01

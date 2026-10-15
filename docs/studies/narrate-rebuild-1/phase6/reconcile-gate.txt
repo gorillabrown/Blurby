@@ -11,4 +11,4 @@
 {"id":"raven-1845","words":1067,"chunks":52,"failed":0,"byClass":{}}
 {"id":"meditations","words":80493,"chunks":3588,"failed":0,"byClass":{}}
 GATE: 0 fail-closed chunks of 3683
-# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --gate | exit 0 | 134 s | stderr bytes 0 | 2026-10-15 09:10
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --gate | exit 0 | 153 s | stderr bytes 0 | 2026-10-15 10:01

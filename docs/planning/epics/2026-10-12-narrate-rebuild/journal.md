@@ -315,6 +315,22 @@ arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4
 - **Did:** GIT WORK verified: branch `eb/narrate-rebuild-1-p6`, tip `973bd0a9` = the planner entry's commit, clean, 0/0 against origin. **P6b start sha: `973bd0a944bd626aafaa9eb3c88b1563cd92b4f4`** (the packet-amendment commit; the fence check diffs against it). Dispatched by Blurby.Roadmap for wave A only; no merge.
 - **Next:** A1 fixtures (first commit), A2 controls on base, A3–A5 edits, A6–A7 gates.
 
+## S6 — 2026-10-15 — P6b wave A done: reconciliation fix, app-ICU tooling, gates green; stopped for Brain
+- **Did:**
+  - A1: fixtures first commit `43694687`: the Kokoro tokenizer (77a02c8e…, be1cb066…, byte copies of the artifacts copy), the Apache-2.0 LICENSE, NOTICE.md, `raven-1845.txt` (all 18 stanzas, written out directly, 1,067 words, no download), the README and `narrate.fixtures.test.js` (2 passed).
+  - A2: the controls, seen failing on base for their named reasons (state.md → Evidence → P6b wave A). The mid-session F4 test needed one test-side change: the engine prefetches the next chunk at once, so with an always-answering fake the prefetch's `missing-table` set the failure before the first word was ticked, and the draft's "notice null while playing" assertion failed on base. The test now holds the producer until the first word sounds (`new FakeProducer({ hold: true })`); runtime untouched. It passes on base and fails with `ModeRuntime.ts:216` removed.
+  - A3–A5: F1–F5 (`normalize.js`, `wordmap.js`, as plan.md), the sentence end in `chunkPlan.ts`, the trial driver reading the notice before Play, `app-node.ps1`, `lib/app-icu.cjs`, `lib/app-icu-guard.mjs`, the guard in all 11 epic scripts, `reconcile-sweep.mjs`, the text-checked D2 checker, the launcher fixes (no inherited `ELECTRON_RUN_AS_NODE`; the CPU sampler leaves out its own pid; the 9431 comment), MAPPING_POLICY.md.
+  - A6–A7: G1–G14 all exited with their stated codes (state.md → Evidence → P6b wave A). Merged `origin/main` `e712558d` (governance only; it contains the `1ea2e1dc` Blurby.Roadmap named, plus two later register commits) as `aca39aa1` before the suite: 27 paths, all `ROADMAP.md` or `Virtuoso/`, no epic path.
+- **Learned:**
+  - With the real Raven, the gate is 0 of 3,683 chunks (the Raven plans 52 chunks, 0 failing) and the control is 127 (the Raven adds 13: B/F 12, A 1; Meditations stays 112). G7 with the title rule is 24 of 172; the planner's 171 predated it.
+  - Deviation from plan.md's exact text, inside the fence: plan.md's `ABBREVIATIONS`/`TITLES` are module-level `Set`s, which `tests/readerModeOwnership.test.ts` fails as undeclared singletons in a mode directory (the first full suite: 1 failed). I replaced them with equal case-insensitive regexes (`ABBREVIATION`, `TITLE`; 26 probes, 0 mismatches against the Set logic). The census policy is outside the fence, so it was not touched. G2–G8 were re-run on that tree with identical counts. Second suite: 172 files, 2,356 passed / 1 skipped / 0 failed.
+  - `p3-producer-check.mjs` under the app's Electron prints `pass:true` (every required check true) but exits 0x40000015 at shutdown, twice; the base script under plain Node exits 0. A native abort at process exit, not a check failure. The fence allows only the guard line in that script, so it is reported, not fixed.
+  - In this shell, pwsh's `bash` is WSL's (no distro): `git show` restores go through Git Bash.
+- **Decisions:** none new (the regex swap is a tier-1 technical fix inside the fenced file, recorded here and in state.md).
+- **Gate/DoD movement:** D14 and D15 met on wave A's evidence. D7's new test passes with its control. D11 is fresh (suite, typecheck, build). D2, D3 and D5 wait for wave B.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** wave B in Brain's quiet window (plan.md § P6b B0–B3).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
