@@ -7485,6 +7485,17 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - `main/constants.js` is untouched by this item (Done-when 12).
     - **Before merging,** `git merge refs/remotes/origin/main` into this branch and re-run Done-when 4–16 and 20. The live control stays out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
 
+##### Review fix round (Blurby.Roadmap, 2026-10-15, Rule 11 tier 1)
+
+The code-quality review of `e6463867` found four cheap defects. They are fixed in this item before merge, each with a positive-control test that fails on `e6463867` and passes after:
+
+- **(fr1) Retry checks the folder it started with.** In `main/folder-notice.js` `retry()`, after `await checkRoot(folder)`, return the current problem unchanged when `getFolder() !== folder`: no clear, no watcher restart, no sync. Test: start Retry on folder A, switch to B (B fails, banner up) before A's check resolves true; B's banner stays, `sync` was not called, and the watcher was not restarted.
+- **(fr2) A failed watcher is always restarted on a clear.** `main.js` keeps a separate `watcherFailed` flag. `onError` sets it whether or not the toast is delivered; `startWatcherFn` clears it when `startWatcher` returns a watcher; `resumeWatcher` restarts when `watcherFailed` is set (not when `folderToastShown` is). `folderToastShown` keeps meaning only "the toast for this episode was sent". Test: a watcher error while the window is loading (no toast sent), then a clear, restarts the watcher.
+- **(fr3) A stale run's failure does not land on another folder.** `syncAll`'s `.catch` reports `sync-failed` only while the source folder is still the run's folder. Test: an old folder's run throws after a switch and after the new folder's clear; the new folder's state is unchanged.
+- **(fr4) `okCheck` cannot raise an unhandled rejection or replace the scan's error.** The `.then` gets a `.catch` that logs one `[folder-notice]` line; on the throw path the original scan error is the one rethrown. Test: `reportFolderOk` throwing does not produce an unhandled rejection, and a scan error still reaches `syncAll`'s catch.
+
+The gates are re-run, the full suite, typecheck and build re-run, and the live control's (e) is re-run on a rebuilt C2. Review findings 3 (the scan verdict versus a late check), 6 (no in-main in-flight guard for Retry), 7 (a same-folder re-select resets the toast flag) and 8 (banner focus and failed-Retry announcement) go to the stub FOLDER-NOTICE-2.
+
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
