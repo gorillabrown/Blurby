@@ -311,6 +311,10 @@ arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4
 - **Git:** eb/narrate-rebuild-1-p6 @ (this commit), on the merge `34eacdf6`; uncommitted: none.
 - **Next:** S6, P6b wave A (state.md next_action).
 
+## S6 — 2026-10-15 09:03 — session start: P6b wave A
+- **Did:** GIT WORK verified: branch `eb/narrate-rebuild-1-p6`, tip `973bd0a9` = the planner entry's commit, clean, 0/0 against origin. **P6b start sha: `973bd0a944bd626aafaa9eb3c88b1563cd92b4f4`** (the packet-amendment commit; the fence check diffs against it). Dispatched by Blurby.Roadmap for wave A only; no merge.
+- **Next:** A1 fixtures (first commit), A2 controls on base, A3–A5 edits, A6–A7 gates.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
