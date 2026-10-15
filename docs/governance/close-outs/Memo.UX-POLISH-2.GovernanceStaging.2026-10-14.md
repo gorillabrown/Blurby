@@ -34,3 +34,11 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 - DW10: `src/styles/keyboard.css:5`; the old `.rbb-mode-btn--last` border line exits 1, empty.
 - Numstat (working tree, implementation agent): `src/types.ts` `1 1`; `src/reader` three `1 1` lines.
 - `npm run typecheck` (implementation agent): exit 0.
+
+### Reviews (on C2 `d5fac362`)
+- Spec compliance (Solon): **APPROVED_WITH_CONCERNS.** 17 of 18 PASS. The concern was a missing space before `className` on `HotkeyMapSettings.tsx:130` (valid JSX, not the specification's literal text), fixed in `6392a142`; test (m) re-run, 5/5. DW2–10 and the DW13 fence re-run by the reviewer and passing.
+- Code quality (Plato): **READY**, with no required fixes. N1 is the same spacing note, fixed.
+- Follow-up for the close-out (outside this specification's edit sites): **W1**. `src/styles/page-reader.css` `.rbb-mode-btn:hover { background: var(--color-border, #444); }` still reads the undefined token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text. Same defect class as fixes 6–7; route to OVERLAY-THEME-SWEEP-1, which already covers the other `--color-*` fallbacks.
+
+### Wave C (after the NARRATE-REBUILD-1 completion merges)
+Full suite, typecheck and build (DW11), the `--dir` build, the merge-order step, the DW13 fence, then Brain's merge go. DW12 is deferred to the batched smoke (see above).
