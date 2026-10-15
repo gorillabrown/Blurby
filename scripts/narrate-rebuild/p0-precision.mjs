@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Precision trial comparison (VERDICT.md addendum; G1 route b): q4 (phase0/tables, acoustic) against fp32 and
 // fp16 (tables-<dtype>, acoustic-<dtype>) on passage A at 1.00x, both voices. Prints the P0-2 facts per table,
 // whether the duration tables differ, the P0-3 summaries with the chunk-start / interior split, and the

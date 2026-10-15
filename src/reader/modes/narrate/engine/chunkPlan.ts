@@ -22,6 +22,37 @@ export const estimateTokens = (text: string): number => Math.ceil(text.length * 
 const SENTENCE_END = /[.!?]["'”’)\]]*$/;
 const PAUSE_MARK = /[,;:—]["'”’)\]]*$/;
 
+/**
+ * Periods that do not end a sentence when a word follows that does not start one (P6b). The table is written for the
+ * words this receives in the app: Electron's ICU segments "B.C." as "B." "C.", "i.e." as "i." "e." and
+ * "www.gutenberg.org" as "www." "gutenberg." "org" (plain Node's ICU keeps them whole, so the whole forms are listed too).
+ */
+const ABBREVIATION = /^(?:i\.e\.|e\.g\.|etc\.|vs\.|a\.d\.|b\.c\.)$/i; // a regex, not a Set: no module singleton in a mode directory
+/** Titles are followed by a name, which is capitalised: they never end a sentence when any word follows (Brain, P6b). */
+const TITLE = /^(?:mr|mrs|ms|dr|st)\.$/i;
+const SINGLE_LETTER = /^[A-Za-z]\.$/;
+/** The next piece of a segmented dotted abbreviation ("C." after "B.", "e." after "i."). */
+const LETTER_PIECE = /^[A-Za-z](?:\.|$)/;
+const WEB_START = /^www\.$/i;
+const WEB_PIECE = /^[a-z0-9-]+\.$/i;
+const NEW_SENTENCE = /^["'“‘(\[]*[A-Z]/;
+
+function isAbbreviation(words: readonly string[], i: number): boolean {
+  if (SINGLE_LETTER.test(words[i]) || ABBREVIATION.test(words[i])) return true;
+  for (let j = i; j >= 0 && WEB_PIECE.test(words[j]); j--) if (WEB_START.test(words[j])) return true;
+  return false;
+}
+
+function isSentenceEnd(words: readonly string[], i: number): boolean {
+  if (!SENTENCE_END.test(words[i])) return false;
+  const next = words[i + 1];
+  if (next === undefined) return true;
+  if (TITLE.test(words[i])) return false;
+  if (!isAbbreviation(words, i)) return true;
+  if (SINGLE_LETTER.test(words[i]) && LETTER_PIECE.test(next)) return false;
+  return NEW_SENTENCE.test(next);
+}
+
 export interface ChunkPlanEntry {
   readonly startWord: number;
   /** Exclusive. */
@@ -45,7 +76,7 @@ export interface ChunkPlanOptions {
 function sentenceEnds(words: readonly string[], from: number, to: number, breaks: ReadonlySet<number>): number[] {
   const ends: number[] = [];
   for (let i = from; i < to; i++) {
-    if (SENTENCE_END.test(words[i]) || breaks.has(i) || i === to - 1) ends.push(i + 1);
+    if (isSentenceEnd(words, i) || breaks.has(i) || i === to - 1) ends.push(i + 1);
   }
   return ends;
 }

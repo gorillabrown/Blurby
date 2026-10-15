@@ -7,6 +7,7 @@
 // worst |error| <= 30 ms) and the 40 ms negative control is caught; 1 otherwise; 2 on a recorder fault.
 // Run from pwsh in the phase worktree: node scripts/narrate-rebuild/p0-acoustic.mjs [--rates 0.80,1.00,1.40,2.00] [--dtype q4|fp32|fp16]
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { PHASE0_DIR, CORPUS_DIR, AUDIO_ROOT, SAMPLE_RATE } from "./lib/offline-kokoro.mjs";
 import { readWav } from "./lib/wav.mjs";
@@ -227,4 +228,7 @@ console.log("control:", JSON.stringify(control));
 console.log(pass ? "P0-3 PASS on every run" : "P0-3 not passed (see runs above)");
 process.exit(pass ? 0 : 1);
 }
-if (import.meta.url === pathToFileURL(process.argv[1]).href) await main();
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+  createRequire(import.meta.url)("./lib/app-icu.cjs").assertAppIcu(); // P6b: refuse plain Node (exit 3)
+  await main();
+}

@@ -1,0 +1,3 @@
+{"id":"meditations","words":80493,"chunks":172,"failed":0,"byClass":{}}
+GATE: 0 fail-closed chunks of 172
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --gate --from 2970 --to 6700 | exit 0 | 18 s | stderr bytes 0 | 2026-10-15 10:01

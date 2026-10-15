@@ -235,9 +235,12 @@ async function run(ctx) {
       step("playing");
       await waitWords();
       await sleep((cfg.minutes ?? 5) * 60000 + 2000);
-      await press(".rbb-play-btn");
+      // Read the notice before touching Play: after an F4 pause, Play starts a new request and the view shows "Voice loading…" (S5).
+      const notice = await js("window.__narrateTrial.notice()");
+      const wasPlaying = await js("window.__narrateTrial.playing()");
+      if (wasPlaying) await press(".rbb-play-btn");
       await sleep(500);
-      step("paused", { commits: await js('window.__narrateTrial.count("narrate-commit")'), notice: await js("window.__narrateTrial.notice()") });
+      step("paused", { commits: await js('window.__narrateTrial.count("narrate-commit")'), notice, wasPlaying });
     } else if (cfg.kind === "warm") {
       const repeat = cfg.repeat ?? 20;
       // "Warm" as in P0-5: the voice and session are ready — every producer worker loaded, and one untimed generation

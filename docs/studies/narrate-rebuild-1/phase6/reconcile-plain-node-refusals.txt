@@ -1,0 +1,12 @@
+reconcile-sweep.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+d2-crossing-check.cjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p5-recorded-output-check.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-acoustic.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-generate.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-identity.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-latency.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-precision.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p0-summary.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p3-producer-check.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+p5-latency-e2e.mjs exit=3 :: refused: plain Node 24.14.0 (ICU 78.2) numbers book words differently from the app; run it
+# plain Node v24.14.0 (G9), 2026-10-15 09:11

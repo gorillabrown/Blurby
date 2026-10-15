@@ -42,8 +42,8 @@ function compareForm(s) {
 function consonants(s) { return [...compareForm(s)].filter((ch) => !isVowel(ch)); }
 function syllables(s) { let n = 0, inV = false; for (const ch of compareForm(s)) { const v = isVowel(ch); if (v && !inV) n++; inV = v; } return n; }
 // Edit distance between consonant skeletons a (isolated forms) and b (the group). `freeInsert` is a consonant the
-// group may carry that the isolated forms lack, at no cost: en-gb linking r ("for a" is phonemized with an r
-// that "for" alone, non-rhotic, has not).
+// group may carry that the isolated forms lack, at no cost: a linking r (en-gb "for a" carries an r that "for" alone,
+// non-rhotic, has not; en-us "our own" carries ɹ after the r-coloured vowel of "our" alone).
 function lev(a, b, freeInsert = null) {
   const ins = (ch) => (ch === freeInsert ? 0 : 1);
   const m = a.length, n = b.length;
@@ -55,20 +55,30 @@ function lev(a, b, freeInsert = null) {
 const SYLLABLE_WEIGHT = 0.34;
 // cost of pairing isolated word forms with group forms: relative consonant edit distance + 0.34 per syllable of
 // mismatch. Syllables are counted per form and summed, so two vowel-adjacent words ("for" + "a") keep both
-// syllables instead of merging into one vowel run. lang "b" (en-gb) allows a linking r at no cost.
+// syllables instead of merging into one vowel run. A linking r is free in both languages (P6b F4).
 const LINKING_R = "ɹ";
 const relCost = (isoForms, groupForms, lang) => {
   const A = isoForms.flatMap(consonants), B = groupForms.flatMap(consonants);
   const syl = (forms) => forms.reduce((n, f) => n + syllables(f), 0);
-  return lev(A, B, lang === "b" ? LINKING_R : null) / Math.max(1, Math.max(A.length, B.length)) + SYLLABLE_WEIGHT * Math.abs(syl(isoForms) - syl(groupForms));
+  return lev(A, B, LINKING_R) / Math.max(1, Math.max(A.length, B.length)) + SYLLABLE_WEIGHT * Math.abs(syl(isoForms) - syl(groupForms));
 };
 
 const ACCEPT_UNIT_COST = 0.5; // a unit whose identification evidence costs more is unreconciled (fail closed)
-const MAX_FUSE = 4; // at most 4 source words in one group, at most 3 groups for one word
+const MAX_FUSE = 4; // at most 4 source words in one group
+const MIN_SPLIT = 3; // one word may span max(3, its own isolated group count) groups (P6b F3)
+const { isSilentToken } = require("./normalize");
 
 // Monotone alignment of W words to G groups. Each unit is (k words <-> 1 group) or (1 word <-> k groups).
-function align(wordForms, groupForms, lang) {
-  const W = wordForms.length, G = groupForms.length;
+// isoGroups[i]: word i's isolated phoneme groups, the evidence (syllables counted per group, P6b F3); spelled[i]: the
+// groups of an all-caps word read letter by letter, a second piece of evidence for a one-word unit, or null (P6b F5).
+function align(isoGroups, spelled, groupForms, lang) {
+  const W = isoGroups.length, G = groupForms.length;
+  const forms = (i, k) => isoGroups.slice(i, i + k).flat();
+  const maxSplit = (i) => Math.max(MIN_SPLIT, isoGroups[i].length, spelled[i]?.length ?? 0);
+  const cost = (i, k, gs) => {
+    const c = relCost(forms(i, k), gs, lang);
+    return k === 1 && spelled[i] ? Math.min(c, relCost(spelled[i], gs, lang)) : c;
+  };
   const INF = 1e9;
   const dp = Array.from({ length: W + 1 }, () => new Array(G + 1).fill(INF));
   const back = Array.from({ length: W + 1 }, () => new Array(G + 1).fill(null));
@@ -76,12 +86,12 @@ function align(wordForms, groupForms, lang) {
   for (let i = 0; i <= W; i++) for (let j = 0; j <= G; j++) {
     if (dp[i][j] >= INF) continue;
     for (let k = 1; k <= MAX_FUSE && i + k <= W && j + 1 <= G; k++) { // k words -> 1 group
-      const c = relCost(wordForms.slice(i, i + k), [groupForms[j]], lang);
+      const c = cost(i, k, [groupForms[j]]);
       const v = dp[i][j] + c;
       if (v < dp[i + k][j + 1]) { dp[i + k][j + 1] = v; back[i + k][j + 1] = { i, j, k: k, g: 1, c }; }
     }
-    for (let g = 2; g <= 3 && i + 1 <= W && j + g <= G; g++) { // 1 word -> g groups
-      const c = relCost([wordForms[i]], groupForms.slice(j, j + g), lang);
+    for (let g = 2; i + 1 <= W && g <= maxSplit(i) && j + g <= G; g++) { // 1 word -> g groups
+      const c = cost(i, 1, groupForms.slice(j, j + g));
       const v = dp[i][j] + c;
       if (v < dp[i + 1][j + g]) { dp[i + 1][j + g] = v; back[i + 1][j + g] = { i, j, k: 1, g, c }; }
     }
@@ -124,7 +134,7 @@ async function buildWordMap(rec, isolated) {
   const dropped = new Set(rec.droppedChars ?? []);
   const keep = (s) => (dropped.size ? [...s].filter((ch) => !dropped.has(ch)).join("") : s);
   for (const seg of rec.segments) {
-    const segWords = seg.text.trim().split(/\s+/).filter(Boolean);
+    const segWords = seg.text.trim().split(/\s+/).filter((w) => w && !isSilentToken(w)); // P6b F1
     const segGroups = kokoroPost(seg.out.join(" "), lang).split(" ").map(keep).filter(Boolean);
     expected.push({ text: seg.text, words: segWords, groups: segGroups });
   }
@@ -137,12 +147,18 @@ async function buildWordMap(rec, isolated) {
   if (segmentsOk) {
     for (const seg of expected) {
       const W = seg.words.length, G = seg.groups.length;
-      const iso = [];
-      for (const w of seg.words) iso.push(keep(kokoroPost((await isolated(w, rec.segments[0].lang)).join(" "), lang).replace(/ /g, "")));
+      const iso = [], isoGroups = [], spelled = [];
+      const groupsOf = async (text) => kokoroPost((await isolated(text, rec.segments[0].lang)).join(" "), lang).split(" ").map(keep).filter(Boolean);
+      for (const w of seg.words) {
+        const gs = await groupsOf(w);
+        isoGroups.push(gs); iso.push(gs.join(""));
+        const letters = w.replace(/[^A-Za-z]/g, "");
+        spelled.push(letters.length >= 2 && !/[a-z]/.test(w) ? await groupsOf([...letters].join(" ")) : null); // P6b F5
+      }
       const groupTexts = seg.groups;
       let plan;
       if (W === G) plan = { cost: 0, units: seg.words.map((_, i) => ({ i, j: i, k: 1, g: 1, c: relCost([iso[i]], [groupTexts[i]], lang), diagonal: true })) };
-      else plan = align(iso, groupTexts, lang);
+      else plan = align(isoGroups, spelled, groupTexts, lang);
       if (!plan) { failures.push(`segment unalignable: ${seg.text}`); break; }
       for (const u of plan.units) {
         const gs = groups.slice(gi + u.j, gi + u.j + u.g);
@@ -164,7 +180,8 @@ async function buildWordMap(rec, isolated) {
           unit.wordBoundaryMarkInside = false; // the phonemizer emits none (probe, S1)
         }
         if (u.g > 1) wordsInSplitGroups += 1;
-        if (!(u.c <= ACCEPT_UNIT_COST) && u.k === 1 && u.g === 1 && !u.diagonal) failures.push(`unit evidence cost ${u.c.toFixed(2)} > ${ACCEPT_UNIT_COST}: ${unit.words.join(" ")} ~ ${unit.group}`);
+        // Every non-diagonal one-word unit is cost-checked, a split word too (P6b F3: a split was never checked).
+        if (!(u.c <= ACCEPT_UNIT_COST) && u.k === 1 && !u.diagonal) failures.push(`unit evidence cost ${u.c.toFixed(2)} > ${ACCEPT_UNIT_COST}: ${unit.words.join(" ")} ~ ${unit.group}`);
         if (u.k > 1 && !(u.c <= ACCEPT_UNIT_COST)) failures.push(`fused unit evidence cost ${u.c.toFixed(2)} > ${ACCEPT_UNIT_COST}: ${unit.words.join(" ")} ~ ${unit.group}`);
         units.push(unit);
         for (let w = 0; w < u.k; w++) words.push({ word: seg.words[u.i + w], unit: units.length - 1 });

@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Phase 0 P1 gate summary: P0-1 (identity), P0-2 (token identity, units law, mapping policy) and
 // P0-4 (all 25 rates) on both voices. Writes docs/studies/narrate-rebuild-1/phase0/summary.json.
 // Exit 0 only when every check passes; 1 on any failure; 2 when the recorder cannot account for its checks.
