@@ -4,7 +4,7 @@ id: NARRATE-REBUILD-1
 item: NARRATE-REBUILD-1
 origin: roadmap — NARRATE-REBUILD-1 (held plan 2026-10-11-narrate-rebuild, absorbed 2026-10-11)
 created: 2026-10-12
-status: active   # active | complete | aborted — set complete only per launch.md Completion protocol
+status: complete   # active | complete | aborted — set complete only per launch.md Completion protocol
 ---
 
 # Epic Charter — Rebuild Narrate with the cursor attached to the playing word
