@@ -8,6 +8,22 @@
 
 ## Incomplete
 
+### BUG-197 — In Page mode, turning pages never saves the reading position
+**Reported:** 2026-10-14 (QUIT-FLUSH-1 Done-when 9 owner smoke, production build of `bd1216fc`; filed for Blurby.Brain)
+**Severity:** MEDIUM (a book reopens where it was last saved, not where the reader stopped; a "Jump back" button appears)
+**Status:** OPEN — intended behaviour is open: owner decision (whether Page-mode page turns should commit the position). Lane: Reader Engine.
+**Location:** Page mode's position commit path; not yet traced.
+**Description:** In Page mode, three page turns followed by a 10 s idle with the app open left the document's `position`, `cfi` and `lastReadAt` unchanged in `library.json`, and a "Jump back" button appeared. Quitting is not the cause: QUIT-FLUSH-1's flush wrote the library cleanly in the same smoke.
+**Fix path:** after the owner decides the intended behaviour, a read-only trace of Page mode's anchor writes (the persistent reading anchor), then a specification.
+
+### BUG-196 — With the source folder cleared, books from that folder no longer open
+**Reported:** 2026-10-14 (QUIT-FLUSH-1 Done-when 9 owner smoke, production build of `bd1216fc`; filed for Blurby.Brain)
+**Severity:** HIGH (about 131 of the owner's books cannot be opened; the reader shows "Could not read EPUB file")
+**Status:** OPEN — scheduled as LIBRARY-READ-ALLOW-1 (fix direction ruled by Blurby.Brain, 2026-10-14). Lane: Library & Content.
+**Location:** `main/ipc/library.js:160-175` (`read-file-buffer`): the allowed roots are only the data folder and `settings.sourceFolder`.
+**Description:** With `sourceFolder` set to `""` (the BUG-193 workaround, kept until LARGE-FOLDER-SYNC-1), a document whose `source` is `"folder"` (for example *Why Nations Fail* under `G:\My Drive\Personal\Readings\Daron Acemoglu\`) fails to open: `read-file-buffer` logs `BLOCKED: ... not within allowed roots` and returns `null`. Changing the folder in the app is not a workaround: the sync prunes the old folder's books (BUG-193 Interactions).
+**Fix path (ruled):** a document already in the library may be read from its own `filepath` (or `convertedEpubPath`) regardless of `sourceFolder`; every other path keeps the allowed-roots check.
+
 ### BUG-195 — An unreachable source folder empties the library of its folder books
 **Reported:** 2026-10-14 (roadmap review 2026-10-14, while specifying FOLDER-SCAN-PERF-1; found by reading the code, not observed)
 **Severity:** HIGH (user data: every folder-sourced book and its reading position is removed from `library.json`)
