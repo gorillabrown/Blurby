@@ -1,0 +1,50 @@
+{
+  "id": "20261015T141712Z-external-create-item-PAGE-SAVE-RESTAMP-3",
+  "operation": "external-create-item",
+  "item_id": "PAGE-SAVE-RESTAMP-3",
+  "created": "2026-10-15T14:17:12Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Rare page-save edge cases after the restamp guard",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-save-restamp-3",
+      "branch": "eb/page-save-restamp-3",
+      "description": "The double-wrap race in long sections, and any failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate.",
+      "sequence": 45,
+      "prerequisites": [],
+      "id": "PAGE-SAVE-RESTAMP-3"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T13:42:18Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SAVE-RESTAMP-3",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-SAVE-RESTAMP-3",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SAVE-RESTAMP-3",
+      "actualRevision": "3457da30dbe0db8114efbd9cd404bf3be72b683f4e04823f94993182600eb0cd",
+      "recoveryId": "20261015T141712Z-external-create-item-PAGE-SAVE-RESTAMP-3",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81e3-875d-d04caf2b297f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T14:20:07Z",
+  "outcome": "succeeded"
+}

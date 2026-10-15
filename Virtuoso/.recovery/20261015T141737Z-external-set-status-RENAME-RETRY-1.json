@@ -1,0 +1,34 @@
+{
+  "id": "20261015T141737Z-external-set-status-RENAME-RETRY-1",
+  "operation": "external-set-status",
+  "item_id": "RENAME-RETRY-1",
+  "created": "2026-10-15T14:17:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 33
+    },
+    "expectedRevision": "3d8d5e3ae1778b0b76ffbc15effe62e6937c995e5d7f8d72b0431aa1758cd21c",
+    "idempotencyKey": "set-status:RENAME-RETRY-1:[('sequence', 33)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RENAME-RETRY-1",
+      "idempotencyKey": "set-status:RENAME-RETRY-1:[('sequence', 33)]",
+      "actualRevision": "9ad3d1bd81bfb9bc5c706774833eecd3384f6700e75d4636d75238353616dbbc",
+      "recoveryId": "20261015T141737Z-external-set-status-RENAME-RETRY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T14:20:33Z",
+  "outcome": "succeeded"
+}
