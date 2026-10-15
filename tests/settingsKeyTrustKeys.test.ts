@@ -22,9 +22,8 @@ const TYPE_KEYS = {
   syncIntervalMinutes: true, syncOnMeteredConnection: true, firstRunCompleted: true, defaultSort: true,
   defaultViewMode: true, libraryCardSize: true, libraryCardSpacing: true, useLegacyRenderer: true,
   ttsCacheEnabled: true, pronunciationOverrides: true, narrationProfiles: true, activeNarrationProfileId: true,
-  readingGoals: true,
+  readingGoals: true, sortBy: true,
 } satisfies Record<keyof BlurbySettings, true>;
-const UNTYPED_UI_KEYS = ["sortBy"];
 
 // main.js's settings literal before this item; a first-run settings.json must stay byte-identical (ruled).
 const PRE_ITEM_MAIN_DEFAULTS = {
@@ -54,7 +53,7 @@ describe("SETTINGS-KEY-TRUST-1 main's settings keys", () => {
   });
 
   it("(t3) main has no other key, no _-prefixed key and no prototype name", () => {
-    const allowed = new Set([...Object.keys(TYPE_KEYS), ...UNTYPED_UI_KEYS]);
+    const allowed = new Set(Object.keys(TYPE_KEYS));
     const keys = Object.keys(SETTINGS_DEFAULTS);
     expect(keys.filter((k) => !allowed.has(k))).toEqual([]);
     expect(keys.filter((k) => k.startsWith("_") || ["__proto__", "constructor", "prototype"].includes(k))).toEqual([]);

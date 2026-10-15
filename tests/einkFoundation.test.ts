@@ -31,10 +31,10 @@ describe("EINK-6A: E-Ink Foundation", () => {
   });
 
   it("main-process defaults and migrations backfill einkMode false", () => {
-    const main = read("main.js");
+    // main's defaults moved from main.js to main/migrations.js (SETTINGS-KEY-TRUST-1).
     const migrations = read("main/migrations.js");
     const stub = read("src/test-harness/electron-api-stub.ts");
-    expect(main).toMatch(/einkMode:\s*false/);
+    expect(migrations).toMatch(/einkMode:\s*false/);
     expect(stub).toMatch(/einkMode:\s*false/);
     expect(migrations).toMatch(/CURRENT_SETTINGS_SCHEMA\s*=\s*\d+/);
     expect(migrations).toContain("data.einkMode = false");

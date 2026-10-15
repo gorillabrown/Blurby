@@ -293,12 +293,63 @@ function loadSettingsData(raw) {
   return runMigrations(raw, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
 }
 
+// Every setting main knows, with its first-run value (SETTINGS-KEY-TRUST-1; moved from main.js). A key set to
+// undefined is absent until the user sets it, as before: main.js copies this object through JSON, which drops it.
+// save-settings and cloud sync take only these keys, so a new setting is added here (and to BlurbySettings).
+const SETTINGS_DEFAULTS = {
+  schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100,
+  sourceFolder: null, folderName: "My reading list", recentFolders: [],
+  theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null,
+  compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false,
+  focusSpan: 0.4, flowTextSize: 100,
+  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
+  layoutSpacing: { line: 1.5, character: 0, word: 0 },
+  initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list",
+  einkMode: false, einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
+  ttsEnabled: false, ttsEngine: "kokoro", ttsVoiceName: null, ttsRate: 1.0,
+  syncIntervalMinutes: 5, syncOnMeteredConnection: false,
+  readingGoals: [],
+  // Absent until set: the rest of BlurbySettings (src/types.ts).
+  focusWpm: undefined, flowWpm: undefined, justifiedText: undefined,
+  flowWordSpan: undefined, flowCursorStyle: undefined, flowZonePosition: undefined, flowZoneLines: undefined,
+  ttsPauseCommaMs: undefined, ttsPauseClauseMs: undefined, ttsPauseSentenceMs: undefined,
+  ttsPauseParagraphMs: undefined, ttsDialogueSentenceThreshold: undefined, ttsFootnoteMode: undefined,
+  lastReadingMode: undefined, isNarrating: undefined, firstRunCompleted: undefined,
+  defaultSort: undefined, defaultViewMode: undefined, libraryCardSize: undefined, libraryCardSpacing: undefined,
+  useLegacyRenderer: undefined, ttsCacheEnabled: undefined, pronunciationOverrides: undefined,
+  narrationProfiles: undefined, activeNarrationProfileId: undefined, sortBy: undefined,
+};
+
+// Never taken from the renderer or the cloud, nor sent to the cloud: main's own keys (migrations set schemaVersion;
+// select-folder and switch-folder set the folder, IPC-PATH-TRUST-1) and the object-prototype names.
+const MAIN_OWNED_SETTINGS = new Set(["schemaVersion", "sourceFolder", "recentFolders", "__proto__", "constructor", "prototype"]);
+// Meaningful only on this device (the OS login item), so never sent to or taken from another device.
+const DEVICE_LOCAL_SETTINGS = new Set(["launchAtLogin"]);
+
+/**
+ * The real user settings in `input`: its own enumerable keys that are keys of SETTINGS_DEFAULTS, never an
+ * _-prefixed key (main's secrets, such as _wsPairingToken) or a main-owned key; with crossDevice (cloud upload,
+ * download and merge), never a device-local key either. Never Object.assign raw input into settings.
+ */
+function pickUserSettings(input, { crossDevice = false } = {}) {
+  const picked = {};
+  if (!input || typeof input !== "object") return picked;
+  for (const key of Object.keys(input)) {
+    if (!Object.hasOwn(SETTINGS_DEFAULTS, key) || key.startsWith("_") || MAIN_OWNED_SETTINGS.has(key)) continue;
+    if (crossDevice && DEVICE_LOCAL_SETTINGS.has(key)) continue;
+    picked[key] = input[key];
+  }
+  return picked;
+}
+
 module.exports = {
   CURRENT_SETTINGS_SCHEMA,
   CURRENT_LIBRARY_SCHEMA,
+  SETTINGS_DEFAULTS,
   settingsMigrations,
   libraryMigrations,
   runMigrations,
   normalizeReaderModes,
   loadSettingsData,
+  pickUserSettings,
 };

@@ -7,7 +7,7 @@ const fs = require("fs");
 const fsPromises = require("fs/promises");
 
 // ── Module imports ─────────────────────────────────────────────────────────
-const { CURRENT_SETTINGS_SCHEMA, CURRENT_LIBRARY_SCHEMA,
+const { CURRENT_SETTINGS_SCHEMA, CURRENT_LIBRARY_SCHEMA, SETTINGS_DEFAULTS,
         settingsMigrations, libraryMigrations, runMigrations, loadSettingsData } = require("./main/migrations");
 const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = require("./main/ipc-handlers");
 const { createMainWindow, createTray, setupAutoUpdater,
@@ -86,20 +86,8 @@ function removeFailedExtraction(filepath) {
   failedExtractions.delete(filepath);
 }
 
-let settings = {
-  schemaVersion: CURRENT_SETTINGS_SCHEMA, wpm: 300, focusTextSize: 100,
-  sourceFolder: null, folderName: "My reading list", recentFolders: [],
-  theme: "dark", launchAtLogin: false, accentColor: null, fontFamily: null,
-  compactMode: false, readingMode: "focus", focusMarks: true, readingRuler: false,
-  focusSpan: 0.4, flowTextSize: 100,
-  rhythmPauses: { commas: true, sentences: true, paragraphs: true, numbers: false, longerWords: false },
-  layoutSpacing: { line: 1.5, character: 0, word: 0 },
-  initialPauseMs: 3000, punctuationPauseMs: 1000, viewMode: "list",
-  einkMode: false, einkWpmCeiling: 250, einkRefreshInterval: 20, einkPhraseGrouping: true,
-  ttsEnabled: false, ttsEngine: "kokoro", ttsVoiceName: null, ttsRate: 1.0,
-  syncIntervalMinutes: 5, syncOnMeteredConnection: false,
-  readingGoals: [],
-};
+// First-run settings: a deep copy of main's defaults; JSON drops the absent-until-set keys (SETTINGS-KEY-TRUST-1).
+let settings = JSON.parse(JSON.stringify(SETTINGS_DEFAULTS));
 let libraryData = { schemaVersion: CURRENT_LIBRARY_SCHEMA, docs: [] };
 let history = { sessions: [], totalWordsRead: 0, totalReadingTimeMs: 0, docsCompleted: 0, streaks: { current: 0, longest: 0, lastReadDate: null } };
 let siteCookies = {};
