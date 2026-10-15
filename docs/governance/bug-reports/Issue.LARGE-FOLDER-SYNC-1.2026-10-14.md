@@ -45,3 +45,13 @@
   - Otherwise record the figures and file W1 as a follow-up. The benchmark stays out of the default test run.
 - **Then:** the Solon and Plato reviews on the fix round, then the heavy run under the load rule. The folderWatcher budget test is in scope for this item and is never environmental.
 - **Follow-ups to the close-out:** N2, N3, N4 and watcher-before-sync on a folder switch. Blurby.Roadmap gathers them into stub LARGE-FOLDER-SYNC-2 at the head of the stubs, beside the open design half.
+
+## Decision 2 (fix-round review, MINOR_FIXES)
+
+**Ruled by:** Blurby Brain (planner), 2026-10-14, CLAUDE.md Rule 11, tier 1. One more fix round on `e6df78b8`.
+- **F1:** keep the index in step on removal: delete from `byPath`, make `byBook` a count map, point `idx.lib` and `idx.len` at the new array. Add an alternating unlink/add phase to the benchmark and an index-agreement test after removals. Done when, at 120,000 books, the median unlink+add pair is under 16 ms and moving 1,000 files in alternating pairs takes under 20 s in total. Both figures are recorded.
+- **F2:** `underFolder` via `path.relative`. Case-insensitive on win32 only (compare lowercased when `process.platform === 'win32'`), exact elsewhere. Tests: drive roots (`E:\` and `C:\`), mixed case on win32, and a sibling prefix (`C:\Books2` against root `C:\Books`) rejected.
+- **F3:** `.catch(log)` on the startup call at `main.js:590`, with a test that a scan rejection does not escape.
+- **F4:** the invariant comment on the index, and the perf script's unused `removeDoc` dep removed.
+- **Index keys:** raw `===` is accepted as a recorded deviation. It matches the base and the rest of the library code. Normalizing every library path comparison goes to LARGE-FOLDER-SYNC-2, with F5 (`refresh()` scanning the library per event).
+- **Then:** a quick re-review of the fix round, then the heavy run under the load rule.
