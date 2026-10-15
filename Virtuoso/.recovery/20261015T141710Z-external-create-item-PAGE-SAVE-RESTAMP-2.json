@@ -1,0 +1,50 @@
+{
+  "id": "20261015T141710Z-external-create-item-PAGE-SAVE-RESTAMP-2",
+  "operation": "external-create-item",
+  "item_id": "PAGE-SAVE-RESTAMP-2",
+  "created": "2026-10-15T14:17:10Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A failed word count or a jump never loses or overwrites the reader's page",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#page-save-restamp-2",
+      "branch": "eb/page-save-restamp-2",
+      "description": "When bookWords cannot arrive, a held Page turn saves its cfi with the stored position kept (update-doc-progress keeps position on -1); every jump (TOC, Jump back, restore, word click, internal link, open without cfi) cancels a held turn; failed-replay diagnostic.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate (10). From PAGE-SAVE-RESTAMP-GUARD-1's quality review (findings 1, 3, 4). Before PAGE-POSITION-SAVE-2. Full Spec: U9/U10 pass.",
+      "sequence": 26,
+      "prerequisites": [],
+      "id": "PAGE-SAVE-RESTAMP-2"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T13:42:18Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SAVE-RESTAMP-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-SAVE-RESTAMP-2",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-SAVE-RESTAMP-2",
+      "actualRevision": "0f0c8ec9388bd68b16e7cf68bdcde998e17878a688525567dd7f17fc4bf27f8e",
+      "recoveryId": "20261015T141710Z-external-create-item-PAGE-SAVE-RESTAMP-2",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8134-8a2d-fc6e90c9b1f3",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T14:19:59Z",
+  "outcome": "succeeded"
+}

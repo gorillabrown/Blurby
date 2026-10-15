@@ -1,0 +1,34 @@
+{
+  "id": "20261015T141742Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-READ-FOLLOWUPS-1",
+  "created": "2026-10-15T14:17:42Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 35
+    },
+    "expectedRevision": "86cbcaf2ba3895d736fa8495c1ae4ec3b393b76bac8f5439f19a8a99641be5bf",
+    "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('sequence', 35)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-READ-FOLLOWUPS-1",
+      "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('sequence', 35)]",
+      "actualRevision": "cb3ade451b4b0aeb909203d3a2ab5ad53a533ff9840d34487d178e2bbf7cf0ce",
+      "recoveryId": "20261015T141742Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T14:20:36Z",
+  "outcome": "succeeded"
+}
