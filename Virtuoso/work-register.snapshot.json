@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T07:19:15Z",
+  "takenAt": "2026-10-15T07:28:51Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2463,6 +2463,28 @@
       "description": "The main extractor joins adjacent word segments through one ICU-independent function shared with segmentWordSpans, segments whole blocks, and guards against an Electron ICU change; saved positions remapped once through their cfi, word text unchanged.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate.",
       "revision": "64d7805426c5582b5725bc3b27b088284cdde68d9f3c09576ee94d4c6e758a0d",
+      "extra": {}
+    },
+    {
+      "id": "LARGE-FOLDER-SYNC-3",
+      "title": "Follow-ups from LARGE-FOLDER-SYNC-2",
+      "sequence": 42,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#large-folder-sync-3",
+      "branch": "eb/large-folder-sync-3",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Watcher skips system folders (no recycle-bin ghost books); rescan's Saved Articles check by path key; switch-folder access and per-file stat bounded with a breaker; test gaps; stale comment; scale benchmark under 2x.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From LARGE-FOLDER-SYNC-2's quality review. Not a release gate.",
+      "revision": "4adf9dfa37cd42f4855df52071f46a2b79b48dc722a4b723b2c34576428ff64a",
       "extra": {}
     }
   ],

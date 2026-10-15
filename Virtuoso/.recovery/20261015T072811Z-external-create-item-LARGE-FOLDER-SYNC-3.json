@@ -1,0 +1,50 @@
+{
+  "id": "20261015T072811Z-external-create-item-LARGE-FOLDER-SYNC-3",
+  "operation": "external-create-item",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-15T07:28:11Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Follow-ups from LARGE-FOLDER-SYNC-2",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#large-folder-sync-3",
+      "branch": "eb/large-folder-sync-3",
+      "description": "Watcher skips system folders (no recycle-bin ghost books); rescan's Saved Articles check by path key; switch-folder access and per-file stat bounded with a breaker; test gaps; stale comment; scale benchmark under 2x.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From LARGE-FOLDER-SYNC-2's quality review. Not a release gate.",
+      "sequence": 42,
+      "prerequisites": [],
+      "id": "LARGE-FOLDER-SYNC-3"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T07:19:15Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LARGE-FOLDER-SYNC-3",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LARGE-FOLDER-SYNC-3",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LARGE-FOLDER-SYNC-3",
+      "actualRevision": "4adf9dfa37cd42f4855df52071f46a2b79b48dc722a4b723b2c34576428ff64a",
+      "recoveryId": "20261015T072811Z-external-create-item-LARGE-FOLDER-SYNC-3",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8124-8915-f9cde5742241",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T07:28:52Z",
+  "outcome": "succeeded"
+}
