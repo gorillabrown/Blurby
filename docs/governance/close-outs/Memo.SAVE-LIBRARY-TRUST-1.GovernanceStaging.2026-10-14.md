@@ -85,3 +85,10 @@ Ruled by Brain (Rule 11 tier 1): pin `ext` and `needsEpubConversion` too, with a
     - `relinkSampleIfMissing` (`library.js:29-36`), self-healing.
     - `folder-sync.js` `refresh()` (`:194-198`), a lost word count.
     - The import and URL conversion paths (`library.js:~280-340`, `~428-440`), unverified.
+
+## Re-gate on main after DEPS-AUDIT-1, and the merge go (Blurby.Roadmap, 2026-10-14)
+- Main (`5d12e19a`, which includes DEPS-AUDIT-1 and its lockfile) was merged in as `65ae6ad8` (tree `039bb836`). DW9 against it lists exactly `BUG_REPORT.md`, `main/ipc/library.js`, `tests/saveLibraryTrust.test.js` and this memo.
+- `npm ci`: exit 0 (the lockfile moved). DW2: 4 files, 27 tests, exit 0.
+- `npm test` under load: **exit 0**, 162 files, 2,170 passed / 1 skipped / 0 failed. No failing set.
+- `npm run typecheck`: exit 0.
+- **Merge go:** Blurby.Roadmap's conditional go, met. The item stays In Flight with its close-out held for the batched owner smoke: no tag, no upload.
