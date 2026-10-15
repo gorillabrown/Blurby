@@ -1,0 +1,34 @@
+{
+  "id": "20261015T050751Z-external-set-status-LARGE-FOLDER-SYNC-2",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-2",
+  "created": "2026-10-15T05:07:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass."
+    },
+    "expectedRevision": "35e51cd30579625513459ec49cce6693d90496859c00c5f0eb24a42a158c40ee",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass.\")]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-2",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass.\")]",
+      "actualRevision": "f4fbf765f51d2e81f6b8729771ebcbc74180806ddb8f7413e2632a0d3a17ce21",
+      "recoveryId": "20261015T050751Z-external-set-status-LARGE-FOLDER-SYNC-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T05:08:55Z",
+  "outcome": "succeeded"
+}
