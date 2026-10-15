@@ -301,3 +301,59 @@ describe("startWatcher — does not starve the main process (BUG-193)", () => {
     }
   }, 30000);
 });
+
+describe("startWatcher — per-file events and close (LARGE-FOLDER-SYNC-1)", () => {
+  // Strict string check: onUnlink() with no path must not throw inside the matcher.
+  const calledWithPath = (mock, p) => mock.mock.calls.some(([x]) => typeof x === "string" && path.resolve(x) === path.resolve(p));
+
+  it("(w1) reports the deleted path to onUnlink", async () => {
+    const root = path.join(await makeBase(), "root");
+    await fs.mkdir(root, { recursive: true });
+    const cb = makeCallbacks();
+    const w = startWatcher(root, cb);
+    try {
+      await settle(w);
+      const newFile = path.join(root, "new.epub");
+      await fs.writeFile(newFile, "new");
+      await vi.waitFor(() => expect(calledWith(cb.onAdd, newFile)).toBe(true), { timeout: 4000 });
+      await sleep(700);
+      await fs.unlink(newFile);
+      await vi.waitFor(
+        () => expect(calledWithPath(cb.onUnlink, newFile), "onUnlink was not called with the deleted path").toBe(true),
+        { timeout: 4000 },
+      );
+    } finally {
+      await w?.close();
+    }
+  }, 20000);
+
+  it("(w2) fires no callback after close()", async () => {
+    const root = path.join(await makeBase(), "root");
+    await fs.mkdir(root, { recursive: true });
+    const realLstat = cjsFs.lstat;
+    let release;
+    const gate = new Promise((r) => { release = r; });
+    let held = 0;
+    const spy = vi.spyOn(cjsFs, "lstat").mockImplementation((...args) => {
+      if (inWatcher()) { held++; return gate.then(() => realLstat.apply(cjsFs, args)); }
+      return realLstat.apply(cjsFs, args);
+    });
+    const cb = makeCallbacks();
+    const w = startWatcher(root, cb);
+    try {
+      await settle(w);
+      await fs.writeFile(path.join(root, "a.epub"), "a");
+      await vi.waitFor(() => expect(held).toBeGreaterThan(0), { timeout: 4000 });
+      await w.close();
+      release();
+      await sleep(1000);
+      expect(cb.onAdd, "onAdd was called after close()").not.toHaveBeenCalled();
+      expect(cb.onChange, "onChange was called after close()").not.toHaveBeenCalled();
+      expect(cb.onUnlink, "onUnlink was called after close()").not.toHaveBeenCalled();
+    } finally {
+      release();
+      spy.mockRestore();
+      await w?.close();
+    }
+  }, 20000);
+});
