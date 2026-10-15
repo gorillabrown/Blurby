@@ -38,3 +38,35 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
 - Passing: (c), (f) and (g) (the controls).
 - `npm run typecheck` (implementation agent): exit 0.
 - **Harness deviation, within failure handling ("fix the test, not the module").** With `checkForUpdates: vi.fn(() => Promise.reject(…))`, (d) passed on the base, because Vitest's mock attaches a handler to the promise it returns and no `unhandledRejection` fires. The fake is a plain object whose `checkForUpdates()` counts calls and returns the promise, and (b) and (c) assert on `fake.calls`. A comment in the test records why.
+
+### Done-when 2–6 — at C2 (`cf5d10ef`, re-run by the orchestrator)
+- DW2: 4 files, 26 tests, exit 0. DW3: `package.json:41` and `:42` (two lines), exit 0. DW4: exit 1, empty. DW5: `main/window-manager.js:2`. DW6: `main/ipc/library.js:2`. Typecheck (implementation agent): exit 0. The C2 diff equals the specification's code.
+
+### Done-when 7 — full suite, typecheck, build (owner's machine)
+- **Run 1, on `cf5d10ef` (tree `94370cf3`), while two reviewers were running vitest at the same time:** `npm test` exit 1. 3 failed in `tests/jsonStore.test.js` (the concurrent-writes test and the two EPERM rename-retry tests); 2,084 passed and 1 skipped. That file took 10.4 s in this run, against about 0.5 s alone. Typecheck exit 0; build exit 0.
+- **Isolation re-runs on `cf5d10ef`:** `npx vitest run tests/jsonStore.test.js` gave 6/6, three times, exit 0 each. Then `npm test` gave 154 files, **2,087 passed / 1 skipped / 0 failed, exit 0**.
+- **Run on the merge result `cc36182b`** (origin/main `112ea45d` merged in; tree `e2fb6cb3`). DW2: 26/26, exit 0. `npm test`: exit 1, with 2 different timing-sensitive failures: `tests/folderWatcher.test.js`, the 1 MB read-within-50 ms budget, and `tests/readerModeBoundaries.test.ts`, a 31 s run. 2,085 passed. Typecheck exit 0. Build exit 0, but it took 17.9 s against its usual 2 s.
+- **Interpretation:** the machine was at 100% CPU during these runs (another project's long pytest run and 29 node processes, none started by this run). Each loaded run failed a different set of timing-sensitive tests, all outside this item's code. `cf5d10ef` and `cc36182b` have identical code: the merge brought only `ROADMAP.md`, `Virtuoso/` and one governance document. So the green isolated suite on `cf5d10ef` covers the code proposed for merge. Classified as infrastructure (load), not a product failure. Disclosed to Blurby Brain under the batched-smoke condition 4, for a ruling.
+
+### Done-when 8 — built artifact
+- `npx electron-builder --win --x64 --dir --publish never`: exit 0, after `npm run build` exit 0 on the same tree. It produced `release\win-unpacked\Blurby.exe` (223,001,088 bytes, 2026-10-14 20:15:09).
+- asar count of `\assets\icon.ico` and `\assets\tray-icon.png`: **2**.
+
+### Done-when 9(b) — launch log on the C2 build
+- `$prof` = `C:\Users\estra\AppData\Local\Temp\blurby-pf1-d8e073be-4a86-483f-b478-c49908a13997`.
+- **`alive=True`; `Failed to load image=0`; `Tray creation failed=0`; `app-update.yml=0`; `UnhandledPromiseRejectionWarning=0`.** The control in 9(a) saw all four messages on the P6 build.
+- The scratch profile's `library.json` holds the `sample-meditations` entry, which is the Done-when 10(d) setup.
+- No Blurby process was left running.
+
+### Done-when 11 — diff fence
+- `git diff --name-status refs/remotes/origin/main HEAD` on `cc36182b`: exactly `M package.json`, `M main/window-manager.js`, `M main/ipc/library.js`, `A tests/packagingFix.test.js`, plus this memo. The time log is added at close.
+
+### Reviews
+- Spec compliance (Solon): **APPROVED_WITH_CONCERNS.** The code matches the specification character for character, and the harness deviation keeps each test's intent. Its concern was that origin/main had moved; that is resolved by the merge-order step above.
+- Code quality (Plato): **READY**, with no confirmed defects. Its main risk, whether the icons load from inside the asar, is settled by 9(b): 0 image or tray errors.
+- Follow-up notes from Plato, for the close-out:
+  - concurrent relinks may copy twice (harmless; the second copy can EBUSY and is logged);
+  - a failed relink returns the stale path, logged as the specification intends;
+  - test (b) uses a fixed 100 ms real-time wait;
+  - no test covers a failed relink;
+  - relinked entries make `delete-doc` delete the data-folder copy, which is safer than BUG-194's current behaviour.
