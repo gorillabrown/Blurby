@@ -48,7 +48,7 @@ const folderDoc = (id, p) => ({ id, filepath: p, filename: path.basename(p), ext
 function makeFolderSync(notice, answers) {
   const state = { lib: [] };
   const deps = {
-    getSourceFolder: () => ROOT,
+    getSourceFolder: () => answers.folder || ROOT,
     getLibrary: () => state.lib,
     setLibrary: vi.fn((d) => { state.lib = d; }),
     addDoc: (d) => { state.lib.unshift(d); },
@@ -429,7 +429,9 @@ describe("clear sites, wiring and the review fixes (FOLDER-NOTICE-1)", () => {
       "emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,",
       "getFolderProblem: () => folderNotice.get(),",
       "retrySourceFolder: () => folderNotice.retry(),",
-      "resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },",
+      "resumeWatcher: () => { if (folderWorkStopped || !watcherFailed) return; startWatcherFn(); },",
+      "      watcherFailed = true;",
+      "  if (watcher) watcherFailed = false;",
       "reason: folderNotice.get()",
     ]) expect.soft(src.includes(text), "main.js lacks: " + text).toBe(true);
     const setAt = src.indexOf('folderNotice.set(folderNotice.get() || "watch-failed");');
@@ -464,6 +466,83 @@ describe("clear sites, wiring and the review fixes (FOLDER-NOTICE-1)", () => {
     expect(f).toBeLessThan(s);
     expect(body.split("folderToastShown = true;").length - 1).toBe(1);
     expect(body.includes("if (folderToastShown) return;")).toBe(false);
+  });
+
+  it("(fr1) Retry checks the folder it started with", async () => {
+    vi.spyOn(console, "log").mockImplementation(() => {});
+    const createFolderNotice = loadNotice();
+    const A = path.join(tmp, "A");
+    const B = path.join(tmp, "B");
+    let folder = A;
+    const d = deferred();
+    const send = vi.fn();
+    const sync = vi.fn();
+    const resumeWatcher = vi.fn();
+    const n = createFolderNotice({ send, getFolder: () => folder, checkRoot: vi.fn(() => d.promise), sync, resumeWatcher });
+    n.set("root-unlistable");
+    const p = n.retry();
+    folder = B; // a switch while A's check runs; B fails, so its banner is up
+    n.reset();
+    n.set("root-unlistable");
+    d.resolve(true);
+    expect(await p).toBe("root-unlistable");
+    expect(n.get(), "A's late answer cleared B's banner").toBe("root-unlistable");
+    expect(sync, "A's late answer started a sync").not.toHaveBeenCalled();
+    expect(resumeWatcher, "A's late answer restarted the watcher").not.toHaveBeenCalled();
+  });
+
+  it("(fr2) a watcher error while the window loads, then a clear, restarts the watcher", () => {
+    // main.js cannot be loaded by a test: its notice and watcher block runs here, from the source, against stubs.
+    const src = fs.readFileSync(new URL("../main.js", import.meta.url), "utf8");
+    const start = src.indexOf("let folderToastShown");
+    const end = src.indexOf("// ── Reading statistics", start);
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "warn").mockImplementation(() => {});
+    const send = vi.fn();
+    const callbacks = [];
+    const env = {
+      createFolderNotice: loadNotice(),
+      settings: { sourceFolder: ROOT },
+      folderWorkStopped: false,
+      watcher: null,
+      mainWindow: { isDestroyed: () => false, webContents: { isLoading: () => true, send } },
+      startWatcher: vi.fn((_dir, cb) => { callbacks.push(cb); return { close: vi.fn() }; }),
+    };
+    const scope = new Proxy(env, {
+      has: (_t, k) => k !== Symbol.unscopables,
+      get: (t, k) => (k in t ? t[k] : k in globalThis ? globalThis[k] : (t[k] = vi.fn())),
+      set: (t, k, v) => { t[k] = v; return true; },
+    });
+    const run = new Function("scope", "with (scope) {\n" + src.slice(start, end) + "\nreturn { startWatcherFn, reportFolderOk, folderNotice };\n}");
+    const m = run(scope);
+    m.startWatcherFn(); // a working watcher
+    expect(env.startWatcher).toHaveBeenCalledTimes(1);
+    callbacks[0].onError(new Error("ENOENT: the folder went away"), ROOT); // its runtime error, while the window loads
+    expect(m.folderNotice.get()).toBe("watch-failed");
+    expect(send.mock.calls.filter((c) => c[0] === "watcher-error"), "a toast was sent to a loading window").toEqual([]);
+    m.reportFolderOk(); // reachable again
+    expect(env.startWatcher, "the clear did not restart the failed watcher").toHaveBeenCalledTimes(2);
+  });
+
+  it("(fr3) a stale run's failure does not land on another folder", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const createFolderNotice = loadNotice();
+    let n;
+    let reject;
+    const answers = { root: true, scan: () => new Promise((_r, rj) => { reject = rj; }) };
+    const { fsync } = makeFolderSync(() => n, answers);
+    n = createFolderNotice({ send: vi.fn(), getFolder: () => answers.folder || ROOT, checkRoot: vi.fn(), sync: vi.fn(), resumeWatcher: vi.fn() });
+    const run = fsync.syncAll(); // the old folder's run, scan pending
+    await flush();
+    answers.folder = path.join(tmp, "B"); // a switch: the new folder fails, then clears
+    n.reset();
+    n.set("watch-failed");
+    n.set(null);
+    reject(new Error("EIO")); // the old run throws now
+    await run;
+    expect(n.get(), "the old folder's failure landed on the new folder").toBeNull();
   });
 
   it("(fn-closed) a replaced watcher's late error is ignored (R8)", () => {

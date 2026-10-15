@@ -674,6 +674,39 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     expect(deps.reportFolderOk, "a partial read did not count as reachable").toHaveBeenCalledWith(ROOT);
   });
 
+  it("(fr4) the root check cannot raise an unhandled rejection or replace the scan's error", async () => {
+    const boom = () => { throw new Error("boom"); };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Only this case's rejections are counted: vitest's own listeners are set aside for its duration.
+    const saved = process.listeners("unhandledRejection");
+    const unhandled = [];
+    const mine = (reason) => unhandled.push(reason && reason.message);
+    process.removeAllListeners("unhandledRejection");
+    process.on("unhandledRejection", mine);
+    try {
+      const m1 = withReports();
+      m1.deps.reportFolderOk = vi.fn(boom);
+      const s1 = createFolderSync(m1.deps);
+      await s1.syncAll();
+      for (let i = 0; i < 3; i++) await new Promise((r) => setImmediate(r));
+      expect(unhandled, "the root check's rejection was unhandled").toEqual([]);
+      expect(log.mock.calls.filter((c) => String(c[0]).startsWith("[folder-notice]")), "no [folder-notice] line for the failed clear").toHaveLength(1);
+
+      const m2 = withReports();
+      m2.deps.reportFolderOk = vi.fn(boom);
+      m2.deps.scanFolderAsync.mockRejectedValue(new Error("EIO"));
+      const s2 = createFolderSync(m2.deps);
+      log.mockClear();
+      await s2.syncAll();
+      expect(log, "the root check's error replaced the scan's").toHaveBeenCalledWith("[folder-sync] full sync failed:", "EIO");
+      expect(m2.deps.reportFolderProblem).toHaveBeenCalledWith("sync-failed", ROOT);
+    } finally {
+      process.removeListener("unhandledRejection", mine);
+      for (const l of saved) process.on("unhandledRejection", l);
+      log.mockRestore();
+    }
+  });
+
   it("(fn-u) control: a root that does not list content does not clear", async () => {
     const m1 = withReports();
     m1.deps.rootHasContent = async () => null;

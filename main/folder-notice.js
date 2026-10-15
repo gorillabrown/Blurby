@@ -29,6 +29,7 @@ function createFolderNotice({ send, getFolder, checkRoot, sync, resumeWatcher })
     if (!folder) return problem;
     const root = await checkRoot(folder);
     console.log("[folder-notice] Retry: one root check:", root);
+    if (getFolder() !== folder) return problem; // the folder changed during the check: its answer is the old folder's
     if (root === true) {
       set(null);
       sync(); // one full sync, not awaited: syncAll joins a running one and never rejects

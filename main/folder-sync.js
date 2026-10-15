@@ -83,7 +83,8 @@ function createFolderSync(deps) {
     addedDuringRun.clear();
     const stale = () => mine !== gen || cancelled || stopped || getSourceFolder() !== folder;
     emitProgress(0, 0, "scanning");
-    const okCheck = rootHasContent(folder).then((r) => { if (r === true && !stale()) reportFolderOk(folder); }); // reachable: clears while the walk runs; never waits twice on a hung root (FOLDER-NOTICE-1)
+    const okCheck = rootHasContent(folder).then((r) => { if (r === true && !stale()) reportFolderOk(folder); }) // reachable: clears while the walk runs; never waits twice on a hung root (FOLDER-NOTICE-1)
+      .catch((err) => console.error("[folder-notice] the sync's root check failed:", err && err.message)); // never unhandled, never the scan's error
     try {
       const report = {};
       const files = await scanFolderAsync(folder, report);
@@ -175,7 +176,7 @@ function createFolderSync(deps) {
     // A failed scan, save or prune is logged here, so the fire-and-forget startup call (main.js) cannot leave an unhandled
     // rejection. The IPC callers (main/ipc/state.js) then go on to startWatcher, as they do after any sync that ends early.
     const promise = runFullSync(folder)
-      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); reportFolderProblem("sync-failed", folder); })
+      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); if (getSourceFolder() === folder) reportFolderProblem("sync-failed", folder); })
       .finally(() => {
         if (!running || running.promise !== promise) return; // an abandoned run settling late changes nothing
         running = null;

@@ -316,13 +316,14 @@ function emitSyncProgress(current, total, phase) {
 // The source folder's problem (FOLDER-NOTICE-1; BUG-195's hook): null, or the last code that means unreachable (the set in
 // main/folder-notice.js; a partial read is only logged here). Each change goes to the library banner, not a toast.
 let folderToastShown = false; // one watcher-error toast per failure episode
+let watcherFailed = false; // the watcher failed this episode, toast sent or not: a clear restarts it
 const folderNotice = createFolderNotice({
   send: (code) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("folder-problem", code); },
   getFolder: () => settings.sourceFolder,
   checkRoot: rootHasContent,
   sync: () => syncLibraryWithFolder(),
-  // On a clear: restart a watcher that failed this episode; the flag keeps a failed restart from toasting (the banner shows).
-  resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },
+  // On a clear: restart a watcher that failed this episode. A failed restart toasts only if this episode's toast was not sent.
+  resumeWatcher: () => { if (folderWorkStopped || !watcherFailed) return; startWatcherFn(); },
 });
 function reportFolderProblem(code, folder) { folderNotice.set(code); console.warn("[folder-sync] source folder problem:", code, folder); }
 function reportFolderOk() { folderNotice.set(null); }
@@ -366,6 +367,7 @@ function startWatcherFn() {
         : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.";
       console.error("[watcher] Error:", err.message);
       folderNotice.set(folderNotice.get() || "watch-failed"); // the banner shows even when no toast is sent
+      watcherFailed = true;
       // The episode's toast counts only once it lands, in a live window that has finished loading (LibraryContainer's
       // listener is mounted by then). Otherwise the banner's mount fetch shows the problem; no toast replays.
       if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
@@ -374,6 +376,7 @@ function startWatcherFn() {
     },
   });
   if (watcher) folderToastShown = false;
+  if (watcher) watcherFailed = false;
 }
 
 // ── Reading statistics ─────────────────────────────────────────────────────────
