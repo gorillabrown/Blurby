@@ -70,3 +70,8 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
   - test (b) uses a fixed 100 ms real-time wait;
   - no test covers a failed relink;
   - relinked entries make `delete-doc` delete the data-folder copy, which is safer than BUG-194's current behaviour.
+
+### Merge go (Blurby Brain, 2026-10-14, Rule 11 tier 1, under batched-smoke condition 4)
+- "Merge go on the isolated full-suite pass at cf5d10ef (code-identical to cc36182b); two loaded runs failed only load-sensitive timing tests outside the diff, with a different set each time, at 100% CPU from processes not started by this run."
+- Follow-up (Brain): the full suite is re-run on `main` after the merge, as the first step of the NARRATE-REBUILD-1 completion, on a quiet machine. If any of those timing tests fails there, stop and send it to Brain.
+- Plato's notes go into the close-out only, with no new item. The item stays In Flight, its close-out held for the batched owner smoke (10(d)). No tag, no upload.
