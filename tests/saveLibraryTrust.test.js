@@ -22,6 +22,8 @@ let errorLog;
 let ownFile;
 let targetFile;
 let convertedPath;
+let convertGate; // when set, convertToEpub waits for it
+let convertStarted;
 
 function clearLibraryModule() {
   try {
@@ -61,7 +63,11 @@ function setup() {
     if (request === "../epub-converter") {
       return {
         htmlToEpub: vi.fn(),
-        convertToEpub: vi.fn(async (_src, dir, id) => ({ epubPath: path.join(dir, id + ".epub"), valid: true })),
+        convertToEpub: vi.fn(async (_src, dir, id) => {
+          convertStarted = true;
+          if (convertGate) await convertGate;
+          return { epubPath: path.join(dir, id + ".epub"), valid: true };
+        }),
       };
     }
     if (request === "../author-normalize") return { normalizeAuthor: (a) => a };
@@ -98,6 +104,8 @@ beforeEach(() => {
   convertedPath = path.join(dataDir, "converted", "d1.epub");
   settings = { sourceFolder: "" };
   scanResult = [];
+  convertGate = null;
+  convertStarted = false;
   library = [d1()];
   setup();
 });
@@ -177,6 +185,33 @@ describe("save-library cannot change where a book's file is", () => {
     expect(library[0].position).toBe(1234);
     expect(library[0].favorite).toBe(true);
     expect(library[0].filepath).toBe(bookPath);
+  });
+
+  it("(l) lazy conversion racing a renderer save does not turn a .txt book into a served .txt EPUB", async () => {
+    const bookPath = write("src/book.txt", "two words");
+    settings = { sourceFolder: path.join(tmpDir, "src") };
+    const F = { id: "f1", title: "Book", filepath: bookPath, filename: "book.txt", ext: ".txt", source: "folder", needsEpubConversion: true };
+    library = [F];
+    const R = structuredClone(F);
+    const converted = path.join(dataDir, "converted", "f1.epub");
+    let release;
+    convertGate = new Promise((r) => { release = r; });
+
+    const opening = call("load-doc-content", "f1");
+    await vi.waitFor(() => expect(convertStarted).toBe(true));
+    await call("save-library", [R]); // replaces main's doc objects while the conversion is pending
+    release();
+    const res = await opening;
+
+    const { libraryUpdates } = resolveLoadedDocResult(R, res);
+    await call("save-library", [{ ...R, ...libraryUpdates, seenAt: 1 }]);
+
+    expect(library[0].filepath).toBe(bookPath);
+    expect(library[0].ext).toBe(".txt");
+    expect(library[0].convertedEpubPath).toBe(converted);
+
+    const reopen = await call("load-doc-content", "f1");
+    expect(reopen).toEqual({ filepath: converted, ext: ".epub" });
   });
 
   it("(i) control: edits and order are saved", async () => {
