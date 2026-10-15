@@ -1,0 +1,3199 @@
+{
+  "description": "NARRATE-REBUILD-1 second-machine non-git inputs. Paths are relative to ArtifactsRoot; entries under models/ resolve against ModelsRoot when it differs. tier completion = needed by the completion run; phase0 = only for re-running Phase 0.",
+  "hashAlgorithm": "SHA256",
+  "generatedUtc": "2026-10-15T02:26:15Z",
+  "files": [
+    {
+      "path": "models/local/kokoro-dur/config.json",
+      "bytes": 44,
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "tier": "completion"
+    },
+    {
+      "path": "models/local/kokoro-dur/onnx/model_fp16.onnx",
+      "bytes": 163234824,
+      "sha256": "72715098ccf04fda3cb0d3ac5ed8395bbd872629064605403d9fb8675b093065",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/local/kokoro-dur/onnx/model_q4.onnx",
+      "bytes": 305216050,
+      "sha256": "2eccfc53272a6d9b302320cf522a0f3cd6201cd29f0c872fad9433c207b95cad",
+      "tier": "completion"
+    },
+    {
+      "path": "models/local/kokoro-dur/onnx/model.onnx",
+      "bytes": 325532316,
+      "sha256": "9336bfc9997f011849f68c306814c91c8a8aae60daa6ac0e08c6f8ab49a9c9fa",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/local/kokoro-dur/tokenizer_config.json",
+      "bytes": 113,
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "tier": "completion"
+    },
+    {
+      "path": "models/local/kokoro-dur/tokenizer.json",
+      "bytes": 3497,
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "tier": "completion"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/config.json",
+      "bytes": 44,
+      "sha256": "df34b4f930b23447cd4dc410fabfb42eb3f24e803e6c3f97d618fb359380a36f",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model_fp16.onnx",
+      "bytes": 163234740,
+      "sha256": "ba4527a874b42b21e35f468c10d326fdff3c7fc8cac1f85e9eb6c0dfc35c334a",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model_q4.onnx",
+      "bytes": 305215966,
+      "sha256": "04cf570cf9c4153694f76347ed4b9a48c1b59ff1de0999e6605d123966b197c7",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/onnx/model.onnx",
+      "bytes": 325532232,
+      "sha256": "8fbea51ea711f2af382e88c833d9e288c6dc82ce5e98421ea61c058ce21a34cb",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/tokenizer_config.json",
+      "bytes": 113,
+      "sha256": "be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20",
+      "tier": "phase0"
+    },
+    {
+      "path": "models/onnx-community/Kokoro-82M-v1.0-ONNX/tokenizer.json",
+      "bytes": 3497,
+      "sha256": "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/af_bella/1.00/chunk-0.wav",
+      "bytes": 210044,
+      "sha256": "5f422d95d35356868b9ea197fe1054f37cbe7a0db9dfd06d65058e3d51f0586b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/af_bella/1.00/chunk-1.wav",
+      "bytes": 498044,
+      "sha256": "63a35037b0fe1dd18ec5e42ccdbb5a11795b23a11e18217cab26a4008d75675d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/af_bella/1.00/chunk-2.wav",
+      "bytes": 711644,
+      "sha256": "bf1ae89bffc0441ac99096db60d475c1110ac9ae65d538ed079066036e710003",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/af_bella/1.00/chunk-3.wav",
+      "bytes": 670844,
+      "sha256": "8e9a5f00b4fca760f1f1668f943397475d69868afedb57dd7744297140f6b4a6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/af_bella/1.00/chunk-4.wav",
+      "bytes": 855644,
+      "sha256": "33340f36c0568da31ff72675cda0375ed5d51e13454cb2af148f8879b93c9b25",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/bf_emma/1.00/chunk-0.wav",
+      "bytes": 195644,
+      "sha256": "11ad10c3995c2dc43054847c8eba1238d1dcfda9a4d8efc0bc128c4fe333e72d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/bf_emma/1.00/chunk-1.wav",
+      "bytes": 430844,
+      "sha256": "833e3efd914dfeee2238f357a59edaad08dd10c4ca0d6934ec23c03de605bdae",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/bf_emma/1.00/chunk-2.wav",
+      "bytes": 643244,
+      "sha256": "5800e43e73f986570ca2855a237e93ea67bb37e22b0ddd25124939a6baf7ef29",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/bf_emma/1.00/chunk-3.wav",
+      "bytes": 601244,
+      "sha256": "bca216d27da9bcb5213e093bd2095e5e9f8d5526a9c14c0629b2a5c395b49aef",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp16/passage-a/bf_emma/1.00/chunk-4.wav",
+      "bytes": 777644,
+      "sha256": "05ffa9ca61f6ba7186b8fba2f79a2418ef75cfe2177f1bfcc62083f735f56e5c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/af_bella/1.00/chunk-0.wav",
+      "bytes": 210044,
+      "sha256": "d88e1abccf9ecf8227ce04ba4f5619e82109f81f74f79bc2c641f43952328432",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/af_bella/1.00/chunk-1.wav",
+      "bytes": 498044,
+      "sha256": "7ea0fb9254c80151a2b03dca450865ac3b39c9ab7c111e0e167907f6a4e71691",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/af_bella/1.00/chunk-2.wav",
+      "bytes": 710444,
+      "sha256": "5f59d2c82d4b2ae31b7f4ee64e84e65d547512e7e7bc384fd2a62e79a22f558a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/af_bella/1.00/chunk-3.wav",
+      "bytes": 670844,
+      "sha256": "4e8225805be23210e625fc4e8e10347a13405a2a676dba97be4b826b8ae06996",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/af_bella/1.00/chunk-4.wav",
+      "bytes": 854444,
+      "sha256": "fee608a6f573a9b62509d0c92bbb00ddc5ad312a17e6e4adefc95717a5998e4b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/bf_emma/1.00/chunk-0.wav",
+      "bytes": 195644,
+      "sha256": "964cc82627129914a5bf78227fa8073ea84484b4cae6a1a640bdffa69ca168f2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/bf_emma/1.00/chunk-1.wav",
+      "bytes": 430844,
+      "sha256": "54b4b090bd073ab4b04aae1b514c3e70a3712de64a09c362f5a156daf10af9ca",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/bf_emma/1.00/chunk-2.wav",
+      "bytes": 643244,
+      "sha256": "b1ab72c55732ddc30cc467080caf029f8ac4e8fc7fa77bdfa1adffef90f65246",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/bf_emma/1.00/chunk-3.wav",
+      "bytes": 601244,
+      "sha256": "45a240170a26a691d78b1a4306dacd009874acfe93ecae2d08c8d0e53c419711",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/fp32/passage-a/bf_emma/1.00/chunk-4.wav",
+      "bytes": 777644,
+      "sha256": "6cf0b44537a64e2e3aecefebfe882e5279d4843bde241e6f4227eeb2cdbc2e35",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.80/chunk-0.wav",
+      "bytes": 259244,
+      "sha256": "927df52a98a953139a549b5dc9e17b32162a88d077cf475ba38374321825f999",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.80/chunk-1.wav",
+      "bytes": 609644,
+      "sha256": "d699971cf17dff48ff2ff2c359e565283e7ec2ee4b968fb677f15f19db511755",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.80/chunk-2.wav",
+      "bytes": 879644,
+      "sha256": "d961b81bf02281d85091ec022af0325f214835457fe1f1b15042638eeebd3cde",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.80/chunk-3.wav",
+      "bytes": 799244,
+      "sha256": "00efef1292f49f91fddfc6e272615ff556e91fb415e5eb6b195d322d81e84c79",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.80/chunk-4.wav",
+      "bytes": 1042844,
+      "sha256": "3a4d5e0f1173cf04c54e36425d793bc776d01f622bd391ed679caa0ca1cc2ce9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.85/chunk-0.wav",
+      "bytes": 242444,
+      "sha256": "3bf7555aba4a7400b5a4e1292b7b4db663a92d493931e758930c66e04e5a95eb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.85/chunk-1.wav",
+      "bytes": 567644,
+      "sha256": "f9d1dab1874c90da828925b10b3b442144c8d3c216ab6406e175ff9ff51ca30a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.85/chunk-2.wav",
+      "bytes": 824444,
+      "sha256": "66701e825239618d0923b8d2db343ef73010ec25c5203cd9ecca65c5e0108550",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.85/chunk-3.wav",
+      "bytes": 758444,
+      "sha256": "72c09a48fece3bf05273ebf9a6bd4b8b6808a798fd733295af8b7d2a89d491f8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.85/chunk-4.wav",
+      "bytes": 987644,
+      "sha256": "0bee32434e9acf02a1c4fa0178426201feadb37e5067159733abffbe27c66fa4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.90/chunk-0.wav",
+      "bytes": 229244,
+      "sha256": "3182fc5e742b34d5dd4efe84e14a89e5a85249f818085bae53c8305392dbad38",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.90/chunk-1.wav",
+      "bytes": 538844,
+      "sha256": "6ecac5a01fa184009e050ecf18cd6296bcb9d2e71b82d0ac6966ea00172921e8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.90/chunk-2.wav",
+      "bytes": 774044,
+      "sha256": "28072406b7d283dfc614f8288e5e9f2ee86cc4b312f32d21b67325dac1daed3e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.90/chunk-3.wav",
+      "bytes": 721244,
+      "sha256": "f5653a139b2b08c9b72eeef1ef93fd34fe8bd598090a21cc4da6a6a97952e5ac",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.90/chunk-4.wav",
+      "bytes": 934844,
+      "sha256": "b379bfa8488dd1b1400e21753d7317d2755da3d9de9151acb5f95f4f8e7716b6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.95/chunk-0.wav",
+      "bytes": 219644,
+      "sha256": "8b3295a4819270f24382370c31ae692113712d3d7d7379fd13ec68c8db4b0b78",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.95/chunk-1.wav",
+      "bytes": 514844,
+      "sha256": "66bb80470235a953f5a27b57b549072d82d87f7059feb1d78f046e5b1339569a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.95/chunk-2.wav",
+      "bytes": 750044,
+      "sha256": "0ba8ea4ff21f1e5c8b2b3720abf100874d3633e18e621d2bc45704d5e6ddf723",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.95/chunk-3.wav",
+      "bytes": 686444,
+      "sha256": "724465729cf3507e1a86ad710ad43a369d110003baf19255171d5162a723c580",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/0.95/chunk-4.wav",
+      "bytes": 902444,
+      "sha256": "2f1ee66faa67d641960c0ada4b3bab4ff922b0c4b8e1bc0c8120150c56263596",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.00/chunk-0.wav",
+      "bytes": 213644,
+      "sha256": "184eb6c3ed7cfa0ea6d0353659231f1c60ab76f6d1f8a8ca282707e970133ce6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.00/chunk-1.wav",
+      "bytes": 495644,
+      "sha256": "7b352b7660b0e1064f9f147e05b48cf496688937c35c174579ec183c2f8da493",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.00/chunk-2.wav",
+      "bytes": 717644,
+      "sha256": "139c9cda6e40c526e2c4b230d90bbf92cce4c43d1fc968cd39e511a644f2dfe3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.00/chunk-3.wav",
+      "bytes": 669644,
+      "sha256": "9cff45aa39ee348ebce9dfb6a276b9c3cf12bd82de4aa6785142e19c882b874a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.00/chunk-4.wav",
+      "bytes": 876044,
+      "sha256": "ed2fc1cc7a52ddff558bc6e0be1013d079b2b39e9afbea1ce3e2d19c3d0fe3f3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.05/chunk-0.wav",
+      "bytes": 201644,
+      "sha256": "64f15bf41fb071b2b4f82fcbf56e8e4f3feb0307454264c71c6035fa2147dbae",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.05/chunk-1.wav",
+      "bytes": 476444,
+      "sha256": "6e17e8e991bbb277472f9113926967785db856c4d667214c7c5a38ed8d948419",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.05/chunk-2.wav",
+      "bytes": 696044,
+      "sha256": "aa32de6959cec90178a715631de22b2f0e6da94106d8d7e06842e81dd6b06274",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.05/chunk-3.wav",
+      "bytes": 648044,
+      "sha256": "e589664676c2ab17567d4563fc8392e7b721cc2206bea693aa0ffb0d6062e294",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.05/chunk-4.wav",
+      "bytes": 844844,
+      "sha256": "4d19d82493d108043aa4442209953b6967c5835966570f2abce137e4117e425b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.10/chunk-0.wav",
+      "bytes": 194444,
+      "sha256": "2975e4a115d81147fd0a1a2d00df7c2a55c0d29c36e39030327884c6deb269fb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.10/chunk-1.wav",
+      "bytes": 460844,
+      "sha256": "2d5d956348f973e8bb6b3df10ab210fd7b16830ac67d4192cbfd60ba1b4f556f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.10/chunk-2.wav",
+      "bytes": 676844,
+      "sha256": "9af82baa2de9496530c6e93b15b8f61af623372d1acadd822764e8a029ab3dff",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.10/chunk-3.wav",
+      "bytes": 631244,
+      "sha256": "9741d20b496369ecacb6cdc59983a190fd2cdf8d4e67a93414802b225a0fd370",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.10/chunk-4.wav",
+      "bytes": 819644,
+      "sha256": "b0ea28541ea152737569b2be526157347f9460ba68f8c93d1158a9cf75529cb0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.15/chunk-0.wav",
+      "bytes": 187244,
+      "sha256": "1723732d217e29ee70a3dc4ffab9a2aa32caf159c5dd8f665d38ac0b777b8bcd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.15/chunk-1.wav",
+      "bytes": 448844,
+      "sha256": "bb6fa5a72919f3651e0bc54d80766ba61119e3d64f6735869899a3304498ac90",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.15/chunk-2.wav",
+      "bytes": 654044,
+      "sha256": "bb255bfd212d52231ee845c913631502624e537e885af1a8f3ae9b2cb64b7b21",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.15/chunk-3.wav",
+      "bytes": 610844,
+      "sha256": "a9ca83ac26aaf48c0ad42bb45380c8732e4c0bd705f3ec9e3574596a7c2c2fa3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.15/chunk-4.wav",
+      "bytes": 789644,
+      "sha256": "e8659d1a9f6ab77e1e42feb84d6f170e2f7164ffecb1b495c83ad83844c64f79",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.20/chunk-0.wav",
+      "bytes": 182444,
+      "sha256": "b3d6073086f22bbbff5399efdf3708443ef5793e3b981404ac04b6d4716e5d1a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.20/chunk-1.wav",
+      "bytes": 436844,
+      "sha256": "00f29c7434f8002046c30fb18825692662a78e330f5d36fab1f97b152f01abaa",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.20/chunk-2.wav",
+      "bytes": 632444,
+      "sha256": "dc58727f6255a83f602d116c276fd7ceacf924e6337e1c4c7953cd22be1f3bf7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.20/chunk-3.wav",
+      "bytes": 595244,
+      "sha256": "9ff2a8f0647a54ce1a3ed2f45c46bc53d4d66876f021c5aae2c5a81dd8c9756b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.20/chunk-4.wav",
+      "bytes": 763244,
+      "sha256": "babbcc5524923d236f54bb0eb8ea424a34c5d228a71c7421ef21cd89f315b7e6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.25/chunk-0.wav",
+      "bytes": 174044,
+      "sha256": "fd2a64e6f4dde9edd97687daf904a8508583095bcbcdc66882a56af1f6aaf1c9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.25/chunk-1.wav",
+      "bytes": 420044,
+      "sha256": "732b95e4a5eb9b2cc65a5eb2f1be610ee77ca27f6360cde8740cd4394e4176e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.25/chunk-2.wav",
+      "bytes": 610844,
+      "sha256": "dd3d18d0a71edd432bfa3ab44cf9e4d186fc73f068ee46bd76e1dfbcea43b2cf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.25/chunk-3.wav",
+      "bytes": 570044,
+      "sha256": "22a177268dd6eb11ebf69fb6ad1dec9cd29df4cb5149b5ebd5d432a29aa4dc72",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.25/chunk-4.wav",
+      "bytes": 733244,
+      "sha256": "83c18331fdb5caacaabd47907b0c48ff6eee098ef0370ea682e6fbed0269a80e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.30/chunk-0.wav",
+      "bytes": 170444,
+      "sha256": "87320a58ab7a025950efb4df7bbc06ccb770abe6350ee4f59854657105ec2bac",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.30/chunk-1.wav",
+      "bytes": 397244,
+      "sha256": "fac88f2eb76477ac067e0befcf950db68805efe8a3d83dc277d9c8652ef3370c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.30/chunk-2.wav",
+      "bytes": 590444,
+      "sha256": "a6f072940f5810f633b791468060a371b13c54b54383fa672990076620ecff24",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.30/chunk-3.wav",
+      "bytes": 542444,
+      "sha256": "0ec8c2a2a14ea122829c5dd9363840177dcd3fdfdce4d53430c8a2165a3de89c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.30/chunk-4.wav",
+      "bytes": 702044,
+      "sha256": "b93af36ba879e769ff20dfaac58e775a283a0c4157154a96bbc801d495b89647",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.35/chunk-0.wav",
+      "bytes": 148844,
+      "sha256": "34afb4ad0996211e596d8383d8bdaa4719aa13f9ed3dd3f69b26f8f255486ba7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.35/chunk-1.wav",
+      "bytes": 354044,
+      "sha256": "5608c6f7899c04bbad5a6b28acd80bdd0e81fefb0af721149bc4751ae34aed39",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.35/chunk-2.wav",
+      "bytes": 507644,
+      "sha256": "4c9e5af93ebad155be6ccebebc011f7905ef7155f2998a93a4436930b5feb95f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.35/chunk-3.wav",
+      "bytes": 472844,
+      "sha256": "b1f4b2bcf35f4316a7449d750ebc65872cbe2c49f504d50898595fc83e7a543e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.35/chunk-4.wav",
+      "bytes": 606044,
+      "sha256": "0de2bad41482eda498f0cc2a0e8aea1ac0b641414f9f468f46b24cd4dfaf6b6e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.40/chunk-0.wav",
+      "bytes": 144044,
+      "sha256": "c3bdfd83e9a48be205390c9e2f0dfb19be188c88c923d3d8cd28ce2e0fb31a23",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.40/chunk-1.wav",
+      "bytes": 340844,
+      "sha256": "7b55af0cd75a05a6a8e9a4eb6bbd95ae9d2b08d796625ee00f50c7e0080f1ce1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.40/chunk-2.wav",
+      "bytes": 489644,
+      "sha256": "012031de7e2ab6afbacb170f2e9e587bb59f0c37c4cc98651578d29e886ba69f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.40/chunk-3.wav",
+      "bytes": 458444,
+      "sha256": "6daed3b822d49abd95d5af5d470c80fd9003ce58b14ef709d9939aa41dc20a5c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.40/chunk-4.wav",
+      "bytes": 583244,
+      "sha256": "0fb60a6dc74c2427f14aba8cd6f5d721db25e0dc32cd085d9f25e6e9de98b22b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.45/chunk-0.wav",
+      "bytes": 140444,
+      "sha256": "77721f74c488dc090f9f4b6481a273fa90df7a25e575e56c4e0fd18f63e3712c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.45/chunk-1.wav",
+      "bytes": 333644,
+      "sha256": "78ecc1e0bc8d0c2079cb97d1faa8e6c8369202c15b81b600aeae5bbd3caea06d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.45/chunk-2.wav",
+      "bytes": 481244,
+      "sha256": "daebfd149bc26b4bedf1a323809b80d897d07d921af5e39469d7e32545a9b3ea",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.45/chunk-3.wav",
+      "bytes": 445244,
+      "sha256": "faf9cd32bef1e1aa8ea26b8da604b4a068913811915a8d2b3406ca127b133cb3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.45/chunk-4.wav",
+      "bytes": 565244,
+      "sha256": "a8c4c248ae57ed8c33749f2ebb510015b443c92cfbbd0462a84d524fef4d6651",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.50/chunk-0.wav",
+      "bytes": 138044,
+      "sha256": "3b44039cc3ef213876edcc9d39a6263b4fde902299e9d7ec86113bf19e3aba2a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.50/chunk-1.wav",
+      "bytes": 327644,
+      "sha256": "4627c63bf57c00427c37f47506b336e7b139301154e6afdca203a82bec472b23",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.50/chunk-2.wav",
+      "bytes": 468044,
+      "sha256": "a1242a7e0ece0c301efcdace7aadea35e9c2b02ff547212a4a71606109454c66",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.50/chunk-3.wav",
+      "bytes": 434444,
+      "sha256": "6adc36d9593b6acc9fb4f86f032cd74a6a426d41c4af7ddd12a71284231b98cc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.50/chunk-4.wav",
+      "bytes": 548444,
+      "sha256": "9e2ca0b45007e45238ce4f7105c519068ec0e202a4843070a7d329faca65d668",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.55/chunk-0.wav",
+      "bytes": 135644,
+      "sha256": "6790f8fd18a4cd1b6f7bfab4460c476d90655f32a352368e9004837b63fb18cc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.55/chunk-1.wav",
+      "bytes": 320444,
+      "sha256": "245a6dcb7d612373c3565f0d6dcec35bd75651cda9983fcf7bb17e1968c0dadb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.55/chunk-2.wav",
+      "bytes": 462044,
+      "sha256": "197d3615c89395ced550c7ba4c1099548c8a2ba13f73e719acbc13d841dbfad3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.55/chunk-3.wav",
+      "bytes": 423644,
+      "sha256": "a47c95ccb35f185e2683243f899cc737ec41e3c039476e7abacb6e2cfa48c213",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.55/chunk-4.wav",
+      "bytes": 541244,
+      "sha256": "bfc252b8a366f6316c9f676d0f72d3c7925a4dde0614b0e1c788977776798416",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.60/chunk-0.wav",
+      "bytes": 133244,
+      "sha256": "8a01845280b28635d5fd65faacbc6820f4987e560894d25f6bf69310174ef76f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.60/chunk-1.wav",
+      "bytes": 310844,
+      "sha256": "af2e6ca5273d06ea1ce4beb4e5e4afb9a19f5f1a962397591b99f6f976bc86c8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.60/chunk-2.wav",
+      "bytes": 451244,
+      "sha256": "b7dc5f2f672874c0bf8296c318cabaf2a528ccfa4472c1a7d1c099a59cf7e390",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.60/chunk-3.wav",
+      "bytes": 420044,
+      "sha256": "3b8d5c6c2676ae88407335ebdddd4c237355823883e7f45e7509948faef961a4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.60/chunk-4.wav",
+      "bytes": 531644,
+      "sha256": "9923b8756894351e8d1dc7317385bb18fd1f143c29ff09b80be44056b9697089",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.65/chunk-0.wav",
+      "bytes": 132044,
+      "sha256": "d5872c1681503ec71fd4a4eed7958cb785332e2fb087bf59d02c088561f2e4c5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.65/chunk-1.wav",
+      "bytes": 302444,
+      "sha256": "3d2c3574bec03befdcbc7e067e7895d36e7561825420c507fedd354ed84bb052",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.65/chunk-2.wav",
+      "bytes": 442844,
+      "sha256": "ed01fbf4ce5dd156d01490f45f3ab8d97b0ec99eeac839b362651c37c5cf6f8a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.65/chunk-3.wav",
+      "bytes": 414044,
+      "sha256": "2afc1ad8397494744951b70defa102f12e1d0c7b40d0d8186d26ebba00c511cc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.65/chunk-4.wav",
+      "bytes": 522044,
+      "sha256": "eb99777fbbe8a34084606ce3683c9c92627e815ecb4000780c07f718d8b59fd7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.70/chunk-0.wav",
+      "bytes": 129644,
+      "sha256": "c3f2e0da5dec8a18844c312415feeb455b94aea95e4ecc03ca9651436f93c53f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.70/chunk-1.wav",
+      "bytes": 298844,
+      "sha256": "b7ac2e9b86fbe97c8053e7b074014e2308435223817606d55e513879100bfb33",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.70/chunk-2.wav",
+      "bytes": 432044,
+      "sha256": "0f6afc91b8d60f73a8bc344782f5f3e1e0e1a1f89c303df207ad8c7a3e3c30ed",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.70/chunk-3.wav",
+      "bytes": 406844,
+      "sha256": "2c04d8174926a6f735e019d0aacc07b2cfa06fc34420237659f8894a30d4bfe9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.70/chunk-4.wav",
+      "bytes": 516044,
+      "sha256": "9a196c1944ee6545295ac22314f06864b263a820cf14027c07720930068e11a2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.75/chunk-0.wav",
+      "bytes": 128444,
+      "sha256": "fad08c19f555a761db70f16aac421a7155bf8e35997e7bdbbab93ed38ec868b1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.75/chunk-1.wav",
+      "bytes": 292844,
+      "sha256": "9f04f06d1d0eca9c4cce53ea1718b8d55f3759295b550e7eadaaf14734634be0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.75/chunk-2.wav",
+      "bytes": 424844,
+      "sha256": "40e95ae4d51fcb244b275acb4286542513b65ca3cc611524ee7c2e80c96173c0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.75/chunk-3.wav",
+      "bytes": 400844,
+      "sha256": "efa4626fb2467de5f2b6f16bddfa5e4b72a043fedd7a2541a9b28bbd1e39da16",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.75/chunk-4.wav",
+      "bytes": 510044,
+      "sha256": "2892be45ed6ccdef160698bbc89e4d425d69e1056983b11c7b774ffbafb543fa",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.80/chunk-0.wav",
+      "bytes": 124844,
+      "sha256": "2340ddc2c09afe2b5f97a3a22c573f8d0e9fdff5eb99119ef41cd94667461d63",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.80/chunk-1.wav",
+      "bytes": 290444,
+      "sha256": "313a3a6044dfb5da89e2654cdc24348842658a493ef1e26aa3e81b95bf94f2c8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.80/chunk-2.wav",
+      "bytes": 420044,
+      "sha256": "77d5e228abbd1e1c82f330b85428149e67858f5508fb808930f718f5e9aa60c2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.80/chunk-3.wav",
+      "bytes": 394844,
+      "sha256": "3f4457a021b59885ab752e6d04bec13406d83e6951782c1dcb11383b6f92c73d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.80/chunk-4.wav",
+      "bytes": 500444,
+      "sha256": "7ce62637f054f70cc3170644bdaaae451f20f483dda2010c644a12075b80d8ab",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.85/chunk-0.wav",
+      "bytes": 121244,
+      "sha256": "e9618f5a96e6286244158f786c21f8eece2307a2938a71e6a1329eeca7a04132",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.85/chunk-1.wav",
+      "bytes": 285644,
+      "sha256": "bc1d7712cb7630d5643108516755dd82c155cc19e01e37a8e80ae4a30879b2ae",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.85/chunk-2.wav",
+      "bytes": 409244,
+      "sha256": "4b0be5183596029680eafb7ef4ff43405dec5af58c1781350ce4a5292ac9c76b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.85/chunk-3.wav",
+      "bytes": 387644,
+      "sha256": "65d60de750a6030ae5e5e9fc9697072aa0861f20e5d6a98bf800d7e3a8b1b399",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.85/chunk-4.wav",
+      "bytes": 498044,
+      "sha256": "bc5916d03ee286efd16b17108758b965fa1b39590b1c41563989b1c2f26a05a0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.90/chunk-0.wav",
+      "bytes": 120044,
+      "sha256": "58836fead19145c1764c1026ff7d4d733e17c6046a8b8c2e3e06823e826cb432",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.90/chunk-1.wav",
+      "bytes": 280844,
+      "sha256": "8513cd0d7eba153eb9aa0c9bf084afb1aab037ed515e39b37958e7a96ea1b464",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.90/chunk-2.wav",
+      "bytes": 404444,
+      "sha256": "538b7f13939a28eba5dcf0b1e619465494fc0a5a55d90884036b68d866ff7a31",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.90/chunk-3.wav",
+      "bytes": 382844,
+      "sha256": "190acf892fcd383fd3b922cba84c0e5a3a016d76e164eba58671f1d44f141d88",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.90/chunk-4.wav",
+      "bytes": 484844,
+      "sha256": "b803cb0788c885fb206a825a019188dc0f48a45b9ace5faec73a65749bc415f8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.95/chunk-0.wav",
+      "bytes": 118844,
+      "sha256": "7bfbcf502558380f76410e2e7b94db214d04bc092aa133739def17fdb66e64ae",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.95/chunk-1.wav",
+      "bytes": 270044,
+      "sha256": "5e1ad5ad23b754a3016b7bd1a22f50297a279f2fb83a6f090be12b7451040737",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.95/chunk-2.wav",
+      "bytes": 391244,
+      "sha256": "a84ae0b88e757e2a160e1e0187a585a71454e4d5101b733f38caeca4e49a2741",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.95/chunk-3.wav",
+      "bytes": 373244,
+      "sha256": "92c582ead8fff05c6d677fb7c53bcfc013de826c433db538cfc7d7a9880bdcf6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/1.95/chunk-4.wav",
+      "bytes": 477644,
+      "sha256": "4f7eb15cd8562dde6f067f655a9d290defb5de5f18bbfc15133e5253cf35bf9d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/2.00/chunk-0.wav",
+      "bytes": 117644,
+      "sha256": "c74d33bd6edfdc35d19c1c2dfd49a0a66d5e05039a175d4c7a2df38e2c95594b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/2.00/chunk-1.wav",
+      "bytes": 266444,
+      "sha256": "956bdecc9f0e4bf5f9290586903453e84dd813cd6d280ba7b6c202425f3c45c3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/2.00/chunk-2.wav",
+      "bytes": 387644,
+      "sha256": "c6438787c17c39c1621656914b62a67b5f5ebf55e52104fc8987539f017f55ff",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/2.00/chunk-3.wav",
+      "bytes": 370844,
+      "sha256": "21861ab33d44a57df4079544dbd24021f5bee03b7d56132659c4d33805aa4d65",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/af_bella/2.00/chunk-4.wav",
+      "bytes": 466844,
+      "sha256": "0f8c1378380743ffd755de1646f256320f84d78e8a586e78f381a4446f20335f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.80/chunk-0.wav",
+      "bytes": 242444,
+      "sha256": "1ce34637a6da80fbcc94e8ba9032ea636b0cefaf8bfff9a5d11182698fa5bef1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.80/chunk-1.wav",
+      "bytes": 508844,
+      "sha256": "72b3ce5de6fb274e98ecaac0fd17a1ac9c74d3cf871a68c51ad26941716bb7cc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.80/chunk-2.wav",
+      "bytes": 770444,
+      "sha256": "865f1ee182c2127b0b11894f56d751e469a40f276a2daf376994d4bb52525edf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.80/chunk-3.wav",
+      "bytes": 711644,
+      "sha256": "18acfc0a8f6e00db8e279d9c11e3f61c610d682451e3f4e422559f25c85aa537",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.80/chunk-4.wav",
+      "bytes": 930044,
+      "sha256": "182a4336c212506f93bc459ed5fe0912ba0231c09e94de971839092effcb1c96",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.85/chunk-0.wav",
+      "bytes": 228044,
+      "sha256": "61281967a0b6d149d03d31725c69088ac966a2fe3e5fe3b6b44f6f34023d74f8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.85/chunk-1.wav",
+      "bytes": 481244,
+      "sha256": "d7fc5a5df48e20e3ba2845fee580c3babfa4d2ad03320b35316a2e0c520d6fb7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.85/chunk-2.wav",
+      "bytes": 732044,
+      "sha256": "acdfe0be7ab85bdc87beb6a46a02ec2313f4bf542995f56305b637ae427c938d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.85/chunk-3.wav",
+      "bytes": 670844,
+      "sha256": "37d981a394ad95228494a15ddddfa36afd65ec39be0a4fb5f722cb6035bbd8ef",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.85/chunk-4.wav",
+      "bytes": 892844,
+      "sha256": "669423f8952d244ffef1e472219fa5b64c55c5c69ba4fe79868c46c078e13683",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.90/chunk-0.wav",
+      "bytes": 222044,
+      "sha256": "be924683d0e2a5c78dccb89bc787931af5c049299fa8571eed62eeec7d1a7705",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.90/chunk-1.wav",
+      "bytes": 459644,
+      "sha256": "ce3ba7ab1954be19a42658ddac5d84e15f94bf8838171abfcd591c71fed1190a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.90/chunk-2.wav",
+      "bytes": 698444,
+      "sha256": "0b97b5fa2573cbbac3e171d3f37dac2b563d0fb55d78b1e7ae3ddd47755c5bf8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.90/chunk-3.wav",
+      "bytes": 634844,
+      "sha256": "b2441ec1180919939ebc02815f1205b7a2fa5f296cbd1d7c5abc80e7507b8cd4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.90/chunk-4.wav",
+      "bytes": 844844,
+      "sha256": "867101ab27d9e0c4702b21b3469d2875a18587f5e278d47058562b72e84ff949",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.95/chunk-0.wav",
+      "bytes": 211244,
+      "sha256": "82b3907292366755d585c1b76398d846150d2691c97f41da92e388ec9a477c1f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.95/chunk-1.wav",
+      "bytes": 438044,
+      "sha256": "4a1cbeecc03dec4178636590d022bcedba4e3bf68b65d9c3d3e9da8b57c32097",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.95/chunk-2.wav",
+      "bytes": 664844,
+      "sha256": "cc79b42c130d9e8d2c47414b14e48017402eeaf81dc05482d791f0cd94c11761",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.95/chunk-3.wav",
+      "bytes": 613244,
+      "sha256": "a94ffc51d5b1c30d7d55cf59b284ac174de11911141f2acd44921fbb59a8dce7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/0.95/chunk-4.wav",
+      "bytes": 814844,
+      "sha256": "fe82aea81ba8e7c6c806593ddfd7d953e9c5e8d02bc73983e1710876918a84ee",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.00/chunk-0.wav",
+      "bytes": 200444,
+      "sha256": "3ed67c5d5eb0ceff9ddc2127c38266f5c0aa0e1cd8db26d9df199c332b26a9b7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.00/chunk-1.wav",
+      "bytes": 420044,
+      "sha256": "e1a7808ee886e07060bfa0cb5a18b8e688afd793453843621c8081e7ea194b3f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.00/chunk-2.wav",
+      "bytes": 634844,
+      "sha256": "0206c5ee2e1af5e42f60d2ca40dde807fe7df1558554d9222796fc810189e886",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.00/chunk-3.wav",
+      "bytes": 597644,
+      "sha256": "dae48c5c1664a03e01c07c609d9fa22c6e7de57a724bcab1ae0224c136f19eaf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.00/chunk-4.wav",
+      "bytes": 787244,
+      "sha256": "6c5e862f7cb460f514100771351a5b76d5b8b672e5fe5f6e42c0cd7809b41d65",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.05/chunk-0.wav",
+      "bytes": 192044,
+      "sha256": "7799cfd8717c20408c4958bb7045ab8452a128d970a667b806bd0ec9cf608753",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.05/chunk-1.wav",
+      "bytes": 410444,
+      "sha256": "af1dedbfcdc371624ef745173d6c74f9c1ea73e039d42c78579282d953bd729a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.05/chunk-2.wav",
+      "bytes": 618044,
+      "sha256": "5858a9b595998b685faa862de04ae9c019b03a79f49d86a399ed510aca89a61f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.05/chunk-3.wav",
+      "bytes": 578444,
+      "sha256": "163361b06f96fab7398d01b6fba5961d3ca4fbaa15116fa03a5a7cf98ec8af0a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.05/chunk-4.wav",
+      "bytes": 762044,
+      "sha256": "5094d8522dab981d2df4c6f752f13ab2f4e460a748c92ce560ad4e46327c7125",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.10/chunk-0.wav",
+      "bytes": 187244,
+      "sha256": "1615f852e65769b8016292adfe0dded81d0f8e1d7eaae7f5e2895242449fd23d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.10/chunk-1.wav",
+      "bytes": 400844,
+      "sha256": "5147a30c0ef33465b5e47a62b616b07f1251e0b7007c7e93abf4b50a95961c78",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.10/chunk-2.wav",
+      "bytes": 600044,
+      "sha256": "b79b6f1b796a0c5a66071dbb6d4d4aeac4e716a717697973dd760566affda2d1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.10/chunk-3.wav",
+      "bytes": 567644,
+      "sha256": "5d317c824f0055d95ed1c4f86494a78a4b5d59c01af1c0bc1d29b7d3a638a078",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.10/chunk-4.wav",
+      "bytes": 741644,
+      "sha256": "36645d2730749debf372a5693a6043abe792b887f42c18b7013db9420a8eff4e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.15/chunk-0.wav",
+      "bytes": 181244,
+      "sha256": "1ca71947ce6136738e58fd3fffc47e6c5d5d9396f10ef0cd2aa0e328c2647562",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.15/chunk-1.wav",
+      "bytes": 382844,
+      "sha256": "2d18482c38bb0ed1123c93a75c0edc2e4fbb6c57783cb46883cce1522ff0b1b3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.15/chunk-2.wav",
+      "bytes": 585644,
+      "sha256": "4573d2afa816834a59666b2a50229540a8bd7192052ba525d5b6e823b20b5ef5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.15/chunk-3.wav",
+      "bytes": 556844,
+      "sha256": "3ceb142d6af4f86c5529bb27dfb8c4d975992dce94c9d385475ee5e9390df577",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.15/chunk-4.wav",
+      "bytes": 720044,
+      "sha256": "7502eaaea3cd55bbd5200b26767bca5c4ed0eb8a92426938bbfe9d9a5bc1c9cb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.20/chunk-0.wav",
+      "bytes": 177644,
+      "sha256": "d201f59ab8665db4888ac41af4253139a53c5ffcf839e686b640c0d7896260d9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.20/chunk-1.wav",
+      "bytes": 369644,
+      "sha256": "2fce9cfed4f5c9df8e6ed9d12d11817f6a2795ffc485493e53bff77bdd96c055",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.20/chunk-2.wav",
+      "bytes": 578444,
+      "sha256": "5f8029d7ef1161b110b01324fcd443e8c05e1a79af1b24d3d6dc25fdb436fb55",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.20/chunk-3.wav",
+      "bytes": 535244,
+      "sha256": "64a2b1a90bc33a039a9a8f30cebab520296cb9e914f7d440b2cec82ecd859b40",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.20/chunk-4.wav",
+      "bytes": 705644,
+      "sha256": "c438d64e30f18ccc5cea87a9e2d621d012d33bbf06bb7324419a053b373a37c9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.25/chunk-0.wav",
+      "bytes": 171644,
+      "sha256": "5c0ccbbf5548c5fd8eee31d2f337553b4a693d3a7c81a7abfefa9830ea7779e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.25/chunk-1.wav",
+      "bytes": 357644,
+      "sha256": "71ce6ad59133beb361d9d822772d2d16e95b487059b8404b4401e9a5eb59e562",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.25/chunk-2.wav",
+      "bytes": 553244,
+      "sha256": "61afb3a021cf1f44b4734ddd1152dcd82b73757fe8ca38ed6a38c6737503ee44",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.25/chunk-3.wav",
+      "bytes": 518444,
+      "sha256": "834ef45f7fd7d0d6c9062f0af1f8591416c057e7c7bac3f8067c0f22b3fd4cad",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.25/chunk-4.wav",
+      "bytes": 675644,
+      "sha256": "da8cb62c4062eeeca0f1b72d298520bf7e5adb690ba1746c16795abe2dd550de",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.30/chunk-0.wav",
+      "bytes": 159644,
+      "sha256": "ea97af863b5147e1347be63d21792d7b1e3ae3de4fbe5c02ed192dc035ac97b5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.30/chunk-1.wav",
+      "bytes": 345644,
+      "sha256": "c3cf56ba6a19b6601644231d2beca6c206b9cf12caecc23c493f96203f598c34",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.30/chunk-2.wav",
+      "bytes": 517244,
+      "sha256": "8af25c62c61c3b79b6ef1a06a63802e145cbebfd4b252fd0f42bc8c395b2748b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.30/chunk-3.wav",
+      "bytes": 492044,
+      "sha256": "bd849e6548330e9a022c5964357ed11e804b462aa91254731e43885a074f690f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.30/chunk-4.wav",
+      "bytes": 649244,
+      "sha256": "ec94bacebd11a54c9e1aadd5d1428c1a2c49063c06ea632f90f179e994187e79",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.35/chunk-0.wav",
+      "bytes": 141644,
+      "sha256": "a65a9062f1a61c16458f7ec171040793c6272fc6360ae7e73165b559a883e55a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.35/chunk-1.wav",
+      "bytes": 297644,
+      "sha256": "d173d690fc3dde114d2b9b8ea117be0d775ba9a191358461678f3012cfc66fdf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.35/chunk-2.wav",
+      "bytes": 445244,
+      "sha256": "ab9acbcd0c38865b1fd70cb64b67814b0056ea6269300dff95663027f4a8cf89",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.35/chunk-3.wav",
+      "bytes": 411644,
+      "sha256": "b4a7008ffbd590480970e057ef86a366be4ba1604c3cf877482bdd44c1169d95",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.35/chunk-4.wav",
+      "bytes": 535244,
+      "sha256": "92d58b1d5286179c8bcf51cd840fe67a1f48d6363ae5bad5e9a8aa7f1946c97c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.40/chunk-0.wav",
+      "bytes": 136844,
+      "sha256": "b32e483224dbb778de7566064939937304f09b1683efadfdc782792b1b35ca0a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.40/chunk-1.wav",
+      "bytes": 289244,
+      "sha256": "a344d4a68014ab49f95acb799c537d0e3ffb9aaae8ef7e57e993bf9399533935",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.40/chunk-2.wav",
+      "bytes": 430844,
+      "sha256": "af88c99b8db156b5ea6721d19e62ecb6de9de12965e30881080124b52c49eb8b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.40/chunk-3.wav",
+      "bytes": 403244,
+      "sha256": "e18f7044ed827bebcc7eb8c9f5401422d40574921f0f2f8946a0207009cf30e2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.40/chunk-4.wav",
+      "bytes": 520844,
+      "sha256": "85d7d823f2ee5de7d803daee8d911cf715c981f46b47d29f240db661275a955c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.45/chunk-0.wav",
+      "bytes": 132044,
+      "sha256": "99041b6e7781fbcee6d0e1502beec512abf8c8c90495b245d08654723e42a0b7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.45/chunk-1.wav",
+      "bytes": 280844,
+      "sha256": "a346e5a0748cb5a19672fb02f32d88fad4a29f72f93753f20d596daa5b3fefdf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.45/chunk-2.wav",
+      "bytes": 426044,
+      "sha256": "7729f62212305db92caa8121792963e49d34f8f6106d7f3f1be400b398f98818",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.45/chunk-3.wav",
+      "bytes": 393644,
+      "sha256": "f7d32584a9535cb182a721a0a6ba65e8703571525c5f34bdd52a8185ebb6fc9c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.45/chunk-4.wav",
+      "bytes": 506444,
+      "sha256": "3102e560a67527ede7c30a4abd6407760befde320330ca2f4245ccdb666ac99c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.50/chunk-0.wav",
+      "bytes": 128444,
+      "sha256": "b9a56e39c53bc78a9f2287f92cf07ca77b62a629e3fdff04258daa671eec1c32",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.50/chunk-1.wav",
+      "bytes": 279644,
+      "sha256": "52f43fc78f2e8fd8ca00c98fe1c40705a57ed1507bb0e1bdf4d9b25403852a28",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.50/chunk-2.wav",
+      "bytes": 418844,
+      "sha256": "ec09c8c238b3d29613fbde165a8d5ef2692cfca2320247f468a699be71b5cb30",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.50/chunk-3.wav",
+      "bytes": 387644,
+      "sha256": "7b6d3ca27b956cd9f73f7c80dcc227750364f47dd7ceee22bf8528aa232dfce0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.50/chunk-4.wav",
+      "bytes": 500444,
+      "sha256": "d2e25f7e33e5e16eb92fb2223af535bbbecd94b8fbbd336c4b79035f5dc86efb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.55/chunk-0.wav",
+      "bytes": 127244,
+      "sha256": "9c29203bd4431feb5570251b84bc1927f43bde108be67ac58787666d5f44cc01",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.55/chunk-1.wav",
+      "bytes": 276044,
+      "sha256": "2c55537f9c2e6fee9ee02b46d6c4c9da9b4b4ec0dfc6a858a8e03f17eb3223b3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.55/chunk-2.wav",
+      "bytes": 410444,
+      "sha256": "e276345695f4d9d19f3d50213ddda9c5e6be03651e746bb6f1dcad153d42515d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.55/chunk-3.wav",
+      "bytes": 384044,
+      "sha256": "42e1249abfa0531a4a4256b77ee452f1f7a8a889a15ae083701487e595ee77aa",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.55/chunk-4.wav",
+      "bytes": 496844,
+      "sha256": "8aa3f7d0d4447c2f3d02191bedca1957b6eb0f95aff3130d91f25c971279f074",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.60/chunk-0.wav",
+      "bytes": 123644,
+      "sha256": "236460df75f14fce66d133711f6f02ff3b291c7dd467e1baa4d6ea9629d43a9c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.60/chunk-1.wav",
+      "bytes": 271244,
+      "sha256": "605e983213fb13f05fa0755354c45cd365a44c7fe3ab475d195a07b097b1875d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.60/chunk-2.wav",
+      "bytes": 404444,
+      "sha256": "e687acd1ba5b29ae4de84392cf97604ee5e1480954489ab5ff1ba846b1b3731f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.60/chunk-3.wav",
+      "bytes": 382844,
+      "sha256": "711416d04de5b4fbd456dfda26f7aa81a6fac6079932946b51b4c204f587ee33",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.60/chunk-4.wav",
+      "bytes": 489644,
+      "sha256": "3adb86ce7f80642b3d5fe6a8728e38a15160c004be61c66b316607bd816d7023",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.65/chunk-0.wav",
+      "bytes": 121244,
+      "sha256": "b4898a6f3aa5f90775e090aa744287c9e2566fa8e46fe373aab955c64c6e8c74",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.65/chunk-1.wav",
+      "bytes": 265244,
+      "sha256": "82b376822d04fb98b5332ff4f8a8000bb25669ffca2e04878aa9bfc5f481184a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.65/chunk-2.wav",
+      "bytes": 391244,
+      "sha256": "28a85405e422d33233f78ecc1a1167543f1a1c6d2bc15b7841a8a75047e2eadd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.65/chunk-3.wav",
+      "bytes": 375644,
+      "sha256": "a663d8e2565b1d6bca6c704744aaaab8930b752cf8b6b04fb9eaa2c4efef1b85",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.65/chunk-4.wav",
+      "bytes": 484844,
+      "sha256": "35da8d7e49d6b767a0bd5fec560ff6c56ed6927fb8d10f7cd3b6b5c991218eb2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.70/chunk-0.wav",
+      "bytes": 118844,
+      "sha256": "956afab612dadb8f7c68721c8675662f630051236a59cd90abb30f3da4504d2e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.70/chunk-1.wav",
+      "bytes": 262844,
+      "sha256": "12208b4ccddca8fa81b8902d0ab25df9a8c45c02158d25a62d969fbb2eea1134",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.70/chunk-2.wav",
+      "bytes": 388844,
+      "sha256": "197554b1c08e868b12c31f334bfb0a40553b3d3b1ba181821d787fbdca08dc74",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.70/chunk-3.wav",
+      "bytes": 374444,
+      "sha256": "7cb08a366cdecd1dbbb697387bc2f2ea159ac3674555d8d6614927006ee6494d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.70/chunk-4.wav",
+      "bytes": 480044,
+      "sha256": "e453677b865405825510b6622081ed86360e8db264bcf199d41cdaeb5ef7c08e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.75/chunk-0.wav",
+      "bytes": 116444,
+      "sha256": "a7457690912ce5ed91e46d9e6f6e545e134bc7bb50ce70cc4469346cdd3c8cbb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.75/chunk-1.wav",
+      "bytes": 261644,
+      "sha256": "01cf23957989a33b5e07b3db0cb4287ba3286e56e6ca97b418409e9c560e7491",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.75/chunk-2.wav",
+      "bytes": 387644,
+      "sha256": "f3884806b54d90617203b0c1f946cfbbeb03de6efb8f02374002514f389748c4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.75/chunk-3.wav",
+      "bytes": 372044,
+      "sha256": "897eb90140702f4803d78f965abff304e2cc569210bea629ef30383a841104b0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.75/chunk-4.wav",
+      "bytes": 472844,
+      "sha256": "ca758a07b6fb7c827db29ae7aaa0b72bbfe458cd47e1d43366b070c067df261f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.80/chunk-0.wav",
+      "bytes": 114044,
+      "sha256": "cc4f626b53913b157595d6f9a37f5f101281883c34f2625238babde794b18186",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.80/chunk-1.wav",
+      "bytes": 258044,
+      "sha256": "0a6ddd3e375c1be547f9839f02f8f6367dd763ac030e8d6a1a61a28289633008",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.80/chunk-2.wav",
+      "bytes": 382844,
+      "sha256": "54a7dd5d12eda9e9a31aa0e5e8e0bb2b248a584d330dbea814e756383078bc40",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.80/chunk-3.wav",
+      "bytes": 367244,
+      "sha256": "3bb7432d6aa0e0633383167dd72963654195e6cdf076b6d724b1ab78de0445ba",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.80/chunk-4.wav",
+      "bytes": 465644,
+      "sha256": "530784f179dfc6c29f1936ef841a4f140b19f60ff6e791e0338e741dcceb9e2e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.85/chunk-0.wav",
+      "bytes": 114044,
+      "sha256": "cc4f626b53913b157595d6f9a37f5f101281883c34f2625238babde794b18186",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.85/chunk-1.wav",
+      "bytes": 254444,
+      "sha256": "e8ed2b421e39790364c5abf2cb5a18c011c1bcf1912d0ed5419e36dd2e011868",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.85/chunk-2.wav",
+      "bytes": 378044,
+      "sha256": "6d1e9aada08131078efc059870f1a242120180b5c1e70b314c7916e0e4d67924",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.85/chunk-3.wav",
+      "bytes": 362444,
+      "sha256": "8b915eff139b6d735befcdd8824f805ca556faedb39d67f08cd048b873304d24",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.85/chunk-4.wav",
+      "bytes": 458444,
+      "sha256": "82bfb9cac58265914542d95984e42eef8a8beae931fd37550d4a4fe50d1c1145",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.90/chunk-0.wav",
+      "bytes": 111644,
+      "sha256": "394ade6379c91628f4c5981c50ab3d9c42acb99df573d4f10545befbfc2a0082",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.90/chunk-1.wav",
+      "bytes": 250844,
+      "sha256": "e6c742a6527c1e8c3c6b268fc7f2786b33728d58e44d7451f80891c9f96d691e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.90/chunk-2.wav",
+      "bytes": 374444,
+      "sha256": "bd0871f88cf147ff6d8a0d2c93163f0647a2c6e330ad9ce3ef93a39df259575c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.90/chunk-3.wav",
+      "bytes": 360044,
+      "sha256": "e8931274fe8047d9d7114991987d9734aa4ddf5d386adbf5d70abe58a10d3883",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.90/chunk-4.wav",
+      "bytes": 454844,
+      "sha256": "0bf3b750f61042749d71ef160764260989b109493c06400434f900ece5138264",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.95/chunk-0.wav",
+      "bytes": 110444,
+      "sha256": "eb5ff47c048c935a10ad498f7f7109800689ec8097cf3d65a4712699cbe58b23",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.95/chunk-1.wav",
+      "bytes": 248444,
+      "sha256": "ae0b90284c7fd08a3e726f3f9adec14f64c4002a10dd8d54a0cf4f11944f7b72",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.95/chunk-2.wav",
+      "bytes": 367244,
+      "sha256": "fdb659c34476abb42a8e8a516a075e0e3252bc44311b66ce26da0ba83fadb856",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.95/chunk-3.wav",
+      "bytes": 354044,
+      "sha256": "ccbb356be798a276a4b403fdc61d6ebe1c034757781c9ba3e6bb52a758ea732f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/1.95/chunk-4.wav",
+      "bytes": 448844,
+      "sha256": "8544d6b937d7b51f1908139e1ed78474eb731f359115dbd9afd9fcee7a26ca11",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/2.00/chunk-0.wav",
+      "bytes": 110444,
+      "sha256": "eb5ff47c048c935a10ad498f7f7109800689ec8097cf3d65a4712699cbe58b23",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/2.00/chunk-1.wav",
+      "bytes": 240044,
+      "sha256": "82233a75ed1350d0ea5267bc531203d1abae9fb9c9ae82214df45abc45107bb6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/2.00/chunk-2.wav",
+      "bytes": 366044,
+      "sha256": "fcda4c2ddd632824dd3e8fa08549321d4095a989453f682fea04db0aa9c43726",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/2.00/chunk-3.wav",
+      "bytes": 343244,
+      "sha256": "30b041ea05360cea2a27ab037286afda7d035427a703e7edd42afc9818262cf4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-a/bf_emma/2.00/chunk-4.wav",
+      "bytes": 440444,
+      "sha256": "69539012d548b69a6b3230462ae5b71ce3eb9b91df747ca7be46513ff28cad7d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.80/chunk-0.wav",
+      "bytes": 210044,
+      "sha256": "cd73ee295ec3471b38c83ab3db469fad064dd38fdb46d39a36d5de240dd01c25",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.80/chunk-1.wav",
+      "bytes": 1218044,
+      "sha256": "cd4ae48e659d169b6dfc25c770988ee52eda07227059296e68258bd3a24d9e14",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.80/chunk-2.wav",
+      "bytes": 754844,
+      "sha256": "55045d5994ce4896cf4e4971dc9e92b56abd862db5bdd279d8f80d574f23129a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.80/chunk-3.wav",
+      "bytes": 325244,
+      "sha256": "43742913f5201c2d589f9e50dc132cca3d4ddd3c480a276dfc12443b93ed33e8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.80/chunk-4.wav",
+      "bytes": 369644,
+      "sha256": "192755e6d6552e54bd01b169495f66561f9ff0d6add49d804c4211c8076856d3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.85/chunk-0.wav",
+      "bytes": 195644,
+      "sha256": "8746cb7896f47d5c878cef107f771e042453953e6030770c9b93d0b1ad2cf1b3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.85/chunk-1.wav",
+      "bytes": 1135244,
+      "sha256": "57f4b1c791cc9dd9ea4e412f004e770d5f2d4e645d4c3b139cd556da6a86356d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.85/chunk-2.wav",
+      "bytes": 711644,
+      "sha256": "ab30bd01a8400baed374b7ca14a58b834794036bbfa9f30a6afbcbf6fca94089",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.85/chunk-3.wav",
+      "bytes": 306044,
+      "sha256": "68edc177f82cd6130a2b1dd6c9a48ef089bbc39f4171d12e2914bb3f818dd5a2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.85/chunk-4.wav",
+      "bytes": 349244,
+      "sha256": "0a24cee0ea2e50d8292700d0e5815923bcf341d5af32ead14aeee41ee43c3e52",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.90/chunk-0.wav",
+      "bytes": 186044,
+      "sha256": "ce64ded06c7e5816c9012c448fa56e9c319efb46b2fbf6a435fcdc1301376f9a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.90/chunk-1.wav",
+      "bytes": 1066844,
+      "sha256": "7f9793942fead0ea49e16f761dd073fb6316ba65b662eeab756c6cf0f789cfc8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.90/chunk-2.wav",
+      "bytes": 669644,
+      "sha256": "13ff2313dce30b091ff380282ceedba3196106fcd97a4a19b95931992e98d279",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.90/chunk-3.wav",
+      "bytes": 289244,
+      "sha256": "65c46376727b4fd157ea8b79e6bb01e1fb526362cf15fc1b5145814b6d4983c6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.90/chunk-4.wav",
+      "bytes": 333644,
+      "sha256": "3e87b2c5d73ce779bac1f6a98b8a9bdbf82562e78ae47873e9a45c5c19aa1863",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.95/chunk-0.wav",
+      "bytes": 177644,
+      "sha256": "8dd816a4a8d97a9fa3ebe8f53ef1451f5566c7c6dfe0ca2fc8a0d086fad95462",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.95/chunk-1.wav",
+      "bytes": 1032044,
+      "sha256": "027eb65ac9fef0f13aa3965657113b609835b96b6f4ce0ff0aa11f7f8b276857",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.95/chunk-2.wav",
+      "bytes": 640844,
+      "sha256": "8fb26474f47d9b69ff7f91e48aed4494d5ec53f7c13fbbdcd67f641996271e8e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.95/chunk-3.wav",
+      "bytes": 274844,
+      "sha256": "5cc1f76089e77c7ae9cfb69102e91fee8c3613aa9ddefa5af57411e62e59f016",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/0.95/chunk-4.wav",
+      "bytes": 321644,
+      "sha256": "f8d009ac9f06d28a48314eac27106545e0eb20d188d5b428080cc96801d00cb6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.00/chunk-0.wav",
+      "bytes": 171644,
+      "sha256": "a05a81a212209f635d6aa277cb9959dcf63e6ccf8df10a225431f63dc5815bf5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.00/chunk-1.wav",
+      "bytes": 1004444,
+      "sha256": "ca997c5934f4942257cecb7d5d388030bdd63459b0484a7b823b81f7c0d51d25",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.00/chunk-2.wav",
+      "bytes": 616844,
+      "sha256": "97ab8c02b5dd56fa52d193ce1798a2cc54a2e0516aa1a76661cd2ed60cf9a21a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.00/chunk-3.wav",
+      "bytes": 265244,
+      "sha256": "264bda092110795ca5bc67921aff2cc1de98c9097e501575aec5a14e3d4fe1cd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.00/chunk-4.wav",
+      "bytes": 313244,
+      "sha256": "5689befd12f46dacd5aaff7accefb09222b5a7114efba5d3331faa2f6eda6270",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.05/chunk-0.wav",
+      "bytes": 165644,
+      "sha256": "c76ddf19c9a37822f0bdce81f16db20e93ca8ed7204cda23d516dba153637f0a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.05/chunk-1.wav",
+      "bytes": 975644,
+      "sha256": "ad56f623cbcc2f72aff3f227bf845f55c20dbfd68f29a90431f2488b28ae5f3a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.05/chunk-2.wav",
+      "bytes": 598844,
+      "sha256": "a085d62c786a564280edb3d478380046aa926c7bac950922a5107a9d45e573e5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.05/chunk-3.wav",
+      "bytes": 261644,
+      "sha256": "11d14c4f7a9e5a07fe7f2c475f2b79d7192b12c35c019371a43ff8eaaa6dcdf7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.05/chunk-4.wav",
+      "bytes": 302444,
+      "sha256": "44c1e995d19bbc9519c3a0574d93ef5b9c8a64ec6be25ae897589f4d9b5e3468",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.10/chunk-0.wav",
+      "bytes": 160844,
+      "sha256": "d255eca918564a9d2ce021bd4f72cd578708ab969aa9798b6b653451bfacdef1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.10/chunk-1.wav",
+      "bytes": 945644,
+      "sha256": "0028f053232b46082be063d5693a66735c945e648bc7b3f09e8874f378806fb2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.10/chunk-2.wav",
+      "bytes": 582044,
+      "sha256": "7bd1347dbaa39397e88701645258e86ce82bbccb7bba505fbfbd47cc01f2eb47",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.10/chunk-3.wav",
+      "bytes": 255644,
+      "sha256": "80e77375c024ddce02edfdcc1a5eb5da7d19866fdf0224c61ad474b2da2efae7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.10/chunk-4.wav",
+      "bytes": 296444,
+      "sha256": "dd0544e0eff14d72f4a9652a1eb1d03875da8b72eb06de2237fa0548ea022503",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.15/chunk-0.wav",
+      "bytes": 154844,
+      "sha256": "3e4bbf08d3610d3919d538f3b4541ccd85e1b8fa6f5560a1d13e7123a7a17ff1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.15/chunk-1.wav",
+      "bytes": 920444,
+      "sha256": "b29f97a01ef68e84e8563e56c6333696e8d951bdaa5ac28b79f69af9b219a146",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.15/chunk-2.wav",
+      "bytes": 567644,
+      "sha256": "ea3093172ca9ded668b67e395e64f6e1eed496a5e946e91692ddafbd55613c80",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.15/chunk-3.wav",
+      "bytes": 247244,
+      "sha256": "0e311ba8dba49e3d67c1139ead77f96484187dbec14b45d92d15b587ee23623a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.15/chunk-4.wav",
+      "bytes": 290444,
+      "sha256": "a247119b4f4e5c55dba8233a4770b0eaa3726a903b0c6d91e7cba5709b322ecb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.20/chunk-0.wav",
+      "bytes": 147644,
+      "sha256": "8895216b5f1031cec0fb3cda9bd894e1d3c105e00e450c309be06029db95946c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.20/chunk-1.wav",
+      "bytes": 886844,
+      "sha256": "d8a1f4903a41425545211dfdfff300b62013abbe6e653c2276b6b51db69d4bd8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.20/chunk-2.wav",
+      "bytes": 546044,
+      "sha256": "a60ac47e01bee79048dbbf61e8fe4eee723f7e225b9f97289438b68d91edc3e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.20/chunk-3.wav",
+      "bytes": 236444,
+      "sha256": "aaf67a4e8b45bba581e5e6f6b13d25bae0c299c8cf93391f575430b409627d1b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.20/chunk-4.wav",
+      "bytes": 279644,
+      "sha256": "2cc3826dc0c0d1ca91fdd21a160ef999173ba2064afdbd7935cf5bc3c6260277",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.25/chunk-0.wav",
+      "bytes": 142844,
+      "sha256": "ec49b896cac66d8f53e975904a5527718d970351b52a9bd7a4241d6f59bf0c5a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.25/chunk-1.wav",
+      "bytes": 841244,
+      "sha256": "25fdd06c9514e063c2075f9d4162456ddb6ca95e153f560d0cc521ffe13424b6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.25/chunk-2.wav",
+      "bytes": 524444,
+      "sha256": "2abd2c0e1f376080205eb5f09ad536d0f6dc0524dca89e0b2d09020cf30a2528",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.25/chunk-3.wav",
+      "bytes": 228044,
+      "sha256": "d952899f6178f9ee237d6e051f403530c17bddc16c0de537de19aa9efcddcc2d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.25/chunk-4.wav",
+      "bytes": 267644,
+      "sha256": "2df052de1d499793ef6b66b119103fcef4ccb0971606e05b1e5d5c4d4a794072",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.30/chunk-0.wav",
+      "bytes": 139244,
+      "sha256": "4b65c6c3be210ee204665962d638ff282074557b4fd8ca703d16f7fd11cac7f2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.30/chunk-1.wav",
+      "bytes": 814844,
+      "sha256": "da1054967975f4ea397bb34dc0b0d75746339cf47f9cdffb175299430d0e9957",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.30/chunk-2.wav",
+      "bytes": 505244,
+      "sha256": "4fe0894bae7cd321a0151a938a0a5fad10ce9f1136be5255d81a140ac6751232",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.30/chunk-3.wav",
+      "bytes": 216044,
+      "sha256": "32d0447e963e5ca77374c0ac079e0aeed1754907059778024c0170129dc37652",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.30/chunk-4.wav",
+      "bytes": 253244,
+      "sha256": "c581df9378f7d59332cc8e2bcb7c838de08d44026443af5cce2cf6d46231d95c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.35/chunk-0.wav",
+      "bytes": 121244,
+      "sha256": "892da8da08302003f0468faf037c393b581ab0ea3c25d631a8582997c14ce98d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.35/chunk-1.wav",
+      "bytes": 710444,
+      "sha256": "b5111ea128239b9b0ea595076907ee5d869de41f61d4efd4f2a9517349908e87",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.35/chunk-2.wav",
+      "bytes": 442844,
+      "sha256": "cf0ae72a5eea45799432a0f724030065ee54ecd9b6199b2ab5d02da9147cabcf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.35/chunk-3.wav",
+      "bytes": 186044,
+      "sha256": "b20c85dde64d8bc846a203a4943218bccca08002c26f332f63b978b8473a7dfc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.35/chunk-4.wav",
+      "bytes": 216044,
+      "sha256": "4a5dd654d1ff9a872833eb25a8eaa7e9bd5eadbca9413c0520a0e5c614f98cc1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.40/chunk-0.wav",
+      "bytes": 120044,
+      "sha256": "f267acbc5acdc15dc0a63dedd4fdb6cbffbcb5a622c1cfb5bcdbbf03ca244b99",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.40/chunk-1.wav",
+      "bytes": 686444,
+      "sha256": "55a663db1c7726fdb30fb3c906a67d0342e634ca9d3c16b0303e29e8762643f2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.40/chunk-2.wav",
+      "bytes": 424844,
+      "sha256": "b09353f390c4a7f5855a3038d5be1bbd51c6c65b8b9f0d29d370e181fa62bb8e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.40/chunk-3.wav",
+      "bytes": 178844,
+      "sha256": "493d81be732f790f3e38c44aa1de72e03761f295fb93748b6e6bc913fc910b8e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.40/chunk-4.wav",
+      "bytes": 206444,
+      "sha256": "9c1532dd3e48527a01c5829f86544fcc2b6bd42782eda383a1b11fdab2799db7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.45/chunk-0.wav",
+      "bytes": 117644,
+      "sha256": "1af87e06cc846cdca4e8827de240d2c191a8d53e1244dfb3daa3b3c2947a6dc6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.45/chunk-1.wav",
+      "bytes": 667244,
+      "sha256": "00ca793579791fd173e6f2c41fc64602f41fb786df45720c3cef8696695f499b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.45/chunk-2.wav",
+      "bytes": 415244,
+      "sha256": "87ea52079abeba2cf38b2a92d843cd079da3766e13855a9bb946dbe194bf6148",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.45/chunk-3.wav",
+      "bytes": 176444,
+      "sha256": "38b0d5dfe1fa7da05c32a99e2e9acedd2d27a4618f21508dc8cbf6096f95f008",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.45/chunk-4.wav",
+      "bytes": 202844,
+      "sha256": "f3abd842011016a6f0cc29af444b6ecb89843215aa341544c25e16bddb3e17d9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.50/chunk-0.wav",
+      "bytes": 116444,
+      "sha256": "56815a7655ad8ace4797a6292354bea00559f725c399a79b392ceb40e636a17b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.50/chunk-1.wav",
+      "bytes": 654044,
+      "sha256": "d658e2db1482807d2127c861cdbbf60b388f58fdd57a36376c008c6ca84644a9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.50/chunk-2.wav",
+      "bytes": 404444,
+      "sha256": "b7567f048ec91c73403d5a8a6b60d8c14956105cf749942fea27bbc50268559f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.50/chunk-3.wav",
+      "bytes": 170444,
+      "sha256": "7b22b3f8eaff58ad16c339c057d1073a9198f3fd1b14eff0109607b145a0cf76",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.50/chunk-4.wav",
+      "bytes": 200444,
+      "sha256": "6f91adaa43a7625d8b0a73a859d454aa050e05f6d139fad9718eeeaf61e7a9e4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.55/chunk-0.wav",
+      "bytes": 114044,
+      "sha256": "c3941eacaf7109f0b2307f0220960570bcbb241e75c039a52df7febbdf485710",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.55/chunk-1.wav",
+      "bytes": 644444,
+      "sha256": "adb7fd6a10140e273271491b0f82e8689366d7132efe3a95804fbea6e274fae1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.55/chunk-2.wav",
+      "bytes": 396044,
+      "sha256": "c17686514de4f74de1a0f29b9d06edc7830101f43bb3deb5d793fd5b73d78e3d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.55/chunk-3.wav",
+      "bytes": 166844,
+      "sha256": "9019815ca9abb0bc4b9d7e2874c5c8afa8d191829eda11e9a3f4ec94d7927fa9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.55/chunk-4.wav",
+      "bytes": 196844,
+      "sha256": "62abf3f0822343d0a270c686df1accf4ee4efaa591f87fea760db017ed2a8c1e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.60/chunk-0.wav",
+      "bytes": 111644,
+      "sha256": "cb6e726d85c6573f7ba0a64e165d10ac4200aa35182e1c7bf7a6bdaf4d43b00a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.60/chunk-1.wav",
+      "bytes": 625244,
+      "sha256": "4b6ba12c99095782f003b3629fb935cefe74613fea6b6aabdc701e34ceb7c93b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.60/chunk-2.wav",
+      "bytes": 386444,
+      "sha256": "9435a01165d72f7c90f03151ae897333d3e4441d55c394ade2177e38f29c1252",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.60/chunk-3.wav",
+      "bytes": 163244,
+      "sha256": "a5e62a8d7703b6f953518d8517900f6936dc3242be1f5564d6ea520c1de2d00b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.60/chunk-4.wav",
+      "bytes": 194444,
+      "sha256": "c3f08c58bb5937628fff577ce0c7e97881f14b15ea0e576733a228cd8124560d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.65/chunk-0.wav",
+      "bytes": 110444,
+      "sha256": "a0300d70b01f331745d9aefd41d9f9d3db3039a83c46b7461c3ccf9a3175bd6f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.65/chunk-1.wav",
+      "bytes": 618044,
+      "sha256": "97e04d5b038d3758c3b1462ba12c62dacde96a373d6eb2b25241843b9cedd9bf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.65/chunk-2.wav",
+      "bytes": 380444,
+      "sha256": "a4761689b347a89579bf2a064fb831c04093e592f61b7c96628b9b0f88b4deda",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.65/chunk-3.wav",
+      "bytes": 160844,
+      "sha256": "21dcf9bc71958a6d6ff19b05e42bb0262447e33a43a483131390433ca86e4aff",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.65/chunk-4.wav",
+      "bytes": 193244,
+      "sha256": "5392bc6079796267f995bc7572e46f13370a3f58ce27676490f5fbdc4d3ae30b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.70/chunk-0.wav",
+      "bytes": 108044,
+      "sha256": "b25ac2f883b4fb3a800cd662faca39a2ed86102d3c2f9274245c184c9f0614d1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.70/chunk-1.wav",
+      "bytes": 614444,
+      "sha256": "60cf927eaf81df363f2eef20d7c7b91689b9473318dc930dd1eace1dc90d6723",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.70/chunk-2.wav",
+      "bytes": 379244,
+      "sha256": "04251d285786000491848d91a62b8b8ad7cefe18f20242884cd3e9170a9b512c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.70/chunk-3.wav",
+      "bytes": 159644,
+      "sha256": "a0048679eea86d71c64339c5e49cf31182e8a2ae5d0dd511159b6a8a666b5d90",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.70/chunk-4.wav",
+      "bytes": 193244,
+      "sha256": "5392bc6079796267f995bc7572e46f13370a3f58ce27676490f5fbdc4d3ae30b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.75/chunk-0.wav",
+      "bytes": 106844,
+      "sha256": "111c72ed72eac4b4044907647ac7de64ec0280b31e005ba2a24168d31be6bb7b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.75/chunk-1.wav",
+      "bytes": 607244,
+      "sha256": "f8caf9f5999d044c5fcf4ccb0ecf4c608d1a29fe742504b9c9956d49fdf9db59",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.75/chunk-2.wav",
+      "bytes": 370844,
+      "sha256": "67807e46926477702e61e56a290646e7d4bcd62fb9d32e2fa7af0b64f56427f9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.75/chunk-3.wav",
+      "bytes": 158444,
+      "sha256": "b2d5bb4686a0a3ab6dd5da6ae21f3ceab3c1457babc5a5a6974196acc21ba030",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.75/chunk-4.wav",
+      "bytes": 187244,
+      "sha256": "818b8ff7ba8a7bbbc5eb72623e2bbb295160a915a373be661aea1a886545ff65",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.80/chunk-0.wav",
+      "bytes": 105644,
+      "sha256": "3a94ba0d531738cbc24031f48533a8e5cc586ffe0c695f753933ea6d178fc896",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.80/chunk-1.wav",
+      "bytes": 600044,
+      "sha256": "01f119229f06e5eba9806e0e4df4f6a71820f0bf23952dc3ce1757593b330b2f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.80/chunk-2.wav",
+      "bytes": 363644,
+      "sha256": "69bc69801bccdd41b447528e3135628c2b37cd40b82ba64e88968070c68cc345",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.80/chunk-3.wav",
+      "bytes": 154844,
+      "sha256": "8faabfae16164161c2c859c4451db433c0ec03d68cad8f4a6473039e6347cae2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.80/chunk-4.wav",
+      "bytes": 184844,
+      "sha256": "32acbd22ecd5f22be4a41851be89e09854dd98ccdcc707e0b4a800935afa6afe",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.85/chunk-0.wav",
+      "bytes": 104444,
+      "sha256": "13c494e0a40b6ab342845d47b1ae4a31ca043d99841399c846400471df6833a4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.85/chunk-1.wav",
+      "bytes": 591644,
+      "sha256": "86d1c6f61d08ec0c6e6bf76dd4cf33c10ce3ee0975e97b5419fb5782ddb335de",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.85/chunk-2.wav",
+      "bytes": 360044,
+      "sha256": "a18c59ef5edba00475bdcaf48e0269f37d719c48228b747ae9e0a562db9d0fee",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.85/chunk-3.wav",
+      "bytes": 152444,
+      "sha256": "dab4b67f8cf2cb90af6e11757ac4f6a7b54a0dea51a5f8e72f340b7404639f3a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.85/chunk-4.wav",
+      "bytes": 181244,
+      "sha256": "fc47dcbc6830d65706a69d11a32f3e6ed82db66ab02dfe5d564083481b1520c2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.90/chunk-0.wav",
+      "bytes": 102044,
+      "sha256": "64fe0b7c4383dfd428b6801adef46d613d76d8c0a167e99a453d7e343a7f6238",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.90/chunk-1.wav",
+      "bytes": 585644,
+      "sha256": "d8f88668a1b2094bb36d990c9f199998eb0b53e46f3e0b5971d9e8d9510fe4bb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.90/chunk-2.wav",
+      "bytes": 354044,
+      "sha256": "fee740898c3b12a6a3c5cff9ebe6a651e61728e3577d7dcdccba8ef61855c113",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.90/chunk-3.wav",
+      "bytes": 150044,
+      "sha256": "746b25eda284fb43972c00dc64b06a10ebed6f549a78a2e9f98f2a7386260709",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.90/chunk-4.wav",
+      "bytes": 181244,
+      "sha256": "fc47dcbc6830d65706a69d11a32f3e6ed82db66ab02dfe5d564083481b1520c2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.95/chunk-0.wav",
+      "bytes": 102044,
+      "sha256": "64fe0b7c4383dfd428b6801adef46d613d76d8c0a167e99a453d7e343a7f6238",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.95/chunk-1.wav",
+      "bytes": 573644,
+      "sha256": "4b278f821e0ecfec7bb4623ace8bca87952d0af45126e153f556603c314012c7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.95/chunk-2.wav",
+      "bytes": 340844,
+      "sha256": "e280d36045ce34f896abc2dc49cd0c3cf9f9a71994e32ea38d52104f1c04fd8c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.95/chunk-3.wav",
+      "bytes": 144044,
+      "sha256": "4ab37977a94c2d7ebf17676a1ac0bf358aa0cb0b3d68b8d63b1178fa413b5016",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/1.95/chunk-4.wav",
+      "bytes": 177644,
+      "sha256": "fbb518e7df03896c753d784796c40e25d97d98a8ab689a57b8972eb2b2ef4710",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/2.00/chunk-0.wav",
+      "bytes": 96044,
+      "sha256": "be801a480576de96059baa7631f2a7bc3ca7bc80bbda423cb52cc5fea7d3bf3b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/2.00/chunk-1.wav",
+      "bytes": 558044,
+      "sha256": "3bd08341a76481a92ca09c7683af07cacda7b4394133405d8e5d98da0946a37d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/2.00/chunk-2.wav",
+      "bytes": 332444,
+      "sha256": "6562bf7625cf9652736b513f60a490e5205ef920e0d5bcef88d4fb7a95baa270",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/2.00/chunk-3.wav",
+      "bytes": 141644,
+      "sha256": "baccac0dbc0762321e0f41049371c473b71fa19b40876065b6dc5cc6539bef79",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/af_bella/2.00/chunk-4.wav",
+      "bytes": 175244,
+      "sha256": "721424c81fd59ed385dfab59eccab0e2f58319d39e344dedb198b1a7c29d0775",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.80/chunk-0.wav",
+      "bytes": 207644,
+      "sha256": "4b975d16fe181aa8851bf4afed5efcb957357c77ccb81e2265ba5d6aacb29a1d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.80/chunk-1.wav",
+      "bytes": 1042844,
+      "sha256": "4d7197a29edb2f4edee6b73155270876de47006f56635c8d7dca8a6643126b64",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.80/chunk-2.wav",
+      "bytes": 613244,
+      "sha256": "1c9f0552eb0e8e79db1078c58569dba167c40209667cf69ba0e440b95f4861fa",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.80/chunk-3.wav",
+      "bytes": 290444,
+      "sha256": "dac4be255040bd1342055b17d8572b993796de35fda7924fd6c15284c99e580f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.80/chunk-4.wav",
+      "bytes": 342044,
+      "sha256": "a1a0d4ff18183e7c389229c6a9ac8addffd936feff51b53a3ed6bafb85fcc9f7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.85/chunk-0.wav",
+      "bytes": 194444,
+      "sha256": "341fd939a44dca003e7b0151c9eeac9fbac09b7b7a82380e349541571c52b293",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.85/chunk-1.wav",
+      "bytes": 987644,
+      "sha256": "61f5c0bdf304564c64a25651a81076141fe09dca2bd951f613de062a578b2d1b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.85/chunk-2.wav",
+      "bytes": 583244,
+      "sha256": "ea452cec3d08de6d1e2e4feca06da6e515153bb726334181bf15676a91e495de",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.85/chunk-3.wav",
+      "bytes": 276044,
+      "sha256": "6d66f6b3942f6a71c209a4a07cb463247b77a94bc6db759da813af224916e545",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.85/chunk-4.wav",
+      "bytes": 324044,
+      "sha256": "1977b5c771f396a8c08692590785e44cc19ecdfd1d18d0064c4175474d24488c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.90/chunk-0.wav",
+      "bytes": 188444,
+      "sha256": "6cf1b22374fc8fa7a49e09b5559c0891c89ebfbd7d5ab6ce78d4782ec4eb52f1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.90/chunk-1.wav",
+      "bytes": 955244,
+      "sha256": "29355fe37c1bbf238b9d1c8b28395e7a2e81dc457c744be85b1b39ade5100789",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.90/chunk-2.wav",
+      "bytes": 552044,
+      "sha256": "b57c04a1ddc90518f2f69e56b6ca7f2001d2153dd3887b769c0c2ecfd576f1e3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.90/chunk-3.wav",
+      "bytes": 264044,
+      "sha256": "d2e98342758a0f073f4a7543bd462e8c718b3885e316f87f8221adc929df397e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.90/chunk-4.wav",
+      "bytes": 307244,
+      "sha256": "d3f6dbb6a144f9bbddc5bb0636e7be59c73e0dc03b1a70da519a5f80f2291f4b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.95/chunk-0.wav",
+      "bytes": 177644,
+      "sha256": "64728953f9021361df46b12ac797af01e3c9efa1040799bce08cfff2db7cfdbc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.95/chunk-1.wav",
+      "bytes": 925244,
+      "sha256": "0c20249a2df05cad423a5a5fc85f9aac1f149f982a5d0bea362dd05351efdfc0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.95/chunk-2.wav",
+      "bytes": 532844,
+      "sha256": "1ff3e570a4db15299fe2574abf385288bf914bcb9540ae18846f42704dcfb791",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.95/chunk-3.wav",
+      "bytes": 255644,
+      "sha256": "ff26baf6071083be26465217f4da8676fe0c051b8dc09a32d96548d284da9f2c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/0.95/chunk-4.wav",
+      "bytes": 298844,
+      "sha256": "675fa7b96688d43c04ea78edab51696a4a6912b10f8cc88cdead32b976e829c8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.00/chunk-0.wav",
+      "bytes": 174044,
+      "sha256": "1a998cfd9c06dca9274b64120e7f34c687088525eca319ec5a48b93bd2e4c4cc",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.00/chunk-1.wav",
+      "bytes": 908444,
+      "sha256": "fb2dba598a5f6f991e8d9c92335605962527bf1f391fea4c7615f259ca0cc6a5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.00/chunk-2.wav",
+      "bytes": 517244,
+      "sha256": "0861e079de84e8391e7e00603351a2d641c1721642dd3d0e9bd67aa3cca370bb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.00/chunk-3.wav",
+      "bytes": 246044,
+      "sha256": "1054ce5162e7933ca00cce6f7fe06d687aad505774faaa20819ff5bd84c66294",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.00/chunk-4.wav",
+      "bytes": 292844,
+      "sha256": "05727ef27cd1be86861e8542151478e8792100c3e45955d21c61a32eb242f2be",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.05/chunk-0.wav",
+      "bytes": 164444,
+      "sha256": "4f1e5a732fdb36ff14b931bff1c0562c613fa52652aff4be38a83897e293151c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.05/chunk-1.wav",
+      "bytes": 883244,
+      "sha256": "28042def392bc4e1057f11225f7007be539372250727bb48a03b4914277078e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.05/chunk-2.wav",
+      "bytes": 505244,
+      "sha256": "20b6aa503b1b736149dc699fbb3106fdf35fe56e5523795220c70fa5f3667bad",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.05/chunk-3.wav",
+      "bytes": 240044,
+      "sha256": "df825dc0e0b34637c901a7421b569604d287d3b1f35418fbcb05137d133ae986",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.05/chunk-4.wav",
+      "bytes": 280844,
+      "sha256": "410fea4ac7ccfd69374bae92ce296fa5b397c84e74ea31dd2c83d75c80e3fe6f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.10/chunk-0.wav",
+      "bytes": 159644,
+      "sha256": "74d45e7ed34879fa993aec8ed9573479bf2707d9f3516ba3001ac90fc87c5517",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.10/chunk-1.wav",
+      "bytes": 853244,
+      "sha256": "f1d3a06d2c919ddd74b5ebed2420d3d40778b704bc82abc77c189649c2557a04",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.10/chunk-2.wav",
+      "bytes": 494444,
+      "sha256": "f74d126bea977c21e135cb312dbc1d32938723083792954fd8ef6971a8b75c3c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.10/chunk-3.wav",
+      "bytes": 231644,
+      "sha256": "ccea9b35a497e72529be8516a945ee48b450029abb91b0b0df79af4f2ca6ade9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.10/chunk-4.wav",
+      "bytes": 274844,
+      "sha256": "ab5da0174c9fd307ae242b239bb6c283701d3e53b0ebc041366677f3623e80d7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.15/chunk-0.wav",
+      "bytes": 152444,
+      "sha256": "dad6f13e548f0495800d9896750260a89f73eef1f7c346362d5bfcbb9c8766ca",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.15/chunk-1.wav",
+      "bytes": 836444,
+      "sha256": "6b934a67b35191e18a947003cb6aa7c3a21f42fe5a491dd5432b80a4869c83ee",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.15/chunk-2.wav",
+      "bytes": 488444,
+      "sha256": "3279468aff882f0e5a64ba310d36a15c42db3d5db53b9af56e220ac40a029490",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.15/chunk-3.wav",
+      "bytes": 222044,
+      "sha256": "f747f506038acba5b18bd70d5cebc3fb5513e39b3a25a30d529998c71e593aea",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.15/chunk-4.wav",
+      "bytes": 267644,
+      "sha256": "d1dd253d678ac34f3b95022b77354e2d4c452b2e12a612219f9fabb9eb158e0b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.20/chunk-0.wav",
+      "bytes": 148844,
+      "sha256": "000bd0fc2fd3a07196c88d596b8f5ba9560e3985536c76f1b09cd00e7d8bfb46",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.20/chunk-1.wav",
+      "bytes": 814844,
+      "sha256": "b3e4153aba63e05b230287e3e176b38a89396cf6a7e69fd9c8b10d081db13551",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.20/chunk-2.wav",
+      "bytes": 476444,
+      "sha256": "43251e9e2dc184ee4fd325b33c39ef25e36a223e15061d8da95892a5daaa04e5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.20/chunk-3.wav",
+      "bytes": 218444,
+      "sha256": "71f1651f84597d356aef6c3d96a9b78b9ac71cae7c10507cb5fb3858fb6dd41b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.20/chunk-4.wav",
+      "bytes": 259244,
+      "sha256": "bd9e65d760096943d827cce6e06c0a3b6fd91cfb43cfe7cc1ec36f2f48878bdb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.25/chunk-0.wav",
+      "bytes": 145244,
+      "sha256": "aef7eaaf46e9330b4a99c018dc7d43382f6dd2cac75966b4b34293e4688ae185",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.25/chunk-1.wav",
+      "bytes": 780044,
+      "sha256": "19825092b6f5ea34bb07e0670638f561adf8f1539101aba93bd90184ee061285",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.25/chunk-2.wav",
+      "bytes": 450044,
+      "sha256": "72009890341593a1a0003866932b0403386b808e2fb73669b4abb80dcea1553b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.25/chunk-3.wav",
+      "bytes": 210044,
+      "sha256": "dfde226300d37cf1865ccfcda192249b455c59da5a175abdacc8e5e6790f1b93",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.25/chunk-4.wav",
+      "bytes": 252044,
+      "sha256": "cc5dae9d252d358a7df93121fec3e677d94ee437a3f078d90776174dac23603c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.30/chunk-0.wav",
+      "bytes": 140444,
+      "sha256": "19fb1e410f58883e295dbddbc1a2a4ffec179ede21dc2df1e30fe35b80a73d32",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.30/chunk-1.wav",
+      "bytes": 752444,
+      "sha256": "f196b8176cf206cce0ca1ac2623fc798e450decb314ba7c8bf06c4b1e338544c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.30/chunk-2.wav",
+      "bytes": 418844,
+      "sha256": "1341aaf7dd69284e4e280a9c7727ca169f28d074767fe5b50b695532e4d1b1b1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.30/chunk-3.wav",
+      "bytes": 200444,
+      "sha256": "38d834cb0b765910dde46fbadf9b6684eae54f80df73d740c35b9a65499ab28c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.30/chunk-4.wav",
+      "bytes": 236444,
+      "sha256": "050621e1012400bf59a4ffd664de5bbd41e95b363f052b5cecee15d694d53280",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.35/chunk-0.wav",
+      "bytes": 123644,
+      "sha256": "d6b8e570d43fc08366c42a96c07a6f61ada50989c2ac3c567b0724cea0a50fc0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.35/chunk-1.wav",
+      "bytes": 615644,
+      "sha256": "abc4193f2d1105a1855593d723bd88d7a91dc38586c36f1dbd71119555026ca7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.35/chunk-2.wav",
+      "bytes": 362444,
+      "sha256": "c0f76502302f089d463d49f084e8a6ec214fa4be3471a4d5f5457ee543644141",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.35/chunk-3.wav",
+      "bytes": 165644,
+      "sha256": "c1a8ffbdceca0de4ab4cffee7ffc533d6c18ee05176e18f87ca9df0a5f564cad",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.35/chunk-4.wav",
+      "bytes": 199244,
+      "sha256": "730a0a71cdf3c8cba93dce32802d72c725704b94a7a24a439686ee07b45dc946",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.40/chunk-0.wav",
+      "bytes": 118844,
+      "sha256": "96f0b8a82b12e298fdb8fd8da411a2ac9a5c8212df40204cdad9c14775ca1f71",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.40/chunk-1.wav",
+      "bytes": 602444,
+      "sha256": "e42ce0edf8d03214c24a3ab5cb160d593be7990476bf3f0bf0f4072f5056e456",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.40/chunk-2.wav",
+      "bytes": 354044,
+      "sha256": "e77254ad3827c35d80356cb77886950209ca442f437c532e77d7da52124f8a9b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.40/chunk-3.wav",
+      "bytes": 160844,
+      "sha256": "28c72c3584708408e2f14c462b9a2b16c71a88d27ec26fff170b7378241ce392",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.40/chunk-4.wav",
+      "bytes": 194444,
+      "sha256": "f304f50948b636c21467f8c70528a00127b7d89501159807251045c262b68125",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.45/chunk-0.wav",
+      "bytes": 118844,
+      "sha256": "96f0b8a82b12e298fdb8fd8da411a2ac9a5c8212df40204cdad9c14775ca1f71",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.45/chunk-1.wav",
+      "bytes": 591644,
+      "sha256": "33276086e25da252da9a39d81ad10b36164a3d47634dec9ed660fbe27806ae1d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.45/chunk-2.wav",
+      "bytes": 344444,
+      "sha256": "67aba6ab5c9f7a5c635f293ea80c9bb5c386fdc0c7a76f84176529736a8d9b0b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.45/chunk-3.wav",
+      "bytes": 156044,
+      "sha256": "60f945bfad2cce0731f450107cb58528cb79bfeba65e1e7857f7c0376263420b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.45/chunk-4.wav",
+      "bytes": 189644,
+      "sha256": "413986aa0f5dae3d6cdde7ab54bcae80865ab35a1bd41d8ff261be09f0430f25",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.50/chunk-0.wav",
+      "bytes": 114044,
+      "sha256": "4928d6f1d29bbf6ea66b5db00cd876ae0c11ecddf1eb66bddb8291cbdde8341c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.50/chunk-1.wav",
+      "bytes": 586844,
+      "sha256": "292f1ce877a0d41ab57434c89144b03e67be86f4e726f8979feb4a1f5238986d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.50/chunk-2.wav",
+      "bytes": 337244,
+      "sha256": "f260c1d080acce872f2af62bfeb3cc4e3045e7d67964da8beba0f08f0b5f56ab",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.50/chunk-3.wav",
+      "bytes": 153644,
+      "sha256": "21d32725ea6a7a5d70d5bb5288875c7e3c7ce64aeb2dde5dc246df7a5b51cf36",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.50/chunk-4.wav",
+      "bytes": 183644,
+      "sha256": "65df31f93bc25d21bdb6db360c58789a4e22955bd7901810bd373c6b8aa69cdf",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.55/chunk-0.wav",
+      "bytes": 111644,
+      "sha256": "7913f8724eee00f730b16149830d143be704692854d33b7a374e0a8122d24be1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.55/chunk-1.wav",
+      "bytes": 579644,
+      "sha256": "6a32624f3327c73be0af8f91d091eef130063f55a97807a223520c08e463fccd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.55/chunk-2.wav",
+      "bytes": 332444,
+      "sha256": "1b960da8b36b232ae1bcc827103bbf4cb63a16d6b4c2cb289702cc6cdc8a1bd2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.55/chunk-3.wav",
+      "bytes": 151244,
+      "sha256": "f0f99089afe875c54e729b24da6346f6a330b428ca1b8a19df10231735245c6f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.55/chunk-4.wav",
+      "bytes": 180044,
+      "sha256": "f7d83b020780e54bd4d98864939c5af958df02e98549a5e716c434e447de1407",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.60/chunk-0.wav",
+      "bytes": 108044,
+      "sha256": "b7ef7851a3fc9280ee83fe3c034d707f9e75c217aa215a5ec01185fd23e3aeb7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.60/chunk-1.wav",
+      "bytes": 572444,
+      "sha256": "11b3baaea0f5644043a497ef6069a2da8045a839af7cde6cc762536ee622248a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.60/chunk-2.wav",
+      "bytes": 326444,
+      "sha256": "5dc8425f598c06682fa5195993cafa780d1037eaf505eb9082bbca80bbe003c1",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.60/chunk-3.wav",
+      "bytes": 150044,
+      "sha256": "bd00ea82089f76b08aa4f38302da20db3998a57fad2f382e5d43c050a3f8f67f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.60/chunk-4.wav",
+      "bytes": 177644,
+      "sha256": "9b76292e1ef9d2a1d82a0e69c0b2efab62c472400ae64a6ebc75e61f653551bd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.65/chunk-0.wav",
+      "bytes": 106844,
+      "sha256": "e4e66674983aa901d13fb9bbda37f730c6ee716bf158762dc35cd938265543cb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.65/chunk-1.wav",
+      "bytes": 567644,
+      "sha256": "efab12a8bb62255012848afaa67180e316e4ba66fe824a0c81adb618ed1195c6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.65/chunk-2.wav",
+      "bytes": 318044,
+      "sha256": "a5e6f378eb4216fc87d81f5678f79349ee856cf18e16d869f6abcacc7c697fcb",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.65/chunk-3.wav",
+      "bytes": 146444,
+      "sha256": "952e16ce996e7e04abdb3d76d286e45f1f2158ee0b4f97d9245a96963b08819f",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.65/chunk-4.wav",
+      "bytes": 175244,
+      "sha256": "ba3672ce4065fe536463ccba46122e54197001ed377fc37b83034a11c5cc3d53",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.70/chunk-0.wav",
+      "bytes": 105644,
+      "sha256": "d2f3a60fbd738d1d35136ba53e87617248f7562ed99632f9731ea6a1699de8a4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.70/chunk-1.wav",
+      "bytes": 561644,
+      "sha256": "7c7e570046fa9c242cd4354022eebcf3b945a6dbcc05737f0bd1d8beb0b14593",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.70/chunk-2.wav",
+      "bytes": 313244,
+      "sha256": "54506187078a369bc245b3726d0bb4e133c736a89fa45ab0b907d28983cae6c6",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.70/chunk-3.wav",
+      "bytes": 142844,
+      "sha256": "5111f0e86e12344ed9580f701de262702c6d61ae8ef581f0780194f47b2367f3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.70/chunk-4.wav",
+      "bytes": 174044,
+      "sha256": "17a723c4c2f2b82e64f82b9ba7b98b305c16cee149187743899b1382d7b4a411",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.75/chunk-0.wav",
+      "bytes": 103244,
+      "sha256": "70d2ff8e97077e213ac404f8fa4315967812540584c9c6dcd0a629763e359b20",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.75/chunk-1.wav",
+      "bytes": 556844,
+      "sha256": "d41553d3028cec686a9ac1e6d92a36416fd31be593956f2b417bcae34499f649",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.75/chunk-2.wav",
+      "bytes": 312044,
+      "sha256": "934ae221467510af1dc8c9a4007a9eb66e8d8d30d5599ae3a5e7002c3f362a4e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.75/chunk-3.wav",
+      "bytes": 141644,
+      "sha256": "eb17ca62abf76962c80aa4b31a3383e7149568e863cd4238c4c2cfd2e875259d",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.75/chunk-4.wav",
+      "bytes": 170444,
+      "sha256": "1e6a41a82eecbb43d0f5615dd06f00ceffe3053fdcfb5b89db61c3652b94a2e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.80/chunk-0.wav",
+      "bytes": 102044,
+      "sha256": "d9a1b06544af1e8a8d9a463500563539c5567309e9cb2fec7fb9db47afb32f49",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.80/chunk-1.wav",
+      "bytes": 550844,
+      "sha256": "5d0681229b9e8762948bec265c3648077016aca66715401ad63b354f857c49a8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.80/chunk-2.wav",
+      "bytes": 307244,
+      "sha256": "6a21bc173d2cd8e09363f4f2851180aab28cc200709101d3f7f96c1369b843a3",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.80/chunk-3.wav",
+      "bytes": 139244,
+      "sha256": "64bef96db1712fb272937becb7c6b371038a1ef019736b8ee23280d91a7800ac",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.80/chunk-4.wav",
+      "bytes": 170444,
+      "sha256": "1e6a41a82eecbb43d0f5615dd06f00ceffe3053fdcfb5b89db61c3652b94a2e0",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.85/chunk-0.wav",
+      "bytes": 99644,
+      "sha256": "2e2b48e4b7eda178eff9b83dba1b75648ddda2f923478ccaac5c2c20427e73a7",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.85/chunk-1.wav",
+      "bytes": 542444,
+      "sha256": "299e86d99d311ced16f7cdd8d2e081e09c5dd68d0d207675e7829ca79863c319",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.85/chunk-2.wav",
+      "bytes": 306044,
+      "sha256": "344847eaf8e3fb81ee00c883bedb57b57e2b2f8335a19c8d280ada16d7549491",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.85/chunk-3.wav",
+      "bytes": 135644,
+      "sha256": "08bead62c29cba9b5010458d1fa61efad6f45f6bbedf76af58c0d291e1f21eb2",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.85/chunk-4.wav",
+      "bytes": 169244,
+      "sha256": "beb17199ca8b8cc32ba36abac631a37ff2f8bfc6357c0cf171d038b3213a62fd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.90/chunk-0.wav",
+      "bytes": 98444,
+      "sha256": "2e2c30a6091c9d9b6d3f24f4f3192dc5019da2cf674be72dca729ac4cd63feca",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.90/chunk-1.wav",
+      "bytes": 536444,
+      "sha256": "93e8c0fc25ac899e01f63edcadfc3d6d91e0086b765f71f55efaad3d82197cc4",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.90/chunk-2.wav",
+      "bytes": 300044,
+      "sha256": "15df6892eb3753d1b57bf9e9328976de33635b1fddda83e5a0e1527d619aa17c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.90/chunk-3.wav",
+      "bytes": 134444,
+      "sha256": "8918a46183c917e53bcf12618c8ceb18b76483265ee9293eae7a345afdd4f5e5",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.90/chunk-4.wav",
+      "bytes": 166844,
+      "sha256": "ba532f75950a7211d2f0cc3e776e9ad3e40d40f5f2eb3e1f5ec0c55218e4531c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.95/chunk-0.wav",
+      "bytes": 98444,
+      "sha256": "2e2c30a6091c9d9b6d3f24f4f3192dc5019da2cf674be72dca729ac4cd63feca",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.95/chunk-1.wav",
+      "bytes": 526844,
+      "sha256": "9218eb0797df18052e6bb7672595b3f896d7002acf76f438d439262a6abe5fd8",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.95/chunk-2.wav",
+      "bytes": 298844,
+      "sha256": "27b1e9259159fec3c04ec143bacf0616d836bf283e29c02260c0f85cdb5541bd",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.95/chunk-3.wav",
+      "bytes": 133244,
+      "sha256": "f74d4a6b0efad3b2225ee9598dc0340adbb7cc39bcdef3cce7165802d2918698",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/1.95/chunk-4.wav",
+      "bytes": 166844,
+      "sha256": "ba532f75950a7211d2f0cc3e776e9ad3e40d40f5f2eb3e1f5ec0c55218e4531c",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/2.00/chunk-0.wav",
+      "bytes": 94844,
+      "sha256": "3bd3c4709fcbb4df67ec6d429e3b52843b053de82854b896117aa5b6f1276f9b",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/2.00/chunk-1.wav",
+      "bytes": 523244,
+      "sha256": "d7106f45f1ac1f49e8c2f8772493e090fdad3815a75bab5878e213cbb92478d9",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/2.00/chunk-2.wav",
+      "bytes": 296444,
+      "sha256": "563c2d2c3fa3d413331ad8b14225938189922ba5df308ce6f41c9497f825506e",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/2.00/chunk-3.wav",
+      "bytes": 130844,
+      "sha256": "2fafd20320e325ccf96453cd5fc2836ecf7655277a47f023dff5dddc82d34e2a",
+      "tier": "phase0"
+    },
+    {
+      "path": "audio/passage-b/bf_emma/2.00/chunk-4.wav",
+      "bytes": 159644,
+      "sha256": "bd27f0f4fa8d9475c4a4904320e33eedb154001d77d05d7af649a40374009705",
+      "tier": "phase0"
+    }
+  ]
+}
