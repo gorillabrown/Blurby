@@ -15,6 +15,7 @@ const { createMainWindow, createTray, setupAutoUpdater,
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
 const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
+const { createFolderSync } = require("./main/folder-sync");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -321,82 +322,21 @@ async function extractNewFileDoc(file) {
   };
 }
 
-// Cancellation flag for folder sync
-let syncCancelled = false;
-function cancelSync() { syncCancelled = true; }
-
 function emitSyncProgress(current, total, phase) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("sync-progress", { current, total, phase });
   }
 }
 
-async function syncLibraryWithFolder() {
-  if (!settings.sourceFolder) return;
-  syncCancelled = false;
-
-  emitSyncProgress(0, 0, "scanning");
-  const files = await scanFolderAsync(settings.sourceFolder);
-  if (syncCancelled) return;
-
-  const docs = getLibrary();
-  const existing = new Map(docs.map((d) => [d.filepath, d]));
-  const synced = [];
-
-  const newFiles = [];
-  for (const file of files) {
-    const prev = existing.get(file.filepath);
-    if (prev) {
-      synced.push({ ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
-    } else if (!failedExtractions.has(file.filepath)) {
-      newFiles.push(file);
-    }
-  }
-
-  emitSyncProgress(0, newFiles.length, "extracting");
-
-  const BATCH_SIZE = FOLDER_SYNC_BATCH_SIZE;
-  for (let i = 0; i < newFiles.length; i += BATCH_SIZE) {
-    if (syncCancelled) break;
-    const batch = newFiles.slice(i, i + BATCH_SIZE);
-    const results = await Promise.all(batch.map(extractNewFileDoc));
-    if (syncCancelled) break; // Check after batch completes — don't process stale results
-    for (const doc of results) {
-      if (doc) synced.push(doc);
-    }
-    emitSyncProgress(Math.min(i + BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
-    // Yield to event loop between batches so UI stays responsive
-    if (i + BATCH_SIZE < newFiles.length) {
-      await new Promise((resolve) => setImmediate(resolve));
-    }
-  }
-
-  if (syncCancelled) {
-    // Save partial progress so extracted docs aren't lost on cancellation
-    if (synced.length > 0) {
-      setLibrary(synced);
-      await saveLibraryNow();
-      broadcastLibrary();
-    }
-    return;
-  }
-
-  const savedArticlesPath = settings.sourceFolder
-    ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
-    : null;
-  for (const doc of docs) {
-    if (doc.source !== "folder") {
-      synced.push(doc);
-    } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
-      synced.push(doc);
-    }
-  }
-
-  setLibrary(synced);
-  saveLibrary();
-  broadcastLibrary();
-  emitSyncProgress(newFiles.length, newFiles.length, "done");
-}
+const folderSync = createFolderSync({
+  getSourceFolder: () => settings.sourceFolder,
+  getLibrary, setLibrary, scanFolderAsync,
+  extractNewFileDoc, extractContent, countWords,
+  isFailed: (p) => failedExtractions.has(p),
+  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
+});
+function syncLibraryWithFolder() { return folderSync.syncAll(); }
+function cancelSync() { folderSync.cancel(); }
 
 // ── Watcher management ─────────────────────────────────────────────────────
 function startWatcherFn() {
@@ -406,17 +346,7 @@ function startWatcherFn() {
   watcher = startWatcher(settings.sourceFolder, {
     onAdd: () => debouncedSyncLibraryWithFolder(),
     onUnlink: () => debouncedSyncLibraryWithFolder(),
-    onChange: async (filepath) => {
-      const doc = getLibrary().find((d) => d.filepath === filepath);
-      if (doc) {
-        const content = await extractContent(filepath);
-        if (content && typeof content === "string") {
-          doc.wordCount = countWords(content);
-          saveLibrary();
-          broadcastLibrary();
-        }
-      }
-    },
+    onChange: (filepath) => folderSync.applyChange(filepath),
     onError: (err, folderPath) => {
       const isPermission = err.message && (
         err.message.includes("EACCES") ||

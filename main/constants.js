@@ -153,6 +153,8 @@ const FOLDER_SYNC_DEBOUNCE_MS = 1000;
 const FOLDER_SYNC_BATCH_SIZE = 4;
 /** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */
 const FOLDER_SYNC_STARTUP_DELAY_MS = 3000;
+/** During a long folder import, save and broadcast the library at most this often (ms) */
+const FOLDER_SYNC_SAVE_INTERVAL_MS = 30000;
 /** Delay before starting auto-updater check at launch (ms) */
 const AUTO_UPDATE_DELAY_MS = 5000;
 /** Timeout for browser-based URL fetch via BrowserWindow (ms) */
@@ -269,6 +271,7 @@ module.exports = {
   FOLDER_SYNC_DEBOUNCE_MS,
   FOLDER_SYNC_BATCH_SIZE,
   FOLDER_SYNC_STARTUP_DELAY_MS,
+  FOLDER_SYNC_SAVE_INTERVAL_MS,
   AUTO_UPDATE_DELAY_MS,
   BROWSER_FETCH_TIMEOUT_MS,
   BROWSER_CONTENT_SETTLE_MS,
