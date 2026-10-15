@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T06:00:17Z",
+  "takenAt": "2026-10-15T06:11:46Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1814,8 +1814,8 @@
       "id": "FOLDER-UNREACHABLE-GUARD-1",
       "title": "Keep folder books when the source folder cannot be reached",
       "sequence": 22,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1824,12 +1824,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#folder-unreachable-guard-1",
       "branch": "eb/folder-unreachable-guard-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "An unreachable source folder makes the scan return nothing and both sync paths prune every folder book. Report unreachable distinctly and skip the prune. Fixes BUG-195.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode.",
-      "revision": "a74851880a20f437f0b4aee7532dad3d0c3fa2c22e1c836b226014e100c10261",
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-unreachable-guard-1 from main efb446db).",
+      "revision": "2ca174a967873632a1923a237a17f4fe75395711d42b1568bdf70513e8d1564e",
       "extra": {}
     },
     {
