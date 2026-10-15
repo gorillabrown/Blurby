@@ -1,0 +1,273 @@
+// @vitest-environment jsdom
+// PAGE-POSITION-SAVE-1 (BUG-197). A Page-mode page turn (key, button or swipe) saves the first word of the
+// page it lands on, at once, as a full anchor commit. Drives the real Page runtime and the real Page
+// FoliateView against a fake foliate view whose paginator is an EventTarget (as in
+// foliateViewTeardown.test.tsx, which this reuses).
+import { act, createElement } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { DEFAULT_SETTINGS } from "../../src/constants";
+import { createInitialHandoff } from "../../src/reader/document/ReaderDocumentSnapshot";
+import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
+import { pageMode } from "../../src/reader/modes/page";
+import PageFoliateView from "../../src/reader/modes/page/FoliateView";
+import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
+
+vi.mock("foliate-js/view.js", () => ({}));
+
+/** The paginator under test: next()/prev() fire the turn's relocate on the host view (as view.js re-emits it). */
+class FakePaginator extends EventTarget {
+  page = 2;
+  pages = 6;
+  contents: Array<{ doc: Document; index: number }> = [];
+  detail: Record<string, unknown> = {};
+  host: EventTarget | null = null;
+  setAttribute(): void {}
+  remove(): void {}
+  destroy(): void {}
+  getContents(): Array<{ doc: Document; index: number }> { return this.contents; }
+  private turn(): Promise<void> {
+    this.host?.dispatchEvent(new CustomEvent("relocate", { detail: this.detail }));
+    return Promise.resolve();
+  }
+  next(): Promise<void> { return this.turn(); }
+  prev(): Promise<void> { return this.turn(); }
+}
+
+class FakeFoliateView extends HTMLElement {
+  renderer = new FakePaginator();
+  book = { toc: [], sections: [] };
+  constructor() { super(); this.renderer.host = this; }
+  async open(): Promise<void> {}
+  async init(): Promise<void> {}
+  async goToFraction(): Promise<void> {}
+  async goTo(): Promise<void> {}
+  getCFI(index: number, range: Range): string { return `cfi:${index}:${range.toString()}`; }
+  close(): void {}
+}
+if (!customElements.get("foliate-view")) customElements.define("foliate-view", FakeFoliateView);
+
+/** A section document whose words are stamped: body text "Ten eleven twelve thirteen", spans 10..13. */
+function stampedDoc(): { doc: Document; range: Range } {
+  const doc = document.implementation.createHTMLDocument();
+  doc.body.innerHTML = '<p><span data-word-index="10">Ten</span> <span data-word-index="11">eleven</span> '
+    + '<span data-word-index="12">twelve</span> <span data-word-index="13">thirteen</span></p>';
+  const range = doc.createRange();
+  range.setStart(doc.querySelector('[data-word-index="12"]')!.firstChild!, 0);
+  range.setEnd(doc.querySelector('[data-word-index="13"]')!.firstChild!, 8);
+  return { doc, range };
+}
+
+/** A raw section document (no spans yet); the range covers "gamma delta". */
+function rawDoc(): { doc: Document; range: Range } {
+  const doc = document.implementation.createHTMLDocument();
+  doc.body.innerHTML = "<p>Alpha beta gamma delta</p>";
+  const text = doc.querySelector("p")!.firstChild!;
+  const range = doc.createRange();
+  range.setStart(text, 11);
+  range.setEnd(text, 22);
+  return { doc, range };
+}
+
+let container: HTMLElement;
+let root: Root;
+
+async function mount() {
+  const fake = createFakeInfrastructure({ document: createFakeDocument() });
+  const broker = createReaderPorts(fake.infra);
+  const snapshot = fake.infra.document.snapshot();
+  broker.openDocument(snapshot.documentId);
+  const { key, ports } = broker.issue("page");
+  const runtime = pageMode.createRuntime({
+    key,
+    ports,
+    document: snapshot,
+    settings: fake.infra.settings.read(),
+    handoff: createInitialHandoff(snapshot, snapshot.wordCount),
+    arrival: "silent",
+  }) as any;
+
+  const render = async () => {
+    await act(async () => {
+      root.render(createElement(PageFoliateView as never, {
+        document: snapshot,
+        settings: DEFAULT_SETTINGS,
+        focusTextSize: DEFAULT_SETTINGS.focusTextSize,
+        initialCfi: "epubcfi(/6/2!/4/2)",
+        readBookBytes: () => Promise.resolve(new ArrayBuffer(8)),
+        recordDiagnostic: () => {},
+        onRelocate: runtime.onRelocate,
+        onTocReady: () => {},
+        onWordClick: () => {},
+        onLoad: runtime.onSurfaceLoad,
+        onWordsReextracted: runtime.onWordsReextracted,
+        viewApiRef: runtime.viewApiRef,
+        showJumpBackToAnchor: runtime.getSnapshot().isBrowsedAway,
+        onJumpBackToAnchor: () => runtime.jumpBack(),
+        onUserBrowseAway: runtime.onUserBrowseAway,
+        onPageTurned: runtime.onPageTurned,
+        highlightedWordIndex: runtime.getSnapshot().highlightedWordIndex,
+        renderVersion: 0,
+      } as never));
+    });
+  };
+
+  await render();
+  for (let i = 0; i < 50 && runtime.viewApiRef.current === null; i++) {
+    await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+  }
+  expect(runtime.viewApiRef.current).not.toBeNull();
+  const view = container.querySelector("foliate-view") as FakeFoliateView;
+  expect(view).not.toBeNull();
+  return { fake, runtime, view, renderer: view.renderer, render };
+}
+
+const saves = (fake: ReturnType<typeof createFakeInfrastructure>) =>
+  fake.effects.filter((e) => e.method === "persistence.updateDocProgress");
+const click = (label: string) =>
+  act(async () => { (container.querySelector(`[aria-label="${label}"]`) as HTMLElement).click(); });
+const jumpBackButton = () => container.querySelector('[aria-label="Jump back to persistent last-read word"]');
+const relocate = (target: EventTarget, detail: Record<string, unknown>) =>
+  act(async () => { target.dispatchEvent(new CustomEvent("relocate", { detail })); });
+
+describe("Page mode page turns save the first word of the new page (BUG-197)", () => {
+  beforeEach(() => {
+    vi.stubGlobal("requestAnimationFrame", () => 0);
+    vi.stubGlobal("cancelAnimationFrame", () => {});
+    vi.stubGlobal("ResizeObserver", class { observe() {} unobserve() {} disconnect() {} });
+    (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    root = createRoot(container);
+  });
+  afterEach(() => {
+    act(() => root.unmount());
+    container.remove();
+    vi.unstubAllGlobals();
+  });
+
+  it("(a) the Next page button saves the first visible word with its cfi", async () => {
+    const { fake, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+  });
+
+  it("(b) the saved word equals the anchor (ruling Q1)", async () => {
+    const { fake, runtime, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    const saved = saves(fake).at(-1)?.args[1];
+    expect(saved).toBe(12);
+    const snap = runtime.getSnapshot();
+    expect(snap.canonicalWordIndex).toBe(saved);
+    expect(snap.currentWordIndex).toBe(saved);
+    expect(snap.highlightedWordIndex).toBe(saved);
+    expect(runtime.exportHandoff("persistent").canonicalWordIndex).toBe(saved);
+  });
+
+  it("(c) onPageTurned commits a full anchor and records progress and cfi", async () => {
+    const { fake, runtime } = await mount();
+    runtime.onPageTurned({ wordIndex: 12, cfi: "c12" });
+    const calls = fake.effects.map((e) => [e.method, ...e.args]);
+    expect(calls).toContainEqual(["persistence.updateDocProgress", "doc-1", 12, "c12"]);
+    expect(calls).toContainEqual(["persistence.updateProgress", "doc-1", 12]);
+    expect(calls).toContainEqual(["persistence.recordCfi", "c12"]);
+    const handoff = runtime.exportHandoff("persistent");
+    expect(handoff.resumeAnchor).toBe(12);
+    expect(handoff.explicitSelectionAnchor).toBeNull();
+  });
+
+  it("(d) a turn whose section is not stamped saves when the section's words are wrapped", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = rawDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    expect(saves(fake)).toEqual([]);
+    await act(async () => {
+      view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 0 } }));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 2, "cfi:0:gamma"]);
+  });
+
+  it("(e) a swipe that snaps onto a text page saves that page's first word (ruling Q4)", async () => {
+    const { fake, runtime, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.page = 2;
+    await relocate(renderer, { reason: "snap", range, index: 0, fraction: 0.5 });
+    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+    expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
+  });
+
+  it("(f) a swipe onto the blank edge page saves the adjacent section's first page", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.page = 0;
+    await relocate(renderer, { reason: "snap", range: undefined, index: 0, fraction: 0.5 });
+    expect(saves(fake)).toEqual([]);
+    await relocate(view, { cfi: "range-cfi", fraction: 0.5, range });
+    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+  });
+
+  it("(g) a page turn does not mark browse-away and shows no Jump back", async () => {
+    const { runtime, renderer, render } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await render();
+    expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
+    expect(jumpBackButton()).toBeNull();
+  });
+
+  it("(h) control: a passive view relocate (book open) saves nothing", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    await relocate(view, { cfi: "range-cfi", fraction: 0.5, range });
+    expect(saves(fake)).toEqual([]);
+  });
+
+  it("(i) control: a non-snap renderer relocate with no turn in flight saves nothing", async () => {
+    const { fake, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    await relocate(renderer, { reason: "page", range, index: 0, fraction: 0.5 });
+    expect(saves(fake)).toEqual([]);
+  });
+
+  it("(j) control: hardSelect still saves its word and cfi", async () => {
+    const { fake, runtime } = await mount();
+    runtime.hardSelect({ cfi: "c4", word: "w4", globalWordIndex: 4 });
+    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 4, "c4"]);
+  });
+
+  it("(k) control: onPageTurned after stop adds no effect", async () => {
+    const { fake, runtime } = await mount();
+    runtime.stop("teardown");
+    const before = fake.effects.length;
+    runtime.onPageTurned?.({ wordIndex: 3, cfi: "c3" });
+    expect(fake.effects.length).toBe(before);
+  });
+
+  it("(l) control: the kept Jump back path still works", async () => {
+    const { runtime, render } = await mount();
+    expect(jumpBackButton()).toBeNull();
+    runtime.onUserBrowseAway();
+    expect(runtime.getSnapshot().isBrowsedAway).toBe(true);
+    await render();
+    expect(jumpBackButton()).not.toBeNull();
+    await act(async () => { (jumpBackButton() as HTMLElement).click(); });
+    expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
+    await render();
+    expect(jumpBackButton()).toBeNull();
+  });
+});
