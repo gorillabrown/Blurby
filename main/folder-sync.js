@@ -83,72 +83,77 @@ function createFolderSync(deps) {
     addedDuringRun.clear();
     const stale = () => mine !== gen || cancelled || stopped || getSourceFolder() !== folder;
     emitProgress(0, 0, "scanning");
-    if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder); // reachable, known before the walk (FOLDER-NOTICE-1)
-    const report = {};
-    const files = await scanFolderAsync(folder, report);
-    if (stale()) return;
-    if (!files) { reportFolderProblem("root-unlistable", folder); return; } // BUG-195: an unlistable root proves nothing gone
+    const okCheck = rootHasContent(folder).then((r) => { if (r === true && !stale()) reportFolderOk(folder); }); // reachable: clears while the walk runs; never waits twice on a hung root (FOLDER-NOTICE-1)
+    try {
+      const report = {};
+      const files = await scanFolderAsync(folder, report);
+      if (stale()) return;
+      if (!files) { reportFolderProblem("root-unlistable", folder); return; } // BUG-195: an unlistable root proves nothing gone
 
-    // Built from the live library, not the index: the index can miss a second book at one path (removeUnder's fast path).
-    // One pathKey per library path; the prune reuses it. On a case-only collision the first doc is the book, and the
-    // other stays as it is: its key is on disk, so the prune keeps it (LARGE-FOLDER-SYNC-2, ruling B).
-    const keyOf = new Map();
-    const byPath = new Map();
-    for (const d of getLibrary()) {
-      const k = pathKey(d.filepath);
-      keyOf.set(d, k);
-      if (!byPath.has(k)) byPath.set(k, d);
-    }
-    const onDisk = new Set();
-    const newFiles = [];
-    for (const file of files) {
-      const k = pathKey(file.filepath);
-      onDisk.add(k);
-      const prev = byPath.get(k);
-      if (prev) Object.assign(prev, { filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
-      else if (!isFailed(file.filepath)) newFiles.push(file);
-    }
-    emitProgress(0, newFiles.length, "extracting");
-
-    let added = 0;
-    let lastSave = now();
-    for (let i = 0; i < newFiles.length && !stale(); i += FOLDER_SYNC_BATCH_SIZE) {
-      const results = await Promise.all(newFiles.slice(i, i + FOLDER_SYNC_BATCH_SIZE).map(extractGuarded));
-      if (stale()) break; // a folder switch makes these results another folder's
-      for (const doc of results) if (doc && !findByPath(doc.filepath)) { trackAdd(doc); added++; }
-      emitProgress(Math.min(i + FOLDER_SYNC_BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
-      if (now() - lastSave >= FOLDER_SYNC_SAVE_INTERVAL_MS) {
-        await saveLibraryNow();
-        broadcastLibrary();
-        lastSave = now();
-      } else {
-        await new Promise((resolve) => setImmediate(resolve)); // keep the UI responsive between batches
+      // Built from the live library, not the index: the index can miss a second book at one path (removeUnder's fast path).
+      // One pathKey per library path; the prune reuses it. On a case-only collision the first doc is the book, and the
+      // other stays as it is: its key is on disk, so the prune keeps it (LARGE-FOLDER-SYNC-2, ruling B).
+      const keyOf = new Map();
+      const byPath = new Map();
+      for (const d of getLibrary()) {
+        const k = pathKey(d.filepath);
+        keyOf.set(d, k);
+        if (!byPath.has(k)) byPath.set(k, d);
       }
-    }
+      const onDisk = new Set();
+      const newFiles = [];
+      for (const file of files) {
+        const k = pathKey(file.filepath);
+        onDisk.add(k);
+        const prev = byPath.get(k);
+        if (prev) Object.assign(prev, { filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
+        else if (!isFailed(file.filepath)) newFiles.push(file);
+      }
+      emitProgress(0, newFiles.length, "extracting");
 
-    if (stale()) {
-      if (!stopped && added > 0) { await saveLibraryNow(); broadcastLibrary(); } // the quit flush saves when stopped
-      return;
+      let added = 0;
+      let lastSave = now();
+      for (let i = 0; i < newFiles.length && !stale(); i += FOLDER_SYNC_BATCH_SIZE) {
+        const results = await Promise.all(newFiles.slice(i, i + FOLDER_SYNC_BATCH_SIZE).map(extractGuarded));
+        if (stale()) break; // a folder switch makes these results another folder's
+        for (const doc of results) if (doc && !findByPath(doc.filepath)) { trackAdd(doc); added++; }
+        emitProgress(Math.min(i + FOLDER_SYNC_BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
+        if (now() - lastSave >= FOLDER_SYNC_SAVE_INTERVAL_MS) {
+          await saveLibraryNow();
+          broadcastLibrary();
+          lastSave = now();
+        } else {
+          await new Promise((resolve) => setImmediate(resolve)); // keep the UI responsive between batches
+        }
+      }
+
+      if (stale()) {
+        if (!stopped && added > 0) { await saveLibraryNow(); broadcastLibrary(); } // the quit flush saves when stopped
+        return;
+      }
+      const savedArticles = pathKey(path.join(folder, "Saved Articles")) + path.sep; // a path segment, not a string prefix (Q3)
+      const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
+      const keep = (d) => {
+        if (d.source !== "folder") return true;
+        const k = keyOf.has(d) ? keyOf.get(d) : pathKey(d.filepath); // a book added during this run is not in keyOf
+        return onDisk.has(k) || addedDuringRun.has(k) || (!!k && (k.startsWith(savedArticles) || underAny(k, skipped)));
+      };
+      const library = getLibrary();
+      // BUG-195: no book found while the prune would remove books under this folder (an unmounted or starting Drive can list
+      // an empty folder) is not evidence they are gone. A new, empty folder holds none, so a switch still prunes the old one.
+      if (files.length === 0 && library.some((d) => !keep(d) && d.filepath && underFolder(d.filepath))) {
+        reportFolderProblem("root-empty-suspect", folder);
+        return;
+      }
+      if (skipped.length) reportFolderProblem("partial-read", folder);
+      setLibrary(library.filter(keep));
+      saveLibrary();
+      broadcastLibrary();
+      emitProgress(newFiles.length, newFiles.length, "done");
+    } catch (e) {
+      await okCheck; // a thrown scan settles the check first, so sync-failed is reported after its clear (FOLDER-NOTICE-1)
+      throw e;
     }
-    const savedArticles = pathKey(path.join(folder, "Saved Articles")) + path.sep; // a path segment, not a string prefix (Q3)
-    const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
-    const keep = (d) => {
-      if (d.source !== "folder") return true;
-      const k = keyOf.has(d) ? keyOf.get(d) : pathKey(d.filepath); // a book added during this run is not in keyOf
-      return onDisk.has(k) || addedDuringRun.has(k) || (!!k && (k.startsWith(savedArticles) || underAny(k, skipped)));
-    };
-    const library = getLibrary();
-    // BUG-195: no book found while the prune would remove books under this folder (an unmounted or starting Drive can list
-    // an empty folder) is not evidence they are gone. A new, empty folder holds none, so a switch still prunes the old one.
-    if (files.length === 0 && library.some((d) => !keep(d) && d.filepath && underFolder(d.filepath))) {
-      reportFolderProblem("root-empty-suspect", folder);
-      return;
-    }
-    if (skipped.length) reportFolderProblem("partial-read", folder);
-    setLibrary(library.filter(keep));
-    saveLibrary();
-    broadcastLibrary();
-    emitProgress(newFiles.length, newFiles.length, "done");
   }
 
   async function syncAll() {

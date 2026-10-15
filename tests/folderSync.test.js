@@ -631,15 +631,15 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     expect(deps.reportFolderProblem).not.toHaveBeenCalled();
   });
 
-  it("(fn-h) the clear comes before the walk", async () => {
+  it("(fn-h) the clear comes while the walk is pending (ruling A)", async () => {
     const { deps, sync } = withReports();
     const scan = deferred();
     deps.scanFolderAsync.mockImplementation(() => scan.promise);
     const run = sync.syncAll();
     await new Promise((r) => setImmediate(r));
     try {
+      expect(deps.scanFolderAsync).toHaveBeenCalled();
       expect(deps.reportFolderOk, "the sync did not clear while its scan was pending").toHaveBeenCalledWith(ROOT);
-      expect(deps.reportFolderOk.mock.invocationCallOrder[0]).toBeLessThan(deps.scanFolderAsync.mock.invocationCallOrder[0]);
     } finally {
       scan.resolve([]);
       await run;
