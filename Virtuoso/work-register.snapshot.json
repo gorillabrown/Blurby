@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T06:41:41Z",
+  "takenAt": "2026-10-15T06:43:18Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2377,8 +2377,8 @@
       "id": "GET-STATE-SECRET-1",
       "title": "No secret reaches the renderer through state or settings reads",
       "sequence": 23,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2387,12 +2387,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#get-state-secret-1",
       "branch": "eb/get-state-secret-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "get-state returns a copy of pickUserSettings(settings) plus sourceFolder and recentFolders, never a _-prefixed key or main's live object; the extension-pairing handlers stop returning the pairing token and the unused get-ws-pairing-token is removed; pins startSync's outer pickUserSettings and removes the dead schemaVersion merge step.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate. From SETTINGS-KEY-TRUST-1's quality review. Touches preload.js (one line removed) and src/types.ts (shared core). Full Spec: U9/U10 pass.",
-      "revision": "a032b38e4f4a15688cbbb57d551a64a12e00738b3236ceb60b407c93e53086b9",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate. From SETTINGS-KEY-TRUST-1's quality review. Touches preload.js (one line removed) and src/types.ts (shared core). Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/get-state-secret-1 from main c293db78).",
+      "revision": "7046f0c89ae5f324b593de29b1027b3346f2f055713284ec75e594060f0b8e76",
       "extra": {}
     }
   ],
