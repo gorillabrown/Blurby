@@ -1,0 +1,52 @@
+{
+  "id": "20261015T013416Z-external-create-item-NARRATE-SENTENCE-RESUME-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-SENTENCE-RESUME-1",
+  "created": "2026-10-15T01:34:16Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Narrate restarts at the beginning of the current sentence",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-sentence-resume-1",
+      "branch": "eb/narrate-sentence-resume-1",
+      "description": "When Narrate starts from a position that is not a sentence start (resume, reopen, after a page turn), playback, cursor and saved position rewind to the first word of that sentence. Owner decision 2026-10-14.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
+      "sequence": 23,
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "id": "NARRATE-SENTENCE-RESUME-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T00:50:04Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SENTENCE-RESUME-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-SENTENCE-RESUME-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SENTENCE-RESUME-1",
+      "actualRevision": "2026-10-15T01:36:04Z",
+      "recoveryId": "20261015T013416Z-external-create-item-NARRATE-SENTENCE-RESUME-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8165-a8f6-c7db56fd1041",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T01:36:07Z",
+  "outcome": "succeeded"
+}
