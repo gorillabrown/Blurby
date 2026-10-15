@@ -75,6 +75,22 @@ const BOOK_WORDS = {
   bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 24, wordCount: 4 }],
   getCanonicalSectionWords: (i: number) => (i === 3 ? ["Alpha", "beta", "gamma", "delta"] : undefined),
 };
+/** The extractor's reply for the 25-word fixture: section 3 at words 20..23 (PAGE-SAVE-RESTAMP-2). */
+const BOOK_VALUE = {
+  words: [...Array.from({ length: 20 }, (_, i) => `w${i}`), "Alpha", "beta", "gamma", "delta", "w24"],
+  sections: BOOK_WORDS.bookWordSections,
+  totalWords: 25,
+  footnoteCues: [],
+};
+const EMPTY_VALUE = { ...BOOK_VALUE, sections: [] };
+/** Every way Page moves its view without a page turn (PAGE-SAVE-RESTAMP-2, D6). */
+const JUMPS: Array<{ name: string; jump: (m: { runtime: any; view: any; doc: Document }) => unknown }> = [
+  { name: "TOC (go-to-href)", jump: ({ runtime }) => runtime.handleCommand({ kind: "go-to-href", href: "ch2.xhtml" }) },
+  { name: "goToSection (jump back, restore)", jump: ({ runtime, view }) => { view.book.sections.push({ id: "s0" }); return runtime.viewApiRef.current.goToSection(0); } },
+  { name: "highlight with motion (jump back, restore)", jump: ({ runtime }) => runtime.viewApiRef.current.highlightWordByIndex(1, undefined, { allowMotion: true, forceMotion: true }) },
+  { name: "word click", jump: ({ doc }) => (doc.querySelector('[data-word-index="1"]') as HTMLElement).click() },
+  { name: "internal link", jump: ({ view }) => view.dispatchEvent(new CustomEvent("link", { detail: { href: "#fn-1" }, cancelable: true })) },
+];
 /** From the start of span `from` to the end of span `to`, once the view has stamped the spans. */
 function spanRange(doc: Document, from: number, to: number): Range {
   const range = doc.createRange();
@@ -400,5 +416,141 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     });
     await settle();
     expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 21, "cfi:3:Word1"]]);
+  });
+
+  it("(v) a rejected extraction: the turn saves its cfi and keeps the stored index, and later turns save at once", async () => {
+    const { fake, runtime, view, renderer } = await mount({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    const before = runtime.getSnapshot().canonicalWordIndex;
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.6, range: spanRange(doc, 3, 3) };
+    await click("Next page");
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"], ["doc-1", -1, "cfi:3:delta"]]);
+    expect(fake.effects.filter((e) => e.method === "persistence.updateProgress")).toEqual([]);
+    const deferred = fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred");
+    expect(deferred).toHaveLength(1);
+    expect(String(deferred[0].args[1]).startsWith("reason=book-words")).toBe(true);
+    expect(runtime.getSnapshot().canonicalWordIndex).toBe(before);
+  });
+
+  it("(w) no sections from the extractor, through the real runtime and port: the turn saves its cfi only", async () => {
+    const { fake, runtime, view, renderer, render } = await mount();
+    await render({ ensureBookWords: runtime.ensureBookWords });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await act(async () => { fake.resolveBookWords(null); }); // a reply without sections resolves null (ReaderContainer.tsx:282)
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
+    expect(fake.effects.filter((e) => e.method === "document.ensureBookWords")).toHaveLength(1);
+  });
+
+  it("(x) empty sections from the extractor: the turn saves its cfi only", async () => {
+    const { fake, runtime, view, renderer, render } = await mount();
+    await render({ ensureBookWords: runtime.ensureBookWords });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await act(async () => { fake.resolveBookWords(EMPTY_VALUE as never); });
+    await render({ ensureBookWords: runtime.ensureBookWords, bookWordSections: [] }); // the snapshot's empty sections reach the view
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
+  });
+
+  it.each(JUMPS)("(y) a held turn is not saved over a jump: $name", async ({ jump }) => {
+    const { fake, runtime, view, renderer, render } = await mount();
+    (renderer as any).scrollToAnchor = vi.fn(async () => {});
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await act(async () => { await jump({ runtime, view, doc }); });
+    await render(BOOK_WORDS);
+    await settle();
+    expect(saves(fake)).toEqual([]);
+  });
+
+  it("(z) control: with the port wired, a normal re-stamp still saves the held turn", async () => {
+    const { fake, runtime, view, renderer, render } = await mount();
+    await render({ ensureBookWords: runtime.ensureBookWords });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await act(async () => { fake.resolveBookWords(BOOK_VALUE as never); });
+    await render({ ensureBookWords: runtime.ensureBookWords, ...BOOK_WORDS });
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+  });
+
+  it("(q) a held turn that the re-stamp cannot report records page-turn-lost", async () => {
+    const { fake, view, renderer, render } = await mount();
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    const gap = doc.querySelector('[data-word-index="0"]')!.nextSibling!;
+    expect(gap.textContent).toBe(" "); // the space after "Alpha"
+    const range = doc.createRange();
+    range.setStart(gap, 0);
+    range.setEnd(gap, 1);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await render(BOOK_WORDS);
+    await settle();
+    expect(saves(fake)).toEqual([]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"))).toHaveLength(1);
+  });
+
+  // Rulings at registration (Blurby.Brain, 2026-10-15): a word click on provisional numbering holds its save like a turn.
+  const clickWord = (doc: Document, index: number) =>
+    act(async () => { (doc.querySelector(`[data-word-index="${index}"]`) as HTMLElement).click(); });
+  async function mountWiredClicks() {
+    const mounted = await mount();
+    const wired = { onWordClick: mounted.runtime.onWordClick, onHeldClickSave: mounted.runtime.onHeldClickSave };
+    await mounted.render(wired);
+    (mounted.renderer as any).scrollToAnchor = vi.fn(async () => {});
+    const { doc } = rawDoc();
+    mounted.renderer.contents = [{ doc, index: 3 }];
+    await loadSection(mounted.view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+    return { ...mounted, wired, doc };
+  }
+
+  it("(WC1) a word click before the book's word numbers apply saves the re-stamped index once they do", async () => {
+    const { fake, runtime, render, wired, doc } = await mountWiredClicks();
+    await clickWord(doc, 1);
+    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1); // the click still sets the anchor at once
+    await render({ ...wired, ...BOOK_WORDS });
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 21, "cfi:3:beta"]]);
+  });
+
+  it("(WC2) a word click then a turn, before the numbers apply, saves only the turn", async () => {
+    const { fake, renderer, render, wired, doc } = await mountWiredClicks();
+    await clickWord(doc, 1);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await render({ ...wired, ...BOOK_WORDS });
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+  });
+
+  it("(WC3) a word click then a TOC jump, before the numbers apply, saves nothing held", async () => {
+    const { fake, runtime, render, wired, doc } = await mountWiredClicks();
+    await clickWord(doc, 1);
+    await act(async () => { runtime.handleCommand({ kind: "go-to-href", href: "ch2.xhtml" }); });
+    await render({ ...wired, ...BOOK_WORDS });
+    await settle();
+    expect(saves(fake)).toEqual([]);
   });
 });
