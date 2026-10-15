@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T07:04:43Z",
+  "takenAt": "2026-10-15T07:12:50Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2417,6 +2417,28 @@
       "description": "A few chunks in the owner's books exceed Kokoro's 400-id token cap and pause with F4's notice; fix the chunk planner's token estimate (changes chunk timing).",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate.",
       "revision": "955604bcd94b89bfd92b7cf2abbb5a928695b1bc08172f160b7b8161d292942d",
+      "extra": {}
+    },
+    {
+      "id": "WS-TOKEN-REGEN-1",
+      "title": "Regenerating the pairing code stores one encrypted token",
+      "sequence": 40,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#ws-token-regen-1",
+      "branch": "eb/ws-token-regen-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "regenerate-ws-pairing-token stores the new token through startServer's encrypt path, so one token exists and plaintext never reaches settings.json when safeStorage is available; schemaVersion optional in BlurbySettings; every BlurbySettings key in SETTINGS_DEFAULTS.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate.",
+      "revision": "3b07e2195fdf373201a76dc1b8d2c0e3bbfcf36a5cbb90ba7fd2b0dbe8f867ec",
       "extra": {}
     }
   ],
