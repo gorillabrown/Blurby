@@ -1,0 +1,34 @@
+{
+  "id": "20261015T161707Z-external-set-status-WORD-INDEX-UNIFY-1",
+  "operation": "external-set-status",
+  "item_id": "WORD-INDEX-UNIFY-1",
+  "created": "2026-10-15T16:17:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued"
+    },
+    "expectedRevision": "5a0e65f1476fab7418c6d595cc76ff033682f94aa3ef80ec38c10be1199a48c6",
+    "idempotencyKey": "set-status:WORD-INDEX-UNIFY-1:[('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WORD-INDEX-UNIFY-1",
+      "idempotencyKey": "set-status:WORD-INDEX-UNIFY-1:[('status', 'queued')]",
+      "actualRevision": "b7380a7e606dd35c9a3618a83c5ef96633871dbc2d9cc11c3eae8211ee6380ef",
+      "recoveryId": "20261015T161707Z-external-set-status-WORD-INDEX-UNIFY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:47Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261015T161702Z-external-set-status-NARRATE-RECONCILE-RESIDUAL-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-RECONCILE-RESIDUAL-1",
+  "created": "2026-10-15T16:17:02Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued"
+    },
+    "expectedRevision": "40b8247a4b6145ce7b88c809c13348208f80a94068ce0192818358592bb3037e",
+    "idempotencyKey": "set-status:NARRATE-RECONCILE-RESIDUAL-1:[('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-RECONCILE-RESIDUAL-1",
+      "idempotencyKey": "set-status:NARRATE-RECONCILE-RESIDUAL-1:[('status', 'queued')]",
+      "actualRevision": "0e1cd96306c6ea8ecf8cdea28a0b58a0f6ad2ca385a70eb4f6f1545d8e57edd1",
+      "recoveryId": "20261015T161702Z-external-set-status-NARRATE-RECONCILE-RESIDUAL-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:44Z",
+  "outcome": "succeeded"
+}

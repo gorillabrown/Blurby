@@ -1,0 +1,50 @@
+{
+  "id": "20261015T161709Z-external-create-item-NARRATE-KEY-REPEAT-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-KEY-REPEAT-1",
+  "created": "2026-10-15T16:17:09Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Narrate's key forwarder drops held-key repeat",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XS",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-key-repeat-1",
+      "branch": "eb/narrate-key-repeat-1",
+      "description": "src/reader/modes/narrate/FoliateView.tsx:931-936 forwards iframe keys without repeat: ke.repeat, so held keys arrive as fresh presses.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at NARRATE-REBUILD-1's close-out (finding F10). Not a release gate.",
+      "sequence": 58,
+      "prerequisites": [],
+      "id": "NARRATE-KEY-REPEAT-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T15:51:52Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-KEY-REPEAT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-KEY-REPEAT-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-KEY-REPEAT-1",
+      "actualRevision": "52d487257d2426442871fc93fbf1152c5dd57d6aecfda6d88ca1e0d4b5a48ccf",
+      "recoveryId": "20261015T161709Z-external-create-item-NARRATE-KEY-REPEAT-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8155-a4c6-db029346a665",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T16:18:48Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261015T161700Z-external-set-status-NARRATE-TOKEN-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TOKEN-CAP-1",
+  "created": "2026-10-15T16:17:00Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued"
+    },
+    "expectedRevision": "e75bc664bb17182a727ca61982437b842a107a6d9d9a0def3f12dd54072ba779",
+    "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TOKEN-CAP-1",
+      "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('status', 'queued')]",
+      "actualRevision": "aa2ea4d8227370feb13ca3d70c2e5709783d4e3d38e1fce54a4e553320ac059d",
+      "recoveryId": "20261015T161700Z-external-set-status-NARRATE-TOKEN-CAP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T16:18:43Z",
+  "outcome": "succeeded"
+}
