@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T15:30:03Z",
+  "takenAt": "2026-10-15T15:51:52Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2805,6 +2805,28 @@
       "description": "Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate.",
       "revision": "538d886c051dc6690c07d930d034a9aef1543c843adc5ad17ec7966af4d484a4",
+      "extra": {}
+    },
+    {
+      "id": "TOC-JUMP-SAVE-1",
+      "title": "A contents-list jump in Page mode reopens on the old page",
+      "sequence": 57,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#toc-jump-save-1",
+      "branch": "eb/toc-jump-save-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "handleJumpToChapter saves the chapter's word index with the old page's cfi before navigating, and the new page's save is skipped; the book reopens on the old page. Pre-existing.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap from PAGE-SAVE-RESTAMP-2's live check (Blurby.Brain ruling: pre-existing, stub). Not a release gate.",
+      "revision": "eaa9459a5e45e8684b494b50afd7b4942732603e890a105ca3695a1aa1b74f37",
       "extra": {}
     }
   ],
