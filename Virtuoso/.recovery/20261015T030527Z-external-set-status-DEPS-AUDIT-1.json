@@ -1,0 +1,35 @@
+{
+  "id": "20261015T030527Z-external-set-status-DEPS-AUDIT-1",
+  "operation": "external-set-status",
+  "item_id": "DEPS-AUDIT-1",
+  "created": "2026-10-15T03:05:27Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-14"
+    },
+    "expectedRevision": "055c1b723b649919a32f9d677853df7b0cfb6dd4b076fab50910590bb9120c3f",
+    "idempotencyKey": "set-status:DEPS-AUDIT-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "DEPS-AUDIT-1",
+      "idempotencyKey": "set-status:DEPS-AUDIT-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-15T03:05:56Z",
+      "recoveryId": "20261015T030527Z-external-set-status-DEPS-AUDIT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T03:05:56Z",
+  "outcome": "succeeded"
+}

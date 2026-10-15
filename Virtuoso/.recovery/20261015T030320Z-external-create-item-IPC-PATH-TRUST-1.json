@@ -1,0 +1,50 @@
+{
+  "id": "20261015T030320Z-external-create-item-IPC-PATH-TRUST-1",
+  "operation": "external-create-item",
+  "item_id": "IPC-PATH-TRUST-1",
+  "created": "2026-10-15T03:03:20Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Main decides which files and folders the renderer can reach",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#ipc-path-trust-1",
+      "branch": "eb/ipc-path-trust-1",
+      "description": "get-cover-image reads only covers folders or a held doc's coverPath; save-settings ignores renderer sourceFolder and recentFolders; switch-folder accepts only main's dialog or recent list; coverPath pinned in save-library and dropped from apply-metadata-updates.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate. Merges after SAVE-LIBRARY-TRUST-1 (same keepMainPaths line). Full Spec: U9/U10 pass.",
+      "sequence": 19,
+      "prerequisites": [],
+      "id": "IPC-PATH-TRUST-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T01:37:13Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:IPC-PATH-TRUST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "IPC-PATH-TRUST-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:IPC-PATH-TRUST-1",
+      "actualRevision": "2026-10-15T03:04:43Z",
+      "recoveryId": "20261015T030320Z-external-create-item-IPC-PATH-TRUST-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81bb-9b46-de62eb91a539",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T03:04:46Z",
+  "outcome": "succeeded"
+}

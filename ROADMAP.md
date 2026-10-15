@@ -3,7 +3,7 @@
 **Last updated**: 2026-10-14 (QUIT-FLUSH-1 completed, merge `d21009b3`: BUG-192 resolved; the quit saves run in the cancelled first `will-quit` under a 3 s cap; review fixes W1, W2 and N1 ruled by Blurby Brain; LL-159; READER-VISUAL-DIAG-1 moves to 10 and dispatch-ready depth falls to 4; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, 2026-10-14 (LARGE-FOLDER-SYNC-1 technical half specified: Full Spec at 15, dispatch-ready depth back to 5; the design half stays an open owner decision; FOLDER-UNREACHABLE-GUARD-1 restated against `main/folder-sync.js`). Before it, 2026-10-14 (FOLDER-SCAN-PERF-1 completed, merge `534b43d2`: BUG-193 resolved; Done-when 9(d) waived by the owner; LARGE-FOLDER-SYNC-1 filed as a stub at 15, and the dispatch-ready items move up one; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, 2026-10-14 (roadmap review: G2 preparation surfaced launch, quit and packaging defects; Stage 8 adds FOLDER-SCAN-PERF-1, QUIT-FLUSH-1, PACKAGING-FIX-1 and UX-POLISH-2 as Full Specs plus six stubs; DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; BUG-194 and BUG-195 filed; LL-147 and LL-149 promoted to standing rules 47 and 48; see the [2026-10-14 plan](docs/planning/roadmap-reviews/2026-10-14-plan.md)). Before it, 2026-10-13 (roadmap review: NARRATE-REBUILD-1 is in flight at P5 of 6; the buffer is re-audited against the epic's P3/P4 merges and given a parallel-run plan with measurement windows; CLEANUP-MODE-BARREL-1, SETTINGS-WRITE-DURABLE-1 and UX-POLISH-1 amended; HB-2/HB-3 absorbed as GOV-NOTION-VIEWS-1 and GOV-NOTION-LINKS-1; LL-153 promoted to standing rule 46; see the [2026-10-13 plan](docs/planning/roadmap-reviews/2026-10-13-plan.md)). Before it, 2026-10-12 (buffer refilled to 5 full specifications; LL-135/138/143/141 promoted to standing rules 42–45; [plan](docs/planning/roadmap-reviews/2026-10-12-plan.md)). Earlier that day: NARRATE-REMOVE-1 completed (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1 completed, and OutsideAudit.10 closed ([D5 decisions](docs/studies/audit/OutsideAudit.10.2026-10-11/AuditDecisions.10.2026-10-12.md)).
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: Narration rebuilt (owner, 2026-10-11): the new Narrate (NARRATE-REBUILD-1) passes its Done-when. The cursor is the word at the current playback sample, frames F2–F6 of the held storyboard hold, and the owner signs off. No dated deadline (storyboard A7). The earlier finish line, TTS Quality Confidence + Reading Experience v2, is retired with the old Narrate. Its mode-separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, kept as history).
-**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (10, read-only) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half; its prerequisite QUIT-FLUSH-1 is met) → LIBRARY-READ-ALLOW-1 (15, BUG-196, Full Spec) → PAGE-POSITION-SAVE-1 (16, BUG-197, Full Spec) → stubs FOLDER-UNREACHABLE-GUARD-1 (17), PDF-IMPORT-DIAG-1 (18), OVERLAY-THEME-SWEEP-1 (19), EINK-CONTROLS-1 (20), KF2-WAIVER-RETIRE-1 (21), NARRATE-YEARS-1 (22, blocked on the epic). Dispatch-ready depth is 5 (10, 13, 14, 15, 16). The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. QUIT-FLUSH-1 completed 2026-10-14 (merge `d21009b3`); FOLDER-SCAN-PERF-1 before it (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
+**Queue**: NARRATE-REBUILD-1 (9, **Path: epic**, head, **in flight**: P1–P5 merged, P6 at owner gate G2, which is ready; [packet](docs/planning/epics/2026-10-12-narrate-rebuild/charter.md)) → READER-VISUAL-DIAG-1 (10, read-only) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, in flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half; its prerequisite QUIT-FLUSH-1 is met) → LIBRARY-READ-ALLOW-1 (15, BUG-196, Full Spec) → PAGE-POSITION-SAVE-1 (16, BUG-197, Full Spec) → DEPS-AUDIT-1 (17), SAVE-LIBRARY-TRUST-1 (18) and IPC-PATH-TRUST-1 (19), Full Specs and release gates → stubs SAVE-LIBRARY-MERGE-1 (20), LARGE-FOLDER-SYNC-2 (21), PAGE-POSITION-SAVE-2 (22), FOLDER-UNREACHABLE-GUARD-1 (23), PDF-IMPORT-DIAG-1 (24), OVERLAY-THEME-SWEEP-1 (25), EINK-CONTROLS-1 (26), KF2-WAIVER-RETIRE-1 (27), NARRATE-YEARS-1 (28, blocked on the epic). Dispatch-ready depth is 5 (10, 13, 14, 15, 16). The LARGE-FOLDER-SYNC-1 design half (very large folders) is an open owner decision. QUIT-FLUSH-1 completed 2026-10-14 (merge `d21009b3`); FOLDER-SCAN-PERF-1 before it (merge `534b43d2`). See [Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14) and the [Parallel run plan](#parallel-run-plan-2026-10-13).
 **Last sprint**: QUIT-FLUSH-1, completed 2026-10-14 (merge `d21009b3`; [close-out](docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md)). Before it, FOLDER-SCAN-PERF-1, completed 2026-10-14 (merge `534b43d2`; [close-out](docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md)). Before it, NARRATE-REMOVE-1, completed 2026-10-12 (merge `386651fc`; [close-out](docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md)). Before it, TEST-TIMEOUT-HEADROOM-1, EINK-HOVER-FIX-1 and LIBRARY-SETTINGS-FIX-1, all completed 2026-10-12 (close-outs: [timeouts](docs/governance/close-outs/CloseOut.TEST-TIMEOUT-HEADROOM-1.2026-10-12.md), [e-ink](docs/governance/close-outs/CloseOut.EINK-HOVER-FIX-1.2026-10-12.md), [Ctrl+K](docs/governance/close-outs/CloseOut.LIBRARY-SETTINGS-FIX-1.2026-10-12.md)). Before them, READER-MODE-SEPARATION-2 (completed 2026-10-11; [close-out](docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md)).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -530,9 +530,9 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparation and the owner smokes surfaced. The finish line is still the epic; these are sideways fixes that make the G2 build and daily use sound. See the [plan](docs/planning/roadmap-reviews/2026-10-14-plan.md).
 
-**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all three hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine"), after the last Stage 8 merge; (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1, PAGE-POSITION-SAVE-1); (3) SAVE-LIBRARY-TRUST-1 is merged, because LIBRARY-READ-ALLOW-1 lets `read-file-buffer` trust any library document's own path. Full-suite failures under load on this machine follow Brain's closed-list rule (the three timing-sensitive tests, outside the item's diff, passing twice when re-run alone). NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge, from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
+**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
 
-**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
+**Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1) → DEPS-AUDIT-1 (17, release gate; moves Electron to 41.10.7) → SAVE-LIBRARY-TRUST-1 (18, release gate; BUG-198) → IPC-PATH-TRUST-1 (19, release gate; after SAVE-LIBRARY-TRUST-1, same `keepMainPaths` line). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
 <a id="quit-flush-1"></a>
 
@@ -1690,18 +1690,855 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 - **LL-108 (one mode-aware canonical anchor; 0 is valid):** the commit moves `currentWordIndex` and the canonical anchor, so progress, exit, backtrack and the next mode's start all read the same word. Test (b) pins that agreement. Every check uses `== null` or `typeof`, so word 0 saves.
 - **LL-083 (visual indicators via refs, not state):** no new React state. The highlight goes through the existing published highlight index, and the turn bookkeeping lives in refs.
 
+<a id="deps-audit-1"></a>
+
+#### DEPS-AUDIT-1 — Fix or account for every production dependency advisory *(position 17 — Full Spec; authored 2026-10-14 on main @ 0100f140)*
+
+- **What:** Apply every non-major advisory fix (`npm audit fix`, never `--force`). Put a size cap on every read of an entry from an EPUB (a ZIP archive), so a crafted book cannot make the main process allocate gigabytes. Record a reachability note for every advisory that stays. After this item, `npm audit --omit=dev` lists no high or critical advisory that a non-major move would fix. The five that stay are adm-zip and the Kokoro stack (kokoro-js, @huggingface/transformers, onnxruntime-node, sharp), and each has a written note. The lockfile moves; `package.json` does not (measured). The Kokoro pins do not move. This item is a Stage 8 release gate (Technical rulings).
+- **Why** (every line read on `main` @ `0100f140`, 2026-10-14; measured in the probe worktree `C:\Projects\Blurby\.worktrees\deps-audit-probe`, detached at `0100f140`, after `npm ci`):
+  - **Counts on the base.** `npm audit --json`: 53 (3 critical, 36 high, 13 moderate, 1 low). `npm audit --omit=dev --json`: 25 (0 critical, 16 high, 9 moderate). These match Blurby.Brain's evidence.
+  - **Production high, fixable without a major (11):** `@xmldom/xmldom`, `brace-expansion`, `builder-util-runtime`, `electron-updater`, `form-data`, `js-yaml`, `nanoid`, `protobufjs`, `tmp`, `undici`, `ws`. These are the packages whose `fixAvailable` is `true`, or an object with `isSemVerMajor: false`.
+  - **Production high with no fix (5):** `adm-zip` (direct), `kokoro-js` (direct), and its subtree `@huggingface/transformers`, `onnxruntime-node`, `sharp`.
+  - **After `npm audit fix` in the probe** (exit 1, because advisories remain; 80 s): production 13 (5 high, 8 moderate, 0 critical). The 5 highs are exactly the no-fix five. All dependencies: 22 (0 critical, 9 high, 13 moderate). The 9 highs are the five plus the `patch-package` chain (`patch-package`, `braces`, `micromatch`, `find-yarn-workspace-root`). npm's only fix for that chain is a major downgrade to `patch-package@6.0.7`. All three criticals (`concurrently`, `shell-quote`, `tar`) are gone. `package.json` was not written (`git diff --quiet -- package.json` exits 0).
+  - **What `npm audit fix` changes** (dry-run with `--dry-run --json`, then confirmed by applying it; 238 add/remove/change lines). Moves of note:
+    - **Production:** `adm-zip` 0.5.16→0.5.18, `electron-updater` 6.8.3→6.8.9, `builder-util-runtime` 9.5.1→9.7.0, `@xmldom/xmldom` 0.8.13→0.8.15 (under `mammoth`), `mammoth` 1.12.0→1.13.0, `undici` 7.24.6→7.30.0 (under `cheerio`), `ws` 8.20.0→8.22.0 and `form-data` 4.0.5→4.0.6 (under `jsdom`), `nanoid` 5.1.7→5.1.16 (under `docx`), `tmp` 0.2.5→0.2.7 (under `exceljs`), `js-yaml` 4.1.1→4.3.2 (under `electron-updater`), `protobufjs` 7.5.6→7.6.6, `qs` 6.15.0→6.16.1.
+    - **Development:** `electron` 41.1.0→41.10.7, `electron-builder` and `app-builder-lib` 26.8.1→26.15.3, `vite` 6.4.2→6.4.4, `vitest` 4.1.2→4.1.11, `concurrently` 9.2.1→9.2.5, `tar` 7.5.13→7.5.22, `shell-quote` 1.8.3→1.12.0, `postcss` 8.5.13→8.5.30, `@electron/rebuild` 4.0.3→4.2.1.
+  - **No direct dependency changes major.** Compared by package name across `dependencies` and `devDependencies`, there are 0 major moves. Compared by lockfile path, 11 entries change major: `@electron/get` 2→5, `abbrev` 3→4, `ajv` 6→8, `env-paths` 2→3, `fs-extra` 8→10, `json-schema-traverse` 0.4→1, `jsonfile` 4→6, `node-gyp` 11→12, `nopt` 8→9, `proc-log` 5→6, `universalify` 0.1→2. Each is either a dependency of the in-range `electron` or `electron-builder` update, or a change in which copy is hoisted to the top level. For example, `electron-updater` used `fs-extra` 10.1.0 before, from a nested copy, and still does; only the hoisted copy changed. The three non-dev entries (`fs-extra`, `jsonfile`, `universalify`) are the `electron-updater` copies.
+  - **The Kokoro pins do not move.** The lockfile has `kokoro-js` 1.2.1, `@huggingface/transformers` 3.8.1, `onnxruntime-node` 1.24.3 and `onnxruntime-common` 1.24.3 (held by the `overrides` entry, `package.json:93-95`), `sharp` 0.34.5 and `phonemizer` 1.2.1, identical before and after. `kokoro-js` 1.2.1 is also the newest version published, so a fresh resolve cannot move it either.
+    - The one move inside that subtree is `protobufjs` (a dependency of `onnxruntime-web` under transformers). In Node, transformers' `require` entry is `dist/transformers.node.cjs` (its `exports.node.require`). That file requires only `onnxruntime-common` and `onnxruntime-node`, so neither `onnxruntime-web` nor `protobufjs` loads in Blurby.
+    - After `npm audit fix`, `scripts/patch-onnxruntime.js` still applies: `node_modules/onnxruntime-node/dist/backend.js` has 0 `setImmediate`, and `tests/onnxruntime-patch.test.js` passes.
+  - **`patches/kokoro-js+1.2.1.patch` no longer exists on main.** NARRATE-REBUILD-1's P5 checkpoint deleted it (`238f47ec`, "D10 patch deleted"; charter D10). `git ls-files -- patches` prints nothing. The `postinstall` (`package.json:17`) still runs `patch-package`, which finds no patch files. So "the patch application is unchanged" means the patch stays absent and no new patch appears.
+  - **adm-zip: the advisories and where Blurby reaches them.** There are eight advisories on `adm-zip <=0.6.0`. npm offers no fix, because `^0.5.16` (`package.json:98`) excludes 0.6.x, and `onnxruntime-node` also requires `^0.5.16`. `npm audit fix` takes 0.5.18, which is still in every advisory's range.
+    - **Reached: three memory-allocation DoS advisories.**
+      - GHSA-xcpc-8h2w-3j85 (fixed in 0.6.0): `Buffer.alloc(_centralHeader.size)` runs before any check (`node_modules/adm-zip/zipEntry.js:103`). The advisory names `getData()`, `readFile()`, `readAsText()` and the extract methods as triggers.
+      - GHSA-7q85-xj36-vmfc (fixed in 0.6.1): allocation from the declared uncompressed size, via `getData()`.
+      - GHSA-rcw4-f5rp-g42v (fixed in 0.6.1): a declared size of 0 turns the inflate cap off (`methods/inflater.js:5` sets `maxOutputLength` only when `expectedLength > 0`).
+      - **Probe:** an 8 KiB entry with its central and local size fields set to 0 is fully inflated by `getData()`, which then throws `CRC32 checksum failed`. The memory is spent before the failure.
+      - Blurby calls `getData()` or `readAsText()` on entries of user-supplied EPUBs at 15 sites (listed below). A crafted EPUB in an import or a synced source folder can therefore make the main process try to allocate up to about 4 GB and crash. Severity is high (CVSS 7.5, availability only; no confidentiality or integrity impact).
+    - **Not reached: five advisories.**
+      - GHSA-vwc7-r8mq-g2x9 (symlink-following extract), GHSA-j5f4-cc29-5x44 (SUID bits on extract) and GHSA-p634-w6r4-rjp2 (`getEntry` and `extractAllTo` disagree on duplicate names): Blurby never extracts to disk. `git grep -n -E 'extractAllTo|extractEntryTo' -- main main.js` exits 1. The one file written from an archive is the cover, at `path.join(dataPath, "covers", docId + ext)` (`main/file-parsers.js:638-641`); `docId` comes from the app and `ext` from the image's magic bytes, so an entry name never becomes a path.
+      - GHSA-c6fg-446q-cg94 (`getDataAsync` skips the size guard) and GHSA-8238-w5pm-2374 (unhandled error in async DEFLATE): Blurby uses no async adm-zip API.
+  - **adm-zip call sites in `main/`** (`git grep -n -E 'adm-zip|AdmZip|extractAllTo|extractEntryTo|getEntries|readFile|readAsText'`, filtered to adm-zip objects):
+
+    | # | Function (file:line) | Input | adm-zip calls | Reaches the vulnerable path? |
+    |---|---|---|---|---|
+    | 1 | `extractContent`, `.epub` branch (`main/file-parsers.js:385-520`) | user EPUB: import, folder sync (`main.js:310`, `:412`), `main/ipc/library.js:208`, `:233`, `:280`, `:381`, first-run sample (`main.js:609`) | `new AdmZip(filepath)` `:389`; `getEntries()` `:400`; `getData()` at `:404` (container), `:422` (OPF), `:449` (nav), `:464` (NCX), `:491` (every spine document) | **Yes**: 5 `getData()` reads |
+    | 2 | `extractEpubCover` (`main/file-parsers.js:575-645`) | user EPUB (`main/ipc/library.js:353`; `extractDocMetadata`) | `new AdmZip` `:578`; `getEntries()` `:579`; `getData()` `:585`, `:595`, `:636` (cover image, written to `covers/<docId><ext>`) | **Yes** (memory). Write path: no (name not used) |
+    | 3 | `extractEpubMetadata` (`main/file-parsers.js:651-674`) | user EPUB (`main.js:19` import, `extractDocMetadata`) | `new AdmZip` `:655`; `getEntries()` `:656`; `getData()` `:661`, `:668` | **Yes**: 2 reads |
+    | 4 | `extractWords` (`main/epub-word-extractor.js:163-300`) | library EPUB, via `extract-epub-words` (`main/ipc/tts.js:162-175`, used by Narrate) | `new AdmZip(epubPath)` `:169`; `getEntries()` `:175`; `getData()` `:181`, `:195`, `:228` (every spine document) | **Yes**: 3 reads |
+    | 5 | `validateEpub` (`main/epub-converter.js:1054-1124`) | the user's EPUB copied as is (`convertToEpub` `.epub` case, `:1028-1037`), and Blurby's own converter output (`:442`, `:576`, `:718`, `:771`, `:888`, `:979`) | `new Zip(epubPath)` `:1058`; `getEntries()` `:1059`; `readAsText()` `:1065`, `:1082`; `getEntry().header.method` `:1117` | **Yes**: 2 reads (the `.epub` copy is untrusted) |
+    | 6 | `buildEpubZip` (`main/epub-converter.js:84-204`) | Blurby's own chapters, cover and images | `new Zip()`, `addFile`, `getEntry().header`, `toBuffer()` | **No**: write side only. No advisory covers building an archive |
+
+    `new AdmZip(path)` itself reads the whole file and parses the central directory. Its memory is bounded by the file's real size, not by a declared size. No advisory names the constructor or `getEntries()`.
+  - **adm-zip inside the Kokoro stack is install-time only.** `onnxruntime-node` requires `adm-zip` and `global-agent` only from `script/install.js` and `script/install-utils.js`, its `postinstall`. Its runtime `dist/` requires neither. On `win32/x64` and `win32/arm64` its install metadata lists no downloads (`requirements` is `[]`; only `linux/x64` fetches CUDA), so on Blurby's platform the script downloads and extracts nothing.
+  - **electron-updater.** `electron-updater` <=6.8.8 depends on `builder-util-runtime` <9.7.0. That version can leak a `PRIVATE-TOKEN` or `Authorization` header on a cross-origin redirect (GHSA-p2f4-r6v6-j797). Versions 6.8.4 to 6.8.10 exist; `npm audit fix` takes 6.8.9 (the `latest` tag), which is non-major. The issue is not exploitable here, because Blurby sets no updater token or request headers (`git grep -n -i -E 'requestHeaders|GH_TOKEN|addAuthHeader|setFeedURL' -- main main.js` exits 1; the github provider, `package.json:31-35`, is public). It is fixed anyway.
+  - **Electron is listed as dev but is the shipped runtime.** `electron` <=41.10.5 carries 9 high advisories, among them a context-isolation bypass (GHSA-h7rp-cf8h-j98x, <41.2.2), cross-origin reads through file and HTTP protocol handlers (GHSA-j84w-jfhq-vhvj, <41.10.6), and `<webview>` enabling Node in workers (GHSA-9qh4-3jw8-366w, <41.10.6). `npm audit fix` takes 41.10.7 within major 41. `npm audit --omit=dev` does not show these advisories, but every build ships this Electron.
+  - **Probe test results after `npm audit fix`.** The nine suites touching adm-zip users or the updater (`tests/epub-2b-pipeline.test.js`, `epub-converter.test.js`, `epub-fidelity.test.js`, `epubWordExtractor.test.js`, `hotfix12.test.ts`, `packagingFix.test.js`, `rich-article-capture.test.mjs`, `tts-engine.test.js`, `onnxruntime-patch.test.js`): `npx vitest run` exits 0, 143 passed. `npm run typecheck` exits 0. The full suite, `npm run build` and `--dir` builds were not run in the probe (the machine was loaded).
+  - **adm-zip 0.6.1, measured for option C.** Copied over the probe's `node_modules/adm-zip` and then restored: the public method lists of `adm-zip.js` and `zipEntry.js` are identical to 0.5.18, and the six adm-zip suites pass (114 tests). 0.6.1 allocates STORED data from the real length and caps inflate output at the declared size (`zipEntry.js:103-130`, `methods/inflater.js:5-12`).
+  - **Sample-book characterization** (plain Node at `0100f140`, used in Done-when 13): `extractContent('resources/sample-meditations.epub')` returns a 486,874-character string; `countWords` of it is 80,479. `extractWords` returns 80,426 words in 18 sections. `extractEpubMetadata` returns `{"title":"Meditations","author":"Emperor of Rome Marcus Aurelius"}`. `validateEpub` returns `{"valid":true,"errors":[]}`.
+- **Rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1; scope, in substance):**
+  1. Apply every non-major fix (`npm audit fix`, never `--force`), then run the full gates.
+  2. adm-zip is the priority, because it parses untrusted EPUB files the user imports. Read the advisories, classify every call site as reaching the vulnerable path or not, and put the technical choice (A: harden the call sites; B: replace the library) to Blurby.Brain with a recommendation. Write the spec complete for the recommended option.
+  3. electron-updater: take the fixed version if it is non-major; if only a major fixes it, flag it and leave it out. **Measured:** 6.8.9 is non-major, so it is taken.
+  4. Kokoro stack (no fix offered): record each advisory and whether Blurby's local-inference use reaches it. Do not change the pinned model or `kokoro-js` (NARRATE-REBUILD-1 charter). Confirm `npm audit fix` without `--force` does not move `kokoro-js`, `onnxruntime-node` or `@huggingface/transformers`; if it would, pin or exclude them. **Measured:** it does not move them, so no pin or exclusion is needed. Done-when 6 asserts the versions.
+  5. Dev-only criticals: fix them if the fix is non-major; otherwise record them. **Measured:** all three are fixed by non-major moves.
+  - **Done when (ruled):** `npm audit --omit=dev` shows no high or critical that is fixable without a major bump; each remaining one has a written reachability note; the full gates are green.
+- **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1, on the planner's five questions):**
+  - **Q1 (A), harden the call sites:**
+    - One small module wraps every adm-zip read site and caps two things: the entry's declared uncompressed size, checked before inflating, and its actual inflated size.
+    - The caps are 64 MiB per entry and 512 MiB per operation. 512, not 256, because a large illustrated EPUB can legitimately pass 256 MiB of images.
+    - Text, metadata and word extraction touch only the entries they need.
+    - Both caps live in `main/constants.js` (Constants Separation Rule).
+    - A cap breach returns the existing clear read or import error and never crashes the main process.
+    - adm-zip 0.5.18 is taken through `npm audit fix`.
+    - **Tests:** a crafted zip whose declared size exceeds each cap is rejected without allocating; a normal EPUB and a large-but-legitimate EPUB under the caps still read.
+    - Option B (replace the library) is not taken, and option C (adm-zip 0.6.1) is rejected.
+  - **Q2, yes:** Electron 41.1.0→41.10.7 and electron-builder 26.15.3 are in this item. Their gates are the `--dir` build, the scratch-profile launch-log control and the full suite (Done-when 12–13).
+  - **Q3, yes:** DEPS-AUDIT-1 merges before the Stage 8 batched quiet suite and the owner smoke. NARRATE-REBUILD-1's D3 and D6 are re-run on final `main` on the quiet machine as part of that batched run.
+  - **Q4, record:** the `patch-package` chain is recorded (dev and install time only), not removed.
+  - **Q5, record:** the production moderates whose fix is a major are recorded. A follow-up is filed only if a reachability note finds one reachable; none does (Implementation detail, advisories doc).
+  - **Release gate:** DEPS-AUDIT-1 is itself a Stage 8 release gate, because a crafted import can crash the main process through adm-zip. Nothing is released until it is merged.
+  - **Position 17; the stubs are not renumbered here.**
+- **Design decisions (planner, 2026-10-14, within the rulings):**
+  - **One bounded reader, made per operation.** A new `main/zip-read.js` exports `createEntryReader()`, which returns `readEntry(entry)`. Each parser function makes one reader per call (one operation). The reader never calls adm-zip's `getData()`, so adm-zip's own allocation is never used. It works in this order:
+    1. **Declared size first.** If `entry.header.size` (the declared uncompressed size) is above the per-entry cap or above what is left of the operation's budget, it throws before reading or inflating anything.
+    2. It takes the entry's raw bytes with `entry.getCompressedData()`. For an unmodified entry this is a slice of the file buffer already in memory (`zipEntry.js:22-28`, `:144-148`), so it adds no allocation.
+    3. It handles the entry by method:
+       - STORED: the slice, rejected if longer than the cap.
+       - DEFLATE: `zlib.inflateRawSync(raw, { maxOutputLength: cap })`, so Node's zlib stops at the real cap even when the header lies; a declared size of 0 is no bypass.
+       - Encrypted or any other method: throws.
+    4. The CRC is still checked (`zlib.crc32(data)` against `entry.header.crc`), so a corrupted entry fails as it does today. Electron 41 and the test runner ship Node 24, which has `zlib.crc32`.
+  - **Two limits:**
+    - `ZIP_ENTRY_MAX_BYTES` (64 MiB) for one entry.
+    - `ZIP_OPERATION_MAX_BYTES` (512 MiB) across all entries one operation reads, so 1,000 bombs of 64 MiB each cannot pile up in a word list.
+    - Over either limit, `readEntry` throws `Error("ZIP entry too large: <name>")` with `code: "ZIP_ENTRY_TOO_LARGE"`.
+  - **Only the entries each operation needs.** On the base this already holds, and the item keeps it:
+    - `extractContent` and `extractWords`: container, OPF, nav/NCX and spine documents only.
+    - `extractEpubMetadata`: container and OPF.
+    - `extractEpubCover`: container, OPF and the one cover image.
+    - `validateEpub`: `mimetype` and the OPF.
+
+    No operation reads image entries other than the cover. A large illustrated EPUB's images therefore count against no text operation.
+  - **A breach is the existing error, never a crash.** Each function already catches a bad entry:
+    - `extractContent`: `{ userError: "Could not read this file — it may be corrupted or in an unsupported format." }` (`:558-563`). This is the existing import error the library shows.
+    - `extractEpubCover`: `null` (`:642-645`).
+    - `extractEpubMetadata`: `{ title: null, author: null }` (`:671-673`).
+    - `validateEpub`: `valid: false` with the error in `errors` (`:1119-1121`).
+    - `extractWords`: the throw reaches `extract-epub-words`, which returns `{ error }` (`main/ipc/tts.js:173-175`).
+
+    No allocation happens before the throw, so the main process stays up. There is no new user-facing text and no renderer change. The reader's own "Could not read EPUB file" message (`src/reader/modes/*/FoliateView.tsx`) comes from foliate's renderer-side open and is unchanged.
+  - **The limits are read at call time** (`constants.ZIP_ENTRY_MAX_BYTES`, not destructured at load). This lets tests lower them before calling the real parsers, and it keeps the Constants Separation Rule.
+  - **adm-zip stays and is updated** (0.5.16 → 0.5.18 through `npm audit fix`). Its constructor, `getEntries()`, `getEntry()` and the writer are unchanged. The audit row for adm-zip stays, with its reachability note.
+  - **The lockfile is the only package change.** `npm audit fix` writes no `package.json` change (measured). No range is raised by hand.
+- **Out of scope:**
+  - Any semver-major move: `adm-zip` 0.6.x (option C, rejected), `@azure/msal-node` 7, the `exceljs`/`mammoth`/`patch-package` downgrades npm proposes, and `electron` 42+.
+  - Removing `patch-package` (ruling Q4: recorded, kept).
+  - A follow-up for the production moderates (ruling Q5). They are recorded with reachability notes, and none is reached:
+    - `uuid` via `@azure/msal-node` and `exceljs`: both call only `v4()` with no buffer (`@azure/msal-node/dist/crypto/GuidGenerator.mjs:3`; `exceljs/lib/xlsx/xform/sheet/cf-ext/cf-rule-ext-xform.js:1`, `:43`, `:77`). The advisory needs a caller-supplied buffer to v3/v5/v6.
+    - `argparse` and `sprintf-js` via `mammoth`: required only by `mammoth/bin/mammoth`, its command-line tool.
+    - `global-agent`, `roarr` and `sprintf-js` via `onnxruntime-node`: install script only.
+  - The Kokoro model file, `kokoro-js`, `onnxruntime-node`, transformers, `sharp`, the `overrides` entry, `scripts/patch-onnxruntime.js`, `main/sharp-stub.js`, and everything under `main/narrate/**` and `main/tts-*.js`.
+  - `buildEpubZip` (write side).
+  - The MOBI parsers (no ZIP).
+  - DOCX import (mammoth parses its own ZIP; its `@xmldom/xmldom` is fixed by `npm audit fix`).
+  - **LL-156 check:** the one waiver this item adds is "the Kokoro stack is not changed", and the lockfile does touch its subtree: `protobufjs` under `onnxruntime-web`. That move is brought into scope, named, checked for whether it loads (it does not, in Node), and asserted in Done-when 6. No earlier waiver names `main/file-parsers.js`, `main/epub-word-extractor.js`, `main/epub-converter.js` or the lockfile.
+- **Prerequisites:** none in code. Merges after PAGE-POSITION-SAVE-1 (ruled), so it lands after every in-flight change. No in-flight item edits `package.json` or `package-lock.json`, checked 2026-10-14 against `refs/remotes/origin/main`:
+  - LARGE-FOLDER-SYNC-1 (`origin/eb/large-folder-sync-1`, unmerged) edits `main/constants.js`, at `:147-158` and `:266-271`. This item's constants hunks are `:67` and `:227`, so they do not collide.
+  - LIBRARY-READ-ALLOW-1 merged as `037472c9` (`main/ipc/library.js` only).
+  - PAGE-POSITION-SAVE-1's fence excludes package files and the parsers.
+  - NARRATE-REBUILD-1 P6 (`origin/eb/narrate-rebuild-1-p6`) edits only its own docs and `scripts/narrate-rebuild/epic-window.ps1`.
+  - `main` has since moved to `b542ecec` (the LIBRARY-READ-ALLOW-1 merge and governance commits). `git diff --name-status 0100f140 b542ecec -- main/file-parsers.js main/epub-word-extractor.js main/epub-converter.js main/constants.js package.json package-lock.json` prints nothing.
+  - **Stage 8 release gate (rulings Q3 and "release gate"):** DEPS-AUDIT-1 is a release gate. It merges after PAGE-POSITION-SAVE-1 and before the batched quiet full suite and the batched owner smoke, so both run on a `main` that has Electron 41.10.7 and the capped reader.
+    - NARRATE-REBUILD-1's D3 and D6 are re-run on that final `main`, on the quiet machine, as part of the same batched run.
+    - This item does not edit the epic's files; the batched run's owner schedules those re-runs.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44).
+  - An `npm audit` command exits 1 whenever any advisory remains, and advisories remain here by design. So the audit rows gate on the parse, and record npm's exit code (expected 1) without gating on it.
+  - Dry-runs were made on `0100f140` (base) and in the probe after `npm audit fix` (post), 2026-10-14.
+  - `$S` in the rows below means the session scratch folder.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/zipEntryCap.test.js` exits 1, and exactly tests (a)–(e) fail, each for its stated reason (the over-cap entry is read in full); controls (f), (f2) and (f3) pass. (f3) carries a 60 s per-test timeout (`it(..., 60_000)`), because it parses an 8 MiB chapter. Record the output in the staging memo. Dry-run of the fixture on base (plain Node, cap lowered to 4096): `extractWords` returned 1,639 words, `extractContent` returned the text, `extractEpubCover` wrote an 8,196-byte cover, `extractEpubMetadata` returned the title "Bomb", and each would fail its C2 expectation.
+    2. After C2: `npx vitest run tests/zipEntryCap.test.js tests/zipRead.test.js tests/epub-2b-pipeline.test.js tests/epub-converter.test.js tests/epub-fidelity.test.js tests/epubWordExtractor.test.js tests/hotfix12.test.ts tests/packagingFix.test.js tests/rich-article-capture.test.mjs tests/tts-engine.test.js tests/onnxruntime-patch.test.js` exits 0. Dry-run post (the nine existing files only): exit 0, 143 passed.
+    3. `npm ci` exits 0 on the C2 tree, which installs from the committed lockfile and runs `postinstall`. Dry-run base: exit 0, 741 packages.
+    4. **Production audit (ruled Done-when):**
+       ```powershell
+       npm audit --omit=dev --json > "$S\prod.json"; "npm exit=$LASTEXITCODE"
+       $v = (Get-Content "$S\prod.json" -Raw | ConvertFrom-Json).vulnerabilities.PSObject.Properties.Value
+       $hc = @($v | Where-Object { $_.severity -in 'high','critical' })
+       $fx = @($hc | Where-Object { ($_.fixAvailable -is [bool] -and $_.fixAvailable) -or ($_.fixAvailable -isnot [bool] -and -not $_.fixAvailable.isSemVerMajor) })
+       "fixable=$($fx.Count) remaining=$(($hc.name | Sort-Object) -join ',')"
+       ```
+       Passes when it prints `fixable=0 remaining=@huggingface/transformers,adm-zip,kokoro-js,onnxruntime-node,sharp`. Dry-run base: `fixable=11` (the eleven listed under Why), 16 remaining. Post: exactly the passing line; npm exit 1.
+    5. **All-dependency audit:** the same parse on `npm audit --json`, plus `$j.metadata.vulnerabilities.critical`, prints `critical=0 fixable=0 remaining=@huggingface/transformers,adm-zip,braces,find-yarn-workspace-root,kokoro-js,micromatch,onnxruntime-node,patch-package,sharp`. Dry-run base: `critical=3`, `fixable` 36 of 39. Post: the passing line.
+    6. **Pinned and expected versions, from the committed lockfile:**
+       ```powershell
+       $p = (Get-Content package-lock.json -Raw | ConvertFrom-Json -AsHashtable).packages
+       (@('kokoro-js','@huggingface/transformers','onnxruntime-node','onnxruntime-common','sharp','phonemizer','adm-zip','electron-updater','electron','electron-builder') | ForEach-Object { "$_=" + $p["node_modules/$_"].version }) -join ' '
+       ```
+       Passes when it prints `kokoro-js=1.2.1 @huggingface/transformers=3.8.1 onnxruntime-node=1.24.3 onnxruntime-common=1.24.3 sharp=0.34.5 phonemizer=1.2.1 adm-zip=0.5.18 electron-updater=6.8.9 electron=41.10.7 electron-builder=26.15.3`. On the base, the first six fields are identical and the last four read 0.5.16, 6.8.3, 41.1.0 and 26.8.1.
+       Also, every lockfile key matching `^node_modules/(kokoro-js|@huggingface/|onnxruntime-|sharp|@img/|phonemizer)` has the same version as on `refs/remotes/origin/main`, a count of 0 differences (dry-run post: 0).
+       Also, `git diff refs/remotes/origin/main -- package.json` prints nothing and exits 0. This covers `overrides` and every range (dry-run post: exit 0, empty).
+    7. **No major move of a direct dependency:** for each name in `package.json`'s `dependencies` and `devDependencies`, the major (or 0.minor) of `node_modules/<name>` in the lockfile equals the base's. The check prints `direct major moves=0` (dry-run post: 0). The path-level major moves are exactly the eleven listed under Why; a different list stops the run (Failure handling).
+    8. **Kokoro patch state unchanged:** `git ls-files -- patches` prints nothing and exits 0 (dry-run base: same). After Done-when 3, `(Select-String -Path node_modules\onnxruntime-node\dist\backend.js -Pattern setImmediate -AllMatches | Measure-Object).Count` prints `0` (dry-run post: 0).
+    9. **No unbounded entry read is left in `main/`:** `git grep -n -E '\.(getData|getDataAsync|readAsText|readAsTextAsync|readFileAsync|extractAllTo|extractAllToAsync|extractEntryTo)\(' -- main` prints nothing (exit 1). Dry-run base: 15 hits, exit 0: `main/epub-converter.js:1065`, `:1082`; `main/epub-word-extractor.js:181`, `:195`, `:228`; `main/file-parsers.js:404`, `:422`, `:449`, `:464`, `:491`, `:585`, `:595`, `:636`, `:661`, `:668`.
+    10. `git grep -c -F 'createEntryReader' -- main` prints exactly `main/epub-converter.js:2`, `main/epub-word-extractor.js:2`, `main/file-parsers.js:4`, `main/zip-read.js:2` and exits 0. Each consumer has the require plus one call per function; `zip-read.js` has the definition and the export. Dry-run base: exit 1, no output.
+    11. `git grep -n -E 'ZIP_ENTRY_MAX_BYTES|ZIP_OPERATION_MAX_BYTES' -- main/constants.js` prints 4 lines and exits 0: `const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;`, `const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;` and the two export lines. Dry-run base: exit 1.
+    12. `npm test` exits 0 on the owner's machine (standing rule 47). Under load, Stage 8's closed-list rule applies: the three timing-sensitive tests, outside this diff, each pass twice when re-run alone. `npm run typecheck` exits 0. `npm run build` exits 0 (standing rule 48; the build tool itself moved: vite 6.4.4).
+    13. **Launch control, new Electron, scratch profile, no owner (LL-151, LL-152):**
+        - **Setup:** `$prof = Join-Path $env:TEMP ("blurby-da1-" + [guid]::NewGuid())`, an empty folder. A fresh profile's first run imports the bundled sample through `extractContent`, `extractEpubMetadata` and `extractEpubCover` (`main.js:598-625`). This exercises three of the five hardened sites and Electron 41.10.7.
+        - **Control first, on a C1 build** (base lockfile, Electron 41.1.0): `npm run build`, then `npx electron-builder --win --x64 --dir --publish never` (each exits 0). With `$env:BLURBY_USER_DATA_DIR = $prof`, launch `release\win-unpacked\Blurby.exe`, wait 30 s, then close the window. `$prof\library.json` holds `sample-meditations` with `wordCount` 80479. Record `error.log` (if any) in full.
+        - **Then on C2** (after Done-when 3, a new `$prof`): the same steps. `library.json` holds `sample-meditations` with `wordCount` 80479 and a `coverPath` exactly when the C1 run had one. `error.log` has no line containing `too large` or `Failed to load sample document`, and no line that the C1 run's log lacks.
+        - **Reader check:** open Meditations from its library card (the executor may drive it), and the reader shows the first section. Record a screenshot in the staging memo.
+        - The owner's profile and Drive are never touched. Each build is made in this item's worktree and never overwrites the G2 build.
+    14. **Advisories doc:** `docs/governance/DEPENDENCY_ADVISORIES.md` exists, and it has a row for every advisory name Done-when 4 and 5 leave (adm-zip, kokoro-js, @huggingface/transformers, onnxruntime-node, sharp, patch-package, braces, micromatch, find-yarn-workspace-root), each with a verdict and evidence. Check: for each name, `git grep -c -F "| $name |" -- docs/governance/DEPENDENCY_ADVISORIES.md` exits 0. Dry-run base: the file does not exist; `git grep -c -F "| adm-zip |" -- docs/governance/DEPENDENCY_ADVISORIES.md` exits 1 with no output.
+    15. **Diff fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log `docs/governance/close-outs/Timing.DEPS-AUDIT-1.jsonl` and the staging memo if kept (standing rule 41):
+        - `M package-lock.json`
+        - `M main/constants.js`
+        - `A main/zip-read.js`
+        - `M main/file-parsers.js`
+        - `M main/epub-word-extractor.js`
+        - `M main/epub-converter.js`
+        - `A tests/zipEntryCap.test.js`
+        - `A tests/zipRead.test.js`
+        - `A docs/governance/DEPENDENCY_ADVISORIES.md`
+
+        `package.json` is not in the list: it is measured unchanged, and the rulings take no major. `release/`, `dist/` and `tests/perf-baseline-results.json` are never staged.
+- **Effort:** M.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the Stage 8 batched smoke (ruling Q3).
+- **Lane:** Platform & Maintenance. Execution surfaces D (main process) and B (tests).
+- **Source:** Blurby.Brain's ruling of 2026-10-14 (tier 1), on the `npm audit` evidence from `main` @ `0100f140`; the GitHub advisories named under Why.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `0100f140`; unchanged at `b542ecec`; re-grep after PAGE-POSITION-SAVE-1 and LARGE-FOLDER-SYNC-1 merge):
+  - **`package-lock.json`:** run `npm audit fix` (never `--force`, never `npm update`), and nothing else. Then run Done-when 4–8 before touching code.
+  - **`main/constants.js`:** after `EPUB_CHAPTER_CACHE_MAX` (`:67`), in the "File Parsers" block, add:
+    ```js
+    /** Largest single entry read from an EPUB/ZIP archive, declared or inflated (bytes, 64 MiB); adm-zip <=0.6.0 trusts the declared size */
+    const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;
+    /** Largest total read by one archive operation (bytes, 512 MiB; a large illustrated EPUB can pass 256 MiB) */
+    const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;
+    ```
+    Then add `ZIP_ENTRY_MAX_BYTES,` and `ZIP_OPERATION_MAX_BYTES,` after `EPUB_CHAPTER_CACHE_MAX,` in `module.exports` (`:227`).
+  - **New `main/zip-read.js`** (CommonJS, no file I/O):
+    ```js
+    // main/zip-read.js — bounded reads of entries from untrusted ZIP archives (EPUB).
+    // CommonJS only — Electron main process
+    "use strict";
+    const zlib = require("zlib");
+    const constants = require("./constants"); // read at call time so tests can lower the caps
+
+    // Reads around adm-zip's getData(): adm-zip <=0.6.0 sizes its output from the entry's declared
+    // size (GHSA-xcpc-8h2w-3j85, GHSA-7q85-xj36-vmfc, GHSA-rcw4-f5rp-g42v). The caps here are ours.
+    // One reader per operation (one parser call); the operation cap spans every entry it reads.
+    function createEntryReader() {
+      const maxEntry = constants.ZIP_ENTRY_MAX_BYTES;
+      let left = constants.ZIP_OPERATION_MAX_BYTES;
+      return function readEntry(entry) {
+        if (entry.isDirectory) return Buffer.alloc(0);
+        const name = entry.entryName;
+        const tooLarge = () => Object.assign(new Error(`ZIP entry too large: ${name}`), { code: "ZIP_ENTRY_TOO_LARGE" });
+        if (entry.header.encrypted) throw new Error(`ZIP entry is encrypted: ${name}`);
+        const cap = Math.min(maxEntry, left);
+        if (entry.header.size > cap) throw tooLarge(); // declared size, checked before anything is read or inflated
+        const raw = entry.getCompressedData();
+        let data;
+        if (entry.header.method === 0) {
+          if (raw.length > cap) throw tooLarge();
+          data = raw;
+        } else if (entry.header.method === 8) {
+          // actual size: zlib stops at the cap even when the header lies (a declared 0 is no bypass)
+          try { data = zlib.inflateRawSync(raw, { maxOutputLength: Math.max(cap, 1) }); }
+          catch (err) { if (err.code === "ERR_BUFFER_TOO_LARGE") throw tooLarge(); throw err; }
+        } else {
+          throw new Error(`Unsupported ZIP method ${entry.header.method}: ${name}`);
+        }
+        if ((zlib.crc32(data) >>> 0) !== (entry.header.crc >>> 0)) throw new Error(`ZIP entry CRC mismatch: ${name}`);
+        left -= data.length;
+        return data;
+      };
+    }
+
+    module.exports = { createEntryReader };
+    ```
+  - **`main/file-parsers.js`:**
+    - After the constants import (`:13`), add `const { createEntryReader } = require("./zip-read");`.
+    - `extractContent`: after `const entries = zip.getEntries();` (`:400`), add `const readEntry = createEntryReader();`. Replace `X.getData()` with `readEntry(X)` at `:404`, `:422`, `:449`, `:464` and `:491`; the `.toString("utf-8")` calls stay.
+    - `extractEpubCover`: after `:579`, add `const readEntry = createEntryReader();`. Replace at `:585`, `:595` and `:636` (`const coverData = readEntry(coverEntry);`).
+    - `extractEpubMetadata`: after `:656`, add `const readEntry = createEntryReader();`. Replace at `:661` and `:668`.
+  - **`main/epub-word-extractor.js`:** after the `getAdmZip` line (`:14`), add `const { createEntryReader } = require("./zip-read");`. After `const entries = zip.getEntries();` (`:175`), add `const readEntry = createEntryReader();`. Replace at `:181`, `:195` and `:228`.
+  - **`main/epub-converter.js`:**
+    - After the constants import (`:11`), add `const { createEntryReader } = require("./zip-read");`.
+    - In `validateEpub`, after `:1059`, add:
+      ```js
+      const readEntry = createEntryReader();
+      const readText = (name) => { const e = zip.getEntry(name); return e ? readEntry(e).toString("utf8") : ""; };
+      ```
+      This keeps `readAsText`'s `""` for a missing entry (`node_modules/adm-zip/adm-zip.js:161-170`).
+    - `:1065` becomes `readText("mimetype").trim()`, and `:1082` becomes `readText(opfEntry)`.
+    - `buildEpubZip` and `:1117` are unchanged.
+  - **New `docs/governance/DEPENDENCY_ADVISORIES.md`:** a dated table (base sha, `npm audit` date). It has one row per remaining high or critical advisory name, with columns `| Package | Version | Scope | Advisories | Reached by Blurby? | Evidence | Revisit when |`, and two shorter tables:
+    - **Fixed by DEPS-AUDIT-1:** the eleven production packages, plus electron, concurrently, shell-quote and tar, each with the version moved to.
+    - **Moderates left:** each with the major its fix would need and its reachability note (ruling Q5), from Out of scope. None is reached: `uuid` (only `v4()` with no buffer), `argparse` and `sprintf-js` (mammoth's CLI only), `global-agent`, `roarr` and `sprintf-js` (onnxruntime-node install script only). So no follow-up is filed. If a later audit adds a reached moderate, it gets a follow-up stub.
+
+    The rows, from the Why:
+    - **adm-zip 0.5.18** (prod, direct; 8 advisories): the three allocation DoS advisories are not reached after this item, because every entry read goes through `main/zip-read.js` and no `getData`/`readAsText` remains (Done-when 9). Its tests are `tests/zipEntryCap.test.js` and `tests/zipRead.test.js`. The five extract and async advisories are not reached: there are no extract calls and no async API. The copy under `onnxruntime-node` is install-time only, with no download on win32. Revisit when `onnxruntime-node` allows `adm-zip` ^0.6.1. A move to 0.6.x was rejected for this item (ruling Q1).
+    - **kokoro-js 1.2.1, @huggingface/transformers 3.8.1** (prod; no advisory of their own, only inherited from `onnxruntime-node` and `sharp`): not reached. Revisit when NARRATE-REBUILD-1 closes and its pins can move.
+    - **onnxruntime-node 1.24.3** (prod; via `adm-zip` and `global-agent`): not reached at runtime, because both are required only by `script/install*.js`, and the install metadata for win32 lists no downloads. The CPU inference path loads neither.
+    - **sharp 0.34.5** (prod; libvips, libheif and librsvg CVEs): not reached. transformers imports it for image processing only, and Blurby runs text-to-speech, never an image pipeline. The packaged workers stub it when it is not found (`main/tts-worker.js:17`, `main/narrate/producer-worker.js:9`, `main/sharp-stub.js`).
+    - **patch-package 8.0.1 and its braces / micromatch / find-yarn-workspace-root chain** (dev; stack-exhaustion DoS on glob patterns): install-time only, on patterns patch-package builds itself, and no patch files exist (`patches/` is gone since `238f47ec`). The fix is a major downgrade; recorded and kept (ruling Q4).
+    - **The protobufjs move inside the Kokoro subtree:** one line, not loaded in Node (the `transformers.node.cjs` requires).
+- **Tests:**
+  - **New `tests/zipEntryCap.test.js`** (Vitest, node environment, committed at C1). It builds real EPUBs under `os.tmpdir()` with `adm-zip`:
+    - `mimetype` is stored, with `header.method = 0`, as `buildEpubZip` does at `main/epub-converter.js:102-104`.
+    - `META-INF/container.xml` points to `OEBPS/content.opf`.
+    - The OPF has a `dc:title` "Bomb", a `dc:creator`, a manifest with `c1.xhtml` and `cover.jpg` (`id="cover"`, `image/jpeg`), and a spine of `c1`.
+    - `c1.xhtml` is a `<p>` of repeated `word `.
+    - `cover.jpg` is `FF D8 FF E0` followed by zeros.
+
+    The builder takes `{ chapterBytes, coverBytes, opfPadBytes }`; the OPF pad is an XML comment. `beforeAll` sets `require("../main/constants").ZIP_ENTRY_MAX_BYTES = 4096`, and `afterAll` restores it. At C1 that property is read by nothing.
+    - **(a)** `extractWords` on `{ chapterBytes: 8192 }` rejects with `/too large/`. Fails at C1: it resolves with about 1,639 words.
+    - **(b)** `extractContent` on the same file returns `{ userError: "Could not read this file — it may be corrupted or in an unsupported format." }`. Fails at C1: it returns the text.
+    - **(c)** `extractEpubCover(file, "doc1", tmp)` on `{ coverBytes: 8192 }` returns `null`, and no file exists under `tmp/covers`. Fails at C1: it writes an 8,196-byte cover.
+    - **(d)** `extractEpubMetadata` on `{ opfPadBytes: 8192 }` returns `{ title: null, author: null }`. Fails at C1: `{ title: "Bomb", author: … }`.
+    - **(e)** `validateEpub` on `{ opfPadBytes: 8192 }` returns `valid: false`, with an error matching `/too large/`. Fails at C1: `valid: true`.
+    - **(f) control:** on `{ chapterBytes: 1024, coverBytes: 1024 }` with the same lowered cap, every function works as today: `extractWords().totalWords > 0`; `extractContent` returns a string containing `word`; the cover file is written with 1,028 bytes; the title is "Bomb"; `validateEpub` returns `{ valid: true, errors: [] }`. Passes at C1 and C2.
+    - **(f2) control, normal EPUB at the default caps** (a separate `describe` that lowers nothing): `resources/sample-meditations.epub` gives exactly the characterization under Why. `extractContent` returns a 486,874-character string whose `countWords` is 80,479; `extractWords` gives 80,426 words in 18 sections; `extractEpubMetadata` gives `{ title: "Meditations", author: "Emperor of Rome Marcus Aurelius" }`; `validateEpub` gives `{ valid: true, errors: [] }`. Passes at C1 and C2.
+    - **(f3) control, large but legitimate EPUB at the default caps:** `{ chapterBytes: 8 * 1024 * 1024, coverBytes: 40 * 1024 * 1024 }`, with true declared sizes. `extractWords` returns about 1.68 million words (`totalWords > 1_600_000`); `extractContent` returns the text; `extractEpubCover` writes a 41,943,044-byte cover; `validateEpub` is valid. Passes at C1 and C2.
+  - **New `tests/zipRead.test.js`** (committed at C2 with the module; unit tests of new code, not positive controls). Entries are built with `adm-zip`, and their size fields are rewritten in the buffer where a case needs a lying header: central `PK\1\2` offset 24, local `PK\3\4` offset 22. Each case spies on `entry.getData`, `entry.getCompressedData` and `require("zlib").inflateRawSync` (`vi.spyOn`); "without allocating" means none of those three is called.
+    - **(g) Declared size over the per-entry cap, rejected without allocating:** an 8 KiB deflated entry declared as `0xFFFFFFF0` (about 4 GiB) throws `code === "ZIP_ENTRY_TOO_LARGE"` at the default caps, and all three spies show 0 calls.
+    - **(h) Declared size over the per-operation cap, rejected without allocating:** with `ZIP_OPERATION_MAX_BYTES = 4096`, two deflated entries each declared and holding 3 KiB. The first read returns 3,072 bytes. The second throws `ZIP_ENTRY_TOO_LARGE`, with `inflateRawSync` and `getCompressedData` called once in total (for the first entry only).
+    - **(i) Actual size over the cap when the header lies small:** the 8 KiB entry declared as `0` with `ZIP_ENTRY_MAX_BYTES = 4096` throws `ZIP_ENTRY_TOO_LARGE`. `inflateRawSync` is called once, with `maxOutputLength: 4096`, so zlib never produces more than the cap.
+    - **(j) A small lying header under the cap still reads correctly:** the same entry declared as `0` reads back as 8,192 correct bytes at the default caps (prototyped on 0.5.18).
+    - **(k)** A STORED 8 KiB entry with the 4 KiB cap throws `ZIP_ENTRY_TOO_LARGE` before `getCompressedData`, because its declared size is checked first.
+    - **(l)** A STORED entry with one data byte flipped in the buffer throws `/CRC mismatch/`.
+    - **(m)** A directory entry returns a 0-length buffer.
+    - Each test restores the constants it lowers and its spies.
+- **Constants:** `ZIP_ENTRY_MAX_BYTES` (64 MiB) and `ZIP_OPERATION_MAX_BYTES` (512 MiB) in `main/constants.js`, as ruled.
+  - The per-entry cap is above any legitimate EPUB text document or cover by more than an order of magnitude (the sample's whole text is 486,874 characters; (f3) reads a 40 MiB cover).
+  - The operation cap leaves room for a large illustrated EPUB (ruling Q1), though today no operation reads images other than the cover.
+  - Both keep a crafted archive's reads bounded.
+- **Branch:** `eb/deps-audit-1` from `refs/remotes/origin/main` after PAGE-POSITION-SAVE-1 merges, in worktree `C:\Projects\Blurby\.worktrees\deps-audit-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:**
+  - **C1:** `tests/zipEntryCap.test.js` only (gate: Done-when 1). Then build C1 and run the Done-when 13 control.
+  - **C2:** `package-lock.json` from `npm audit fix`, `main/constants.js`, `main/zip-read.js`, the three parser files, `tests/zipRead.test.js` and `docs/governance/DEPENDENCY_ADVISORIES.md` (gates: Done-when 2–15).
+  - Stage files by name. Then merge to `main` with `--no-ff` on Blurby.Brain's go, and push (Rule 5b).
+- **Failure handling:**
+  - **Any move to a new major stops the run** and goes to Blurby.Brain, with the lockfile diff for that package. That covers a direct dependency in Done-when 7, any change in the Kokoro subtree in Done-when 6, or a path-level major move list different from the eleven under Why. Do not pin, override or `--force` around it.
+  - **Registry or advisory drift:** if `npm audit fix` at run time moves a package not listed under Why, or Done-when 4 or 5 shows an advisory not listed here, record it in the staging memo and stop for Blurby.Brain. Do not widen the scope silently.
+  - At C1, (f) failing is a fixture fault: fix the test, not the code. Any of (a)–(e) passing means the test cannot see the exposure: fix the test.
+  - If (f) fails at C2, the cap rejects legitimate books: stop for Blurby.Brain. Do not raise the constants on your own.
+  - If the Done-when 13 C2 run differs from the C1 control in `wordCount`, `coverPath` or new `error.log` lines, record both logs and stop. That is an Electron 41.10.7 or packaging regression for Blurby.Brain (LL-152). If the C1 control itself fails to import the sample, the control cannot see the defect: stop (LL-151).
+  - If an existing test fails, report it exactly and stop; do not weaken it.
+  - **Line drift:** if a cited line differs after the prerequisites merge, proceed only when the content is identical, and record the new number in the staging memo.
+  - Retry ceiling: two corrections per task, then a BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`, then `npm ci`. There is no data-format change.
+- **Lane ownership (parallel run):** surface D: `package-lock.json`, `main/constants.js` (the two definitions after `:67` and the two export lines after `:227` only), the new `main/zip-read.js`, and the entry-read lines and one require in each of `main/file-parsers.js`, `main/epub-word-extractor.js` and `main/epub-converter.js`. Surface B: the two new tests. Surface E: the new advisories doc.
+  - **Forbidden:**
+    - `package.json`; `patches/`; `scripts/patch-onnxruntime.js`.
+    - Every file NARRATE-REBUILD-1 owns or pins: `main/narrate/**`, `main/tts-*.js`, `main/sharp-stub.js`, `main/ipc/tts.js`, `src/reader/modes/narrate/**`, the model under `%APPDATA%\Blurby\models\`, and the `kokoro-js`, `onnxruntime-node`, `@huggingface/transformers` and `sharp` versions.
+    - `buildEpubZip`; every other line of the three parser files and of `main/constants.js`; `main.js`; `main/ipc/**`; `preload.js`; every renderer file.
+    - The shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`).
+  - **Shared-core touches:** none.
+  - **Merge order:** after PAGE-POSITION-SAVE-1 (ruled), and therefore after LARGE-FOLDER-SYNC-1 (same `main/constants.js`, different hunks). Before the Stage 8 batched quiet full suite and the batched owner smoke (ruling Q3), because it is a release gate.
+    - NARRATE-REBUILD-1's D3 and D6 are re-run on that final `main`, on the quiet machine, within the batched run. This item does not edit the epic.
+    - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–12 and 15.
+    - Position 17 is Blurby.Brain's to reconcile with the stubs; this run renumbers nothing (standing rule 46).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Call-site cap tests committed and failing on today's parsers; normal, small and large-legitimate controls pass; C1 `--dir` build and launch control | calculable | positive control | bounded | medium | 60m (one new test file with an EPUB builder, five failing cases and three controls over five real parser functions including a 48 MiB fixture, one `--dir` build and one scratch-profile launch) | — | — |
+| 2 | `npm audit fix` applied; audit, version, major-move and patch-state gates read | calculable | dependency update | mechanical | low | 20m (one 80 s command, `npm ci`, five pwsh parse gates already dry-run) | — | — |
+| 3 | Bounded entry reader with declared- and actual-size caps, two constants, fifteen read sites switched, helper unit tests with no-allocation spies | calculable | main-process fix | bounded | medium | 50m (one 40-line module, 18 one-line call-site edits across three files, one test file with seven cases, header-rewrite fixtures and three spies) | — | — |
+| 4 | Dependency advisories doc written from the measured evidence | calculable | documentation | mechanical | low | 20m (three tables, rows prescribed in the spec) | — | — |
+| 5 | Full suite, typecheck, build, C2 `--dir` build and launch with reader check; reviews; merged and pushed | calculable | merge and verify | mechanical | low | 60m (full `npm test` + typecheck + build + `--dir` build + launch, log compare and screenshot, two parallel reviews, one --no-ff merge) | — | — |
+
+**Total:** chain 7m · sum 7m; 5 of 5 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):**
+  - The base was verified before any claim: `git fetch`, `0100f140` recorded, and a detached probe worktree.
+  - Every line was read on `0100f140`, and the five files were re-checked against `b542ecec` (no change).
+  - The run re-greps after PAGE-POSITION-SAVE-1 and LARGE-FOLDER-SYNC-1 merge.
+  - The `npm audit` results are dated, because the advisory database moves.
+- **Standing rule 41 (LL-136):** the fence (Done-when 15) exempts the time log and staging memo.
+- **Standing rule 43 (LL-138):**
+  - (a)–(e) fail at C1 because each of the five reached call sites reads an over-cap entry in full. This was dry-run with the real parsers on the base.
+  - (f), (f2) and (f3) prove the caps do not reject a small, a normal (the sample) or a large-but-legitimate book.
+  - The helper's own tests are labelled as unit tests of new code, not controls.
+- **Standing rule 44 (LL-143):**
+  - Every row names `pwsh` and an exact exit code.
+  - Where `npm audit`'s exit code is 1 by design, the row gates on the parsed JSON instead and says so.
+  - Every `git grep` gate was dry-run on the base: the "prints nothing" gate (9) has 15 hits there, and the presence gates (10, 11) exit 1 there.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register and renumbers no stub.
+- **Standing rule 47 (LL-147):** the full suite, the Windows `--dir` builds and the launches run in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** `npm run typecheck` and `npm run build` are in Done-when 12, though no TypeScript changes, because the build tool and the test runner both move.
+- **LL-142 (a label is a declaration, not evidence):**
+  - "Not reached" is backed by an executed or read proof, not by advisory text: the grep for extract calls, the cover path built from `docId`, the `transformers.node.cjs` requires, the empty win32 install metadata, and the fixture probe that read over-cap entries through all five sites.
+  - "Fixed" means the parsed audit (Done-when 4), not npm's summary line.
+  - The Kokoro pins are asserted from the committed lockfile, not assumed from "`npm audit fix` is safe".
+- **LL-150 (census what a deletion removes):** `npm audit fix` removes 73 package names from the tree. Each was `git grep`ped as an import target across `main`, `main.js`, `preload.js`, `src`, `scripts`, `tests` and the Vite config: 0 hits, so no Blurby file imports a removed package directly. Among the removed names is `yauzl`, which had been a candidate replacement for adm-zip.
+- **LL-151 (prove the recorder can see a failure):** Done-when 13 first runs the launch on a C1 build, which must import the sample and produce the `wordCount` the C2 run is compared against.
+- **LL-152 (A/B on the base before attributing):** the Electron 41.1.0 → 41.10.7 move is judged against a C1 build launched with the same steps, not against memory of how the app behaved.
+- **LL-156:** the "Kokoro stack unchanged" waiver was checked against the item's own edit (the lockfile). The one move inside that subtree (`protobufjs`) is named, shown not to load, and asserted.
+- **LL-118 (trace imports bottom-up):** reachability was traced from every adm-zip import upward to its IPC and startup callers (the call-site table), and from `kokoro-js`'s `require` down to the files transformers actually loads in Node.
+- **LL-089 (patch-package fork maintenance):** superseded on main. The kokoro-js patch was deleted at P5, so there is no fork to regenerate. Done-when 8 asserts that `patches/` stays empty and that the separate onnxruntime patch still applies after `npm ci`.
+
+<a id="save-library-trust-1"></a>
+
+#### SAVE-LIBRARY-TRUST-1 — The renderer cannot change where a library book's file is *(position 18 — Full Spec; authored 2026-10-14 on main @ `b542ecec`)*
+
+- **What:** `save-library` stops trusting the renderer for file locations. For every document id the main process already holds, it keeps main's own `filepath` and `convertedEpubPath` and ignores the values the renderer sent. It does not add any id main does not hold, so new documents enter only through the main-process import paths. A payload that is not an array is ignored. Every other field the renderer edits is saved as it is today. The user sees no change, except that BUG-198 (below) stops happening. **Release gate:** Stage 8 release-gate condition (3) (`ROADMAP.md:533`). Nothing is released until this item is merged.
+- **Why:**
+  - `save-library` (`main/ipc/library.js:47`) is `ctx.setLibrary(newDocs); ctx.saveLibrary();`. It replaces the whole library with the renderer's array (`main.js:118`), and `preload.js:47` exposes it as `saveLibrary`.
+  - LIBRARY-READ-ALLOW-1 (merge `037472c9`) lets `read-file-buffer` read any path that exactly matches a library document's `filepath` or `convertedEpubPath` (`isLibraryDocPath`, `main/ipc/library.js:38-44`, called at `:195`). So a compromised renderer can save a document whose `filepath` is any file, then read that file (`preload.js:56`).
+  - The same forged record also reaches every handler that reads paths by document id:
+    - `load-doc-content` (`:140-182`; returns `doc.filepath` or `doc.convertedEpubPath` at `:147-154`);
+    - `get-doc-chapters` (`:209-220`; parses `doc.filepath`);
+    - `extract-epub-words` (`main/ipc/tts.js:162-176`);
+    - `open-doc-source` (`main/ipc/documents.js:101-118`; `shell.showItemInFolder(doc.filepath)` at `:114`);
+    - `scan-library-metadata` (`main/ipc/library.js:662`);
+    - **`delete-doc`, which unlinks `doc.filepath` from disk** (`:70-82`; `fs.unlink` at `:79`). So today `saveLibrary` followed by `deleteDoc` deletes any file the app's user can delete. This item closes that too.
+  - Every handler above takes an id, not a path, and reads the record the main process holds (`ctx.getDocById`, `main.js:116`, or `ctx.getLibrary().find`, `main/ipc/tts.js:165`). None takes a path from the renderer, so making `save-library` keep main's paths closes all of them. No edit is needed in those handlers.
+  - **BUG-198: a stale renderer copy already overwrites main's paths, without any attack.** The sequence:
+    1. `load-doc-content` converts a non-EPUB book lazily and writes `doc.convertedEpubPath` and `doc.ext` on main's record (`:167-170`), without broadcasting the change.
+    2. On the renderer side, `resolveLoadedDocResult` (`src/utils/loadDocResult.ts:17-24`) sets the renderer's own `filepath` to the converted EPUB, and `LibraryContainer.tsx:247-250` merges that into the renderer's library.
+    3. The next renderer save sends that copy back. `markDocsSeen` (`:441-450`) does this without a click. Main's `filepath` is now the converted EPUB.
+    4. `rescan-folder` matches books by `filepath` (`:345`), so it no longer finds the source file's book. It adds the file as a new record at position 0 (`:394-399`) and drops the old record (`:445-449`). The full folder sync does the same (`main.js:345`). The reading position, favourite, tags, collection and queue place are lost.
+
+    A save from a copy taken before the conversion also drops `convertedEpubPath`, so the book is converted again on the next open. Both stop once main keeps its own two paths.
+- **Ruling (Blurby.Brain, 2026-10-14, Rule 11 tier 1, security, nothing user-visible):**
+  - `save-library` keeps `filepath` and `convertedEpubPath` from the main process's existing record for every doc id it already has, and ignores renderer-supplied values for those two fields.
+  - It ignores any new id the renderer adds with a filepath. New documents enter only through the main-process import paths.
+  - Confirm that `load-doc-content` and `get-doc-chapters` read only the main-held record (confirmed above).
+  - Tests: a renderer save that changes an existing doc's filepath leaves it unchanged; a renderer-added doc with a filepath is rejected; a `read-file-buffer` `convertedEpubPath` match test.
+  - Placed right after DEPS-AUDIT-1 (memo `docs/governance/close-outs/Memo.LIBRARY-READ-ALLOW-1.GovernanceStaging.2026-10-14.md`, lines 52 and 55).
+- **Technical rulings (Blurby.Brain, 2026-10-14):**
+  - **Q1 (a):** ship as ruled. The three remaining arbitrary-read paths (`get-cover-image`, `sourceFolder` through `save-settings`, and `switch-folder`) go to IPC-PATH-TRUST-1, the next item (position 19).
+  - **Q2 (a):** removal by omission stays in this item, and SAVE-LIBRARY-MERGE-1 follows.
+  - The position loss traced above is filed as **BUG-198**, and this item fixes it, with a regression test at the IPC boundary (test (h)).
+  - This item is a release gate (Stage 8).
+- **BUG-198 entry** (Blurby.Roadmap files it in `docs/governance/BUG_REPORT.md`, above BUG-197, when this specification folds in; C2 changes only its **Status** line):
+  ```
+  ### BUG-198 — A converted folder book is reset to the start after a rescan
+  **Reported:** 2026-10-14 (code trace while specifying SAVE-LIBRARY-TRUST-1, on `main` @ `037472c9`; not yet seen live; filed for Blurby.Brain)
+  **Severity:** MEDIUM (a folder book's reading position, favourite, tags, collection and queue place are lost; needs only an open, a library save and a rescan or folder sync)
+  **Status:** OPEN (fix scheduled: SAVE-LIBRARY-TRUST-1)
+  **Location:** `main/ipc/library.js:47` (`save-library` takes the renderer's `filepath`), `:167` (lazy conversion), `:345` (`rescan-folder` matches by `filepath`); `main.js:345` (folder sync, same); `src/utils/loadDocResult.ts:17-24` (the renderer's copy takes the converted path as its `filepath`).
+  **Description:** Opening a non-EPUB folder book converts it on demand. The renderer's copy of the book then carries the converted EPUB as its `filepath`, and the next library save from the renderer (for example marking cards seen) writes that path into main's record. The next rescan or folder sync no longer recognises the source file as this book: it adds a new record at position 0 and drops the old one.
+  **Fix path (ruled):** `save-library` keeps main's `filepath` and `convertedEpubPath` for every document it holds (SAVE-LIBRARY-TRUST-1).
+  ```
+- **Design decisions (planner, 2026-10-14):**
+  - **Main's record comes from `ctx.getLibrary()`, not `ctx.getDocById`.** `setLibrary` rebuilds the id index on a 100 ms debounce (`main.js:111-118`), so `getDocById` can return objects that are no longer in the library for up to 100 ms after any `setLibrary`. `getLibrary()` is what gets saved and what `isLibraryDocPath` checks, so it is the record to keep.
+  - **Unknown ids are dropped, with or without a path.** This enforces the ruling that new documents enter only through the main import paths, with one condition.
+    - No renderer caller adds documents through `saveLibrary`: all five callers (`LibraryContainer.tsx:264`, `:355`, `:426`, `:436`, `:449`) map over the existing array.
+    - Dropping only path-bearing ids would still let a stale copy bring back a document main removed (a rescan prune or a cloud-sync replace).
+    - Rejecting the whole save instead would lose the legitimate edits in the same array.
+  - **Main's values always win, absent ones too.** If main's record has no `convertedEpubPath`, the saved record has none, whatever the renderer sent. Assigning `filepath: held.filepath` writes an `undefined` key when main has none; `JSON.stringify` drops it, and `isLibraryDocPath` skips falsy paths (`:43`).
+  - **Only the two ruled fields are pinned.**
+    - `ext` is not pinned. A stale `ext` cannot redirect a read, because `load-doc-content` checks `convertedEpubPath` first (`:147`), and `get-doc-chapters` uses `path.extname(doc.filepath)` (`:215`).
+    - `originalFilepath` is never read in `main/`; it is only written (`:264`, `:308`).
+    - `coverPath` goes to `get-cover-image`. IPC-PATH-TRUST-1 adds it to this same function (`keepMainPaths`) when it makes covers depend on main's record.
+  - **A non-array payload is ignored** (no `setLibrary`, no `saveLibrary`). Today it replaces the library with a non-array value. This is a one-line check on a trust boundary.
+  - **Deletion by omission is kept** (technical ruling Q2 (a)). A document the renderer leaves out is removed, as today. This is not a read hole, because removing a record only shrinks what `isLibraryDocPath` allows. Its data race (a stale array drops documents main just added, and tombstones are lost) belongs to SAVE-LIBRARY-MERGE-1.
+  - **No change to `preload.js`, the renderer, `main.js` or any other handler.** `preload.js` stays the boundary (PR-6), and the method signature is unchanged.
+- **Out of scope:**
+  - IPC-PATH-TRUST-1 (position 19, technical ruling Q1 (a)) takes the renderer-controlled paths that read files without going through the library:
+    - `get-cover-image` (`main/ipc/misc.js:312-332`, reads any path, `:321`);
+    - `save-settings` setting `sourceFolder` (`main/ipc/state.js:26`, `Object.assign(settings, newSettings)`), which `read-file-buffer` then trusts as an allowed root (`main/ipc/library.js:190-194`);
+    - `switch-folder` (`main/ipc/state.js:76-85`, any existing folder).
+  - `import-dropped-files` (`main/ipc/library.js:222-334`) stays as designed: the user chose those files (`preload.js:66`, `:73`).
+  - SAVE-LIBRARY-MERGE-1 (technical ruling Q2 (a)): `save-library` keeping documents the renderer omits, and the tombstones a `get-state` copy strips (`main/ipc/state.js:15-18` against `main.js:272-275`).
+  - Cloud sync replacing the library from remote data (`main/sync-engine.js:838`, `:1070`), and `import-library` (`main/ipc/library.js:506-540`, a backup file the user picks in a main-process dialog). Neither is renderer-supplied; each is a separate trust boundary.
+  - The 100 ms stale-index window (`main.js:111-118`), in which `load-doc-content` can write `convertedEpubPath` onto an object that has just left the library. It predates this item, which does not change it.
+  - **LL-156 check:** LIBRARY-READ-ALLOW-1 left "other handlers that read `doc.filepath` directly (`load-doc-content`, `get-doc-chapters`, `extract-epub-words`)" out of scope. This item changes where their paths come from, not their code; those handlers stay unedited and are closed by this fix. FOLDER-SCAN-PERF-1's waiver on the allowed-roots check is not touched (`:190-194` unchanged; Done-when 5).
+- **Prerequisites:** none in code. LIBRARY-READ-ALLOW-1 (merged `037472c9`) is the reason for this item, and its test file is reused as a regression suite. `main/ipc/library.js` is unchanged between `037472c9` and `b542ecec`, so every line number below holds on `b542ecec`. BUG-198 is filed (text above) before dispatch.
+  - **Merge after DEPS-AUDIT-1** (queue order). DEPS-AUDIT-1 has no specification on `main` @ `b542ecec`. Its adm-zip call sites are `main/epub-converter.js:16`, `main/epub-word-extractor.js:14` and `main/file-parsers.js:18`, none in `main/ipc/library.js`. Re-grep at dispatch. If DEPS-AUDIT-1 renames anything `main/ipc/library.js:8-12` requires, the test's stubs absorb it (each module is a `Proxy` of `vi.fn()` with named overrides).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `b542ecec` (2026-10-14) were run as `git grep … refs/remotes/origin/main -- <path>`, so their output carries the `refs/remotes/origin/main:` prefix. They are noted with each gate.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/saveLibraryTrust.test.js` exits 1. Exactly tests (a)–(h) fail, each for its named reason:
+       - (a) the existing document's `filepath` becomes the forged path;
+       - (b) its `convertedEpubPath` becomes the forged path;
+       - (c) a stale copy without `convertedEpubPath` erases main's value;
+       - (d) the two renderer-added ids are in the library;
+       - (e) `read-file-buffer` returns the forged file's bytes instead of `null`;
+       - (f) a non-array payload replaces the library, and `saveLibrary` is called;
+       - (g) `delete-doc` unlinks the forged target;
+       - (h) BUG-198: after the rescan the book has a new id and position 0.
+
+       Controls (i), (j) and (k) pass. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/saveLibraryTrust.test.js tests/readFileBufferLibrary.test.js tests/documentsOpenSource.test.js tests/packagingFix.test.js` exits 0.
+    3. `git grep -n -F 'ctx.setLibrary(newDocs)' -- main/ipc/library.js` prints nothing (exit 1).
+       - Dry-run: exit 0, `main/ipc/library.js:47:  ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });`, so the gate can fail.
+    4. `git grep -c -F 'keepMainPaths' -- main/ipc/library.js` prints `main/ipc/library.js:2` and exits 0 (the definition and the one call).
+       - Dry-run: exit 1, no output.
+    5. The read check is untouched:
+       - `git grep -c -F 'isLibraryDocPath' -- main/ipc/library.js` still prints `main/ipc/library.js:2` and exits 0. Dry-run: `main/ipc/library.js:2`, exit 0.
+       - `git grep -n -F 'settings.sourceFolder,' -- main/ipc/library.js` still prints the allowed-roots line. Dry-run: `main/ipc/library.js:192:        settings.sourceFolder,` and `main/ipc/library.js:239:` (the drop-import `path.join`), exit 0. After C2 it prints the same two lines with their text unchanged, each moved down by the number of lines C2 inserts above it.
+    6. `git grep -n -E 'ipcMain\.handle\("(load-doc-content|get-doc-chapters)", async \(_, docId\)' -- main/ipc/library.js` prints exactly two lines and exits 0, so both handlers still take an id, never a path.
+       - Dry-run: `main/ipc/library.js:140:` and `main/ipc/library.js:209:`, exit 0.
+    7. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    8. BUG-198's **Status** line in `docs/governance/BUG_REPORT.md` reads exactly `RESOLVED in source (SAVE-LIBRARY-TRUST-1): save-library keeps main's filepath and convertedEpubPath, so a renderer save cannot unlink a book from its source file; closes after the batched owner smoke.` `git grep -c -F 'RESOLVED in source (SAVE-LIBRARY-TRUST-1)' -- docs/governance/BUG_REPORT.md` prints `docs/governance/BUG_REPORT.md:1` and exits 0.
+       - Dry-run: exit 1, no output (BUG-198 is not yet filed on `b542ecec`).
+    9. `git diff --name-status refs/remotes/origin/main` lists exactly `M docs/governance/BUG_REPORT.md`, `M main/ipc/library.js` and `A tests/saveLibraryTrust.test.js`. The time log `docs/governance/close-outs/Timing.SAVE-LIBRARY-TRUST-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.SAVE-LIBRARY-TRUST-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). `preload.js` and every `src/**` file are absent from the list.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke (Stage 8).
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:** `docs/governance/close-outs/Memo.LIBRARY-READ-ALLOW-1.GovernanceStaging.2026-10-14.md` (the follow-up at line 52, Blurby.Brain's tier-1 ruling at line 55); Blurby.Brain's technical rulings of 2026-10-14; this trace on `037472c9`, re-checked on `b542ecec`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `b542ecec`; re-grep after DEPS-AUDIT-1 merges):
+  - **`main/ipc/library.js`, after `isLibraryDocPath` (`:38-44`) and before `function register(ctx)` (`:46`)**, add:
+    ```js
+    // The renderer may edit a document's fields, never where its file is, and cannot add documents (SAVE-LIBRARY-TRUST-1).
+    function keepMainPaths(newDocs, library) {
+      const held = new Map((library || []).map((doc) => [doc.id, doc]));
+      return newDocs
+        .filter((doc) => doc && held.has(doc.id))
+        .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath }));
+    }
+    ```
+  - **`save-library` (`:47`)**. Before:
+    ```js
+      ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
+    ```
+    After:
+    ```js
+      ipcMain.handle("save-library", (_, newDocs) => {
+        if (!Array.isArray(newDocs)) return;
+        ctx.setLibrary(keepMainPaths(newDocs, ctx.getLibrary()));
+        ctx.saveLibrary();
+      });
+    ```
+    Nothing else in the file changes.
+  - **`docs/governance/BUG_REPORT.md`**, BUG-198: the **Status** line becomes the Done-when 8 text.
+- **What the five renderer callers keep doing.** All five are in `src/components/LibraryContainer.tsx`, and each runs `library.map` over the full array from `useLibrary` (`src/hooks/useLibrary.ts:19-26`):
+  - `handleOpenDocById` sets `lastReadAt` (`:259-267`);
+  - `onToggleUnread` flips `unread` (`:349-357`);
+  - `handleTagToggle` edits `tags` (`:416-427`);
+  - `handleCollectionMove` sets `collection` (`:429-438`);
+  - `markDocsSeen` sets `seenAt` and `unread` (`:441-450`).
+
+  None adds, reorders or removes a document, and none needs to change a path, so all five behave as today. Other edits use their own handlers, and none of those is touched: deletion uses `delete-doc` (`preload.js:49`); queue order uses `add-to-queue`, `remove-from-queue` and `reorder-queue`; titles use `update-doc` and `apply-metadata-updates`.
+- **Tests:** new **`tests/saveLibraryTrust.test.js`** (Vitest, node environment). It uses the `Module._load` pattern of `tests/readFileBufferLibrary.test.js:1-75` and `tests/documentsOpenSource.test.js:1-60`.
+  - **Fake `electron`:** `ipcMain.handle` capturing handlers in a `Map`, `dialog: {}`, and `app: { isPackaged: false }`.
+  - **Stubbed modules:**
+    - `../file-parsers`: a `Proxy` that returns `vi.fn()` for every name except three overrides that test (h) needs, because `main/ipc/library.js:8-11` destructures them at load. The overrides are `extractContent: vi.fn(async () => "two words")`, `extractDocMetadata: vi.fn(async () => ({ title: "Book", author: null, coverPath: null }))` and `countWords: () => 2`.
+    - `../epub-converter`: `{ htmlToEpub: vi.fn(), convertToEpub: vi.fn(async (_src, dir, id) => ({ epubPath: path.join(dir, id + ".epub"), valid: true })) }`.
+    - `../author-normalize`: `{ normalizeAuthor: (a) => a }`.
+    - `../folder-watcher`: `{ scanFolderAsync: vi.fn(async () => scanResult), SUPPORTED_EXT: [".epub", ".txt"] }`.
+    - `../sync-engine`: `{ getSyncStatus: () => ({ revision: 0 }), clearDocHashes: vi.fn() }`.
+    - `../sync-queue`: `{ getDeviceId: () => "test-device", enqueue: vi.fn(async () => {}) }`.
+    - `../constants` is the real module.
+    - `delete-doc` and `rescan-folder` require their modules inside the handler (`:87-88`, `:342`), so the patched loader stays installed until `afterEach`.
+  - **Renderer helper:** import `resolveLoadedDocResult` from `../src/utils/loadDocResult`, the real renderer helper.
+  - **`ctx`:** `register(ctx)`, where `ctx` is a `Proxy` over the members below; every other member is a `vi.fn()`.
+    - `getDataPath`: a temporary data folder;
+    - `getSettings`: the test's `settings` variable (`{ sourceFolder: "" }` unless a test sets it);
+    - `getLibrary`: the test's current `library` variable;
+    - `setLibrary(docs)`: assigns `library = docs`;
+    - `getDocById(id)`: `library.find((d) => d.id === id)`;
+    - `saveLibrary`: a `vi.fn()`;
+    - `getErrorLogPath`: a file in the temp folder.
+  - **Fixtures:** real files under `os.tmpdir()`: `elsewhere/own.epub` (the main-held file, outside both roots) and `secret/target.txt` (the forged target, outside both roots). Seed `library = [{ id: "d1", title: "Own", filepath: <own.epub>, convertedEpubPath: <data>/converted/d1.epub, ext: ".epub", unread: true }]`, plus `{ id: "d2", title: "Two" }` where a test needs a second document.
+  - **(a)** `save-library` with `[{ ...d1, filepath: <target.txt> }]`: `library[0].filepath` is still `<own.epub>`. Fails at C1: it is `<target.txt>`.
+  - **(b)** `save-library` with `[{ ...d1, convertedEpubPath: <target.txt> }]`: `library[0].convertedEpubPath` is still main's. Fails at C1.
+  - **(c)** Stale copy: `save-library` with d1 without its `convertedEpubPath` key, and with `filepath` set to the converted path (the shape `resolveLoadedDocResult` gives the renderer). Both of main's values are kept. Fails at C1: `convertedEpubPath` is `undefined` and `filepath` is the converted path.
+  - **(d)** `save-library` with `[d1, { id: "new-1", title: "X", filepath: <target.txt> }, { id: "new-2", title: "Y", content: "text" }]`: the library holds only `d1`. Fails at C1: it holds three documents.
+  - **(e)** End to end: `save-library` with `[{ ...d1, filepath: <target.txt> }]`, then `read-file-buffer` with `<target.txt>`. It returns `null`, and `error.log` gains a `BLOCKED` line. Fails at C1: it returns the file's bytes.
+  - **(f)** `save-library` with `{ not: "an array" }`: `library` is unchanged, and `saveLibrary` was not called. Fails at C1.
+  - **(g)** `save-library` with `[{ ...d1, filepath: <target.txt> }]`, then `delete-doc` with `"d1"`: `<target.txt>` still exists on disk. Fails at C1: it is unlinked. After the fix this test deletes `<own.epub>`, as `delete-doc` is designed to; that file is a temp copy.
+  - **(h) BUG-198 regression, at the IPC boundary.**
+    - Setup: a real file `<src>/book.txt`, and `settings.sourceFolder = <src>`. The library is `[F]` with `F = { id: "f1", title: "Book", filepath: <src>/book.txt, filename: "book.txt", ext: ".txt", source: "folder", position: 1234, favorite: true }`. Let `R = structuredClone(F)` be the renderer's copy.
+    - Step 1: `const res = await load-doc-content("f1")`. Main's record now has `convertedEpubPath`.
+    - Step 2: `const { libraryUpdates } = resolveLoadedDocResult(R, res)`.
+    - Step 3: `save-library` with `[{ ...R, ...libraryUpdates, seenAt: 1, unread: false }]`, the `markDocsSeen` shape.
+    - Step 4: set `scanResult = [{ filepath: <src>/book.txt, filename: "book.txt", ext: ".txt", modified: 1, size: 9 }]`, then run `rescan-folder`.
+    - Expected: the library holds exactly one document, with `id` `"f1"`, `position` 1234, `favorite` true and `filepath` `<src>/book.txt`. Fails at C1: one document with a new id and position 0.
+  - **(i)** Control: `save-library` with d1 and d2 in reverse order, with d1's `unread: false`, `tags: ["t"]`, `collection: "c"`, `lastReadAt: 5`, `seenAt: 6` and `title: "Renamed"`. Each field is saved, the order is `[d2, d1]`, and `saveLibrary` was called once.
+  - **(j)** Control: with d1 and d2 held, `save-library` with `[d1]`. The library holds only `d1`; deletion by omission is kept (technical ruling Q2 (a)).
+  - **(k)** Control: a document `{ id: "c1", convertedEpubPath: <tmp>/elsewhere/conv.epub }` (outside both roots, no `filepath`) is in the library. `read-file-buffer` with that path returns an `ArrayBuffer` of the file's length. This is the `convertedEpubPath` match the ruling asks for; it passes at C1 because LIBRARY-READ-ALLOW-1 already does it.
+- **Constants:** none.
+- **Branch:** `eb/save-library-trust-1` from `refs/remotes/origin/main` after DEPS-AUDIT-1 merges, in worktree `C:\Projects\Blurby\.worktrees\save-library-trust-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:** C1: `tests/saveLibraryTrust.test.js` only (gate: Done-when 1). C2: the `main/ipc/library.js` edit and the BUG-198 status line (gate: Done-when 2–9). Then merge to `main` with `--no-ff` on Blurby.Brain's go and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - If any of (a)–(h) passes at C1, the fake is not exercising the real handler (for example, `setLibrary` does not reassign `library`, or the scan stub is not consulted): fix the test, not the module.
+  - If (h) fails at C2 for a reason other than the id or position (for example, `load-doc-content` returns a `userError`), the conversion stub is wrong: fix the test.
+  - If (i) or (j) fails at C2, the fix dropped a legitimate edit or changed deletion: stop and send it to Blurby.Brain.
+  - If an existing test fails, report it exactly and stop; do not weaken it. A renderer test that saves a new document through `saveLibrary` and expects main to keep it would be a hidden caller: stop and report it.
+  - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`; no data format change (`library.json` keeps the same fields).
+- **Lane ownership (parallel run):** surface D: `main/ipc/library.js` (the new function before `register` and the `save-library` handler only), the new test file, and the BUG-198 Status line.
+  - **Forbidden:**
+    - every other file, and every other line of `main/ipc/library.js`;
+    - `preload.js`, `main.js` and every renderer file;
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
+  - **Shared-core touches:** none.
+  - **Merge order:**
+    - After DEPS-AUDIT-1, by queue order. It has no specification on `main` to check hunks against, and its adm-zip call sites are in other files.
+    - PAGE-POSITION-SAVE-1 (in flight; `eb/page-position-save-1` has no commits past `037472c9`) edits `main/ipc/documents.js` (`update-doc-progress`) and Page files, not `main/ipc/library.js`. The two are file-disjoint, so either may land first.
+    - FOLDER-UNREACHABLE-GUARD-1 (stub) will edit `rescan-folder` in the same file, a different hunk.
+    - LARGE-FOLDER-SYNC-1 forbids `main/ipc/**`.
+    - IPC-PATH-TRUST-1 (position 19) merges after this item and extends `keepMainPaths` with `coverPath`.
+    - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–8.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Save-library trust tests committed; (a)–(h) fail on today's handler, including the BUG-198 sequence; controls (i)–(k) pass | calculable | positive control | bounded | low | 40m (one new test file, eleven cases on real temp files, sync, scan and converter stubs, one renderer-helper import) | — | — |
+| 2 | `save-library` keeps main-held paths, drops unknown ids and non-array payloads; BUG-198 line updated | calculable | main-process fix | bounded | low | 10m (one small function, one handler body, one doc line) | — | — |
+| 3 | Suites, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
+
+**Total:** chain 5m · sum 5m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `037472c9`, and `main/ipc/library.js` was confirmed unchanged on `b542ecec` (fetched 2026-10-14). The run re-greps after DEPS-AUDIT-1 merges and stops on any content drift.
+- **Standing rule 41 (LL-136):** the Done-when 9 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):** (a)–(h) fail on today's handler for named reasons. These include the end-to-end read (e), the file delete (g) and the BUG-198 sequence (h), which runs through the real renderer helper and the real `load-doc-content` and `rescan-folder`. Controls (i)–(k) prove the fix keeps legitimate edits, deletion by omission and the `convertedEpubPath` read.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 3–6 and 8 were dry-run on `b542ecec`. Gate 3 finds its line there, so it can fail, and gates 4 and 8 are empty there.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite runs in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** typecheck and build are in Done-when 7. Only JavaScript changes, but the test imports a TypeScript renderer module.
+- **LL-156:** LIBRARY-READ-ALLOW-1's waiver on the id-based handlers is restated against this item: they stay unedited, and the fix closes them through their input. FOLDER-SCAN-PERF-1's waiver on the allowed-roots check stays intact (Done-when 5). The out-of-scope list names IPC-PATH-TRUST-1 as the owner of the next edit to `keepMainPaths`.
+- **PR-6 / AP-2 (`preload.js` is the security boundary):** the fix lives in the main-process handler. `preload.js` is unchanged, and the renderer's API is the same.
+- **LL-069:** the renderer's normalization of `load-doc-content` results writes the converted path into the renderer's own `filepath` (`src/utils/loadDocResult.ts:17-24`). That is BUG-198's first step. It is also why main's value must win and the renderer is not edited: its copy is display state, not the record.
+- **LL-158:** BUG-198 was traced end to end through code this item does not change (`load-doc-content`, the renderer helper, the five callers, `rescan-folder` and the folder sync), and test (h) runs that chain rather than asserting a field alone.
+- **LL-159:** the fix adds no deferred writer. It calls the same debounced `ctx.saveLibrary()` once, so the quit step list does not change.
+- **LL-151 (not applied, deliberately):** there is no launch control. Nothing is user-visible apart from BUG-198, which is not yet seen live, and tests (a)–(k) run the real handler module on real files. The batched owner smoke (Stage 8) covers the build.
+
+<a id="ipc-path-trust-1"></a>
+
+#### IPC-PATH-TRUST-1 — Main decides which files and folders the renderer can reach *(position 19 — Full Spec; authored 2026-10-14 on main @ `b542ecec`)*
+
+- **What:** Three main-process handlers stop taking a file or folder location from the renderer on trust:
+  - `get-cover-image` reads only inside the app's covers folders, or the exact `coverPath` of a document main holds. Any other path returns `null`.
+  - `save-settings` ignores a renderer-supplied `sourceFolder`, and keeps the existing value.
+  - `switch-folder` accepts only a folder in main's own `recentFolders` list. New folders still come only through main's folder dialog (`select-folder`).
+
+  To make the second and third rules hold, `save-settings` also ignores `recentFolders`. For the same reason, the `coverPath` a renderer save or a metadata update sends can no longer change main's record. The user sees no change: Browse for a folder, switching from the recent list, and covers all work as today. **Release gate:** this item joins the Stage 8 release gate (`ROADMAP.md:533`, Blurby.Brain 2026-10-14). Nothing is released until it is merged.
+- **Why:**
+  - **`get-cover-image`** (`main/ipc/misc.js:312-332`, `preload.js:63`) takes any path. It passes the path to `fsPromises.readFile` (`:321`) and returns the bytes as a base64 data URL (`:324`). A compromised renderer can therefore read any file the user can read.
+  - **`save-settings`** (`main/ipc/state.js:23-43`, `preload.js:44`) runs `Object.assign(settings, newSettings)` (`:26`). The renderer can set `sourceFolder` to any folder, and `read-file-buffer` then trusts that folder as an allowed root (`main/ipc/library.js:190-194`). That makes it an arbitrary read too. It can also set `recentFolders`.
+  - **`switch-folder`** (`main/ipc/state.js:76-85`, `preload.js:41`) sets `sourceFolder` to any existing folder (`:79-80`), with the same read effect. It also starts a folder sync of that folder (`:82`), which prunes the books of the previous folder (BUG-193 Interactions).
+  - **The exact-`coverPath` rule needs main's `coverPath` to be main's.** `save-library` passes the renderer's `coverPath` through (SAVE-LIBRARY-TRUST-1 pins only `filepath` and `convertedEpubPath`). `apply-metadata-updates` lists `coverPath` among its allowed fields (`main/ipc/library.js:688`). Without the two edits in this item, a renderer could set any `coverPath` and then read it through the exact-match rule.
+  - SAVE-LIBRARY-TRUST-1 (Q1, technical ruling (a)) left these three paths to this item.
+- **What the renderer sends today** (traced on `b542ecec`):
+  - **Select folder:**
+    - `useLibrary.selectFolder` (`src/hooks/useLibrary.ts:76-84`) and `OnboardingOverlay.handleFolderPick` (`src/components/OnboardingOverlay.tsx:65-70`) both call `api.selectFolder()` with no argument.
+    - Main opens the dialog and sets `sourceFolder` and `recentFolders` itself (`main/ipc/state.js:58-74`).
+    - The "Browse for folder..." entry of the folder menu (`src/components/RecentFolders.tsx:27-33`) calls `onBrowse`, which is `onSelectFolder`, which is the same `selectFolder` (`src/components/LibraryView.tsx:462`, `src/components/LibraryContainer.tsx:672`).
+    - Nothing in this flow changes.
+  - **Switch from the recent list:**
+    - `RecentFolders` renders one button per entry of `settings.recentFolders` (`src/components/RecentFolders.tsx:13-21`, fed at `src/components/LibraryView.tsx:458-463`).
+    - A click calls `onSwitch(folder)`, which goes through `LibraryContainer.tsx:673` to `useLibrary.switchFolder` (`src/hooks/useLibrary.ts:86-92`), and that sends `api.switchFolder(folder)`.
+    - So the renderer sends one string from its copy of `recentFolders`. That copy came from `get-state` (`main/ipc/state.js:15-18`), so the string is main's own list entry, byte for byte. The current folder is in that list too (marked "current"), and clicking it re-syncs, as today.
+    - An error result is shown as a toast (`useLibrary.ts:88`).
+  - **Settings:**
+    - These are every renderer `saveSettings` call: `LibraryContainer.tsx:220` (`wpm`, `folderName`), `OnboardingOverlay.tsx:41`/`:46` (`firstRunCompleted`), `ReaderContainer.tsx:552` (`focusTextSize`), and `SettingsContext.tsx:32` (`updateSettings(updates)`, partial objects).
+    - No `src/**` code writes `sourceFolder` or `recentFolders`: `git grep -nE "sourceFolder|recentFolders" -- src` shows only reads, defaults, types and the test-harness stub.
+  - **Covers:**
+    - `DocCard.tsx:27` and `DocGridCard.tsx:66` call `getCoverImage(doc.coverPath)` with main's record value.
+    - Main writes every cover under `<userData>/blurby-data/covers` (`main/file-parsers.js:640`, `:720`, `main/ipc/misc.js:218`, `main/ws-server.js:350`) or `<userData>/covers` (`main/file-parsers.js:265`, `main/ipc/library.js:369`). Calibre cover files next to a book are copied into a covers folder, not referenced in place (`main/ipc/library.js:373`, `main/file-parsers.js:724`).
+    - `MetadataWizard.handleApply` sends only `title` and `author` (`src/components/MetadataWizard.tsx:94-105`). No renderer code sends `coverPath` to main.
+- **Ruling (Blurby.Brain, 2026-10-14, Rule 11 tier 1):**
+  - `get-cover-image` reads only inside the covers folder, or the exact `coverPath` of a doc main holds; any other path returns `null`.
+  - `save-settings` ignores a renderer-supplied `sourceFolder` and keeps the existing value.
+  - `switch-folder` accepts only a path from main's own folder dialog or main's `recentFolders` list, never an arbitrary renderer string. Test that select folder and switch from the recent list still work.
+  - `import-dropped-files` stays as designed, because the user chose those files.
+  - This item is a release gate, and it merges after SAVE-LIBRARY-TRUST-1.
+- **Design decisions (planner, 2026-10-14):**
+  - **Setting a cover from the UI (Blurby.Brain, 2026-10-14):** no UI path sets a cover today. If one is added later (in this item or any spec), it must go through a main-side handler that writes the image into the covers folder, never through a renderer-supplied path.
+  - **Two covers folders.** `<getDataPath()>/covers` and `<getUserDataPath()>/covers` are both live today (see above), so both are allowed roots. A path is inside a root when its resolved form starts with the resolved root plus `path.sep`; `path.resolve` removes `..`. On Windows the comparison is case-insensitive, as in `isLibraryDocPath` (`main/ipc/library.js:40`).
+  - **The exact-`coverPath` rule reads `ctx.getLibrary()` at call time.** It covers covers that older builds or imported backups stored elsewhere.
+  - **The check runs before the cover cache** (`main/ipc/misc.js:314-319`). A cached data URL is otherwise served for a path that is no longer allowed. Today the cache holds only successful reads, so after this item it holds only allowed paths, but checking first makes that hold without relying on the cache's history.
+  - **A non-string `coverPath` returns `null`.** Today `!coverPath` is the only guard (`:313`), and `path.resolve` would throw on an object.
+  - **`save-settings` drops `recentFolders` as well as `sourceFolder`.** This is required by the ruled `switch-folder` rule: if the renderer could write `recentFolders`, it could add any folder and then switch to it. Main writes both fields only in `select-folder` and `switch-folder` (`main/ipc/state.js:68-69`, `:79-80`), which keep doing so. Every other field is assigned as today, `theme` included.
+  - **`switch-folder` accepts a string found in `settings.recentFolders`, by exact match.** The renderer echoes main's own string, so exact match is enough. The existing "Folder no longer exists." check runs after it, unchanged. A refused folder returns `{ error: "That folder is not in your recent folders. Use Browse for folder to choose it." }`, and the renderer shows it as a toast with no code change. "Main's own folder dialog" is `select-folder`, which already sets the folder itself. No renderer flow passes a dialog result to `switch-folder`, so no dialog token is needed.
+  - **`coverPath` is pinned in `save-library` and removed from `apply-metadata-updates`.** SAVE-LIBRARY-TRUST-1's `keepMainPaths` gains `coverPath: held.get(doc.id).coverPath`. `ALLOWED_FIELDS` becomes `["title", "author"]`. No renderer caller sends `coverPath` to either handler. A side effect: a stale renderer copy can no longer revert a cover that a rescan just set (`main/ipc/library.js:361`, `:373`, `:381`).
+  - **No change to `preload.js` or any renderer file.** Every exposed method keeps its signature (PR-6).
+- **Out of scope:**
+  - `import-dropped-files` (ruled: the user chose the files), `get-file-path-for-drop` (a passthrough, `main/ipc/library.js:615-618`), and `webUtils.getPathForFile` (`preload.js:66`).
+  - Cloud settings sync writing `sourceFolder` from another device (`main/sync-engine.js`). This is a remote trust boundary, not the renderer.
+  - `import-library` (a backup file the user picks in a main-process dialog) bringing in `coverPath` values. The exact-match rule then allows them, by design.
+  - Symlinks or junctions inside a covers folder: the check is lexical, like `read-file-buffer`'s.
+  - SAVE-LIBRARY-MERGE-1 (deletion by omission in `save-library`).
+  - **LL-156 check:**
+    - SAVE-LIBRARY-TRUST-1 said "only the two ruled fields are pinned; `coverPath` … IPC-PATH-TRUST-1 adds it". This item brings that line into scope, and changes only that one property in `keepMainPaths`.
+    - LIBRARY-READ-ALLOW-1's and FOLDER-SCAN-PERF-1's waivers on `read-file-buffer`'s allowed-roots check are kept: the check's code (`main/ipc/library.js:186-207`) is untouched. Only the value of `settings.sourceFolder` it reads stops being renderer-writable.
+- **Prerequisites:**
+  - **SAVE-LIBRARY-TRUST-1 merged.** This item edits that item's `keepMainPaths` line, and test (c) needs it.
+  - The line numbers below are on `b542ecec`. `main/ipc/library.js` gains SAVE-LIBRARY-TRUST-1's function (about 11 lines above `register`), so re-grep its `:688` after that merge.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `b542ecec` (2026-10-14) were run as `git grep … refs/remotes/origin/main -- <path>`, so their output carries the `refs/remotes/origin/main:` prefix. They are noted with each gate.
+    1. **Positive control (standing rule 43):** at C1 (on top of SAVE-LIBRARY-TRUST-1), `npx vitest run tests/ipcPathTrust.test.js` exits 1. Exactly tests (a)–(h) fail, each for its named reason:
+       - (a) a cover read outside both covers folders, matching no document's `coverPath`, returns a data URL;
+       - (b) the same through a `..` path that starts inside a covers folder;
+       - (c) after a renderer save forges d1's `coverPath`, the record holds the forged path and the read returns a data URL;
+       - (d) `apply-metadata-updates` writes the forged `coverPath`;
+       - (e) a renderer-supplied `sourceFolder` takes effect;
+       - (f) a renderer-supplied `recentFolders` takes effect;
+       - (g) after (e)'s change, `read-file-buffer` returns a file from the forged folder;
+       - (h) `switch-folder` to an arbitrary existing folder succeeds and starts a sync.
+
+       Controls (i)–(o) pass. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/ipcPathTrust.test.js tests/saveLibraryTrust.test.js tests/readFileBufferLibrary.test.js tests/settingsNarrateNormalization.test.js tests/quitSequence.test.js tests/documentsOpenSource.test.js` exits 0.
+    3. `git grep -n -F 'Object.assign(settings, newSettings)' -- main/ipc/state.js` prints nothing (exit 1).
+       - Dry-run: exit 0, `main/ipc/state.js:26:    Object.assign(settings, newSettings);`, so the gate can fail.
+    4. `git grep -c -F 'isAllowedCoverPath' -- main/ipc/misc.js` prints `main/ipc/misc.js:2` and exits 0 (the definition and the one call).
+       - Dry-run: exit 1, no output.
+    5. `git grep -n -F 'recentFolders || []).includes(folder)' -- main/ipc/state.js` prints exactly one line and exits 0.
+       - Dry-run: exit 1, no output.
+    6. `apply-metadata-updates` no longer allows `coverPath`:
+       - `git grep -n -F 'const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);' -- main/ipc/library.js` prints nothing (exit 1). Dry-run: exit 0, `main/ipc/library.js:688:`.
+       - `git grep -n -F 'const ALLOWED_FIELDS = new Set(["title", "author"]);' -- main/ipc/library.js` prints one line and exits 0. Dry-run: exit 1, no output.
+    7. `git grep -n -F 'coverPath: held.get(doc.id).coverPath' -- main/ipc/library.js` prints exactly one line and exits 0.
+       - Dry-run: exit 1, no output. It is also empty with SAVE-LIBRARY-TRUST-1 as specified.
+    8. `select-folder` is untouched: `git grep -n -F 'dialog.showOpenDialog' -- main/ipc/state.js` prints exactly one line with that text and exits 0.
+       - Dry-run: `main/ipc/state.js:62:    const result = await dialog.showOpenDialog(mainWindow, {`, exit 0. After C2 the line number moves down by the lines C2 adds to `save-settings`.
+    9. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    10. `git diff --name-status refs/remotes/origin/main` lists exactly `M main/ipc/library.js`, `M main/ipc/misc.js`, `M main/ipc/state.js` and `A tests/ipcPathTrust.test.js`. The time log `docs/governance/close-outs/Timing.IPC-PATH-TRUST-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.IPC-PATH-TRUST-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). `preload.js` and every `src/**` file are absent from the list.
+    11. **Owner checks, deferred to the Stage 8 batched owner smoke (standing rule 45).** Blurby.Roadmap adds "IPC-PATH-TRUST-1" to that list when this specification folds in. On the batched build:
+        - (a) the folder button, then "Browse for folder...": the dialog opens, and the chosen folder's books appear;
+        - (b) the folder button, then a recent folder: the library switches to it;
+        - (c) covers show in the list and grid views.
+
+        These need a real dialog and real eyes, so they are not unattended gates.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke (Done-when 11).
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:** SAVE-LIBRARY-TRUST-1's Q1 and Blurby.Brain's technical ruling (a) of 2026-10-14; Blurby.Brain's IPC-PATH-TRUST-1 decisions of 2026-10-14; this trace on `b542ecec`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `b542ecec`; re-grep after SAVE-LIBRARY-TRUST-1 merges):
+  - **`main/ipc/misc.js`, immediately before `function register(ctx)` (`:150`)**, add:
+    ```js
+    // A cover is read only from main's covers folders, or from a library document's own coverPath (IPC-PATH-TRUST-1).
+    function isAllowedCoverPath(coverPath, ctx) {
+      const norm = (p) => (process.platform === "win32" ? path.resolve(p).toLowerCase() : path.resolve(p));
+      const target = norm(coverPath);
+      const roots = [path.join(ctx.getDataPath(), "covers"), path.join(ctx.getUserDataPath(), "covers")];
+      return roots.some((root) => target.startsWith(norm(root) + path.sep))
+        || (ctx.getLibrary() || []).some((doc) => doc.coverPath && norm(doc.coverPath) === target);
+    }
+    ```
+  - **`get-cover-image` (`main/ipc/misc.js:313`)**. Before:
+    ```js
+        if (!coverPath) return null;
+    ```
+    After:
+    ```js
+        if (typeof coverPath !== "string" || !coverPath || !isAllowedCoverPath(coverPath, ctx)) return null;
+    ```
+    The cache lookup and the read below it are unchanged.
+  - **`save-settings` (`main/ipc/state.js:23-27`)**. Before:
+    ```js
+      ipcMain.handle("save-settings", (_, newSettings) => {
+        const settings = ctx.getSettings();
+        // Update in-memory state immediately so all readers see the new value
+        Object.assign(settings, newSettings);
+        if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+    ```
+    After:
+    ```js
+      ipcMain.handle("save-settings", (_, newSettings) => {
+        const settings = ctx.getSettings();
+        // The folder and its recent list are main's: only select-folder and switch-folder set them (IPC-PATH-TRUST-1).
+        const safe = { ...newSettings };
+        delete safe.sourceFolder;
+        delete safe.recentFolders;
+        // Update in-memory state immediately so all readers see the new value
+        Object.assign(settings, safe);
+        if (safe.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+    ```
+    The debounced write and sync enqueue below are unchanged.
+  - **`switch-folder` (`main/ipc/state.js:76-78`)**. Before:
+    ```js
+      ipcMain.handle("switch-folder", async (_, folder) => {
+        const settings = ctx.getSettings();
+        try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
+    ```
+    After:
+    ```js
+      ipcMain.handle("switch-folder", async (_, folder) => {
+        const settings = ctx.getSettings();
+        // Only a folder main already listed; a new folder comes through select-folder's dialog (IPC-PATH-TRUST-1).
+        if (typeof folder !== "string" || !(settings.recentFolders || []).includes(folder)) {
+          return { error: "That folder is not in your recent folders. Use Browse for folder to choose it." };
+        }
+        try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
+    ```
+  - **`main/ipc/library.js`, `keepMainPaths`** (added by SAVE-LIBRARY-TRUST-1). Its `.map` line gains `coverPath: held.get(doc.id).coverPath`. After:
+    ```js
+        .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath, coverPath: held.get(doc.id).coverPath }));
+    ```
+    Update its comment to read `… never where its file or cover is, and cannot add documents (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).`
+  - **`apply-metadata-updates` (`main/ipc/library.js:688` on `b542ecec`)**: `const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);` becomes `const ALLOWED_FIELDS = new Set(["title", "author"]);`.
+  - Nothing else changes in any of the three files.
+- **Tests:** new **`tests/ipcPathTrust.test.js`** (Vitest, node environment). It registers `main/ipc/misc.js`, `main/ipc/state.js` and `main/ipc/library.js` into one handler `Map` with one shared `ctx`. It uses the `Module._load` pattern of `tests/readFileBufferLibrary.test.js:1-75` and `tests/settingsNarrateNormalization.test.js:161-200`, and clears all three modules from `require.cache` before and after each test.
+  - **Fake `electron`:** `ipcMain.handle` capturing handlers, `session: {}`, `net: {}`, `dialog: { showOpenDialog: vi.fn() }`, and `app: { isPackaged: false }`. `select-folder` requires `dialog` inside the handler (`main/ipc/state.js:59`), so the patched loader stays installed until `afterEach`.
+  - **Stubbed modules:**
+    - `../window-manager`: `{ getSystemTheme: vi.fn(), updateWindowTheme: vi.fn(), createReaderWindow: vi.fn() }`.
+    - `../file-parsers`, `../url-extractor` and `../ws-server`: each a `Proxy` returning `vi.fn()` for every name (`main/ipc/misc.js:374` requires `../ws-server` at register time).
+    - `../epub-converter`: `{ htmlToEpub: vi.fn(), convertToEpub: vi.fn(), imageMediaType: vi.fn() }`.
+    - `../author-normalize`: `{ normalizeAuthor: (a) => a }`.
+    - `../sync-engine`: `{ getSyncStatus: () => ({ revision: 0 }), clearDocHashes: vi.fn() }`.
+    - `../sync-queue`: `{ getDeviceId: () => "d", enqueue: vi.fn(async () => {}) }`.
+    - `../constants` and `./url-validation` are the real modules.
+  - **`ctx`** (every other member is a `vi.fn()`):
+    - `getUserDataPath`: `<tmp>/userData`;
+    - `getDataPath`: `<tmp>/userData/blurby-data`;
+    - `getSettings`: the test's `settings` object, `{ sourceFolder: <tmp>/books, recentFolders: [<tmp>/books, <tmp>/books2], wpm: 300 }`;
+    - `getLibrary`, `setLibrary` and `getDocById`: over the test's `library` array, as in SAVE-LIBRARY-TRUST-1's test;
+    - `saveSettings`, `syncLibraryWithFolder` (`vi.fn(async () => {})`), `startWatcher`, `saveLibrary` and `broadcastLibrary`: each a `vi.fn()`;
+    - `getMainWindow`: `null`;
+    - `getErrorLogPath`: a file in the temp folder.
+  - **Fixtures:** real files: `<data>/covers/d1.png`, `<userData>/covers/d2.png`, `<tmp>/legacy/cover.png` (a document's own `coverPath` outside both folders), and `<tmp>/secret/photo.png`. Real folders: `<tmp>/books`, `<tmp>/books2` and `<tmp>/secret`. Library: `[{ id: "d1", title: "One", coverPath: <data>/covers/d1.png }, { id: "d3", title: "Legacy", coverPath: <tmp>/legacy/cover.png }]`.
+  - **(a)** `get-cover-image` with `<tmp>/secret/photo.png` returns `null`. Fails at C1: it returns a data URL.
+  - **(b)** `get-cover-image` with `path.join(<data>, "covers", "..", "..", "..", "secret", "photo.png")` returns `null`. Fails at C1.
+  - **(c)** `save-library` with `[{ ...d1, coverPath: <tmp>/secret/photo.png }, d3]`, then `get-cover-image` with `<tmp>/secret/photo.png`. `library[0].coverPath` is still main's, and the read returns `null`. Fails at C1: the forged value is stored and read.
+  - **(d)** `apply-metadata-updates` with `[{ docId: "d1", updates: { coverPath: <tmp>/secret/photo.png, title: "T2" } }]`. d1's `coverPath` is unchanged and its `title` is `"T2"`. Fails at C1: `coverPath` is the forged path.
+  - **(e)** `save-settings` with `{ sourceFolder: <tmp>/secret, wpm: 410 }`. `settings.sourceFolder` is still `<tmp>/books`, and `settings.wpm` is 410. Fails at C1.
+  - **(f)** `save-settings` with `{ recentFolders: [<tmp>/secret] }`. `settings.recentFolders` is unchanged. Fails at C1.
+  - **(g)** End to end: `save-settings` with `{ sourceFolder: <tmp>/secret }`, then `read-file-buffer` with `<tmp>/secret/photo.png`. It returns `null`. Fails at C1: it returns the bytes.
+  - **(h)** `switch-folder` with `<tmp>/secret` (it exists, and is not in `recentFolders`). The result has an `error`, `settings.sourceFolder` is unchanged, and `syncLibraryWithFolder` and `startWatcher` were not called. Fails at C1: `{ folder }`, and a sync started.
+  - **(i)** Control: `get-cover-image` with `<data>/covers/d1.png`, and with `<userData>/covers/d2.png`, returns a `data:image/png;base64,` URL each time.
+  - **(j)** Control: `get-cover-image` with d3's `<tmp>/legacy/cover.png` (exact `coverPath`, outside both folders) returns a data URL.
+  - **(k)** Control: with fake timers, `save-settings` with `{ wpm: 410, theme: "dark" }` applies both fields and calls `updateWindowTheme` once. After 500 ms, `ctx.saveSettings` has been called once.
+  - **(l)** Control, select folder: `dialog.showOpenDialog` resolves `{ canceled: false, filePaths: [<tmp>/books3] }`. `select-folder` returns `<tmp>/books3`, `settings.sourceFolder` is `<tmp>/books3`, `settings.recentFolders[0]` is `<tmp>/books3`, and `syncLibraryWithFolder` and `startWatcher` were each called once.
+  - **(m)** Control, switch from the recent list, as the renderer does it: take `get-state`'s `settings.recentFolders[1]` (`<tmp>/books2`, the string `RecentFolders` renders) and pass it to `switch-folder`. It returns `{ folder: <tmp>/books2 }`, `settings.sourceFolder` is `<tmp>/books2`, `recentFolders[0]` is `<tmp>/books2`, and `syncLibraryWithFolder` was called once.
+  - **(n)** Control: `settings.recentFolders` holds `<tmp>/gone`, which does not exist. `switch-folder` with it returns `{ error: "Folder no longer exists." }`, unchanged.
+  - **(o)** Control (Blurby.Brain's condition, 2026-10-14): the metadata wizard's flow still works. `apply-metadata-updates` with the exact payload shape `src/components/MetadataWizard.tsx:95-112` sends, `[{ docId: "d1", updates: { title: "New title", author: "New author" } }, { docId: "d2", updates: { title: "Only title" } }]`, returns `{ updated: 2 }`, and both docs carry the new fields with `coverPath` unchanged. Passes at C1 and C2. The wizard sends only `title` and `author` today (`MetadataWizard.tsx:100-101`), so no UI path sets a cover.
+- **Constants:** none. The covers folder name `"covers"` stays a literal, as at its six writers. Moving it to `main/constants.js` would touch those writers, which are outside this item.
+- **Branch:** `eb/ipc-path-trust-1` from `refs/remotes/origin/main` after SAVE-LIBRARY-TRUST-1 merges, in worktree `C:\Projects\Blurby\.worktrees\ipc-path-trust-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:** C1: `tests/ipcPathTrust.test.js` only (gate: Done-when 1). C2: the edits in `main/ipc/misc.js`, `main/ipc/state.js` and `main/ipc/library.js` (gate: Done-when 2–10). Then merge to `main` with `--no-ff` on Blurby.Brain's go and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass (Done-when 11). Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - If any of (a)–(h) passes at C1, the fake is not exercising the real handler (for example, the covers folders in `ctx` do not match the fixture, or SAVE-LIBRARY-TRUST-1 is not in the base): fix the test or the base, not the module.
+  - If (i), (j), (l) or (m) fails at C2, a real flow broke: stop and send it to Blurby.Brain.
+  - If an existing test fails, report it exactly and stop; do not weaken it. A test that sets `sourceFolder` or `recentFolders` through `save-settings` and expects it to stick is a hidden caller: stop and report it.
+  - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`; no data format change.
+- **Lane ownership (parallel run):** surface D. The owned lines are:
+  - `main/ipc/misc.js`: the new function before `register`, and the first line of `get-cover-image`;
+  - `main/ipc/state.js`: the head of `save-settings` and the head of `switch-folder`;
+  - `main/ipc/library.js`: `keepMainPaths`'s `.map` line and comment, and `ALLOWED_FIELDS`;
+  - the new test file.
+  - **Forbidden:**
+    - every other file, and every other line of those three;
+    - `preload.js`, `main.js`, `main/folder-watcher.js` and `main/folder-sync.js` (LARGE-FOLDER-SYNC-1's);
+    - `main/ipc/documents.js` (PAGE-POSITION-SAVE-1's);
+    - every renderer file;
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
+  - **Shared-core touches:** none.
+  - **Merge order:**
+    - After SAVE-LIBRARY-TRUST-1 (ruled): same `keepMainPaths` line.
+    - PAGE-POSITION-SAVE-1 edits `main/ipc/documents.js` and Page files. It is file-disjoint from this item, so either may land first.
+    - LARGE-FOLDER-SYNC-1 (position 14) does not edit `select-folder` or `switch-folder`: its Forbidden list names `main/ipc/**` and `preload.js`, and it keeps `ctx.syncLibraryWithFolder` (`main/ipc/state.js:71`, `:82` on `b542ecec`) unchanged as a one-line wrapper. So there is no hunk overlap and no merge-order constraint; it is earlier in the queue anyway. Its re-entry guard (a sync for a different folder cancels the running one) still covers `switch-folder`, which this item only narrows. Any new cover writer it adds must write under a covers folder (it reuses `extractNewFileDoc`, which does).
+    - FOLDER-UNREACHABLE-GUARD-1 (stub) edits `rescan-folder` in `main/ipc/library.js`, a different hunk.
+    - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–9.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Path-trust tests committed; (a)–(h) fail on today's handlers, controls (i)–(n) pass | calculable | positive control | bounded | low | 45m (one new test file registering three IPC modules, fourteen cases on real temp files, fake dialog and timers) | — | — |
+| 2 | Cover reads limited to the covers folders and held `coverPath`s; settings and switch-folder no longer take a renderer folder; `coverPath` pinned | calculable | main-process fix | bounded | low | 20m (one helper, three handler heads, two one-line edits in `library.js`) | — | — |
+| 3 | Suites, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
+
+**Total:** chain 5m · sum 5m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `b542ecec` (fetched 2026-10-14). The run re-greps `main/ipc/library.js` after SAVE-LIBRARY-TRUST-1 merges and stops on any content drift.
+- **Standing rule 41 (LL-136):** the Done-when 10 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):** (a)–(h) fail on today's handlers for named reasons, including two end-to-end reads, (c) and (g). Controls (i)–(n) prove the real flows still work: both covers folders, legacy covers, ordinary settings, select folder, and switch from the recent list.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 3–8 were dry-run on `b542ecec`. Gates 3 and 6 find their lines there, so they can fail, and gates 4, 5 and 7 are empty there.
+- **Standing rule 45 (LL-141):** the dialog and the visual cover check need the owner, so they are a short checklist in the batched smoke (Done-when 11), not unattended gates.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite runs in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** typecheck and build are in Done-when 9.
+- **LL-156:** SAVE-LIBRARY-TRUST-1's "only the two ruled fields are pinned" line named code this item edits, so it is brought into scope here, for one property only. The `read-file-buffer` allowed-roots waivers are kept: that code is untouched, and only its input stops being renderer-writable.
+- **PR-6 / AP-2 (`preload.js` is the security boundary):** every check is in a main-process handler, `preload.js` is unchanged, and so is every renderer call.
+- **LL-158:** both folder flows were traced end to end through renderer code this item does not change: the button, `RecentFolders`, `LibraryView`, `LibraryContainer`, `useLibrary`, preload and the handler. Test (m) feeds `switch-folder` the exact string the renderer renders.
+- **LL-159:** no deferred writer is added. `save-settings` keeps its single debounced write, so the quit step list does not change.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
+- <a id="save-library-merge-1"></a>**SAVE-LIBRARY-MERGE-1 — A library save merges instead of replacing** *(position 20 — stub; after IPC-PATH-TRUST-1; not a release gate)*. Blurby.Brain ruling (2026-10-14, tier 1): `save-library` becomes a merge, and only an explicit `delete-doc` removes a document. Today a document the renderer leaves out is deleted, so a stale renderer save drops documents main just added and can strip the deletion records cloud sync relies on. It must preserve cloud-sync tombstones. Tests: a stale save after a main-side add keeps the added document; a stale save with tombstones present keeps them. Also (PAGE-POSITION-SAVE-1 N5): a renderer full-library save can write back a stale `lastReadAt`, the same mechanism as the stale-`cfi` limit; the merge keeps main's progress fields. Pre-existing race; this release does not make it worse. Lane: Library & Content.
+- <a id="large-folder-sync-2"></a>**LARGE-FOLDER-SYNC-2 — Follow-ups from LARGE-FOLDER-SYNC-1** *(position 21 — stub)*. Ruled by Blurby.Brain at LARGE-FOLDER-SYNC-1's merge (2026-10-14): (N2) cancelling and then re-syncing the same folder returns the cancelled run's promise; (N3) per-file `saveLibrary` during a full sync weakens the batching; (N4) confirm `hasBook`'s case rule; start the watcher before the sync on a folder switch; normalize every library path comparison (the index keys use raw `===`, an accepted deviation); (F5) `refresh()` scans the library per change event, 1–3 ms at 120,000 books; a user-visible scan-failure signal (tier 2: pick-folder and switch-folder now resolve on a failed scan and only log it); a test for the fast-path duplicate-filepath edge. Known limit: a second book at the same filepath survives a single-file removal until the next full sync prunes it. The owner's real-folder check runs in the batched owner smoke. Lane: Library & Content.
+- <a id="page-position-save-2"></a>**PAGE-POSITION-SAVE-2 — Follow-ups from PAGE-POSITION-SAVE-1** *(position 22 — stub)*. Ruled by Blurby.Brain at PAGE-POSITION-SAVE-1's merge (2026-10-14): (N2) a live check that a swipe's crossing flag is taken by the adjacent section's relocate; (N4) a diagnostic when `sectionStart < 0` loses a deferred page-turn save; remove Page's dead browse-away code (`userBrowsingRef`, `pollBrowsing`, the 500 ms poll effect) together with its two reader-mode ownership-manifest entries (the `page/FoliateView.tsx` `userBrowsingRef` anchor and the `page/useModeBindings.ts` `setInterval` anchor). Nothing in Page sets browse-away any more, so a future Jump back trigger must set it itself. Lane: Reader Engine.
+
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 17 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 22 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 23 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 18 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 21 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 19 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 20 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- <a id="folder-unreachable-guard-1"></a>**FOLDER-UNREACHABLE-GUARD-1 — Keep folder books when the source folder cannot be reached** *(position 23 — stub; specify next — it should merge before the owner keeps `sourceFolder` set for daily use)*. BUG-195 (High): `scanFolderAsync` returns `[]` for an unreachable root, and both the full folder sync and `rescan-folder` (`main/ipc/library.js`) then prune every folder-sourced book. Fix: report an unreachable root distinctly and skip the prune in both callers, with a test per caller. LL-156: LARGE-FOLDER-SYNC-1 (position 15) moves the full sync from `main.js` into `main/folder-sync.js` (`runFullSync`), so the guard goes there, not in `main.js`; that item already keeps its new per-file remove from removing anything when the root is unreachable. Merges after LARGE-FOLDER-SYNC-1 (same `main/folder-sync.js` and `main/folder-watcher.js`) and PACKAGING-FIX-1 (same `main/ipc/library.js`), at different hunks. Lane: Library & Content.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 28 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 29 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 24 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="kf2-waiver-retire-1"></a>**KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver** *(position 27 — stub; governance)*. SETTINGS-WRITE-DURABLE-1 added a bounded rename retry to `main/json-store.js` (`JSON_RENAME_RETRY_DELAYS_MS`), which removes the Windows EPERM rename that KF-2 (READER-MODE-SEPARATION-2 Decision #25) waived. Its close-out proposes retiring the waiver after clean full runs. Done when two consecutive full `npm test` runs on the owner's machine show no EPERM rename, and every live KF-2 reference is restated as retired (LL-156). Lane: Platform & Maintenance.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 25 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 26 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes

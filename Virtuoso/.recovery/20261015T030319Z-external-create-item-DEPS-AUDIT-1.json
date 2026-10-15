@@ -1,0 +1,50 @@
+{
+  "id": "20261015T030319Z-external-create-item-DEPS-AUDIT-1",
+  "operation": "external-create-item",
+  "item_id": "DEPS-AUDIT-1",
+  "created": "2026-10-15T03:03:19Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Fix or account for every production dependency advisory",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "M",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#deps-audit-1",
+      "branch": "eb/deps-audit-1",
+      "description": "Apply every non-major npm audit fix (Electron 41.10.7, electron-updater 6.8.9, adm-zip 0.5.18), wrap every adm-zip read in a size-capped reader (64 MiB per entry, 512 MiB per operation) so a crafted EPUB cannot crash main, and write a reachability note for each remaining advisory. Kokoro pins untouched.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate. Merges before the batched quiet suite and owner smoke; the epic's D3 and D6 re-run on final main. Full Spec: U9/U10 pass.",
+      "sequence": 17,
+      "prerequisites": [],
+      "id": "DEPS-AUDIT-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T01:37:13Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:DEPS-AUDIT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "DEPS-AUDIT-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:DEPS-AUDIT-1",
+      "actualRevision": "2026-10-15T03:04:43Z",
+      "recoveryId": "20261015T030319Z-external-create-item-DEPS-AUDIT-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8141-9067-e33edb874227",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T03:04:44Z",
+  "outcome": "succeeded"
+}

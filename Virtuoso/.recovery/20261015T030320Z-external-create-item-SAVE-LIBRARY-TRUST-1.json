@@ -1,0 +1,50 @@
+{
+  "id": "20261015T030320Z-external-create-item-SAVE-LIBRARY-TRUST-1",
+  "operation": "external-create-item",
+  "item_id": "SAVE-LIBRARY-TRUST-1",
+  "created": "2026-10-15T03:03:20Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "The renderer cannot change where a library book's file is",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#save-library-trust-1",
+      "branch": "eb/save-library-trust-1",
+      "description": "save-library keeps main's filepath and convertedEpubPath for every document it holds and drops unknown ids, closing the read-any-file and delete-any-file chains through read-file-buffer and delete-doc. Fixes BUG-198 (position reset after a rescan).",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate. Merges after DEPS-AUDIT-1. Full Spec: U9/U10 pass.",
+      "sequence": 18,
+      "prerequisites": [],
+      "id": "SAVE-LIBRARY-TRUST-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T01:37:13Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:SAVE-LIBRARY-TRUST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "SAVE-LIBRARY-TRUST-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:SAVE-LIBRARY-TRUST-1",
+      "actualRevision": "2026-10-15T03:04:43Z",
+      "recoveryId": "20261015T030320Z-external-create-item-SAVE-LIBRARY-TRUST-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8154-816f-dcb5df1e49ec",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T03:04:45Z",
+  "outcome": "succeeded"
+}
