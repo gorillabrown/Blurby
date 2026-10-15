@@ -218,6 +218,14 @@ describe("save-library cannot change where a book's file is", () => {
     expect(convertStarted).toBe(false); // served the stored conversion, did not reconvert
   });
 
+  it("(m) a renderer save cannot set ext or clear needsEpubConversion before main has converted", async () => {
+    const bookPath = write("src/book.txt", "two words");
+    const F = { id: "f1", title: "Book", filepath: bookPath, ext: ".txt", source: "folder", needsEpubConversion: true };
+    library = [F];
+    await call("save-library", [{ ...structuredClone(F), ext: ".epub", needsEpubConversion: undefined, title: "Renamed" }]);
+    expect(library[0]).toMatchObject({ title: "Renamed", ext: ".txt", needsEpubConversion: true, filepath: bookPath });
+  });
+
   it("(i) control: edits and order are saved", async () => {
     library = [d1(), { id: "d2", title: "Two" }];
     await call("save-library", [
