@@ -562,6 +562,26 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   };
 
+  /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
+  onPageTurned = (first: { readonly wordIndex: number; readonly cfi: string }): void => {
+    if (!this.alive) return;
+    const s = this.state;
+    this.markEngaged();
+    this.ports.persistence.markPageActivity();
+    s.userExplicitSelection = false;
+    s.explicitSelectionAnchor = null;
+    s.cfi = first.cfi;
+    this.ports.persistence.recordCfi(first.cfi);
+    s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
+      cfi: first.cfi,
+      persist: true,
+      publishState: true,
+      navigate: false,
+    });
+    s.isBrowsedAway = false;
+    s.notify();
+  };
+
   /** Legacy useFoliateSync effect 1 tick (setIsBrowsedAway(isUserBrowsing())). */
   pollBrowsing = (): void => {
     if (!this.alive) return;

@@ -32,6 +32,8 @@ import {
   extractWordsFromView,
   queryWordSpans,
   parseWordIndexAttribute,
+  findWordSpanInTextRange,
+  textOffsetBefore,
   type FoliateWord,
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
@@ -245,6 +247,8 @@ export interface PageFoliateViewProps {
   showJumpBackToAnchor: boolean;
   onJumpBackToAnchor: () => void;
   onUserBrowseAway: () => void;
+  /** PAGE-POSITION-SAVE-1: a page turn landed; the first word on the new page and that word's CFI. */
+  onPageTurned: (first: { wordIndex: number; cfi: string }) => void;
   highlightedWordIndex: number;
   bookWordSections?: readonly Readonly<SectionBoundary>[];
   renderVersion: number;
@@ -267,6 +271,7 @@ export default function PageFoliateView({
   showJumpBackToAnchor,
   onJumpBackToAnchor,
   onUserBrowseAway,
+  onPageTurned,
   highlightedWordIndex,
   bookWordSections,
   renderVersion,
@@ -292,6 +297,13 @@ export default function PageFoliateView({
   onWordClickRef.current = onWordClick;
   const onUserBrowseAwayRef = useRef(onUserBrowseAway);
   onUserBrowseAwayRef.current = onUserBrowseAway;
+  const onPageTurnedRef = useRef(onPageTurned);
+  onPageTurnedRef.current = onPageTurned;
+  // PAGE-POSITION-SAVE-1: page turns in flight (a relocate while > 0 is a turn's) and a turn not yet stamped.
+  const pageTurnsInFlightRef = useRef(0);
+  const pendingTurnRef = useRef<{ doc: Document; start: number; end: number } | null>(null);
+  // A swipe that snapped onto the blank edge page: the next relocate (the adjacent section's) is the turn's.
+  const swipeCrossingRef = useRef(false);
   const onLoadRef = useRef(onLoad);
   onLoadRef.current = onLoad;
   const onWordsReextractedRef = useRef(onWordsReextracted);
@@ -396,11 +408,6 @@ export default function PageFoliateView({
 
   const invalidateWordPositionIndex = useCallback(() => {
     wordPositionIndexRef.current.invalidate();
-  }, []);
-
-  const markUserBrowsingAway = useCallback(() => {
-    userBrowsingRef.current = true;
-    onUserBrowseAwayRef.current?.();
   }, []);
 
   const clearSoftHighlight = useCallback(() => {
@@ -546,6 +553,32 @@ export default function PageFoliateView({
         host.appendChild(view);
         viewRef.current = view;
 
+        // PAGE-POSITION-SAVE-1: report the first word on the page a turn landed on; false while it is not stamped.
+        const reportFirstWordOnPage = (doc: Document, start: number, end: number): boolean => {
+          const span = findWordSpanInTextRange(doc.body, start, end);
+          const rendered = parseWordIndexAttribute(span?.getAttribute("data-word-index"));
+          const match = (view.renderer?.getContents?.() ?? []).find((c: any) => c.doc === doc);
+          if (!span || rendered == null || typeof match?.index !== "number") return false;
+          const wordRange = doc.createRange();
+          wordRange.selectNodeContents(span);
+          onPageTurnedRef.current?.({
+            wordIndex: resolveRenderedWordIndexToGlobal(match.index, rendered, foliateWordsRef.current, liveSections()),
+            cfi: view.getCFI(match.index, wordRange),
+          });
+          return true;
+        };
+        // PAGE-POSITION-SAVE-1: a turn (key, button or swipe) landed on the page `range` shows; save it or hold it.
+        const reportTurn = (range: Range | undefined): void => {
+          const turnedDoc = range?.startContainer.ownerDocument;
+          if (!range || !turnedDoc?.body) return;
+          const start = textOffsetBefore(turnedDoc.body, range.startContainer, range.startOffset);
+          const end = textOffsetBefore(turnedDoc.body, range.endContainer, range.endOffset);
+          if (start === end) return; // a blank edge page has no words to save or wait for
+          const saved = reportFirstWordOnPage(turnedDoc, start, end);
+          pendingTurnRef.current = saved ? null : { doc: turnedDoc, start, end };
+          if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
+        };
+
         // Attach load listener BEFORE open() — events may fire during init
         const onSectionLoad = async (e: any) => {
           const { doc, index } = e.detail;
@@ -570,6 +603,13 @@ export default function PageFoliateView({
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
             }
+          }
+
+          // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+          const pendingTurn = pendingTurnRef.current;
+          if (pendingTurn && pendingTurn.doc === doc) {
+            pendingTurnRef.current = null;
+            reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end);
           }
 
           lastLoadedSectionIndexRef.current = index;
@@ -691,11 +731,25 @@ export default function PageFoliateView({
           const fraction = e.detail.fraction ?? 0;
           onRelocateRef.current?.({ cfi, fraction });
           scheduleWordPositionIndexRebuild("relocate");
+          // PAGE-POSITION-SAVE-1: a relocate during a key/button turn, or right after a swipe left its section, is the turn's.
+          if (pageTurnsInFlightRef.current > 0 || swipeCrossingRef.current) {
+            swipeCrossingRef.current = false;
+            reportTurn(e.detail.range);
+          }
         });
 
         // Open the book
         await view.open(file);
         if (cancelled) return;
+
+        // PAGE-POSITION-SAVE-1: a touch swipe is a page turn. foliate snaps with reason "snap" (paginator.js:831-848);
+        // a snap onto the blank edge page crosses into the adjacent section, whose relocate is then the turn's.
+        view.renderer.addEventListener?.("relocate", (e: any) => {
+          if (cancelled || e.detail?.reason !== "snap") return;
+          const r = view.renderer;
+          if (r.page <= 0 || r.page >= r.pages - 1) swipeCrossingRef.current = true;
+          else reportTurn(e.detail.range);
+        });
 
         // Set renderer attributes (Page is always paginated)
         view.renderer.setAttribute("flow", "paginated");
@@ -1034,34 +1088,34 @@ export default function PageFoliateView({
     applyVisualHighlightByIndex(highlightedWordIndex, undefined, false);
   }, [applyVisualHighlightByIndex, highlightedWordIndex]);
 
+  // PAGE-POSITION-SAVE-1: a key or button page turn saves its new page's first word (the relocate it fires, above).
+  const turnPage = useCallback((dir: 1 | -1) => {
+    const renderer = viewRef.current?.renderer;
+    if (!renderer) return;
+    pageTurnsInFlightRef.current += 1;
+    void Promise.resolve(dir > 0 ? renderer.next() : renderer.prev())
+      .finally(() => { pageTurnsInFlightRef.current -= 1; });
+  }, []);
+
   // Keyboard page turn
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      const view = viewRef.current;
-      if (!view?.renderer) return;
+      if (!viewRef.current?.renderer) return;
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
-        markUserBrowsingAway();
-        view.renderer.next();
+        turnPage(1);
       } else if (e.key === "ArrowLeft" || e.key === "PageUp") {
         e.preventDefault();
-        markUserBrowsingAway();
-        view.renderer.prev();
+        turnPage(-1);
       }
     };
 
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [markUserBrowsingAway]);
+  }, [turnPage]);
 
-  const goNext = useCallback(() => {
-    markUserBrowsingAway();
-    viewRef.current?.renderer?.next();
-  }, [markUserBrowsingAway]);
-  const goPrev = useCallback(() => {
-    markUserBrowsingAway();
-    viewRef.current?.renderer?.prev();
-  }, [markUserBrowsingAway]);
+  const goNext = useCallback(() => turnPage(1), [turnPage]);
+  const goPrev = useCallback(() => turnPage(-1), [turnPage]);
 
   return (
     <div className="rm-page-view" ref={containerRef}>

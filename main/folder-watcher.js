@@ -83,21 +83,27 @@ function startWatcher(sourceFolder, callbacks) {
   // Resolved once per watcher; only a symbolic link needs it.
   const realRoot = fsPromises.realpath(sourceFolder).catch(() => null);
   const pending = new Map(); // relative path -> { timer, renamed }
+  let closed = false; // set by close(): no callback fires after it
 
   // Runs once a path has had no event for FOLDER_WATCHER_STABILITY_MS.
   async function settle(rel, renamed) {
     pending.delete(rel);
+    if (closed) return;
     const full = path.join(sourceFolder, rel);
     let st;
-    try { st = await fsPromises.lstat(full); } catch { onUnlink(); return; }
+    try { st = await fsPromises.lstat(full); } catch { if (!closed) onUnlink(full); return; }
+    if (closed) return;
     if (st.isDirectory()) {
-      // A folder moved in raises one event; the caller rescans the whole folder.
+      // A folder moved in raises one event; the caller imports the files under it.
       if (renamed) onAdd(full);
       return;
     }
     if (!SUPPORTED_EXT.includes(path.extname(full).toLowerCase())) return;
     if (st.isSymbolicLink()) {
-      if (!await isPathWithinFolder(full, sourceFolder, await realRoot)) return;
+      const root = await realRoot;
+      if (closed) return;
+      const inside = await isPathWithinFolder(full, sourceFolder, root);
+      if (closed || !inside) return;
     } else if (!st.isFile()) {
       return;
     }
@@ -106,7 +112,7 @@ function startWatcher(sourceFolder, callbacks) {
   }
 
   function onEvent(eventType, rel) {
-    if (!rel) return;
+    if (closed || !rel) return;
     const parts = rel.split(/[\\/]/);
     if (parts.some((p) => p.startsWith(".")) || parts[0] === "Saved Articles") return;
     const prev = pending.get(rel);
@@ -134,6 +140,7 @@ function startWatcher(sourceFolder, callbacks) {
 
   const closeHandle = watcher.close.bind(watcher);
   watcher.close = () => {
+    closed = true;
     for (const { timer } of pending.values()) clearTimeout(timer);
     pending.clear();
     closeHandle();

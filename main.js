@@ -15,6 +15,7 @@ const { createMainWindow, createTray, setupAutoUpdater,
 const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
 const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
+const { createFolderSync } = require("./main/folder-sync");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -29,8 +30,8 @@ if (process.env.BLURBY_USER_DATA_DIR) app.setPath("userData", path.resolve(proce
 if (process.env.BLURBY_NARRATE_TRIAL) app.commandLine.appendSwitch("disable-features", "CalculateNativeWinOcclusion");
 
 // ── Constants ────────────────────────────────────────────────────────────────
-const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS, FOLDER_SYNC_DEBOUNCE_MS,
-        FOLDER_SYNC_BATCH_SIZE, MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
+const { LIBRARY_SAVE_DEBOUNCE_MS, BROADCAST_DEBOUNCE_MS,
+        MAX_RECENT_FOLDERS, MAX_HISTORY_SESSIONS,
         MS_PER_DAY, AUTO_UPDATE_DELAY_MS, BROWSER_FETCH_TIMEOUT_MS,
         BROWSER_CONTENT_SETTLE_MS, URL_FETCH_TIMEOUT_MS, FOLDER_SYNC_STARTUP_DELAY_MS } = require('./main/constants');
 
@@ -63,7 +64,8 @@ let mainWindow = null;
 let readerWindows = new Map();
 let tray = null;
 let watcher = null;
-let syncDebounceTimer = null;
+let folderWorkTimer = null; // the startup folder work, until it runs or quit stops it
+let folderWorkStopped = false;
 // failedExtractions: Map<filepath, timestamp> — bounded, auto-cleans
 const FAILED_EXTRACTIONS_MAX = 500;
 const failedExtractions = new Map();
@@ -301,11 +303,6 @@ async function loadState() {
 }
 
 // ── Folder sync ────────────────────────────────────────────────────────────
-function debouncedSyncLibraryWithFolder() {
-  if (syncDebounceTimer) clearTimeout(syncDebounceTimer);
-  syncDebounceTimer = setTimeout(() => { syncDebounceTimer = null; syncLibraryWithFolder(); }, FOLDER_SYNC_DEBOUNCE_MS);
-}
-
 async function extractNewFileDoc(file) {
   const content = await extractContent(file.filepath);
   if (!content) { addFailedExtraction(file.filepath); return null; }
@@ -321,81 +318,28 @@ async function extractNewFileDoc(file) {
   };
 }
 
-// Cancellation flag for folder sync
-let syncCancelled = false;
-function cancelSync() { syncCancelled = true; }
-
 function emitSyncProgress(current, total, phase) {
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.webContents.send("sync-progress", { current, total, phase });
   }
 }
 
-async function syncLibraryWithFolder() {
-  if (!settings.sourceFolder) return;
-  syncCancelled = false;
-
-  emitSyncProgress(0, 0, "scanning");
-  const files = await scanFolderAsync(settings.sourceFolder);
-  if (syncCancelled) return;
-
-  const docs = getLibrary();
-  const existing = new Map(docs.map((d) => [d.filepath, d]));
-  const synced = [];
-
-  const newFiles = [];
-  for (const file of files) {
-    const prev = existing.get(file.filepath);
-    if (prev) {
-      synced.push({ ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
-    } else if (!failedExtractions.has(file.filepath)) {
-      newFiles.push(file);
-    }
-  }
-
-  emitSyncProgress(0, newFiles.length, "extracting");
-
-  const BATCH_SIZE = FOLDER_SYNC_BATCH_SIZE;
-  for (let i = 0; i < newFiles.length; i += BATCH_SIZE) {
-    if (syncCancelled) break;
-    const batch = newFiles.slice(i, i + BATCH_SIZE);
-    const results = await Promise.all(batch.map(extractNewFileDoc));
-    if (syncCancelled) break; // Check after batch completes — don't process stale results
-    for (const doc of results) {
-      if (doc) synced.push(doc);
-    }
-    emitSyncProgress(Math.min(i + BATCH_SIZE, newFiles.length), newFiles.length, "extracting");
-    // Yield to event loop between batches so UI stays responsive
-    if (i + BATCH_SIZE < newFiles.length) {
-      await new Promise((resolve) => setImmediate(resolve));
-    }
-  }
-
-  if (syncCancelled) {
-    // Save partial progress so extracted docs aren't lost on cancellation
-    if (synced.length > 0) {
-      setLibrary(synced);
-      await saveLibraryNow();
-      broadcastLibrary();
-    }
-    return;
-  }
-
-  const savedArticlesPath = settings.sourceFolder
-    ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
-    : null;
-  for (const doc of docs) {
-    if (doc.source !== "folder") {
-      synced.push(doc);
-    } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
-      synced.push(doc);
-    }
-  }
-
-  setLibrary(synced);
-  saveLibrary();
-  broadcastLibrary();
-  emitSyncProgress(newFiles.length, newFiles.length, "done");
+const folderSync = createFolderSync({
+  getSourceFolder: () => settings.sourceFolder,
+  getLibrary, setLibrary, addDoc: addDocToLibrary,
+  scanFolderAsync, statFile: (p) => fsPromises.stat(p),
+  extractNewFileDoc, extractContent, countWords,
+  isFailed: (p) => failedExtractions.has(p), addFailed: addFailedExtraction,
+  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
+});
+function syncLibraryWithFolder() { return folderSync.syncAll(); }
+function cancelSync() { folderSync.cancel(); }
+// Quit (Fold-in 2a): the startup folder work never starts, and a running sync or per-file add stops writing.
+function stopFolderWork() {
+  folderWorkStopped = true;
+  clearTimeout(folderWorkTimer);
+  folderWorkTimer = null;
+  folderSync.stop();
 }
 
 // ── Watcher management ─────────────────────────────────────────────────────
@@ -404,19 +348,9 @@ function startWatcherFn() {
   if (!settings.sourceFolder) return;
 
   watcher = startWatcher(settings.sourceFolder, {
-    onAdd: () => debouncedSyncLibraryWithFolder(),
-    onUnlink: () => debouncedSyncLibraryWithFolder(),
-    onChange: async (filepath) => {
-      const doc = getLibrary().find((d) => d.filepath === filepath);
-      if (doc) {
-        const content = await extractContent(filepath);
-        if (content && typeof content === "string") {
-          doc.wordCount = countWords(content);
-          saveLibrary();
-          broadcastLibrary();
-        }
-      }
-    },
+    onAdd: (filepath) => folderSync.applyAdd(filepath),
+    onUnlink: (filepath) => folderSync.applyUnlink(filepath),
+    onChange: (filepath) => folderSync.applyChange(filepath),
     onError: (err, folderPath) => {
       const isPermission = err.message && (
         err.message.includes("EACCES") ||
@@ -653,7 +587,7 @@ app.whenReady().then(async () => {
 
   // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
   if (settings.sourceFolder) {
-    const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+    const startFolderWork = () => { if (folderWorkStopped) return; folderWorkTimer = setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS); };
     if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
     else startFolderWork();
   }
@@ -682,6 +616,7 @@ app.on("window-all-closed", () => {
 app.on("will-quit", createWillQuitHandler({
   app,
   stopNewWork: () => {
+    stopFolderWork();
     if (watcher) watcher.close();
     try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
     try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }

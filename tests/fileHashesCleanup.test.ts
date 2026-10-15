@@ -209,14 +209,13 @@ describe("clearDocHashes — edge cases", () => {
 // (f) main/constants.js exports all 11 values with correct types
 // ─────────────────────────────────────────────────────────────────────────────
 
-describe("main/constants.js — exports all 11 main.js constants", () => {
+describe("main/constants.js — exports all 10 main.js constants", () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const constants = require(path.resolve(__dirname, "../main/constants.js"));
 
   const expectedKeys = [
     "LIBRARY_SAVE_DEBOUNCE_MS",
     "BROADCAST_DEBOUNCE_MS",
-    "FOLDER_SYNC_DEBOUNCE_MS",
     "FOLDER_SYNC_BATCH_SIZE",
     "MAX_RECENT_FOLDERS",
     "MAX_HISTORY_SESSIONS",
@@ -227,7 +226,7 @@ describe("main/constants.js — exports all 11 main.js constants", () => {
     "URL_FETCH_TIMEOUT_MS",
   ];
 
-  it("(f) exports all 11 main.js constants", () => {
+  it("(f) exports all 10 main.js constants", () => {
     for (const key of expectedKeys) {
       expect(constants).toHaveProperty(key);
       expect(typeof constants[key]).toBe("number");
@@ -250,10 +249,6 @@ describe("main/constants.js — values match expected defaults", () => {
 
   it("(g) BROADCAST_DEBOUNCE_MS is 200", () => {
     expect(constants.BROADCAST_DEBOUNCE_MS).toBe(200);
-  });
-
-  it("(g) FOLDER_SYNC_DEBOUNCE_MS is 1000", () => {
-    expect(constants.FOLDER_SYNC_DEBOUNCE_MS).toBe(1000);
   });
 
   it("(g) FOLDER_SYNC_BATCH_SIZE is 4", () => {
@@ -302,10 +297,6 @@ describe("main.js — uses imported constants from main/constants.js", () => {
 
   it("(h) main.js destructures BROADCAST_DEBOUNCE_MS from constants", () => {
     expect(src).toContain("BROADCAST_DEBOUNCE_MS");
-  });
-
-  it("(h) main.js destructures FOLDER_SYNC_DEBOUNCE_MS from constants", () => {
-    expect(src).toContain("FOLDER_SYNC_DEBOUNCE_MS");
   });
 
   it("(h) main.js destructures MS_PER_DAY from constants", () => {
