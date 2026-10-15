@@ -611,4 +611,117 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     expect.soft(src.slice(at)).toContain("stopFolderWork();");
     expect.soft(src).not.toContain("debouncedSyncLibraryWithFolder");
   });
+
+  // ── FOLDER-NOTICE-1: the folder sync's clear sites ───────────────────────
+  // Each case sets the two reports before createFolderSync, which destructures its dependencies when it is created.
+  const withReports = (init) => {
+    const { state, deps } = makeDeps(init);
+    deps.reportFolderOk = vi.fn();
+    deps.reportFolderProblem = vi.fn();
+    return { state, deps, sync: createFolderSync(deps) };
+  };
+
+  it("(fn-g) a full sync whose root lists clears", async () => {
+    const a = path.join(ROOT, "a.epub");
+    const { deps, sync } = withReports({ disk: [ROOT, a], lib: [folderDoc("A", a)] });
+    deps.scanFolderAsync.mockImplementation(async () => [file(a)]);
+    await sync.syncAll();
+    expect(deps.reportFolderOk, "a full sync of a reachable root did not clear").toHaveBeenCalledTimes(1);
+    expect(deps.reportFolderOk).toHaveBeenCalledWith(ROOT);
+    expect(deps.reportFolderProblem).not.toHaveBeenCalled();
+  });
+
+  it("(fn-h) the clear comes while the walk is pending (ruling A)", async () => {
+    const { deps, sync } = withReports();
+    const scan = deferred();
+    deps.scanFolderAsync.mockImplementation(() => scan.promise);
+    const run = sync.syncAll();
+    await new Promise((r) => setImmediate(r));
+    try {
+      expect(deps.scanFolderAsync).toHaveBeenCalled();
+      expect(deps.reportFolderOk, "the sync did not clear while its scan was pending").toHaveBeenCalledWith(ROOT);
+    } finally {
+      scan.resolve([]);
+      await run;
+    }
+  });
+
+  it("(fn-i) a thrown scan reports sync-failed after the clear", async () => {
+    const { deps, sync } = withReports();
+    deps.scanFolderAsync.mockRejectedValue(new Error("EIO"));
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      await sync.syncAll();
+      expect(deps.reportFolderProblem, "syncAll's catch did not report").toHaveBeenCalledWith("sync-failed", ROOT);
+      expect(deps.reportFolderOk).toHaveBeenCalled();
+      expect(deps.reportFolderOk.mock.invocationCallOrder[0]).toBeLessThan(deps.reportFolderProblem.mock.invocationCallOrder[0]);
+    } finally { log.mockRestore(); }
+  });
+
+  it("(fn-j) a watcher add under the folder clears", async () => {
+    const p = path.join(ROOT, "n.epub");
+    const { deps, sync } = withReports({ disk: [ROOT, p] });
+    await sync.applyAdd(p);
+    expect(deps.reportFolderOk, "a watcher add did not clear").toHaveBeenCalledWith(ROOT);
+  });
+
+  it("(fn-v) a partial read still counts as reachable (R1)", async () => {
+    const a = path.join(ROOT, "a.epub");
+    const { deps, sync } = withReports({ lib: [folderDoc("A", a)] });
+    deps.scanFolderAsync.mockImplementation(async (_dir, report) => { report.skipped = [path.join(ROOT, "sub")]; return [file(a)]; });
+    await sync.syncAll();
+    expect(deps.reportFolderProblem).toHaveBeenCalledWith("partial-read", ROOT);
+    expect(deps.reportFolderOk, "a partial read did not count as reachable").toHaveBeenCalledWith(ROOT);
+  });
+
+  it("(fr4) the root check cannot raise an unhandled rejection or replace the scan's error", async () => {
+    const boom = () => { throw new Error("boom"); };
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    // Only this case's rejections are counted: vitest's own listeners are set aside for its duration.
+    const saved = process.listeners("unhandledRejection");
+    const unhandled = [];
+    const mine = (reason) => unhandled.push(reason && reason.message);
+    process.removeAllListeners("unhandledRejection");
+    process.on("unhandledRejection", mine);
+    try {
+      const m1 = withReports();
+      m1.deps.reportFolderOk = vi.fn(boom);
+      const s1 = createFolderSync(m1.deps);
+      await s1.syncAll();
+      for (let i = 0; i < 3; i++) await new Promise((r) => setImmediate(r));
+      expect(unhandled, "the root check's rejection was unhandled").toEqual([]);
+      expect(log.mock.calls.filter((c) => String(c[0]).startsWith("[folder-notice]")), "no [folder-notice] line for the failed clear").toHaveLength(1);
+
+      const m2 = withReports();
+      m2.deps.reportFolderOk = vi.fn(boom);
+      m2.deps.scanFolderAsync.mockRejectedValue(new Error("EIO"));
+      const s2 = createFolderSync(m2.deps);
+      log.mockClear();
+      await s2.syncAll();
+      expect(log, "the root check's error replaced the scan's").toHaveBeenCalledWith("[folder-sync] full sync failed:", "EIO");
+      expect(m2.deps.reportFolderProblem).toHaveBeenCalledWith("sync-failed", ROOT);
+    } finally {
+      process.removeListener("unhandledRejection", mine);
+      for (const l of saved) process.on("unhandledRejection", l);
+      log.mockRestore();
+    }
+  });
+
+  it("(fn-u) control: a root that does not list content does not clear", async () => {
+    const m1 = withReports();
+    m1.deps.rootHasContent = async () => null;
+    const s1 = createFolderSync(m1.deps);
+    m1.deps.scanFolderAsync.mockImplementation(async () => null);
+    await s1.syncAll();
+    expect(m1.deps.reportFolderProblem).toHaveBeenCalledWith("root-unlistable", ROOT);
+    expect(m1.deps.reportFolderOk).not.toHaveBeenCalled();
+
+    const m2 = withReports({ lib: [folderDoc("H", path.join(ROOT, "held.epub"))] });
+    m2.deps.rootHasContent = async () => false;
+    const s2 = createFolderSync(m2.deps);
+    m2.deps.scanFolderAsync.mockImplementation(async () => []);
+    await s2.syncAll();
+    expect(m2.deps.reportFolderProblem).toHaveBeenCalledWith("root-empty-suspect", ROOT);
+    expect(m2.deps.reportFolderOk).not.toHaveBeenCalled();
+  });
 });
