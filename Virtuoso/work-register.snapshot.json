@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T05:22:34Z",
+  "takenAt": "2026-10-15T05:37:48Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2106,8 +2106,8 @@
       "id": "SAVE-LIBRARY-MERGE-1",
       "title": "A library save merges instead of replacing",
       "sequence": 20,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2116,12 +2116,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#save-library-merge-1",
       "branch": "eb/save-library-merge-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "save-library becomes a merge; only an explicit delete-doc removes a document; cloud-sync tombstones and main's progress fields (lastReadAt) are preserved.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass.",
-      "revision": "a51470d518e82967cb9d40a994d97a6c0a0eee7da82085640e5d0dd19c36e6c5",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/save-library-merge-1 from main 745ee383).",
+      "revision": "63c13e11950ddd0d03be75228dee8f9379e7b104ac6f44a708a0387d6f610123",
       "extra": {}
     },
     {
