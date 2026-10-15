@@ -13,10 +13,15 @@ let saveSettingsTimeout = null;
 let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it
 
 function register(ctx) {
-  ipcMain.handle("get-state", () => ({
-    settings: ctx.getSettings(),
-    library: ctx.getLibrary().filter((d) => !d.deleted),
-  }));
+  ipcMain.handle("get-state", () => {
+    const settings = ctx.getSettings();
+    return {
+      // A copy: the real user settings plus the folder keys the library view shows; never an _-prefixed secret
+      // such as _wsPairingToken, or schemaVersion, which the renderer does not read (GET-STATE-SECRET-1).
+      settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },
+      library: ctx.getLibrary().filter((d) => !d.deleted),
+    };
+  });
 
   ipcMain.handle("get-platform", () => process.platform);
   ipcMain.handle("get-system-theme", () => getSystemTheme());
