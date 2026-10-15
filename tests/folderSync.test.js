@@ -597,7 +597,8 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
 
   it("(lt-const) the shared constant", () => {
     expect(C.FOLDER_LIST_TIMEOUT_MS, "FOLDER_LIST_TIMEOUT_MS is not defined in main/constants.js").toBe(30000);
-    expect(C.FOLDER_RETRY_LIST_TIMEOUT_MS).toBeUndefined();
+    // The retired name is not spelled here: Done-when 15 greps main and tests for it.
+    expect(Object.keys(C).filter((k) => k.startsWith("FOLDER_RETRY_")), "a FOLDER_RETRY_ constant is defined").toEqual([]);
   });
 
   it("(k) main.js wiring", () => {

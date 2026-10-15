@@ -377,11 +377,21 @@ function register(ctx) {
         return { count: docs.length, empty: true, reason: "root-empty-suspect" };
       }
       const skipped = (report.skipped || []).map(pathKey);
-      const existing = new Map(docs.map((d) => [pathKey(d.filepath), d]));
+      // One pathKey per library path. On a case-only collision the first doc is the book; the other is kept below, never dropped.
+      const keyOf = new Map();
+      const existing = new Map();
+      for (const d of docs) {
+        const k = pathKey(d.filepath);
+        keyOf.set(d, k);
+        if (!existing.has(k)) existing.set(k, d);
+      }
+      const onDisk = new Set();
       const synced = [];
 
       for (const file of files) {
-        const prev = existing.get(pathKey(file.filepath));
+        const k = pathKey(file.filepath);
+        onDisk.add(k);
+        const prev = existing.get(k);
         if (prev) {
           let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
           if (file.ext === ".epub") {
@@ -443,6 +453,7 @@ function register(ctx) {
         ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
         : null;
       for (const doc of docs) {
+        const k = keyOf.get(doc);
         if (doc.source === "url" && doc.content && !doc.convertedEpubPath) {
           try {
             const os = require("os");
@@ -481,8 +492,10 @@ function register(ctx) {
           synced.push(doc);
         } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
           synced.push(doc);
-        } else if (doc.filepath && skipped.some((s) => pathKey(doc.filepath) === s || pathKey(doc.filepath).startsWith(s + path.sep))) {
+        } else if (doc.filepath && skipped.some((s) => k === s || k.startsWith(s + path.sep))) {
           synced.push(doc); // under a folder or file the scan could not read (BUG-195)
+        } else if (onDisk.has(k) && existing.get(k) !== doc) {
+          synced.push(doc); // a case-only duplicate of a book on disk: kept as it is, not dropped (LARGE-FOLDER-SYNC-2)
         }
       }
 
