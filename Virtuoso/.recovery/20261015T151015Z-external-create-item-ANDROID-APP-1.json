@@ -1,0 +1,50 @@
+{
+  "id": "20261015T151015Z-external-create-item-ANDROID-APP-1",
+  "operation": "external-create-item",
+  "item_id": "ANDROID-APP-1",
+  "created": "2026-10-15T15:10:15Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Establish the Android app",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XL",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#android-app-1",
+      "branch": "eb/android-app-1",
+      "description": "Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 52,
+      "prerequisites": [],
+      "id": "ANDROID-APP-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ANDROID-APP-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "ANDROID-APP-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ANDROID-APP-1",
+      "actualRevision": "d0b0b02c10f6220db8c2a6805011fea9a45ff729ce80c2df12cbca091bee845e",
+      "recoveryId": "20261015T151015Z-external-create-item-ANDROID-APP-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81f6-9659-faedb3e2139f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T15:11:21Z",
+  "outcome": "succeeded"
+}
