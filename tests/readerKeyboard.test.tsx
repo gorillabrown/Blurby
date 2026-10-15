@@ -132,6 +132,23 @@ describe("reader keyboard - Flow playback separation", () => {
 
     expect(container.querySelector("[data-testid='mode']")?.textContent).toBe("flow");
   });
+
+  it("(i) a repeated Space in Flow does not toggle play, and the repeat is claimed", async () => {
+    const onTogglePlay = vi.fn();
+
+    await act(async () => {
+      root.render(<KeyboardHarness onTogglePlay={onTogglePlay} />);
+    });
+
+    let notClaimed = true;
+    await act(async () => {
+      notClaimed = window.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", repeat: true, bubbles: true, cancelable: true }));
+    });
+
+    expect(onTogglePlay).not.toHaveBeenCalled();
+    expect(notClaimed).toBe(false);
+    expect(container.querySelector("[data-testid='mode']")?.textContent).toBe("flow");
+  });
 });
 
 type PageSpaceSpies = {
@@ -254,6 +271,17 @@ describe("reader keyboard - Page Space enters the remembered mode (UX-POLISH-1)"
     await act(async () => {
       field.dispatchEvent(new KeyboardEvent("keydown", { code: "Space", key: " ", bubbles: true, cancelable: true }));
     });
+    expectOnly(null);
+  });
+
+  // UX-POLISH-2: a held Space auto-repeats keydown; repeats are claimed and run nothing.
+  it("(h) a repeated Space in Page calls no handler", async () => {
+    await renderAndPress({ lastReadingMode: "flow" }, { repeat: true });
+    expectOnly(null);
+  });
+
+  it("(j) a repeated Shift+Space in Page calls no handler", async () => {
+    await renderAndPress({ lastReadingMode: "flow" }, { shiftKey: true, repeat: true });
     expectOnly(null);
   });
 });
