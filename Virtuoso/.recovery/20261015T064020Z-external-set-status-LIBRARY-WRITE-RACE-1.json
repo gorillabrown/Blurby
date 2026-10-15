@@ -1,0 +1,35 @@
+{
+  "id": "20261015T064020Z-external-set-status-LIBRARY-WRITE-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-1",
+  "created": "2026-10-15T06:40:20Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 34,
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub."
+    },
+    "expectedRevision": "4eb4fb9d19c363ec8a86129309443eb9452d1421863a6da2472d1be83b4c846f",
+    "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub.\"), ('sequence', 34)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-1",
+      "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub.\"), ('sequence', 34)]",
+      "actualRevision": "ebc40221f1b7a682d128a90a91c08a5386ca4683eb1022a469afaeef7190fcf2",
+      "recoveryId": "20261015T064020Z-external-set-status-LIBRARY-WRITE-RACE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T06:41:54Z",
+  "outcome": "succeeded"
+}
