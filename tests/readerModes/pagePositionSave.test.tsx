@@ -515,9 +515,9 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
   // Rulings at registration (Blurby.Brain, 2026-10-15): a word click on provisional numbering holds its save like a turn.
   const clickWord = (doc: Document, index: number) =>
     act(async () => { (doc.querySelector(`[data-word-index="${index}"]`) as HTMLElement).click(); });
-  async function mountWiredClicks() {
+  async function mountWiredClicks(extra: Record<string, unknown> = {}) {
     const mounted = await mount();
-    const wired = { onWordClick: mounted.runtime.onWordClick, onHeldClickSave: mounted.runtime.onHeldClickSave };
+    const wired = { onWordClick: mounted.runtime.onWordClick, onHeldClickSave: mounted.runtime.onHeldClickSave, ...extra };
     await mounted.render(wired);
     (mounted.renderer as any).scrollToAnchor = vi.fn(async () => {});
     const { doc } = rawDoc();
@@ -552,5 +552,14 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await render({ ...wired, ...BOOK_WORDS });
     await settle();
     expect(saves(fake)).toEqual([]);
+  });
+
+  it("(WC4) a word click held when the book's words cannot arrive saves its cfi only and keeps the stored index", async () => {
+    const { fake, runtime, doc } = await mountWiredClicks({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    await clickWord(doc, 1);
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"]]);
+    expect(fake.effects.filter((e) => e.method === "persistence.updateProgress")).toEqual([]);
+    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1); // the click's anchor is unchanged in memory
   });
 });

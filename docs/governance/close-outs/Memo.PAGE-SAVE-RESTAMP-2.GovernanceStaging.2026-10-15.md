@@ -156,5 +156,47 @@ The raw records are `scratchpad\psr2-live\psr2-live-c1-1792078790679.json` and `
 
 ## Known limits
 - This item retires PAGE-SAVE-RESTAMP-GUARD-1's known limit "if extraction fails, turns stay held" (LL-156). MarcusAurelius removes it at close-out.
-- On failure, a held click saves cfi only. That path runs through the shared `checkBookWords` release and `holdWordClick`'s failed branch, but no test covers it on its own (the ruling named three click tests).
+- On failure, a held click saves cfi only. Test (WC4) now covers it (Round 2, ruling 3).
+- **The link cancel can drop a turn (Round 2, ruling 2: stays as specified).** If a link is followed within about 20 ms of a turn, the cancel can drop the held turn while the view stays on the turned page. The cost is one unsaved turn: the stored position stays older but correct, and the next save covers it. Moving the cancel to after the jump lands is a follow-up in the PAGE-SAVE-RESTAMP-3 stub.
 - The section-load replay (`:633`) now passes the held entry's `click` flag. PAGE-POSITION-SAVE-2's N4 edit at `:631` must keep both this item's condition and `:633`'s argument.
+
+## Round 2 (Blurby.Brain rulings, 2026-10-15, Rule 11 tier 1)
+Blurby.Brain's rulings: (1) re-time the driver so the link fires only after the turn has settled, adjust L9's window to match, and re-run L2 on C1 and L9 on C2; (2) the link-cancel residual stays as specified, as a known limit (above), and moving the cancel goes to PAGE-SAVE-RESTAMP-3; (3) add one test for the held click's failure path; (4) the TOC finding is accepted as pre-existing and filed by Blurby.Brain as its own stub.
+
+### Ruling 3: test (WC4)
+- (WC4): with `ensureBookWords` rejecting, a word click on renderer-numbered spans saves `[["doc-1", -1, "cfi:3:beta"]]`, sends no `updateProgress`, and keeps the click's in-memory `explicitSelectionAnchor` at 1.
+- **Positive control on the base.** The four source files were checked out from C1 `7307e3f6` (the base code) into the working tree, then restored from HEAD; `git status` showed only the test file changed afterwards. On the base code, `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "WC4"` exits **1**: `expected [ [ 'doc-1', 1, 'cfi:3:beta' ] ] to deeply equal [ [ 'doc-1', -1, 'cfi:3:beta' ] ]` (the section-local index, saved at once). On the C2 code it passes.
+- No source code changed in Round 2, so the C2 package (`9d922a69`) was not rebuilt. `origin/main` moved to `bd6af475` with governance files only (`git diff --name-only 132c25de bd6af475 -- src main tests preload.js` is empty).
+
+### Ruling 1: the re-timed driver
+- **Change.** The turn records `pageAtTurn`. The link fires only when all three hold: a relocate came after the turn, `renderer.page === pageAtTurn + 1`, and there has been no relocate for 500 ms. Everything else in the driver is verbatim.
+- **L9's window, adjusted.** It was "`linkAt − firstSpansAt` between 150 and 400 ms". It is now:
+  - the link fires after the turn has settled (the condition above);
+  - the final probe's page differs from the turned page, so the jump took effect;
+  - the first extract's time plus 3000 is later than `linkAt`, so the words arrived after the jump.
+  - The other checks are unchanged.
+- **Two diagnostics led to it** (read-only, scratch profile):
+  - A 250 ms probe timeline through the first re-timed L2 showed that the view never left the turned page. That driver fired on the first relocate, 7 ms after the key, before the view had settled.
+  - On an idle, settled view, the real click path (`a.click()`) emitted `link` (not prevented) and a relocate, and moved the view from page 3 to page 2, where `#fn-13.1` lays out.
+  - (A direct `view.goTo` on the raw attribute href throws "Could not go to …"; the click path first resolves the href through `section.resolveHref`. Not used by the driver.)
+- **First re-timed attempt (settle = first relocate after the turn):** L2 missed again. `turnRelocateAt` came +7 ms after the key, the link fired at +11 ms, and the view stayed on page 3. Record `psr2-live-c1-1792079626263.json`, plus a timeline run.
+
+### L2 on C1, re-run (record `psr2-live-c1-1792079914627.json`): DEFECT VISIBLE
+- Deep: 63171, equal to the probe. Pass. (The deep step's `goTo(15)` landed one line earlier than in the first runs, 63171 against 63198; it is the same page 2.)
+- `__psrg`: `firstSpansAt` 1792079875589; the turn at +222 ms (`pageAtTurn` 2); the turn's relocate at +230 ms; the last relocate at +746 ms; `settledPage` 3; `link` `…#fn-13.1` at **+740 ms**.
+- Timeline: page 3 (rendered index 399) at +442 ms, then page 2 from +974 ms to the end (+14 s). The jump landed.
+- `__saves`: exactly one, at +6,831 ms (after `linkAt`): position 63419, cfi `…/16,/384,/384` (the held turn's page 3). The final probe is page 2 (63171, `…/10,/2,/2`), whose cfi differs from the save's: **the re-stamp saved the older, held page over the jump.**
+- `__extracts`: one, `slow`, at +219 ms. `$d` changed from `$before` `{ 63171, …/10,/2,/2 }` to `{ 63419, …/16,/384,/384 }`.
+
+### L9 on C2, re-run (record `psr2-live-c2-1792079996608.json`): PASS
+- Deep: 63171, equal to the probe. Pass.
+- `__psrg`: the turn at +222 ms (`pageAtTurn` 2); the turn's relocate at +229 ms; `settledPage` 3; `link` at **+741 ms**, after the turn settled.
+- Timeline: page 3 at +437 ms, then page 2 from +955 ms to the end. The jump landed.
+- `__extracts`: one, `slow`, at +219 ms; +219 + 3000 is later than +741, so the words arrived after the jump.
+- `__saves` is `[]`, and `$d` equals `$before` (`{ 63171, …/10,/2,/2 }`). The held turn is not saved over the jump.
+
+### Gates after Round 2 (the merged tree with `bd6af475`, plus WC4)
+- **DW2:** 18 files, 209/209, exit 0.
+- **DW3–DW6:** the counts are unchanged (6; 5; 5/1/1; 3; 8; 1; 1; 2; 3), each exit 0.
+- `npm test` exits **0**: 2,382 passed, 1 skipped, 0 failed, in 170 files. `npm run typecheck` exits **0**. `npm run build` exits **0**.
+- Done-when 1 at C1 now counts 14 failing tests with WC4, which was shown against the base code separately (above).
