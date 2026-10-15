@@ -29,6 +29,27 @@ export function queryWordSpans(root: ParentNode | null | undefined): HTMLElement
   return Array.from(root.querySelectorAll<HTMLElement>("[data-word-index]"));
 }
 
+/** Characters of body's text before the boundary point (node, offset) (PAGE-POSITION-SAVE-1). */
+export function textOffsetBefore(body: HTMLElement, node: Node, offset: number): number {
+  const range = body.ownerDocument.createRange();
+  range.setStart(body, 0);
+  range.setEnd(node, offset);
+  return range.toString().length;
+}
+
+/** The first stamped word span with text in [start, end) of body's text, or null (wrapping keeps the text). */
+export function findWordSpanInTextRange(body: HTMLElement, start: number, end: number): HTMLElement | null {
+  const walker = body.ownerDocument.createTreeWalker(body, NodeFilter.SHOW_TEXT);
+  let seen = 0;
+  for (let node = walker.nextNode(); node && seen < end; node = walker.nextNode()) {
+    seen += node.nodeValue?.length ?? 0;
+    if (seen <= start) continue;
+    const span = node.parentElement?.closest<HTMLElement>("[data-word-index]");
+    if (span) return span;
+  }
+  return null;
+}
+
 export function hasToken(value: string | null | undefined, token: string): boolean {
   return String(value || "").toLowerCase().split(/\s+/).includes(token.toLowerCase());
 }

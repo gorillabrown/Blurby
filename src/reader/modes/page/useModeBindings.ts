@@ -37,6 +37,7 @@ export function usePageModeBindings(runtime: PageModeRuntime): { readonly useFol
       showJumpBackToAnchor: snapshot.isBrowsedAway,
       onJumpBackToAnchor: () => runtime.jumpBack(),
       onUserBrowseAway: runtime.onUserBrowseAway,
+      onPageTurned: runtime.onPageTurned,
       highlightedWordIndex: snapshot.highlightedWordIndex,
       bookWordSections: document.bookWords?.sections,
       renderVersion: runtime.getRenderVersion(),

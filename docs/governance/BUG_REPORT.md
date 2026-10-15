@@ -11,7 +11,7 @@
 ### BUG-197 — In Page mode, turning pages never saves the reading position
 **Reported:** 2026-10-14 (QUIT-FLUSH-1 Done-when 9 owner smoke, production build of `bd1216fc`; filed for Blurby.Brain)
 **Severity:** MEDIUM (a book reopens where it was last saved, not where the reader stopped; a "Jump back" button appears)
-**Status:** OPEN — intended behaviour decided (owner, 2026-10-14, relayed by Blurby.Brain): page turns in Page mode save the reading position, and the saved position is the "First word of that page" (the word index of the first word visible on the newly shown page as `position`, with its matching `cfi`; not the middle or end of the page, not the old reading anchor). Scheduled as PAGE-POSITION-SAVE-1. Lane: Reader Engine.
+**Status:** RESOLVED in source (PAGE-POSITION-SAVE-1): a Page-mode page turn saves the first word of the new page (position and its cfi) at once; closes after the batched owner smoke.
 **Location:** Page mode's position commit path; not yet traced.
 **Description:** In Page mode, three page turns followed by a 10 s idle with the app open left the document's `position`, `cfi` and `lastReadAt` unchanged in `library.json`, and a "Jump back" button appeared. Quitting is not the cause: QUIT-FLUSH-1's flush wrote the library cleanly in the same smoke.
 **Fix path:** PAGE-POSITION-SAVE-1: a page turn commits the first visible word's index and cfi; how the persistent anchor and the "Jump back" button adapt is Blurby.Brain's technical call. Its live check covers QUIT-FLUSH-1's untestable Done-when 9(f).

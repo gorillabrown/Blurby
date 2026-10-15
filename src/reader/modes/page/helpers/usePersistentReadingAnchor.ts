@@ -11,7 +11,8 @@ export type PersistentAnchorCause =
   | "hard-selection"
   | "mode-advance"
   | "explicit-navigation"
-  | "jump-back";
+  | "jump-back"
+  | "page-turn";
 
 export interface CommitPersistentWordOptions {
   cfi?: string | null;

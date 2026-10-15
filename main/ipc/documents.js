@@ -23,6 +23,7 @@ function register(ctx) {
       doc.position = position;
       if (cfi) doc.cfi = cfi;
       doc.modified = Date.now();
+      doc.lastReadAt = Date.now();
       doc.revision = revision;
       ctx.saveLibrary();
 
