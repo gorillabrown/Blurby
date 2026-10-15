@@ -43,15 +43,16 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
-// The renderer may edit a document's fields, never where its file is or how it is converted (filepath, convertedEpubPath,
-// ext, needsEpubConversion are main's), and cannot add documents (SAVE-LIBRARY-TRUST-1).
+// The renderer may edit a document's fields, never where its file or cover is or how it is converted (filepath,
+// convertedEpubPath, ext, needsEpubConversion and coverPath are main's), and cannot add documents
+// (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
 function keepMainPaths(newDocs, library) {
   const held = new Map((library || []).map((doc) => [doc.id, doc]));
   return newDocs
     .filter((doc) => doc && held.has(doc.id))
     .map((doc) => {
       const h = held.get(doc.id);
-      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion };
+      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion, coverPath: h.coverPath };
     });
 }
 
@@ -702,7 +703,7 @@ function register(ctx) {
   ipcMain.handle("apply-metadata-updates", async (_, updates) => {
     if (!Array.isArray(updates)) return { updated: 0 };
 
-    const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);
+    const ALLOWED_FIELDS = new Set(["title", "author"]);
     const library = ctx.getLibrary();
     const updateMap = new Map();
     for (const { docId, updates: fields } of updates) {
