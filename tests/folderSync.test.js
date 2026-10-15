@@ -11,6 +11,13 @@ import fs from "fs";
 
 const { createFolderSync } = await import("../main/folder-sync.js");
 const { FOLDER_SYNC_SAVE_INTERVAL_MS } = await import("../main/constants.js");
+const constantsModule = await import("../main/constants.js");
+const C = constantsModule.default || constantsModule;
+// LARGE-FOLDER-SYNC-2: absent before C2, so a fake-timer case fails on its own assertion, and (lt-const) names it.
+const LIST_MS = C.FOLDER_LIST_TIMEOUT_MS ?? 30000;
+const realSetTimeout = globalThis.setTimeout; // captured before any case fakes timers
+const realWait = (ms) => new Promise((resolve) => realSetTimeout(resolve, ms));
+const fakeTimers = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
 
 const ROOT = path.join(os.tmpdir(), "lfs-root");
 const file = (p) => ({ filepath: p, filename: path.basename(p), ext: path.extname(p).toLowerCase(), size: 1, modified: 1 });
@@ -40,9 +47,10 @@ function makeDeps(init = {}) {
     addDoc: (d) => { state.lib.unshift(d); },
     removeDoc: (id) => { state.lib = state.lib.filter((d) => d.id !== id); },
     scanFolderAsync: vi.fn(async () => []),
+    rootHasContent: async (p) => (state.disk.has(p) ? true : null), // the old exists(root) rule; tests/folderUnreachableGuard.test.js drives the real one
     statFile: (p) => (state.disk.has(p)
       ? Promise.resolve({ isDirectory: () => false, size: 1, mtimeMs: 1 })
-      : Promise.reject(new Error("ENOENT"))),
+      : Promise.reject(Object.assign(new Error("ENOENT"), { code: "ENOENT" }))),
     extractNewFileDoc: vi.fn(async (f) => {
       if (state.hold) await state.hold(f);
       return { id: "id-" + path.basename(f.filepath), filepath: f.filepath, source: "folder", position: 0 };
@@ -157,7 +165,7 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     scanA.resolve([file(path.join(rootA, "new.epub"))]);
     await Promise.all([sa, sb]);
     expect(m.deps.extractNewFileDoc, "folder A added a book after the switch").not.toHaveBeenCalled();
-    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB);
+    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB, expect.any(Object));
   });
 
   it("(e) a long import saves as it goes", async () => {
@@ -392,6 +400,47 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
       await sync.applyAdd(path.join(ROOT, "n3.epub"));
       expect(reads, "the add after a removal re-read every library book (index rebuilt)").toBe(0);
     });
+
+    winIt("(norm-b) win32: a folder spelled in another case is the same book", async () => {
+      setPlatform("win32");
+      const root = "C:\\Books";
+      const p = "c:\\books\\sub\\title.epub";
+      const { state, deps, sync } = makeDeps({ disk: [root, p], lib: [folderDoc("p", "C:\\Books\\Sub\\Title.pdf")] });
+      state.folder = root;
+      await sync.applyAdd(p);
+      expect(deps.extractNewFileDoc, "a book in a folder spelled in another case was extracted again").not.toHaveBeenCalled();
+    });
+
+    winIt("(case-rename) win32: a case-only rename keeps the book and its position", async () => {
+      setPlatform("win32");
+      const root = "C:\\Books";
+      for (const [stored, scanned] of [["C:\\Books\\title.epub", "C:\\Books\\Title.epub"], ["C:\\Books\\Sub\\x.epub", "C:\\Books\\sub\\x.epub"]]) {
+        const { state, deps, sync } = makeDeps({ lib: [folderDoc("X", stored, { position: 500 })] });
+        state.folder = root;
+        deps.scanFolderAsync.mockImplementation(async () => [file(scanned)]);
+        await sync.syncAll();
+        expect(state.lib.map((d) => [d.id, d.position]), "a case-only rename of " + stored + " lost the book or its position").toEqual([["X", 500]]);
+        expect(state.lib[0].filename).toBe(path.basename(scanned));
+        expect(deps.extractNewFileDoc).not.toHaveBeenCalled();
+        await sync.applyChange(scanned);
+        expect(state.lib[0].wordCount).toBe(3);
+      }
+    });
+
+    winIt("(case-dup) win32: two docs differing only in case are both kept, and the first gets the scan", async () => {
+      setPlatform("win32");
+      const { state, deps, sync } = makeDeps({
+        lib: [folderDoc("X", "C:\\Books\\a.epub", { position: 500 }), folderDoc("Y", "C:\\Books\\A.epub")],
+      });
+      state.folder = "C:\\Books";
+      deps.scanFolderAsync.mockImplementation(async () => [{ ...file("C:\\Books\\A.epub"), size: 9 }]);
+      await sync.syncAll();
+      expect(state.lib.map((d) => d.id), "a case-only duplicate was pruned").toEqual(["X", "Y"]);
+      const [x, y] = state.lib;
+      expect([x.size, x.position]).toEqual([9, 500]);
+      expect(y.size).toBe(1);
+      expect(deps.extractNewFileDoc).not.toHaveBeenCalled();
+    });
   });
 
   it("(F3) a scan rejection from syncAll does not escape; it is logged", async () => {
@@ -403,6 +452,153 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
       expect(log).toHaveBeenCalledWith("[folder-sync] full sync failed:", "EIO");
       await expect(sync.syncAll()).resolves.toBeUndefined(); // the running slot was released
     } finally { log.mockRestore(); }
+  });
+
+  // ── LARGE-FOLDER-SYNC-2 ──────────────────────────────────────────────────
+  it("(n2) a re-sync right after a cancel runs", async () => {
+    const { state, deps, sync } = makeDeps({ lib: [folderDoc("gone", path.join(ROOT, "gone.epub")), folderDoc("keep", path.join(ROOT, "keep.epub"))] });
+    const first = deferred();
+    let calls = 0;
+    deps.scanFolderAsync.mockImplementation(() => (calls++ === 0 ? first.promise : Promise.resolve([file(path.join(ROOT, "keep.epub"))])));
+    const a = sync.syncAll();
+    sync.cancel();
+    const b = sync.syncAll();
+    first.resolve([]);
+    await Promise.all([a, b]);
+    expect(deps.scanFolderAsync, "the re-sync after cancel() returned the cancelled run").toHaveBeenCalledTimes(2);
+    expect(state.lib.map((d) => d.id)).toEqual(["keep"]);
+  });
+
+  it("(n3) per-file events during a full sync do not save", async () => {
+    const late = path.join(ROOT, "late.epub");
+    const c = path.join(ROOT, "c.epub");
+    const g = path.join(ROOT, "g.epub");
+    const { state, deps, sync } = makeDeps({ disk: [ROOT, late, c], lib: [folderDoc("c", c), folderDoc("g", g)] });
+    const scan = deferred();
+    deps.scanFolderAsync.mockImplementation(() => scan.promise);
+    const run = sync.syncAll();
+    await sync.applyAdd(late);
+    await sync.applyChange(c);
+    await sync.applyUnlink(g);
+    expect(deps.saveLibrary, "a per-file event saved the library during a full sync").not.toHaveBeenCalled();
+    sync.cancel();
+    scan.resolve([]);
+    await run;
+    expect(deps.saveLibrary).toHaveBeenCalledTimes(1); // the owed save
+    const ids = state.lib.map((d) => d.id);
+    expect(ids).toContain("id-late.epub");
+    expect(ids).toContain("c");
+    expect(ids).not.toContain("g");
+    expect(state.lib.find((d) => d.id === "c").wordCount).toBe(3);
+  });
+
+  it("(f5) a change event uses the index", async () => {
+    const n1 = path.join(ROOT, "n1.epub");
+    const bystander = folderDoc("by", path.join(ROOT, "by.epub"));
+    let reads = 0;
+    const fp = bystander.filepath;
+    Object.defineProperty(bystander, "filepath", { get() { reads++; return fp; }, enumerable: true });
+    const c = path.join(ROOT, "c.epub");
+    const { state, sync } = makeDeps({ disk: [ROOT, n1], lib: [bystander, folderDoc("c", c, { wordCount: 1 })] });
+    await sync.applyAdd(n1); // builds the index
+    reads = 0;
+    await sync.applyChange(c);
+    await sync.applyChange(path.join(ROOT, "not-in-library.epub"));
+    expect(reads, "a change event scanned the library").toBe(0);
+    expect(state.lib.find((d) => d.id === "c").wordCount).toBe(3);
+  });
+
+  it("(norm-a) a dot-segment path matches its book", async () => {
+    const { state, sync } = makeDeps({ lib: [folderDoc("a", path.join(ROOT, "a.epub"))] });
+    await sync.applyUnlink(ROOT + path.sep + "sub" + path.sep + ".." + path.sep + "a.epub");
+    expect(state.lib, "a dot-segment spelling of the book's path removed nothing").toEqual([]);
+  });
+
+  it("(sa) a gone book in a folder whose name starts with \"Saved Articles\" is pruned", async () => {
+    const { state, deps, sync } = makeDeps({
+      lib: [
+        folderDoc("a", path.join(ROOT, "a.epub")),
+        folderDoc("s", path.join(ROOT, "Saved Articles", "s.epub")),
+        folderDoc("o", path.join(ROOT, "Saved Articles Old", "o.epub")),
+      ],
+    });
+    deps.scanFolderAsync.mockImplementation(async () => [file(path.join(ROOT, "a.epub"))]);
+    await sync.syncAll();
+    expect(state.lib.map((d) => d.id).sort(), "a gone book under Saved Articles Old was kept").toEqual(["a", "s"]);
+  });
+
+  it("(dup) control: the fast-path duplicate-filepath edge (known limit)", async () => {
+    const p = path.join(ROOT, "d.epub");
+    const o = path.join(ROOT, "o.epub");
+    const { state, deps, sync } = makeDeps({ lib: [folderDoc("a1", p), folderDoc("a2", p), nonFolderDoc("m"), folderDoc("o", o)] });
+    await sync.applyUnlink(p);
+    expect(state.lib.map((d) => d.id)).toEqual(["a2", "m", "o"]); // one of the two survives until the next full sync
+    deps.scanFolderAsync.mockImplementation(async () => [file(p), file(o)]);
+    await sync.syncAll();
+    expect(countPath(state.lib, p)).toBe(1);
+    expect(state.lib.find((d) => d.filepath === p).id).toBe("a2");
+    expect(deps.extractNewFileDoc, "the full sync imported the survivor's file again").not.toHaveBeenCalled();
+    deps.scanFolderAsync.mockImplementation(async () => [file(o)]);
+    await sync.syncAll();
+    expect(state.lib.map((d) => d.id)).toEqual(["m", "o"]);
+  });
+
+  it("(n4) control: the stem rule", async () => {
+    const p = path.join(ROOT, "TITLE.epub");
+    const { deps, sync } = makeDeps({ disk: [ROOT, p], lib: [folderDoc("p", path.join(ROOT, "Title.pdf"))] });
+    await sync.applyAdd(p);
+    expect(deps.extractNewFileDoc).not.toHaveBeenCalled();
+  });
+
+  it("(sw-hang) a folder switch does not wait for ever on a hung sync", async () => {
+    fakeTimers();
+    try {
+      const rootA = path.join(os.tmpdir(), "lfs-A");
+      const rootB = path.join(os.tmpdir(), "lfs-B");
+      const { state, deps, sync } = makeDeps({ lib: [folderDoc("a", path.join(rootA, "a.epub"))] });
+      state.folder = rootA;
+      deps.scanFolderAsync.mockImplementation((dir) => (dir === rootA ? new Promise(() => {}) : Promise.resolve([file(path.join(rootB, "b.epub"))])));
+      sync.syncAll();
+      state.folder = rootB;
+      let settled = false;
+      const sb = sync.syncAll().then(() => { settled = true; });
+      await vi.advanceTimersByTimeAsync(LIST_MS - 1);
+      expect(deps.scanFolderAsync).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      await Promise.race([sb, realWait(2000)]);
+      expect(settled, "the switch still waits on the hung sync after FOLDER_LIST_TIMEOUT_MS").toBe(true);
+      expect(deps.scanFolderAsync).toHaveBeenCalledWith(rootB, expect.any(Object));
+      expect(state.lib.map((d) => d.id)).toEqual(["id-b.epub"]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("(n2-hang) an abandoned run applies nothing when it settles late", async () => {
+    fakeTimers();
+    try {
+      const keep = path.join(ROOT, "keep.epub");
+      const { state, deps, sync } = makeDeps({ lib: [folderDoc("keep", keep)] });
+      const d1 = deferred();
+      let calls = 0;
+      deps.scanFolderAsync.mockImplementation(() => (calls++ === 0 ? d1.promise : Promise.resolve([file(keep)])));
+      const a = sync.syncAll();
+      sync.cancel();
+      let settled = false;
+      const b = sync.syncAll().then(() => { settled = true; });
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([b, realWait(2000)]);
+      expect(settled, "the re-sync after cancel() still waits on the hung run").toBe(true);
+      expect(deps.scanFolderAsync).toHaveBeenCalledTimes(2);
+      d1.resolve([file(path.join(ROOT, "zz.epub"))]);
+      await Promise.race([a, realWait(2000)]);
+      expect(deps.extractNewFileDoc, "the abandoned run imported its late listing").not.toHaveBeenCalled();
+      expect(state.lib.map((d) => d.id)).toEqual(["keep"]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("(lt-const) the shared constant", () => {
+    expect(C.FOLDER_LIST_TIMEOUT_MS, "FOLDER_LIST_TIMEOUT_MS is not defined in main/constants.js").toBe(30000);
+    // The retired name is not spelled here: Done-when 15 greps main and tests for it.
+    expect(Object.keys(C).filter((k) => k.startsWith("FOLDER_RETRY_")), "a FOLDER_RETRY_ constant is defined").toEqual([]);
   });
 
   it("(k) main.js wiring", () => {

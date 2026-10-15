@@ -1,0 +1,34 @@
+{
+  "id": "20261015T075925Z-external-set-status-FOLDER-NOTICE-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-NOTICE-1",
+  "created": "2026-10-15T07:59:25Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 28
+    },
+    "expectedRevision": "ddc452f9d47a3adca113847196afbfcdece1bc14a4035bd4a4b2028116873c8f",
+    "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('sequence', 28)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-NOTICE-1",
+      "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('sequence', 28)]",
+      "actualRevision": "46229142c860595552e74f9a36f8201c0cfbe7d3fc4aeaa56372f81f557aaccd",
+      "recoveryId": "20261015T075925Z-external-set-status-FOLDER-NOTICE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T08:01:32Z",
+  "outcome": "succeeded"
+}

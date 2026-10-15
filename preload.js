@@ -144,7 +144,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   startWsServer: () => ipcRenderer.invoke("start-ws-server"),
   stopWsServer: () => ipcRenderer.invoke("stop-ws-server"),
   getWsStatus: () => ipcRenderer.invoke("get-ws-status"),
-  getWsPairingToken: () => ipcRenderer.invoke("get-ws-pairing-token"),
   regenerateWsPairingToken: () => ipcRenderer.invoke("regenerate-ws-pairing-token"),
   getWsShortCode: () => ipcRenderer.invoke("get-ws-short-code"),
   regenerateWsShortCode: () => ipcRenderer.invoke("regenerate-ws-short-code"),

@@ -104,27 +104,27 @@ describe("(a) startup: loadSettingsData", () => {
 describe("(b) cloud apply: applyCloudSettings", () => {
   it("keeps narrate through the settings save and keeps unrelated keys", () => {
     const { ctx, saved } = makeCtx({ schemaVersion: 13, lastReadingMode: "flow", wpm: 300 });
-    applyCloudSettings(ctx, { lastReadingMode: "narrate", fontSize: 20 });
+    applyCloudSettings(ctx, { lastReadingMode: "narrate", flowTextSize: 120 });
     expect(saved.length).toBe(1);
-    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, fontSize: 20 });
+    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, flowTextSize: 120 });
   });
 });
 
 describe("(c) merge feeds apply: mergeSettings then applyCloudSettings", () => {
   it("a newer cloud narrate wins the merge, then apply submits narrate", () => {
     const local = { schemaVersion: 13, lastReadingMode: "flow", wpm: 300 };
-    const cloud = { schemaVersion: 12, lastReadingMode: "narrate", fontSize: 20 };
+    const cloud = { schemaVersion: 12, lastReadingMode: "narrate", flowTextSize: 120 };
     const ts = {
-      settings: { "local:lastReadingMode": 1, "cloud:lastReadingMode": 2, "cloud:fontSize": 2 },
+      settings: { "local:lastReadingMode": 1, "cloud:lastReadingMode": 2, "cloud:flowTextSize": 2 },
     };
     const merged = mergeSettings(local, cloud, ts);
-    expect(merged).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, fontSize: 20 });
+    expect(merged).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, flowTextSize: 120 });
 
     const { ctx, saved } = makeCtx(local);
     applyCloudSettings(ctx, merged);
     expect(saved.length).toBe(1);
     expect(saved[0].lastReadingMode).toBe("narrate");
-    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, fontSize: 20 });
+    expect(saved[0]).toEqual({ schemaVersion: 13, lastReadingMode: "narrate", wpm: 300, flowTextSize: 120 });
   });
 });
 

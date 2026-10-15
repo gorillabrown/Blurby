@@ -11,6 +11,8 @@ const { extractContent, extractDocMetadata, countWords,
         clearChapterCache, epubChapterCache, epubChapterCacheGet } = require("../file-parsers");
 const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
+const { pathKey } = require("../folder-sync");
+const { pickUserSettings } = require("../migrations");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -43,23 +45,26 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
-// The renderer may edit a document's fields, never where its file or cover is or how it is converted (filepath,
-// convertedEpubPath, ext, needsEpubConversion and coverPath are main's), and cannot add documents
-// (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
-function keepMainPaths(newDocs, library) {
-  const held = new Map((library || []).map((doc) => [doc.id, doc]));
-  return newDocs
-    .filter((doc) => doc && held.has(doc.id))
-    .map((doc) => {
-      const h = held.get(doc.id);
-      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion, coverPath: h.coverPath };
-    });
+// The only fields a renderer library save may set; every other field is main's (SAVE-LIBRARY-MERGE-1).
+const RENDERER_FIELDS = ["unread", "seenAt", "tags", "collection"];
+
+// A renderer save edits main's records in place. It never adds, removes, reorders or replaces one, so tombstones,
+// main-side adds and main's fields survive a stale copy (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1).
+function mergeRendererEdits(newDocs, library) {
+  const sent = new Map(newDocs.filter((doc) => doc && typeof doc === "object").map((doc) => [doc.id, doc]));
+  for (const held of library || []) {
+    const doc = sent.get(held.id);
+    if (!doc || held.deleted) continue;
+    for (const key of RENDERER_FIELDS) if (key in doc) held[key] = doc[key];
+    // Both are Date.now() on this machine, so the later open wins (PAGE-POSITION-SAVE-1 N5).
+    if (Number.isFinite(doc.lastReadAt) && doc.lastReadAt > (held.lastReadAt || 0)) held.lastReadAt = doc.lastReadAt;
+  }
 }
 
 function register(ctx) {
   ipcMain.handle("save-library", (_, newDocs) => {
     if (!Array.isArray(newDocs)) return;
-    ctx.setLibrary(keepMainPaths(newDocs, ctx.getLibrary()));
+    mergeRendererEdits(newDocs, ctx.getLibrary());
     ctx.saveLibrary();
   });
 
@@ -358,13 +363,36 @@ function register(ctx) {
     ctx.clearFailedExtractions();
     try {
       const { scanFolderAsync } = require("../folder-watcher");
-      const files = await scanFolderAsync(settings.sourceFolder);
+      const report = {};
+      const files = await scanFolderAsync(settings.sourceFolder, report);
       const docs = ctx.getLibrary();
-      const existing = new Map(docs.map((d) => [d.filepath, d]));
+      // BUG-195: a folder that cannot be listed, or lists no book while folder books are held under it (Google Drive for
+      // desktop can list a mounted folder as empty while it starts), proves nothing gone: the library is left as it is.
+      if (!files) return { error: "Could not reach the source folder. Nothing was changed.", reason: "root-unlistable" };
+      const root = pathKey(settings.sourceFolder);
+      const underRoot = (p) => {
+        const rel = path.relative(root, pathKey(p));
+        return rel === "" || (rel !== ".." && !rel.startsWith(".." + path.sep) && !path.isAbsolute(rel));
+      };
+      if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {
+        return { count: docs.length, empty: true, reason: "root-empty-suspect" };
+      }
+      const skipped = (report.skipped || []).map(pathKey);
+      // One pathKey per library path. On a case-only collision the first doc is the book; the other is kept below, never dropped.
+      const keyOf = new Map();
+      const existing = new Map();
+      for (const d of docs) {
+        const k = pathKey(d.filepath);
+        keyOf.set(d, k);
+        if (!existing.has(k)) existing.set(k, d);
+      }
+      const onDisk = new Set();
       const synced = [];
 
       for (const file of files) {
-        const prev = existing.get(file.filepath);
+        const k = pathKey(file.filepath);
+        onDisk.add(k);
+        const prev = existing.get(k);
         if (prev) {
           let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
           if (file.ext === ".epub") {
@@ -426,6 +454,7 @@ function register(ctx) {
         ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
         : null;
       for (const doc of docs) {
+        const k = keyOf.get(doc);
         if (doc.source === "url" && doc.content && !doc.convertedEpubPath) {
           try {
             const os = require("os");
@@ -464,13 +493,17 @@ function register(ctx) {
           synced.push(doc);
         } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
           synced.push(doc);
+        } else if (doc.filepath && skipped.some((s) => k === s || k.startsWith(s + path.sep))) {
+          synced.push(doc); // under a folder or file the scan could not read (BUG-195)
+        } else if (onDisk.has(k) && existing.get(k) !== doc) {
+          synced.push(doc); // a case-only duplicate of a book on disk: kept as it is, not dropped (LARGE-FOLDER-SYNC-2)
         }
       }
 
       ctx.setLibrary(synced);
       ctx.saveLibrary();
       ctx.broadcastLibrary();
-      return { count: synced.length };
+      return skipped.length ? { count: synced.length, reason: "partial-read" } : { count: synced.length };
     } catch (err) {
       console.error("Rescan failed:", err);
       logToFile(`Rescan failed: ${err.message}`, ctx.getErrorLogPath());
@@ -513,7 +546,8 @@ function register(ctx) {
     if (result.canceled) return null;
     const exportData = {
       exportedAt: new Date().toISOString(),
-      settings: { ...settings },
+      // Real user settings only: a backup holds no _-prefixed secret and no main-owned key (GET-STATE-SECRET-1).
+      settings: pickUserSettings(settings),
       library: ctx.getLibrary(),
       history: ctx.getHistory(),
     };

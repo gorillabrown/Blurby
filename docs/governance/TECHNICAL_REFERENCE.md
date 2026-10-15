@@ -708,7 +708,7 @@ Documents enter the library through four paths:
 |------|-------------|---------|
 | Manual add | "Paste text" UI | `addManualDoc` IPC |
 | File drag-and-drop | Drop zone anywhere in app | `importDroppedFiles` IPC |
-| Folder watch | native recursive `fs.watch` on configured folder (startup start deferred until the main window loads); a watcher event adds, removes or refreshes one book without a rescan, and one full sync runs at a time, saving every FOLDER_SYNC_SAVE_INTERVAL_MS (main/folder-sync.js, LARGE-FOLDER-SYNC-1) | `main/folder-watcher.js` |
+| Folder watch | native recursive `fs.watch` on configured folder (startup start deferred until the main window loads); a watcher event adds, removes or refreshes one book without a rescan, and one full sync runs at a time, saving every FOLDER_SYNC_SAVE_INTERVAL_MS (main/folder-sync.js, LARGE-FOLDER-SYNC-1); a folder, subfolder or file that cannot be read removes no book, and a readable folder that lists no book keeps the books held under it (FOLDER-UNREACHABLE-GUARD-1); library path comparisons fold case on win32, so a case-only rename keeps the book; the scan and the root check skip $RECYCLE.BIN, System Volume Information and .shortcut-targets-by-id; a folder listing or file stat that has not settled in FOLDER_LIST_TIMEOUT_MS counts as unreadable (LARGE-FOLDER-SYNC-2). Known limit: when two books share one file path, removing the file removes one of them, and the other stays until the next full sync | `main/folder-watcher.js` |
 | URL import | Paste URL or Chrome extension | `addDocFromUrl` IPC via `main/url-extractor.js` |
 
 Folder-sourced documents do NOT store content in `library.json`. Content is loaded on-demand via the `load-doc-content` IPC channel.
@@ -748,6 +748,8 @@ Library supports grid and list view modes, search, favorites, archives, tags, co
 Blurby hosts a localhost WebSocket server on port 48924 for the Chrome extension.
 
 **Pairing flow:** 6-digit short code with 5-minute TTL. Long-lived token stored in safeStorage (server) and `chrome.storage.local` (extension). Token survives app restart. Extension reconnects with exponential backoff (1s→30s, ±25% jitter). Pending articles persisted in `chrome.storage.local` and replayed on reconnect with delivery confirmation (article-ack).
+
+**Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer or a library backup. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code, which the pairing banner fetches with `get-ws-short-code` after the `ws-connection-attempt` push. `export-library` writes only real user settings (no `_`-prefixed or main-owned key), and `import-library` restores no settings.
 
 **Push event channels (EXT-ENR-B, v1.43.0):** Server emits two push events to the renderer via `mainWindow.webContents.send()`:
 

@@ -1,0 +1,36 @@
+{
+  "id": "20261015T061115Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-UNREACHABLE-GUARD-1",
+  "created": "2026-10-15T06:11:15Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-15",
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-unreachable-guard-1 from main efb446db)."
+    },
+    "expectedRevision": "a74851880a20f437f0b4aee7532dad3d0c3fa2c22e1c836b226014e100c10261",
+    "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-unreachable-guard-1 from main efb446db).'), ('started', '2026-10-15'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+      "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass. Amended 2026-10-15 (owner notice decision): ships the corrected toast text, once per failure episode. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-unreachable-guard-1 from main efb446db).'), ('started', '2026-10-15'), ('status', 'in-flight')]",
+      "actualRevision": "2ca174a967873632a1923a237a17f4fe75395711d42b1568bdf70513e8d1564e",
+      "recoveryId": "20261015T061115Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T06:11:48Z",
+  "outcome": "succeeded"
+}

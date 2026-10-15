@@ -290,7 +290,7 @@ export default function LibraryView({
       if (doc) {
         doc.title = newTitle.trim() || doc.title;
         doc.author = newAuthor.trim() || doc.author;
-        api.updateDocProgress(doc.id, doc.position || 0); // triggers library save
+        void api.applyMetadataUpdates?.([{ docId: doc.id, updates: { title: doc.title, author: doc.author } }]);
       }
       setNewTitle(""); setNewAuthor(""); setShowAdd(false); setEditingId(null); setEditMetaMode(false);
       return;

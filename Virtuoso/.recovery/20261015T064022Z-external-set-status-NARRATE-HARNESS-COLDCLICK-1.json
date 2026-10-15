@@ -1,0 +1,34 @@
+{
+  "id": "20261015T064022Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-HARNESS-COLDCLICK-1",
+  "created": "2026-10-15T06:40:22Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 35
+    },
+    "expectedRevision": "460bbdb2495bcad6115623603facf80b53e7a27ab34fb47cab582120396ce6e0",
+    "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('sequence', 35)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+      "idempotencyKey": "set-status:NARRATE-HARNESS-COLDCLICK-1:[('sequence', 35)]",
+      "actualRevision": "ac006eac57290bfa36fd7a175e3c02ecfcd8cc69077928436da5bc32d0005ed6",
+      "recoveryId": "20261015T064022Z-external-set-status-NARRATE-HARNESS-COLDCLICK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T06:41:55Z",
+  "outcome": "succeeded"
+}

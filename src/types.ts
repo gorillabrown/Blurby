@@ -199,6 +199,8 @@ export interface BlurbySettings {
   defaultViewMode?: "grid" | "list";
   libraryCardSize?: "small" | "medium" | "large";
   libraryCardSpacing?: "compact" | "cozy" | "roomy";
+  // Quick-settings sort select (QuickSettingsPopover); saved and synced, read by nothing else yet (SETTINGS-KEY-TRUST-1)
+  sortBy?: string;
   // TD-02: Import pipeline
   useLegacyRenderer?: boolean;   // opt-in for legacy word-by-word renderer
   // NAR-4: TTS cache settings
@@ -338,11 +340,10 @@ export interface ElectronAPI {
   scanLibraryMetadata?: () => Promise<any[]>;
   applyMetadataUpdates?: (updates: any) => Promise<{ updated?: number; error?: string }>;
   // WebSocket server (Chrome extension)
-  startWsServer: () => Promise<{ port: number; token: string }>;
+  startWsServer: () => Promise<{ port: number }>;
   stopWsServer: () => Promise<{ ok: boolean }>;
-  getWsStatus: () => Promise<{ running: boolean; port: number; clients: number; token: string | null }>;
-  getWsPairingToken: () => Promise<string | null>;
-  regenerateWsPairingToken: () => Promise<{ port: number; token: string }>;
+  getWsStatus: () => Promise<{ running: boolean; port: number; clients: number }>;
+  regenerateWsPairingToken: () => Promise<{ port: number }>;
   getWsShortCode: () => Promise<{ code: string; expiresAt: number; status?: "connected" | "pending"; connected?: boolean }>;
   regenerateWsShortCode: () => Promise<{ code: string; expiresAt: number }>;
   // Cloud sync

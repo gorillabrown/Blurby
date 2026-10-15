@@ -147,13 +147,13 @@ async function downloadArticleImages({ contentHtml, articleImages, heroImageUrl 
   return { images, heroBuffer, heroExt, contentHtml: rewrittenHtml };
 }
 
-// A cover is read only from main's covers folders, or from a library document's own coverPath (IPC-PATH-TRUST-1).
+// A cover is read only from main's covers folders, or from a library document's own string coverPath (IPC-PATH-TRUST-1, SETTINGS-KEY-TRUST-1).
 function isAllowedCoverPath(coverPath, ctx) {
   const norm = (p) => (process.platform === "win32" ? path.resolve(p).toLowerCase() : path.resolve(p));
   const target = norm(coverPath);
   const roots = [path.join(ctx.getDataPath(), "covers"), path.join(ctx.getUserDataPath(), "covers")];
   return roots.some((root) => target.startsWith(norm(root) + path.sep))
-    || (ctx.getLibrary() || []).some((doc) => doc.coverPath && norm(doc.coverPath) === target);
+    || (ctx.getLibrary() || []).some((doc) => typeof doc?.coverPath === "string" && doc.coverPath && norm(doc.coverPath) === target);
 }
 
 function register(ctx) {
@@ -382,8 +382,10 @@ function register(ctx) {
 
   const wsServer = require("../ws-server");
 
+  // The long-lived pairing token stays in main: no handler returns it to the renderer (GET-STATE-SECRET-1).
   ipcMain.handle("start-ws-server", () => {
-    return wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx);
+    return { port };
   });
 
   ipcMain.handle("stop-ws-server", () => {
@@ -392,12 +394,8 @@ function register(ctx) {
   });
 
   ipcMain.handle("get-ws-status", () => {
-    return wsServer.getStatus();
-  });
-
-  ipcMain.handle("get-ws-pairing-token", () => {
-    const status = wsServer.getStatus();
-    return status.token || null;
+    const { running, port, clients } = wsServer.getStatus();
+    return { running, port, clients };
   });
 
   ipcMain.handle("get-ws-short-code", () => {
@@ -421,7 +419,8 @@ function register(ctx) {
     ctx.saveSettings();
     // Restart server with new token
     wsServer.stopServer();
-    return wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx);
+    return { port };
   });
 
   // ── Auto-updater ─────────────────────────────────────────────────────────

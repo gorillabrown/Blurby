@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveLoadedDocResult } from "../src/utils/loadDocResult";
 
 // SAVE-LIBRARY-TRUST-1 (BUG-198): save-library keeps main's filepath and convertedEpubPath, drops unknown ids,
-// ignores a non-array payload, and still removes by omission.
+// ignores a non-array payload, and keeps documents the renderer omits (SAVE-LIBRARY-MERGE-1).
 const require = createRequire(import.meta.url);
 const Module = require("module");
 const originalLoad = Module._load;
@@ -223,24 +223,24 @@ describe("save-library cannot change where a book's file is", () => {
     const F = { id: "f1", title: "Book", filepath: bookPath, ext: ".txt", source: "folder", needsEpubConversion: true };
     library = [F];
     await call("save-library", [{ ...structuredClone(F), ext: ".epub", needsEpubConversion: undefined, title: "Renamed" }]);
-    expect(library[0]).toMatchObject({ title: "Renamed", ext: ".txt", needsEpubConversion: true, filepath: bookPath });
+    expect(library[0]).toMatchObject({ title: "Book", ext: ".txt", needsEpubConversion: true, filepath: bookPath });
   });
 
-  it("(i) control: edits and order are saved", async () => {
+  it("(i) control: renderer edits are saved, in main's order", async () => {
     library = [d1(), { id: "d2", title: "Two" }];
     await call("save-library", [
       { id: "d2", title: "Two" },
       { ...d1(), unread: false, tags: ["t"], collection: "c", lastReadAt: 5, seenAt: 6, title: "Renamed" },
     ]);
-    expect(library.map((d) => d.id)).toEqual(["d2", "d1"]);
-    expect(library[1]).toMatchObject({ unread: false, tags: ["t"], collection: "c", lastReadAt: 5, seenAt: 6, title: "Renamed" });
+    expect(library.map((d) => d.id)).toEqual(["d1", "d2"]);
+    expect(library[0]).toMatchObject({ unread: false, tags: ["t"], collection: "c", lastReadAt: 5, seenAt: 6, title: "Own" });
     expect(saveLibrary).toHaveBeenCalledTimes(1);
   });
 
-  it("(j) control: removal by omission is kept", async () => {
+  it("(j) control: a document the renderer omits is kept (SAVE-LIBRARY-MERGE-1)", async () => {
     library = [d1(), { id: "d2", title: "Two" }];
     await call("save-library", [d1()]);
-    expect(library.map((d) => d.id)).toEqual(["d1"]);
+    expect(library.map((d) => d.id)).toEqual(["d1", "d2"]);
   });
 
   it("(k) control: a library document's convertedEpubPath is readable", async () => {

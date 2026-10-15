@@ -1,0 +1,36 @@
+{
+  "id": "20261015T053717Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+  "operation": "external-set-status",
+  "item_id": "SAVE-LIBRARY-MERGE-1",
+  "created": "2026-10-15T05:37:17Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-15",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/save-library-merge-1 from main 745ee383)."
+    },
+    "expectedRevision": "a51470d518e82967cb9d40a994d97a6c0a0eee7da82085640e5d0dd19c36e6c5",
+    "idempotencyKey": "set-status:SAVE-LIBRARY-MERGE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/save-library-merge-1 from main 745ee383).\"), ('started', '2026-10-15'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "SAVE-LIBRARY-MERGE-1",
+      "idempotencyKey": "set-status:SAVE-LIBRARY-MERGE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/save-library-merge-1 from main 745ee383).\"), ('started', '2026-10-15'), ('status', 'in-flight')]",
+      "actualRevision": "63c13e11950ddd0d03be75228dee8f9379e7b104ac6f44a708a0387d6f610123",
+      "recoveryId": "20261015T053717Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T05:37:50Z",
+  "outcome": "succeeded"
+}

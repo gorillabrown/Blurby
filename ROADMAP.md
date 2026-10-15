@@ -532,7 +532,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 **Session routing (owner, 2026-10-14; corrected the same day by the owner to Blurby.Roadmap: "you coordinate all work but brain will stay coordinating the other machine").** Blurby.Roadmap coordinates all work: it dispatches, sequences and gives the merge go for items built on this machine (the implementation session blurby-05), and runs governance (ROADMAP.md, specifications, BUG_REPORT.md, LESSONS_LEARNED.md, the Notion register, `/pointer-closeout`). Blurby.Brain coordinates the second machine ("Quiet blurby test machine") and its run queue, and stays the channel for technical rulings (Rule 11) and for design and functionality questions to the owner.
 
-**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
+**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). **Widened 2026-10-15 (Blurby.Brain):** (9) GET-STATE-SECRET-1 is merged (no secret reaches the renderer through `get-state` or the extension-pairing handlers; the renderer displays imported third-party HTML). (10) PAGE-SAVE-RESTAMP-GUARD-1 is merged or closed on evidence (PAGE-POSITION-SAVE-1 saves on every page turn, so a turn before the book's word numbers apply could save a position up to 91 words off; Blurby.Brain 2026-10-15). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
 
 **Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1) → DEPS-AUDIT-1 (17, release gate; moves Electron to 41.10.7) → SAVE-LIBRARY-TRUST-1 (18, release gate; BUG-198) → IPC-PATH-TRUST-1 (19, release gate; after SAVE-LIBRARY-TRUST-1, same `keepMainPaths` line). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
@@ -4285,29 +4285,638 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 - **LL-063:** the scripted live control uses a local folder under `%TEMP%`, never a cloud-synced folder. The owner check reads the Drive but writes nothing to it.
 - **LL-031 (stale async results):** the new `!files` return sits after `runFullSync`'s existing `stale()` check. A folder switched during the scan still returns through `stale()` first, so a stale result can never reach the guard or the prune.
 
+<a id="get-state-secret-1"></a>
+
+#### GET-STATE-SECRET-1 — No secret reaches the renderer through state or settings reads *(position 23 — Full Spec; authored 2026-10-15 on main @ `051d004c`; amended 2026-10-15 on main @ `181da234` with Blurby.Brain's rulings on the widening, the backup export and the backup import; release gate)*
+
+- **What:** the renderer stops receiving the Chrome extension's pairing secret, or any other `_`-prefixed key, from main, and a library backup stops carrying it.
+  - **`get-state`** returns a copy of the real user settings, plus the two folder keys the library view shows (`sourceFolder`, `recentFolders`). It never returns main's live settings object, a `_`-prefixed key (such as `_wsPairingToken`) or `schemaVersion`, which no renderer code reads.
+  - **The four WebSocket handlers that return the long-lived pairing token** stop returning it. `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return the same values without `token`. `get-ws-pairing-token`, which returns nothing else and has no renderer caller, is removed from main, `preload.js` and the `ElectronAPI` type. The pairing banner keeps its code: it gets it from `get-ws-short-code` after the `ws-connection-attempt` push, and neither path changes (tested).
+  - **`export-library`** writes only real user settings into the backup file: no `_`-prefixed key and no main-owned key (`pickUserSettings`).
+  - **`import-library`** already restores no settings from a backup. It is not changed; a test pins it, with a mutation control.
+  - **Two follow-ups from SETTINGS-KEY-TRUST-1's code-quality review:**
+    - a test pins the outer `pickUserSettings` on `startSync`'s merge output, so deleting it fails;
+    - `mergeSettings`' dead `schemaVersion` step is removed, with a one-line reason.
+  - **The user sees no change.** The pairing UI shows only the 6-digit short code, which is unchanged. Every settings key the renderer reads is still returned (traced below, and tested). A new backup file no longer lists the source folder, the recent folders or the schema version; nothing reads a backup's settings (the import ignores them).
+  - **Release gate** (Blurby.Brain, 2026-10-15). This is the same boundary as the three trust items (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SETTINGS-KEY-TRUST-1), and the renderer displays imported third-party HTML. Blurby.Roadmap has added it to the Stage 8 release gate as item (9) (`f1ad7cba`). Nothing is released until it is merged.
+- **Why** (lines on `181da234`, fetched 2026-10-15). The original trace was on `051d004c`. `git diff --quiet 051d004c 181da234` exits 0 over `main/ipc/state.js`, `main/ipc/misc.js`, `main/sync-engine.js`, `preload.js`, `src/**`, `tests/settingsKeyTrust.test.js`, `main/ws-server.js`, `main/migrations.js`, `main/ipc/cloud.js`, `main/window-manager.js`, `main/ipc/documents.js` and `main/auth.js`. Between them, FOLDER-UNREACHABLE-GUARD-1 (`89a5a95c`) changed `main.js`, `main/ipc/library.js` and another hunk of `docs/governance/TECHNICAL_REFERENCE.md` (`:711`), so citations in those files are given on `181da234`. `git diff --stat 89a5a95c 181da234 -- main main.js preload.js src tests docs/governance/TECHNICAL_REFERENCE.md` prints nothing: the commits after it are governance only.
+  - **`get-state` hands over main's live settings object.** The handler (`main/ipc/state.js:16-19`, reached through `preload.js:35`) returns `settings: ctx.getSettings()` (`:17`). That object holds `_wsPairingToken`, which the WebSocket server writes into it in two forms (`main/ws-server.js:444-470`):
+    - **Encrypted:** `safeStorage.encryptString(token).toString("base64")` (`:457`, `:466`; and `:241-242` on a successful pairing).
+    - **Plaintext:** the 32-hex token itself, when OS encryption is unavailable (`:459`, `:468`; read back as the token at `:450`). `regenerate-ws-pairing-token` also writes the plaintext token before restarting the server (`main/ipc/misc.js:420`).
+
+    So any renderer script can read the token, in plaintext on a machine without OS encryption. It can read `schemaVersion` too. SETTINGS-KEY-TRUST-1 recorded this as a new finding (its Out of scope; `docs/governance/close-outs/Memo.SETTINGS-KEY-TRUST-1.GovernanceStaging.2026-10-15.md:86`).
+  - **Four handlers hand the token over directly, always in plaintext.** `wsServer.startServer` returns `{ port, token: _pairingToken }` (`main/ws-server.js:438`, `:523`), and `getStatus` returns `{ running, port, clients, token }` (`:547-554`).
+    - `start-ws-server` (`main/ipc/misc.js:385-387`) and `regenerate-ws-pairing-token` (`:417-425`) return `startServer`'s value.
+    - `get-ws-status` (`:394-396`) returns `getStatus()`.
+    - `get-ws-pairing-token` (`:398-401`) returns `status.token`.
+
+    No renderer code reads a token from any of them. The only renderer call among the four is `src/components/settings/ConnectorsSettings.tsx:86` (`await api.regenerateWsPairingToken();`). It ignores the result and refreshes the short code instead (`:88-90`), which is the evidence that the UI never used the returned token. `git grep -n -E "getWsPairingToken|startWsServer|getWsStatus" -- src` finds only `src/types.ts:343-347` and the dev stub `src/test-harness/electron-api-stub.ts:565-569`. `docs/planning/AGENT_FINDINGS.md:68` (H-SEC-3) recorded the `getStatus` leak earlier and proposed keeping `getWsPairingToken`; this item supersedes that proposal, since that channel leaks the same token.
+  - **The pairing banner's code does not come from any of the four.** `main/ws-server.js` pushes `ws-connection-attempt` when an unauthenticated client connects (`:147-151`) and `ws-pairing-success` on pair or auth (`:251-255`, `:274-278`). All three sends carry only `{ timestamp: Date.now() }`. On the attempt push, the library view asks `getWsShortCode()` for the code and shows the banner (`src/components/LibraryContainer.tsx:169-178`); on the success push it hides it (`:182-183`). `get-ws-short-code` (`main/ipc/misc.js:403-409`) returns `{ code, expiresAt, connected, status }` and is not edited. The extension receives the long-lived token over its own socket (`pair-ok`, `main/ws-server.js:250`), never through the renderer.
+  - **`export-library` writes the secret into the backup.** `main/ipc/library.js:524-541` writes `settings: { ...settings }` (`:535`), main's whole live object with `_wsPairingToken` (either form), `sourceFolder`, `recentFolders` and `schemaVersion`, to the file the user picks (`:527-531`, `:539`). The file is meant to be kept and moved, so a plaintext token in it survives outside the app.
+  - **`import-library` restores no settings.** `main/ipc/library.js:543-577` reads the backup (`:552-553`) and uses only `data.library` (`:554-566`). `git grep -n "data.settings" -- main/ipc/library.js` prints nothing, and `git grep -n -E "\.settings\b|restore|backup" -- main.js main` finds no other path that applies a backup's settings (the `backupFile` hits, `main.js:56`, `:275`, `:280`, are the migration's `.bak` copies). So a backup cannot set any setting today: no fix is needed, and test (z) pins it.
+  - **`startSync`'s outer filter is not pinned.** The merge function is `(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true })` (`main/sync-engine.js:817`). `mergeSettings` (`:372-390`) copies a cloud key when `fieldTimestamps.settings["cloud:<key>"]` is greater than `["local:<key>"]` (`:376-383`), and `loadSyncState` keeps whatever a persisted `sync-state.json` carries (`:65-80`). The only test of the outer filter, (r1) (`tests/settingsKeyTrust.test.js:252-261`), seeds no timestamps, so `mergeSettings` takes no cloud key and the outer `pickUserSettings` can be deleted without failing any test.
+  - **`mergeSettings`' `schemaVersion` step is dead.** `:385-387` raises `merged.schemaVersion` to the cloud's. Its only production caller is `startSync`'s merge function, whose output `pickUserSettings` filters, and `schemaVersion` is main-owned (`main/migrations.js:325`), so the step's result is always dropped. The loop's own skip (`:377`) stays: it keeps a cloud `schemaVersion` out of the merge in every caller.
+- **Every path that hands settings or state to the renderer, or out of the app** (ruling 3; searched with `git grep -n -E "webContents\.send|sender\.send|event\.reply|returnValue|executeJavaScript|ipcMain\.on\("` and `git grep -n "getSettings()"` over `main.js`, `main/**` and `preload.js`; every `ctx.getSettings()` site and every handler whose return could carry settings was read):
+
+  | # | Path | Where (`181da234`) | What it hands over | Leaks? |
+  |---|---|---|---|---|
+  | 1 | `get-state` | `main/ipc/state.js:16-19` | main's live settings object, with `_wsPairingToken` (either form) and `schemaVersion`; and the library | **Yes.** Fixed here |
+  | 2 | `start-ws-server` | `main/ipc/misc.js:385-387` | `startServer`'s `{ port, token }` (`ws-server.js:438`, `:523`) | **Yes** (plaintext). Fixed here |
+  | 3 | `get-ws-status` | `misc.js:394-396` | `getStatus()`, with `token` (`ws-server.js:547-554`) | **Yes** (plaintext). Fixed here |
+  | 4 | `get-ws-pairing-token` | `misc.js:398-401`; `preload.js:147` | the token itself | **Yes** (plaintext). Removed here |
+  | 5 | `regenerate-ws-pairing-token` | `misc.js:417-425` | `startServer`'s `{ port, token }` | **Yes** (plaintext). Fixed here |
+  | 6 | `export-library` | `main/ipc/library.js:524-541` | writes `{ ...settings }` (`:535`), `_wsPairingToken` and the folder paths included, into the user's backup file; returns only the file path | **Yes** (to disk, not the renderer). Fixed here |
+  | 7 | `import-library` | `library.js:543-577` | reads a backup; applies only `data.library` | No: sets no setting. Pinned here |
+  | 8 | `save-settings` return | `state.js:24-47` | nothing: the handler has no `return`, so it resolves `undefined` | No |
+  | 9 | `get-launch-at-login`, `set-launch-at-login` | `state.js:49-60` | the OS flag; the boolean sent | No |
+  | 10 | `select-folder`, `switch-folder` | `state.js:62-93` | the folder the user chose; `{ folder }` or `{ error }` | No |
+  | 11 | Settings-change broadcast | none exists | — (no `webContents.send` carries settings; all 16 sends are rows 12–17) | No |
+  | 12 | `library-updated`, `sync-progress`, `watcher-error` | `main.js:264`, `:311`, `:361` | `getLibrary()`; counts; a message and a reason code | No settings (library fields are out of scope) |
+  | 13 | `cloud-sync-status-changed`, `cloud-auth-required` | `main/ipc/cloud.js:94`, `:102` | a status string (`sync-engine.js:58-62`); the provider name | No |
+  | 14 | `system-theme-changed`, `update-available`, `update-downloaded` | `main/window-manager.js:212`, `:216`, `:172`, `:178` | the theme name; a version string | No |
+  | 15 | `ws-connection-attempt`, `ws-pairing-success` | `main/ws-server.js:150`, `:254`, `:277` | `{ timestamp }` | No |
+  | 16 | Kokoro status sends | `main/ipc/tts.js:57`, `:115`; `main/tts-engine.js:98`, `:173` | loading and download state | No |
+  | 17 | `cloud-sync-now`, `cloud-force-sync` | `cloud.js:49-56`, `:66-68` | `startSync`'s `{ status, results, lastSync, revision, meteredMode }` (`sync-engine.js:910-916`; `results.settings` is an action name); `forceSync`'s `{ status, revision }` (`:1101`) or `startSync`'s. `applyCloudSettings` returns the live object (`:395`), but both callers discard it (`:822`, `:1066`) | No |
+  | 18 | `cloud-get-sync-status`, `cloud-get-merge-preview`, `cloud-full-reconciliation`, `cloud-download-doc-content` | `cloud.js:58-64`, `:81-88` | status and revision (`sync-engine.js:963-970`); document counts (`:1015-1022`); `{ fixed, errors, lastReconcile }` (`:760`); `{ content }` (`:666`) | No |
+  | 19 | `cloud-get-auth-state`, `cloud-sign-in` | `cloud.js:45-47`, `:10-32` | `userInfo` only (`main/auth.js:28`, `:182-183`, `:269-270`); OAuth tokens stay in `saveTokens` | No |
+  | 20 | Window creation and theme | `main.js:503`, `:506`, `:601`; `main/ipc/documents.js:122`; `state.js:31` | the windows take only theme colours (`window-manager.js:59`, `:107`, `:195-206`); the reader URL carries the document id only (`:136-138`) | No |
+  | 21 | `get-ws-short-code`, `regenerate-ws-short-code` | `misc.js:403-415` | the 6-digit short code, shown in the UI by design (5-minute life) | No |
+  | 22 | `isMeteredConnection` | `sync-engine.js:769-778` | a fixed `executeJavaScript` expression, no settings | No |
+  | 23 | `tts-eval-trace-*` | `main.js:228-250` | takes renderer events; returns `{ ok, tracePath }` | No |
+- **What the renderer reads from `get-state`'s settings** (traced on `051d004c`; `src/**` is unchanged on `181da234`). The readers are `src/App.tsx:45-49`, `src/components/ThemeProvider.tsx:167-172` and `src/hooks/useLibrary.ts:19-22`, `:80-82` and `:90-92`. `useLibrary` stores the object whole (`setSettings(state.settings)`), and the library and settings views read it from there. `src/test-harness/electron-api-stub.ts:265` and `main/narrate/trial.js:156` (which reads only `library`) are not app paths.
+  - **Every key the renderer reads is a `SETTINGS_DEFAULTS` key.** `git grep -h -o -E "[sS]ettings\??\.[A-Za-z_]+" -- src ':!src/**/*.test.*' ':!src/test-harness/**'` gives 47 distinct names. 43 are `SETTINGS_DEFAULTS` keys (`main/migrations.js:299-321`). The other four are not settings: `isEink` is `ReaderView`'s own prop (`src/components/ReaderView.tsx:14`), and `update`, `read` and `settings` are members of the mode ports' `settings` object (for example `src/reader/modes/flow/ModeRuntime.ts:668`, `src/reader/modes/flow/useModeBindings.ts:30`). No renderer code reads settings with a computed key, and the only destructuring is `useSettings()` itself (`ReaderContainer.tsx:141`).
+  - **The main-owned keys the renderer reads:**
+    - `sourceFolder`: `src/components/LibraryView.tsx:411` (the folder name in the header), `:460` (the recent-folders list's current folder), `:469` (Rescan disabled without a folder) and `:802` (the folder section).
+    - `recentFolders`: `LibraryView.tsx:459`, rendered by `src/components/RecentFolders.tsx:13`.
+  - **Not read:**
+    - `schemaVersion`: no renderer reader. It appears only as the renderer's default (`src/constants.ts:295`) and in the type (`src/types.ts:140`). `src/types/eval.ts:244` and `src/utils/ttsEvalTrace.ts:52` are a trace file's own schema.
+    - `launchAtLogin`: `LibraryView.tsx:98`, `:336` and `:795` use local state from `get-launch-at-login` (`preload.js:95`), not settings. It stays in `get-state`'s output, because `pickUserSettings` keeps it without `crossDevice`.
+    - Any `_`-prefixed key: no renderer code reads one.
+- **Ruling (Blurby.Brain, 2026-10-15, Rule 11 tier 1):**
+  1. `get-state` returns `pickUserSettings(settings)` plus the main-owned keys the UI actually reads, derived from the renderer's real readers. It never returns a `_`-prefixed key, and it returns a copy, never the live object.
+  2. Test: `get-state`'s output contains no `_`-prefixed key, with `_wsPairingToken` set both encrypted (the safeStorage ciphertext form) and in plaintext. Also test that every key the renderer reads is still present.
+  3. Check every other IPC or push that hands settings or state to the renderer for the same leak, and fix them in this item.
+  4. Fold in two items from SETTINGS-KEY-TRUST-1's quality review: (a) a test that pins the outer `pickUserSettings` on `startSync`'s merge output, seeding `fieldTimestamps.settings["cloud:_wsPairingToken"]: 9`, so that deleting the wrapper fails it; (b) remove the dead `schemaVersion` branch in `mergeSettings`, with a one-line reason.
+  5. A Stage 8 release gate: the same boundary as the three trust items, and the renderer displays imported third-party HTML.
+  6. Positive controls name which tests fail on the base, and why (standing rule 43).
+- **Amendment ruling (Blurby.Brain, 2026-10-15, Rule 11 tier 1):**
+  7. **The widening is confirmed as written** (the four token handlers, `preload.js` and the type). Add one test: the pairing banner flow still gets its one-time code after the ws push, so removing `token` does not sweep the code away. `ConnectorsSettings.tsx:86` ignoring `regenerateWsPairingToken()`'s result is recorded as evidence.
+  8. **Fold in `export-library`:** filter the exported settings through `pickUserSettings`, dropping `_`-prefixed keys. Test: an export with `_wsPairingToken` set contains no `_` key (positive control: fails on the base).
+  9. **Check the matching import path.** An imported backup must not be able to set `_`-prefixed or main-owned keys (`sourceFolder`, `recentFolders`, `schemaVersion`). If it already cannot, add only a pinning test with a mutation control; otherwise fix it with a positive-control test. **Result:** `import-library` reads no settings at all (Why), so it gets the pinning test (z) and mutation control 2(d), and no code change.
+- **Technical rulings (Blurby.Brain, 2026-10-15) and how this item applies them:**
+  - **The main-owned keys returned are `sourceFolder` and `recentFolders`** (ruling 1). They are the only main-owned keys any renderer code reads (trace above). `schemaVersion` is not returned.
+  - **The four token handlers are fixed under ruling 3, confirmed by ruling 7.** They return the same secret from `ipcMain.handle`, always in plaintext, and nothing in the renderer reads it. The fix is main-side, plus the contract lines that describe it (LL-106): the three returns drop `token`, and the unused `get-ws-pairing-token` channel is deleted from `main/ipc/misc.js`, `preload.js:147`, `src/types.ts:346` and the dev stub.
+  - **The banner test pins what the banner actually uses** (ruling 7). The push itself carries no code, only a timestamp, so the test checks both halves: `get-ws-short-code` still returns the code, and the three push sends in `main/ws-server.js` still carry only `{ timestamp: Date.now() }`.
+  - **The real timestamp key form is `cloud:<key>` under `fieldTimestamps.settings`** (`main/sync-engine.js:374`, `:379`), so the ruled seed is used as written.
+  - **Base:** `main` @ `181da234` (SETTINGS-KEY-TRUST-1 and FOLDER-UNREACHABLE-GUARD-1 merged, and this item registered In Flight).
+- **Design decisions (planner, 2026-10-15):**
+  - **`get-state`'s settings are `{ ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders }`.**
+    - `pickUserSettings` (`main/migrations.js:334-343`) already returns a new object holding only own `SETTINGS_DEFAULTS` keys, never a `_`-prefixed, main-owned or prototype key. So the result can never hold `_wsPairingToken`, `_future`, `schemaVersion`, an unknown key or a legacy key.
+    - The two folder keys are added by name, so a later main-owned key is not returned unless someone adds it here.
+    - It is called without `crossDevice`, so `launchAtLogin` stays, as today.
+    - The copy is one level deep. Nested values (`recentFolders`, `rhythmPauses`, `readingGoals`) are still main's objects inside the process, but IPC structured-clones the reply, so the renderer never holds a reference into main. No in-process caller of `get-state` exists outside tests.
+  - **`get-state` stays one handler, in its file.** No new helper is added: the picker exists, and the two keys are one expression.
+  - **The WebSocket returns are built from named fields** (`{ port }`; `{ running, port, clients }`), so a field added to `startServer` or `getStatus` later does not reach the renderer by default. `main/ws-server.js` is not edited: `startServer` and `getStatus` keep returning the token to their main-side callers (`misc.js:406` reads `getStatus().running`).
+  - **`get-ws-pairing-token` is deleted, not stubbed.** It has no renderer caller, so a channel that would only return `null` is dead surface. Deleting it narrows `preload.js` by one line (PR-6). Its `ElectronAPI` entry and the dev stub's entry go with it; the stub is typed `ElectronAPI` (`electron-api-stub.ts:263`), so a leftover entry would fail typecheck (TS2353). The stub's other three ws entries drop their mock tokens, to match the new types.
+  - **The `ElectronAPI` return types drop `token`** (`src/types.ts:343`, `:345`, `:347`), so the type does not promise a field main no longer sends. That is four lines in a shared-core file (Shared-Core Touches).
+  - **The export uses `pickUserSettings(settings)` as it is** (ruling 8). That drops every `_`-prefixed key and also the main-owned `sourceFolder`, `recentFolders` and `schemaVersion`, so a backup carries no secret and no machine-local folder path. No reader depends on them: the import ignores `settings`. It runs without `crossDevice`, so `launchAtLogin` stays, like every other user setting. The export's `library` and `history` are unchanged.
+  - **The import is not changed** (ruling 9). A restore of a backup's settings is not a feature today; adding one is out of scope. Test (z) fails if any later change lets a backup set a setting; such a change must then go through `pickUserSettings` and update (z) on purpose.
+  - **The dead step is replaced by a one-line comment** at `main/sync-engine.js:385-387`. The comment does not name `pickUserSettings`, so the file's count stays 5 (Done-when 6). `:377`'s skip stays.
+  - **The tests go into `tests/settingsKeyTrust.test.js`.** Its harness already registers `state.js` and `misc.js` against one `ctx`, fakes `../ws-server`, and drives the real `startSync` over an in-memory cloud, so no second harness is written. Five small harness edits:
+    - `MODULES` gains `../main/ipc/library.js`, and `setup()` registers it after `misc.js` (`tests/ipcPathTrust.test.js` registers the same three handlers against the same fakes);
+    - a module-level `dialog` fake with `showOpenDialog` and `showSaveDialog` replaces the inline `dialog: { showOpenDialog: vi.fn() }`, so (y) and (z) can pick the file;
+    - the `../ws-server` fake gains `startServer` and `getStatus`, returning what the real ones return (the token included), so a handler that passes the token through fails; and `getShortCode` and `getClientCount`, for (v5);
+    - `initSync` takes an optional `extraState` merged into the seeded `sync-state.json`, for (w).
+
+    Every existing case keeps its body. (o) still passes: `regenerate-ws-pairing-token` still writes `settings._wsPairingToken`.
+- **Out of scope:**
+  - **`library-updated`'s payload** (`main.js:264`): the full library, tombstones and file paths included. It carries no settings, and the library's fields are SAVE-LIBRARY-TRUST-1's and IPC-PATH-TRUST-1's boundary. The same holds for the export's `library` array.
+  - **Restoring settings from a backup** (a new import feature). Not added; (z) pins today's behaviour.
+  - **The short code** stays visible to the renderer: it is the pairing UI's purpose, and it expires in 5 minutes.
+  - **`regenerate-ws-pairing-token` writes the plaintext token into settings** (`misc.js:420`) even when OS encryption is available. `startServer` then fails to decrypt it and writes a fresh encrypted token (`ws-server.js:452-461`). The stored form ends up correct, and nothing reaches the renderer once this item lands. Noticed, not changed.
+  - **`main/ws-server.js`** keeps `token` in `startServer`'s and `getStatus`'s returns, for main-side callers.
+  - **Backups written before this item** keep whatever they hold. Recorded as a known limit; the user can re-export.
+  - **LL-156 check:**
+    - SETTINGS-KEY-TRUST-1's out-of-scope line "`get-state` returns `_wsPairingToken` to the renderer" is brought into scope (ruled).
+    - Its line "`mergeSettings` … unchanged" is brought into scope for one step (`:385-387`, ruling 4(b)). The rest of `mergeSettings`, and its note that an own `__proto__` cloud key can set the prototype of the local `merged` object, stay as they were: the picker still copies only own keys.
+    - Its line "`import-library` stays out of scope, by design" (a backup's library) is unchanged; this item pins only the import's settings half.
+    - AGENT_FINDINGS H-SEC-3 (`docs/planning/AGENT_FINDINGS.md:68`) is resolved in a different form: neither channel returns the token. Blurby.Roadmap marks it when this folds in.
+    - No waiver or known-failure entry names `main/ipc/state.js:16-19`, `main/ipc/misc.js:385-425`, `main/ipc/library.js:524-577` or `preload.js:147`.
+- **Prerequisites:**
+  - **SETTINGS-KEY-TRUST-1** merged (`051d004c`): `pickUserSettings` is in `main/migrations.js:334-343`, and `main/ipc/state.js:9` already requires it.
+  - Re-grep every edit site on `refs/remotes/origin/main` at dispatch (standing rule 36), and stop on content drift.
+- **Baseline and WHERE (read order):** baseline `main` @ `181da234` (2026-10-15). Read in this order:
+  1. `main/ipc/state.js:1-19` (the require and `get-state`);
+  2. `main/migrations.js:296-343` (`SETTINGS_DEFAULTS`, `MAIN_OWNED_SETTINGS`, `pickUserSettings`);
+  3. `main/ws-server.js:140-155`, `:235-280`, `:437-470`, `:523` and `:547-554` (the pushes, `pair-ok`, the token's two stored forms, what `startServer` and `getStatus` return);
+  4. `main/ipc/misc.js:381-425` (the WebSocket handlers);
+  5. `main/ipc/library.js:1-15` and `:524-577` (the requires, `export-library`, `import-library`);
+  6. `preload.js:142-151`; `src/types.ts:342-349`; `src/test-harness/electron-api-stub.ts:263`, `:564-571`;
+  7. `main/sync-engine.js:368-390` (`mergeSettings`) and `:806-823` (`startSync`'s settings step);
+  8. `tests/settingsKeyTrust.test.js` (whole file: the harness, `seedCloud`, `initSync`, `expectNoForbiddenKey`);
+  9. the renderer readers: `src/hooks/useLibrary.ts:17-28`, `:76-93`; `src/App.tsx:42-50`; `src/components/ThemeProvider.tsx:164-175`; `src/components/LibraryView.tsx:405-470`, `:795-805`; `src/components/LibraryContainer.tsx:165-185`; `src/components/settings/ConnectorsSettings.tsx:77-92`;
+  10. `docs/governance/TECHNICAL_REFERENCE.md:746-760`.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs:
+  - **Base:** run as `git grep … 181da234 -- <path>` on 2026-10-15, so output carries that prefix. (The first draft's dry-runs on `051d004c` gave the same results for every file except `main/ipc/library.js`, which the first draft did not edit.)
+  - **Prescribed edit:** run with `git grep --no-index` on scratch copies of the nine edited files from `181da234`, with every edit under Edit sites applied. `node --check` passed on the five edited `.js` sources and on the test file.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/settingsKeyTrust.test.js` exits 1, with 9 failed and 64 passed (73 tests). Exactly these fail, each for its named reason:
+       - (p) encrypted and (p) plaintext: `get-state`'s settings are main's live object, so they carry `_wsPairingToken` (the ciphertext form, then the 32-hex plaintext form), `_future` and `schemaVersion`;
+       - (q): the returned object is main's settings object (`toBe`), so a renderer-side write would change main's;
+       - (v) `start-ws-server`, (v) `get-ws-status` and (v) `regenerate-ws-pairing-token`: each result carries `token: "live-token"`;
+       - (v4): `get-ws-pairing-token` is a registered channel;
+       - (x): `mergeSettings` returns the cloud's `schemaVersion`, 99, through the dead step;
+       - (y): the exported `settings` is main's whole object, with `_wsPairingToken: "main-secret"`, `schemaVersion`, `sourceFolder` and `recentFolders`, not `{ wpm: 300, launchAtLogin: false }`.
+
+       These pass at C1: (u), (v5), (w) and (z), which pin behaviour that already holds, and the 60 cases the file already has ((a)–(f), (g) ×5, (h), (i), (r1)–(r3), (s), (j), (k), (l) ×38, (m), (n), (o)). Record the output in the staging memo.
+    2. **Mutation controls** (standing rule 43, one for each control that passes at C1). Each runs as one `pwsh` block from the worktree root, in this form, with the file `$f`, the exact text `$a`, its replacement `$b`, the expected rows `$rows` and the case `$case` given below:
+       ```powershell
+       [Environment]::CurrentDirectory = (Get-Location).Path   # [IO.File] resolves relative paths against the process folder, not Set-Location
+       git diff --quiet -- $f                                   # must exit 0: the file starts clean
+       [IO.File]::WriteAllText($f, [IO.File]::ReadAllText($f).Replace($a, $b))
+       git diff --numstat -- $f                                 # must print exactly "$rows`t$f", or the control is void: restore and stop
+       npx vitest run tests/settingsKeyTrust.test.js -t $case   # must exit 1, with exactly that case failed
+       [IO.File]::WriteAllText($f, [IO.File]::ReadAllText($f).Replace($b, $a))
+       git diff --quiet -- $f                                   # must exit 0: the file is restored
+       ```
+       A control whose numstat check prints anything else (an empty line included, which means the mutation landed elsewhere) is void, even if the test then fails or passes.
+       - **(a) The outer merge filter (ruling 4(a)), after the C1 commit.** `$f = 'main/sync-engine.js'`; `$a = '(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),'`; `$b = '(local, cloud) => mergeSettings(local, cloud, syncState.fieldTimestamps),'`; `` $rows = "1`t1" ``; `$case = '\(w\)'`. (w) fails, showing the cloud copy's forbidden own keys as `["_wsPairingToken", "sourceFolder", "recentFolders", "launchAtLogin"]`.
+       - **(b) The renderer's folder keys, after the C2 commit.** `$f = 'main/ipc/state.js'`; `$a = 'settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },'`; `$b = 'settings: { ...pickUserSettings(settings) },'`; `` $rows = "1`t1" ``; `$case = '\(u\)'`. (u) fails on `sourceFolder` (`undefined` instead of the fixture folder).
+       - **(c) The banner's code (ruling 7), after the C1 commit.** `$f = 'main/ipc/misc.js'`; `$a = 'return { code, expiresAt, connected: hasAuth, status };'`; `$b = 'return { expiresAt, connected: hasAuth, status };'`; `` $rows = "1`t1" ``; `$case = '\(v5\)'`. (v5) fails: the result has no `code`.
+       - **(d) The import sets no setting (ruling 9), after the C1 commit.** `$f = 'main/ipc/library.js'`; `$a = 'const data = JSON.parse(raw);'`; `$b = 'const data = JSON.parse(raw); Object.assign(ctx.getSettings(), data.settings);'`; `` $rows = "1`t1" ``; `$case = '\(z\)'`. (z) fails: `settings` now holds `_wsPairingToken: "backup-token"`, the backup's `sourceFolder`, `recentFolders` and `schemaVersion`, and `wpm: 999`.
+
+       Each `$a` occurs exactly once in its file: on `181da234` for (a), (c) and (d) (dry-run: `git grep -c -F` prints `:1` for each), and on the C2 edit for (b) (gate 4). No `$b` occurs before its mutation. Record all four outputs, numstat lines included, in the staging memo.
+    3. After C2, `npx vitest run tests/settingsKeyTrust.test.js tests/settingsKeyTrustKeys.test.ts tests/ipcPathTrust.test.js tests/settingsNarrateNormalization.test.js tests/sync-hardening.test.js tests/saveLibraryTrust.test.js tests/saveLibraryMerge.test.js tests/folderUnreachableGuard.test.js tests/readFileBufferLibrary.test.js tests/ws-server.test.js tests/electronApiStubGoals.test.ts tests/einkFoundation.test.ts` exits 0.
+    4. `get-state` returns a filtered copy:
+       - `git grep -n -F 'settings: ctx.getSettings(),' -- main/ipc/state.js` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/state.js:17:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },' -- main/ipc/state.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/state.js:21:`, exit 0.
+       - `git grep -c -F 'pickUserSettings' -- main/ipc/state.js` prints `main/ipc/state.js:3` and exits 0 (the require, `save-settings`, `get-state`). Dry-run, base: `181da234:main/ipc/state.js:2`, so the gate fails until the edit. Dry-run, edit: `main/ipc/state.js:3`.
+    5. No handler returns the pairing token, and main still writes it:
+       - `git grep -n -F 'get-ws-pairing-token' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/misc.js:398:` and `181da234:preload.js:147:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'getWsPairingToken' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:preload.js:147:`, `181da234:src/test-harness/electron-api-stub.ts:568:` and `181da234:src/types.ts:346:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'return wsServer.startServer(ctx);' -- main/ipc/misc.js` prints nothing (exit 1). Dry-run, base: exit 0, `:386:` and `:424:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'return wsServer.getStatus();' -- main/ipc/misc.js` prints nothing (exit 1). Dry-run, base: exit 0, `:395:`. Dry-run, edit: exit 1.
+       - `git grep -c -F 'const { port } = wsServer.startServer(ctx);' -- main/ipc/misc.js` prints `main/ipc/misc.js:2` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/misc.js:2`.
+       - `git grep -n -F 'const { running, port, clients } = wsServer.getStatus();' -- main/ipc/misc.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:397:`, exit 0.
+       - `git grep -n -F 'settings._wsPairingToken = token;' -- main/ipc/misc.js` prints exactly one line and exits 0. Dry-run, base: `:420:`. Dry-run, edit: `:418:`.
+    6. The contract lines and the merge follow-ups:
+       - `git grep -n -F 'token: string' -- src/types.ts` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:src/types.ts:343:`, `:345:` and `:347:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'startWsServer: () => Promise<{ port: number }>;' -- src/types.ts` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `src/types.ts:343:`, exit 0.
+       - `git grep -n -F 'mock-token' -- src/test-harness/electron-api-stub.ts` prints nothing (exit 1). Dry-run, base: exit 0, `:565:`, `:568:` and `:569:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'if (cloud.schemaVersion > merged.schemaVersion) {' -- main/sync-engine.js` and `git grep -n -F 'merged.schemaVersion = cloud.schemaVersion;' -- main/sync-engine.js` each print nothing (exit 1). Dry-run, base: exit 0, `181da234:main/sync-engine.js:385:` and `:386:`. Dry-run, edit: exit 1 each.
+       - `git grep -n -F '(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),' -- main/sync-engine.js` prints exactly one line and exits 0, and `git grep -n -F 'if (key === "schemaVersion") continue;' -- main/sync-engine.js` prints exactly one line and exits 0. Dry-run, base: `:817:` and `:377:`. Dry-run, edit: `:815:` and `:377:`.
+       - `git grep -c -F 'pickUserSettings' -- main/sync-engine.js` prints `main/sync-engine.js:5` and exits 0. Dry-run: `:5` on both base and edit; the gate fails if the new comment names the picker, or if a call is lost.
+    7. The backup export is filtered, and the import still reads no settings:
+       - `git grep -n -F 'settings: { ...settings },' -- main/ipc/library.js` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/library.js:535:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'settings: pickUserSettings(settings),' -- main/ipc/library.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/library.js:537:`, exit 0.
+       - `git grep -c -F 'pickUserSettings' -- main/ipc/library.js` prints `main/ipc/library.js:2` and exits 0 (the require and the export; the comment does not name it). Dry-run, base: exit 1. Dry-run, edit: `main/ipc/library.js:2`.
+       - `git grep -n -F 'data.settings' -- main/ipc/library.js` prints nothing (exit 1). Dry-run: exit 1 on base and edit. This regression fence fails only if the import starts reading a backup's settings.
+    8. The tests are in place:
+       - `git grep -c -F 'GET-STATE-SECRET-1' -- tests/settingsKeyTrust.test.js` prints `tests/settingsKeyTrust.test.js:5` and exits 0 (the fake's comment, the block comment and three `describe` names). Dry-run, base: exit 1. Dry-run, edit: `:5`.
+       - `git grep -n -F '"cloud:_wsPairingToken": 9' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:412:`.
+       - `git grep -n -F 'startServer: () => ({ port: 48924, token: "live-token" }),' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:76:`.
+       - `git grep -n -F 'require("../main/ipc/library.js").register(ctx);' -- tests/settingsKeyTrust.test.js` and `git grep -n -F 'showSaveDialog: vi.fn()' -- tests/settingsKeyTrust.test.js` each print exactly one line and exit 0. Dry-run, base: exit 1 each. Dry-run, edit: `:114:` and `:52:`.
+    9. No settings are sent to the renderer by push: `git grep -n -E 'webContents\.send\([^)]*[sS]ettings' -- main.js main` prints nothing (exit 1). Dry-run: exit 1 on base and edit. This regression fence fails only if such a send is added.
+    10. `git grep -c -F 'Token boundary (GET-STATE-SECRET-1' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:1`.
+    11. `npm ci` exits 0 in the worktree before the first vitest run. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; this item edits `src/types.ts`, the dev stub and `preload.js`).
+    12. `git diff --name-status refs/remotes/origin/main` lists exactly these:
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+        - `M main/ipc/library.js`
+        - `M main/ipc/misc.js`
+        - `M main/ipc/state.js`
+        - `M main/sync-engine.js`
+        - `M preload.js`
+        - `M src/test-harness/electron-api-stub.ts`
+        - `M src/types.ts`
+        - `M tests/settingsKeyTrust.test.js`
+
+        The time log `docs/governance/close-outs/Timing.GET-STATE-SECRET-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.GET-STATE-SECRET-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). These must be absent from the list:
+        - `main.js`, `main/ws-server.js`, `main/migrations.js`, `main/folder-sync.js` and `main/ipc/cloud.js`;
+        - `src/components/settings/ConnectorsSettings.tsx`, `src/components/LibraryContainer.tsx`, `src/components/ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts`;
+        - every `src/**` file other than `src/types.ts` and `src/test-harness/electron-api-stub.ts`.
+
+        `git diff --numstat refs/remotes/origin/main` prints these rows (dry-run on the scratch copies against `181da234`): `2 0` for `docs/governance/TECHNICAL_REFERENCE.md`, `3 1` for `main/ipc/library.js`, `7 8` for `main/ipc/misc.js`, `9 4` for `main/ipc/state.js`, `1 3` for `main/sync-engine.js`, `0 1` for `preload.js`, `3 4` for the stub, `3 4` for `src/types.ts` and `123 5` for the test file. A larger removal in any file fails the gate (truncation check). `git diff refs/remotes/origin/main -- preload.js` removes exactly the `getWsPairingToken` line and adds nothing. `git diff refs/remotes/origin/main -- main/ipc/library.js` touches only the require after `:14` and the export's `settings` line (`:535`); no hunk is in `rescan-folder` or `import-library`.
+    13. **Owner check, deferred to the Stage 8 batched owner smoke (standing rule 45).** Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away). Nothing here is perceptual. The check covers the one path the tests cannot drive, the real IPC structured clone through the changed preload. Blurby.Roadmap adds "GET-STATE-SECRET-1" to that list when this specification folds in. On the batched build:
+        - with a source folder set, the library header shows the folder's name, and the folder button lists the recent folders;
+        - Settings → Connectors shows a pairing code, and "New Code" shows a new one.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Roadmap's merge go; owner only in the batched smoke (Done-when 13).
+- **Lane:** Platform & Maintenance. Execution surface D (main process, `preload.js` and the IPC contract), with four lines of shared-core `src/types.ts` and the dev stub (surface C, scheduled below).
+- **Source:**
+  - Blurby.Brain's rulings of 2026-10-15 (Rule 11 tier 1), and its amendment ruling the same day;
+  - SETTINGS-KEY-TRUST-1's out-of-scope finding (`docs/governance/close-outs/Memo.SETTINGS-KEY-TRUST-1.GovernanceStaging.2026-10-15.md:86`) and its code-quality review (the two fold-ins, as Blurby.Brain relayed them);
+  - `docs/planning/AGENT_FINDINGS.md:68` (H-SEC-3);
+  - the first draft's ruling-3 sweep (the `export-library` row);
+  - this trace on `051d004c`, re-based on `181da234`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `181da234`; re-grep at dispatch):
+  - **`get-state` (`main/ipc/state.js:16-19`).** `pickUserSettings` is already required at `:9`. Before:
+    ```js
+      ipcMain.handle("get-state", () => ({
+        settings: ctx.getSettings(),
+        library: ctx.getLibrary().filter((d) => !d.deleted),
+      }));
+    ```
+    After:
+    ```js
+      ipcMain.handle("get-state", () => {
+        const settings = ctx.getSettings();
+        return {
+          // A copy: the real user settings plus the folder keys the library view shows; never an _-prefixed secret
+          // such as _wsPairingToken, or schemaVersion, which the renderer does not read (GET-STATE-SECRET-1).
+          settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },
+          library: ctx.getLibrary().filter((d) => !d.deleted),
+        };
+      });
+    ```
+    The comment must not name `pickUserSettings`, so that Done-when 4 counts `:3`.
+  - **`start-ws-server` (`main/ipc/misc.js:385-387`).** Before:
+    ```js
+      ipcMain.handle("start-ws-server", () => {
+        return wsServer.startServer(ctx);
+      });
+    ```
+    After:
+    ```js
+      // The long-lived pairing token stays in main: no handler returns it to the renderer (GET-STATE-SECRET-1).
+      ipcMain.handle("start-ws-server", () => {
+        const { port } = wsServer.startServer(ctx);
+        return { port };
+      });
+    ```
+  - **`get-ws-status` and `get-ws-pairing-token` (`main/ipc/misc.js:394-401`).** Before:
+    ```js
+      ipcMain.handle("get-ws-status", () => {
+        return wsServer.getStatus();
+      });
+
+      ipcMain.handle("get-ws-pairing-token", () => {
+        const status = wsServer.getStatus();
+        return status.token || null;
+      });
+    ```
+    After (the second handler is deleted, with its trailing blank line kept as the one separator before `get-ws-short-code`):
+    ```js
+      ipcMain.handle("get-ws-status", () => {
+        const { running, port, clients } = wsServer.getStatus();
+        return { running, port, clients };
+      });
+    ```
+  - **`regenerate-ws-pairing-token` (`main/ipc/misc.js:423-424`).** Before:
+    ```js
+        wsServer.stopServer();
+        return wsServer.startServer(ctx);
+    ```
+    After:
+    ```js
+        wsServer.stopServer();
+        const { port } = wsServer.startServer(ctx);
+        return { port };
+    ```
+    `:418-422` (the token write, the save and the comment) are unchanged. `get-ws-short-code` (`:403-409`) is unchanged.
+  - **`main/ipc/library.js:14`** (`const { pathKey } = require("../folder-sync");`). Add this line immediately after:
+    ```js
+    const { pickUserSettings } = require("../migrations");
+    ```
+    `main/migrations.js` requires only `./constants`, so there is no cycle.
+  - **`export-library` (`main/ipc/library.js:535`).** Before:
+    ```js
+          settings: { ...settings },
+    ```
+    After:
+    ```js
+          // Real user settings only: a backup holds no _-prefixed secret and no main-owned key (GET-STATE-SECRET-1).
+          settings: pickUserSettings(settings),
+    ```
+    The rest of `export-library` (`:524-541`) and all of `import-library` (`:543-577`) are unchanged.
+  - **`mergeSettings` (`main/sync-engine.js:385-387`).** Before:
+    ```js
+      if (cloud.schemaVersion > merged.schemaVersion) {
+        merged.schemaVersion = cloud.schemaVersion;
+      }
+    ```
+    After (the blank lines at `:384` and `:388` stay):
+    ```js
+      // No schemaVersion step: startSync keeps only shared user settings from this output, so it is dropped (GET-STATE-SECRET-1).
+    ```
+  - **`preload.js:147`.** Delete the line `  getWsPairingToken: () => ipcRenderer.invoke("get-ws-pairing-token"),`. Nothing else in `preload.js` changes.
+  - **`src/types.ts:343-347`.** Before:
+    ```ts
+      startWsServer: () => Promise<{ port: number; token: string }>;
+      stopWsServer: () => Promise<{ ok: boolean }>;
+      getWsStatus: () => Promise<{ running: boolean; port: number; clients: number; token: string | null }>;
+      getWsPairingToken: () => Promise<string | null>;
+      regenerateWsPairingToken: () => Promise<{ port: number; token: string }>;
+    ```
+    After:
+    ```ts
+      startWsServer: () => Promise<{ port: number }>;
+      stopWsServer: () => Promise<{ ok: boolean }>;
+      getWsStatus: () => Promise<{ running: boolean; port: number; clients: number }>;
+      regenerateWsPairingToken: () => Promise<{ port: number }>;
+    ```
+  - **`src/test-harness/electron-api-stub.ts:565-569`.** Before:
+    ```ts
+      startWsServer: async () => trace("startWsServer", [], { port: 48924, token: "mock-token-12345" }),
+      stopWsServer: async () => trace("stopWsServer", [], { ok: true }),
+      getWsStatus: async () => trace("getWsStatus", [], { running: false, port: 48924, clients: 0, token: null }),
+      getWsPairingToken: async () => trace("getWsPairingToken", [], "mock-token-12345"),
+      regenerateWsPairingToken: async () => trace("regenerateWsPairingToken", [], { port: 48924, token: "mock-token-new-67890" }),
+    ```
+    After:
+    ```ts
+      startWsServer: async () => trace("startWsServer", [], { port: 48924 }),
+      stopWsServer: async () => trace("stopWsServer", [], { ok: true }),
+      getWsStatus: async () => trace("getWsStatus", [], { running: false, port: 48924, clients: 0 }),
+      regenerateWsPairingToken: async () => trace("regenerateWsPairingToken", [], { port: 48924 }),
+    ```
+  - **`docs/governance/TECHNICAL_REFERENCE.md`, after `:750`** (the "**Pairing flow:**" paragraph), add a blank line and:
+    ```md
+    **Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer or a library backup. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code, which the pairing banner fetches with `get-ws-short-code` after the `ws-connection-attempt` push. `export-library` writes only real user settings (no `_`-prefixed or main-owned key), and `import-library` restores no settings.
+    ```
+  - Nothing else changes in any of these files.
+- **Tests** (all in `tests/settingsKeyTrust.test.js`; the harness is described in SETTINGS-KEY-TRUST-1's Tests and is kept):
+  - **Harness edit 1, `:14`.** `const MODULES = ["../main/ipc/state.js", "../main/ipc/misc.js", "../main/sync-engine.js"];` becomes `const MODULES = ["../main/ipc/state.js", "../main/ipc/misc.js", "../main/ipc/library.js", "../main/sync-engine.js"];`.
+  - **Harness edit 2, after `:31`** (`let syncEngine;`), add `let dialog;`. In `setup()`, immediately after `  handlers = new Map();` (`:50`), add `  dialog = { showOpenDialog: vi.fn(), showSaveDialog: vi.fn() };`. In the `electron` fake, `      dialog: { showOpenDialog: vi.fn() },` (`:64`) becomes `      dialog,`.
+  - **Harness edit 3, `:71`.** Before:
+    ```js
+        "../ws-server": new Proxy({ generatePairingToken: () => "new-token" }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
+    ```
+    After:
+    ```js
+        // startServer and getStatus return what the real server's do: the live token included (GET-STATE-SECRET-1).
+        "../ws-server": new Proxy({
+          generatePairingToken: () => "new-token",
+          startServer: () => ({ port: 48924, token: "live-token" }),
+          getStatus: () => ({ running: true, port: 48924, clients: 0, token: "live-token" }),
+          getShortCode: () => ({ code: "123456", expiresAt: 1 }),
+          getClientCount: () => 0,
+        }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
+    ```
+  - **Harness edit 4, after `:104`** (`  require("../main/ipc/misc.js").register(ctx);`), add `  require("../main/ipc/library.js").register(ctx);`.
+  - **Harness edit 5, `:140` and `:142`.** `async function initSync() {` becomes `async function initSync(extraState = {}) {`, and the `writeFileSync` line's object becomes `{ deviceId: "dev-1", lastReconcile: Date.now(), ...extraState }`. Every existing call passes no argument, so its seed is unchanged.
+  - **Append after `:334`** (the end of the file), as given:
+    ```js
+
+    // GET-STATE-SECRET-1: no secret reaches the renderer through state or settings reads.
+    describe("GET-STATE-SECRET-1 renderer reads", () => {
+      // The two stored forms of the pairing token (main/ws-server.js startServer): safeStorage ciphertext as base64,
+      // or the 32-hex plaintext token when OS encryption is unavailable.
+      it.each([
+        ["encrypted", Buffer.from("safeStorage-ciphertext-bytes").toString("base64")],
+        ["plaintext", "0123456789abcdef0123456789abcdef"],
+      ])("(p) get-state returns no _-prefixed key, with the %s token form", async (_form, token) => {
+        settings._wsPairingToken = token;
+        settings._future = "x";
+        const shown = (await call("get-state")).settings;
+        expect(Object.keys(shown).filter((k) => k.startsWith("_"))).toEqual([]);
+        expect(JSON.stringify(shown)).not.toContain(token);
+        expect(Object.hasOwn(shown, "schemaVersion")).toBe(false);
+      });
+
+      it("(q) get-state returns a copy, never main's live settings object", async () => {
+        const shown = (await call("get-state")).settings;
+        expect(shown).not.toBe(settings);
+        shown.wpm = 1;
+        shown._wsPairingToken = "renderer";
+        expect(settings.wpm).toBe(300);
+        expect(settings._wsPairingToken).toBe("main-secret");
+      });
+
+      it("(u) control: get-state still returns every key the renderer reads", async () => {
+        const { SETTINGS_DEFAULTS } = require("../main/migrations.js");
+        // Traced: the renderer reads only SETTINGS_DEFAULTS keys from get-state, and no renderer code reads schemaVersion.
+        const read = Object.keys(SETTINGS_DEFAULTS).filter((k) => k !== "schemaVersion");
+        expect(read.length).toBe(57);
+        for (const k of read) if (!Object.hasOwn(settings, k)) settings[k] = `value-${k}`;
+        const shown = (await call("get-state")).settings;
+        for (const k of read) expect(shown[k]).toEqual(settings[k]);
+        expect(shown.sourceFolder).toBe(books);
+        expect(shown.recentFolders).toEqual([books]);
+      });
+
+      it.each(["start-ws-server", "get-ws-status", "regenerate-ws-pairing-token"])(
+        "(v) %s returns no pairing token", async (channel) => {
+          const result = await call(channel);
+          expect(Object.hasOwn(result, "token")).toBe(false);
+          expect(JSON.stringify(result)).not.toContain("live-token");
+          expect(result.port).toBe(48924);
+        });
+
+      it("(v4) get-ws-pairing-token is not a channel", () => {
+        expect(handlers.has("get-ws-pairing-token")).toBe(false);
+      });
+
+      it("(v5) control: the pairing banner still gets its code, and the ws pushes carry only a timestamp", async () => {
+        // LibraryContainer.tsx:169-178: on the ws-connection-attempt push the banner asks get-ws-short-code for the code.
+        expect(await call("get-ws-short-code")).toEqual({ code: "123456", expiresAt: 1, connected: false, status: "connecting" });
+        const src = fs.readFileSync(new URL("../main/ws-server.js", import.meta.url), "utf-8");
+        const pushes = src.match(/webContents\.send\(WS_(?:CONNECTION_ATTEMPT|PAIRING_SUCCESS)_CHANNEL, .*\);/g);
+        expect(pushes).toEqual([
+          "webContents.send(WS_CONNECTION_ATTEMPT_CHANNEL, { timestamp: Date.now() });",
+          "webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });",
+          "webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });",
+        ]);
+      });
+    });
+
+    describe("GET-STATE-SECRET-1 sync-engine follow-ups", () => {
+      it("(w) when stored timestamps let the cloud win secret and folder keys, the merge uploads none of them", async () => {
+        seedCloud();
+        await initSync({ fieldTimestamps: { settings: {
+          "cloud:_wsPairingToken": 9, "cloud:sourceFolder": 9, "cloud:recentFolders": 9, "cloud:launchAtLogin": 9,
+        } } });
+        const result = await syncEngine.startSync();
+        expect(result.results.settings).toBe("merged");
+        expectNoForbiddenKey();
+        expect(settings._wsPairingToken).toBe("main-secret");
+        expect(settings.sourceFolder).toBe(books);
+      });
+
+      it("(x) mergeSettings keeps the local schemaVersion over a higher cloud one", () => {
+        expect(syncEngine.mergeSettings({ schemaVersion: 13, wpm: 300 }, { schemaVersion: 99 }, {}).schemaVersion).toBe(13);
+      });
+    });
+
+    describe("GET-STATE-SECRET-1 library backup", () => {
+      it("(y) export-library writes only real user settings: no _-prefixed or main-owned key", async () => {
+        vi.useRealTimers();
+        const out = path.join(tmpDir, "backup-out.json");
+        dialog.showSaveDialog.mockResolvedValue({ canceled: false, filePath: out });
+        expect(await call("export-library")).toBe(out);
+        const text = fs.readFileSync(out, "utf-8");
+        const exported = JSON.parse(text);
+        expect(exported.settings).toEqual({ wpm: 300, launchAtLogin: false });
+        expect(text).not.toContain("main-secret");
+        expect(exported.library).toEqual(library);
+        expect(exported.history).toEqual(history);
+      });
+
+      it("(z) control: import-library sets no setting from a backup, secret or main-owned keys included", async () => {
+        vi.useRealTimers();
+        const backup = write("backup-in.json", JSON.stringify({
+          settings: { _wsPairingToken: "backup-token", sourceFolder: secret, recentFolders: [secret], schemaVersion: 1, wpm: 999 },
+          library: [{ id: "n1", title: "New" }],
+        }));
+        dialog.showOpenDialog.mockResolvedValue({ canceled: false, filePaths: [backup] });
+        const before = structuredClone(settings);
+        expect(await call("import-library")).toEqual({ added: 1, total: 1 });
+        expect(settings).toEqual(before);
+        expect(ctx.saveSettings).not.toHaveBeenCalled();
+      });
+    });
+    ```
+  - **Why each case holds or fails:**
+    - **(p)** at C2: `pickUserSettings` keeps no `_`-prefixed or main-owned key, and `_future` is not a settings key either.
+    - **(q)** at C2: the spread builds a new object.
+    - **(u):** `SETTINGS_DEFAULTS` has 58 keys, so `read` has 57. The fixture's own six keys keep their values, and the rest are set to markers. At C2, every one comes back: 55 through the picker, and `sourceFolder` and `recentFolders` by name. `launchAtLogin` is kept, because the picker runs without `crossDevice`.
+    - **(v):** the fake returns the token exactly as the real `startServer` and `getStatus` do. So only a handler that builds its own return passes.
+    - **(v5):** `get-ws-short-code` reads `getShortCode()`, `getClientCount()` (0, so not connected) and `getStatus().running` (true, so `"connecting"`), and is not edited. The three push sends are read from `main/ws-server.js`'s source, which this item does not edit, so a later change that moves the code into, or a token onto, a push fails here.
+    - **(w):** with no stored hash, the first `startSync` takes the merge path (as in (r1)). The local input is already filtered, so the only way a forbidden key reaches the cloud is `mergeSettings` taking it from the cloud. The seeded timestamps make it take four (`_wsPairingToken`, `sourceFolder`, `recentFolders`, `launchAtLogin`), and only the outer `pickUserSettings` removes them. `schemaVersion` is skipped by `:377` either way.
+    - **(x):** with the step gone, `merged.schemaVersion` is the local 13.
+    - **(y):** the fixture settings are `{ schemaVersion: 13, sourceFolder, recentFolders, wpm: 300, launchAtLogin: false, _wsPairingToken: "main-secret" }`, so the picker keeps exactly `{ wpm: 300, launchAtLogin: false }`. Real timers, because the handler does real file I/O.
+    - **(z):** `import-library` uses only `data.library`; `addDocToLibrary` is the `ctx` proxy's mock, so `settings` and `ctx.saveSettings` are untouched.
+  - **Letters:** (p), (q), (u), (v) ×3, (v4), (v5), (w), (x), (y) and (z) are new. None reuses SETTINGS-KEY-TRUST-1's (a)–(s) or (t1)–(t4).
+- **Constants:** none. No tunable is added.
+- **Branch:** `eb/get-state-secret-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\get-state-secret-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree first.
+- **Staging plan:**
+  - **C1:** the `tests/settingsKeyTrust.test.js` edits only (gates: Done-when 1, and mutation controls 2(a), 2(c) and 2(d)).
+  - **C2:** the edits in `main/ipc/state.js`, `main/ipc/misc.js`, `main/ipc/library.js`, `main/sync-engine.js`, `preload.js`, `src/types.ts`, `src/test-harness/electron-api-stub.ts` and `docs/governance/TECHNICAL_REFERENCE.md` (gates: mutation control 2(b), and Done-when 3–12).
+  - Then merge to `main` with `--no-ff` on Blurby.Roadmap's merge go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass (Done-when 13).
+  - Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - **The C1 counts differ from 9 failed and 64 passed.** If (u), (v5), (w) or (z) fails, or any of the 60 existing cases fails, a harness edit is wrong (for example, the `dialog` fake not reaching `library.js`, the fake's `getStatus` shape, or `extraState` not reaching `sync-state.json`). Fix the test, not the module.
+  - **A mutation control's numstat check is not the expected row.** The control is void: restore the file, check `[Environment]::CurrentDirectory`, and run it again. Never record a void control as passed.
+  - **(w)'s `results.settings` is not `"merged"`, or mutation 2(a) does not fail (w).** Check the seeded `sync-state.json`: it must carry `fieldTimestamps.settings` with the four `cloud:` keys, and no `fileHashes`. Fix the fixture, not the module.
+  - **(u) fails at C2.** A renderer-read key is missing from `get-state`. If it is a `SETTINGS_DEFAULTS` key, the picker call is wrong. If a renderer reader of a main-owned key was missed, stop: it is an untraced reader, and goes to Blurby.Roadmap.
+  - **Typecheck fails on the stub or a caller of a ws method.** A reader of `token` or `getWsPairingToken` exists that the trace missed. Stop and report it; do not restore the token.
+  - **An existing test fails** outside this file. Report it exactly and stop; do not weaken it. A test that expects main's live object from `get-state`, a `token` from a ws handler, the whole settings object in an export, or a cloud `schemaVersion` from `mergeSettings` is a hidden caller: stop and report it.
+  - **Retry ceiling:** two corrections per task, then a BLOCKER to Blurby.Roadmap.
+  - **Rollback:** `git revert -m 1 <merge>`. There is no data format change: settings files, cloud copies and the stored token are untouched. A backup written after this item lacks the filtered keys, which nothing reads.
+- **Lane Ownership (parallel run):** surface D, plus the shared-core type lines and the dev stub. The owned lines are:
+  - `main/ipc/state.js:16-19` (`get-state`);
+  - `main/ipc/misc.js:385-387`, `:394-401` and `:423-424`, plus the one comment line added before `start-ws-server`;
+  - `main/ipc/library.js`: the require added after `:14`, and `:535` with its comment;
+  - `main/sync-engine.js:385-387`;
+  - `preload.js:147`;
+  - `src/types.ts:343`, `:345-347`;
+  - `src/test-harness/electron-api-stub.ts:565`, `:567-569`;
+  - `docs/governance/TECHNICAL_REFERENCE.md`: the paragraph added after `:750`;
+  - `tests/settingsKeyTrust.test.js`: `:14`, `:31`, `:50`, `:64`, `:71`, `:104`, `:140`, `:142` and the appended block.
+- **Forbidden During Parallel Run:**
+  - every other file, and every other line of the files above;
+  - in `main/ipc/library.js`: `rescan-folder` (`:358-…`, FOLDER-NOTICE-1's and LARGE-FOLDER-SYNC-2's hunk), `import-library` (`:543-577`, pinned, not edited), `save-library` and `isLibraryDocPath`;
+  - `main/ws-server.js`, `main/migrations.js`, `main.js`, `main/folder-sync.js` and `main/ipc/cloud.js`;
+  - `src/components/settings/ConnectorsSettings.tsx`, `src/components/LibraryContainer.tsx` and every renderer component;
+  - `src/components/ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts` (the rest of the shared-core freeze set);
+  - `main/constants.js`;
+  - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
+- **Shared-Core Touches:** `src/types.ts:343`, `:345`, `:346` (deleted) and `:347`, the `ElectronAPI` WebSocket entries (ruling 3, confirmed by ruling 7). The integration window is this item's run. No other sprint may edit `src/types.ts` while this item is in flight.
+  - **No in-flight item holds `src/types.ts`** (checked 2026-10-15 on `181da234`). The committed register snapshot (`Virtuoso/work-register.snapshot.json`) lists 14 In Flight items. Every one except NARRATE-REBUILD-1 and this item has merged its branch to `main` (Stage 8 holds their close-outs), so none has an open edit. NARRATE-REBUILD-1's open branches (`eb/narrate-rebuild-1-p6`, `eb/narrate-rebuild-1-p6-quiet-evidence`) do not touch `src/types.ts`: `git diff --stat refs/remotes/origin/main...<branch> -- src/types.ts` prints nothing for either. Over every unmerged remote branch, only two stale branches touch it (`claude/review-blurby-roadmap-1lsoT`, 2026-03-21; `sprint/kokoro-export-1-long-form-audio-export`, 2026-05-17, the dissolved KOKORO-EXPORT-1), and neither is a register item. The live Notion register was not queried (reads and git grep only); Blurby.Roadmap confirms it at dispatch.
+  - FOLDER-NOTICE-1 (26) adds three lines after `onWatcherError?` (`src/types.ts:371`). After this item that anchor is at `:370`, so it re-greps by text (standing rule 36). Blurby.Roadmap records the window in ROADMAP when this specification folds in.
+- **Merge Order:**
+  - **After SETTINGS-KEY-TRUST-1** (merged, `051d004c`) and **FOLDER-UNREACHABLE-GUARD-1** (merged, `89a5a95c`), in the Stage 8 release-gate order.
+  - **Before FOLDER-NOTICE-1 (26),** which edits `src/types.ts`, `preload.js` (`:207-211`), other hunks of `main/ipc/state.js`, and `main/ipc/library.js` at `rescan-folder` (one line). The shared-core rule serializes them. Its `library.js` line is a different hunk from this item's (`:14`, `:535`).
+  - **LARGE-FOLDER-SYNC-2** also edits `main/ipc/library.js` at `rescan-folder`, a different hunk, and `main/ipc/state.js` near `:59` and `:71-72`, none of them this item's lines. KF2-WAIVER-RETIRE-1 names `main/sync-engine.js:97` (RENAME-RETRY-1's site), not this item's. Whichever merges second takes `refs/remotes/origin/main` in first.
+  - **Open branches:** `git diff --stat refs/remotes/origin/main...<branch>` over this item's nine files, run on 2026-10-15 on `181da234` over every unmerged remote branch, printed only three stale branches from March–May 2026 (`claude/review-blurby-roadmap-1lsoT`, `perf-optimize-staging-uploads-…`, `sprint/kokoro-export-1-long-form-audio-export`), which are not in the queue.
+  - **NARRATE-REBUILD-1 and any later item** that reads settings in the renderer reads them from `get-state`'s filtered copy. A new main-owned key the renderer must show is added to `get-state` by name, and (u) is extended.
+  - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 3–12.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Secret-read and backup tests committed: (p), (q), (v) ×3, (v4), (x) and (y) fail on today's code; (u), (v5), (w), (z) and the 60 existing cases pass; mutation controls 2(a), 2(c) and 2(d) fail their cases, each with its numstat check | calculable | positive control | bounded | medium | 45m (five harness edits, 13 cases in an existing harness, three mutation runs) | — | — |
+| 2 | `get-state` returns a filtered copy; the ws handlers return no token; `get-ws-pairing-token` removed from main, preload, type and stub; the export is filtered; dead `schemaVersion` step removed; TECHNICAL_REFERENCE line; mutation control 2(b) | calculable | main-process fix | bounded | low | 30m (one handler body, three returns, one deleted handler, one require and one export line, four one-line contract edits, one comment, one doc line) | — | — |
+| 3 | Suites, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
+
+**Total:** chain 7m · sum 7m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `051d004c` and re-based on `181da234` (fetched 2026-10-15). The edit sites outside `main/ipc/library.js` were confirmed identical (`git diff --quiet`, exit 0), and the `library.js` and `main.js` citations are given on `181da234`. The run re-greps every edit site at dispatch and stops on content drift.
+- **Standing rule 41 (LL-136):** the Done-when 12 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):**
+  - (p), (q), (v) ×3, (v4), (x) and (y) fail on `181da234` for named reasons: the live object with both token forms, the shared reference, the token in three returns, the registered channel, the dead step's 99, and the whole settings object in the export.
+  - (u), (v5), (w) and (z) pin behaviour that already holds, so each gets a mutation control (Done-when 2). Each control is void unless its numstat check shows the mutation landed in this worktree's file: the implementer's first C1 run showed that `[IO.File]` with a relative path writes against the process folder, not `Set-Location`, and can mutate another worktree while the test passes.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code.
+  - Done-when 4–10 were dry-run on `181da234` and on scratch copies with every edit applied.
+  - Every "prints nothing" gate finds its lines on the base, so each can fail.
+  - Every new-line gate is empty on the base and found on the edit.
+  - The count gate that does not change (`sync-engine.js:5`) and the fences (gate 7's `data.settings`, gate 9) are named as regression fences.
+  - Each mutation's `$a` was checked to occur exactly once on the base.
+- **Standing rule 45 (LL-141):** nothing is perceptual. The one owner row covers the real IPC path and is deferred to the batched smoke, with the standard line.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite runs in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** typecheck and build are in Done-when 11. Typecheck matters here: `src/types.ts` and the `ElectronAPI`-typed stub change together, and a leftover stub entry fails it.
+- **LL-156:**
+  - SETTINGS-KEY-TRUST-1's out-of-scope `get-state` line is brought into scope.
+  - Its "`mergeSettings` unchanged" line is brought into scope for one step only.
+  - Its `import-library` line stays as it was; only the settings half is pinned.
+  - AGENT_FINDINGS H-SEC-3's proposal is superseded, not followed.
+- **LL-158:**
+  - Every renderer reader of `get-state`'s settings was traced from the call (`App.tsx`, `ThemeProvider.tsx`, `useLibrary.ts`) to the views that read the stored object, and checked against `SETTINGS_DEFAULTS` by a whole-tree key diff.
+  - Every main-to-renderer path, and the backup export and import, were enumerated (23 rows).
+  - The four token handlers were traced to their only renderer caller, which ignores the result. The pairing banner was traced from the push to `get-ws-short-code`, which (v5) pins.
+  - The import was traced to its only use of the backup (`data.library`), and every other settings-restore candidate in `main/` was searched.
+  - The owner row's trigger is opening the folder list and pressing "New Code", both of which read through the changed paths.
+- **LL-159 / LL-157:** no deferred writer is added, and no quit step changes.
+- **LL-106 (three-way contract):** `get-ws-pairing-token` leaves main, `preload.js` and `ElectronAPI` together, and the three changed returns change in main and in the type together.
+- **PR-6 / AP-2 (`preload.js` is the security boundary):** `preload.js` only loses one method. Every filter is in a main-process handler.
+
 <a id="large-folder-sync-2"></a>
 
-#### LARGE-FOLDER-SYNC-2 — Follow-ups from LARGE-FOLDER-SYNC-1 *(position 23 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+#### LARGE-FOLDER-SYNC-2 — Follow-ups from LARGE-FOLDER-SYNC-1 *(position 24 — Full Spec; authored 2026-10-14 on main @ `0f285836`; amended 2026-10-15 on main @ `89a5a95c`)*
 
-- **What:** Seven technical follow-ups to the per-file folder sync in `main/folder-sync.js` (LARGE-FOLDER-SYNC-1, merge `0eb46e33`), plus one call-order change in `main/ipc/state.js`:
+- **What:** Technical follow-ups to the per-file folder sync in `main/folder-sync.js` (LARGE-FOLDER-SYNC-1, merge `0eb46e33`), building on FOLDER-UNREACHABLE-GUARD-1 (merge `89a5a95c`), plus one call-order change in `main/ipc/state.js`, and three rulings Blurby.Brain approved on 2026-10-15:
   1. A re-sync of the same folder right after a cancel starts a new run (N2).
   2. A per-file add, remove or change during a full sync stops arming its own library save. The sync's own saves write it (N3).
   3. `hasBook`'s case rule is confirmed (N4) and given one key rule.
-  4. Every library path comparison in `main/folder-sync.js` goes through one key, `pathKey`. That key normalizes separators and dot segments, and folds case on win32 only.
+  4. Every library path comparison left in `main/folder-sync.js` goes through FOLDER-UNREACHABLE-GUARD-1's exported `pathKey` (`path.resolve`, case folded on win32 only). There is no second key.
   5. A change event finds its book through the path index, not a library scan (F5).
   6. Picking or switching a folder starts the watcher before the sync.
   7. A test pins the fast-path duplicate-filepath edge, and its known limit is recorded.
+  8. **(A) System folders.** The scan and `rootHasContent` ignore `$RECYCLE.BIN` (any case), `System Volume Information` and Google Drive for desktop's `.shortcut-targets-by-id`. A drive-root or mount-point source folder holding only those counts as empty.
+  9. **(B) Case-only duplicates.** Two library docs whose paths differ only in case collide on one key. In the full sync's `byPath`/`onDisk` and in `rescan-folder`'s map, the first doc in library order is the book, and the other is kept as it is, never dropped. Each map computes `pathKey` once per path. A case-only rename of a book on disk keeps the doc and its reading position.
+  10. **(C) Listing timeout.** Every folder listing and file stat the scan makes, and `rootHasContent`'s listing, fails as unreadable once `FOLDER_LIST_TIMEOUT_MS` (30 s, one shared constant with FOLDER-NOTICE-1) passes. A full sync whose root listing hangs then ends like an unreachable root. A folder switch waits at most that long for a cancelled sync, then abandons it and proceeds.
+  11. The scale benchmark (`scripts/perf/folder-sync-scale.mjs`) gets the two fake-dependency lines FOLDER-UNREACHABLE-GUARD-1's remove path now needs, so it runs again.
 
-  The user sees no change on a normal library. The fixes show only on a folder whose path changes case (no re-import), on a long first sync (fewer full-library writes), and on files copied in while a sync of a newly picked folder is running (they are picked up). The user-visible scan-failure signal is **not** built here: the owner chose the notice (below), it is FOLDER-NOTICE-1, and this item keeps today's behaviour (log only).
-- **Why** (every line read on `main` @ `0f285836`, fetched 2026-10-14):
-  - **N2.** `syncAll` (`main/folder-sync.js:115-130`) returns the running promise whenever the running folder matches (`:119`), even after `cancel()` (`:206`) has set `cancelled`. The cancelled run stops at its next `stale()` check (`:71`, `:89`, `:103`) without pruning (`:103-106`). So a `cancel()` followed at once by `syncAll()` on the same folder returns a run that is already giving up, and no new sync happens. Nothing in the renderer calls `cancel-sync` today (`main/ipc/library.js:610-613`, `preload.js:65`, no `src/` caller), so this is latent. It is still a wrong answer from the module's contract.
-  - **N3.** Each per-file path calls `saveLibrary()` directly: `addOne` (`:149`), `removeUnder` (`:189`) and `refresh` (`:199`). `saveLibrary` (`main.js:131-142`) writes the whole `library.json` after `LIBRARY_SAVE_DEBOUNCE_MS` = 500 ms (`main/constants.js:143`). During a full sync, which saves only every `FOLDER_SYNC_SAVE_INTERVAL_MS` = 30 s (`:94-97`, `main/constants.js:155`), a stream of watcher events therefore writes the 120,000-book library about twice a second. That defeats the batching. Starting the watcher first (below) makes this stream more likely on a new folder.
-  - **N4, confirmed.** `bookKey` (`:18`) is the folder as written (case-sensitive) plus the file stem lowercased, with any extension dropped. `scanFolderAsync`'s dedupe key is identical (`main/folder-watcher.js:65-67`). Within one walk every folder string comes from the same root and the same directory entries, so the scan never meets two spellings of one folder. The per-file path can meet them, because a watcher path and a library path may spell the folder differently. This item keeps the stem rule and gives the folder part the `pathKey` rule (case folded on win32). `scanFolderAsync` is unchanged.
-  - **Raw path comparisons** (recorded deviation, LARGE-FOLDER-SYNC-1 Decision 2): `findByPath` (`:48`), the index build (`:32`), `trackAdd` (`:44`), `removeUnder`'s fast and slow paths (`:167`, `:176`) and its index upkeep (`:183`), `inFlight` (`:141`, `:143`, `:152`), `addedDuringRun` (`:148`, `:109`), `runFullSync`'s `byPath` and `onDisk` (`:76`, `:80-81`, `:108`), the Saved Articles test (`:109`) and `refresh` (`:194`) all use `===` or raw `startsWith`. Only `underFolder` (`:51-59`) folds case on win32. `isLibraryDocPath` (`main/ipc/library.js:39-44`) already folds case on win32 too. Windows paths are case-insensitive, so a library whose stored paths spell the folder `C:\Books` and a scan of `c:\books` (a re-picked folder, or a drive letter in another case) do not match. The full sync then imports every book again and prunes the originals (`:81-83`, `:108-109`), which loses their positions, favourites, tags and queue places. That is the same loss as BUG-198, from a different cause.
-  - **The Saved Articles test is a raw prefix.** `path.resolve(d.filepath).startsWith(savedArticles)` (`:109`) also matches `<root>\Saved Articles Old\…`. A gone folder book there is kept for ever. The scan skips only the exact `Saved Articles` folder at the root (`main/folder-watcher.js:41`), so that sibling folder is a normal folder.
-  - **F5.** `refresh` (`:193-201`) runs `getLibrary().find(...)` on every change event. The watcher fires `onChange` after every settled file event, adds included (`main/folder-watcher.js:110-111`). At 120,000 books that is 1–3 ms per event (LARGE-FOLDER-SYNC-1 close-out), and it costs a full scan for a path that is not in the library (every new file). The path index already holds the answer (`:24-49`).
-  - **Watcher after sync.** `select-folder` (`main/ipc/state.js:71-72`) and `switch-folder` (`:82-83`) `await ctx.syncLibraryWithFolder()` and only then `ctx.startWatcher()`. On the owner's folder a first sync takes minutes (the scan alone took 93.6 s, LL-158). During that time the old folder's watcher is still open, and the new folder has none. A file copied in during the first sync is missed until the next full sync. The startup path already starts the watcher first (`main.js:590`).
-  - **Fast-path duplicate edge.** `removeUnder`'s single-file fast path (`:169-173`) removes only the indexed book. The comment at `:170-171` says a second book at the same filepath is "left for the next sync's prune". No test pins that.
+  The user sees no change on a normal library. The fixes show only on:
+  - a folder whose path changes case, or a book renamed only in case (no re-import, position kept);
+  - a long first sync (fewer full-library writes);
+  - files copied in while a sync of a newly picked folder is running (they are picked up);
+  - a drive-root source folder (the recycle bin is not imported);
+  - a hung Drive or network mount (the sync ends, and a folder switch goes through).
+
+  The user-visible scan-failure signal is **not** built here: the owner chose the notice (below), it is FOLDER-NOTICE-1, and this item keeps today's behaviour (log only, plus FOLDER-UNREACHABLE-GUARD-1's reason codes).
+- **Why** (every line read on `main` @ `89a5a95c`, fetched 2026-10-15; `refs/remotes/origin/main` then advanced to `181da234`, which changes only `ROADMAP.md` and register files, so every code anchor below holds there too):
+  - **N2.** `syncAll` (`main/folder-sync.js:132-147`) returns the running promise whenever the running folder matches (`:136`), even after `cancel()` (`:229`) has set `cancelled`. The cancelled run stops at its next `stale()` check (`:80`, `:96`, `:98`, `:110`) without pruning (`:110-113`). So a `cancel()` followed at once by `syncAll()` on the same folder returns a run that is already giving up, and no new sync happens. Nothing in the renderer calls `cancel-sync` today (`main/ipc/library.js:647-650`, `preload.js:65`, no `src/` caller), so this is latent. It is still a wrong answer from the module's contract.
+  - **N3.** Each per-file path calls `saveLibrary()` directly: `addOne` (`:166`), `removeUnder` (`:212`) and `refresh` (`:222`). `saveLibrary` (`main.js:119-130`) writes the whole `library.json` after `LIBRARY_SAVE_DEBOUNCE_MS` = 500 ms (`main/constants.js:147`). During a full sync, which saves only every `FOLDER_SYNC_SAVE_INTERVAL_MS` = 30 s (`:101-104`, `main/constants.js:159`), a stream of watcher events therefore writes the 120,000-book library about twice a second. That defeats the batching. Starting the watcher first (below) makes this stream more likely on a new folder.
+  - **N4, confirmed.** `bookKey` (`:21`) is the folder as written (case-sensitive) plus the file stem lowercased, with any extension dropped. `scanFolderAsync`'s dedupe key is identical (`main/folder-watcher.js:73-82`). Within one walk every folder string comes from the same root and the same directory entries, so the scan never meets two spellings of one folder. The per-file path can meet them, because a watcher path and a library path may spell the folder differently. This item keeps the stem rule and gives the folder part the `pathKey` rule (case folded on win32). The dedupe is unchanged.
+  - **`pathKey` exists; most comparisons still do not use it.** FOLDER-UNREACHABLE-GUARD-1 defined it once, at module level, and exported it (`main/folder-sync.js:7-9`, `:237`): `path.resolve(p)`, lowercased when `process.platform === "win32"` (read at call time), and a falsy path returned as it is. `main/ipc/library.js:14` requires it. Inside `main/folder-sync.js` it keys only the skipped-path test (`:71`, `:115`). These still compare raw paths (`git grep` dry-run, Done-when 5, 21 lines):
+    - `bookKey` (`:21`), the index build (`:35-36`), `trackAdd` (`:47-48`) and `findByPath` (`:51`);
+    - `runFullSync`'s `byPath` and `onDisk` (`:83`, `:87-88`) and the prune's `keep` (`:116-117`);
+    - `addOne`'s `inFlight` (`:158`, `:160`, `:169`) and `addedDuringRun` (`:165`);
+    - `removeUnder`'s prefix (`:184`), fast path (`:190`), slow path (`:199`) and index upkeep (`:206-207`);
+    - `refresh` (`:217`).
+
+    Only `underFolder` (`:54-62`) and `underAny` fold case. Windows paths are case-insensitive, so a library whose stored paths spell the folder `C:\Books` and a scan of `c:\books` (a re-picked folder, or a drive letter in another case) do not match. The full sync then imports every book again (`:88-90`) and prunes the originals (`:116`, `:126`), which loses their positions, favourites, tags and queue places. That is the same loss as BUG-198, from a different cause.
+  - **(B) A case-only rename loses the book today.** Rename `title.epub` to `Title.epub` in Explorer: the next full sync's scan lists `Title.epub`, `byPath.get(file.filepath)` (`:88`) misses the stored `title.epub`, the file is imported as a new book at position 0, and `onDisk.has(d.filepath)` (`:116`) is false for the original, so the prune removes it.
+  - **(B) Case-only duplicates.** Two docs whose paths differ only in case (an earlier per-file add made one through the raw `hasBook`, N4) collide once keyed:
+    - In the full sync today, the scan's one spelling matches only the raw-equal doc, and the other is pruned, whichever holds the reading position.
+    - In `rescan-folder`, FOLDER-UNREACHABLE-GUARD-1 already keys the map by `pathKey` (`main/ipc/library.js:380`). `new Map(entries)` keeps the **last** doc for a key, so the earlier doc gets no scan update, and the per-doc loop (`:445-487`) drops it: a folder doc is kept there only under Saved Articles (`:482`) or under a skipped path (`:484`).
+    - The rescan's skipped test (`:484`) calls `pathKey(doc.filepath)` twice per skipped entry, inside `skipped.some`, inside the loop over every library doc: O(docs × skipped) `path.resolve` calls on a folder with many unreadable entries.
+  - **The Saved Articles test is a raw prefix.** `path.resolve(d.filepath).startsWith(savedArticles)` (`:117`, `savedArticles` at `:114`) also matches `<root>\Saved Articles Old\…`. A gone folder book there is kept for ever. The scan skips only the exact `Saved Articles` folder at the root (`main/folder-watcher.js:52`), so that sibling folder is a normal folder.
+  - **F5.** `refresh` (`:216-224`) runs `getLibrary().find(...)` on every change event. The watcher fires `onChange` after every settled file event, adds included (`main/folder-watcher.js:128-129`). At 120,000 books that is 1–3 ms per event (LARGE-FOLDER-SYNC-1 close-out), and it costs a full scan for a path that is not in the library (every new file). The path index already holds the answer (`:22-52`).
+  - **Watcher after sync.** `select-folder` (`main/ipc/state.js:75-76`) and `switch-folder` (`:90-91`) `await ctx.syncLibraryWithFolder()` and only then `ctx.startWatcher()`. On the owner's folder a first sync takes minutes (the scan alone took 93.6 s, LL-158). During that time the old folder's watcher is still open, and the new folder has none. A file copied in during the first sync is missed until the next full sync. The startup path already starts the watcher first (`main.js:587`).
+  - **Fast-path duplicate edge.** `removeUnder`'s single-file fast path (`:192-197`) removes only the indexed book. The comment at `:193-194` says a second copy at the same filepath "is left for the next sync's prune". No test pins that.
+  - **(A) System folders are scanned as books.** `walkDir` (`main/folder-watcher.js:38-67`) descends into every directory except the root's `Saved Articles` (`:52`), and `rootHasContent` (`:89-93`) counts any subfolder as content. Observed read-only on the owner's machine (2026-10-15): `C:\` holds `$Recycle.Bin` and `System Volume Information`. `G:\`, Google Drive for desktop's drive while it runs (streaming mode), holds `.shortcut-targets-by-id` (hidden, empty), `$RECYCLE.BIN` (hidden, system), `My Drive`, `Other computers` and `Shared drives`. So on a drive-root or mount-point source:
+    - The scan imports deleted books from the recycle bin as new books (an `.epub` sent to the bin keeps its extension, renamed `$R` plus random characters).
+    - `System Volume Information` denies listing, so every sync reports `partial-read`.
+    - A root whose only entries are these folders counts as having content, so FOLDER-UNREACHABLE-GUARD-1's per-file remove trusts it (`:179-180`).
+  - **(C) Nothing bounds a listing.** `walkDir`'s `readdir` (`:41`), its per-file `stat` (`:57`) and `rootHasContent`'s `readdir` (`:91`) are awaited with no timeout (FOLDER-UNREACHABLE-GUARD-1 left this here, its Out of scope). A Drive or network mount that stops answering leaves `runFullSync` waiting at `:79`. `running` (`:145`) then stays set, so every later `syncAll` for the same folder returns the hung promise (`:136`). A folder switch awaits it at `:138` for ever, so `switch-folder` (`main/ipc/state.js:90`) never returns.
+  - **(C) The whole scan cannot share a 30 s cap.** The owner's scan legitimately takes 93.6 s (LL-158). A 30 s race on `await scanFolderAsync(...)` would end every full sync on that folder as unreachable. So the bound goes on each listing and stat inside the walk, the calls that hang. A hung root listing then ends the sync as `root-unlistable` through the existing `if (!files)` guard (`:81`), and a hung listing below the root becomes a skipped path, whose books are kept (`:115-117`).
+  - **The scale benchmark no longer runs.** `scripts/perf/folder-sync-scale.mjs` builds the sync without `rootHasContent` (`:22-37`), and its `statFile` rejects with an `Error` that has no `code` (`:32`). Since FOLDER-UNREACHABLE-GUARD-1, `removeUnder` awaits `rootHasContent(folder)` (`main/folder-sync.js:179`). That throws, `guarded` logs it (`:226`), nothing is removed, and the script throws `removal count wrong` at its `:61` check and exits 1. This is by reading, not by running: this amendment ran no `node`. With a `rootHasContent` stub alone, `fileState` (`:70`) would still read the code-less rejection as `unreadable`, so both lines are needed.
 - **Rulings (Blurby.Brain, at LARGE-FOLDER-SYNC-1's merge, 2026-10-14):**
   - N2: cancelling a full sync and then re-syncing the same folder at once returns the cancelled run's promise. Fix it.
   - N3: per-file `saveLibrary` calls during a full sync weaken the batching. Fix it.
@@ -4320,95 +4929,161 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   - The user-visible scan-failure signal is tier 2 (pick-folder and switch-folder resolve on a failed scan and only log it). It is not specified here: the owner chose the notice, FOLDER-NOTICE-1 builds it, and this item keeps today's behaviour.
   - The owner's real-folder check runs in the batched owner smoke (Stage 8).
 - **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1, all as recommended):**
-  - **Q1:** `rescan-folder`'s raw map (`main/ipc/library.js:345`) moves into FOLDER-UNREACHABLE-GUARD-1 and uses the same `pathKey`. Whichever item merges first defines `pathKey` once, in `main/folder-sync.js`, exported; the other reuses it. There is no second implementation. FOLDER-UNREACHABLE-GUARD-1 merges first (it is a release gate), so this item **reuses its `pathKey`**. If FOLDER-UNREACHABLE-GUARD-1 has not defined it, define it here. This item makes no change to `main/ipc/library.js`.
+  - **Q1:** one `pathKey`, defined once. Delivered by FOLDER-UNREACHABLE-GUARD-1 (`main/folder-sync.js:9`, exported at `:237`); this item reuses it and defines none. The rescan's raw map moved into that item and is `pathKey`-keyed (`main/ipc/library.js:380`). Ruling (B) below brings that map's collision rule and its skipped-test cost into this item, so this item now edits `rescan-folder`, and only there.
   - **Q2:** keep the per-file view updates (broadcasts) during a full sync. Only the saves are batched.
   - **Q3:** the Saved Articles fix is a bug fix. Match the folder as a path segment, not a string prefix. Test (sa) uses a "Saved Articles Old" folder.
   - **Scan-failure notice:** decided (below); FOLDER-NOTICE-1 builds it. This item keeps today's behaviour and FOLDER-UNREACHABLE-GUARD-1's reason-code hook.
-- **Design decisions (planner, 2026-10-14):**
-  - **One key, `pathKey`, defined once (ruling Q1).** FOLDER-UNREACHABLE-GUARD-1 defines it at module level in `main/folder-sync.js` and exports it. This item reuses it. If it is absent at dispatch, this item defines it with the definition below and exports it. It is `path.normalize(p)`, lowercased when `process.platform === "win32"`, and `""` for a missing path. That is `underFolder`'s case rule (`:56`) and `isLibraryDocPath`'s (`main/ipc/library.js:40`). It uses `normalize`, not `resolve`: library and watcher paths are absolute, and `resolve` costs more on a 120,000-book index build. `process.platform` is read at call time, as `underFolder` does, so the F2 tests' platform override still works.
-  - **`bookKey` takes a key, not a path.** It is `path.dirname(k) + "\0" + stem(k).toLowerCase()`. Each index build or add computes `pathKey` once per book and derives both keys from it, so the rebuild does one normalization per book, not two.
-  - **`runFullSync` keeps its own `byPath` map, now keyed by `pathKey`. It does not switch to `findByPath`.** After a fast-path removal of one of two books at the same path, the index has no entry for the survivor (known limit, below). A full sync that used the index would then import the file again as a duplicate. The local map, built from the live library, finds the survivor. The new control test (dup) pins this.
-  - **N2: a cancelled run is not reused.** `syncAll` returns the running promise only when the folder matches **and** `cancelled` is false. Otherwise it sets `cancelled`, waits for the run to end, and starts a new one. `runFullSync` resets `cancelled` when it starts (`:69`), so two callers that both waited share the new run.
+- **Technical rulings (Blurby.Brain, 2026-10-15, approved; not release gates):**
+  - **(A) System-folder exclusion:** `rootHasContent` and the scan ignore `$RECYCLE.BIN`, `System Volume Information` and Drive placeholder folders, so a drive-root or mount-point source holding only those counts as empty. Tests cover each.
+  - **(B) Case-only duplicates:** collision handling in the full sync's `byPath`/`onDisk` and the rescan map, with a single `pathKey` call per path, and the rescan's per-skipped-path double call fixed. A case-only rename keeps the doc and its position; positive control required.
+  - **(C) Listing timeout:** `scanFolderAsync` and `rootHasContent` calls in the full sync are bounded, with ONE constant shared with FOLDER-NOTICE-1. On timeout the sync keeps every book, reports `root-unlistable`, and releases `running`. `switch-folder` does not await a hung scan for ever: on timeout it cancels the old run and proceeds. Tested on fake timers with a listing that never resolves.
+- **Design decisions (planner, 2026-10-14; amended 2026-10-15):**
+  - **One key, `pathKey`, reused (ruling Q1).** FOLDER-UNREACHABLE-GUARD-1's definition is kept as it is. It uses `resolve`, not the `normalize` this spec first planned: the result is the same for the absolute paths the library, the scan and the watcher hold, and the scale run (Done-when 3) bounds the extra cost on the 120,000-book index build. It returns a falsy path as it is (`undefined` for a URL or manual doc), so every new comparison treats a falsy key as "no path": the index build skips it as today, `keep` tests `!!k`, and `removeUnder`'s slow path tests `k &&`.
+  - **`bookKey` takes a key, not a path.** It is `path.dirname(k) + "\0" + stem(k).toLowerCase()`. Each index build or add computes `pathKey` once per book and derives both keys from it, so the rebuild does one key per book, not two.
+  - **`runFullSync` keeps its own `byPath` map, now keyed by `pathKey`. It does not switch to `findByPath`.** After a fast-path removal of one of two books at the same path, the index has no entry for the survivor (known limit, below). A full sync that used the index would then import the file again as a duplicate. The local map, built from the live library, finds the survivor. Control test (dup) pins this.
+  - **(B) One key per path, first doc wins, nothing is dropped.**
+    - The full sync builds `byPath` in one loop that also fills `keyOf` (doc → key). The prune's `keep` reads `keyOf`, so each library path is keyed once per run; only a book added during the run (not in `keyOf`) is keyed again.
+    - `rescan-folder` does the same: one loop fills `keyOf` and `existing` (first wins), and the per-doc loop reads `const k = keyOf.get(doc)`. That replaces the two `pathKey` calls per skipped entry with one map read per doc.
+    - First wins, as the index already does (`if (!idx.byPath.has(k))`, `:35`). The first doc gets the scan's `filename`, `ext`, `modified` and `size`.
+    - The other doc is kept unchanged. In the full sync it is kept because its key is in `onDisk`. In the rescan a new branch keeps a folder doc whose key is on disk but is not the map's doc. A duplicate card stays visible, as it is today, and no reading position is lost. Merging two docs is a design question, not this item's.
+    - **A case-only rename keeps the doc.** The scan's new spelling has the old key on win32, so `byPath` finds the doc, `onDisk` holds its key, and the prune keeps it. Its `filepath` keeps the stored spelling, and `filename` takes the new one, as the rescan already does (`main/ipc/library.js:386`). Rewriting `filepath` would edit the index's key field in place, against the INVARIANT at `main/folder-sync.js:25-26`. Opening the file works because Windows paths are case-insensitive.
+  - **N2: a cancelled run is not reused.** `syncAll` returns the running promise only when the folder matches **and** `cancelled` is false. Otherwise it sets `cancelled`, waits for the run to end, and starts a new one. `runFullSync` resets `cancelled` when it starts (`:74`), so two callers that both waited share the new run.
+  - **(C) A wait that cannot end is abandoned, and an abandoned run applies nothing.**
+    - `syncAll`'s wait for a cancelled run races it against one `FOLDER_LIST_TIMEOUT_MS` timer, cleared when either settles. On the timeout, it logs one line, sets `running = null` (only if that run is still the one it waited on), and starts the new run. The old run's walk keeps going in the background, because Node cannot cancel a `readdir`.
+    - A run generation, `gen`, makes the abandoned run stale for good. `runFullSync` takes `const mine = ++gen;`, and `stale()` adds `mine !== gen`. This is needed because the new run resets the shared `cancelled` to `false`: without the generation, a same-folder run abandoned after `cancel()` would see itself as live when its scan finally returns, and would prune with an old listing. Test (n2-hang) pins this.
+    - The `.finally` of a run does its work (clear `running`, the owed save) only when `running.promise` is still its own promise. An abandoned run that settles late changes nothing.
+  - **(C) The bound is per listing, not per scan, and the code is `root-unlistable`.**
+    - A new `timeLimit(promise)` in `main/folder-watcher.js` wraps the walk's `readdir`, the walk's per-file `stat` and `rootHasContent`'s `readdir`. When the timer fires first, it rejects with `code: "ETIMEDOUT"`, and the existing catch takes it: an unlistable root (`scanFolderAsync` returns `null`, so the full sync reports `root-unlistable` and keeps every book), a skipped subfolder or file (`partial-read`, its books kept), or `rootHasContent` → `null` (a per-file remove reports `root-unlistable` and removes nothing).
+    - **No new reason code.** To the user a root that does not answer in 30 s is the same as one that cannot be reached: same banner (FOLDER-NOTICE-1 shows `root-unlistable`), same rule (keep every book). A new code would need FOLDER-NOTICE-1 to add it to its set of four. The log keeps the cases apart: the walk's catch logs the error message (`timed out`).
+    - Bounding the listings bounds `rootHasContent` everywhere it is called: the per-file remove today, and FOLDER-NOTICE-1's planned pre-walk check in `runFullSync` and its Retry. Ruling (C)'s "`rootHasContent` calls in the full sync" are therefore covered, though `runFullSync` makes none on `89a5a95c`.
+    - Cost: one `setTimeout`/`clearTimeout` pair per listing and per supported file. On the owner's 120,000-file scan that is about 120,000 pairs, estimated well under 1 % of the 93.6 s scan; not benchmarked here (the scale script stubs the scan).
+  - **(C) One constant, `FOLDER_LIST_TIMEOUT_MS = 30000`, in `main/constants.js`.** FOLDER-NOTICE-1's spec names it `FOLDER_RETRY_LIST_TIMEOUT_MS`. Here it bounds every folder listing the main process waits on, and the switch wait, not only Retry's check, so the name drops `RETRY_`. **FOLDER-NOTICE-1 must use `FOLDER_LIST_TIMEOUT_MS`.** Because `rootHasContent` then bounds itself, FOLDER-NOTICE-1's own race in `retry()` is redundant but harmless; Blurby.Roadmap amends that spec at its re-anchor. Whichever item lands first defines it; this one is expected to (FOLDER-NOTICE-1 merges after it), and Done-when 15 gates both cases.
+  - **(A) Three folder names, matched exactly, at any depth, case-insensitively.** `SYSTEM_FOLDERS` in `main/folder-watcher.js` holds `$recycle.bin`, `system volume information` and `.shortcut-targets-by-id`, compared lowercased (NTFS shows `$Recycle.Bin` on `C:` and `$RECYCLE.BIN` elsewhere). Any depth, because a volume can be mounted to a folder below the source root. The walk skips them, and `rootHasContent` does not count them as content.
+    - **Verified:** the names above, on the owner's `C:\` and `G:\` (Drive for desktop, running, streaming mode), 2026-10-15.
+    - **Not excluded, on purpose:** `My Drive`, `Shared drives` and `Other computers`. They are Drive's own top-level folders and hold the user's files; skipping them would drop every book of a `G:\` source.
+    - **Not verified:** what `G:\` lists while Drive for desktop is starting, in mirror mode, or with a folder mount point instead of a drive letter. When Drive is stopped, `G:\` does not exist, which is already `root-unlistable`. No other Drive placeholder name is added without evidence.
+    - The watcher is not changed (ruling A names the scan and `rootHasContent`). See Out of scope.
   - **N3: a per-file change during a full sync is owed, not saved.** A new `savePerFile()` arms `saveLibrary()` when no full sync is running. While one runs, it sets `owed`.
-    - The sync's interval save (`saveLibraryNow`, `:95`) writes the whole live library, owed changes included.
+    - The sync's interval save (`saveLibraryNow`, `:102`) writes the whole live library, owed changes included.
     - When the run ends for any reason (done, cancelled, folder switch or an error), `syncAll`'s `finally` arms one `saveLibrary()` if anything is owed and the module is not stopped.
-    - At quit, `stop()` blocks that save, and the quit step `["library", saveLibraryNow]` (`main.js:628`) writes the live library unconditionally.
-    - Per-file broadcasts are unchanged, so new books still appear in the UI at once. `broadcastLibrary` is already debounced (`main.js:267-272`, 200 ms).
+    - At quit, `stop()` blocks that save, and the quit step `["library", saveLibraryNow]` (`main.js:625`) writes the live library unconditionally.
+    - Per-file broadcasts are unchanged, so new books still appear in the UI at once. `broadcastLibrary` is already debounced (`main.js:255-261`, `BROADCAST_DEBOUNCE_MS` = 200 ms).
+    - During a long scan no interval save runs, so an owed change waits for the run's end. Every owed change is derived from disk, so a crash in that window costs only a re-import at the next sync.
   - **F5: `refresh` uses `findByPath`.** That lookup is O(1), plus one O(n) index rebuild after another module replaces the library array. The rebuild already exists, and LARGE-FOLDER-SYNC-1 measured it.
   - **The Saved Articles test matches the folder as a path segment** (ruling Q3, a bug fix). The key must start with `pathKey(<root>\Saved Articles) + path.sep`. A gone book under `Saved Articles Old` is now pruned like any other folder book. Positive control (sa) covers it.
-  - **Watcher first: two line swaps in `main/ipc/state.js`.** `ctx.startWatcher()` moves above `await ctx.syncLibraryWithFolder()` in both handlers. `startWatcherFn` closes the old watcher first (`main.js:347`), so the old folder's late events also stop at once. That is a second guard beside `underFolder` (W3). The new folder's events during its first sync go through `addOne`. That function already records them in `addedDuringRun`, so the prune keeps them, and N3 keeps them from writing the library per event. The handlers still await the sync before they return.
+  - **Watcher first: two line swaps in `main/ipc/state.js`.** `ctx.startWatcher()` moves above `await ctx.syncLibraryWithFolder()` in both handlers. `startWatcherFn` closes the old watcher first (`main.js:341`), so the old folder's late events also stop at once. That is a second guard beside `underFolder` (W3). The new folder's events during its first sync go through `addOne`. That function already records them in `addedDuringRun`, so the prune keeps them, and N3 keeps them from writing the library per event. The handlers still await the sync before they return.
   - **Known limit, recorded, not fixed (ruling).** When two books share one file path, removing that file through the fast path removes the indexed one. The other stays until the next full sync prunes it. Until then the index has no entry for it, so a change event does not refresh its word count. A `Map` of lists would fix it at the cost of more index code. The case needs another module to add a second book at a path already in the library, so it is not worth that code. The code comment, the Technical Reference row and test (dup) record it.
-  - **Scan-failure signal: today's behaviour is kept.** `syncAll`'s catch (`:123-127`) is unchanged. It logs, resolves `undefined`, and both IPC handlers return as on a successful sync. FOLDER-UNREACHABLE-GUARD-1's reason-code hook is kept as that item leaves it: this item neither removes nor rewires it. See "Owner decision: the scan-failure notice" below.
+  - **Scan-failure signal: today's behaviour is kept.** `syncAll`'s `.catch` line (`:143`) is unchanged. It logs, resolves `undefined`, and both IPC handlers return as on a successful sync. FOLDER-UNREACHABLE-GUARD-1's reason-code hook (`main.js:315-319`) is kept as that item left it. See "Owner decision: the scan-failure notice" below.
 - **Out of scope:**
   - **The scan-failure notice** (owner decision, below): FOLDER-NOTICE-1.
-  - **`rescan-folder`'s raw `filepath` map** (`main/ipc/library.js:345`), the only other raw library-path comparison in `main/`. Ruling Q1 moves it into FOLDER-UNREACHABLE-GUARD-1, with the same `pathKey`.
-  - **`failedExtractions`** (`main.js:332`, `:467`), a skip cache keyed by raw path. A case variant is extracted once more and then cached. That is harmless, and `main.js` is outside this item's fence.
-  - **`isLibraryDocPath`** (`main/ipc/library.js:39-44`): already case-folded on win32. It is a security check, and it is not edited.
-  - **`scanFolderAsync`'s dedupe** (`main/folder-watcher.js:62-74`): within one walk the folder strings are consistent (N4). The file is not edited, and its 50 ms budget test stays out of this item.
+  - **The watcher's events under a system folder.** `startWatcher`'s `onEvent` (`main/folder-watcher.js:132-143`) filters dot-named parts and the root's `Saved Articles` only. On a drive-root source, deleting a book moves it into `$RECYCLE.BIN`, and the watcher's add imports the recycled copy until the next full sync prunes it (that sync's scan now skips the folder). Ruling (A) names the scan and `rootHasContent`; extending it to the watcher (one condition, `parts.some(isSystemFolder)`) is for Blurby.Brain.
+  - **`rescan-folder`'s Saved Articles test** (`main/ipc/library.js:482`) is the same raw prefix as (sa). Ruling Q3 named the full sync; the rescan line is left for Blurby.Brain.
+  - **Other hangs.** A hung extraction (`extractNewFileDoc`) or a hung per-file `statFile` (`main.js:324`) is not bounded. A folder switch still proceeds after the timeout, but a same-folder re-sync after such a hang waits for it.
+  - **Stopping an abandoned walk.** Its listings run to their end in the background. A cancel hook inside the walk is a possible follow-up.
+  - **Other platforms' system folders** (`.Trashes`, `.Spotlight-V100`, `lost+found`) and dot-named folders other than `.shortcut-targets-by-id`: still scanned, as today.
+  - **Merging case-only duplicates into one doc:** a design question (Rule 11 tier 2).
+  - **`failedExtractions`** (`main.js:71`, read through `isFailed` at `:326`), a skip cache keyed by raw path. A case variant is extracted once more and then cached. That is harmless, and `main.js` is outside this item's fence.
+  - **`isLibraryDocPath`** (`main/ipc/library.js:40-45`): already case-folded on win32. It is a security check, and it is not edited.
+  - **`scanFolderAsync`'s dedupe** (`main/folder-watcher.js:72-84`): within one walk the folder strings are consistent (N4). It is not edited; only the walk's two awaited calls and its directory branch are.
   - **The LARGE-FOLDER-SYNC-1 design half** (very large folders): still an open owner decision.
-  - **BUG-195** (an unreachable root prunes every folder book): FOLDER-UNREACHABLE-GUARD-1.
   - **LL-156 check.** LARGE-FOLDER-SYNC-1 recorded three deviations against code this item edits:
     - Raw index keys: brought into scope here (ruling).
-    - F3's catch placed in `syncAll`, not at the startup call (`tests/perfAudit.test.ts` pins `main.js:590`): kept unchanged. The catch's line moves with the N2 and N3 edits around it.
+    - F3's catch placed in `syncAll`, not at the startup call (`tests/perfAudit.test.ts` pins `main.js:587`): kept unchanged. The catch's line moves with the N2, N3 and (C) edits around it.
     - The fast-path known limit: restated against the new key and pinned by test (dup).
 
-    FOLDER-UNREACHABLE-GUARD-1's guard goes into `runFullSync` (its stub, LL-156). This item edits the same function's map and prune lines, so it re-greps after that merge (Prerequisites).
+    FOLDER-UNREACHABLE-GUARD-1 has merged. Its guard (`:81`, `:118-125`), `fileState` and `underAny` (`:70-71`), `removeUnder`'s root check (`:179-183`) and the rescan's guards (`main/ipc/library.js:368-379`) are built on, not changed, except `underAny`'s first argument, which becomes a key.
 - **Prerequisites:**
-  - **FOLDER-UNREACHABLE-GUARD-1 (position 20) merged.**
-    - Its stub puts an unreachable-root guard in `runFullSync`, which skips the prune and reports the root distinctly. It may also change what `scanFolderAsync` returns.
-    - Under ruling Q1 it defines and exports `pathKey` in `main/folder-sync.js`. Check `git grep -n -F 'pathKey' -- main/folder-sync.js`. If the module-level definition and its export are there, reuse them and skip this item's definition step. If they are not, define it here (edit sites). This item edits `runFullSync`'s `byPath`/`onDisk` lines (`:76-84`) and its prune (`:107-109`), which are adjacent or the same hunks. Re-grep `main/folder-sync.js` after that merge. If the prune moved inside a guard, or `files` changed shape, apply the same key edits to the new lines and record the new line numbers in the staging memo.
-  - **IPC-PATH-TRUST-1 (position 19) merged.** It edits the heads of `switch-folder` and `save-settings` in `main/ipc/state.js` (a `recentFolders` check). This item swaps the two lines at the tail of `select-folder` and `switch-folder`, which are different hunks. Test (ws-switch) puts the target folder in `recentFolders`, so it passes with or without that check.
-  - Position note: the ROADMAP.md stub of 2026-10-14 says position 21. The heading uses 23, as Blurby.Brain ruled. Blurby.Roadmap applies the slot at the next roadmap review.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other exit code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). The dry-runs on `0f285836` (2026-10-14) were run as `git grep … refs/remotes/origin/main -- <path>`, so their output carries that prefix. They are noted with each gate.
-    1. **Positive control (standing rule 43):** at C1, on the owner's Windows machine, `npx vitest run tests/folderSync.test.js tests/folderSwitchWatcherFirst.test.js` exits 1.
-       - Exactly these 9 fail, each for its named reason: (n2), (n3), (f5), (norm-a), (norm-b), (norm-c), (sa), (ws-select), (ws-switch).
-       - These pass: the controls (dup), (n4) and (ws-wait), and every existing test in `tests/folderSync.test.js`.
-       - (norm-b) and (norm-c) run only where `path.sep` is `\` (the existing `winIt` guard). On another host they are skipped, and the gate is not met there (standing rule 47).
+  - **FOLDER-UNREACHABLE-GUARD-1 merged** (`89a5a95c`): met. Every anchor above is on that tree.
+  - **IPC-PATH-TRUST-1 merged:** met. Its `recentFolders` check is at the head of `switch-folder` (`main/ipc/state.js:82-86`), a different hunk from the swap. Test (ws-switch) puts the target folder in `recentFolders`.
+  - **GET-STATE-SECRET-1 (position 23) merged.** It edits `get-state` in `main/ipc/state.js:16-19` (its spec: 9 lines added, 4 removed), so the swap lines move down by about 5. After it merges, re-grep `ctx.startWatcher();` in `main/ipc/state.js` and record the new lines in the staging memo. Its spec says this item edits `preload.js:65`; it does not (Done-when 9).
+  - **The shared constant, at dispatch:** run Done-when 15's dispatch check on `refs/remotes/origin/main` and record the case.
+  - Position note: on `181da234` the heading already reads 24, and PAGE-POSITION-SAVE-2 reads 25.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other exit code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). The dry-runs (2026-10-15) were run as `git grep … refs/remotes/origin/main -- <path>` with `refs/remotes/origin/main` at `181da234`, whose code is identical to `89a5a95c` (`git diff --stat 89a5a95c 181da234` lists only `ROADMAP.md`, `Virtuoso/` and register files), so their output carries that prefix. They are noted with each gate.
+    1. **Positive control (standing rule 43):** at C1, on the owner's Windows machine, `npx vitest run tests/folderSync.test.js tests/folderSwitchWatcherFirst.test.js tests/folderUnreachableGuard.test.js` exits 1.
+       - Exactly these 21 fail, each for its named reason: (n2), (n3), (f5), (norm-a), (norm-b), (case-rename), (case-dup), (sa), (sw-hang), (n2-hang), (lt-const), (ws-select), (ws-switch), (sys-list), (sys-sync), (sys-remove), (rescan-dup), (rescan-cost), (lt-scan), (lt-sub), (lt-root). In Done-when 15's case B, (lt-const) passes at C1 and the count is 20.
+       - These pass: the controls (dup), (n4), (ws-wait) and (sys-ctl), and every existing test in the three files.
+       - (norm-b), (case-rename) and (case-dup) run only where `path.sep` is `\` (the existing `winIt` guard), and (rescan-dup) only on win32 (`it.runIf`, as the existing (t) does). On another host they are skipped, and the gate is not met there (standing rule 47).
+       - No new test may hang: each (lt-*), (sw-hang) and (n2-hang) case settles within about 2 s at C1.
        - Record the output in the staging memo.
-    2. After C2, `npx vitest run tests/folderSync.test.js tests/folderSwitchWatcherFirst.test.js tests/folderWatcher.test.js tests/perfAudit.test.ts tests/ipcPathTrust.test.js` exits 0. If IPC-PATH-TRUST-1 changed its test's name, use the name on `main`.
+    2. After C2, `npx vitest run tests/folderSync.test.js tests/folderSwitchWatcherFirst.test.js tests/folderUnreachableGuard.test.js tests/folderWatcher.test.js tests/perfAudit.test.ts tests/ipcPathTrust.test.js tests/settingsKeyTrust.test.js` exits 0.
     3. **Scale (LL-158).** In the same session:
-       - At C1, `node scripts/perf/folder-sync-scale.mjs` exits 0. Record its four lines.
+       - At C1, with the two-line script repair committed, `node scripts/perf/folder-sync-scale.mjs` exits 0. Record its four lines. (On `89a5a95c` it is expected to exit 1 with `removal count wrong`, by reading; see Why.)
        - At C2, run it again. It exits 0 and its last line is exactly `within thresholds`.
        - The C2 `one per-file add` worst is at most twice the C1 worst. It includes the one index rebuild that `pathKey` makes dearer.
-       - Record both outputs. The script is the one LARGE-FOLDER-SYNC-1 committed, and it is not edited.
+       - Record both outputs.
     4. `git grep -n -F 'if (running.folder === folder) return running.promise;' -- main/folder-sync.js` prints nothing (exit 1).
-       - Dry-run: exit 0, `main/folder-sync.js:119:      if (running.folder === folder) return running.promise;`, so the gate can fail.
-    5. `git grep -n -E -e 'byPath\.get\(p\)' -e 'd\.filepath === p' -e '\.has\(d\.filepath\)' -e '\.get\(file\.filepath\)' -e '\.add\(file\.filepath\)' -e 'startsWith\(savedArticles\)' -e 'inFlight\.(has|add|delete)\(p\)' -e 'addedDuringRun\.add\(p\)' -e 'byPath\.(has|set|get|delete)\((d|doc)\.filepath' -e 'bookKey\((d|doc)\.filepath\)' -e 'path\.dirname\(p\) \+' -- main/folder-sync.js` prints nothing (exit 1): no raw path comparison is left.
-       - Dry-run: exit 0, 19 lines: `:18`, `:32`, `:33`, `:44`, `:45`, `:48`, `:80`, `:81`, `:108`, `:109`, `:141`, `:143`, `:152`, `:167`, `:176`, `:183`, `:184`, `:194`, plus `:148` from the `addedDuringRun.add(p)` pattern.
-    6. `git grep -n -E '(const pathKey = |function pathKey\()' -- main/folder-sync.js` prints exactly one line and exits 0. There is one definition, whichever item wrote it (ruling Q1). `git grep -c -F 'pathKey' -- main/ipc/library.js` prints the same as on `refs/remotes/origin/main` before this branch: this item adds no use there.
-       - Dry-run on `0f285836`: exit 1, no output. After FOLDER-UNREACHABLE-GUARD-1 merges, it may already print its line. The gate then passes only if this item added no second definition.
+       - Dry-run: exit 0, `refs/remotes/origin/main:main/folder-sync.js:136:      if (running.folder === folder) return running.promise;`, so the gate can fail.
+    5. `git grep -n -E -e 'byPath\.get\(p\)' -e 'd\.filepath === p' -e '\.has\(d\.filepath\)' -e '\.get\(file\.filepath\)' -e '\.add\(file\.filepath\)' -e '\[d\.filepath, d\]' -e 'path\.resolve\(d\.filepath\)\.startsWith' -e 'underAny\(d\.filepath' -e 'inFlight\.(has|add|delete)\(p\)' -e 'addedDuringRun\.add\(p\)' -e 'byPath\.(has|set|get|delete)\((d|doc)\.filepath' -e 'bookKey\((d|doc)\.filepath\)' -e 'path\.dirname\(p\) \+' -e 'prefix = p \+' -- main/folder-sync.js` prints nothing (exit 1): no raw path comparison is left.
+       - Dry-run: exit 0, 21 lines: `:21`, `:35`, `:36`, `:47`, `:48`, `:51`, `:83`, `:87`, `:88`, `:116`, `:117`, `:158`, `:160`, `:165`, `:169`, `:184`, `:190`, `:199`, `:206`, `:207`, `:217`. None of the After code in Implementation detail matches a pattern.
+    6. `git grep -n -E '(const pathKey = |function pathKey\()' -- main` prints exactly one line, `main/folder-sync.js:9:const pathKey = …`, and exits 0: one definition in the main process (ruling Q1).
+       - Dry-run: exit 0, that one line. The gate stays green only if no second key is added.
     7. `git grep -n -E '^\s+saveLibrary\(\);' -- main/folder-sync.js` prints exactly one line, the end-of-sync save after the prune, and exits 0. The per-file sites now call `savePerFile()`, and `git grep -c -F 'savePerFile();' -- main/folder-sync.js` prints `main/folder-sync.js:3` and exits 0.
-       - Dry-run of the first: exit 0, four lines (`:110`, `:149`, `:189`, `:199`), so the gate can fail. Dry-run of the second: exit 1, no output.
+       - Dry-run of the first: exit 0, four lines (`:127`, `:166`, `:212`, `:222`), so the gate can fail. Dry-run of the second: exit 1, no output.
     8. `git grep -n -F 'getLibrary().find((d) => d.filepath === p)' -- main/folder-sync.js` prints nothing (exit 1).
-       - Dry-run: exit 0, `:194`.
-    9. `git diff --quiet refs/remotes/origin/main -- main.js main/folder-watcher.js preload.js src scripts/perf/folder-sync-scale.mjs` exits 0.
+       - Dry-run: exit 0, `:217`.
+    9. `git diff --quiet refs/remotes/origin/main -- main.js preload.js src` exits 0.
+       - Dry-run (no branch yet): exit 0.
     10. `git grep -c -F 'until the next full sync' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0.
         - Dry-run: exit 1, no output.
     11. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
     12. `git diff --name-status refs/remotes/origin/main` lists exactly:
         - `M docs/governance/TECHNICAL_REFERENCE.md`
+        - `M main/constants.js` (case A of Done-when 15 only)
         - `M main/folder-sync.js`
+        - `M main/folder-watcher.js`
+        - `M main/ipc/library.js`
         - `M main/ipc/state.js`
+        - `M scripts/perf/folder-sync-scale.mjs`
         - `A tests/folderSwitchWatcherFirst.test.js`
         - `M tests/folderSync.test.js`
+        - `M tests/folderUnreachableGuard.test.js`
 
         The time log `docs/governance/close-outs/Timing.LARGE-FOLDER-SYNC-2.jsonl` and the staging memo `docs/governance/close-outs/Memo.LARGE-FOLDER-SYNC-2.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41).
     13. **Owner smoke, batched (standing rule 45):** record "Owner smoke deferred to batched smoke by Blurby Brain (Rule 11; owner is away)". The owner checklist for the batched smoke:
         - (a) Switch to a second folder from the recent list. While it syncs, copy one EPUB into it. The book appears and is still there after the sync ends.
         - (b) On the real folder, delete one book file. Its card goes within a few seconds, and no other card goes.
-- **Effort:** M. Small, local edits in one module and two line swaps. Most of the effort goes into the nine positive controls and the scale run.
+        - (c) Open a book, read a few pages, close it. In Explorer, rename its file changing only the case of one letter. After the next sync (Rescan, or a relaunch), the card is still there, with the same reading position, and no second card appears.
+    14. **(A) system folders.** `git grep -n -F '"$recycle.bin", "system volume information", ".shortcut-targets-by-id"' -- main/folder-watcher.js` prints exactly one line and exits 0. `git grep -c -F 'isSystemFolder' -- main/folder-watcher.js` prints `main/folder-watcher.js:3` (the definition, the walk, `rootHasContent`) and exits 0.
+        - Dry-run of both: exit 1, no output.
+    15. **(C) the shared constant and the bound.**
+        - **Dispatch check, before C1:** `git grep -c -E 'FOLDER_(RETRY_)?LIST_TIMEOUT_MS' refs/remotes/origin/main -- main/constants.js`. Record the result.
+          - **Case A** (exit 1, no output; the dry-run, 2026-10-15): this item defines it. Gate: `git diff --name-status refs/remotes/origin/main -- main/constants.js` prints exactly `M`, a tab, `main/constants.js`, and exits 0.
+          - **Case B** (prints `refs/remotes/origin/main:main/constants.js:2` and `git grep -n -F 'FOLDER_LIST_TIMEOUT_MS' refs/remotes/origin/main -- main/constants.js` shows the agreed name): FOLDER-NOTICE-1 landed first. Reuse it. Gate: `git diff --quiet refs/remotes/origin/main -- main/constants.js` exits 0.
+          - **Any other result** (the old name `FOLDER_RETRY_LIST_TIMEOUT_MS` on `main`, or a value other than 30000): stop for Blurby.Brain. Renaming it is FOLDER-NOTICE-1's file.
+        - Both cases: `git grep -n -E '^const FOLDER_LIST_TIMEOUT_MS = 30000;$' -- main/constants.js` prints exactly one line and exits 0. Dry-run: exit 1, no output.
+        - Both cases: `git grep -n -F 'FOLDER_RETRY_LIST_TIMEOUT_MS' -- main tests` prints nothing (exit 1). Dry-run: exit 1, no output (the guard holds on the base too).
+        - `git grep -c -F 'FOLDER_LIST_TIMEOUT_MS' -- main/constants.js main/folder-sync.js main/folder-watcher.js` prints exactly `main/constants.js:2`, `main/folder-sync.js:2` and `main/folder-watcher.js:2` (each a definition or require, plus one use), and exits 0. Dry-run: exit 1, no output.
+        - `git grep -c -F 'timeLimit(' -- main/folder-watcher.js` prints `main/folder-watcher.js:4` (the definition and three uses) and exits 0. Dry-run: exit 1, no output.
+        - `git grep -n -F -e 'const mine = ++gen;' -e 'if (!running || running.promise !== promise) return;' -- main/folder-sync.js` prints exactly two lines and exits 0. Dry-run: exit 1, no output.
+    16. **(B) one key per path.** `git grep -n -F -e 'pathKey(doc.filepath)' -e 'new Map(docs.map((d) => [pathKey(d.filepath), d]))' -- main/ipc/library.js` prints nothing (exit 1). `git grep -n -F 'new Map(getLibrary().map(' -- main/folder-sync.js` prints nothing (exit 1).
+        - Dry-run of the first: exit 0, `refs/remotes/origin/main:main/ipc/library.js:380:` (the last-wins map) and `:484:` (the double call). Dry-run of the second: exit 0, `:83`.
+    17. **Watcher first.** `git grep -n -E '^\s+ctx\.startWatcher\(\);$' -- main/ipc/state.js` prints nothing (exit 1), and `git grep -c -F 'ctx.startWatcher(); // before the sync' -- main/ipc/state.js` prints `main/ipc/state.js:2` and exits 0.
+        - Dry-run of the first: exit 0, `refs/remotes/origin/main:main/ipc/state.js:76:    ctx.startWatcher();` and `:91:`. Dry-run of the second: exit 1, no output.
+    18. **Scale script repair.** `git grep -n -E -e 'rootHasContent: async \(\) => true,' -e 'code: "ENOENT"' -- scripts/perf/folder-sync-scale.mjs` prints exactly two lines and exits 0, and `git grep -n -F 'Promise.reject(new Error("ENOENT"))' -- scripts/perf/folder-sync-scale.mjs` prints nothing (exit 1). `git diff --numstat refs/remotes/origin/main -- scripts/perf/folder-sync-scale.mjs` prints `2`, a tab, `1`, a tab, the path.
+        - Dry-run of the first: exit 1, no output. Of the second: exit 0, `refs/remotes/origin/main:scripts/perf/folder-sync-scale.mjs:32:`.
+- **Effort:** M, at its upper end. Small local edits in two modules, one rescan hunk, two line swaps and one constant. Most of the effort goes into the 21 positive controls (five of them on fake timers, three of those on real folders) and the scale run.
 - **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke (Stage 8).
 - **Lane:** Library & Content. Execution surface D (main process).
-- **Source:** `docs/governance/bug-reports/Issue.LARGE-FOLDER-SYNC-1.2026-10-14.md` (Decision and Decision 2, follow-ups); `docs/governance/close-outs/Memo.LARGE-FOLDER-SYNC-1.GovernanceStaging.2026-10-14.md` ("Recorded deviations" and "Follow-ups to LARGE-FOLDER-SYNC-2"); the ROADMAP.md stub of 2026-10-14; this trace on `0f285836`.
+- **Source:** `docs/governance/bug-reports/Issue.LARGE-FOLDER-SYNC-1.2026-10-14.md` (Decision and Decision 2, follow-ups); `docs/governance/close-outs/Memo.LARGE-FOLDER-SYNC-1.GovernanceStaging.2026-10-14.md` ("Recorded deviations" and "Follow-ups to LARGE-FOLDER-SYNC-2"); the ROADMAP.md stub of 2026-10-14; Blurby.Brain's rulings (A), (B) and (C), 2026-10-15; the trace on `0f285836` and this re-trace on `89a5a95c`; a read-only listing of `C:\` and `G:\` on the owner's machine, 2026-10-15.
 - **Path:** dispatch.
 
 ##### Implementation detail
-- **Edit sites** (on `main` @ `0f285836`; re-grep after FOLDER-UNREACHABLE-GUARD-1 and IPC-PATH-TRUST-1 merge, and proceed only when the content matches):
-  - **`main/folder-sync.js:12-17`, state.** After `const addedDuringRun = new Set();` (`:16`), add:
+- **Edit sites** (on `main` @ `89a5a95c`; re-grep `main/ipc/state.js` after GET-STATE-SECRET-1 merges, and proceed only when the content matches):
+  - **`main/folder-sync.js:6`, the constants require.** Before:
+    ```js
+    const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS } = require("./constants");
+    ```
+    After:
+    ```js
+    const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS, FOLDER_LIST_TIMEOUT_MS } = require("./constants");
+    ```
+    `pathKey` (`:7-9`) and `module.exports = { createFolderSync, pathKey };` (`:237`) are unchanged. If `:9` differs from the dry-run line in Done-when 6, stop for Blurby.Brain. Do not add a second key.
+  - **`:15-19`, state.** After `const addedDuringRun = new Set(); // per-file adds since the running sync's scan; its prune keeps them` (`:19`), add:
     ```js
       let owed = false; // a per-file change made during a full sync: the sync's own saves write it (N3)
+      let gen = 0; // full-sync generation: a run syncAll abandoned (it hung) stays stale for good
     ```
-  - **`:18` `bookKey`.** Before:
+  - **`:21` `bookKey`.** Before:
     ```js
       const bookKey = (p) => path.dirname(p) + "\0" + path.basename(p, path.extname(p)).toLowerCase();
     ```
@@ -4417,18 +5092,8 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
       // A book is a folder plus a file stem, any extension; k is a pathKey. Same stem rule as the scan's dedupe (N4).
       const bookKey = (k) => path.dirname(k) + "\0" + path.basename(k, path.extname(k)).toLowerCase();
     ```
-  - **`pathKey`, module level (ruling Q1).** Reuse FOLDER-UNREACHABLE-GUARD-1's exported `pathKey` if it is in the file, and do not redefine it. Only if it is absent, add it after the `require` lines (`:5-6`) and export it, changing `module.exports = { createFolderSync };` (`:214`) to `module.exports = { createFolderSync, pathKey };`:
-    ```js
-    // One key for every library path comparison (LARGE-FOLDER-SYNC-2, shared with rescan-folder): separators and dot
-    // segments normalized, case folded on win32 only, as underFolder does (Windows paths are case-insensitive). "" if missing.
-    function pathKey(p) {
-      if (!p) return "";
-      const n = path.normalize(p);
-      return process.platform === "win32" ? n.toLowerCase() : n;
-    }
-    ```
-    If FOLDER-UNREACHABLE-GUARD-1's definition differs in behaviour (not case-folded on win32, or not normalized), stop for Blurby.Brain. Do not add a second key.
-  - **`:30-34`, the index build.** Before:
+    The comment at `:22` changes "Path index over the library (W1)" to "Path index over the library (W1), keyed by pathKey". At `:27`, `byPath: Map<filepath, doc>` becomes `byPath: Map<pathKey, doc>`.
+  - **`:33-37`, the index build.** Before:
     ```js
         for (const d of lib) {
           if (!d.filepath) continue;
@@ -4445,8 +5110,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
           bump(idx.byBook, bookKey(k), 1);
         }
     ```
-    The comment at `:19` changes "Path index over the library (W1)" to "Path index over the library (W1), keyed by pathKey".
-  - **`:43-46`, `trackAdd`.** Before:
+  - **`:46-49`, `trackAdd`.** Before:
     ```js
         if (doc.filepath) {
           if (!i.byPath.has(doc.filepath)) i.byPath.set(doc.filepath, doc);
@@ -4461,7 +5125,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
           bump(i.byBook, bookKey(k), 1);
         }
     ```
-  - **`:48-49`.** Before:
+  - **`:51-52`.** Before:
     ```js
       const findByPath = (p) => index().byPath.get(p);
       const hasBook = (p) => index().byBook.has(bookKey(p)); // counts are kept above 0, so has() is count > 0
@@ -4471,12 +5135,33 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
       const findByPath = (p) => index().byPath.get(pathKey(p));
       const hasBook = (p) => index().byBook.has(bookKey(pathKey(p))); // counts are kept above 0, so has() is count > 0
     ```
-  - **After `:66` (`exists`)**, add:
+  - **`:71`, `underAny`, and the new `savePerFile`.** Before:
     ```js
+      const underAny = (p, keys) => { const k = pathKey(p); return keys.some((s) => k === s || k.startsWith(s + path.sep)); }; // keys of unread paths
+    ```
+    After:
+    ```js
+      const underAny = (k, keys) => keys.some((s) => k === s || k.startsWith(s + path.sep)); // k and keys are pathKeys; keys of unread paths
       // While a full sync runs, its interval save and its end write per-file changes; one write per event would defeat the batching (N3).
       const savePerFile = () => { if (running) owed = true; else saveLibrary(); };
     ```
-  - **`:76-84`, `runFullSync`'s scan merge.** Before:
+  - **`:73-76`, `runFullSync`'s head.** Before:
+    ```js
+      async function runFullSync(folder) {
+        cancelled = false;
+        addedDuringRun.clear();
+        const stale = () => cancelled || stopped || getSourceFolder() !== folder;
+    ```
+    After:
+    ```js
+      async function runFullSync(folder) {
+        const mine = ++gen;
+        cancelled = false;
+        addedDuringRun.clear();
+        const stale = () => mine !== gen || cancelled || stopped || getSourceFolder() !== folder;
+    ```
+    `:77-81` (the scan, the stale check and FOLDER-UNREACHABLE-GUARD-1's `if (!files)` guard) are unchanged.
+  - **`:83-91`, the scan merge.** Before:
     ```js
         const byPath = new Map(getLibrary().map((d) => [d.filepath, d]));
         const onDisk = new Set();
@@ -4488,7 +5173,15 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     After:
     ```js
         // Built from the live library, not the index: the index can miss a second book at one path (removeUnder's fast path).
-        const byPath = new Map(getLibrary().map((d) => [pathKey(d.filepath), d]));
+        // One pathKey per library path; the prune reuses it. On a case-only collision the first doc is the book, and the
+        // other stays as it is: its key is on disk, so the prune keeps it (LARGE-FOLDER-SYNC-2, ruling B).
+        const keyOf = new Map();
+        const byPath = new Map();
+        for (const d of getLibrary()) {
+          const k = pathKey(d.filepath);
+          keyOf.set(d, k);
+          if (!byPath.has(k)) byPath.set(k, d);
+        }
         const onDisk = new Set();
         const newFiles = [];
         for (const file of files) {
@@ -4496,24 +5189,26 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
           onDisk.add(k);
           const prev = byPath.get(k);
     ```
-    `:82-83` are unchanged.
-  - **`:107-109`, the prune.** Before:
+    `:89-90` are unchanged. A case-only rename keeps the stored `filepath` (Design decisions).
+  - **`:114-117`, the prune's `keep`.** Before:
     ```js
         const savedArticles = path.join(path.resolve(folder), "Saved Articles");
-        setLibrary(getLibrary().filter((d) => d.source !== "folder" || onDisk.has(d.filepath)
-          || addedDuringRun.has(d.filepath) || (d.filepath && path.resolve(d.filepath).startsWith(savedArticles))));
+        const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
+        const keep = (d) => d.source !== "folder" || onDisk.has(d.filepath) || addedDuringRun.has(d.filepath)
+          || (d.filepath && (path.resolve(d.filepath).startsWith(savedArticles) || underAny(d.filepath, skipped)));
     ```
     After:
     ```js
-        const savedArticles = pathKey(path.join(path.resolve(folder), "Saved Articles")) + path.sep;
-        setLibrary(getLibrary().filter((d) => {
+        const savedArticles = pathKey(path.join(folder, "Saved Articles")) + path.sep; // a path segment, not a string prefix (Q3)
+        const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
+        const keep = (d) => {
           if (d.source !== "folder") return true;
-          const k = pathKey(d.filepath);
-          return onDisk.has(k) || addedDuringRun.has(k) || k.startsWith(savedArticles);
-        }));
+          const k = keyOf.has(d) ? keyOf.get(d) : pathKey(d.filepath); // a book added during this run is not in keyOf
+          return onDisk.has(k) || addedDuringRun.has(k) || (!!k && (k.startsWith(savedArticles) || underAny(k, skipped)));
+        };
     ```
-    A folder book with no `filepath` keys as `""` and is pruned, as on the base. `:110-112` are unchanged.
-  - **`:118-128`, `syncAll`.** Before:
+    A folder book with no `filepath` has a falsy key and is pruned, as on the base. `:118-129` (the BUG-195 guard, `partial-read`, the prune, the save) are unchanged.
+  - **`:135-139` and `:142-144`, `syncAll`.** Before:
     ```js
         while (running) {
           if (running.folder === folder) return running.promise;
@@ -4530,19 +5225,28 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         while (running) {
           if (running.folder === folder && !cancelled) return running.promise;
           cancelled = true; // a folder switch, or a re-sync after cancel(): let the old run stop, then start a new one (N2)
-          await running.promise.catch(() => {});
+          const old = running;
+          let timer;
+          const ended = await Promise.race([old.promise.then(() => true),
+            new Promise((resolve) => { timer = setTimeout(() => resolve(false), FOLDER_LIST_TIMEOUT_MS); })]);
+          clearTimeout(timer);
+          if (!ended && running === old) { // hung in a listing or an extraction: abandoned; mine !== gen keeps it from applying anything
+            console.warn("[folder-sync] a cancelled sync did not stop in time; starting the new one");
+            running = null;
+          }
         }
     ```
     and
     ```js
           .finally(() => {
+            if (!running || running.promise !== promise) return; // an abandoned run settling late changes nothing
             running = null;
             if (owed && !stopped) saveLibrary(); // per-file changes made during the run (N3); at quit, the flush writes them
             owed = false;
           });
     ```
-    The F3 comment and the `.catch` between them are unchanged.
-  - **`:141-152`, `addOne`.** Before:
+    The F3 comment (`:140-141`), `const promise = runFullSync(folder)` (`:142`) and the `.catch` line (`:143`, which FOLDER-NOTICE-1 builds on) are unchanged. `old.promise` never rejects (its chain ends in that `.catch`).
+  - **`:158-169`, `addOne`.** Before:
     ```js
         if (inFlight.has(p) || isFailed(p) || hasBook(p)) return;
         const folder = getSourceFolder();
@@ -4555,20 +5259,20 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         const folder = getSourceFolder();
         inFlight.add(k);
     ```
-    `addedDuringRun.add(p);` (`:148`) becomes `addedDuringRun.add(k);`. `saveLibrary();` (`:149`) becomes `savePerFile();`. `inFlight.delete(p);` (`:152`) becomes `inFlight.delete(k);`. `isFailed(p)` stays raw (out of scope: `main.js`'s cache).
-  - **`:161-189`, `removeUnder`.**
-    - `const prefix = p + path.sep;` (`:161`) becomes two lines:
+    `addedDuringRun.add(p);` (`:165`) becomes `addedDuringRun.add(k);`. `saveLibrary();` (`:166`) becomes `savePerFile();`. `inFlight.delete(p);` (`:169`) becomes `inFlight.delete(k);`. `isFailed(p)` stays raw (out of scope: `main.js`'s cache).
+  - **`:184-212`, `removeUnder`.**
+    - `const prefix = p + path.sep;` (`:184`) becomes two lines:
       ```js
           const key = pathKey(p);
           const prefix = key + path.sep;
       ```
-    - `const hit = i.byPath.get(p);` (`:167`) becomes `const hit = i.byPath.get(key);`.
-    - The comment at `:170-171` becomes:
+    - `const hit = i.byPath.get(p);` (`:190`) becomes `const hit = i.byPath.get(key);`.
+    - The comment at `:193-194` becomes:
       ```js
             // A single file (a path that is a book is not also a folder): two array copies, no per-book test. Known limit: a
             // second book another module put at the same path stays until the next full sync prunes it, unindexed meanwhile.
       ```
-    - The slow-path loop (`:175-178`). Before:
+    - The slow-path loop (`:198-201`). Before:
       ```js
             for (const d of lib0) {
               if (d.source === "folder" && d.filepath && (d.filepath === p || d.filepath.startsWith(prefix))) gone.push(d);
@@ -4583,7 +5287,7 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
               else kept.push(d);
             }
       ```
-    - The index upkeep (`:182-185`). Before:
+    - The index upkeep (`:205-208`). Before:
       ```js
           for (const d of gone) {
             if (i.byPath.get(d.filepath) === d) i.byPath.delete(d.filepath);
@@ -4598,8 +5302,8 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
             bump(i.byBook, bookKey(k), -1);
           }
       ```
-    - `saveLibrary();` (`:189`) becomes `savePerFile();`.
-  - **`:193-200`, `refresh`.** Before:
+    - `saveLibrary();` (`:212`) becomes `savePerFile();`. The root check and `fileState` (`:176-183`) are unchanged.
+  - **`:216-222`, `refresh`.** Before:
     ```js
         const doc = getLibrary().find((d) => d.filepath === p); // a path not yet in the library is ignored
     ```
@@ -4607,9 +5311,120 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     ```js
         const doc = findByPath(p); // the index, not a library scan per event (F5); a path not yet in the library is ignored
     ```
-    `saveLibrary();` (`:199`) becomes `savePerFile();`.
-  - Nothing else in `main/folder-sync.js` changes. In particular, `underFolder`, `extractGuarded`, `stop()`, `cancel()` and the `guarded` wrappers are unchanged.
-  - **`main/ipc/state.js`, `select-folder` (`:71-72`) and `switch-folder` (`:82-83`).** In each, before:
+    `saveLibrary();` (`:222`) becomes `savePerFile();`.
+  - Nothing else in `main/folder-sync.js` changes. In particular `underFolder`, `extractGuarded`, `fileState`, `stop()`, `cancel()` and the `guarded` wrappers are unchanged.
+  - **`main/folder-watcher.js:7`, the constants require.** Before:
+    ```js
+    const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY } = require("./constants");
+    ```
+    After:
+    ```js
+    const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY, FOLDER_LIST_TIMEOUT_MS } = require("./constants");
+    ```
+  - **After `:10` (`FORMAT_PRIORITY`)**, add:
+    ```js
+    // Volume and Drive for desktop system folders, never books, at any depth (a volume can be mounted below the root). A
+    // drive-root or mount-point source holding only these lists no book. Lowercased: NTFS shows $Recycle.Bin on C:.
+    // Drive's own My Drive, Shared drives and Other computers hold the user's files, so they are scanned (LARGE-FOLDER-SYNC-2).
+    const SYSTEM_FOLDERS = new Set(["$recycle.bin", "system volume information", ".shortcut-targets-by-id"]);
+    const isSystemFolder = (name) => SYSTEM_FOLDERS.has(name.toLowerCase());
+
+    // A listing or stat that never settles (a hung Drive or network mount) rejects once the list timeout passes, so the walk
+    // treats it as unreadable: an unlistable root, or a skipped path below it (BUG-195). Node cannot cancel it; a late answer is dropped.
+    function timeLimit(promise) {
+      let timer;
+      const cap = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(Object.assign(new Error("timed out"), { code: "ETIMEDOUT" })), FOLDER_LIST_TIMEOUT_MS);
+      });
+      return Promise.race([promise, cap]).finally(() => clearTimeout(timer));
+    }
+    ```
+    The comments must not contain `timeLimit(`, `isSystemFolder` or `FOLDER_LIST_TIMEOUT_MS` (Done-when 14 and 15 count lines).
+  - **`:41`, the walk's listing.** `entries = await fsPromises.readdir(dir, { withFileTypes: true });` becomes `entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true }));`.
+  - **`:51-53`, the directory branch.** Before:
+    ```js
+          if (entry.isDirectory()) {
+            if (entry.name === savedArticlesName && dir === folderPath) continue;
+            await walkDir(fullPath);
+    ```
+    After:
+    ```js
+          if (entry.isDirectory()) {
+            if (isSystemFolder(entry.name) || (entry.name === savedArticlesName && dir === folderPath)) continue;
+            await walkDir(fullPath);
+    ```
+  - **`:57`, the per-file stat.** `try { stat = await fsPromises.stat(fullPath); } catch { … }` becomes `try { stat = await timeLimit(fsPromises.stat(fullPath)); } catch { … }`; the rest of the line is unchanged.
+  - **`:87-93`, `rootHasContent`.** Before:
+    ```js
+    // true: the folder lists a subfolder or a supported file. false: it lists neither (an unmounted Drive's mount point may
+    // keep only desktop.ini). null: it cannot be listed. A per-file remove is trusted only on true (BUG-195).
+    async function rootHasContent(dir) {
+      let entries;
+      try { entries = await fsPromises.readdir(dir, { withFileTypes: true }); } catch { return null; }
+      return entries.some((e) => e.isDirectory() || (e.isFile() && SUPPORTED_EXT.includes(path.extname(e.name).toLowerCase())));
+    }
+    ```
+    After:
+    ```js
+    // true: the folder lists a subfolder (not a system folder) or a supported file. false: it lists neither (an unmounted
+    // Drive's mount point may keep only desktop.ini). null: it cannot be listed, or not in time. A per-file remove is trusted only on true (BUG-195).
+    async function rootHasContent(dir) {
+      let entries;
+      try { entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true })); } catch { return null; }
+      return entries.some((e) => (e.isDirectory() && !isSystemFolder(e.name)) || (e.isFile() && SUPPORTED_EXT.includes(path.extname(e.name).toLowerCase())));
+    }
+    ```
+    Nothing else in `main/folder-watcher.js` changes: not `startWatcher`, not the dedupe, not `module.exports`.
+  - **`main/constants.js`, case A only (Done-when 15).** After `const FOLDER_SCAN_YIELD_EVERY = 500;` (`:173`), add:
+    ```js
+    /** A folder listing or file stat in the scan, or a root check, that has not settled by then counts as unreadable; a folder switch also waits no longer than this for a cancelled sync (ms) */
+    const FOLDER_LIST_TIMEOUT_MS = 30000;
+    ```
+    In `module.exports`, after `  FOLDER_SCAN_YIELD_EVERY,` (`:284`), add `  FOLDER_LIST_TIMEOUT_MS,`. In case B, `main/constants.js` is not edited.
+  - **`main/ipc/library.js:379-384`, `rescan-folder`'s map (ruling B).** Before:
+    ```js
+          const skipped = (report.skipped || []).map(pathKey);
+          const existing = new Map(docs.map((d) => [pathKey(d.filepath), d]));
+          const synced = [];
+
+          for (const file of files) {
+            const prev = existing.get(pathKey(file.filepath));
+    ```
+    After:
+    ```js
+          const skipped = (report.skipped || []).map(pathKey);
+          // One pathKey per library path. On a case-only collision the first doc is the book; the other is kept below, never dropped.
+          const keyOf = new Map();
+          const existing = new Map();
+          for (const d of docs) {
+            const k = pathKey(d.filepath);
+            keyOf.set(d, k);
+            if (!existing.has(k)) existing.set(k, d);
+          }
+          const onDisk = new Set();
+          const synced = [];
+
+          for (const file of files) {
+            const k = pathKey(file.filepath);
+            onDisk.add(k);
+            const prev = existing.get(k);
+    ```
+  - **`:445` and `:484-486`, the per-doc loop.** After `for (const doc of docs) {` (`:445`), add `        const k = keyOf.get(doc);`. Then, before:
+    ```js
+            } else if (doc.filepath && skipped.some((s) => pathKey(doc.filepath) === s || pathKey(doc.filepath).startsWith(s + path.sep))) {
+              synced.push(doc); // under a folder or file the scan could not read (BUG-195)
+            }
+    ```
+    After:
+    ```js
+            } else if (doc.filepath && skipped.some((s) => k === s || k.startsWith(s + path.sep))) {
+              synced.push(doc); // under a folder or file the scan could not read (BUG-195)
+            } else if (onDisk.has(k) && existing.get(k) !== doc) {
+              synced.push(doc); // a case-only duplicate of a book on disk: kept as it is, not dropped (LARGE-FOLDER-SYNC-2)
+            }
+    ```
+    Nothing else in `main/ipc/library.js` changes, including the Saved Articles branch (`:482`, Out of scope) and the guards at `:368-378`.
+  - **`main/ipc/state.js`, `select-folder` (`:75-76`) and `switch-folder` (`:90-91`).** In each, before:
     ```js
         await ctx.syncLibraryWithFolder();
         ctx.startWatcher();
@@ -4620,11 +5435,13 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         await ctx.syncLibraryWithFolder();
     ```
     Nothing else in the file changes.
-  - **`docs/governance/TECHNICAL_REFERENCE.md:711`**, the Folder watch row. Append to its middle cell, before ` (main/folder-sync.js, LARGE-FOLDER-SYNC-1)`: `; library path comparisons fold case on win32 (LARGE-FOLDER-SYNC-2). Known limit: when two books share one file path, removing the file removes one of them, and the other stays until the next full sync`.
+  - **`scripts/perf/folder-sync-scale.mjs:31-32`** (the benchmark, repaired for FOLDER-UNREACHABLE-GUARD-1's remove path; committed at C1). After `  scanFolderAsync: async () => [],` (`:31`), add `  rootHasContent: async () => true,`. At `:32`, `Promise.reject(new Error("ENOENT"))` becomes `Promise.reject(Object.assign(new Error("ENOENT"), { code: "ENOENT" }))`; the rest of the line is unchanged. Nothing else in the script changes.
+  - **`docs/governance/TECHNICAL_REFERENCE.md:711`**, the Folder watch row. In its middle cell, replace `(FOLDER-UNREACHABLE-GUARD-1) |` with `(FOLDER-UNREACHABLE-GUARD-1); library path comparisons fold case on win32, so a case-only rename keeps the book; the scan and the root check skip $RECYCLE.BIN, System Volume Information and .shortcut-targets-by-id; a folder listing or file stat that has not settled in FOLDER_LIST_TIMEOUT_MS counts as unreadable (LARGE-FOLDER-SYNC-2). Known limit: when two books share one file path, removing the file removes one of them, and the other stays until the next full sync |`.
 - **Tests** (all committed at C1):
-  - **`tests/folderSync.test.js`**: append to the outer `describe` block, before `(k)`. Put (norm-b) and (norm-c) inside the inner `describe("folder check (F2) and index (F1), fix round 2")`, which defines `winIt`, `setPlatform` and the `afterEach` that restores `process.platform`. Use the file's `makeDeps`, `deferred`, `file`, `folderDoc`, `nonFolderDoc` and `countPath`.
-    - **(n2) A re-sync right after a cancel runs.** The library is `[folderDoc("gone", <ROOT>/gone.epub)]`. The first `scanFolderAsync` call returns a deferred promise, and later calls resolve `[]`. Run `const a = sync.syncAll(); sync.cancel(); const b = sync.syncAll();`, resolve the deferred with `[]`, then `await Promise.all([a, b])`.
-      - Expected: `scanFolderAsync` was called twice, and the library is empty (the second run pruned `gone`).
+  - **Shared rules.** Where a case advances fake timers, it calls `vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })` (so `setImmediate` and I/O stay real) and `vi.useRealTimers()` in a `finally`. It reads `const LIST_MS = FOLDER_LIST_TIMEOUT_MS ?? 30000;` from `../main/constants.js`, so that at C1 (constant absent) the case fails on its own assertion, and (lt-const) names the missing constant. It never `await`s a promise that can hang at C1: it races it against `realWait(2000)`, a promise on the real `setTimeout` captured at module top before any test fakes it, and then asserts a `settled` flag set in `.then`.
+  - **`tests/folderSync.test.js`**: append to the outer `describe` block, before `(k)`. Put (norm-b), (case-rename) and (case-dup) inside the inner `describe("folder check (F2) and index (F1), fix round 2")`, which defines `winIt`, `setPlatform` and the `afterEach` that restores `process.platform`. Use the file's `makeDeps`, `deferred`, `file`, `folderDoc`, `nonFolderDoc` and `countPath`. FOLDER-UNREACHABLE-GUARD-1's empty-scan guard keeps every folder book when a scan lists none, so every case that expects a prune gives its scan at least one file.
+    - **(n2) A re-sync right after a cancel runs.** Library: `[folderDoc("gone", <ROOT>/gone.epub), folderDoc("keep", <ROOT>/keep.epub)]`. The first `scanFolderAsync` call returns a deferred promise; later calls resolve `[file(<ROOT>/keep.epub)]`. Run `const a = sync.syncAll(); sync.cancel(); const b = sync.syncAll();`, resolve the deferred with `[]`, then `await Promise.all([a, b])`.
+      - Expected: `scanFolderAsync` was called twice, and the library ids are `["keep"]` (the second run pruned `gone`).
       - *Fails at C1: one scan call, and `gone` is still there, because `b` is the cancelled run's promise.*
     - **(n3) Per-file events during a full sync do not save.** Disk: ROOT, `late.epub`, `c.epub`. Library: `c` (`c.epub`) and `g` (`g.epub`, not on disk). The scan returns a deferred promise. Start `const run = sync.syncAll()`, then `await sync.applyAdd(late)`, `await sync.applyChange(c)` and `await sync.applyUnlink(g)`.
       - Expected while the scan is pending: `deps.saveLibrary` not called (message: "a per-file event saved the library during a full sync").
@@ -4636,28 +5453,42 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     - **(norm-a) A dot-segment path matches its book (all platforms).** Library: `[folderDoc("a", path.join(ROOT, "a.epub"))]`; disk: ROOT only. Run `await sync.applyUnlink(ROOT + path.sep + "sub" + path.sep + ".." + path.sep + "a.epub")`.
       - Expected: the library is empty.
       - *Fails at C1: the raw key misses, and nothing is removed.*
-    - **(norm-b) win32: a folder spelled in another case is the same book** (`winIt`, `setPlatform("win32")` as (F2) does). Root `C:\Books`; library `[folderDoc("p", "C:\\Books\\Sub\\Title.pdf")]`; disk: root and `c:\books\sub\title.epub`. Run `await sync.applyAdd("c:\\books\\sub\\title.epub")`.
-      - Expected: `extractNewFileDoc` not called (`hasBook`).
-      - *Fails at C1: the book key's folder part is case-sensitive, so it is extracted and added.*
-    - **(norm-c) win32: a full sync whose scan spells the folder in another case keeps the book** (`winIt`). Root `C:\Books`; library `[folderDoc("X", "C:\\Books\\x.epub", { position: 500 })]`. The scan returns `[file("c:\\books\\x.epub")]`. Run `await sync.syncAll()`.
-      - Expected: the library is exactly one document, with id `X` and position 500. `extractNewFileDoc` not called.
-      - *Fails at C1: one document `id-x.epub` at position 0. The original was re-imported and pruned.*
-    - **(sa) A gone book in a folder whose name starts with "Saved Articles" is pruned.** Library: `folderDoc("s", <ROOT>/Saved Articles/s.epub)` and `folderDoc("o", <ROOT>/Saved Articles Old/o.epub)`. The scan returns `[]`.
-      - Expected after `syncAll()`: ids `["s"]`.
+    - **(sa) A gone book in a folder whose name starts with "Saved Articles" is pruned.** Library: `folderDoc("a", <ROOT>/a.epub)`, `folderDoc("s", <ROOT>/Saved Articles/s.epub)` and `folderDoc("o", <ROOT>/Saved Articles Old/o.epub)`. The scan returns `[file(<ROOT>/a.epub)]`.
+      - Expected after `syncAll()`: sorted ids `["a", "s"]`.
       - *Fails at C1: `o` is kept by the raw prefix.*
-    - **(dup) control: the fast-path duplicate-filepath edge (known limit).** `p = <ROOT>/d.epub`. Library: `[folderDoc("a1", p), folderDoc("a2", p), nonFolderDoc("m")]`; disk: ROOT only.
-      - Run `await sync.applyUnlink(p)`. Expected: ids `["a2", "m"]`; one of the two survives.
-      - Then put `p` back on disk, with the scan returning `[file(p)]`, and run `await sync.syncAll()`. Expected: `countPath(state.lib, p)` is 1, its id is `a2`, and `extractNewFileDoc` not called. The local map finds the survivor.
-      - Then take `p` off disk again, with the scan returning `[]`, and run `await sync.syncAll()`. Expected: ids `["m"]`.
+    - **(dup) control: the fast-path duplicate-filepath edge (known limit).** `p = <ROOT>/d.epub`, `o = <ROOT>/o.epub`. Library: `[folderDoc("a1", p), folderDoc("a2", p), nonFolderDoc("m"), folderDoc("o", o)]`; disk: ROOT only.
+      - Run `await sync.applyUnlink(p)`. Expected: ids `["a2", "m", "o"]`; one of the two survives.
+      - Then the scan returns `[file(p), file(o)]`; run `await sync.syncAll()`. Expected: `countPath(state.lib, p)` is 1, its id is `a2`, and `extractNewFileDoc` not called. The local map finds the survivor.
+      - Then the scan returns `[file(o)]`; run `await sync.syncAll()`. Expected: ids `["m", "o"]`.
       - Passes at C1 and C2.
     - **(n4) control: the stem rule.** Library: `[folderDoc("p", <ROOT>/Title.pdf)]`; disk: ROOT and `<ROOT>/TITLE.epub`. Run `await sync.applyAdd(<ROOT>/TITLE.epub)`.
       - Expected: `extractNewFileDoc` not called.
       - Passes at C1 and C2 (the case of the stem was always folded).
+    - **(sw-hang) A folder switch does not wait for ever on a hung sync** (fake timers). `rootA`, `rootB` as in (d). Library: `[folderDoc("a", <rootA>/a.epub)]`; `state.folder = rootA`. `scanFolderAsync` returns `new Promise(() => {})` for `rootA` and `[file(<rootB>/b.epub)]` for `rootB`. Run `sync.syncAll()` (not awaited), set `state.folder = rootB`, and start `const sb = sync.syncAll().then(() => { settled = true; })`.
+      - After `await vi.advanceTimersByTimeAsync(LIST_MS - 1)`: `scanFolderAsync` called once.
+      - After `await vi.advanceTimersByTimeAsync(1)` and `await Promise.race([sb, realWait(2000)])`: `settled` is true (message: "the switch still waits on the hung sync after FOLDER_LIST_TIMEOUT_MS"), `scanFolderAsync` was called with `rootB`, and the ids are `["id-b.epub"]`.
+      - *Fails at C1: `settled` is false and `rootB` was never scanned; the wait has no bound.*
+    - **(n2-hang) An abandoned run applies nothing when it settles late** (fake timers). Library: `[folderDoc("keep", <ROOT>/keep.epub)]`. The first scan call returns deferred `d1`; later calls resolve `[file(<ROOT>/keep.epub)]`. Run `const a = sync.syncAll(); sync.cancel();` and `const b = sync.syncAll().then(() => { settled = true; })`.
+      - After `await vi.advanceTimersByTimeAsync(LIST_MS)` and `await Promise.race([b, realWait(2000)])`: `settled` is true, and `scanFolderAsync` was called twice.
+      - Then `d1.resolve([file(<ROOT>/zz.epub)])` and `await Promise.race([a, realWait(2000)])`. Expected: `extractNewFileDoc` not called, and the ids are `["keep"]`.
+      - *Fails at C1: one scan call and `settled` false (`b` is the hung run's promise, N2).* At C2 without the generation guard it would fail on the late resolve: the old run would import `zz` and prune `keep`.
+    - **(lt-const) The shared constant.** `FOLDER_LIST_TIMEOUT_MS` from `../main/constants.js` is exactly 30000, and `FOLDER_RETRY_LIST_TIMEOUT_MS` is undefined. *Fails at C1 in case A: `FOLDER_LIST_TIMEOUT_MS` is undefined.*
+    - **(norm-b) win32: a folder spelled in another case is the same book** (`winIt`, `setPlatform("win32")` as (F2) does). Root `C:\Books`; library `[folderDoc("p", "C:\\Books\\Sub\\Title.pdf")]`; disk: root and `c:\books\sub\title.epub`. Run `await sync.applyAdd("c:\\books\\sub\\title.epub")`.
+      - Expected: `extractNewFileDoc` not called (`hasBook`).
+      - *Fails at C1: the book key's folder part is case-sensitive, so it is extracted and added.*
+    - **(case-rename) win32: a case-only rename keeps the book and its position** (`winIt`, `setPlatform("win32")`; replaces the earlier draft's (norm-c)). Root `C:\Books`. Two runs, each with a fresh `makeDeps`:
+      - The file: library `[folderDoc("X", "C:\\Books\\title.epub", { position: 500 })]`; the scan returns `[file("C:\\Books\\Title.epub")]`.
+      - The folder: library `[folderDoc("X", "C:\\Books\\Sub\\x.epub", { position: 500 })]`; the scan returns `[file("C:\\Books\\sub\\x.epub")]`.
+      - In each, after `await sync.syncAll()`: the library is exactly one document, with id `X`, position 500 and the scan's `filename`, and `extractNewFileDoc` not called. Then `await sync.applyChange(<the scan's spelling>)` sets `X.wordCount` to 3.
+      - *Fails at C1: one document `id-Title.epub` (or `id-x.epub`) at position 0. The full sync's raw `byPath.get(file.filepath)` (`:88`) missed, the file was re-imported, and the raw `onDisk.has(d.filepath)` (`:116`) pruned the original.*
+    - **(case-dup) win32: two docs differing only in case are both kept, and the first gets the scan** (`winIt`, `setPlatform("win32")`). Root `C:\Books`; library `[folderDoc("X", "C:\\Books\\a.epub", { position: 500 }), folderDoc("Y", "C:\\Books\\A.epub")]`; the scan returns `[{ ...file("C:\\Books\\A.epub"), size: 9 }]`. Run `await sync.syncAll()`.
+      - Expected: ids `["X", "Y"]`; `X.size` is 9 and `X.position` 500; `Y.size` is 1; `extractNewFileDoc` not called.
+      - *Fails at C1: ids `["Y"]`. The raw map matched only `Y`, and `X`, the doc holding the reading position, was pruned.*
   - **New `tests/folderSwitchWatcherFirst.test.js`** (Vitest, node environment). It uses the `Module._load` pattern of `tests/documentsOpenSource.test.js:1-30`, and clears `../main/ipc/state.js` from `require.cache` before and after each test.
     - **Fakes:**
-      - `electron`: `ipcMain.handle` capturing into a `Map`, and `dialog: { showOpenDialog: vi.fn(async () => ({ canceled: false, filePaths: [dirB] })) }`. `select-folder` requires `electron` inside the handler (`main/ipc/state.js:59`), so the patched loader stays installed until `afterEach`.
+      - `electron`: `ipcMain.handle` capturing into a `Map`, and `dialog: { showOpenDialog: vi.fn(async () => ({ canceled: false, filePaths: [dirB] })) }`. `select-folder` requires `electron` inside the handler (`main/ipc/state.js:63`), so the patched loader stays installed until `afterEach`.
       - `../window-manager`: `{ getSystemTheme: vi.fn(), updateWindowTheme: vi.fn() }`.
-      - `../constants` is the real module.
+      - `../constants` and `../migrations` are the real modules.
     - **Fixtures:** `dirA` and `dirB` are real folders from `fs.mkdtempSync(path.join(os.tmpdir(), "lfs2-"))`. `settings = { sourceFolder: dirA, recentFolders: [dirA, dirB] }`.
     - **`ctx`:**
       - `getSettings: () => settings`, `getMainWindow: () => null`, `saveSettings: vi.fn()`, `getLibrary: () => []`;
@@ -4666,56 +5497,90 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     - **(ws-select)** `select-folder`: resolve `gate` first. Expected: `order` is `["watch", "sync"]` and the result is `dirB`. *Fails at C1: `["sync", "watch"]`.*
     - **(ws-switch)** `switch-folder` with `dirB`: expected `order` `["watch", "sync"]` and the result `{ folder: dirB }`. *Fails at C1: `["sync", "watch"]`.*
     - **(ws-wait) control: the handler still waits for the sync.** Call `switch-folder` with `dirB` and do not resolve `gate`. After `await new Promise((r) => setImmediate(r))`, the handler's promise has not settled; check with a flag set in `.then`. Resolve `gate`; the promise then resolves `{ folder: dirB }`. Passes at C1 and C2.
-- **Constants:** none. `FOLDER_SYNC_SAVE_INTERVAL_MS` and `LIBRARY_SAVE_DEBOUNCE_MS` are unchanged.
-- **Branch:** `eb/large-folder-sync-2` from `refs/remotes/origin/main` after FOLDER-UNREACHABLE-GUARD-1 merges, in worktree `C:\Projects\Blurby\.worktrees\large-folder-sync-2`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+  - **`tests/folderUnreachableGuard.test.js`**: append one `describe("LARGE-FOLDER-SYNC-2: system folders, case-only duplicates, listing timeout")`. Use the file's `write`, `folderDoc`, `manual`, `ids`, `makeSync`, `makeRescan`, `cjsFs` and its real `scanFolderAsync` and `rootHasContent`. Add two helpers in that block, each capturing the real `cjsFs.readdir` before spying (the file's `failOn` cannot be stacked: a second call would capture the spy):
+    - `failReaddirAll(targets, code)`: rejects with `code` for each resolved path in `targets`.
+    - `hangReaddir(target)`: returns a `reached` promise, resolved when `target` is listed; that call returns `new Promise(() => {})`.
+    - **(sys-list) The scan and the root check skip system folders, in any case and at any depth.** Write `books/a.epub`, `books/$Recycle.Bin/S-1-5-21/$R1.epub`, `books/System Volume Information/v.epub`, `books/.shortcut-targets-by-id/abc/s.epub` and `books/sub/$RECYCLE.BIN/q.epub`.
+      - Expected: `(await scanFolderAsync(root)).map((f) => f.filename)` is `["a.epub"]`.
+      - Then a second folder `sys/` holding only `$RECYCLE.BIN/`, `System Volume Information/`, `.shortcut-targets-by-id/` and `desktop.ini`: `rootHasContent(<tmp>/sys)` is `false`.
+      - *Fails at C1: the scan lists all five books, and `rootHasContent` is `true`.*
+    - **(sys-sync) A full sync of a root holding only system folders keeps every book.** Write `books/$RECYCLE.BIN/S-1-5-21/$R1.epub`, an empty `books/System Volume Information/` and `books/.shortcut-targets-by-id/abc/c.epub`. Library `[folderDoc("A", root/a.epub, { position: 42 }), folderDoc("B", root/sub/b.epub)]`. Run `await m.sync.syncAll()`.
+      - Expected: ids `["A", "B"]`, `A.position` 42, `extractNewFileDoc` not called, and `reportFolderProblem` called with `"root-empty-suspect"`.
+      - *Fails at C1: the recycle-bin and shortcut-target files were imported, so the scan listed books, and A and B were pruned.*
+    - **(sys-remove) A per-file remove under such a root removes nothing.** `books/` holds only an empty `$RECYCLE.BIN/` and an empty `System Volume Information/`. Library `[folderDoc("A", root/a.epub)]`. Run `await m.sync.applyUnlink(root/a.epub)`.
+      - Expected: ids `["A"]`, and `reportFolderProblem` called with `"root-empty-suspect"`.
+      - *Fails at C1: `rootHasContent` counted the two folders as content, the stat said ENOENT, and A was removed.*
+    - **(sys-ctl) control: near names and Drive's own folders are scanned.** Write one book each under `books/My Drive/`, `books/Shared drives/`, `books/Other computers/`, `books/Recycle Bin Books/` and `books/System Volume Information Old/`. Expected: the scan lists all five, and `rootHasContent(root)` is `true`. Passes at C1 and C2.
+    - **(rescan-dup) win32: a case-only duplicate survives a rescan, and the first doc is the book** (`it.runIf(process.platform === "win32")`). Write `books/A.txt`. Library `[folderDoc("X", <root>\a.txt, { position: 42 }), folderDoc("Y", <root>\A.txt), manual]`. Run `await r.rescan()`.
+      - Expected: the folder docs' ids are `["X", "Y"]` and `X.position` is 42; `r.parsers.extractContent` not called.
+      - *Fails at C1: only `Y` is left. The last-wins map (`main/ipc/library.js:380`) matched `Y`, and the per-doc loop dropped `X`, the doc holding the position.*
+    - **(rescan-cost) The rescan keys each doc once, whatever the number of skipped folders.** Write `books/a.txt` and `books/s1/x.txt`, `books/s2/x.txt`, `books/s3/x.txt`. `G = folderDoc("G", root/gone.txt)` with a counting `filepath` getter, as (F1) in `tests/folderSync.test.js` does. Two rescans, each with a fresh `makeRescan([folderDoc("A", root/a.txt), G])` and `reads = 0`:
+      - Run 1: `failReaddirAll([root/s1], "EIO")`; record `r1 = reads`. Then `vi.restoreAllMocks()`.
+      - Run 2: `failReaddirAll([root/s1, root/s2, root/s3], "EIO")`; record `r3 = reads`.
+      - Expected: `r3` equals `r1`, and each run's library holds `A` and not `G`.
+      - *Fails at C1: `r3` is `r1 + 4`; the skipped test (`:484`) reads the path twice per skipped entry.*
+    - **(lt-scan) A full sync whose root listing hangs ends as unlistable and releases the slot** (fake timers). Write `books/a.epub`. Library `[folderDoc("A", root/a.epub, { position: 42 }), folderDoc("B", root/sub/b.epub)]`. `const reached = hangReaddir(root)`; `const run = m.sync.syncAll().then(() => { settled = true; })`; `await reached`; `await vi.advanceTimersByTimeAsync(LIST_MS)`; `await Promise.race([run, realWait(2000)])`.
+      - Expected: `settled` is true, ids `["A", "B"]`, `A.position` 42, `setLibrary` not called, and `reportFolderProblem` called with `"root-unlistable"`.
+      - Then `vi.restoreAllMocks()` and `await m.sync.syncAll()`: a new scan runs and ids are `["A"]` (B is not on disk), which proves `running` was released.
+      - *Fails at C1: `settled` is false; the root listing has no bound.*
+    - **(lt-sub) A hung subfolder listing is skipped; its books are kept** (fake timers). Write `books/a.epub` and `books/sub/b.epub`. Library `[A (root/a.epub), B (root/sub/b.epub), G (root/gone.epub)]`. `hangReaddir(root/sub)`; start the sync as in (lt-scan); `await reached`; advance `LIST_MS`; race against `realWait(2000)`.
+      - Expected: `settled` is true, ids `["A", "B"]` (G pruned, B kept under the skipped folder), and `reportFolderProblem` called with `"partial-read"`.
+      - *Fails at C1: `settled` is false.*
+    - **(lt-root) A hung root check removes nothing** (fake timers). Write `books/other.epub`. Library `[folderDoc("A", root/a.epub)]`. `hangReaddir(root)`; `const p = m.sync.applyUnlink(root/a.epub).then(() => { settled = true; })`; `await reached`; advance `LIST_MS`; race `p` against `realWait(2000)`.
+      - Expected: `settled` is true, ids `["A"]`, and `reportFolderProblem` called with `"root-unlistable"`. Then, with the mock still in place, `rootHasContent(root)` started before another `LIST_MS` advance resolves `null`.
+      - *Fails at C1: `settled` is false; `rootHasContent` has no bound.*
+- **Constants:** one, `FOLDER_LIST_TIMEOUT_MS = 30000` (ruling C), defined here unless FOLDER-NOTICE-1 landed first under that name (Done-when 15). `FOLDER_SYNC_SAVE_INTERVAL_MS` and `LIBRARY_SAVE_DEBOUNCE_MS` are unchanged.
+- **Branch:** `eb/large-folder-sync-2` from `refs/remotes/origin/main` after GET-STATE-SECRET-1 merges, in worktree `C:\Projects\Blurby\.worktrees\large-folder-sync-2`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
 - **Staging plan:**
-  - C1: `tests/folderSync.test.js` and `tests/folderSwitchWatcherFirst.test.js` only (gate: Done-when 1). Run the C1 half of Done-when 3.
-  - C2: `main/folder-sync.js`, `main/ipc/state.js` and the Technical Reference row (gates: Done-when 2–12).
+  - C1: `tests/folderSync.test.js`, `tests/folderSwitchWatcherFirst.test.js`, `tests/folderUnreachableGuard.test.js` and the two-line repair of `scripts/perf/folder-sync-scale.mjs` (gate: Done-when 1 and 18). Run the C1 half of Done-when 3.
+  - C2: `main/folder-sync.js`, `main/folder-watcher.js`, `main/ipc/library.js`, `main/ipc/state.js`, `main/constants.js` (case A) and the Technical Reference row (gates: Done-when 2–17).
   - Then merge to `main` with `--no-ff` on Blurby.Brain's go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass.
   - Stage files by name. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
 - **Failure handling:**
-  - At C1, if (dup), (n4) or (ws-wait) fails, the harness is wrong: fix the test, not the module. If any of the nine positive controls passes, the test cannot see the defect: fix the test.
-  - If (norm-b) or (norm-c) is skipped on the executing machine, the run is not on the owner's Windows machine: stop (standing rule 47).
-  - If an existing `tests/folderSync.test.js` test fails at C2, report it exactly and stop; do not weaken it. Watch (e2) in particular: it counts `saveLibrary` calls, and only per-file events may change that count.
+  - At C1, if (dup), (n4), (ws-wait) or (sys-ctl) fails, the harness is wrong: fix the test, not the module. If any of the 21 positive controls passes, the test cannot see the defect: fix the test.
+  - If a new case hangs at C1 instead of failing within about 2 s, it awaits a promise without `realWait`: fix the test.
+  - If (norm-b), (case-rename), (case-dup) or (rescan-dup) is skipped on the executing machine, the run is not on the owner's Windows machine: stop (standing rule 47).
+  - If the repaired scale script still exits non-zero at C1, stop and send its output to Blurby.Brain. Do not edit any other line of it.
+  - If an existing test in the three files fails at C2, report it exactly and stop; do not weaken it. Watch (e2) in particular: it counts `saveLibrary` calls, and only per-file events may change that count. Watch FOLDER-UNREACHABLE-GUARD-1's (o): its Saved Articles book must still be kept by the segment test.
   - If Done-when 3 prints `OVER THRESHOLD`, or the C2 add worst is more than twice the C1 worst, stop and send both outputs to Blurby.Brain. Do not add caching to `pathKey`.
-  - If FOLDER-UNREACHABLE-GUARD-1 changed `scanFolderAsync`'s return so that `files` is not an array of `{ filepath, … }`, stop for Blurby.Brain: the scan-merge edit no longer applies as written.
+  - If Done-when 15's dispatch check is neither case A nor case B, stop for Blurby.Brain.
   - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
   - Rollback: `git revert -m 1 <merge>`. There is no data-format change; `library.json` paths are stored as before.
 - **Lane ownership (parallel run):** surface D.
-  - **Owned:** `main/folder-sync.js` (the sites above), the two line pairs in `main/ipc/state.js`, the two test files, and the Technical Reference row at `:711`.
+  - **Owned:** `main/folder-sync.js` (the sites above); in `main/folder-watcher.js`, the require, the two new definitions, the walk's listing, directory branch and stat, and `rootHasContent`; in `main/ipc/library.js`, `rescan-folder`'s map and the per-doc loop lines named above; the two line pairs in `main/ipc/state.js`; the one constant and its export in `main/constants.js` (case A); the two lines of `scripts/perf/folder-sync-scale.mjs`; the three test files; the Technical Reference row at `:711`.
   - **Forbidden:**
-    - every other file, and every other line of `main/ipc/state.js` (the heads of `save-settings` and `switch-folder` are IPC-PATH-TRUST-1's);
-    - `main.js`, `main/folder-watcher.js`, `preload.js`, `main/ipc/library.js` and `scripts/perf/**` (run, never edited);
-    - every renderer file;
+    - every other file, and every other line of the files above. In particular: `main/ipc/state.js`'s `get-state` (GET-STATE-SECRET-1's) and the heads of `save-settings` and `switch-folder` (IPC-PATH-TRUST-1's and SETTINGS-KEY-TRUST-1's); `startWatcher` in `main/folder-watcher.js`; `rescan-folder`'s guards and its Saved Articles branch;
+    - `main.js`, `preload.js` and every renderer file;
     - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
-    - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
+    - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`);
+    - FOLDER-NOTICE-1's planned files (`main/folder-notice.js`, the banner component); this item adds nothing it would own.
   - **Shared-core touches:** none.
   - **Merge order:**
-    - **After FOLDER-UNREACHABLE-GUARD-1 (position 20).** It edits `runFullSync` in `main/folder-sync.js`, likely the scan result and prune hunks this item also edits (Prerequisites). It may also edit `main/folder-watcher.js` and `main/ipc/library.js`'s `rescan-folder`, neither of which this item touches.
-    - **After IPC-PATH-TRUST-1 (position 19):** `main/ipc/state.js`, different hunks.
-    - SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1 edit `main/ipc/library.js`; DEPS-AUDIT-1 edits dependencies; PAGE-POSITION-SAVE-2 edits Page files. All are file-disjoint from this item, so either may land first.
-    - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2 and 4–12. The live checks stay out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
+    - **After GET-STATE-SECRET-1 (position 23).** It edits `get-state` (`main/ipc/state.js:16-19`), `main/ipc/misc.js`, `main/sync-engine.js`, `preload.js`, `src/types.ts`, the browser stub and `tests/settingsKeyTrust.test.js`. Only `main/ipc/state.js` is shared, in a different hunk; the swap lines move down by about 5 (Prerequisites). Done-when 2 runs its test file.
+    - **Before FOLDER-NOTICE-1 (position 27).** It builds on this item's `syncAll` (the cancelled-run rule, the unchanged `.catch` line), the swapped handler order, `runFullSync`'s head (its pre-walk root check goes after `const mine = ++gen;`), and the shared constant. It must use `FOLDER_LIST_TIMEOUT_MS`, and it re-greps every anchor after this merge (its Prerequisites).
+    - FOLDER-UNREACHABLE-GUARD-1, IPC-PATH-TRUST-1, SETTINGS-KEY-TRUST-1, SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1 have merged and are built on. PAGE-POSITION-SAVE-2 (25) edits Page files and is file-disjoint, so either may land first.
+    - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2 and 4–18. The live checks stay out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
 
 ##### Owner decision: the scan-failure notice
 
-Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the first failure, with corrected text that FOLDER-UNREACHABLE-GUARD-1 ships, plus a persistent library banner whose Retry button makes exactly one guarded sync attempt per press (owner: "button tries only once. No infinite loop"). The banner is FOLDER-NOTICE-1, after this item. This item keeps today's behaviour and the reason-code hook from FOLDER-UNREACHABLE-GUARD-1, and changes no line FOLDER-NOTICE-1 builds on.
+Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the first failure, with corrected text that FOLDER-UNREACHABLE-GUARD-1 shipped, plus a persistent library banner whose Retry button makes exactly one guarded sync attempt per press (owner: "button tries only once. No infinite loop"). The banner is FOLDER-NOTICE-1 (position 27), after this item. This item keeps today's behaviour and the reason-code hook from FOLDER-UNREACHABLE-GUARD-1. A hung root listing reports the existing `root-unlistable`, so the banner needs no new code, and FOLDER-NOTICE-1's Retry check is bounded by the same constant.
 
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Follow-up tests committed: (n2), (n3), (f5), (norm-a/b/c), (sa), (ws-select), (ws-switch) fail on today's code; controls (dup), (n4), (ws-wait) pass; C1 benchmark recorded | calculable | positive control | bounded | low | 45m (nine new cases in one existing file on fakes, one new IPC test file with real temp folders, one benchmark run) | — | — |
-| 2 | One path key across `main/folder-sync.js`; a cancelled run is not reused; per-file saves owed during a full sync; `refresh` through the index; watcher before sync in both folder handlers; known limit in the Technical Reference | calculable | main-process fix | bounded | medium | 30m (one module's key sites, two small control-flow edits, two line swaps, one doc line) | — | — |
+| 1 | Follow-up tests committed: the 21 positive controls fail on today's code for their named reasons; controls (dup), (n4), (ws-wait), (sys-ctl) pass; scale script repaired and the C1 benchmark recorded | calculable | positive control | bounded | medium | 75m (13 cases in one existing file on fakes, two of them on fake timers; one new IPC test file with real temp folders; nine cases in the guard file on real temp trees, three on fake timers; a two-line script repair; one benchmark run) | — | — |
+| 2 | One path key across `main/folder-sync.js`, first-doc-wins collisions in the full sync and the rescan; a cancelled run is not reused and a hung one is abandoned; per-file saves owed during a full sync; `refresh` through the index; system folders skipped and every listing bounded in `main/folder-watcher.js`; the shared constant; watcher before sync in both folder handlers; the Technical Reference row | calculable | main-process fix | bounded | medium | 45m (one module's key sites and two control-flow edits, one rescan hunk, one helper and three call sites, one constant, two line swaps, one doc line) | — | — |
 | 3 | C2 benchmark, gates, full suite, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 40m (benchmark + full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
 
-**Total:** chain 5m · sum 5m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+**Total:** chain 7m · sum 7m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
 
 ##### Lessons applied
-- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `0f285836` (fetched 2026-10-14). The run re-greps `main/folder-sync.js` after FOLDER-UNREACHABLE-GUARD-1 merges and `main/ipc/state.js` after IPC-PATH-TRUST-1 merges, and stops on any content drift.
+- **Standing rule 36 (SRL-086/087):** every line was re-read on `main` @ `89a5a95c` (fetched 2026-10-15), after FOLDER-UNREACHABLE-GUARD-1 moved most anchors; `181da234` changes no code. The run re-greps `main/ipc/state.js` after GET-STATE-SECRET-1 merges and stops on any content drift.
 - **Standing rule 41 (LL-136):** the Done-when 12 fence exempts the time log and the staging memo.
-- **Standing rule 43 (LL-138):** nine tests fail on today's code for named reasons, among them the BUG-198-shaped loss (norm-c) and the watcher order at the IPC boundary. Controls (dup), (n4) and (ws-wait) prove that the known limit, the stem rule and the awaited sync are kept.
-- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 4–8 and 10 were dry-run on `0f285836`. Gates 4, 5, 7 and 8 find their lines there, so they can fail, and gates 6 and 10 are empty there.
-- **Standing rule 45 (LL-141):** the real-folder behaviour needs the owner's Drive folder, so it is a two-step batched-smoke checklist (Done-when 13), not an unattended gate.
+- **Standing rule 43 (LL-138):** 21 tests fail on today's code for named reasons, among them the BUG-198-shaped loss through a case-only rename (case-rename), the recycle-bin import that prunes every book (sys-sync), and the hung listing (lt-scan). Controls (dup), (n4), (ws-wait) and (sys-ctl) prove that the known limit, the stem rule, the awaited sync and Drive's own folders are kept. (n2-hang) also pins the generation guard, which a fix without it would fail.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code, and every `git grep` gate was dry-run on `refs/remotes/origin/main` (`181da234`, code identical to `89a5a95c`). Gates 4, 5, 7, 8, 16, 17 and 18's second check find their lines there, so they can fail. Gates 7's second, 10, 14, 15 and 18's first are empty there. Gate 6 and 15's old-name guard hold on the base and stay green only if no second key or old name is added. Gate 5's patterns were changed from the first draft: its `startsWith\(savedArticles\)` would have matched the fixed line.
+- **Standing rule 45 (LL-141):** the real-folder behaviour needs the owner's Drive folder, so it is a three-step batched-smoke checklist (Done-when 13), not an unattended gate.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
 - **Standing rule 47 (LL-147):** the win32 controls, the benchmark and the full suite run in a local session on the owner's machine.
 - **Standing rule 48 (LL-149):** typecheck and build are in Done-when 11, though only JavaScript changes.
@@ -4723,18 +5588,367 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - The raw keys are brought into scope.
   - F3's catch is kept, with its line moved.
   - The fast-path limit is restated against the new key and pinned by (dup).
-  - FOLDER-UNREACHABLE-GUARD-1's guard lands in the same `runFullSync`, so that item merges first and this one re-greps.
+  - FOLDER-UNREACHABLE-GUARD-1 has merged. Its `pathKey` is reused as defined (`resolve`, falsy passthrough), and its guards are built on. Its merge left the scale benchmark unable to run; the two-line repair is named and gated (Done-when 18), not folded silently into "not edited".
 - **LL-158:**
   - The scale run reuses the 120,000-book benchmark and bounds the one cost the key adds: the index rebuild, at most twice the C1 worst.
-  - The watcher-first path was traced through code this item does not change: `startWatcherFn` closes the old watcher (`main.js:347`); new events go to `addOne` (`underFolder`, `addedDuringRun`); and the prune keeps them (`:108-109`).
+  - The listing timeout is per call, not per scan, because the owner's scan legitimately takes 93.6 s. The per-call timer cost on that scan is estimated, not measured (the scale script stubs the scan); recorded under Design decisions.
+  - The watcher-first path was traced through code this item does not change: `startWatcherFn` closes the old watcher (`main.js:341`); new events go to `addOne` (`underFolder`, `addedDuringRun`); and the prune keeps them (`:116`).
 - **LL-159:** no deferred writer is added.
   - Per-file saves during a full sync move to the sync's interval `saveLibraryNow` and to one debounced `saveLibrary` in `syncAll`'s `finally`. That is the same `_saveLibraryTimer` the quit step `["library", saveLibraryNow]` already drains.
-  - `stop()` blocks the `finally` save, so nothing arms a write after the quit flush.
-- **LL-151 (not applied, deliberately):** there is no launch control. Every change is in a module whose steps are injected. The tests run the real module and the real IPC handlers, and the batched owner smoke covers the build.
+  - `stop()` blocks the `finally` save, so nothing arms a write after the quit flush. An abandoned run's late `finally` does nothing.
+- **LL-151 (not applied, deliberately):** there is no launch control. Every change is in a module whose steps are injected, or in a function the tests call on real temporary folders. The tests run the real module and the real IPC handlers, and the batched owner smoke covers the build.
+
+<a id="page-save-restamp-guard-1"></a>
+
+#### PAGE-SAVE-RESTAMP-GUARD-1 — A page turn never saves a position before the book's word numbers apply *(position 25 — Full Spec; authored 2026-10-15 on main @ `b3e2fc93`; release gate)*
+
+- **What:** In Page mode, a page turn (key, ‹ › button or swipe) that lands on a section whose word spans still carry the renderer's provisional numbering does not save. The view holds the turn. When the book's word numbers (`bookWords`, from the main-process extractor) are applied to that section, the view saves the latest held turn, once, with the re-stamped index. A turn on a section that already carries the book's numbering saves at once, as today. Only `src/reader/modes/page/FoliateView.tsx` and one test file change.
+- **Why** (every line read on `main` @ `b3e2fc93`, fetched 2026-10-15; `src/`, `preload.js`, `main/ipc/documents.js` and `main/ipc/tts.js` are unchanged since `8f27fe70`, the measured build):
+  - **When the book's words arrive.** `ReaderContainer` asks for them on a timer: 1000 ms after the reader mounts, 2000 ms for books over 100,000 words (`src/components/ReaderContainer.tsx:589-597`, `ensureBookWords` `:272-299`). The reply sets `bookWordsState` (`:291`). Page's binding then passes `document.bookWords?.sections` and `getCanonicalSectionWords` to the view (`src/reader/modes/page/useModeBindings.ts:42`, `:44`). Page itself never asks for them earlier.
+  - **Before they arrive, spans carry section-local renderer numbers.** `onSectionLoad` computes the section's offset with `getSectionGlobalOffset` (`src/reader/modes/page/FoliateView.tsx:600`). With no sections it falls back to the section's start in the loaded slice (`helpers/foliateWordOffsets.ts:43-50`), which is 0 when one section is loaded. Without canonical words, `wrapWordsInSpans` numbers the spans by the renderer's own `segmentWordSpans` (`helpers/foliateWordWrapping.ts:116`). So in section 15 of *Meditations* (book words 63,019–69,099) the spans read 0–6,073.
+  - **A turn saves that number as is.** Every turn source reaches `reportTurn` (`FoliateView.tsx:571-580`): keys (`:1101-1113`) and the ‹ › buttons (`:1117`) through `turnPage` (`:1092-1098`) and the view's `relocate` listener (`:728-739`), and swipes through the renderer's `snap` listener (`:747-752`). `reportFirstWordOnPage` (`:557-569`) converts the span's index with `resolveRenderedWordIndexToGlobal(…, liveSections())` (`:565`). With no sections that function returns the rendered index unchanged (`foliateWordOffsets.ts:72`). `onPageTurned` commits it with `persist: true` (`ModeRuntime.ts:566-584`), and `update-doc-progress` stores it (`main/ipc/documents.js:15-27`). Nothing checks that the book's numbers apply. The `cfi` is right, because it is taken from the word's own range.
+  - **When the re-stamp applies them.** The re-stamp effect (`FoliateView.tsx:1013-1036`) runs when `bookWordSections` changes. For each loaded section it unwraps the spans and wraps them again with the extractor's words (`contentAlignWords`). `wrapWordsInSpans` yields every 50 block groups (`foliateWordWrapping.ts:11`, `:144`). In a section with more groups, a turn can land between batches, while part of the section has no spans yet; that turn is held, and nothing saves it later (the held turn is consumed only by a section load, `:609-613`).
+  - **Restore and first relocate do not save.** A relocate saves only while a turn is in flight or a swipe crossing is armed (`:735`). The restore and the book-open relocates are passive (LL-073). The measurement confirms it: no `update-doc-progress` call without a turn.
+  - **The second numbering difference is smaller.** Once sections are known, a span that still carries the renderer's numbering is mapped by the section start (`foliateWordOffsets.ts:74-89`). The error is then the renderer-versus-extractor difference (−3 to −91 words in *Meditations*, prior diagnosis `scratchpad\seg-diag\`). In the run below the re-stamp completed in the same task that delivered the words, so this second window did not occur. By code, it opens in sections over 50 block groups.
+- **Measured (2026-10-15, Blurby.Roadmap, read-only):**
+  - **Build and profile.** The built tree in `C:\Projects\Blurby\.worktrees\get-state-secret-1` (HEAD `8f27fe70`, which contains `309f2390`; `dist/` built 02:03, after its last `src/` commit) was launched with `BLURBY_USE_DIST=1` and `BLURBY_USER_DATA_DIR` set to a new folder under the session scratchpad. The owner's profile and Drive were not touched. The window was shown and focused, and background throttling was off: in a hidden window the renderer's timers stalled, which voids a timing.
+  - **Book.** The bundled *Meditations*: 80,493 extractor words in 18 sections. The 1.9 MB owner copy in `scratchpad\owner-epub-copy\` holds about five minutes of text and did not open in a reader view within 12 s, so it is not a bigger text book. The other owner copies are smaller. No larger text EPUB was available.
+  - **Method.**
+    - A session-1 control turn after the re-stamp saved a position in section 15 (63,450), and the app quit.
+    - Session 2 was a cold launch that restores there. Warm opens were renderer reloads, with the main process, file cache and code cache warm.
+    - The main process was hooked in memory through `--inspect`. `update-doc-progress` and `extract-epub-words` were wrapped to log time and arguments.
+    - The renderer was probed through CDP. A MutationObserver on each section document recorded every change of span numbering, and a listener recorded each `relocate`'s text range. A long-task observer logged blocked time.
+    - One PageDown (the window `keydown` the section-document forwarder dispatches) fired about 40 ms after the first stamped spans appeared. In practice the turns ran 94–170 ms after them.
+    - After the re-stamp, the same text range was resolved against the re-stamped spans. That gives the book index of the same first visible word.
+    - Nothing in the repo changed. The harness is `scratchpad\restamp\restamp.mjs`; the results are `restamp-meditations-r2.json` to `r8.json` (r8 has the long-task log).
+  - **The window** (run r8; r6–r7 in brackets):
+
+    | Open | Click → first spans | First spans → words arrive (turns save wrong here) | Blocking task (arrival + snapshot + re-stamp) | First spans → re-stamp done |
+    |---|---|---|---|---|
+    | Cold | 517 ms | 602 ms (545–558) | 3,817 ms | 4,419 ms (5,449–6,392) |
+    | Warm (×5) | 279–295 ms | 799–840 ms (749–788) | 2,837–3,923 ms | 3,636–4,740 ms (4,222–5,484) |
+
+    The extractor reply came 1,002–1,026 ms after the click and took 73–101 ms. A turn pressed during the blocking task runs after it, once the re-stamp has applied, and saves correctly: turns requested at +1,500 ms and +2,500 ms ran at +4,371 ms and +4,232 ms and saved 65,374 and 65,764, equal to the re-stamped index.
+  - **Saves inside the window (every run r2–r8, cold and warm):**
+
+    | Run | Saved `position` | Book index of the same first word (re-stamped span) | Off by |
+    |---|---|---|---|
+    | Cold | 671 ("was") | 63,691 ("himself") | −63,020 |
+    | Warm, 3 turns | 1,221 / 1,434 | 64,241 / 64,454 | −63,020 each |
+    | Warm, 1 turn | 1,969 | 64,993 | −63,024 |
+
+    Each saved `cfi` named the right page. In r2 the three-turn run wrote three wrong saves (1,221, 1,434, 1,677). In r8 foliate dropped the middle turn, so two were written. The control turn after the re-stamp saved the re-stamped index in every run (63,978, 64,699, 65,136 and so on).
+  - **What a wrong save does.** The library card's progress is `position / wordCount` (`src/components/DocGridCard.tsx:72`), so it shows 0.8 % for a reader at 79 %. The next mode's start word and the resume anchor are seeded from `position` (`ReaderDocumentSnapshot.ts:162`, `page/ModeState.ts:40`, cited in PAGE-POSITION-SAVE-1). Cloud sync sends `position` (`documents.js:31`). Only the reopened page is right, because it comes from `cfi`.
+  - **Conclusion.** The window is real, and it is larger than "up to 91 words". Before the book's words arrive, a turn saves a section-local index. The error is the section's start in the book: 63,020 words in section 15, and 0 to a few words only in the first text section. WORD-INDEX-UNIFY-1 (stub 41) makes the two numberings agree, but it does not remove this error: the spans are still numbered from 0 within the section before the book's words arrive.
+- **Technical ruling (Blurby.Brain, 2026-10-15, Rule 11 tier 1):** hold page-turn saves until the `bookWords` re-stamp has applied, then save the latest turn once it lands. Release gate (10) of Stage 8: merged, or closed on evidence.
+- **Design decisions (planner, 2026-10-15, within the ruling):**
+  - **The gate is per section document, kept in the view.** A `WeakSet<Document>` (`rendererNumberedDocsRef`) holds the documents whose spans were wrapped while no book sections were known. The view knows which numbering each document carries; the runtime only sees the final index. So `ModeRuntime.ts` and `useModeBindings.ts` (both edited by PAGE-POSITION-SAVE-2) are not touched.
+  - **A document leaves the set only when its re-stamp finishes.** The re-stamp effect removes it after that document's `wrapWordsInSpans` resolves, then saves the turn held on it. A turn that lands mid-re-stamp (between batches) is therefore held too, and is not lost.
+  - **A section loaded after the words arrived is never in the set.** Its turns save at once (test (s)). If the words arrive while a section-load wrap is still running, the load does not add the document: the re-stamp effect, which runs over the loaded sections, owns it.
+  - **Latest turn only, once.** The held turn uses the existing single `pendingTurnRef` slot, so a later turn replaces an earlier one (test (t)). The existing section-load consumption skips a document that is still in the set.
+  - **The re-stamp effect reaches the held turn through a ref.** `reportFirstWordOnPage` lives inside the open effect's `loadBook` closure, so `loadBook` sets `reportHeldTurnRef.current` and the re-stamp effect calls it.
+  - **Diagnostic.** A held turn records `page-turn-deferred` with detail `reason=book-words start=… end=…`. That is the existing kind; the reason says why it was held (LL-142 rec. 5).
+  - **No new React state, timer or constant** (LL-083). The pre-extraction timer in `ReaderContainer.tsx` (shared core) is unchanged. Asking earlier would shorten the window, not close it.
+- **Out of scope:**
+  - **Known limit, extraction failure:** if `extract-epub-words` never delivers words for a book, turns in that session stay held and do not save. That session then behaves as before PAGE-POSITION-SAVE-1, with a `reason=book-words` diagnostic for each held turn. Today it saves a section-local index. This follows from the ruling and is recorded for Blurby.Brain. It is not a question.
+  - **Known limit, quit or exit inside the window:** a held turn is lost on a quit before the re-stamp (LL-159, the same class as PAGE-POSITION-SAVE-1's ruling Q4). Leaving the reader there writes the previous anchor, because the held turn has not moved it. The window is about 0.5–0.9 s on this machine.
+  - A pre-existing race: a section-load wrap that yields while the book's words arrive can be wrapped twice at once by the load and the re-stamp. That is not changed here and was not observed.
+  - Sections the extractor does not list keep the renderer's numbering after the re-stamp, as today (`getSectionGlobalOffset` falls back).
+  - Requesting the book's words earlier (`ReaderContainer.tsx:589-597`, shared core), and the 2.8–3.9 s blocking task at arrival.
+  - WORD-INDEX-UNIFY-1's numbering unification, and PAGE-POSITION-SAVE-2's N2, N4 and dead-code work.
+  - **LL-156 check:** PAGE-POSITION-SAVE-1's known limit names `pendingTurnRef` and the cross-section held save; it stands, and this item adds a second reason to hold. PAGE-POSITION-SAVE-2's N4 edit site (the section-load consumption block, `:608-613`) gains one condition here; its merge note is under Merge order. No other waiver names an edit site.
+- **Prerequisites:** none in code. PAGE-POSITION-SAVE-1 is merged (`309f2390`).
+  - No in-flight or queued item before position 25 edits `src/reader/modes/page/**`. LARGE-FOLDER-SYNC-2 (merged `1f573bc2`) edits only `main/` files.
+  - Re-grep every line below at dispatch (standing rule 36).
+  - The live check needs the first-run sample *Meditations*, readable on this base (LIBRARY-READ-ALLOW-1 merged).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `b3e2fc93` (2026-10-15) were run as `git grep … refs/remotes/origin/main -- <path>` and are noted with each gate.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerModes/pagePositionSave.test.tsx` exits 1.
+       - Exactly 2 tests fail, each for its stated reason. (r) fails because the turn saved the renderer's index 2 at once (`saves` is not `[]`). (t) fails because two saves were written, at indexes 1 and 2, not one at 102.
+       - These pass: control (s), the amended (d), and every other existing test: (a)–(c), (e)–(l), (W1), (W2) and (N1). That is 16 passing tests.
+       - Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/readerModes/page.behavior.test.tsx tests/readerModes/page.contract.test.ts tests/readerModes/foliateViewTeardown.test.tsx tests/readerModes/chunkVisualParity.test.tsx tests/readerModes/focus.behavior.test.tsx tests/readerModes/flow.behavior.test.tsx tests/foliate-bridge.test.ts tests/foliateWordOffsets.test.ts tests/foliateContentAlign.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/persistentReadingAnchor.test.ts tests/wordAnchor.test.ts` exits 0.
+    3. `git grep -c -F 'rendererNumberedDocsRef' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:5` and exits 0 (declaration, the turn gate, the load's add, the load's consumption check, the re-stamp's delete). Dry-run: exit 1, no output.
+    4. `git grep -c -F 'reportHeldTurnRef' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:3` and exits 0. `git grep -c -F 'reason=book-words' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:1` and exits 0. Dry-runs: both exit 1, no output.
+    5. `git grep -c -F '"page-turn-deferred"' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:2` and exits 0. The existing deferral is kept, and the new one is added. Dry-run: exit 0, `FoliateView.tsx:1`.
+    6. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    7. **Live check on production `--dir` builds of C1 and C2, scratch profile.** The executor may drive the app. The owner's profile and Drive are never touched.
+       - **Setup (each build):**
+         - `$prof = Join-Path $env:TEMP ("blurby-psrg-" + [guid]::NewGuid())`.
+         - `npm run build`, then `npx electron-builder --win --x64 --dir --publish never`; each exits 0.
+         - `$env:BLURBY_USER_DATA_DIR = $prof`, then launch `release\win-unpacked\Blurby.exe --remote-debugging-port=9337`.
+         - Drive the reader page target from `http://127.0.0.1:9337/json/list` with CDP `Runtime.evaluate`, as PAGE-POSITION-SAVE-1 did. The driver is a scratch script under `$env:TEMP` and is not committed.
+         - Before each timed step, bring the window to the front. A probe whose `visible` is not `"visible"` voids its step; rerun it (standing rule 45). A hidden window throttles the renderer's timers.
+         - Read state with `$d = ((Get-Content "$prof\blurby-data\library.json" -Raw -Encoding utf8 | ConvertFrom-Json).docs | Where-Object id -eq 'sample-meditations')`.
+       - **Deep position (each build):**
+         - Open *Meditations* from its library card and wait 15 s.
+         - Evaluate `document.querySelector("foliate-view").goTo(15)` and wait 3 s.
+         - Press PageDown once (the turn after the re-stamp; this trigger is shown to commit, LL-158 rider). Wait 3 s.
+         - `$d.position -eq` the **probe**'s `wordIndex`, and that value is at least 63019.
+         - Close the app with Alt+F4 sent through the OS, and wait for the process to exit.
+       - **(a) Driver control on the C1 build (the defect is visible; LL-151):**
+         - Relaunch with the same `$prof`.
+         - Before clicking the card, install the **turn driver** (Implementation detail) with `window.__psrgTurns = 1`. Then click the card.
+         - Wait 15 s and run the probe. Record `window.__psrg` (`firstSpansAt` and the turn time).
+         - Expected: `$d.position` is below 6100 (section 15's local numbering), while the probe's `wordIndex` is at least 63019.
+         - If `$d.position` equals the probe's `wordIndex`, the driver missed the window: stop and report.
+       - **(b) Idle control on the C2 build:** relaunch with the deep position, click the card without the driver, and wait 15 s. `$d.position` and `$d.cfi` are unchanged.
+       - **(c) A turn inside the window on the C2 build:**
+         - Relaunch, then use the driver with 1 turn and wait 15 s.
+         - `$d.position -eq` the probe's `wordIndex`, which is at least 63019, and `$d.cfi -eq` the probe's `cfi`.
+         - Also, `(await window.electronAPI.extractEpubWords("sample-meditations")).words[<$d.position>]` equals the probe's `text`.
+         - The driver's turn ran within 400 ms of `firstSpansAt`.
+       - **(d) Three turns inside the window on the C2 build:**
+         - Evaluate `location.reload()`, reopen with the driver at `window.__psrgTurns = 3`, and wait 15 s.
+         - `$d.position -eq` the probe's `wordIndex`: the page on screen, which is the latest turn's.
+       - **(e) A turn after the re-stamp on the C2 build:** press PageDown once and wait 3 s. `$d.position -eq` the probe's `wordIndex`.
+       - Record every value, `window.__psrg` and the probes in the staging memo. Record "Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away)." Merging gates on the automated rows.
+       - **Owner batched-smoke checklist** (standing rule 45): open a book you left in a later chapter, and press PageDown as soon as the page appears. Wait 10 s, then close the book. The library card's progress matches that chapter, not near 0 %. Reopen the book and switch to Focus: it starts at the first word of that page.
+    8. `git diff --name-status refs/remotes/origin/main` lists exactly:
+       - `M src/reader/modes/page/FoliateView.tsx`
+       - `M tests/readerModes/pagePositionSave.test.tsx`
+
+       The time log `docs/governance/close-outs/Timing.PAGE-SAVE-RESTAMP-GUARD-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.PAGE-SAVE-RESTAMP-GUARD-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). No file under `src/reader/modes/{focus,flow,narrate}/`, `src/components/`, `src/utils/`, `main/` or `src/types.ts` is in the list.
+- **Effort:** S. A three-site fix in one view file and three tests on the existing harness. The two production builds and the CDP-timed live check make up most of the time.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke (Stage 8).
+- **Lane:** Reader Engine. Execution surface A (Page view and its page-turn save); no main-process file.
+- **Source:** Blurby.Brain's ruling (tier 1, 2026-10-15) and Stage 8 release gate (10); the prior diagnosis `scratchpad\seg-diag\` (`appcheck.mjs`, `domseg.cjs`); this trace and measurement on `b3e2fc93` (`scratchpad\restamp\`).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `b3e2fc93`), all in **`src/reader/modes/page/FoliateView.tsx`**:
+  - **`:304`, the refs.** After `  const pendingTurnRef = useRef<{ doc: Document; start: number; end: number } | null>(null);` insert:
+    ```tsx
+      // PAGE-SAVE-RESTAMP-GUARD-1: section documents whose spans still carry the renderer's own numbering (wrapped
+      // before the book's words arrived). A turn on one is held, latest only, until the re-stamp applies the book's.
+      const rendererNumberedDocsRef = useRef(new WeakSet<Document>());
+      const reportHeldTurnRef = useRef<(doc: Document) => void>(() => {});
+    ```
+  - **`:571-580`, `reportTurn`.** After `          if (start === end) return; // a blank edge page has no words to save or wait for` insert:
+    ```tsx
+              // PAGE-SAVE-RESTAMP-GUARD-1: never save the renderer's provisional numbering; hold the latest turn instead.
+              if (rendererNumberedDocsRef.current.has(turnedDoc)) {
+                pendingTurnRef.current = { doc: turnedDoc, start, end };
+                recordDiagnosticRef.current("page-turn-deferred", `reason=book-words start=${start} end=${end}`);
+                return;
+              }
+    ```
+    After the closing `        };` of `reportTurn` (`:580`) insert:
+    ```tsx
+            // PAGE-SAVE-RESTAMP-GUARD-1: lets the re-stamp effect (outside this closure) save the turn it held.
+            reportHeldTurnRef.current = (doc: Document) => {
+              const held = pendingTurnRef.current;
+              if (!held || held.doc !== doc) return;
+              pendingTurnRef.current = null;
+              reportFirstWordOnPage(doc, held.start, held.end);
+            };
+    ```
+  - **`:601-613`, `onSectionLoad`.** Before:
+    ```tsx
+                if (sectionStart >= 0) {
+                  const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
+                  const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                  await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                }
+              }
+
+              // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+              const pendingTurn = pendingTurnRef.current;
+              if (pendingTurn && pendingTurn.doc === doc) {
+    ```
+    After:
+    ```tsx
+                if (sectionStart >= 0) {
+                  const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
+                  const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                  const provisional = !liveSections()?.length; // PAGE-SAVE-RESTAMP-GUARD-1: no book words yet
+                  await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                  // PAGE-SAVE-RESTAMP-GUARD-1: these spans carry the renderer's own numbering until the re-stamp effect
+                  // replaces them. If the book's words arrived during this wrap, that effect already owns the document.
+                  if (provisional && !liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
+                }
+              }
+
+              // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+              const pendingTurn = pendingTurnRef.current;
+              if (pendingTurn && pendingTurn.doc === doc && !rendererNumberedDocsRef.current.has(doc)) {
+    ```
+    The body of that `if` (`:611-612`) is unchanged.
+  - **`:1027`, the re-stamp effect.** After `        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);` (inside the `for` loop) insert:
+    ```tsx
+            // PAGE-SAVE-RESTAMP-GUARD-1: the book's numbering now applies to this section; save the turn held on it.
+            rendererNumberedDocsRef.current.delete(doc);
+            if (!cancelled) reportHeldTurnRef.current(doc);
+    ```
+  - Nothing else in the file changes. That includes the turn counter, the swipe listeners, `reportFirstWordOnPage`, the click handler and the effect's dependency list (refs need no entry).
+- **Probe** (Done-when 7): PAGE-POSITION-SAVE-2's probe, verbatim. It reads foliate's live layout, not the item's text-offset path (LL-142):
+  ```js
+  (() => {
+    const v = document.querySelector("foliate-view");
+    const r = v.renderer;
+    const { doc, index } = r.getContents()[0];
+    const lo = r.start - r.size, hi = r.end - r.size; // the current page in iframe coordinates
+    const span = [...doc.querySelectorAll("[data-word-index]")].find((s) => {
+      const b = s.getBoundingClientRect();
+      return b.width > 0 && b.right > lo && b.left < hi;
+    });
+    let cfi = null;
+    if (span) { const range = doc.createRange(); range.selectNodeContents(span); cfi = v.getCFI(index, range); }
+    return JSON.stringify({ index, page: r.page, pages: r.pages, wordIndex: span ? Number(span.dataset.wordIndex) : null, text: span ? span.textContent : null, cfi, visible: document.visibilityState });
+  })()
+  ```
+- **Turn driver** (Done-when 7 (a), (c), (d)). Install it before clicking the card. It fires the window `keydown` that the section-document forwarder dispatches (`FoliateView.tsx:716-722`), 40 ms after the first stamped spans, then every 120 ms. It is mutation-driven, because a timer-polling loop stalled in the measurement:
+  ```js
+  (() => {
+    const S = window.__psrg = { firstSpansAt: null, turns: [] };
+    const seen = new WeakSet();
+    const turn = () => { S.turns.push(Date.now()); window.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true })); };
+    const check = () => {
+      const v = document.querySelector("foliate-view");
+      if (v && !v.__psrg) { v.__psrg = true; v.addEventListener("load", check); }
+      const cs = v && v.renderer && v.renderer.getContents ? v.renderer.getContents() : [];
+      for (const { doc } of cs) if (doc && doc.body && !seen.has(doc)) { seen.add(doc); new MutationObserver(check).observe(doc.body, { subtree: true, childList: true }); }
+      if (S.firstSpansAt == null && cs.some((c) => c.doc && c.doc.querySelector("[data-word-index]"))) {
+        S.firstSpansAt = Date.now();
+        for (let k = 0; k < (window.__psrgTurns || 1); k++) setTimeout(turn, 40 + k * 120);
+      }
+    };
+    new MutationObserver(check).observe(document.body, { subtree: true, childList: true });
+    const frame = () => { check(); if (S.firstSpansAt == null) requestAnimationFrame(frame); };
+    requestAnimationFrame(frame);
+    return "ok";
+  })()
+  ```
+- **Tests** (all in `tests/readerModes/pagePositionSave.test.tsx`, committed at C1):
+  - **Harness change:** `mount()` takes extra view props, and `render()` takes more, so a test can deliver the book's words later.
+    - `:75`: `async function mount() {` becomes `async function mount(extra: Record<string, unknown> = {}) {`.
+    - `:90`: `const render = async () => {` becomes `const render = async (more: Record<string, unknown> = {}) => {`.
+    - After `:110` (`        renderVersion: 0,`) add `        ...extra,` and `        ...more,`.
+    - Existing calls pass nothing, so their behaviour is unchanged.
+  - **New helpers**, after `rawDoc()` (`:62-71`):
+    ```ts
+    /** The book's words for section 3: the extractor puts it at words 100..103 (PAGE-SAVE-RESTAMP-GUARD-1). */
+    const BOOK_WORDS = {
+      bookWordSections: [{ sectionIndex: 3, startWordIdx: 100, endWordIdx: 104, wordCount: 4 }],
+      getCanonicalSectionWords: (i: number) => (i === 3 ? ["Alpha", "beta", "gamma", "delta"] : undefined),
+    };
+    /** From the start of span `from` to the end of span `to`, once the view has stamped the spans. */
+    function spanRange(doc: Document, from: number, to: number): Range {
+      const range = doc.createRange();
+      range.setStart(doc.querySelector(`[data-word-index="${from}"]`)!.firstChild!, 0);
+      const last = doc.querySelector(`[data-word-index="${to}"]`)!.firstChild!;
+      range.setEnd(last, last.textContent!.length);
+      return range;
+    }
+    const loadSection = (view: EventTarget, doc: Document, index: number) =>
+      act(async () => {
+        view.dispatchEvent(new CustomEvent("load", { detail: { doc, index } }));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+    const settle = () => act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    ```
+  - **(d) amended:** its first line becomes `const { fake, view, renderer } = await mount({ bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }], getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });`, with the comment `// The book's words are known, so the load stamps the book's numbering and saves the held turn (PAGE-SAVE-RESTAMP-GUARD-1).` Its expectation stays `[["doc-1", 2, "cfi:0:gamma"]]`. Without the book's words, the load now stamps provisional numbers and keeps the turn held, which (r) covers. Passes at C1 and C2.
+  - **(r) A turn before the book's word numbers apply saves the re-stamped index once they do.**
+    - `const { fake, view, renderer, render } = await mount();` and `const { doc } = rawDoc();`.
+    - Set `renderer.contents = [{ doc, index: 3 }]`, then `await loadSection(view, doc, 3)`. There are no book words yet, so the renderer numbers the section 0..3.
+    - Set `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) }`, then `await click("Next page")`.
+    - Expected after the turn:
+      - `saves(fake)` is `[]`;
+      - `fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred" && String(d.args[1]).startsWith("reason=book-words"))` has length 1.
+    - Then `await render(BOOK_WORDS); await settle();`.
+    - Expected: `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`.
+    - *Fails at C1: the turn saved the renderer's index 2 at once, so `saves` is `[{ method: "persistence.updateDocProgress", args: ["doc-1", 2, "cfi:3:gamma"] }]`.*
+  - **(s) control: a turn after the book's word numbers apply saves at once.**
+    - `const { fake, view, renderer } = await mount(BOOK_WORDS);` and `const { doc } = rawDoc();`.
+    - Set `renderer.contents = [{ doc, index: 3 }]`, then `await loadSection(view, doc, 3)`. The spans are stamped 100..103.
+    - Set `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 102, 103) }`, then `await click("Next page")`.
+    - Expected, with no further event:
+      - `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`;
+      - there is no `page-turn-deferred` diagnostic.
+    - Passes at C1 and C2.
+  - **(t) Several turns before the book's word numbers apply save only the latest, once.**
+    - `mount()`, `rawDoc()`, `renderer.contents = [{ doc, index: 3 }]`, `await loadSection(view, doc, 3)`.
+    - First turn: `renderer.detail = { cfi: "range-cfi", fraction: 0.4, range: spanRange(doc, 1, 2) }`, then `await click("Next page")`.
+    - Second turn: `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) }`, then `await click("Next page")`.
+    - Then `await render(BOOK_WORDS); await settle();`.
+    - Expected: `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`.
+    - *Fails at C1: two saves, `["doc-1", 1, "cfi:3:beta"]` and `["doc-1", 2, "cfi:3:gamma"]`.*
+  - Place (r), (s) and (t) after (l), inside the same `describe`.
+- **Constants:** none added or removed.
+- **Branch:** `eb/page-save-restamp-guard-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\page-save-restamp-guard-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:**
+  - C1: `tests/readerModes/pagePositionSave.test.tsx` only (gate: Done-when 1). Build C1 for Done-when 7(a).
+  - C2: `src/reader/modes/page/FoliateView.tsx` (gates: Done-when 2–6 and 8). Then build C2 and run Done-when 7(b)–(e).
+  - Then merge to `main` with `--no-ff` on Blurby.Brain's go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass.
+  - Stage files by name. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - At C1, if (s), (d) or an existing test fails, the harness change is wrong: fix the test, not the code. If (r) or (t) passes, the test cannot see the defect: fix the test.
+  - If any test in Done-when 2 fails at C2, report it exactly and stop; do not weaken it. Watch the G4 baselines (`page.behavior.test.tsx`): no recorded fixture turns a page, so a changed baseline needs Blurby.Brain.
+  - Done-when 7:
+    - (a) showing no defect: the driver missed the window; stop (LL-151).
+    - (c) or (d) failing: record `window.__psrg`, the probe and `$d`, and stop for Blurby.Brain.
+    - A hidden-window probe voids its step only.
+  - **Line drift:** if a cited line differs at dispatch, proceed only when the content is identical, and record the new number in the staging memo.
+  - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`. There is no data-format change.
+- **Lane ownership (parallel run):** surface A.
+  - **Owned:**
+    - `src/reader/modes/page/FoliateView.tsx`, at the four sites above only;
+    - `tests/readerModes/pagePositionSave.test.tsx`: the harness lines, (d)'s first line, the helpers and (r), (s), (t).
+  - **Forbidden:**
+    - every other file, and every other line of the owned files. In particular:
+      - `src/reader/modes/page/ModeRuntime.ts`, `useModeBindings.ts`, `surface.ts` and `helpers/**` (including `foliateWordWrapping.ts` and `foliateWordOffsets.ts`);
+      - `src/reader/modes/{focus,flow,narrate}/**`;
+      - `src/reader/ports/**`, `src/reader/document/**` and `src/constants.ts`;
+      - every `main/` file and `preload.js`;
+      - `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json` and `ownership.json`;
+    - PAGE-POSITION-SAVE-2's sites as its specification lists them (`FoliateView.tsx` `userBrowsingRef` lines `:291`, `:471`, `:483-484`, `:498`, `:948`, `:965-967`; `ModeRuntime.ts:558`, `:585-593`; `useModeBindings.ts:1-21`; the manifest's lines 672 and 733);
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - every file NARRATE-REBUILD-1's open phase owns: `main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, `tests/narrate/**`, `scripts/narrate-rebuild/**`, `patches/kokoro-js+1.2.1.patch`, the Narrate lines of `boundary-policy.json`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`.
+  - **Shared-core touches:** none. The pre-extraction timer and `ensureBookWords` in `ReaderContainer.tsx` are read, not changed.
+  - **Merge order:**
+    - After PAGE-POSITION-SAVE-1 (merged `309f2390`).
+    - **Before PAGE-POSITION-SAVE-2 (position 25).** This item is a release gate, and that one is not. Both edit `FoliateView.tsx` and `pagePositionSave.test.tsx`. When PAGE-POSITION-SAVE-2 rebases onto this merge, it re-greps its sites:
+      - its N4 edit keeps this item's `&& !rendererNumberedDocsRef.current.has(doc)` on the section-load `if`;
+      - its `makeRuntime()` harness change keeps `mount(extra)` and `render(more)`;
+      - its (n4b) "run (d)'s steps exactly" uses the amended (d);
+      - its (n4a) needs no change: no wrap runs, so the document is not in the set and the load still drops the held turn;
+      - its Done-when 1 control list adds (r), (s) and (t).
+    - File-disjoint from FOLDER-UNREACHABLE-GUARD-1, the SAVE-LIBRARY items, IPC-PATH-TRUST-1, DEPS-AUDIT-1 and LARGE-FOLDER-SYNC-3, so either may land first. If DEPS-AUDIT-1 moves `foliate-js`, re-read `view.js:316-324` (`relocate`'s `range`) before Done-when 7.
+    - WORD-INDEX-UNIFY-1 (stub 41) lands later. It edits the extractor and `segmentWords`, not this view.
+    - The live check stays out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan). Each production build is made in this item's worktree and never overwrites the G2 build.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Tests committed: (r) and (t) fail on today's code, control (s), the amended (d) and the existing suite pass; `mount(extra)`/`render(more)` added | calculable | positive control | bounded | low | 30m (one existing file: three view-level cases on the existing harness, one amended case) | — | — |
+| 2 | Turns on renderer-numbered sections held and saved after the re-stamp, latest only (four sites in `FoliateView.tsx`) | calculable | renderer fix | bounded | low | 20m (one view file, four small inserts) | — | — |
+| 3 | Production `--dir` builds of C1 and C2; CDP-timed live check (driver control on C1, idle control, in-window turn, three turns, turn after the re-stamp) on a scratch profile | calculable | live check | bounded | medium | 75m (two builds + two `--dir` builds + three launches + CDP driver + probes) | — | — |
+| 4 | Gates, full suite, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
+
+**Total:** chain 10m · sum 10m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `b3e2fc93` (fetched 2026-10-15). The run re-greps at dispatch, and stops on any content drift.
+- **Standing rule 41 (LL-136):** the Done-when 8 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):** (r) and (t) fail on today's code for named reasons. Control (s) proves a turn after the re-stamp still saves at once, and the amended (d) proves the existing held-turn path still saves.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Gates 3–5 were dry-run on `b3e2fc93`. Gates 3 and 4 are empty there, and gate 5 counts 1 there, so each can fail.
+- **Standing rule 45 (LL-141):** "the saved word is the one on screen" is judged by a probe of foliate's live layout. Every probe returns `visibilityState`, and a hidden sample voids its step. The owner's check is one short checklist.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite, the builds and the live check run in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** `npm run typecheck` and `npm run build` are in Done-when 6. A TypeScript view changes.
+- **LL-151:** the live driver is proven able to see the defect on the C1 build before the C2 rows are trusted (row (a)).
+- **LL-152:** the live route is a production `--dir` build, not `npm run dev`. The measurement also found that a hidden window stalls the renderer's timers, so each timed step brings the window to the front.
+- **LL-142:** each live row is judged by `library.json` against foliate's live layout and the extractor's word at the saved index, not against the item's own text-offset path.
+- **LL-158 and its QUIT-FLUSH-1 rider:** the live rows name a trigger shown to commit (the deep-position turn after the re-stamp), and an idle control (b) runs before the timed rows. The in-window path was traced end to end: turn → `reportTurn` → hold → re-stamp → `reportHeldTurnRef` → `onPageTurned` → `update-doc-progress` → main's 500 ms `saveLibrary`. The 15 s wait covers the re-stamp's 3.6–6.4 s and the save.
+- **LL-159:** a held turn lost on a quit inside the window is recorded as a known limit, the same class as PAGE-POSITION-SAVE-1's ruling Q4.
+- **LL-156:** PAGE-POSITION-SAVE-1's held-save known limit and PAGE-POSITION-SAVE-2's N4 site are restated, with the merge note for the latter.
+- **LL-073:** passive relocates stay passive; the hold applies only to turns.
+- **LL-083:** no new React state, timer or constant; two refs only.
 
 <a id="page-position-save-2"></a>
 
-#### PAGE-POSITION-SAVE-2 — Follow-ups from PAGE-POSITION-SAVE-1 *(position 24 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+#### PAGE-POSITION-SAVE-2 — Follow-ups from PAGE-POSITION-SAVE-1 *(position 26 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
 
 - **What:** Three follow-ups to Page mode's page-turn save (PAGE-POSITION-SAVE-1, merge `309f2390`), all in `src/reader/modes/page/**` and the reader-mode ownership manifest:
   1. **N2, a live check:** on a production build, a touch swipe that crosses a section edge saves the first word of the page it lands on. That proves the swipe's crossing flag is taken by the adjacent section's `relocate`. This is a check only; the swipe code is not changed.
@@ -5165,7 +6379,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 
 <a id="kf2-waiver-retire-1"></a>
 
-#### KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver *(position 25 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+#### KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver *(position 27 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
 
 - **What:** Governance only, with no product or test code.
   - Record that the KF-2 waiver is retired.
@@ -5353,17 +6567,24 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 
 <a id="folder-notice-1"></a>
 
-#### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(position 26 — Full Spec; authored 2026-10-15 on main @ `d0720ce0`; not a release gate)*
+#### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(position 28 — Full Spec; authored 2026-10-15 on main @ `d0720ce0`, re-anchored on `89a5a95c` after FOLDER-UNREACHABLE-GUARD-1 merged; not a release gate)*
 
 - **What:** While Blurby cannot reach the source folder, the library shows a persistent banner with a Retry button. It stays until the folder is shown reachable again. The owner chose option (C), described below.
-  - **The toast is not this item's.** FOLDER-UNREACHABLE-GUARD-1 (position 22) ships the corrected toast text, sent once per failure episode (`folderToastShown`). This item adds the banner beside it.
-  - **Banner text:** the same as the toast: "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." **Button:** "Retry". The banner never offers "choose another folder".
+  - **The toast.** FOLDER-UNREACHABLE-GUARD-1 (merged at `89a5a95c`) shipped the corrected toast, sent once per failure episode (`folderToastShown`). This item adds the banner beside it, and makes three fixes from that item's quality review (Blurby.Brain, approved; R6–R8 below):
+    - the reason code clears on a reachable sync;
+    - the episode's toast counts only once it lands;
+    - a replaced watcher's late error is ignored.
+  - **Banner and toast text: pending owner decision** (Brain relaying: "…then press Retry" recommended). Call it `FINAL_TEXT`.
+    - The banner and the toast use the same string.
+    - The toast's string shipped at `main.js:356` ("Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.") changes to `FINAL_TEXT` in this item, once the wording is decided.
+    - Blurby.Roadmap writes `FINAL_TEXT` in at fold-in (Done-when 13).
+    - **Button:** "Retry". The banner never offers "choose another folder".
   - **One press, one attempt** (owner: "button tries only once. No infinite loop"; refined by Blurby.Brain, 2026-10-15). Each press of Retry makes exactly one root check and at most one sync call:
-    - **(a)** one `rootHasContent` check of the source folder, raced against `FOLDER_RETRY_LIST_TIMEOUT_MS` (30 s);
+    - **(a)** one `rootHasContent` check of the source folder. After LARGE-FOLDER-SYNC-2, that check bounds itself: a listing that has not answered within `FOLDER_LIST_TIMEOUT_MS` (30 s) returns `null`;
     - **(b)** on `true`: the banner clears, a watcher that failed this episode restarts with no toast, and one `syncLibraryWithFolder()` starts without being awaited;
-    - **(c)** on `false`, `null` or the timeout: the banner stays, Retry is enabled again, and no toast fires.
+    - **(c)** on `false` or `null` (the timeout included): the banner stays, Retry is enabled again, and no toast fires.
   - **Retry returns after (a) and (b),** so on the owner's 120,000-file folder the banner clears within seconds. The full sync carries on as usual.
-  - **Nothing retries from the banner:** no polling, no background loop, and no timer other than the one root-check cap, which is cleared when the check settles.
+  - **Nothing retries from the banner:** no polling, no background loop, and no timer in this item's code. The only timer is LARGE-FOLDER-SYNC-2's per-listing bound inside `rootHasContent`, cleared when the listing settles.
   - **The button is disabled while its root check runs,** so presses cannot queue.
   - **The banner clears whenever the folder is shown reachable,** whatever showed it:
     - Retry;
@@ -5383,18 +6604,20 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - `src/components/LibraryView.tsx:373-378`, `src/styles/base.css:387-398`, `src/styles/library.css:1858-1861`.
 
     There is no new CSS, no inline style and no new visual design.
-- **Why** (every line read on `main` @ `d0720ce0`, fetched 2026-10-15; FOLDER-UNREACHABLE-GUARD-1 as amended at `ed05868a`, which changes only `ROADMAP.md`):
+- **Why** (every line re-read on `main` @ `89a5a95c`, fetched 2026-10-15, with FOLDER-UNREACHABLE-GUARD-1 merged; first traced on `d0720ce0`):
   - **Today nothing persists.**
-    - When the root is missing at launch, `fs.watch` throws, and `startWatcher` calls `onError` synchronously and returns `null` (`main/folder-watcher.js:128-134`).
-    - `main.js:354-367` sends one `watcher-error`, and `LibraryContainer.tsx:145-147` shows it as a 7 s toast.
-    - After FOLDER-UNREACHABLE-GUARD-1 the text is corrected and is sent once per episode. But once the toast is gone, the user has no sign that the folder is still unreachable.
-  - **Nothing restarts the watcher.** `watcher` stays `null` (`main.js:350`) until a folder pick or switch (`main/ipc/state.js:75-76`, `:90-91`) or a relaunch (`main.js:590`). So when Drive comes back mid-session, live sync does not resume, and the toast's promise ("Blurby will pick it up") does not hold without a relaunch.
-  - **The sync's failure is invisible.** `syncAll`'s catch (`main/folder-sync.js:126`) logs and resolves `undefined`. `select-folder` and `switch-folder` then return as on success (LARGE-FOLDER-SYNC-2, ruling "tier 2").
+    - When the root is missing at launch, `fs.watch` throws, and `startWatcher` calls `onError` synchronously and returns `null` (`main/folder-watcher.js:146-152`).
+    - `main.js:348-362` sends one `watcher-error` per episode, and `LibraryContainer.tsx:145-147` shows it as a 7 s toast.
+    - Once the toast is gone, the user has no sign that the folder is still unreachable.
+  - **Nothing restarts the watcher.** `watcher` stays `null` (`main.js:344`) until a folder pick or switch (`main/ipc/state.js:75-76`, `:90-91`) or a relaunch (`main.js:587`). So when Drive comes back mid-session, live sync does not resume, and the toast's promise ("Blurby will pick it up") does not hold without a relaunch.
+  - **The sync's failure is invisible.** `syncAll`'s catch (`main/folder-sync.js:143`) logs and resolves `undefined`. `select-folder` and `switch-folder` then return as on success (LARGE-FOLDER-SYNC-2, ruling "tier 2").
+  - **The guard's review found three gaps in the merged code:**
+    - **A stale reason.** `lastFolderProblem` (`main.js:317`) is never cleared, and `partial-read` writes it too (`:319`, `main/folder-sync.js:125`, `:182`). So a later, unrelated watch error carries an old code in its payload (`main.js:361`).
+    - **The flag is set before the send.** `folderToastShown = true` (`main.js:359`) comes before the `mainWindow` check (`:360`). So an error with no live window spends the episode's toast, and nothing is ever shown. A send to a page still loading, before LibraryContainer's listener has mounted, is also lost.
+    - **A replaced watcher can still report.** `startWatcherFn` closes the old watcher (`main.js:341`). Its `close()` sets `closed` (`main/folder-watcher.js:160-161`), but its `error` listener (`:154-157`) does not check `closed`. A late error from the old handle therefore calls `onError`, which sets the flag and can toast for the new episode.
   - **A full sync learns late that the folder is reachable.** The scan walks the whole tree before it returns (93.6 s on the owner's folder, LL-158). The import that follows runs for as long as the library lacks files (LARGE-FOLDER-SYNC-1's design half is open). FOLDER-UNREACHABLE-GUARD-1's `rootHasContent` (one `readdir` of the root) answers the same question at once.
-  - **A listing can hang.** There is no timeout anywhere in the scan (FOLDER-UNREACHABLE-GUARD-1, Out of scope). A Retry that waited on a hung listing would keep its button disabled indefinitely.
-  - **FOLDER-UNREACHABLE-GUARD-1 leaves a hook and no state.**
-    - Its `lastFolderProblem` is written by `reportFolderProblem` and never cleared. It is read only by the `watcher-error` payload's `reason`, which the renderer ignores.
-    - Its hook comment says "Nothing new is sent: each send is a toast". This item adds a separate push channel that is not a toast (LL-156, restated below).
+  - **A listing can hang** on `89a5a95c`: nothing bounds one (FOLDER-UNREACHABLE-GUARD-1, Out of scope). LARGE-FOLDER-SYNC-2's (C), which merges first, bounds every listing, and `rootHasContent`'s, with `FOLDER_LIST_TIMEOUT_MS`. Without that bound, a Retry that waited on a hung listing would keep its button disabled indefinitely.
+  - **FOLDER-UNREACHABLE-GUARD-1 leaves a hook and no state.** Its hook comment (`main.js:315-316`) says "Nothing new is sent: each send is a toast". This item adds a separate push channel that is not a toast (LL-156, restated below).
   - **Where the banner goes.**
     - The library view is rendered only on `LibraryContainer`'s library branch (`:648-700`).
     - `LibraryView` holds the library's only notice strip (`:373-378`), above `.library-scroll`.
@@ -5405,16 +6628,20 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - **R2:** the banner clears when the root is shown reachable, not after the full scan or sync.
     - "Reachable" means `rootHasContent(folder)` returns `true`. `false` keeps `root-empty-suspect`, and `null` keeps `root-unlistable`.
     - `reportFolderOk` is emitted once the root lists with content, before the walk.
-    - Retry is (a) one root check raced against a timeout, (b) on `true`, clear, quiet watcher restart and one un-awaited sync, (c) otherwise, nothing more. It returns after (a) and (b).
+    - Retry is (a) one bounded root check, (b) on `true`, clear, quiet watcher restart and one un-awaited sync, (c) otherwise, nothing more. It returns after (a) and (b).
     - Pinned by tests: one root check and at most one sync call per press.
     - Owner check: the banner clears within about 10 s of pressing Retry with Drive running.
   - **R3:** a successful Rescan clears the banner too, with a one-line emit in `rescan-folder` where it has listed the root with content. `reportFolderOk` reaches the library IPC handlers through the IPC context, like the other `main.js` dependencies.
-  - **R4:** a hung listing is capped by `FOLDER_RETRY_LIST_TIMEOUT_MS = 30000` in `main/constants.js`.
+  - **R4 (amended 2026-10-15 to LARGE-FOLDER-SYNC-2's (C)):** a hung listing is capped by the shared `FOLDER_LIST_TIMEOUT_MS = 30000`. LARGE-FOLDER-SYNC-2 defines it in `main/constants.js`, and this item only requires it (Done-when 12).
     - If the root check has not settled by then, the attempt fails: Retry is enabled again, the banner stays, no toast fires, and nothing retries in the background.
-    - It uses one timer, cleared when the check settles.
+    - The timer is LARGE-FOLDER-SYNC-2's `timeLimit` around `rootHasContent`'s `readdir`, cleared when the listing settles. Retry adds no race of its own (design decisions).
   - **R5 (at approval, `79061f65`; replaces the empty-readable-folder known limit):** `select-folder` and `switch-folder` reset the banner state and set `folderToastShown = false` when the chosen folder differs from the current one by `pathKey`, before the new folder's watcher start and sync.
     - It is one `main.js` function, `resetFolderNotice()`, which reaches `ctx` the way `reportFolderOk` does.
     - Test: the banner is up for folder A; a switch to an empty readable folder B clears it; a switch to an unlistable folder C raises it again, with one `watcher-error` send for C.
+  - **R6–R8 (FOLDER-UNREACHABLE-GUARD-1's quality review, approved by Blurby.Brain at its merge `89a5a95c`; each has its own test):**
+    - **R6:** the reason code clears on a reachable sync, and nothing stale rides on a later, unrelated watch error.
+    - **R7:** the episode flag is set only after a delivered send: a live window, with the renderer listener mounted or the send known to land. The current problem is re-sent on renderer mount through the getter, so a toast sent before the listener mounted is not lost for the episode.
+    - **R8:** a `closed` guard on the watcher's `error` handler (`main/folder-watcher.js:154-157`), so a late error from a replaced watcher cannot set the flag or toast for the new episode.
 - **Design decisions (planner, 2026-10-15, Rule 11 tier 1):**
   - **Main owns the folder's state.** A new CommonJS module, `main/folder-notice.js`, holds `problem`: `null`, or the last code that means unreachable.
     - `set(code)` pushes each change, and only a change, on one new channel, `folder-problem`.
@@ -5424,7 +6651,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - It is a module, not code in `main.js`, because the owner's required tests (one press, one check; no timers) need a unit under test, and `main.js` cannot be loaded by a test (`tests/folderSync.test.js:3-4`).
   - **Set by:**
     - every `reportFolderProblem` call carrying `root-unlistable` or `root-empty-suspect`, from FOLDER-UNREACHABLE-GUARD-1's full sync and per-file remove;
-    - the watcher's `onError`, as `folderNotice.get() || "watch-failed"`. This runs before FOLDER-UNREACHABLE-GUARD-1's `if (folderToastShown) return;`, so the banner shows even when the toast is not sent;
+    - the watcher's `onError`, as `folderNotice.get() || "watch-failed"`. This runs before the toast guard, so the banner shows even when the toast is not sent;
     - `syncAll`'s catch, as `sync-failed` (LARGE-FOLDER-SYNC-2's signal; one line in `main/folder-sync.js`).
   - **Cleared by `reportFolderOk`.** In `main.js` it is one function, `function reportFolderOk() { folderNotice.set(null); }`. It reaches `createFolderSync` as an optional dependency (default a no-op, like `reportFolderProblem`) and the IPC handlers as a `ctx` member (R3). It is called at three sites, each where reachability is first known:
     - **The full sync, before the walk (R2).**
@@ -5434,91 +6661,138 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
       - The cost is one more `readdir` of the root per full sync.
       - The run does not return early on a stale result there. It continues to the scan as today, so LARGE-FOLDER-SYNC-2's (n2) still sees two scans after a cancel.
     - **A Rescan that lists books (R3).** In `rescan-folder`, after FOLDER-UNREACHABLE-GUARD-1's `root-unlistable` and `root-empty-suspect` returns, `if (files.length) ctx.reportFolderOk();`. A scan that returned at least one book has listed the root with content, so this needs no extra `readdir`, and the handler's `../folder-watcher` require is unchanged. The test stubs of SAVE-LIBRARY-TRUST-1 and IPC-PATH-TRUST-1 then keep working, and their Proxy `ctx` supplies `reportFolderOk` as a `vi.fn()`.
-    - **A watcher add.** In `addOne`, after the file's `stat` succeeds under the folder (`underFolder(p)`, `:133`). A supported file under the root means the root lists that file or the subfolder holding it, which is exactly what `rootHasContent` returns `true` for. That avoids a second `readdir` per event. These are "the folder watcher's normal events".
-      - The watcher's `onUnlink` fires on a failed `lstat` (`main/folder-watcher.js:94`), so it is not evidence and does not clear.
+    - **A watcher add.** In `addOne`, after the file's `stat` succeeds under the folder (`underFolder(p)`, `:150`). A supported file under the root means the root lists that file or the subfolder holding it, which is exactly what `rootHasContent` returns `true` for. That avoids a second `readdir` per event. These are "the folder watcher's normal events".
+      - The watcher's `onUnlink` fires on a failed `lstat` (`main/folder-watcher.js:112`), so it is not evidence and does not clear.
       - `main.js`'s watcher callbacks stay unchanged; `tests/folderSync.test.js` (k) pins them.
   - **A clear restarts a watcher that failed this episode, quietly.** When the problem goes to `null`, `set` calls the injected `resumeWatcher`. In `main.js`, `resumeWatcher` does nothing at quit (`folderWorkStopped`), and nothing while a watcher exists that has not failed this episode (`watcher && !folderToastShown`). Otherwise it sets `folderToastShown = true` and calls `startWatcherFn()`.
     - FOLDER-UNREACHABLE-GUARD-1's reset (`if (watcher) folderToastShown = false;`) clears the flag when the restart succeeds.
     - A restart that fails leaves the flag set. Its `onError` therefore sets the banner again and sends no toast.
     - It cannot loop. Only a clear calls `resumeWatcher`. A failed restart sets a problem, never `null`, and nothing scheduled follows it.
+  - **No stale reason (R6).**
+    - `problem` is the only state. It is cleared by every `reportFolderOk` (the full sync's root check, a Rescan, a watcher add, Retry) and by a folder switch.
+    - It never holds `partial-read` (R1).
+    - The `watcher-error` payload reads `reason: folderNotice.get()` right after the `onError` line sets `folderNotice.get() || "watch-failed"`. So a watch error after a reachable sync carries `watch-failed`, never the earlier code.
+  - **The toast counts only once it lands (R7).** In `onError`, the guard becomes `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`, and only after it come `folderToastShown = true;` and the send.
+    - **Why `isLoading()` as "known to land".** LibraryContainer is the root component in the main window (`src/App.tsx:149`), and it registers its `onWatcherError` listener in its first effect (`LibraryContainer.tsx:144-149`), whatever view it shows. The entry script imports `App` dynamically (`src/main.tsx:19`), so the mount can trail `did-finish-load` by the time of one import.
+    - The startup folder work waits `FOLDER_SYNC_STARTUP_DELAY_MS` (3 s) after `did-finish-load` (`main.js:587`), so the startup toast always lands.
+    - The one residual case is a watch error in the moment between a window's load and its mount, for example after the tray re-creates the window. The flag is then already set, and that toast is lost.
+    - Rejected: an acknowledgement from the renderer when its listener mounts. That needs a new IPC channel and preload method for a toast whose words the banner already shows, persistently.
+    - **On mount, the banner shows; no toast replays.** The banner's mount fetch (`getFolderProblem`) re-sends the current problem, so a problem whose toast never landed is still shown, as the banner.
+    - Replaying a toast on mount was rejected. Main cannot tell a lost toast from one that was shown, so a replay would toast twice in one episode whenever a window is re-created.
+  - **A replaced watcher stays silent (R8).** In `main/folder-watcher.js`, the `error` listener calls `onError` only while `!closed`. It still logs the error. The same `closed` flag already stops `settle` and `onEvent` after `close()` (`:109`, `:133`).
   - **A folder switch resets without resuming** (R5). The module gets a third mutator, `reset()`, which sets `problem` to `null` and pushes `null` (when it was not already `null`), without calling `resumeWatcher`.
     - `set(null)` would call `resumeWatcher`. That could start a watcher on the new folder with `folderToastShown` already set to `true`, which would swallow the new folder's first toast, and the handler then starts the watcher again.
     - `main.js`'s `resetFolderNotice()` is `folderToastShown = false; folderNotice.reset();`. Both handlers call `ctx.resetFolderNotice()` after their checks and before `settings.sourceFolder = folder;`, and only when `pathKey(folder) !== pathKey(settings.sourceFolder)`.
     - After LARGE-FOLDER-SYNC-2's swap, the handler's order is: reset, set the folder, save, start the watcher, sync. So the new folder's watcher failure toasts once (a new episode), and its root check alone decides the banner.
     - `main/ipc/state.js` requires `pathKey` from `../folder-sync`, as `main/ipc/library.js` does after FOLDER-UNREACHABLE-GUARD-1. `main/folder-sync.js` requires only `path` and `./constants`, so there is no cycle.
   - **Retry, in the module** (R2, R4):
-    - `retry()` reads the folder, starts one `setTimeout` for `FOLDER_RETRY_LIST_TIMEOUT_MS`, and races it against `checkRoot(folder)` (`rootHasContent`, injected). It clears the timer in a `finally`, whichever settles first. It logs one line, `[folder-notice] Retry: one root check: <result>`, where the result is `true`, `false`, `null` or `timeout`.
+    - `retry()` reads the folder, awaits `checkRoot(folder)` (`rootHasContent`, injected) once, and logs one line, `[folder-notice] Retry: one root check: <result>`, where the result is `true`, `false` or `null`.
+    - **No race of its own.** LARGE-FOLDER-SYNC-2's bounded `rootHasContent` covers the hang fully:
+      - its only await is the `readdir`, wrapped in `timeLimit`, and a timeout is caught and returned as `null`;
+      - the rest is a synchronous `.some` over the entries;
+      - so `checkRoot` always settles within `FOLDER_LIST_TIMEOUT_MS`, and it never rejects.
+
+      A second race in `retry()` would be a second timer for the same bound. The only thing lost is the log's `timeout` label: a timed-out check logs `null`, and the hung listing itself is not logged by `rootHasContent`. That is not a behaviour gap, because the user and the banner treat both the same.
     - On `true`, it calls `set(null)`, which clears and restarts the watcher, then calls `sync()` once without awaiting it.
     - It returns `problem` (`null` or a code), the same shape the getter and the push carry.
-    - A check that settles after the timeout is ignored. Node cannot cancel a `readdir`, so it runs to its end, does nothing, and starts nothing.
-    - With no source folder, it returns `problem` at once, with no check and no timer.
-  - **A Retry during a running sync** starts no second scan. Its one sync call reaches `syncAll`, which returns the running run's promise for the same folder (`main/folder-sync.js:119`; after LARGE-FOLDER-SYNC-2, only when that run is not cancelled). Retry does not await it either way.
+    - A `readdir` answering after the bound is dropped by `timeLimit`. Node cannot cancel it, so it runs to its end, and nothing in Retry is waiting on it.
+    - With no source folder, it returns `problem` at once, with no check.
+  - **A Retry during a running sync** starts no second scan. Its one sync call reaches `syncAll`, which returns the running run's promise for the same folder (`main/folder-sync.js:136`; after LARGE-FOLDER-SYNC-2, only when that run is not cancelled). Retry does not await it either way.
   - **The renderer fetches once on mount and listens.** `FolderNoticeBanner` subscribes to `onFolderProblem`, then calls `getFolderProblem()` once, and ignores the getter's answer if a push has already arrived (the push is newer). This shows the banner when the startup sync failed before the library mounted, and again after the reader unmounts and remounts the library. The component has no timer.
   - **Presses cannot queue.** The button is `disabled` while its call runs, which is 30 s at most; React does not dispatch `onClick` to a disabled button. A call that rejects leaves the banner up and enables Retry again.
   - **Preload stays minimal** (it is the security boundary): one getter, one invoke and one listener, in the existing `onWatcherError` pattern (`preload.js:207-211`). There is no argument, so there is nothing to validate.
-  - **`src/types.ts`: three optional members.** They are optional, like `onWatcherError?` (`:371`), and every call uses `?.`. The two mocks that implement `ElectronAPI` without these methods therefore need no change: the browser stub `src/test-harness/electron-api-stub.ts:263`, typed `ElectronAPI`, and `tests/updateInstallGating.test.tsx`'s mock, which renders `LibraryContainer`.
+  - **`src/types.ts`: three optional members.** They are optional, like `onWatcherError?` (`:373`), and every call uses `?.`. The two mocks that implement `ElectronAPI` without these methods therefore need no change: the browser stub `src/test-harness/electron-api-stub.ts:263`, typed `ElectronAPI`, and `tests/updateInstallGating.test.tsx`'s mock, which renders `LibraryContainer`.
   - **The handlers go in `main/ipc/state.js`**, beside `select-folder` and `switch-folder`, the folder handlers that already call `ctx.syncLibraryWithFolder`. They are reached through two new `ctx` members, `getFolderProblem` and `retrySourceFolder`.
-  - **The banner's text is a literal in `FolderNoticeBanner.tsx`.** A test checks that the toast in `main.js` holds the identical string, so the two cannot drift apart.
-  - **Constants (R4):** one, `FOLDER_RETRY_LIST_TIMEOUT_MS = 30000`, in `main/constants.js`'s Folder Watcher section. It has a `/** … (ms) */` comment like its neighbours, and is exported beside them. The module reads it; the tests use fake timers, so nothing injects it.
+  - **The banner's text is a literal in `FolderNoticeBanner.tsx`** (`FINAL_TEXT`). A test checks that the toast in `main.js` holds the identical string, so the two cannot drift apart.
+  - **Constants (R4):** none of its own. It requires LARGE-FOLDER-SYNC-2's `FOLDER_LIST_TIMEOUT_MS = 30000` in `main/constants.js` (Done-when 12). Only test (fn-z) reads it. Its comment and placement are LARGE-FOLDER-SYNC-2's.
 - **Out of scope:**
-  - The toast's text and its once-per-episode rule (FOLDER-UNREACHABLE-GUARD-1).
+  - The wording itself (pending owner decision; `FINAL_TEXT`). The once-per-episode rule stays as FOLDER-UNREACHABLE-GUARD-1 shipped it, apart from R7's delivery guard.
   - `partial-read` in the banner (R1). Known limit: a subfolder or file that cannot be read shows nothing in the UI. Its books are kept (FOLDER-UNREACHABLE-GUARD-1), and the log line names the case.
-  - A timeout on the full scan's own listing (FOLDER-UNREACHABLE-GUARD-1's out of scope, unchanged). Only Retry's root check is capped.
+  - The listing bound itself (LARGE-FOLDER-SYNC-2's (C)): this item relies on it, and does not edit `main/folder-watcher.js`'s `timeLimit`, the scan or `rootHasContent`.
   - A per-file remove whose root check passed (`rootHasContent === true`) is also evidence of reachability. It is not wired: adds and full syncs cover a returning folder, and FOLDER-UNREACHABLE-GUARD-1's remove path is not this item's.
   - The browser test stub's comment counting preload methods (`electron-api-stub.ts:2`). The optional members need no stub entry, so the banner never shows in the browser harness.
   - LARGE-FOLDER-SYNC-1's design half: what the first sync of a very large folder imports.
 - **Prerequisites:**
-  - **FOLDER-UNREACHABLE-GUARD-1 (22) and LARGE-FOLDER-SYNC-2 (23) merged.** This item builds on these lines of theirs. After both merge, re-grep each anchor in `main.js`, `main/folder-sync.js`, `main/ipc/library.js` and `main/ipc/state.js`. Record the line numbers in the staging memo, and stop on any content drift (standing rule 36).
+  - **FOLDER-UNREACHABLE-GUARD-1 (22): merged** (`89a5a95c`, 2026-10-15). Every anchor below was read on `refs/remotes/origin/main` @ `89a5a95c`.
+  - **GET-STATE-SECRET-1 (23) and LARGE-FOLDER-SYNC-2 (24): not yet merged; this item merges after both.**
+    - Lines below are on `89a5a95c`. After both merge, re-grep each anchor, record the new line numbers in the staging memo, and stop on any content drift (standing rule 36).
+    - **Re-grep after LARGE-FOLDER-SYNC-2 merges** (its amended specification edits these files):
+      - `main/folder-sync.js`: the constants require (`:6`), the destructure (`:12-14`), `runFullSync`'s head (`const mine = ++gen;` and the `stale()` with `mine !== gen`, above `:77`), `syncAll` (`:135-144`; the `.catch` at `:143` stays unchanged), and `addOne` (`:158-169`, below this item's `:152-153` anchor).
+      - `main/folder-watcher.js`: the require, `timeLimit`, `SYSTEM_FOLDERS`, the walk, and the bounded `rootHasContent` (`:87-93`). The `error` listener (`:154-157`) that R8 edits is not in its edits; re-grep it anyway, because lines above it move.
+      - `main/ipc/library.js`: `rescan-folder`'s map (`:379-384`). It keeps `      const skipped = (report.skipped || []).map(pathKey);` as its first line, which is this item's anchor; the other lines follow it.
+      - `main/ipc/state.js`: the swapped tails (`:75-76`, `:90-91`).
+      - `main/constants.js`: `const FOLDER_LIST_TIMEOUT_MS = 30000;` (Done-when 12, present).
+      - `tests/folderSync.test.js` and `tests/folderUnreachableGuard.test.js`: LARGE-FOLDER-SYNC-2 appends cases to both. This item's cases are appended after them, with unique labels.
+    - **Re-grep after GET-STATE-SECRET-1 merges:** `main/ipc/state.js` (`get-state`, `:16-19`; the folder handlers move down by about 5 lines), `preload.js` and `src/types.ts` (this item's `:41`, `:211` and `:373` anchors).
+    - Unchanged by both: `main.js` (every anchor below).
     - **`main.js`:**
-      - `:15`: `const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");`.
-      - FOLDER-UNREACHABLE-GUARD-1's hook block, as its Implementation detail and "Once per episode" ruling leave it. That is the two-line `// HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): …` comment, then `let lastFolderProblem = null;`, `let folderToastShown = false; // one watcher-error toast per failure episode`, and `function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }`.
-      - `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,` (FOLDER-UNREACHABLE-GUARD-1's `:332`).
-      - `onError`: `      console.error("[watcher] Error:", err.message);`, then `      if (folderToastShown) return;` and `      folderToastShown = true;`.
-      - `onError`: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`.
-      - `startWatcherFn`: `  if (watcher) folderToastShown = false;`, after the `startWatcher` call.
-      - The toast text `"Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up."` (one line).
+      - `:15`: `const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");`. `:18`: `const { createFolderSync } = require("./main/folder-sync");`.
+      - `:315-319`, the hook block:
+        - the two-line `// HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): …` comment;
+        - `let lastFolderProblem = null;`;
+        - `let folderToastShown = false; // one watcher-error toast per failure episode`;
+        - `function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }`.
+      - `:327`: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,`.
+      - `:356`, the toast text: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";`.
+      - `onError`:
+        - `:357`: `      console.error("[watcher] Error:", err.message);`;
+        - `:358`: `      if (folderToastShown) return;`;
+        - `:359`: `      folderToastShown = true;`;
+        - `:360-362`: `      if (mainWindow && !mainWindow.isDestroyed()) {`, `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`, `      }`.
+      - `:365`: `  if (watcher) folderToastShown = false;`. `:460`: `  startWatcher: startWatcherFn,`. `:587`: the startup line that `tests/perfAudit.test.ts` pins.
     - **`main/folder-sync.js`:**
-      - The destructure: `rootHasContent` is in its first line, and its last line is `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`.
-      - `runFullSync`: `    emitProgress(0, 0, "scanning");` (`:72` on the base), directly followed by FOLDER-UNREACHABLE-GUARD-1's `    const report = {};` and `    const files = await scanFolderAsync(folder, report);`.
-      - `runFullSync`: `    if (skipped.length) reportFolderProblem("partial-read", folder);`. This item does not edit it.
-      - `syncAll`: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`. LARGE-FOLDER-SYNC-2 keeps it unchanged.
-      - `addOne`: `    try { st = await statFile(p); } catch { return; }`, followed by `    if (stopped) return;` (`:135-136` on the base; LARGE-FOLDER-SYNC-2's edits start at `:141`).
-    - **`main/ipc/library.js`**, `rescan-folder`, FOLDER-UNREACHABLE-GUARD-1's guard. Its `if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {` block, which returns `{ count: docs.length, empty: true, reason: "root-empty-suspect" }`, is followed by `      const skipped = (report.skipped || []).map(pathKey);`.
+      - `:12-14`, the destructure: `rootHasContent` is in its first line, and its last line is `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`.
+      - `:77-79`: `    emitProgress(0, 0, "scanning");`, then `    const report = {};` and `    const files = await scanFolderAsync(folder, report);`. After LARGE-FOLDER-SYNC-2, `runFullSync`'s first line is `    const mine = ++gen;`, and `stale()` includes `mine !== gen`. This item's root-check line goes after `emitProgress`, so it follows `mine`.
+      - `:125`: `    if (skipped.length) reportFolderProblem("partial-read", folder);`. This item does not edit it.
+      - `:143`: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`. LARGE-FOLDER-SYNC-2 keeps it unchanged.
+      - `:152-153`, `addOne`: `    try { st = await statFile(p); } catch { return; }`, then `    if (stopped) return;`.
+      - `:237`: `module.exports = { createFolderSync, pathKey };`.
+    - **`main/folder-watcher.js:154-157`**, the `error` listener: `  watcher.on("error", (err) => {`, `    console.error("[watcher] fs.watch error:", err.message);`, `    if (onError) onError(err, sourceFolder);`, `  });`. The same `if (onError) onError(err, sourceFolder);` text is also at `:150`, the `fs.watch` throw path, which is not edited.
+    - **`main/ipc/library.js`**, `rescan-folder`:
+      - `:370` is the `root-unlistable` return.
+      - `:371-378` is the `if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {` block, returning `{ count: docs.length, empty: true, reason: "root-empty-suspect" }`.
+      - It is followed at `:379` by `      const skipped = (report.skipped || []).map(pathKey);`.
     - **`main/ipc/state.js`:**
-      - `:9`: `const fsPromises = require("fs/promises");`.
-      - `select-folder`: `    const folder = result.filePaths[0];`, directly followed by `    settings.sourceFolder = folder;` (`:71-72` on the base).
-      - `switch-folder`: IPC-PATH-TRUST-1's recent-folder check (`:83-85`, merged), then `    try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }`, directly followed by `    settings.sourceFolder = folder;` (`:86-87`).
-      - The tail of `switch-folder`, after LARGE-FOLDER-SYNC-2's swap: `    ctx.startWatcher(); …`, `    await ctx.syncLibraryWithFolder();`, `    return { folder };`, `  });`, then the `}` closing `register`.
-      - SETTINGS-KEY-TRUST-1 replaces IPC-PATH-TRUST-1's `save-settings` head (`:25-28`), a different handler. Re-grep both handler heads after each merges (standing rule 36).
-    - **`main/folder-sync.js` exports `pathKey`** (FOLDER-UNREACHABLE-GUARD-1): `module.exports = { createFolderSync, pathKey };`.
-    - **`tests/folderUnreachableGuard.test.js`** (n): the expected string `reason: lastFolderProblem || "watch-failed"`.
+      - `:10`: `const fsPromises = require("fs/promises");`. SETTINGS-KEY-TRUST-1's `:9` (`pickUserSettings`) is above it.
+      - `select-folder`: `:71` `    const folder = result.filePaths[0];`, directly followed by `:72` `    settings.sourceFolder = folder;`.
+      - `switch-folder`: IPC-PATH-TRUST-1's recent-folder check (`:83-85`), then `:86` `    try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }`, directly followed by `:87` `    settings.sourceFolder = folder;`.
+      - The tail of `switch-folder` (`:90-94`; LARGE-FOLDER-SYNC-2 swaps `:90-91`): `    await ctx.syncLibraryWithFolder();`, `    ctx.startWatcher();`, `    return { folder };`, `  });`, then the `}` closing `register`.
+    - **`tests/folderUnreachableGuard.test.js`** (n), `:297-311`: the expected strings `reason: lastFolderProblem || "watch-failed"`, `if (folderToastShown) return;` and the shipped toast text.
 
-    If the hook block, the `folderToastShown` lines, the payload line or the rescan guard differ from the above, stop for Blurby.Brain: the edits below would no longer apply as written.
+    If an anchor differs after LARGE-FOLDER-SYNC-2 merges, stop for Blurby.Brain: the edits below would no longer apply as written.
   - **Queue items that edit this item's files in other hunks.** Re-grep after each merges.
-    - SAVE-LIBRARY-TRUST-1 and IPC-PATH-TRUST-1 (merged): `main/ipc/library.js` `keepMainPaths`, `save-library` and `ALLOWED_FIELDS`.
-    - SAVE-LIBRARY-MERGE-1: `save-library`, and `LibraryView.tsx:286-297` (the Edit form).
-    - SETTINGS-KEY-TRUST-1: `main/ipc/state.js:25-28` (the `save-settings` head), and `src/types.ts` (`sortBy`, after `:201`).
+    - SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1 and SETTINGS-KEY-TRUST-1 are merged in `89a5a95c`. Their lines (`main/ipc/library.js` `keepMainPaths`, `save-library` and `ALLOWED_FIELDS`; the `LibraryView.tsx` Edit form; the `main/ipc/state.js` `save-settings` head and `:9`; `src/types.ts` `sortBy`) are other hunks.
     - UX-POLISH-2: `src/types.ts:188`, a comment.
-    - DEPS-AUDIT-1 (merged, `a6383286`): `main/constants.js`, at `@@ -65,6 +65,10 @@` (the ZIP caps) and in `module.exports` at `@@ -225,6 +229,8 @@`. This item edits the Folder Watcher section (`:169-174`) and its export lines (`:282-284`), which are different hunks.
+    - `main/constants.js` is not this item's. LARGE-FOLDER-SYNC-2 adds `FOLDER_LIST_TIMEOUT_MS` there, and DEPS-AUDIT-1 (merged, `a6383286`) edited the ZIP caps.
   - **Shared-core:** `src/types.ts` is edited only while no other active item edits it. Confirm at dispatch that UX-POLISH-2, SETTINGS-KEY-TRUST-1 and NARRATE-REBUILD-1's open phase are not editing it.
 - **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other exit code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44).
-  - **About the dry-runs:** they were run on `d0720ce0` (2026-10-15) as `git grep … d0720ce0 -- <path>`, so their output carries the `d0720ce0:` prefix. They are noted with each gate.
-  - **Names from FOLDER-UNREACHABLE-GUARD-1.** Gates on names it introduces (`lastFolderProblem`, `folderToastShown`, `reportFolderProblem`, `rootHasContent`) are empty on `d0720ce0`. They become live on the merged base. The prerequisite re-grep (Done-when 3) must find those lines there before any edit, so each such gate can fail.
+  - **About the dry-runs:** they were re-run on `89a5a95c` (FOLDER-UNREACHABLE-GUARD-1 merged; 2026-10-15) as `git grep … refs/remotes/origin/main -- <path>`, so their output carries the `refs/remotes/origin/main:` prefix. They are noted with each gate. If LARGE-FOLDER-SYNC-2 shifts a line, the content still has to match (Done-when 3).
     1. **Positive control (standing rule 43):** at C1, on the owner's Windows machine, `npx vitest run tests/folderNotice.test.js tests/folderNoticeBanner.test.tsx tests/folderSync.test.js` exits 1.
-       - Exactly these 23 fail, each for its named reason (Implementation detail, Tests): (fn-a)–(fn-s), (fn-v), (fn-x), (fn-z) and (fn-sw).
+       - Exactly these 26 fail, each for its named reason (Implementation detail, Tests): (fn-a)–(fn-s), (fn-v), (fn-x), (fn-z), (fn-sw), (fn-reason), (fn-deliver) and (fn-closed).
        - These pass: the controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same), and every existing test in `tests/folderSync.test.js`.
        - Record the output in the staging memo.
-    2. At C1, `npx vitest run tests/updateInstallGating.test.tsx tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js` exits 0.
-    3. **Prerequisite anchors (standing rule 36):** on the merged base, before any C2 edit, each anchor listed under Prerequisites is found once with the content shown. Record the lines in the staging memo. Any drift stops the run.
-    4. After C2, `npx vitest run tests/folderNotice.test.js tests/folderNoticeBanner.test.tsx tests/folderSync.test.js tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js tests/folderWatcher.test.js tests/updateInstallGating.test.tsx tests/ipcPathTrust.test.js tests/readFileBufferLibrary.test.js tests/perfAudit.test.ts` exits 0. Add `tests/settingsKeyTrust.test.js` and `tests/saveLibraryTrust.test.js` if they exist on the merged base.
-    5. `git grep -n -F 'lastFolderProblem' -- main.js main` prints nothing (exit 1): one state, not two.
-       - Dry-run on `d0720ce0`: exit 1, no output. The name is FOLDER-UNREACHABLE-GUARD-1's. Done-when 3 must find its three lines (declaration, `reportFolderProblem`, payload) on the merged base.
-    6. `git grep -c -F 'folderNotice.' -- main.js` prints `main.js:7` and exits 0. The seven lines are the bodies of `reportFolderProblem`, `reportFolderOk` and `resetFolderNotice`, the `onError` set, the payload, and the two `ctx` members `getFolderProblem` and `retrySourceFolder`. No comment uses the name.
-       - Dry-run: exit 1, no output.
-    7. `git grep -c -F 'folderToastShown' -- main.js` prints `main.js:6` and exits 0: FOLDER-UNREACHABLE-GUARD-1's four lines, plus the one `resumeWatcher` line and the one `resetFolderNotice` line. No comment uses the name.
-       - Dry-run: exit 1, no output. It is `main.js:4` on the merged base (FOLDER-UNREACHABLE-GUARD-1's gate).
+    2. At C1, `npx vitest run tests/updateInstallGating.test.tsx tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js tests/folderWatcher.test.js` exits 0.
+    3. **Prerequisite anchors (standing rule 36):** on the base (`89a5a95c` plus GET-STATE-SECRET-1's and LARGE-FOLDER-SYNC-2's merges), including Done-when 12's two "present" checks, before any C2 edit, each anchor listed under Prerequisites is found once with the content shown. Record the lines in the staging memo. Any drift stops the run.
+    4. After C2, `npx vitest run tests/folderNotice.test.js tests/folderNoticeBanner.test.tsx tests/folderSync.test.js tests/folderUnreachableGuard.test.js tests/folderSwitchWatcherFirst.test.js tests/folderWatcher.test.js tests/updateInstallGating.test.tsx tests/ipcPathTrust.test.js tests/readFileBufferLibrary.test.js tests/saveLibraryTrust.test.js tests/saveLibraryMerge.test.js tests/settingsKeyTrust.test.js tests/perfAudit.test.ts` exits 0.
+    5. **One state, not two (R6).** `git grep -n -F 'lastFolderProblem' -- main.js main` prints nothing (exit 1).
+       - Dry-run: exit 0, three lines: `refs/remotes/origin/main:main.js:317:`, `:319:` and `:361:`. So the gate can fail.
+    6. `git grep -c -F 'folderNotice.' -- main.js` prints `main.js:7` and exits 0. The seven lines are:
+       - the bodies of `reportFolderProblem`, `reportFolderOk` and `resetFolderNotice`;
+       - the `onError` set and the payload;
+       - the two `ctx` members `getFolderProblem` and `retrySourceFolder`.
+
+       No comment uses the name. Dry-run: exit 1, no output.
+    7. **The toast flag (R5, R7).**
+       - `git grep -c -F 'folderToastShown' -- main.js` prints `main.js:6` and exits 0. The six lines are the declaration, the new delivery guard, the set, `startWatcherFn`'s reset, `resumeWatcher` and `resetFolderNotice`. No comment uses the name. Dry-run: exit 0, `refs/remotes/origin/main:main.js:4`.
+       - `git grep -n -F 'if (folderToastShown) return;' -- main.js` prints nothing (exit 1). Dry-run: exit 0, `refs/remotes/origin/main:main.js:358:`.
+       - `git grep -n -F 'if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;' -- main.js` prints one line and exits 0. Dry-run: exit 1, no output.
+       - `git grep -n -F 'if (mainWindow && !mainWindow.isDestroyed()) {' -- main.js` prints exactly two lines, the base's `:263` and `:310` (the library broadcast and the sync progress), and exits 0: the `onError` one is gone. Dry-run: exit 0, three lines, `refs/remotes/origin/main:main.js:263:`, `:310:` and `:360:`.
     8. `git grep -n -F '"folder-problem"' -- main.js preload.js` prints exactly three lines and exits 0: one in `main.js` (the send) and two in `preload.js` (`on` and `removeListener`).
        - Dry-run: exit 1, no output.
+    8a. **A replaced watcher stays silent (R8).**
+        - `git grep -n -F 'if (onError && !closed) onError(err, sourceFolder);' -- main/folder-watcher.js` prints one line and exits 0. Dry-run: exit 1, no output.
+        - `git grep -c -F 'if (onError) onError(err, sourceFolder);' -- main/folder-watcher.js` prints `main/folder-watcher.js:1` and exits 0 (the `fs.watch` throw path at `:150` is unchanged). Dry-run: exit 0, `refs/remotes/origin/main:main/folder-watcher.js:2`.
+        - `git diff --numstat refs/remotes/origin/main -- main/folder-watcher.js` prints exactly `1	1	main/folder-watcher.js` and exits 0.
     9. **The clear sites.**
        - `git grep -c -F 'reportFolderOk' -- main.js main/folder-sync.js main/ipc/library.js` prints exactly `main.js:3`, `main/folder-sync.js:3` and `main/ipc/library.js:1`, and exits 0. No comment uses the name.
          - In `main.js`: the function, the `createFolderSync` dependency and the `ctx` member.
@@ -5527,39 +6801,49 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
        - `git grep -n -F 'if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder);' -- main/folder-sync.js` prints one line and exits 0.
        - `git grep -n -F 'if (files.length) ctx.reportFolderOk();' -- main/ipc/library.js` prints one line and exits 0.
        - `git grep -c -F 'rootHasContent' -- main.js main/folder-sync.js` prints exactly `main.js:3` and `main/folder-sync.js:3`, and exits 0. Each is FOLDER-UNREACHABLE-GUARD-1's two lines, plus `checkRoot: rootHasContent,` and the root-check line respectively.
-       - Dry-runs: each exits 1, no output.
+       - Dry-runs:
+         - The first three exit 1, with no output.
+         - The `rootHasContent` count exits 0 with `refs/remotes/origin/main:main.js:2` and `refs/remotes/origin/main:main/folder-sync.js:2`.
     9a. **Four banner codes; `partial-read` is log-only** (R1):
-        - `git grep -n -F 'const BANNER_CODES = new Set(["root-unlistable", "root-empty-suspect", "watch-failed", "sync-failed"]);' -- main/folder-notice.js` prints one line and exits 0.
-        - `git grep -n -F 'partial-read' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). Neither file names the code; the module's comment says "a partial read".
-        - `git grep -c -E '"(root-unlistable|root-empty-suspect|partial-read)"' -- main/folder-sync.js` still prints `main/folder-sync.js:5` and exits 0, so FOLDER-UNREACHABLE-GUARD-1's reports, its `partial-read` log line included, are unchanged.
-        - Dry-runs on `d0720ce0`: each exits 1, no output. The third is FOLDER-UNREACHABLE-GUARD-1's gate 11 count, which Done-when 3 must see on the merged base.
+        - `git grep -n -F 'const BANNER_CODES = new Set(["root-unlistable", "root-empty-suspect", "watch-failed", "sync-failed"]);' -- main/folder-notice.js` prints one line and exits 0. Dry-run: exit 1, no output.
+        - `git grep -n -F 'partial-read' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). Neither file names the code; the module's comment says "a partial read". Dry-run: exit 1 (no files).
+        - `git grep -c -E '"(root-unlistable|root-empty-suspect|partial-read)"' -- main/folder-sync.js` still prints `main/folder-sync.js:5` and exits 0, so FOLDER-UNREACHABLE-GUARD-1's reports, its `partial-read` log line included, are unchanged. Dry-run: exit 0, `refs/remotes/origin/main:main/folder-sync.js:5`.
     9b. **A different folder starts over** (R5):
         - `git grep -c -F 'resetFolderNotice' -- main.js main/ipc/state.js` prints exactly `main.js:2` (the function and the `ctx` member) and `main/ipc/state.js:2` (one call in each handler), and exits 0. No comment uses the name.
         - `git grep -c -F 'if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice();' -- main/ipc/state.js` prints `main/ipc/state.js:2` and exits 0.
         - `git grep -n -F 'const { pathKey } = require("../folder-sync");' -- main/ipc/state.js` prints one line and exits 0.
         - `git grep -n -F 'function reset() {' -- main/folder-notice.js` prints one line and exits 0.
-        - Dry-runs: each exits 1, no output. On the base, `git grep -n -F '    settings.sourceFolder = folder;' -- main/ipc/state.js` prints `d0720ce0:main/ipc/state.js:72:` and `:87:`, exit 0: the two lines the calls go before.
+        - Dry-runs: each exits 1, no output. On the base, `git grep -n -F '    settings.sourceFolder = folder;' -- main/ipc/state.js` prints `refs/remotes/origin/main:main/ipc/state.js:72:` and `:87:`, exit 0: the two lines the calls go before.
     10. **`syncAll`'s catch reports.**
-        - `git grep -n -F 'err && err.message); })' -- main/folder-sync.js` prints nothing (exit 1). Dry-run: exit 0, `d0720ce0:main/folder-sync.js:126:      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
+        - `git grep -n -F 'err && err.message); })' -- main/folder-sync.js` prints nothing (exit 1). Dry-run: exit 0, `refs/remotes/origin/main:main/folder-sync.js:143:      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
         - `git grep -n -F 'reportFolderProblem("sync-failed", folder)' -- main/folder-sync.js` prints one line and exits 0. Dry-run: exit 1, no output.
+        - `git grep -c -F 'reportFolderProblem' -- main.js main/folder-sync.js` prints exactly `main.js:2` and `main/folder-sync.js:7`, and exits 0. Dry-run: exit 0, `refs/remotes/origin/main:main.js:2` and `refs/remotes/origin/main:main/folder-sync.js:6`.
     11. **Two new handlers.** `git grep -c -F 'ipcMain.handle(' -- main/ipc/state.js` prints `main/ipc/state.js:10` and exits 0.
-        - Dry-run: exit 0, `d0720ce0:main/ipc/state.js:8`.
+        - Dry-run: exit 0, `refs/remotes/origin/main:main/ipc/state.js:8`.
         - `git grep -n -E 'ipcMain\.handle\("(get-folder-problem|retry-source-folder)"' -- main/ipc/state.js` prints two lines and exits 0. Dry-run: exit 1, no output.
-    12. **One timer, no loop, no inline style** (R4):
-        - `git grep -c -F 'FOLDER_RETRY_LIST_TIMEOUT_MS' -- main/constants.js main/folder-notice.js` prints exactly `main/constants.js:2` (the definition and the export) and `main/folder-notice.js:2` (the require and the timer), and exits 0. `git grep -n -F 'const FOLDER_RETRY_LIST_TIMEOUT_MS = 30000;' -- main/constants.js` prints one line and exits 0.
-        - `git grep -c -F 'setTimeout(' -- main/folder-notice.js` prints `main/folder-notice.js:1`, and `git grep -c -F 'clearTimeout(timer)' -- main/folder-notice.js` prints `main/folder-notice.js:1`; each exits 0.
-        - `git grep -n -E 'setInterval|requestAnimationFrame' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). `git grep -n -E 'setTimeout|setInterval|requestAnimationFrame' -- src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). `git grep -n -F 'style=' -- src/components/FolderNoticeBanner.tsx` prints nothing (exit 1).
-        - Dry-runs: each exits 1, no output. The new files do not exist on the base, so the "prints nothing" checks are vacuous there; tests (fn-b), (fn-z) and (fn-p) are their positive controls. On the base, `git grep -c -F 'FOLDER_' -- main/constants.js` prints `d0720ce0:main/constants.js:10`, and this item makes it 12.
-    13. **One text, two places.** `git grep -c -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js src/components/FolderNoticeBanner.tsx` prints exactly `main.js:1` and `src/components/FolderNoticeBanner.tsx:1`, and exits 0.
-        - Dry-run: exit 1, no output. On the merged base it prints `main.js:1`.
+    12. **The shared bound is present; no timer, no loop, no inline style here** (R4):
+        - **Present (LARGE-FOLDER-SYNC-2's):**
+          - `git grep -n -E '^const FOLDER_LIST_TIMEOUT_MS = 30000;$' -- main/constants.js` prints exactly one line and exits 0.
+          - `git grep -n -F 'try { entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true })); } catch { return null; }' -- main/folder-watcher.js` prints one line and exits 0. This is the bounded `rootHasContent` that Retry relies on.
+          - Both are checked on the base before C1 (Done-when 3). If either is absent, LARGE-FOLDER-SYNC-2 has not merged as amended: stop.
+        - **Not edited here:** `git diff --quiet refs/remotes/origin/main -- main/constants.js` exits 0, and `git grep -n -F 'FOLDER_RETRY_LIST_TIMEOUT_MS' -- main src tests` prints nothing (exit 1).
+        - `git grep -n -E 'setTimeout|setInterval|requestAnimationFrame' -- main/folder-notice.js src/components/FolderNoticeBanner.tsx` prints nothing (exit 1). `git grep -n -F 'style=' -- src/components/FolderNoticeBanner.tsx` prints nothing (exit 1).
+        - **Dry-runs on `89a5a95c`:**
+          - The two "present" checks exit 1, with no output: LARGE-FOLDER-SYNC-2 adds them, so they become live once it merges.
+          - `FOLDER_RETRY_LIST_TIMEOUT_MS` exits 1.
+          - The new files do not exist on the base, so their "prints nothing" checks are vacuous there. Tests (fn-b), (fn-z) and (fn-p) are their positive controls.
+    13. **One text, two places — PLACEHOLDER until the owner decides the wording** (Brain relaying: "…then press Retry" recommended). Blurby.Roadmap writes `FINAL_TEXT` into this gate, the Edit sites and the tests at fold-in. The item does not dispatch while this gate still reads `FINAL_TEXT`.
+        - `git grep -c -F "FINAL_TEXT" -- main.js src/components/FolderNoticeBanner.tsx` prints exactly `main.js:1` and `src/components/FolderNoticeBanner.tsx:1`, and exits 0.
+        - If `FINAL_TEXT` differs from the shipped string, `git grep -n -F "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up." -- main.js src` prints nothing (exit 1).
+        - Dry-run of the shipped string: exit 0, `refs/remotes/origin/main:main.js:356:`, so that check can fail.
     14. **Shared core:** `git diff --numstat refs/remotes/origin/main -- src/types.ts` prints exactly `3	0	src/types.ts` and exits 0. `git grep -n -E '(getFolderProblem|retrySourceFolder|onFolderProblem)\?:' -- src/types.ts` prints three lines and exits 0.
         - Dry-run of the second: exit 1, no output.
     15. **These stay untouched:**
-        - `git grep -n -F 'showToast(data.message, 7000);' -- src/components/LibraryContainer.tsx` still prints one line and exits 0. Dry-run: `d0720ce0:src/components/LibraryContainer.tsx:146:`, exit 0.
-        - `git grep -n -F 'onAdd: (filepath) => folderSync.applyAdd(filepath),' -- main.js` still prints one line and exits 0, and so does `onChange: (filepath) => folderSync.applyChange(filepath),`. Dry-runs: `d0720ce0:main.js:351:` and `:353:`, exit 0.
+        - `git grep -n -F 'showToast(data.message, 7000);' -- src/components/LibraryContainer.tsx` still prints one line and exits 0. Dry-run: `refs/remotes/origin/main:src/components/LibraryContainer.tsx:146:`, exit 0.
+        - `git grep -n -F 'onAdd: (filepath) => folderSync.applyAdd(filepath),' -- main.js` still prints one line and exits 0, and so does `onChange: (filepath) => folderSync.applyChange(filepath),`. Dry-runs: `refs/remotes/origin/main:main.js:345:` and `:347:`, exit 0.
         - `git diff --numstat refs/remotes/origin/main -- main/ipc/library.js` prints exactly `1	0	main/ipc/library.js` and exits 0: one added line.
-        - `git diff --quiet refs/remotes/origin/main -- src/styles src/components/LibraryContainer.tsx main/folder-watcher.js src/test-harness` exits 0.
-    16. **Technical Reference.** `docs/governance/TECHNICAL_REFERENCE.md:711`, the "Folder watch" row: its description cell ends with `; while the folder cannot be reached, the library shows a banner whose Retry makes one root check per press, capped at FOLDER_RETRY_LIST_TIMEOUT_MS, and starts one sync when the folder lists (main/folder-notice.js, FOLDER-NOTICE-1)`, directly before ` | \`main/folder-watcher.js\` |`.
+        - `git diff --quiet refs/remotes/origin/main -- src/styles src/components/LibraryContainer.tsx src/test-harness` exits 0.
+    16. **Technical Reference.** `docs/governance/TECHNICAL_REFERENCE.md:711`, the "Folder watch" row: its description cell ends with `; while the folder cannot be reached, the library shows a banner whose Retry makes one root check per press, bounded by FOLDER_LIST_TIMEOUT_MS, and starts one sync when the folder lists (main/folder-notice.js, FOLDER-NOTICE-1)`, directly before ` | \`main/folder-watcher.js\` |`. On the base, that row ends `… (FOLDER-UNREACHABLE-GUARD-1) | \`main/folder-watcher.js\` |`.
         - `git grep -c -F 'FOLDER-NOTICE-1' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0. Dry-run: exit 1, no output.
     17. **Scratch-profile live control, with an instrument control (LL-151, LL-152), production builds, a LOCAL temp folder.**
         - Never the owner's profile, and never Google Drive. The executor runs it unattended; every probe checks `document.visibilityState` (standing rule 45). Not dry-run by the planner (it launches the app). The full recipe is in Implementation detail, Live control.
@@ -5585,9 +6869,9 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     20. `git diff --name-status refs/remotes/origin/main` (after `git merge refs/remotes/origin/main`) lists exactly the following, plus the time log `docs/governance/close-outs/Timing.FOLDER-NOTICE-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.FOLDER-NOTICE-1.GovernanceStaging.<date>.md` if kept (standing rule 41):
         - `M docs/governance/TECHNICAL_REFERENCE.md`
         - `M main.js`
-        - `M main/constants.js`
         - `A main/folder-notice.js`
         - `M main/folder-sync.js`
+        - `M main/folder-watcher.js`
         - `M main/ipc/library.js`
         - `M main/ipc/state.js`
         - `M preload.js`
@@ -5600,35 +6884,28 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         - `M tests/folderSync.test.js`
         - `M tests/folderUnreachableGuard.test.js`
 
-        Absent: every `src/styles/**` file, `src/components/LibraryContainer.tsx`, `main/folder-watcher.js` and `src/test-harness/**`.
-- **Effort:** M. The code is small: one 30-line module, one 40-line component, one constant, and one-line edits elsewhere. Most of the effort is twenty-eight tests (fake timers, the real folder sync, the rescan handler, a jsdom library render), a scripted live control with an instrument control, and an owner check.
+        Absent: every `src/styles/**` file, `src/components/LibraryContainer.tsx` and `src/test-harness/**`.
+- **Effort:** M. The code is small: one 25-line module, one 40-line component, and one-line edits elsewhere. Most of the effort is thirty-one tests (fake timers, the real folder sync, the rescan handler, a real watcher, a jsdom library render), a scripted live control with an instrument control, and an owner check.
 - **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; the repository operator merges on Blurby.Roadmap's go (Stage 8 session routing); technical questions go to Blurby.Brain; the owner runs Done-when 18 in the batched smoke.
-- **Lane:** UX polish. Execution surfaces C (the library banner) and D (main-process state, IPC, preload and one constant). Cross-lane: it builds on two Library & Content items, FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2.
+- **Lane:** UX polish. Execution surfaces C (the library banner) and D (main-process state, IPC and preload). Cross-lane: it builds on two Library & Content items, FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2.
 - **Source:**
   - The owner's decision (option C, 2026-10-14/15, relayed by Blurby.Brain), with the refinement "button tries only once. No infinite loop".
   - Blurby.Brain's rulings R1–R4 of 2026-10-15.
-  - FOLDER-UNREACHABLE-GUARD-1's ruling Q1 (amended) and its "Once per episode" ruling (`ed05868a`).
+  - FOLDER-UNREACHABLE-GUARD-1's ruling Q1 (amended) and its "Once per episode" ruling (`ed05868a`); its quality review's three findings, approved by Blurby.Brain at its merge (`89a5a95c`) as R6–R8.
   - LARGE-FOLDER-SYNC-2's "Owner decision: the scan-failure notice".
-  - This trace on `d0720ce0`.
+  - This trace: first on `d0720ce0`, re-anchored on `89a5a95c`.
 - **Path:** dispatch.
-- **Branch:** `eb/folder-notice-1` from `refs/remotes/origin/main` after FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2 merge, in worktree `C:\Projects\Blurby\.worktrees\folder-notice-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
-- **Merge order:** after FOLDER-UNREACHABLE-GUARD-1 (22), which also edits `rescan-folder`, and LARGE-FOLDER-SYNC-2 (23). It is not a release gate: the release does not wait for it, but if it merges first, the batched smoke covers it.
+- **Branch:** `eb/folder-notice-1` from `refs/remotes/origin/main` after GET-STATE-SECRET-1 and LARGE-FOLDER-SYNC-2 merge (FOLDER-UNREACHABLE-GUARD-1 is merged, `89a5a95c`), in worktree `C:\Projects\Blurby\.worktrees\folder-notice-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Merge order:** after FOLDER-UNREACHABLE-GUARD-1 (22, merged `89a5a95c`; it also edited `rescan-folder`), GET-STATE-SECRET-1 (23) and LARGE-FOLDER-SYNC-2 (24), whose bounded `rootHasContent` and `FOLDER_LIST_TIMEOUT_MS` this item requires. It does not dispatch until the owner's wording is written in (Done-when 13). It is not a release gate: the release does not wait for it, but if it merges first, the batched smoke covers it.
 
 ##### Implementation detail
-- **Edit sites.** Line numbers are on `d0720ce0`; the anchors are on the merged base (Prerequisites). Re-grep before each edit.
-  - **`main/constants.js:173`**, in the Folder Watcher section, after `const FOLDER_SCAN_YIELD_EVERY = 500;`, add:
-    ```js
-    /** Retry's check that the source folder lists gives up after this long; the banner stays and Retry can be pressed again (ms) */
-    const FOLDER_RETRY_LIST_TIMEOUT_MS = 30000;
-    ```
-    In `module.exports`, after `  FOLDER_SCAN_YIELD_EVERY,` (`:284`), add `  FOLDER_RETRY_LIST_TIMEOUT_MS,`.
+- **Edit sites.** Line numbers are on `89a5a95c` (FOLDER-UNREACHABLE-GUARD-1 merged); the anchors are listed under Prerequisites. Re-grep before each edit, after LARGE-FOLDER-SYNC-2 merges.
   - **New `main/folder-notice.js`:**
     ```js
     // main/folder-notice.js: the source folder's problem for the library banner (FOLDER-NOTICE-1): null, or the last code
     // that means unreachable. Each change is pushed. Retry makes one root check per press and at most one sync call.
     // CommonJS only — Electron main process
     "use strict";
-    const { FOLDER_RETRY_LIST_TIMEOUT_MS } = require("./constants");
 
     // Only these codes mean the folder cannot be reached. A partial read stays log-only: the root was listed, so "can't
     // reach your source folder" would be false, and Drive placeholder read errors on a large folder would make the banner noisy.
@@ -5649,14 +6926,12 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         problem = null;
         send(null);
       }
-      // One root check, capped by one timer that is always cleared; on true, clear and start one sync without waiting for it.
-      // A check that settles after the cap is ignored. Nothing is scheduled after this returns.
+      // One root check per press: rootHasContent bounds its own listing and answers null on a hang (LARGE-FOLDER-SYNC-2).
+      // On true, clear and start one sync without waiting for it. Nothing is scheduled after this returns.
       async function retry() {
         const folder = getFolder();
         if (!folder) return problem;
-        let timer;
-        const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), FOLDER_RETRY_LIST_TIMEOUT_MS); });
-        const root = await Promise.race([checkRoot(folder), cap]).finally(() => clearTimeout(timer));
+        const root = await checkRoot(folder);
         console.log("[folder-notice] Retry: one root check:", root);
         if (root === true) {
           set(null);
@@ -5670,7 +6945,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     module.exports = { createFolderNotice };
     ```
   - **`main.js:18`**, after `const { createFolderSync } = require("./main/folder-sync");`, add `const { createFolderNotice } = require("./main/folder-notice");`.
-  - **`main.js`, FOLDER-UNREACHABLE-GUARD-1's hook block** (between `emitSyncProgress`, `:321-325`, and `const folderSync = createFolderSync({`, `:327`). Before (as amended at `ed05868a`):
+  - **`main.js:315-319`, FOLDER-UNREACHABLE-GUARD-1's hook block** (between `emitSyncProgress`, `:308-312`, and `const folderSync = createFolderSync({`, `:321`). Before:
     ```js
     // HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): the last folder problem's code ("root-unlistable",
     // "root-empty-suspect" or "partial-read") rides on the existing watcher-error payload. Nothing new is sent: each send is a toast.
@@ -5695,46 +6970,60 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     function reportFolderOk() { folderNotice.set(null); }
     function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); } // a different folder: a new episode (R5)
     ```
-    `syncLibraryWithFolder` and `startWatcherFn` are hoisted function declarations. `rootHasContent` comes from FOLDER-UNREACHABLE-GUARD-1's import at `:15`. `watcher`, `folderWorkStopped`, `settings` and `mainWindow` are module-level `let`s (`main.js:63-68`, `:89`). Each is read only when a callback runs, after app ready.
-  - **`main.js`, the `createFolderSync` dependencies** (FOLDER-UNREACHABLE-GUARD-1's `:332`).
+    `syncLibraryWithFolder` and `startWatcherFn` are hoisted function declarations. `rootHasContent` comes from FOLDER-UNREACHABLE-GUARD-1's import at `:15`. `watcher`, `folderWorkStopped`, `settings` and `mainWindow` are module-level `let`s (`main.js:63`, `:66`, `:68`, `:90`). Each is read only when a callback runs, after app ready.
+  - **`main.js:327`, the `createFolderSync` dependencies.**
     - Before: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,`.
     - After: `  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,`.
     - The substring that FOLDER-UNREACHABLE-GUARD-1's test (n) pins, `emitProgress: emitSyncProgress, reportFolderProblem,`, is kept.
-  - **`main.js`, `onError`.** Directly before `      if (folderToastShown) return;`, add:
+  - **`main.js:356`, the toast text** (wording pending; Done-when 13). Before: `        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";`. After: `        : "FINAL_TEXT";`, written in at fold-in. The permission branch (`:355`, "Can't watch this folder — check permissions.") is unchanged.
+  - **`main.js:357-362`, `onError`'s tail** (R6, R7). Before:
     ```js
-          folderNotice.set(folderNotice.get() || "watch-failed"); // the banner shows even when this episode's toast was sent
+          console.error("[watcher] Error:", err.message);
+          if (folderToastShown) return;
+          folderToastShown = true;
+          if (mainWindow && !mainWindow.isDestroyed()) {
+            mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });
+          }
     ```
-  - **`main.js`, the payload.**
-    - Before: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });`.
-    - After: `        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: folderNotice.get() });`.
-    - The line above has just set a non-null code, so the value is unchanged. The renderer reads only `data.message`.
-  - **`main.js:463`**, the `ipcContext`. After `  startWatcher: startWatcherFn,`, add:
+    After:
+    ```js
+          console.error("[watcher] Error:", err.message);
+          folderNotice.set(folderNotice.get() || "watch-failed"); // the banner shows even when no toast is sent
+          // The episode's toast counts only once it lands, in a live window that has finished loading (LibraryContainer's
+          // listener is mounted by then). Otherwise the banner's mount fetch shows the problem; no toast replays.
+          if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
+          folderToastShown = true;
+          mainWindow.webContents.send("watcher-error", { message: userMessage, reason: folderNotice.get() });
+    ```
+    The reason is read right after it is set, so it is never `null` and never a stale code (R6). The renderer reads only `data.message`.
+  - **`main/folder-watcher.js:156`** (R8), inside the `error` listener (`:154-157`). Before: `    if (onError) onError(err, sourceFolder);`. After: `    if (onError && !closed) onError(err, sourceFolder); // a replaced watcher's late error belongs to no episode`. The log line above it (`:155`) and the throw path's call (`:150`) are unchanged.
+  - **`main.js:460`**, the `ipcContext`. After `  startWatcher: startWatcherFn,`, add:
     ```js
       reportFolderOk,
       resetFolderNotice,
       getFolderProblem: () => folderNotice.get(),
       retrySourceFolder: () => folderNotice.retry(),
     ```
-  - **`main/folder-sync.js`, the destructure.** Before: `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`. After: `    emitProgress, now = Date.now, reportFolderProblem = () => {}, reportFolderOk = () => {} } = deps;`.
-  - **`main/folder-sync.js:72`**, `runFullSync`. Directly after `    emitProgress(0, 0, "scanning");` (before FOLDER-UNREACHABLE-GUARD-1's `const report = {};`), add:
+  - **`main/folder-sync.js:14`, the destructure.** Before: `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`. After: `    emitProgress, now = Date.now, reportFolderProblem = () => {}, reportFolderOk = () => {} } = deps;`.
+  - **`main/folder-sync.js:77`**, `runFullSync`. Directly after `    emitProgress(0, 0, "scanning");` (before FOLDER-UNREACHABLE-GUARD-1's `const report = {};`), add:
     ```js
         if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder); // reachable, known before the walk (FOLDER-NOTICE-1)
     ```
     The run then continues to the scan exactly as before. A stale run is not returned from here, so the scan-call counts of existing tests (d), (n2) and (n3) are unchanged.
-  - **`main/folder-sync.js:126`**, `syncAll`'s catch.
+  - **`main/folder-sync.js:143`**, `syncAll`'s catch.
     - Before: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
     - After: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); reportFolderProblem("sync-failed", folder); })`.
     - The F3 log line that `tests/folderSync.test.js:403` pins is unchanged.
-  - **`main/folder-sync.js:135-136`**, `addOne`. After `    try { st = await statFile(p); } catch { return; }` and its `    if (stopped) return;`, add:
+  - **`main/folder-sync.js:152-153`**, `addOne`. After `    try { st = await statFile(p); } catch { return; }` and its `    if (stopped) return;`, add:
     ```js
         reportFolderOk(getSourceFolder()); // a watcher add read a file under the folder, so the root lists content
     ```
-    `underFolder(p)` (`:133`) has already checked that the path is under the source folder.
-  - **`main/ipc/library.js`, `rescan-folder`** (R3). After FOLDER-UNREACHABLE-GUARD-1's `root-empty-suspect` block closes, and before `      const skipped = (report.skipped || []).map(pathKey);`, add:
+    `underFolder(p)` (`:150`) has already checked that the path is under the source folder.
+  - **`main/ipc/library.js:378-379`, `rescan-folder`** (R3). After FOLDER-UNREACHABLE-GUARD-1's `root-empty-suspect` block closes (`:378`), and before `      const skipped = (report.skipped || []).map(pathKey);`, add:
     ```js
           if (files.length) ctx.reportFolderOk(); // the rescan listed books, so the root is reachable (FOLDER-NOTICE-1)
     ```
-  - **`main/ipc/state.js:9`**, after `const fsPromises = require("fs/promises");`, add `const { pathKey } = require("../folder-sync");`.
+  - **`main/ipc/state.js:10`**, after `const fsPromises = require("fs/promises");`, add `const { pathKey } = require("../folder-sync");`.
   - **`main/ipc/state.js:72`** (`select-folder`) and **`:87`** (`switch-folder`) (R5). Directly before each `    settings.sourceFolder = folder;`, add:
     ```js
         if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice(); // a different folder: the banner was the old one's
@@ -5760,7 +7049,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         return () => ipcRenderer.removeListener("folder-problem", handler);
       },
     ```
-  - **`src/types.ts:371`** (shared core), after `  onWatcherError?: (callback: (data: { message: string }) => void) => () => void;`, add exactly:
+  - **`src/types.ts:373`** (shared core), after `  onWatcherError?: (callback: (data: { message: string }) => void) => () => void;`, add exactly:
     ```ts
       getFolderProblem?: () => Promise<string | null>; // FOLDER-NOTICE-1: null, or the source folder's reason code
       retrySourceFolder?: () => Promise<string | null>;
@@ -5773,7 +7062,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     import { useEffect, useState } from "react";
 
     const api = window.electronAPI;
-    const TEXT = "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";
+    const TEXT = "FINAL_TEXT"; // pending owner decision; the same string as the toast in main.js (Done-when 13)
 
     export default function FolderNoticeBanner() {
       const [problem, setProblem] = useState<string | null>(null);
@@ -5819,13 +7108,17 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - **`tests/folderSwitchWatcherFirst.test.js`** (LARGE-FOLDER-SYNC-2's), its plain `ctx` (C2, with the `main/ipc/state.js` edit). Add `resetFolderNotice: vi.fn(),`.
     - Its (ws-select) and (ws-switch) cases pick a folder that differs from `sourceFolder`, so the handler now calls `ctx.resetFolderNotice()`. On a plain object without it, that throws.
     - Nothing else changes, and its `order` assertions are unaffected. `tests/ipcPathTrust.test.js` and SETTINGS-KEY-TRUST-1's harness use a `Proxy` `ctx` whose unlisted members are `vi.fn()`, so they need no edit.
-  - **`tests/folderUnreachableGuard.test.js`, test (n)** (C2, with the `main.js` edit). Replace the expected string `reason: lastFolderProblem || "watch-failed"` with `reason: folderNotice.get()`. Nothing else in that file changes. FOLDER-UNREACHABLE-GUARD-1's pin moves with the code it pins (LL-156).
+  - **`tests/folderUnreachableGuard.test.js`, test (n)** (`:297-311`; C2, with the `main.js` edit). Three expected strings move with the code they pin (LL-156). Nothing else in that file changes.
+    - `reason: lastFolderProblem || "watch-failed"` becomes `reason: folderNotice.get()`.
+    - `if (folderToastShown) return;` becomes `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`.
+    - The shipped toast text becomes `FINAL_TEXT`, at fold-in.
+    - Its `Can't watch this folder` and `try re-selecting the folder` checks stay as they are.
   - **`docs/governance/TECHNICAL_REFERENCE.md:711`:** the Done-when 16 text.
   - Nothing else changes. In particular, these stay as they are:
     - `main.js`'s watcher callbacks;
-    - the toast text and its once-per-episode lines;
+    - the toast's permission branch, `startWatcherFn`'s flag reset, and the `fs.watch` throw path;
     - `LibraryContainer.tsx` and every stylesheet;
-    - the scan (`main/folder-watcher.js`);
+    - every other line of `main/folder-watcher.js` (the scan included);
     - every other line of `rescan-folder` and `main/ipc/library.js`;
     - FOLDER-UNREACHABLE-GUARD-1's `partial-read` reports.
 - **Tests** (all committed at C1, except the one-string edit to (n) above):
@@ -5836,7 +7129,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         - `send = vi.fn()`, `resumeWatcher = vi.fn()` and `getFolder = () => ROOT`;
         - `checkRoot = vi.fn(root)`, where `root` defaults to `async () => null`;
         - `sync = vi.fn(sync)`, where `sync` defaults to `async () => {}`.
-      - `const { FOLDER_RETRY_LIST_TIMEOUT_MS } = require("../main/constants.js")`. The value is read, not hard-coded, except in (fn-z)'s check that it is 30000.
+      - `const { FOLDER_LIST_TIMEOUT_MS } = require("../main/constants.js")` (LARGE-FOLDER-SYNC-2's). The value is read, not hard-coded, except in (fn-z)'s check that it is 30000.
       - `afterEach`: `vi.useRealTimers()`, `vi.restoreAllMocks()`, `Module._load = originalLoad`, and clear `../main/ipc/state.js` and `../main/ipc/library.js` from `require.cache`.
     - **The state IPC harness:**
       - It uses the `Module._load` pattern of `tests/folderSwitchWatcherFirst.test.js` (LARGE-FOLDER-SYNC-2): a fake `electron` whose `ipcMain.handle` captures handlers into a `Map`, with `dialog: {}` and `app: {}`; and `../window-manager` as `{ getSystemTheme: vi.fn(), updateWindowTheme: vi.fn() }`. `../constants` is the real module.
@@ -5854,7 +7147,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         - A `console.log` spy saw `"[folder-notice] Retry: one root check:"` exactly once, with `null`.
         - The same holds with the check resolving `false`.
       - **(fn-b) A failed attempt schedules nothing.** `vi.useFakeTimers()`, then (fn-a)'s setup and `await n.retry()`.
-        - `vi.getTimerCount()` is 0 (the cap was cleared).
+        - `vi.getTimerCount()` is 0 (the module arms no timer).
         - After `vi.advanceTimersByTime(60 * 60 * 1000)`, `checkRoot` is still called once, `sync` never, and `send` has gained no call.
       - **(fn-c) A clear from any source pushes once and resumes the watcher once.**
         - `n.set("watch-failed")`, then `n.set(null)`: `send` was last called with `null`, and `resumeWatcher` once.
@@ -5895,10 +7188,10 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
           - `retrySourceFolder: () => folderNotice.retry(),`
           - `resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },`
           - `reason: folderNotice.get()`
-        - The index of `folderNotice.set(folderNotice.get() || "watch-failed");` is greater than `-1` and less than the index of `if (folderToastShown) return;`.
+        - The index of `folderNotice.set(folderNotice.get() || "watch-failed");` is greater than `-1`, and less than the index of `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`.
         - `main.js` has at least three matches of `/\breportFolderOk\b/g`.
         - It does not contain `lastFolderProblem`.
-        - It still contains `if (watcher) folderToastShown = false;` and the toast text.
+        - It still contains `if (watcher) folderToastShown = false;` and `FINAL_TEXT`.
         - `preload.js` contains `getFolderProblem: () => ipcRenderer.invoke("get-folder-problem"),`, `retrySourceFolder: () => ipcRenderer.invoke("retry-source-folder"),` and `ipcRenderer.on("folder-problem", handler);`.
         - *C1: the listed `main.js` and `preload.js` strings are absent, and `lastFolderProblem` is present.*
       - **(fn-s) `partial-read` is log-only** (R1).
@@ -5906,13 +7199,16 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
         - After `n.set("root-unlistable")` (one `send`): `n.set("partial-read")` leaves `n.get()` `"root-unlistable"`, with no new `send`.
         - An unknown code such as `n.set("other")` is also ignored.
       - **(fn-x) A Rescan that lists books clears** (R3). On disk: `root/a.txt`. Library: `[folderDoc("A", root/a.txt)]`. After `rescan-folder`, `ctx.reportFolderOk` was called exactly once. *C1: not called.*
-      - **(fn-z) A hung root check fails after the cap, with no sync and no pending timer** (R4).
-        - `FOLDER_RETRY_LIST_TIMEOUT_MS` is 30000.
-        - `vi.useFakeTimers()`; `make({ root: () => new Promise(() => {}) })`, a check that never settles; `n.set("root-unlistable")`.
-        - `const p = n.retry()`. After `await vi.advanceTimersByTimeAsync(FOLDER_RETRY_LIST_TIMEOUT_MS - 1)`, `p` has not settled (a flag set in `.then`).
+      - **(fn-z) A hung root check fails at the bound, with no sync and no pending timer** (R4, against LARGE-FOLDER-SYNC-2's bounded `rootHasContent`).
+        - `FOLDER_LIST_TIMEOUT_MS` (from `../main/constants.js`) is 30000.
+        - `const cjsFs = require("fs/promises")` (the object `folder-watcher.js` calls through). `vi.spyOn(cjsFs, "readdir")` returns a promise that never settles when `path.resolve(arg)` is `ROOT`, and calls the original otherwise.
+        - `vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] })`, the rule LARGE-FOLDER-SYNC-2's tests use.
+        - `make({ root: require("../main/folder-watcher.js").rootHasContent })`, the real, bounded check; then `n.set("root-unlistable")`.
+        - `const p = n.retry()`. After `await vi.advanceTimersByTimeAsync(FOLDER_LIST_TIMEOUT_MS - 1)`, `p` has not settled (a flag set in `.then`).
         - After `await vi.advanceTimersByTimeAsync(1)`, `await p` is `"root-unlistable"`.
         - `checkRoot` was called once, `sync` never, `resumeWatcher` never, and `send` gained no call. `vi.getTimerCount()` is 0.
-        - The log line carried `"timeout"`.
+        - The log line carried `null`.
+        - *C1: `Cannot find module '../main/folder-notice.js'`.*
       - **(fn-sw) A different folder clears the banner and starts a new toast episode** (R5). This uses the state harness with real temp folders `A`, `B` (empty, readable) and `C`, and the real `createFolderNotice`.
         - **`ctx`:**
           - `settings = { sourceFolder: A, recentFolders: [A, B, C] }`.
@@ -5924,6 +7220,23 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
           - `switch-folder` with `C`: `n.get()` is `"root-unlistable"` (the banner is up again), and `watcherErrors` is exactly `[C]`.
         - **Run 2** (A → C directly), with the same starting state. `switch-folder` with `C`: `watcherErrors` is exactly `[C]`. Without the reset, A's flag would have swallowed C's first toast.
         - *C1: the handlers never call `resetFolderNotice`. After run 1's switch to `B` the banner is still `"root-unlistable"`, and run 2's `watcherErrors` is empty.*
+      - **(fn-reason) No stale reason after a reachable sync** (R6). This uses the real module, `n`, and the real `createFolderSync` with (fn-e)'s fakes.
+        - First sync: `rootHasContent` resolves `null` and the scan resolves `null`. `n.get()` is `"root-unlistable"`.
+        - Second sync: `rootHasContent` resolves `true` and the scan resolves `[file(ROOT/a.epub)]`. `n.get()` is `null`.
+        - Then `applyUnlink` of an unreadable file (`statFile` rejects with `EIO`), which makes FOLDER-UNREACHABLE-GUARD-1 report `partial-read`. `n.get()` is still `null`.
+        - So the payload expression `main.js` uses, `n.get() || "watch-failed"`, evaluates to `"watch-failed"` for a later, unrelated watch error: neither `root-unlistable` nor `partial-read` rides on it.
+        - *C1: the module does not exist. The base's `lastFolderProblem` would carry `partial-read`.*
+      - **(fn-deliver) The episode's toast counts only once it lands** (R7; source text, `main.js`'s `onError` body, from `onError: (err, folderPath) => {` to the `startWatcher` call's closing `});`).
+        - It contains `if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;`.
+        - The indexes of the guard, then `folderToastShown = true;`, then `mainWindow.webContents.send("watcher-error"` rise in that order.
+        - `folderToastShown = true;` appears exactly once in the body.
+        - The body does not contain `if (folderToastShown) return;`.
+        - *C1: the base sets the flag at `:359`, before the window check at `:360`.*
+      - **(fn-closed) A replaced watcher's late error is ignored** (R8). Real `startWatcher` on a real temp folder, with `console.error` mocked and `onError = vi.fn()`.
+        - `const w = startWatcher(dir, { onAdd() {}, onUnlink() {}, onChange() {}, onError })`.
+        - `w.emit("error", new Error("EPERM"))`: `onError` was called once (the control half).
+        - `w.close()`, then `w.emit("error", new Error("EPERM"))`: `onError` is still called once.
+        - *C1: twice. The `error` listener at `:154-157` does not check `closed`.*
     - **Controls, passing at C1 and C2:**
       - **(fn-same) Re-selecting the same folder is not a switch** (R5). Same harness, starting state as (fn-sw), with `ctx.resetFolderNotice` as a spy. `switch-folder` with `A`: the spy was not called, and `n.get()` is still `"root-unlistable"`.
       - **(fn-t)** The state harness still registers `select-folder` and `switch-folder`, and `get-state` returns `{ settings, library }`.
@@ -5950,11 +7263,12 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
       - `retrySourceFolder: vi.fn(() => gate.promise)`, where `gate` is a deferred promise;
       - `onFolderProblem: vi.fn((cb) => { push = cb; return () => { push = null; }; })`.
     - Render `LibraryContainer` (`vi.resetModules()`, then `await import("../src/components/LibraryContainer")`) inside `act`, then flush promises.
-    - `TEXT` is the banner text. `banner()` finds `[role="alert"]` whose text includes `TEXT`. `retryBtn()` finds the button inside it whose text is `"Retry"`.
+    - `TEXT` is `FINAL_TEXT` (written in at fold-in). `banner()` finds `[role="alert"]` whose text includes `TEXT`. `retryBtn()` finds the button inside it whose text is `"Retry"`.
     - **Fail at C1** (no banner in the library):
       - **(fn-n) It shows on mount when main already holds a problem.** `initial = "root-unlistable"`.
         - `banner()` exists, and `retryBtn()` exists and is not disabled.
         - The `main.js` source contains `TEXT` exactly: the toast and the banner say the same thing.
+        - The mount fetch shows the banner, and no toast replays (R7): no `.toast` element contains `TEXT`.
         - *C1: `banner()` is null.*
       - **(fn-o) One press, one call; a press during the attempt is ignored.**
         - Click Retry inside `act`: `retrySourceFolder` called once, and `retryBtn().disabled` is `true`.
@@ -5991,13 +7305,14 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     $launch = { param($exe, $tag) Start-Process -FilePath $exe -ArgumentList '--remote-debugging-port=9338' -RedirectStandardOutput "$prof-$tag-out.txt" -RedirectStandardError "$prof-$tag-err.txt" -PassThru }
     $cdpJs = "const expr=process.argv[1];fetch('http://127.0.0.1:9338/json/list').then(r=>r.json()).then(l=>{const t=l.find(x=>x.type==='page'&&!x.url.startsWith('devtools'));const s=new WebSocket(t.webSocketDebuggerUrl);s.onopen=()=>s.send(JSON.stringify({id:1,method:'Runtime.evaluate',params:{expression:expr,awaitPromise:true,returnByValue:true}}));s.onmessage=(m)=>{const d=JSON.parse(m.data);if(d.id===1){console.log(d.result.result.value);process.exit(0)}};s.onerror=()=>process.exit(1)}).catch(e=>{console.error(e.message);process.exit(1)})"
     $cdp = { param($expr) & node -e $cdpJs $expr }
-    $probe = "JSON.stringify({vis:document.visibilityState,banner:[...document.querySelectorAll('.update-banner')].some(b=>b.textContent.includes('reach your source folder')),disabled:([...document.querySelectorAll('.update-banner button')].find(b=>b.textContent==='Retry')||{disabled:null}).disabled,toasts:window.__fnT})"
-    $observe = "(()=>{window.__fnT=0;let was=false;new MutationObserver(()=>{const on=[...document.querySelectorAll('.toast')].some(t=>t.textContent.includes('reach your source folder'));if(on&&!was)window.__fnT++;was=on;}).observe(document.body,{childList:true,subtree:true,characterData:true});const d=document.createElement('div');d.className='toast';d.textContent='reach your source folder';document.body.appendChild(d);return new Promise(r=>setTimeout(()=>{d.remove();setTimeout(()=>{const n=window.__fnT;window.__fnT=0;r('self-test '+n)},50)},50));})()"
+    $probe = "JSON.stringify({vis:document.visibilityState,banner:[...document.querySelectorAll('.update-banner')].some(b=>b.textContent.includes('source folder')),disabled:([...document.querySelectorAll('.update-banner button')].find(b=>b.textContent==='Retry')||{disabled:null}).disabled,toasts:window.__fnT})"
+    $observe = "(()=>{window.__fnT=0;let was=false;new MutationObserver(()=>{const on=[...document.querySelectorAll('.toast')].some(t=>t.textContent.includes('source folder'));if(on&&!was)window.__fnT++;was=on;}).observe(document.body,{childList:true,subtree:true,characterData:true});const d=document.createElement('div');d.className='toast';d.textContent='source folder';document.body.appendChild(d);return new Promise(r=>setTimeout(()=>{d.remove();setTimeout(()=>{const n=window.__fnT;window.__fnT=0;r('self-test '+n)},50)},50));})()"
     $press = "(()=>{const b=[...document.querySelectorAll('.update-banner button')].find(b=>b.textContent==='Retry');if(!b)return 'no button';b.click();return 'pressed'})()"
     $quitJs = "fetch('http://127.0.0.1:9338/json/version').then(r=>r.json()).then(v=>{const s=new WebSocket(v.webSocketDebuggerUrl);s.onopen=()=>s.send(JSON.stringify({id:1,method:'Browser.close'}));s.onclose=()=>process.exit(0);s.onerror=()=>process.exit(1)}).catch(e=>{console.error(e.message);process.exit(1)})"
     $quit = { param($p) & node -e $quitJs | Out-Null; try { Wait-Process -Id $p.Id -Timeout 20 -ErrorAction Stop } catch { taskkill /PID $p.Id /T /F | Out-Null; "forced quit" } }
     $logCount = { param($tag, $text) @(Select-String -Path "$prof-$tag-out.txt","$prof-$tag-err.txt" -SimpleMatch -Pattern $text).Count }
     ```
+    - The probe and the toast counter match the fragment `source folder`. Blurby.Roadmap confirms at fold-in that it is a fragment of `FINAL_TEXT`, and picks another fragment if it is not.
     - The helpers follow FOLDER-UNREACHABLE-GUARD-1's live control: Node 24's global `WebSocket`, the CDP `Browser.close` quit, and `$lib` returning `$null` mid-rename (poll again).
     - The probe and the press use single-quoted JS inside double-quoted PowerShell strings, with no `$` and no apostrophe, so nothing is expanded.
     - **The probe is void unless it reports `"vis":"visible"`;** rerun that step (standing rule 45).
@@ -6040,7 +7355,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
       - The `a` logs hold no new `[watcher] Error:` line after the press.
     - **(f)** `Copy-Item "<worktree>\resources\sample-meditations.epub" "$src\d.epub"`. Poll each second, for 15 s at most, until a document has `filepath -eq "$src\d.epub"`. Pass: it arrives (the watcher resumed with no relaunch), and the probe still reads `"toasts":0`. Then `& $quit $p`.
     - **(g)** `$p = & $launch $exe2 g`; wait 15 s. The probe reads `"banner":false`; the root-check count in the `g` logs is 0. Then `& $quit $p`.
-  - The hung-listing cap (R4) is not driven live: a local folder cannot be made to hang on demand. Test (fn-z) covers it on fake timers.
+  - The hung-listing bound (R4, LARGE-FOLDER-SYNC-2's) is not driven live: a local folder cannot be made to hang on demand. Test (fn-z) covers it on fake timers.
   - **After:**
     - `Get-ChildItem "$prof\blurby-data" -Filter *.tmp` prints nothing.
     - `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
@@ -6073,7 +7388,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   if (Get-Process GoogleDriveFS -ErrorAction SilentlyContinue) { throw "Google Drive is still running" }
   if (Test-Path $drive) { throw "The Drive path is still reachable" }
   $p = Start-Process -FilePath $exe -RedirectStandardOutput "$prof-N-out.txt" -RedirectStandardError "$prof-N-err.txt" -PassThru
-  # Owner: the library opens; the toast "Blurby can't reach your source folder. ..." appears once and goes;
+  # Owner: the library opens; the toast (FINAL_TEXT) appears once and goes;
   # the banner with the same words and a Retry button stays. Wait 20 s and confirm it is still there.
 
   # B. Owner: press Retry once. Then:
@@ -6100,11 +7415,11 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 - **Staging plan:**
   - **C1:** `tests/folderNotice.test.js`, `tests/folderNoticeBanner.test.tsx` and the six cases in `tests/folderSync.test.js` (gates: Done-when 1 and 2). Then make the C1 control build (Live control, Builds).
   - **C2:** the code and docs edits (gates: Done-when 3–17, 19 and 20). They are:
-    - `main/constants.js` and `main/folder-notice.js`;
-    - `main.js`, `main/folder-sync.js`, `main/ipc/library.js` and `main/ipc/state.js`;
+    - `main/folder-notice.js`;
+    - `main.js`, `main/folder-sync.js`, `main/folder-watcher.js`, `main/ipc/library.js` and `main/ipc/state.js`;
     - `preload.js` and `src/types.ts`;
     - `src/components/FolderNoticeBanner.tsx` and `src/components/LibraryView.tsx`;
-    - test (n)'s one string, and the `resetFolderNotice: vi.fn(),` fixture line in `tests/folderSwitchWatcherFirst.test.js`;
+    - test (n)'s three strings, and the `resetFolderNotice: vi.fn(),` fixture line in `tests/folderSwitchWatcherFirst.test.js`;
     - the Technical Reference line.
   - Then merge to `main` with `--no-ff` on Blurby.Roadmap's go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass, including Done-when 18.
   - Stage files by name. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
@@ -6133,13 +7448,13 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 - **Lane ownership (parallel run):** surfaces C and D.
   - **Owned lines:**
     - `main/folder-notice.js` and `src/components/FolderNoticeBanner.tsx` (new);
-    - `main/constants.js`: two lines after `:173`, and one export after `:284`;
-    - `main.js`: the require after `:18`; FOLDER-UNREACHABLE-GUARD-1's hook block (replaced); the `reportFolderProblem,` dependency line; one line in `onError`; the payload line; and three `ipcContext` lines after `:463`;
-    - `main/folder-sync.js`: the destructure's last line; one line after `:72`; the catch at `:126`; and one line in `addOne` after `:136`;
-    - `main/ipc/library.js`: one line in `rescan-folder`, after FOLDER-UNREACHABLE-GUARD-1's `root-empty-suspect` block;
-    - `main/ipc/state.js`: one `pathKey` require after `:9`; one line in `select-folder` before `:72` and one in `switch-folder` before `:87`; and the two handlers after `switch-folder`;
+    - `main.js`: the require after `:18`; FOLDER-UNREACHABLE-GUARD-1's hook block `:315-319` (replaced); the dependency line `:327`; the toast text `:356`; `onError`'s tail `:357-362`; and four `ipcContext` lines after `:460`;
+    - `main/folder-watcher.js`: `:156` only;
+    - `main/folder-sync.js`: the destructure's last line `:14`; one line after `:77`; the catch at `:143`; and one line in `addOne` after `:153`;
+    - `main/ipc/library.js`: one line in `rescan-folder`, between `:378` and `:379`;
+    - `main/ipc/state.js`: one `pathKey` require after `:10`; one line in `select-folder` before `:72` and one in `switch-folder` before `:87`; and the two handlers after `switch-folder`;
     - `preload.js`: two lines after `:41`, and five after `:211`;
-    - `src/types.ts`: three lines after `:371`;
+    - `src/types.ts`: three lines after `:373`;
     - `src/components/LibraryView.tsx`: one import after `:15`, and one element after `:378`;
     - the two new test files, the six cases in `tests/folderSync.test.js`, the one string in `tests/folderUnreachableGuard.test.js`, the one fixture line in `tests/folderSwitchWatcherFirst.test.js`, and the Technical Reference line.
   - **Forbidden:**
@@ -6147,54 +7462,65 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - in particular: the toast text and its `folderToastShown` check, set and reset; `main.js`'s watcher callbacks; FOLDER-UNREACHABLE-GUARD-1's `partial-read` reports; and every other line of `rescan-folder`;
     - in `main/ipc/library.js`, `keepMainPaths`, `save-library` and `ALLOWED_FIELDS` (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1 and SAVE-LIBRARY-MERGE-1);
     - in `main/ipc/state.js`, every other line of `select-folder` and `switch-folder`. IPC-PATH-TRUST-1 edited their heads (`:83-85`, merged), and LARGE-FOLDER-SYNC-2 swaps their tails. Re-grep both handlers after each merges (standing rule 36), and do not touch the `save-settings` head (IPC-PATH-TRUST-1, then SETTINGS-KEY-TRUST-1);
-    - in `main/constants.js`, the ZIP caps (DEPS-AUDIT-1);
-    - `src/components/LibraryContainer.tsx`, every stylesheet, `main/folder-watcher.js` and `src/test-harness/**`;
+    - `main/constants.js` (LARGE-FOLDER-SYNC-2 defines the shared bound; DEPS-AUDIT-1 owns the ZIP caps);
+    - in `main/folder-watcher.js`, LARGE-FOLDER-SYNC-2's `timeLimit`, `SYSTEM_FOLDERS` and bounded `rootHasContent`;
+    - `src/components/LibraryContainer.tsx`, every stylesheet and `src/test-harness/**`;
+    - in `main/folder-watcher.js`, every line except `:156` (the scan, `rootHasContent`, `settle`, `onEvent`, `close` and the throw path at `:150`);
     - the other shared-core files (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`);
     - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
-  - **Shared-core touches:** `src/types.ts`, three added lines directly after `onWatcherError?` (`:371`): the getter, Retry and the listener, as given under Edit sites.
+  - **Shared-core touches:** `src/types.ts`, three added lines directly after `onWatcherError?` (`:373`): the getter, Retry and the listener, as given under Edit sites.
     - No other line of the file changes (Done-when 14).
     - The run starts this edit only while no other active item edits `src/types.ts`. UX-POLISH-2 (`:188`) and SETTINGS-KEY-TRUST-1 (`sortBy`, after `:201`) are other hunks. Confirm at dispatch that neither of them, nor NARRATE-REBUILD-1's open phase, has the file open.
   - **Merge order:**
-    - **After FOLDER-UNREACHABLE-GUARD-1 (22):** this item replaces its hook block, edits lines it adds, and adds one line after its `rescan-folder` guard. It is the release gate; this item is not.
-    - **After LARGE-FOLDER-SYNC-2 (23):** it edits `runFullSync` and `addOne` next to this item's lines, and swaps the `switch-folder` tail where the new handlers follow.
+    - **After FOLDER-UNREACHABLE-GUARD-1 (22, merged `89a5a95c`):** this item replaces its hook block, edits lines it adds (the toast guard, the payload, the toast text, and the watcher's error listener), and adds one line after its `rescan-folder` guard. It is the release gate; this item is not.
+    - **After GET-STATE-SECRET-1 (23):** it edits `get-state` in `main/ipc/state.js`, plus `preload.js` and `src/types.ts`, in other hunks.
+    - **After LARGE-FOLDER-SYNC-2 (24):** it defines `FOLDER_LIST_TIMEOUT_MS` and bounds `rootHasContent`, which Retry relies on (Done-when 12). It edits `runFullSync`, `syncAll` and `addOne` next to this item's lines, and the `rescan-folder` map right after this item's Rescan line. It also swaps the `switch-folder` tail where the new handlers follow.
     - **Other hunks of this item's files** (if still open, they land first):
       - SAVE-LIBRARY-MERGE-1: `save-library`, and the `LibraryView.tsx` Edit form;
       - SETTINGS-KEY-TRUST-1: the `main/ipc/state.js` head, and `src/types.ts`;
       - UX-POLISH-2: `src/types.ts:188`.
-    - DEPS-AUDIT-1 is merged; its `main/constants.js` edit is in other hunks.
+    - `main/constants.js` is untouched by this item (Done-when 12).
     - **Before merging,** `git merge refs/remotes/origin/main` into this branch and re-run Done-when 4–16 and 20. The live control stays out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan).
 
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Banner and Retry tests committed; 23 cases fail on the merged base (no module, no handlers, no `reportFolderOk`, no Rescan clear, no switch reset, no banner in the library); controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same) and the existing suites pass | calculable | positive control | bounded | low | 75m (two new test files: the module on fake timers including the hung-check cap, IPC on fakes, the real folder sync end to end, the rescan handler on a real temp tree, a jsdom render of `LibraryContainer`; six cases in an existing file) | — | — |
-| 2 | Prerequisite anchors re-grepped; one constant; `main/folder-notice.js` with the capped root check; hook block replaced; the switch reset in `select-folder` and `switch-folder`; one-line edits in `main.js`, `main/folder-sync.js`, `main/ipc/library.js`, `main/ipc/state.js`, `preload.js`; three `src/types.ts` lines; `FolderNoticeBanner` under the update banner; test (n) string; one test fixture line; Technical Reference line | calculable | feature | bounded | medium | 50m (one 30-line module with one timer, one 40-line component, one constant, about twenty one-line edits across eight files, one fixture line, one doc line) | — | — |
+| 1 | Banner and Retry tests committed; 26 cases fail on the base (no module, no handlers, no `reportFolderOk`, no Rescan clear, no switch reset, a stale reason, the flag set before the send, a closed watcher still reporting, no banner in the library); controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same) and the existing suites pass | calculable | positive control | bounded | low | 75m (two new test files: the module on fake timers, including a hung listing through LARGE-FOLDER-SYNC-2's bounded `rootHasContent`, IPC on fakes, the real folder sync end to end, the rescan handler on a real temp tree, a jsdom render of `LibraryContainer`; six cases in an existing file) | — | — |
+| 2 | Prerequisite anchors re-grepped (after LARGE-FOLDER-SYNC-2); `main/folder-notice.js` with one bounded root check per press; hook block replaced; the switch reset in `select-folder` and `switch-folder`; one-line edits in `main.js`, `main/folder-sync.js`, `main/ipc/library.js`, `main/ipc/state.js`, `preload.js`; three `src/types.ts` lines; `FolderNoticeBanner` under the update banner; R6's single state; R7's delivery guard; R8's `closed` check; test (n) strings; one test fixture line; Technical Reference line (the final wording goes in at fold-in) | calculable | feature | bounded | medium | 55m (one 30-line module with one timer, one 40-line component, one constant, about twenty-two one-line edits across nine files, one fixture line, one doc line) | — | — |
 | 3 | C1 and C2 `--dir` builds; scratch-profile live control with the local folder renamed away and restored, against the C1 instrument control | calculable | packaging verify | mechanical | low | 40m (two `--dir` builds, seed, four launches, CDP probes, presses and quits, log counts) | — | — |
 | 4 | Suites, typecheck, build; reviews; merged and pushed; the owner Drive check queued for the batched smoke | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + two parallel reviews + one `--no-ff` merge) | — | — |
 
-**Total:** chain 5m · sum 5m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+**Total:** chain 7m · sum 7m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
 
 ##### Lessons applied
 - **Standing rule 36 (SRL-086/087):**
-  - Every line was read on `main` @ `d0720ce0` (fetched 2026-10-15).
-  - FOLDER-UNREACHABLE-GUARD-1's amended hook, "Once per episode" ruling, `main.js` edits and `rescan-folder` guard were read at `ed05868a`.
-  - DEPS-AUDIT-1's `main/constants.js` hunks were read at `a6383286`.
-  - The `select-folder` and `switch-folder` heads (IPC-PATH-TRUST-1, merged) and lines `:71-72` and `:86-87` were read on `d0720ce0`. They are re-grepped after LARGE-FOLDER-SYNC-2 and SETTINGS-KEY-TRUST-1 merge.
+  - Every line was first read on `main` @ `d0720ce0`, then re-read on `refs/remotes/origin/main` @ `89a5a95c` (fetched 2026-10-15), with FOLDER-UNREACHABLE-GUARD-1, SAVE-LIBRARY-MERGE-1 and SETTINGS-KEY-TRUST-1 merged. Every line number in this specification is on `89a5a95c`.
+  - LARGE-FOLDER-SYNC-2's amended specification (its (C): `timeLimit`, the bounded `rootHasContent`, `FOLDER_LIST_TIMEOUT_MS`, `runFullSync`'s `gen`, and the `rescan-folder` map) was read on 2026-10-15. Its edits are re-grepped after it merges.
+  - The `select-folder` and `switch-folder` heads (IPC-PATH-TRUST-1, merged) and lines `:71-72` and `:86-87` were read on `89a5a95c`. They are re-grepped after LARGE-FOLDER-SYNC-2 and SETTINGS-KEY-TRUST-1 merge.
   - The anchors this item builds on are listed under Prerequisites. The run re-greps them after both prerequisites merge (Done-when 3), and stops on any content drift.
 - **Standing rule 41 (LL-136):** the Done-when 20 fence exempts the time log and the staging memo.
-- **Standing rule 43 (LL-138):** 23 cases fail on the merged base for named reasons.
+- **Standing rule 43 (LL-138):** 26 cases fail on the base for named reasons.
   - (fn-s) and (fn-v) pin R1: `partial-read` is log-only, and still counts as reachable.
   - (fn-a), (fn-d) and (fn-e) pin R2's counts: one root check per press, and at most one sync call.
   - (fn-x) pins R3.
-  - (fn-z) pins R4's cap: no sync, no pending timer.
+  - (fn-z) pins R4 through LARGE-FOLDER-SYNC-2's bound: no sync, and no pending timer.
   - The renderer cases render the real `LibraryContainer`, so they fail because the library has no banner, not only because a file is missing.
   - The new-module cases load the module inside each test, so each fails on its own and the controls in the same file still run.
   - (fn-sw) pins R5: a different folder clears the banner and starts a new toast episode.
+  - (fn-reason), (fn-deliver) and (fn-closed) pin R6–R8: no stale reason, the flag set only after a send that lands, and a replaced watcher kept silent.
   - Controls (fn-t), (fn-u), (fn-w), (fn-y) and (fn-same) prove that these behave as on the base: the folder handlers, an unreachable or empty root, an empty problem state, a failed Rescan, and re-selecting the same folder.
-- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 5–16 were dry-run on `d0720ce0`.
-  - Gate 9b's anchor lines (`state.js:72`, `:87`), gate 10's first check, gate 11's count and gate 12's `FOLDER_` baseline find their lines there, so they can fail. Gate 9b's new names are empty there. Gate 15's lines match the base.
-  - Gates 5, 7, 9's `rootHasContent` count and 9a's third check are empty there, by design: they become live once FOLDER-UNREACHABLE-GUARD-1 merges, and Done-when 3 must see their lines on the merged base first.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Done-when 5–16 were re-dry-run on `89a5a95c`.
+  - With FOLDER-UNREACHABLE-GUARD-1 merged, these find their lines on `89a5a95c`, so each can fail:
+    - gate 5 (`lastFolderProblem`, 3 lines);
+    - gate 7 (`folderToastShown` 4; `if (folderToastShown) return;` at `:358`; the `onError` window check at `:360`);
+    - gate 8a (`if (onError) onError(err, sourceFolder);`, 2);
+    - gate 9's `rootHasContent` count (2 and 2) and 9a's code count (5);
+    - gate 9b's anchors (`state.js:72`, `:87`);
+    - gate 10 (the catch at `:143`; `reportFolderProblem` 2 and 6);
+    - gate 11 (8), gate 12's `FOLDER_` baseline (10) and gate 13's shipped text (`:356`).
+  - Every new name is empty there. Gate 15's lines match the base.
+  - Gate 13 is a placeholder until the owner decides the wording, and the item does not dispatch before then.
   - Gate 12's "prints nothing" checks are vacuous on the base (no files); tests (fn-b), (fn-z) and (fn-p) are their controls.
 - **Standing rule 45 (LL-141):** the live control is unattended. It reads the DOM over CDP with a visibility check that voids the step, and counts log lines. The real press, the real Drive and seeing the toast once need the owner: Done-when 18, a short owner checklist in the batched smoke.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
@@ -6207,9 +7533,9 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 - **LL-152:** both live checks run on production `--dir` builds, not `npm run dev`. The C1 build is the like-for-like A/B.
 - **LL-156:**
   - FOLDER-UNREACHABLE-GUARD-1's hook comment ("Nothing new is sent: each send is a toast") is restated: the new `folder-problem` channel is not a toast, and the comment is rewritten with the block.
-  - That item's test (n) pins `reason: lastFolderProblem || "watch-failed"`. The pin moves with the code to `reason: folderNotice.get()`, and nothing else in its tests changes.
-  - Its out-of-scope "no timeout on a hung listing" now has one exception in this item's own code, Retry's capped root check (R4). The full scan stays uncapped, as that item left it.
-  - LARGE-FOLDER-SYNC-2's statement that it "changes no line FOLDER-NOTICE-1 builds on" was checked: `:72`, the catch at `:126` and `addOne`'s `:135-136` are outside its edits.
+  - That item's test (n) pins `reason: lastFolderProblem || "watch-failed"`, `if (folderToastShown) return;` and the shipped toast text. Each pin moves with the code (to `reason: folderNotice.get()`, the delivery guard, and `FINAL_TEXT`), and nothing else in its tests changes.
+  - Its out-of-scope "no timeout on a hung listing" is now LARGE-FOLDER-SYNC-2's (C). This item first planned its own race, under `FOLDER_RETRY_LIST_TIMEOUT_MS`. It dropped both, because the bound moved into `rootHasContent` with one shared constant. (fn-z) now runs against that bound, so a regression there fails this item's test too.
+  - LARGE-FOLDER-SYNC-2's statement that it "changes no line FOLDER-NOTICE-1 builds on" was checked against `89a5a95c`: `:77`, the catch at `:143` and `addOne`'s `:152-153` are outside its edits.
   - `tests/folderSync.test.js` (k) pins `main.js`'s watcher callbacks, so the watcher-add clear lives in `addOne`, not in `main.js`.
   - R5 adds a `ctx` call to `select-folder` and `switch-folder`. LARGE-FOLDER-SYNC-2's `tests/folderSwitchWatcherFirst.test.js` builds a plain `ctx` for those handlers, so the fixture gains one `resetFolderNotice: vi.fn()` line. The Proxy-`ctx` harnesses need none.
 - **LL-158:** every live row was traced through code this item does not change, at the size it runs at.
@@ -6224,27 +7550,31 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 - **LL-063:** the scripted live control uses a local folder under `%TEMP%`, never a cloud-synced folder. The owner check reads the Drive and writes nothing to it.
 - **LL-031 (stale async results):**
   - The sync's clear is guarded by `!stale()`, so a folder switched during the root check clears nothing.
-  - Retry ignores a root check that settles after its cap.
+  - A `readdir` answering after LARGE-FOLDER-SYNC-2's bound is dropped by `timeLimit`, so a late answer changes nothing in Retry.
   - In the banner, a push that lands before the getter's answer wins (`pushed`).
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 30 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
-- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 31 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
-- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 32 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
-- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 33 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. Lane: Library & Content.
-- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 34 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
-- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 35 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
+- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 32 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
+- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 33 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
+- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 34 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
+- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 35 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. From SAVE-LIBRARY-MERGE-1's quality review (2026-10-15): `apply-metadata-updates` (`main/ipc/library.js`) still replaces the edited record and the array, reopening the 100 ms stale-index window after an Edit-form save, so a progress write or sample relink in that window lands on a detached record; the Edit form's save is fire-and-forget (an IPC rejection shows the edit and later reverts it, unhandled); `tags`, `collection`, `unread` and `seenAt` are stored without type checks; renderer edits do not bump `modified`, so a cloud merge can undo them; and the cloud sync's `setLibrary(gcd)` after an await can drop an edit made during the sync. Lane: Library & Content.
+- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 36 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
+- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 36 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 37 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 27 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 28 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 29 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 38 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 39 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
+- <a id="narrate-token-cap-1"></a>**NARRATE-TOKEN-CAP-1 — Narrate passages that exceed the 400-id token cap** *(position 40 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 reconciliation sweep (Blurby.Brain ruling): a few chunks in two of the owner's books exceed Kokoro's 400-id token cap (class E: 3 and 5 chunks). Narration pauses there with F4's notice, so it fails safe rather than wrong. The fix changes the chunk planner's token estimate, which changes chunk timing, so it is out of NARRATE-REBUILD-1 P6b. Re-run the reconcile sweep's owner-library pass after it lands. Lane: TTS / Narration Engine.
+- <a id="ws-token-regen-1"></a>**WS-TOKEN-REGEN-1 — Regenerating the pairing code stores one encrypted token** *(position 41 — stub; not a release gate)*. From GET-STATE-SECRET-1's security review (Blurby.Brain ruling 2026-10-15): `regenerate-ws-pairing-token` (`main/ipc/misc.js` ~:416-418) writes a plaintext token to `settings._wsPairingToken` and saves; with safeStorage available, `startServer` (`main/ws-server.js` ~:444-468) fails to decrypt it, generates a second token and stores that encrypted, so the first is discarded and plaintext can briefly reach `settings.json`. Fix direction: regenerate stores the new token through the same encrypt path `startServer` reads, so one token exists and is never written in plaintext when safeStorage is available. Test: after a regenerate, `settings.json` holds ciphertext only and `startServer` accepts the token without making a new one. Fold-ins: `schemaVersion` optional in `BlurbySettings` (`src/types.ts:140`; the renderer no longer receives it), and a test that every `BlurbySettings` key is in `SETTINGS_DEFAULTS`. Lane: Platform & Maintenance.
+- <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 42 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
+- <a id="large-folder-sync-3"></a>**LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2** *(position 43 — stub; not a release gate)*. From LARGE-FOLDER-SYNC-2's quality review, approved by Blurby.Brain (2026-10-15): (W1) the watcher's `onEvent` (`main/folder-watcher.js` ~:151) skips system folders too (`|| parts.some(isSystemFolder)`), so a drive-root source does not import `$Recycle.Bin` files as ghost books; watcher test; (W2) `rescan-folder`'s Saved Articles check (`main/ipc/library.js` ~:453-455, :494) uses `keyOf` with `pathKey(path.join(sourceFolder, "Saved Articles")) + path.sep`, not a raw case-sensitive prefix; rescan test; (W3) `switch-folder`'s `fsPromises.access(folder)` and per-file `statFile` (`main.js` ~:326) are bounded by `FOLDER_LIST_TIMEOUT_MS`, and a short breaker (its window a constant in `main/constants.js`) skips `rootHasContent` after a root timeout so a hung mount cannot pin the libuv pool; test gaps: timer-leak checks (`vi.getTimerCount()`), the stat timeout, an abandoned run hung in extraction, a normal prune saving once, a watcher-first test that the new watcher's events apply during the sync; the stale F3 comment in `syncAll`. Re-run `scripts/perf/folder-sync-scale.mjs` after the changes and stop if the add worst-case crosses 2x of LARGE-FOLDER-SYNC-2's C1 (it was 1.83–1.92x). Lane: Library & Content.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 29 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 30 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 31 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes
