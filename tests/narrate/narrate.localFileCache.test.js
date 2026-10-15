@@ -25,7 +25,7 @@ describe("narrate local-file cache (Decision #19)", () => {
       expect(ab).toBeInstanceOf(ArrayBuffer);
       expect(Buffer.from(ab).equals(bytes)).toBe(true);
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -39,7 +39,7 @@ describe("narrate local-file cache (Decision #19)", () => {
       expect(await cache.match(undefined)).toBeUndefined();
       await expect(cache.put("x", {})).resolves.toBeUndefined();
     } finally {
-      fs.rmSync(dir, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
