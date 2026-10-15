@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T17:25:42Z",
+  "takenAt": "2026-10-15T21:39:34Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2972,6 +2972,29 @@
       "description": "src/reader/modes/narrate/FoliateView.tsx:931-936 forwards iframe keys without repeat: ke.repeat, so held keys arrive as fresh presses.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at NARRATE-REBUILD-1's close-out (finding F10). Not a release gate.",
       "revision": "52d487257d2426442871fc93fbf1152c5dd57d6aecfda6d88ca1e0d4b5a48ccf",
+      "extra": {}
+    },
+    {
+      "id": "ELECTRON-42-UPGRADE-1",
+      "title": "Upgrade Electron to 42 so a normal quit does not crash on x64",
+      "sequence": 59,
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "M",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#electron-42-upgrade-1",
+      "branch": "eb/electron-42-upgrade-1",
+      "started": "2026-10-15",
+      "completed": "",
+      "evidence": "",
+      "description": "Electron 41.10.7 lacks the Node fix for a Windows x64 shutdown crash (0x80000003 on 57 of 121 gate launches, after the save). Upgrade to ^42.11.14 with native-module, ICU, breaking-change and crash-count checks.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent.",
+      "revision": "229dd850c1c1ef397ced6b7d4b90b7858affd43b7a8c5c6a2914ca988a502a13",
       "extra": {}
     }
   ],

@@ -532,7 +532,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 **Session routing (owner, 2026-10-14; corrected the same day by the owner to Blurby.Roadmap: "you coordinate all work but brain will stay coordinating the other machine").** Blurby.Roadmap coordinates all work: it dispatches, sequences and gives the merge go for items built on this machine (the implementation session blurby-05), and runs governance (ROADMAP.md, specifications, BUG_REPORT.md, LESSONS_LEARNED.md, the Notion register, `/pointer-closeout`). Blurby.Brain coordinates the second machine ("Quiet blurby test machine") and its run queue, and stays the channel for technical rulings (Rule 11) and for design and functionality questions to the owner.
 
-**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, a quit with Narrate playing and then paused showing no crash dialog and no crash dump (NARRATE-EXIT-CRASH-1; a crash makes it a release gate), FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). **Widened 2026-10-15 (Blurby.Brain):** (9) GET-STATE-SECRET-1 is merged (no secret reaches the renderer through `get-state` or the extension-pairing handlers; the renderer displays imported third-party HTML). (10) PAGE-SAVE-RESTAMP-GUARD-1 is merged or closed on evidence (PAGE-POSITION-SAVE-1 saves on every page turn, so a turn before the book's word numbers apply could save a position up to 91 words off; Blurby.Brain 2026-10-15). (11) NARRATE-EXIT-CRASH-1 is merged and gate (1) re-runs with 0 crashed launches (gate (1) on 2026-10-15, main `1da81be2`, passed every measurement but 57 of 121 cold-trial launches exited 0x80000003 after the quit flush; Blurby.Brain). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
+**Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, a quit with Narrate playing and then paused showing no crash dialog and no crash dump (NARRATE-EXIT-CRASH-1; a crash makes it a release gate), FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). **Widened 2026-10-15 (Blurby.Brain):** (9) GET-STATE-SECRET-1 is merged (no secret reaches the renderer through `get-state` or the extension-pairing handlers; the renderer displays imported third-party HTML). (10) PAGE-SAVE-RESTAMP-GUARD-1 is merged or closed on evidence (PAGE-POSITION-SAVE-1 saves on every page turn, so a turn before the book's word numbers apply could save a position up to 91 words off; Blurby.Brain 2026-10-15). (11) ELECTRON-42-UPGRADE-1 is merged (the fix for NARRATE-EXIT-CRASH-1's upstream cause) and gate (1) re-runs with 0 crashed launches (gate (1) on 2026-10-15, main `1da81be2`, passed every measurement but 57 of 121 cold-trial launches exited 0x80000003 after the quit flush; Blurby.Brain). Full-suite failures under load on this machine follow Brain's closed-list rule. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
 
 **Order and parallel run.** FOLDER-SCAN-PERF-1 (completed 2026-10-14, merge `534b43d2`; spec archived) → QUIT-FLUSH-1 (completed 2026-10-14, merge `d21009b3`; spec archived) → READER-VISUAL-DIAG-1 (10, Stage 7) → PACKAGING-FIX-1 (11) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half, Full Spec; QUIT-FLUSH-1 has merged, and its `stopNewWork` and quit step list are this item's to extend (LL-159); merges before FOLDER-UNREACHABLE-GUARD-1) → LIBRARY-READ-ALLOW-1 (15, BUG-196; after PACKAGING-FIX-1, same file) → PAGE-POSITION-SAVE-1 (16, BUG-197; after UX-POLISH-2 and LIBRARY-READ-ALLOW-1) → DEPS-AUDIT-1 (17, release gate; moves Electron to 41.10.7) → SAVE-LIBRARY-TRUST-1 (18, release gate; BUG-198) → IPC-PATH-TRUST-1 (19, release gate; after SAVE-LIBRARY-TRUST-1, same `keepMainPaths` line). FOLDER-SCAN-PERF-1, PACKAGING-FIX-1 and UX-POLISH-2 are file-disjoint and may be implemented in parallel; QUIT-FLUSH-1 shares `main.js` with FOLDER-SCAN-PERF-1 (different hunks) and merges after it. PACKAGING-FIX-1 and FOLDER-SCAN-PERF-1 both edit `package.json` (`build.files` against `dependencies`); the second to merge takes `refs/remotes/origin/main` in first. UX-POLISH-2 is the only item touching the shared-core set (`src/types.ts`, one comment line). NARRATE-REBUILD-1's P6 edits only its own docs, so none of these touches its files; the measurement windows (Stage 7, Parallel run plan) still govern heavy gates. Each item's production build is made in its own worktree and never overwrites the G2 build.
 
@@ -6451,6 +6451,122 @@ Review notes W2 (the relocate save writes a fraction estimate after a failed-wor
 - **LL-156:** PAGE-SAVE-RESTAMP-GUARD-1's extraction-failure known limit is retired here and removed at close-out. PAGE-POSITION-SAVE-2's N4 site gains a condition, with its merge note.
 - **LL-073:** passive relocates stay passive. A cfi-only turn commits no anchor and leaves the book-open `resumeAnchor`, so relocates still save no index.
 - **LL-083:** no new React state, timer or IPC channel; two refs, one optional prop and one wire constant.
+
+<a id="electron-42-upgrade-1"></a>
+
+#### ELECTRON-42-UPGRADE-1 — Upgrade Electron to 42 so a normal quit does not crash on x64 *(position 59 — Full Spec; authored 2026-10-15 on main @ `7bb79f1e`; release gate (11), replacing NARRATE-EXIT-CRASH-1's fix)*
+
+- **What:** Move Blurby from Electron 41.10.7 to 42.11.14. That release carries the Node fix for a shutdown crash: on Windows x64, a quit made soon after Narrate's voice was busy exits 0x80000003 (STATUS_BREAKPOINT). It happened on 57 of 121 launches in release gate (1), always after the quit flush finished, so no data was lost. Nothing in Blurby's own quit path changes.
+- **Cause (diagnosis, 2026-10-15; evidence in the planner scratchpad `exitcrash\` and the owner's Drive `Blurby-transfer\release-final-main\final-main-d3d6\`):**
+  - The bug is nodejs/node#56645, fixed by nodejs/node#61999 ("Ignore PostDelayedTask after Stop").
+  - Electron backported the fix in electron/electron#52956, which shipped in 42.10.0, 43.5.0 and 44.1.0. 41.10.7 is the last 41.x release and does not carry it.
+  - The mechanism: at shutdown, Node's delayed-task scheduler closes its loop. A V8 background thread then posts one more delayed task, and on Windows that post hits the closed IOCP handle (`PostQueuedCompletionStatus: (6) The handle is invalid`). libuv's fatal handler raises a breakpoint.
+  - The trigger is pending V8 background work at exit: TurboFan recompiling the producer's espeak-ng WebAssembly after per-word phonemize calls.
+  - Blurby's producer workers, onnxruntime sessions and quit flush had all finished before the crash. QUIT-FLUSH-1's awaited, uncapped producer shutdown and `QUIT_FLUSH_TIMEOUT_MS` are not at fault and stay unchanged.
+- **Technical rulings (Blurby.Brain, 2026-10-15, Rule 11 tier 1):**
+  - (a) Upgrade to `^42.11.14`. NARRATE-EXIT-CRASH-1 closes as diagnosed, with the cause upstream and fixed by this upgrade.
+  - (b) Stay on 42.x, the smallest jump that carries the fix.
+  - (c) Hold the release until this lands.
+  - **Word numbering (LL-160):** if the app's word numbering changes at all under 42, stop and bring it to Blurby.Brain before merge, because saved positions are at stake.
+  - **electron-builder:** if it needs a bump to support 42, a minor version is allowed. A major version goes to Blurby.Brain.
+- **Out of scope:** any change to `main/quit-sequence.js`, `main.js`'s quit block or `main/narrate/**`; a 43.x or 44.x jump; other dependency upgrades not required by 42.
+
+##### WHERE (read order)
+
+1. `CLAUDE.md`; `docs/governance/LESSONS_LEARNED.md` LL-157, LL-159, LL-160, LL-151, LL-152 and standing rules 36, 41, 43–48.
+2. `package.json`: `devDependencies.electron` (`:88`), `electron-builder` (`:89`), the `build` block (`:19-…`, including `asarUnpack` and the `files` globs for `onnxruntime-node`), `overrides`, and `postinstall` (`patch-package && node scripts/patch-onnxruntime.js`).
+3. `scripts/patch-onnxruntime.js` and `patches/` (if present), which may pin to Electron's ABI.
+4. `scripts/narrate-rebuild/p3-producer-check.mjs` (`:48`, `producer.shutdown()` not awaited before `process.exit`).
+5. The minimal repro in the planner scratchpad: `C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\bbe4b04a-f097-4f3e-ba25-221d3dcf13e9\scratchpad\exitcrash\mini\` (`main.js`, `package.json`, `run.ps1`) and `exitcrash\cold-driver.mjs`. The x64 Electron 41.10.7 zip used for emulation is in the local Electron cache.
+6. Electron 42's breaking changes (the official "Breaking Changes" document for 42.0), checked against every Electron API Blurby uses.
+
+##### Tasks
+
+1. **C1, positive control committed:**
+   - Commit the minimal repro as `scripts/narrate-rebuild/exit-crash-repro/` (its `main.js`, `package.json` and a `run.ps1` that runs N launches under a given Electron binary and counts exit codes). Adapt the paths to the repo, and keep no scratchpad paths in it.
+   - Run it with x64 Electron 41.10.7 for 50 launches and record the count. It must be at least 1, and the diagnosis saw 5–9 of 50. If it is 0, stop: the instrument cannot see the defect.
+2. **C2, the upgrade:**
+   - Change `package.json`'s `electron` to `"^42.11.14"`. Run `npm install` to regenerate `package-lock.json`, through the project's normal registry and nothing else.
+   - If electron-builder 26 rejects 42, bump it within 26.x (a minor version). If only a major bump works, stop and report.
+   - Confirm `postinstall` (`patch-package`, `scripts/patch-onnxruntime.js`) still applies cleanly.
+3. **Native modules (ruling 1):**
+   - List every `.node` binary the packaged app loads. Find them with `git ls-files`, plus a scan of `node_modules` for `*.node` under the packages in `build.files` and `asarUnpack`. Do not assume the list.
+   - For each binary, confirm it loads under 42 in the packaged `--dir` build on x64, and on ARM64 natively on this machine.
+   - Narrate must produce a first voiced word in the packaged app on a scratch profile.
+   - Record the list and the results.
+4. **ICU and word numbering (ruling 3, LL-160):**
+   - Under Electron 42, through `scripts/narrate-rebuild/app-node.ps1`, record `process.versions.icu`.
+   - Check `extractEpubWords` on `resources/sample-meditations.epub` returns 80,493 words, that app word 2970 is "ancient", that 5480 is "HIS", and that 9431 is "THE".
+   - Run `tests/narrate/narrate.appIcu.test.js` and the epic checkers (D15).
+   - If any number or word differs, stop and report it before merge.
+5. **Breaking-change review (ruling 5):**
+   - Check each Electron API Blurby uses against 42's breaking changes, at least `safeStorage`, `webContents` (including `send`, `isLoading` and `isDestroyed`), `protocol` handlers, `session`, `BrowserWindow` options, `contextBridge` and `ipcRenderer` in `preload.js`, `app` lifecycle events (`will-quit`, `before-quit`), `shell`, `dialog` and `powerMonitor`.
+   - Find them with `git grep` over `main.js`, `main/**` and `preload.js`.
+   - Record each as "unaffected" or "changed: <what was done>". A required code change stays within the files the API lives in, and is listed in the memo with its reason.
+6. **`p3-producer-check.mjs`:**
+   - Make it await `producer.shutdown()` before `process.exit` (`:48`).
+   - Record its exit code under 42 (0x40000015 under 41).
+7. **Gates on this machine:**
+   - The positive control under x64 42.11.14: 100 launches, 0 crashed.
+   - The full-app cold pattern on x64 42.11.14: at least 56 launches, 0 crashed. Use the diagnosis's cold driver with Electron 42's x64 build; downloading that build through npm or `@electron/get` is allowed.
+   - Full `npm test` (Stage 8's closed-list rule), `npm run typecheck` and `npm run build`.
+   - `electron-builder --dir` builds for x64 and ARM64, if the toolchain allows a cross-arch `--dir`; otherwise the local architecture plus a note that CI covers the other.
+   - A packaged quit on a scratch profile: start Narrate, quit while it plays and then while it is paused, exit code 0 each time, with no crash dump.
+8. **Docs:** add `docs/governance/TECHNICAL_REFERENCE.md`'s Electron version line and the tech-stack entry. Write the time log and staging memo. CLAUDE.md's tech stack line ("Electron 41") goes into the memo as a fold-in, for the close-out to apply.
+
+##### Done when
+
+1. **C1:** the committed repro under x64 Electron 41.10.7 records at least 1 crashed launch in 50, with the count in the memo.
+2. `git grep -n -F '"electron": "^42.11.14"' -- package.json` prints one line and exits 0, and `git grep -n -F '"electron": "^41' -- package.json` exits 1.
+3. `package-lock.json` resolves `electron` to 42.11.14 or a later 42.x patch. Record the exact resolved version.
+4. The native-module list and its load results on x64 and ARM64 are in the memo, all loaded, with a first voiced word in the packaged app.
+5. ICU check: the word count is 80,493, the four words match, the appIcu test exits 0 and the epic checkers pass. If anything differs, the item stops before merge (ruling 3).
+6. The breaking-change table is in the memo, with every API row marked "unaffected" or "changed".
+7. `p3-producer-check.mjs` awaits shutdown, and its exit code under 42 is recorded.
+8. The positive control under x64 42.11.14 gives 0 of 100 crashed. The full-app cold pattern on x64 42.11.14 gives 0 crashed out of at least 56.
+9. `npm test` exits 0 (closed-list rule), and `npm run typecheck` and `npm run build` exit 0.
+10. The `--dir` builds succeed (architectures as recorded), and the packaged playing and paused quits exit 0.
+11. `git diff --name-status refs/remotes/origin/main` lists only: `package.json`, `package-lock.json`, `scripts/narrate-rebuild/p3-producer-check.mjs`, the new `scripts/narrate-rebuild/exit-crash-repro/**`, `docs/governance/TECHNICAL_REFERENCE.md`, any API change from task 5 (each one listed in the memo), and the time log and memo (standing rule 41). `main/quit-sequence.js` and `main/narrate/**` are absent.
+12. **After merge, by Blurby.Brain on the quiet machine, release gate (1) re-runs on the final main:**
+    - the quiet suite;
+    - the full launcher with 0 crashed launches out of all;
+    - the D3/D5 rows as before;
+    - D6 on Decision #22's mainstream row.
+    D2's text check is added only if Done-when 5 found a numbering change, and in that case the item would already have stopped.
+13. Owner smoke (deferred): "Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away)." The packaged playing and paused quits join the batched smoke list.
+
+- **Effort:** M. It is a one-line dependency change, but it carries a binary-compatibility survey, an ICU check, a breaking-change review, two crash-count controls and packaging on two architectures.
+- **Owners:** the implementation agent; reviewers for spec compliance and code quality, in parallel. Blurby.Roadmap merges. Blurby.Brain runs gate (1).
+- **Lane:** Platform & Maintenance. Execution surface D.
+- **Source:** the NARRATE-EXIT-CRASH-1 diagnosis (2026-10-15); release gate (1) on `1da81be2`; Blurby.Brain's rulings (a)–(c) and additions 1–6.
+- **Path:** dispatch.
+- **Branch:** `eb/electron-42-upgrade-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\electron-42-upgrade-1`. Run `npm ci` before any change. Push with `HEAD:refs/heads/eb/electron-42-upgrade-1` if an `EB/` ref folder blocks `-u`.
+- **Merge order:** next to merge. Every other item rebases its gates on the merged runtime.
+- **Lane Ownership:** D (`package.json`, the lockfile, packaging).
+- **Forbidden During Parallel Run:** `main/quit-sequence.js`, `main/narrate/**`, `src/**` except an API change from task 5, and the shared-core freeze set.
+- **Shared-Core Touches:** none.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control committed and run under x64 41.10.7 (at least 1 crash in 50) | calculable | positive control | bounded | low | 30m (copy the mini repro, adapt its paths, 50 launches) | — | — |
+| 2 | Electron 42.11.14 in `package.json` and the lockfile; electron-builder within 26.x; postinstall checked | calculable | dependency upgrade | bounded | medium | 20m (one install plus postinstall) | — | — |
+| 3 | Native-module survey; ICU and numbering check; breaking-change table; `p3-producer-check` await | calculable | feature | bounded | medium | 45m (greps, two architectures, the checker runs) | — | — |
+| 4 | Crash-count gates under 42 (100 and 56 or more), full suite, typecheck, build, `--dir` builds, packaged quits, memo | calculable | merge and verify | mechanical | medium | 60m (about 160 launches plus the suite and builds) | — | — |
+
+**Total:** chain 13m · sum 13m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-160:** word numbering depends on the runtime's ICU. Task 4 re-measures the canonical book's count and four anchor words under 42, and any change stops the item.
+- **LL-157 and LL-159:** the quit path is unchanged. The packaged playing and paused quits confirm the save at exit still holds on the new runtime.
+- **LL-151 and LL-152:** the crash count is judged against an instrument control that is proven to see the defect on 41.10.7 before 42 is trusted.
+- **Standing rule 36:** every `package.json` anchor is re-grepped on the base.
+- **Standing rule 43 (LL-138):** the positive control fails on the base for the named reason.
+- **Standing rule 44 (LL-143):** every gate names its exit code.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rules 47 and 48:** the full suite, typecheck and build run on the owner's machine.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and the memo.
 
 <a id="page-position-save-2"></a>
 

@@ -1,0 +1,50 @@
+{
+  "id": "20261015T213823Z-external-create-item-ELECTRON-42-UPGRADE-1",
+  "operation": "external-create-item",
+  "item_id": "ELECTRON-42-UPGRADE-1",
+  "created": "2026-10-15T21:38:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Upgrade Electron to 42 so a normal quit does not crash on x64",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "M",
+      "lane": "Platform & Maintenance",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#electron-42-upgrade-1",
+      "branch": "eb/electron-42-upgrade-1",
+      "description": "Electron 41.10.7 lacks the Node fix for a Windows x64 shutdown crash (0x80000003 on 57 of 121 gate launches, after the save). Upgrade to ^42.11.14 with native-module, ICU, breaking-change and crash-count checks.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass.",
+      "sequence": 59,
+      "prerequisites": [],
+      "id": "ELECTRON-42-UPGRADE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T17:25:42Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ELECTRON-42-UPGRADE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "ELECTRON-42-UPGRADE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ELECTRON-42-UPGRADE-1",
+      "actualRevision": "ccc9cff7bab24451adba3a9355a53f4e4af91679d67aebbec4d48bebe78e7d89",
+      "recoveryId": "20261015T213823Z-external-create-item-ELECTRON-42-UPGRADE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8159-96a7-dca8177e8ed6",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T21:39:04Z",
+  "outcome": "succeeded"
+}
