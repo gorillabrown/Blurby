@@ -19,7 +19,7 @@
 ### BUG-199 — A book deleted on this device returns after a cloud sync
 **Reported:** 2026-10-14 (code trace while specifying SAVE-LIBRARY-MERGE-1, on `eb/ipc-path-trust-1` @ `e1b72949`, re-read on `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
 **Severity:** MEDIUM (a deleted book reappears in the library, with its file already removed from disk; needs cloud sync on, a delete, then any renderer library save, such as marking cards seen, before the next sync)
-**Status:** OPEN — scheduled as SAVE-LIBRARY-MERGE-1 (release gate). Lane: Library & Content.
+**Status:** RESOLVED in source (SAVE-LIBRARY-MERGE-1): save-library edits main's records in place and never removes one, so a deletion's tombstone survives every renderer save; closes after the batched owner smoke.
 **Location:** `main/ipc/library.js:60-64` (`save-library` replaces the library with the renderer's array), `:110-127` (`delete-doc` writes the tombstone); `main/ipc/state.js:17` and `src/hooks/useLibrary.ts:55` (the renderer's copy holds no tombstones); `main/sync-engine.js:355-360` (a cloud-only document is added back).
 **Description:** Deleting a book keeps a deletion record (a tombstone) so that cloud sync can carry the deletion to other devices. The renderer's copy of the library never holds that record, and a library save from the renderer replaces main's library with its copy, so the record is lost. On the next sync the cloud still has the book, and the merge adds it back.
 **Fix path (ruled):** `save-library` edits main's records in place and never removes one; only `delete-doc` removes a document (SAVE-LIBRARY-MERGE-1).
