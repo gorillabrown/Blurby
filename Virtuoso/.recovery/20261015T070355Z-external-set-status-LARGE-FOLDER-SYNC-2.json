@@ -1,0 +1,36 @@
+{
+  "id": "20261015T070355Z-external-set-status-LARGE-FOLDER-SYNC-2",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-2",
+  "created": "2026-10-15T07:03:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-15",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass. Amended 2026-10-15 on main 89a5a95c (system folders, case-only duplicates, FOLDER_LIST_TIMEOUT_MS). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/large-folder-sync-2 from main f41ca75a)."
+    },
+    "expectedRevision": "c6cf85896f4adbec264831187161d3629944c92e74dc5e76c9b5a32f69b25005",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass. Amended 2026-10-15 on main 89a5a95c (system folders, case-only duplicates, FOLDER_LIST_TIMEOUT_MS). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/large-folder-sync-2 from main f41ca75a).\"), ('started', '2026-10-15'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-2",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass. Amended 2026-10-15 on main 89a5a95c (system folders, case-only duplicates, FOLDER_LIST_TIMEOUT_MS). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/large-folder-sync-2 from main f41ca75a).\"), ('started', '2026-10-15'), ('status', 'in-flight')]",
+      "actualRevision": "97946b8e72582ededd08caac9e311104241bbe140926c418415eb7a20c5c9570",
+      "recoveryId": "20261015T070355Z-external-set-status-LARGE-FOLDER-SYNC-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T07:04:45Z",
+  "outcome": "succeeded"
+}

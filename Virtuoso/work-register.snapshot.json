@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T06:43:18Z",
+  "takenAt": "2026-10-15T07:04:43Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2062,8 +2062,8 @@
       "id": "LARGE-FOLDER-SYNC-2",
       "title": "Follow-ups from LARGE-FOLDER-SYNC-1",
       "sequence": 24,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2072,12 +2072,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#large-folder-sync-2",
       "branch": "eb/large-folder-sync-2",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "Cancel then re-sync, per-file saves during a full sync, path normalization, refresh cost, watcher-before-sync on switch, a user-visible scan-failure signal, and a duplicate-filepath test.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass.",
-      "revision": "c6cf85896f4adbec264831187161d3629944c92e74dc5e76c9b5a32f69b25005",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice decided 2026-10-15 (option C): FOLDER-NOTICE-1 builds it. U9/U10 pass. Amended 2026-10-15 on main 89a5a95c (system folders, case-only duplicates, FOLDER_LIST_TIMEOUT_MS). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/large-folder-sync-2 from main f41ca75a).",
+      "revision": "97946b8e72582ededd08caac9e311104241bbe140926c418415eb7a20c5c9570",
       "extra": {}
     },
     {
@@ -2393,6 +2393,30 @@
       "description": "get-state returns a copy of pickUserSettings(settings) plus sourceFolder and recentFolders, never a _-prefixed key or main's live object; the extension-pairing handlers stop returning the pairing token and the unused get-ws-pairing-token is removed; pins startSync's outer pickUserSettings and removes the dead schemaVersion merge step.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate. From SETTINGS-KEY-TRUST-1's quality review. Touches preload.js (one line removed) and src/types.ts (shared core). Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/get-state-secret-1 from main c293db78).",
       "revision": "7046f0c89ae5f324b593de29b1027b3346f2f055713284ec75e594060f0b8e76",
+      "extra": {}
+    },
+    {
+      "id": "NARRATE-TOKEN-CAP-1",
+      "title": "Narrate passages that exceed the 400-id token cap",
+      "sequence": 39,
+      "status": "blocked",
+      "raw_status": "Blocked",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "effort": "S",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-token-cap-1",
+      "branch": "eb/narrate-token-cap-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "A few chunks in the owner's books exceed Kokoro's 400-id token cap and pause with F4's notice; fix the chunk planner's token estimate (changes chunk timing).",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate.",
+      "revision": "955604bcd94b89bfd92b7cf2abbb5a928695b1bc08172f160b7b8161d292942d",
       "extra": {}
     }
   ],
