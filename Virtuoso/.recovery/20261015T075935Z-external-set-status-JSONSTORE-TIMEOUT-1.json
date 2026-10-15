@@ -1,0 +1,34 @@
+{
+  "id": "20261015T075935Z-external-set-status-JSONSTORE-TIMEOUT-1",
+  "operation": "external-set-status",
+  "item_id": "JSONSTORE-TIMEOUT-1",
+  "created": "2026-10-15T07:59:35Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 33
+    },
+    "expectedRevision": "c9387d23d17404d7835c6982f6b5296ec9a329f4fcb02e7eb9141451a0cd154e",
+    "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('sequence', 33)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "JSONSTORE-TIMEOUT-1",
+      "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('sequence', 33)]",
+      "actualRevision": "ba30f5e17d43738d6db85c3ed86ae5c4a325beae6a24009a98a00eca8ee50958",
+      "recoveryId": "20261015T075935Z-external-set-status-JSONSTORE-TIMEOUT-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T08:01:38Z",
+  "outcome": "succeeded"
+}

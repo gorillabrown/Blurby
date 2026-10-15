@@ -5598,9 +5598,357 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - `stop()` blocks the `finally` save, so nothing arms a write after the quit flush. An abandoned run's late `finally` does nothing.
 - **LL-151 (not applied, deliberately):** there is no launch control. Every change is in a module whose steps are injected, or in a function the tests call on real temporary folders. The tests run the real module and the real IPC handlers, and the batched owner smoke covers the build.
 
+<a id="page-save-restamp-guard-1"></a>
+
+#### PAGE-SAVE-RESTAMP-GUARD-1 — A page turn never saves a position before the book's word numbers apply *(position 25 — Full Spec; authored 2026-10-15 on main @ `b3e2fc93`; release gate)*
+
+- **What:** In Page mode, a page turn (key, ‹ › button or swipe) that lands on a section whose word spans still carry the renderer's provisional numbering does not save. The view holds the turn. When the book's word numbers (`bookWords`, from the main-process extractor) are applied to that section, the view saves the latest held turn, once, with the re-stamped index. A turn on a section that already carries the book's numbering saves at once, as today. Only `src/reader/modes/page/FoliateView.tsx` and one test file change.
+- **Why** (every line read on `main` @ `b3e2fc93`, fetched 2026-10-15; `src/`, `preload.js`, `main/ipc/documents.js` and `main/ipc/tts.js` are unchanged since `8f27fe70`, the measured build):
+  - **When the book's words arrive.** `ReaderContainer` asks for them on a timer: 1000 ms after the reader mounts, 2000 ms for books over 100,000 words (`src/components/ReaderContainer.tsx:589-597`, `ensureBookWords` `:272-299`). The reply sets `bookWordsState` (`:291`). Page's binding then passes `document.bookWords?.sections` and `getCanonicalSectionWords` to the view (`src/reader/modes/page/useModeBindings.ts:42`, `:44`). Page itself never asks for them earlier.
+  - **Before they arrive, spans carry section-local renderer numbers.** `onSectionLoad` computes the section's offset with `getSectionGlobalOffset` (`src/reader/modes/page/FoliateView.tsx:600`). With no sections it falls back to the section's start in the loaded slice (`helpers/foliateWordOffsets.ts:43-50`), which is 0 when one section is loaded. Without canonical words, `wrapWordsInSpans` numbers the spans by the renderer's own `segmentWordSpans` (`helpers/foliateWordWrapping.ts:116`). So in section 15 of *Meditations* (book words 63,019–69,099) the spans read 0–6,073.
+  - **A turn saves that number as is.** Every turn source reaches `reportTurn` (`FoliateView.tsx:571-580`): keys (`:1101-1113`) and the ‹ › buttons (`:1117`) through `turnPage` (`:1092-1098`) and the view's `relocate` listener (`:728-739`), and swipes through the renderer's `snap` listener (`:747-752`). `reportFirstWordOnPage` (`:557-569`) converts the span's index with `resolveRenderedWordIndexToGlobal(…, liveSections())` (`:565`). With no sections that function returns the rendered index unchanged (`foliateWordOffsets.ts:72`). `onPageTurned` commits it with `persist: true` (`ModeRuntime.ts:566-584`), and `update-doc-progress` stores it (`main/ipc/documents.js:15-27`). Nothing checks that the book's numbers apply. The `cfi` is right, because it is taken from the word's own range.
+  - **When the re-stamp applies them.** The re-stamp effect (`FoliateView.tsx:1013-1036`) runs when `bookWordSections` changes. For each loaded section it unwraps the spans and wraps them again with the extractor's words (`contentAlignWords`). `wrapWordsInSpans` yields every 50 block groups (`foliateWordWrapping.ts:11`, `:144`). In a section with more groups, a turn can land between batches, while part of the section has no spans yet; that turn is held, and nothing saves it later (the held turn is consumed only by a section load, `:609-613`).
+  - **Restore and first relocate do not save.** A relocate saves only while a turn is in flight or a swipe crossing is armed (`:735`). The restore and the book-open relocates are passive (LL-073). The measurement confirms it: no `update-doc-progress` call without a turn.
+  - **The second numbering difference is smaller.** Once sections are known, a span that still carries the renderer's numbering is mapped by the section start (`foliateWordOffsets.ts:74-89`). The error is then the renderer-versus-extractor difference (−3 to −91 words in *Meditations*, prior diagnosis `scratchpad\seg-diag\`). In the run below the re-stamp completed in the same task that delivered the words, so this second window did not occur. By code, it opens in sections over 50 block groups.
+- **Measured (2026-10-15, Blurby.Roadmap, read-only):**
+  - **Build and profile.** The built tree in `C:\Projects\Blurby\.worktrees\get-state-secret-1` (HEAD `8f27fe70`, which contains `309f2390`; `dist/` built 02:03, after its last `src/` commit) was launched with `BLURBY_USE_DIST=1` and `BLURBY_USER_DATA_DIR` set to a new folder under the session scratchpad. The owner's profile and Drive were not touched. The window was shown and focused, and background throttling was off: in a hidden window the renderer's timers stalled, which voids a timing.
+  - **Book.** The bundled *Meditations*: 80,493 extractor words in 18 sections. The 1.9 MB owner copy in `scratchpad\owner-epub-copy\` holds about five minutes of text and did not open in a reader view within 12 s, so it is not a bigger text book. The other owner copies are smaller. No larger text EPUB was available.
+  - **Method.**
+    - A session-1 control turn after the re-stamp saved a position in section 15 (63,450), and the app quit.
+    - Session 2 was a cold launch that restores there. Warm opens were renderer reloads, with the main process, file cache and code cache warm.
+    - The main process was hooked in memory through `--inspect`. `update-doc-progress` and `extract-epub-words` were wrapped to log time and arguments.
+    - The renderer was probed through CDP. A MutationObserver on each section document recorded every change of span numbering, and a listener recorded each `relocate`'s text range. A long-task observer logged blocked time.
+    - One PageDown (the window `keydown` the section-document forwarder dispatches) fired about 40 ms after the first stamped spans appeared. In practice the turns ran 94–170 ms after them.
+    - After the re-stamp, the same text range was resolved against the re-stamped spans. That gives the book index of the same first visible word.
+    - Nothing in the repo changed. The harness is `scratchpad\restamp\restamp.mjs`; the results are `restamp-meditations-r2.json` to `r8.json` (r8 has the long-task log).
+  - **The window** (run r8; r6–r7 in brackets):
+
+    | Open | Click → first spans | First spans → words arrive (turns save wrong here) | Blocking task (arrival + snapshot + re-stamp) | First spans → re-stamp done |
+    |---|---|---|---|---|
+    | Cold | 517 ms | 602 ms (545–558) | 3,817 ms | 4,419 ms (5,449–6,392) |
+    | Warm (×5) | 279–295 ms | 799–840 ms (749–788) | 2,837–3,923 ms | 3,636–4,740 ms (4,222–5,484) |
+
+    The extractor reply came 1,002–1,026 ms after the click and took 73–101 ms. A turn pressed during the blocking task runs after it, once the re-stamp has applied, and saves correctly: turns requested at +1,500 ms and +2,500 ms ran at +4,371 ms and +4,232 ms and saved 65,374 and 65,764, equal to the re-stamped index.
+  - **Saves inside the window (every run r2–r8, cold and warm):**
+
+    | Run | Saved `position` | Book index of the same first word (re-stamped span) | Off by |
+    |---|---|---|---|
+    | Cold | 671 ("was") | 63,691 ("himself") | −63,020 |
+    | Warm, 3 turns | 1,221 / 1,434 | 64,241 / 64,454 | −63,020 each |
+    | Warm, 1 turn | 1,969 | 64,993 | −63,024 |
+
+    Each saved `cfi` named the right page. In r2 the three-turn run wrote three wrong saves (1,221, 1,434, 1,677). In r8 foliate dropped the middle turn, so two were written. The control turn after the re-stamp saved the re-stamped index in every run (63,978, 64,699, 65,136 and so on).
+  - **What a wrong save does.** The library card's progress is `position / wordCount` (`src/components/DocGridCard.tsx:72`), so it shows 0.8 % for a reader at 79 %. The next mode's start word and the resume anchor are seeded from `position` (`ReaderDocumentSnapshot.ts:162`, `page/ModeState.ts:40`, cited in PAGE-POSITION-SAVE-1). Cloud sync sends `position` (`documents.js:31`). Only the reopened page is right, because it comes from `cfi`.
+  - **Conclusion.** The window is real, and it is larger than "up to 91 words". Before the book's words arrive, a turn saves a section-local index. The error is the section's start in the book: 63,020 words in section 15, and 0 to a few words only in the first text section. WORD-INDEX-UNIFY-1 (stub 41) makes the two numberings agree, but it does not remove this error: the spans are still numbered from 0 within the section before the book's words arrive.
+- **Technical ruling (Blurby.Brain, 2026-10-15, Rule 11 tier 1):** hold page-turn saves until the `bookWords` re-stamp has applied, then save the latest turn once it lands. Release gate (10) of Stage 8: merged, or closed on evidence.
+- **Design decisions (planner, 2026-10-15, within the ruling):**
+  - **The gate is per section document, kept in the view.** A `WeakSet<Document>` (`rendererNumberedDocsRef`) holds the documents whose spans were wrapped while no book sections were known. The view knows which numbering each document carries; the runtime only sees the final index. So `ModeRuntime.ts` and `useModeBindings.ts` (both edited by PAGE-POSITION-SAVE-2) are not touched.
+  - **A document leaves the set only when its re-stamp finishes.** The re-stamp effect removes it after that document's `wrapWordsInSpans` resolves, then saves the turn held on it. A turn that lands mid-re-stamp (between batches) is therefore held too, and is not lost.
+  - **A section loaded after the words arrived is never in the set.** Its turns save at once (test (s)). If the words arrive while a section-load wrap is still running, the load does not add the document: the re-stamp effect, which runs over the loaded sections, owns it.
+  - **Latest turn only, once.** The held turn uses the existing single `pendingTurnRef` slot, so a later turn replaces an earlier one (test (t)). The existing section-load consumption skips a document that is still in the set.
+  - **The re-stamp effect reaches the held turn through a ref.** `reportFirstWordOnPage` lives inside the open effect's `loadBook` closure, so `loadBook` sets `reportHeldTurnRef.current` and the re-stamp effect calls it.
+  - **Diagnostic.** A held turn records `page-turn-deferred` with detail `reason=book-words start=… end=…`. That is the existing kind; the reason says why it was held (LL-142 rec. 5).
+  - **No new React state, timer or constant** (LL-083). The pre-extraction timer in `ReaderContainer.tsx` (shared core) is unchanged. Asking earlier would shorten the window, not close it.
+- **Out of scope:**
+  - **Known limit, extraction failure:** if `extract-epub-words` never delivers words for a book, turns in that session stay held and do not save. That session then behaves as before PAGE-POSITION-SAVE-1, with a `reason=book-words` diagnostic for each held turn. Today it saves a section-local index. This follows from the ruling and is recorded for Blurby.Brain. It is not a question.
+  - **Known limit, quit or exit inside the window:** a held turn is lost on a quit before the re-stamp (LL-159, the same class as PAGE-POSITION-SAVE-1's ruling Q4). Leaving the reader there writes the previous anchor, because the held turn has not moved it. The window is about 0.5–0.9 s on this machine.
+  - A pre-existing race: a section-load wrap that yields while the book's words arrive can be wrapped twice at once by the load and the re-stamp. That is not changed here and was not observed.
+  - Sections the extractor does not list keep the renderer's numbering after the re-stamp, as today (`getSectionGlobalOffset` falls back).
+  - Requesting the book's words earlier (`ReaderContainer.tsx:589-597`, shared core), and the 2.8–3.9 s blocking task at arrival.
+  - WORD-INDEX-UNIFY-1's numbering unification, and PAGE-POSITION-SAVE-2's N2, N4 and dead-code work.
+  - **LL-156 check:** PAGE-POSITION-SAVE-1's known limit names `pendingTurnRef` and the cross-section held save; it stands, and this item adds a second reason to hold. PAGE-POSITION-SAVE-2's N4 edit site (the section-load consumption block, `:608-613`) gains one condition here; its merge note is under Merge order. No other waiver names an edit site.
+- **Prerequisites:** none in code. PAGE-POSITION-SAVE-1 is merged (`309f2390`).
+  - No in-flight or queued item before position 25 edits `src/reader/modes/page/**`. LARGE-FOLDER-SYNC-2 (merged `1f573bc2`) edits only `main/` files.
+  - Re-grep every line below at dispatch (standing rule 36).
+  - The live check needs the first-run sample *Meditations*, readable on this base (LIBRARY-READ-ALLOW-1 merged).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A command passes only on the exact exit code stated; any other code, any stderr text, or a command that did not run fails it. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs on `b3e2fc93` (2026-10-15) were run as `git grep … refs/remotes/origin/main -- <path>` and are noted with each gate.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/readerModes/pagePositionSave.test.tsx` exits 1.
+       - Exactly 2 tests fail, each for its stated reason. (r) fails because the turn saved the renderer's index 2 at once (`saves` is not `[]`). (t) fails because two saves were written, at indexes 1 and 2, not one at 102.
+       - These pass: control (s), the amended (d), and every other existing test: (a)–(c), (e)–(l), (W1), (W2) and (N1). That is 16 passing tests.
+       - Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/readerModes/page.behavior.test.tsx tests/readerModes/page.contract.test.ts tests/readerModes/foliateViewTeardown.test.tsx tests/readerModes/chunkVisualParity.test.tsx tests/readerModes/focus.behavior.test.tsx tests/readerModes/flow.behavior.test.tsx tests/foliate-bridge.test.ts tests/foliateWordOffsets.test.ts tests/foliateContentAlign.test.ts tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts tests/persistentReadingAnchor.test.ts tests/wordAnchor.test.ts` exits 0.
+    3. `git grep -c -F 'rendererNumberedDocsRef' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:5` and exits 0 (declaration, the turn gate, the load's add, the load's consumption check, the re-stamp's delete). Dry-run: exit 1, no output.
+    4. `git grep -c -F 'reportHeldTurnRef' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:3` and exits 0. `git grep -c -F 'reason=book-words' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:1` and exits 0. Dry-runs: both exit 1, no output.
+    5. `git grep -c -F '"page-turn-deferred"' -- src/reader/modes/page` prints exactly `src/reader/modes/page/FoliateView.tsx:2` and exits 0. The existing deferral is kept, and the new one is added. Dry-run: exit 0, `FoliateView.tsx:1`.
+    6. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    7. **Live check on production `--dir` builds of C1 and C2, scratch profile.** The executor may drive the app. The owner's profile and Drive are never touched.
+       - **Setup (each build):**
+         - `$prof = Join-Path $env:TEMP ("blurby-psrg-" + [guid]::NewGuid())`.
+         - `npm run build`, then `npx electron-builder --win --x64 --dir --publish never`; each exits 0.
+         - `$env:BLURBY_USER_DATA_DIR = $prof`, then launch `release\win-unpacked\Blurby.exe --remote-debugging-port=9337`.
+         - Drive the reader page target from `http://127.0.0.1:9337/json/list` with CDP `Runtime.evaluate`, as PAGE-POSITION-SAVE-1 did. The driver is a scratch script under `$env:TEMP` and is not committed.
+         - Before each timed step, bring the window to the front. A probe whose `visible` is not `"visible"` voids its step; rerun it (standing rule 45). A hidden window throttles the renderer's timers.
+         - Read state with `$d = ((Get-Content "$prof\blurby-data\library.json" -Raw -Encoding utf8 | ConvertFrom-Json).docs | Where-Object id -eq 'sample-meditations')`.
+       - **Deep position (each build):**
+         - Open *Meditations* from its library card and wait 15 s.
+         - Evaluate `document.querySelector("foliate-view").goTo(15)` and wait 3 s.
+         - Press PageDown once (the turn after the re-stamp; this trigger is shown to commit, LL-158 rider). Wait 3 s.
+         - `$d.position -eq` the **probe**'s `wordIndex`, and that value is at least 63019.
+         - Close the app with Alt+F4 sent through the OS, and wait for the process to exit.
+       - **(a) Driver control on the C1 build (the defect is visible; LL-151):**
+         - Relaunch with the same `$prof`.
+         - Before clicking the card, install the **turn driver** (Implementation detail) with `window.__psrgTurns = 1`. Then click the card.
+         - Wait 15 s and run the probe. Record `window.__psrg` (`firstSpansAt` and the turn time).
+         - Expected: `$d.position` is below 6100 (section 15's local numbering), while the probe's `wordIndex` is at least 63019.
+         - If `$d.position` equals the probe's `wordIndex`, the driver missed the window: stop and report.
+       - **(b) Idle control on the C2 build:** relaunch with the deep position, click the card without the driver, and wait 15 s. `$d.position` and `$d.cfi` are unchanged.
+       - **(c) A turn inside the window on the C2 build:**
+         - Relaunch, then use the driver with 1 turn and wait 15 s.
+         - `$d.position -eq` the probe's `wordIndex`, which is at least 63019, and `$d.cfi -eq` the probe's `cfi`.
+         - Also, `(await window.electronAPI.extractEpubWords("sample-meditations")).words[<$d.position>]` equals the probe's `text`.
+         - The driver's turn ran within 400 ms of `firstSpansAt`.
+       - **(d) Three turns inside the window on the C2 build:**
+         - Evaluate `location.reload()`, reopen with the driver at `window.__psrgTurns = 3`, and wait 15 s.
+         - `$d.position -eq` the probe's `wordIndex`: the page on screen, which is the latest turn's.
+       - **(e) A turn after the re-stamp on the C2 build:** press PageDown once and wait 3 s. `$d.position -eq` the probe's `wordIndex`.
+       - Record every value, `window.__psrg` and the probes in the staging memo. Record "Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away)." Merging gates on the automated rows.
+       - **Owner batched-smoke checklist** (standing rule 45): open a book you left in a later chapter, and press PageDown as soon as the page appears. Wait 10 s, then close the book. The library card's progress matches that chapter, not near 0 %. Reopen the book and switch to Focus: it starts at the first word of that page.
+    8. `git diff --name-status refs/remotes/origin/main` lists exactly:
+       - `M src/reader/modes/page/FoliateView.tsx`
+       - `M tests/readerModes/pagePositionSave.test.tsx`
+
+       The time log `docs/governance/close-outs/Timing.PAGE-SAVE-RESTAMP-GUARD-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.PAGE-SAVE-RESTAMP-GUARD-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). No file under `src/reader/modes/{focus,flow,narrate}/`, `src/components/`, `src/utils/`, `main/` or `src/types.ts` is in the list.
+- **Effort:** S. A three-site fix in one view file and three tests on the existing harness. The two production builds and the CDP-timed live check make up most of the time.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Brain's go; owner only in the batched smoke (Stage 8).
+- **Lane:** Reader Engine. Execution surface A (Page view and its page-turn save); no main-process file.
+- **Source:** Blurby.Brain's ruling (tier 1, 2026-10-15) and Stage 8 release gate (10); the prior diagnosis `scratchpad\seg-diag\` (`appcheck.mjs`, `domseg.cjs`); this trace and measurement on `b3e2fc93` (`scratchpad\restamp\`).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `b3e2fc93`), all in **`src/reader/modes/page/FoliateView.tsx`**:
+  - **`:304`, the refs.** After `  const pendingTurnRef = useRef<{ doc: Document; start: number; end: number } | null>(null);` insert:
+    ```tsx
+      // PAGE-SAVE-RESTAMP-GUARD-1: section documents whose spans still carry the renderer's own numbering (wrapped
+      // before the book's words arrived). A turn on one is held, latest only, until the re-stamp applies the book's.
+      const rendererNumberedDocsRef = useRef(new WeakSet<Document>());
+      const reportHeldTurnRef = useRef<(doc: Document) => void>(() => {});
+    ```
+  - **`:571-580`, `reportTurn`.** After `          if (start === end) return; // a blank edge page has no words to save or wait for` insert:
+    ```tsx
+              // PAGE-SAVE-RESTAMP-GUARD-1: never save the renderer's provisional numbering; hold the latest turn instead.
+              if (rendererNumberedDocsRef.current.has(turnedDoc)) {
+                pendingTurnRef.current = { doc: turnedDoc, start, end };
+                recordDiagnosticRef.current("page-turn-deferred", `reason=book-words start=${start} end=${end}`);
+                return;
+              }
+    ```
+    After the closing `        };` of `reportTurn` (`:580`) insert:
+    ```tsx
+            // PAGE-SAVE-RESTAMP-GUARD-1: lets the re-stamp effect (outside this closure) save the turn it held.
+            reportHeldTurnRef.current = (doc: Document) => {
+              const held = pendingTurnRef.current;
+              if (!held || held.doc !== doc) return;
+              pendingTurnRef.current = null;
+              reportFirstWordOnPage(doc, held.start, held.end);
+            };
+    ```
+  - **`:601-613`, `onSectionLoad`.** Before:
+    ```tsx
+                if (sectionStart >= 0) {
+                  const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
+                  const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                  await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                }
+              }
+
+              // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+              const pendingTurn = pendingTurnRef.current;
+              if (pendingTurn && pendingTurn.doc === doc) {
+    ```
+    After:
+    ```tsx
+                if (sectionStart >= 0) {
+                  const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
+                  const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                  const provisional = !liveSections()?.length; // PAGE-SAVE-RESTAMP-GUARD-1: no book words yet
+                  await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                  // PAGE-SAVE-RESTAMP-GUARD-1: these spans carry the renderer's own numbering until the re-stamp effect
+                  // replaces them. If the book's words arrived during this wrap, that effect already owns the document.
+                  if (provisional && !liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
+                }
+              }
+
+              // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
+              const pendingTurn = pendingTurnRef.current;
+              if (pendingTurn && pendingTurn.doc === doc && !rendererNumberedDocsRef.current.has(doc)) {
+    ```
+    The body of that `if` (`:611-612`) is unchanged.
+  - **`:1027`, the re-stamp effect.** After `        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);` (inside the `for` loop) insert:
+    ```tsx
+            // PAGE-SAVE-RESTAMP-GUARD-1: the book's numbering now applies to this section; save the turn held on it.
+            rendererNumberedDocsRef.current.delete(doc);
+            if (!cancelled) reportHeldTurnRef.current(doc);
+    ```
+  - Nothing else in the file changes. That includes the turn counter, the swipe listeners, `reportFirstWordOnPage`, the click handler and the effect's dependency list (refs need no entry).
+- **Probe** (Done-when 7): PAGE-POSITION-SAVE-2's probe, verbatim. It reads foliate's live layout, not the item's text-offset path (LL-142):
+  ```js
+  (() => {
+    const v = document.querySelector("foliate-view");
+    const r = v.renderer;
+    const { doc, index } = r.getContents()[0];
+    const lo = r.start - r.size, hi = r.end - r.size; // the current page in iframe coordinates
+    const span = [...doc.querySelectorAll("[data-word-index]")].find((s) => {
+      const b = s.getBoundingClientRect();
+      return b.width > 0 && b.right > lo && b.left < hi;
+    });
+    let cfi = null;
+    if (span) { const range = doc.createRange(); range.selectNodeContents(span); cfi = v.getCFI(index, range); }
+    return JSON.stringify({ index, page: r.page, pages: r.pages, wordIndex: span ? Number(span.dataset.wordIndex) : null, text: span ? span.textContent : null, cfi, visible: document.visibilityState });
+  })()
+  ```
+- **Turn driver** (Done-when 7 (a), (c), (d)). Install it before clicking the card. It fires the window `keydown` that the section-document forwarder dispatches (`FoliateView.tsx:716-722`), 40 ms after the first stamped spans, then every 120 ms. It is mutation-driven, because a timer-polling loop stalled in the measurement:
+  ```js
+  (() => {
+    const S = window.__psrg = { firstSpansAt: null, turns: [] };
+    const seen = new WeakSet();
+    const turn = () => { S.turns.push(Date.now()); window.dispatchEvent(new KeyboardEvent("keydown", { key: "PageDown", bubbles: true, cancelable: true })); };
+    const check = () => {
+      const v = document.querySelector("foliate-view");
+      if (v && !v.__psrg) { v.__psrg = true; v.addEventListener("load", check); }
+      const cs = v && v.renderer && v.renderer.getContents ? v.renderer.getContents() : [];
+      for (const { doc } of cs) if (doc && doc.body && !seen.has(doc)) { seen.add(doc); new MutationObserver(check).observe(doc.body, { subtree: true, childList: true }); }
+      if (S.firstSpansAt == null && cs.some((c) => c.doc && c.doc.querySelector("[data-word-index]"))) {
+        S.firstSpansAt = Date.now();
+        for (let k = 0; k < (window.__psrgTurns || 1); k++) setTimeout(turn, 40 + k * 120);
+      }
+    };
+    new MutationObserver(check).observe(document.body, { subtree: true, childList: true });
+    const frame = () => { check(); if (S.firstSpansAt == null) requestAnimationFrame(frame); };
+    requestAnimationFrame(frame);
+    return "ok";
+  })()
+  ```
+- **Tests** (all in `tests/readerModes/pagePositionSave.test.tsx`, committed at C1):
+  - **Harness change:** `mount()` takes extra view props, and `render()` takes more, so a test can deliver the book's words later.
+    - `:75`: `async function mount() {` becomes `async function mount(extra: Record<string, unknown> = {}) {`.
+    - `:90`: `const render = async () => {` becomes `const render = async (more: Record<string, unknown> = {}) => {`.
+    - After `:110` (`        renderVersion: 0,`) add `        ...extra,` and `        ...more,`.
+    - Existing calls pass nothing, so their behaviour is unchanged.
+  - **New helpers**, after `rawDoc()` (`:62-71`):
+    ```ts
+    /** The book's words for section 3: the extractor puts it at words 100..103 (PAGE-SAVE-RESTAMP-GUARD-1). */
+    const BOOK_WORDS = {
+      bookWordSections: [{ sectionIndex: 3, startWordIdx: 100, endWordIdx: 104, wordCount: 4 }],
+      getCanonicalSectionWords: (i: number) => (i === 3 ? ["Alpha", "beta", "gamma", "delta"] : undefined),
+    };
+    /** From the start of span `from` to the end of span `to`, once the view has stamped the spans. */
+    function spanRange(doc: Document, from: number, to: number): Range {
+      const range = doc.createRange();
+      range.setStart(doc.querySelector(`[data-word-index="${from}"]`)!.firstChild!, 0);
+      const last = doc.querySelector(`[data-word-index="${to}"]`)!.firstChild!;
+      range.setEnd(last, last.textContent!.length);
+      return range;
+    }
+    const loadSection = (view: EventTarget, doc: Document, index: number) =>
+      act(async () => {
+        view.dispatchEvent(new CustomEvent("load", { detail: { doc, index } }));
+        await new Promise((resolve) => setTimeout(resolve, 50));
+      });
+    const settle = () => act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+    ```
+  - **(d) amended:** its first line becomes `const { fake, view, renderer } = await mount({ bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }], getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });`, with the comment `// The book's words are known, so the load stamps the book's numbering and saves the held turn (PAGE-SAVE-RESTAMP-GUARD-1).` Its expectation stays `[["doc-1", 2, "cfi:0:gamma"]]`. Without the book's words, the load now stamps provisional numbers and keeps the turn held, which (r) covers. Passes at C1 and C2.
+  - **(r) A turn before the book's word numbers apply saves the re-stamped index once they do.**
+    - `const { fake, view, renderer, render } = await mount();` and `const { doc } = rawDoc();`.
+    - Set `renderer.contents = [{ doc, index: 3 }]`, then `await loadSection(view, doc, 3)`. There are no book words yet, so the renderer numbers the section 0..3.
+    - Set `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) }`, then `await click("Next page")`.
+    - Expected after the turn:
+      - `saves(fake)` is `[]`;
+      - `fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred" && String(d.args[1]).startsWith("reason=book-words"))` has length 1.
+    - Then `await render(BOOK_WORDS); await settle();`.
+    - Expected: `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`.
+    - *Fails at C1: the turn saved the renderer's index 2 at once, so `saves` is `[{ method: "persistence.updateDocProgress", args: ["doc-1", 2, "cfi:3:gamma"] }]`.*
+  - **(s) control: a turn after the book's word numbers apply saves at once.**
+    - `const { fake, view, renderer } = await mount(BOOK_WORDS);` and `const { doc } = rawDoc();`.
+    - Set `renderer.contents = [{ doc, index: 3 }]`, then `await loadSection(view, doc, 3)`. The spans are stamped 100..103.
+    - Set `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 102, 103) }`, then `await click("Next page")`.
+    - Expected, with no further event:
+      - `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`;
+      - there is no `page-turn-deferred` diagnostic.
+    - Passes at C1 and C2.
+  - **(t) Several turns before the book's word numbers apply save only the latest, once.**
+    - `mount()`, `rawDoc()`, `renderer.contents = [{ doc, index: 3 }]`, `await loadSection(view, doc, 3)`.
+    - First turn: `renderer.detail = { cfi: "range-cfi", fraction: 0.4, range: spanRange(doc, 1, 2) }`, then `await click("Next page")`.
+    - Second turn: `renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) }`, then `await click("Next page")`.
+    - Then `await render(BOOK_WORDS); await settle();`.
+    - Expected: `saves(fake).map((e) => e.args)` is `[["doc-1", 102, "cfi:3:gamma"]]`.
+    - *Fails at C1: two saves, `["doc-1", 1, "cfi:3:beta"]` and `["doc-1", 2, "cfi:3:gamma"]`.*
+  - Place (r), (s) and (t) after (l), inside the same `describe`.
+- **Constants:** none added or removed.
+- **Branch:** `eb/page-save-restamp-guard-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\page-save-restamp-guard-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree before the first vitest run.
+- **Staging plan:**
+  - C1: `tests/readerModes/pagePositionSave.test.tsx` only (gate: Done-when 1). Build C1 for Done-when 7(a).
+  - C2: `src/reader/modes/page/FoliateView.tsx` (gates: Done-when 2–6 and 8). Then build C2 and run Done-when 7(b)–(e).
+  - Then merge to `main` with `--no-ff` on Blurby.Brain's go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass.
+  - Stage files by name. Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - At C1, if (s), (d) or an existing test fails, the harness change is wrong: fix the test, not the code. If (r) or (t) passes, the test cannot see the defect: fix the test.
+  - If any test in Done-when 2 fails at C2, report it exactly and stop; do not weaken it. Watch the G4 baselines (`page.behavior.test.tsx`): no recorded fixture turns a page, so a changed baseline needs Blurby.Brain.
+  - Done-when 7:
+    - (a) showing no defect: the driver missed the window; stop (LL-151).
+    - (c) or (d) failing: record `window.__psrg`, the probe and `$d`, and stop for Blurby.Brain.
+    - A hidden-window probe voids its step only.
+  - **Line drift:** if a cited line differs at dispatch, proceed only when the content is identical, and record the new number in the staging memo.
+  - Retry ceiling: two corrections per task, then BLOCKER to Blurby.Brain.
+  - Rollback: `git revert -m 1 <merge>`. There is no data-format change.
+- **Lane ownership (parallel run):** surface A.
+  - **Owned:**
+    - `src/reader/modes/page/FoliateView.tsx`, at the four sites above only;
+    - `tests/readerModes/pagePositionSave.test.tsx`: the harness lines, (d)'s first line, the helpers and (r), (s), (t).
+  - **Forbidden:**
+    - every other file, and every other line of the owned files. In particular:
+      - `src/reader/modes/page/ModeRuntime.ts`, `useModeBindings.ts`, `surface.ts` and `helpers/**` (including `foliateWordWrapping.ts` and `foliateWordOffsets.ts`);
+      - `src/reader/modes/{focus,flow,narrate}/**`;
+      - `src/reader/ports/**`, `src/reader/document/**` and `src/constants.ts`;
+      - every `main/` file and `preload.js`;
+      - `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json` and `ownership.json`;
+    - PAGE-POSITION-SAVE-2's sites as its specification lists them (`FoliateView.tsx` `userBrowsingRef` lines `:291`, `:471`, `:483-484`, `:498`, `:948`, `:965-967`; `ModeRuntime.ts:558`, `:585-593`; `useModeBindings.ts:1-21`; the manifest's lines 672 and 733);
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - every file NARRATE-REBUILD-1's open phase owns: `main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, `tests/narrate/**`, `scripts/narrate-rebuild/**`, `patches/kokoro-js+1.2.1.patch`, the Narrate lines of `boundary-policy.json`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`.
+  - **Shared-core touches:** none. The pre-extraction timer and `ensureBookWords` in `ReaderContainer.tsx` are read, not changed.
+  - **Merge order:**
+    - After PAGE-POSITION-SAVE-1 (merged `309f2390`).
+    - **Before PAGE-POSITION-SAVE-2 (position 25).** This item is a release gate, and that one is not. Both edit `FoliateView.tsx` and `pagePositionSave.test.tsx`. When PAGE-POSITION-SAVE-2 rebases onto this merge, it re-greps its sites:
+      - its N4 edit keeps this item's `&& !rendererNumberedDocsRef.current.has(doc)` on the section-load `if`;
+      - its `makeRuntime()` harness change keeps `mount(extra)` and `render(more)`;
+      - its (n4b) "run (d)'s steps exactly" uses the amended (d);
+      - its (n4a) needs no change: no wrap runs, so the document is not in the set and the load still drops the held turn;
+      - its Done-when 1 control list adds (r), (s) and (t).
+    - File-disjoint from FOLDER-UNREACHABLE-GUARD-1, the SAVE-LIBRARY items, IPC-PATH-TRUST-1, DEPS-AUDIT-1 and LARGE-FOLDER-SYNC-3, so either may land first. If DEPS-AUDIT-1 moves `foliate-js`, re-read `view.js:316-324` (`relocate`'s `range`) before Done-when 7.
+    - WORD-INDEX-UNIFY-1 (stub 41) lands later. It edits the extractor and `segmentWords`, not this view.
+    - The live check stays out of NARRATE-REBUILD-1's measurement windows (Stage 7, Parallel run plan). Each production build is made in this item's worktree and never overwrites the G2 build.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Tests committed: (r) and (t) fail on today's code, control (s), the amended (d) and the existing suite pass; `mount(extra)`/`render(more)` added | calculable | positive control | bounded | low | 30m (one existing file: three view-level cases on the existing harness, one amended case) | — | — |
+| 2 | Turns on renderer-numbered sections held and saved after the re-stamp, latest only (four sites in `FoliateView.tsx`) | calculable | renderer fix | bounded | low | 20m (one view file, four small inserts) | — | — |
+| 3 | Production `--dir` builds of C1 and C2; CDP-timed live check (driver control on C1, idle control, in-window turn, three turns, turn after the re-stamp) on a scratch profile | calculable | live check | bounded | medium | 75m (two builds + two `--dir` builds + three launches + CDP driver + probes) | — | — |
+| 4 | Gates, full suite, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
+
+**Total:** chain 10m · sum 10m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `b3e2fc93` (fetched 2026-10-15). The run re-greps at dispatch, and stops on any content drift.
+- **Standing rule 41 (LL-136):** the Done-when 8 fence exempts the time log and the staging memo.
+- **Standing rule 43 (LL-138):** (r) and (t) fail on today's code for named reasons. Control (s) proves a turn after the re-stamp still saves at once, and the amended (d) proves the existing held-turn path still saves.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code. Gates 3–5 were dry-run on `b3e2fc93`. Gates 3 and 4 are empty there, and gate 5 counts 1 there, so each can fail.
+- **Standing rule 45 (LL-141):** "the saved word is the one on screen" is judged by a probe of foliate's live layout. Every probe returns `visibilityState`, and a hidden sample voids its step. The owner's check is one short checklist.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **Standing rule 47 (LL-147):** the full suite, the builds and the live check run in a local session on the owner's machine.
+- **Standing rule 48 (LL-149):** `npm run typecheck` and `npm run build` are in Done-when 6. A TypeScript view changes.
+- **LL-151:** the live driver is proven able to see the defect on the C1 build before the C2 rows are trusted (row (a)).
+- **LL-152:** the live route is a production `--dir` build, not `npm run dev`. The measurement also found that a hidden window stalls the renderer's timers, so each timed step brings the window to the front.
+- **LL-142:** each live row is judged by `library.json` against foliate's live layout and the extractor's word at the saved index, not against the item's own text-offset path.
+- **LL-158 and its QUIT-FLUSH-1 rider:** the live rows name a trigger shown to commit (the deep-position turn after the re-stamp), and an idle control (b) runs before the timed rows. The in-window path was traced end to end: turn → `reportTurn` → hold → re-stamp → `reportHeldTurnRef` → `onPageTurned` → `update-doc-progress` → main's 500 ms `saveLibrary`. The 15 s wait covers the re-stamp's 3.6–6.4 s and the save.
+- **LL-159:** a held turn lost on a quit inside the window is recorded as a known limit, the same class as PAGE-POSITION-SAVE-1's ruling Q4.
+- **LL-156:** PAGE-POSITION-SAVE-1's held-save known limit and PAGE-POSITION-SAVE-2's N4 site are restated, with the merge note for the latter.
+- **LL-073:** passive relocates stay passive; the hold applies only to turns.
+- **LL-083:** no new React state, timer or constant; two refs only.
+
 <a id="page-position-save-2"></a>
 
-#### PAGE-POSITION-SAVE-2 — Follow-ups from PAGE-POSITION-SAVE-1 *(position 25 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+#### PAGE-POSITION-SAVE-2 — Follow-ups from PAGE-POSITION-SAVE-1 *(position 26 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
 
 - **What:** Three follow-ups to Page mode's page-turn save (PAGE-POSITION-SAVE-1, merge `309f2390`), all in `src/reader/modes/page/**` and the reader-mode ownership manifest:
   1. **N2, a live check:** on a production build, a touch swipe that crosses a section edge saves the first word of the page it lands on. That proves the swipe's crossing flag is taken by the adjacent section's `relocate`. This is a check only; the swipe code is not changed.
@@ -6031,7 +6379,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 
 <a id="kf2-waiver-retire-1"></a>
 
-#### KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver *(position 26 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+#### KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver *(position 27 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
 
 - **What:** Governance only, with no product or test code.
   - Record that the KF-2 waiver is retired.
@@ -6219,7 +6567,7 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 
 <a id="folder-notice-1"></a>
 
-#### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(position 27 — Full Spec; authored 2026-10-15 on main @ `d0720ce0`, re-anchored on `89a5a95c` after FOLDER-UNREACHABLE-GUARD-1 merged; not a release gate)*
+#### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(position 28 — Full Spec; authored 2026-10-15 on main @ `d0720ce0`, re-anchored on `89a5a95c` after FOLDER-UNREACHABLE-GUARD-1 merged; not a release gate)*
 
 - **What:** While Blurby cannot reach the source folder, the library shows a persistent banner with a Retry button. It stays until the folder is shown reachable again. The owner chose option (C), described below.
   - **The toast.** FOLDER-UNREACHABLE-GUARD-1 (merged at `89a5a95c`) shipped the corrected toast, sent once per failure episode (`folderToastShown`). This item adds the banner beside it, and makes three fixes from that item's quality review (Blurby.Brain, approved; R6–R8 below):
@@ -7209,24 +7557,24 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 31 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
-- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 32 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
-- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 33 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
-- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 34 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. From SAVE-LIBRARY-MERGE-1's quality review (2026-10-15): `apply-metadata-updates` (`main/ipc/library.js`) still replaces the edited record and the array, reopening the 100 ms stale-index window after an Edit-form save, so a progress write or sample relink in that window lands on a detached record; the Edit form's save is fire-and-forget (an IPC rejection shows the edit and later reverts it, unhandled); `tags`, `collection`, `unread` and `seenAt` are stored without type checks; renderer edits do not bump `modified`, so a cloud merge can undo them; and the cloud sync's `setLibrary(gcd)` after an await can drop an edit made during the sync. Lane: Library & Content.
-- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 35 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
-- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 36 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
+- <a id="rename-retry-1"></a>**RENAME-RETRY-1 — Every JSON rename retries a transient Windows lock** *(position 32 — stub)*. Ruled by Blurby.Brain (KF2-WAIVER-RETIRE-1 trace, 2026-10-14): six raw `rename` calls outside `main/json-store.js` have no retry: `main/sync-engine.js:97` (sync state; a dropped rename loses data, so first), `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206`, `main/tts-cache.js:197`. Reuse json-store's existing retry helper; no new retry code. Lane: Platform & Maintenance.
+- <a id="jsonstore-timeout-1"></a>**JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom** *(position 33 — stub; test-only)*. Ruled by Blurby.Brain (2026-10-14): give `tests/jsonStore.test.js` test (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did, and isolate (d)/(e) from a timed-out (a). Once it lands, jsonStore comes off the closed list of load-tolerated tests. Lane: Platform & Maintenance.
+- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 34 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
+- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 35 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. From SAVE-LIBRARY-MERGE-1's quality review (2026-10-15): `apply-metadata-updates` (`main/ipc/library.js`) still replaces the edited record and the array, reopening the 100 ms stale-index window after an Edit-form save, so a progress write or sample relink in that window lands on a detached record; the Edit form's save is fire-and-forget (an IPC rejection shows the edit and later reverts it, unhandled); `tags`, `collection`, `unread` and `seenAt` are stored without type checks; renderer edits do not bump `modified`, so a cloud merge can undo them; and the cloud sync's `setLibrary(gcd)` after an await can drop an edit made during the sync. Lane: Library & Content.
+- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 36 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
+- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 37 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 38 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
-- <a id="narrate-token-cap-1"></a>**NARRATE-TOKEN-CAP-1 — Narrate passages that exceed the 400-id token cap** *(position 39 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 reconciliation sweep (Blurby.Brain ruling): a few chunks in two of the owner's books exceed Kokoro's 400-id token cap (class E: 3 and 5 chunks). Narration pauses there with F4's notice, so it fails safe rather than wrong. The fix changes the chunk planner's token estimate, which changes chunk timing, so it is out of NARRATE-REBUILD-1 P6b. Re-run the reconcile sweep's owner-library pass after it lands. Lane: TTS / Narration Engine.
-- <a id="ws-token-regen-1"></a>**WS-TOKEN-REGEN-1 — Regenerating the pairing code stores one encrypted token** *(position 40 — stub; not a release gate)*. From GET-STATE-SECRET-1's security review (Blurby.Brain ruling 2026-10-15): `regenerate-ws-pairing-token` (`main/ipc/misc.js` ~:416-418) writes a plaintext token to `settings._wsPairingToken` and saves; with safeStorage available, `startServer` (`main/ws-server.js` ~:444-468) fails to decrypt it, generates a second token and stores that encrypted, so the first is discarded and plaintext can briefly reach `settings.json`. Fix direction: regenerate stores the new token through the same encrypt path `startServer` reads, so one token exists and is never written in plaintext when safeStorage is available. Test: after a regenerate, `settings.json` holds ciphertext only and `startServer` accepts the token without making a new one. Fold-ins: `schemaVersion` optional in `BlurbySettings` (`src/types.ts:140`; the renderer no longer receives it), and a test that every `BlurbySettings` key is in `SETTINGS_DEFAULTS`. Lane: Platform & Maintenance.
-- <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 41 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
-- <a id="large-folder-sync-3"></a>**LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2** *(position 42 — stub; not a release gate)*. From LARGE-FOLDER-SYNC-2's quality review, approved by Blurby.Brain (2026-10-15): (W1) the watcher's `onEvent` (`main/folder-watcher.js` ~:151) skips system folders too (`|| parts.some(isSystemFolder)`), so a drive-root source does not import `$Recycle.Bin` files as ghost books; watcher test; (W2) `rescan-folder`'s Saved Articles check (`main/ipc/library.js` ~:453-455, :494) uses `keyOf` with `pathKey(path.join(sourceFolder, "Saved Articles")) + path.sep`, not a raw case-sensitive prefix; rescan test; (W3) `switch-folder`'s `fsPromises.access(folder)` and per-file `statFile` (`main.js` ~:326) are bounded by `FOLDER_LIST_TIMEOUT_MS`, and a short breaker (its window a constant in `main/constants.js`) skips `rootHasContent` after a root timeout so a hung mount cannot pin the libuv pool; test gaps: timer-leak checks (`vi.getTimerCount()`), the stat timeout, an abandoned run hung in extraction, a normal prune saving once, a watcher-first test that the new watcher's events apply during the sync; the stale F3 comment in `syncAll`. Re-run `scripts/perf/folder-sync-scale.mjs` after the changes and stop if the add worst-case crosses 2x of LARGE-FOLDER-SYNC-2's C1 (it was 1.83–1.92x). Lane: Library & Content.
-- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 28 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 29 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 30 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 38 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
+- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 39 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
+- <a id="narrate-token-cap-1"></a>**NARRATE-TOKEN-CAP-1 — Narrate passages that exceed the 400-id token cap** *(position 40 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 reconciliation sweep (Blurby.Brain ruling): a few chunks in two of the owner's books exceed Kokoro's 400-id token cap (class E: 3 and 5 chunks). Narration pauses there with F4's notice, so it fails safe rather than wrong. The fix changes the chunk planner's token estimate, which changes chunk timing, so it is out of NARRATE-REBUILD-1 P6b. Re-run the reconcile sweep's owner-library pass after it lands. Lane: TTS / Narration Engine.
+- <a id="ws-token-regen-1"></a>**WS-TOKEN-REGEN-1 — Regenerating the pairing code stores one encrypted token** *(position 41 — stub; not a release gate)*. From GET-STATE-SECRET-1's security review (Blurby.Brain ruling 2026-10-15): `regenerate-ws-pairing-token` (`main/ipc/misc.js` ~:416-418) writes a plaintext token to `settings._wsPairingToken` and saves; with safeStorage available, `startServer` (`main/ws-server.js` ~:444-468) fails to decrypt it, generates a second token and stores that encrypted, so the first is discarded and plaintext can briefly reach `settings.json`. Fix direction: regenerate stores the new token through the same encrypt path `startServer` reads, so one token exists and is never written in plaintext when safeStorage is available. Test: after a regenerate, `settings.json` holds ciphertext only and `startServer` accepts the token without making a new one. Fold-ins: `schemaVersion` optional in `BlurbySettings` (`src/types.ts:140`; the renderer no longer receives it), and a test that every `BlurbySettings` key is in `SETTINGS_DEFAULTS`. Lane: Platform & Maintenance.
+- <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 42 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
+- <a id="large-folder-sync-3"></a>**LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2** *(position 43 — stub; not a release gate)*. From LARGE-FOLDER-SYNC-2's quality review, approved by Blurby.Brain (2026-10-15): (W1) the watcher's `onEvent` (`main/folder-watcher.js` ~:151) skips system folders too (`|| parts.some(isSystemFolder)`), so a drive-root source does not import `$Recycle.Bin` files as ghost books; watcher test; (W2) `rescan-folder`'s Saved Articles check (`main/ipc/library.js` ~:453-455, :494) uses `keyOf` with `pathKey(path.join(sourceFolder, "Saved Articles")) + path.sep`, not a raw case-sensitive prefix; rescan test; (W3) `switch-folder`'s `fsPromises.access(folder)` and per-file `statFile` (`main.js` ~:326) are bounded by `FOLDER_LIST_TIMEOUT_MS`, and a short breaker (its window a constant in `main/constants.js`) skips `rootHasContent` after a root timeout so a hung mount cannot pin the libuv pool; test gaps: timer-leak checks (`vi.getTimerCount()`), the stat timeout, an abandoned run hung in extraction, a normal prune saving once, a watcher-first test that the new watcher's events apply during the sync; the stale F3 comment in `syncAll`. Re-run `scripts/perf/folder-sync-scale.mjs` after the changes and stop if the add worst-case crosses 2x of LARGE-FOLDER-SYNC-2's C1 (it was 1.83–1.92x). Lane: Library & Content.
+- <a id="pdf-import-diag-1"></a>**PDF-IMPORT-DIAG-1 — Reproduce the PDF that cannot be converted** *(position 29 — stub; read-only diagnosis)*. BUG-190: a 223-page PDF imports but opening it shows "This document needs to be re-imported. The original file could not be converted." That toast comes from the `load-doc-content` EPUB conversion path in `main/ipc/library.js`, so the investigation starts there and in `convertToEpub()`. Reproduce on the current build with a large PDF, capture the main-process conversion error, and decide between a parser failure and a missing original file. Ends with a fix specification. Lane: Library & Content.
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 30 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
+- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 31 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
 
 ## Deferred Lanes
