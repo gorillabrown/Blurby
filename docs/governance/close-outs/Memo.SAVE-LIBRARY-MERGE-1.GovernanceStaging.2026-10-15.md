@@ -56,10 +56,22 @@ tests/readFileBufferLibrary.test.js tests/documentsOpenSource.test.js tests/sync
 - 10: `docs/governance/BUG_REPORT.md:1`, exit 0. The Status line reads exactly the Done-when 10 text (the base line's
   trailing "Lane: Library & Content." is not part of that text and went with the old line).
 
-### Done-when 11 (partial)
-`npm run typecheck` (pwsh): **exit 0**. The full `npm test` and `npm run build` are not run in wave A.
+### Wave B (2026-10-15, on Blurby.Roadmap's go; the traced session had ended)
+- `git fetch origin`: `refs/remotes/origin/main` is still `167d64d1`, the branch's base. `git merge --no-ff
+  refs/remotes/origin/main`: "Already up to date.", exit 0, no merge commit (HEAD stayed `08ba65ab`).
+- Done-when 2 re-run (pwsh): **exit 0**; `Test Files 7 passed (7)`, `Tests 91 passed (91)`.
+- Done-when 3–10 re-run (pwsh): every gate gave the same output and exit code as listed above.
 
-### Remaining (wave B, on Blurby.Roadmap's go)
-- Done-when 11: full `npm test` on the owner's machine (standing rule 47) and `npm run build`.
-- Before merging: `git merge refs/remotes/origin/main` into this branch and re-run Done-when 2–11.
-- Done-when 13: the Stage 8 batched owner smoke (a) and (b).
+### Done-when 11 (pwsh, worktree root, this machine)
+- `npm test`: **exit 0**; `Test Files 164 passed (164)`, `Tests 2204 passed | 1 skipped (2205)`. No failures, so the
+  Stage 8 closed-list rule was not needed.
+- `npm run typecheck`: **exit 0**.
+- `npm run build`: **exit 0**.
+- `tests/perf-baseline-results.json`, rewritten by the suite, is left unstaged.
+
+### Done-when 13
+Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away).
+
+### Remaining
+- Blurby.Roadmap's review and the `--no-ff` merge to `main` (not done by this run).
+- Done-when 13: the Stage 8 batched owner smoke, checks (a) and (b).
