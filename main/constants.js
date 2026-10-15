@@ -65,6 +65,10 @@ const MAX_MOBI_TEXT_BYTES = 10 * 1024 * 1024;
 const EPUB_HEADING_MAX_LENGTH = 100;
 /** Maximum entries in the EPUB chapter LRU cache */
 const EPUB_CHAPTER_CACHE_MAX = 50;
+/** Largest single entry read from an EPUB/ZIP archive, declared or inflated (bytes, 64 MiB); adm-zip <=0.6.0 trusts the declared size */
+const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;
+/** Largest total read by one archive operation (bytes, 512 MiB; a large illustrated EPUB can pass 256 MiB) */
+const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;
 
 // ── EPUB Converter ──────────────────────────────────────────────────────────
 /** Subdirectory for converted EPUBs in userData */
@@ -225,6 +229,8 @@ module.exports = {
   MAX_MOBI_TEXT_BYTES,
   EPUB_HEADING_MAX_LENGTH,
   EPUB_CHAPTER_CACHE_MAX,
+  ZIP_ENTRY_MAX_BYTES,
+  ZIP_OPERATION_MAX_BYTES,
   // EPUB Converter
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,

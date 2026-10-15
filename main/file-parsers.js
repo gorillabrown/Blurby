@@ -11,6 +11,7 @@ const {
   EPUB_HEADING_MAX_LENGTH,
   EPUB_CHAPTER_CACHE_MAX,
 } = require("./constants");
+const { createEntryReader } = require("./zip-read");
 
 // ── Lazy-loaded heavy modules (cached after first require) ─────────────────
 let _cheerio, _admZip, _pdfParse, _canvas;
@@ -398,10 +399,11 @@ async function extractContent(filepath) {
       const AdmZip = getAdmZip();
       const cheerio = getCheerio();
       const entries = zip.getEntries();
+      const readEntry = createEntryReader();
       const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
       let opfPath = "";
       if (containerEntry) {
-        const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+        const $ = cheerio.load(readEntry(containerEntry).toString("utf-8"), { xmlMode: true });
         opfPath = $("rootfile").attr("full-path") || "";
       }
       const opfEntry = entries.find((e) => e.entryName === opfPath);
@@ -419,7 +421,7 @@ async function extractContent(filepath) {
       let ncxHref = null;
       if (opfEntry) {
         const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
-        const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+        const $ = cheerio.load(readEntry(opfEntry).toString("utf-8"), { xmlMode: true });
         $("manifest item").each((_, el) => {
           const id = $(el).attr("id");
           const href = $(el).attr("href");
@@ -446,7 +448,7 @@ async function extractContent(filepath) {
           const navEntry = entries.find((e) => e.entryName === tocHref);
           if (navEntry) {
             const navDir = tocHref.includes("/") ? tocHref.substring(0, tocHref.lastIndexOf("/") + 1) : "";
-            const $ = cheerio.load(navEntry.getData().toString("utf-8"));
+            const $ = cheerio.load(readEntry(navEntry).toString("utf-8"));
             $('nav[*|type="toc"] a, nav#toc a, nav.toc a').each((_, el) => {
               const href = $(el).attr("href");
               const title = $(el).text().trim();
@@ -461,7 +463,7 @@ async function extractContent(filepath) {
           const ncxEntry = entries.find((e) => e.entryName === ncxHref);
           if (ncxEntry) {
             const ncxDir = ncxHref.includes("/") ? ncxHref.substring(0, ncxHref.lastIndexOf("/") + 1) : "";
-            const $ = cheerio.load(ncxEntry.getData().toString("utf-8"), { xmlMode: true });
+            const $ = cheerio.load(readEntry(ncxEntry).toString("utf-8"), { xmlMode: true });
             $("navPoint").each((_, el) => {
               const title = $(el).find("> navLabel > text").first().text().trim();
               const src = $(el).find("> content").attr("src");
@@ -488,7 +490,7 @@ async function extractContent(filepath) {
         const entry = entries.find((e) => e.entryName === href);
         if (!entry || processedPaths.has(href)) continue;
         processedPaths.add(href);
-        const $ = cheerio.load(entry.getData().toString("utf-8"));
+        const $ = cheerio.load(readEntry(entry).toString("utf-8"));
         $("script, style").remove();
         // Remove EPUB page-break markers, editorial annotations, and hidden metadata
         $(".pb, .pagebreak, [role='doc-pagebreak'], [epub\\:type='pagebreak']").remove();
@@ -577,12 +579,13 @@ async function extractEpubCover(filepath, docId, dataPath) {
     const AdmZip = getAdmZip();
     const zip = new AdmZip(filepath);
     const entries = zip.getEntries();
+    const readEntry = createEntryReader();
 
     const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
     let opfPath = "";
     if (containerEntry) {
       const cheerio = getCheerio();
-      const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+      const $ = cheerio.load(readEntry(containerEntry).toString("utf-8"), { xmlMode: true });
       opfPath = $("rootfile").attr("full-path") || "";
     }
 
@@ -592,7 +595,7 @@ async function extractEpubCover(filepath, docId, dataPath) {
     if (opfEntry) {
       const cheerio = getCheerio();
       const opfDir = opfPath.includes("/") ? opfPath.substring(0, opfPath.lastIndexOf("/") + 1) : "";
-      const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+      const $ = cheerio.load(readEntry(opfEntry).toString("utf-8"), { xmlMode: true });
 
       let coverHref = null;
       $("manifest item").each((_, el) => {
@@ -633,7 +636,7 @@ async function extractEpubCover(filepath, docId, dataPath) {
 
     if (!coverEntry) return null;
 
-    const coverData = coverEntry.getData();
+    const coverData = readEntry(coverEntry);
     const ext = validateImageMagicBytes(coverData);
     if (!ext) return null; // Skip cover if not a valid image format
 
@@ -654,18 +657,19 @@ async function extractEpubMetadata(filepath) {
     const cheerio = getCheerio();
     const zip = new AdmZip(filepath);
     const entries = zip.getEntries();
+    const readEntry = createEntryReader();
 
     const containerEntry = entries.find((e) => e.entryName.endsWith("container.xml"));
     let opfPath = "";
     if (containerEntry) {
-      const $ = cheerio.load(containerEntry.getData().toString("utf-8"), { xmlMode: true });
+      const $ = cheerio.load(readEntry(containerEntry).toString("utf-8"), { xmlMode: true });
       opfPath = $("rootfile").attr("full-path") || "";
     }
 
     const opfEntry = entries.find((e) => e.entryName === opfPath);
     if (!opfEntry) return { title: null, author: null };
 
-    const $ = cheerio.load(opfEntry.getData().toString("utf-8"), { xmlMode: true });
+    const $ = cheerio.load(readEntry(opfEntry).toString("utf-8"), { xmlMode: true });
     const creator = $("dc\\:creator, creator").first().text().trim();
     const title = $("dc\\:title, title").first().text().trim();
     return { title: title || null, author: creator || null };

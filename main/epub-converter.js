@@ -9,6 +9,7 @@ const {
   TXT_CHAPTER_MIN_LINES,
   PDF_MIN_EXTRACTABLE_WORDS,
 } = require("./constants");
+const { createEntryReader } = require("./zip-read");
 
 // Lazy-loaded heavy dependencies
 let AdmZip = null;
@@ -1057,12 +1058,14 @@ async function validateEpub(epubPath) {
     const Zip = getAdmZip();
     const zip = new Zip(epubPath);
     const entries = zip.getEntries().map((e) => e.entryName);
+    const readEntry = createEntryReader();
+    const readText = (name) => { const e = zip.getEntry(name); return e ? readEntry(e).toString("utf8") : ""; };
 
     // Check mimetype
     if (!entries.includes("mimetype")) {
       errors.push("Missing mimetype entry");
     } else {
-      const mimetype = zip.readAsText("mimetype").trim();
+      const mimetype = readText("mimetype").trim();
       if (mimetype !== "application/epub+zip") {
         errors.push(`Invalid mimetype: "${mimetype}"`);
       }
@@ -1079,7 +1082,7 @@ async function validateEpub(epubPath) {
     if (!opfEntry) {
       errors.push("Missing content.opf");
     } else {
-      const opfXml = zip.readAsText(opfEntry);
+      const opfXml = readText(opfEntry);
       const $ = getCheerio().load(opfXml, { xmlMode: true });
 
       // Extract manifest items: id → href
