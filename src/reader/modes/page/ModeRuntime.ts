@@ -113,6 +113,9 @@ export class PageMode implements ReadingMode {
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const PAGE_SURFACE_LOAD_DELAY_MS = 200;
 
+/** update-doc-progress keeps the stored word index for a negative position: a cfi-only save (PAGE-SAVE-RESTAMP-2). */
+const KEEP_STORED_POSITION = -1;
+
 /** Frozen inputs are kept as-is; anything else is deep-copied and frozen first. */
 function own<T>(value: T) {
   return Object.isFrozen(value) ? value : freezeValue(value);
@@ -138,6 +141,8 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** Legacy useReader wpmRef: the latest value this runtime asked the shell to store. */
   private wpm: number;
   private engine: PageMode | null = null;
+  /** PAGE-SAVE-RESTAMP-2 (review fr1/fr3): the provisional anchor of the word click whose save the view holds. */
+  private heldClickAnchor: number | null = null;
   private readonly loadTimers = new Set<ReturnType<typeof setTimeout>>();
   private alive = true;
   private destroyed = false;
@@ -297,7 +302,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
 
   // ── User intents ──────────────────────────────────────────────────────────
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths). */
-  hardSelect(input: ReaderHardSelectInput): void {
+  hardSelect(input: ReaderHardSelectInput, holdSave = false): void {
     if (!this.alive) return;
     const s = this.state;
     this.markEngaged();
@@ -317,7 +322,11 @@ export class PageModeRuntime implements ReaderModeRuntime {
       }));
       s.explicitSelectionAnchor = resolved;
       // commitSharedWordAnchor(resolved, "hard-selection", cfi, { skipNarrationResync: true })
-      const anchored = this.commitShared(resolved, "hard-selection", input.cfi);
+      // PAGE-SAVE-RESTAMP-2: a click on provisional numbering keeps all of this but the save; the view saves it later.
+      const anchored = holdSave
+        ? this.commitShared(resolved, "hard-selection", input.cfi, false)
+        : this.commitShared(resolved, "hard-selection", input.cfi);
+      this.heldClickAnchor = holdSave ? anchored : null; // review fr1/fr3: the provisional index the held save will correct
       // retargetActiveModeToWord: Page has no running engine to retarget.
       if (shouldClearBrowseAwayOnAnchorEvent({ type: "hard-selection", wordIndex: anchored })) {
         this.surface.clearUserBrowsing();
@@ -326,6 +335,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
       s.notify();
       return;
     }
+    this.heldClickAnchor = null; // review fr3: an unresolved click holds nothing
     s.resumeAnchor = null; // TTS-7M: explicit selection with no index clears stale anchors
     this.ports.diagnostics.transition("resumeAnchor:consumed", () => ({
       resumeAnchor: null,
@@ -545,8 +555,8 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   };
 
-  onWordClick = (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number): void => {
-    this.hardSelect({ cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex });
+  onWordClick = (cfi: string, word: string, sectionIndex?: number, wordOffsetInSection?: number, globalWordIndex?: number, holdSave?: boolean): void => {
+    this.hardSelect({ cfi, word, sectionIndex, wordOffsetInSection, globalWordIndex }, holdSave);
   };
 
   onTocReady = (toc: unknown[], sectionCount: number): void => {
@@ -563,7 +573,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
   };
 
   /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
-  onPageTurned = (first: { readonly wordIndex: number; readonly cfi: string }): void => {
+  onPageTurned = (first: { readonly wordIndex: number | null; readonly cfi: string }): void => {
     if (!this.alive) return;
     const s = this.state;
     this.markEngaged();
@@ -572,7 +582,9 @@ export class PageModeRuntime implements ReaderModeRuntime {
     s.explicitSelectionAnchor = null;
     s.cfi = first.cfi;
     this.ports.persistence.recordCfi(first.cfi);
-    s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
+    // PAGE-SAVE-RESTAMP-2: no index (the book's words cannot arrive): save the page and keep the stored word index.
+    if (first.wordIndex == null) this.ports.persistence.updateDocProgress(this.document.documentId, KEEP_STORED_POSITION, first.cfi);
+    else s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
       cfi: first.cfi,
       persist: true,
       publishState: true,
@@ -595,6 +607,25 @@ export class PageModeRuntime implements ReaderModeRuntime {
 
   recordDiagnostic = (kind: string, detail: string): void => {
     if (this.alive) this.ports.diagnostics.record(kind, detail);
+  };
+
+  /** PAGE-SAVE-RESTAMP-2: the view asks this, on a held turn, whether the book's words can arrive. */
+  ensureBookWords = () => this.ports.document.ensureBookWords();
+
+  /** PAGE-SAVE-RESTAMP-2 (ruling): a word click held on provisional numbering saves now; the click already set the anchor. */
+  onHeldClickSave = (click: { readonly wordIndex: number | null; readonly cfi: string }): void => {
+    const provisional = this.heldClickAnchor;
+    if (!this.alive || provisional == null) return; // review fr3: no resolved click is held
+    this.heldClickAnchor = null;
+    this.ports.persistence.updateDocProgress(this.document.documentId, click.wordIndex ?? KEEP_STORED_POSITION, click.cfi);
+    if (click.wordIndex == null) return;
+    this.ports.persistence.updateProgress(this.document.documentId, click.wordIndex);
+    // Review fr1: move the click's anchor to the re-stamped index too, unless the reader has made a new selection since,
+    // so a Focus or Narrate handoff starts at that word and cannot save the provisional index over this save.
+    if (this.state.explicitSelectionAnchor === provisional) {
+      this.commitShared(click.wordIndex, "hard-selection", click.cfi, false);
+      this.state.notify();
+    }
   };
 
   /** Canonical extractor words for a section, when full-book words exist (SRL-067). */
@@ -650,10 +681,10 @@ export class PageModeRuntime implements ReaderModeRuntime {
   }
 
   /** Legacy commitSharedWordAnchor (Page never narrates, so the resync branch cannot fire). */
-  private commitShared(wordIndex: number, cause: "hard-selection" | "explicit-navigation", cfi: string | null | undefined): number {
+  private commitShared(wordIndex: number, cause: "hard-selection" | "explicit-navigation", cfi: string | null | undefined, persist = true): number {
     const clamped = this.anchor.commitPersistentWordIndex(wordIndex, cause, {
       cfi,
-      persist: true,
+      persist,
       publishState: true,
       navigate: true,
     });

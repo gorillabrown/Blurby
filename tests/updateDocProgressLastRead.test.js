@@ -21,12 +21,13 @@ function createDocumentsHarness(doc) {
     shell: { openExternal: vi.fn(async () => {}), showItemInFolder: vi.fn() },
   };
 
+  const enqueue = vi.fn(async () => {});
   Module._load = function patchedLoad(request, parent, isMain) {
     if (request === "electron") return electronMock;
     if (request === "../window-manager") return { createReaderWindow: vi.fn() };
     // The handler requires these at call time (main/ipc/documents.js:18-19).
     if (request === "../sync-engine") return { getSyncStatus: () => ({ revision: 3 }) };
-    if (request === "../sync-queue") return { enqueue: vi.fn(async () => {}) };
+    if (request === "../sync-queue") return { enqueue };
     return originalLoad.call(this, request, parent, isMain);
   };
 
@@ -45,11 +46,12 @@ function createDocumentsHarness(doc) {
     readerWindows: new Map(),
   });
 
-  return { ipcHandlers, saveLibrary };
+  return { ipcHandlers, saveLibrary, enqueue };
 }
 
 const PAGE_CFI = "epubcfi(/6/4!/4/2/1:0)";
 const FOCUS_CFI = "epubcfi(/6/4!/4/8/1:0)";
+const NEXT_PAGE_CFI = "epubcfi(/6/4!/4/4/1:0)";
 
 describe("update-doc-progress", () => {
   beforeEach(() => {
@@ -97,5 +99,20 @@ describe("update-doc-progress", () => {
     expect(doc.position).toBe(60);
     expect(doc.cfi).toBe(FOCUS_CFI); // a cfi-less write keeps the cfi (documents.js:24)
     expect(saveLibrary).toHaveBeenCalledTimes(3);
+  });
+
+  it("(o) a negative position is a cfi-only save: the stored position stays and no progress is queued (PAGE-SAVE-RESTAMP-2)", async () => {
+    const doc = { id: "doc-1", lastReadAt: 5 };
+    const { ipcHandlers, saveLibrary, enqueue } = createDocumentsHarness(doc);
+    const handler = ipcHandlers.get("update-doc-progress");
+    await handler({}, "doc-1", 12, PAGE_CFI);
+    vi.advanceTimersByTime(1000);
+    await handler({}, "doc-1", -1, NEXT_PAGE_CFI); // Page when the book's words cannot arrive
+    expect(doc.position).toBe(12);
+    expect(doc.cfi).toBe(NEXT_PAGE_CFI);
+    expect(doc.lastReadAt).toBe(2000);
+    expect(saveLibrary).toHaveBeenCalledTimes(2);
+    expect(enqueue).toHaveBeenCalledTimes(1);
+    expect(enqueue).toHaveBeenCalledWith("update-progress", { docId: "doc-1", value: 12, revision: 3 });
   });
 });

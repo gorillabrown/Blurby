@@ -327,9 +327,10 @@ export const electronAPIStub: ElectronAPI = {
   updateDocProgress: async (docId: string, position: number, cfi?: string) => {
     const doc = findDoc(docId);
     if (doc) {
-      doc.position = position;
+      const hasPosition = Number.isFinite(position) && position >= 0; // as main/ipc/documents.js: -1 is a cfi-only save (PAGE-SAVE-RESTAMP-2)
+      if (hasPosition) doc.position = position;
       if (cfi) doc.cfi = cfi;
-      if (position > (doc.furthestPosition ?? 0)) doc.furthestPosition = position;
+      if (hasPosition && position > (doc.furthestPosition ?? 0)) doc.furthestPosition = position;
       doc.lastReadAt = Date.now();
     }
     return traceMut("updateDocProgress", [docId, position, cfi], undefined);
