@@ -140,7 +140,8 @@ describe("save-library cannot change where a book's file is", () => {
     await call("save-library", [{ ...d1(), filepath: targetFile }]);
     const result = await call("read-file-buffer", targetFile);
     expect(result).toBeNull();
-    expect(fs.readFileSync(errorLog, "utf-8")).toContain("BLOCKED");
+    // read-file-buffer does not await its log write
+    await vi.waitFor(() => expect(fs.readFileSync(errorLog, "utf-8")).toContain("BLOCKED"));
   });
 
   it("(f) a non-array payload is ignored", async () => {
