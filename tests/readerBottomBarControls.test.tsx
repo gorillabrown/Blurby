@@ -269,4 +269,14 @@ describe("ReaderBottomBar — Page Play disabled", () => {
       expect(playButton.disabled).toBe(false);
     }
   });
+
+  it("(l) the Page hint line describes remembered-mode Space, Shift+Space and N (UX-POLISH-2)", async () => {
+    await act(async () => {
+      root.render(<ReaderBottomBar {...baseProps} readingMode="page" />);
+    });
+
+    expect(container.querySelector(".rbb-info-hint")?.textContent).toBe(
+      "← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu",
+    );
+  });
 });

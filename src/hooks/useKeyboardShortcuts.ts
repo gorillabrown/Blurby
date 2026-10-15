@@ -239,6 +239,8 @@ export function useReaderKeys(
       if (e.shiftKey && !e.ctrlKey && e.code === "ArrowDown" && !isFlow) { e.preventDefault(); s.nextChapter?.(); return; }
       // Escape
       if (e.code === "Escape") { e.preventDefault(); s.exitReader(); return; }
+      // A held Space auto-repeats: claim the repeats so entering, switching and play/pause fire once per press
+      if (e.code === "Space" && e.repeat) { e.preventDefault(); return; }
 
       // ── Page-mode specific keys ────────────────────────────────────
       if (isPage) {

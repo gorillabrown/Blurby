@@ -1,0 +1,58 @@
+# Sprint Close-Out Governance Staging — UX-POLISH-2
+
+Worktree-resident run (`eb/ux-polish-2`, `C:\Projects\Blurby\.worktrees\ux-polish-2`, from `refs/remotes/origin/main` @ `e476aed1`), dispatched by Blurby.Roadmap 2026-10-14. Light waves (A, B and the reviews) run while the NARRATE-REBUILD-1 completion waits for a quiet machine. Wave C's heavy gates run after the epic merges. Blurby.Roadmap runs the close-out.
+
+## Gate evidence
+
+### Setup (2026-10-14)
+- Reconciliation recipe: every STOP passed; `npm ci` exit 0; at `e476aed1`.
+- Re-grep on `e476aed1` (standing rule 36): the hook's Escape line is still `:241`. The forwarders are at `page:680`, `focus:805` and `flow:880` (narrate `:934`, untouched). `ShortcutsOverlay.tsx:177-190`, `HotkeyMapSettings.tsx:130`, `ReaderBottomBar.tsx:55`, `types.ts:188`, `keyboard.css:269-270` and `:297`, `page-reader.css:463` and `:490`, and the test anchors (`readerKeyboard` `:135` and `:259`, `foliate-bridge` `:40`, `readerBottomBarControls` `:272`) all match. **Drift:** the `TECHNICAL_REFERENCE.md` `] / N` sentence is at `:784` (the specification says `:785`); content identical.
+- Shared core: `git diff --name-only refs/remotes/origin/main refs/heads/eb/narrate-rebuild-1-p6` lists no code path (epic docs and two governance files only), so the `src/types.ts` comment edit collides with nothing.
+
+### Owner smoke (Done-when 12)
+Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away).
+
+### Done-when 1 — positive control at C1 (re-run by the orchestrator)
+`npx vitest run tests/readerKeyboard.test.tsx tests/foliate-bridge.test.ts tests/readerBottomBarControls.test.tsx tests/helpSurfaces.test.tsx`: **exit 1**, `Tests 11 failed | 29 passed (40)`.
+- Failing, exactly the expected set:
+  - (h): `enterFlow` called once.
+  - (i): `togglePlay` called.
+  - (j): `cycleMode` called once.
+  - (k) ×3: page, focus and flow lack `repeat: ke.repeat`.
+  - (l): the old hint string.
+  - (m): "Encountered two children with the same key" logged, with 83 `.hotkey-row` elements, so the check is non-vacuous.
+  - (n): `exitReader` called beside `onClose`.
+  - (o): `--color-bg` defined in 0 theme maps.
+  - (p): the `.rbb-mode-btn` border does not read `var(--border)`.
+- Passing: control (q) and every existing test in the four files.
+
+### Done-when 2–10 — at C2 (re-run by the orchestrator; working tree, then committed)
+- DW2: 21 files, 177 tests passed, **exit 0**.
+- DW3, DW4, DW5, DW6 (grep): exit 1, empty.
+- DW7: `:1` on page, focus and flow; narrate exit 1, empty.
+- DW8: `src/hooks/useKeyboardShortcuts.ts:243` (one line). DW9: `src/components/ShortcutsOverlay.tsx:189` (one line).
+- DW10: `src/styles/keyboard.css:5`; the old `.rbb-mode-btn--last` border line exits 1, empty.
+- Numstat (working tree, implementation agent): `src/types.ts` `1 1`; `src/reader` three `1 1` lines.
+- `npm run typecheck` (implementation agent): exit 0.
+
+### Reviews (on C2 `d5fac362`)
+- Spec compliance (Solon): **APPROVED_WITH_CONCERNS.** 17 of 18 PASS. The concern was a missing space before `className` on `HotkeyMapSettings.tsx:130` (valid JSX, not the specification's literal text), fixed in `6392a142`; test (m) re-run, 5/5. DW2–10 and the DW13 fence re-run by the reviewer and passing.
+- Code quality (Plato): **READY**, with no required fixes. N1 is the same spacing note, fixed.
+- Follow-up for the close-out (outside this specification's edit sites): **W1**. `src/styles/page-reader.css` `.rbb-mode-btn:hover { background: var(--color-border, #444); }` still reads the undefined token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text. Same defect class as fixes 6–7; route to OVERLAY-THEME-SWEEP-1, which already covers the other `--color-*` fallbacks.
+
+### Wave C (after the NARRATE-REBUILD-1 completion merges)
+Full suite, typecheck and build (DW11), the `--dir` build, the merge-order step, the DW13 fence, then Brain's merge go. DW12 is deferred to the batched smoke (see above).
+
+### Wave C — merge-order step and heavy gates (under load, per Blurby Brain's ruling of 2026-10-14)
+- `git merge refs/remotes/origin/main` (`d9469a81`: governance and register commits; no edit-site overlap) → `bff2e60f`, tree `d30afb99adb2670987bcf10c7d9c30080152082b`.
+- DW2 on the merged tree: 21 files, 177 passed, **exit 0**.
+- **DW11:**
+  - `npm test`: 155 files, **2,099 passed / 1 skipped / 0 failed, exit 0**. The loaded run had no failing set, so no isolated re-runs were needed.
+  - `npm run typecheck`: **exit 0**.
+  - `npm run build`: **exit 0**.
+- Packaged build: `npx electron-builder --win --x64 --dir --publish never` **exit 0**.
+- **DW13** (three-dot, on `bff2e60f`): exactly the 11 edit sites (M), the 3 modified tests (M), `A tests/helpSurfaces.test.tsx`, and this memo. The time log is added in the merge commit set.
+- DW12: deferred to the batched owner smoke (above).
+
+### Merge go
+Blurby Brain, 2026-10-14, Rule 11 tier 1: merge go on b6323b07 (code identical to the tested merge bff2e60f). Item stays In Flight; close-out held for the batched owner smoke; no tag, no upload. W1 goes to OVERLAY-THEME-SWEEP-1's stub (Blurby.Roadmap adds it).

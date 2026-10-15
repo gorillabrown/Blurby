@@ -677,7 +677,7 @@ export default function PageFoliateView({
           doc.addEventListener("keydown", (ke: KeyboardEvent) => {
             window.dispatchEvent(new KeyboardEvent("keydown", {
               key: ke.key, code: ke.code, keyCode: ke.keyCode,
-              ctrlKey: ke.ctrlKey, shiftKey: ke.shiftKey, altKey: ke.altKey, metaKey: ke.metaKey,
+              ctrlKey: ke.ctrlKey, shiftKey: ke.shiftKey, altKey: ke.altKey, metaKey: ke.metaKey, repeat: ke.repeat,
               bubbles: true, cancelable: true,
             }));
           });
