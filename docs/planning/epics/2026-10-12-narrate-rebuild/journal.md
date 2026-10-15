@@ -331,6 +331,15 @@ arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4
 - **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
 - **Next:** wave B in Brain's quiet window (plan.md § P6b B0–B3).
 
+## S7 — 2026-10-15 — P6b complete (wave B ruled PASS); completion record on eb/narrate-rebuild-1-done
+
+- **Did:** on Blurby.Roadmap's dispatch, after Blurby.Brain ran wave B on the quiet machine and ruled PASS. Merged `eb/narrate-rebuild-1-p6b-quiet-evidence` `19222f48` as `8f56eab5` (only `phase5/recorded-output.p6b-1.json`, `phase6/d2-ancient-crossing.p6b.json`). Re-ran the D2 checker on the committed trace through `app-node.ps1`: exit 0 with Brain's figures, `--break` exit 1. Corrected plan.md's B0 expected exit (Brain). Added the Gate log row "P6b". Wrote done.md and set charter `status: complete` on `eb/narrate-rebuild-1-done`.
+- **Learned:** origin/main (`bd6af475`) is no longer governance-only: since `aca39aa1` it carries FOLDER-NOTICE-1 product code (`main.js`, `main/folder-notice.js`, `main/folder-sync.js`, `main/folder-watcher.js`, `main/ipc/library.js`, `main/ipc/state.js`, `preload.js`, `src/components/FolderNoticeBanner.tsx`, `src/components/LibraryView.tsx`, `src/types.ts`, five tests). It is not merged into P6, because the dispatch allowed only `ROADMAP.md`, `docs/governance/**` and `Virtuoso/**`. No file overlaps with P6's diff, and `git merge-tree` reports no conflict.
+- **Decisions:** none.
+- **Gate/DoD movement:** P6b complete; D1–D15 met (done.md).
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** Blurby.Roadmap: the P6 code merge, then the docs-only completion merge of `eb/narrate-rebuild-1-done`, then `/pointer-closeout NARRATE-REBUILD-1`.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
