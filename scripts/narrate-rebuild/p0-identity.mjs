@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // P0-1 Producer identity. Records every hash and runtime fact the Phase 0 evidence depends on and
 // checks the pinned model, the original copy and the duration-exposed copy against the OutsideAudit.10
 // record. Writes docs/studies/narrate-rebuild-1/phase0/identity.json. Exit 0 only when P0-1 passes.

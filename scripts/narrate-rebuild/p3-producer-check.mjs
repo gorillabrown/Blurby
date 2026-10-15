@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // P3 producer identity check (NARRATE-REBUILD-1): the product's producer (main/narrate/producer.js, worker, the
 // exposed model, the capture seams) must reproduce the Phase 0 harness for passage A chunk 0 at 1.00x on af_bella
 // (docs/studies/narrate-rebuild-1/phase0/tables/passage-a.af_bella.json and the recorded WAV in the artifacts folder).

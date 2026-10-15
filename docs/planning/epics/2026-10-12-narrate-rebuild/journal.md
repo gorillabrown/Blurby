@@ -222,6 +222,124 @@
 - **Git:** eb/narrate-rebuild-1-p5 @ (this checkpoint); uncommitted: `tests/perf-baseline-results.json` (suite output, never committed).
 - **Next:** merge per GIT WORK; open P6 with the records; P6 starts with the production build for G2.
 
+## S3 — 2026-10-13 21:12 — P5 merged; P6 opened; the run stops before G2's build
+
+- **Did:** merged P5 per GIT WORK (`05a5480a`, parents `69d00047` + `ea432c70`, pushed, ancestor check exit 0); opened P6 from `origin/main` at the merge (branch `eb/narrate-rebuild-1-p6`); this commit holds the P5 merge records (plan.md Gate log and worklist, state.md, journal, staging memo bug status) and closes time-log row 66.
+- **Learned:** —
+- **Decisions:** none new.
+- **Gate/DoD movement:** P5 passed and merged.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit, trailer NARRATE-REBUILD-1-P6-Base); uncommitted: none. The P5 worktree keeps only `tests/perf-baseline-results.json` (suite output).
+- **Next:** P6 — `npm ci`, the production build for the owner, then G2 (always stops).
+
+## S4 — 2026-10-14 — session start: completion protocol after G2
+
+- **Did:** resumed by a new session (blurby-05) on Blurby.Roadmap's dispatch. Resume protocol: branch `eb/narrate-rebuild-1-p6` @ `f677353f`, clean, 0/0 against origin. Recorded G2 (owner, 2026-10-14, verbatim in state.md → Evidence). Merged `origin/main` `e476aed1` into P6 as `0f19c66c`. Main changed since `ab5cead4` only in quit, packaging and folder code (`main.js`, `main/{constants,folder-watcher,json-store,quit-sequence,window-manager}.js`, `main/ipc/{library,state}.js`, `package.json`, five tests); no epic path was touched; no conflicts.
+- **Learned:** the machine is busy with another project's long pytest run (CPU 49–63 %). The quiet-machine full suite on main (Blurby Brain's follow-up from PACKAGING-FIX-1) and every measurement row wait for an idle host.
+- **Decisions:** none.
+- **Gate/DoD movement:** D12, D2 (owner half) and D7 F5 (owner half) approved at G2.
+- **Git:** eb/narrate-rebuild-1-p6 @ 0f19c66c; uncommitted: state.md, journal.md.
+- **Next:** `npm ci`; once the host is quiet: the main full suite, then D1–D13 fresh in one session; done.md; completion merge.
+
+## S4 — 2026-10-14 — parked: the timed rows wait for a second machine
+
+- **Did:** prepared the completion window. `npm ci` in P6 and in a clean worktree at main `e476aed1`. Staged a serial runner: step 0 the main full suite; the P6 build; one `p5-latency-e2e.mjs --minutes 5 --warm 20 --cold 5 --rates 1.0,2.0` run for D3, D5 and D6 into `C:ProjectsBlurby-artifacts
+arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4, D5 and D7 suites (`tests/narrate`, `tests/readerModes/narrate.contract.test.ts`); the D8 suites and baselines against `05a5480a`; the D9 suites; the D10 grep; the D3 recorder `--break`.
+- **Learned:** the shared quiet window was cancelled. The owner is arranging a second computer for Blurby, and GOG resumes heavy work on this one. Records written by the launcher (`latency-e2e.json`, `recorded-output.json`) must be renamed `*.completion-1.json` after the run, and the committed `recorded-output.json` restored.
+- **Decisions:** none (parking is Blurby.Roadmap's order).
+- **Gate/DoD movement:** none. D2, D12 and D7 F5 hold from G2.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** on the second machine: step 0, then every DoD row fresh in one session, done.md, and the completion merge.
+
+## S5 — 2026-10-15 — completion record: evidence merged, light checks green; stopped on the D2 log question
+
+- **Did:** resumed after blurby-05 died in a restart, on Blurby.Roadmap's dispatch. Committed the reference-run evidence (`ccd98b8e`). Merged the laptop evidence branch `512a0b19` (`e0dcce6f`) and `origin/main` `745ee383` (`31deeac0`); both scopes checked. Light checks green (state.md → Evidence → S5 completion checks).
+- **Learned:** D2's charter evidence has a log half ("first voiced word = 'ancient' and a continuous crossing") that no recorded trace covers. G2 used the packaged build, which has no trace levers. The D3 sessions start at word 8723 and cross into THE SECOND BOOK.
+- **Decisions:** none. done.md is withheld until Blurby.Roadmap rules on D2 (state.md blockers line).
+- **Gate/DoD movement:** D1, D3–D13 recorded as met (D6 by Brain's ruling under Decision #22). D12 and D7 F5 are met from G2. D2's owner half is met; its log half is open.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** if the ruling is "met": write done.md (draft staged in the session scratchpad), set charter `status: complete`, append the final journal entry, then the docs-only completion merge after P6's code merge. If the ruling is "trace it": one traced session from "ancient", then the same steps.
+
+## S5 — 2026-10-15 — D2 traced session from "ancient": FAILED at word 3217 (F4 unreconciled); stopped
+
+- **Did:** Blurby.Roadmap chose the traced session over a waiver (Brain's criteria: (1) the first voiced word is "ancient"; (2) across Introduction → HIS FIRST BOOK the voiced words follow the text order, with nothing skipped, repeated or out of order and no stop or hang; (3) timing is for information only). I extracted the sample's words with `main/epub-word-extractor.js`: the Introduction is section 1, words 183–5473; "ancient" occurs there at words 369, 2963 and 4892; HIS FIRST BOOK starts at 5473. I chose 2963 ("political virtue of the ancient world"), which is lowercase and mid-sentence. Run (pwsh, P6 worktree, built `dist` of `94a5ebfd`, scratch profile under `--out`): `node scripts/narrate-rebuild/p5-latency-e2e.mjs --only session --rates 1.0 --minutes 18 --position 2963 --out C:\Projects\Blurby-artifacts\narrate-rebuild-1\p6-d2-ancient`, **exit 1**. The launcher's verdict: "session 1.00: FAIL 1 chunk failures (F4): unreconciled@3217; session 1.59 min < 18 min". Foreign CPU averaged 11 %. Checker `node scripts/narrate-rebuild/d2-crossing-check.cjs <trace> 2963 5473`, **exit 1**: "never crossed word 5473" and "stop before the boundary". The checker exits 0 on the reference session trace (`8723 9423`) and 1 with `--break` (a dropped boundary unit) and with a wrong first word (LL-151). The run rewrote `phase5/recorded-output.json`, which was restored with `git show`. The trace is committed as `phase5/d2-ancient-crossing.json` (raw logs in `…\p6-d2-ancient\`).
+- **Learned:** (1) PASS: the request, the first scheduled unit and the first commit are all word 2963 "ancient", the first voiced sample 745 ms after Play. (2) FAIL: words 2963–3216 kept the text order (246 commits = 246 scheduled units, 14 contiguous chunks, the last 3192–3217). The chunk starting at 3217 raised `narrate-failure` `unreconciled` (`atWord` 3217, `detail` null) at t = 96.9 s. Narration stayed paused until the driver's stop at about 1,087 s and never reached 5473 (2,256 words short). The failed chunk's text: "the Imitation to overcome himself, and every day to be stronger than himself.' In withstanding of the passions standeth very peace of heart.' Let us set the axe to the root, that we being purged of our passions may have a peaceable mind.'". Candidate mismatch pointers, not a diagnosis: (a) the stray closing quotes (`himself.'`, `heart.'`, `mind.'`) with no opening quotes among the extracted words; (b) the join across the chunk boundary: the previous chunk ends on "says" (3216), and the chunk starts on "the" (3217), a function word the espeak fusion could bind to its neighbour. The F4 notice is unconfirmed: at the driver's final pause the trial read the on-screen notice as "Voice loading…", not F4's "this passage couldn't be timed". A new Play request (word 3216) was in flight then, so the reading is inconclusive. The G2 owner pass fits this only if the owner started past word 3217 (for example the "Ancient" at word 4892) or stopped listening before it. Not checked: whether the failure repeats on every run.
+- **Decisions:** none. Per Blurby.Roadmap: no retry, no fix, no merge, no done.md.
+- **Gate/DoD movement:** D2's log half FAILED. The epic is not done.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** root-cause diagnosis of the `unreconciled` failure at word 3217 (Blurby.Brain deciding); then a fix with a failing-first test, and this same session re-run.
+
+## 2026-10-15 — planner: P6b packet amendment on Blurby.Brain's rulings (Decision #23, #24)
+
+- **Did:**
+  - Merged `origin/main` `813ff38a` into the branch with `--no-ff`. Main's Stage 8 merges touch no epic path; `tests/settingsNarrateNormalization.test.js` (D9) changed only an unrelated settings key, `fontSize` → `flowTextSize`, with its narrate assertions unchanged.
+  - Added phase P6b to plan.md, amended charter.md (preamble, D2, D3, D5, D7; new D14, D15; one Lessons row), and updated state.md.
+  - No product code, script or fixture changed; wave A writes them.
+- **Rulings recorded (Blurby.Brain, tier 1, 2026-10-15):**
+  - P6b scope:
+    - F1–F5 in `main/narrate/normalize.js` and `main/narrate/wordmap.js` only.
+    - A committed sweep gate, `scripts/narrate-rebuild/reconcile-sweep.mjs`: `--gate` exits 0 with 0 fail-closed chunks; `--control` (fix off) exits 1.
+    - The mid-session F4 notice test; the trial driver reading the notice before Play; the D2 checker comparing the first word by text.
+  - Every epic checker, the harness, the sweep gate and the D2 checker run under `ELECTRON_RUN_AS_NODE` with the app's own Electron and refuse plain Node, with a control proving the refusal. D2 restarts at 2970 ("ancient") and crosses at 5480 (HIS FIRST BOOK), plus at least 2 minutes. `p5-latency-e2e.mjs`'s hard-coded positions are corrected.
+  - An abbreviation-aware sentence end in `chunkPlan.ts`: narrow and table-driven (single letters, i.e., e.g., etc., vs., A.D., B.C., dotted web addresses), not a sentence end when followed directly by a word rather than a capitalised new-sentence start, designed for in-app tokenization. Tests: "B.C. 50" stays in one chunk; "in Section B. The next…" still ends.
+  - Done-when additions:
+    - The gate exits 0 and `--control` exits 1.
+    - The owner-library sweep runs on copies in the scratchpad, counts only, books hashed, every remaining failure class E or ruled.
+    - The changed passing tables are listed, each old one shown to hold a wrong split unit; no correct table may change.
+    - D3/D5 re-run in a quiet window that Brain arranges with GOG, then D2 by text.
+    - The existing suites, typecheck and build.
+  - Fixtures: the Kokoro tokenizer from onnx-community/Kokoro-82M-v1.0-ONNX (Apache-2.0) with a LICENSE/NOTICE line and its sha256, plus a check that it still equals the artifacts copy. A public-domain Raven (Poe, 1845), not the owner's file; Meditations is `resources/sample-meditations.epub`.
+  - Chunk planning changes alter chunk plans, so D3/D5 must re-run.
+  - On the six planning questions:
+    1. Accept the owner class-D residual, the one chunk at word 12529, which fails closed. D14's owner part reads "class E, or a residual ruled on by Blurby Brain"; the stub is NARRATE-RECONCILE-RESIDUAL-1.
+    2. A wrong split unit is a split unit with cost above 0 that the new table replaces (confirmed). The plan records the 36 gate tables and the 18 checked owner tables against it.
+    3. Commit `tokenizer.json` (77a02c8e…), `tokenizer_config.json` (be1cb066…) and the Apache-2.0 LICENSE text together under the test fixtures, plus the equality check against the artifacts copy, in wave A's first commit.
+    4. Titles (Mr., Mrs., Ms., Dr., St.) never end a sentence when any word follows: a one-line table flag plus a "Mr. Smith" test.
+    5. The Raven: no download. Wave A commits the 1845 text written out directly (all 18 stanzas) and measures the gate numbers on it.
+    6. D6 is not re-run in P6b; the final-main D3/D6 run before release covers it.
+  - Also approved: both launcher fixes, the 1-minute smoke opening wave B, and `MAPPING_POLICY.md` updated on the same branch.
+- **Learned** (planning measurements under the app's Electron, 2026-10-15; details in plan.md § P6b):
+  - Electron 41.10.7 runs as Node with ICU 77.1; app numbering puts "ancient" at 2970, HIS FIRST BOOK at 5480 and THE SECOND BOOK at 9431. The harness's plan from 2963 reproduces the S5 trace's 14 chunks exactly. The failed in-app chunk 3217 is "It should be a man's task, …peace of heart.'"; S5's quoted text was plain-Node word 3217, 7 words later.
+  - With the final edits:
+    - The gate gives 0 fail-closed chunks of 3,635 (Meditations 3,588; the Raven was a stand-in).
+    - The control gives 114 (Meditations 112: A 53, B/F 43, C 8, D 8).
+    - 36 tables changed, all replacing a wrong split.
+    - The D2 route from 2970 has 0 failures (the base had 24).
+    - The owner library (8 copies) has 18 class-E failures plus the ruled residual.
+  - pwsh does not wait for a bare `electron.exe` call (GUI subsystem): no output, no exit code. `app-node.ps1` pipes it.
+- **Decisions:** #23 (Brain), #24 (planner).
+- **Gate/DoD movement:** none. Rows D3, D5, D7 and D11 reopen for the P6b build; D14 and D15 added.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit), on the merge `34eacdf6`; uncommitted: none.
+- **Next:** S6, P6b wave A (state.md next_action).
+
+## S6 — 2026-10-15 09:03 — session start: P6b wave A
+- **Did:** GIT WORK verified: branch `eb/narrate-rebuild-1-p6`, tip `973bd0a9` = the planner entry's commit, clean, 0/0 against origin. **P6b start sha: `973bd0a944bd626aafaa9eb3c88b1563cd92b4f4`** (the packet-amendment commit; the fence check diffs against it). Dispatched by Blurby.Roadmap for wave A only; no merge.
+- **Next:** A1 fixtures (first commit), A2 controls on base, A3–A5 edits, A6–A7 gates.
+
+## S6 — 2026-10-15 — P6b wave A done: reconciliation fix, app-ICU tooling, gates green; stopped for Brain
+- **Did:**
+  - A1: fixtures first commit `43694687`: the Kokoro tokenizer (77a02c8e…, be1cb066…, byte copies of the artifacts copy), the Apache-2.0 LICENSE, NOTICE.md, `raven-1845.txt` (all 18 stanzas, written out directly, 1,067 words, no download), the README and `narrate.fixtures.test.js` (2 passed).
+  - A2: the controls, seen failing on base for their named reasons (state.md → Evidence → P6b wave A). The mid-session F4 test needed one test-side change: the engine prefetches the next chunk at once, so with an always-answering fake the prefetch's `missing-table` set the failure before the first word was ticked, and the draft's "notice null while playing" assertion failed on base. The test now holds the producer until the first word sounds (`new FakeProducer({ hold: true })`); runtime untouched. It passes on base and fails with `ModeRuntime.ts:216` removed.
+  - A3–A5: F1–F5 (`normalize.js`, `wordmap.js`, as plan.md), the sentence end in `chunkPlan.ts`, the trial driver reading the notice before Play, `app-node.ps1`, `lib/app-icu.cjs`, `lib/app-icu-guard.mjs`, the guard in all 11 epic scripts, `reconcile-sweep.mjs`, the text-checked D2 checker, the launcher fixes (no inherited `ELECTRON_RUN_AS_NODE`; the CPU sampler leaves out its own pid; the 9431 comment), MAPPING_POLICY.md.
+  - A6–A7: G1–G14 all exited with their stated codes (state.md → Evidence → P6b wave A). Merged `origin/main` `e712558d` (governance only; it contains the `1ea2e1dc` Blurby.Roadmap named, plus two later register commits) as `aca39aa1` before the suite: 27 paths, all `ROADMAP.md` or `Virtuoso/`, no epic path.
+- **Learned:**
+  - With the real Raven, the gate is 0 of 3,683 chunks (the Raven plans 52 chunks, 0 failing) and the control is 127 (the Raven adds 13: B/F 12, A 1; Meditations stays 112). G7 with the title rule is 24 of 172; the planner's 171 predated it.
+  - Deviation from plan.md's exact text, inside the fence: plan.md's `ABBREVIATIONS`/`TITLES` are module-level `Set`s, which `tests/readerModeOwnership.test.ts` fails as undeclared singletons in a mode directory (the first full suite: 1 failed). I replaced them with equal case-insensitive regexes (`ABBREVIATION`, `TITLE`; 26 probes, 0 mismatches against the Set logic). The census policy is outside the fence, so it was not touched. G2–G8 were re-run on that tree with identical counts. Second suite: 172 files, 2,356 passed / 1 skipped / 0 failed.
+  - `p3-producer-check.mjs` under the app's Electron prints `pass:true` (every required check true) but exits 0x40000015 at shutdown, twice; the base script under plain Node exits 0. A native abort at process exit, not a check failure. The fence allows only the guard line in that script, so it is reported, not fixed.
+  - In this shell, pwsh's `bash` is WSL's (no distro): `git show` restores go through Git Bash.
+- **Decisions:** none new (the regex swap is a tier-1 technical fix inside the fenced file, recorded here and in state.md).
+- **Gate/DoD movement:** D14 and D15 met on wave A's evidence. D7's new test passes with its control. D11 is fresh (suite, typecheck, build). D2, D3 and D5 wait for wave B.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** wave B in Brain's quiet window (plan.md § P6b B0–B3).
+
+## S7 — 2026-10-15 — P6b complete (wave B ruled PASS); completion record on eb/narrate-rebuild-1-done
+
+- **Did:** on Blurby.Roadmap's dispatch, after Blurby.Brain ran wave B on the quiet machine and ruled PASS. Merged `eb/narrate-rebuild-1-p6b-quiet-evidence` `19222f48` as `8f56eab5` (only `phase5/recorded-output.p6b-1.json`, `phase6/d2-ancient-crossing.p6b.json`). Re-ran the D2 checker on the committed trace through `app-node.ps1`: exit 0 with Brain's figures, `--break` exit 1. Corrected plan.md's B0 expected exit (Brain). Added the Gate log row "P6b". Wrote done.md and set charter `status: complete` on `eb/narrate-rebuild-1-done`.
+- **Learned:** origin/main (`bd6af475`) is no longer governance-only: since `aca39aa1` it carries FOLDER-NOTICE-1 product code (`main.js`, `main/folder-notice.js`, `main/folder-sync.js`, `main/folder-watcher.js`, `main/ipc/library.js`, `main/ipc/state.js`, `preload.js`, `src/components/FolderNoticeBanner.tsx`, `src/components/LibraryView.tsx`, `src/types.ts`, five tests). It is not merged into P6, because the dispatch allowed only `ROADMAP.md`, `docs/governance/**` and `Virtuoso/**`. No file overlaps with P6's diff, and `git merge-tree` reports no conflict.
+- **Decisions:** none.
+- **Gate/DoD movement:** P6b complete; D1–D15 met (done.md).
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** Blurby.Roadmap: the P6 code merge, then the docs-only completion merge of `eb/narrate-rebuild-1-done`, then `/pointer-closeout NARRATE-REBUILD-1`.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]

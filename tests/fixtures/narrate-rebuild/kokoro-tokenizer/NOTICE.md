@@ -1,0 +1,3 @@
+tokenizer.json and tokenizer_config.json: unmodified from onnx-community/Kokoro-82M-v1.0-ONNX (Hugging Face), Apache License 2.0 (LICENSE beside them); tokenizer.json sha256 77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34, tokenizer_config.json be1cb066d6ef6b074b3f15e6a6dd21ac88ff3cdaedf325f0aaed686c70f75d20; pinned by tests/narrate/narrate.fixtures.test.js and `reconcile-sweep.mjs --check-tokenizer`.
+
+Copied byte for byte from the artifacts copy `C:\Projects\Blurby-artifacts\narrate-rebuild-1\models\local\kokoro-dur\` (equal to its `onnx-community\Kokoro-82M-v1.0-ONNX\` copy); LICENSE is the Apache-2.0 text from `node_modules/kokoro-js/LICENSE` (NARRATE-REBUILD-1 P6b, 2026-10-15).

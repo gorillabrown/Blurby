@@ -1,0 +1,78 @@
+{
+  "verdict": "FAIL",
+  "failures": [
+    "word 9423 is \"and\", want \"THE\" (numbering)"
+  ],
+  "break": false,
+  "icu": "77.1",
+  "bookWords": 80493,
+  "firstVoiced": {
+    "index": 8723,
+    "text": "casting",
+    "context": "I might stay my casting of blood, and",
+    "latencyMs": 814,
+    "cause": "play"
+  },
+  "crossing": {
+    "boundary": 9423,
+    "boundaryText": "and from thy",
+    "pastBoundaryS": 44.9,
+    "committedAround": [
+      "9419:meek",
+      "9420:and",
+      "9421:well",
+      "9422:satisfied,",
+      "9423:and",
+      "9424:from",
+      "9425:thy",
+      "9426:heart",
+      "9427:thankful"
+    ],
+    "chunksAround": [
+      [
+        9374,
+        9398
+      ],
+      [
+        9398,
+        9423
+      ],
+      [
+        9423,
+        9431
+      ],
+      [
+        9431,
+        9435
+      ],
+      [
+        9435,
+        9464
+      ]
+    ],
+    "gapAtBoundaryMs": 1283.4,
+    "worstGapsMs": [
+      1699.8,
+      1683.3,
+      1516.5
+    ]
+  },
+  "counts": {
+    "commits": 802,
+    "scheduledUnits": 825,
+    "chunks": 40,
+    "stops": [
+      {
+        "chunkStart": 9552,
+        "reason": "pause"
+      },
+      {
+        "chunkStart": 9553,
+        "reason": "pause"
+      }
+    ],
+    "firstCommit": 8723,
+    "lastCommit": 9559
+  }
+}
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/d2-crossing-check.cjs C:\Projects\Blurby-artifacts\narrate-rebuild-1\p6-completion\traces\session-1-00.trace.json 8723 casting 9423 THE --min-past-s 30 | exit 1 | 1 s | stderr bytes 0 | 2026-10-15 09:10

@@ -97,6 +97,30 @@ describe("narrate mode (P4)", () => {
     expect(runtime.getSnapshot()).toMatchObject({ playing: true, highlightedWordIndex: 7 });
   });
 
+  it("an F4 pause mid-session shows F4's notice, not Voice loading", async () => {
+    // S5's D2 trial read "Voice loading…" after the word-3217 refusal because the driver pressed Play first; the notice
+    // itself must be F4's while narration is paused on the refusal.
+    // The engine prefetches the next chunk at once, so the producer holds its answers until the first word sounds.
+    const { runtime, producer, output } = open({ producer: new FakeProducer({ hold: true }) });
+    opened.push(runtime);
+    producer.nextControl("ok"); // the first chunk is lawful and plays
+    producer.nextControl("missing-table"); // the next one fails closed (F4) after words have been spoken
+    runtime.select(7);
+    runtime.start({ cause: "play-button" });
+    producer.requests[0].release();
+    await flush();
+    output.advance(INTO_FIRST_WORD_S);
+    runtime.tick();
+    expect(runtime.getNotice()).toBeNull();
+    producer.setHold(false);
+    for (const r of producer.requests) r.release();
+    await flush();
+    for (let i = 0; i < 200 && runtime.getSnapshot().playing; i++) { output.advance(WORD_S); runtime.tick(); await flush(); }
+    expect(runtime.getSnapshot().playing).toBe(false);
+    expect(runtime.getSnapshot().highlightedWordIndex).toBeGreaterThan(7); // mid-session: words were spoken first
+    expect(runtime.getNotice()).toEqual({ kind: "timing-missing", text: "This passage couldn't be timed. Narration paused on the last timed word." });
+  });
+
   it("speed: the rate lives on the 0.05 grid inside 0.80–2.00, is written to settings, and WPM speeds are ignored", () => {
     const { fake, runtime } = open();
     opened.push(runtime);

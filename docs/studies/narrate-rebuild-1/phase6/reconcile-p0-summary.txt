@@ -1,0 +1,7 @@
+P0-1 PASS | P0-2 PASS | P0-4 PASS | checks 514/514 pass
+factor(s): 600 | largest chunk: {"tokens":352,"words":62,"samples":609000,"passage":"passage-b","voice":"af_bella","rate":"0.80","chunk":1}
+coverage passage-a/af_bella: words 165, in fused runs 20 (0.1212) at 1.00x, 20 at 2.00x; split-exact runs 0
+coverage passage-b/af_bella: words 123, in fused runs 6 (0.0488) at 1.00x, 6 at 2.00x; split-exact runs 0
+coverage passage-a/bf_emma: words 165, in fused runs 20 (0.1212) at 1.00x, 20 at 2.00x; split-exact runs 0
+coverage passage-b/bf_emma: words 123, in fused runs 6 (0.0488) at 1.00x, 6 at 2.00x; split-exact runs 0
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/p0-summary.mjs | exit 0 | 1 s | stderr bytes 0 | 2026-10-15 09:19

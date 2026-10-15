@@ -11,6 +11,7 @@
 // Exit 0 = PASS on every file; 1 = any FAIL or INCONCLUSIVE. --break plants a late commit in the first file's
 // records before analysis and must exit 1 (the positive control, LL-151). Nothing here estimates timing.
 import fs from "node:fs";
+import { createRequire } from "node:module";
 
 export const FRAME_TOLERANCE_MS = 1;   // measurement slack on either side of the refresh interval
 export const MAPPING_LIMIT_MS = 10;    // D3: clock-mapping uncertainty ceiling
@@ -147,6 +148,7 @@ export function readTraceEvents(file) {
 
 const isMain = process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/").split("/").pop());
 if (isMain) {
+  createRequire(import.meta.url)("./lib/app-icu.cjs").assertAppIcu(); // P6b: refuse plain Node (exit 3)
   const args = process.argv.slice(2);
   const minIdx = args.indexOf("--min-minutes");
   const minMinutes = minIdx >= 0 ? Number(args[minIdx + 1]) : 5;

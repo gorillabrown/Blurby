@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // P0-2 / P0-4 generation matrix: every chunk of every passage, at every rate, on every voice.
 // Writes redacted numeric tables to docs/studies/narrate-rebuild-1/phase0/tables/<passage>.<voice>.json
 // and WAV audio outside the repository (artifacts/audio). Resumable: rates already in a table are skipped.
