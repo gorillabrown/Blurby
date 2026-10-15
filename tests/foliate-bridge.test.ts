@@ -37,4 +37,8 @@ describe("Foliate bridge contracts (NARR-LAYER-1B)", () => {
       expect(readModeFile(mode, "useModeBindings.ts")).toContain("showJumpBackToAnchor: snapshot.isBrowsedAway,");
     }
   });
+
+  it.each(READER_MODES)("%s FoliateView forwards the iframe keydown's repeat flag (UX-POLISH-2)", (mode) => {
+    expect(readModeFile(mode, "FoliateView.tsx")).toContain("repeat: ke.repeat");
+  });
 });
