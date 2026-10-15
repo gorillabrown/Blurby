@@ -171,6 +171,8 @@ const URL_FETCH_TIMEOUT_MS = 15000;
 const FOLDER_WATCHER_STABILITY_MS = 500;
 /** Directory entries walked between event-loop yields in scanFolderAsync */
 const FOLDER_SCAN_YIELD_EVERY = 500;
+/** A folder listing or file stat in the scan, or a root check, that has not settled by then counts as unreadable; a folder switch also waits no longer than this for a cancelled sync (ms) */
+const FOLDER_LIST_TIMEOUT_MS = 30000;
 
 // ── Window Dimensions ───────────────────────────────────────────────────
 /** Default main window width (px) */
@@ -282,6 +284,7 @@ module.exports = {
   // Folder Watcher
   FOLDER_WATCHER_STABILITY_MS,
   FOLDER_SCAN_YIELD_EVERY,
+  FOLDER_LIST_TIMEOUT_MS,
   // Window Dimensions
   MAIN_WINDOW_WIDTH,
   MAIN_WINDOW_HEIGHT,

@@ -14,6 +14,10 @@ const originalLoad = Module._load;
 const cjsFs = require("fs/promises"); // the object folder-watcher.js calls through, so vi.spyOn intercepts it
 const { scanFolderAsync, rootHasContent } = require("../main/folder-watcher.js");
 const { createFolderSync } = require("../main/folder-sync.js");
+// LARGE-FOLDER-SYNC-2: absent before C2, so a fake-timer case fails on its own assertion.
+const LIST_MS = require("../main/constants.js").FOLDER_LIST_TIMEOUT_MS ?? 30000;
+const realSetTimeout = globalThis.setTimeout; // captured before any case fakes timers
+const realWait = (ms) => new Promise((resolve) => realSetTimeout(resolve, ms));
 
 let tmp;
 let root;
@@ -355,5 +359,163 @@ describe("controls: real prunes still happen", () => {
     expect(ids(r.library)).toEqual(["A"]);
     expect(typeof res.count).toBe("number");
     expect(res).not.toHaveProperty("reason");
+  });
+});
+
+describe("LARGE-FOLDER-SYNC-2: system folders, case-only duplicates, listing timeout", () => {
+  // Each captures the real readdir before spying; the file's failOn cannot be stacked (a second call captures the spy).
+  function failReaddirAll(targets, code) {
+    const original = cjsFs.readdir;
+    const ts = new Set(targets.map((t) => path.resolve(t)));
+    vi.spyOn(cjsFs, "readdir").mockImplementation(function (arg, ...rest) {
+      if (ts.has(path.resolve(String(arg)))) return Promise.reject(Object.assign(new Error(code), { code }));
+      return original.call(this, arg, ...rest);
+    });
+  }
+  function hangReaddir(target) {
+    const original = cjsFs.readdir;
+    const t = path.resolve(target);
+    let hit;
+    const reached = new Promise((resolve) => { hit = resolve; });
+    vi.spyOn(cjsFs, "readdir").mockImplementation(function (arg, ...rest) {
+      if (path.resolve(String(arg)) === t) { hit(); return new Promise(() => {}); }
+      return original.call(this, arg, ...rest);
+    });
+    return reached;
+  }
+  const fakeTimers = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+
+  it("(sys-list) the scan and the root check skip system folders, in any case and at any depth", async () => {
+    write("books/a.epub");
+    write("books/$Recycle.Bin/S-1-5-21/$R1.epub");
+    write("books/System Volume Information/v.epub");
+    write("books/.shortcut-targets-by-id/abc/s.epub");
+    write("books/sub/$RECYCLE.BIN/q.epub");
+    expect((await scanFolderAsync(root)).map((f) => f.filename), "the scan listed a book under a system folder").toEqual(["a.epub"]);
+    for (const dir of ["$RECYCLE.BIN", "System Volume Information", ".shortcut-targets-by-id"]) fs.mkdirSync(path.join(tmp, "sys", dir), { recursive: true });
+    write("sys/desktop.ini", "");
+    expect(await rootHasContent(path.join(tmp, "sys")), "a root holding only system folders counted as content").toBe(false);
+  });
+
+  it("(sys-sync) a full sync of a root holding only system folders keeps every book", async () => {
+    write("books/$RECYCLE.BIN/S-1-5-21/$R1.epub");
+    fs.mkdirSync(path.join(root, "System Volume Information"), { recursive: true });
+    write("books/.shortcut-targets-by-id/abc/c.epub");
+    const m = makeSync(root, [folderDoc("A", path.join(root, "a.epub"), { position: 42 }), folderDoc("B", path.join(root, "sub", "b.epub"))]);
+    await m.sync.syncAll();
+    expect(ids(m.state.lib), "the sync imported system-folder files and pruned the books").toEqual(["A", "B"]);
+    expect(m.state.lib[0].position).toBe(42);
+    expect(m.deps.extractNewFileDoc).not.toHaveBeenCalled();
+    expect(m.deps.reportFolderProblem).toHaveBeenCalledWith("root-empty-suspect", root);
+  });
+
+  it("(sys-remove) a per-file remove under such a root removes nothing", async () => {
+    fs.mkdirSync(path.join(root, "$RECYCLE.BIN"), { recursive: true });
+    fs.mkdirSync(path.join(root, "System Volume Information"), { recursive: true });
+    const a = path.join(root, "a.epub");
+    const m = makeSync(root, [folderDoc("A", a)]);
+    await m.sync.applyUnlink(a);
+    expect(ids(m.state.lib), "a per-file remove under a root holding only system folders removed the book").toEqual(["A"]);
+    expect(m.deps.reportFolderProblem).toHaveBeenCalledWith("root-empty-suspect", root);
+  });
+
+  it("(sys-ctl) control: near names and Drive's own folders are scanned", async () => {
+    for (const dir of ["My Drive", "Shared drives", "Other computers", "Recycle Bin Books", "System Volume Information Old"]) write(`books/${dir}/${dir}.epub`);
+    expect(await scanFolderAsync(root)).toHaveLength(5);
+    expect(await rootHasContent(root)).toBe(true);
+  });
+
+  it.runIf(process.platform === "win32")("(rescan-dup) win32: a case-only duplicate survives a rescan, and the first doc is the book", async () => {
+    write("books/A.txt");
+    const r = makeRescan([folderDoc("X", path.join(root, "a.txt"), { position: 42 }), folderDoc("Y", path.join(root, "A.txt")), manual]);
+    await r.rescan();
+    const folderDocs = r.library.filter((d) => d.source === "folder");
+    expect(folderDocs.map((d) => d.id), "the rescan dropped a case-only duplicate").toEqual(["X", "Y"]);
+    expect(folderDocs[0].position).toBe(42);
+    expect(r.parsers.extractContent).not.toHaveBeenCalled();
+  });
+
+  it("(rescan-cost) the rescan keys each doc once, whatever the number of skipped folders", async () => {
+    write("books/a.txt");
+    for (const s of ["s1", "s2", "s3"]) write(`books/${s}/x.txt`);
+    const gonePath = path.join(root, "gone.txt");
+    const G = folderDoc("G", gonePath);
+    let reads = 0;
+    Object.defineProperty(G, "filepath", { get() { reads++; return gonePath; }, enumerable: true });
+    const run = async (skippedDirs) => {
+      const r = makeRescan([folderDoc("A", path.join(root, "a.txt")), G]);
+      failReaddirAll(skippedDirs.map((s) => path.join(root, s)), "EIO");
+      reads = 0;
+      await r.rescan();
+      const n = reads;
+      expect(ids(r.library)).toContain("A");
+      expect(ids(r.library)).not.toContain("G");
+      vi.restoreAllMocks();
+      return n;
+    };
+    const r1 = await run(["s1"]);
+    const r3 = await run(["s1", "s2", "s3"]);
+    expect(r3, "the rescan reads a doc's path again per skipped folder").toBe(r1);
+  });
+
+  it("(lt-scan) a full sync whose root listing hangs ends as unlistable and releases the slot", async () => {
+    write("books/a.epub");
+    const m = makeSync(root, [folderDoc("A", path.join(root, "a.epub"), { position: 42 }), folderDoc("B", path.join(root, "sub", "b.epub"))]);
+    fakeTimers();
+    try {
+      const reached = hangReaddir(root);
+      let settled = false;
+      const run = m.sync.syncAll().then(() => { settled = true; });
+      await reached;
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([run, realWait(2000)]);
+      expect(settled, "the full sync still waits on the hung root listing").toBe(true);
+      expect(ids(m.state.lib)).toEqual(["A", "B"]);
+      expect(m.state.lib[0].position).toBe(42);
+      expect(m.deps.setLibrary).not.toHaveBeenCalled();
+      expect(m.deps.reportFolderProblem).toHaveBeenCalledWith("root-unlistable", root);
+      vi.restoreAllMocks();
+      await m.sync.syncAll();
+      expect(ids(m.state.lib), "no new sync ran after the hung one: the slot was not released").toEqual(["A"]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("(lt-sub) a hung subfolder listing is skipped; its books are kept", async () => {
+    write("books/a.epub");
+    write("books/sub/b.epub");
+    const m = makeSync(root, [folderDoc("A", path.join(root, "a.epub")), folderDoc("B", path.join(root, "sub", "b.epub")), folderDoc("G", path.join(root, "gone.epub"))]);
+    fakeTimers();
+    try {
+      const reached = hangReaddir(path.join(root, "sub"));
+      let settled = false;
+      const run = m.sync.syncAll().then(() => { settled = true; });
+      await reached;
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([run, realWait(2000)]);
+      expect(settled, "the full sync still waits on the hung subfolder listing").toBe(true);
+      expect(ids(m.state.lib)).toEqual(["A", "B"]);
+      expect(m.deps.reportFolderProblem).toHaveBeenCalledWith("partial-read", root);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("(lt-root) a hung root check removes nothing", async () => {
+    write("books/other.epub");
+    const a = path.join(root, "a.epub");
+    const m = makeSync(root, [folderDoc("A", a)]);
+    fakeTimers();
+    try {
+      const reached = hangReaddir(root);
+      let settled = false;
+      const p = m.sync.applyUnlink(a).then(() => { settled = true; });
+      await reached;
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([p, realWait(2000)]);
+      expect(settled, "the per-file remove still waits on the hung root check").toBe(true);
+      expect(ids(m.state.lib)).toEqual(["A"]);
+      expect(m.deps.reportFolderProblem).toHaveBeenCalledWith("root-unlistable", root);
+      const rc = rootHasContent(root);
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      expect(await Promise.race([rc, realWait(2000).then(() => "hung")])).toBeNull();
+    } finally { vi.useRealTimers(); }
   });
 });

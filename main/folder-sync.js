@@ -3,7 +3,7 @@
 // CommonJS only — Electron main process
 "use strict";
 const path = require("path");
-const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS } = require("./constants");
+const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS, FOLDER_LIST_TIMEOUT_MS } = require("./constants");
 // One key for every library path comparison: resolved, and lowercased on win32, where paths are case-insensitive.
 // LARGE-FOLDER-SYNC-2 reuses it; keep one implementation. A falsy path (a manual or URL document) is returned as is.
 const pathKey = (p) => (p ? (process.platform === "win32" ? path.resolve(p).toLowerCase() : path.resolve(p)) : p);
@@ -17,14 +17,17 @@ function createFolderSync(deps) {
   let stopped = false; // set at quit: nothing more is applied or saved
   const inFlight = new Set(); // paths a per-file add is extracting
   const addedDuringRun = new Set(); // per-file adds since the running sync's scan; its prune keeps them
+  let owed = false; // a per-file change made during a full sync: the sync's own saves write it (N3)
+  let gen = 0; // full-sync generation: a run syncAll abandoned (it hung) stays stale for good
 
-  const bookKey = (p) => path.dirname(p) + "\0" + path.basename(p, path.extname(p)).toLowerCase();
-  // Path index over the library (W1): one pass, not a scan of 120,000 books per watcher event. It is rebuilt whenever the
+  // A book is a folder plus a file stem, any extension; k is a pathKey. Same stem rule as the scan's dedupe (N4).
+  const bookKey = (k) => path.dirname(k) + "\0" + path.basename(k, path.extname(k)).toLowerCase();
+  // Path index over the library (W1), keyed by pathKey: one pass, not a scan of 120,000 books per watcher event. It is rebuilt whenever the
   // library array or its length differs from what the index last saw (another module added or removed a book, or a sync
   // pruned), and kept in step by trackAdd on every add and removeUnder on every removal here.
   // INVARIANT: the index is trusted while the array identity and length are unchanged, so no writer may edit a doc's
   // filepath in place on the same array, and no writer may swap one book for another without changing the array or length.
-  let idx = null; // { lib, len, byPath: Map<filepath, doc>, byBook: Map<bookKey, count of books with that key> }
+  let idx = null; // { lib, len, byPath: Map<pathKey, doc>, byBook: Map<bookKey, count of books with that key> }
   const bump = (m, k, n) => { const c = (m.get(k) || 0) + n; if (c > 0) m.set(k, c); else m.delete(k); };
   function index() {
     const lib = getLibrary();
@@ -32,8 +35,9 @@ function createFolderSync(deps) {
     idx = { lib, len: lib.length, byPath: new Map(), byBook: new Map() };
     for (const d of lib) {
       if (!d.filepath) continue;
-      if (!idx.byPath.has(d.filepath)) idx.byPath.set(d.filepath, d);
-      bump(idx.byBook, bookKey(d.filepath), 1);
+      const k = pathKey(d.filepath);
+      if (!idx.byPath.has(k)) idx.byPath.set(k, d);
+      bump(idx.byBook, bookKey(k), 1);
     }
     return idx;
   }
@@ -44,12 +48,13 @@ function createFolderSync(deps) {
     i.lib = lib;
     i.len = lib.length;
     if (doc.filepath) {
-      if (!i.byPath.has(doc.filepath)) i.byPath.set(doc.filepath, doc);
-      bump(i.byBook, bookKey(doc.filepath), 1);
+      const k = pathKey(doc.filepath);
+      if (!i.byPath.has(k)) i.byPath.set(k, doc);
+      bump(i.byBook, bookKey(k), 1);
     }
   }
-  const findByPath = (p) => index().byPath.get(p);
-  const hasBook = (p) => index().byBook.has(bookKey(p)); // counts are kept above 0, so has() is count > 0
+  const findByPath = (p) => index().byPath.get(pathKey(p));
+  const hasBook = (p) => index().byBook.has(bookKey(pathKey(p))); // counts are kept above 0, so has() is count > 0
   // Only paths under the CURRENT source folder: a late event from a replaced watcher must not touch another folder.
   const underFolder = (p) => {
     const folder = getSourceFolder();
@@ -68,24 +73,37 @@ function createFolderSync(deps) {
   });
   // Only ENOENT means gone: EIO, EACCES, EPERM or EBUSY on a Drive file is a read error, not a deletion (BUG-195).
   const fileState = (p) => statFile(p).then(() => "present", (err) => (err && err.code === "ENOENT" ? "gone" : "unreadable"));
-  const underAny = (p, keys) => { const k = pathKey(p); return keys.some((s) => k === s || k.startsWith(s + path.sep)); }; // keys of unread paths
+  const underAny = (k, keys) => keys.some((s) => k === s || k.startsWith(s + path.sep)); // k and keys are pathKeys; keys of unread paths
+  // While a full sync runs, its interval save and its end write per-file changes; one write per event would defeat the batching (N3).
+  const savePerFile = () => { if (running) owed = true; else saveLibrary(); };
 
   async function runFullSync(folder) {
+    const mine = ++gen;
     cancelled = false;
     addedDuringRun.clear();
-    const stale = () => cancelled || stopped || getSourceFolder() !== folder;
+    const stale = () => mine !== gen || cancelled || stopped || getSourceFolder() !== folder;
     emitProgress(0, 0, "scanning");
     const report = {};
     const files = await scanFolderAsync(folder, report);
     if (stale()) return;
     if (!files) { reportFolderProblem("root-unlistable", folder); return; } // BUG-195: an unlistable root proves nothing gone
 
-    const byPath = new Map(getLibrary().map((d) => [d.filepath, d]));
+    // Built from the live library, not the index: the index can miss a second book at one path (removeUnder's fast path).
+    // One pathKey per library path; the prune reuses it. On a case-only collision the first doc is the book, and the
+    // other stays as it is: its key is on disk, so the prune keeps it (LARGE-FOLDER-SYNC-2, ruling B).
+    const keyOf = new Map();
+    const byPath = new Map();
+    for (const d of getLibrary()) {
+      const k = pathKey(d.filepath);
+      keyOf.set(d, k);
+      if (!byPath.has(k)) byPath.set(k, d);
+    }
     const onDisk = new Set();
     const newFiles = [];
     for (const file of files) {
-      onDisk.add(file.filepath);
-      const prev = byPath.get(file.filepath);
+      const k = pathKey(file.filepath);
+      onDisk.add(k);
+      const prev = byPath.get(k);
       if (prev) Object.assign(prev, { filename: file.filename, ext: file.ext, modified: file.modified, size: file.size });
       else if (!isFailed(file.filepath)) newFiles.push(file);
     }
@@ -111,10 +129,13 @@ function createFolderSync(deps) {
       if (!stopped && added > 0) { await saveLibraryNow(); broadcastLibrary(); } // the quit flush saves when stopped
       return;
     }
-    const savedArticles = path.join(path.resolve(folder), "Saved Articles");
+    const savedArticles = pathKey(path.join(folder, "Saved Articles")) + path.sep; // a path segment, not a string prefix (Q3)
     const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
-    const keep = (d) => d.source !== "folder" || onDisk.has(d.filepath) || addedDuringRun.has(d.filepath)
-      || (d.filepath && (path.resolve(d.filepath).startsWith(savedArticles) || underAny(d.filepath, skipped)));
+    const keep = (d) => {
+      if (d.source !== "folder") return true;
+      const k = keyOf.has(d) ? keyOf.get(d) : pathKey(d.filepath); // a book added during this run is not in keyOf
+      return onDisk.has(k) || addedDuringRun.has(k) || (!!k && (k.startsWith(savedArticles) || underAny(k, skipped)));
+    };
     const library = getLibrary();
     // BUG-195: no book found while the prune would remove books under this folder (an unmounted or starting Drive can list
     // an empty folder) is not evidence they are gone. A new, empty folder holds none, so a switch still prunes the old one.
@@ -133,15 +154,28 @@ function createFolderSync(deps) {
     const folder = getSourceFolder();
     if (!folder || stopped) return;
     while (running) {
-      if (running.folder === folder) return running.promise;
-      cancelled = true; // a folder switch: let the old sync stop, then start the new one
-      await running.promise.catch(() => {});
+      if (running.folder === folder && !cancelled) return running.promise;
+      cancelled = true; // a folder switch, or a re-sync after cancel(): let the old run stop, then start a new one (N2)
+      const old = running;
+      let timer;
+      const ended = await Promise.race([old.promise.then(() => true),
+        new Promise((resolve) => { timer = setTimeout(() => resolve(false), FOLDER_LIST_TIMEOUT_MS); })]);
+      clearTimeout(timer);
+      if (!ended && running === old) { // hung in a listing or an extraction: abandoned; mine !== gen keeps it from applying anything
+        console.warn("[folder-sync] a cancelled sync did not stop in time; starting the new one");
+        running = null;
+      }
     }
     // A failed scan, save or prune is logged here, so the fire-and-forget startup call (main.js) cannot leave an unhandled
     // rejection. The IPC callers (main/ipc/state.js) then go on to startWatcher, as they do after any sync that ends early.
     const promise = runFullSync(folder)
       .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })
-      .finally(() => { running = null; });
+      .finally(() => {
+        if (!running || running.promise !== promise) return; // an abandoned run settling late changes nothing
+        running = null;
+        if (owed && !stopped) saveLibrary(); // per-file changes made during the run (N3); at quit, the flush writes them
+        owed = false;
+      });
     running = { folder, promise };
     return promise;
   }
@@ -155,18 +189,19 @@ function createFolderSync(deps) {
       for (const file of (await scanFolderAsync(p)) || []) await addOne(file.filepath); // a folder moved in; null: unreadable
       return;
     }
-    if (inFlight.has(p) || isFailed(p) || hasBook(p)) return;
+    const k = pathKey(p);
+    if (inFlight.has(k) || isFailed(p) || hasBook(p)) return;
     const folder = getSourceFolder();
-    inFlight.add(p);
+    inFlight.add(k);
     try {
       const doc = await extractGuarded({ filepath: p, filename: path.basename(p), ext: path.extname(p).toLowerCase(), size: st.size, modified: st.mtimeMs });
       if (!doc || stopped || getSourceFolder() !== folder || findByPath(p)) return;
       trackAdd(doc);
-      addedDuringRun.add(p);
-      saveLibrary();
+      addedDuringRun.add(k);
+      savePerFile();
       broadcastLibrary();
     } finally {
-      inFlight.delete(p);
+      inFlight.delete(k);
     }
   }
 
@@ -181,45 +216,48 @@ function createFolderSync(deps) {
     const state = await fileState(p);
     if (state === "unreadable") reportFolderProblem("partial-read", folder);
     if (state !== "gone" || stopped) return;
-    const prefix = p + path.sep;
+    const key = pathKey(p);
+    const prefix = key + path.sep;
     // One pass over the library, splitting kept from gone (removeDoc is O(library) per book); setLibrary also rebuilds main.js's id index.
     const i = index(); // before setLibrary: it is valid for the current array
     let gone = [];
     let kept = [];
     const lib0 = getLibrary();
-    const hit = i.byPath.get(p);
+    const hit = i.byPath.get(key);
     const at = hit && hit.source === "folder" ? lib0.indexOf(hit) : -1;
     if (at >= 0) {
-      // A single file (a path that is a book is not also a folder): two array copies, no per-book test. Add paths never
-      // duplicate a filepath (findByPath guards them), so a second copy from another module is left for the next sync's prune.
+      // A single file (a path that is a book is not also a folder): two array copies, no per-book test. Known limit: a
+      // second book another module put at the same path stays until the next full sync prunes it, unindexed meanwhile.
       gone = [hit];
       kept = lib0.slice(0, at).concat(lib0.slice(at + 1));
     } else {
       for (const d of lib0) {
-        if (d.source === "folder" && d.filepath && (d.filepath === p || d.filepath.startsWith(prefix))) gone.push(d);
+        const k = d.source === "folder" ? pathKey(d.filepath) : "";
+        if (k && (k === key || k.startsWith(prefix))) gone.push(d);
         else kept.push(d);
       }
     }
     if (!gone.length) return;
     setLibrary(kept);
     for (const d of gone) {
-      if (i.byPath.get(d.filepath) === d) i.byPath.delete(d.filepath);
-      bump(i.byBook, bookKey(d.filepath), -1);
+      const k = pathKey(d.filepath);
+      if (i.byPath.get(k) === d) i.byPath.delete(k);
+      bump(i.byBook, bookKey(k), -1);
     }
     const lib = getLibrary();
     i.lib = lib;
     i.len = lib.length;
-    saveLibrary();
+    savePerFile();
     broadcastLibrary();
   }
 
   async function refresh(p) {
-    const doc = getLibrary().find((d) => d.filepath === p); // a path not yet in the library is ignored
+    const doc = findByPath(p); // the index, not a library scan per event (F5); a path not yet in the library is ignored
     if (stopped || !doc) return;
     const content = await extractContent(p);
     if (stopped || !content || typeof content !== "string") return;
     doc.wordCount = countWords(content);
-    saveLibrary();
+    savePerFile();
     broadcastLibrary();
   }
 

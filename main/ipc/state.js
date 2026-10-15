@@ -77,8 +77,8 @@ function register(ctx) {
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
+    ctx.startWatcher(); // before the sync: files copied in during a long first sync are picked up (LARGE-FOLDER-SYNC-2)
     await ctx.syncLibraryWithFolder();
-    ctx.startWatcher();
     return folder;
   });
 
@@ -92,8 +92,8 @@ function register(ctx) {
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
+    ctx.startWatcher(); // before the sync: files copied in during a long first sync are picked up (LARGE-FOLDER-SYNC-2)
     await ctx.syncLibraryWithFolder();
-    ctx.startWatcher();
     return { folder };
   });
 }
