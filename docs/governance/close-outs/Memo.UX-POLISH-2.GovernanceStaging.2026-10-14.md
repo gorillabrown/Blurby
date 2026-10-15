@@ -53,3 +53,6 @@ Full suite, typecheck and build (DW11), the `--dir` build, the merge-order step,
 - Packaged build: `npx electron-builder --win --x64 --dir --publish never` **exit 0**.
 - **DW13** (three-dot, on `bff2e60f`): exactly the 11 edit sites (M), the 3 modified tests (M), `A tests/helpSurfaces.test.tsx`, and this memo. The time log is added in the merge commit set.
 - DW12: deferred to the batched owner smoke (above).
+
+### Merge go
+Blurby Brain, 2026-10-14, Rule 11 tier 1: merge go on b6323b07 (code identical to the tested merge bff2e60f). Item stays In Flight; close-out held for the batched owner smoke; no tag, no upload. W1 goes to OVERLAY-THEME-SWEEP-1's stub (Blurby.Roadmap adds it).
