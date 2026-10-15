@@ -1,0 +1,53 @@
+{
+  "id": "20261015T150848Z-external-create-item-CLOUD-CONNECTORS-1",
+  "operation": "external-create-item",
+  "item_id": "CLOUD-CONNECTORS-1",
+  "created": "2026-10-15T15:08:48Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Connections to the mainstream cloud services",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XL",
+      "lane": "Platform & Maintenance",
+      "group": "Product Expansion",
+      "spec_link": "ROADMAP.md#cloud-connectors-1",
+      "branch": "eb/cloud-connectors-1",
+      "description": "Connect Google Drive, OneDrive, Box, Dropbox and iCloud as book and article sources (and, where the owner wants it, sync targets). Builds on the existing Microsoft (@azure/msal-node) and Google (googleapis) auth and the deferred Phase 7 Cloud Sync lane, which it supersedes. Likely splits into one item per service.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 51,
+      "prerequisites": [],
+      "id": "CLOUD-CONNECTORS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CLOUD-CONNECTORS-1",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "failed",
+      "operation": "create-item",
+      "itemId": "CLOUD-CONNECTORS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CLOUD-CONNECTORS-1",
+      "actualRevision": "",
+      "recoveryId": "20261015T150848Z-external-create-item-CLOUD-CONNECTORS-1",
+      "detail": {
+        "reason": "Notion rejected Phase \"Product Expansion\" (not a select option); re-planned with an existing phase"
+      },
+      "providerItemId": ""
+    },
+    "supersededBy": "20261015T151013Z-external-create-item-CLOUD-CONNECTORS-1"
+  },
+  "resolved": "2026-10-15T15:10:13Z",
+  "outcome": "superseded",
+  "reason": "superseded by 20261015T151013Z-external-create-item-CLOUD-CONNECTORS-1"
+}

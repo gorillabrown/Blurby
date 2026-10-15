@@ -1,0 +1,53 @@
+{
+  "id": "20261015T150850Z-external-create-item-ANDROID-APP-1",
+  "operation": "external-create-item",
+  "item_id": "ANDROID-APP-1",
+  "created": "2026-10-15T15:08:50Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Establish the Android app",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XL",
+      "lane": "Platform & Maintenance",
+      "group": "Product Expansion",
+      "spec_link": "ROADMAP.md#android-app-1",
+      "branch": "eb/android-app-1",
+      "description": "Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 52,
+      "prerequisites": [],
+      "id": "ANDROID-APP-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ANDROID-APP-1",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "failed",
+      "operation": "create-item",
+      "itemId": "ANDROID-APP-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ANDROID-APP-1",
+      "actualRevision": "",
+      "recoveryId": "20261015T150850Z-external-create-item-ANDROID-APP-1",
+      "detail": {
+        "reason": "Notion rejected Phase \"Product Expansion\" (not a select option); re-planned with an existing phase"
+      },
+      "providerItemId": ""
+    },
+    "supersededBy": "20261015T151015Z-external-create-item-ANDROID-APP-1"
+  },
+  "resolved": "2026-10-15T15:10:15Z",
+  "outcome": "superseded",
+  "reason": "superseded by 20261015T151015Z-external-create-item-ANDROID-APP-1"
+}

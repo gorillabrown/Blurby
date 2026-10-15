@@ -1,0 +1,52 @@
+{
+  "id": "20261015T151009Z-external-create-item-RSS-AGGREGATOR-1",
+  "operation": "external-create-item",
+  "item_id": "RSS-AGGREGATOR-1",
+  "created": "2026-10-15T15:10:09Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "RSS feed aggregator for Newsroom",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "L",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#rss-aggregator-1",
+      "branch": "eb/rss-aggregator-1",
+      "description": "Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 49,
+      "prerequisites": [
+        "APP-TABS-1"
+      ],
+      "id": "RSS-AGGREGATOR-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RSS-AGGREGATOR-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "RSS-AGGREGATOR-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RSS-AGGREGATOR-1",
+      "actualRevision": "5674a4ed9dda5063cc47b08c64ecfedec89ec249fb24ebe142b8d58d7ff6467a",
+      "recoveryId": "20261015T151009Z-external-create-item-RSS-AGGREGATOR-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81db-adbd-ca7e0d7170c9",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T15:11:17Z",
+  "outcome": "succeeded"
+}

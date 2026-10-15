@@ -1,0 +1,55 @@
+{
+  "id": "20261015T150846Z-external-create-item-PODCAST-SOURCE-1",
+  "operation": "external-create-item",
+  "item_id": "PODCAST-SOURCE-1",
+  "created": "2026-10-15T15:08:46Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Podcast source service integration",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "L",
+      "lane": "Library & Content",
+      "group": "Product Expansion",
+      "spec_link": "ROADMAP.md#podcast-source-1",
+      "branch": "eb/podcast-source-1",
+      "description": "Connect a podcast source service so the Podcasts tab can list shows and episodes. The tab ships with its \"Coming Soon\" banner under APP-TABS-1; this item replaces the banner with real content.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
+      "sequence": 50,
+      "prerequisites": [
+        "APP-TABS-1"
+      ],
+      "id": "PODCAST-SOURCE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T14:58:22Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PODCAST-SOURCE-1",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "failed",
+      "operation": "create-item",
+      "itemId": "PODCAST-SOURCE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PODCAST-SOURCE-1",
+      "actualRevision": "",
+      "recoveryId": "20261015T150846Z-external-create-item-PODCAST-SOURCE-1",
+      "detail": {
+        "reason": "Notion rejected Phase \"Product Expansion\" (not a select option); re-planned with an existing phase"
+      },
+      "providerItemId": ""
+    },
+    "supersededBy": "20261015T151011Z-external-create-item-PODCAST-SOURCE-1"
+  },
+  "resolved": "2026-10-15T15:10:11Z",
+  "outcome": "superseded",
+  "reason": "superseded by 20261015T151011Z-external-create-item-PODCAST-SOURCE-1"
+}
