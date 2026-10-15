@@ -266,8 +266,9 @@
   z-index: 10000;
 }
 .shortcuts-container {
-  background: var(--color-bg, #1a1a2e);
-  border: 1px solid var(--color-border, #333);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
   border-radius: 12px;
   width: min(700px, 90vw);
   max-height: 80vh;
@@ -294,7 +295,7 @@
 }
 .shortcuts-key {
   font-family: monospace;
-  background: var(--color-border, #333);
+  background: var(--border);
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 12px;

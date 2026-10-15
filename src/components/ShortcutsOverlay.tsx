@@ -178,6 +178,7 @@ export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayP
     (e: KeyboardEvent) => {
       if (e.key === "Escape" || e.key === "?") {
         e.preventDefault();
+        e.stopPropagation(); // the reader's Escape (exit) must not also run
         onClose();
       }
     },
@@ -185,8 +186,8 @@ export default function ShortcutsOverlay({ onClose, context }: ShortcutsOverlayP
   );
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown, true); // capture: before the reader's window listener (MenuFlap pattern)
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
   }, [handleKeyDown]);
 
   return (

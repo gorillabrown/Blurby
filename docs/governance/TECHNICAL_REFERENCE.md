@@ -781,7 +781,7 @@ Eight settings sub-pages in `src/components/settings/`:
 | Cloud Sync | Provider sign-in, sync frequency, manual sync |
 | Help | Version info, auto-updater, error logs |
 
-The narration settings pages (voice, engine and Narrate options) were deleted by NARRATE-REMOVE-1. The Reading Goals page (`ReadingGoalsSettings.tsx`) is retained; its styles live in `src/styles/reading-goals.css` (restored verbatim from the deleted `tts-settings.css` by owner decision, 2026-10-12). `HotkeyMapSettings.tsx` still shows `] / N` for Next chapter although bare `N` is unbound (to be fixed with UX-POLISH-1).
+The narration settings pages (voice, engine and Narrate options) were deleted by NARRATE-REMOVE-1. The Reading Goals page (`ReadingGoalsSettings.tsx`) is retained; its styles live in `src/styles/reading-goals.css` (restored verbatim from the deleted `tts-settings.css` by owner decision, 2026-10-12). `HotkeyMapSettings.tsx` lists `]` for Next chapter and `N` for Enter Narrate (UX-POLISH-1).
 
 ### Settings Cascade
 
