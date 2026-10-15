@@ -69,10 +69,31 @@ function rawDoc(): { doc: Document; range: Range } {
   return { doc, range };
 }
 
+/** The book's words for section 3: the extractor puts it at words 20..23, inside the 25-word fixture document,
+ *  whose word count clamps every save (PAGE-SAVE-RESTAMP-GUARD-1). */
+const BOOK_WORDS = {
+  bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 24, wordCount: 4 }],
+  getCanonicalSectionWords: (i: number) => (i === 3 ? ["Alpha", "beta", "gamma", "delta"] : undefined),
+};
+/** From the start of span `from` to the end of span `to`, once the view has stamped the spans. */
+function spanRange(doc: Document, from: number, to: number): Range {
+  const range = doc.createRange();
+  range.setStart(doc.querySelector(`[data-word-index="${from}"]`)!.firstChild!, 0);
+  const last = doc.querySelector(`[data-word-index="${to}"]`)!.firstChild!;
+  range.setEnd(last, last.textContent!.length);
+  return range;
+}
+const loadSection = (view: EventTarget, doc: Document, index: number) =>
+  act(async () => {
+    view.dispatchEvent(new CustomEvent("load", { detail: { doc, index } }));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  });
+const settle = () => act(async () => { await new Promise((resolve) => setTimeout(resolve, 50)); });
+
 let container: HTMLElement;
 let root: Root;
 
-async function mount() {
+async function mount(extra: Record<string, unknown> = {}) {
   const fake = createFakeInfrastructure({ document: createFakeDocument() });
   const broker = createReaderPorts(fake.infra);
   const snapshot = fake.infra.document.snapshot();
@@ -87,7 +108,7 @@ async function mount() {
     arrival: "silent",
   }) as any;
 
-  const render = async () => {
+  const render = async (more: Record<string, unknown> = {}) => {
     await act(async () => {
       root.render(createElement(PageFoliateView as never, {
         document: snapshot,
@@ -108,6 +129,8 @@ async function mount() {
         onPageTurned: runtime.onPageTurned,
         highlightedWordIndex: runtime.getSnapshot().highlightedWordIndex,
         renderVersion: 0,
+        ...extra,
+        ...more,
       } as never));
     });
   };
@@ -183,7 +206,8 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
   });
 
   it("(d) a turn whose section is not stamped saves when the section's words are wrapped", async () => {
-    const { fake, view, renderer } = await mount();
+    // The book's words are known, so the load stamps the book's numbering and saves the held turn (PAGE-SAVE-RESTAMP-GUARD-1).
+    const { fake, view, renderer } = await mount({ bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }], getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
     const { doc, range } = rawDoc();
     renderer.contents = [{ doc, index: 0 }];
     renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
@@ -314,5 +338,45 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
     await render();
     expect(jumpBackButton()).toBeNull();
+  });
+
+  it("(r) a turn before the book's word numbers apply saves the re-stamped index once they do", async () => {
+    const { fake, view, renderer, render } = await mount();
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    expect(saves(fake)).toEqual([]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred"
+      && String(d.args[1]).startsWith("reason=book-words"))).toHaveLength(1);
+    await render(BOOK_WORDS);
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+  });
+
+  it("(s) control: a turn after the book's word numbers apply saves at once", async () => {
+    const { fake, view, renderer } = await mount(BOOK_WORDS);
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3); // the spans are stamped 20..23
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 22, 23) };
+    await click("Next page");
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred")).toEqual([]);
+  });
+
+  it("(t) several turns before the book's word numbers apply save only the latest, once", async () => {
+    const { fake, view, renderer, render } = await mount();
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.4, range: spanRange(doc, 1, 2) };
+    await click("Next page");
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await render(BOOK_WORDS);
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
   });
 });
