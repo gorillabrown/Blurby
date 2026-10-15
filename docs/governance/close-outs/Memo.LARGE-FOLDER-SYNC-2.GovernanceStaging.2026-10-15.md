@@ -94,3 +94,15 @@ The C2 add worst is 1.83x the C1 worst, and 1.92x on the merged tree. Both are i
 
 - The F3 comment above `const promise = runFullSync(folder)` in `main/folder-sync.js` still says the IPC callers "then go on to startWatcher". Since the swap they start the watcher before the sync. The spec keeps that comment unchanged, so it is stale. This is a one-line follow-up, for FOLDER-NOTICE-1 or the next item that touches `syncAll`.
 - `npm test` rewrote `tests/perf-baseline-results.json`. It is left unstaged.
+
+## Measured baseline for the listing timeout (Blurby.Brain, 2026-10-15, read-only, after merge)
+
+Owner's real folder `G:\My Drive\Personal\Readings`, Drive for desktop running, mixed warm and cold:
+
+- root readdir: 135 entries, 13 ms
+- `Books`: 38,173 entries, 338 ms
+- `Books\Books`: 81,904 entries, 946 ms
+
+Single listings sit 30x or more under the 30 s per-call `FOLDER_LIST_TIMEOUT_MS`. The 93.6 s full scan (2026-10-14) is per-file work across 120k files, which the per-call timeout does not cover. W4 is low risk for this owner.
+
+Owner batched-smoke line (added by Blurby.Roadmap on Blurby.Brain's ruling): a full sync on the real folder completes with no `root-unlistable` and no skipped-subfolder log line. If it ever shows a `root-unlistable` line, it goes to Blurby.Brain; the constant is not raised blind.
