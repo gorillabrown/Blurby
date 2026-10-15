@@ -569,6 +569,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.markEngaged();
     this.ports.persistence.markPageActivity();
     s.userExplicitSelection = false;
+    s.explicitSelectionAnchor = null;
     s.cfi = first.cfi;
     this.ports.persistence.recordCfi(first.cfi);
     s.currentWordIndex = this.anchor.commitPersistentWordIndex(first.wordIndex, "page-turn", {
@@ -579,15 +580,6 @@ export class PageModeRuntime implements ReaderModeRuntime {
     });
     s.isBrowsedAway = false;
     s.notify();
-  };
-
-  /** Legacy useFoliateSync effect 1 tick (setIsBrowsedAway(isUserBrowsing())). */
-  pollBrowsing = (): void => {
-    if (!this.alive) return;
-    const browsing = this.surface.isUserBrowsing();
-    if (browsing === this.state.isBrowsedAway) return;
-    this.state.isBrowsedAway = browsing;
-    this.state.notify();
   };
 
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();

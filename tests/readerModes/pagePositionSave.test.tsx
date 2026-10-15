@@ -95,7 +95,7 @@ async function mount() {
         focusTextSize: DEFAULT_SETTINGS.focusTextSize,
         initialCfi: "epubcfi(/6/2!/4/2)",
         readBookBytes: () => Promise.resolve(new ArrayBuffer(8)),
-        recordDiagnostic: () => {},
+        recordDiagnostic: runtime.recordDiagnostic,
         onRelocate: runtime.onRelocate,
         onTocReady: () => {},
         onWordClick: () => {},
@@ -152,7 +152,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     renderer.contents = [{ doc, index: 0 }];
     renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
     await click("Next page");
-    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
   });
 
   it("(b) the saved word equals the anchor (ruling Q1)", async () => {
@@ -193,7 +193,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 0 } }));
       await new Promise((resolve) => setTimeout(resolve, 50));
     });
-    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 2, "cfi:0:gamma"]);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 2, "cfi:0:gamma"]]);
   });
 
   it("(e) a swipe that snaps onto a text page saves that page's first word (ruling Q4)", async () => {
@@ -202,7 +202,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     renderer.contents = [{ doc, index: 0 }];
     renderer.page = 2;
     await relocate(renderer, { reason: "snap", range, index: 0, fraction: 0.5 });
-    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
     expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
   });
 
@@ -214,7 +214,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await relocate(renderer, { reason: "snap", range: undefined, index: 0, fraction: 0.5 });
     expect(saves(fake)).toEqual([]);
     await relocate(view, { cfi: "range-cfi", fraction: 0.5, range });
-    expect(saves(fake).map((e) => e.args)).toContainEqual(["doc-1", 12, "cfi:0:twelve"]);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
   });
 
   it("(g) a page turn does not mark browse-away and shows no Jump back", async () => {
@@ -226,6 +226,51 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await render();
     expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
     expect(jumpBackButton()).toBeNull();
+  });
+
+  it("(W1) once a turn settles, a passive relocate is no longer a turn", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    expect(saves(fake)).toHaveLength(1);
+    await act(async () => { await Promise.resolve(); }); // the turn's promise has settled
+    await relocate(view, { cfi: "range-cfi", fraction: 0.5, range }); // e.g. a resize relocate
+    expect(saves(fake)).toHaveLength(1);
+  });
+
+  it("(W2) a page turn clears the explicit selection, so the next mode starts at the page's first word", async () => {
+    const { runtime, renderer } = await mount();
+    runtime.hardSelect({ cfi: "c4", word: "w4", globalWordIndex: 4 });
+    expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(4);
+    const { doc, range } = stampedDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    const handoff = runtime.exportHandoff("persistent");
+    expect(handoff.explicitSelectionAnchor).toBeNull();
+    expect(handoff.canonicalWordIndex).toBe(12);
+    expect(handoff.resumeAnchor).toBe(12);
+  });
+
+  it("(N1) a blank edge page (empty range) during a turn is skipped: no deferred diagnostic, nothing pending", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc } = rawDoc();
+    const empty = doc.createRange();
+    empty.setStart(doc.body, 0);
+    empty.setEnd(doc.body, 0);
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: empty };
+    await click("Next page");
+    const deferred = () => fake.diagnostics.filter((d) => d.args[0] === "page-turn-deferred");
+    expect(deferred()).toEqual([]);
+    await act(async () => {
+      view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 0 } }));
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(saves(fake)).toEqual([]);
+    expect(deferred()).toEqual([]);
   });
 
   it("(h) control: a passive view relocate (book open) saves nothing", async () => {

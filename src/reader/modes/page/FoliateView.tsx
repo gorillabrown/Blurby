@@ -287,8 +287,6 @@ export default function PageFoliateView({
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
   const lastLoadedSectionIndexRef = useRef<number | null>(null);
-  // Track when the user has manually browsed away from the anchor
-  const userBrowsingRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -468,7 +466,7 @@ export default function PageFoliateView({
       el.classList.add(highlightClass);
     });
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
+    if (allowMotion && state.doc && (!state.visible || forceMotion)) {
       try {
         const range = state.doc.createRange();
         range.selectNodeContents(state.span);
@@ -476,12 +474,6 @@ export default function PageFoliateView({
       } catch {
         // Safe to ignore.
       }
-    }
-
-    // Auto-clear the browsed-away flag when the highlighted word becomes visible again
-    // (paginated visibility detection is meaningful in Page).
-    if (userBrowsingRef.current && state.visible) {
-      userBrowsingRef.current = false;
     }
 
     return true;
@@ -494,8 +486,6 @@ export default function PageFoliateView({
     const view = viewRef.current;
     const range = buildResolvedTokenRange(doc, resolution);
     if (!view?.renderer?.scrollToAnchor || !range) return false;
-
-    userBrowsingRef.current = false;
 
     (async () => {
       try {
@@ -573,6 +563,7 @@ export default function PageFoliateView({
           if (!range || !turnedDoc?.body) return;
           const start = textOffsetBefore(turnedDoc.body, range.startContainer, range.startOffset);
           const end = textOffsetBefore(turnedDoc.body, range.endContainer, range.endOffset);
+          if (start === end) return; // a blank edge page has no words to save or wait for
           const saved = reportFirstWordOnPage(turnedDoc, start, end);
           pendingTurnRef.current = saved ? null : { doc: turnedDoc, start, end };
           if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
@@ -944,7 +935,7 @@ export default function PageFoliateView({
             }
             return -1; // No visible words (e.g., cover page with only images)
           },
-          isUserBrowsing: () => userBrowsingRef.current,
+          isUserBrowsing: () => false, // no Page path marks browse-away (PAGE-POSITION-SAVE-1); surface.ts still reads it
           goToSection: async (sectionIndex: number) => {
             const sections = view.book?.sections;
             if (!sections || sectionIndex >= sections.length) return;
@@ -961,9 +952,7 @@ export default function PageFoliateView({
           waitForSectionReady,
           applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
           clearSoftHighlight: () => clearSoftHighlight(),
-          clearUserBrowsing: () => {
-            userBrowsingRef.current = false;
-          },
+          clearUserBrowsing: () => {}, // kept for surface.ts and foliateAnchorNavigation (outside this item's fence)
         };
 
         setLoading(false);
