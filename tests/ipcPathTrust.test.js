@@ -111,7 +111,7 @@ beforeEach(() => {
   settings = { sourceFolder: books, recentFolders: [books, books2], wpm: 300 };
   library = [
     { id: "d1", title: "One", coverPath: d1Cover },
-    { id: "d2", title: "Two", coverPath: d2Cover },
+    { id: "d2", title: "Two" }, // no coverPath: (i) reads d2Cover through the <userData>/covers root alone
     { id: "d3", title: "Legacy", coverPath: legacyCover },
   ];
   setup();
@@ -127,6 +127,16 @@ afterEach(() => {
 describe("IPC-PATH-TRUST-1 attacks", () => {
   it("(a) a cover read outside both covers folders, matching no coverPath, returns null", async () => {
     expect(await call("get-cover-image", secretPhoto)).toBeNull();
+  });
+
+  it("(b2) a sibling folder whose name starts with covers returns null", async () => {
+    const sibling = write("userData/blurby-data/covers2/x.png", "png4");
+    expect(await call("get-cover-image", sibling)).toBeNull();
+  });
+
+  it("(b3) a non-string cover argument returns null", async () => {
+    expect(await call("get-cover-image", { path: d1Cover })).toBeNull();
+    expect(await call("get-cover-image", 42)).toBeNull();
   });
 
   it("(b) a .. path that starts inside a covers folder returns null", async () => {
@@ -225,6 +235,7 @@ describe("IPC-PATH-TRUST-1 controls", () => {
     const d1 = library.find((d) => d.id === "d1");
     const d2 = library.find((d) => d.id === "d2");
     expect(d1).toMatchObject({ title: "New title", author: "New author", coverPath: d1Cover });
-    expect(d2).toMatchObject({ title: "Only title", coverPath: d2Cover });
+    expect(d2).toMatchObject({ title: "Only title" });
+    expect(d2.coverPath).toBeUndefined();
   });
 });
