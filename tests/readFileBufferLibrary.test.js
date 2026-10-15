@@ -68,7 +68,7 @@ beforeEach(() => {
 afterEach(() => {
   Module._load = originalLoad;
   clearLibraryModule();
-  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 describe("read-file-buffer allows a library document's own file", () => {

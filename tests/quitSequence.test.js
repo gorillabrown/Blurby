@@ -93,7 +93,7 @@ describe("(a) saves are on disk at exit", () => {
     } finally {
       // The unfixed handler keeps running its steps after the fake exit: let them finish before removing the directory.
       await Promise.race([allDone, new Promise((r) => setTimeout(r, 1500))]);
-      fs.rmSync(dir, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 });
