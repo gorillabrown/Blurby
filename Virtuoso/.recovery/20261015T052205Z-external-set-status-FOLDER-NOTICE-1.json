@@ -1,0 +1,35 @@
+{
+  "id": "20261015T052205Z-external-set-status-FOLDER-NOTICE-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-NOTICE-1",
+  "created": "2026-10-15T05:22:05Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass."
+    },
+    "expectedRevision": "82d191990d3a69e1041f40dab1dc67c581b4ad2b3820b32ffd0c4175bc83f2f7",
+    "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('description', 'A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.'), ('notes', 'Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain\\'s technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-NOTICE-1",
+      "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('description', 'A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.'), ('notes', 'Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain\\'s technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.')]",
+      "actualRevision": "b91ce7d7701f5a7bdbc306022d25af4f1874bbb3b5a8bc4f29c91783a0f46585",
+      "recoveryId": "20261015T052205Z-external-set-status-FOLDER-NOTICE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T05:22:36Z",
+  "outcome": "succeeded"
+}

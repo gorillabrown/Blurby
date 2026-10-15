@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T05:08:37Z",
+  "takenAt": "2026-10-15T05:22:34Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2368,9 +2368,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails; each Retry press makes exactly one guarded sync attempt, no background retry; clears on any successful reachable sync and restarts the watcher without a toast. partial-read stays log-only.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings. After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.",
-      "revision": "82d191990d3a69e1041f40dab1dc67c581b4ad2b3820b32ffd0c4175bc83f2f7",
+      "description": "A library banner, with the same text as the corrected toast, while the source folder cannot be reached or a folder sync fails. Each Retry press makes one root check (capped at 30 s) and at most one sync; no background retry. The banner clears as soon as the root lists with content (sync, Retry, Rescan or a watcher add) and the watcher restarts without a toast. partial-read stays log-only.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass.",
+      "revision": "b91ce7d7701f5a7bdbc306022d25af4f1874bbb3b5a8bc4f29c91783a0f46585",
       "extra": {}
     }
   ],
