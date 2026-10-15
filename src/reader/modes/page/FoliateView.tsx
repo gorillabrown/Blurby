@@ -302,6 +302,10 @@ export default function PageFoliateView({
   // PAGE-POSITION-SAVE-1: page turns in flight (a relocate while > 0 is a turn's) and a turn not yet stamped.
   const pageTurnsInFlightRef = useRef(0);
   const pendingTurnRef = useRef<{ doc: Document; start: number; end: number } | null>(null);
+  // PAGE-SAVE-RESTAMP-GUARD-1: section documents whose spans still carry the renderer's own numbering (wrapped
+  // before the book's words arrived). A turn on one is held, latest only, until the re-stamp applies the book's.
+  const rendererNumberedDocsRef = useRef(new WeakSet<Document>());
+  const reportHeldTurnRef = useRef<(doc: Document) => void>(() => {});
   // A swipe that snapped onto the blank edge page: the next relocate (the adjacent section's) is the turn's.
   const swipeCrossingRef = useRef(false);
   const onLoadRef = useRef(onLoad);
@@ -574,9 +578,22 @@ export default function PageFoliateView({
           const start = textOffsetBefore(turnedDoc.body, range.startContainer, range.startOffset);
           const end = textOffsetBefore(turnedDoc.body, range.endContainer, range.endOffset);
           if (start === end) return; // a blank edge page has no words to save or wait for
+          // PAGE-SAVE-RESTAMP-GUARD-1: never save the renderer's provisional numbering; hold the latest turn instead.
+          if (rendererNumberedDocsRef.current.has(turnedDoc)) {
+            pendingTurnRef.current = { doc: turnedDoc, start, end };
+            recordDiagnosticRef.current("page-turn-deferred", `reason=book-words start=${start} end=${end}`);
+            return;
+          }
           const saved = reportFirstWordOnPage(turnedDoc, start, end);
           pendingTurnRef.current = saved ? null : { doc: turnedDoc, start, end };
           if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
+        };
+        // PAGE-SAVE-RESTAMP-GUARD-1: lets the re-stamp effect (outside this closure) save the turn it held.
+        reportHeldTurnRef.current = (doc: Document) => {
+          const held = pendingTurnRef.current;
+          if (!held || held.doc !== doc) return;
+          pendingTurnRef.current = null;
+          reportFirstWordOnPage(doc, held.start, held.end);
         };
 
         // Attach load listener BEFORE open() — events may fire during init
@@ -601,13 +618,17 @@ export default function PageFoliateView({
             if (sectionStart >= 0) {
               const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+              const provisional = !liveSections()?.length; // PAGE-SAVE-RESTAMP-GUARD-1: no book words yet
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              // PAGE-SAVE-RESTAMP-GUARD-1: these spans carry the renderer's own numbering until the re-stamp effect
+              // replaces them. If the book's words arrived during this wrap, that effect already owns the document.
+              if (provisional && !liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
             }
           }
 
           // PAGE-POSITION-SAVE-1: a turn that relocated before this section's words were stamped saves now.
           const pendingTurn = pendingTurnRef.current;
-          if (pendingTurn && pendingTurn.doc === doc) {
+          if (pendingTurn && pendingTurn.doc === doc && !rendererNumberedDocsRef.current.has(doc)) {
             pendingTurnRef.current = null;
             reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end);
           }
@@ -1025,6 +1046,9 @@ export default function PageFoliateView({
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
         await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        // PAGE-SAVE-RESTAMP-GUARD-1: the book's numbering now applies to this section; save the turn held on it.
+        rendererNumberedDocsRef.current.delete(doc);
+        if (!cancelled) reportHeldTurnRef.current(doc);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);
