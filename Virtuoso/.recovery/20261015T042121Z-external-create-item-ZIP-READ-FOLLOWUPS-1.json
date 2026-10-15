@@ -1,0 +1,50 @@
+{
+  "id": "20261015T042121Z-external-create-item-ZIP-READ-FOLLOWUPS-1",
+  "operation": "external-create-item",
+  "item_id": "ZIP-READ-FOLLOWUPS-1",
+  "created": "2026-10-15T04:21:21Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Follow-ups from DEPS-AUDIT-1's capped zip reader",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#zip-read-followups-1",
+      "branch": "eb/zip-read-followups-1",
+      "description": "Import file-size check, a lying STORED-header test, and a parser-level operation-cap test.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews.",
+      "sequence": 31,
+      "prerequisites": [],
+      "id": "ZIP-READ-FOLLOWUPS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T03:05:24Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ZIP-READ-FOLLOWUPS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "ZIP-READ-FOLLOWUPS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:ZIP-READ-FOLLOWUPS-1",
+      "actualRevision": "4f7d2779bafec0f908996db65c9bfb9e78a011c4235d485bd581bccc41b77336",
+      "recoveryId": "20261015T042121Z-external-create-item-ZIP-READ-FOLLOWUPS-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-814d-8971-f1bb3bb37e49",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T04:27:58Z",
+  "outcome": "succeeded"
+}

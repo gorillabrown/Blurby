@@ -1,0 +1,36 @@
+{
+  "id": "20261015T041935Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-UNREACHABLE-GUARD-1",
+  "created": "2026-10-15T04:19:35Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 22,
+      "written_status": "full-spec",
+      "notes": "Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass."
+    },
+    "expectedRevision": "cb4e5761b250fbadf6822622d9a12ed1180eccdb2112014a7b553e5ff30e69af",
+    "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass.'), ('sequence', 22), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-UNREACHABLE-GUARD-1",
+      "idempotencyKey": "set-status:FOLDER-UNREACHABLE-GUARD-1:[('notes', 'Created by roadmap review 2026-10-14. BUG-195 (High). Specify next; merge before the owner keeps a source folder set for daily use. Release gate (Blurby.Brain 2026-10-14). Full Spec on main 0f285836; fixes BUG-195 and the per-file remove path from LARGE-FOLDER-SYNC-1. U9/U10 pass.'), ('sequence', 22), ('written_status', 'full-spec')]",
+      "actualRevision": "268009120d08f74ca0c2764b57efb173e3077af0fd4b6003ee774894f3bc0eff",
+      "recoveryId": "20261015T041935Z-external-set-status-FOLDER-UNREACHABLE-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:41Z",
+  "outcome": "succeeded"
+}

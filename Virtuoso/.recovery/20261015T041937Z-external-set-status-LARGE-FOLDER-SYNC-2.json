@@ -1,0 +1,36 @@
+{
+  "id": "20261015T041937Z-external-set-status-LARGE-FOLDER-SYNC-2",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-2",
+  "created": "2026-10-15T04:19:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 23,
+      "written_status": "full-spec",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice is the owner decision pending. U9/U10 pass."
+    },
+    "expectedRevision": "98a641fe87e49ecbda5bfd67a8c9c54c76d8644e31ed7fe75f923b52ab578df7",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice is the owner decision pending. U9/U10 pass.\"), ('sequence', 23), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-2",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-2:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at LARGE-FOLDER-SYNC-1's merge. The scan-failure signal is tier 2. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); scan-failure notice is the owner decision pending. U9/U10 pass.\"), ('sequence', 23), ('written_status', 'full-spec')]",
+      "actualRevision": "35e51cd30579625513459ec49cce6693d90496859c00c5f0eb24a42a158c40ee",
+      "recoveryId": "20261015T041937Z-external-set-status-LARGE-FOLDER-SYNC-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:44Z",
+  "outcome": "succeeded"
+}

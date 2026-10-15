@@ -1,0 +1,34 @@
+{
+  "id": "20261015T041942Z-external-set-status-PDF-IMPORT-DIAG-1",
+  "operation": "external-set-status",
+  "item_id": "PDF-IMPORT-DIAG-1",
+  "created": "2026-10-15T04:19:42Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 26
+    },
+    "expectedRevision": "d7f12c7333e477849cd516f7d6fd6dc963ba2f9a76d0043a5cdbc021983d7305",
+    "idempotencyKey": "set-status:PDF-IMPORT-DIAG-1:[('sequence', 26)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PDF-IMPORT-DIAG-1",
+      "idempotencyKey": "set-status:PDF-IMPORT-DIAG-1:[('sequence', 26)]",
+      "actualRevision": "dea9951219eb04d6bc26f06aec89201bf49c844f32794e4ba9f91ea1e970a018",
+      "recoveryId": "20261015T041942Z-external-set-status-PDF-IMPORT-DIAG-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:51Z",
+  "outcome": "succeeded"
+}
