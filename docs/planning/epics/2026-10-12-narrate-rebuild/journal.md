@@ -250,6 +250,15 @@ arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4
 - **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
 - **Next:** on the second machine: step 0, then every DoD row fresh in one session, done.md, and the completion merge.
 
+## S5 — 2026-10-15 — completion record: evidence merged, light checks green; stopped on the D2 log question
+
+- **Did:** resumed after blurby-05 died in a restart, on Blurby.Roadmap's dispatch. Committed the reference-run evidence (`ccd98b8e`). Merged the laptop evidence branch `512a0b19` (`e0dcce6f`) and `origin/main` `745ee383` (`31deeac0`); both scopes checked. Light checks green (state.md → Evidence → S5 completion checks).
+- **Learned:** D2's charter evidence has a log half ("first voiced word = 'ancient' and a continuous crossing") that no recorded trace covers. G2 used the packaged build, which has no trace levers. The D3 sessions start at word 8723 and cross into THE SECOND BOOK.
+- **Decisions:** none. done.md is withheld until Blurby.Roadmap rules on D2 (state.md blockers line).
+- **Gate/DoD movement:** D1, D3–D13 recorded as met (D6 by Brain's ruling under Decision #22). D12 and D7 F5 are met from G2. D2's owner half is met; its log half is open.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
+- **Next:** if the ruling is "met": write done.md (draft staged in the session scratchpad), set charter `status: complete`, append the final journal entry, then the docs-only completion merge after P6's code merge. If the ruling is "trace it": one traced session from "ancient", then the same steps.
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
