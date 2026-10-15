@@ -1,0 +1,35 @@
+{
+  "id": "20261015T022909Z-external-set-status-PAGE-POSITION-SAVE-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-POSITION-SAVE-1",
+  "created": "2026-10-15T02:29:09Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-14"
+    },
+    "expectedRevision": "0cc3c8f1e6e235d6d02a6a2b695b9f8e3082b74b1698340bccc8a28776e4cdf5",
+    "idempotencyKey": "set-status:PAGE-POSITION-SAVE-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-POSITION-SAVE-1",
+      "idempotencyKey": "set-status:PAGE-POSITION-SAVE-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-15T02:29:41Z",
+      "recoveryId": "20261015T022909Z-external-set-status-PAGE-POSITION-SAVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T02:29:43Z",
+  "outcome": "succeeded"
+}
