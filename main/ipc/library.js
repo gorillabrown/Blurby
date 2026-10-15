@@ -377,6 +377,7 @@ function register(ctx) {
       if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {
         return { count: docs.length, empty: true, reason: "root-empty-suspect" };
       }
+      if (files.length) ctx.reportFolderOk(); // the rescan listed books, so the root is reachable (FOLDER-NOTICE-1)
       const skipped = (report.skipped || []).map(pathKey);
       // One pathKey per library path. On a case-only collision the first doc is the book; the other is kept below, never dropped.
       const keyOf = new Map();

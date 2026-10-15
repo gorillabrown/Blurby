@@ -8,6 +8,7 @@ const {
 } = require("../constants");
 const { pickUserSettings } = require("../migrations");
 const fsPromises = require("fs/promises");
+const { pathKey } = require("../folder-sync");
 
 let saveSettingsTimeout = null;
 let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it
@@ -74,6 +75,7 @@ function register(ctx) {
     });
     if (result.canceled || !result.filePaths.length) return null;
     const folder = result.filePaths[0];
+    if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice(); // a different folder: the banner was the old one's
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
@@ -89,6 +91,7 @@ function register(ctx) {
       return { error: "That folder is not in your recent folders. Use Browse for folder to choose it." };
     }
     try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
+    if (pathKey(folder) !== pathKey(settings.sourceFolder)) ctx.resetFolderNotice(); // a different folder: the banner was the old one's
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);
     ctx.saveSettings();
@@ -96,6 +99,10 @@ function register(ctx) {
     await ctx.syncLibraryWithFolder();
     return { folder };
   });
+
+  // The library banner (FOLDER-NOTICE-1): main owns the folder's problem; Retry is one root check per call, never repeated.
+  ipcMain.handle("get-folder-problem", () => ctx.getFolderProblem());
+  ipcMain.handle("retry-source-folder", () => ctx.retrySourceFolder());
 }
 
 /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
