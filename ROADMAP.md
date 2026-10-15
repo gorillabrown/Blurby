@@ -4287,58 +4287,63 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
 
 <a id="get-state-secret-1"></a>
 
-#### GET-STATE-SECRET-1 — No secret reaches the renderer through state or settings reads *(position 23 — Full Spec; authored 2026-10-15 on main @ `051d004c`; release gate)*
+#### GET-STATE-SECRET-1 — No secret reaches the renderer through state or settings reads *(position 23 — Full Spec; authored 2026-10-15 on main @ `051d004c`; amended 2026-10-15 on main @ `181da234` with Blurby.Brain's rulings on the widening, the backup export and the backup import; release gate)*
 
-- **What:** the renderer stops receiving the Chrome extension's pairing secret, or any other `_`-prefixed key, from main.
+- **What:** the renderer stops receiving the Chrome extension's pairing secret, or any other `_`-prefixed key, from main, and a library backup stops carrying it.
   - **`get-state`** returns a copy of the real user settings, plus the two folder keys the library view shows (`sourceFolder`, `recentFolders`). It never returns main's live settings object, a `_`-prefixed key (such as `_wsPairingToken`) or `schemaVersion`, which no renderer code reads.
-  - **The four WebSocket handlers that return the long-lived pairing token** stop returning it. `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return the same values without `token`. `get-ws-pairing-token`, which returns nothing else and has no renderer caller, is removed from main, `preload.js` and the `ElectronAPI` type.
+  - **The four WebSocket handlers that return the long-lived pairing token** stop returning it. `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return the same values without `token`. `get-ws-pairing-token`, which returns nothing else and has no renderer caller, is removed from main, `preload.js` and the `ElectronAPI` type. The pairing banner keeps its code: it gets it from `get-ws-short-code` after the `ws-connection-attempt` push, and neither path changes (tested).
+  - **`export-library`** writes only real user settings into the backup file: no `_`-prefixed key and no main-owned key (`pickUserSettings`).
+  - **`import-library`** already restores no settings from a backup. It is not changed; a test pins it, with a mutation control.
   - **Two follow-ups from SETTINGS-KEY-TRUST-1's code-quality review:**
     - a test pins the outer `pickUserSettings` on `startSync`'s merge output, so deleting it fails;
     - `mergeSettings`' dead `schemaVersion` step is removed, with a one-line reason.
-  - **The user sees no change.** The pairing UI shows only the 6-digit short code, which is unchanged. Every settings key the renderer reads is still returned (traced below, and tested).
-  - **Release gate** (Blurby.Brain, 2026-10-15). This is the same boundary as the three trust items (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SETTINGS-KEY-TRUST-1), and the renderer displays imported third-party HTML. When this specification folds in, Blurby.Roadmap adds it to the Stage 8 release gate as item (9) (`ROADMAP.md:535` on main @ `051d004c`). Nothing is released until it is merged.
-- **Why** (lines on `051d004c`, fetched 2026-10-15). During authoring `refs/remotes/origin/main` advanced to `89a5a95c` (the FOLDER-UNREACHABLE-GUARD-1 merge). `git diff --quiet 051d004c 89a5a95c` exits 0 over every edit site (`main/ipc/state.js`, `main/ipc/misc.js`, `main/sync-engine.js`, `preload.js`, `src/**`, `tests/settingsKeyTrust.test.js`) and over `main/ws-server.js`, `main/migrations.js`, `main/ipc/cloud.js`, `main/window-manager.js`, `main/ipc/documents.js` and `main/auth.js`. Only cited lines in `main.js` and `main/ipc/library.js` shift; the path table gives both.
+  - **The user sees no change.** The pairing UI shows only the 6-digit short code, which is unchanged. Every settings key the renderer reads is still returned (traced below, and tested). A new backup file no longer lists the source folder, the recent folders or the schema version; nothing reads a backup's settings (the import ignores them).
+  - **Release gate** (Blurby.Brain, 2026-10-15). This is the same boundary as the three trust items (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SETTINGS-KEY-TRUST-1), and the renderer displays imported third-party HTML. Blurby.Roadmap has added it to the Stage 8 release gate as item (9) (`f1ad7cba`). Nothing is released until it is merged.
+- **Why** (lines on `181da234`, fetched 2026-10-15). The original trace was on `051d004c`. `git diff --quiet 051d004c 181da234` exits 0 over `main/ipc/state.js`, `main/ipc/misc.js`, `main/sync-engine.js`, `preload.js`, `src/**`, `tests/settingsKeyTrust.test.js`, `main/ws-server.js`, `main/migrations.js`, `main/ipc/cloud.js`, `main/window-manager.js`, `main/ipc/documents.js` and `main/auth.js`. Between them, FOLDER-UNREACHABLE-GUARD-1 (`89a5a95c`) changed `main.js`, `main/ipc/library.js` and another hunk of `docs/governance/TECHNICAL_REFERENCE.md` (`:711`), so citations in those files are given on `181da234`. `git diff --stat 89a5a95c 181da234 -- main main.js preload.js src tests docs/governance/TECHNICAL_REFERENCE.md` prints nothing: the commits after it are governance only.
   - **`get-state` hands over main's live settings object.** The handler (`main/ipc/state.js:16-19`, reached through `preload.js:35`) returns `settings: ctx.getSettings()` (`:17`). That object holds `_wsPairingToken`, which the WebSocket server writes into it in two forms (`main/ws-server.js:444-470`):
     - **Encrypted:** `safeStorage.encryptString(token).toString("base64")` (`:457`, `:466`; and `:241-242` on a successful pairing).
     - **Plaintext:** the 32-hex token itself, when OS encryption is unavailable (`:459`, `:468`; read back as the token at `:450`). `regenerate-ws-pairing-token` also writes the plaintext token before restarting the server (`main/ipc/misc.js:420`).
 
-    So any renderer script can read the token, in plaintext on a machine without OS encryption. It can read `schemaVersion` too. SETTINGS-KEY-TRUST-1 recorded this as a new finding (`ROADMAP.md:3101`).
+    So any renderer script can read the token, in plaintext on a machine without OS encryption. It can read `schemaVersion` too. SETTINGS-KEY-TRUST-1 recorded this as a new finding (its Out of scope; `docs/governance/close-outs/Memo.SETTINGS-KEY-TRUST-1.GovernanceStaging.2026-10-15.md:86`).
   - **Four handlers hand the token over directly, always in plaintext.** `wsServer.startServer` returns `{ port, token: _pairingToken }` (`main/ws-server.js:438`, `:523`), and `getStatus` returns `{ running, port, clients, token }` (`:547-554`).
     - `start-ws-server` (`main/ipc/misc.js:385-387`) and `regenerate-ws-pairing-token` (`:417-425`) return `startServer`'s value.
     - `get-ws-status` (`:394-396`) returns `getStatus()`.
     - `get-ws-pairing-token` (`:398-401`) returns `status.token`.
 
-    No renderer code reads a token from any of them. The only renderer call among the four is `ConnectorsSettings.tsx:86` (`await api.regenerateWsPairingToken();`), which discards the result and refreshes the short code (`:88-90`). `git grep -n -E "getWsPairingToken|startWsServer|getWsStatus" -- src` on `051d004c` finds only `src/types.ts:343-347` and the dev stub `src/test-harness/electron-api-stub.ts:565-569`. `docs/planning/AGENT_FINDINGS.md:68` (H-SEC-3) recorded the `getStatus` leak earlier and proposed keeping `getWsPairingToken`; this item supersedes that proposal, since that channel leaks the same token.
+    No renderer code reads a token from any of them. The only renderer call among the four is `src/components/settings/ConnectorsSettings.tsx:86` (`await api.regenerateWsPairingToken();`). It ignores the result and refreshes the short code instead (`:88-90`), which is the evidence that the UI never used the returned token. `git grep -n -E "getWsPairingToken|startWsServer|getWsStatus" -- src` finds only `src/types.ts:343-347` and the dev stub `src/test-harness/electron-api-stub.ts:565-569`. `docs/planning/AGENT_FINDINGS.md:68` (H-SEC-3) recorded the `getStatus` leak earlier and proposed keeping `getWsPairingToken`; this item supersedes that proposal, since that channel leaks the same token.
+  - **The pairing banner's code does not come from any of the four.** `main/ws-server.js` pushes `ws-connection-attempt` when an unauthenticated client connects (`:147-151`) and `ws-pairing-success` on pair or auth (`:251-255`, `:274-278`). All three sends carry only `{ timestamp: Date.now() }`. On the attempt push, the library view asks `getWsShortCode()` for the code and shows the banner (`src/components/LibraryContainer.tsx:169-178`); on the success push it hides it (`:182-183`). `get-ws-short-code` (`main/ipc/misc.js:403-409`) returns `{ code, expiresAt, connected, status }` and is not edited. The extension receives the long-lived token over its own socket (`pair-ok`, `main/ws-server.js:250`), never through the renderer.
+  - **`export-library` writes the secret into the backup.** `main/ipc/library.js:524-541` writes `settings: { ...settings }` (`:535`), main's whole live object with `_wsPairingToken` (either form), `sourceFolder`, `recentFolders` and `schemaVersion`, to the file the user picks (`:527-531`, `:539`). The file is meant to be kept and moved, so a plaintext token in it survives outside the app.
+  - **`import-library` restores no settings.** `main/ipc/library.js:543-577` reads the backup (`:552-553`) and uses only `data.library` (`:554-566`). `git grep -n "data.settings" -- main/ipc/library.js` prints nothing, and `git grep -n -E "\.settings\b|restore|backup" -- main.js main` finds no other path that applies a backup's settings (the `backupFile` hits, `main.js:56`, `:275`, `:280`, are the migration's `.bak` copies). So a backup cannot set any setting today: no fix is needed, and test (z) pins it.
   - **`startSync`'s outer filter is not pinned.** The merge function is `(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true })` (`main/sync-engine.js:817`). `mergeSettings` (`:372-390`) copies a cloud key when `fieldTimestamps.settings["cloud:<key>"]` is greater than `["local:<key>"]` (`:376-383`), and `loadSyncState` keeps whatever a persisted `sync-state.json` carries (`:65-80`). The only test of the outer filter, (r1) (`tests/settingsKeyTrust.test.js:252-261`), seeds no timestamps, so `mergeSettings` takes no cloud key and the outer `pickUserSettings` can be deleted without failing any test.
   - **`mergeSettings`' `schemaVersion` step is dead.** `:385-387` raises `merged.schemaVersion` to the cloud's. Its only production caller is `startSync`'s merge function, whose output `pickUserSettings` filters, and `schemaVersion` is main-owned (`main/migrations.js:325`), so the step's result is always dropped. The loop's own skip (`:377`) stays: it keeps a cloud `schemaVersion` out of the merge in every caller.
-- **Every path that hands settings or state to the renderer** (ruling 3; searched with `git grep -n -E "webContents\.send|sender\.send|event\.reply|returnValue|executeJavaScript|ipcMain\.on\("` and `git grep -n "getSettings()"` over `main.js`, `main/**` and `preload.js` on `051d004c`; every `ctx.getSettings()` site and every handler whose return could carry settings was read):
+- **Every path that hands settings or state to the renderer, or out of the app** (ruling 3; searched with `git grep -n -E "webContents\.send|sender\.send|event\.reply|returnValue|executeJavaScript|ipcMain\.on\("` and `git grep -n "getSettings()"` over `main.js`, `main/**` and `preload.js`; every `ctx.getSettings()` site and every handler whose return could carry settings was read):
 
-  | # | Path | Where (`051d004c`) | What it hands over | Leaks? |
+  | # | Path | Where (`181da234`) | What it hands over | Leaks? |
   |---|---|---|---|---|
   | 1 | `get-state` | `main/ipc/state.js:16-19` | main's live settings object, with `_wsPairingToken` (either form) and `schemaVersion`; and the library | **Yes.** Fixed here |
   | 2 | `start-ws-server` | `main/ipc/misc.js:385-387` | `startServer`'s `{ port, token }` (`ws-server.js:438`, `:523`) | **Yes** (plaintext). Fixed here |
   | 3 | `get-ws-status` | `misc.js:394-396` | `getStatus()`, with `token` (`ws-server.js:547-554`) | **Yes** (plaintext). Fixed here |
   | 4 | `get-ws-pairing-token` | `misc.js:398-401`; `preload.js:147` | the token itself | **Yes** (plaintext). Removed here |
   | 5 | `regenerate-ws-pairing-token` | `misc.js:417-425` | `startServer`'s `{ port, token }` | **Yes** (plaintext). Fixed here |
-  | 6 | `save-settings` return | `state.js:24-47` | nothing: the handler has no `return`, so it resolves `undefined` | No |
-  | 7 | `get-launch-at-login`, `set-launch-at-login` | `state.js:49-60` | the OS flag; the boolean sent | No |
-  | 8 | `select-folder`, `switch-folder` | `state.js:62-93` | the folder the user chose; `{ folder }` or `{ error }` | No |
-  | 9 | Settings-change broadcast | none exists | — (no `webContents.send` carries settings; all 16 sends are rows 10–15) | No |
-  | 10 | `library-updated` | `main.js:264` | `getLibrary()` | No settings (library fields are out of scope) |
-  | 11 | `sync-progress`, `watcher-error` | `main.js:311`, `:353` (`:361` on `89a5a95c`) | counts; a message and, on `89a5a95c`, a reason code | No |
-  | 12 | `cloud-sync-status-changed`, `cloud-auth-required` | `main/ipc/cloud.js:94`, `:102` | a status string (`sync-engine.js:58-62`); the provider name | No |
-  | 13 | `system-theme-changed`, `update-available`, `update-downloaded` | `main/window-manager.js:212`, `:216`, `:172`, `:178` | the theme name; a version string | No |
-  | 14 | `ws-connection-attempt`, `ws-pairing-success` | `main/ws-server.js:150`, `:254`, `:277` | `{ timestamp }` | No |
-  | 15 | Kokoro status sends | `main/ipc/tts.js:57`, `:115`; `main/tts-engine.js:98`, `:173` | loading and download state | No |
-  | 16 | `cloud-sync-now`, `cloud-force-sync` | `cloud.js:49-56`, `:66-68` | `startSync`'s `{ status, results, lastSync, revision, meteredMode }` (`sync-engine.js:910-916`; `results.settings` is an action name); `forceSync`'s `{ status, revision }` (`:1101`) or `startSync`'s. `applyCloudSettings` returns the live object (`:395`), but both callers discard it (`:822`, `:1066`) | No |
-  | 17 | `cloud-get-sync-status`, `cloud-get-merge-preview`, `cloud-full-reconciliation`, `cloud-download-doc-content` | `cloud.js:58-64`, `:81-88` | status and revision (`sync-engine.js:963-970`); document counts (`:1015-1022`); `{ fixed, errors, lastReconcile }` (`:760`); `{ content }` (`:666`) | No |
-  | 18 | `cloud-get-auth-state`, `cloud-sign-in` | `cloud.js:45-47`, `:10-32` | `userInfo` only (`main/auth.js:28`, `:182-183`, `:269-270`); OAuth tokens stay in `saveTokens` | No |
-  | 19 | Window creation and theme | `main.js:494`, `:497`, `:592` (`:503`, `:506`, `:601` on `89a5a95c`); `main/ipc/documents.js:122`; `state.js:31` | the windows take only theme colours (`window-manager.js:59`, `:107`, `:195-206`); the reader URL carries the document id only (`:136-138`) | No |
-  | 20 | `get-ws-short-code`, `regenerate-ws-short-code` | `misc.js:403-415` | the 6-digit short code, shown in the UI by design (5-minute life) | No |
-  | 21 | `isMeteredConnection` | `sync-engine.js:769-778` | a fixed `executeJavaScript` expression, no settings | No |
-  | 22 | `tts-eval-trace-*` | `main.js:228-250` | takes renderer events; returns `{ ok, tracePath }` | No |
-  | 23 | `export-library` | `main/ipc/library.js:508-525` (`:524-541` on `89a5a95c`) | writes `settings: { ...settings }`, `_wsPairingToken` included, to the backup file the user chose; returns only the file path | No renderer leak. The secret in the export file is out of scope (below) |
-- **What the renderer reads from `get-state`'s settings** (traced on `051d004c`). The readers are `src/App.tsx:45-49`, `src/components/ThemeProvider.tsx:167-172` and `src/hooks/useLibrary.ts:19-22`, `:80-82` and `:90-92`. `useLibrary` stores the object whole (`setSettings(state.settings)`), and the library and settings views read it from there. `src/test-harness/electron-api-stub.ts:265` and `main/narrate/trial.js:156` (which reads only `library`) are not app paths.
+  | 6 | `export-library` | `main/ipc/library.js:524-541` | writes `{ ...settings }` (`:535`), `_wsPairingToken` and the folder paths included, into the user's backup file; returns only the file path | **Yes** (to disk, not the renderer). Fixed here |
+  | 7 | `import-library` | `library.js:543-577` | reads a backup; applies only `data.library` | No: sets no setting. Pinned here |
+  | 8 | `save-settings` return | `state.js:24-47` | nothing: the handler has no `return`, so it resolves `undefined` | No |
+  | 9 | `get-launch-at-login`, `set-launch-at-login` | `state.js:49-60` | the OS flag; the boolean sent | No |
+  | 10 | `select-folder`, `switch-folder` | `state.js:62-93` | the folder the user chose; `{ folder }` or `{ error }` | No |
+  | 11 | Settings-change broadcast | none exists | — (no `webContents.send` carries settings; all 16 sends are rows 12–17) | No |
+  | 12 | `library-updated`, `sync-progress`, `watcher-error` | `main.js:264`, `:311`, `:361` | `getLibrary()`; counts; a message and a reason code | No settings (library fields are out of scope) |
+  | 13 | `cloud-sync-status-changed`, `cloud-auth-required` | `main/ipc/cloud.js:94`, `:102` | a status string (`sync-engine.js:58-62`); the provider name | No |
+  | 14 | `system-theme-changed`, `update-available`, `update-downloaded` | `main/window-manager.js:212`, `:216`, `:172`, `:178` | the theme name; a version string | No |
+  | 15 | `ws-connection-attempt`, `ws-pairing-success` | `main/ws-server.js:150`, `:254`, `:277` | `{ timestamp }` | No |
+  | 16 | Kokoro status sends | `main/ipc/tts.js:57`, `:115`; `main/tts-engine.js:98`, `:173` | loading and download state | No |
+  | 17 | `cloud-sync-now`, `cloud-force-sync` | `cloud.js:49-56`, `:66-68` | `startSync`'s `{ status, results, lastSync, revision, meteredMode }` (`sync-engine.js:910-916`; `results.settings` is an action name); `forceSync`'s `{ status, revision }` (`:1101`) or `startSync`'s. `applyCloudSettings` returns the live object (`:395`), but both callers discard it (`:822`, `:1066`) | No |
+  | 18 | `cloud-get-sync-status`, `cloud-get-merge-preview`, `cloud-full-reconciliation`, `cloud-download-doc-content` | `cloud.js:58-64`, `:81-88` | status and revision (`sync-engine.js:963-970`); document counts (`:1015-1022`); `{ fixed, errors, lastReconcile }` (`:760`); `{ content }` (`:666`) | No |
+  | 19 | `cloud-get-auth-state`, `cloud-sign-in` | `cloud.js:45-47`, `:10-32` | `userInfo` only (`main/auth.js:28`, `:182-183`, `:269-270`); OAuth tokens stay in `saveTokens` | No |
+  | 20 | Window creation and theme | `main.js:503`, `:506`, `:601`; `main/ipc/documents.js:122`; `state.js:31` | the windows take only theme colours (`window-manager.js:59`, `:107`, `:195-206`); the reader URL carries the document id only (`:136-138`) | No |
+  | 21 | `get-ws-short-code`, `regenerate-ws-short-code` | `misc.js:403-415` | the 6-digit short code, shown in the UI by design (5-minute life) | No |
+  | 22 | `isMeteredConnection` | `sync-engine.js:769-778` | a fixed `executeJavaScript` expression, no settings | No |
+  | 23 | `tts-eval-trace-*` | `main.js:228-250` | takes renderer events; returns `{ ok, tracePath }` | No |
+- **What the renderer reads from `get-state`'s settings** (traced on `051d004c`; `src/**` is unchanged on `181da234`). The readers are `src/App.tsx:45-49`, `src/components/ThemeProvider.tsx:167-172` and `src/hooks/useLibrary.ts:19-22`, `:80-82` and `:90-92`. `useLibrary` stores the object whole (`setSettings(state.settings)`), and the library and settings views read it from there. `src/test-harness/electron-api-stub.ts:265` and `main/narrate/trial.js:156` (which reads only `library`) are not app paths.
   - **Every key the renderer reads is a `SETTINGS_DEFAULTS` key.** `git grep -h -o -E "[sS]ettings\??\.[A-Za-z_]+" -- src ':!src/**/*.test.*' ':!src/test-harness/**'` gives 47 distinct names. 43 are `SETTINGS_DEFAULTS` keys (`main/migrations.js:299-321`). The other four are not settings: `isEink` is `ReaderView`'s own prop (`src/components/ReaderView.tsx:14`), and `update`, `read` and `settings` are members of the mode ports' `settings` object (for example `src/reader/modes/flow/ModeRuntime.ts:668`, `src/reader/modes/flow/useModeBindings.ts:30`). No renderer code reads settings with a computed key, and the only destructuring is `useSettings()` itself (`ReaderContainer.tsx:141`).
   - **The main-owned keys the renderer reads:**
     - `sourceFolder`: `src/components/LibraryView.tsx:411` (the folder name in the header), `:460` (the recent-folders list's current folder), `:469` (Rescan disabled without a folder) and `:802` (the folder section).
@@ -4353,105 +4358,129 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
   3. Check every other IPC or push that hands settings or state to the renderer for the same leak, and fix them in this item.
   4. Fold in two items from SETTINGS-KEY-TRUST-1's quality review: (a) a test that pins the outer `pickUserSettings` on `startSync`'s merge output, seeding `fieldTimestamps.settings["cloud:_wsPairingToken"]: 9`, so that deleting the wrapper fails it; (b) remove the dead `schemaVersion` branch in `mergeSettings`, with a one-line reason.
   5. A Stage 8 release gate: the same boundary as the three trust items, and the renderer displays imported third-party HTML.
-  6. Positive controls name which tests fail on `051d004c`, and why (standing rule 43).
+  6. Positive controls name which tests fail on the base, and why (standing rule 43).
+- **Amendment ruling (Blurby.Brain, 2026-10-15, Rule 11 tier 1):**
+  7. **The widening is confirmed as written** (the four token handlers, `preload.js` and the type). Add one test: the pairing banner flow still gets its one-time code after the ws push, so removing `token` does not sweep the code away. `ConnectorsSettings.tsx:86` ignoring `regenerateWsPairingToken()`'s result is recorded as evidence.
+  8. **Fold in `export-library`:** filter the exported settings through `pickUserSettings`, dropping `_`-prefixed keys. Test: an export with `_wsPairingToken` set contains no `_` key (positive control: fails on the base).
+  9. **Check the matching import path.** An imported backup must not be able to set `_`-prefixed or main-owned keys (`sourceFolder`, `recentFolders`, `schemaVersion`). If it already cannot, add only a pinning test with a mutation control; otherwise fix it with a positive-control test. **Result:** `import-library` reads no settings at all (Why), so it gets the pinning test (z) and mutation control 2(d), and no code change.
 - **Technical rulings (Blurby.Brain, 2026-10-15) and how this item applies them:**
   - **The main-owned keys returned are `sourceFolder` and `recentFolders`** (ruling 1). They are the only main-owned keys any renderer code reads (trace above). `schemaVersion` is not returned.
-  - **The four token handlers are fixed under ruling 3** (planner's application, for Blurby.Brain to confirm at fold-in). They return the same secret from `ipcMain.handle`, always in plaintext, and nothing in the renderer reads it. Fixing only `get-state` would leave the token one call away. The fix is main-side, plus the contract lines that describe it (LL-106): the three returns drop `token`, and the unused `get-ws-pairing-token` channel is deleted from `main/ipc/misc.js`, `preload.js:147`, `src/types.ts:346` and the dev stub. The user sees no change.
+  - **The four token handlers are fixed under ruling 3, confirmed by ruling 7.** They return the same secret from `ipcMain.handle`, always in plaintext, and nothing in the renderer reads it. The fix is main-side, plus the contract lines that describe it (LL-106): the three returns drop `token`, and the unused `get-ws-pairing-token` channel is deleted from `main/ipc/misc.js`, `preload.js:147`, `src/types.ts:346` and the dev stub.
+  - **The banner test pins what the banner actually uses** (ruling 7). The push itself carries no code, only a timestamp, so the test checks both halves: `get-ws-short-code` still returns the code, and the three push sends in `main/ws-server.js` still carry only `{ timestamp: Date.now() }`.
   - **The real timestamp key form is `cloud:<key>` under `fieldTimestamps.settings`** (`main/sync-engine.js:374`, `:379`), so the ruled seed is used as written.
-  - **Base:** `main` @ `051d004c` (SETTINGS-KEY-TRUST-1 merged). FOLDER-UNREACHABLE-GUARD-1 merged at `89a5a95c` during authoring; it touches none of this item's edit sites, and only another hunk of `docs/governance/TECHNICAL_REFERENCE.md` (`:711`; this item's line goes after `:750`).
+  - **Base:** `main` @ `181da234` (SETTINGS-KEY-TRUST-1 and FOLDER-UNREACHABLE-GUARD-1 merged, and this item registered In Flight).
 - **Design decisions (planner, 2026-10-15):**
   - **`get-state`'s settings are `{ ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders }`.**
     - `pickUserSettings` (`main/migrations.js:334-343`) already returns a new object holding only own `SETTINGS_DEFAULTS` keys, never a `_`-prefixed, main-owned or prototype key. So the result can never hold `_wsPairingToken`, `_future`, `schemaVersion`, an unknown key or a legacy key.
     - The two folder keys are added by name, so a later main-owned key is not returned unless someone adds it here.
     - It is called without `crossDevice`, so `launchAtLogin` stays, as today.
-    - The copy is one level deep. Nested values (`recentFolders`, `rhythmPauses`, `readingGoals`) are still main's objects inside the process, but IPC structured-clones the reply, so the renderer never holds a reference into main. Today's behaviour for these values is unchanged; no in-process caller of `get-state` exists outside tests.
+    - The copy is one level deep. Nested values (`recentFolders`, `rhythmPauses`, `readingGoals`) are still main's objects inside the process, but IPC structured-clones the reply, so the renderer never holds a reference into main. No in-process caller of `get-state` exists outside tests.
   - **`get-state` stays one handler, in its file.** No new helper is added: the picker exists, and the two keys are one expression.
   - **The WebSocket returns are built from named fields** (`{ port }`; `{ running, port, clients }`), so a field added to `startServer` or `getStatus` later does not reach the renderer by default. `main/ws-server.js` is not edited: `startServer` and `getStatus` keep returning the token to their main-side callers (`misc.js:406` reads `getStatus().running`).
   - **`get-ws-pairing-token` is deleted, not stubbed.** It has no renderer caller, so a channel that would only return `null` is dead surface. Deleting it narrows `preload.js` by one line (PR-6). Its `ElectronAPI` entry and the dev stub's entry go with it; the stub is typed `ElectronAPI` (`electron-api-stub.ts:263`), so a leftover entry would fail typecheck (TS2353). The stub's other three ws entries drop their mock tokens, to match the new types.
-  - **The `ElectronAPI` return types drop `token`** (`src/types.ts:343`, `:345`, `:347`), so the type does not promise a field main no longer sends. That is four lines in a shared-core file (Shared-core touches).
+  - **The `ElectronAPI` return types drop `token`** (`src/types.ts:343`, `:345`, `:347`), so the type does not promise a field main no longer sends. That is four lines in a shared-core file (Shared-Core Touches).
+  - **The export uses `pickUserSettings(settings)` as it is** (ruling 8). That drops every `_`-prefixed key and also the main-owned `sourceFolder`, `recentFolders` and `schemaVersion`, so a backup carries no secret and no machine-local folder path. No reader depends on them: the import ignores `settings`. It runs without `crossDevice`, so `launchAtLogin` stays, like every other user setting. The export's `library` and `history` are unchanged.
+  - **The import is not changed** (ruling 9). A restore of a backup's settings is not a feature today; adding one is out of scope. Test (z) fails if any later change lets a backup set a setting; such a change must then go through `pickUserSettings` and update (z) on purpose.
   - **The dead step is replaced by a one-line comment** at `main/sync-engine.js:385-387`. The comment does not name `pickUserSettings`, so the file's count stays 5 (Done-when 6). `:377`'s skip stays.
-  - **The tests go into `tests/settingsKeyTrust.test.js`.** Its harness already registers `state.js` and `misc.js` against one `ctx`, fakes `../ws-server`, and drives the real `startSync` over an in-memory cloud, so no second harness is written. Two small harness edits:
-    - the `../ws-server` fake gains `startServer` and `getStatus`, returning what the real ones return (the token included), so a handler that passes the token through fails;
+  - **The tests go into `tests/settingsKeyTrust.test.js`.** Its harness already registers `state.js` and `misc.js` against one `ctx`, fakes `../ws-server`, and drives the real `startSync` over an in-memory cloud, so no second harness is written. Five small harness edits:
+    - `MODULES` gains `../main/ipc/library.js`, and `setup()` registers it after `misc.js` (`tests/ipcPathTrust.test.js` registers the same three handlers against the same fakes);
+    - a module-level `dialog` fake with `showOpenDialog` and `showSaveDialog` replaces the inline `dialog: { showOpenDialog: vi.fn() }`, so (y) and (z) can pick the file;
+    - the `../ws-server` fake gains `startServer` and `getStatus`, returning what the real ones return (the token included), so a handler that passes the token through fails; and `getShortCode` and `getClientCount`, for (v5);
     - `initSync` takes an optional `extraState` merged into the seeded `sync-state.json`, for (w).
 
     Every existing case keeps its body. (o) still passes: `regenerate-ws-pairing-token` still writes `settings._wsPairingToken`.
 - **Out of scope:**
-  - **`export-library` writes `_wsPairingToken` into the user's backup file** (`main/ipc/library.js:519`; `:535` on `89a5a95c`). That file is a disk export the user chose, not a renderer path. `import-library` never reads `settings` back (`:527-561` on `051d004c`). Recorded for Blurby.Roadmap as a candidate stub (EXPORT-SECRET-1: export `pickUserSettings(settings)`). Not fixed here.
-  - **`library-updated`'s payload** (`main.js:264`): the full library, tombstones and file paths included. It carries no settings, and the library's fields are SAVE-LIBRARY-TRUST-1's and IPC-PATH-TRUST-1's boundary.
+  - **`library-updated`'s payload** (`main.js:264`): the full library, tombstones and file paths included. It carries no settings, and the library's fields are SAVE-LIBRARY-TRUST-1's and IPC-PATH-TRUST-1's boundary. The same holds for the export's `library` array.
+  - **Restoring settings from a backup** (a new import feature). Not added; (z) pins today's behaviour.
   - **The short code** stays visible to the renderer: it is the pairing UI's purpose, and it expires in 5 minutes.
   - **`regenerate-ws-pairing-token` writes the plaintext token into settings** (`misc.js:420`) even when OS encryption is available. `startServer` then fails to decrypt it and writes a fresh encrypted token (`ws-server.js:452-461`). The stored form ends up correct, and nothing reaches the renderer once this item lands. Noticed, not changed.
   - **`main/ws-server.js`** keeps `token` in `startServer`'s and `getStatus`'s returns, for main-side callers.
+  - **Backups written before this item** keep whatever they hold. Recorded as a known limit; the user can re-export.
   - **LL-156 check:**
     - SETTINGS-KEY-TRUST-1's out-of-scope line "`get-state` returns `_wsPairingToken` to the renderer" is brought into scope (ruled).
     - Its line "`mergeSettings` … unchanged" is brought into scope for one step (`:385-387`, ruling 4(b)). The rest of `mergeSettings`, and its note that an own `__proto__` cloud key can set the prototype of the local `merged` object, stay as they were: the picker still copies only own keys.
+    - Its line "`import-library` stays out of scope, by design" (a backup's library) is unchanged; this item pins only the import's settings half.
     - AGENT_FINDINGS H-SEC-3 (`docs/planning/AGENT_FINDINGS.md:68`) is resolved in a different form: neither channel returns the token. Blurby.Roadmap marks it when this folds in.
-    - No waiver or known-failure entry names `main/ipc/state.js:16-19`, `main/ipc/misc.js:385-425` or `preload.js:147`.
+    - No waiver or known-failure entry names `main/ipc/state.js:16-19`, `main/ipc/misc.js:385-425`, `main/ipc/library.js:524-577` or `preload.js:147`.
 - **Prerequisites:**
   - **SETTINGS-KEY-TRUST-1** merged (`051d004c`): `pickUserSettings` is in `main/migrations.js:334-343`, and `main/ipc/state.js:9` already requires it.
-  - Re-grep every edit site on `refs/remotes/origin/main` at dispatch (standing rule 36), and stop on content drift. At authoring, the edit sites were identical on `051d004c` and `89a5a95c`.
-- **Baseline and WHERE (read order):** baseline `main` @ `051d004c` (2026-10-15); Stage 8 order, with SETTINGS-KEY-TRUST-1 and FOLDER-UNREACHABLE-GUARD-1 merged. Read in this order:
+  - Re-grep every edit site on `refs/remotes/origin/main` at dispatch (standing rule 36), and stop on content drift.
+- **Baseline and WHERE (read order):** baseline `main` @ `181da234` (2026-10-15). Read in this order:
   1. `main/ipc/state.js:1-19` (the require and `get-state`);
   2. `main/migrations.js:296-343` (`SETTINGS_DEFAULTS`, `MAIN_OWNED_SETTINGS`, `pickUserSettings`);
-  3. `main/ws-server.js:437-470`, `:523` and `:547-554` (the token's two stored forms; what `startServer` and `getStatus` return);
+  3. `main/ws-server.js:140-155`, `:235-280`, `:437-470`, `:523` and `:547-554` (the pushes, `pair-ok`, the token's two stored forms, what `startServer` and `getStatus` return);
   4. `main/ipc/misc.js:381-425` (the WebSocket handlers);
-  5. `preload.js:142-151`; `src/types.ts:342-349`; `src/test-harness/electron-api-stub.ts:263`, `:564-571`;
-  6. `main/sync-engine.js:368-390` (`mergeSettings`) and `:806-823` (`startSync`'s settings step);
-  7. `tests/settingsKeyTrust.test.js` (whole file: the harness, `seedCloud`, `initSync`, `expectNoForbiddenKey`);
-  8. the renderer readers: `src/hooks/useLibrary.ts:17-28`, `:76-93`; `src/App.tsx:42-50`; `src/components/ThemeProvider.tsx:164-175`; `src/components/LibraryView.tsx:405-470`, `:795-805`; `src/components/settings/ConnectorsSettings.tsx:77-92`;
-  9. `docs/governance/TECHNICAL_REFERENCE.md:746-760`.
+  5. `main/ipc/library.js:1-15` and `:524-577` (the requires, `export-library`, `import-library`);
+  6. `preload.js:142-151`; `src/types.ts:342-349`; `src/test-harness/electron-api-stub.ts:263`, `:564-571`;
+  7. `main/sync-engine.js:368-390` (`mergeSettings`) and `:806-823` (`startSync`'s settings step);
+  8. `tests/settingsKeyTrust.test.js` (whole file: the harness, `seedCloud`, `initSync`, `expectNoForbiddenKey`);
+  9. the renderer readers: `src/hooks/useLibrary.ts:17-28`, `:76-93`; `src/App.tsx:42-50`; `src/components/ThemeProvider.tsx:164-175`; `src/components/LibraryView.tsx:405-470`, `:795-805`; `src/components/LibraryContainer.tsx:165-185`; `src/components/settings/ConnectorsSettings.tsx:77-92`;
+  10. `docs/governance/TECHNICAL_REFERENCE.md:746-760`.
 - **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Dry-runs:
-  - **Base:** run as `git grep … 051d004c -- <path>` on 2026-10-15, so output carries that prefix.
-  - **Prescribed edit:** run with `git grep --no-index` on scratch copies of the eight edited files, with every edit under Edit sites applied. `node --check` passed on the four edited `.js` sources and on the test file.
-    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/settingsKeyTrust.test.js` exits 1, with 8 failed and 62 passed (70 tests). Exactly these fail, each for its named reason:
+  - **Base:** run as `git grep … 181da234 -- <path>` on 2026-10-15, so output carries that prefix. (The first draft's dry-runs on `051d004c` gave the same results for every file except `main/ipc/library.js`, which the first draft did not edit.)
+  - **Prescribed edit:** run with `git grep --no-index` on scratch copies of the nine edited files from `181da234`, with every edit under Edit sites applied. `node --check` passed on the five edited `.js` sources and on the test file.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/settingsKeyTrust.test.js` exits 1, with 9 failed and 64 passed (73 tests). Exactly these fail, each for its named reason:
        - (p) encrypted and (p) plaintext: `get-state`'s settings are main's live object, so they carry `_wsPairingToken` (the ciphertext form, then the 32-hex plaintext form), `_future` and `schemaVersion`;
        - (q): the returned object is main's settings object (`toBe`), so a renderer-side write would change main's;
        - (v) `start-ws-server`, (v) `get-ws-status` and (v) `regenerate-ws-pairing-token`: each result carries `token: "live-token"`;
        - (v4): `get-ws-pairing-token` is a registered channel;
-       - (x): `mergeSettings` returns the cloud's `schemaVersion`, 99, through the dead step.
+       - (x): `mergeSettings` returns the cloud's `schemaVersion`, 99, through the dead step;
+       - (y): the exported `settings` is main's whole object, with `_wsPairingToken: "main-secret"`, `schemaVersion`, `sourceFolder` and `recentFolders`, not `{ wpm: 300, launchAtLogin: false }`.
 
-       These pass at C1: (u) and (w), which pin behaviour that already holds, and the 60 existing cases ((a)–(f), (g) ×5, (h), (i), (r1)–(r3), (s), (j), (k), (l) ×38, (m), (n), (o)). Record the output in the staging memo.
-    2. **Mutation controls** (standing rule 43, for the two controls that pass at C1; each starts and ends with a clean file):
-       - **(a) The outer merge filter (ruling 4(a)), after the C1 commit.**
-         - `git diff --quiet -- main/sync-engine.js` exits 0.
-         - Then run `$f = 'main/sync-engine.js'; [IO.File]::WriteAllText($f, [IO.File]::ReadAllText($f).Replace('(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),', '(local, cloud) => mergeSettings(local, cloud, syncState.fieldTimestamps),'))`.
-         - `npx vitest run tests/settingsKeyTrust.test.js -t "\(w\)"` exits 1, with 1 failed (w). The failure shows the cloud copy's forbidden own keys as `["_wsPairingToken", "sourceFolder", "recentFolders", "launchAtLogin"]`.
-         - Reverse the `Replace`, and `git diff --quiet -- main/sync-engine.js` exits 0.
-       - **(b) The renderer's folder keys, after the C2 commit.**
-         - `git diff --quiet -- main/ipc/state.js` exits 0.
-         - Then replace `settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },` with `settings: { ...pickUserSettings(settings) },` the same way.
-         - `npx vitest run tests/settingsKeyTrust.test.js -t "\(u\)"` exits 1, with 1 failed (u), on `sourceFolder` (`undefined` instead of the fixture folder).
-         - Reverse it, and `git diff --quiet -- main/ipc/state.js` exits 0.
+       These pass at C1: (u), (v5), (w) and (z), which pin behaviour that already holds, and the 60 cases the file already has ((a)–(f), (g) ×5, (h), (i), (r1)–(r3), (s), (j), (k), (l) ×38, (m), (n), (o)). Record the output in the staging memo.
+    2. **Mutation controls** (standing rule 43, one for each control that passes at C1). Each runs as one `pwsh` block from the worktree root, in this form, with the file `$f`, the exact text `$a`, its replacement `$b`, the expected rows `$rows` and the case `$case` given below:
+       ```powershell
+       [Environment]::CurrentDirectory = (Get-Location).Path   # [IO.File] resolves relative paths against the process folder, not Set-Location
+       git diff --quiet -- $f                                   # must exit 0: the file starts clean
+       [IO.File]::WriteAllText($f, [IO.File]::ReadAllText($f).Replace($a, $b))
+       git diff --numstat -- $f                                 # must print exactly "$rows`t$f", or the control is void: restore and stop
+       npx vitest run tests/settingsKeyTrust.test.js -t $case   # must exit 1, with exactly that case failed
+       [IO.File]::WriteAllText($f, [IO.File]::ReadAllText($f).Replace($b, $a))
+       git diff --quiet -- $f                                   # must exit 0: the file is restored
+       ```
+       A control whose numstat check prints anything else (an empty line included, which means the mutation landed elsewhere) is void, even if the test then fails or passes.
+       - **(a) The outer merge filter (ruling 4(a)), after the C1 commit.** `$f = 'main/sync-engine.js'`; `$a = '(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),'`; `$b = '(local, cloud) => mergeSettings(local, cloud, syncState.fieldTimestamps),'`; `` $rows = "1`t1" ``; `$case = '\(w\)'`. (w) fails, showing the cloud copy's forbidden own keys as `["_wsPairingToken", "sourceFolder", "recentFolders", "launchAtLogin"]`.
+       - **(b) The renderer's folder keys, after the C2 commit.** `$f = 'main/ipc/state.js'`; `$a = 'settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },'`; `$b = 'settings: { ...pickUserSettings(settings) },'`; `` $rows = "1`t1" ``; `$case = '\(u\)'`. (u) fails on `sourceFolder` (`undefined` instead of the fixture folder).
+       - **(c) The banner's code (ruling 7), after the C1 commit.** `$f = 'main/ipc/misc.js'`; `$a = 'return { code, expiresAt, connected: hasAuth, status };'`; `$b = 'return { expiresAt, connected: hasAuth, status };'`; `` $rows = "1`t1" ``; `$case = '\(v5\)'`. (v5) fails: the result has no `code`.
+       - **(d) The import sets no setting (ruling 9), after the C1 commit.** `$f = 'main/ipc/library.js'`; `$a = 'const data = JSON.parse(raw);'`; `$b = 'const data = JSON.parse(raw); Object.assign(ctx.getSettings(), data.settings);'`; `` $rows = "1`t1" ``; `$case = '\(z\)'`. (z) fails: `settings` now holds `_wsPairingToken: "backup-token"`, the backup's `sourceFolder`, `recentFolders` and `schemaVersion`, and `wpm: 999`.
 
-       Record both outputs in the staging memo.
-    3. After C2, `npx vitest run tests/settingsKeyTrust.test.js tests/settingsKeyTrustKeys.test.ts tests/ipcPathTrust.test.js tests/settingsNarrateNormalization.test.js tests/sync-hardening.test.js tests/saveLibraryTrust.test.js tests/saveLibraryMerge.test.js tests/ws-server.test.js tests/electronApiStubGoals.test.ts tests/einkFoundation.test.ts` exits 0.
+       Each `$a` occurs exactly once in its file: on `181da234` for (a), (c) and (d) (dry-run: `git grep -c -F` prints `:1` for each), and on the C2 edit for (b) (gate 4). No `$b` occurs before its mutation. Record all four outputs, numstat lines included, in the staging memo.
+    3. After C2, `npx vitest run tests/settingsKeyTrust.test.js tests/settingsKeyTrustKeys.test.ts tests/ipcPathTrust.test.js tests/settingsNarrateNormalization.test.js tests/sync-hardening.test.js tests/saveLibraryTrust.test.js tests/saveLibraryMerge.test.js tests/folderUnreachableGuard.test.js tests/readFileBufferLibrary.test.js tests/ws-server.test.js tests/electronApiStubGoals.test.ts tests/einkFoundation.test.ts` exits 0.
     4. `get-state` returns a filtered copy:
-       - `git grep -n -F 'settings: ctx.getSettings(),' -- main/ipc/state.js` prints nothing (exit 1). Dry-run, base: exit 0, `051d004c:main/ipc/state.js:17:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'settings: ctx.getSettings(),' -- main/ipc/state.js` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/state.js:17:`. Dry-run, edit: exit 1.
        - `git grep -n -F 'settings: { ...pickUserSettings(settings), sourceFolder: settings.sourceFolder, recentFolders: settings.recentFolders },' -- main/ipc/state.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/state.js:21:`, exit 0.
-       - `git grep -c -F 'pickUserSettings' -- main/ipc/state.js` prints `main/ipc/state.js:3` and exits 0 (the require, `save-settings`, `get-state`). Dry-run, base: `051d004c:main/ipc/state.js:2`, so the gate fails until the edit. Dry-run, edit: `main/ipc/state.js:3`.
+       - `git grep -c -F 'pickUserSettings' -- main/ipc/state.js` prints `main/ipc/state.js:3` and exits 0 (the require, `save-settings`, `get-state`). Dry-run, base: `181da234:main/ipc/state.js:2`, so the gate fails until the edit. Dry-run, edit: `main/ipc/state.js:3`.
     5. No handler returns the pairing token, and main still writes it:
-       - `git grep -n -F 'get-ws-pairing-token' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `051d004c:main/ipc/misc.js:398:` and `051d004c:preload.js:147:`. Dry-run, edit: exit 1.
-       - `git grep -n -F 'getWsPairingToken' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `051d004c:preload.js:147:`, `051d004c:src/test-harness/electron-api-stub.ts:568:` and `051d004c:src/types.ts:346:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'get-ws-pairing-token' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/misc.js:398:` and `181da234:preload.js:147:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'getWsPairingToken' -- main preload.js src` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:preload.js:147:`, `181da234:src/test-harness/electron-api-stub.ts:568:` and `181da234:src/types.ts:346:`. Dry-run, edit: exit 1.
        - `git grep -n -F 'return wsServer.startServer(ctx);' -- main/ipc/misc.js` prints nothing (exit 1). Dry-run, base: exit 0, `:386:` and `:424:`. Dry-run, edit: exit 1.
        - `git grep -n -F 'return wsServer.getStatus();' -- main/ipc/misc.js` prints nothing (exit 1). Dry-run, base: exit 0, `:395:`. Dry-run, edit: exit 1.
        - `git grep -c -F 'const { port } = wsServer.startServer(ctx);' -- main/ipc/misc.js` prints `main/ipc/misc.js:2` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/misc.js:2`.
        - `git grep -n -F 'const { running, port, clients } = wsServer.getStatus();' -- main/ipc/misc.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:397:`, exit 0.
        - `git grep -n -F 'settings._wsPairingToken = token;' -- main/ipc/misc.js` prints exactly one line and exits 0. Dry-run, base: `:420:`. Dry-run, edit: `:418:`.
     6. The contract lines and the merge follow-ups:
-       - `git grep -n -F 'token: string' -- src/types.ts` prints nothing (exit 1). Dry-run, base: exit 0, `051d004c:src/types.ts:343:`, `:345:` and `:347:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'token: string' -- src/types.ts` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:src/types.ts:343:`, `:345:` and `:347:`. Dry-run, edit: exit 1.
        - `git grep -n -F 'startWsServer: () => Promise<{ port: number }>;' -- src/types.ts` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `src/types.ts:343:`, exit 0.
        - `git grep -n -F 'mock-token' -- src/test-harness/electron-api-stub.ts` prints nothing (exit 1). Dry-run, base: exit 0, `:565:`, `:568:` and `:569:`. Dry-run, edit: exit 1.
-       - `git grep -n -F 'if (cloud.schemaVersion > merged.schemaVersion) {' -- main/sync-engine.js` and `git grep -n -F 'merged.schemaVersion = cloud.schemaVersion;' -- main/sync-engine.js` each print nothing (exit 1). Dry-run, base: exit 0, `051d004c:main/sync-engine.js:385:` and `:386:`. Dry-run, edit: exit 1 each.
+       - `git grep -n -F 'if (cloud.schemaVersion > merged.schemaVersion) {' -- main/sync-engine.js` and `git grep -n -F 'merged.schemaVersion = cloud.schemaVersion;' -- main/sync-engine.js` each print nothing (exit 1). Dry-run, base: exit 0, `181da234:main/sync-engine.js:385:` and `:386:`. Dry-run, edit: exit 1 each.
        - `git grep -n -F '(local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),' -- main/sync-engine.js` prints exactly one line and exits 0, and `git grep -n -F 'if (key === "schemaVersion") continue;' -- main/sync-engine.js` prints exactly one line and exits 0. Dry-run, base: `:817:` and `:377:`. Dry-run, edit: `:815:` and `:377:`.
        - `git grep -c -F 'pickUserSettings' -- main/sync-engine.js` prints `main/sync-engine.js:5` and exits 0. Dry-run: `:5` on both base and edit; the gate fails if the new comment names the picker, or if a call is lost.
-    7. The tests are in place:
-       - `git grep -c -F 'GET-STATE-SECRET-1' -- tests/settingsKeyTrust.test.js` prints `tests/settingsKeyTrust.test.js:4` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:4`.
-       - `git grep -n -F '"cloud:_wsPairingToken": 9' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:395:`.
-       - `git grep -n -F 'startServer: () => ({ port: 48924, token: "live-token" }),' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:74:`.
-    8. No settings are sent to the renderer by push: `git grep -n -E 'webContents\.send\([^)]*[sS]ettings' -- main.js main` prints nothing (exit 1). Dry-run: exit 1 on base and edit. This regression fence fails only if such a send is added.
-    9. `git grep -c -F 'Token boundary (GET-STATE-SECRET-1' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:1`.
-    10. `npm ci` exits 0 in the worktree before the first vitest run. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; this item edits `src/types.ts`, the dev stub and `preload.js`).
-    11. `git diff --name-status refs/remotes/origin/main` lists exactly these:
+    7. The backup export is filtered, and the import still reads no settings:
+       - `git grep -n -F 'settings: { ...settings },' -- main/ipc/library.js` prints nothing (exit 1). Dry-run, base: exit 0, `181da234:main/ipc/library.js:535:`. Dry-run, edit: exit 1.
+       - `git grep -n -F 'settings: pickUserSettings(settings),' -- main/ipc/library.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `main/ipc/library.js:537:`, exit 0.
+       - `git grep -c -F 'pickUserSettings' -- main/ipc/library.js` prints `main/ipc/library.js:2` and exits 0 (the require and the export; the comment does not name it). Dry-run, base: exit 1. Dry-run, edit: `main/ipc/library.js:2`.
+       - `git grep -n -F 'data.settings' -- main/ipc/library.js` prints nothing (exit 1). Dry-run: exit 1 on base and edit. This regression fence fails only if the import starts reading a backup's settings.
+    8. The tests are in place:
+       - `git grep -c -F 'GET-STATE-SECRET-1' -- tests/settingsKeyTrust.test.js` prints `tests/settingsKeyTrust.test.js:5` and exits 0 (the fake's comment, the block comment and three `describe` names). Dry-run, base: exit 1. Dry-run, edit: `:5`.
+       - `git grep -n -F '"cloud:_wsPairingToken": 9' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:412:`.
+       - `git grep -n -F 'startServer: () => ({ port: 48924, token: "live-token" }),' -- tests/settingsKeyTrust.test.js` prints exactly one line and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:76:`.
+       - `git grep -n -F 'require("../main/ipc/library.js").register(ctx);' -- tests/settingsKeyTrust.test.js` and `git grep -n -F 'showSaveDialog: vi.fn()' -- tests/settingsKeyTrust.test.js` each print exactly one line and exit 0. Dry-run, base: exit 1 each. Dry-run, edit: `:114:` and `:52:`.
+    9. No settings are sent to the renderer by push: `git grep -n -E 'webContents\.send\([^)]*[sS]ettings' -- main.js main` prints nothing (exit 1). Dry-run: exit 1 on base and edit. This regression fence fails only if such a send is added.
+    10. `git grep -c -F 'Token boundary (GET-STATE-SECRET-1' -- docs/governance/TECHNICAL_REFERENCE.md` prints `docs/governance/TECHNICAL_REFERENCE.md:1` and exits 0. Dry-run, base: exit 1. Dry-run, edit: `:1`.
+    11. `npm ci` exits 0 in the worktree before the first vitest run. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; this item edits `src/types.ts`, the dev stub and `preload.js`).
+    12. `git diff --name-status refs/remotes/origin/main` lists exactly these:
         - `M docs/governance/TECHNICAL_REFERENCE.md`
+        - `M main/ipc/library.js`
         - `M main/ipc/misc.js`
         - `M main/ipc/state.js`
         - `M main/sync-engine.js`
@@ -4461,26 +4490,27 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         - `M tests/settingsKeyTrust.test.js`
 
         The time log `docs/governance/close-outs/Timing.GET-STATE-SECRET-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.GET-STATE-SECRET-1.GovernanceStaging.<date>.md` are also allowed, if kept (standing rule 41). These must be absent from the list:
-        - `main.js`, `main/ws-server.js`, `main/migrations.js`, `main/ipc/library.js` and `main/ipc/cloud.js`;
-        - `src/components/settings/ConnectorsSettings.tsx`, `src/components/ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts`;
+        - `main.js`, `main/ws-server.js`, `main/migrations.js`, `main/folder-sync.js` and `main/ipc/cloud.js`;
+        - `src/components/settings/ConnectorsSettings.tsx`, `src/components/LibraryContainer.tsx`, `src/components/ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts`;
         - every `src/**` file other than `src/types.ts` and `src/test-harness/electron-api-stub.ts`.
 
-        `git diff --numstat refs/remotes/origin/main` prints these rows (dry-run on the scratch copies): `2 0` for `docs/governance/TECHNICAL_REFERENCE.md`, `7 8` for `main/ipc/misc.js`, `9 4` for `main/ipc/state.js`, `1 3` for `main/sync-engine.js`, `0 1` for `preload.js`, `3 4` for the stub, `3 4` for `src/types.ts` and `76 3` for the test file. A larger removal in any file fails the gate (truncation check). `git diff refs/remotes/origin/main -- preload.js` removes exactly the `getWsPairingToken` line and adds nothing.
-    12. **Owner check, deferred to the Stage 8 batched owner smoke (standing rule 45).** Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away). Nothing here is perceptual. The check covers the one path the tests cannot drive, the real IPC structured clone through the changed preload. Blurby.Roadmap adds "GET-STATE-SECRET-1" to that list when this specification folds in. On the batched build:
+        `git diff --numstat refs/remotes/origin/main` prints these rows (dry-run on the scratch copies against `181da234`): `2 0` for `docs/governance/TECHNICAL_REFERENCE.md`, `3 1` for `main/ipc/library.js`, `7 8` for `main/ipc/misc.js`, `9 4` for `main/ipc/state.js`, `1 3` for `main/sync-engine.js`, `0 1` for `preload.js`, `3 4` for the stub, `3 4` for `src/types.ts` and `123 5` for the test file. A larger removal in any file fails the gate (truncation check). `git diff refs/remotes/origin/main -- preload.js` removes exactly the `getWsPairingToken` line and adds nothing. `git diff refs/remotes/origin/main -- main/ipc/library.js` touches only the require after `:14` and the export's `settings` line (`:535`); no hunk is in `rescan-folder` or `import-library`.
+    13. **Owner check, deferred to the Stage 8 batched owner smoke (standing rule 45).** Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner is away). Nothing here is perceptual. The check covers the one path the tests cannot drive, the real IPC structured clone through the changed preload. Blurby.Roadmap adds "GET-STATE-SECRET-1" to that list when this specification folds in. On the batched build:
         - with a source folder set, the library header shows the folder's name, and the folder button lists the recent folders;
         - Settings → Connectors shows a pairing code, and "New Code" shows a new one.
 - **Effort:** S.
-- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Roadmap's merge go; owner only in the batched smoke (Done-when 12).
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges on Blurby.Roadmap's merge go; owner only in the batched smoke (Done-when 13).
 - **Lane:** Platform & Maintenance. Execution surface D (main process, `preload.js` and the IPC contract), with four lines of shared-core `src/types.ts` and the dev stub (surface C, scheduled below).
 - **Source:**
-  - Blurby.Brain's rulings of 2026-10-15 (Rule 11 tier 1);
-  - SETTINGS-KEY-TRUST-1's out-of-scope finding (`ROADMAP.md:3101`; `docs/governance/close-outs/Memo.SETTINGS-KEY-TRUST-1.GovernanceStaging.2026-10-15.md:86`) and its code-quality review (the two fold-ins, as Blurby.Brain relayed them);
+  - Blurby.Brain's rulings of 2026-10-15 (Rule 11 tier 1), and its amendment ruling the same day;
+  - SETTINGS-KEY-TRUST-1's out-of-scope finding (`docs/governance/close-outs/Memo.SETTINGS-KEY-TRUST-1.GovernanceStaging.2026-10-15.md:86`) and its code-quality review (the two fold-ins, as Blurby.Brain relayed them);
   - `docs/planning/AGENT_FINDINGS.md:68` (H-SEC-3);
-  - this trace on `051d004c`, re-checked against `89a5a95c`.
+  - the first draft's ruling-3 sweep (the `export-library` row);
+  - this trace on `051d004c`, re-based on `181da234`.
 - **Path:** dispatch.
 
 ##### Implementation detail
-- **Edit sites** (on `051d004c`; re-grep at dispatch):
+- **Edit sites** (on `181da234`; re-grep at dispatch):
   - **`get-state` (`main/ipc/state.js:16-19`).** `pickUserSettings` is already required at `:9`. Before:
     ```js
       ipcMain.handle("get-state", () => ({
@@ -4544,7 +4574,22 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         const { port } = wsServer.startServer(ctx);
         return { port };
     ```
-    `:418-422` (the token write, the save and the comment) are unchanged.
+    `:418-422` (the token write, the save and the comment) are unchanged. `get-ws-short-code` (`:403-409`) is unchanged.
+  - **`main/ipc/library.js:14`** (`const { pathKey } = require("../folder-sync");`). Add this line immediately after:
+    ```js
+    const { pickUserSettings } = require("../migrations");
+    ```
+    `main/migrations.js` requires only `./constants`, so there is no cycle.
+  - **`export-library` (`main/ipc/library.js:535`).** Before:
+    ```js
+          settings: { ...settings },
+    ```
+    After:
+    ```js
+          // Real user settings only: a backup holds no _-prefixed secret and no main-owned key (GET-STATE-SECRET-1).
+          settings: pickUserSettings(settings),
+    ```
+    The rest of `export-library` (`:524-541`) and all of `import-library` (`:543-577`) are unchanged.
   - **`mergeSettings` (`main/sync-engine.js:385-387`).** Before:
     ```js
       if (cloud.schemaVersion > merged.schemaVersion) {
@@ -4588,11 +4633,13 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
     ```
   - **`docs/governance/TECHNICAL_REFERENCE.md`, after `:750`** (the "**Pairing flow:**" paragraph), add a blank line and:
     ```md
-    **Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code.
+    **Token boundary (GET-STATE-SECRET-1, 2026-10-15):** the long-lived token never reaches the renderer or a library backup. `get-state` returns a copy of the real user settings plus `sourceFolder` and `recentFolders`, with no `_`-prefixed key and no `schemaVersion`; `start-ws-server`, `get-ws-status` and `regenerate-ws-pairing-token` return no token; there is no `get-ws-pairing-token` channel. The renderer shows only the 6-digit short code, which the pairing banner fetches with `get-ws-short-code` after the `ws-connection-attempt` push. `export-library` writes only real user settings (no `_`-prefixed or main-owned key), and `import-library` restores no settings.
     ```
   - Nothing else changes in any of these files.
 - **Tests** (all in `tests/settingsKeyTrust.test.js`; the harness is described in SETTINGS-KEY-TRUST-1's Tests and is kept):
-  - **Harness edit 1, `:71`.** Before:
+  - **Harness edit 1, `:14`.** `const MODULES = ["../main/ipc/state.js", "../main/ipc/misc.js", "../main/sync-engine.js"];` becomes `const MODULES = ["../main/ipc/state.js", "../main/ipc/misc.js", "../main/ipc/library.js", "../main/sync-engine.js"];`.
+  - **Harness edit 2, after `:31`** (`let syncEngine;`), add `let dialog;`. In `setup()`, immediately after `  handlers = new Map();` (`:50`), add `  dialog = { showOpenDialog: vi.fn(), showSaveDialog: vi.fn() };`. In the `electron` fake, `      dialog: { showOpenDialog: vi.fn() },` (`:64`) becomes `      dialog,`.
+  - **Harness edit 3, `:71`.** Before:
     ```js
         "../ws-server": new Proxy({ generatePairingToken: () => "new-token" }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
     ```
@@ -4603,9 +4650,12 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
           generatePairingToken: () => "new-token",
           startServer: () => ({ port: 48924, token: "live-token" }),
           getStatus: () => ({ running: true, port: 48924, clients: 0, token: "live-token" }),
+          getShortCode: () => ({ code: "123456", expiresAt: 1 }),
+          getClientCount: () => 0,
         }, { get: (t, k) => (k in t ? t[k] : vi.fn()) }),
     ```
-  - **Harness edit 2, `:140` and `:142`.** `async function initSync() {` becomes `async function initSync(extraState = {}) {`, and the `writeFileSync` line's object becomes `{ deviceId: "dev-1", lastReconcile: Date.now(), ...extraState }`. Every existing call passes no argument, so its seed is unchanged.
+  - **Harness edit 4, after `:104`** (`  require("../main/ipc/misc.js").register(ctx);`), add `  require("../main/ipc/library.js").register(ctx);`.
+  - **Harness edit 5, `:140` and `:142`.** `async function initSync() {` becomes `async function initSync(extraState = {}) {`, and the `writeFileSync` line's object becomes `{ deviceId: "dev-1", lastReconcile: Date.now(), ...extraState }`. Every existing call passes no argument, so its seed is unchanged.
   - **Append after `:334`** (the end of the file), as given:
     ```js
 
@@ -4657,6 +4707,18 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
       it("(v4) get-ws-pairing-token is not a channel", () => {
         expect(handlers.has("get-ws-pairing-token")).toBe(false);
       });
+
+      it("(v5) control: the pairing banner still gets its code, and the ws pushes carry only a timestamp", async () => {
+        // LibraryContainer.tsx:169-178: on the ws-connection-attempt push the banner asks get-ws-short-code for the code.
+        expect(await call("get-ws-short-code")).toEqual({ code: "123456", expiresAt: 1, connected: false, status: "connecting" });
+        const src = fs.readFileSync(new URL("../main/ws-server.js", import.meta.url), "utf-8");
+        const pushes = src.match(/webContents\.send\(WS_(?:CONNECTION_ATTEMPT|PAIRING_SUCCESS)_CHANNEL, .*\);/g);
+        expect(pushes).toEqual([
+          "webContents.send(WS_CONNECTION_ATTEMPT_CHANNEL, { timestamp: Date.now() });",
+          "webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });",
+          "webContents.send(WS_PAIRING_SUCCESS_CHANNEL, { timestamp: Date.now() });",
+        ]);
+      });
     });
 
     describe("GET-STATE-SECRET-1 sync-engine follow-ups", () => {
@@ -4676,88 +4738,127 @@ The waves follow the C1/C2 split. Wave B's four tasks touch disjoint files and m
         expect(syncEngine.mergeSettings({ schemaVersion: 13, wpm: 300 }, { schemaVersion: 99 }, {}).schemaVersion).toBe(13);
       });
     });
+
+    describe("GET-STATE-SECRET-1 library backup", () => {
+      it("(y) export-library writes only real user settings: no _-prefixed or main-owned key", async () => {
+        vi.useRealTimers();
+        const out = path.join(tmpDir, "backup-out.json");
+        dialog.showSaveDialog.mockResolvedValue({ canceled: false, filePath: out });
+        expect(await call("export-library")).toBe(out);
+        const text = fs.readFileSync(out, "utf-8");
+        const exported = JSON.parse(text);
+        expect(exported.settings).toEqual({ wpm: 300, launchAtLogin: false });
+        expect(text).not.toContain("main-secret");
+        expect(exported.library).toEqual(library);
+        expect(exported.history).toEqual(history);
+      });
+
+      it("(z) control: import-library sets no setting from a backup, secret or main-owned keys included", async () => {
+        vi.useRealTimers();
+        const backup = write("backup-in.json", JSON.stringify({
+          settings: { _wsPairingToken: "backup-token", sourceFolder: secret, recentFolders: [secret], schemaVersion: 1, wpm: 999 },
+          library: [{ id: "n1", title: "New" }],
+        }));
+        dialog.showOpenDialog.mockResolvedValue({ canceled: false, filePaths: [backup] });
+        const before = structuredClone(settings);
+        expect(await call("import-library")).toEqual({ added: 1, total: 1 });
+        expect(settings).toEqual(before);
+        expect(ctx.saveSettings).not.toHaveBeenCalled();
+      });
+    });
     ```
   - **Why each case holds or fails:**
     - **(p)** at C2: `pickUserSettings` keeps no `_`-prefixed or main-owned key, and `_future` is not a settings key either.
     - **(q)** at C2: the spread builds a new object.
     - **(u):** `SETTINGS_DEFAULTS` has 58 keys, so `read` has 57. The fixture's own six keys keep their values, and the rest are set to markers. At C2, every one comes back: 55 through the picker, and `sourceFolder` and `recentFolders` by name. `launchAtLogin` is kept, because the picker runs without `crossDevice`.
     - **(v):** the fake returns the token exactly as the real `startServer` and `getStatus` do. So only a handler that builds its own return passes.
+    - **(v5):** `get-ws-short-code` reads `getShortCode()`, `getClientCount()` (0, so not connected) and `getStatus().running` (true, so `"connecting"`), and is not edited. The three push sends are read from `main/ws-server.js`'s source, which this item does not edit, so a later change that moves the code into, or a token onto, a push fails here.
     - **(w):** with no stored hash, the first `startSync` takes the merge path (as in (r1)). The local input is already filtered, so the only way a forbidden key reaches the cloud is `mergeSettings` taking it from the cloud. The seeded timestamps make it take four (`_wsPairingToken`, `sourceFolder`, `recentFolders`, `launchAtLogin`), and only the outer `pickUserSettings` removes them. `schemaVersion` is skipped by `:377` either way.
     - **(x):** with the step gone, `merged.schemaVersion` is the local 13.
-  - **Letters:** (p), (q), (u), (v) ×3, (v4), (w) and (x) are new. None reuses SETTINGS-KEY-TRUST-1's (a)–(s) or (t1)–(t4).
+    - **(y):** the fixture settings are `{ schemaVersion: 13, sourceFolder, recentFolders, wpm: 300, launchAtLogin: false, _wsPairingToken: "main-secret" }`, so the picker keeps exactly `{ wpm: 300, launchAtLogin: false }`. Real timers, because the handler does real file I/O.
+    - **(z):** `import-library` uses only `data.library`; `addDocToLibrary` is the `ctx` proxy's mock, so `settings` and `ctx.saveSettings` are untouched.
+  - **Letters:** (p), (q), (u), (v) ×3, (v4), (v5), (w), (x), (y) and (z) are new. None reuses SETTINGS-KEY-TRUST-1's (a)–(s) or (t1)–(t4).
 - **Constants:** none. No tunable is added.
 - **Branch:** `eb/get-state-secret-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\get-state-secret-1`. Write refs in full, because a `main/` directory exists. Run `npm ci` in the worktree first.
 - **Staging plan:**
-  - **C1:** the `tests/settingsKeyTrust.test.js` edits only (gates: Done-when 1 and 2(a)).
-  - **C2:** the edits in `main/ipc/state.js`, `main/ipc/misc.js`, `main/sync-engine.js`, `preload.js`, `src/types.ts`, `src/test-harness/electron-api-stub.ts` and `docs/governance/TECHNICAL_REFERENCE.md` (gates: Done-when 2(b) and 3–11).
-  - Then merge to `main` with `--no-ff` on Blurby.Roadmap's merge go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass (Done-when 12).
+  - **C1:** the `tests/settingsKeyTrust.test.js` edits only (gates: Done-when 1, and mutation controls 2(a), 2(c) and 2(d)).
+  - **C2:** the edits in `main/ipc/state.js`, `main/ipc/misc.js`, `main/ipc/library.js`, `main/sync-engine.js`, `preload.js`, `src/types.ts`, `src/test-harness/electron-api-stub.ts` and `docs/governance/TECHNICAL_REFERENCE.md` (gates: mutation control 2(b), and Done-when 3–12).
+  - Then merge to `main` with `--no-ff` on Blurby.Roadmap's merge go, and push (Rule 5b). Stage 8 holds the close-out until the batched gates pass (Done-when 13).
   - Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
 - **Failure handling:**
-  - **The C1 counts differ from 8 failed and 62 passed.** If (u) or (w) fails, or any of the 60 existing cases fails, the harness edit is wrong (for example, the fake's `getStatus` shape, or `extraState` not reaching `sync-state.json`). Fix the test, not the module.
+  - **The C1 counts differ from 9 failed and 64 passed.** If (u), (v5), (w) or (z) fails, or any of the 60 existing cases fails, a harness edit is wrong (for example, the `dialog` fake not reaching `library.js`, the fake's `getStatus` shape, or `extraState` not reaching `sync-state.json`). Fix the test, not the module.
+  - **A mutation control's numstat check is not the expected row.** The control is void: restore the file, check `[Environment]::CurrentDirectory`, and run it again. Never record a void control as passed.
   - **(w)'s `results.settings` is not `"merged"`, or mutation 2(a) does not fail (w).** Check the seeded `sync-state.json`: it must carry `fieldTimestamps.settings` with the four `cloud:` keys, and no `fileHashes`. Fix the fixture, not the module.
   - **(u) fails at C2.** A renderer-read key is missing from `get-state`. If it is a `SETTINGS_DEFAULTS` key, the picker call is wrong. If a renderer reader of a main-owned key was missed, stop: it is an untraced reader, and goes to Blurby.Roadmap.
   - **Typecheck fails on the stub or a caller of a ws method.** A reader of `token` or `getWsPairingToken` exists that the trace missed. Stop and report it; do not restore the token.
-  - **An existing test fails** outside this file. Report it exactly and stop; do not weaken it. A test that expects main's live object from `get-state`, a `token` from a ws handler, or a cloud `schemaVersion` from `mergeSettings` is a hidden caller: stop and report it.
+  - **An existing test fails** outside this file. Report it exactly and stop; do not weaken it. A test that expects main's live object from `get-state`, a `token` from a ws handler, the whole settings object in an export, or a cloud `schemaVersion` from `mergeSettings` is a hidden caller: stop and report it.
   - **Retry ceiling:** two corrections per task, then a BLOCKER to Blurby.Roadmap.
-  - **Rollback:** `git revert -m 1 <merge>`. There is no data format change: settings files, cloud copies and the stored token are untouched.
+  - **Rollback:** `git revert -m 1 <merge>`. There is no data format change: settings files, cloud copies and the stored token are untouched. A backup written after this item lacks the filtered keys, which nothing reads.
 - **Lane Ownership (parallel run):** surface D, plus the shared-core type lines and the dev stub. The owned lines are:
   - `main/ipc/state.js:16-19` (`get-state`);
   - `main/ipc/misc.js:385-387`, `:394-401` and `:423-424`, plus the one comment line added before `start-ws-server`;
+  - `main/ipc/library.js`: the require added after `:14`, and `:535` with its comment;
   - `main/sync-engine.js:385-387`;
   - `preload.js:147`;
   - `src/types.ts:343`, `:345-347`;
   - `src/test-harness/electron-api-stub.ts:565`, `:567-569`;
   - `docs/governance/TECHNICAL_REFERENCE.md`: the paragraph added after `:750`;
-  - `tests/settingsKeyTrust.test.js`: `:71`, `:140`, `:142` and the appended block.
+  - `tests/settingsKeyTrust.test.js`: `:14`, `:31`, `:50`, `:64`, `:71`, `:104`, `:140`, `:142` and the appended block.
 - **Forbidden During Parallel Run:**
   - every other file, and every other line of the files above;
-  - `main/ws-server.js`, `main/migrations.js`, `main.js`, `main/ipc/library.js` and `main/ipc/cloud.js`;
-  - `src/components/settings/ConnectorsSettings.tsx` and every renderer component;
+  - in `main/ipc/library.js`: `rescan-folder` (`:358-…`, FOLDER-NOTICE-1's and LARGE-FOLDER-SYNC-2's hunk), `import-library` (`:543-577`, pinned, not edited), `save-library` and `isLibraryDocPath`;
+  - `main/ws-server.js`, `main/migrations.js`, `main.js`, `main/folder-sync.js` and `main/ipc/cloud.js`;
+  - `src/components/settings/ConnectorsSettings.tsx`, `src/components/LibraryContainer.tsx` and every renderer component;
   - `src/components/ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts` (the rest of the shared-core freeze set);
   - `main/constants.js`;
   - every file NARRATE-REBUILD-1's open phase owns (`main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**`, and its packet under `docs/planning/epics/2026-10-12-narrate-rebuild/`).
-- **Shared-Core Touches:** `src/types.ts:343`, `:345`, `:346` (deleted) and `:347`, the `ElectronAPI` WebSocket entries. This is a planner decision under ruling 3 (Technical rulings), for Blurby.Brain to confirm when this specification folds in. The integration window is this item's run. No other sprint may edit `src/types.ts` while this item is in flight. FOLDER-NOTICE-1 (26) adds three lines after `onWatcherError?` (`src/types.ts:371` on `051d004c`); after this item that anchor is at `:370`, so it re-greps by text (standing rule 36). Blurby.Roadmap records the window in ROADMAP when this specification folds in.
+- **Shared-Core Touches:** `src/types.ts:343`, `:345`, `:346` (deleted) and `:347`, the `ElectronAPI` WebSocket entries (ruling 3, confirmed by ruling 7). The integration window is this item's run. No other sprint may edit `src/types.ts` while this item is in flight.
+  - **No in-flight item holds `src/types.ts`** (checked 2026-10-15 on `181da234`). The committed register snapshot (`Virtuoso/work-register.snapshot.json`) lists 14 In Flight items. Every one except NARRATE-REBUILD-1 and this item has merged its branch to `main` (Stage 8 holds their close-outs), so none has an open edit. NARRATE-REBUILD-1's open branches (`eb/narrate-rebuild-1-p6`, `eb/narrate-rebuild-1-p6-quiet-evidence`) do not touch `src/types.ts`: `git diff --stat refs/remotes/origin/main...<branch> -- src/types.ts` prints nothing for either. Over every unmerged remote branch, only two stale branches touch it (`claude/review-blurby-roadmap-1lsoT`, 2026-03-21; `sprint/kokoro-export-1-long-form-audio-export`, 2026-05-17, the dissolved KOKORO-EXPORT-1), and neither is a register item. The live Notion register was not queried (reads and git grep only); Blurby.Roadmap confirms it at dispatch.
+  - FOLDER-NOTICE-1 (26) adds three lines after `onWatcherError?` (`src/types.ts:371`). After this item that anchor is at `:370`, so it re-greps by text (standing rule 36). Blurby.Roadmap records the window in ROADMAP when this specification folds in.
 - **Merge Order:**
   - **After SETTINGS-KEY-TRUST-1** (merged, `051d004c`) and **FOLDER-UNREACHABLE-GUARD-1** (merged, `89a5a95c`), in the Stage 8 release-gate order.
-  - **Before FOLDER-NOTICE-1 (26),** which edits `src/types.ts`, `preload.js` (`:207-211`) and other hunks of `main/ipc/state.js`. The shared-core rule serializes them.
-  - **File-disjoint hunks with the other specified items.** LARGE-FOLDER-SYNC-2 edits `main/ipc/state.js` near `:59` and `:71-72`, and `preload.js:65`; KF2-WAIVER-RETIRE-1 names `main/sync-engine.js:97` (RENAME-RETRY-1's site). Neither touches this item's lines. Whichever merges second takes `refs/remotes/origin/main` in first.
-  - **Open branches:** `git diff --stat refs/remotes/origin/main...<branch>` over this item's eight files, run on 2026-10-15 over every unmerged remote branch, printed only `eb/folder-unreachable-guard-1` (the TECHNICAL_REFERENCE `:711` hunk, since merged) and three stale branches from March–April 2026 (`claude/review-blurby-roadmap-1lsoT`, `perf-optimize-staging-uploads-…`, `sprint/kokoro-export-1-long-form-audio-export`), which are not in the queue.
+  - **Before FOLDER-NOTICE-1 (26),** which edits `src/types.ts`, `preload.js` (`:207-211`), other hunks of `main/ipc/state.js`, and `main/ipc/library.js` at `rescan-folder` (one line). The shared-core rule serializes them. Its `library.js` line is a different hunk from this item's (`:14`, `:535`).
+  - **LARGE-FOLDER-SYNC-2** also edits `main/ipc/library.js` at `rescan-folder`, a different hunk, and `main/ipc/state.js` near `:59` and `:71-72` and `preload.js:65`, none of them this item's lines. KF2-WAIVER-RETIRE-1 names `main/sync-engine.js:97` (RENAME-RETRY-1's site), not this item's. Whichever merges second takes `refs/remotes/origin/main` in first.
+  - **Open branches:** `git diff --stat refs/remotes/origin/main...<branch>` over this item's nine files, run on 2026-10-15 on `181da234` over every unmerged remote branch, printed only three stale branches from March–May 2026 (`claude/review-blurby-roadmap-1lsoT`, `perf-optimize-staging-uploads-…`, `sprint/kokoro-export-1-long-form-audio-export`), which are not in the queue.
   - **NARRATE-REBUILD-1 and any later item** that reads settings in the renderer reads them from `get-state`'s filtered copy. A new main-owned key the renderer must show is added to `get-state` by name, and (u) is extended.
-  - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 3–11.
+  - Before merging, `git merge refs/remotes/origin/main` into this branch and re-run Done-when 3–12.
 
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Secret-read tests committed: (p), (q), (v) ×3, (v4) and (x) fail on today's code; (u), (w) and the 60 existing cases pass; mutation control 2(a) fails (w) | calculable | positive control | bounded | medium | 35m (two harness edits, 10 cases in an existing harness, one mutation run) | — | — |
-| 2 | `get-state` returns a filtered copy; the ws handlers return no token; `get-ws-pairing-token` removed from main, preload, type and stub; dead `schemaVersion` step removed; TECHNICAL_REFERENCE line; mutation control 2(b) | calculable | main-process fix | bounded | low | 25m (one handler body, three returns, one deleted handler, four one-line contract edits, one comment, one doc line) | — | — |
+| 1 | Secret-read and backup tests committed: (p), (q), (v) ×3, (v4), (x) and (y) fail on today's code; (u), (v5), (w), (z) and the 60 existing cases pass; mutation controls 2(a), 2(c) and 2(d) fail their cases, each with its numstat check | calculable | positive control | bounded | medium | 45m (five harness edits, 13 cases in an existing harness, three mutation runs) | — | — |
+| 2 | `get-state` returns a filtered copy; the ws handlers return no token; `get-ws-pairing-token` removed from main, preload, type and stub; the export is filtered; dead `schemaVersion` step removed; TECHNICAL_REFERENCE line; mutation control 2(b) | calculable | main-process fix | bounded | low | 30m (one handler body, three returns, one deleted handler, one require and one export line, four one-line contract edits, one comment, one doc line) | — | — |
 | 3 | Suites, typecheck, build; merged and pushed | calculable | merge and verify | mechanical | low | 30m (full `npm test` + typecheck + build + one `--no-ff` merge) | — | — |
 
 **Total:** chain 7m · sum 7m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
 
 ##### Lessons applied
-- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `051d004c` (fetched 2026-10-15). `refs/remotes/origin/main` advanced to `89a5a95c` during authoring: the edit sites were confirmed identical (`git diff --quiet`, exit 0), and the two shifted citations are given on both. The run re-greps every edit site at dispatch and stops on content drift.
-- **Standing rule 41 (LL-136):** the Done-when 11 fence exempts the time log and the staging memo.
+- **Standing rule 36 (SRL-086/087):** every line was read on `main` @ `051d004c` and re-based on `181da234` (fetched 2026-10-15). The edit sites outside `main/ipc/library.js` were confirmed identical (`git diff --quiet`, exit 0), and the `library.js` and `main.js` citations are given on `181da234`. The run re-greps every edit site at dispatch and stops on content drift.
+- **Standing rule 41 (LL-136):** the Done-when 12 fence exempts the time log and the staging memo.
 - **Standing rule 43 (LL-138):**
-  - (p), (q), (v) ×3, (v4) and (x) fail on `051d004c` for named reasons: the live object with both token forms, the shared reference, the token in three returns, the registered channel, and the dead step's 99.
-  - (u) and (w) pin behaviour that already holds, so each gets a mutation control (Done-when 2): (w) fails when the outer merge filter is removed (ruling 4(a)), and (u) fails when the folder keys are dropped.
+  - (p), (q), (v) ×3, (v4), (x) and (y) fail on `181da234` for named reasons: the live object with both token forms, the shared reference, the token in three returns, the registered channel, the dead step's 99, and the whole settings object in the export.
+  - (u), (v5), (w) and (z) pin behaviour that already holds, so each gets a mutation control (Done-when 2). Each control is void unless its numstat check shows the mutation landed in this worktree's file: the implementer's first C1 run showed that `[IO.File]` with a relative path writes against the process folder, not `Set-Location`, and can mutate another worktree while the test passes.
 - **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code.
-  - Done-when 4–9 were dry-run on `051d004c` and on scratch copies with every edit applied.
+  - Done-when 4–10 were dry-run on `181da234` and on scratch copies with every edit applied.
   - Every "prints nothing" gate finds its lines on the base, so each can fail.
   - Every new-line gate is empty on the base and found on the edit.
-  - The two count gates that do not change (`sync-engine.js:5`, gate 8's fence) are named as regression fences.
+  - The count gate that does not change (`sync-engine.js:5`) and the fences (gate 7's `data.settings`, gate 9) are named as regression fences.
+  - Each mutation's `$a` was checked to occur exactly once on the base.
 - **Standing rule 45 (LL-141):** nothing is perceptual. The one owner row covers the real IPC path and is deferred to the batched smoke, with the standard line.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
 - **Standing rule 47 (LL-147):** the full suite runs in a local session on the owner's machine.
-- **Standing rule 48 (LL-149):** typecheck and build are in Done-when 10. Typecheck matters here: `src/types.ts` and the `ElectronAPI`-typed stub change together, and a leftover stub entry fails it.
+- **Standing rule 48 (LL-149):** typecheck and build are in Done-when 11. Typecheck matters here: `src/types.ts` and the `ElectronAPI`-typed stub change together, and a leftover stub entry fails it.
 - **LL-156:**
   - SETTINGS-KEY-TRUST-1's out-of-scope `get-state` line is brought into scope.
   - Its "`mergeSettings` unchanged" line is brought into scope for one step only.
+  - Its `import-library` line stays as it was; only the settings half is pinned.
   - AGENT_FINDINGS H-SEC-3's proposal is superseded, not followed.
 - **LL-158:**
   - Every renderer reader of `get-state`'s settings was traced from the call (`App.tsx`, `ThemeProvider.tsx`, `useLibrary.ts`) to the views that read the stored object, and checked against `SETTINGS_DEFAULTS` by a whole-tree key diff.
-  - Every main-to-renderer path was enumerated (23 rows).
-  - The four token handlers were traced to their only renderer caller, which discards the result.
+  - Every main-to-renderer path, and the backup export and import, were enumerated (23 rows).
+  - The four token handlers were traced to their only renderer caller, which ignores the result. The pairing banner was traced from the push to `get-ws-short-code`, which (v5) pins.
+  - The import was traced to its only use of the backup (`data.library`), and every other settings-restore candidate in `main/` was searched.
   - The owner row's trigger is opening the folder list and pressing "New Code", both of which read through the changed paths.
 - **LL-159 / LL-157:** no deferred writer is added, and no quit step changes.
 - **LL-106 (three-way contract):** `get-ws-pairing-token` leaves main, `preload.js` and `ElectronAPI` together, and the three changed returns change in main and in the type together.
