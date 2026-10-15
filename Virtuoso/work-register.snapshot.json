@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T08:01:27Z",
+  "takenAt": "2026-10-15T08:03:04Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2491,8 +2491,8 @@
       "id": "PAGE-SAVE-RESTAMP-GUARD-1",
       "title": "A page turn never saves a position before the book's word numbers apply",
       "sequence": 25,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2501,12 +2501,12 @@
       "group": "Reader Polish",
       "spec_link": "ROADMAP.md#page-save-restamp-guard-1",
       "branch": "eb/page-save-restamp-guard-1",
-      "started": "",
+      "started": "2026-10-15",
       "completed": "",
       "evidence": "",
       "description": "A Page turn in the 0.5-0.9 s before bookWords re-stamps the spans saves a section-local index (63,020 words off in Meditations section 15); hold such turns and save the latest once the section's re-stamp lands.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate (10). Measured on a scratch profile: every in-window turn saved a section-local index; cfi was right. Before PAGE-POSITION-SAVE-2. Full Spec: U9/U10 pass.",
-      "revision": "2f51a8563dff33425554768222aec4bb8020ffed184b14610131e162fadd9c6c",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). Release gate (10). Measured on a scratch profile: every in-window turn saved a section-local index; cfi was right. Before PAGE-POSITION-SAVE-2. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/page-save-restamp-guard-1 from main 28824768).",
+      "revision": "8438e2d83bdc00c274d0c076baa1e001112a24178f1c9470d4f315ef8c998745",
       "extra": {}
     }
   ],
