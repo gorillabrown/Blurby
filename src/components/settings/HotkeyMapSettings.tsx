@@ -127,7 +127,7 @@ export function HotkeyMapSettings() {
           <h4 className="hotkey-section-title">{section.title}</h4>
           <div className="hotkey-grid">
             {section.shortcuts.map((s) => (
-              <div key={s.action} className="hotkey-row">
+              <div key={`${s.action}|${s.key}`}className="hotkey-row">
                 <span className="hotkey-action">{s.action}</span>
                 <span className="hotkey-key">{s.key}</span>
               </div>

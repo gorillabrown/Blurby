@@ -52,7 +52,7 @@ interface ReaderBottomBarProps {
 }
 
 const HINT_TEXT: Record<string, string> = {
-  page: "← → page  ↑ ↓ speed  space play  ⇧space mode  tab menu",
+  page: "← → page  ↑ ↓ speed  space last mode  ⇧space switch mode  N narrate  tab menu",
   focus: "← → rewind  ↑ ↓ speed  space play/pause  M menu",
   flow: "← → speed  ↑ ↓ line  space play/pause  M menu",
   narrate: "← → rewind  ↑ ↓ speed  space play/pause  M menu",

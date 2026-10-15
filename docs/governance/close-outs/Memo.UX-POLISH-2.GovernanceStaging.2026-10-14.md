@@ -25,3 +25,12 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
   - (o): `--color-bg` defined in 0 theme maps.
   - (p): the `.rbb-mode-btn` border does not read `var(--border)`.
 - Passing: control (q) and every existing test in the four files.
+
+### Done-when 2–10 — at C2 (re-run by the orchestrator; working tree, then committed)
+- DW2: 21 files, 177 tests passed, **exit 0**.
+- DW3, DW4, DW5, DW6 (grep): exit 1, empty.
+- DW7: `:1` on page, focus and flow; narrate exit 1, empty.
+- DW8: `src/hooks/useKeyboardShortcuts.ts:243` (one line). DW9: `src/components/ShortcutsOverlay.tsx:189` (one line).
+- DW10: `src/styles/keyboard.css:5`; the old `.rbb-mode-btn--last` border line exits 1, empty.
+- Numstat (working tree, implementation agent): `src/types.ts` `1 1`; `src/reader` three `1 1` lines.
+- `npm run typecheck` (implementation agent): exit 0.
