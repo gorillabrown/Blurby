@@ -8,6 +8,14 @@
 
 ## Incomplete
 
+### BUG-198 — A converted folder book is reset to the start after a rescan
+**Reported:** 2026-10-14 (code trace while specifying SAVE-LIBRARY-TRUST-1, on `main` @ `037472c9`; not yet seen live; filed for Blurby.Brain)
+**Severity:** MEDIUM (a folder book's reading position, favourite, tags, collection and queue place are lost; needs only an open, a library save and a rescan or folder sync)
+**Status:** RESOLVED in source (SAVE-LIBRARY-TRUST-1): save-library keeps main's filepath and convertedEpubPath, so a renderer save cannot unlink a book from its source file; closes after the batched owner smoke.
+**Location:** `main/ipc/library.js:47` (`save-library` takes the renderer's `filepath`), `:167` (lazy conversion), `:345` (`rescan-folder` matches by `filepath`); `main.js:345` (folder sync, same); `src/utils/loadDocResult.ts:17-24` (the renderer's copy takes the converted path as its `filepath`).
+**Description:** Opening a non-EPUB folder book converts it on demand. The renderer's copy of the book then carries the converted EPUB as its `filepath`, and the next library save from the renderer (for example marking cards seen) writes that path into main's record. The next rescan or folder sync no longer recognises the source file as this book: it adds a new record at position 0 and drops the old one.
+**Fix path (ruled):** `save-library` keeps main's `filepath` and `convertedEpubPath` for every document it holds (SAVE-LIBRARY-TRUST-1).
+
 ### BUG-197 — In Page mode, turning pages never saves the reading position
 **Reported:** 2026-10-14 (QUIT-FLUSH-1 Done-when 9 owner smoke, production build of `bd1216fc`; filed for Blurby.Brain)
 **Severity:** MEDIUM (a book reopens where it was last saved, not where the reader stopped; a "Jump back" button appears)

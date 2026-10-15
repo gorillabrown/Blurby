@@ -43,8 +43,25 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
+// The renderer may edit a document's fields, never where its file or cover is or how it is converted (filepath,
+// convertedEpubPath, ext, needsEpubConversion and coverPath are main's), and cannot add documents
+// (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
+function keepMainPaths(newDocs, library) {
+  const held = new Map((library || []).map((doc) => [doc.id, doc]));
+  return newDocs
+    .filter((doc) => doc && held.has(doc.id))
+    .map((doc) => {
+      const h = held.get(doc.id);
+      return { ...doc, filepath: h.filepath, convertedEpubPath: h.convertedEpubPath, ext: h.ext, needsEpubConversion: h.needsEpubConversion, coverPath: h.coverPath };
+    });
+}
+
 function register(ctx) {
-  ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
+  ipcMain.handle("save-library", (_, newDocs) => {
+    if (!Array.isArray(newDocs)) return;
+    ctx.setLibrary(keepMainPaths(newDocs, ctx.getLibrary()));
+    ctx.saveLibrary();
+  });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
     const syncEngine = require("../sync-engine");
@@ -163,10 +180,11 @@ function register(ctx) {
           title: doc.title,
           author: doc.author || "Unknown",
         });
-        // Update doc record with EPUB path
-        doc.convertedEpubPath = convResult.epubPath;
-        doc.ext = ".epub";
-        if (doc.needsEpubConversion) delete doc.needsEpubConversion;
+        // Update the CURRENT record: a concurrent save-library may have replaced `doc` during the await
+        const current = ctx.getLibrary().find((d) => d.id === docId) || doc;
+        current.convertedEpubPath = convResult.epubPath;
+        current.ext = ".epub";
+        if (current.needsEpubConversion) delete current.needsEpubConversion;
         ctx.saveLibrary();
         return { filepath: convResult.epubPath, ext: ".epub" };
       } catch (convErr) {
@@ -685,7 +703,7 @@ function register(ctx) {
   ipcMain.handle("apply-metadata-updates", async (_, updates) => {
     if (!Array.isArray(updates)) return { updated: 0 };
 
-    const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);
+    const ALLOWED_FIELDS = new Set(["title", "author"]);
     const library = ctx.getLibrary();
     const updateMap = new Map();
     for (const { docId, updates: fields } of updates) {
