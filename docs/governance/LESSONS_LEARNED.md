@@ -2986,3 +2986,27 @@ Related: LL-157, LL-006, LL-142.
 
 ### LL-158 — status (QUIT-FLUSH-1, 2026-10-14)
 **Status:** Observation — recurred in a second form (planner ruling: fold it here). QUIT-FLUSH-1 Done-when 9(f) paged forward in Page mode and expected the book to reopen at the new position after Alt+F4. Page-mode page turns never write a reading position: Blurby Brain's no-quit control on build `bd1216fc` left `library.json` unchanged after 10 s with the app open. So the row could not test the quit flush. Rider: a live smoke row that checks state persisted across an action must name a trigger shown to commit that state, with a no-action control run before the row is written. This is the second occurrence of "an acceptance row unreachable for reasons in code the item does not change", and a candidate for promotion at the next roadmap review.
+
+### LL-160 — Word segmentation depends on the runtime's ICU, so tooling that numbers words runs under the app's runtime (NARRATE-REBUILD-1, 2026-10-15)
+**Verdict:** `main/epub-word-extractor.js` gives different word counts by runtime. Plain Node 24 (ICU 78.2) counts Meditations at 80,426 words; the app's Electron 41 (Chromium's ICU 77.1) counts 80,493, because Chromium's ICU splits a full stop between letters ("B.C." becomes "B." and "C."; web addresses split too). Every epic checker, the harness and Vitest ran under plain Node, so they named word 2963 "ancient" when the app's 2963 is "the", and called 5473 HIS FIRST BOOK when the app's is 5480. The app itself was consistent: engine, page spans and saved positions share one numbering.
+**Evidence:** scratchpad `seg-diag\` (dump, diff, app check). The extractor's runtime counts were measured in the app over DevTools on a scratch profile. P6b's `scripts/narrate-rebuild/app-node.ps1` and `lib/app-icu-guard.mjs` now run the checkers under the app's Electron and exit 3 under plain Node.
+**Recommendation:** Any script, checker or test that turns text into word indices, or picks a position by index, runs under the shipped runtime (`ELECTRON_RUN_AS_NODE` with the app's Electron binary) and asserts it, or compares by text. Treat a word count from plain Node as a different numbering, not the app's.
+**Applies to:** Narrate, Focus and Flow tooling; saved-position tests; any harness that chooses a start word by index; Electron upgrades (re-measure the canonical book's word count, which DEPS-AUDIT-1's 41.10.7 kept at 80,493); WORD-INDEX-UNIFY-1.
+**Status:** Observation
+Related: LL-136, LL-153, LL-161.
+
+### LL-161 — A correctness row about a word is checked by the word's text, not its index (NARRATE-REBUILD-1, 2026-10-15)
+**Verdict:** D2 asks narration to start on "ancient". S5's checker compared indices only, so it reported "first word is ancient: PASS" while the app had voiced "the", seven words earlier in app numbering. The rewritten checker compares the first voiced word's text, and it fails the S5 trace.
+**Evidence:** `scripts/narrate-rebuild/d2-crossing-check.cjs` (rewritten in P6b; `<trace> 2970 ancient 5480 HIS`). The S5 trace is now its numbering control (exit 1).
+**Recommendation:** When an acceptance row names a word, a passage or a heading, the gate checks the text at the position as well as the position, and a control proves it fails on a known-wrong position.
+**Applies to:** Narrate and reading-mode acceptance rows; resume and handoff checks; any trace checker keyed by word index.
+**Status:** Observation
+Related: LL-160, LL-143.
+
+### LL-162 — Sweep the whole corpus offline before trusting sampled sessions, and validate every unit class the mapper accepts (NARRATE-REBUILD-1, 2026-10-15)
+**Verdict:** D3/D5's sessions all started at word 8723, so for days no live run reached the stray-quote failure at word 3217. An offline, text-side sweep of every chunk (the real normalizer, segmenter, espeak and tokenizer, with a stub model) found 112 fail-closed chunks in Meditations and 804 across the owner's library copies in about two minutes. The same sweep showed that the mapper cost-checked only one-to-one and fused units, so 85 split-word units with wrong sounds passed silently.
+**Evidence:** `scripts/narrate-rebuild/reconcile-sweep.mjs` (`--gate`, `--control`, `--changed`, `--owner`); `docs/studies/narrate-rebuild-1/phase6/reconcile-*.txt`; P6b's F3 in `main/narrate/wordmap.js`.
+**Recommendation:** For a pipeline that must hold on every input (alignment, tokenization, extraction), add a whole-corpus offline sweep as a gate before relying on a few live sessions, with a `--control` that runs the base code. When a validator accepts several unit or record shapes, check that each shape is validated, and pin each with a positive control.
+**Applies to:** Narrate reconciliation and chunking; word extraction and segmentation; import parsers; any gate whose live runs start from a fixed position.
+**Status:** Observation
+Related: LL-142, LL-151, LL-160.
