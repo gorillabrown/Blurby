@@ -268,6 +268,49 @@ arrate-rebuild-1p6-completion`; D11; D1 (`p0-summary.mjs` and `--break`); the D4
 - **Git:** eb/narrate-rebuild-1-p6 @ (this commit); uncommitted: none.
 - **Next:** root-cause diagnosis of the `unreconciled` failure at word 3217 (Blurby.Brain deciding); then a fix with a failing-first test, and this same session re-run.
 
+## 2026-10-15 — planner: P6b packet amendment on Blurby.Brain's rulings (Decision #23, #24)
+
+- **Did:**
+  - Merged `origin/main` `813ff38a` into the branch with `--no-ff`. Main's Stage 8 merges touch no epic path; `tests/settingsNarrateNormalization.test.js` (D9) changed only an unrelated settings key, `fontSize` → `flowTextSize`, with its narrate assertions unchanged.
+  - Added phase P6b to plan.md, amended charter.md (preamble, D2, D3, D5, D7; new D14, D15; one Lessons row), and updated state.md.
+  - No product code, script or fixture changed; wave A writes them.
+- **Rulings recorded (Blurby.Brain, tier 1, 2026-10-15):**
+  - P6b scope:
+    - F1–F5 in `main/narrate/normalize.js` and `main/narrate/wordmap.js` only.
+    - A committed sweep gate, `scripts/narrate-rebuild/reconcile-sweep.mjs`: `--gate` exits 0 with 0 fail-closed chunks; `--control` (fix off) exits 1.
+    - The mid-session F4 notice test; the trial driver reading the notice before Play; the D2 checker comparing the first word by text.
+  - Every epic checker, the harness, the sweep gate and the D2 checker run under `ELECTRON_RUN_AS_NODE` with the app's own Electron and refuse plain Node, with a control proving the refusal. D2 restarts at 2970 ("ancient") and crosses at 5480 (HIS FIRST BOOK), plus at least 2 minutes. `p5-latency-e2e.mjs`'s hard-coded positions are corrected.
+  - An abbreviation-aware sentence end in `chunkPlan.ts`: narrow and table-driven (single letters, i.e., e.g., etc., vs., A.D., B.C., dotted web addresses), not a sentence end when followed directly by a word rather than a capitalised new-sentence start, designed for in-app tokenization. Tests: "B.C. 50" stays in one chunk; "in Section B. The next…" still ends.
+  - Done-when additions:
+    - The gate exits 0 and `--control` exits 1.
+    - The owner-library sweep runs on copies in the scratchpad, counts only, books hashed, every remaining failure class E or ruled.
+    - The changed passing tables are listed, each old one shown to hold a wrong split unit; no correct table may change.
+    - D3/D5 re-run in a quiet window that Brain arranges with GOG, then D2 by text.
+    - The existing suites, typecheck and build.
+  - Fixtures: the Kokoro tokenizer from onnx-community/Kokoro-82M-v1.0-ONNX (Apache-2.0) with a LICENSE/NOTICE line and its sha256, plus a check that it still equals the artifacts copy. A public-domain Raven (Poe, 1845), not the owner's file; Meditations is `resources/sample-meditations.epub`.
+  - Chunk planning changes alter chunk plans, so D3/D5 must re-run.
+  - On the six planning questions:
+    1. Accept the owner class-D residual, the one chunk at word 12529, which fails closed. D14's owner part reads "class E, or a residual ruled on by Blurby Brain"; the stub is NARRATE-RECONCILE-RESIDUAL-1.
+    2. A wrong split unit is a split unit with cost above 0 that the new table replaces (confirmed). The plan records the 36 gate tables and the 18 checked owner tables against it.
+    3. Commit `tokenizer.json` (77a02c8e…), `tokenizer_config.json` (be1cb066…) and the Apache-2.0 LICENSE text together under the test fixtures, plus the equality check against the artifacts copy, in wave A's first commit.
+    4. Titles (Mr., Mrs., Ms., Dr., St.) never end a sentence when any word follows: a one-line table flag plus a "Mr. Smith" test.
+    5. The Raven: no download. Wave A commits the 1845 text written out directly (all 18 stanzas) and measures the gate numbers on it.
+    6. D6 is not re-run in P6b; the final-main D3/D6 run before release covers it.
+  - Also approved: both launcher fixes, the 1-minute smoke opening wave B, and `MAPPING_POLICY.md` updated on the same branch.
+- **Learned** (planning measurements under the app's Electron, 2026-10-15; details in plan.md § P6b):
+  - Electron 41.10.7 runs as Node with ICU 77.1; app numbering puts "ancient" at 2970, HIS FIRST BOOK at 5480 and THE SECOND BOOK at 9431. The harness's plan from 2963 reproduces the S5 trace's 14 chunks exactly. The failed in-app chunk 3217 is "It should be a man's task, …peace of heart.'"; S5's quoted text was plain-Node word 3217, 7 words later.
+  - With the final edits:
+    - The gate gives 0 fail-closed chunks of 3,635 (Meditations 3,588; the Raven was a stand-in).
+    - The control gives 114 (Meditations 112: A 53, B/F 43, C 8, D 8).
+    - 36 tables changed, all replacing a wrong split.
+    - The D2 route from 2970 has 0 failures (the base had 24).
+    - The owner library (8 copies) has 18 class-E failures plus the ruled residual.
+  - pwsh does not wait for a bare `electron.exe` call (GUI subsystem): no output, no exit code. `app-node.ps1` pipes it.
+- **Decisions:** #23 (Brain), #24 (planner).
+- **Gate/DoD movement:** none. Rows D3, D5, D7 and D11 reopen for the P6b build; D14 and D15 added.
+- **Git:** eb/narrate-rebuild-1-p6 @ (this commit), on the merge `34eacdf6`; uncommitted: none.
+- **Next:** S6, P6b wave A (state.md next_action).
+
 <!-- Entry template — copy for each session:
 
 ## S[N] — [YYYY-MM-DD HH:MM]
