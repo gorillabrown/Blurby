@@ -43,8 +43,20 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
+// The renderer may edit a document's fields, never where its file is, and cannot add documents (SAVE-LIBRARY-TRUST-1).
+function keepMainPaths(newDocs, library) {
+  const held = new Map((library || []).map((doc) => [doc.id, doc]));
+  return newDocs
+    .filter((doc) => doc && held.has(doc.id))
+    .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath }));
+}
+
 function register(ctx) {
-  ipcMain.handle("save-library", (_, newDocs) => { ctx.setLibrary(newDocs); ctx.saveLibrary(); });
+  ipcMain.handle("save-library", (_, newDocs) => {
+    if (!Array.isArray(newDocs)) return;
+    ctx.setLibrary(keepMainPaths(newDocs, ctx.getLibrary()));
+    ctx.saveLibrary();
+  });
 
   ipcMain.handle("add-manual-doc", (_, title, content) => {
     const syncEngine = require("../sync-engine");
