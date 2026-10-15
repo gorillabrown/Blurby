@@ -6797,7 +6797,8 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
          - In `main.js`: the function, the `createFolderSync` dependency and the `ctx` member.
          - In `main/folder-sync.js`: the destructure, the root-check line and `addOne`'s call.
          - In `main/ipc/library.js`: the Rescan line.
-       - `git grep -n -F 'if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder);' -- main/folder-sync.js` prints one line and exits 0.
+       - `git grep -n -F 'const okCheck = rootHasContent(folder).then((r) => { if (r === true && !stale()) reportFolderOk(folder); });' -- main/folder-sync.js` prints one line and exits 0.
+       - `git grep -c -F 'await okCheck;' -- main/folder-sync.js` prints `main/folder-sync.js:1` and exits 0.
        - `git grep -n -F 'if (files.length) ctx.reportFolderOk();' -- main/ipc/library.js` prints one line and exits 0.
        - `git grep -c -F 'rootHasContent' -- main.js main/folder-sync.js` prints exactly `main.js:3` and `main/folder-sync.js:3`, and exits 0. Each is FOLDER-UNREACHABLE-GUARD-1's two lines, plus `checkRoot: rootHasContent,` and the root-check line respectively.
        - Dry-runs:
@@ -7006,9 +7007,11 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
   - **`main/folder-sync.js:14`, the destructure.** Before: `    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;`. After: `    emitProgress, now = Date.now, reportFolderProblem = () => {}, reportFolderOk = () => {} } = deps;`.
   - **`main/folder-sync.js:77`**, `runFullSync`. Directly after `    emitProgress(0, 0, "scanning");` (before FOLDER-UNREACHABLE-GUARD-1's `const report = {};`), add:
     ```js
-        if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder); // reachable, known before the walk (FOLDER-NOTICE-1)
+        const okCheck = rootHasContent(folder).then((r) => { if (r === true && !stale()) reportFolderOk(folder); }); // reachable: clears while the walk runs; never waits twice on a hung root (FOLDER-NOTICE-1)
     ```
-    The run then continues to the scan exactly as before. A stale run is not returned from here, so the scan-call counts of existing tests (d), (n2) and (n3) are unchanged.
+    The run then continues to the scan exactly as before, without awaiting `okCheck`. A stale run is not returned from here, so the scan-call counts of existing tests (d), (n2) and (n3) are unchanged.
+    - **Ruling (A), Blurby.Roadmap 2026-10-15 (Rule 11 tier 1), found at C2:** awaiting the check first made a hung root wait two `FOLDER_LIST_TIMEOUT_MS` periods (the check, then the scan), failing LARGE-FOLDER-SYNC-2's (lt-scan). The check now runs alongside the scan.
+    - **Order kept:** the rest of `runFullSync`'s body goes in a `try`, and its `catch (e) { await okCheck; throw e; }` makes a thrown scan settle the check before the error reaches `syncAll`'s catch. So `sync-failed` is always reported after a clear in the same run, and (fn-i) holds. `rootHasContent` never rejects (it is bounded and resolves `null`), so `await okCheck` cannot throw.
   - **`main/folder-sync.js:143`**, `syncAll`'s catch.
     - Before: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })`.
     - After: `      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); reportFolderProblem("sync-failed", folder); })`.
@@ -7245,8 +7248,9 @@ Decided 2026-10-14 (relayed by Blurby.Brain): option (C), both. A toast on the f
     - `makeDeps`'s `rootHasContent` fake is FOLDER-UNREACHABLE-GUARD-1's: `true` for a path in `disk` (ROOT by default), otherwise `null`.
     - **Fail at C1** (the C1 module never calls `reportFolderOk`):
       - **(fn-g) A full sync whose root lists clears.** Disk: ROOT and `a.epub`. The scan returns `[file(a)]`; the library is `[folderDoc("A", a)]`. After `syncAll()`: `reportFolderOk` was called once with ROOT, and `reportFolderProblem` was not called.
-      - **(fn-h) The clear comes before the walk.** `scanFolderAsync` returns a deferred promise. Start `const run = sync.syncAll()`, then `await new Promise((r) => setImmediate(r))`.
-        - While the scan is pending, `reportFolderOk` has been called with ROOT, and its call order is below `scanFolderAsync`'s.
+      - **(fn-h) The clear comes while the walk is pending** (ruling A). `scanFolderAsync` returns a deferred promise. Start `const run = sync.syncAll()`, then `await new Promise((r) => setImmediate(r))`.
+        - While the scan is still pending, `reportFolderOk` has been called with ROOT.
+        - (lt-scan) in `tests/folderUnreachableGuard.test.js` is unchanged and passes: a hung root ends at one timeout.
         - Then resolve the scan with `[]` and `await run`.
       - **(fn-i) A thrown scan reports `sync-failed` after the clear.** `scanFolderAsync.mockRejectedValue(new Error("EIO"))`, with `console.error` mocked. `reportFolderProblem` was called with `("sync-failed", ROOT)`, and after `reportFolderOk` (call order), so the last state is the problem.
       - **(fn-j) A watcher add under the folder clears.** Disk: ROOT and `p = ROOT/n.epub`. After `applyAdd(p)`: `reportFolderOk` was called with ROOT.
