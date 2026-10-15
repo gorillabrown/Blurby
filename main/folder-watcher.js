@@ -23,41 +23,51 @@ async function isPathWithinFolder(filepath, folderPath, realFolder) {
 
 // ── Folder scanning ────────────────────────────────────────────────────────
 
-async function scanFolderAsync(folderPath) {
+// Returns null when the root itself cannot be listed (missing, no permission, a failed listing): the caller must not
+// prune (BUG-195). report.skipped collects each folder or file below the root that could not be read, so the caller
+// keeps the books under them.
+async function scanFolderAsync(folderPath, report = {}) {
   if (!folderPath) return [];
-  try { await fsPromises.access(folderPath); } catch { return []; }
+  report.skipped = [];
+  let rootUnreadable = false;
 
   const files = [];
   const savedArticlesName = "Saved Articles";
 
   let walked = 0;
   async function walkDir(dir) {
+    let entries;
     try {
-      const entries = await fsPromises.readdir(dir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));
-        const fullPath = path.join(dir, entry.name);
-        if (entry.isDirectory()) {
-          if (entry.name === savedArticlesName && dir === folderPath) continue;
-          await walkDir(fullPath);
-        } else if (entry.isFile() && SUPPORTED_EXT.includes(path.extname(entry.name).toLowerCase())) {
-          // readdir reports a symlink as a link, never a file or directory, so every file reached here is inside folderPath
-          const stat = await fsPromises.stat(fullPath);
-          files.push({
-            filename: entry.name,
-            filepath: fullPath,
-            ext: path.extname(entry.name).toLowerCase(),
-            size: stat.size,
-            modified: stat.mtimeMs,
-          });
-        }
-      }
+      entries = await fsPromises.readdir(dir, { withFileTypes: true });
     } catch (err) {
       console.log("Skipping inaccessible directory:", dir, err.message);
+      if (dir === folderPath) rootUnreadable = true;
+      else report.skipped.push(dir);
+      return;
+    }
+    for (const entry of entries) {
+      if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === savedArticlesName && dir === folderPath) continue;
+        await walkDir(fullPath);
+      } else if (entry.isFile() && SUPPORTED_EXT.includes(path.extname(entry.name).toLowerCase())) {
+        // readdir reports a symlink as a link, never a file or directory, so every file reached here is inside folderPath
+        let stat;
+        try { stat = await fsPromises.stat(fullPath); } catch { report.skipped.push(fullPath); continue; } // one bad file no longer ends its folder's listing
+        files.push({
+          filename: entry.name,
+          filepath: fullPath,
+          ext: path.extname(entry.name).toLowerCase(),
+          size: stat.size,
+          modified: stat.mtimeMs,
+        });
+      }
     }
   }
 
   await walkDir(folderPath);
+  if (rootUnreadable) return null;
 
   // Deduplicate: when the same book exists in multiple formats, keep the best format
   const byDirAndStem = new Map();
@@ -72,6 +82,14 @@ async function scanFolderAsync(folderPath) {
   }
 
   return [...byDirAndStem.values()].sort((a, b) => a.filename.localeCompare(b.filename));
+}
+
+// true: the folder lists a subfolder or a supported file. false: it lists neither (an unmounted Drive's mount point may
+// keep only desktop.ini). null: it cannot be listed. A per-file remove is trusted only on true (BUG-195).
+async function rootHasContent(dir) {
+  let entries;
+  try { entries = await fsPromises.readdir(dir, { withFileTypes: true }); } catch { return null; }
+  return entries.some((e) => e.isDirectory() || (e.isFile() && SUPPORTED_EXT.includes(path.extname(e.name).toLowerCase())));
 }
 
 // ── File watcher ───────────────────────────────────────────────────────────
@@ -154,5 +172,6 @@ module.exports = {
   FORMAT_PRIORITY,
   isPathWithinFolder,
   scanFolderAsync,
+  rootHasContent,
   startWatcher,
 };

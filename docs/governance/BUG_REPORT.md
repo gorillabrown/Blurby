@@ -51,7 +51,7 @@
 ### BUG-195 — An unreachable source folder empties the library of its folder books
 **Reported:** 2026-10-14 (roadmap review 2026-10-14, while specifying FOLDER-SCAN-PERF-1; found by reading the code, not observed)
 **Severity:** HIGH (user data: every folder-sourced book and its reading position is removed from `library.json`)
-**Status:** OPEN — scheduled as FOLDER-UNREACHABLE-GUARD-1 (stub). Lane: Library & Content.
+**Status:** RESOLVED in source (FOLDER-UNREACHABLE-GUARD-1): a folder, subfolder or file that cannot be read removes no book, and a readable folder that lists no book keeps the books held under it; closes after the batched owner smoke. Lane: Library & Content.
 **Location:** `main/folder-watcher.js:29` (`scanFolderAsync` returns `[]` when `access` fails); the prune in `syncLibraryWithFolder` (`main.js:333-398`) and in `rescan-folder` (`main/ipc/library.js:310` onward), which keep only documents the scan found.
 **Description:** If the source folder cannot be reached when a sync runs (Google Drive not yet mounted at launch, a removed USB disk, a network share offline), the scan returns an empty list and the sync treats every folder-sourced book as deleted. FOLDER-SCAN-PERF-1's 3 s startup delay narrows the window at launch but does not close it.
 **Fix path:** distinguish "unreachable" from "empty": the scan reports an unreachable root (for example `null`), and both callers skip the prune and leave the library unchanged. A test drives each caller with an unreachable folder and asserts the folder books survive.

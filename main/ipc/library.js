@@ -11,6 +11,7 @@ const { extractContent, extractDocMetadata, countWords,
         clearChapterCache, epubChapterCache, epubChapterCacheGet } = require("../file-parsers");
 const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
+const { pathKey } = require("../folder-sync");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -361,13 +362,26 @@ function register(ctx) {
     ctx.clearFailedExtractions();
     try {
       const { scanFolderAsync } = require("../folder-watcher");
-      const files = await scanFolderAsync(settings.sourceFolder);
+      const report = {};
+      const files = await scanFolderAsync(settings.sourceFolder, report);
       const docs = ctx.getLibrary();
-      const existing = new Map(docs.map((d) => [d.filepath, d]));
+      // BUG-195: a folder that cannot be listed, or lists no book while folder books are held under it (Google Drive for
+      // desktop can list a mounted folder as empty while it starts), proves nothing gone: the library is left as it is.
+      if (!files) return { error: "Could not reach the source folder. Nothing was changed.", reason: "root-unlistable" };
+      const root = pathKey(settings.sourceFolder);
+      const underRoot = (p) => {
+        const rel = path.relative(root, pathKey(p));
+        return rel === "" || (rel !== ".." && !rel.startsWith(".." + path.sep) && !path.isAbsolute(rel));
+      };
+      if (files.length === 0 && docs.some((d) => d.source === "folder" && d.filepath && underRoot(d.filepath))) {
+        return { count: docs.length, empty: true, reason: "root-empty-suspect" };
+      }
+      const skipped = (report.skipped || []).map(pathKey);
+      const existing = new Map(docs.map((d) => [pathKey(d.filepath), d]));
       const synced = [];
 
       for (const file of files) {
-        const prev = existing.get(file.filepath);
+        const prev = existing.get(pathKey(file.filepath));
         if (prev) {
           let updates = { ...prev, filename: file.filename, ext: file.ext, modified: file.modified, size: file.size };
           if (file.ext === ".epub") {
@@ -467,13 +481,15 @@ function register(ctx) {
           synced.push(doc);
         } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
           synced.push(doc);
+        } else if (doc.filepath && skipped.some((s) => pathKey(doc.filepath) === s || pathKey(doc.filepath).startsWith(s + path.sep))) {
+          synced.push(doc); // under a folder or file the scan could not read (BUG-195)
         }
       }
 
       ctx.setLibrary(synced);
       ctx.saveLibrary();
       ctx.broadcastLibrary();
-      return { count: synced.length };
+      return skipped.length ? { count: synced.length, reason: "partial-read" } : { count: synced.length };
     } catch (err) {
       console.error("Rescan failed:", err);
       logToFile(`Rescan failed: ${err.message}`, ctx.getErrorLogPath());

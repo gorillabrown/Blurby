@@ -158,7 +158,7 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     scanA.resolve([file(path.join(rootA, "new.epub"))]);
     await Promise.all([sa, sb]);
     expect(m.deps.extractNewFileDoc, "folder A added a book after the switch").not.toHaveBeenCalled();
-    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB);
+    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB, expect.any(Object));
   });
 
   it("(e) a long import saves as it goes", async () => {
