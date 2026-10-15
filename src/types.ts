@@ -199,6 +199,8 @@ export interface BlurbySettings {
   defaultViewMode?: "grid" | "list";
   libraryCardSize?: "small" | "medium" | "large";
   libraryCardSpacing?: "compact" | "cozy" | "roomy";
+  // Quick-settings sort select (QuickSettingsPopover); saved and synced, read by nothing else yet (SETTINGS-KEY-TRUST-1)
+  sortBy?: string;
   // TD-02: Import pipeline
   useLegacyRenderer?: boolean;   // opt-in for legacy word-by-word renderer
   // NAR-4: TTS cache settings

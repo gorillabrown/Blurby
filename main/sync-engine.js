@@ -17,6 +17,7 @@ const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
 const syncQueue = require("./sync-queue");
+const { pickUserSettings } = require("./migrations");
 const {
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,
@@ -388,9 +389,10 @@ function mergeSettings(local, cloud, fieldTimestamps) {
   return merged;
 }
 
-// Apply cloud settings to the live settings object: assign, then submit to the settings writer.
+// Apply cloud settings to the live settings object: only real user settings that belong on every device
+// (SETTINGS-KEY-TRUST-1), then submit to the settings writer.
 // Synchronous on purpose, and never awaits the save: a settings write failure must not abort startSync (NARRATE-REMOVE-1 D12).
-function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, data); ctx.saveSettings(); return settings; }
+function applyCloudSettings(ctx, data) { const settings = ctx.getSettings(); Object.assign(settings, pickUserSettings(data, { crossDevice: true })); ctx.saveSettings(); return settings; }
 
 /**
  * History merge: union sessions, take max docsCompleted, take newer streaks.
@@ -806,11 +808,13 @@ async function startSync() {
 
     // ── Sync settings.json ────────────────────────────────────────────
     const settings = ctx.getSettings();
+    // The cloud copy is replaced by this device's shared settings only: no secret, folder, schemaVersion or
+    // device-local key goes up, and none left in the cloud by an older version survives a merge (SETTINGS-KEY-TRUST-1).
     const settingsResult = await syncFile(
       storage,
       "settings.json",
-      settings,
-      (local, cloud) => mergeSettings(local, cloud, syncState.fieldTimestamps),
+      pickUserSettings(settings, { crossDevice: true }),
+      (local, cloud) => pickUserSettings(mergeSettings(local, cloud, syncState.fieldTimestamps), { crossDevice: true }),
       conditionalWriteOpts
     );
     results.settings = settingsResult.action;
@@ -1036,14 +1040,15 @@ async function forceSync(direction) {
 
     if (direction === "upload") {
       const settings = ctx.getSettings();
+      const cloudSettings = pickUserSettings(settings, { crossDevice: true }); // replaces the cloud copy (SETTINGS-KEY-TRUST-1)
       const libraryData = { schemaVersion: settings.schemaVersion || 1, docs: ctx.getLibrary() };
       const history = ctx.getHistory();
 
-      await storage.writeFile("settings.json", Buffer.from(JSON.stringify(settings, null, 2), "utf-8"));
+      await storage.writeFile("settings.json", Buffer.from(JSON.stringify(cloudSettings, null, 2), "utf-8"));
       await storage.writeFile("library.json", Buffer.from(JSON.stringify(libraryData, null, 2), "utf-8"));
       await storage.writeFile("history.json", Buffer.from(JSON.stringify(history, null, 2), "utf-8"));
 
-      syncState.fileHashes["settings.json"] = sha256(JSON.stringify(settings, null, 2));
+      syncState.fileHashes["settings.json"] = sha256(JSON.stringify(cloudSettings, null, 2));
       syncState.fileHashes["library.json"] = sha256(JSON.stringify(libraryData, null, 2));
       syncState.fileHashes["history.json"] = sha256(JSON.stringify(history, null, 2));
 
