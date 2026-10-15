@@ -147,6 +147,15 @@ async function downloadArticleImages({ contentHtml, articleImages, heroImageUrl 
   return { images, heroBuffer, heroExt, contentHtml: rewrittenHtml };
 }
 
+// A cover is read only from main's covers folders, or from a library document's own coverPath (IPC-PATH-TRUST-1).
+function isAllowedCoverPath(coverPath, ctx) {
+  const norm = (p) => (process.platform === "win32" ? path.resolve(p).toLowerCase() : path.resolve(p));
+  const target = norm(coverPath);
+  const roots = [path.join(ctx.getDataPath(), "covers"), path.join(ctx.getUserDataPath(), "covers")];
+  return roots.some((root) => target.startsWith(norm(root) + path.sep))
+    || (ctx.getLibrary() || []).some((doc) => doc.coverPath && norm(doc.coverPath) === target);
+}
+
 function register(ctx) {
   const coverCache = new Map();
 
@@ -310,7 +319,7 @@ function register(ctx) {
   });
 
   ipcMain.handle("get-cover-image", async (_, coverPath) => {
-    if (!coverPath) return null;
+    if (typeof coverPath !== "string" || !coverPath || !isAllowedCoverPath(coverPath, ctx)) return null;
     if (coverCache.has(coverPath)) {
       const val = coverCache.get(coverPath);
       coverCache.delete(coverPath);

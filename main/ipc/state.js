@@ -22,9 +22,13 @@ function register(ctx) {
 
   ipcMain.handle("save-settings", (_, newSettings) => {
     const settings = ctx.getSettings();
+    // The folder and its recent list are main's: only select-folder and switch-folder set them (IPC-PATH-TRUST-1).
+    const safe = { ...newSettings };
+    delete safe.sourceFolder;
+    delete safe.recentFolders;
     // Update in-memory state immediately so all readers see the new value
-    Object.assign(settings, newSettings);
-    if (newSettings.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+    Object.assign(settings, safe);
+    if (safe.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
 
     // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write
     clearTimeout(saveSettingsTimeout);
@@ -75,6 +79,10 @@ function register(ctx) {
 
   ipcMain.handle("switch-folder", async (_, folder) => {
     const settings = ctx.getSettings();
+    // Only a folder main already listed; a new folder comes through select-folder's dialog (IPC-PATH-TRUST-1).
+    if (typeof folder !== "string" || !(settings.recentFolders || []).includes(folder)) {
+      return { error: "That folder is not in your recent folders. Use Browse for folder to choose it." };
+    }
     try { await fsPromises.access(folder); } catch { return { error: "Folder no longer exists." }; }
     settings.sourceFolder = folder;
     settings.recentFolders = [folder, ...settings.recentFolders.filter((f) => f !== folder)].slice(0, MAX_RECENT_FOLDERS);

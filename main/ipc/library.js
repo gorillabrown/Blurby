@@ -43,12 +43,12 @@ function isLibraryDocPath(resolved, library) {
     .some((p) => p && norm(path.resolve(p)) === target));
 }
 
-// The renderer may edit a document's fields, never where its file is, and cannot add documents (SAVE-LIBRARY-TRUST-1).
+// The renderer may edit a document's fields, never where its file or cover is, and cannot add documents (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1).
 function keepMainPaths(newDocs, library) {
   const held = new Map((library || []).map((doc) => [doc.id, doc]));
   return newDocs
     .filter((doc) => doc && held.has(doc.id))
-    .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath }));
+    .map((doc) => ({ ...doc, filepath: held.get(doc.id).filepath, convertedEpubPath: held.get(doc.id).convertedEpubPath, coverPath: held.get(doc.id).coverPath }));
 }
 
 function register(ctx) {
@@ -697,7 +697,7 @@ function register(ctx) {
   ipcMain.handle("apply-metadata-updates", async (_, updates) => {
     if (!Array.isArray(updates)) return { updated: 0 };
 
-    const ALLOWED_FIELDS = new Set(["title", "author", "coverPath"]);
+    const ALLOWED_FIELDS = new Set(["title", "author"]);
     const library = ctx.getLibrary();
     const updateMap = new Map();
     for (const { docId, updates: fields } of updates) {
