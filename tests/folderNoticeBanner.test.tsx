@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import fs from "node:fs";
+import path from "node:path";
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -8,6 +9,7 @@ import { DEFAULT_SETTINGS } from "../src/constants";
 
 // FOLDER-NOTICE-1: the library banner, rendered through the real LibraryContainer, so a C1 failure shows the banner
 // missing from the library and not only a missing file. (fn-n)-(fn-r) fail at C1; (fn-w) is a control.
+const read = (rel: string) => fs.readFileSync(path.resolve(__dirname, "..", rel), "utf-8"); // jsdom: import.meta.url is not a file URL
 const TEXT = "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.";
 
 function flushPromises() {
@@ -106,7 +108,7 @@ describe("folder notice banner (FOLDER-NOTICE-1)", () => {
     expect(banner(), "the library shows no folder banner").not.toBeNull();
     expect(retryBtn()).not.toBeNull();
     expect(retryBtn()!.disabled).toBe(false);
-    const mainSrc = fs.readFileSync(new URL("../main.js", import.meta.url), "utf8");
+    const mainSrc = read("main.js");
     expect(mainSrc.includes(TEXT), "the toast in main.js does not say what the banner says").toBe(true);
     expect(toastWithText(), "a toast replayed on mount").toBe(false);
   }, 30_000);
@@ -134,7 +136,7 @@ describe("folder notice banner (FOLDER-NOTICE-1)", () => {
     await settle();
     expect(mock.api.retrySourceFolder, "something retried on its own").toHaveBeenCalledTimes(1);
     expect(toastWithText()).toBe(false);
-    const src = fs.readFileSync(new URL("../src/components/FolderNoticeBanner.tsx", import.meta.url), "utf8");
+    const src = read("src/components/FolderNoticeBanner.tsx");
     expect(/setTimeout|setInterval|requestAnimationFrame/.test(src), "the banner arms a timer").toBe(false);
   }, 30_000);
 

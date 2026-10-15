@@ -370,6 +370,9 @@ export interface ElectronAPI {
   onCloudSyncStatusChanged?: (callback: (status: SyncStatusValue) => void) => () => void;
   onCloudAuthRequired?: (callback: (provider: string) => void) => () => void;
   onWatcherError?: (callback: (data: { message: string }) => void) => () => void;
+  getFolderProblem?: () => Promise<string | null>; // FOLDER-NOTICE-1: null, or the source folder's reason code
+  retrySourceFolder?: () => Promise<string | null>;
+  onFolderProblem?: (callback: (code: string | null) => void) => () => void;
   // EPUB word extraction (HOTFIX-6)
   extractEpubWords?: (bookId: string) => Promise<{
     words?: string[];

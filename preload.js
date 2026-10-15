@@ -39,6 +39,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // Folder
   selectFolder: () => ipcRenderer.invoke("select-folder"),
   switchFolder: (folder) => ipcRenderer.invoke("switch-folder", folder),
+  getFolderProblem: () => ipcRenderer.invoke("get-folder-problem"),
+  retrySourceFolder: () => ipcRenderer.invoke("retry-source-folder"),
 
   // Settings
   saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
@@ -207,6 +209,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
     const handler = (_event, data) => callback(data);
     ipcRenderer.on("watcher-error", handler);
     return () => ipcRenderer.removeListener("watcher-error", handler);
+  },
+  onFolderProblem: (callback) => {
+    const handler = (_event, code) => callback(code);
+    ipcRenderer.on("folder-problem", handler);
+    return () => ipcRenderer.removeListener("folder-problem", handler);
   },
   onWsConnectionAttempt: (callback) => {
     const handler = (_event, data) => callback(data);

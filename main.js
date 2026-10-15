@@ -16,6 +16,7 @@ const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder
 const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
 const { createFolderSync } = require("./main/folder-sync");
+const { createFolderNotice } = require("./main/folder-notice");
 const { extractContent, extractDocMetadata, countWords,
         extractEpubMetadata, extractEpubCover,
         extractMobiCover, parseMobiMetadata, parseCallibreOpf,
@@ -312,11 +313,20 @@ function emitSyncProgress(current, total, phase) {
   }
 }
 
-// HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): the last folder problem's code ("root-unlistable",
-// "root-empty-suspect" or "partial-read") rides on the existing watcher-error payload. Nothing new is sent: each send is a toast.
-let lastFolderProblem = null;
+// The source folder's problem (FOLDER-NOTICE-1; BUG-195's hook): null, or the last code that means unreachable (the set in
+// main/folder-notice.js; a partial read is only logged here). Each change goes to the library banner, not a toast.
 let folderToastShown = false; // one watcher-error toast per failure episode
-function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }
+const folderNotice = createFolderNotice({
+  send: (code) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("folder-problem", code); },
+  getFolder: () => settings.sourceFolder,
+  checkRoot: rootHasContent,
+  sync: () => syncLibraryWithFolder(),
+  // On a clear: restart a watcher that failed this episode; the flag keeps a failed restart from toasting (the banner shows).
+  resumeWatcher: () => { if (folderWorkStopped || (watcher && !folderToastShown)) return; folderToastShown = true; startWatcherFn(); },
+});
+function reportFolderProblem(code, folder) { folderNotice.set(code); console.warn("[folder-sync] source folder problem:", code, folder); }
+function reportFolderOk() { folderNotice.set(null); }
+function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); } // a different folder: a new episode (R5)
 
 const folderSync = createFolderSync({
   getSourceFolder: () => settings.sourceFolder,
@@ -324,7 +334,7 @@ const folderSync = createFolderSync({
   scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),
   extractNewFileDoc, extractContent, countWords,
   isFailed: (p) => failedExtractions.has(p), addFailed: addFailedExtraction,
-  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,
+  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,
 });
 function syncLibraryWithFolder() { return folderSync.syncAll(); }
 function cancelSync() { folderSync.cancel(); }
@@ -353,13 +363,14 @@ function startWatcherFn() {
       );
       const userMessage = isPermission
         ? "Can't watch this folder — check permissions."
-        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";
+        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry.";
       console.error("[watcher] Error:", err.message);
-      if (folderToastShown) return;
+      folderNotice.set(folderNotice.get() || "watch-failed"); // the banner shows even when no toast is sent
+      // The episode's toast counts only once it lands, in a live window that has finished loading (LibraryContainer's
+      // listener is mounted by then). Otherwise the banner's mount fetch shows the problem; no toast replays.
+      if (folderToastShown || !mainWindow || mainWindow.isDestroyed() || mainWindow.webContents.isLoading()) return;
       folderToastShown = true;
-      if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });
-      }
+      mainWindow.webContents.send("watcher-error", { message: userMessage, reason: folderNotice.get() });
     },
   });
   if (watcher) folderToastShown = false;
@@ -458,6 +469,10 @@ const ipcContext = {
   syncLibraryWithFolder,
   cancelSync,
   startWatcher: startWatcherFn,
+  reportFolderOk,
+  resetFolderNotice,
+  getFolderProblem: () => folderNotice.get(),
+  retrySourceFolder: () => folderNotice.retry(),
   clearFailedExtractions: () => failedExtractions.clear(),
   addFailedExtraction: addFailedExtraction,
   removeFailedExtraction: removeFailedExtraction,

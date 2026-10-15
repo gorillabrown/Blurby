@@ -53,6 +53,7 @@ beforeEach(() => {
     getLibrary: () => [],
     syncLibraryWithFolder: vi.fn(() => { order.push("sync"); return gate.promise; }),
     startWatcher: vi.fn(() => order.push("watch")),
+    resetFolderNotice: vi.fn(),
   });
 });
 

@@ -11,7 +11,7 @@ const pathKey = (p) => (p ? (process.platform === "win32" ? path.resolve(p).toLo
 function createFolderSync(deps) {
   const { getSourceFolder, getLibrary, setLibrary, addDoc, scanFolderAsync, rootHasContent, statFile,
     extractNewFileDoc, extractContent, countWords, isFailed, addFailed = () => {}, saveLibrary, saveLibraryNow, broadcastLibrary,
-    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;
+    emitProgress, now = Date.now, reportFolderProblem = () => {}, reportFolderOk = () => {} } = deps;
   let running = null; // { folder, promise } of the one full sync allowed at a time
   let cancelled = false;
   let stopped = false; // set at quit: nothing more is applied or saved
@@ -83,6 +83,7 @@ function createFolderSync(deps) {
     addedDuringRun.clear();
     const stale = () => mine !== gen || cancelled || stopped || getSourceFolder() !== folder;
     emitProgress(0, 0, "scanning");
+    if ((await rootHasContent(folder)) === true && !stale()) reportFolderOk(folder); // reachable, known before the walk (FOLDER-NOTICE-1)
     const report = {};
     const files = await scanFolderAsync(folder, report);
     if (stale()) return;
@@ -169,7 +170,7 @@ function createFolderSync(deps) {
     // A failed scan, save or prune is logged here, so the fire-and-forget startup call (main.js) cannot leave an unhandled
     // rejection. The IPC callers (main/ipc/state.js) then go on to startWatcher, as they do after any sync that ends early.
     const promise = runFullSync(folder)
-      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); })
+      .catch((err) => { console.error("[folder-sync] full sync failed:", err && err.message); reportFolderProblem("sync-failed", folder); })
       .finally(() => {
         if (!running || running.promise !== promise) return; // an abandoned run settling late changes nothing
         running = null;
@@ -185,6 +186,7 @@ function createFolderSync(deps) {
     let st;
     try { st = await statFile(p); } catch { return; }
     if (stopped) return;
+    reportFolderOk(getSourceFolder()); // a watcher add read a file under the folder, so the root lists content
     if (st.isDirectory()) {
       for (const file of (await scanFolderAsync(p)) || []) await addOne(file.filepath); // a folder moved in; null: unreadable
       return;
