@@ -1,0 +1,14 @@
+{"id":"passage-a","words":165,"chunks":10,"failed":0,"byClass":{}}
+{"id":"passage-b","words":122,"chunks":8,"failed":0,"byClass":{}}
+{"id":"legacy/chapter-transition","words":25,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/dialogue-switches","words":35,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/long-sentence","words":41,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/pause-resume","words":26,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/prose-basic","words":38,"chunks":4,"failed":0,"byClass":{}}
+{"id":"legacy/punctuation-dense","words":26,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/queued-handoff","words":26,"chunks":3,"failed":0,"byClass":{}}
+{"id":"legacy/section-transition","words":23,"chunks":3,"failed":0,"byClass":{}}
+{"id":"raven-1845","words":1067,"chunks":52,"failed":0,"byClass":{}}
+{"id":"meditations","words":80493,"chunks":3588,"failed":0,"byClass":{}}
+GATE: 0 fail-closed chunks of 3683
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --gate | exit 0 | 134 s | stderr bytes 0 | 2026-10-15 09:10

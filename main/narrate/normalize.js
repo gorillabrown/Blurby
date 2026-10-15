@@ -58,19 +58,19 @@ function segments(normalized) {
   return out;
 }
 
-const wordsOf = (pieces) => pieces.flatMap((s) => s.trim().split(/\s+/).filter(Boolean));
+// A token of apostrophes only is phonemized to nothing (no phoneme, no id, no frame): kokoro maps ‘ and ’ to ', which is
+// not in its punctuation set, so a closing quote after a stop ("heart.'") reaches espeak as a word of its own (P6b F1).
+const isSilentToken = (w) => /^'+$/.test(w);
+const wordsOf = (pieces) => pieces.flatMap((s) => s.trim().split(/\s+/).filter((w) => w && !isSilentToken(w)));
 const spokenWordsOf = (text) => wordsOf(segments(normalize(text)));
 
 /**
- * How many spoken (normalized, punctuation-free) words each source word becomes. Every rule of the normalizer
- * keeps the space between two words, so a word without a digit or a currency sign becomes exactly one spoken
- * word (or none, when it is punctuation only); a word with digits or a currency sign is normalized on its own.
+ * How many spoken (normalized, punctuation-free) words each source word becomes, each normalized on its own: none for
+ * punctuation or a closing quote, two for an em-dash join ("word—word"), several for a year or an amount (P6b F2).
+ * The caller checks the sum against the spoken words of the whole chunk, so a context-dependent rule fails closed.
  */
 function spokenCounts(sourceWords) {
-  return sourceWords.map((w) => {
-    if (/[\d$£]/.test(w)) return spokenWordsOf(w).length;
-    return spokenWordsOf(w).length === 0 ? 0 : 1;
-  });
+  return sourceWords.map((w) => spokenWordsOf(w).length);
 }
 
 /**
@@ -134,4 +134,4 @@ function mapUnitsToSourceWords(text, capturedSegments, units) {
   }));
 }
 
-module.exports = { normalize, segments, spokenWordsOf, spokenCounts, mapUnitsToSourceWords, PUNCT };
+module.exports = { normalize, segments, spokenWordsOf, spokenCounts, mapUnitsToSourceWords, isSilentToken, PUNCT };

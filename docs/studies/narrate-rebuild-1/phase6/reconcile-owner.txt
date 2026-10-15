@@ -1,0 +1,10 @@
+{"id":"c933bd96","words":1875,"chunks":88,"failed":0,"byClass":{}}
+{"id":"b6e457e6","words":55882,"chunks":2562,"failed":3,"byClass":{"E":[10848,40005,45844]}}
+{"id":"ef95fc39","words":55882,"chunks":2562,"failed":3,"byClass":{"E":[10848,40005,45844]}}
+{"id":"dab1d9d7","words":16718,"chunks":726,"failed":5,"byClass":{"E":[1250,3905,4492,5064],"D:ruled":[12529]}}
+{"id":"58ed7188","words":16718,"chunks":726,"failed":5,"byClass":{"E":[1250,3905,4492,5064],"D:ruled":[12529]}}
+{"id":"3c6f42b3","words":16718,"chunks":726,"failed":5,"byClass":{"E":[1250,3905,4492,5064],"D:ruled":[12529]}}
+{"id":"844e92e6","words":1111,"chunks":52,"failed":0,"byClass":{}}
+{"id":"9015cc65","words":80493,"chunks":3588,"failed":0,"byClass":{}}
+OWNER: 21 fail-closed chunks of 11030 in 8 books; 18 class E, 3 ruled residual, 0 other
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --owner C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\bbe4b04a-f097-4f3e-ba25-221d3dcf13e9\scratchpad\owner-epub-copy | exit 0 | 483 s | stderr bytes 0 | 2026-10-15 09:10

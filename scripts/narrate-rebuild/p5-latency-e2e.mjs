@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // NARRATE-REBUILD-1 P5 — D6 end-to-end latency, and the launcher for the D3 recorded-output sessions.
 // Launches the built app unpackaged from this worktree (BLURBY_USE_DIST=1) with a scratch profile under --out
 // (BLURBY_USER_DATA_DIR: the real profile is never touched), the duration-exposed model copy (NARRATE_MODELS_ROOT),
@@ -37,8 +38,8 @@ const DIAG = process.argv.includes("--diag");
 // --break plants 2.5 s on the first trial read (the positive control, LL-151): any run must then exit 1.
 const BREAK = process.argv.includes("--break");
 let breakPlanted = false;
-// The book word every session opens at. 8723 is 700 words before THE SECOND BOOK (word 9423 of the sample EPUB's
-// extraction), so a five-minute session crosses a section boundary (D5, F2) inside plain body text.
+// The book word every session opens at. 8723 is 708 words before THE SECOND BOOK (word 9431 in the app's numbering,
+// Electron 41's ICU; plain Node says 9423), so a five-minute session crosses a section boundary (D5, F2) inside plain body text.
 const POSITION = Number(arg("--position", 8723));
 const MODELS_ROOT = process.env.NARRATE_MODELS_ROOT || "C:/Projects/Blurby-artifacts/narrate-rebuild-1/models";
 const RECORDS_DIR = path.join(ROOT, "docs/studies/narrate-rebuild-1/phase5");
@@ -58,7 +59,7 @@ function startCpuSampler() {
   const host = [];
   const app = [];
   const hostTimer = setInterval(() => { const s = cpuSnapshot(); host.push({ t: Date.now(), ...s }); }, CPU_SAMPLE_MS);
-  const ps = `$root = '${ROOT.replace(/'/g, "''")}'; while ($true) { $s = 0; Get-Process electron -ErrorAction SilentlyContinue | Where-Object { $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $s += $_.TotalProcessorTime.TotalSeconds }; [Console]::Out.WriteLine(([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()).ToString() + ' ' + $s.ToString([Globalization.CultureInfo]::InvariantCulture)); Start-Sleep -Milliseconds ${CPU_SAMPLE_MS} }`;
+  const ps = `$root = '${ROOT.replace(/'/g, "''")}'; while ($true) { $s = 0; Get-Process electron -ErrorAction SilentlyContinue | Where-Object { $_.Id -ne ${process.pid} -and $_.Path -and $_.Path.StartsWith($root, [StringComparison]::OrdinalIgnoreCase) } | ForEach-Object { $s += $_.TotalProcessorTime.TotalSeconds }; [Console]::Out.WriteLine(([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()).ToString() + ' ' + $s.ToString([Globalization.CultureInfo]::InvariantCulture)); Start-Sleep -Milliseconds ${CPU_SAMPLE_MS} }`;
   const child = spawn("pwsh", ["-NoProfile", "-NonInteractive", "-Command", ps], { stdio: ["ignore", "pipe", "ignore"], windowsHide: true });
   let buf = "";
   child.stdout.on("data", (d) => { buf += d; let i; while ((i = buf.indexOf("\n")) >= 0) { const [t, sec] = buf.slice(0, i).trim().split(" ").map(Number); buf = buf.slice(i + 1); if (Number.isFinite(t) && Number.isFinite(sec)) app.push({ t, sec }); } });
@@ -86,8 +87,9 @@ async function launch(label, trial) {
   const profile = path.join(OUT, "profiles", `${label}-${Date.now()}`);
   for (const d of [traceDir, path.join(OUT, "logs"), path.join(OUT, "summaries"), profile]) fs.mkdirSync(d, { recursive: true });
   try { fs.rmSync(tracePathFor(label), { force: true }); } catch { /* none */ }
+  const { ELECTRON_RUN_AS_NODE: _asNode, ...inherited } = process.env; // the launcher runs as Node; the app must not
   const env = {
-    ...process.env,
+    ...inherited,
     BLURBY_USE_DIST: "1",
     BLURBY_USER_DATA_DIR: profile,
     BLURBY_TTS_EVAL_TRACE_DIR: traceDir,

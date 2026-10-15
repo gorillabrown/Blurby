@@ -1,0 +1,46 @@
+{
+  "verdict": "FAIL",
+  "failures": [
+    "word 2963 is \"the\", want \"ancient\" (numbering)",
+    "first committed word is \"the\", want \"ancient\"",
+    "never crossed word 5480",
+    "stop before the boundary: {\"kind\":\"narrate-stop\",\"t\":1087197.6,\"epoch\":2,\"chunkStart\":3192,\"at\":1082.704,\"reason\":\"drop\",\"ts\":1792043580201}"
+  ],
+  "break": false,
+  "icu": "77.1",
+  "bookWords": 80493,
+  "firstVoiced": {
+    "index": 2963,
+    "text": "the",
+    "context": "whole. Public spirit was the most splendid political",
+    "latencyMs": 745,
+    "cause": "play"
+  },
+  "crossing": {
+    "boundary": 5480,
+    "boundaryText": "HIS FIRST BOOK",
+    "pastBoundaryS": null,
+    "committedAround": null,
+    "chunksAround": [],
+    "gapAtBoundaryMs": null,
+    "worstGapsMs": [
+      1584,
+      1366.7,
+      1266.6
+    ]
+  },
+  "counts": {
+    "commits": 246,
+    "scheduledUnits": 246,
+    "chunks": 14,
+    "stops": [
+      {
+        "chunkStart": 3192,
+        "reason": "drop"
+      }
+    ],
+    "firstCommit": 2963,
+    "lastCommit": 3216
+  }
+}
+# command: pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/d2-crossing-check.cjs docs/studies/narrate-rebuild-1/phase5/d2-ancient-crossing.json 2963 ancient 5480 HIS | exit 1 | 1 s | stderr bytes 0 | 2026-10-15 09:10

@@ -1,3 +1,4 @@
+import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // P0-5 Latency (one component of the Latency budget; ruling R3; charter choices T6, T7).
 // Harness time = request -> first voiced PCM sample: generation (normalization, phonemization, synthesis,
 // timing extraction) plus the leading silence before the first voiced 1 ms window (T6: RMS >= 1% of the
