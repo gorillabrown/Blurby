@@ -19,7 +19,7 @@
 ### BUG-196 — With the source folder cleared, books from that folder no longer open
 **Reported:** 2026-10-14 (QUIT-FLUSH-1 Done-when 9 owner smoke, production build of `bd1216fc`; filed for Blurby.Brain)
 **Severity:** HIGH (about 131 of the owner's books cannot be opened; the reader shows "Could not read EPUB file")
-**Status:** OPEN — scheduled as LIBRARY-READ-ALLOW-1 (fix direction ruled by Blurby.Brain, 2026-10-14). Lane: Library & Content.
+**Status:** RESOLVED in source (LIBRARY-READ-ALLOW-1): a library document's own file is readable regardless of sourceFolder; closes after the batched owner smoke.
 **Location:** `main/ipc/library.js:160-175` (`read-file-buffer`): the allowed roots are only the data folder and `settings.sourceFolder`.
 **Description:** With `sourceFolder` set to `""` (the BUG-193 workaround, kept until LARGE-FOLDER-SYNC-1), a document whose `source` is `"folder"` (for example *Why Nations Fail* under `G:\My Drive\Personal\Readings\Daron Acemoglu\`) fails to open: `read-file-buffer` logs `BLOCKED: ... not within allowed roots` and returns `null`. Changing the folder in the app is not a workaround: the sync prunes the old folder's books (BUG-193 Interactions).
 **Fix path (ruled):** a document already in the library may be read from its own `filepath` (or `convertedEpubPath`) regardless of `sourceFolder`; every other path keeps the allowed-roots check.
