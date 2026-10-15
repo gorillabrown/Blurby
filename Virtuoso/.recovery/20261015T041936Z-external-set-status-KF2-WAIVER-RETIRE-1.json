@@ -1,0 +1,36 @@
+{
+  "id": "20261015T041936Z-external-set-status-KF2-WAIVER-RETIRE-1",
+  "operation": "external-set-status",
+  "item_id": "KF2-WAIVER-RETIRE-1",
+  "created": "2026-10-15T04:19:36Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 25,
+      "written_status": "full-spec",
+      "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass."
+    },
+    "expectedRevision": "8b499c44bb8e66a2ca2d5fb4451d98704377bdb69a4dbd1643791593624355e1",
+    "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('notes', 'Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass.'), ('sequence', 25), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "KF2-WAIVER-RETIRE-1",
+      "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('notes', 'Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass.'), ('sequence', 25), ('written_status', 'full-spec')]",
+      "actualRevision": "689ce0d82de5a3fe2fb4d3f1d6df242ee1a22b0c9b8145959ca00295eb952d14",
+      "recoveryId": "20261015T041936Z-external-set-status-KF2-WAIVER-RETIRE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:42Z",
+  "outcome": "succeeded"
+}

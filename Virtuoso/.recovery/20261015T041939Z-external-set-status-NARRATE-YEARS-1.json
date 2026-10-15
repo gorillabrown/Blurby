@@ -1,0 +1,34 @@
+{
+  "id": "20261015T041939Z-external-set-status-NARRATE-YEARS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-YEARS-1",
+  "created": "2026-10-15T04:19:39Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 35
+    },
+    "expectedRevision": "76249f366f36466eeb5a58b79c2d90a7865def3babc408034f8c580058b23d87",
+    "idempotencyKey": "set-status:NARRATE-YEARS-1:[('sequence', 35)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-YEARS-1",
+      "idempotencyKey": "set-status:NARRATE-YEARS-1:[('sequence', 35)]",
+      "actualRevision": "a14fb35bccf40e05aae5facfae9f07ca4ab6bae43007ac14e01b114121327c7f",
+      "recoveryId": "20261015T041939Z-external-set-status-NARRATE-YEARS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:47Z",
+  "outcome": "succeeded"
+}

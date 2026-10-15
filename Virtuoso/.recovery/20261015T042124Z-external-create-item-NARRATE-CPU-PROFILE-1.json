@@ -1,0 +1,52 @@
+{
+  "id": "20261015T042124Z-external-create-item-NARRATE-CPU-PROFILE-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-CPU-PROFILE-1",
+  "created": "2026-10-15T04:21:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Narrate saturates a 4-core CPU during warm requests",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-cpu-profile-1",
+      "branch": "eb/narrate-cpu-profile-1",
+      "description": "A profile pass on producer and worker time, and whether chunk ramp or worker count should adapt to core count.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the quiet-machine run. Not a release gate.",
+      "sequence": 34,
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "id": "NARRATE-CPU-PROFILE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T03:05:24Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-CPU-PROFILE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-CPU-PROFILE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-CPU-PROFILE-1",
+      "actualRevision": "98989e73dc077f137802c25ba0bce3dc0cec2c1e66479a3a4b999d1000c39cb5",
+      "recoveryId": "20261015T042124Z-external-create-item-NARRATE-CPU-PROFILE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81e1-b020-ebf7e9886d7a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T04:28:02Z",
+  "outcome": "succeeded"
+}

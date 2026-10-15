@@ -1,0 +1,36 @@
+{
+  "id": "20261015T041943Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+  "operation": "external-set-status",
+  "item_id": "SAVE-LIBRARY-MERGE-1",
+  "created": "2026-10-15T04:19:43Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 20,
+      "written_status": "full-spec",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass."
+    },
+    "expectedRevision": "9e5090b219369ebd2bab5dd2431cc695dc2e2177840b05002e37e4f04b527ae0",
+    "idempotencyKey": "set-status:SAVE-LIBRARY-MERGE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass.\"), ('sequence', 20), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "SAVE-LIBRARY-MERGE-1",
+      "idempotencyKey": "set-status:SAVE-LIBRARY-MERGE-1:[('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Not a release gate (pre-existing race). After IPC-PATH-TRUST-1. Release gate (Blurby.Brain 2026-10-14). Full Spec on eb/ipc-path-trust-1 d0ef1f5d; fixes BUG-199. U9/U10 pass.\"), ('sequence', 20), ('written_status', 'full-spec')]",
+      "actualRevision": "a51470d518e82967cb9d40a994d97a6c0a0eee7da82085640e5d0dd19c36e6c5",
+      "recoveryId": "20261015T041943Z-external-set-status-SAVE-LIBRARY-MERGE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T04:27:52Z",
+  "outcome": "succeeded"
+}

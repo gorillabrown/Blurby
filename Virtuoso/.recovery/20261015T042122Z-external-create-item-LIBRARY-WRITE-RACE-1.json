@@ -1,0 +1,50 @@
+{
+  "id": "20261015T042122Z-external-create-item-LIBRARY-WRITE-RACE-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-WRITE-RACE-1",
+  "created": "2026-10-15T04:21:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Library writers that mutate a document across an await",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#library-write-race-1",
+      "branch": "eb/library-write-race-1",
+      "description": "Remaining main-side writers in the save-race class, orphaned converted files, payload id dedupe and malformed-element tests.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1.",
+      "sequence": 32,
+      "prerequisites": [],
+      "id": "LIBRARY-WRITE-RACE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T03:05:24Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-WRITE-RACE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-1",
+      "actualRevision": "dbde014f18b3cc3f22cfc4693642866dbda63c01254106279dfecedeb2e02792",
+      "recoveryId": "20261015T042122Z-external-create-item-LIBRARY-WRITE-RACE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-812d-ae46-d2e318b20df1",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T04:27:59Z",
+  "outcome": "succeeded"
+}

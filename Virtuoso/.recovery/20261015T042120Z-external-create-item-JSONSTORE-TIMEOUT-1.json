@@ -1,0 +1,50 @@
+{
+  "id": "20261015T042120Z-external-create-item-JSONSTORE-TIMEOUT-1",
+  "operation": "external-create-item",
+  "item_id": "JSONSTORE-TIMEOUT-1",
+  "created": "2026-10-15T04:21:20Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Give the jsonStore concurrency test real headroom",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "XS",
+      "lane": "Platform & Maintenance",
+      "group": "Test Health",
+      "spec_link": "ROADMAP.md#jsonstore-timeout-1",
+      "branch": "eb/jsonstore-timeout-1",
+      "description": "A 30 s timeout for jsonStore test (a) and isolation of (d)/(e); then jsonStore leaves the closed list.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only.",
+      "sequence": 30,
+      "prerequisites": [],
+      "id": "JSONSTORE-TIMEOUT-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T03:05:24Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:JSONSTORE-TIMEOUT-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "JSONSTORE-TIMEOUT-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:JSONSTORE-TIMEOUT-1",
+      "actualRevision": "3e1489d13dfa0428a195b222a8011cb9d6d7a8fc4518206931ac71e9568f2884",
+      "recoveryId": "20261015T042120Z-external-create-item-JSONSTORE-TIMEOUT-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81f6-91d8-e04b3e798d20",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T04:27:55Z",
+  "outcome": "succeeded"
+}

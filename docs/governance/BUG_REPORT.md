@@ -8,6 +8,22 @@
 
 ## Incomplete
 
+### BUG-200 — The quick-settings "Sort by" does not change the library order
+**Reported:** 2026-10-14 (code trace while specifying SETTINGS-KEY-TRUST-1, on `eb/ipc-path-trust-1` @ `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
+**Severity:** LOW (a visible control that does nothing)
+**Status:** OPEN — unscheduled; whether the control should exist is an owner question (Blurby.Brain raises it). Lane: UX polish.
+**Location:** `src/components/QuickSettingsPopover.tsx:270-295` (the select; options at `:32-37`) saves `settings.sortBy`; nothing else reads `sortBy`. The library sorts with `LibraryView`'s own state, `useState(settings.defaultSort || "author")` (`src/components/LibraryView.tsx:84`).
+**Description:** The quick-settings popover's "Sort by" select saves `settings.sortBy` and shows it back, but the library's order comes from `LibraryView`'s own sort state: seeded once from `defaultSort` when the view mounts, changed only by the section's own select (`:681-690`, `:741-750`), applied only to the "Not Started" section (`:252-278`), and using a different vocabulary (`author`, `alpha`, `newest`, `oldest`). Settings → Library's default sort also offers `progress`, which `LibraryView` has no branch for.
+**Fix path:** owner decision first (remove the control, or wire it to the library's sort with one vocabulary).
+
+### BUG-199 — A book deleted on this device returns after a cloud sync
+**Reported:** 2026-10-14 (code trace while specifying SAVE-LIBRARY-MERGE-1, on `eb/ipc-path-trust-1` @ `e1b72949`, re-read on `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
+**Severity:** MEDIUM (a deleted book reappears in the library, with its file already removed from disk; needs cloud sync on, a delete, then any renderer library save, such as marking cards seen, before the next sync)
+**Status:** OPEN — scheduled as SAVE-LIBRARY-MERGE-1 (release gate). Lane: Library & Content.
+**Location:** `main/ipc/library.js:60-64` (`save-library` replaces the library with the renderer's array), `:110-127` (`delete-doc` writes the tombstone); `main/ipc/state.js:17` and `src/hooks/useLibrary.ts:55` (the renderer's copy holds no tombstones); `main/sync-engine.js:355-360` (a cloud-only document is added back).
+**Description:** Deleting a book keeps a deletion record (a tombstone) so that cloud sync can carry the deletion to other devices. The renderer's copy of the library never holds that record, and a library save from the renderer replaces main's library with its copy, so the record is lost. On the next sync the cloud still has the book, and the merge adds it back.
+**Fix path (ruled):** `save-library` edits main's records in place and never removes one; only `delete-doc` removes a document (SAVE-LIBRARY-MERGE-1).
+
 ### BUG-198 — A converted folder book is reset to the start after a rescan
 **Reported:** 2026-10-14 (code trace while specifying SAVE-LIBRARY-TRUST-1, on `main` @ `037472c9`; not yet seen live; filed for Blurby.Brain)
 **Severity:** MEDIUM (a folder book's reading position, favourite, tags, collection and queue place are lost; needs only an open, a library save and a rescan or folder sync)
