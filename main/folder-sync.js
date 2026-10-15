@@ -4,11 +4,14 @@
 "use strict";
 const path = require("path");
 const { FOLDER_SYNC_BATCH_SIZE, FOLDER_SYNC_SAVE_INTERVAL_MS } = require("./constants");
+// One key for every library path comparison: resolved, and lowercased on win32, where paths are case-insensitive.
+// LARGE-FOLDER-SYNC-2 reuses it; keep one implementation. A falsy path (a manual or URL document) is returned as is.
+const pathKey = (p) => (p ? (process.platform === "win32" ? path.resolve(p).toLowerCase() : path.resolve(p)) : p);
 
 function createFolderSync(deps) {
-  const { getSourceFolder, getLibrary, setLibrary, addDoc, scanFolderAsync, statFile,
+  const { getSourceFolder, getLibrary, setLibrary, addDoc, scanFolderAsync, rootHasContent, statFile,
     extractNewFileDoc, extractContent, countWords, isFailed, addFailed = () => {}, saveLibrary, saveLibraryNow, broadcastLibrary,
-    emitProgress, now = Date.now } = deps;
+    emitProgress, now = Date.now, reportFolderProblem = () => {} } = deps;
   let running = null; // { folder, promise } of the one full sync allowed at a time
   let cancelled = false;
   let stopped = false; // set at quit: nothing more is applied or saved
@@ -63,15 +66,19 @@ function createFolderSync(deps) {
     addFailed(file.filepath);
     return null;
   });
-  const exists = (p) => statFile(p).then(() => true, () => false);
+  // Only ENOENT means gone: EIO, EACCES, EPERM or EBUSY on a Drive file is a read error, not a deletion (BUG-195).
+  const fileState = (p) => statFile(p).then(() => "present", (err) => (err && err.code === "ENOENT" ? "gone" : "unreadable"));
+  const underAny = (p, keys) => { const k = pathKey(p); return keys.some((s) => k === s || k.startsWith(s + path.sep)); }; // keys of unread paths
 
   async function runFullSync(folder) {
     cancelled = false;
     addedDuringRun.clear();
     const stale = () => cancelled || stopped || getSourceFolder() !== folder;
     emitProgress(0, 0, "scanning");
-    const files = await scanFolderAsync(folder);
+    const report = {};
+    const files = await scanFolderAsync(folder, report);
     if (stale()) return;
+    if (!files) { reportFolderProblem("root-unlistable", folder); return; } // BUG-195: an unlistable root proves nothing gone
 
     const byPath = new Map(getLibrary().map((d) => [d.filepath, d]));
     const onDisk = new Set();
@@ -105,8 +112,18 @@ function createFolderSync(deps) {
       return;
     }
     const savedArticles = path.join(path.resolve(folder), "Saved Articles");
-    setLibrary(getLibrary().filter((d) => d.source !== "folder" || onDisk.has(d.filepath)
-      || addedDuringRun.has(d.filepath) || (d.filepath && path.resolve(d.filepath).startsWith(savedArticles))));
+    const skipped = (report.skipped || []).map(pathKey); // a test's scan stub may not fill the report
+    const keep = (d) => d.source !== "folder" || onDisk.has(d.filepath) || addedDuringRun.has(d.filepath)
+      || (d.filepath && (path.resolve(d.filepath).startsWith(savedArticles) || underAny(d.filepath, skipped)));
+    const library = getLibrary();
+    // BUG-195: no book found while the prune would remove books under this folder (an unmounted or starting Drive can list
+    // an empty folder) is not evidence they are gone. A new, empty folder holds none, so a switch still prunes the old one.
+    if (files.length === 0 && library.some((d) => !keep(d) && d.filepath && underFolder(d.filepath))) {
+      reportFolderProblem("root-empty-suspect", folder);
+      return;
+    }
+    if (skipped.length) reportFolderProblem("partial-read", folder);
+    setLibrary(library.filter(keep));
     saveLibrary();
     broadcastLibrary();
     emitProgress(newFiles.length, newFiles.length, "done");
@@ -135,7 +152,7 @@ function createFolderSync(deps) {
     try { st = await statFile(p); } catch { return; }
     if (stopped) return;
     if (st.isDirectory()) {
-      for (const file of await scanFolderAsync(p)) await addOne(file.filepath); // a folder moved in
+      for (const file of (await scanFolderAsync(p)) || []) await addOne(file.filepath); // a folder moved in; null: unreadable
       return;
     }
     if (inFlight.has(p) || isFailed(p) || hasBook(p)) return;
@@ -156,8 +173,14 @@ function createFolderSync(deps) {
   async function removeUnder(p) {
     const folder = getSourceFolder();
     if (!underFolder(p)) return;
-    // Only a path that is really gone, under a root that is reachable: a Drive hiccup or an unplugged root removes nothing.
-    if (stopped || !folder || !(await exists(folder)) || await exists(p) || stopped) return;
+    // Only a path that is really gone (ENOENT), under a root that still lists a subfolder or a book: a missing, unreadable
+    // or emptied root (an unmounted Drive's mount point), or a read error on the file, removes nothing (BUG-195).
+    if (stopped || !folder) return;
+    const root = await rootHasContent(folder);
+    if (root !== true) { reportFolderProblem(root === null ? "root-unlistable" : "root-empty-suspect", folder); return; }
+    const state = await fileState(p);
+    if (state === "unreadable") reportFolderProblem("partial-read", folder);
+    if (state !== "gone" || stopped) return;
     const prefix = p + path.sep;
     // One pass over the library, splitting kept from gone (removeDoc is O(library) per book); setLibrary also rebuilds main.js's id index.
     const i = index(); // before setLibrary: it is valid for the current array
@@ -211,4 +234,4 @@ function createFolderSync(deps) {
   };
 }
 
-module.exports = { createFolderSync };
+module.exports = { createFolderSync, pathKey };

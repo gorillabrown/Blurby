@@ -12,7 +12,7 @@ const { CURRENT_SETTINGS_SCHEMA, CURRENT_LIBRARY_SCHEMA, SETTINGS_DEFAULTS,
 const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = require("./main/ipc-handlers");
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
-const { startWatcher, scanFolderAsync } = require("./main/folder-watcher");
+const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");
 const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
 const { createFolderSync } = require("./main/folder-sync");
@@ -312,13 +312,19 @@ function emitSyncProgress(current, total, phase) {
   }
 }
 
+// HOOK (LARGE-FOLDER-SYNC-2 / owner notice, BUG-195): the last folder problem's code ("root-unlistable",
+// "root-empty-suspect" or "partial-read") rides on the existing watcher-error payload. Nothing new is sent: each send is a toast.
+let lastFolderProblem = null;
+let folderToastShown = false; // one watcher-error toast per failure episode
+function reportFolderProblem(code, folder) { lastFolderProblem = code; console.warn("[folder-sync] source folder problem:", code, folder); }
+
 const folderSync = createFolderSync({
   getSourceFolder: () => settings.sourceFolder,
   getLibrary, setLibrary, addDoc: addDocToLibrary,
-  scanFolderAsync, statFile: (p) => fsPromises.stat(p),
+  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),
   extractNewFileDoc, extractContent, countWords,
   isFailed: (p) => failedExtractions.has(p), addFailed: addFailedExtraction,
-  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress,
+  saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem,
 });
 function syncLibraryWithFolder() { return folderSync.syncAll(); }
 function cancelSync() { folderSync.cancel(); }
@@ -347,13 +353,16 @@ function startWatcherFn() {
       );
       const userMessage = isPermission
         ? "Can't watch this folder — check permissions."
-        : "Folder watching encountered an error — try re-selecting the folder.";
+        : "Blurby can't reach your source folder. Your books are kept. Reconnect the drive and Blurby will pick it up.";
       console.error("[watcher] Error:", err.message);
+      if (folderToastShown) return;
+      folderToastShown = true;
       if (mainWindow && !mainWindow.isDestroyed()) {
-        mainWindow.webContents.send("watcher-error", { message: userMessage });
+        mainWindow.webContents.send("watcher-error", { message: userMessage, reason: lastFolderProblem || "watch-failed" });
       }
     },
   });
+  if (watcher) folderToastShown = false;
 }
 
 // ── Reading statistics ─────────────────────────────────────────────────────────

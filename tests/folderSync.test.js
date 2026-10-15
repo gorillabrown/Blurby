@@ -40,9 +40,10 @@ function makeDeps(init = {}) {
     addDoc: (d) => { state.lib.unshift(d); },
     removeDoc: (id) => { state.lib = state.lib.filter((d) => d.id !== id); },
     scanFolderAsync: vi.fn(async () => []),
+    rootHasContent: async (p) => (state.disk.has(p) ? true : null), // the old exists(root) rule; tests/folderUnreachableGuard.test.js drives the real one
     statFile: (p) => (state.disk.has(p)
       ? Promise.resolve({ isDirectory: () => false, size: 1, mtimeMs: 1 })
-      : Promise.reject(new Error("ENOENT"))),
+      : Promise.reject(Object.assign(new Error("ENOENT"), { code: "ENOENT" }))),
     extractNewFileDoc: vi.fn(async (f) => {
       if (state.hold) await state.hold(f);
       return { id: "id-" + path.basename(f.filepath), filepath: f.filepath, source: "folder", position: 0 };
@@ -157,7 +158,7 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     scanA.resolve([file(path.join(rootA, "new.epub"))]);
     await Promise.all([sa, sb]);
     expect(m.deps.extractNewFileDoc, "folder A added a book after the switch").not.toHaveBeenCalled();
-    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB);
+    expect(m.deps.scanFolderAsync).toHaveBeenCalledWith(rootB, expect.any(Object));
   });
 
   it("(e) a long import saves as it goes", async () => {
