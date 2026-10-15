@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T07:12:50Z",
+  "takenAt": "2026-10-15T07:19:15Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2439,6 +2439,30 @@
       "description": "regenerate-ws-pairing-token stores the new token through startServer's encrypt path, so one token exists and plaintext never reaches settings.json when safeStorage is available; schemaVersion optional in BlurbySettings; every BlurbySettings key in SETTINGS_DEFAULTS.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate.",
       "revision": "3b07e2195fdf373201a76dc1b8d2c0e3bbfcf36a5cbb90ba7fd2b0dbe8f867ec",
+      "extra": {}
+    },
+    {
+      "id": "WORD-INDEX-UNIFY-1",
+      "title": "One word numbering in every runtime",
+      "sequence": 41,
+      "status": "blocked",
+      "raw_status": "Blocked",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "effort": "M",
+      "lane": "Reader Engine",
+      "group": "Reader Polish",
+      "spec_link": "ROADMAP.md#word-index-unify-1",
+      "branch": "eb/word-index-unify-1",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "The main extractor joins adjacent word segments through one ICU-independent function shared with segmentWordSpans, segments whole blocks, and guards against an Electron ICU change; saved positions remapped once through their cfi, word text unchanged.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate.",
+      "revision": "64d7805426c5582b5725bc3b27b088284cdde68d9f3c09576ee94d4c6e758a0d",
       "extra": {}
     }
   ],
