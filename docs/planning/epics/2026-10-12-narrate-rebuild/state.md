@@ -256,3 +256,4 @@ arrate-rebuild-1-p6eleasewin-unpacked`; relayed by Blurby.Roadmap to session S4
   - D2: you watch narration on Meditations (check F2) and confirm it works.
   - D7 F5: a second check you watch yourself."
   This closes gate G2: D12, D2 (owner-observed half) and D7 F5 (owner-observed half) pass on that build.
+- **D13 trailer check** (S4, 2026-10-14): the second-machine D13 loop's `--format` string was single-quoted, so `$n` did not expand and the loop printed no trailer values; it is now double-quoted. Run on this machine: P1 `b03dfec4` → `25ba145d`, P2 `d688db3a` → `7bbf6b20`, P3 `ae7a7fe5` → `d81aeb4b`, P4 `6e27a552` → `ef245815`, P5 `84d35933` → `331f8313`; each value equals `git rev-parse <first commit>^`. **P6's base is verified by parent equality**, because its base line is not a parsed git trailer (the loop prints an empty value for P6): `git rev-parse a06e05ba^` = `05a5480a` (the P5 merge).

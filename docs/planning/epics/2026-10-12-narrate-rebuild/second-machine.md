@@ -45,8 +45,13 @@ D13 (run in `$P6`, after `git fetch origin --prune`; the P6 merge itself comes l
 ```pwsh
 git log --merges --first-parent --format='%h %s' refs/remotes/origin/main | Select-String 'narrate-rebuild-1-p[0-9]'
 # expected: exactly one "Merge eb/narrate-rebuild-1-p<n>" line per phase merged so far (P1..P5 today: 7bbf6b20, d81aeb4b, ef245815, 331f8313, 05a5480a)
-foreach ($n in 1..6) { "P$n"; git log --format='%h %(trailers:key=NARRATE-REBUILD-1-P$n-Base,valueonly)' --grep="NARRATE-REBUILD-1-P$n-Base" refs/remotes/origin/main refs/heads/eb/narrate-rebuild-1-p6 }
+foreach ($n in 1..6) { "P$n"; git log --format="%h %(trailers:key=NARRATE-REBUILD-1-P$n-Base,valueonly)" --grep="NARRATE-REBUILD-1-P$n-Base" refs/remotes/origin/main refs/heads/eb/narrate-rebuild-1-p6 }
 # each phase's FIRST commit must carry the trailer, and its value must equal that commit's parent: compare with  git rev-parse <first commit>^
+# The --format string is double-quoted so $n expands (single quotes passed a literal "P$n" key and printed no values).
+# P6 exception: its first commit a06e05ba prints an empty value, because its base line is not a parsed git trailer.
+# P6's base is verified by parent equality instead:  git rev-parse a06e05ba^  must print 05a5480a (the P5 merge).
+# Verified 2026-10-14 on this machine: P1 b03dfec4 -> 25ba145d, P2 d688db3a -> 7bbf6b20, P3 ae7a7fe5 -> d81aeb4b,
+# P4 6e27a552 -> ef245815, P5 84d35933 -> 331f8313; P6 a06e05ba^ = 05a5480a.
 ```
 
 Pass rules (charter, verbatim in effect):
