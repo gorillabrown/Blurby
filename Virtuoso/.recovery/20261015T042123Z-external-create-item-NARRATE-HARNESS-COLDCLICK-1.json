@@ -1,0 +1,52 @@
+{
+  "id": "20261015T042123Z-external-create-item-NARRATE-HARNESS-COLDCLICK-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-HARNESS-COLDCLICK-1",
+  "created": "2026-10-15T04:21:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Measure cold click on mainstream hardware",
+      "status": "Blocked",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-harness-coldclick-1",
+      "branch": "eb/narrate-harness-coldclick-1",
+      "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate.",
+      "sequence": 33,
+      "prerequisites": [
+        "NARRATE-REBUILD-1"
+      ],
+      "id": "NARRATE-HARNESS-COLDCLICK-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-15T03:05:24Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-HARNESS-COLDCLICK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-HARNESS-COLDCLICK-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-HARNESS-COLDCLICK-1",
+      "actualRevision": "12660e194f9287f077f15f5fcb99112b40131bb707f1a5cddd38221aa0613257",
+      "recoveryId": "20261015T042123Z-external-create-item-NARRATE-HARNESS-COLDCLICK-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-81ca-8d3f-fa962cabdd31",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T04:28:01Z",
+  "outcome": "succeeded"
+}
