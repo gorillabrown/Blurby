@@ -1,0 +1,50 @@
+{
+  "id": "20261015T004549Z-external-create-item-LIBRARY-READ-ALLOW-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-READ-ALLOW-1",
+  "created": "2026-10-15T00:45:49Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Let a library book open from its own file wherever it lives",
+      "status": "Queued",
+      "written_status": "Full Spec",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#library-read-allow-1",
+      "branch": "eb/library-read-allow-1",
+      "description": "A document already in the library may be read from its own file (exact path match) regardless of the source folder; every other path keeps the allowed-roots check. Fixes BUG-196.",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's ruling (BUG-196, found in the QUIT-FLUSH-1 smoke). Merges after PACKAGING-FIX-1 (same file). Full Spec: U9/U10 pass.",
+      "sequence": 14,
+      "prerequisites": [],
+      "id": "LIBRARY-READ-ALLOW-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T23:15:19Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-READ-ALLOW-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-READ-ALLOW-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-READ-ALLOW-1",
+      "actualRevision": "2026-10-15T00:46:12Z",
+      "recoveryId": "20261015T004549Z-external-create-item-LIBRARY-READ-ALLOW-1",
+      "detail": {},
+      "providerItemId": "3fa7c96c-c31e-8128-8090-ca086880bf6a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-15T00:46:13Z",
+  "outcome": "succeeded"
+}
