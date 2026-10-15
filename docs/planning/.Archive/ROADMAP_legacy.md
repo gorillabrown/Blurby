@@ -7348,3 +7348,621 @@ Content:
 **Rationale:** The exclusion assumed the EPERM lived in `main/sync-queue.js`'s own writer, but C2 moved that writer into `main/json-store.js`. Without a retry the new test cannot pass reliably, and real settings saves (including the quit flush) are dropped on a transient AV or indexer lock.
 **Scope change:** (1) `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` in `main/constants.js`. (2) In `main/json-store.js`'s serialized write, retry the rename on EPERM/EBUSY/EACCES after each delay, then rethrow the last error; rethrow other codes at once; never retry writeFile. (3) `tests/jsonStore.test.js` (d): transient EPERM ×2, then success, 3 rename calls. (e): persistent EPERM rejects after 4 calls. Both spy on the CommonJS `fs/promises` object and must fail before the retry lands (standing rule 43). (4) Done-when 9's fence adds `M main/constants.js`. (5) The KF-2 waiver does not apply: any EPERM/EBUSY/EACCES escaping `json-store.js` after the retries is BLOCKER(USER), and the delays are not lengthened.
 **Follow-up items:** This completes READER-MODE-SEPARATION-2 follow-up 4 (KF-2, Decision #25). Propose retiring the KF-2 waiver at the next /roadmap-review after clean full runs. Separate: Electron does not await an async `will-quit` listener (Plato). If Done-when 7's quit check fails, file it as a new issue; do not fix it in this sprint.
+
+<!-- Archived 2026-10-14 by /pointer-closeout FOLDER-SCAN-PERF-1; close-out docs/governance/close-outs/CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md. The specification as it stood at 534b43d2, with staging Fold-in 2 (the Done-when 10 fence) applied; Fold-ins 1 and 1b (control (h) budget, D2(b)) migrated to the close-out's Mid-Dispatch Decisions. -->
+
+
+#### FOLDER-SCAN-PERF-1 — Stop a large source folder stalling every launch *(position 10 — Full Spec; authored 2026-10-14; fixes BUG-193, and closes BUG-189 if the measurement shows it)*
+
+- **What:** With a large source folder (the owner's is about 120,000 files on Google Drive), a book opens about 2 minutes after launch. Make the folder work cheap and keep it off the startup path, without changing any feature: (1) the folder watcher (`startWatcher`) uses Node's native recursive `fs.watch` (one OS handle on Windows) instead of chokidar's whole-tree crawl, with the same callbacks and filters; (2) the folder scan (`scanFolderAsync`) makes no `realpath` call per file and yields to the event loop every `FOLDER_SCAN_YIELD_EVERY` entries; (3) the startup watcher and folder sync start after the main window has loaded, plus `FOLDER_SYNC_STARTUP_DELAY_MS`; (4) chokidar is removed from the dependencies (its only importer is `main/folder-watcher.js`).
+- **Why:**
+  - **The startup path** (`main.js:653-657`, on `66f15981`): whenever `settings.sourceFolder` is set, Phase 4 calls `startWatcherFn()` (`main.js:401-434`, which calls `startWatcher`) and then `syncLibraryWithFolder()` (`main.js:333-398`, which calls `scanFolderAsync`), as soon as auth and sync init finish (`main.js:588-593`).
+  - **The watcher** (`main/folder-watcher.js:78-108`): `getChokidar().watch(sourceFolder, …)` (`:82-86`) crawls and stats the whole tree, even with `ignoreInitial: true`, and opens a watch per directory. Each `add` and `change` then calls `isPathWithinFolder` (`:90`, `:98`).
+  - **The scan** (`main/folder-watcher.js:27-74`): for each supported file, `isPathWithinFolder(fullPath, folderPath)` (`:43`) makes two `fsPromises.realpath` calls (`:17-18`; it resolves the root folder again every time), plus one `stat` (`:44`).
+  - **The read that waits:** the renderer's `api.readFileBuffer` (`src/components/ReaderContainer.tsx:332-337`) reaches the `read-file-buffer` handler (`main/ipc/library.js:160-182`), which shares the main process's event loop and libuv threadpool with the scan and the watcher.
+  - **Planner probe** (2026-10-14; plain Node 24.14.0, which is Electron 41.1.0's Node, checked with `ELECTRON_RUN_AS_NODE`; local NTFS synthetic trees; scripts kept in the session scratchpad `scanprobe/`, not committed). On 40,000 files in 4,000 directories:
+    - `startWatcher` (chokidar): 46.4 s to `ready`. The longest event-loop stall was 10,970 ms, concurrent 2 MB reads took up to 25.7 s, and one read still took 1.4 s after `ready`.
+    - `scanFolderAsync`: 1.37 s, with a longest stall of 16 ms and concurrent reads of 2–3 ms. It made 4,000 `realpath` calls for 2,000 supported files.
+    - `fs.watch(root, { recursive: true })`: set up in 64 ms, with a longest stall of 7 ms.
+
+    On 3,000 files in 300 directories (three runs each), a 1 MB read started 20 ms after `startWatcher` took 607–814 ms, with stalls of 405–575 ms. The same read after a recursive `fs.watch` took 2 ms, with stalls of 16–17 ms. **So on local disk the watcher is the blocker, and the scan is not.** On Drive, every `realpath` and `stat` goes through the Drive filesystem, so the scan's 2 `realpath` calls per file also add up there. That was not measured on Drive; Done-when 9 measures the whole effect.
+  - **Symlinks never reach the scan's file branch:** `readdir(…, { withFileTypes: true })` reports a junction or symlink as a link (probe: `isDirectory=false isFile=false isSymbolicLink=true`). `walkDir` only recurses into `isDirectory()` and only collects `isFile()` (`:39`, `:42`), so every file it collects is inside the root by construction. The check at `:43` has never excluded anything that the walk would otherwise collect.
+  - **Evidence for BUG-193:**
+    - Executor (scratch profile with a copy of the owner's settings): a fresh profile renders in 1 s. With the owner's settings it was still stuck at a 120 s cap. With `sourceFolder` deleted it renders at once, and with a 12-file Drive folder it renders in 6.7 s.
+    - Planner (owner's real profile): both a Drive EPUB and a local EPUB stayed on "Loading book…" for 38+ s.
+    - LL-152's status line (2026-10-14) records a dev build that took 2.5–4 min to load during SETTINGS-WRITE-DURABLE-1's smoke, on the same profile. This is why BUG-189 (dev-mode slowness) may share the cause.
+- **Owner decisions (2026-10-14):**
+  - "Cheap scan, off the critical path. No feature change." This binds the design: resolve the root once, take a per-file `realpath` only for a symbolic link, yield every N entries, start the startup sync after the library is shown, replace chokidar's crawl with native recursive `fs.watch` under the same `startWatcher` contract, and leave the `read-file-buffer` allowed-roots check and the sync's pruning unchanged.
+  - DEV-PERF-MEASURE-1 is dissolved into this item. If Done-when 9(e) shows dev mode back to normal, BUG-189 closes here.
+- **Planner resolutions (roadmap review 2026-10-14):** `FOLDER_SYNC_STARTUP_DELAY_MS = 3000`; unlink keeps chokidar parity (any vanished path rescans); BUG-189 closes on the library within 30 s and a book within 10 s in dev, plus the owner's judgment, otherwise a fresh measurement item is filed; Done-when 9 waits for G2 and sets only `sourceFolder` (settings changed since the G2 backup survive); if 9(d) shows no Drive events, stop for an owner decision (manual rescans or a polling item). The unreachable-folder prune is filed as BUG-195 (High) and fixed by FOLDER-UNREACHABLE-GUARD-1, not here. Until that item merges, the owner keeps a `library.json` backup and checks that the Drive is mounted before launching with `sourceFolder` set.
+- **Design decisions (planner, 2026-10-14):**
+  - **Scan:** delete the per-file `isPathWithinFolder` call (`:43`) and give no replacement. Dirents never report a link as a file or directory (see Why), so the walk makes zero per-file `realpath` calls, and the scan needs no root `realpath` either. This keeps today's behaviour exactly (symlinked files and folders are skipped today and stay skipped). Following symlinks would be a feature change and stays out.
+  - **Yield:** one counter across the whole walk. On every `FOLDER_SCAN_YIELD_EVERY`-th entry, `await new Promise((resolve) => setImmediate(resolve))`. The counter covers unsupported entries, because a directory of tens of thousands of non-book files (`Readings/Books` holds 38,173 entries) is otherwise walked in one synchronous loop.
+  - **Watcher:** `fs.watch(sourceFolder, { recursive: true }, listener)`. The listener receives `(eventType, relativeName)`, and the rules below map it onto the existing contract:
+    - **Ignore:** any path segment starting with `.` (the regex `(^|[\/\\])\.` today), and a first segment equal to `"Saved Articles"` (the root-level folder only, as today).
+    - **Stability:** each path's callback waits until that path has had no event for `FOLDER_WATCHER_STABILITY_MS`. This is a per-path debounce, the `awaitWriteFinish`-like rule. If any event in the window was `rename`, the settled event counts as a rename.
+    - **Settle:** `lstat` the path.
+      - It is gone: `onUnlink()`, for any path. This is parity: chokidar's `unlink` handler (`:94`) has no extension filter.
+      - A directory that arrived by rename: `onAdd(dirPath)`. A folder moved in raises one event on Windows. Chokidar reported its files, and `main.js:406` ignores the argument and debounces a sync.
+      - A supported-extension file, or a symlink whose `realpath` lies inside the root: `onAdd(path)` when renamed, `onChange(path)` otherwise.
+      - Anything else is ignored.
+    - **Root `realpath`:** resolved once per `startWatcher` call (`fsPromises.realpath(sourceFolder)`, kept as a promise) and used only for symlinks. For that, `isPathWithinFolder` gains an optional third argument, `realFolder`, which is used instead of resolving the folder again.
+    - **Start failure:** a synchronous `fs.watch` throw (ENOENT, EPERM) is caught: log it, call `onError(err, sourceFolder)` (the existing user toast, `main.js:419-432`) and return `null`. `startWatcherFn` assigns `watcher = null`, and every `watcher.close()` call site is already guarded (`main.js:402`, `:689`).
+    - **`close()`:** clears the pending timers, then closes the handle. It is synchronous; chokidar's returned a promise that no caller awaited.
+  - **Startup hook:** replace `main.js:653-657` with a deferred start. `const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);`. If `mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()`, attach it with `mainWindow.webContents.once("did-finish-load", startFolderWork)`; otherwise call it now.
+    - Why `did-finish-load` and not `ready-to-show`: `main/window-manager.js:85` already uses `ready-to-show` to show the window, and by `main.js:654` the page may have loaded already (Phase 3 awaits auth at `:588`). `isLoading()` can be queried, but `ready-to-show` cannot be re-checked once it has fired.
+    - The listener is synchronous and fire-and-forget, so nothing depends on Electron awaiting it (LL-157).
+    - The watcher still starts before the sync, as `tests/perfAudit.test.ts` "c" (`:290-318`) describes.
+    - Both functions read `settings` when they fire, so a folder chosen in the meantime (`select-folder` and `switch-folder`, `main/ipc/state.js:69`, `:80`) is honoured. The second start only restarts the watcher and runs one more sync.
+  - **Dependency:** `npm uninstall chokidar --package-lock-only` removes `package.json:102`, plus chokidar's lockfile entries (`package-lock.json:16`, `:4392-4406`) and its only dependency `readdirp` (`:8997`). `git grep -i chokidar` finds no other importer in `main/`, `main.js`, `src/`, `preload.js` or `tests/`; outside documentation, its only other mention is the `main/constants.js:162` comment, which this item edits. `--package-lock-only` leaves `node_modules` alone; `npm ci` (Done-when 6) proves that the lockfile and manifest agree.
+  - **Platforms:** recursive `fs.watch` is native on Windows (ReadDirectoryChangesW) and macOS (FSEvents), and has been supported on Linux since Node 20 (Electron 41.1.0 ships Node 24.14.0). On Linux, Node implements it by watching each directory, so it is not cheap on a huge tree; no Linux user has such a tree today (see Out of scope).
+- **Out of scope:**
+  - **The sync's pruning** (`main.js:383-394`). It drops every folder-sourced document that the new scan does not find. This includes a scan that returns `[]` because the folder cannot be reached (`main/folder-watcher.js:29`), for example Drive not yet mounted at launch. That behaviour is unchanged, and this item keeps the `access` → `[]` line as it is (LL-156: the waiver names lines this item does not move). Filed as BUG-195; fixed by FOLDER-UNREACHABLE-GUARD-1.
+  - **The `read-file-buffer` allowed-roots check** (`main/ipc/library.js:163-170`).
+  - **The executor's other outline items** (BUG-193 Fix path): a file-count cap with a notice, watcher depth limits, a cap on new-file extraction per sync, and a worker-thread scan. These are feature changes, or not needed once the probe numbers hold.
+  - **The cost of a full rescan after each watcher event** on a 120,000-file Drive tree. It is the same as today (debounced by `FOLDER_SYNC_DEBOUNCE_MS`).
+  - **The cost of recursive `fs.watch` on Linux.**
+  - **P6 build findings C** (`assets/` not packaged) **and D** (`app-update.yml` ENOENT on `--dir` builds).
+- **Prerequisites:**
+  - No code prerequisite. This item touches no shared-core file and nothing that NARRATE-REBUILD-1 P6 owns.
+  - Done-when 9 runs on the owner's real profile. That profile is in use for P6's G2 with `sourceFolder` cleared, so Done-when 9 runs after G2 finishes (or when the owner releases the profile).
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44). Each gate was dry-run on `66f15981` (2026-10-14), and the result is in parentheses.
+    1. **Positive controls (standing rule 43):** at C1, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts` exits 1, and exactly the controls (a), (b), (g), (h) and (i) fail, each for the stated reason:
+       - (a) sees about 100 `realpath` calls;
+       - (b) sees 0 yields;
+       - (g) sees 6 or more `realpath` calls;
+       - (h) times the read or the event-loop gap over 250 ms;
+       - (i) finds the bare `startWatcherFn();` line.
+
+       The characterization tests (c), (d), (e) and (f), and every existing `perfAudit` test, pass. Record the output in the staging memo. (Probe dry-run of (h) on the base: a 607–814 ms read and 405–575 ms gaps; on the prescribed `fs.watch`, a 2 ms read and 16–17 ms gaps.)
+    2. After C2, `npx vitest run tests/folderWatcher.test.js tests/perfAudit.test.ts tests/fileHashesCleanup.test.ts tests/jsonStore.test.js` exits 0.
+    3. `git grep -n -i -F 'chokidar' -- main main.js package.json` prints nothing. (Dry-run: 7 lines: `main/constants.js:162`, `main/folder-watcher.js:1`, `:7`, `:8`, `:82`, `:103`, `package.json:102`.)
+    4. `git grep -n -E '"node_modules/(chokidar|readdirp)"' -- package-lock.json` prints nothing. (Dry-run: `:4392`, `:8997`.)
+    5. `git grep -n -F 'isPathWithinFolder(fullPath' -- main` prints nothing (dry-run: `main/folder-watcher.js:43`). `git grep -n -E '^    startWatcherFn\(\);$' -- main.js` prints nothing (dry-run: `main.js:655`). `git grep -c -E 'FOLDER_SYNC_STARTUP_DELAY_MS|FOLDER_SCAN_YIELD_EVERY' -- main.js main/constants.js main/folder-watcher.js` prints exactly `main.js:2`, `main/constants.js:4`, `main/folder-watcher.js:2` and exits 0. (Dry-run: exits 1, no output.)
+    6. `npm ci` exits 0 (the lockfile matches `package.json` without chokidar).
+    7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48; the packaged main process changes).
+    8. `git grep -n -i -F 'chokidar' -- docs/governance/TECHNICAL_REFERENCE.md` prints nothing. (Dry-run: `:51`, `:136`, `:159`, `:712`.)
+    9. **Owner re-measure** (standing rule 45; LL-152). Run it on the owner's **real** profile, after G2, recorded per step in the staging memo:
+       - (a) **Setup:** with the app closed, copy `%APPDATA%\blurby\blurby-data\library.json` and `settings.json` to a new `blurby-data\fsp1-backup-<date>\`. Record the number of `"source": "folder"` documents. Confirm that `G:\My Drive\Personal\Readings` is reachable (`Test-Path` returns `True`; see Out of scope, pruning). Set only the `sourceFolder` field of `settings.json` to `G:\\My Drive\\Personal\\Readings`; every other field stays as it is.
+       - (b) **Base:** run the base production build (P6's `release\win-unpacked\Blurby.exe`, which includes main `ab5cead4`). Launch, wait 15 s (the scan is running), then open the Drive *Meditations* (`pg2680-images-3.epub`). Time from the click to the first rendered section (stopwatch), with a 180 s cap. Quit.
+       - (c) **Fix:** build this branch with `npm run build`, then `npx electron-builder --win --x64 --dir --publish never` (each exits 0), which produces `release\win-unpacked\Blurby.exe` in this worktree. Repeat (b) exactly on this build: same book, same 15 s wait, same actions. Then repeat it for the local EPUB `converted9591611769k92w18.epub`. **Pass:** each first section renders within 10 s of the click.
+       - (d) **Live and data checks,** on the fix build:
+         - Copy any small EPUB into `G:\My Drive\Personal\Readings\` while the app is open. It appears in the library within 30 s. Delete it, and it leaves within 30 s.
+         - After the scan finishes, the `"source": "folder"` count equals (a)'s, give or take the file added and deleted above.
+         - No `read-file-buffer blocked` or `[watcher]` line appears in `error.log`.
+       - (e) **Dev mode:** run `npm run dev` in this worktree on the same profile. Time from the Electron window appearing to the library being shown, and the (c) book-open time. If the library shows within 30 s, the book renders within 10 s, and the owner judges dev mode back to normal, BUG-189 closes with this item. Otherwise BUG-189 stays open with these numbers recorded, and a fresh measurement item is filed.
+    10. `git diff --name-status refs/remotes/origin/main` lists exactly these paths, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.FOLDER-SCAN-PERF-1.2026-10-14.md` (the C1 stop) if kept (standing rule 41):
+        - `M main/folder-watcher.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M package.json`
+        - `M package-lock.json`
+        - `A tests/folderWatcher.test.js`
+        - `M tests/perfAudit.test.ts`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** M.
+- **Owners:** implementation agent; reviewers for spec compliance and code quality, in parallel; repository operator merges; owner for Done-when 9.
+- **Lane:** Library & Content. Execution surface D (main process: `main/`, `main.js`, dependencies).
+- **Source:** BUG-193 (filed `5d4da6e3`, main `66f15981`); the P6 G2 diagnosis (`c6400477` on `eb/narrate-rebuild-1-p6`, `state.md` "G2 finding A"); BUG-189 and the DEV-PERF-MEASURE-1 stub (dissolved here); the planner probe of 2026-10-14; owner decision 2026-10-14.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `main` @ `66f15981`):
+  - **`main/folder-watcher.js`:**
+    - `:1`: the header becomes `// main/folder-watcher.js — native recursive fs.watch folder watching and library sync`.
+    - `:4-8`: add `const fs = require("fs");`. `:6` becomes `const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY } = require("./constants");`. Delete `:7-8` (the chokidar loader).
+    - `:15-23`: the signature becomes `isPathWithinFolder(filepath, folderPath, realFolder)`, and `:18` becomes `const realFolderPath = realFolder || await fsPromises.realpath(folderPath);`; the comparison at `:19` uses `realFolderPath`. Its behaviour is unchanged when the third argument is omitted. Keep the export.
+    - `:34-57`:
+      - before `async function walkDir`, add `let walked = 0;`;
+      - as the first statement inside `for (const entry of entries) {` (`:37`), add `if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));`;
+      - delete `:43`, and put one comment in its place: `// readdir reports a symlink as a link, never a file or directory, so every file reached here is inside folderPath`.
+    - `:78-108`: replace the body of `startWatcher` with the native watcher in the design decisions, keeping the signature `startWatcher(sourceFolder, callbacks)` and the return value (the watcher, or `null` on a start failure). Prescribed shape:
+      - `const realRoot = fsPromises.realpath(sourceFolder).catch(() => null);`
+      - `const pending = new Map();` maps the relative path to `{ timer, renamed }`;
+      - `try { watcher = fs.watch(sourceFolder, { recursive: true }, (eventType, rel) => { … }) } catch (err) { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); return null; }`;
+      - the listener returns on an empty `rel`. It splits `rel` on `/[\\/]/` and returns if any segment starts with `.` or if `parts[0] === "Saved Articles"`. Otherwise it clears that path's timer, sets `renamed = (prev && prev.renamed) || eventType === "rename"`, and schedules `settle(rel, renamed)` after `FOLDER_WATCHER_STABILITY_MS`;
+      - `settle` deletes the entry and runs `lstat(path.join(sourceFolder, rel))`:
+        - if `lstat` throws: `onUnlink()`;
+        - a directory: `onAdd(full)` if renamed, then return;
+        - an unsupported extension: return;
+        - a symlink: return unless `await isPathWithinFolder(full, sourceFolder, await realRoot)`;
+        - not a file and not a symlink: return;
+        - otherwise `(renamed ? onAdd : onChange)(full)`;
+      - `watcher.on("error", (err) => { console.error("[watcher] fs.watch error:", err.message); if (onError) onError(err, sourceFolder); });`;
+      - wrap `watcher.close` so that it clears every pending timer before closing.
+
+      The planner ran this shape as a prototype on Windows (`scanprobe/proto.js`). A nested add gave `onAdd`, an append gave `onChange` and a delete gave `onUnlink`; writes under `Saved Articles/`, `.hidden/` and a `.jpg` produced no callback.
+  - **`main/constants.js`:**
+    - after `FOLDER_SYNC_BATCH_SIZE` (`:149-150`), add `/** Delay after the main window has loaded before the startup folder watcher and sync start (ms) */ const FOLDER_SYNC_STARTUP_DELAY_MS = 3000;`;
+    - `:161-163` become `// ── Folder Watcher`, then `/** Watcher stability window — a path must see no further event this long before its callback fires (ms) */ const FOLDER_WATCHER_STABILITY_MS = 500;` and `/** Directory entries walked between event-loop yields in scanFolderAsync */ const FOLDER_SCAN_YIELD_EVERY = 500;`;
+    - export `FOLDER_SYNC_STARTUP_DELAY_MS` after `FOLDER_SYNC_BATCH_SIZE,` (`:263`) and `FOLDER_SCAN_YIELD_EVERY` after `FOLDER_WATCHER_STABILITY_MS,` (`:269`).
+  - **`main.js`:**
+    - `:31-34`: add `FOLDER_SYNC_STARTUP_DELAY_MS` to the destructured `require('./main/constants')`.
+    - `:653-657` become:
+
+      ```js
+        // Folder watcher + sync — after the main window has loaded (BUG-193); the watcher still starts first
+        if (settings.sourceFolder) {
+          const startFolderWork = () => setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS);
+          if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents.isLoading()) mainWindow.webContents.once("did-finish-load", startFolderWork);
+          else startFolderWork();
+        }
+      ```
+
+      Nothing else in `main.js` changes. In particular, the `will-quit` handler (`:679-706`; `watcher.close()` at `:689` works on an `fs.FSWatcher` or `null`) belongs to QUIT-FLUSH-1.
+  - **`package.json:102`** and **`package-lock.json`:** `npm uninstall chokidar --package-lock-only`. Make no other dependency change.
+  - **`docs/governance/TECHNICAL_REFERENCE.md`:**
+    - `:51`: `chokidar folder watching` becomes `fs.watch folder watching` (same width; the box stays aligned);
+    - `:136`: delete the `chokidar` row;
+    - `:159`: drop `` `chokidar`, `` from the lazy-loaded list;
+    - `:712`: `` `chokidar` watcher on configured folder `` becomes `` native recursive `fs.watch` on configured folder (startup start deferred until the main window loads) ``.
+  - **At close-out (not in this diff):** `CLAUDE.md:383` drops chokidar from the dependency list. BUG_REPORT's BUG-193 status line becomes `RESOLVED (FOLDER-SCAN-PERF-1)` (LL-148: the merge sha goes in the close-out), and so does BUG-189's if Done-when 9(e) closes it. The DEV-PERF-MEASURE-1 stub (`ROADMAP.md:521-527`) is removed as dissolved.
+- **Tests:**
+  - **`tests/folderWatcher.test.js`** (new; no file of this name exists, and no current test imports `main/folder-watcher.js`). Follow `tests/jsonStore.test.js`'s pattern: `await import("../main/folder-watcher.js")`, then `createRequire(import.meta.url)("fs/promises")` to get the same CommonJS object the module calls through. Real trees go under `fs.mkdtemp(path.join(os.tmpdir(), "blurby-folder-watcher-"))`, removed in `afterEach`, and every watcher is closed in `finally` (`await w?.close()` works for both implementations). Count `realpath` calls and yields **only when the call stack includes `folder-watcher.js`** (`new Error().stack`), so that vitest's own calls cannot pass or fail a control. Wait for callbacks with `vi.waitFor(…, { timeout: 4000 })`.
+    - `describe("scanFolderAsync — cost (BUG-193)")`:
+      - **(a) control:** "makes at most one realpath call for 50 supported files". Build 5 dirs × 10 `.epub` and spy on `realpath`. Expect ≤ 1 (base: 100).
+      - **(b) control:** "yields to the event loop every FOLDER_SCAN_YIELD_EVERY entries". One dir holds 2,000 `.jpg` and 1 `.epub`; spy on `globalThis.setImmediate`. Expect ≥ `Math.floor(2002 / (FOLDER_SCAN_YIELD_EVERY || 500))`; the `|| 500` keeps C1 failing on the yield count and not on the constant that is still missing (base: 0, from a plain-Node dry-run).
+      - **(c) characterization:** "returns the same files". The tree holds `a/book.epub` + `a/book.pdf` (one result, `.epub` kept), `b/notes.txt`, `Saved Articles/s.epub` at the root (skipped), `x/Saved Articles/t.epub` (kept: only the root level is skipped), `pic.jpg` (skipped), and a junction `link` (`fs.symlink(target, link, "junction")`) to an outside folder holding `o.epub` (skipped). Expect the exact filenames, sorted.
+    - `describe("startWatcher — contract (BUG-193)")`:
+      - **(d) characterization:** "reports add, change and unlink for supported files and ignores dotfiles, Saved Articles and unsupported files". Write `a/b/new.epub` and expect `onAdd` with that path. Append to an existing `a/b/old.epub` and expect `onChange` with its path. Write `Saved Articles/s.epub`, `.hidden/h.epub` and `a/pic.jpg`, wait 1,500 ms, and expect no new call. Delete `new.epub` and expect `onUnlink`.
+      - **(e) characterization:** "reports an add when a folder is moved into the tree". `fs.rename` an outside folder containing `m.epub` into the root, and expect `onAdd` called at least once.
+      - **(f) characterization:** "does not throw when the folder does not exist". `startWatcher(missing, callbacks)` returns without throwing, and closing its result (if any) does not throw.
+      - **(g) control:** "resolves the root realpath at most once, not per event". Add 3 `.epub` files, wait for 3 `onAdd` calls, and count `realpath` calls from `folder-watcher.js`. Expect ≤ 1 (base: 6 or more, two per `isPathWithinFolder`).
+    - `describe("startWatcher — does not starve the main process (BUG-193)")`:
+      - **(h) control:** "a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 250 ms, and no event-loop gap exceeds 250 ms in the next second". Build 300 dirs × 10 files (one `.epub` per dir), and sample the gap with `setInterval(…, 5)`. Probe: 607–814 ms and 405–575 ms on the base; 2 ms and 16–17 ms on `fs.watch`.
+  - **`tests/perfAudit.test.ts`:** add inside `describe("folder watcher starts before sync completes")`, after the existing "c" test (`:290-318`):
+    - **(i) control:** "c2: main.js starts the folder watcher and sync only after the main window has loaded". Read `main.js` and slice from `// Folder watcher + sync` to `// Start cloud sync`. Expect the slice to contain `once("did-finish-load", startFolderWork)` and `setTimeout(() => { startWatcherFn(); syncLibraryWithFolder(); }, FOLDER_SYNC_STARTUP_DELAY_MS)`, and not to match `/^\s*startWatcherFn\(\);\s*$/m`. On the base the bare line at `:655` matches, and both expected strings are missing.
+    - The existing replica test "c" stays unchanged.
+- **Constants:** `FOLDER_SCAN_YIELD_EVERY = 500` (entries) and `FOLDER_SYNC_STARTUP_DELAY_MS = 3000` (ms), both new in `main/constants.js` (Constants Separation Rule). `FOLDER_WATCHER_STABILITY_MS = 500` keeps its value; only its comment changes.
+- **Branch:** `eb/folder-scan-perf-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\folder-scan-perf-1`. Write refs in full (a `main/` directory exists). Run `npm ci` before C1, because the worktree has no `node_modules`.
+- **Staging plan:**
+  - C1: `tests/folderWatcher.test.js` and `tests/perfAudit.test.ts` only (gate: Done-when 1).
+  - C2: every other path in Done-when 10 (gates: Done-when 2–8).
+  - Owner re-measure (Done-when 9) on C2's build, then merge to `main` with `--no-ff` and push (Rule 5b).
+  - Never stage `tests/perf-baseline-results.json` or anything under `release/`.
+- **Failure handling:**
+  - If a control passes at C1 or fails for another reason, stop: the base has changed since this spec. Examples: (h) under its budget on the base, or (a) failing on a missing export.
+  - If (h) fails after C2 only under full-suite load, record both runs and raise its budget once, to 350 ms. That is still below the base's lowest observed gap of 405 ms. Any further raise is BLOCKER(USER).
+  - If (d) or (e) fails after C2, the `fs.watch` mapping is wrong; do not weaken the test.
+  - If Done-when 9(d)'s add or delete is not reported on G: (DriveFS may not deliver `ReadDirectoryChangesW` events), record it and stop for an owner decision before merging: accept manual rescans, or file a polling item.
+  - If 9(c) misses 10 s, record the times and stop: the remaining cost is elsewhere, and the next step is a measurement, not a guess (Pike rule 1).
+  - If 9(a) finds G: unreachable, do not launch: the existing pruning would drop the folder-sourced books.
+  - Retry ceiling: two corrections per task, then BLOCKER(USER). Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D. The files are `main/folder-watcher.js`, `main/constants.js`, `main.js:31-34` and `:653-657` only, `package.json`, `package-lock.json`, the two test files and the four `TECHNICAL_REFERENCE.md` lines.
+  - **Forbidden:**
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js`'s `will-quit` handler (`:678-706`, owned by QUIT-FLUSH-1), and every other `main.js` line;
+    - `main/ipc/library.js` and `main/ipc/state.js`;
+    - `src/**`;
+    - every file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none expected.
+  - **Merge order:** this item merges first. QUIT-FLUSH-1 also edits `main.js` (different hunks: `will-quit`), and it merges `refs/remotes/origin/main` in before its own merge. The order is independent of NARRATE-REBUILD-1 P6, which edits no file here; P6's G2 must finish before Done-when 9 uses the owner's profile.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Scan-cost, watcher-starvation and startup-order controls committed and failing on the current code; watcher contract characterized | calculable | positive control | bounded | medium | 45m (one new test file with eight tests on real temp trees, one source-inspection test) | — | — |
+| 2 | Scan cheap and yielding, watcher on native recursive `fs.watch` with the same contract, startup folder work after the window loads, chokidar gone | calculable | main-process fix | bounded | high | 60m (one watcher rewrite of about 40 lines, two scan edits, one startup hunk, two constants, one dependency removal, four doc lines) | — | — |
+| 3 | `npm ci`, suites, typecheck and build green on the owner's machine | calculable | merge and verify | mechanical | low | 30m (`npm ci` + full `npm test` + typecheck + build + grep gates) | — | — |
+| 4 | Owner re-measure on base and fixed production builds and on dev, recorded; merged and pushed | calculable | owner gate | mechanical | low | 45m (one packaged dir build, two timed sessions per build, one dev session, one --no-ff merge) | — | — |
+
+**Total:** chain 1m · sum 1m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** five controls fail on the current code for a stated reason before the fix: (a) and (g) on `realpath` counts, (b) on yields, (h) on read latency and event-loop gap, and (i) on the startup line. Their failing output is recorded (Done-when 1).
+- **Standing rule 39 (LL-112):** the watcher is replaced, so (c)–(f) characterize today's contract on the chokidar implementation, and the native watcher must pass them unchanged.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exit code, and each search gate was dry-run on `66f15981` with its hits recorded. The control (h) was dry-run as a plain-Node probe on both the base and the prescribed watcher.
+- **LL-152 and Pike rule 1:** the cause was measured before the design was fixed. The probe showed that the watcher, not the scan, starves the event loop on local disk. That moved the main control onto `startWatcher`, where the BUG-193 outline had pointed at the scan. Done-when 9 is a like-for-like A/B (same book, same 15 s wait, base build against fixed build) on production builds, with dev mode measured separately.
+- **LL-142:** "fixed" is claimed only from results read back: the owner's timed first render, the library's folder-document count compared with the backup, and `error.log` checked for blocks. The probe's Drive behaviour is stated as unmeasured, not assumed.
+- **LL-157:** the startup hook is a synchronous `did-finish-load` listener that schedules work; nothing relies on Electron awaiting a listener. The `will-quit` handler is left to QUIT-FLUSH-1.
+- **LL-156:** the pruning and allowed-roots waivers name lines that this item does not move. The scan's `access` → `[]` line (`:29`), which feeds the pruning, is kept verbatim, and the hazard is restated and filed as BUG-195.
+- **SRL-086/087 (standing rule 36):** every line number was read on `66f15981`; the probe ran against this worktree's `main/folder-watcher.js` and Electron 41.1.0's own Node.
+- **Standing rule 47 (LL-147):** the full suite and the re-measure run on the owner's machine, in a local session.
+- **Standing rule 48 (LL-149):** typecheck and build are listed (Done-when 7), next to `npm ci` for the dependency change.
+- **Standing rule 45 (LL-141):** the timing and the live Drive add/delete are owner-observed.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register; status moves stay with the ceremonies.
+- **LL-148:** status lines name the item; the merge sha goes in the close-out.
+
+#### QUIT-FLUSH-1 — Finish every save before the app quits *(position 10 — Full Spec; drafted 2026-10-14 on `main` @ `66f15981`; line numbers re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged)*
+
+*Completed 2026-10-14 (merge `d21009b3`; BUG-192 resolved; close-out `docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md`; ledger TR-073). Archived with Fold-in 2 (the diff fence covers the issue file) applied. The review-findings amendment (W1, W2, N1; Blurby Brain, option A + N1) is recorded in the close-out's Mid-Dispatch Decisions.*
+
+- **What:** Do the quit-time saves in the cancelled first `will-quit` pass. Cancel the first quit, stop new work, and run the saves in order: eval traces, library, the pending debounced settings save, settings, any pending JSON writes, then the final cloud sync. Each save is guarded, and all of them share one 3-second cap. The Narrate producer shutdown runs alongside them and is never cut. Then quit. The second pass does nothing. A change made just before quitting is kept, and no `*.tmp` file is left behind. Fixes BUG-192.
+- **Why:**
+  - **The cause:** `main.js:679-707` cancels only the first quit. It calls `event.preventDefault()` (`:684`), awaits the producer shutdown (`:685`), then calls `app.quit()` (`:686`) and returns. Every later `await` therefore runs in the second, uncancelled pass, after Electron has already decided to exit. Electron does not await an async listener (LL-157). This covers `flushTtsEvalTraceCaptures()` (`:692`), `saveLibraryNow()` (`:693`), `saveSettingsFn()` (`:694`) and `syncEngine.startSync()` (`:701`).
+  - **Owner evidence, 2026-10-13 (BUG-192):**
+    - The accent colour changed just before quitting was lost. `settings.json.tmp` held the new value and was never renamed.
+    - `sync-queue.json.tmp` was 0 bytes.
+    - A second quit left `library.json.tmp` unrenamed.
+    - Production-build quits on 2026-10-14 repeatedly left `library.json.tmp` unrenamed.
+  - **Does a change made under 500 ms before quitting reach main? Yes. It is in scope.**
+    - The renderer has no settings debounce. `updateSettings` calls `api.saveSettings(updates)` at once (`src/contexts/SettingsContext.tsx:32`), which is `ipcRenderer.invoke("save-settings", …)` (`preload.js:44`).
+    - Main applies the change to the in-memory settings at once (`main/ipc/state.js:25`).
+    - The 500 ms debounce is in main. It delays only the file write and the `update-settings` sync enqueue (`main/ipc/state.js:29-39`).
+    - So a flush at quit that writes the in-memory settings keeps the change.
+    - A timer still pending at quit has two failure modes:
+      - Its sync enqueue is lost.
+      - It fires during or after the flush. Its write and its `sync-queue.json` write then race the exit and leave a `.tmp` behind.
+    - So the flush must run that pending timer's work itself.
+  - **Pending sync-queue writes.**
+    - `main/sync-queue.js` has no debounce of its own. `saveQueue` (`:53-56`) awaits `writeJSON` directly, but every caller fires `enqueue` without awaiting it (`main/ipc/state.js:38`, `main/ipc/library.js:41`, `:97`, `main/ipc/documents.js:30`, `:47`).
+    - An in-flight queue write is visible only as a tail in `main/json-store.js`'s per-file write chain (`writeTails`, `:30`).
+    - History and site-cookie saves are fire-and-forget too.
+    - The final cloud sync also starts a settings write without awaiting it (`applyCloudSettings`, `main/sync-engine.js:392`).
+    - So the flush must wait for every write already in that chain, once before the cloud sync and once after it.
+  - **The producer cannot share the 3 s cap.**
+    - `shutdown()` asks each worker to finish its generation in progress (`main/narrate/producer.js:52-58`, `:193`).
+    - It terminates a worker only after `NARRATE_STOP_TIMEOUT_MS` = 30,000 ms (`main/narrate/constants.js:31`).
+    - The comment at `main.js:681-682` records the constraint: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+    - Quitting at a 3 s cap while that wait is open would bring the crash back.
+  - **No other quit path saves.** There is no `before-quit` listener. `window-all-closed` (`main.js:675-677`) only calls `app.quit()`. The tray Quit item (`main/window-manager.js:154`) and `autoUpdater.quitAndInstall` (`main/ipc/misc.js:441`) all reach the same `will-quit`.
+- **Owner decision (2026-10-14, binding): "Local saves, cloud best-effort."**
+  - Cancel the first quit.
+  - Await, in order:
+    1. the Narrate producer shutdown
+    2. the eval-trace flush
+    3. `saveLibraryNow()`
+    4. `saveSettingsFn()`
+    5. any pending sync-queue write
+    6. the final cloud sync, when signed in
+  - All of it runs under one overall cap of 3 s, a named constant in `main/constants.js`.
+  - Each step is guarded, so one failure does not block the rest.
+  - Then `app.quit()`. The second pass does only what is genuinely fire-and-forget.
+  - Anything not synced to the cloud stays in the sync queue for the next launch.
+  - Keep the Narrate producer shutdown guarantee.
+- **Owner ruling (2026-10-14, Rule 11 tier 2, at dispatch): "Cap the saves only."** The 3 s cap covers the saves and the final cloud sync; the Narrate producer shutdown runs alongside them and is awaited uncapped.
+- **Planner resolutions (roadmap review 2026-10-14):** the producer shutdown runs alongside the capped saves and is awaited uncapped (the 3 s cap applies to the saves; cutting the producer brings back 0xC0000409); one cap over sequential steps, library first; the watcher, WebSocket and auto-sync stops move to the start of the first pass, leaving the second pass empty; a `sync-*.tmp` written after launch while signed in and online is accepted under "cloud best-effort" (smoke (d)).
+- **Design decisions (planner, 2026-10-14):**
+  - **Extract the quit sequence into `main/quit-sequence.js`** (CommonJS, no file I/O of its own). Its steps are injected, so it can be unit-tested against an Electron-faithful fake `app`.
+    - `main.js` is not unit-testable. It calls `app.requestSingleInstanceLock()` and registers the app lifecycle at load (`:539-708`). Its only test reads its source as text (`tests/einkFoundation.test.ts:34`).
+    - The module holds the ordering, guards, cap and pass state. `main.js` holds only the wiring.
+  - **The producer shutdown starts first and runs alongside the capped saves.** The handler awaits it before `app.quit()` and never cuts it at the cap (the 0xC0000409 guarantee).
+    - This applies the owner's "ALL under one cap" to the saves, which can be safely abandoned. It does not apply it to the producer, which cannot.
+    - The producer is still started first. Running it alongside the saves means a long generation in progress does not delay or starve them.
+    - In the usual case, with no Narrate workers, the shutdown resolves at once. See Open question 1.
+  - **Stop new work at the start of the first pass, not in the second.** Stop the folder watcher, stop the WebSocket server and stop auto-sync before the saves start, so none of them can queue a write during the flush.
+    - The second pass then returns at once and saves nothing.
+    - This is the decision's "whatever is genuinely fire-and-forget", moved earlier so it protects the flush.
+  - **Pass states `idle` → `flushing` → `done`:**
+    - A `will-quit` that arrives while flushing (for example a tray Quit click during the flush) is also cancelled and waits for the flush.
+    - Only the handler's own final `app.quit()`, issued in state `done`, is allowed through.
+  - **Step order** (one overall cap of `QUIT_FLUSH_TIMEOUT_MS`):
+    1. eval traces (`() => flushTtsEvalTraceCaptures()`, a closure because `main.js:228` reassigns that variable after the listener is registered)
+    2. `saveLibraryNow`
+    3. the pending settings save (`flushPendingSettingsSave`, new in `main/ipc/state.js`: it runs the debounced write and `update-settings` enqueue now and clears the timer)
+    4. `saveSettingsFn`
+    5. pending JSON writes (`whenWritesSettled`, new in `main/json-store.js`)
+    6. the cloud sync, when signed in
+    7. pending JSON writes again, for the cloud sync's own settings, sync-state and queue writes
+  - **What the cap does and does not do.**
+    - At the cap the runner stops waiting, logs which step it was in, and the handler quits.
+    - A hanging step is abandoned, not cancelled. Its I/O may be cut by the exit.
+    - Every JSON write is write-then-rename (LL-006), so a cut write leaves the previous file intact plus a stale `.tmp`. The next write to that file reuses the stale `.tmp`.
+    - Steps run in sequence, so a hang starves the steps after it. Local saves come first and the slow, best-effort cloud sync comes last.
+  - **Guards.** Each step is `try { await step() } catch { log }`, so a step that throws or rejects is logged with its name and the next step runs. The runner never rejects.
+  - **Constant.** `QUIT_FLUSH_TIMEOUT_MS = 3000` goes in `main/constants.js` under "Main Process Lifecycle" (CLAUDE.md Constants Separation Rule). `main/quit-sequence.js` reads it there.
+  - **Keep the 500 ms debounce literal.** `tests/perfAudit.test.ts:447-456` asserts that the source contains `}, 500)`.
+- **Out of scope:**
+  - Per-step timeouts (one overall cap, per the owner).
+  - Cancelling a cloud sync already in progress when the quit starts. `startSync` returns `"already-syncing"` (`main/sync-engine.js:782`), and the in-flight auto-sync may be cut at exit.
+  - Windows logoff and shutdown (`session-end`); `app.exit()` paths, which skip `will-quit` by design (`main.js:584`, `main/narrate/trial.js:329-331`).
+  - The folder-sync debounce timer (`main.js:302-305`), which can schedule a library save during the flush when `sourceFolder` is set, and the deferred startup folder timer (FOLDER-SCAN-PERF-1, `FOLDER_SYNC_STARTUP_DELAY_MS`) can start the watcher and a sync during a flush that begins within 3 s of load: both are LARGE-FOLDER-SYNC-1's area (its watcher closed flag and cancellable startup timer). The owner's `sourceFolder` is cleared, so neither runs in this item's smoke.
+  - Cleaning stale `*.tmp` files left by earlier quits.
+  - The BUG-192 **Location** line, which still cites `:691` on `15e9c2f1` (the close-out updates it).
+  - Any renderer change.
+  - **LL-156 check:** SETTINGS-WRITE-DURABLE-1 put "flushing the debounced sync enqueue at quit" out of scope and forbade `main/ipc/state.js`. This item explicitly brings both into scope.
+- **Prerequisites:** none in code.
+  - The production build for the owner smoke is made in this item's own worktree (`<worktree>\release\win-unpacked`). It does not overwrite the G2 build in the P6 worktree.
+  - Close every running Blurby before each smoke launch. The single-instance lock (`main.js:539-541`) quits a second instance.
+  - Re-grep every line number below on the base before dispatch.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+  - A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr. Any other exit code, any stderr text, or a command that did not run fails the gate (standing rule 44).
+  - Dry-runs on `66f15981` (2026-10-14) are noted in parentheses.
+    1. **Positive control (standing rule 43):** at C1, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js` exits 1, and exactly these tests fail:
+       - **(a):** at the fake exit, `library.json` and `settings.json` are missing or stale.
+       - **(b):** the fake exits at about 0 ms, not at `QUIT_FLUSH_TIMEOUT_MS`.
+       - **(c):** steps 2–3 had not run at exit; the thrown step is unguarded.
+       - **(d):** the second pass runs the steps again.
+       - **(d2):** a `will-quit` during the producer shutdown is not cancelled.
+       - **(f):** `flushPendingSettingsSave is not a function`.
+       - **(g):** `whenWritesSettled is not a function`.
+
+       **(e)** and every existing `jsonStore` test pass. Vitest may also report the unhandled rejection from (c); record it. Record the output in the staging memo.
+    2. After C2, `npx vitest run tests/quitSequence.test.js tests/jsonStore.test.js tests/sync-queue.test.js tests/settingsNarrateNormalization.test.js tests/perfAudit.test.ts tests/einkFoundation.test.ts` exits 0.
+    3. `git grep -n -F 'app.on("will-quit", async' -- main.js` prints nothing (dry-run: prints `main.js:680:app.on("will-quit", async (event) => {`).
+    4. `git grep -n -F 'app.on("will-quit", createWillQuitHandler(' -- main.js` prints exactly one line and exits 0 (dry-run: exit 1, no output).
+    5. `git grep -c -F 'await saveSettingsFn();' -- main.js` prints `main.js:1` and exits 0. Only `loadState` (`:286`) remains; the quit step passes the function by reference (dry-run: `main.js:2`).
+    6. `git grep -c -F 'QUIT_FLUSH_TIMEOUT_MS' -- main/constants.js` prints `main/constants.js:2` (the definition and the export) and exits 0 (dry-run: exit 1, no output).
+    7. `git grep -n -F '}, 500)' -- main/ipc/state.js` prints exactly one line and exits 0, so the perfAudit literal stays (dry-run: `main/ipc/state.js:39:    }, 500);`).
+    8. Typecheck, build and the full suite: `npm ci` exits 0 in the worktree; then, on the owner's machine (LL-147), `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 (LL-149).
+    9. **Owner smoke on a production build** (standing rule 45, LL-152; dev mode cannot quit within 1 s). Record each check as pass or fail in the staging memo.
+       - **Build:** in the worktree, `npm run build` exits 0, then `npx electron-builder --win --x64 --dir --publish never` exits 0. This produces `C:\Projects\Blurby\.worktrees\quit-flush-1\release\win-unpacked\Blurby.exe`.
+       - **Setup:**
+         - Close every Blurby process.
+         - Record `Get-ChildItem "$env:APPDATA\blurby\blurby-data" -Filter *.tmp | Select-Object Name, Length, LastWriteTime` (stale files from earlier quits may exist; leave them).
+         - Record the launch time.
+         - Record the `sourceFolder` value and whether you are signed in to cloud sync. Neither is required.
+       - **Checks:**
+         - **(a)** Launch that `Blurby.exe`. Open Settings, then Theme, and pick a different accent preset. Press Alt+F4 within 1 s.
+         - **(b)** Within 5 s, `Get-Process Blurby -ErrorAction SilentlyContinue` prints nothing.
+         - **(c)** `(Get-Content "$env:APPDATA\blurby\blurby-data\settings.json" -Raw | ConvertFrom-Json).accentColor` prints the new colour.
+         - **(d)** The `*.tmp` listing shows no file whose `LastWriteTime` is later than the launch time. If signed in to cloud sync and online, a `sync-state.json.tmp` or `sync-queue.json.tmp` is recorded as accepted (cloud best-effort), not as a fail; `library.json.tmp` and `settings.json.tmp` always fail.
+         - **(e)** Relaunch: the new accent is shown.
+         - **(f)** Open a book, page forward several pages, and press Alt+F4 within 1 s. Then repeat (b) and (d), and relaunch: the book reopens at the new position.
+    10. `docs/governance/BUG_REPORT.md` BUG-192's **Status** line reads `RESOLVED in source (QUIT-FLUSH-1): the quit saves run in the cancelled first will-quit under QUIT_FLUSH_TIMEOUT_MS; closes after the owner's production-build smoke.`
+    11. `docs/governance/TECHNICAL_REFERENCE.md:235` ends with `At quit, the first will-quit is cancelled and the library, settings and pending JSON writes are awaited (cloud sync best-effort) within QUIT_FLUSH_TIMEOUT_MS before the app quits (QUIT-FLUSH-1).`
+    12. `git diff --name-status refs/remotes/origin/main` lists exactly the following, plus the time log, the staging memo and `docs/governance/bug-reports/Issue.QUIT-FLUSH-1.2026-10-14.md` (the review-findings stop) if kept (standing rule 41):
+        - `A main/quit-sequence.js`
+        - `A tests/quitSequence.test.js`
+        - `M main.js`
+        - `M main/constants.js`
+        - `M main/json-store.js`
+        - `M main/ipc/state.js`
+        - `M tests/jsonStore.test.js`
+        - `M docs/governance/BUG_REPORT.md`
+        - `M docs/governance/TECHNICAL_REFERENCE.md`
+- **Effort:** S.
+- **Owners:**
+  - the implementation agent
+  - reviewers for spec compliance and code quality, in parallel
+  - the repository operator, who merges
+  - the owner, for Done-when 9
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:**
+  - [BUG_REPORT.md BUG-192](docs/governance/BUG_REPORT.md)
+  - LL-157
+  - the SETTINGS-WRITE-DURABLE-1 close-out (`docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md`, finding at Done-when 7(b))
+  - the P6 build record in `docs/planning/epics/2026-10-12-narrate-rebuild/state.md` (the `electron-builder --dir` command)
+  - the owner decision of 2026-10-14
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified on `main` @ `66f15981`, 2026-10-14):
+  - **New `main/quit-sequence.js`** (CommonJS, `"use strict"`, no file I/O). The C2 content:
+    ```js
+    // main/quit-sequence.js — The will-quit flush. Electron does not await an async quit listener (LL-157), so the
+    // first quit is cancelled, the work is awaited, then the app quits again.
+    // CommonJS only — Electron main process
+    "use strict";
+    const { QUIT_FLUSH_TIMEOUT_MS } = require("./constants");
+
+    /** Run [name, fn] steps in order, each guarded. Resolves "done", or "timeout" if QUIT_FLUSH_TIMEOUT_MS passes first. Never rejects. */
+    async function runQuitSteps(steps) {
+      let current = null;
+      let timer;
+      const cap = new Promise((resolve) => { timer = setTimeout(() => resolve("timeout"), QUIT_FLUSH_TIMEOUT_MS); });
+      const run = (async () => {
+        for (const [name, step] of steps) {
+          current = name;
+          try { await step(); } catch (err) { console.error("[quit] " + name + " failed:", err && err.message); }
+        }
+        return "done";
+      })();
+      const outcome = await Promise.race([run, cap]);
+      clearTimeout(timer);
+      if (outcome === "timeout") console.warn("[quit] flush cut at " + QUIT_FLUSH_TIMEOUT_MS + " ms during: " + current);
+      return outcome;
+    }
+
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let state = "idle"; // idle → flushing → done
+      return async function onWillQuit(event) {
+        if (state === "done") return; // the handler's own final quit: everything already ran
+        event.preventDefault();
+        if (state === "flushing") return; // a quit during the flush waits for it
+        state = "flushing";
+        try { stopNewWork(); } catch (err) { console.error("[quit] stop failed:", err && err.message); }
+        // Never cut at the cap: a worker ended under a live onnxruntime run takes the process down with 0xC0000409.
+        const producer = Promise.resolve().then(shutdownProducer).catch(() => {});
+        await runQuitSteps(steps);
+        await producer;
+        state = "done";
+        app.quit();
+      };
+    }
+
+    module.exports = { createWillQuitHandler, runQuitSteps };
+    ```
+    At **C1** the module has the same exports and signature but the **current behaviour verbatim**, with no cap and no guards:
+    ```js
+    function createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps }) {
+      let producerStopped = false;
+      return async function onWillQuit(event) {
+        if (!producerStopped) {
+          producerStopped = true;
+          event.preventDefault();
+          try { await shutdownProducer(); } catch { /* ignore */ }
+          app.quit();
+          return;
+        }
+        stopNewWork();
+        for (const [, step] of steps) await step();
+      };
+    }
+    ```
+    C1 also exports `runQuitSteps` as `async (steps) => { for (const [, s] of steps) await s(); return "done"; }`.
+  - **`main.js`:**
+    - **`:16`** becomes `const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");`. At C1 it stays as is.
+    - **After `:16`**, add `const { createWillQuitHandler } = require("./main/quit-sequence");`.
+    - **`:679-707`** (`let narrateProducerStopped = false;` through the listener's closing `});`) are replaced by the C2 block below. **Leave `:708-709` as is.**
+      ```js
+      // The quit flush (BUG-192, LL-157): Electron does not await an async will-quit listener, so the first quit is cancelled,
+      // local saves are awaited under QUIT_FLUSH_TIMEOUT_MS (cloud sync best-effort; unsynced work stays queued), then it quits.
+      app.on("will-quit", createWillQuitHandler({
+        app,
+        stopNewWork: () => {
+          if (watcher) watcher.close();
+          try { require("./main/ws-server").stopServer(); } catch { /* ignore */ }
+          try { require("./main/sync-engine").stopAutoSync(); } catch { /* ignore */ }
+        },
+        // A worker ended under a live onnxruntime run takes the process down with 0xC0000409: always awaited, never capped.
+        shutdownProducer: () => require("./main/narrate/producer").shutdown(),
+        steps: [
+          ["eval traces", () => flushTtsEvalTraceCaptures()], // a closure: setupTtsEvalTraceCapture reassigns it after this runs
+          ["library", saveLibraryNow],
+          ["pending settings save", () => require("./main/ipc/state").flushPendingSettingsSave()],
+          ["settings", saveSettingsFn],
+          ["pending writes", whenWritesSettled],
+          ["cloud sync", async () => { if (require("./main/auth").getAuthState()) await require("./main/sync-engine").startSync(); }],
+          ["writes after sync", whenWritesSettled],
+        ],
+      }));
+      ```
+      **At C1** the same block has no comment lines and three differences:
+      - `steps` holds only `["eval traces", …]`, `["library", saveLibraryNow]`, `["settings", saveSettingsFn]` and the cloud step;
+      - the cloud step keeps today's `try { … } catch (err) { console.log("[cloud] Quit sync failed:", err.message); }` around its body;
+      - `stopNewWork` is the same as in C2.
+
+      The behaviour is unchanged except that `stopAutoSync` now runs before the eval-trace flush rather than before the cloud sync.
+  - **`main/ipc/state.js`** (C2):
+    - **After `:11`**, add `let flushSettingsSave = null; // the pending debounced write and sync enqueue, until its timer fires or quit flushes it`.
+    - **`:29-39`** become:
+      ```js
+          clearTimeout(saveSettingsTimeout);
+          flushSettingsSave = async () => {
+            clearTimeout(saveSettingsTimeout);
+            saveSettingsTimeout = null;
+            flushSettingsSave = null;
+            const saved = ctx.saveSettings();
+            // Enqueue update-settings for sync
+            const syncEngine = require("../sync-engine");
+            const syncQueue = require("../sync-queue");
+            const revision = syncEngine.getSyncStatus().revision || 0;
+            await Promise.all([saved, syncQueue.enqueue("update-settings", { revision }).catch(err => console.error("[sync-queue] update-settings enqueue failed:", err.message))]);
+          };
+          saveSettingsTimeout = setTimeout(() => { flushSettingsSave(); }, 500);
+      ```
+      The `}, 500)` literal stays, for `tests/perfAudit.test.ts:455`.
+    - **Before `:85`**, add:
+      ```js
+      /** Quit flush: run the pending debounced settings write and sync enqueue now; resolves at once when none is pending. */
+      function flushPendingSettingsSave() { return flushSettingsSave ? flushSettingsSave() : Promise.resolve(); }
+      ```
+    - **`:85`** becomes `module.exports = { register, flushPendingSettingsSave };`.
+  - **`main/json-store.js`** (C2):
+    - **After `:57`** (the end of `saveJSON`), add:
+      ```js
+      /** Resolves once every write started so far has settled; never rejects (the tails swallow errors). For the quit flush. */
+      function whenWritesSettled() { return Promise.all([...writeTails.values()]); }
+      ```
+    - **`:59`** becomes `module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled };`.
+  - **`main/constants.js`** (C1, so the tests can import it):
+    - **After `:145`**, add:
+      ```js
+      /** Overall cap on the quit flush's saves and final cloud sync; the Narrate producer shutdown is not capped (ms) */
+      const QUIT_FLUSH_TIMEOUT_MS = 3000;
+      ```
+    - **After `:264`** (`JSON_RENAME_RETRY_DELAYS_MS,` in the export list), add `QUIT_FLUSH_TIMEOUT_MS,`.
+  - **Docs (C2):** BUG-192's **Status** line and `docs/governance/TECHNICAL_REFERENCE.md:235`, per Done-when 10–11.
+- **Tests:**
+  - **New `tests/quitSequence.test.js`** (ESM, `await import("../main/quit-sequence.js")`, as `tests/jsonStore.test.js:10` does). It runs against a fake `app` that models Electron:
+    ```js
+    function makeApp() {
+      const app = { exits: 0, onExit: () => {}, handler: null, quit: vi.fn(() => {
+        const event = { defaultPrevented: false, preventDefault() { this.defaultPrevented = true; } };
+        app.handler(event);                    // Electron does not await the listener's promise
+        if (!event.defaultPrevented) { app.exits++; app.onExit(); }
+      }) };
+      return app;
+    }
+    ```
+    Each test sets `app.handler = createWillQuitHandler({ app, stopNewWork, shutdownProducer, steps })` and then calls `app.quit()`. `onExit` snapshots state synchronously (sync `fs` is fine in a test).
+    - **(a) Saves are on disk at exit** (real temporary directory under `os.tmpdir()`; real timers).
+      - Steps: `["library", () => writeJSON(lib, L)]`, `["settings", () => saveJSON(set, S, "settings")]`, `["queue", () => writeJSON(q, Q)]`.
+      - `onExit` reads the three files back and lists the directory.
+      - Wait (poll, up to 2 s) for `app.exits === 1`.
+      - Pass: all three files parse to their payloads at exit, no `*.tmp` existed at exit, and the steps ran in declared order.
+    - **(b) A hanging step is abandoned at the cap** (`vi.useFakeTimers()`).
+      - Steps: 1 resolves at once; 2 never settles; 3 is a spy.
+      - After `await vi.advanceTimersByTimeAsync(QUIT_FLUSH_TIMEOUT_MS - 1)`: `app.exits === 0`.
+      - After 1 ms more: `app.exits === 1`, step 1 ran, step 3 was not called, and `console.warn` was called once with text containing step 2's name.
+    - **(c) A failing step does not block the rest.**
+      - Step 1 throws synchronously; step 2 returns a rejected promise; step 3 is a spy.
+      - At exit, step 3 has run, and `console.error` was called with each failed step's name.
+    - **(d) The second pass saves nothing.**
+      - After the flush and exit, call `app.handler(freshEvent)` once more.
+      - Pass: `freshEvent.defaultPrevented === false`, no step or `shutdownProducer` spy count changed, and `app.quit` was not called again.
+    - **(d2) A quit during the flush waits.**
+      - `shutdownProducer` resolves only when released.
+      - While it is pending, call `app.handler(e2)`.
+      - Pass: `e2.defaultPrevented === true`, `app.exits === 0`; after release, `app.exits === 1`, with exactly one exit.
+    - **(e) The producer shutdown is never cut** (fake timers; all steps instant).
+      - `shutdownProducer` resolves at 5,000 ms.
+      - At 4,999 ms: `app.exits === 0`; at 5,000 ms: `app.exits === 1`. `shutdownProducer` was called exactly once.
+      - This passes at C1 and C2: it characterizes the guarantee.
+    - **(f) `flushPendingSettingsSave`** (`main/ipc/state.js` under fake timers). Use the `Module._load` fakes pattern of `tests/settingsNarrateNormalization.test.js:51-54` and `:161-200`: `electron.ipcMain.handle`, `../window-manager`, `../sync-engine` with `getSyncStatus: () => ({ revision: 7 })`, and `../sync-queue` with an `enqueue` spy.
+      - Call `handlers.get("save-settings")({}, { accentColor: "#FF5B7F" })`, then `await flushPendingSettingsSave()`.
+      - Pass: `ctx.saveSettings` was called once and `enqueue` once with `("update-settings", { revision: 7 })`; after `advanceTimersByTime(500)`, neither count changed.
+      - A second `await flushPendingSettingsSave()` with nothing pending calls neither.
+  - **`tests/jsonStore.test.js`:** add **(g)** in a new `describe("whenWritesSettled")`, importing `whenWritesSettled` alongside the existing imports at `:10`.
+    - Start three `writeJSON` calls to two paths without awaiting them, plus one write whose parent is a regular file (it fails).
+    - `await whenWritesSettled()` resolves (does not reject).
+    - Both good paths then hold their last payloads, and no `*.tmp` remains.
+- **Constants:** `QUIT_FLUSH_TIMEOUT_MS = 3000` in `main/constants.js` (above).
+- **Branch:** `eb/quit-flush-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\quit-flush-1`. Write refs in full (a `main/` directory exists).
+- **Staging plan:**
+  - **C1 (failing tests, no behaviour change):**
+    - `main/quit-sequence.js` with the current behaviour verbatim;
+    - `main.js` wired to it;
+    - `QUIT_FLUSH_TIMEOUT_MS` in `main/constants.js`;
+    - `tests/quitSequence.test.js` and the `tests/jsonStore.test.js` addition.
+
+    Gate: Done-when 1 and `npm run typecheck` exits 0.
+  - **C2 (the fix):**
+    - the capped, guarded, stateful handler;
+    - the full step list;
+    - `flushPendingSettingsSave`;
+    - `whenWritesSettled`;
+    - the two docs.
+
+    Gate: Done-when 2–8 and 10–12.
+  - **Merge:** run the owner smoke (Done-when 9) on C2, then merge to `main` with `--no-ff` and push (Rule 5b). Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If (a) passes at C1 (the fake exit somehow saw the files written), stop with BLOCKER(USER): the fake does not model Electron's non-awaiting `quit`, and the control proves nothing.
+  - If any other C1 control fails for a different reason than stated, fix the test, not the module, and re-record.
+  - If an existing test fails, report the exact test and stop; do not weaken it. Three are at risk:
+    - `tests/settingsNarrateNormalization.test.js` (e), which drives the 500 ms timer;
+    - `tests/perfAudit.test.ts` e;
+    - `tests/einkFoundation.test.ts`, which reads `main.js`.
+  - If smoke (b) fails (the process is still alive after 5 s), record the `[quit]` lines from `%APPDATA%\blurby\blurby-data` logs or the console if available, and stop: either the producer wait or `app.quit()` re-entry is wrong.
+  - If (c)–(f) fail, record a fail with the `*.tmp` listing.
+  - If the full suite fails only in `tests/onnxruntime-patch.test.js` with ENOENT under `node_modules`, run `npm ci` in the worktree and rerun (environmental, as in SETTINGS-WRITE-DURABLE-1).
+  - Retry ceiling: two corrections per task, then BLOCKER(USER).
+  - Rollback: `git revert -m 1 <merge>`. File formats are unchanged, so no data migration is involved.
+- **Lane ownership (parallel run):** surface D only.
+  - **Forbidden:**
+    - every file not named above;
+    - the shared-core freeze set (`src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/types.ts`);
+    - `main.js:640-666` (startup recent-folders, the deferred folder work and cloud-sync start) and `main/folder-watcher.js` (FOLDER-SCAN-PERF-1, merged `534b43d2`; next edited by LARGE-FOLDER-SYNC-1);
+    - `main/sync-engine.js`, `main/sync-queue.js` and `main/narrate/**` (called, not edited);
+    - any file NARRATE-REBUILD-1's open phase owns.
+  - **Shared-core touches:** none.
+  - **Merge order:** FOLDER-SCAN-PERF-1 merged first (`534b43d2`, 2026-10-14); the line numbers here were re-read on `8a38d6fb`. Before merging, `git merge refs/remotes/origin/main` into this branch, re-grep the edit-site line numbers, and re-run Done-when 2–8. Re-run the smoke if `main.js`'s quit block or `main/json-store.js` changed. Independent of the other buffer items.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Quit handler extracted verbatim into its own module; quit, settings-flush and write-drain tests committed and failing on the unchanged behaviour | calculable | positive control | bounded | medium | 40m (one small module, one wiring block, one constant, one new test file with seven cases, one added test) | — | — |
+| 2 | Cancelled-first-quit flush in place: capped, guarded, producer never cut; pending settings save and pending writes flushed; docs updated | calculable | main-process fix | bounded | medium | 35m (one module body, one step list, two small exports, two doc lines) | — | — |
+| 3 | Full suite, typecheck and build green; production `--dir` build smoked by the owner; merged and pushed | calculable | merge and verify | mechanical | low | 45m (full `npm test` + typecheck + build + electron-builder dir build + smoke + one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-157 (the core lesson)** — the saves move into the cancelled first quit with an overall time limit. Done-when 1(a) is the LL-157 test: it quits during pending writes and reads the files back at the moment of exit.
+- **Standing rule 43 (LL-138)** — C1 extracts the handler verbatim and commits the tests failing on the unchanged behaviour (Done-when 1). (e) characterizes the producer guarantee and must pass at both C1 and C2 (standing rule 39, LL-112: characterize before extracting).
+- **Standing rule 44 (LL-143)** — every gate names `pwsh` and an exact exit code. Each search gate was dry-run on `66f15981`, and a gate with no hit on the base was not used.
+- **Standing rule 45 (LL-141)** and **LL-152** — the 1-second quit is owner-observed on a production `--dir` build. Dev mode takes minutes to load and cannot be quit within 1 s (LL-152 status record, 2026-10-14).
+- **LL-006 / standing rule 3 (PR-10)** — write-then-rename is untouched. A write cut at the cap leaves the previous file intact.
+- **LL-142** — durability is judged by files read back at exit, never by a call having been made.
+- **LL-156** — SETTINGS-WRITE-DURABLE-1's waiver ("the debounced sync enqueue at quit is out of scope"; `main/ipc/state.js` forbidden) named code this item edits, so it is explicitly brought into scope.
+- **Standing rule 47 (LL-147)** — the full suite runs on the owner's machine (Done-when 8).
+- **Standing rule 48 (LL-149)** — typecheck and build are in Done-when 8.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- **Standing rule 42 (LL-135)** — the dispatch carries the reconciliation recipe.
+- **Standing rule 46 (LL-153)** — the run writes nothing to the register; status moves stay with the ceremonies.
+- **SRL-086/087 (standing rule 36)** — every line number was read on `66f15981` and re-read on `8a38d6fb` after FOLDER-SCAN-PERF-1 merged; the merge-order step re-greps again before merging.

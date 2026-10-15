@@ -16,6 +16,7 @@
 8. **Always print CLI-formatted sprint dispatches.** Dispatches are POINTERS not PAYLOADS: reference the Notion item by Sprint Code and URL, its Seq and baseline, branch, and full ROADMAP.md specification.
 9. **Always provide a recommendation.** When presenting options, decisions, or status updates, lead with a clear recommendation and rationale. Don't leave decisions hanging — state what you'd do and why.
 10. **Do not wipe the workspace.** In this repo, never use cleanup/reset/delete flows to remove local work as a convenience step. If something is uncommitted, we either ignore it, preserve it, or commit it. We do not delete it unless the user explicitly asks for deletion.
+11. **Decision authority, three tiers (owner ruling 2026-10-14).** (1) Fully technical back-end decisions: Claude decides unilaterally, for the best version of Blurby. (2) Hybrid, a technical change with a user-visible effect or one that touches an owner ruling: elevate for discussion, with a recommendation. (3) Design and functionality (front of house): elevate for the owner's decision.
 
 ---
 
@@ -187,7 +188,7 @@ The dispatch's Task table tells Zeus:
 Before committing, verify ALL of these:
 
 - [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
-- [ ] `npm test` passes (1,955+ tests, 0 failures; count as of 2026-10-12 after NARRATE-REMOVE-1) and `npm run typecheck` exits 0
+- [ ] `npm test` passes (2,080+ tests, 0 failures; count as of 2026-10-14 after QUIT-FLUSH-1) and `npm run typecheck` exits 0
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
@@ -279,13 +280,12 @@ Every session starts with awareness of these 7 documents. They are the single so
 
 When a sprint **completes**:
 
-1. **Notion work register** — Record completion, date and evidence through the provider/connector flow, then refresh the snapshot.
-2. **Notion work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, and verify queued depth ≥ 3.
-3. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
-4. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
-5. **ROADMAP.md** — Update Execution Order diagram.
-6. **CLAUDE.md** — Update "What's NOT Done" list, Dependency Chain, and test counts.
-7. **Backfill** — If queue depth drops below 3, spec the next sprint from IDEAS.md or Someday Backlog.
+1. **Notion work register** — Record completion date and evidence, clear the finished item's Seq, renumber the queue through the provider/connector flow, verify queued depth ≥ 3, then refresh the snapshot.
+2. **ROADMAP.md** — Move the full spec section to `docs/planning/.Archive/ROADMAP_legacy.md`. Keep ROADMAP forward-looking only.
+3. **ROADMAP.md** — Update Sprint Status table (remove or mark complete).
+4. **ROADMAP.md** — Update Execution Order diagram.
+5. **CLAUDE.md** — Update "What's NOT Done" list, Dependency Chain, and test counts.
+6. **Backfill** — If queue depth drops below 3, spec the next sprint from IDEAS.md or Someday Backlog.
 
 ### Where Things Live
 
@@ -306,7 +306,7 @@ When a sprint **completes**:
 
 ### Cleanup Cadence
 
-- **Every sprint completion**: Run steps 1-7 above.
+- **Every sprint completion**: Run steps 1-6 above.
 - **Every 3rd sprint**: Review `docs/` for stale files. Archive anything from completed work.
 - **ROADMAP.md target**: <500 lines. If approaching, check for completed specs that weren't archived.
 - **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
@@ -364,12 +364,11 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 
 **Current operational state:**
 - **Engine posture:** Kokoro is the sole engine and is dormant. NARRATE-REMOVE-1 (2026-10-12) removed the Narrate mode and deleted the MOSS-Nano, Pocket and Qwen code; the Kokoro main-process files (`main/tts-engine.js`, `tts-engine-marathon.js`, `tts-worker.js`, `tts-cache.js`, `tts-opus.js`) are byte-identical to the base, their IPC handlers stay registered in `main/ipc/tts.js`, nothing starts Kokoro at launch, and `preload.js` exposes none of those `tts-*` handlers. NARRATE-REBUILD-1 P3 added a second producer (`main/narrate/`, `main/ipc/narrate.js`) and an engine (`src/reader/modes/narrate/engine/`); P4 (`331f8313`) exposed them as preload `narrate*` and added the Narrate mode. NARRATE-REBUILD-1 builds the new Narrate on it (or, if Phase 0 fails, on a bake-off winner) and must call `ttsCache.init` before using the cache. The reading modes are Page, Focus and Flow; settings schema 13 turns a saved `narrate` mode into `flow`. Desktop v2.0 shipped.
-- **Queue (roadmap review 2026-10-13):** Notion database Blurby.Roadmap. NARRATE-REBUILD-1 (9, Path: epic, In Flight; P5 merged `05a5480a`, P6 holds its production build for G2) → READER-VISUAL-DIAG-1 (12) → UX-POLISH-1 (14, merged `e942e3fd`, close-out after the G2 keyboard smoke) → DEV-PERF-MEASURE-1 (15, stub). TEST-BUDGET-WORDINDEX-1 (`76956729`), CLEANUP-MODE-BARREL-1 (`03e218bd`) and SETTINGS-WRITE-DURABLE-1 (`b728a3e8`) completed 2026-10-13; dispatch-ready depth is 1, so a `/roadmap-review` is due (Rule 5a). Parallel items' heavy gates (full suite, build, live sessions) stay out of the epic's measurement windows (ROADMAP.md Stage 7, Parallel run plan). LL-135, LL-138, LL-143 and LL-141 are standing rules 42–45; LL-153 is standing rule 46 (2026-10-13). Completed 2026-10-12: NARRATE-REMOVE-1 (merge `386651fc`), TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`); close-outs in `docs/governance/close-outs/`. NARRATE-HEARD-CURSOR-1, NARRATE-APPLYRATECHANGE-COLLAPSE-1 and NARRATE-SUBSCRIBER-CURSOR-1 were superseded, and KOKORO-EXPORT-1 dissolved, on 2026-10-11. Standing rule 41 (LL-136): exact-path fences exempt the time log.
-  - Completions of 2026-10-10 to 2026-10-12 (EPIC-MAIN-PROCESS-CLEANUP, TTS-ENGINE-SHARED-1, TERMINAL-BACKFILL-1, READER-MODE-SEPARATION-2, NARRATE-REMOVE-1): archived to `docs/planning/CLAUDE_md_archive_session1.md`.
-- **Open bugs:** BUG-186 resolved 2026-10-13 (TEST-BUDGET-WORDINDEX-1); BUG-190 (PDF import failure, Medium, unreproduced) and BUG-191 (years read as cardinals, carry into Narrate normalization) were filed by the 2026-10-13 governance sweep; BUG-192 (saves at quit are abandoned, the last change before quitting is lost; Medium; found in the SETTINGS-WRITE-DURABLE-1 owner smoke) was filed 2026-10-13. Open: BUG-187 (dev-mode `ResizeObserver loop` warning flood in the profile error.log; Low, needs read-only diagnosis), BUG-188 (Focus and Flow horizontal cursor band sits apart from the word cursor; pre-existing; Low), BUG-189 (dev-mode slowness across the whole app, equal on the base; Low), BUG-154 (parked, likely not a bug, needs live verification), BUG-184 (e-ink hover wiped overlay backgrounds; resolved in source by EINK-HOVER-FIX-1 `61bad595`, open until a rebuild and the owner's e-ink smoke), BUG-185 (settings writes are fire-and-forget with a shared .tmp path; filed 2026-10-11 from OutsideAudit.10 F7, Low, scheduled as SETTINGS-WRITE-DURABLE-1; observed live at startup during the NARRATE-REMOVE-1 smoke, ENOENT on the settings.json and sync-queue.json renames).
+- **Queue (close-out 2026-10-14):** Notion database Blurby.Roadmap. NARRATE-REBUILD-1 (9, Path: epic, In Flight; P6 at owner gate G2, ready at `f677353f`) → READER-VISUAL-DIAG-1 (10) → PACKAGING-FIX-1 (11) → UX-POLISH-1 (12, In Flight: merged `e942e3fd`, close-out after the G2 keyboard checks) → UX-POLISH-2 (13) → LARGE-FOLDER-SYNC-1 (14, technical half: per-file live sync; its prerequisite QUIT-FLUSH-1 is met; the very-large-folder design half is an open owner decision); stubs 15–20: FOLDER-UNREACHABLE-GUARD-1 (BUG-195), PDF-IMPORT-DIAG-1, OVERLAY-THEME-SWEEP-1, EINK-CONTROLS-1, KF2-WAIVER-RETIRE-1, NARRATE-YEARS-1 (blocked on the epic). Dispatch-ready depth is 4, below the buffer target of 5. QUIT-FLUSH-1 completed 2026-10-14 (TR-073); FOLDER-SCAN-PERF-1 before it (TR-072). Parallel items' heavy gates (full suite, build, live sessions) stay out of the epic's measurement windows (ROADMAP.md Stage 7, Parallel run plan; Stage 8 for merge order). Standing rules: LL-136 is 41; LL-135, LL-138, LL-143, LL-141 are 42–45; LL-153 is 46; LL-147 is 47 (full suite on the owner's machine) and LL-149 is 48 (typecheck and build in Done-when), 2026-10-14.
+- **Open bugs:** BUG-195 (an unreachable source folder empties the library of its folder books; High; filed 2026-10-14, FOLDER-UNREACHABLE-GUARD-1), BUG-194 (deleting the sample book deletes the bundled sample file; Low; unscheduled), BUG-191 (years read as cardinals; NARRATE-YEARS-1), BUG-190 (PDF import failure, unreproduced; PDF-IMPORT-DIAG-1), BUG-189 (dev-mode slowness; re-measure still owed), BUG-188 and BUG-187 (READER-VISUAL-DIAG-1), BUG-185 and BUG-184 (resolved in source; close after the G2 smoke), BUG-154 (parked).
 - **Deferred lanes:** Android APK, Cloud Sync, RSS/News, long-form audio export (KOKORO-EXPORT-1 dissolved). MOSS-Nano, Pocket TTS and Qwen were deleted by NARRATE-REMOVE-1 (2026-10-12).
-- **Most recent implementation:** NARRATE-REBUILD-1 P4 The mode (merge `331f8313`) and P3 Core engine (`ef245815`), 2026-10-13. Before it, NARRATE-REMOVE-1 (merge `386651fc`, 2026-10-12): Narrate and the dormant non-Kokoro engines removed, Kokoro kept dormant, settings schema 13. Before it, TEST-TIMEOUT-HEADROOM-1 (`072a65f3`), EINK-HOVER-FIX-1 (`61bad595`) and LIBRARY-SETTINGS-FIX-1 (`8c41095e`).
-- Suite on the owner's machine (2026-10-12, sprint tree): 1,955 passed / 1 skipped / 0 failed in 134 files (base: 3,410 passed / 133 skipped in 235 files); `npm run typecheck` exits 0; `npm run build` exits 0. One full run showed `tests/wordPositionIndex.test.ts` over its 200 ms budget under load (BUG-186); the next full run passed.
+- **Most recent implementation:** QUIT-FLUSH-1 (merge `d21009b3`, 2026-10-14): the quit saves (library, the pending settings save, settings, pending JSON writes, best-effort cloud sync and the sync's library save) run in the cancelled first `will-quit` under `QUIT_FLUSH_TIMEOUT_MS` (3 s), each guarded, and the Narrate producer shutdown is awaited uncapped (`main/quit-sequence.js`); BUG-192 resolved. Before it, FOLDER-SCAN-PERF-1 (merge `534b43d2`, 2026-10-14): native recursive `fs.watch` replaces chokidar, a cheaper yielding scan, folder work after the window loads; BUG-193 resolved. Live sync on very large folders moved to LARGE-FOLDER-SYNC-1, and the owner keeps `sourceFolder` cleared until it lands. Before it, NARRATE-REBUILD-1 P4 (merge `331f8313`) and P3 (`ef245815`), 2026-10-13.
+- Suite on the owner's machine (2026-10-14, QUIT-FLUSH-1 tree `bd1216fc`): 2,080 passed / 1 skipped / 0 failed in 153 files; `npm run typecheck` exits 0; `npm run build` exits 0.
 - CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). The TTS `quality-gate` job was removed by NARRATE-REMOVE-1.
 - Governance tooling: Virtuoso connector-backed register, timestamped snapshots, and durable mutation recovery. The XLSX and scripts/recalc.py are historical tools; the live queue no longer depends on Excel.
 - Performance baseline: 21 automated benchmarks via `npm run perf`
@@ -380,7 +379,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - Vitest 4.1 for testing, electron-builder 26 for packaging
 - foliate-js for EPUB rendering (primary reader for EPUBs)
 - Kokoro TTS engine (28 voices, worker thread, q4 quantization) — the only engine in the tree, dormant (no UI or launch path) until NARRATE-REBUILD-1. MOSS-Nano, Pocket TTS and Qwen were deleted by NARRATE-REMOVE-1 (2026-10-12).
-- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), chokidar (folder watch, lazy-loaded), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log), opusscript (Opus audio encoding/decoding), mammoth (DOCX→HTML, lazy-loaded)
+- Dependencies: @azure/msal-node (Microsoft auth), googleapis (Google auth/Drive), @mozilla/readability + jsdom (URL extraction, lazy-loaded), pdf-parse (PDF reading, lazy-loaded), pdfkit (PDF export), adm-zip (EPUB/MOBI, lazy-loaded), cheerio (HTML, lazy-loaded), electron-updater, docx (.docx notes export), exceljs (.xlsx reading log), opusscript (Opus audio encoding/decoding), mammoth (DOCX→HTML, lazy-loaded)
 
 ### Architecture
 

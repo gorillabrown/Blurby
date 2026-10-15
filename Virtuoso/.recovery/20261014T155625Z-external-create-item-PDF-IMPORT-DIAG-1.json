@@ -1,0 +1,50 @@
+{
+  "id": "20261014T155625Z-external-create-item-PDF-IMPORT-DIAG-1",
+  "operation": "external-create-item",
+  "item_id": "PDF-IMPORT-DIAG-1",
+  "created": "2026-10-14T15:56:25Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Reproduce the PDF that cannot be converted",
+      "status": "Queued",
+      "written_status": "Stub",
+      "effort": "S",
+      "lane": "Library & Content",
+      "group": "Platform Health",
+      "spec_link": "ROADMAP.md#pdf-import-diag-1",
+      "branch": "eb/pdf-import-diag-1",
+      "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
+      "notes": "Created by roadmap review 2026-10-14. BUG-190.",
+      "sequence": 17,
+      "prerequisites": [],
+      "id": "PDF-IMPORT-DIAG-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-14T15:33:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PDF-IMPORT-DIAG-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PDF-IMPORT-DIAG-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PDF-IMPORT-DIAG-1",
+      "actualRevision": "2026-10-14T15:57:26Z",
+      "recoveryId": "20261014T155625Z-external-create-item-PDF-IMPORT-DIAG-1",
+      "detail": {},
+      "providerItemId": "3f97c96c-c31e-8105-88f3-ecc65114530f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-14T15:57:31Z",
+  "outcome": "succeeded"
+}

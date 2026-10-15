@@ -1,0 +1,38 @@
+{
+  "id": "20261014T231219Z-external-record-completion-QUIT-FLUSH-1",
+  "operation": "external-record-completion",
+  "item_id": "QUIT-FLUSH-1",
+  "created": "2026-10-14T23:12:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-14",
+      "sequence": null,
+      "evidence": "`docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md`",
+      "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer (branch eb/quit-flush-1 from main 80c71c70). Completed 2026-10-14: merge d21009b3, close-out merge a63048c2; ledger TR-073. Owner smoke (a)-(e) pass on the production build; (f) not testable as written (Page-mode page turns do not commit a position). Review fixes W1, W2 and N1 ruled by Blurby Brain (option A + N1); LL-159; BUG-192 resolved."
+    },
+    "expectedRevision": "61d0009d36c979341492ab03aa88dbdeb4c8a80b0d44abd9323ebfcb14f7ab99",
+    "idempotencyKey": "record-completion:QUIT-FLUSH-1:[('completed', '2026-10-14'), ('evidence', '`docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md`'), ('notes', 'Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer (branch eb/quit-flush-1 from main 80c71c70). Completed 2026-10-14: merge d21009b3, close-out merge a63048c2; ledger TR-073. Owner smoke (a)-(e) pass on the production build; (f) not testable as written (Page-mode page turns do not commit a position). Review fixes W1, W2 and N1 ruled by Blurby Brain (option A + N1); LL-159; BUG-192 resolved.'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "QUIT-FLUSH-1",
+      "idempotencyKey": "record-completion:QUIT-FLUSH-1:[('completed', '2026-10-14'), ('evidence', '`docs/governance/close-outs/CloseOut.QUIT-FLUSH-1.2026-10-14.md`'), ('notes', 'Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer (branch eb/quit-flush-1 from main 80c71c70). Completed 2026-10-14: merge d21009b3, close-out merge a63048c2; ledger TR-073. Owner smoke (a)-(e) pass on the production build; (f) not testable as written (Page-mode page turns do not commit a position). Review fixes W1, W2 and N1 ruled by Blurby Brain (option A + N1); LL-159; BUG-192 resolved.'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261014T231219Z-external-record-completion-QUIT-FLUSH-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T23:12:41Z",
+  "outcome": "succeeded"
+}

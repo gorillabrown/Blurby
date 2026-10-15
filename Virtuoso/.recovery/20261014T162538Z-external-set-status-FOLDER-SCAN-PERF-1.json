@@ -1,0 +1,35 @@
+{
+  "id": "20261014T162538Z-external-set-status-FOLDER-SCAN-PERF-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SCAN-PERF-1",
+  "created": "2026-10-14T16:25:38Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-14"
+    },
+    "expectedRevision": "c2cefe47ba87db178b6df4adbf1fe4a1438d4af2b189d1253405c9af25833fb7",
+    "idempotencyKey": "set-status:FOLDER-SCAN-PERF-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SCAN-PERF-1",
+      "idempotencyKey": "set-status:FOLDER-SCAN-PERF-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-14T16:25:54Z",
+      "recoveryId": "20261014T162538Z-external-set-status-FOLDER-SCAN-PERF-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-14T16:25:54Z",
+  "outcome": "succeeded"
+}

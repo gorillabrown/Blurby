@@ -1,0 +1,35 @@
+{
+  "id": "20261015T002840Z-external-set-status-PACKAGING-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "PACKAGING-FIX-1",
+  "created": "2026-10-15T00:28:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-14"
+    },
+    "expectedRevision": "2934628a99ced4ff80fd4c8c58186309c437b68d0410c9a88dc3dfbee3fe2e9a",
+    "idempotencyKey": "set-status:PACKAGING-FIX-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PACKAGING-FIX-1",
+      "idempotencyKey": "set-status:PACKAGING-FIX-1:[('started', '2026-10-14'), ('status', 'in-flight')]",
+      "actualRevision": "2026-10-15T00:29:07Z",
+      "recoveryId": "20261015T002840Z-external-set-status-PACKAGING-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T00:29:11Z",
+  "outcome": "succeeded"
+}
