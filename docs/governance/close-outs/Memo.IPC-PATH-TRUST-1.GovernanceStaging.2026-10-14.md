@@ -96,3 +96,4 @@ SAVE-LIBRARY-TRUST-1 was amended on its own branch (now `dbd159c3`). `keepMainPa
 - **Done-when 7 text deviation:** the specification's literal `coverPath: held.get(doc.id).coverPath` became `coverPath: h.coverPath` in the amendment's block form (`h = held.get(doc.id)`). It means the same thing. The equivalent check `git grep -n -F 'coverPath: h.coverPath' -- main/ipc/library.js` prints one line (`:55`) and exits 0.
 - **Mutation check:** with `coverPath: h.coverPath` removed, (c) fails; restored.
 - DW2 on the merge: 6 files, 57 tests, exit 0 (SAVE-LIBRARY-TRUST-1's (l) and (m) included).
+- Heavy run on the merge, at `2d5d239d` (tree `7ae42a23`), under load: `npm test` exits 0 (161 files, 2,172 passed / 1 skipped / 0 failed). `npm run typecheck`: exit 0.
