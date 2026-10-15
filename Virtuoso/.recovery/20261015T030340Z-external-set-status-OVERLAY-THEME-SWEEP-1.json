@@ -1,0 +1,34 @@
+{
+  "id": "20261015T030340Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+  "operation": "external-set-status",
+  "item_id": "OVERLAY-THEME-SWEEP-1",
+  "created": "2026-10-15T03:03:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 25
+    },
+    "expectedRevision": "92e0f5787e07543661578fa0fd8b93a85886ab6d61d95c29e3d6f75ad6cffabf",
+    "idempotencyKey": "set-status:OVERLAY-THEME-SWEEP-1:[('sequence', 25)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "OVERLAY-THEME-SWEEP-1",
+      "idempotencyKey": "set-status:OVERLAY-THEME-SWEEP-1:[('sequence', 25)]",
+      "actualRevision": "2026-10-15T03:04:43Z",
+      "recoveryId": "20261015T030340Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T03:04:53Z",
+  "outcome": "succeeded"
+}

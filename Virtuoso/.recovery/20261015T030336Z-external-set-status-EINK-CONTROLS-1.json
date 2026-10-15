@@ -1,0 +1,34 @@
+{
+  "id": "20261015T030336Z-external-set-status-EINK-CONTROLS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-15T03:03:36Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 26
+    },
+    "expectedRevision": "7eb09587f27a440053bf0545f65ec0f51720fc1924820294eab8573b92705532",
+    "idempotencyKey": "set-status:EINK-CONTROLS-1:[('sequence', 26)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "set-status:EINK-CONTROLS-1:[('sequence', 26)]",
+      "actualRevision": "2026-10-15T03:04:43Z",
+      "recoveryId": "20261015T030336Z-external-set-status-EINK-CONTROLS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T03:04:49Z",
+  "outcome": "succeeded"
+}
