@@ -67,5 +67,20 @@ Owner smoke deferred to batched smoke by Blurby Brain 2026-10-14 (Rule 11; owner
     - N3: a parser-level test of the operation cap.
     - N4: peak memory for one 64 MiB entry is about twice the entry, which is acceptable.
 
-### Run 2 (after NARRATE-REBUILD-1 merges)
-Pending: merge that main into this branch, re-run DW2, `npm test` under the load rule, typecheck, build, the `--dir` build and the Done-when 13 launch control, and record the results here.
+### Run 2 — re-gate on the latest main (Blurby.Roadmap go, 2026-10-14)
+Blurby Brain lifted the epic hold: the three security items merge before the owner's single epic run on final main. Blurby.Roadmap (conductor since the owner's 2026-10-14 routing change) granted the merge go, on condition that every gate passes exactly.
+- Main merged in as `f404327d` (tree `ddf9d3c7`, includes `refs/remotes/origin/main` `0f285836`).
+- `npm ci`: exit 0. DW2: 11 files, 158 tests, exit 0.
+- `npm test` under load: **exit 0**, 161 files, 2,157 passed / 1 skipped / 0 failed. No failing set.
+- `npm run typecheck`: exit 0. `npm run build`: exit 0.
+- `--dir` build:
+  - The first attempt exited 1 with `EPERM: operation not permitted, rename 'release\win-unpacked.tmp' -> 'release\win-unpacked'` (`app-builder-lib` `extractArchive`). Windows held a lock on run 1's output folder; nothing in the tree had changed.
+  - The one immediate retry exited 0 (Electron 41.10.7, signed `release\win-unpacked\Blurby.exe`). Both attempts are recorded here.
+- Launch control, run 2 (`%TEMP%\blurby-da1-r2-a8d0477d…`):
+  - `navigator.userAgent` reports `Electron/41.10.7`.
+  - `sample-meditations` has `wordCount` 80479 and a `coverPath`, as in the C1 control.
+  - No `error.log`.
+  - The reader opens *Meditations* with `foliate-view` present and no read error.
+
+### Merge go
+Blurby.Roadmap, 2026-10-14: conditional go, met by run 2 above. The item stays In Flight with its close-out held for the batched owner smoke: no tag, no upload.
