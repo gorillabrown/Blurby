@@ -1,0 +1,37 @@
+{
+  "id": "20261015T134121Z-external-set-status-FOLDER-NOTICE-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-NOTICE-1",
+  "created": "2026-10-15T13:41:21Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-15",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain's technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15 (\"…Reconnect the drive, then press Retry.\"). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1)."
+    },
+    "expectedRevision": "46229142c860595552e74f9a36f8201c0cfbe7d3fc4aeaa56372f81f557aaccd",
+    "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('notes', 'Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain\\'s technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15 (\"…Reconnect the drive, then press Retry.\"). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1).'), ('started', '2026-10-15'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": false,
+      "outcome": "failed",
+      "operation": "set-status",
+      "itemId": "FOLDER-NOTICE-1",
+      "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('notes', 'Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain\\'s technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15 (\"…Reconnect the drive, then press Retry.\"). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1).'), ('started', '2026-10-15'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261015T134121Z-external-set-status-FOLDER-NOTICE-1",
+      "detail": {
+        "reason": "plan carried a mis-encoded character; never sent to the connector; superseded by 20261015T134144Z"
+      }
+    }
+  },
+  "resolved": ""
+}
