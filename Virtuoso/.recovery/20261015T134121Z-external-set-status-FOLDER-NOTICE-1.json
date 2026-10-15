@@ -28,7 +28,9 @@
       "idempotencyKey": "set-status:FOLDER-NOTICE-1:[('notes', 'Created 2026-10-15 by Blurby.Roadmap. Owner decision (option C, both; \"button tries only once. No infinite loop\") relayed by Blurby.Brain, with Brain\\'s technical rulings (2026-10-15: clear at the root listing, Rescan clears, 30 s listing timeout). After FOLDER-UNREACHABLE-GUARD-1 and LARGE-FOLDER-SYNC-2. Not a release gate. Shared core: three optional lines in src/types.ts. Full Spec: U9/U10 pass. Wording decided by the owner 2026-10-15 (\"…Reconnect the drive, then press Retry.\"). Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent (branch eb/folder-notice-1).'), ('started', '2026-10-15'), ('status', 'in-flight')]",
       "actualRevision": "",
       "recoveryId": "20261015T134121Z-external-set-status-FOLDER-NOTICE-1",
-      "detail": {}
+      "detail": {
+        "reason": "plan carried a mis-encoded character; never sent to the connector; superseded by 20261015T134144Z"
+      }
     }
   },
   "resolved": ""
