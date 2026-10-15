@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-15T15:24:20Z",
+  "takenAt": "2026-10-15T15:30:03Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2785,7 +2785,7 @@
     },
     {
       "id": "NARRATE-TRACE-LABELS-1",
-      "title": "Rename the legacy MOSS-Nano labels in Narrate traces",
+      "title": "Narrate harness hygiene: legacy trace labels and rate validation",
       "sequence": 56,
       "status": "blocked",
       "raw_status": "Blocked",
@@ -2802,9 +2802,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "p5-latency-e2e traces still say moss-nano and real-app-selected-nano from before NARRATE-REMOVE-1; rename them so no reader thinks MOSS-Nano ran.",
+      "description": "Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "fd2bddc0b9259d08d904bbd7d0a876c66c978934e35543b2995813e94ff16abc",
+      "revision": "538d886c051dc6690c07d930d034a9aef1543c843adc5ad17ec7966af4d484a4",
       "extra": {}
     }
   ],
