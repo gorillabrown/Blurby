@@ -6456,6 +6456,8 @@ Review notes W2 (the relocate save writes a fraction estimate after a failed-wor
 
 #### ELECTRON-42-UPGRADE-1 — Upgrade Electron to 42 so a normal quit does not crash on x64 *(position 59 — Full Spec; authored 2026-10-15 on main @ `7bb79f1e`; release gate (11), replacing NARRATE-EXIT-CRASH-1's fix)*
 
+- **Dispatch stopped (2026-10-15, owner direction, after C1):** the first dispatch was stopped at the owner's request, to run GOV-NOTION-MAPPING-1 first. It ended after task 1. C1 is committed and pushed: `b979c50d` on `eb/electron-42-upgrade-1` (worktree `C:\Projects\Blurby\.worktrees\electron-42-upgrade-1`, kept). That commit adds `scripts/narrate-rebuild/exit-crash-repro/` (`main.js`, `package.json`, `run.ps1`). Its control result: 50 launches under x64 Electron 41.10.7 gave 32 clean exits and 18 crashes with `0x80000003`, all at `PostQueuedCompletionStatus`. Done-when for C1 is met, and it does not need re-running. C2 onward has not started: `package.json` and the lockfile are unchanged, and no native-module survey, ICU check, breaking-change table, gate run or build has been done. The interrupted 100-run control loop was stopped, and nothing of it was kept. Status returns to Queued. **To resume:** reuse the worktree and branch; start at task 2 (C2, the version bump); do not re-run C1.
+
 - **What:** Move Blurby from Electron 41.10.7 to 42.11.14. That release carries the Node fix for a shutdown crash: on Windows x64, a quit made soon after Narrate's voice was busy exits 0x80000003 (STATUS_BREAKPOINT). It happened on 57 of 121 launches in release gate (1), always after the quit flush finished, so no data was lost. Nothing in Blurby's own quit path changes.
 - **Cause (diagnosis, 2026-10-15; evidence in the planner scratchpad `exitcrash\` and the owner's Drive `Blurby-transfer\release-final-main\final-main-d3d6\`):**
   - The bug is nodejs/node#56645, fixed by nodejs/node#61999 ("Ignore PostDelayedTask after Stop").
@@ -6567,6 +6569,19 @@ Review notes W2 (the relocate save writes a fraction estimate after a failed-wor
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
 - **Standing rules 47 and 48:** the full suite, typecheck and build run on the owner's machine.
 - **Standing rule 41 (LL-136):** the fence exempts the time log and the memo.
+
+<a id="gov-notion-mapping-1"></a>
+#### GOV-NOTION-MAPPING-1 — Restore the Notion mapping and sync the podcast addition *(position 60 — Full Spec in the held plan; added 2026-10-15 at the owner's request; held plan `2026-10-15-notion-mapping-podcast-sync`, HB-4)*
+
+- **What:** Virtuoso 1.15 (installed 2026-10-15) refuses a register mapping that names both `lane` and `workstream`. The main checkout's uncommitted `Virtuoso/workspace-layout.json` adds a `workstream` mapping, so the provider cannot start a mutation handshake from there. The fix maps the canonical `workstream` to the populated Notion **Lane** column and removes the deprecated `lane` alias from `fieldMappings`. It keeps the separate Notion Workstream column and every Lane value. Then it writes the owner's podcast direction (already on `main` in [PODCAST-SOURCE-1](#podcast-source-1), `52f9397f`) into that item's Description and Notes through the mutation handshake, and verifies the text with an SQL read-back.
+- **Why:** the alias collision blocks every register write made from the main checkout under 1.15. The PODCAST-SOURCE-1 register text still predates the owner's addition.
+- **Full specification:** [`docs/planning/holding/2026-10-15-notion-mapping-podcast-sync.md`](docs/planning/holding/2026-10-15-notion-mapping-podcast-sync.md), § *HB-4 — Restore the Notion mapping and sync the podcast addition*. It holds the Done-when list (1–6), the exact podcast payload, the reconciliation recipe, the failure handling and the lessons applied (LL-155, standing rule 46, Rule 10).
+- **Out of scope:** podcast code, any Notion schema change, queue reordering, status changes to PODCAST-SOURCE-1, and general registry modernization.
+- **Prerequisites:** none on the product side. The held plan is published on `main` with this entry, which clears its readiness issue HB-4-PUBLISH-PERMISSION.
+- **Effort:** M. **Lane:** Platform & Maintenance. Execution surface E (governance). **Path:** dispatch. **Branch:** `eb/hb-4` from `origin/main`.
+- **Owners:** the planner (Blurby.Roadmap) performs the register text write through the `roadmap-review` writer. Per standing rule 46, the implementation agent does not write the register. The implementation agent makes the manifest correction and its checks.
+- **Merge order:** before ELECTRON-42-UPGRADE-1 resumes (owner direction, 2026-10-15). It touches no file that ELECTRON-42-UPGRADE-1 owns.
+- **Lane Ownership:** E (`Virtuoso/workspace-layout.json` `fieldMappings`, the snapshot and recovery records). **Forbidden During Parallel Run:** all application code, `package.json`, the lockfile. **Shared-Core Touches:** none.
 
 <a id="page-position-save-2"></a>
 
