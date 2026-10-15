@@ -379,4 +379,26 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await settle();
     expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
   });
+
+  it("(u) a turn while the section's first wrap is still running is held too (review W1)", async () => {
+    const { fake, view, renderer, render } = await mount();
+    const doc = document.implementation.createHTMLDocument();
+    const words = Array.from({ length: 60 }, (_, i) => `Word${i}`);
+    // 60 block groups: the wrap stamps the first 50, then yields (WRAP_BATCH_SIZE) with the rest unwrapped.
+    doc.body.innerHTML = words.map((w) => `<p>${w}</p>`).join("");
+    renderer.contents = [{ doc, index: 3 }];
+    await act(async () => {
+      view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } }));
+      renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 1, 1) }; // provisional span 1
+      (container.querySelector('[aria-label="Next page"]') as HTMLElement).click();
+    });
+    expect(saves(fake)).toEqual([]);
+    await settle();
+    await render({
+      bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 80, wordCount: 60 }],
+      getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined),
+    });
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 21, "cfi:3:Word1"]]);
+  });
 });

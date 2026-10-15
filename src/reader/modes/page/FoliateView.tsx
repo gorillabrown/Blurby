@@ -618,11 +618,11 @@ export default function PageFoliateView({
             if (sectionStart >= 0) {
               const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
-              const provisional = !liveSections()?.length; // PAGE-SAVE-RESTAMP-GUARD-1: no book words yet
+              // PAGE-SAVE-RESTAMP-GUARD-1: with no book words yet, these spans carry the renderer's own numbering until
+              // the re-stamp effect replaces them (and removes the document). Added before the wrap, which yields
+              // between batches, so a turn onto a page stamped mid-wrap is held too.
+              if (!liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
-              // PAGE-SAVE-RESTAMP-GUARD-1: these spans carry the renderer's own numbering until the re-stamp effect
-              // replaces them. If the book's words arrived during this wrap, that effect already owns the document.
-              if (provisional && !liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
             }
           }
 
