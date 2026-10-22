@@ -1,0 +1,40 @@
+{
+  "id": "20261022T224419Z-external-set-status-PDF-IMPORT-DIAG-1",
+  "operation": "external-set-status",
+  "item_id": "PDF-IMPORT-DIAG-1",
+  "created": "2026-10-22T22:44:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 9,
+      "written_status": "full-spec",
+      "title": "PDFs convert again: the EPUB converter uses pdf-parse 2's API",
+      "description": "Every PDF fails to open: the EPUB converter calls pdf-parse 1's API on the installed pdf-parse 2, and never sets the `DOMMatrix` global. Move the one working PDF read into a shared helper, use it from both callers, show the converter's own user message, and add a test that loads the real package.",
+      "notes": "Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's `error.log` and reproduced. `pdfToEpub` calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a `DOMMatrix` global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint)."
+    },
+    "expectedRevision": "3b694a3298942ea44831b8221f71b4da067e43b02af19fa6dd925a6845af845d",
+    "idempotencyKey": "set-status:PDF-IMPORT-DIAG-1:[('description', \"Every PDF fails to open: the EPUB converter calls pdf-parse 1's API on the installed pdf-parse 2, and never sets the `DOMMatrix` global. Move the one working PDF read into a shared helper, use it from both callers, show the converter's own user message, and add a test that loads the real package.\"), ('notes', \"Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's `error.log` and reproduced. `pdfToEpub` calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a `DOMMatrix` global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint).\"), ('sequence', 9), ('title', \"PDFs convert again: the EPUB converter uses pdf-parse 2's API\"), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PDF-IMPORT-DIAG-1",
+      "idempotencyKey": "set-status:PDF-IMPORT-DIAG-1:[('description', \"Every PDF fails to open: the EPUB converter calls pdf-parse 1's API on the installed pdf-parse 2, and never sets the `DOMMatrix` global. Move the one working PDF read into a shared helper, use it from both callers, show the converter's own user message, and add a test that loads the real package.\"), ('notes', \"Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's `error.log` and reproduced. `pdfToEpub` calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a `DOMMatrix` global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint).\"), ('sequence', 9), ('title', \"PDFs convert again: the EPUB converter uses pdf-parse 2's API\"), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261022T224419Z-external-set-status-PDF-IMPORT-DIAG-1",
+      "detail": {
+        "readBack": "SQL 2026-10-22: Seq, Spec State, Name exact; Description and Notes equal to the written text with code-span backticks rendered as formatting (x-notion.textRules)"
+      }
+    }
+  },
+  "resolved": "2026-10-22T22:45:16Z",
+  "outcome": "succeeded"
+}

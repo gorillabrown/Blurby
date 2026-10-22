@@ -3018,3 +3018,9 @@ Related: LL-142, LL-151, LL-160.
 **Applies to:** `Virtuoso/workspace-layout.json` field and status mappings; plugin upgrades; snapshot imports after a mapping change.
 **Status:** Observation
 Related: LL-155.
+
+### LL-148 — status (2026-10-22, 2026-10-22)
+**Status:** Promoted -> ROADMAP standing rule 49
+
+### LL-156 — status (2026-10-22, 2026-10-22)
+**Status:** Promoted -> ROADMAP standing rule 50
