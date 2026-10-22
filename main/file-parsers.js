@@ -4,7 +4,6 @@
 const path = require("path");
 const fsPromises = require("fs/promises");
 const {
-  PDF_PARSE_TIMEOUT_MS,
   MIN_PRINTABLE_RATIO,
   MIN_TEXT_LENGTH,
   MAX_MOBI_TEXT_BYTES,
@@ -12,13 +11,12 @@ const {
   EPUB_CHAPTER_CACHE_MAX,
 } = require("./constants");
 const { createEntryReader } = require("./zip-read");
+const { extractPdfText } = require("./pdf-text");
 
 // ── Lazy-loaded heavy modules (cached after first require) ─────────────────
-let _cheerio, _admZip, _pdfParse, _canvas;
+let _cheerio, _admZip;
 function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
 function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
-function getPDFParse() { if (!_pdfParse) { _pdfParse = require("pdf-parse"); } return _pdfParse; }
-function getCanvas() { if (!_canvas) { try { _canvas = require("@napi-rs/canvas"); } catch { _canvas = null; } } return _canvas; }
 
 // ── Image validation helpers ───────────────────────────────────────────────
 
@@ -335,32 +333,9 @@ async function extractContent(filepath) {
   const ext = path.extname(filepath).toLowerCase();
   try {
     if (ext === ".pdf") {
-      if (!globalThis.DOMMatrix) {
-        try {
-          const canvas = getCanvas();
-          if (canvas) {
-            globalThis.DOMMatrix = canvas.DOMMatrix;
-            globalThis.ImageData = canvas.ImageData;
-            globalThis.Path2D = canvas.Path2D;
-          } else { throw new Error("canvas not available"); }
-        } catch (canvasErr) {
-          console.log("Note: @napi-rs/canvas not available, using polyfills for PDF parsing. Run 'npm rebuild @napi-rs/canvas' if PDF extraction has issues.");
-          globalThis.DOMMatrix = globalThis.DOMMatrix || class DOMMatrix { constructor() { this.a=1;this.b=0;this.c=0;this.d=1;this.e=0;this.f=0; } };
-          globalThis.ImageData = globalThis.ImageData || class ImageData { constructor(w,h) { this.width=w;this.height=h;this.data=new Uint8ClampedArray(w*h*4); } };
-          globalThis.Path2D = globalThis.Path2D || class Path2D { };
-        }
-      }
-      const { PDFParse } = getPDFParse();
       const buffer = await fsPromises.readFile(filepath);
-      const parser = new PDFParse({ data: new Uint8Array(buffer) });
-      let timeoutId;
-      const timeout = new Promise((_, reject) => {
-        timeoutId = setTimeout(() => reject(new Error("PDF parse timeout")), PDF_PARSE_TIMEOUT_MS);
-      });
       try {
-        const result = await Promise.race([parser.getText({ pageJoiner: "\n\n" }), timeout]);
-        clearTimeout(timeoutId);
-        const text = result.text || "";
+        const { text } = await extractPdfText(buffer);
         const printableRatio = text.replace(/[\x00-\x1f\x7f-\x9f]/g, "").length / (text.length || 1);
         if (printableRatio < MIN_PRINTABLE_RATIO || text.length < MIN_TEXT_LENGTH) {
           console.log(`PDF extraction yielded non-text content for ${filepath} (${Math.round(printableRatio*100)}% printable)`);
@@ -368,7 +343,6 @@ async function extractContent(filepath) {
         }
         return text;
       } catch (err) {
-        clearTimeout(timeoutId);
         const isEncrypted = err.message && (err.message.toLowerCase().includes("encrypt") || err.message.toLowerCase().includes("password"));
         const isTimeout = err.message && err.message.includes("timeout");
         const userMessage = isEncrypted
@@ -378,9 +352,6 @@ async function extractContent(filepath) {
             : "Could not read this PDF — the file may be encrypted or corrupted.";
         console.error(`PDF extraction failed for ${filepath}:`, err.message);
         return { userError: userMessage };
-      } finally {
-        // Always destroy parser to prevent memory leaks
-        try { await parser.destroy(); } catch { /* Best-effort cleanup */ }
       }
     }
     if (ext === ".epub") {

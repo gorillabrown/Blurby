@@ -541,6 +541,18 @@ describe("pdfToEpub with the installed pdf-parse", () => {
       .join("\n");
     expect(chapterXhtml).toContain("Lighthouse");
   });
+
+  it("extractContent reads a real PDF through the shared reader", async () => {
+    const { extractContent } = await import("../main/file-parsers.js");
+
+    const inputPath = path.join(tmpDir, "real.pdf");
+    await writeRealPdf(inputPath);
+
+    const result = await extractContent(inputPath);
+
+    expect(typeof result).toBe("string");
+    expect(result).toContain("Lighthouse");
+  });
 });
 
 // ---------------------------------------------------------------------------
