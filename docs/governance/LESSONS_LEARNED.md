@@ -3010,3 +3010,11 @@ Related: LL-160, LL-143.
 **Applies to:** Narrate reconciliation and chunking; word extraction and segmentation; import parsers; any gate whose live runs start from a fixed position.
 **Status:** Observation
 Related: LL-142, LL-151, LL-160.
+
+### LL-163 — A registry alias that is renamed upstream becomes a hard refusal; map the canonical key to the populated column (GOV-NOTION-MAPPING-1, 2026-10-22)
+**Verdict:** Virtuoso 1.15 treats `lane` as the old name of `workstream` and refuses a `fieldMappings` that names both. The main checkout's uncommitted manifest added `"workstream": "Workstream"` next to `"lane": "Lane"`, so every register mutation from there was refused before the handshake could start. The populated column was Lane (125 of 125 rows); the Notion Workstream column was empty (0 of 125). The fix maps `workstream` to Lane and drops `lane`, and it leaves the Workstream column and every Lane value in place. Only the two mapping keys changed; Deliverable was kept.
+**Evidence:** `Virtuoso/workspace-layout.json` (commit `054ffc72`). The unrepaired candidate's `provider` call prints the refusal; the repaired one exits 0. A full SQL read was checked against the snapshot with 17 per-field checksums (a one-character perturbation was detected), and the re-imported snapshot changed no item content. The podcast text sync that the refusal had blocked then ran through mutation-plan, connector, bound SQL equality and mutation-confirm (`7c1138ff`).
+**Recommendation:** When a plugin upgrade renames a canonical key, map the new key to whichever column holds the data before adding any new mapping, and confirm the column populations by SQL first. Don't migrate data between columns to satisfy a name. A snapshot whose field set grows changes every item's revision without changing content, so prove it by diffing item contents, not by comparing revisions.
+**Applies to:** `Virtuoso/workspace-layout.json` field and status mappings; plugin upgrades; snapshot imports after a mapping change.
+**Status:** Observation
+Related: LL-155.

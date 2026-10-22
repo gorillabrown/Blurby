@@ -332,7 +332,6 @@
         "written_status": "Spec State",
         "prerequisites": "Prerequisites",
         "effort": "Effort",
-        "lane": "Lane",
         "group": "Phase",
         "spec_link": "Spec Reference",
         "branch": "Branch",
@@ -340,7 +339,9 @@
         "completed": "Completed",
         "evidence": "Evidence",
         "description": "Description",
-        "notes": "Notes"
+        "notes": "Notes",
+        "workstream": "Lane",
+        "deliverable": "Deliverable"
       },
       "statusMappings": {
         "queued": [
