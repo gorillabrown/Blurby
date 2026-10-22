@@ -33,5 +33,7 @@
       }
     }
   },
-  "resolved": ""
+  "resolved": "2026-10-22T22:18:32Z",
+  "outcome": "abandoned",
+  "reason": "Voided plan (mis-encoded character), never sent to the connector; confirmed failed 2026-10-15 (64b3c95e). Its intent landed through superseding plan 20261015T134144Z (succeeded, resolved 2026-10-15T13:42:19Z). SQL read 2026-10-22: FOLDER-NOTICE-1 In Flight, Started 2026-10-15, Seq 29, Notes 576 chars incl. owner wording and dispatch line. Nothing re-executed. Ruling: Blurby.Brain Q1(a), GOV-NOTION-MAPPING-1 follow-up."
 }
