@@ -121,7 +121,7 @@ Main process event
 | React | 19 | UI rendering with hooks and functional components |
 | Vite | 6 | Dev server and production bundler (ESM) |
 | TypeScript | 5.9 | Type safety in renderer code |
-| Node.js | 24 (Electron 42 and its installer need 22.12 or later; CI runs 24) | Tooling runtime; the main process runs Electron's bundled Node 24.19 |
+| Node.js | 24 (the `electron` package declares Node 22.12 or later, and from 42 its binary download runs on that Node; CI runs 24) | Tooling runtime; the main process runs Electron's bundled Node 24.19 |
 
 ### Production Dependencies
 
