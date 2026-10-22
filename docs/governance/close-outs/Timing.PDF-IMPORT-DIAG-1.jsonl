@@ -7,3 +7,7 @@
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-22T23:06:10Z"}
 {"event": "end", "row": 2, "evidence": "vitest epub-converter + pdfLoadDocContent 39/39 pass; DW3 greps: 1 require line, DOMMatrix only in main/pdf-text.js; IPC test red on base handler", "result": "done", "at": "2026-10-22T23:07:50Z"}
 {"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-22T23:07:51Z"}
+{"event": "wait", "row": 3, "reason": "approval", "at": "2026-10-22T23:12:12Z"}
+{"event": "start", "row": 5, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-22T23:12:13Z"}
+{"event": "end", "row": 5, "evidence": "close-out and merge-go request sent to Blurby.Roadmap (msg 7e0107ac); memo on branch 947347ed", "result": "done", "at": "2026-10-22T23:12:31Z"}
+{"event": "resume", "row": 3, "at": "2026-10-22T23:14:04Z"}
