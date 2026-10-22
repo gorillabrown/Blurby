@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T21:35:43Z",
+  "takenAt": "2026-10-22T21:37:49Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2780,9 +2780,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Connect a podcast source service so the Podcasts tab can list shows and episodes. The tab ships with its \"Coming Soon\" banner under APP-TABS-1; this item replaces the banner with real content.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "66ef8d683ec1758984da2babf5c727231e321cfe112f6e7c9c38b059065bfc78",
+      "description": "After APP-TABS-1, replace the Podcasts tab's Coming Soon banner with directory search, show profiles, episode lists and built-in audio streaming. Use an aggregator API for discovery and metadata, evaluating Podcast Index first; retain Apple's iTunes Search API and Listen Notes / PodcastAPI.com as alternatives. Resolve episode audio from API enclosure metadata or the show's RSS enclosure and stream directly from the publisher's host. Blurby does not host or persist episode audio in this initial scope. ROADMAP.md#podcast-source-1 holds the detailed direction; this remains a stub awaiting investigation and specification.",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.\n\nOwner direction 2026-10-15: aggregator-based discovery and episode metadata; Podcast Index evaluated first, Apple iTunes Search and Listen Notes as alternatives. Stream publisher-hosted enclosure audio directly. Before specification, settle provider credentials, quotas/caching terms, UI/playback behavior and error handling. Transcripts and offline downloads remain separate scope decisions. Planning update only; no podcast implementation or authenticated playback test. See ROADMAP.md#podcast-source-1.",
+      "revision": "3cea1338a5af85245dd3914730473c99b2316cb0990811813783e3680fd50573",
       "extra": {}
     },
     {
