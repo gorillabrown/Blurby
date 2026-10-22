@@ -1,0 +1,35 @@
+{
+  "id": "20261015T220609Z-external-set-status-ELECTRON-42-UPGRADE-1",
+  "operation": "external-set-status",
+  "item_id": "ELECTRON-42-UPGRADE-1",
+  "created": "2026-10-15T22:06:09Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "queued",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1."
+    },
+    "expectedRevision": "229dd850c1c1ef397ced6b7d4b90b7858affd43b7a8c5c6a2914ca988a502a13",
+    "idempotencyKey": "set-status:ELECTRON-42-UPGRADE-1:[('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1.\"), ('status', 'queued')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ELECTRON-42-UPGRADE-1",
+      "idempotencyKey": "set-status:ELECTRON-42-UPGRADE-1:[('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1.\"), ('status', 'queued')]",
+      "actualRevision": "sql-readback:status=Queued,notes-equal",
+      "recoveryId": "20261015T220609Z-external-set-status-ELECTRON-42-UPGRADE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-15T22:07:05Z",
+  "outcome": "succeeded"
+}

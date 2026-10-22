@@ -97,11 +97,12 @@
 ### BUG-190 — A PDF import fails with "The original file could not be converted"
 **Reported:** 2026-05-21 (in-app report `bug-2026-05-21T14-56-19Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** MEDIUM (reporter marked it Broken; the document cannot be read)
-**Status:** OPEN — not reproduced since 2026-05-21; stub PDF-IMPORT-DIAG-1 reproduces it on the current build (roadmap review 2026-10-14). Lane: Library & Content.
-**Location:** PDF-to-EPUB conversion on import (`convertToEpub()` path, `main/` file parsers); exact site undetermined.
+**Status:** OPEN — root cause found and reproduced by roadmap review 2026-10-22; the fix is PDF-IMPORT-DIAG-1 (Full Spec, Seq 9). Lane: Library & Content.
+**Location:** `pdfToEpub` in `main/epub-converter.js:735-738` (with `getPdfParse` at `:27-31`), reached from `load-doc-content` (`main/ipc/library.js:178-198`).
 **Description:** A 223-page PDF ("Dnc. May-20-2026") shows in the library, but opening it shows the toast "This document needs to be re-imported. The original file could not be converted." with a Remove action.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-21T14-56-19Z.json` and `.png` (gitignored, local); the report's console log holds no conversion error.
-**Fix path:** Reproduce with the same or a similar large PDF on the current build; capture the main-process conversion error; then decide whether it is a parser failure or a missing original file.
+**Root cause (roadmap review 2026-10-22):** a parser failure, not a missing file. `pdfToEpub` calls `require("pdf-parse")(buffer)`, which is the pdf-parse 1 API. The installed pdf-parse ^2.4.5 exports `{ PDFParse }` and needs a `DOMMatrix` global, which only the deprecated text path sets (`main/file-parsers.js:337-353`). The owner's `error.log` holds the chain for this file on 2026-05-21: `parse is not a function` (lines 162303-162313), `DOMMatrix is not defined` (162314-162315) and `Cannot transfer object of unsupported type.` (162316-162317). On `main` @ `284c5695`, under the app's Electron, `convertToEpub` on another owner PDF fails with `DOMMatrix is not defined`. None of the owner's 20 library PDFs has a converted EPUB. The tests stay green because every `pdfToEpub` test injects a fake parser. A probe with the v2 API and the existing `DOMMatrix` fallback converts this PDF (223 pages, valid EPUB, 366 ms). `load-doc-content` also replaces the converter's own user message with the generic toast.
+**Fix path:** PDF-IMPORT-DIAG-1 (ROADMAP.md, position 9).
 
 ### BUG-189 — Dev-mode (`npm run dev`) is slow across the whole app
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
