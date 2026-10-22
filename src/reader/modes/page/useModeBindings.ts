@@ -1,8 +1,7 @@
-// Page React binding (READER-MODE-SEPARATION-2 design §B.0, §B.1): subscribes React to the runtime and
-// owns the DOM-side browse-away poll (legacy useFoliateSync effect 1). Every view callback forwards to a
-// runtime method; the runtime owns all state and every port call.
-import { useEffect, useSyncExternalStore } from "react";
-import { FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
+// Page React binding (READER-MODE-SEPARATION-2 design §B.0, §B.1): subscribes React to the runtime. Every view
+// callback forwards to a runtime method; the runtime owns all state and every port call. Page has no browse-away
+// poll (PAGE-POSITION-SAVE-2): browse-away is runtime state, set only through onUserBrowseAway.
+import { useSyncExternalStore } from "react";
 import type { PageFoliateViewProps } from "./FoliateView";
 import type { PageModeRuntime } from "./ModeRuntime";
 
@@ -11,13 +10,6 @@ export function usePageModeBindings(runtime: PageModeRuntime): { readonly useFol
   useSyncExternalStore(runtime.subscribe, runtime.getVersion);
   const snapshot = runtime.getSnapshot();
   const { document, settings } = runtime;
-
-  // useFoliateSync effect 1: poll the view's browse-away flag (Page is a browse-aware surface).
-  useEffect(() => {
-    if (!document.useFoliate) return;
-    const timer = setInterval(runtime.pollBrowsing, FOLIATE_BROWSING_CHECK_INTERVAL_MS);
-    return () => clearInterval(timer);
-  }, [runtime, document.useFoliate]);
 
   return {
     useFoliate: document.useFoliate,

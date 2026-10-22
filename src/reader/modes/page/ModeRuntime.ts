@@ -565,7 +565,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
     this.ports.shell.reportToc(freezeValue(JSON.parse(JSON.stringify(toc)) as unknown[]), sectionCount);
   };
 
-  /** Legacy handleFoliateUserBrowseAway. */
+  /** Legacy handleFoliateUserBrowseAway. Page's only browse-away setter; nothing in Page calls it now, so a Jump back trigger (chapter list, search) must (PAGE-POSITION-SAVE-2). */
   onUserBrowseAway = (): void => {
     if (!this.alive || this.state.isBrowsedAway) return;
     this.state.isBrowsedAway = true;
@@ -592,15 +592,6 @@ export class PageModeRuntime implements ReaderModeRuntime {
     });
     s.isBrowsedAway = false;
     s.notify();
-  };
-
-  /** Legacy useFoliateSync effect 1 tick (setIsBrowsedAway(isUserBrowsing())). */
-  pollBrowsing = (): void => {
-    if (!this.alive) return;
-    const browsing = this.surface.isUserBrowsing();
-    if (browsing === this.state.isBrowsedAway) return;
-    this.state.isBrowsedAway = browsing;
-    this.state.notify();
   };
 
   readBookBytes = (): Promise<ArrayBuffer> => this.ports.document.readBookBytes();
