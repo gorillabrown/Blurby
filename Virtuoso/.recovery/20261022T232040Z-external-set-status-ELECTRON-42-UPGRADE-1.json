@@ -1,0 +1,26 @@
+{
+  "id": "20261022T232040Z-external-set-status-ELECTRON-42-UPGRADE-1",
+  "operation": "external-set-status",
+  "item_id": "ELECTRON-42-UPGRADE-1",
+  "created": "2026-10-22T23:20:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8. Re-dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0), resuming at task 2 on eb/electron-42-upgrade-1 after it takes main in."
+    },
+    "expectedRevision": "a50988db5d0f3c123bb5a27286583f9772dc56557d91e8545bab3333d4029c6d",
+    "idempotencyKey": "set-status:ELECTRON-42-UPGRADE-1:[('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8. Re-dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0), resuming at task 2 on eb/electron-42-upgrade-1 after it takes main in.\"), ('status', 'in-flight')]"
+  },
+  "resolved": "2026-10-22T23:21:04Z",
+  "outcome": "abandoned",
+  "reason": "Notes named the wrong agent (blurby-f0); the item was already running in another implementation session. Never sent; replaced by a corrected plan."
+}
