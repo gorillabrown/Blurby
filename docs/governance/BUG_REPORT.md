@@ -97,7 +97,7 @@
 ### BUG-190 — A PDF import fails with "The original file could not be converted"
 **Reported:** 2026-05-21 (in-app report `bug-2026-05-21T14-56-19Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** MEDIUM (reporter marked it Broken; the document cannot be read)
-**Status:** OPEN — root cause found and reproduced by roadmap review 2026-10-22; the fix is PDF-IMPORT-DIAG-1 (Full Spec, Seq 9). Lane: Library & Content.
+**Status:** RESOLVED in source (PDF-IMPORT-DIAG-1): the converter called pdf-parse 1's API on the installed pdf-parse 2 without its `DOMMatrix` global, and now reads every PDF through the shared `main/pdf-text.js`; closes after the batched owner smoke.
 **Location:** `pdfToEpub` in `main/epub-converter.js:735-738` (with `getPdfParse` at `:27-31`), reached from `load-doc-content` (`main/ipc/library.js:178-198`).
 **Description:** A 223-page PDF ("Dnc. May-20-2026") shows in the library, but opening it shows the toast "This document needs to be re-imported. The original file could not be converted." with a Remove action.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-21T14-56-19Z.json` and `.png` (gitignored, local); the report's console log holds no conversion error.

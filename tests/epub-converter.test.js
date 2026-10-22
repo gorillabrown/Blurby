@@ -542,6 +542,22 @@ describe("pdfToEpub with the installed pdf-parse", () => {
     expect(chapterXhtml).toContain("Lighthouse");
   });
 
+  it("ensurePdfGlobals sets DOMMatrix, ImageData and Path2D when they are missing", async () => {
+    const { ensurePdfGlobals } = await import("../main/pdf-text.js");
+    const names = ["DOMMatrix", "ImageData", "Path2D"];
+    const saved = Object.fromEntries(names.map((n) => [n, globalThis[n]]));
+    try {
+      for (const n of names) delete globalThis[n];
+      expect(globalThis.DOMMatrix).toBeUndefined();
+
+      ensurePdfGlobals();
+
+      for (const n of names) expect(typeof globalThis[n]).toBe("function");
+    } finally {
+      for (const n of names) globalThis[n] = saved[n];
+    }
+  });
+
   it("extractContent reads a real PDF through the shared reader", async () => {
     const { extractContent } = await import("../main/file-parsers.js");
 
