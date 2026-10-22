@@ -379,6 +379,33 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     }
   });
 
+  it("(n4a) a held turn that the section load cannot stamp records page-turn-lost (PAGE-POSITION-SAVE-2)", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = rawDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    expect(fake.diagnostics.some((d) => d.args[0] === "page-turn-deferred")).toBe(true);
+    await loadSection(view, doc, 5); // the loaded words are section 0's, so section 5's start is -1 and nothing is stamped
+    expect(saves(fake)).toEqual([]);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost");
+    expect(lost).toHaveLength(1);
+    expect(String(lost[0].args[1]).startsWith("reason=section-load")).toBe(true);
+    expect(lost[0].args[1]).toContain("section=5");
+    expect(lost[0].args[1]).toContain("sectionStart=-1");
+  });
+
+  it("(n4b) control: a held turn that the section load stamps records no loss", async () => {
+    const { fake, view, renderer } = await mount({ bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }], getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
+    const { doc, range } = rawDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await loadSection(view, doc, 0);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 2, "cfi:0:gamma"]]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=section-load"))).toHaveLength(0);
+  });
+
   it("(r) a turn before the book's word numbers apply saves the re-stamped index once they do", async () => {
     const { fake, view, renderer, render } = await mount();
     const { doc } = rawDoc();
