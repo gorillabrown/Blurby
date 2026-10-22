@@ -6,11 +6,12 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS } from "../../src/constants";
+import { DEFAULT_SETTINGS, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../src/constants";
 import { createInitialHandoff } from "../../src/reader/document/ReaderDocumentSnapshot";
 import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { pageMode } from "../../src/reader/modes/page";
 import PageFoliateView from "../../src/reader/modes/page/FoliateView";
+import { usePageModeBindings } from "../../src/reader/modes/page/useModeBindings";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { electronAPIStub, stubControl } from "../../src/test-harness/electron-api-stub";
 
@@ -111,7 +112,7 @@ const settle = () => act(async () => { await new Promise((resolve) => setTimeout
 let container: HTMLElement;
 let root: Root;
 
-async function mount(extra: Record<string, unknown> = {}) {
+function makeRuntime() {
   const fake = createFakeInfrastructure({ document: createFakeDocument() });
   const broker = createReaderPorts(fake.infra);
   const snapshot = fake.infra.document.snapshot();
@@ -125,6 +126,11 @@ async function mount(extra: Record<string, unknown> = {}) {
     handoff: createInitialHandoff(snapshot, snapshot.wordCount),
     arrival: "silent",
   }) as any;
+  return { fake, runtime, snapshot };
+}
+
+async function mount(extra: Record<string, unknown> = {}) {
+  const { fake, runtime, snapshot } = makeRuntime();
 
   const render = async (more: Record<string, unknown> = {}) => {
     await act(async () => {
@@ -357,6 +363,20 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
     await render();
     expect(jumpBackButton()).toBeNull();
+  });
+
+  it("(p1) a browse-away the runtime sets is not cleared by a timer (PAGE-POSITION-SAVE-2)", async () => {
+    vi.useFakeTimers();
+    try {
+      const { runtime } = makeRuntime();
+      function Probe() { usePageModeBindings(runtime); return null; }
+      await act(async () => { root.render(createElement(Probe)); });
+      runtime.onUserBrowseAway();
+      await act(async () => { vi.advanceTimersByTime(FOLIATE_BROWSING_CHECK_INTERVAL_MS * 3); });
+      expect(runtime.getSnapshot().isBrowsedAway).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("(r) a turn before the book's word numbers apply saves the re-stamped index once they do", async () => {
