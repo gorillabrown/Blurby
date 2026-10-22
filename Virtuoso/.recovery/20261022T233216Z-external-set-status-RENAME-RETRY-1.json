@@ -1,0 +1,39 @@
+{
+  "id": "20261022T233216Z-external-set-status-RENAME-RETRY-1",
+  "operation": "external-set-status",
+  "item_id": "RENAME-RETRY-1",
+  "created": "2026-10-22T23:32:16Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/rename-retry-1",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/rename-retry-1 from main); code and targeted tests first, heavy gates after ELECTRON-42-UPGRADE-1's crash-count runs."
+    },
+    "expectedRevision": "ac4f620b72aaf3a23e17660b64fb032cbe3fc8e9d4562f874d7c75515a5b7cbf",
+    "idempotencyKey": "set-status:RENAME-RETRY-1:[('branch', 'eb/rename-retry-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/rename-retry-1 from main); code and targeted tests first, heavy gates after ELECTRON-42-UPGRADE-1's crash-count runs.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RENAME-RETRY-1",
+      "idempotencyKey": "set-status:RENAME-RETRY-1:[('branch', 'eb/rename-retry-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/rename-retry-1 from main); code and targeted tests first, heavy gates after ELECTRON-42-UPGRADE-1's crash-count runs.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261022T233216Z-external-set-status-RENAME-RETRY-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes equal"
+      }
+    }
+  },
+  "resolved": "2026-10-22T23:32:38Z",
+  "outcome": "succeeded"
+}

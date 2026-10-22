@@ -1,0 +1,39 @@
+{
+  "id": "20261022T233040Z-external-set-status-RELEASE-RUNBOOK-1",
+  "operation": "external-set-status",
+  "item_id": "RELEASE-RUNBOOK-1",
+  "created": "2026-10-22T23:30:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "prerequisites": [
+        "ELECTRON-42-UPGRADE-1"
+      ]
+    },
+    "expectedRevision": "09ac079aa29cb92d8b8617dfb03f2d147ee03a63e71de125ba7546e7b636969a",
+    "idempotencyKey": "set-status:RELEASE-RUNBOOK-1:[('prerequisites', ['ELECTRON-42-UPGRADE-1']), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RELEASE-RUNBOOK-1",
+      "idempotencyKey": "set-status:RELEASE-RUNBOOK-1:[('prerequisites', ['ELECTRON-42-UPGRADE-1']), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261022T233040Z-external-set-status-RELEASE-RUNBOOK-1",
+      "detail": {
+        "readBack": "SQL 2026-10-22: written fields equal"
+      }
+    }
+  },
+  "resolved": "2026-10-22T23:31:32Z",
+  "outcome": "succeeded"
+}

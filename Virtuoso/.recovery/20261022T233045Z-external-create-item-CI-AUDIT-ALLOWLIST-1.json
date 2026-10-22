@@ -1,0 +1,51 @@
+{
+  "id": "20261022T233045Z-external-create-item-CI-AUDIT-ALLOWLIST-1",
+  "operation": "external-create-item",
+  "item_id": "CI-AUDIT-ALLOWLIST-1",
+  "created": "2026-10-22T23:30:45Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "CI fails on a new high advisory, not on the reviewed ones",
+      "status": "Queued",
+      "sequence": 30,
+      "written_status": "Full Spec",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "prerequisites": [
+        "ELECTRON-42-UPGRADE-1"
+      ],
+      "description": "Replace `npm audit --audit-level=high` in `.github/workflows/ci.yml` with `scripts/ci/audit-gate.mjs`. It fails on any high or critical advisory not in `.github/audit-allowlist.json`, or past its review-by date. It also fixes the new follow-redirects advisories.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass.",
+      "id": "CI-AUDIT-ALLOWLIST-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-22T23:26:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CI-AUDIT-ALLOWLIST-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "CI-AUDIT-ALLOWLIST-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CI-AUDIT-ALLOWLIST-1",
+      "actualRevision": "",
+      "recoveryId": "20261022T233045Z-external-create-item-CI-AUDIT-ALLOWLIST-1",
+      "detail": {
+        "readBack": "SQL 2026-10-22: written fields equal"
+      },
+      "providerItemId": "4017c96c-c31e-8170-8bbc-ee494e99256c",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-22T23:31:35Z",
+  "outcome": "succeeded"
+}

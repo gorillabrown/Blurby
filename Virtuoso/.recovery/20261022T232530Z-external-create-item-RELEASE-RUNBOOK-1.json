@@ -1,0 +1,49 @@
+{
+  "id": "20261022T232530Z-external-create-item-RELEASE-RUNBOOK-1",
+  "operation": "external-create-item",
+  "item_id": "RELEASE-RUNBOOK-1",
+  "created": "2026-10-22T23:25:30Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Write the release runbook: build, sign, upload and verify the installers by hand",
+      "status": "Queued",
+      "sequence": 7,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "description": "No workflow builds or uploads installers (`release.yml` was deleted in e9bbf56a), so the Stage 8 release is a manual step. Write a runbook in `docs/governance/` for building the x64 and ARM64 installers with electron-builder, signing them if configured, uploading them to the GitHub release, and checking the `latest.yml` electron-updater reads for both architectures. Docs only.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. `TECHNICAL_REFERENCE.md:945` still describes the deleted release workflow.",
+      "id": "RELEASE-RUNBOOK-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-22T23:22:12Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RELEASE-RUNBOOK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "RELEASE-RUNBOOK-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RELEASE-RUNBOOK-1",
+      "actualRevision": "",
+      "recoveryId": "20261022T232530Z-external-create-item-RELEASE-RUNBOOK-1",
+      "detail": {
+        "readBack": "SQL: all written fields equal (code-span backticks rendered as formatting)"
+      },
+      "providerItemId": "4017c96c-c31e-8132-bbca-d5a04724e15c",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-22T23:25:58Z",
+  "outcome": "succeeded"
+}

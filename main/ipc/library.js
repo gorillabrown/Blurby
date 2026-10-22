@@ -194,7 +194,7 @@ function register(ctx) {
         return { filepath: convResult.epubPath, ext: ".epub" };
       } catch (convErr) {
         logToFile(`load-doc-content EPUB conversion failed for "${doc.title}" (${doc.filepath}): ${convErr.message}`, ctx.getErrorLogPath());
-        return { userError: "This document needs to be re-imported. The original file could not be converted." };
+        return { userError: convErr.userError ? convErr.message : "This document needs to be re-imported. The original file could not be converted." };
       }
     }
 
