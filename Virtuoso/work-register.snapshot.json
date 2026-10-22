@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T22:45:44Z",
+  "takenAt": "2026-10-22T23:13:20Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1869,8 +1869,8 @@
       "id": "PDF-IMPORT-DIAG-1",
       "title": "PDFs convert again: the EPUB converter uses pdf-parse 2's API",
       "sequence": 9,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1880,12 +1880,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#pdf-import-diag-1",
       "branch": "eb/pdf-import-diag-1",
-      "started": "",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "Every PDF fails to open: the EPUB converter calls pdf-parse 1's API on the installed pdf-parse 2, and never sets the DOMMatrix global. Move the one working PDF read into a shared helper, use it from both callers, show the converter's own user message, and add a test that loads the real package.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's error.log and reproduced. pdfToEpub calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a DOMMatrix global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint).",
-      "revision": "c9f3142ae69dd5e057fe79a5a6258146a307953d7c952b78959419bd7bbcb776",
+      "notes": "Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's error.log and reproduced. pdfToEpub calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a DOMMatrix global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/pdf-import-diag-1 from main 19802621). Verified at 947347ed (suite 2414 passed / 1 skipped / 0 failed); merge go given 2026-10-22.",
+      "revision": "a3ed2d164e13cf23417769916f97a0f45e9540fc53526dcb5b928c9ca1cfccc3",
       "extra": {}
     },
     {
