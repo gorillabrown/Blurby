@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T21:37:49Z",
+  "takenAt": "2026-10-22T22:25:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3001,9 +3001,9 @@
     {
       "id": "GOV-NOTION-MAPPING-1",
       "title": "Restore the Notion mapping and sync the podcast addition",
-      "sequence": 60,
-      "status": "queued",
-      "raw_status": "Queued",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -3014,11 +3014,11 @@
       "spec_link": "ROADMAP.md#gov-notion-mapping-1",
       "branch": "eb/hb-4",
       "started": "",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-22",
+      "evidence": "docs/governance/close-outs/CloseOut.GOV-NOTION-MAPPING-1.2026-10-22.md",
       "description": "Virtuoso 1.15 refuses a mapping with both lane and workstream. Map workstream to the populated Lane column and drop the lane alias, keeping every Lane value and the Workstream column; then sync the owner's podcast direction into PODCAST-SOURCE-1's Description and Notes with an SQL read-back.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request, from held plan 2026-10-15-notion-mapping-podcast-sync (HB-4), whose full specification it points to. Runs before ELECTRON-42-UPGRADE-1 resumes.",
-      "revision": "062d9b537d695c7d254d90150c6a25d948aad60eaf0c0c3d32abeaeb3b2c75ec",
+      "revision": "1d69df90c7ad5555df0ee18f95072f1099363befe656bafa5000054255768ce1",
       "extra": {}
     }
   ],
