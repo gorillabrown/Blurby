@@ -13,6 +13,7 @@
 | 2026-10-15 | storyboarded | storyboard | aligned; one item; mapping repair and podcast text sync |
 | 2026-10-15 | planned | write-plan | user approved plan and publication; HB-4; rubric reviewed; publication pending |
 | 2026-10-15 | planned | write-plan | write-plan resumed; no scope drift; checks pass; publication permission issue remains |
+| 2026-10-22 | absorbed | roadmap-review | as GOV-NOTION-MAPPING-1 (queued, full-spec), Seq 60; added 2026-10-15 at the owner's request, recorded 2026-10-22 |
 
 ## Storyboard
 
@@ -119,7 +120,7 @@ Origin: held plan — 2026-10-15-notion-mapping-podcast-sync (HB-4), not yet on 
 Placement: after GOV-NOTION-LINKS-1, before the pending PODCAST-SOURCE-1 text sync; no queue change
 Effort: medium
 Branch: eb/hb-4 from origin/main after the approved held plan is published
-Specification: docs/planning/holding/2026-10-15-notion-mapping-podcast-sync.md#hb-4--restore-the-notion-mapping-and-sync-the-podcast-addition
+Specification: docs/planning/holding/2026-10-15-notion-mapping-podcast-sync.md#gov-notion-mapping-1--restore-the-notion-mapping-and-sync-the-podcast-addition
 Status: planned; user approved plan and publication; implementation unstarted
 Readiness: prerequisites satisfied; specification checks below; repository publication pending; live connector read verified; mapping failure is the repair target
 ```
@@ -129,14 +130,16 @@ Readiness: prerequisites satisfied; specification checks below; repository publi
 This is a recipe for the repository operator after plan approval, not permission for write-plan to execute it.
 
 1. Inspect `git --no-optional-locks status --short`, `git --no-optional-locks diff --cached --name-only`, and `git --no-optional-locks worktree list`. Confirm origin is https://github.com/gorillabrown/Blurby.git and the default branch is main. Stop on a staged unrelated path or a live HB-4 checkout. Preserve all primary-tree changes, including the existing manifest additions and ROADMAP.md podcast addition; never stash/reset/clean.
-2. Publish only the approved held file through a dedicated documentation branch `eb/hb-4-plan`, using an isolated checkout and the file's reviewed bytes. Commit on that branch, merge to main with --no-ff through a clean integration checkout, and push origin/main under policy.git=push. Never commit directly on main. Verify the resulting origin/main contains the exact approved file. Keep its trail updates in the same publication. If network or repository writes are unavailable, retain the local file and report the precise failed command; no implementation starts.
-3. Only after publication, create the isolated implementation checkout with branch `eb/hb-4` from the verified main revision. Carry the reviewed, pre-existing primary-tree manifest candidate into this checkout before applying the alias correction: its Workstream/Deliverable additions are present locally but not in HEAD. Compare the primary manifest hash immediately before copying; stop if it changed since review. Preserve Deliverable and every unrelated manifest field. Never copy all primary-tree changes.
+2. **Done 2026-10-15:** this held file was published to main by Blurby.Roadmap (`37b98d98`, merged as `32714d92`), which closes HB-4-PUBLISH-PERMISSION. The `eb/hb-4-plan` worktree (at `7bb79f1e`, holding an untracked copy) is obsolete; leave it in place for maintenance, and do not publish from it.
+3. Only after publication, create the isolated implementation checkout with branch `eb/hb-4` from the verified main revision. Carry the reviewed, pre-existing primary-tree manifest candidate into this checkout before applying the alias correction: its Workstream/Deliverable additions are present locally but not in HEAD. Compare the primary manifest hash immediately before copying; stop if it changed since review. Reviewed candidate (2026-10-22): `Virtuoso/workspace-layout.json` SHA-256 `4a73a49a0ae8caf521b8a9c71ffc7bbbffe70ac685db9a61a15247a62375dd49`; its only difference from HEAD adds `"workstream": "Workstream"` and `"deliverable": "Deliverable"` after `"notes": "Notes"` in `fieldMappings`. Preserve Deliverable and every unrelated manifest field. Never copy all primary-tree changes.
 4. The owner-approved podcast source text is ROADMAP.md#podcast-source-1 in the primary tree. Read and hash that section as input; do not replace the implementation checkout's entire roadmap with the dirty primary file. The exact intended Notion text is fixed below.
 5. After checks and documentation closeout, stage only HB-4-authored changes to `Virtuoso/workspace-layout.json`, this held entry, `docs/governance/LESSONS_LEARNED.md`, and the registered snapshot/recovery artifacts actually produced for this mutation. Inspect before and after staging; retain unrelated recovery records. Record generated artifact names before staging each exact path. Commit on eb/hb-4, merge main with --no-ff, push, and verify the remote revision. No branch deletion or worktree pruning.
 
 ### Specifications
 
-#### HB-4 — Restore the Notion mapping and sync the podcast addition
+#### GOV-NOTION-MAPPING-1 — Restore the Notion mapping and sync the podcast addition
+
+*(Held as HB-4; on the roadmap as GOV-NOTION-MAPPING-1, Seq 60, since 2026-10-15.)*
 
 - **What:** Restore an unambiguous canonical mapping while preserving existing Lane data, then synchronize the approved podcast text on its existing Notion item.
 - **Why:** `canonical_field_mappings()` rejects simultaneous lane/workstream keys before the mutation handshake can start.
