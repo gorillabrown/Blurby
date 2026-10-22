@@ -13,6 +13,7 @@
 
 const crypto = require("crypto");
 const fsPromises = require("fs/promises");
+const { renameWithRetry } = require("./json-store");
 const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
@@ -95,7 +96,7 @@ async function saveSyncState() {
   if (!syncStatePath) return;
   const tmp = syncStatePath + ".tmp";
   await fsPromises.writeFile(tmp, JSON.stringify(syncState, null, 2), "utf-8");
-  await fsPromises.rename(tmp, syncStatePath);
+  await renameWithRetry(tmp, syncStatePath);
 }
 
 // ── 19A: Revision Counter ─────────────────────────────────────────────────

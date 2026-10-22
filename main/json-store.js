@@ -59,4 +59,4 @@ async function saveJSON(filepath, data, label) {
 /** Resolves once every write started so far has settled; never rejects (the tails swallow errors). For the quit flush. */
 function whenWritesSettled() { return Promise.all([...writeTails.values()]); }
 
-module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled };
+module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled, renameWithRetry };

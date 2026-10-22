@@ -7,6 +7,7 @@
 // f2-producer__expose_dur.cjs (OutsideAudit.10 record: exposed q4 copy sha256 2eccfc53…).
 
 const fsPromises = require("fs/promises");
+const { renameWithRetry } = require("../json-store");
 const path = require("path");
 const crypto = require("crypto");
 
@@ -73,7 +74,7 @@ async function ensureExposedModel({
   await fsPromises.mkdir(path.dirname(outPath), { recursive: true });
   const tmp = `${outPath}.${process.pid}.${Date.now()}.tmp`;
   await fsPromises.writeFile(tmp, output);
-  await fsPromises.rename(tmp, outPath);
+  await renameWithRetry(tmp, outPath);
   return { path: outPath, created: true, sha256: outSha };
 }
 
