@@ -4,6 +4,7 @@
 const { ipcMain } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
+const { renameWithRetry } = require("../json-store");
 const https = require("https");
 const {
   DEFINITION_CACHE_MAX,
@@ -184,7 +185,7 @@ function register(ctx) {
       // Save JSON sidecar (atomic)
       const jsonTmp = jsonPath + ".tmp";
       await fsPromises.writeFile(jsonTmp, JSON.stringify(allNotes, null, 2), "utf-8");
-      await fsPromises.rename(jsonTmp, jsonPath);
+      await renameWithRetry(jsonTmp, jsonPath);
 
       // Regenerate .docx from all notes with Table of Contents
       const paragraphs = [
@@ -241,7 +242,7 @@ function register(ctx) {
       const buffer = await Packer.toBuffer(newDoc);
       const tmp = docxPath + ".tmp";
       await fsPromises.writeFile(tmp, buffer);
-      await fsPromises.rename(tmp, docxPath);
+      await renameWithRetry(tmp, docxPath);
       return { ok: true, path: docxPath, count: allNotes.length };
     } catch (err) {
       console.error("[reader] save-reading-note failed:", err.message);

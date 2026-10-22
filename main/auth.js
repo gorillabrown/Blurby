@@ -6,6 +6,7 @@ const { TOKEN_EXPIRY_FALLBACK_MS, AUTH_WINDOW_WIDTH, AUTH_WINDOW_HEIGHT, TOKEN_R
 const { BrowserWindow, safeStorage } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
+const { renameWithRetry } = require("./json-store");
 const crypto = require("crypto");
 
 // ── Configuration ─────────────────────────────────────────────────────────
@@ -107,7 +108,7 @@ async function saveTokens(tokens) {
   }
   const tmp = tokensPath + ".tmp";
   await fsPromises.writeFile(tmp, JSON.stringify(data, null, 2), "utf-8");
-  await fsPromises.rename(tmp, tokensPath);
+  await renameWithRetry(tmp, tokensPath);
 }
 
 async function clearTokens(provider) {

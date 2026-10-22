@@ -4,6 +4,7 @@
 const { ipcMain, dialog } = require("electron");
 const path = require("path");
 const fsPromises = require("fs/promises");
+const { renameWithRetry } = require("../json-store");
 const { MAX_HISTORY_SESSIONS, MS_PER_DAY, READING_LOG_WORDS_PER_PAGE } = require("../constants");
 
 // ── Reading statistics helpers ─────────────────────────────────────────────
@@ -203,7 +204,7 @@ function register(ctx) {
 
       const tmp = xlsxPath + ".tmp";
       await workbook.xlsx.writeFile(tmp);
-      await fsPromises.rename(tmp, xlsxPath);
+      await renameWithRetry(tmp, xlsxPath);
       return { ok: true, path: xlsxPath };
     } catch (err) {
       return { error: err.message };
