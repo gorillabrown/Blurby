@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T23:13:20Z",
+  "takenAt": "2026-10-22T23:22:12Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2220,8 +2220,8 @@
       "id": "PAGE-POSITION-SAVE-2",
       "title": "Follow-ups from PAGE-POSITION-SAVE-1",
       "sequence": 27,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2231,12 +2231,12 @@
       "group": "Reader Polish",
       "spec_link": "ROADMAP.md#page-position-save-2",
       "branch": "eb/page-position-save-2",
-      "started": "",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "A live swipe-crossing check, a diagnostic for a lost deferred page-turn save, and removal of Page's dead browse-away code with its two ownership-manifest entries.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at PAGE-POSITION-SAVE-1's merge. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14). U9/U10 pass.",
-      "revision": "a229cd3c142c6d2187b2424d452de72843879d00c5e4540340f013dd4725dae9",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Ruled at PAGE-POSITION-SAVE-1's merge. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14). U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/page-position-save-2 from main); code and targeted tests first, heavy gates after ELECTRON-42-UPGRADE-1's crash-count runs.",
+      "revision": "2117090bddb2d4e53fda97272e982676a3db08a58fccc59b88590cb3d2d244c5",
       "extra": {}
     },
     {
@@ -2979,8 +2979,8 @@
       "id": "ELECTRON-42-UPGRADE-1",
       "title": "Upgrade Electron to 42 so a normal quit does not crash on x64",
       "sequence": 8,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2994,8 +2994,8 @@
       "completed": "",
       "evidence": "",
       "description": "Electron 41.10.7 lacks the Node fix for a Windows x64 shutdown crash (0x80000003 on 57 of 121 gate launches, after the save). Upgrade to ^42.11.14 with native-module, ICU, breaking-change and crash-count checks.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8.",
-      "revision": "a50988db5d0f3c123bb5a27286583f9772dc56557d91e8545bab3333d4029c6d",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8. Resumed 2026-10-22 from Blurby.Roadmap's kickoff by an implementation agent: main taken in (8186776c), C2 done (Electron resolves 42.11.18, 4a6b128d), gates in progress.",
+      "revision": "44f7f422ca3d6ee020e3d741513df14b1508fb57aadd4fe53789cc209e9df1ae",
       "extra": {}
     },
     {
