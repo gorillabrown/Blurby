@@ -41,7 +41,7 @@ None.
 
 ## Owner decisions open
 
-- **The next finish line** (recommended: the Stage 8 release).
+- ~~The next finish line~~: ruled 2026-10-22, the Stage 8 release.
 - LARGE-FOLDER-SYNC-1's design half (very large folders).
 - EINK-CONTROLS-1.
 - Stage 9's design questions.
