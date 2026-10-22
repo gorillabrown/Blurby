@@ -1,0 +1,41 @@
+{
+  "id": "20261022T233043Z-external-set-status-JSONSTORE-TIMEOUT-1",
+  "operation": "external-set-status",
+  "item_id": "JSONSTORE-TIMEOUT-1",
+  "created": "2026-10-22T23:30:43Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "effort": "XS",
+      "prerequisites": [
+        "KF2-WAIVER-RETIRE-1"
+      ],
+      "description": "Give test (a) in `tests/jsonStore.test.js` a 30 s timeout. Make (d) and (e) wait for earlier writes and count only their own `.tmp` renames, so a timed-out (a) cannot fail them. The file then leaves Stage 8's closed list."
+    },
+    "expectedRevision": "acf461ef935721c4d243ec5f21ce438f4494fb008143ede7f2f739630b7031db",
+    "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('description', \"Give test (a) in `tests/jsonStore.test.js` a 30 s timeout. Make (d) and (e) wait for earlier writes and count only their own `.tmp` renames, so a timed-out (a) cannot fail them. The file then leaves Stage 8's closed list.\"), ('effort', 'XS'), ('prerequisites', ['KF2-WAIVER-RETIRE-1']), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "JSONSTORE-TIMEOUT-1",
+      "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('description', \"Give test (a) in `tests/jsonStore.test.js` a 30 s timeout. Make (d) and (e) wait for earlier writes and count only their own `.tmp` renames, so a timed-out (a) cannot fail them. The file then leaves Stage 8's closed list.\"), ('effort', 'XS'), ('prerequisites', ['KF2-WAIVER-RETIRE-1']), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261022T233043Z-external-set-status-JSONSTORE-TIMEOUT-1",
+      "detail": {
+        "readBack": "SQL 2026-10-22: written fields equal"
+      }
+    }
+  },
+  "resolved": "2026-10-22T23:31:34Z",
+  "outcome": "succeeded"
+}
