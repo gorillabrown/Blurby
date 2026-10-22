@@ -498,6 +498,52 @@ describe("pdfToEpub", () => {
 });
 
 // ---------------------------------------------------------------------------
+// pdfToEpub (real pdf-parse, BUG-190)
+// ---------------------------------------------------------------------------
+
+const REAL_PDF_TEXT =
+  "Lighthouse keepers recorded the weather every morning before breakfast. " +
+  "The logbook described wind direction, cloud cover, visibility and the state of the sea. " +
+  "During long winters the keepers repaired lamps, painted railings and polished brass fittings. " +
+  "Supply boats arrived every second week with coal, flour, letters and newspapers from the mainland. " +
+  "Children of the keepers learned arithmetic from their parents and geography from passing sailors. " +
+  "When fog rolled in the horn sounded every thirty seconds until the horizon cleared again at dawn.";
+
+async function writeRealPdf(filePath) {
+  const PDFDocument = (await import("pdfkit")).default;
+  const doc = new PDFDocument({ info: { Title: "Lighthouse Notes", Author: "Test Author" } });
+  const chunks = [];
+  doc.on("data", (c) => chunks.push(c));
+  const done = new Promise((resolve) => doc.on("end", resolve));
+  doc.fontSize(12).text(REAL_PDF_TEXT);
+  doc.end();
+  await done;
+  await fs.writeFile(filePath, Buffer.concat(chunks));
+}
+
+describe("pdfToEpub with the installed pdf-parse", () => {
+  it("converts a real PDF with the installed real pdf-parse (no injected parser)", async () => {
+    const { pdfToEpub } = await import("../main/epub-converter.js");
+    const AdmZip = (await import("adm-zip")).default;
+
+    const inputPath = path.join(tmpDir, "real.pdf");
+    await writeRealPdf(inputPath);
+    const outputPath = path.join(tmpDir, "real.epub");
+
+    const result = await pdfToEpub(inputPath, outputPath);
+
+    expect(result.valid).toBe(true);
+    expect(result.chapterCount).toBeGreaterThanOrEqual(1);
+    const zip = new AdmZip(outputPath);
+    const chapterXhtml = zip.getEntries()
+      .filter((e) => /^OEBPS\/Text\/chapter_\d+\.xhtml$/.test(e.entryName))
+      .map((e) => e.getData().toString())
+      .join("\n");
+    expect(chapterXhtml).toContain("Lighthouse");
+  });
+});
+
+// ---------------------------------------------------------------------------
 // mobiToEpub (mocked)
 // ---------------------------------------------------------------------------
 
