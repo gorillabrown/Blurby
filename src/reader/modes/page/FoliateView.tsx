@@ -645,6 +645,7 @@ export default function PageFoliateView({
           invalidateWordPositionIndex();
 
           // Extract words and wrap in spans (Page: full re-extraction on every section load)
+          let sectionStart = -1; // -1: this load stamps no spans
           const v2 = viewRef.current;
           if (v2) {
             const extracted = extractWordsFromView(v2);
@@ -652,7 +653,7 @@ export default function PageFoliateView({
             onWordsReextractedRef.current?.();
             // TTS selection-start fix: when full-book extraction boundaries exist,
             // stamp DOM spans with the global section offset, not the local loaded-slice offset.
-            const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections());
+            sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections());
             if (sectionStart >= 0) {
               const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
@@ -668,7 +669,10 @@ export default function PageFoliateView({
           const pendingTurn = pendingTurnRef.current;
           if (pendingTurn && pendingTurn.doc === doc && (!rendererNumberedDocsRef.current.has(doc) || bookWordsFailedRef.current)) {
             pendingTurnRef.current = null;
-            reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end, pendingTurn.click);
+            // PAGE-POSITION-SAVE-2 (N4): a held turn this load cannot stamp is lost; say so rather than drop it silently.
+            if (!reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end, pendingTurn.click)) {
+              recordDiagnosticRef.current("page-turn-lost", `reason=section-load section=${index} sectionStart=${sectionStart} start=${pendingTurn.start} end=${pendingTurn.end}`);
+            }
           }
 
           lastLoadedSectionIndexRef.current = index;
