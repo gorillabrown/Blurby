@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T22:25:00Z",
+  "takenAt": "2026-10-22T22:45:44Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1867,12 +1867,12 @@
     },
     {
       "id": "PDF-IMPORT-DIAG-1",
-      "title": "Reproduce the PDF that cannot be converted",
-      "sequence": 30,
+      "title": "PDFs convert again: the EPUB converter uses pdf-parse 2's API",
+      "sequence": 9,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
       "effort": "S",
       "workstream": "Library & Content",
@@ -1883,9 +1883,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Read-only diagnosis of BUG-190 on the current build: reproduce with a large PDF, capture the main-process conversion error, end with a fix specification.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-190.",
-      "revision": "3b694a3298942ea44831b8221f71b4da067e43b02af19fa6dd925a6845af845d",
+      "description": "Every PDF fails to open: the EPUB converter calls pdf-parse 1's API on the installed pdf-parse 2, and never sets the DOMMatrix global. Move the one working PDF read into a shared helper, use it from both callers, show the converter's own user message, and add a test that loads the real package.",
+      "notes": "Created by roadmap review 2026-10-14. BUG-190. Full Spec by roadmap review 2026-10-22 (U9/U10 pass): the root cause was found in the owner's error.log and reproduced. pdfToEpub calls pdf-parse 1's API, but pdf-parse 2 is installed and needs a DOMMatrix global. A v2-API probe converted BUG-190's PDF. Seq 9, beside ELECTRON-42-UPGRADE-1 (file-disjoint).",
+      "revision": "c9f3142ae69dd5e057fe79a5a6258146a307953d7c952b78959419bd7bbcb776",
       "extra": {}
     },
     {
@@ -2978,7 +2978,7 @@
     {
       "id": "ELECTRON-42-UPGRADE-1",
       "title": "Upgrade Electron to 42 so a normal quit does not crash on x64",
-      "sequence": 59,
+      "sequence": 8,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -2994,8 +2994,8 @@
       "completed": "",
       "evidence": "",
       "description": "Electron 41.10.7 lacks the Node fix for a Windows x64 shutdown crash (0x80000003 on 57 of 121 gate launches, after the save). Upgrade to ^42.11.14 with native-module, ICU, breaking-change and crash-count checks.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1.",
-      "revision": "3ac2945ab5976d943d44f5f4815bf23cce6de88365cde81a33bae910a0e68f98",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Release gate (11), replacing NARRATE-EXIT-CRASH-1's fix. Full Spec: U9/U10 pass. Dispatched 2026-10-15 by Blurby.Roadmap to an implementation agent. Stopped 2026-10-15 at the owner's direction after task 1 (C1), so GOV-NOTION-MAPPING-1 runs first: C1 committed and pushed as b979c50d on eb/electron-42-upgrade-1 (x64 41.10.7 control: 18 of 50 launches crashed 0x80000003). C2 onward not started. Resume at task 2; see ROADMAP.md#electron-42-upgrade-1. Roadmap review 2026-10-22: GOV-NOTION-MAPPING-1 completed (TR-075), so this item returns to the head at Seq 8.",
+      "revision": "a50988db5d0f3c123bb5a27286583f9772dc56557d91e8545bab3333d4029c6d",
       "extra": {}
     },
     {
