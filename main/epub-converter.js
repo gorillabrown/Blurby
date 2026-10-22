@@ -10,6 +10,7 @@ const {
   PDF_MIN_EXTRACTABLE_WORDS,
 } = require("./constants");
 const { createEntryReader } = require("./zip-read");
+const { extractPdfText } = require("./pdf-text");
 
 // Lazy-loaded heavy dependencies
 let AdmZip = null;
@@ -22,12 +23,6 @@ let cheerio = null;
 function getCheerio() {
   if (!cheerio) cheerio = require("cheerio");
   return cheerio;
-}
-
-let pdfParse = null;
-function getPdfParse() {
-  if (!pdfParse) pdfParse = require("pdf-parse");
-  return pdfParse;
 }
 
 let mammoth = null;
@@ -734,7 +729,7 @@ async function htmlToEpub(inputPath, outputPath, meta = {}) {
 
 async function pdfToEpub(inputPath, outputPath, meta = {}, _deps = {}) {
   const buffer = await fsPromises.readFile(inputPath);
-  const parse = _deps.pdfParse || getPdfParse();
+  const parse = _deps.pdfParse || extractPdfText;
   const data = await parse(buffer);
 
   const title =
