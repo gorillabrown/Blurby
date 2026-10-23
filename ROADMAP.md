@@ -2713,7 +2713,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="focus-keys-fix-1"></a>
 
-#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(position pending — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #92–95; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); no shared-core touch)*
+#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(position 76 — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #92–95; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); no shared-core touch)*
 
 - **What:** in Focus (`FocusModeRuntime.handleCommand`), the navigation keys move the reading word: the word the RSVP engine shows next, and the word Focus starts from.
   - **Keys** (`useKeyboardShortcuts.ts:229-236` and `:286-287`; the Hotkey Map's "Reader — Focus", `HotkeyMapSettings.tsx:64-86`):
@@ -2817,7 +2817,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="flow-keys-fix-1"></a>
 
-#### FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(position pending — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #100–103; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); after FOCUS-KEYS-FIX-1; no shared-core touch)*
+#### FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(position 77 — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #100–103; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); after FOCUS-KEYS-FIX-1; no shared-core touch)*
 
 - **What:** Flow has two pacers: the word timer (`FlowMode`, which owns the published word) and the line pacer (`FlowScrollEngine`, which owns the cursor bar and line scroll). A navigation key moves both of them.
   - **Keys** (`useKeyboardShortcuts.ts:229-236` and `:273-277`; the Hotkey Map's "Reader — Flow", `HotkeyMapSettings.tsx:87-105`):
