@@ -4,7 +4,11 @@
 
 ## New live lessons since 2026-10-22
 
-LL-164: a lesson-status write in an older specification can silently undo a newer promotion (KF2-WAIVER-RETIRE-1). The close-outs since then (RENAME-RETRY-1, JSONSTORE-TIMEOUT-1, CI-AUDIT-ALLOWLIST-1 and READER-VISUAL-DIAG-1) applied existing lessons and recorded no new one, each with a reason, and each passes the close-out lessons gate.
+- **LL-164:** a lesson-status write in an older specification can silently undo a newer promotion (KF2-WAIVER-RETIRE-1). Promoted below.
+- **LL-165** (UI-SWEEP-TRIAGE-1, recorded at its close-out in this review): a driver must prove which profile the app opened before its first action.
+- **LL-166** (the same close-out): a no-effect verdict needs a detector that reads state, and a press made where the control should act.
+
+LL-165 and LL-166 bear on every live check in the buffer. JUMP-LANDING-SAVE-1, BAND-ALIGN-2 and FLOW-PARA-KEYS-1 already require the scratch-profile preflight (Brain's profile guardrail, 2026-10-23), which is LL-165's practice. They are cited at dispatch. The close-outs since then (RENAME-RETRY-1, JSONSTORE-TIMEOUT-1, CI-AUDIT-ALLOWLIST-1 and READER-VISUAL-DIAG-1) applied existing lessons and recorded no new one, each with a reason, and each passes the close-out lessons gate.
 
 ## Which specification applied which (the buffer, Seq 80–84)
 

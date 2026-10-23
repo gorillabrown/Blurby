@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T17:12:10Z",
+  "takenAt": "2026-10-23T17:31:00Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -26,7 +26,7 @@
     {
       "id": "ANDROID-APP-1",
       "title": "Establish the Android app",
-      "sequence": 52,
+      "sequence": 101,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -43,13 +43,13 @@
       "evidence": "",
       "description": "Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "04774fa20a8351a4304086d8d496a203dd14dd9903edc0b515cc3ef1d791995e",
+      "revision": "69d9178afbee20e3a73a5d84f13dcc7568a0af3431df828d1eed040925df3926",
       "extra": {}
     },
     {
       "id": "APP-TABS-1",
       "title": "Four tabs: Library, Newsroom, Podcasts, Marketplace",
-      "sequence": 48,
+      "sequence": 96,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -66,7 +66,7 @@
       "evidence": "",
       "description": "The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a \"Coming Soon\" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highli",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "798a55d7be3a6fc32a7ca83ec9acaad08a02a4a6429a3c9ca7c24a2ab846dfab",
+      "revision": "f8ee3733c1532c8a46cdf0fd57b4d0cb56031b11ffd30530b490117b1cb7defc",
       "extra": {}
     },
     {
@@ -95,26 +95,28 @@
     {
       "id": "BAND-ALIGN-2",
       "title": "In Focus, the text scrolls the cursor's line into the fixed band",
-      "sequence": 70,
+      "sequence": 83,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
-        "BAND-ALIGN-1"
+        "BAND-ALIGN-1",
+        "FOCUS-KEYS-FIX-1",
+        "FLOW-KEYS-FIX-1"
       ],
       "effort": "S",
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "",
-      "branch": "",
+      "spec_link": "ROADMAP.md#band-align-2-spec",
+      "branch": "eb/band-align-2",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Owner decision (BAND-ALIGN-1 Part B): keep the band fixed. In Focus the reader scrolls the cursor word's line into the band on arrival and on every highlight move; in Flow the pacer scrolls the underlined word's line under it, with the word timer as the only clock.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.",
-      "revision": "aaba4072aab4624c772498de2c3c0a3b5d9cd92307ccec9e401534966e4bcf81",
+      "revision": "ce5ed5facf3023f246d9efcc31114fb937d97d86bb45a2d691cf4fe8f2803fba",
       "extra": {}
     },
     {
@@ -146,7 +148,7 @@
     {
       "id": "BOOK-TEXT-COLOUR-1",
       "title": "Book text takes the theme's text colour",
-      "sequence": 6,
+      "sequence": 2,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -157,19 +159,19 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#book-text-colour-1",
-      "branch": "",
+      "branch": "eb/book-text-colour-1",
       "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-208 release fix: book text takes the theme's text colour in every mode.",
       "notes": "",
-      "revision": "2c4d7d6e588b80600c053339f9b0751988a5fac8da47a473a221eda85f704ab0",
+      "revision": "6af48a07f5194d4d01af9f49a24a1e8aec529ec0392c6548b71af4b0c03affe9",
       "extra": {}
     },
     {
       "id": "BOOK-TYPE-SCALE-1",
       "title": "Books use one type scale for headers, sub-headers and body text",
-      "sequence": 6,
+      "sequence": 5,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -187,15 +189,15 @@
       "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "Owner design decision: book pages in all four modes use the reader's font and one size ratio for headers, sub-headers and body text.",
       "notes": "",
-      "revision": "9cb822a83848ad50b8e102b0ff2dff1c9c23ba28c72d5ace0fc61a6e0051b2fc",
+      "revision": "056421e72ec864f1f6bbf4bbb8f76f61f81cbb2c4c09c09175120fbc010da32e",
       "extra": {}
     },
     {
       "id": "BROWSER-EXT-FINALIZE-1",
       "title": "Finalize the Chrome and Firefox extensions",
-      "sequence": 54,
+      "sequence": 99,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -214,7 +216,7 @@
       "evidence": "",
       "description": "Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond).",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "9b0086b414ebf9de0bec02bff07a4d28b1d15872b71d24b767e806c9b2f2a804",
+      "revision": "e1dd0d3e03ae557d2272bdca5d4aa2cdfac3e9b55ad462ff53728a6184b33b4c",
       "extra": {}
     },
     {
@@ -293,7 +295,7 @@
     {
       "id": "CLOUD-CONNECTORS-1",
       "title": "Connections to the mainstream cloud services",
-      "sequence": 51,
+      "sequence": 100,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -310,7 +312,7 @@
       "evidence": "",
       "description": "Connect Google Drive, OneDrive, Box, Dropbox and iCloud as book and article sources (and, where the owner wants it, sync targets). Builds on the existing Microsoft (@azure/msal-node) and Google (googleapis) auth and the deferred Phase 7 Cloud Sync lane, which it supersedes. Likely splits into one item per service.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "bf73a910e6d61419980dcea17dac6df0d718ed3e554e23fabe0fd3d0d60f3935",
+      "revision": "9d143df0d778a2cb1a09fc45a4ed6e9c8c480d1274f11b6ac8e4d05721a61155",
       "extra": {}
     },
     {
@@ -385,7 +387,7 @@
     {
       "id": "EINK-CONTROLS-1",
       "title": "One E-ink control, not two",
-      "sequence": 32,
+      "sequence": 95,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -402,7 +404,7 @@
       "evidence": "",
       "description": "Settings has both an E-ink theme button and an E-ink Display Mode switch that set different fields. Needs an owner decision: merge them or label the difference.",
       "notes": "Created by roadmap review 2026-10-14. Found in the 2026-10-13 SETTINGS smoke. Needs an owner decision.",
-      "revision": "370ae3c35dc6ad2ba4322ff94a8348a21298de1cbae86973c3fb87e806d6f8b1",
+      "revision": "5b2dd8c1ba11b468cff5cd36e0206c718ada534658b89c188a1cbe33d31ccb39",
       "extra": {}
     },
     {
@@ -478,8 +480,8 @@
       "id": "ERROR-LOG-CAP-1",
       "title": "error.log is size-capped and rotated",
       "sequence": 75,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -489,12 +491,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#error-log-cap-1",
       "branch": "eb/error-log-cap-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "The error log is size-capped and rotated instead of growing without bound.",
       "notes": "",
-      "revision": "e7277a94a97cad753b7f63a05c76f40017e3cd28e0f5f195b4a839b69b69d7e6",
+      "revision": "f4dfaa50fb39fe7df4f022f8a7079d5750db20bbce6020fc29737e408c9dedf8",
       "extra": {}
     },
     {
@@ -524,8 +526,8 @@
       "id": "FLOW-KEYS-FIX-1",
       "title": "Flow's line, word, sentence and paragraph keys move both pacers",
       "sequence": 77,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -534,13 +536,38 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#flow-keys-fix-1",
-      "branch": "",
+      "branch": "eb/flow-keys-fix-1",
+      "started": "2026-10-23",
+      "completed": "",
+      "evidence": "",
+      "description": "BUG-211: in Flow, the line, word, sentence and paragraph keys move both pacers (UI-SWEEP-TRIAGE-1 rows 100 to 103). Post-release.",
+      "notes": "",
+      "revision": "2f4c600b9d125b95548e6a3ae03540056fb6de87172c2eab67a0be86ae48ec8d",
+      "extra": {}
+    },
+    {
+      "id": "FLOW-PARA-KEYS-1",
+      "title": "Flow paragraph keys step over whole-book paragraph starts on an EPUB",
+      "sequence": 84,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "FLOW-KEYS-FIX-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#flow-para-keys-1",
+      "branch": "eb/flow-para-keys-1",
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "Check, then fix if red: Flow paragraph keys on an EPUB with full-book words step over loaded-slice breaks; apply Brain ruling A as in FOCUS-KEYS-FIX-1.",
       "notes": "",
-      "revision": "66ed05cb5bb4e5d15392256fd997650f7393fd85dc22164f6f8b56f84cdd9316",
+      "revision": "1f72b6f21c7b382503b0e33ddb650ef10ad6c000650156f4ef9e4564889c2c40",
       "extra": {}
     },
     {
@@ -570,8 +597,8 @@
       "id": "FOCUS-KEYS-FIX-1",
       "title": "Focus's word, sentence and paragraph keys move the reading word",
       "sequence": 76,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -580,13 +607,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#focus-keys-fix-1",
-      "branch": "",
-      "started": "",
+      "branch": "eb/focus-keys-fix-1",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-210: in Focus, the word, sentence and paragraph keys move the reading word (UI-SWEEP-TRIAGE-1 rows 92 to 95). Post-release.",
       "notes": "",
-      "revision": "388c3795e1cc3d36f5804b48f1c4b494eb012f2027d8e4f6158318b38037e8f4",
+      "revision": "6c851b57f64fa24799f069d9ac9404d4dfc7f20f07d72c248cc2bfa106f37a59",
       "extra": {}
     },
     {
@@ -618,7 +645,7 @@
     {
       "id": "FOLDER-NOTICE-2",
       "title": "Follow-ups from FOLDER-NOTICE-1",
-      "sequence": 47,
+      "sequence": 90,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -635,7 +662,7 @@
       "evidence": "",
       "description": "Banner follows the scan's verdict; in-main Retry in-flight guard; same-folder re-select keeps the toast flag; banner focus and failed-Retry announcement.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap from FOLDER-NOTICE-1's quality review. Not a release gate.",
-      "revision": "a441759be5b592710854af6cc7c0f41bbaf80a28e1846930b47e0f448969b902",
+      "revision": "5d5c6a1296d4215a3b96872ad4f5004f783cde920d1e324c4b1a44e5a386275e",
       "extra": {}
     },
     {
@@ -664,7 +691,7 @@
     {
       "id": "FOLDER-SWITCH-HEADER-1",
       "title": "The header follows the folder switch at once",
-      "sequence": 6,
+      "sequence": 3,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -675,13 +702,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#folder-switch-header-1",
-      "branch": "",
+      "branch": "eb/folder-switch-header-1",
       "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-202 release fix: the library header follows a folder switch at once.",
       "notes": "",
-      "revision": "454f7c3cba8afcd02f97ec61fcd4b9a97cb0f73f654bd6840228a5b5cd058225",
+      "revision": "2808f8e221f4601032e758058bb30c340dfe2d33c144f57234f592ca1463ef03",
       "extra": {}
     },
     {
@@ -896,7 +923,7 @@
     {
       "id": "IOS-APP-1",
       "title": "Establish the iOS app",
-      "sequence": 53,
+      "sequence": 102,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -913,7 +940,7 @@
       "evidence": "",
       "description": "Stand up Blurby on iOS and iPadOS: reading modes, library, and sync with the desktop app.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "1a43b96e1f3384e510bfd3f2d3e8fcae112cead93eb9da6eafff87b589c24ff1",
+      "revision": "40291e662366f4626f2207bd788135c3ad4c1cf93fbe91bdbb2c2b9c274c9dc0",
       "extra": {}
     },
     {
@@ -967,24 +994,26 @@
     {
       "id": "JUMP-LANDING-SAVE-1",
       "title": "Other jumps in Page mode save the page they land on",
-      "sequence": 63,
+      "sequence": 81,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
-      "prerequisites": [],
+      "prerequisites": [
+        "TOC-JUMP-SAVE-1"
+      ],
       "effort": "S",
       "workstream": "Reader Engine",
       "deliverable": "",
       "group": "",
-      "spec_link": "",
-      "branch": "",
+      "spec_link": "ROADMAP.md#jump-landing-save-1",
+      "branch": "eb/jump-landing-save-1",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "Internal-link jumps, footnote jumps and next/previous chapter still leave the saved position on the page they jumped from. Route each through the in-flight-turn counting TOC-JUMP-SAVE-1 gives the API goTo.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from TOC-JUMP-SAVE-1's run (notes 3 and 4). Stub. Not a release gate.",
-      "revision": "db86450ca7252da6cac09899ad3fdc0e0328f1b94ecea5277d005dd18e21c89d",
+      "revision": "8b00666f35c2930f172b911e0ac2e6799ec2af5b27e19ca60da1dec018454300",
       "extra": {}
     },
     {
@@ -1005,9 +1034,9 @@
       "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-209 release gate: in Page mode, Keep at furthest saves and reopens at the furthest page the reader reached.",
       "notes": "",
-      "revision": "6fe50bd63905629cdaf2067c369dab00054d0464d725cb8a90a97d75583ec642",
+      "revision": "77fe281393bcbde18f69fb1bb1f7841212bb8881ee9bc14f891b8b30a6f561d4",
       "extra": {}
     },
     {
@@ -1298,7 +1327,7 @@
     {
       "id": "LIBRARY-WRITE-RACE-2",
       "title": "Library writes: the renderer-side and policy follow-ups",
-      "sequence": 64,
+      "sequence": 86,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1317,7 +1346,7 @@
       "evidence": "",
       "description": "Split from LIBRARY-WRITE-RACE-1. Covers save-library id de-duplication, malformed-element tests and type checks; the Edit form's fire-and-forget save, whose failure UX is an owner decision; renderer edits not bumping modified (a Brain sync ruling); and the cloud sync's setLibrary (deferred Cloud lane).",
       "notes": "Created 2026-10-22 by Blurby.Roadmap when LIBRARY-WRITE-RACE-1 was specified. Stub; needs an owner decision (Edit-form failure UX) and a Brain ruling (modified bump). Not a release gate.",
-      "revision": "d4f3550358a9af4205b7fd660b78727005f3af2771e8e6d5c9f7cd63bc598940",
+      "revision": "654822678adc7d5f28fb6050af4dd77e57f39782b9691ad8d5d6a28b823f639e",
       "extra": {}
     },
     {
@@ -1523,7 +1552,7 @@
     {
       "id": "NARRATE-CPU-PROFILE-1",
       "title": "Narrate saturates a 4-core CPU during warm requests",
-      "sequence": 38,
+      "sequence": 94,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1542,7 +1571,7 @@
       "evidence": "",
       "description": "A profile pass on producer and worker time, and whether chunk ramp or worker count should adapt to core count.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the quiet-machine run. Not a release gate.",
-      "revision": "7733fa7f4c61acdb5eac52a65ea1dc2ad92f7d7883462465725527164c4509a6",
+      "revision": "60fb973c7ba4c79d78ad48dbfec189acf3189d55b79279ce7f52be66abf8dfc3",
       "extra": {}
     },
     {
@@ -1598,7 +1627,7 @@
     {
       "id": "NARRATE-EXIT-CRASH-1",
       "title": "A native crash on Narrate producer teardown under Electron",
-      "sequence": 55,
+      "sequence": 88,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1617,13 +1646,13 @@
       "evidence": "",
       "description": "p3-producer-check exits 0x40000015 at shutdown under the app's Electron; check whether the real app crashes on quit with Narrate playing or paused, and fix the teardown.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. RELEASE GATE (11) since 2026-10-15: gate (1) on main 1da81be2 saw 57 of 121 cold-trial launches exit 0x80000003 after the quit flush (no data lost). Diagnosis in progress; gate re-run needs 0 crashed launches.",
-      "revision": "3be25d4a92757eeff755a291a442ae548cf71c89e7da21f7dd6a0bc6b210799b",
+      "revision": "bf18fc9f79aeb2ad0e782df9958ba33e11d13d982b19bbfe00c3fbb875bcc12c",
       "extra": {}
     },
     {
       "id": "NARRATE-HARNESS-COLDCLICK-1",
       "title": "Measure cold click on mainstream hardware",
-      "sequence": 37,
+      "sequence": 93,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1642,7 +1671,7 @@
       "evidence": "",
       "description": "Make the harness's cold-click path attribute on slower hardware; until then cold click is judged on the reference run only.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Owner D6 decision 2026-10-14. Not a release gate.",
-      "revision": "d266a54fa3e98ed285bcdbe95ca32ab08048cce98f6bfff0364c895aa16645a5",
+      "revision": "959f02db6f5499120ba9ec90874e827962276d42c389bae35a5fe4960f9f53f1",
       "extra": {}
     },
     {
@@ -1748,7 +1777,7 @@
     {
       "id": "NARRATE-QUIT-LINGER-1",
       "title": "Quit does not wait on a Kokoro job, and a quick relaunch is not lost",
-      "sequence": 73,
+      "sequence": 85,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1763,9 +1792,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "Quit does not wait on a running Kokoro job, and a quick relaunch is not lost.",
       "notes": "",
-      "revision": "184cede6e8dba8853155429cb5c11d5ad0a5512e6afbdcea7a3395ac14569bb2",
+      "revision": "37d01ddb0ea478c116aa53911f1854e72b25eea15426a2eb55ca5e79ebd645f8",
       "extra": {}
     },
     {
@@ -1796,7 +1825,7 @@
     {
       "id": "NARRATE-RECONCILE-RESIDUAL-1",
       "title": "A capitalised two-word name that espeak voices differently alone",
-      "sequence": 46,
+      "sequence": 92,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -1815,7 +1844,7 @@
       "evidence": "",
       "description": "One owner-book chunk (hash 4e7915ce2410e10e) fails closed on a name espeak voices differently alone; reconcile it without loosening the cost check.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "812c348be22f2d49accca05b68fe30065238ab4da57784e4fe700df3458ba8b1",
+      "revision": "499e59d6cfe7b64e8b415e13ba1eb768c2738a8290e258f73fe66d82976316bf",
       "extra": {}
     },
     {
@@ -1898,7 +1927,7 @@
     {
       "id": "NARRATE-START-STACK-1",
       "title": "Log the full stack when Narrate fails to start",
-      "sequence": 6,
+      "sequence": 4,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -1909,13 +1938,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#narrate-start-stack-1",
-      "branch": "",
+      "branch": "eb/narrate-start-stack-1",
       "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-206 release fix: when Narrate shows a start error, the full stack is logged once to the error log.",
       "notes": "",
-      "revision": "97a60fc2d44d0b09d83a6034936289d4f4e93734a7f789ec812c17567a24864c",
+      "revision": "fe9762d9cab36eb2d1ff4734ae92b4ee93241b79e2213c5c2bcf195999234c8b",
       "extra": {}
     },
     {
@@ -2049,7 +2078,7 @@
     {
       "id": "OVERLAY-THEME-SWEEP-1",
       "title": "Other overlays: Escape and undefined theme tokens",
-      "sequence": 31,
+      "sequence": 89,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2066,7 +2095,7 @@
       "evidence": "",
       "description": "Two overlays likely share the Escape-leaves-reader defect and five panels read an undefined background token. Verify live, then specify on UX-POLISH-2's pattern.",
       "notes": "Created by roadmap review 2026-10-14. Found while specifying UX-POLISH-2; after UX-POLISH-2.",
-      "revision": "409e690b87a0f0d5afbff23c5898cc43c2a3dd1a94b86d70bac9921c673bb583",
+      "revision": "1bbad709163837bf35b4c3eac39497d966aebf1f91a7dbce992d5a1db7dbd7da",
       "extra": {}
     },
     {
@@ -2166,7 +2195,7 @@
     {
       "id": "PAGE-REOPEN-CFI-1",
       "title": "Reopen from the cfi last saved, and save only the cfi on screen",
-      "sequence": 6,
+      "sequence": 1,
       "status": "in-flight",
       "raw_status": "In Flight",
       "written_status": "full-spec",
@@ -2177,13 +2206,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "ROADMAP.md#page-reopen-cfi-1",
-      "branch": "",
-      "started": "",
+      "branch": "eb/page-reopen-cfi-1",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
-      "description": "",
+      "description": "BUG-201 release fix: a reopen in the same session opens on the position main last saved.",
       "notes": "",
-      "revision": "242d8d3abcb8ac4865632357e1930b83664bae3c01022e3112796e29a88597af",
+      "revision": "edb725289869050d1dc278abb1fd4cf3a037aacb86198f3a4a4da201a914c521",
       "extra": {}
     },
     {
@@ -2212,7 +2241,7 @@
     {
       "id": "PAGE-SAVE-RESTAMP-3",
       "title": "Rare page-save edge cases after the restamp guard",
-      "sequence": 45,
+      "sequence": 80,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -2229,7 +2258,7 @@
       "evidence": "",
       "description": "The double-wrap race in long sections, and any failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate.",
-      "revision": "c6c982fd7829989e04632a4f878393dc18eaef67d5372d3ad18f40867e0c5614",
+      "revision": "975fefd4adf7fbfb97aede4352fa569ac994a71c898557fb0c76f5b7c9a4b9cd",
       "extra": {}
     },
     {
@@ -2281,7 +2310,7 @@
     {
       "id": "PODCAST-SOURCE-1",
       "title": "Podcast source service integration",
-      "sequence": 50,
+      "sequence": 98,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2300,7 +2329,7 @@
       "evidence": "",
       "description": "After APP-TABS-1, replace the Podcasts tab's Coming Soon banner with directory search, show profiles, episode lists and built-in audio streaming. Use an aggregator API for discovery and metadata, evaluating Podcast Index first; retain Apple's iTunes Search API and Listen Notes / PodcastAPI.com as alternatives. Resolve episode audio from API enclosure metadata or the show's RSS enclosure and stream directly from the publisher's host. Blurby does not host or persist episode audio in this initial scope. ROADMAP.md#podcast-source-1 holds the detailed direction; this remains a stub awaiting investigation and specification.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.\n\nOwner direction 2026-10-15: aggregator-based discovery and episode metadata; Podcast Index evaluated first, Apple iTunes Search and Listen Notes as alternatives. Stream publisher-hosted enclosure audio directly. Before specification, settle provider credentials, quotas/caching terms, UI/playback behavior and error handling. Transcripts and offline downloads remain separate scope decisions. Planning update only; no podcast implementation or authenticated playback test. See ROADMAP.md#podcast-source-1.",
-      "revision": "3cea1338a5af85245dd3914730473c99b2316cb0990811813783e3680fd50573",
+      "revision": "62b619b0505b34cd5b66ebdc81451699d6f8155c1ff26dbdedfaf342f4958c2c",
       "extra": {}
     },
     {
@@ -2624,7 +2653,7 @@
     {
       "id": "RSS-AGGREGATOR-1",
       "title": "RSS feed aggregator for Newsroom",
-      "sequence": 49,
+      "sequence": 97,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -2643,7 +2672,7 @@
       "evidence": "",
       "description": "Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9, product expansion). Stub; needs owner design decisions before specification. Not a release gate.",
-      "revision": "28d48bc1046e84f3f4a149c7dfedba9bef15d02f815e619dc0ec208a0f1e683e",
+      "revision": "f5c71ac36fa059336ab5832e984c3eeb06f5704a6b5d9e7d93b7f1927dae21b8",
       "extra": {}
     },
     {
@@ -2787,9 +2816,9 @@
     {
       "id": "SMOKE8-DIAG-1",
       "title": "Diagnose the two smoke failures: Page reopen position and the stale folder header",
-      "sequence": 6,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2800,11 +2829,11 @@
       "spec_link": "",
       "branch": "eb/smoke8-diag-1",
       "started": "2026-10-23",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md",
       "description": "Read-only diagnosis of BUG-201 (reopening a Page-mode book lands on an older page; the saved cfi reverts) and BUG-202 (the folder header keeps the old name after a recent-folder switch) on a build of 47ae6e1f, ending in a fix specification for each.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap after release gate (2) failed on the owner smoke (checks #8, #28). Release blocker (BUG-201). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/smoke8-diag-1). Docs-only; may merge during the freeze.",
-      "revision": "bba4c0541cf25b85419b40e1b5c41006c29bc2bf8d415584131506d0a271b3db",
+      "revision": "4c232f6042d71a1a9ee68782d445602139199b83374280b56c6ff0e6010066ed",
       "extra": {}
     },
     {
@@ -3408,9 +3437,9 @@
     {
       "id": "UI-SWEEP-1",
       "title": "Press every control on every screen and report what breaks",
-      "sequence": 68,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -3421,19 +3450,19 @@
       "spec_link": "",
       "branch": "eb/ui-sweep-1",
       "started": "2026-10-23",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md",
       "description": "A CDP-driven sweep (scripts/ui-sweep/sweep.mjs) presses every clickable control on every screen of a --dir build of 47ae6e1f, on a scratch profile, and reports each press as OK, ERROR, NO-EFFECT or skipped, with evidence. Bug candidates are filed by the planner.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner's request (\"are you testing every button?\"). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/ui-sweep-1). Live run waits for the Stage 8 smoke agent to finish. Not a release gate.",
-      "revision": "d1dc3f9602ee891d9b852316a2033645dbd996ee3e4ffdbcc74408047843ad17",
+      "revision": "0ce3d3485d60362c1b9ee53fdc1634ad54d98e2ac1684fe80921d43b8a86b3d7",
       "extra": {}
     },
     {
       "id": "UI-SWEEP-TRIAGE-1",
       "title": "Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates",
-      "sequence": 74,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -3444,11 +3473,11 @@
       "spec_link": "ROADMAP.md#ui-sweep-triage-1",
       "branch": "eb/ui-sweep-triage-1",
       "started": "2026-10-23",
-      "completed": "",
-      "evidence": "",
-      "description": "",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md",
+      "description": "Re-test UI-SWEEP-1's NO-EFFECT and unreachable candidates with a stronger detector; confirm or dismiss each.",
       "notes": "",
-      "revision": "024142579b5dd1dea0d9661d80aafe598e3b49bb4de9b723b1a44200c9a17296",
+      "revision": "6c44771659be7890c9aa80bf59d063a528221810b6275a1107be3116eef582fb",
       "extra": {}
     },
     {
@@ -3502,7 +3531,7 @@
     {
       "id": "WIN-TARGET-NSIS-1",
       "title": "Build full NSIS installers per architecture by default",
-      "sequence": 65,
+      "sequence": 91,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -3519,13 +3548,13 @@
       "evidence": "",
       "description": "Move package.json's build.win.target from nsis-web to nsis, so each architecture gets a full installer and its own latest.yml without CLI overrides. Update the release runbook, and check that electron-updater picks the right architecture.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release.",
-      "revision": "3cafcc56bf1f4fd1c1c8e02b5302d9ed00043c0bdd6da3943f509b7463edca75",
+      "revision": "16a576cf3a6a2d67ed1eda04144af7a1658f467d27db5273b690f6de58137b48",
       "extra": {}
     },
     {
       "id": "WORD-INDEX-UNIFY-1",
       "title": "One word numbering in every runtime",
-      "sequence": 43,
+      "sequence": 87,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "stub",
@@ -3544,7 +3573,7 @@
       "evidence": "",
       "description": "The main extractor joins adjacent word segments through one ICU-independent function shared with segmentWordSpans, segments whole blocks, and guards against an Electron ICU change; saved positions remapped once through their cfi, word text unchanged.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the Narrate 7-word offset diagnosis. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "a0d75a7d0c0dc819548297bbcd9fa5336018806a8b79938af49d1d21ed109256",
+      "revision": "346bb7f405ef0a68d804a6d8e0c61f1d6c2471552ec5e6a581938b25614131cd",
       "extra": {}
     },
     {
@@ -3598,7 +3627,7 @@
     {
       "id": "ZIP-ASYNC-READ-1",
       "title": "Read EPUB archives asynchronously",
-      "sequence": 69,
+      "sequence": 82,
       "status": "queued",
       "raw_status": "Queued",
       "written_status": "full-spec",
@@ -3610,14 +3639,14 @@
       "workstream": "Library & Content",
       "deliverable": "",
       "group": "",
-      "spec_link": "",
-      "branch": "",
+      "spec_link": "ROADMAP.md#zip-async-read-1",
+      "branch": "eb/zip-async-read-1",
       "started": "",
       "completed": "",
       "evidence": "",
       "description": "adm-zip's path constructor reads the archive with fs.readFileSync. In openZip (main/zip-read.js), read with fsPromises.readFile and pass the buffer to adm-zip, with the cap checked on the stat.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.",
-      "revision": "2a8840af955a5d314e76230e2943352b78dd7f7f11cca8ffff73159416f0d4e3",
+      "revision": "f36336d7ca092f5a4d1cf7917438f38b46a08290e7b4a16151817b0ec37d6247",
       "extra": {}
     },
     {
