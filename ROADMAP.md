@@ -1898,6 +1898,345 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 - **Standing rules 41, 46, 47 and 48:** in the Done-when list.
 - **LL-164:** this specification appends no lesson-status line.
 
+<a id="narrate-token-cap-1"></a>
+
+#### NARRATE-TOKEN-CAP-1 — Digit-dense passages are planned under the 400-id token cap *(position 41 — Full Spec; authored 2026-10-23 on main @ `04af780f`; not a release gate)*
+
+- **What:** The Narrate chunk planner's token estimate (`src/reader/modes/narrate/engine/chunkPlan.ts:20`) counts each digit at its measured cost, not at the 1.15 ids per character it uses for letters. Today a digit-dense passage, such as chess notation or a table of numbers, is planned as one 30-word chunk that the producer then refuses for exceeding the 400-id cap. Narration pauses there with F4's notice. After the fix, those passages are planned into shorter chunks that fit, so narration reads through them. Text without digits is planned exactly as today.
+- **Why:** NARRATE-REBUILD-1's owner-library sweep left 18 class-E chunks (of 11,030) that fail closed on the token cap (`CloseOut.NARRATE-REBUILD-1.2026-10-15.md` F6; `docs/studies/narrate-rebuild-1/phase6/reconcile-owner.txt`).
+- **Evidence (planner probe, 2026-10-23):** the reconcile sweep was run under the app's Electron 42 on the two affected books, with counts only and no text.
+  - All 7 distinct class-E chunks are digit-dense: 21 to 77 digits in 28 to 30 words.
+  - The estimate gave 163 to 264 tokens against 435 to 512 real input ids.
+  - Per digit, the real cost is 5.6 to 12.5 ids (`ids − 1.15·(non-digit chars) − 2`, over digits). A digit is spoken as a whole word ("1974" → "nineteen seventy four"; "e4" → "e four").
+  - Normalization barely lengthens these chunks (`normChars − chars` ≤ 23), so the gap comes from phonemes per digit, not from kokoro's text rewrites.
+- **Out of scope:**
+  - The Phase 0 harness copy of the estimate (`main/narrate/chunker.js:13`, used only by `scripts/narrate-rebuild/lib/chunker.mjs`).
+  - The 400-id cap itself (`main/narrate/capture.js:9`).
+  - `PACK_TARGET_TOKENS` (360).
+  - The ramp's word caps.
+  - Any producer-side re-split.
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the new tests of Done-when 2 are committed alone first. `npx vitest run tests/narrate/narrate.chunkPlan.test.ts -t "digit"` exits 1 on the base source. The failure shows the digit-dense passage planned as one chunk.
+    2. **Tests:** `tests/narrate/narrate.chunkPlan.test.ts` gains two tests.
+       - **"digit-dense text is estimated at its spoken cost and planned in more than one chunk":** a fixed 30-word chess-notation passage (`1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 …`, at least 60 digits) planned at steady state (`rampIndex` past the ramp, `maxWords` 30) gives at least 2 chunks, each with `estimateTokens(text) <= PACK_TARGET_TOKENS`.
+       - **"text with no digit is estimated exactly as before":** three fixed strings give the same value as `Math.ceil(text.length * 1.15) + 2`.
+       - `npx vitest run tests/narrate/narrate.chunkPlan.test.ts` exits 0.
+    3. **The owner library has no class E left:** the sweep below runs on the owner's library copies (never the profile). It prints `OWNER: … ; 0 class E, …` and exits 0.
+       ```
+       pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --owner C:\Users\estra\AppData\Local\Temp\claude\C--Projects-Blurby\bbe4b04a-f097-4f3e-ba25-221d3dcf13e9\scratchpad\owner-epub-copy
+       ```
+       - **Dry run on the base (2026-10-15 record):** `18 class E, 3 ruled residual, 0 other`, exit 0. The exit code does not distinguish base from fix, so this gate reads the printed class-E count.
+       - If that copy folder is gone, copy the profile's `.epub` files into a scratch folder first (the sweep refuses the live profile).
+       - Record the new `fail-closed chunks of N` total. It may differ from 11,030, because digit-dense chunks are split.
+    4. **The gate corpus and the D2 live route still pass, and the control still fails:**
+       - `… reconcile-sweep.mjs --gate` exits 0;
+       - `… reconcile-sweep.mjs --gate --from 2970 --to 6700` exits 0;
+       - `… reconcile-sweep.mjs --gate --control` exits 1.
+    5. `git grep -n -F "DIGIT_TOKEN_WEIGHT" -- src` prints exactly two lines, both in `chunkPlan.ts` (the declaration and its use). On the base it exits 1.
+    6. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M src/reader/modes/narrate/engine/chunkPlan.ts` and `M tests/narrate/narrate.chunkPlan.test.ts`, plus the time log and staging memo (standing rule 41).
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** TTS / Narration Engine. Execution surface A.
+- **Source:** CloseOut.NARRATE-REBUILD-1 F6; `reconcile-owner.txt`; this probe (`CAPROW` rows: book `b6e457e6` at 10848, 40005 and 45844; book `dab1d9d7` at 1250, 3905, 4492 and 5064).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `src/reader/modes/narrate/engine/chunkPlan.ts:19-20`:
+    - Add `export const DIGIT_TOKEN_WEIGHT = 13;`, with a comment giving the measured range (5.6–12.5 ids per digit, 2026-10-23 probe) and why it is padded.
+    - Change `estimateTokens` to `(text) => { const digits = (text.match(/\d/g) || []).length; return Math.ceil((text.length - digits) * 1.15 + digits * DIGIT_TOKEN_WEIGHT) + 2; }`.
+    - Keep the docstring's "estimate only packs" sentence.
+  - No other planner line changes: the steady-state cut loop (`:131-140`) already cuts a sentence that does not fit.
+- **Tests:** Done-when 1–2.
+- **Constants:** `DIGIT_TOKEN_WEIGHT = 13` lives in `chunkPlan.ts` beside `PACK_TARGET_TOKENS`, its precedent (a mode directory holds its own constants).
+- **Branch:** `eb/narrate-token-cap-1` from `refs/remotes/origin/main`; worktree `C:\Projects\Blurby\.worktrees\narrate-token-cap-1`; run `npm ci`. Push with the explicit refspec `HEAD:refs/heads/eb/narrate-token-cap-1`.
+- **Staging plan:** the two files plus the memo and time log. Never stage `tests/perf-baseline-results.json`.
+- **Failure handling:**
+  - If Done-when 3 still shows class E, record each chunk's position and ids (the probe pattern: counts only). Raise the weight only as far as the measurement requires, and record it. Never raise `PACK_TARGET_TOKENS`.
+  - If Done-when 4's `--from 2970` route changes, stop and report it: the D2 route must stay as measured.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface A.
+  - **Forbidden:** `main/narrate/**`, `src/reader/modes/narrate/ModeRuntime.ts`, `narrateEngine.ts`, `FoliateView.tsx`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. It overlaps none of the held branches. It merges before NARRATE-SENTENCE-RESUME-1, which also edits `chunkPlan.ts`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows a digit-dense passage planned as one over-cap chunk | calculable | positive control | bounded | low | 15m (two tests, one red run) | — | — |
+| 2 | Digits estimated at their spoken cost; the owner library has no class-E chunk | calculable | bug fix | bounded | medium | 40m (one function, owner sweep about 8 min, gate sweeps) | — | — |
+| 3 | Suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 30m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-162:** the gate is the whole owner corpus offline (Done-when 3), not sampled sessions.
+- **LL-160:** every sweep runs under the app's Electron (`app-node.ps1`), whose ICU numbers the words as the app does.
+- **LL-142:** the cost per digit was measured against the installed tokenizer and phonemizer, not assumed.
+- **Standing rule 43 (LL-138):** Done-when 1 is red on the base.
+- **Standing rule 44 (LL-143):** Done-when 5 exits 1 on the base, and Done-when 3's base count is recorded.
+- **Standing rules 41, 46, 47 and 48** apply as usual.
+- **LL-164:** no lesson-status line is appended.
+- **Standing rule 50:** no waiver or known failure covers these edit sites.
+
+<a id="narrate-trace-labels-1"></a>
+
+#### NARRATE-TRACE-LABELS-1 — Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate *(position 56 — Full Spec; authored 2026-10-23 on main @ `04af780f`; XS; not a release gate)*
+
+- **What:** Three harness fixes, none user-visible:
+  - The eval-trace writer in `main.js` still labels every trace as MOSS-Nano: `evidenceSource` and `provenance.source` `"real-app-selected-nano"` at `:185` and `:187`, `runId` `moss-nano-13d-…` at `:192`, and `scenarioId` `moss-nano-13c-…` at `:193`. It will say Kokoro/Narrate instead.
+  - `scripts/narrate-rebuild/p5-latency-e2e.mjs:32` parses `--rates` with `Number()`, so `"1.0 2.0"` became `NaN`, and a 5-minute "session-NaN" reported PASS and exited 0. It will reject any rate that is not a finite number on Narrate's grid (0.80–2.00, step 0.05; `src/constants.ts:27-29`), exiting 2 before launching.
+  - The launcher writes `latency-e2e.json` into `docs/studies/narrate-rebuild-1/phase5/` (`:245`), where it lies untracked after every run. It will write the file into its `--out` folder instead.
+- **Why:** these are Blurby.Brain's 2026-10-15 findings from NARRATE-REBUILD-1 P6b wave B. A reader of a trace could think MOSS-Nano ran, and a malformed argument produced a false PASS.
+- **Out of scope:**
+  - `recorded-output.json`, which is tracked D3 evidence and stays in `RECORDS_DIR` (`:246`).
+  - The trace schema version.
+  - Any other launcher flag.
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 from the worktree root.
+    1. **Positive control:** the new test file (Done-when 2) is committed alone first. `npx vitest run tests/narrate/narrate.rateArgs.test.js` exits 1 on the base, because the parser module does not exist.
+    2. **Rate parsing:**
+       - `scripts/narrate-rebuild/lib/rates.mjs` exports `parseRates(str)`. It returns the numbers for `"1.0,2.0"` and `"0.8,1.25"`, and throws for `"1.0 2.0"`, `"abc"`, `"0.75"`, `"2.05"`, `"1.03"` and `""`.
+       - `tests/narrate/narrate.rateArgs.test.js` checks every case. It also checks that the grid's ends equal `KOKORO_UI_RATE_MIN` and `KOKORO_UI_RATE_MAX` as declared in `src/constants.ts`, read as text.
+       - `npx vitest run tests/narrate/narrate.rateArgs.test.js` exits 0.
+    3. **The launcher stops on a bad rate:** `node scripts/narrate-rebuild/p5-latency-e2e.mjs --rates "1.0 2.0" --analyze-only --out $env:TEMP\p5-rates-check` exits 2 and prints the bad value. It launches nothing: no `electron` child appears.
+    4. **Labels:**
+       - `git grep -n -F "real-app-selected-nano" -- main.js` and `git grep -n -F "moss-nano-13" -- main.js` each exit 1. On the base each prints 2 lines.
+       - The new values are `evidenceSource: "real-app-narrate-kokoro"`, `provenance.source: "real-app-narrate-kokoro"`, `runId` `narrate-kokoro-${slug}` and `scenarioId` `narrate-kokoro-${slug}-live-evidence`.
+       - `git grep -n -I -F "selected-nano" -- tests scripts src main` exits 1, so no checker matched the old labels (dry run 2026-10-23: exit 1).
+    5. **`latency-e2e.json` goes to `--out`:** `git grep -n -F 'path.join(RECORDS_DIR, "latency-e2e.json")' -- scripts` exits 1, and `path.join(OUT, "latency-e2e.json")` appears once. The header comment at `:14` is updated.
+    6. `npm test` exits 0 (standing rule 47); typecheck and build exit 0 (standing rule 48).
+    7. **Fence:**
+       - `git diff --name-status refs/remotes/origin/main` lists exactly `M main.js`, `M scripts/narrate-rebuild/p5-latency-e2e.mjs`, `A scripts/narrate-rebuild/lib/rates.mjs` and `A tests/narrate/narrate.rateArgs.test.js`, plus the time log and memo.
+       - `main.js` changes only the four label lines.
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** TTS / Narration Engine. Execution surface B (evaluation harness).
+- **Source:** Blurby.Brain's findings recorded in the stub (2026-10-15); `main.js:180-193`; `p5-latency-e2e.mjs:32`, `:245`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `main.js:185`, `:187`, `:192` and `:193`: the labels only.
+  - `scripts/narrate-rebuild/p5-latency-e2e.mjs`:
+    - `:32` becomes `const RATES = parseRates(String(arg("--rates", "1.0,2.0")));`, inside a `try` that prints the error and exits 2 before anything launches.
+    - `:245` writes `path.join(OUT, "latency-e2e.json")`, with `fs.mkdirSync(OUT, { recursive: true })` first.
+    - `:14`, the header comment, is updated.
+  - `scripts/narrate-rebuild/lib/rates.mjs` (new):
+    - `parseRates(str)` splits on `,` and trims each part. Each value must be a finite number in 0.80–2.00 and a whole multiple of 0.05 from 0.80, within 1e-9.
+    - The grid constants are declared there, with a comment pointing to `src/constants.ts:27-29`; the test checks they agree.
+- **Tests:** Done-when 1–3.
+- **Branch:** `eb/narrate-trace-labels-1` from `refs/remotes/origin/main`; worktree `C:\Projects\Blurby\.worktrees\narrate-trace-labels-1`; run `npm ci`. Push with the explicit refspec.
+- **Failure handling:**
+  - If a test or checker turns out to match an old label, update it in scope (standing rule 50) and record it.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership:** surface B.
+  - **Forbidden:** `main.js` beyond the four lines; `src/**`; `main/narrate/**`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. No overlap with any held branch: none touches `main.js:180-193` or the launcher.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control: the rate tests fail on the base | calculable | positive control | mechanical | low | 10m (one test file, one red run) | — | — |
+| 2 | Traces say Kokoro; a bad rate stops the launcher; the latency record goes to --out | calculable | bug fix | bounded | low | 25m (four label lines, one parser module, two launcher edits) | — | — |
+| 3 | Suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 30m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 7m · sum 7m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-151:** the false PASS this item fixes is the "a checker's verdict is never a default 0" trap. A bad rate now exits 2, and Done-when 3 proves it.
+- **Standing rule 43:** Done-when 1 is red on the base.
+- **Standing rule 44:** Done-when 4's greps print 2 lines on the base and exit 1 after the change.
+- **Standing rules 41, 46, 47 and 48** apply as usual.
+- **Standing rule 50:** no checker matches the old labels (Done-when 4's third grep).
+- **LL-164:** no lesson-status line is appended.
+
+<a id="narrate-sentence-resume-1"></a>
+
+#### NARRATE-SENTENCE-RESUME-1 — Narrate starts at the beginning of the current sentence *(position 40 — Full Spec; authored 2026-10-23 on main @ `04af780f`; not a release gate)*
+
+- **What:** when Narrate starts or resumes from a word that is not a sentence's first word, playback starts at that sentence's first word. The cursor and the saved position move there with it.
+  - **The owner's decision (2026-10-14, verbatim):** "when restarting narrate, it should start backwards, at the beginning of the current sentence".
+  - **Blurby.Brain's reading, quoted in the stub:** this applies whenever Narrate starts playing from a position that is not a sentence start. That covers three cases: resume after a pause, play after reopening a book, and play after a page turn. Sentence boundaries come from the segmentation the engine already uses.
+  - **What does not rewind:** an explicit word target keeps its word, because the reader chose it. That means a word click (`engine.play(…, "click")`, `ModeRuntime.ts:426`) and a navigation (`jumpToWord`, `:360`; `:443`). This follows Brain's three cases.
+- **Why:** after a pause, or after a page turn that saves the page's first word (PAGE-POSITION-SAVE-1), Narrate today starts mid-sentence.
+- **Out of scope:**
+  - Rewinding across a paragraph or section break: a sentence start never lies before a chunk break.
+  - Click and navigate starts.
+  - Focus, Flow and Page.
+  - Any change to sentence detection (`isSentenceEnd`, `chunkPlan.ts:46-54`).
+- **Prerequisites:** none. It merges after NARRATE-TOKEN-CAP-1 (same `chunkPlan.ts`).
+- **Done when:** run every command in PowerShell 7 from the worktree root.
+    1. **Positive control (standing rule 43):** the new tests (Done-when 2) are committed alone first, and `npx vitest run tests/narrate/narrate.engine.test.ts tests/narrate/narrate.mode.test.ts -t "sentence start"` exits 1 on the base.
+    2. **Tests:**
+       - **chunkPlan:** `sentenceStartAt(words, i, breaks)` returns `i` at a sentence's first word, the sentence's first word mid-sentence, and never a word before a chunk break.
+       - **engine:**
+         - (s1) a pause mid-sentence resumes at the sentence's first word, scheduled from that unit's `sampleStart` when the word is in a buffered chunk;
+         - (s2) when the sentence began in a chunk that is not buffered, the resume plays from that word as a new epoch;
+         - (s3) a pause at a sentence's first word resumes at the exact paused sample, as today.
+       - **mode:**
+         - (s4) `start()` (Play, Space, reopening a book) from a mid-sentence saved word starts at the sentence's first word, and the first highlight and the saved position are that word;
+         - (s5) a word click and a `jumpToWord` start at their own word.
+       - Each assertion checks the word's text as well as its index (LL-161).
+       - `npx vitest run tests/narrate` exits 0.
+    3. **The exact-resume test is updated (standing rule 50):** `tests/narrate/narrate.engine.test.ts:253` ("pause stops at the exact sample and resume continues from it") pins the old behaviour.
+       - It is changed to pause at a sentence's first word, so it still proves that an exact resume at a sentence start drops and repeats nothing.
+       - Its mid-sentence case becomes (s1).
+       - The engine's doc comment at `narrateEngine.ts:217` changes to match.
+    4. **Live check (the agent, via CDP on a `--dir` build with a scratch profile):** open the sample book in Narrate.
+       - (a) Play, then pause mid-sentence, then resume: the first `narrate-commit` word after the resume is the sentence's first word, by text and by index.
+       - (b) Turn a page in Page mode, switch to Narrate and press Play: the first commit is the first word of the sentence containing the page's first word.
+       - (c) Quit and relaunch, then Play: the same.
+       - Record each with a screenshot.
+    5. **Owner check:** one row goes to the next batched owner smoke: "pause Narrate mid-sentence, resume: it starts at the beginning of that sentence".
+    6. `git grep -n -F "sentenceStartAt" -- src` prints exactly 3 lines: the declaration in `chunkPlan.ts` and one use each in `narrateEngine.ts` and `ModeRuntime.ts`. On the base it exits 1.
+    7. `npm test` exits 0 (standing rule 47); typecheck and build exit 0 (standing rule 48).
+    8. **Fence:** exactly these, plus the time log and memo:
+       - `M src/reader/modes/narrate/engine/chunkPlan.ts`
+       - `M src/reader/modes/narrate/engine/narrateEngine.ts`
+       - `M src/reader/modes/narrate/ModeRuntime.ts`
+       - `M tests/narrate/narrate.chunkPlan.test.ts`
+       - `M tests/narrate/narrate.engine.test.ts`
+       - `M tests/narrate/narrate.mode.test.ts`
+- **Effort:** M.
+- **Owners:** implementation agent; reviewer; owner in the next batched smoke.
+- **Lane:** TTS / Narration Engine. Execution surface A.
+- **Source:** the owner decision and Brain's reading (stub, 2026-10-14). `narrateEngine.ts:196-246`; `ModeRuntime.ts:256-302`, `:316`, `:360`, `:426`, `:443`, `:616-650`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `src/reader/modes/narrate/engine/chunkPlan.ts`, after `isSentenceEnd` (`:46-54`): add `export function sentenceStartAt(words, i, breaks)`. It walks `j` back from `i` while `j > 0 && !isSentenceEnd(words, j - 1) && !breaks.has(j - 1)`, then returns `j`.
+  - `src/reader/modes/narrate/ModeRuntime.ts`, `start()`:
+    - After `startWord` is resolved, and before `publishHighlight` (`:293`), add `startWord = sentenceStartAt(effectiveWords, startWord, this.chunkBreaks(effectiveWords));`.
+    - The highlight, `jumpDisplayToWord` and `engine.play` then all use the rewound word.
+    - `jumpToWord` (`:360`), the click path (`:426`) and `:443` are unchanged.
+  - `src/reader/modes/narrate/engine/narrateEngine.ts`, `resume()` (`:218-246`):
+    - Compute the paused word `w` as `:230` does today, and `s = sentenceStartAt(this.words, w, this.breaks)`.
+    - If `s < w` and `s` is in the paused chunk, schedule that chunk from the `sampleStart` of the unit holding `s`; later chunks follow as today.
+    - If `s` lies before the paused chunk, call `this.play(s, cause)`.
+    - With no paused position (the gap case), apply the same rewind to `this.nextWord`.
+    - Update the doc comment at `:217`.
+- **Tests:** Done-when 1–3.
+- **Constants:** none.
+- **Branch:** `eb/narrate-sentence-resume-1` from `refs/remotes/origin/main`; worktree `C:\Projects\Blurby\.worktrees\narrate-sentence-resume-1`; run `npm ci`. Push with the explicit refspec.
+- **Failure handling:**
+  - If the resume cannot find `s`'s unit, because a fused unit spans the sentence boundary, start at the fused unit's first word, and record the case. Never start inside a unit.
+  - If a test outside the fence pins exact resume, update it in scope (standing rule 50) and list it.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership:** surface A.
+  - **Forbidden:** `src/reader/modes/narrate/FoliateView.tsx` (NARRATE-KEY-REPEAT-1 holds `:934`), `main/narrate/**` and `src/constants.ts`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. It comes after NARRATE-TOKEN-CAP-1 (`chunkPlan.ts`) and re-greps. It is independent of NARRATE-KEY-REPEAT-1, which edits a different file.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control: the new sentence-start tests fail on the base | calculable | positive control | bounded | low | 20m (five tests, one red run) | — | — |
+| 2 | Play and resume start at the sentence's first word; click and navigate keep their word; the exact-resume test is updated | calculable | feature | bounded | medium | 60m (one helper, two call sites, tests) | — | — |
+| 3 | Live check via CDP in the packaged app: pause/resume, after a page turn, after a relaunch | calculable | live check | bounded | medium | 40m (a --dir build, three CDP cases with screenshots) | — | — |
+| 4 | Suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 30m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 24m · sum 24m; 4 of 4 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-161:** every assertion and the live check identify the start word by its text as well as its index.
+- **LL-160:** the live check runs the packaged app, so the words are numbered by the app's ICU.
+- **Standing rule 50:** the exact-resume test and the engine's doc comment pin the old behaviour. The owner's decision replaces it, so both are updated in scope (Done-when 3).
+- **Standing rule 45 (LL-141):** the live check keeps an owner-observed route, through the next batched smoke (Done-when 5).
+- **Standing rules 43, 44, 41, 46, 47 and 48** apply as usual.
+- **LL-164:** no lesson-status line is appended.
+
+<a id="large-folder-sync-3"></a>
+
+#### LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2 *(position 44 — Full Spec; authored 2026-10-23 on main @ `04af780f`; not a release gate)*
+
+- **What:** LARGE-FOLDER-SYNC-2's quality-review follow-ups, approved by Blurby.Brain (2026-10-15):
+  - **(W1)** The folder watcher skips system folders, as the scan does. Today `onEvent` (`main/folder-watcher.js:148-151`) skips dot-folders and `Saved Articles` only. With a drive root as the source, files under `$Recycle.Bin` or `System Volume Information` are imported as ghost books.
+  - **(W2)** `rescan-folder`'s Saved Articles check (`main/ipc/library.js:495`) compares keys. Today it uses a raw, case-sensitive `path.resolve(doc.filepath).startsWith(savedArticlesPath)`; it will use the document's `keyOf` key against `pathKey(savedArticlesPath) + path.sep`, as the rest of the handler does (`:372-394`).
+  - **(W3)** Hung mounts are bounded. `switch-folder`'s `fsPromises.access(folder)` (`main/ipc/state.js:93`) and the folder sync's per-file `statFile` (`main.js:335`) are raced against `FOLDER_LIST_TIMEOUT_MS` (30 s; `main/constants.js:175`). After a root listing times out, `rootHasContent` (`main/folder-watcher.js:105-109`) returns `null` at once for `FOLDER_ROOT_BREAKER_MS` (new constant, 60 s) instead of starting another listing, so a hung mount cannot pin the libuv pool.
+  - **Test gaps:** timer-leak checks (`vi.getTimerCount()`); the stat timeout; an abandoned run hung in extraction; a normal prune saving once; a watcher-first test that the new watcher's events apply during the sync.
+- **Why:** a ghost-book import (W1), a missed Saved Articles document on a case-only path difference (W2), and an unbounded hang on an unreachable mount (W3) are all reachable with a drive-root or network source folder.
+- **Out of scope:**
+  - LARGE-FOLDER-SYNC-1's design half (what Blurby does with a very large folder: an owner decision).
+  - Any change to the scan's cost.
+  - The banner (FOLDER-NOTICE-1/2).
+  - The stub's "stale F3 comment in `syncAll`": re-grepped on `04af780f`, no F3 comment is left in `main/folder-sync.js`, so there is nothing to change.
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 from the worktree root.
+    1. **Positive control (standing rule 43):** the new tests (Done-when 2) are committed alone first. `npx vitest run tests/folderWatcher.test.js tests/folderSync.test.js -t "LARGE-FOLDER-SYNC-3"` exits 1 on the base, with W1, W2 and W3 each failing for its named reason.
+    2. **Tests, each with "LARGE-FOLDER-SYNC-3" in its name:**
+       - **(W1):** a watcher event under `$Recycle.Bin\x.epub` adds nothing, and one under `Books\x.epub` still adds.
+       - **(W2):** a Saved Articles document whose path differs only in case is treated as Saved Articles by `rescan-folder`.
+       - **(W3a):** `switch-folder` on a folder whose `access` never settles returns `{ error: … }` within `FOLDER_LIST_TIMEOUT_MS` (fake timers).
+       - **(W3b):** a `statFile` that never settles counts as unreadable within the limit, so nothing is removed.
+       - **(W3c):** after a root-listing timeout, a second `rootHasContent` within `FOLDER_ROOT_BREAKER_MS` returns `null` without calling `readdir`; after the window it lists again.
+       - **The test gaps above.**
+       - `npx vitest run tests/folderWatcher.test.js tests/folderSync.test.js` exits 0.
+    3. `git grep -n -F "FOLDER_ROOT_BREAKER_MS" -- main` prints the declaration and export in `main/constants.js` and the use in `main/folder-watcher.js`. On the base it exits 1. `git grep -n -F "parts.some(isSystemFolder)" -- main/folder-watcher.js` prints one line; on the base it exits 1.
+    4. **Scale (the stub's stop rule):** `node scripts/perf/folder-sync-scale.mjs` is run before and after the change. Stop if the add worst case crosses 2x of LARGE-FOLDER-SYNC-2's C1, which was 1.83–1.92x. Record both runs in the memo.
+    5. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule for `tests/folderWatcher.test.js`'s load guard, re-run once). Typecheck and build exit 0 (standing rule 48).
+    6. **Fence:** exactly these, plus the time log and memo:
+       - `M main/folder-watcher.js`
+       - `M main/ipc/library.js`
+       - `M main/ipc/state.js`
+       - `M main.js`
+       - `M main/constants.js`
+       - `M tests/folderWatcher.test.js`
+       - `M tests/folderSync.test.js`
+- **Effort:** M.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** Library & Content. Execution surface D.
+- **Source:** the LARGE-FOLDER-SYNC-2 quality review (stub, approved by Blurby.Brain 2026-10-15); the sites above, verified on `04af780f`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `main/folder-watcher.js`:
+    - `:151` becomes `if (parts.some((p) => p.startsWith(".")) || parts.some(isSystemFolder) || parts[0] === "Saved Articles") return;`.
+    - `rootHasContent` (`:105-109`): on a `timeLimit` rejection, set a module-level `rootBreakerUntil = Date.now() + FOLDER_ROOT_BREAKER_MS`, and return `null` at once while `Date.now() < rootBreakerUntil`.
+    - Export `timeLimit` for reuse.
+  - `main/ipc/library.js:495`: `savedArticlesKey && keyOf.get(doc) && keyOf.get(doc).startsWith(savedArticlesKey)`, with `const savedArticlesKey = savedArticlesPath ? pathKey(savedArticlesPath) + path.sep : null;` next to `:455`.
+  - `main/ipc/state.js:93`: race `fsPromises.access(folder)` against a `FOLDER_LIST_TIMEOUT_MS` timer, with the same error text ("Folder no longer exists."), and clear the timer.
+  - `main.js:335`: `statFile: (p) => timeLimit(fsPromises.stat(p))`.
+  - `main/constants.js`: add `FOLDER_ROOT_BREAKER_MS = 60000`, with a comment, next to `FOLDER_LIST_TIMEOUT_MS` (`:175`), and export it (`:287`).
+- **Tests:** Done-when 1–2.
+- **Constants:** `FOLDER_ROOT_BREAKER_MS = 60000` (new); `FOLDER_LIST_TIMEOUT_MS = 30000` (unchanged).
+- **Branch:** `eb/large-folder-sync-3` from `refs/remotes/origin/main`; worktree `C:\Projects\Blurby\.worktrees\large-folder-sync-3`; run `npm ci`. Push with the explicit refspec.
+- **Failure handling:**
+  - If W3c's breaker makes a FOLDER-NOTICE-1 test fail (the banner's Retry is "one root check per call"), keep Retry's own check outside the breaker, and record the choice.
+  - If Done-when 4 crosses 2x, stop with both runs.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership:** surface D.
+  - **Forbidden:** `main/folder-sync.js` (no change needed), the renderer, `preload.js`, `package.json`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts.
+    - It overlaps LIBRARY-WRITE-RACE-1 in `main/ipc/library.js` (different handlers: this one changes `rescan-folder` `:495`; that one changes `delete-doc` and the queue handlers). Whichever merges second re-greps.
+    - It overlaps no held branch: WS-TOKEN-REGEN-1 touches `main/ipc/misc.js`, not `state.js`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control: the W1–W3 tests fail on the base for their named reasons | calculable | positive control | bounded | low | 20m (seven tests, one red run) | — | — |
+| 2 | System folders skipped by the watcher; Saved Articles matched by key; hung mounts bounded with a root breaker | calculable | bug fix | bounded | medium | 50m (five files, constants, test gaps) | — | — |
+| 3 | Scale run before and after; suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 35m (two scale runs, suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-152:** the scale check compares before and after on the same machine, like for like.
+- **Standing rule 50 (LL-156):** Stage 8's closed list admits `tests/folderWatcher.test.js`'s load guard. This item edits that file but not that test, so the admission still covers only the load guard. A new failure in a new test is a product failure.
+- **Standing rule 36:** every site was re-grepped on `04af780f`; the stub's `main.js ~:326` and `~:453-455, :494` moved to the lines above.
+- **Standing rules 43, 44, 41, 46, 47 and 48** apply as usual.
+- **LL-164:** no lesson-status line is appended.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
@@ -1907,16 +2246,12 @@ Each stub needs investigation or an owner decision before it can be specified (R
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 39 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine.
-- <a id="narrate-sentence-resume-1"></a>**NARRATE-SENTENCE-RESUME-1 — Narrate restarts at the beginning of the current sentence** *(position 40 — stub; blocked until NARRATE-REBUILD-1 closes)*. Owner decision (2026-10-14, verbatim): "when restarting narrate, it should start backwards, at the beginning of the current sentence". Blurby.Brain's reading: whenever Narrate starts playing from a position that is not a sentence start (resume after pause, play after reopening a book, play after a page turn), playback rewinds to the first word of the sentence containing that position, and the cursor and the saved position move there too. Sentence boundaries come from the segmentation the Narrate engine already uses for synthesis. Pairs with PAGE-POSITION-SAVE-1: a page turn saves the page's first word, which is usually mid-sentence, and Narrate then starts from that sentence's first word. Done-when needs a live check: pause mid-sentence, resume, and confirm the audio and the cursor start at the sentence's first word; then the same after a page turn and after a relaunch. The epic owns the Narrate files until it closes, so this is not folded into P6. Technical questions go to Blurby.Brain. Lane: TTS / Narration Engine.
-- <a id="narrate-token-cap-1"></a>**NARRATE-TOKEN-CAP-1 — Narrate passages that exceed the 400-id token cap** *(position 41 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 reconciliation sweep (Blurby.Brain ruling): a few chunks in two of the owner's books exceed Kokoro's 400-id token cap (class E: 3 and 5 chunks). Narration pauses there with F4's notice, so it fails safe rather than wrong. The fix changes the chunk planner's token estimate, which changes chunk timing, so it is out of NARRATE-REBUILD-1 P6b. Re-run the reconcile sweep's owner-library pass after it lands. Lane: TTS / Narration Engine.
+- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 39 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine. **Roadmap backfill 2026-10-23, evidence: NARRATE-REBUILD-1 already reads years in paired form.** The rebuilt Narrate runs kokoro-js 1.2.1's own normalization (reproduced verbatim in `main/narrate/normalize.js:10-17`, `:40`). Under the app's Electron 42, espeak phonemizes "In 1974 he left." as `ɪn nˈaɪntiːn sˈɛvənti fˈoːɹ hiː lˈɛft` ("nineteen seventy-four"), "1905" as "nineteen oh five" and "2019" as "twenty nineteen". `tests/narrate/narrate.normalize.test.js:31` already pins `1634; 1701; 1906.` → `16 34; 17 oh 1; 19 oh 6.`. BUG-191 is fixed by NARRATE-REBUILD-1 for 1100–2099, which is the bug's fix path. Recommendation for the next roadmap review: retire this item as superseded by NARRATE-REBUILD-1 and mark BUG-191 resolved. **Owner questions left (design, not specified):** (1) years before 1100 ("1066") are still read as cardinals ("one thousand sixty-six"), because kokoro converts only 1100–2099; should they read "ten sixty-six"? (2) kokoro treats every standalone four-digit number in that range as a year, so "1974 coins" is read "nineteen seventy-four coins". Should counts be told apart from years, and by what rule? Either change needs pre-normalization before kokoro, which the producer's verbatim word mapping must then reproduce.
 - <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 43 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
-- <a id="large-folder-sync-3"></a>**LARGE-FOLDER-SYNC-3 — Follow-ups from LARGE-FOLDER-SYNC-2** *(position 44 — stub; not a release gate)*. From LARGE-FOLDER-SYNC-2's quality review, approved by Blurby.Brain (2026-10-15): (W1) the watcher's `onEvent` (`main/folder-watcher.js` ~:151) skips system folders too (`|| parts.some(isSystemFolder)`), so a drive-root source does not import `$Recycle.Bin` files as ghost books; watcher test; (W2) `rescan-folder`'s Saved Articles check (`main/ipc/library.js` ~:453-455, :494) uses `keyOf` with `pathKey(path.join(sourceFolder, "Saved Articles")) + path.sep`, not a raw case-sensitive prefix; rescan test; (W3) `switch-folder`'s `fsPromises.access(folder)` and per-file `statFile` (`main.js` ~:326) are bounded by `FOLDER_LIST_TIMEOUT_MS`, and a short breaker (its window a constant in `main/constants.js`) skips `rootHasContent` after a root timeout so a hung mount cannot pin the libuv pool; test gaps: timer-leak checks (`vi.getTimerCount()`), the stat timeout, an abandoned run hung in extraction, a normal prune saving once, a watcher-first test that the new watcher's events apply during the sync; the stale F3 comment in `syncAll`. Re-run `scripts/perf/folder-sync-scale.mjs` after the changes and stop if the add worst-case crosses 2x of LARGE-FOLDER-SYNC-2's C1 (it was 1.83–1.92x). Lane: Library & Content.
 - <a id="page-save-restamp-3"></a>**PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard** *(position 45 — stub; not a release gate)*. From PAGE-SAVE-RESTAMP-GUARD-1's quality review (Blurby.Brain ruling 2026-10-15): (2) the double-wrap race: if bookWords arrives during the first wrap of a section of more than 50 groups, the re-stamp can remove the document from the guard set mid-wrap, and the load's wrap keeps stamping provisional numbers, so a turn onto those spans saves unheld; (4) the failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's one-liner, if more is needed. Also (PAGE-SAVE-RESTAMP-2 live check, 2026-10-15): the held-turn cancel fires on foliate's `link` event before the jump lands, so a link within about 20 ms of a turn can cancel the held turn while the view stays on the turned page (the turn goes unsaved; the stored position stays older but correct). Move the cancel to after the jump lands. From PAGE-SAVE-RESTAMP-2's quality review (2026-10-15): W2, after a failed-words turn the relocate save writes a fraction-estimated position (as before); W4, a held turn from another section can outlive a click on a stamped section; N2, `bookWordsFailedRef` is never reset in a view; N4, no test for the open-without-cfi cancel; and a click whose spans are unstamped when failure is already known is dropped without a diagnostic. From PAGE-SAVE-RESTAMP-2's fix-round review (2026-10-15): no test pins the negative side of fr1's guard (a held click followed by a turn or a second click, then the re-stamp, must leave the newer state alone; deleting `=== provisional` keeps every test green); `holdWordClick`'s resolve check in the view can never reject a click; `heldClickAnchor` is not reset when a turn replaces a held click. Lane: Reader Engine.
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
 - <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(position 47 — stub; not a release gate)*. From FOLDER-NOTICE-1's quality review (2026-10-15): (3) within one sync the banner follows whichever of the root check and the scan answers last, so a null scan after a true check, or the reverse, flaps it (and a root holding only directories clears then re-sets `root-empty-suspect`); make the banner follow the scan's verdict; (6) Retry has no in-flight guard in main, so a banner remount mid-attempt allows a second root check; (7) a same-folder re-select through `switch-folder` resets the toast flag, so a second watcher error in the same episode toasts again; (8) the banner's Retry button loses focus when disabled and on success, and a failed Retry is not announced (`role="alert"` fires only on mount): use `aria-busy`/`aria-disabled` and a short status line. From the fix-round review of FOLDER-NOTICE-1 (2026-10-15): (9) `syncAll`'s catch checks only the folder string, so an abandoned same-folder run (A hung, switch to B and back to A) can report `sync-failed` on a healthy A after the new run's clear; add the run-generation check the `.finally` already uses; (10) `retry()`'s folder guard compares raw strings where `state.js` uses `pathKey`; (11) test gaps: a toast is sent once the window finishes loading, and a failed (null) watcher restart does not toast twice. Lane: UX polish.
 - <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transferelease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
-- <a id="narrate-trace-labels-1"></a>**NARRATE-TRACE-LABELS-1 — Narrate harness hygiene: legacy trace labels and rate validation** *(position 56 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b wave B (Blurby.Brain, 2026-10-15): `scripts/narrate-rebuild/p5-latency-e2e.mjs`'s traces still carry pre-NARRATE-REMOVE-1 labels (`scenarioId` "moss-nano-13c-session-1-00-live-evidence", `evidenceSource` "real-app-selected-nano"). Cosmetic, but a reader could think MOSS-Nano ran. Rename them to Kokoro/Narrate labels, and update any checker that matches them. Also (Blurby.Brain, same run): `p5-latency-e2e.mjs:32` parses each `--rates` value with `Number()`, so a malformed `"1.0 2.0"` became `NaN` and the launcher ran a 5-minute "session-NaN", reported PASS and exited 0. It must reject any rate that is not a finite number in its allowed set, exiting non-zero before launching, and never report PASS for a session whose rate is unknown; with a test. Also (Blurby.Brain, 2026-10-15): `docs/studies/narrate-rebuild-1/phase5/latency-e2e.json` is left untracked on main because the launcher writes it fresh; have the launcher write into its `--out` folder (or ignore the file). Lane: TTS / Narration Engine.
 - <a id="jump-landing-save-1"></a>**JUMP-LANDING-SAVE-1 — Other jumps in Page mode save the page they land on** *(position 63 — stub; not a release gate)*. From TOC-JUMP-SAVE-1's run (2026-10-22, note 4). The same defect class remains for internal-link jumps, footnote jumps, and next/previous chapter: each leaves the saved position on the page it jumped from. Also note 3: a jump foliate drops during a turn's lock, an unresolvable href, and an anchor with no pages still keep the early commit. Fix direction: route each through the same in-flight-turn counting TOC-JUMP-SAVE-1 gives the API `goTo`. Lane: Reader Engine.
 - <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1 — Build full NSIS installers per architecture by default** *(position 65 — stub; S; not a release gate)*. The owner's decision for RELEASE-RUNBOOK-1 (2026-10-22, option B) is separate full x64 and ARM64 installers. This release does it with CLI overrides. Move `package.json`'s `build.win.target` from `nsis-web` to `nsis` (artifact name and `latest.yml` per architecture), update the runbook to drop the overrides, and check that electron-updater picks the right architecture's installer for both. Lane: Platform & Maintenance.
 - <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups** *(position 64 — stub; M; after LIBRARY-WRITE-RACE-1; not a release gate)*. Split from LIBRARY-WRITE-RACE-1 (2026-10-22). Four parts. (1) `save-library` id de-duplication, a test for malformed elements, and type checks. (2) The Edit form's fire-and-forget save: how a failed save looks is an **open owner decision** (recommended: the form stays open with an inline "Couldn't save — try again" and keeps the typed values). (3) Renderer edits and sync freshness, **ruled by Blurby.Brain 2026-10-22 (tier 1): main stamps, but never the doc-level `modified`.** For folder docs, `modified` holds the source file's mtime (`syncLibraryWithFolder` writes `modified: file.modified`, and rescans compare against it). The spec first traces what cloud sync's last-writer-wins compares: `sync-state.json` carries a `fieldTimestamps` map. If per-field stamps exist, main stamps the edited field there. If sync only compares `modified`, add a separate main-stamped `editedAt` and have the merge use it for renderer-owned fields. Stamp only when a value actually changes (`markDocsSeen` and other no-op saves stamp nothing). Tests: a title edit beats a staler cloud copy; a folder rescan neither clobbers the edit stamp nor treats an edit as a file change; a no-op save stamps nothing. (4) Cloud sync's `setLibrary(gcd)` stays in the deferred Cloud lane. Lane: Library & Content.
