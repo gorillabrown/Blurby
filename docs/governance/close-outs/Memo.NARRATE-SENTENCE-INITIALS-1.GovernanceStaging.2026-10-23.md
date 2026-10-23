@@ -1,4 +1,4 @@
-# Dispatch Close-Out Governance Staging — NARRATE-SENTENCE-INITIALS-1 (in progress)
+# Dispatch Close-Out Governance Staging — NARRATE-SENTENCE-INITIALS-1 (gates green; held behind the freeze)
 
 **Run setup:**
 - **Branch:** `eb/narrate-sentence-initials-1` from `refs/remotes/origin/eb/narrate-sentence-resume-1` @ `35716c5f`.
@@ -31,10 +31,10 @@ An uppercase single letter other than `I.` (`NAME_INITIAL`, `/^[A-HJ-Z]\.$/`) do
 |---|---|---|
 | 1 | Done | **Red tests committed first** (`tests/narrate/narrate.chunkPlan.test.ts`). On the base `35716c5f`, "M. Annius Verus" (word 4 gives 3, expected 0) and "J. R. R. Tolkien wrote." fail. The `I.` and `x.` controls pass on the base and on the fix. The era test ("born 250 B. C. Cyprus", word 5 gives 4) was red on the first cut `68916c45` and is green now. |
 | 2 | Done | Narrate suite: 20 files, 140 tests, all pass. |
-| 3a | Done, on `68916c45`; **re-run owed on the final rule** | The owner sweep ran under the app's Electron (`app-node.ps1 … reconcile-sweep.mjs --owner <the 8-book corpus NARRATE-TOKEN-CAP-1 used>`). **Fix:** `OWNER: 3 fail-closed chunks of 11320 in 8 books; 0 class E, 3 ruled residual, 0 other`, exit 0. **Base:** `… of 11258 …; 0 class E, 3 ruled residual, 0 other`, exit 0. The re-run on the final rule waits for f0's report. |
+| 3a | Done, final rule (`95ffc0cc`) | The owner sweep ran under the app's Electron (`app-node.ps1 … reconcile-sweep.mjs --owner <the 8-book corpus NARRATE-TOKEN-CAP-1 used>`), after blurby-f0's UI-SWEEP run finished. **Fix:** `OWNER: 3 fail-closed chunks of 11318 in 8 books; 0 class E, 3 ruled residual, 0 other`, exit 0 (the chunk count matches the bound diff). **Base:** `… of 11258 …; 0 class E, 3 ruled residual, 0 other`, exit 0. No worse than the base. (The first cut `68916c45` gave the same counts over 11,320 chunks.) |
 | 3b | Done, final rule | **Chunk-bound diff** under the app's Electron. Each book is planned as the engine plans one epoch from word 0, with the base and the fixed `planChunks`. Totals: 11,258 chunks on the base, 11,318 on the fix; 864 bound positions differ. **Every diverged region (158) contains a word whose sentence-end verdict the fix flipped; 0 regions without one.** Table below. |
-| 4 | Owed | `npm test`, `npm run typecheck`, `npm run build`, after f0's report. |
-| 5 | Fence | `chunkPlan.ts`, the chunk-plan test, this memo, and the time log (to follow). |
+| 4 | Done, on `95ffc0cc` | `npm test`: 177 files, 2,447 passed / 1 skipped / 0 failed. `npm run typecheck` exit 0. `npm run build` exit 0. |
+| 5 | Fence | `chunkPlan.ts`, the chunk-plan test, this memo, and the time log `Timing.NARRATE-SENTENCE-INITIALS-1.jsonl`. `tests/perf-baseline-results.json` stays unstaged. |
 
 ### Changed bounds by book
 
