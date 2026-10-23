@@ -102,6 +102,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | JSONSTORE-TIMEOUT-1 | 2026-10-22 | jsonStore test (a) gets a 30 s timeout; (d) and (e) count only their own renames; the file leaves Stage 8's closed list (merge `8e834ea3`) | `CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md` |
 | CI-AUDIT-ALLOWLIST-1 | 2026-10-22 | CI's audit step fails only on a new or out-of-date high/critical advisory (9 reviewed entries allowlisted); follow-redirects 1.16.1; main CI green again (merge `47ae6e1f`) | `CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md` |
 | READER-VISUAL-DIAG-1 | 2026-10-23 | BUG-188 band sized from a 24 px fallback and untied to the cursor; BUG-187 flood is two leaked foliate View observers (causal by intervention); two fix specs drafted (merge `22d4f7b3`) | `CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md` |
+| UI-SWEEP-1 | 2026-10-23 | 369 controls on 57 surfaces pressed on the release-fix build `97527896`; the only errors are BUG-187's flood (the positive control); 104 NO-EFFECT candidates and W1–W3 went to triage (merge `420efa85`) | `CloseOut.UI-SWEEP-1.2026-10-23.md` |
 | TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 → 1,000 ms; BUG-186 resolved (merge `76956729`) | `CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md` |
 | CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` |
@@ -2522,91 +2523,9 @@ The owner answered both questions this specification left out of scope: "1060s y
 - The out-of-scope list drops both questions.
 <a id="ui-sweep-1"></a>
 
-#### UI-SWEEP-1 — Press every control on every screen and report what breaks *(position 68 — Full Spec; authored 2026-10-23 on main @ `4913d6c8` at the owner's request; not a release gate)*
+#### UI-SWEEP-1 — Press every control on every screen and report what breaks ✅ COMPLETED 2026-10-23 *(TR-081; merge `420efa85`; spec archived)*
 
-- **What:** Write a CDP-driven sweep that presses every clickable control on every screen of a packaged Blurby build, then records what each press did and any errors it produced. Run it once on a `--dir` build of `47ae6e1f`, the frozen tree that ships. The deliverables are the script, `scripts/ui-sweep/sweep.mjs` (dev tooling; `scripts/` is not in `package.json` `build.files`, so it never ships), and the report, `docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`. This item does not fix anything: every broken control becomes a bug candidate in the report, and the planner files the bugs at close-out.
-- **Why:** The owner asked on 2026-10-22 whether every button is tested, and nothing does that. The suite tests code paths, executors' live checks cover the flows their items changed, and the Stage 8 smoke covers deferred owner checks. A control nobody has pressed since an earlier release can be broken unseen.
-- **Surfaces to reach** (from `src/components/` and `src/components/settings/` on the base):
-  - **Library:** list and grid views, the toolbar, `MenuFlap`, the folder button with `RecentFolders`, `DocCard` and `DocGridCard` menus, `AddEditPanel`, `MetadataWizard`, `ImportConfirmDialog`, `DeleteConfirmation`, `BugReportModal`, `CommandPalette`, `StatsPanel`, `ReadingQueue`, `GoalProgressWidget`, `OnboardingOverlay`, `FolderNoticeBanner`, `PairingBanner`.
-  - **Settings:** every pane: `ThemeSettings`, `TextSizeSettings`, `LayoutSettings`, `LibraryLayoutSettings`, `SpeedReadingSettings`, `ReadingGoalsSettings`, `HotkeyMapSettings`, `ConnectorsSettings`, `CloudSyncSettings`, `HelpSettings`.
-  - **Reader, in Page, Focus, Flow and Narrate:** `ReaderBottomBar`, `QuickSettingsPopover`, `HighlightsOverlay`, `HighlightMenu`, `NotePopover`, `SnoozePickerOverlay`, `TagPickerOverlay`, `ShortcutsOverlay`, `ReaderSpeedDialog`, `GoToIndicator`, `DefinitionPopup`, `ReturnToReadingPill`, `BacktrackPrompt`.
-  - **Keyboard:** every shortcut `HotkeyMapSettings` lists, pressed once in each mode it applies to.
-- **Out of scope:**
-  - Fixing anything.
-  - Visual design judgements.
-  - Native OS dialogs (Browse for folder, file import): CDP cannot drive them, so they are recorded as SKIPPED-DIALOG.
-  - Anything that leaves the sandbox (below).
-  - Listening to Narrate's audio.
-- **Prerequisites:** none in code. **Run timing:** the sweep's live run starts only after the Stage 8 smoke agent on the owner's screen has finished, because a second Blurby window would steal focus from it. The planner sends the go. Writing and dry-running the script can start now.
-- **Sandbox (hard rules):**
-  - Run only on a scratch profile (`BLURBY_USER_DATA_DIR`, `main.js:29`). Seed it with copies: the bundled sample, one EPUB, one PDF and one `.txt` from the repo's test fixtures. No real library and no Drive folder.
-  - The owner's live profile is never opened. Hash its `library.json` and `settings.json` before and after the run; they must match.
-  - **Denylist, never pressed** (recorded SKIPPED-SAFETY with the control's label):
-    - anything that opens an external URL or mail client;
-    - OAuth, sign-in or connect for Google, Microsoft or cloud;
-    - Check for updates and Install update;
-    - Send or submit on the bug report. It may be opened, and its local save may be pressed only if it writes inside the scratch profile.
-    - anything whose label names publish, upload or share.
-  - Delete actions run only on the scratch copies. Run the build from a copy of `release\win-*-unpacked`, because BUG-194 means deleting the sample deletes the bundled file from the build.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-    1. **The script exists, with no new dependency.** `scripts/ui-sweep/sweep.mjs` uses Node 24 built-ins only: `fetch`, the global `WebSocket` for CDP and `child_process`. `node --check scripts/ui-sweep/sweep.mjs` exits 0. `git diff --name-only refs/remotes/origin/main -- package.json package-lock.json` prints nothing.
-    2. **Positive control:** the sweep must detect a known defect. On `47ae6e1f`, BUG-187's observer flood is still present (FOLIATE-OBSERVER-LEAK-1 has not merged). The run must record at least one ERROR row whose evidence is `error.log` growth with the ResizeObserver message while Flow is entered or played. If it records none, the detector is blind: stop and report.
-    3. **Method per control:**
-       - Before: a DOM digest of the surface (element count and text hash) and a screenshot.
-       - Press: `Input.dispatchMouseEvent` at the element's box centre, or a key event for shortcuts.
-       - Wait up to 1 s.
-       - After: the DOM digest, a screenshot, new console errors (`Runtime.exceptionThrown`; `Runtime.consoleAPICalled` with type error), and `error.log` bytes added since the press.
-       - Result:
-         - **OK** — the DOM changed or navigation happened, and no error;
-         - **ERROR** — an exception, a console error or `error.log` growth;
-         - **NO-EFFECT** — nothing changed and no error;
-         - **SKIPPED-SAFETY** — on the denylist;
-         - **SKIPPED-DIALOG** — a native dialog opened, which is then dismissed;
-         - **UNREACHABLE** — the surface could not be opened, with the reason.
-       - Then reset to the surface: Escape, Back, or reload the surface's route.
-    4. **Coverage:** the report has one section per surface listed above. Each section shows the enumerated control count and a row per control (surface | label or accessible name | selector | result | evidence), with zero rows marked UNKNOWN. Any surface not reached is listed as UNREACHABLE, with the reason.
-    5. **Summary:** the report opens with the totals per result. Then it lists every ERROR, and every NO-EFFECT control that should plainly do something, as a bug candidate: control, surface, steps, evidence and suspected file. Screenshots go to `C:\Projects\Blurby-artifacts\ui-sweep-1\` and are referenced by file name; they are not committed.
-    6. **The live profile is untouched:** the before and after sha256 of `%APPDATA%\blurby\blurby-data\library.json` and `settings.json` are equal, and recorded in the report.
-    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `A scripts/ui-sweep/sweep.mjs`, the report, and the time log and staging memo. Optionally it may also list `A scripts/ui-sweep/README.md`, a one-paragraph usage note.
-    8. **No product code and no TypeScript:** the full suite, typecheck and build are not gates here (standing rule 48 applies only to items that edit code). Building the `--dir` package of `47ae6e1f` is the run's own step.
-- **Effort:** M.
-- **Owners:** implementation agent; the planner files bugs from the report at close-out.
-- **Lane:** Platform & Maintenance. Execution surfaces B (evaluation harness) and D for the main-process log.
-- **Source:** the owner's question of 2026-10-22; CDP precedent in PAGE-POSITION-SAVE-2's and TOC-JUMP-SAVE-1's live checks (a `--dir` build, a scratch profile, CDP on a debug port); `main.js:29` (`BLURBY_USER_DATA_DIR`).
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Launch:** `release\win-<arch>-unpacked\Blurby.exe --remote-debugging-port=<port>` on a copy of the build, with `BLURBY_USER_DATA_DIR` set to the scratch profile. Read the targets from `http://127.0.0.1:<port>/json/list`, and attach to the renderer page.
-- **Enumeration:** query visible elements matching `button, [role=button], [role=menuitem], [role=tab], a[href], input, select, textarea, [tabindex="0"]`. Dedupe by surface plus accessible name plus role. Order them by DOM position.
-- **Reaching surfaces:** drive each surface by its own controls, in a fixed walk order: library → settings panes → open each fixture book → each mode → each overlay. Log the walk in the report.
-- **Merge:** the report and the script may merge during the Stage 8 freeze (the planner's tier-1 call), because neither ships: `scripts/` is not in `build.files`.
-- **Branch:** `eb/ui-sweep-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\ui-sweep-1`. Build the `--dir` package from a separate detached worktree at `47ae6e1f`.
-- **Failure handling:**
-  - If CDP will not attach to the packaged build, record the error and try the dev build. Label the run as dev in the report, and say so.
-  - If a press hangs the app, record ERROR (hang), restart the app on the same profile, and continue from the next control.
-  - If the positive control fails, stop (Done-when 2).
-  - Rollback: `git revert -m 1 <merge>`.
-- **Lane ownership (parallel run):** surfaces B and D, read-only on product code.
-  - **Forbidden:** any edit to `src/`, `main/`, `preload.js`, `package.json` or the lockfile; the owner's live profile; the owner's screen while the smoke agent runs.
-  - **Shared-core touches:** none.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Sweep script that enumerates and presses every control and classifies each press, dry-run on one surface | calculable | feature | bounded | medium | 60m (CDP driver, enumerator, classifier, reset) | — | — |
-| 2 | Full run on a `--dir` build of 47ae6e1f, positive control red on BUG-187, every surface covered | frontier | diagnosis | bounded | medium | — | ≤2h — stop and report the coverage reached | — |
-| 3 | Report written with totals and bug candidates; live profile hashes equal; merged and pushed | calculable | docs and merge | bounded | medium | 30m (one report, one --no-ff merge) | — | — |
-
-**Total:** chain 12m · sum 12m + 1 timeboxed ≤2h; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** the positive control is BUG-187's known flood. A sweep that cannot see it cannot be trusted with a "no error" row.
-- **LL-142:** each result is classified from a measurement (DOM digest, exceptions, `error.log` bytes), never from a label.
-- **LL-146:** the sweep lives under `scripts/`, never under a collectable test name.
-- **Standing rule 46 (LL-153):** the run writes nothing to the register. The planner files the bugs.
-- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
-- **LL-164:** no lesson-status line is appended.
+- Closed out: [`CloseOut.UI-SWEEP-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md). Report: `docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`; harness `scripts/ui-sweep/sweep.mjs`. Candidates triaged by [UI-SWEEP-TRIAGE-1](#ui-sweep-triage-1).
 
 #### Release fix (from SMOKE8-DIAG-1, 2026-10-23)
 

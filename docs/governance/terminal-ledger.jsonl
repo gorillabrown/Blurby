@@ -78,3 +78,4 @@
 {"recordId": "TR-078", "itemId": "JSONSTORE-TIMEOUT-1", "completed": "2026-10-22", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md", "corrects": "", "effort": "XS"}
 {"recordId": "TR-079", "itemId": "CI-AUDIT-ALLOWLIST-1", "completed": "2026-10-22", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md", "corrects": "", "effort": "S"}
 {"recordId": "TR-080", "itemId": "READER-VISUAL-DIAG-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md", "corrects": "", "effort": "S"}
+{"recordId": "TR-081", "itemId": "UI-SWEEP-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md", "corrects": "", "effort": "M"}
