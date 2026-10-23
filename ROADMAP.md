@@ -1519,12 +1519,367 @@ The restamp items (PAGE-SAVE-RESTAMP-GUARD-1 `813ff38a`, PAGE-SAVE-RESTAMP-2 `55
 - **Standing rules 41, 46, 47 and 48:** in the Done-when list.
 - **LL-164:** this specification appends no lesson-status line.
 
+<a id="zip-read-followups-1"></a>
+
+#### ZIP-READ-FOLLOWUPS-1 — Every EPUB archive is opened through one size-checked door *(position 35 — Full Spec; authored 2026-10-23 on main @ `11c49ebe`; not a release gate)*
+
+- **What:** One new async `openZip(filePath)` in `main/zip-read.js`. It checks the archive's size on disk against a new constant, `ZIP_FILE_MAX_BYTES`, before adm-zip reads the file, and only then calls `new AdmZip(filePath)`. The five places that open an EPUB from disk call it instead of `new AdmZip(...)`. Two tests close DEPS-AUDIT-1's other gaps: a STORED entry whose header lies small, and the per-operation cap at parser level.
+- **Why:** DEPS-AUDIT-1's reviews (2026-10-14).
+  - **N1:** `new AdmZip(path)` reads the whole file into memory at once (adm-zip's `fs.readFileSync`), bounded only by the file's real size. The entry caps (`ZIP_ENTRY_MAX_BYTES`, `ZIP_OPERATION_MAX_BYTES`) apply only after that read.
+  - **N2:** `tests/zipRead.test.js` (k) covers a STORED entry over the cap with a truthful header. The lying-header STORED case, caught by `raw.length > cap` (`main/zip-read.js:22`), has no test.
+  - **N3:** `tests/zipEntryCap.test.js` lowers only the per-entry cap. No parser-level test exercises the per-operation cap.
+- **The cap's value is a no-regression bound:** `ZIP_FILE_MAX_BYTES = 512 MiB`, equal to `ZIP_OPERATION_MAX_BYTES` (`main/constants.js:71`).
+  - An archive's stored bytes are at least its compressed data. An archive larger than the operation cap therefore cannot be read within that cap once its entries are read.
+  - So no EPUB that reads today is refused. The check only moves the refusal ahead of the full-file allocation.
+- **Out of scope:**
+  - New user-facing text. Each caller's existing open-failure path reports the refusal unchanged. `extractContent` shows its existing "Could not open this EPUB — the file may be corrupted." Choosing a "too large" message is an owner wording decision, not this item's.
+  - MOBI/AZW and DOCX readers, which do not use adm-zip on disk paths.
+  - `buildEpubZip`'s `new Zip()` (`main/epub-converter.js:94`), which builds an archive and reads nothing.
+- **Prerequisites:** none. DEPS-AUDIT-1 is merged (`5d12e19a`).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the archive-cap tests of Done-when 3 are committed alone first. `npx vitest run tests/zipEntryCap.test.js -t "archive size cap"` exits 1 on the base, because every caller still opens the file. Record the output.
+    2. **One door:** `git grep -n -E 'new (AdmZip|Zip)\([A-Za-z]' -- main` prints exactly one line, in `main/zip-read.js`, and exits 0.
+       - On the base it prints five lines: `epub-converter.js:1054`, `epub-word-extractor.js:170`, `file-parsers.js:361`, `:551` and `:629`.
+    3. **Archive cap, parser level:** `tests/zipEntryCap.test.js` gains `describe("archive size cap")`.
+       - It lowers `constants.ZIP_FILE_MAX_BYTES` to 1024 and builds one EPUB with `buildEpub()` (larger than 1 KB). Each caller then takes its open-failure path:
+         - `extractWords` resolves to `{ words: [], sections: [], footnoteCues: [], totalWords: 0 }`;
+         - `extractContent` resolves to `{ userError: "Could not open this EPUB — the file may be corrupted." }`;
+         - `extractEpubCover` resolves to `null` and writes no cover file;
+         - `extractEpubMetadata` resolves to `{ title: null, author: null }`;
+         - `validateEpub` is `valid: false`, with an error matching `/too large/`.
+       - A control restores the cap, and the same file reads as test (f) does.
+    4. **Operation cap, parser level (N3):**
+       - In the same file, a test keeps `ZIP_ENTRY_MAX_BYTES` at its default and lowers `ZIP_OPERATION_MAX_BYTES` to 6144.
+       - It builds an EPUB whose chapter and cover are each 4096 bytes. Each entry is under the entry cap, and together they are over the operation cap.
+       - It asserts that `extractWords` rejects with `/too large/`.
+    5. **STORED entry, lying header (N2):** `tests/zipRead.test.js` gains (n).
+       - Set `ZIP_ENTRY_MAX_BYTES = 4096`. Build `buildZip({ "a.txt": { data: eightK(), stored: true } }, 16)`: the declared size is 16, and the real compressed data is 8 KB.
+       - Assert that reading it throws `ZIP_ENTRY_TOO_LARGE`, that `getCompressedData` is called once, and that `getData` is never called.
+       - **Control:** the test is green on the base, because it pins existing behaviour. Prove it is not vacuous: temporarily delete `if (raw.length > cap) throw tooLarge();` (`main/zip-read.js:22`) in a scratch copy, run (n), see it fail, and restore. `git diff -- main/zip-read.js` then shows only this item's edit. Record the run.
+    6. `npx vitest run tests/zipRead.test.js tests/zipEntryCap.test.js` exits 0.
+    7. `npm test` exits 0 on the owner's machine (rule 47; closed-list rule). `npm run typecheck` exits 0, and `npm run build` exits 0 (rule 48).
+    8. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and memo:
+       - `M main/zip-read.js`
+       - `M main/constants.js`
+       - `M main/epub-converter.js`
+       - `M main/epub-word-extractor.js`
+       - `M main/file-parsers.js`
+       - `M tests/zipRead.test.js`
+       - `M tests/zipEntryCap.test.js`
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer; Blurby.Roadmap gives the merge go.
+- **Lane:** Library & Content. Execution surface D (format-scope).
+- **Source:** DEPS-AUDIT-1's reviews (N1–N3, 2026-10-14); this trace on `11c49ebe`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - **`main/constants.js:71`, after `ZIP_OPERATION_MAX_BYTES`:**
+    - Add `/** Largest EPUB/ZIP archive opened from disk (bytes, 512 MiB = ZIP_OPERATION_MAX_BYTES); adm-zip reads the whole file into memory */ const ZIP_FILE_MAX_BYTES = 512 * 1024 * 1024;`.
+    - Export it beside `:235`.
+  - **`main/zip-read.js`:** add `async function openZip(filePath)`.
+    - Use `const { size } = await fsPromises.stat(filePath)`.
+    - If `size > constants.ZIP_FILE_MAX_BYTES`, throw `Object.assign(new Error(\`EPUB archive too large: ${size} bytes\`), { code: "ZIP_FILE_TOO_LARGE" })`. The message contains neither "zip" nor "invalid", so `extractContent`'s mapping picks its generic text.
+    - Otherwise return `new (require("adm-zip"))(filePath)`, keeping adm-zip lazy-loaded, as the callers do today.
+    - Read the constant at call time, as `createEntryReader` does (`:5`). Export `openZip`.
+  - **The five callers:**
+    - `main/file-parsers.js:361` (`extractContent`) becomes `zip = await openZip(filepath);`, inside the existing try/catch (`:359-369`).
+    - `main/file-parsers.js:551` (`extractEpubCover`) and `:629` (`extractEpubMetadata`) change the same way.
+    - `main/epub-word-extractor.js:170` (`extractWords`) changes the same way.
+    - `main/epub-converter.js:1054` (`validateEpub`) changes the same way.
+    - Each is already inside an `async` function and a `try`. Re-grep each line on your base first.
+  - **`getAdmZip` helpers:** remove a helper (`file-parsers.js:19`, `epub-word-extractor.js:14`) only if no other use remains. `epub-converter.js:17` stays, because `buildEpubZip` needs it.
+- **Tests:** Done-when 3–5.
+- **Constants:** `ZIP_FILE_MAX_BYTES = 512 MiB` (new); `ZIP_ENTRY_MAX_BYTES = 64 MiB` and `ZIP_OPERATION_MAX_BYTES = 512 MiB` unchanged.
+- **Branch:** `eb/zip-read-followups-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\zip-read-followups-1`. Run `npm ci`. Push with the explicit refspec `HEAD:refs/heads/eb/zip-read-followups-1`.
+- **Staging plan:** the fence paths. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If a caller's existing catch does not wrap the open, stop and report. Don't add a new user-facing message.
+  - If test (f2), the bundled sample, or (f3), the large legitimate EPUB, changes result, stop: the cap must not refuse a book that reads today.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** the renderer, `preload.js`, `package.json` and the lockfile.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. No open branch shares its files. PDF-IMPORT-DIAG-1's `main/file-parsers.js` edits are already merged (`7c518a30`).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows every EPUB open reading the whole file on the base | calculable | positive control | bounded | low | 15m (one describe block, one red run) | — | — |
+| 2 | One size-checked open for all five callers, plus the two missing cap tests | calculable | bug fix | bounded | medium | 35m (one helper, one constant, five call sites, two tests and a mutation control) | — | — |
+| 3 | Suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 25m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 is red on the base. Done-when 5's coverage test has a mutation control, because it pins existing behaviour.
+- **Standing rule 44 (LL-143):** Done-when 2 was dry-run on the base (five lines, exit 0), and so was the archive-cap failure in Done-when 3.
+- **LL-142:** the cap's no-regression claim is checked by running the real parsers on the bundled sample and the large legitimate EPUB (tests (f2) and (f3)), not argued from adm-zip's source.
+- **Standing rule 50 (LL-156):** no waiver or known failure names these files. DEPS-AUDIT-1's reachability note for adm-zip (`docs/governance/DEPENDENCY_ADVISORIES.md`) is unchanged, because the advisories concern entry sizes, which the existing caps handle.
+- **Standing rules 41, 46, 47 and 48:** in the Done-when list.
+- **LL-164:** this specification appends no lesson-status line.
+
+<a id="library-write-race-1"></a>
+
+#### LIBRARY-WRITE-RACE-1 — Main-side library writers update the live record, never a copy *(position 36 — Full Spec; authored 2026-10-23 on main @ `11c49ebe`; not a release gate)*
+
+- **What:** Every main-process writer that changes an existing library record changes it in place, on the object the library array and the id index already hold. None builds a replacement array of copies. The three writers that convert a document and then write the result after an `await` go through one helper. It finds the live record by id, writes to that, and never resurrects a deleted record. If the record is gone or deleted, the helper removes the converted file it would have orphaned.
+- **Why:** SAVE-LIBRARY-TRUST-1's re-review found the race class, and SAVE-LIBRARY-MERGE-1 fixed it for `save-library` (its table, `docs/planning/.Archive/ROADMAP_snapshot_2026-10-22.md:2627-2640`). The other replace-writers still cause it.
+  - **Replace-writers:** `delete-doc` (`main/ipc/library.js:116-132`), `add-to-queue` (`:597-611`), `remove-from-queue` (`:614-631`), `reorder-queue` (`:634-661`) and `apply-metadata-updates` (`:738-767`). Each maps the array to new objects and calls `setLibrary`, which also reopens the 100 ms stale-index window (`main.js:103-109`).
+  - **What gets lost:** a writer holding a record across an `await` then writes to a detached object. That covers `relinkSampleIfMissing` (`:31-38`, called at `:165`), the folder refresh (`main/folder-sync.js:262-270`), the lazy conversion (`main/ipc/library.js:184-188`), the URL import (`main/ipc/misc.js:247-283`) and the extension import (`main/ws-server.js:378-419`). The write is then lost, as with a progress write or sample relink after an Edit-form save.
+  - **What gets resurrected:** the two imports put their own object back by id (`misc.js:281`, `ws-server.js:413`). A `delete-doc` during the conversion is undone, and the article comes back (BUG-199's class).
+  - **What gets orphaned:** the lazy conversion's `|| doc` fallback (`library.js:184`) writes to a record that left the library during the `await`, and its `<data>/converted/<id>.epub` stays on disk.
+- **Out of scope** (moved to stub **LIBRARY-WRITE-RACE-2**, added by this item):
+  - `save-library` payload hygiene: de-duplicate repeated ids, a test for malformed array elements, and type checks on `tags`, `collection`, `unread` and `seenAt`.
+  - The Edit form's fire-and-forget save. An IPC rejection shows the edit and later reverts it, unhandled. What the user sees on failure is an owner (tier 3) decision.
+  - Renderer edits not bumping `modified`, so a cloud merge can undo them. That is sync conflict semantics, a Blurby.Brain ruling.
+  - The cloud sync's `setLibrary(gcd)` after an `await` (`main/sync-engine.js:841`, `:1074`). Cloud Sync is a deferred lane.
+  - The rescan (`library.js:504`) and folder prunes (`folder-sync.js:150`, `:249`). They filter the array and keep the surviving objects, so they detach only removed records.
+- **Prerequisites:** none. SAVE-LIBRARY-MERGE-1 is merged (`682676b1`).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the identity tests of Done-when 2 are committed alone first. `npx vitest run tests/libraryWriteThrough.test.js` exits 1 on the base, and each replace-writer test fails on `toBe` identity. Record the output.
+    2. **Test file `tests/libraryWriteThrough.test.js`:** use the harness of `tests/saveLibraryMerge.test.js:74-118` (it patches `Module._load` and registers the real `main/ipc/library.js`). For each of `delete-doc`, `add-to-queue`, `remove-from-queue`, `reorder-queue` and `apply-metadata-updates`:
+       - seed three records and keep references;
+       - call the handler;
+       - assert each record in `library` is still `toBe` the seeded object, carries the handler's change, and that `ctx.setLibrary` was not called.
+       - `delete-doc`: the record gains `deleted: true`, `deletedAt`, `deletedBy` and `deletedAtTimestamp`, and has no `content` key.
+       - `apply-metadata-updates`: `title` and `author` change and `modified` is set.
+    3. **Helper tests, in the same file:**
+       - **Live record replaced:** `writeConversionResult(ctx, id, fields, epubPath)` resolves `true` and writes the fields to the record currently in `ctx.getLibrary()`, not to the caller's object, when the library holds a different object for that id.
+       - **Deleted:** with the live record marked `deleted: true`, it resolves `false`, writes nothing, and the file at `epubPath` no longer exists.
+       - **Gone:** with no record for that id, it resolves `false` and removes the file.
+       - **Remove fails:** a file that cannot be removed does not throw; it is logged.
+    4. **Callers use it:**
+       - `git grep -n -E 'setLibrary\([a-zA-Z]+\.map\(' -- main/ipc/library.js main/ipc/misc.js main/ws-server.js` exits 1, empty. On the base it prints `main/ipc/misc.js:281` and `main/ws-server.js:413`.
+       - `git grep -c -F 'writeConversionResult(' -- main/ipc/library.js main/ipc/misc.js main/ws-server.js` prints each file with `:1`.
+       - `git grep -n -F '|| doc;' -- main/ipc/library.js` exits 1. On the base it prints `:184`.
+    5. **No replace-writer left in the five handlers:** `git grep -n -F 'ctx.setLibrary(' -- main/ipc/library.js` prints exactly one line, the rescan's (`:504` on the base, which is out of scope). On the base it prints six lines (`:132`, `:504`, `:609`, `:629`, `:658`, `:764`).
+    6. `npx vitest run tests/libraryWriteThrough.test.js tests/saveLibraryMerge.test.js tests/saveLibraryTrust.test.js tests/folderSync.test.js` exits 0.
+    7. `npm test` exits 0 on the owner's machine (rule 47; closed-list rule). `npm run typecheck` exits 0, and `npm run build` exits 0 (rule 48).
+    8. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and memo:
+       - `A main/library-write.js`
+       - `M main/ipc/library.js`
+       - `M main/ipc/misc.js`
+       - `M main/ws-server.js`
+       - `A tests/libraryWriteThrough.test.js`
+       - `M ROADMAP.md`: only the new LIBRARY-WRITE-RACE-2 stub line, inserted after this item's card in "Stubs beyond the buffer".
+- **Effort:** M.
+- **Owners:** implementation agent; reviewer; Blurby.Roadmap gives the merge go.
+- **Lane:** Library & Content. Execution surface D.
+- **Source:** SAVE-LIBRARY-TRUST-1's re-review; SAVE-LIBRARY-MERGE-1's race table and quality review (2026-10-15); this trace on `11c49ebe`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - **`main/library-write.js` (new, CommonJS, async I/O):**
+    - `async function writeConversionResult(ctx, docId, fields, convertedPath)`. It runs `const live = ctx.getLibrary().find((d) => d.id === docId);`.
+    - If `!live || live.deleted`, it runs `await fsPromises.unlink(convertedPath)` and returns `false`. An unlink failure is caught and logged with `logToFile(..., ctx.getErrorLogPath())`.
+    - Otherwise it writes `fields` to `live`: a key whose value is `undefined` is deleted from the record, and every other key is assigned. It returns `true`.
+    - The caller saves and broadcasts.
+  - **`main/ipc/library.js`:**
+    - **`delete-doc` (`:116-132`):** find the record. Run `Object.assign(d, { deleted: true, deletedAt: revision, deletedBy: deviceId, deletedAtTimestamp: now })`, then `delete d.content`. No `map`, no `setLibrary`. The `else removeDocFromLibrary` branch is unchanged.
+    - **`add-to-queue` (`:597-611`):** set `d.queuePosition = maxPos + 1` on the found record.
+    - **`remove-from-queue` (`:614-631`):** `delete d.queuePosition` on the removed record, and decrement the others in place.
+    - **`reorder-queue` (`:634-661`):** shift the queue positions in place.
+    - **`apply-metadata-updates` (`:738-767`):** run `Object.assign(doc, fields, { modified: Date.now() })` for each matched record. `count` is the same.
+    - **Lazy conversion (`:184-188`):** `if (!(await writeConversionResult(ctx, docId, { convertedEpubPath: convResult.epubPath, ext: ".epub" }, convResult.epubPath))) return null;`. Pass `needsEpubConversion: undefined` in the same fields, so the helper deletes it. Then `ctx.saveLibrary()`.
+  - **`main/ipc/misc.js:273-283` (URL import):** replace the `newDoc.*` writes, the `delete newDoc.content` and the put-back with `writeConversionResult(ctx, docId, { convertedEpubPath, filepath, ext: ".epub", originalSourceUrl: url, content: undefined }, convResult.epubPath)`. Save and broadcast only when it returns `true`. The return value `{ doc: newDoc }` stays.
+  - **`main/ws-server.js:405-419` (extension import):**
+    - The success branch changes the same way.
+    - The failure branch (`:418`) writes `content` only if `ctx.getLibrary().find(...)` returns a live, non-deleted record.
+    - It does not touch the pairing code (`:233-260`, `:434+`), which WS-TOKEN-REGEN-1 and WS-PAIR-LOG-1 own.
+  - **`ROADMAP.md`:** add the LIBRARY-WRITE-RACE-2 stub line listing this specification's Out of scope, with the two rulings it needs named.
+- **Tests:** Done-when 2–3.
+- **Constants:** none.
+- **Branch:** `eb/library-write-race-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\library-write-race-1`. Run `npm ci`. Use the explicit push refspec.
+- **Staging plan:** the fence paths. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If any main-side reader relies on a writer producing a new object (for example, a hash or equality check that expects a fresh reference), stop and report the site. The sync engine's document hashes are content-based (`clearDocHashes`); re-check that on your base.
+  - If `tests/saveLibraryMerge.test.js` (g), which pins the index-window mechanism, changes result, stop.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** `save-library`'s merge (`library.js:65-90`); the renderer; `preload.js`; `main/sync-engine.js`; `main/folder-sync.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts, and after WS-TOKEN-REGEN-1 (`eb/ws-token-regen-1`, which edits `main/ws-server.js` from `:434` and `main/ipc/misc.js`'s regenerate handler) and WS-PAIR-LOG-1 (`main/ws-server.js:237-245`). Take `refs/remotes/origin/main` in and re-grep every cited line before merging.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows the five replace-writers building copies on the base | calculable | positive control | bounded | low | 20m (one test file, one red run) | — | — |
+| 2 | The five writers update records in place; the three conversion writers go through one live-record helper | calculable | bug fix | cross-cutting | medium | 60m (one helper, five handlers, three callers, helper tests) | — | — |
+| 3 | Suite, typecheck and build pass; LIBRARY-WRITE-RACE-2 stub written; merged and pushed | calculable | merge and verify | bounded | medium | 30m (suite, typecheck, build, one stub line, one --no-ff merge) | — | — |
+
+**Total:** chain 1h05m · sum 1h05m; 2 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 50 (LL-156):** SAVE-LIBRARY-MERGE-1's race table was re-read against these edit sites. Every "What remains" row it routed to LIBRARY-WRITE-THROUGH-1 or CONVERTED-CLEANUP-1 is either in scope here or named in LIBRARY-WRITE-RACE-2, so none is dropped.
+- **Standing rule 43 (LL-138):** Done-when 1 is red on the base.
+- **Standing rule 44 (LL-143):** Done-when 4 and 5 were dry-run on the base (two lines; one line; six lines).
+- **LL-142:** "no reader depends on fresh objects" is a claim to prove on the base by grep and the full suite (Failure handling), not to assume.
+- **Standing rules 41, 46, 47 and 48:** in the Done-when list. The one `ROADMAP.md` edit is the stub line this specification asks for.
+- **LL-164:** this specification appends no lesson-status line.
+
+<a id="page-held-turn-fail-1"></a>
+
+#### PAGE-HELD-TURN-FAIL-1 — A held page turn the word count cannot place is reported, not dropped *(position 61 — Full Spec; authored 2026-10-23 on main @ `11c49ebe`; not a release gate)*
+
+- **What:** When the book's word count fails (`checkBookWords`' `fail()`, `src/reader/modes/page/FoliateView.tsx:586-593`), a held turn on a renderer-numbered page is always released. If it cannot be saved, it records `page-turn-lost` with `reason=book-words-failed`, as the re-stamp and section-load paths already do. All three loss lines also say what was held: they end in ` kind=turn` or ` kind=click`.
+- **Why:** PAGE-POSITION-SAVE-2's quality review, NOTE 2 (2026-10-22).
+  - In `fail()`, a held turn on a renderer-numbered document is cleared only when `reportFirstWordOnPage(...)` returns `true` (`:590-592`).
+  - When it returns `false`, for example because the held range has no word, the turn stays in `pendingTurnRef` with nothing logged. Nothing re-tries it, because the section is already loaded. The next turn overwrites it silently.
+  - NOTE 1: the loss lines at `:634` (`reason=restamp`) and `:674` (`reason=section-load`) do not say whether the held thing was a turn or a word click (`held.click`).
+- **Out of scope:**
+  - A held turn on a document that is **not** renderer-numbered. In `fail()` that one is waiting for its section load, which saves or reports it (`:669-676`), so `fail()` leaves it held, as today.
+  - The jump-cancel sites (`:491`, `:508`, `:795`, `:864`, `:982`, `:1025`), where a jump cancelling a held turn is intended.
+  - Other jumps' landing saves (JUMP-LANDING-SAVE-1).
+- **Prerequisites:** TOC-JUMP-SAVE-1 merged, because it edits the same file (`eb/toc-jump-save-1` @ `db03f2f5`; its one hunk is at `:980-985`, after these sites).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** test (hf1) is committed alone first. `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "hf1"` exits 1 on the base, failing on an empty `page-turn-lost` list. Record the output.
+    2. **Tests, in `tests/readerModes/pagePositionSave.test.tsx`:**
+       - **(hf1):** use (v)'s mount with a rejecting `ensureBookWords` (`:471-472`) and (q)'s gap range, the space after "Alpha" (`:547-559`). Click "Next page" and settle. Assert:
+         - no save;
+         - exactly one `page-turn-lost` whose `args[1]` starts with `reason=book-words-failed` and contains `start=`, `end=` and ` kind=turn`.
+       - **(hf2), control:** the same mount with a word range. The turn saves its cfi, as (v) does, and no `reason=book-words-failed` line is recorded.
+       - **(q):** add an assertion that its `reason=restamp` line contains ` kind=turn`.
+       - **(n4a):** add an assertion that its `reason=section-load` line contains ` kind=turn`.
+       - Every existing test passes unchanged.
+    3. `npx vitest run tests/readerModes/pagePositionSave.test.tsx` exits 0.
+    4. **The three loss lines:**
+       - `git grep -c -F '"page-turn-lost"' -- src/reader/modes/page/FoliateView.tsx` prints `…:3`. On the base it prints `…:2`.
+       - `git grep -n -E 'kind=\$\{' -- src/reader/modes/page/FoliateView.tsx` prints exactly three lines. On the base it exits 1.
+    5. `npm test` exits 0 on the owner's machine (rule 47; closed-list rule). `npm run typecheck` exits 0, and `npm run build` exits 0 (rule 48).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M src/reader/modes/page/FoliateView.tsx` and `M tests/readerModes/pagePositionSave.test.tsx`, plus the time log and memo.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer; Blurby.Roadmap gives the merge go.
+- **Lane:** Reader Engine. Execution surface C.
+- **Source:** PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2); this trace on `11c49ebe`, and TOC-JUMP-SAVE-1's diff on `db03f2f5`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (lines on `11c49ebe`; TOC-JUMP-SAVE-1 does not move them, but re-grep after taking it in):
+  - **`FoliateView.tsx:589-592`:** `fail()` becomes:
+
+    ```
+    const held = pendingTurnRef.current;
+    if (held && rendererNumberedDocsRef.current.has(held.doc)) {
+      pendingTurnRef.current = null;
+      if (!reportFirstWordOnPage(held.doc, held.start, held.end, held.click)) {
+        recordDiagnosticRef.current("page-turn-lost", `reason=book-words-failed start=${held.start} end=${held.end} kind=${held.click ? "click" : "turn"}`);
+      }
+    }
+    ```
+
+  - **`:634`:** append ` kind=${held.click ? "click" : "turn"}` to the `reason=restamp` template.
+  - **`:674`:** append ` kind=${pendingTurn.click ? "click" : "turn"}` to the `reason=section-load` template.
+  - Keep each existing prefix, because (q) and (n4a) match `startsWith`.
+- **Tests:** Done-when 2.
+- **Constants:** none.
+- **Branch:** `eb/page-held-turn-fail-1` from `refs/remotes/origin/main` after TOC-JUMP-SAVE-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\page-held-turn-fail-1`. Run `npm ci`. Use the explicit push refspec.
+- **Staging plan:** the fence paths. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If (hf1)'s gap range is saved under a rejected word count (that is, `reportFirstWordOnPage` returns `true`), use another range with no word on the page. Record which one, and don't change the code to fit the test.
+  - If any existing test matches a loss line exactly rather than by prefix, stop and report it.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C.
+  - **Forbidden:** `ReaderContainer.tsx` (shared core), the other modes' views, and `main/`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts, and after TOC-JUMP-SAVE-1 (same file). Take `refs/remotes/origin/main` in and re-grep `:586-593`, `:634` and `:674` before editing.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows a held turn dropped silently when the word count fails on the base | calculable | positive control | bounded | low | 15m (one test, one red run) | — | — |
+| 2 | The failed-word-count path reports the held turn it cannot save; all three loss lines name turn or click | calculable | bug fix | bounded | medium | 25m (three edits, two new tests, two extended assertions) | — | — |
+| 3 | Suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 25m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 is red on the base.
+- **Standing rule 44 (LL-143):** Done-when 4 was dry-run on the base (`:2`; exit 1).
+- **LL-161:** the loss lines identify the held range by its text offsets (`start=`, `end=`), not by a word index the failed count cannot supply.
+- **Standing rule 50 (LL-156):** PAGE-POSITION-SAVE-2's amendment pins the `reason=section-load` prefix. That prefix is kept, and only ` kind=` is appended, so its gate still matches.
+- **Standing rules 41, 46, 47 and 48:** in the Done-when list.
+- **LL-164:** this specification appends no lesson-status line.
+
+<a id="ws-pair-log-1"></a>
+
+#### WS-PAIR-LOG-1 — Say why a pairing is not saved when OS encryption is unavailable *(position 62 — Full Spec; authored 2026-10-23 on main @ `11c49ebe`; not a release gate)*
+
+- **What:** The extension pair flow (`main/ws-server.js:233-260`) keeps its behaviour: it persists the new pairing token only through safeStorage encryption (`:238-245`). It now logs one clear line when it cannot:
+  - when encryption is unavailable, `[ws-server] pairing not saved: OS encryption unavailable`;
+  - when the encrypted save throws, `[ws-server] pairing not saved: <error message>`. Today that is the silent `catch { /* best-effort persist */ }` at `:244`.
+- **Why:** WS-TOKEN-REGEN-1's review (2026-10-22). **Blurby.Brain's ruling (2026-10-22, tier 1):** keep session-only pairing when OS encryption is unavailable, and never write a credential in plaintext. Add the log line, so a Linux user who re-pairs after every restart can tell why.
+- **Finding for Blurby.Brain, out of scope here:** `startServer` writes the pairing token **in plaintext** to `settings._wsPairingToken` when encryption is unavailable. On the base that is `main/ws-server.js:459` and `:468`. WS-TOKEN-REGEN-1's `encodePairingToken` keeps it: "else plaintext" (`eb/ws-token-regen-1` @ `7a0d36d4`). That conflicts with the ruling's principle ("never write a credential in plaintext"). This item does not change it. It needs a ruling, and if the ruling says so, a follow-up.
+- **Out of scope:** any change to what is persisted, and when; the auth flow; WS-TOKEN-REGEN-1's helpers.
+- **Prerequisites:** WS-TOKEN-REGEN-1 merged, because it edits the same file (`main/ws-server.js` from `:434`; it does not touch `:233-260`).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the new test file is committed alone first. `npx vitest run tests/wsPairLog.test.js` exits 1 on the base, because no line is logged. Record the output.
+    2. **Test `tests/wsPairLog.test.js`:**
+       - Load the real `main/ws-server.js` with `electron` patched through `Module._load` to a fake `safeStorage`, as `tests/auth.test.js` does. WS-TOKEN-REGEN-1's `tests/wsTokenRegen.test.js` uses the same pattern once merged.
+       - Drive a pair through `handleConnection`, plus a `pair` frame with `getShortCode().code`, using `tests/wsServerAuth.test.js`'s mock socket and frame helpers (`:7-58`), with `_testSetState(ctx, …)`.
+       - **Encryption unavailable:** the response is `pair-ok`; `console.warn` is called exactly once with `[ws-server] pairing not saved: OS encryption unavailable`; and `ctx.saveSettings` is not called.
+       - **Encryption available (control):** `pair-ok`; `settings._wsPairingToken` is set to the fake ciphertext; `saveSettings` is called once; and no `pairing not saved` line appears.
+       - **`encryptString` throws `new Error("boom")`:** `pair-ok`; one `console.warn` with `[ws-server] pairing not saved: boom`.
+    3. `npx vitest run tests/wsPairLog.test.js tests/wsServerAuth.test.js tests/ws-server.test.js` exits 0.
+    4. **The line exists once per case:** `git grep -c -F 'pairing not saved:' -- main/ws-server.js` prints `main/ws-server.js:2`. On the base it exits 1.
+    5. `npm test` exits 0 on the owner's machine (rule 47; closed-list rule). `npm run typecheck` exits 0, and `npm run build` exits 0 (rule 48).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M main/ws-server.js` and `A tests/wsPairLog.test.js`, plus the time log and memo.
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer; Blurby.Roadmap gives the merge go.
+- **Lane:** Platform & Maintenance. Execution surface D.
+- **Source:** WS-TOKEN-REGEN-1's review; Blurby.Brain's ruling (2026-10-22); this trace on `11c49ebe` and `7a0d36d4`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** `main/ws-server.js:238-245`. Re-grep after WS-TOKEN-REGEN-1 merges.
+
+  ```
+  if (_ctx && safeStorage?.isEncryptionAvailable?.()) {
+    try { …unchanged encrypt, set and save… }
+    catch (err) { console.warn(`[ws-server] pairing not saved: ${err && err.message}`); }
+  } else if (_ctx) {
+    console.warn("[ws-server] pairing not saved: OS encryption unavailable");
+  }
+  ```
+
+  No log when `_ctx` is unset, which only tests do.
+- **Tests:** Done-when 2.
+- **Constants:** none.
+- **Branch:** `eb/ws-pair-log-1` from `refs/remotes/origin/main` after WS-TOKEN-REGEN-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\ws-pair-log-1`. Run `npm ci`. Use the explicit push refspec.
+- **Staging plan:** the fence paths. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If a plain-Node `require("electron")` in the tests cannot be patched, use `tests/auth.test.js`'s exact load order and report it. Don't mock at module scope in a way that leaks into other files.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** `startServer` (`:438+`), `main/ipc/misc.js`, the renderer, `preload.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts, after WS-TOKEN-REGEN-1, and before LIBRARY-WRITE-RACE-1 (which also edits `main/ws-server.js`, at `:405-419`).
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows the pair flow saying nothing when it cannot save on the base | calculable | positive control | mechanical | low | 10m (one test file, one red run) | — | — |
+| 2 | The pair flow logs why a pairing was not saved; suite, typecheck and build; merged and pushed | calculable | merge and verify | bounded | low | 25m (two log lines, three tests, suite, one --no-ff merge) | — | — |
+
+**Total:** chain 5m · sum 5m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 is red on the base.
+- **Standing rule 44 (LL-143):** Done-when 4 was dry-run on the base (exit 1).
+- **LL-142:** the plaintext write in `startServer` was found by reading the code that runs. That code contradicts the ruling's stated principle, so the conflict is raised here rather than assumed away.
+- **Standing rule 50 (LL-156):** no waiver names this site.
+- **Standing rules 41, 46, 47 and 48:** in the Done-when list.
+- **LL-164:** this specification appends no lesson-status line.
+
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
-- <a id="zip-read-followups-1"></a>**ZIP-READ-FOLLOWUPS-1 — Follow-ups from DEPS-AUDIT-1's capped zip reader** *(position 35 — stub)*. From DEPS-AUDIT-1's reviews (2026-10-14): (N1) `new AdmZip` reads the whole file into memory, bounded only by its real size; consider an import file-size check; (N2) a test for a STORED entry whose header lies small; (N3) a parser-level per-operation cap test. Lane: Library & Content.
-- <a id="library-write-race-1"></a>**LIBRARY-WRITE-RACE-1 — Library writers that mutate a document across an await** *(position 36 — stub)*. The race class SAVE-LIBRARY-TRUST-1's amendment found (a doc object mutated after an await while a concurrent save replaces it): SAVE-LIBRARY-MERGE-1's in-place merge fixes the `save-library` side; the remaining main-side writers it names, and converted files left orphaned in `converted/` when a document is removed mid-conversion, go here. Also SAVE-LIBRARY-TRUST-1's optional follow-ups: de-duplicate repeated ids in a save payload, and a test for malformed array elements. From SAVE-LIBRARY-MERGE-1's quality review (2026-10-15): `apply-metadata-updates` (`main/ipc/library.js`) still replaces the edited record and the array, reopening the 100 ms stale-index window after an Edit-form save, so a progress write or sample relink in that window lands on a detached record; the Edit form's save is fire-and-forget (an IPC rejection shows the edit and later reverts it, unhandled); `tags`, `collection`, `unread` and `seenAt` are stored without type checks; renderer edits do not bump `modified`, so a cloud merge can undo them; and the cloud sync's `setLibrary(gcd)` after an await can drop an edit made during the sync. Lane: Library & Content.
 - <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
 - <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 38 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
@@ -1540,8 +1895,6 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(position 47 — stub; not a release gate)*. From FOLDER-NOTICE-1's quality review (2026-10-15): (3) within one sync the banner follows whichever of the root check and the scan answers last, so a null scan after a true check, or the reverse, flaps it (and a root holding only directories clears then re-sets `root-empty-suspect`); make the banner follow the scan's verdict; (6) Retry has no in-flight guard in main, so a banner remount mid-attempt allows a second root check; (7) a same-folder re-select through `switch-folder` resets the toast flag, so a second watcher error in the same episode toasts again; (8) the banner's Retry button loses focus when disabled and on success, and a failed Retry is not announced (`role="alert"` fires only on mount): use `aria-busy`/`aria-disabled` and a short status line. From the fix-round review of FOLDER-NOTICE-1 (2026-10-15): (9) `syncAll`'s catch checks only the folder string, so an abandoned same-folder run (A hung, switch to B and back to A) can report `sync-failed` on a healthy A after the new run's clear; add the run-generation check the `.finally` already uses; (10) `retry()`'s folder guard compares raw strings where `state.js` uses `pathKey`; (11) test gaps: a toast is sent once the window finishes loading, and a failed (null) watcher restart does not toast twice. Lane: UX polish.
 - <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transferelease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
 - <a id="narrate-trace-labels-1"></a>**NARRATE-TRACE-LABELS-1 — Narrate harness hygiene: legacy trace labels and rate validation** *(position 56 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b wave B (Blurby.Brain, 2026-10-15): `scripts/narrate-rebuild/p5-latency-e2e.mjs`'s traces still carry pre-NARRATE-REMOVE-1 labels (`scenarioId` "moss-nano-13c-session-1-00-live-evidence", `evidenceSource` "real-app-selected-nano"). Cosmetic, but a reader could think MOSS-Nano ran. Rename them to Kokoro/Narrate labels, and update any checker that matches them. Also (Blurby.Brain, same run): `p5-latency-e2e.mjs:32` parses each `--rates` value with `Number()`, so a malformed `"1.0 2.0"` became `NaN` and the launcher ran a 5-minute "session-NaN", reported PASS and exited 0. It must reject any rate that is not a finite number in its allowed set, exiting non-zero before launching, and never report PASS for a session whose rate is unknown; with a test. Also (Blurby.Brain, 2026-10-15): `docs/studies/narrate-rebuild-1/phase5/latency-e2e.json` is left untracked on main because the launcher writes it fresh; have the launcher write into its `--out` folder (or ignore the file). Lane: TTS / Narration Engine.
-- <a id="page-held-turn-fail-1"></a>**PAGE-HELD-TURN-FAIL-1 — A held page turn is dropped silently when the word count fails** *(position 61 — stub; not a release gate)*. From PAGE-POSITION-SAVE-2's quality review (NOTE 2, 2026-10-22): `checkBookWords`' `fail()` path keeps a held turn it cannot report, so the turn is never saved and nothing is logged. Also NOTE 1: the new `reason=section-load` line does not say whether the held thing was a turn or a word click. Fix direction: on `fail()`, report or log the held turn through the same `page-turn-lost` diagnostic, and add `kind=turn|click` to both loss lines. Lane: Reader Engine.
-- <a id="ws-pair-log-1"></a>**WS-PAIR-LOG-1 — Say why a pairing is not saved when OS encryption is unavailable** *(position 62 — stub; XS; not a release gate)*. From WS-TOKEN-REGEN-1's review (2026-10-22). The pair flow (`main/ws-server.js:237-245`) does not persist the token when safeStorage encryption is unavailable, so a pairing on such a machine lasts only for the session. **Ruling (Blurby.Brain, 2026-10-22, tier 1): keep that behaviour.** Never write a credential in plaintext. A session-only pairing is the secure default, and Blurby ships on Windows, where DPAPI is always present. The one change: when pairing can't be persisted, log one clear line (`pairing not saved: OS encryption unavailable`), so a Linux user who re-pairs after every restart can tell why. Lane: Platform & Maintenance.
 - <a id="jump-landing-save-1"></a>**JUMP-LANDING-SAVE-1 — Other jumps in Page mode save the page they land on** *(position 63 — stub; not a release gate)*. From TOC-JUMP-SAVE-1's run (2026-10-22, note 4). The same defect class remains for internal-link jumps, footnote jumps, and next/previous chapter: each leaves the saved position on the page it jumped from. Also note 3: a jump foliate drops during a turn's lock, an unresolvable href, and an anchor with no pages still keep the early commit. Fix direction: route each through the same in-flight-turn counting TOC-JUMP-SAVE-1 gives the API `goTo`. Lane: Reader Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
