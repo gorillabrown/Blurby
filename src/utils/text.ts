@@ -102,34 +102,29 @@ export function findParagraphStart(paragraphBreaks: readonly number[], currentIn
 }
 
 /**
- * Paragraph breaks in book-wide word indices, for an EPUB whose words are the full book while its view's breaks
- * index the loaded slice. Every section's last word is a break. A loaded section's own breaks are added only when
- * its loaded word count equals the book's count for that section, so the mapping is exact, never estimated.
- * loadedWordSections holds each loaded word's section index, in loaded order.
+ * The previous or next paragraph start in book-wide word indices, for an EPUB with full-book words. renderedStarts
+ * are the rendered block-start words of sections stamped against the book; sectionStarts are the book's section
+ * starts, which are paragraph starts too and cover the sections not rendered (or still provisionally numbered).
+ * Next: the nearest start after currentIndex, else lastIndex. Previous: the nearest start before it, else 0.
+ * With no sections known it returns null, and the caller does not move.
  */
-export function bookParagraphBreaks(
-  loadedWordSections: readonly number[],
-  loadedBreaks: readonly number[],
-  sections: readonly { sectionIndex: number; startWordIdx: number; endWordIdx: number }[],
-): number[] {
-  const breaks = new Set<number>();
-  for (const section of sections) {
-    if (section.endWordIdx > section.startWordIdx) breaks.add(section.endWordIdx - 1);
+export function findBookParagraphStart(
+  renderedStarts: readonly number[],
+  sectionStarts: readonly number[],
+  currentIndex: number,
+  direction: "forward" | "backward",
+  lastIndex: number,
+): number | null {
+  if (sectionStarts.length === 0) return null;
+  const starts = [...new Set([...renderedStarts, ...sectionStarts])].sort((a, b) => a - b);
+  if (direction === "forward") {
+    const next = starts.find((start) => start > currentIndex);
+    return next === undefined ? lastIndex : Math.min(next, lastIndex);
   }
-  const firstLoaded = new Map<number, number>();
-  const loadedCount = new Map<number, number>();
-  loadedWordSections.forEach((sectionIndex, i) => {
-    if (!firstLoaded.has(sectionIndex)) firstLoaded.set(sectionIndex, i);
-    loadedCount.set(sectionIndex, (loadedCount.get(sectionIndex) ?? 0) + 1);
-  });
-  for (const local of loadedBreaks) {
-    const sectionIndex = loadedWordSections[local];
-    if (sectionIndex === undefined) continue;
-    const section = sections.find((entry) => entry.sectionIndex === sectionIndex);
-    if (!section || loadedCount.get(sectionIndex) !== section.endWordIdx - section.startWordIdx) continue;
-    breaks.add(section.startWordIdx + (local - firstLoaded.get(sectionIndex)!));
+  for (let i = starts.length - 1; i >= 0; i--) {
+    if (starts[i] < currentIndex) return starts[i];
   }
-  return [...breaks].sort((a, b) => a - b);
+  return 0;
 }
 
 // Title case minor words that should stay lowercase (unless first/last word)
