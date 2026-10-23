@@ -1,0 +1,39 @@
+{
+  "id": "20261023T022241Z-external-set-status-NARRATE-TRACE-LABELS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TRACE-LABELS-1",
+  "created": "2026-10-23T02:22:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-23",
+      "branch": "eb/narrate-trace-labels-1",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-trace-labels-1 from main), built during the Stage 8 freeze and merged after it lifts."
+    },
+    "expectedRevision": "633b57286cfc326b8707a19793b7d2d9dbc15e2e971fa8358bfd75c51301ec1e",
+    "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('branch', 'eb/narrate-trace-labels-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-trace-labels-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TRACE-LABELS-1",
+      "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('branch', 'eb/narrate-trace-labels-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-trace-labels-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T022241Z-external-set-status-NARRATE-TRACE-LABELS-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:23:17Z",
+  "outcome": "succeeded"
+}

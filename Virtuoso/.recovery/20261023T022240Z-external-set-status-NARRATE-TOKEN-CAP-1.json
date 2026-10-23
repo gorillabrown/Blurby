@@ -1,0 +1,39 @@
+{
+  "id": "20261023T022240Z-external-set-status-NARRATE-TOKEN-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TOKEN-CAP-1",
+  "created": "2026-10-23T02:22:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-23",
+      "branch": "eb/narrate-token-cap-1",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-token-cap-1 from main), built during the Stage 8 freeze and merged after it lifts."
+    },
+    "expectedRevision": "a8de722fd3c57289c9daf04e2a66941339388978320d93b11d9d1ef5912381bd",
+    "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('branch', 'eb/narrate-token-cap-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-token-cap-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TOKEN-CAP-1",
+      "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('branch', 'eb/narrate-token-cap-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-token-cap-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T022240Z-external-set-status-NARRATE-TOKEN-CAP-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:23:14Z",
+  "outcome": "succeeded"
+}
