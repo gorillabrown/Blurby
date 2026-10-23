@@ -13,6 +13,7 @@
 | 2026-10-23 | storyboarded | storyboard | aligned; epic-scale; 1 item (BLURBY-SERVER-1, provisional); 4 phases |
 | 2026-10-23 | planned | write-plan | epic-scale: 4 phase specs written as an epic charter draft beside the entry (`2026-10-23-blurby-server/charter-draft.md`); 11 owner questions with recommendations; prerequisites pending: Stage 8 release, post-freeze merge train |
 | 2026-10-23 | storyboarded | write-plan | epic-scale stays held (corrects the hand-written planned row above): 4 phase specs as an epic charter draft at 2026-10-23-blurby-server/charter-draft.md for /roadmap-review then /epic; 11 owner questions |
+| 2026-10-23 | storyboarded | write-plan | owner rulings 2026-10-23 folded into the alignment record: server narration Kokoro only (MeloTTS dropped); no desktop ads for now; Q1-Q8, Q10, Q11 as recommended; charter draft updated; 0 open questions |
 
 ## Storyboard
 
@@ -50,6 +51,9 @@
 - Hosting: "A, It's on cloudflare".
 - Narration: on server narration costs, "Where are these costs coming from?"; on Kokoro, "So you're saying we cannot run Kokoro from cloudflare?"; then "a" (desktop first, then Kokoro hosted on Cloudflare Containers).
 - Placement: "a" (after the Stage 8 release and the merge train, ahead of the rest of Stage 9).
+- On the plan's MeloTTS fallback (write-plan, 2026-10-23): "Drop this. Only focus on kokoro".
+- On desktop ads (write-plan, 2026-10-23): "What if we did a chromium app? If that doesn't work, we can likely drop ads on the desktop app for now". The agent checked: Blurby is already a Chromium (Electron) app. AdSense bans ads "integrated into a software application", and its only app exception (the WebView API for Ads) needs the Google Mobile Ads SDK, which is mobile-only. So the fallback applies.
+- On the plan's other open questions (Q1–Q8, Q10, Q11): "Agree with the rest".
 - Books per plan: "move this down to 5 personal books, with unlimited purchased books through Blurby's marketplace. Same for the 25 on tier 1."
 - Onboarding: "Blurby should be a drag and drop, so the onboarding consists of a drag and drop window, which is also available at any further stage, with document type limitations. If the drag and drop is larger than the allowed capacity of the user's plan, it is denyed for now."
 - Trial: "Perhaps in the future, we allow a trial mode for new users on the unlimited plan, with a timer that backs out at expiry asking users to remove books or upgrade to a new plan." Then: "Add to future roadmap, holding".
@@ -83,6 +87,9 @@
 | Library intake | A drag-and-drop window, at onboarding and at any time. Unsupported types are refused. A drop over the plan limit is refused whole (upgrade or cancel) | the user | 2026-10-23 |
 | Narration beyond the desktop | Desktop first. A later phase hosts Kokoro on Cloudflare Containers, starting with a speed-and-cost test, with MeloTTS on Workers AI as the fallback | the user | 2026-10-23 |
 | Placement | After the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9, as an epic | the user | 2026-10-23 |
+| Server narration engine (supersedes the MeloTTS fallback in "Narration beyond the desktop") | Kokoro only. MeloTTS is dropped. If the Kokoro speed-and-cost test fails, server narration comes back to the owner, with no fallback engine | the user | 2026-10-23 |
+| Ads on the desktop (amends the Plans table's Ads row) | No ads on the desktop app for now: a "Chromium app" is still software under AdSense policy. Free keeps its limits. Ads return when a surface that allows them exists (the phone apps with AdMob, or a future web reader) | the user | 2026-10-23 |
+| The plan's open questions Q1–Q8, Q10, Q11 | As the plan recommends (charter draft → Owner rulings) | the user | 2026-10-23 |
 
 **Plans (approved starting values; stored as adjustable server settings):**
 
@@ -94,7 +101,7 @@
 | Podcast follows / offline downloads | 5 / none | 50 / yes | Unlimited |
 | Narrate time | 5 h a month | 30 h a month | Unlimited |
 | Devices | 3 | Unlimited | Unlimited |
-| Ads | Library and between books only | none | none |
+| Ads | Library and between books only (**desktop: none for now**, decision 2026-10-23) | none | none |
 
 **Research behind the plans (third-party figures; check before launch):**
 - [BookFusion](https://www.bookfusion.com/): free tier of 10 uploads and 3 devices; paid from $1.99 a month.
@@ -194,6 +201,7 @@ Considered and set aside:
 - Point ANDROID-APP-1's and IOS-APP-1's sync dependency at this server.
 
 **Follow-up flags (for the review's non-blocking follow-up queue):**
+- **Ads on Free (owner, 2026-10-23):** deferred off the desktop. Revisit with the phone apps (AdMob, in the library and between books only) or a future web reader.
 - **Unlimited trial for new users (owner, 2026-10-23: "Add to future roadmap, holding"):** a time-limited Unlimited plan for new accounts. At expiry, it asks the user to remove books down to their plan's limit or upgrade.
 
 ### Alignment verdict
@@ -211,7 +219,7 @@ Written by `/write-plan` on 2026-10-23 against `main` @ `ac9dc539`, at the owner
 | Finding | Result |
 |---|---|
 | **Specification** | The charter draft has: the epic DoD (E1–E9); planner decisions T1–T15 (tier 1); and four phases, each with What, Why, Done when, edit sites, tests, failure handling, a task list and Lessons applied. Edit-site anchors were grep-verified on `ac9dc539` (2026-10-23). Cloudflare, auth, payments and ads facts come from the vendors' docs, read 2026-10-23. |
-| **Owner questions** | 11 open (Q1–Q11), each with a recommendation. None blocks Phase 1's start except Q1 (file size), which blocks only P1 task 4. |
+| **Owner questions** | All 11 ruled on 2026-10-23 (recorded in the alignment record above): Q9, Kokoro only, MeloTTS dropped; Q7, no ads on the desktop for now; the rest as recommended. None is open. |
 | **Prerequisites** | **Pending, with the wait encoded:** the Stage 8 release and the post-freeze merge train. Phase 1 is server-only and may overlap the train. |
 | **External** | Owner actions: Cloudflare Workers Paid; Google, Microsoft and Apple registrations; the email domain; terms and takedown text. Later: a payment provider and an ad source (draft → External prerequisites). |
 | **Register** | Not read or written by this plan (planning only). |
@@ -233,5 +241,5 @@ Placement: after the Stage 8 release and the post-freeze merge train, ahead of t
 Path: epic (4 phases) | Effort: max
 Specification: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md
 Status: storyboarded — held for roadmap review (epic-scale; never `planned` here) | Prerequisites: Stage 8 release ✗; merge train ✗
-Readiness: specification ✓ (draft) · prerequisites ✗ (wait encoded) · owner questions 11 open · register not touched
+Readiness: specification ✓ (draft) · prerequisites ✗ (wait encoded) · owner questions 0 open (ruled 2026-10-23) · register not touched
 ```
