@@ -4,7 +4,7 @@ id: BLURBY-SERVER-1 (provisional; the review assigns the id)
 item: BLURBY-SERVER-1
 origin: held plan 2026-10-23-blurby-server (storyboard aligned 2026-10-23, owner "a")
 created: 2026-10-23
-status: draft   # draft → /epic charters it after /roadmap-review places it as Path: epic
+status: draft   # not a launched charter; /epic sets active when it scaffolds the packet after /roadmap-review places the item as Path: epic
 ---
 
 # Epic Charter Draft — One library on every device (blrby.app server)
@@ -100,17 +100,17 @@ This is what the edit sites hold now. Phase specs cite it. Each run re-greps its
 
 Commands name their shell and pass only on their exact exit code (standing rule 44). Every check script is first shown to record a failure (LL-151).
 
-| # | Condition | Verify by |
-|---|---|---|
-| E1 | Frame 1: page 120 on the computer opens at page 120 on a second signed-in device, with the same highlights and notes. | Phase 2 DoD row P2-D1 (two desktop profiles on two machines, owner-observed) |
-| E2 | Frame 2: the drag-and-drop window works at onboarding and at any time; unsupported files are named and refused; a drop over the limit is refused whole, with upgrade or cancel, and nothing from it is added. | P1-D4 (server), P2-D3 (desktop) |
-| E3 | Frame 3: offline highlights and position survive reconnect; the most recent position wins; every device's highlights are kept. | P2-D4 |
-| E4 | Frame 4: a sixth personal book on Free is blocked with upgrade, delete or cancel; Marketplace books are owned and never counted. | P1-D4, P2-D3; P3-D2 for the upgrade path |
-| E5 | Frame 5 (must never): no account reaches another's books or data, even by a guessed link; deleting an account removes everything. | P1-D3 (route matrix), P1-D6 (deletion) |
-| E6 | Frame 6: Narrate minutes count on every device; the reading page and Narrate never show ads. | P2-D6 (counting), P3-D4 (no ads on reading or Narrate surfaces) |
-| E7 | blrby.app publishes terms of use and a takedown contact before uploads open. | P1-D7 (the uploads flag cannot be turned on without them) |
-| E8 | Own-cloud sync is gone: `main/sync-engine.js`, `main/cloud-onedrive.js`, `main/cloud-google.js`, `main/cloud-storage.js`, `main/cloud-retry.js` and their IPC, preload and UI are deleted, with no dangling import. | P2-D7 |
-| E9 | Project gates: `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine; `npm --prefix server test` and `npm --prefix server run typecheck` exit 0 (LL-149). | Every phase |
+| # | Condition | Verify by | Expected evidence |
+|---|---|---|---|
+| E1 | Frame 1: page 120 on the computer opens at page 120 on a second signed-in device, with the same highlights and notes. | Phase 2 DoD row P2-D1 (two desktop profiles on two machines, owner-observed) | Owner pass recorded in state.md; the two-device test output |
+| E2 | Frame 2: the drag-and-drop window works at onboarding and at any time; unsupported files are named and refused; a drop over the limit is refused whole, with upgrade or cancel, and nothing from it is added. | P1-D4 (server), P2-D3 (desktop) | Test output; owner pass recorded |
+| E3 | Frame 3: offline highlights and position survive reconnect; the most recent position wins; every device's highlights are kept. | P2-D4 | Test output, including the kill-mid-write case |
+| E4 | Frame 4: a sixth personal book on Free is blocked with upgrade, delete or cancel; Marketplace books are owned and never counted. | P1-D4, P2-D3; P3-D2 for the upgrade path | Test output; the test-mode purchase recorded |
+| E5 | Frame 5 (must never): no account reaches another's books or data, even by a guessed link; deleting an account removes everything. | P1-D3 (route matrix), P1-D6 (deletion) | Matrix output, including its broken-route control exiting 1; the deletion test output |
+| E6 | Frame 6: Narrate minutes count on every device; the reading page and Narrate never show ads. | P2-D6 (counting), P3-D4 (no ads on reading or Narrate surfaces) | Test output, including the injected-slot control exiting 1 |
+| E7 | blrby.app publishes terms of use and a takedown contact before uploads open. | P1-D7 (the uploads flag cannot be turned on without them) | The gate test output; production `/terms` and `/takedown` returning 200 |
+| E8 | Own-cloud sync is gone: `main/sync-engine.js`, `main/cloud-onedrive.js`, `main/cloud-google.js`, `main/cloud-storage.js`, `main/cloud-retry.js` and their IPC, preload and UI are deleted, with no dangling import. | P2-D7 | The census in the phase's first commit; the grep exits 1 (it exits 0 on the base) |
+| E9 | Project gates: `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine; `npm --prefix server test` and `npm --prefix server run typecheck` exit 0 (LL-149). | Every phase | Exit 0 for each command, with the suite counts recorded |
 
 ## Constraints
 
@@ -187,6 +187,8 @@ Commands name their shell and pass only on their exact exit code (standing rule 
 ---
 
 ## Phase specifications
+
+<!-- /epic's plan.md is phase-altitude (intent, exit gate, rough size). These specs are fuller at the owner's request; /epic derives plan.md from each phase's What and Done-when, and the task lists are pricing guidance, not a pre-built backlog. -->
 
 ### Phase 1 — Server foundation and plan limits
 
