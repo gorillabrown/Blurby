@@ -85,6 +85,19 @@ Blurby.Roadmap then held the other executors. One foreign process was still pres
 | 33 | PASS (on the smoke8-folder2 copies, not the Drive folder) | I | The executor deleted the BRIMSTONE copy. Within 2 s the cards went from 6 to 5, and only BRIMSTONE was gone. The executor did not delete a file in the owner's Drive folder, because the directive forbids deleting user data. |
 | 34 | PASS (on smoke8-folder2) | I | The executor opened *STOLEN IN DEATH*, turned 3 pages (CDP ArrowRight) and closed it. The saved state was id `1792724160740ffuriu`, position 20, cfi `/6/6!/4/20,/2,/2`. The file was renamed to `01. sTOLEN…`, and Rescan (⟳) was run. Afterwards there was the same id, position and cfi, 1 matching card of 5, and no second card. |
 
+### B3. Drive disconnected
+
+The executor quit Google Drive for desktop through its tray popup (gear → Quit, real clicks). GoogleDriveFS then had 0 processes and the Drive path was unreachable.
+
+This group used a fresh FN1/FUG1 copy profile, `%TEMP%\blurby-fn1-owner-20261022221*`, made with robocopy (leaving out `auth-tokens.json` and `*-backup-*`). Its `sourceFolder` is the Drive path, and `orig` = 131 folder books under the Drive path.
+
+| # | Result | Build | Evidence |
+|---|---|---|---|
+| 35 | PASS (against the owner's 2026-10-15 wording) | I | Launch 1 and quit: missing 0 (131 folder books); `source folder problem: root-unlistable` was logged once; "re-selecting" never appeared.<br>Launch 2 had a 150 ms DOM toast watcher attached from launch. The toast appeared **once**, from 3.0 s to 10.2 s, and never again in 130 s.<br>The toast reads "Blurby can't reach your source folder. Your books are kept. Reconnect the drive, then press Retry." That is FOLDER-NOTICE-1's owner wording (`FolderNoticeBanner.tsx:6`, the same string as `main.js`). **The checklist's quoted text ("…and Blurby will pick it up.") is out of date.** |
+| 36 | PASS | I | The banner, with the same words and a Retry button, stayed after the toast went (`36-banner.jpg`). Retry was pressed once with a real click at 22:18:34. Result: 1 `Retry: one root check: null` line at +5 s, still 1 at about +95 s, and no second toast. |
+| 37 | PASS | I | Drive was started again at 22:20:19 and the path was reachable at 22:20:25. With nothing pressed, the banner was still shown at 22:21:00. Retry was then pressed (real click): the banner cleared within 1 s, with one `Retry: one root check: true` line. |
+| 38 | PASS | I | With Drive running, the app was relaunched and *Theo of Golden* (a Drive book) opened and rendered its cover page (`38-drive-book-renders.jpg`). The executor then quit: 33 s open in total, missing 0, 131 folder books. |
+
 ## Findings so far (not checklist failures)
 
 - **F1:** the tray icon renders as a tiny dot. `assets/tray-icon.png` is 1024×1024 with heavy padding.
