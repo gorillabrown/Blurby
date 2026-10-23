@@ -88,7 +88,7 @@
 ### BUG-191 — Narration reads four-digit years as cardinal numbers
 **Reported:** 2026-05-20 (in-app report `bug-2026-05-20T21-03-25Z`; triaged 2026-10-13 by the governance sweep)
 **Severity:** LOW (comprehension; Narrate is removed, so it cannot occur until the rebuild ships)
-**Status:** OPEN — stub NARRATE-YEARS-1, after NARRATE-REBUILD-1 closes (roadmap review 2026-10-14). Lane: TTS / Narration Engine.
+**Status:** RESOLVED in source (NARRATE-YEARS-1): NARRATE-REBUILD-1 reads 1100–2099 as years (kokoro's own normalizer, reproduced in `main/narrate/normalize.js`); NARRATE-YEARS-1 adds 1001–1099 and their decades ("1066" → "ten sixty-six", "the 1060s" → "the ten sixties") and reads an en dash between two years as "to", per the owner's rulings of 2026-10-22 and 2026-10-23. A comma marks a count ("1,974 coins"). The owner's listening check is on the next smoke list. Lane: TTS / Narration Engine.
 **Location:** the removed Narrate pipeline's spoken-text normalization (Kokoro, voice `am_adam`, 1.2x); no live code path until NARRATE-REBUILD-1.
 **Description:** "Years are read like one thousand and seventy four instead of the standard nineteen seventy four." A year such as 1974 is spoken as a cardinal number instead of in paired-digit year form.
 **Evidence:** `docs/bug-reports/.Archive/bug-2026-05-20T21-03-25Z.json` and `.png` (gitignored, local to the owner's machine).
