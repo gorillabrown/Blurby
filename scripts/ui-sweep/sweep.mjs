@@ -152,7 +152,8 @@ function denied(c) {
   const m = c.label.match(DENY_LABEL);
   return m ? `label matches "${m[0]}"` : null;
 }
-const DESTRUCTIVE = /\b(delete|remove|clear|reset|erase|forget|unpair|wipe|discard|trash|normalize|apply)\b/i;
+// "archive" too: an archived book leaves the default list, so every later route through its card would fail.
+const DESTRUCTIVE = /\b(delete|remove|clear|reset|erase|forget|unpair|wipe|discard|trash|normalize|apply|archive)\b/i;
 const DIALOG_HINT = /\b(browse|choose (a )?folder|select folder|open folder|import|add (a )?(book|file)s?|open file|export|save as|change folder|pick)\b/i;
 
 // ── native dialog watcher (one persistent pwsh; EnumWindows by owner pid, class #32770) ─────────────────────────
@@ -229,6 +230,8 @@ class Session {
     this.cdp.on("Page.javascriptDialogOpening", (p) => { this.jsDialogs.push(`${p.type}: ${p.message}`.slice(0, 200)); this.cdp.send("Page.handleJavaScriptDialog", { accept: true }).catch(() => {}); });
     this.mainTarget = target.id;
     await this.cdp.send("Runtime.enable"); await this.cdp.send("Page.enable");
+    // A swept window may sit behind other windows: emulate focus so focus-gated APIs (the clipboard) and keys work.
+    await this.cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true }).catch(() => {});
     await this.helpers();
   }
   async helpers() { await this.cdp.eval(PAGE_HELPERS); this.helpersOk = true; }
@@ -349,7 +352,7 @@ async function runSteps(s, steps, vars = {}) {
       const b = await s.sw(`box(${JSON.stringify(st.rightClick)})`); if (!b) throw new Error(`step: ${st.rightClick} not found`);
       for (const type of ["mousePressed", "mouseReleased"]) await s.cdp.send("Input.dispatchMouseEvent", { type, x: b.x, y: b.y, button: "right", clickCount: 1 });
     } else if (st.clickText) {
-      const sel = await s.cdp.eval(`(() => { const want = ${JSON.stringify(st.clickText)}.toLowerCase(); const el = [...document.querySelectorAll(${JSON.stringify(st.within || "*")})].find((e) => (e.innerText || "").trim().toLowerCase().startsWith(want)); if (!el) return null; el.setAttribute("data-sweep-step", "1"); return '[data-sweep-step="1"]'; })()`);
+      const sel = await s.cdp.eval(`(() => { const want = ${JSON.stringify(st.clickText)}.toLowerCase(); const el = [...document.querySelectorAll(${JSON.stringify(st.within || "*")})].find((e) => (e.innerText || "").replace(/^[^\\p{L}\\p{N}]+/u, "").trim().toLowerCase().startsWith(want)); if (!el) return null; el.setAttribute("data-sweep-step", "1"); return '[data-sweep-step="1"]'; })()`);
       if (!sel) throw new Error(`step: text "${st.clickText}" not found`);
       const b = await s.sw(`box(${JSON.stringify(sel)})`); await s.click(b.x, b.y);
       await s.cdp.eval(`document.querySelector('[data-sweep-step="1"]')?.removeAttribute("data-sweep-step")`).catch(() => {});
