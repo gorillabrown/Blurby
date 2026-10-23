@@ -1087,7 +1087,7 @@ The restamp items (PAGE-SAVE-RESTAMP-GUARD-1 `813ff38a`, PAGE-SAVE-RESTAMP-2 `55
 
 <a id="release-runbook-1"></a>
 
-#### RELEASE-RUNBOOK-1 — Write the release runbook: build, sign, upload and verify the installers by hand *(position 7 — Full Spec; authored 2026-10-22 on main @ `e257c08a`; RELEASE GATE (12); created on Blurby.Brain's ruling)*
+#### RELEASE-RUNBOOK-1 — Write the release runbook: build, sign, upload and verify the installers by hand *(merged `3872c6e8` 2026-10-23, release gate (12) met; In Flight, close-out held for the smoke's arm64 row; the ARM64 installer fix (`ELECTRON_BUILDER_7Z_FILTER=BCJ`) was accepted by Blurby.Brain 2026-10-23; position 7 — Full Spec; authored 2026-10-22 on main @ `e257c08a`; RELEASE GATE (12); created on Blurby.Brain's ruling)*
 
 - **What:** Write `docs/governance/RELEASE_RUNBOOK.md`, the manual procedure for publishing a Blurby desktop release. Validate every command in it on the release's `main`, without publishing. Correct the stale release text in `docs/governance/TECHNICAL_REFERENCE.md`. Docs only: no workflow, no script, no product code.
 - **Why:** no workflow builds or uploads installers. `.github/workflows/release.yml` was deleted in `e9bbf56a` (2026-03-31), and `ci.yml` only tests. The Stage 8 release (the finish line) is therefore a manual step. Release gate (12) requires the steps to be written down and proven before the batched owner smoke, so the build the owner smokes is the build that ships.
