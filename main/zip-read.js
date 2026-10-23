@@ -5,17 +5,25 @@ const zlib = require("zlib");
 const fsPromises = require("fs/promises");
 const constants = require("./constants"); // read at call time so tests can lower the caps
 
-// The one way main/ opens an archive from disk: adm-zip reads the whole file into memory before any
-// entry cap applies, so its size on disk is checked first. A file stat cannot see (missing, bad path)
-// goes on to adm-zip, so its open error, and each caller's message for it, stay as they were.
-// adm-zip stays lazy-loaded.
+// The one way main/ opens an archive from disk. Its size is checked on the stat, then the file is read with
+// fs.promises (never adm-zip's synchronous read) and checked again on the bytes read, so a file that grew after the
+// stat is refused too. A path stat cannot see keeps adm-zip's "Invalid filename" error, and so each caller's message
+// for it. adm-zip stays lazy-loaded.
 async function openZip(filePath) {
+  const tooLarge = (size) => Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
   const size = await fsPromises.stat(filePath).then((s) => s.size, () => 0);
-  if (size > constants.ZIP_FILE_MAX_BYTES) {
-    throw Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
+  if (size > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(size);
+  let buffer;
+  try {
+    buffer = await fsPromises.readFile(filePath);
+  } catch (err) {
+    // adm-zip's own wording for a path it cannot see, so each caller's message for it stays as it was.
+    if (err.code === "ENOENT" || err.code === "ENOTDIR") throw Object.assign(new Error("ADM-ZIP: Invalid filename"), { code: err.code });
+    throw err;
   }
+  if (buffer.length > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(buffer.length); // it grew after the stat
   const AdmZip = require("adm-zip");
-  return new AdmZip(filePath);
+  return new AdmZip(buffer);
 }
 
 // Reads around adm-zip's getData(): adm-zip <=0.6.0 sizes its output from the entry's declared
