@@ -1,0 +1,51 @@
+{
+  "id": "20261023T081652Z-external-create-item-KEEP-FURTHEST-FIX-1",
+  "operation": "external-create-item",
+  "item_id": "KEEP-FURTHEST-FIX-1",
+  "created": "2026-10-23T08:16:52Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "Sprint Code": "KEEP-FURTHEST-FIX-1",
+      "title": "Keep at furthest in Page mode keeps the furthest page the reader reached",
+      "Status": "In Flight",
+      "Seq": 6.6,
+      "Lane": "Reader Engine",
+      "Effort": "S",
+      "Spec State": "Full Spec",
+      "Spec Reference": "ROADMAP.md#keep-furthest-fix-1",
+      "Branch": "eb/keep-furthest-fix-1",
+      "Started": "2026-10-23",
+      "id": "KEEP-FURTHEST-FIX-1",
+      "status": "Queued",
+      "written_status": "Stub",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:26:55Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:KEEP-FURTHEST-FIX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "KEEP-FURTHEST-FIX-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:KEEP-FURTHEST-FIX-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T081652Z-external-create-item-KEEP-FURTHEST-FIX-1",
+      "detail": {},
+      "providerItemId": "",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T08:17:05Z",
+  "outcome": "succeeded"
+}

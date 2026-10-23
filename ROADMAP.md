@@ -294,7 +294,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 **Gate (2) result, 2026-10-23: FAILED.** The owner smoke on `47ae6e1f` (`docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`) passed 33 of 40 checks. It failed #8, BUG-201 (Page reopen position, a release blocker), and #28, BUG-202 (stale folder header, pending reproduction). The first ARM64 installer also failed (#1), and was fixed by RELEASE-RUNBOOK-1's BCJ build. [SMOKE8-DIAG-1](#smoke8-diag-1) diagnoses BUG-201 and BUG-202. The fixes land on `main` as the release fix. Then gate (1) and the failed and not-run smoke checks (#8, #9, #28–#30, and the owner's tray right-click on #1) re-run on the new sha. The freeze holds, moving to that sha.
 
-**Freeze moved, 2026-10-23: the release-fix sha is `97527896`.** The release fix merged in this order: PAGE-REOPEN-CFI-1 (`34bec523`), BOOK-TEXT-COLOUR-1 (`c83c6553`), FOLDER-SWITCH-HEADER-1 (`ba591572`), NARRATE-START-STACK-1 (`a612b353`), BOOK-TYPE-SCALE-1 (`97527896`). Gate (1) and the smoke re-run now run on `97527896`, and the freeze holds from it on the same terms: docs-only merges, plus UI-SWEEP-1's non-shipping script and report. The smoke re-checks are:
+**Release line reopened, 2026-10-23 (Blurby.Brain): KEEP-FURTHEST-FIX-1 is a new release gate. The release-fix sha will move to its merge, and the installers from `97527896` are superseded.** **Freeze moved, 2026-10-23: the release-fix sha is `97527896`.** The release fix merged in this order: PAGE-REOPEN-CFI-1 (`34bec523`), BOOK-TEXT-COLOUR-1 (`c83c6553`), FOLDER-SWITCH-HEADER-1 (`ba591572`), NARRATE-START-STACK-1 (`a612b353`), BOOK-TYPE-SCALE-1 (`97527896`). Gate (1) and the smoke re-run now run on `97527896`, and the freeze holds from it on the same terms: docs-only merges, plus UI-SWEEP-1's non-shipping script and report. The smoke re-checks are:
 - #8, #9 (reopen position, across a relaunch);
 - #28–#30 (folder header);
 - the tray right-click;
@@ -2681,6 +2681,35 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Branch:** `eb/book-text-colour-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\book-text-colour-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
 - **Scope:** Fence: the four `src/reader/modes/*/helpers/foliateStyles.ts`, the per-mode test, the contrast test, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo. Rule choice: **owner decision 2026-10-23 (via Blurby.Brain): the general rule.** "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour." Extra Done-when (Brain): a `<span>` inside an `<a>` computes to the accent, not the body text colour. BOOK-TYPE-SCALE-1 stacks on this branch.
 - **Path:** dispatch.
+
+<a id="keep-furthest-fix-1"></a>
+
+#### KEEP-FURTHEST-FIX-1 — "Keep at furthest" in Page mode keeps the furthest page the reader reached *(position 6.6 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; **release gate, added by Blurby.Brain 2026-10-23**; holds the shared-core window for `ReaderContainer.tsx`)*
+
+- **What:** in Page mode, the backtrack prompt's "Keep at furthest" must save the furthest position the reader reached. Today it saves the stale open position, so progress is lost and the book reopens on the earlier page.
+  - Page-turn commits raise the furthest mark (`furthestPositionRef`) and record that page's cfi in a new `furthestCfiRef`, with no extra save.
+  - Keep sends the furthest mark through `finishReading(furthestPositionRef.current, cfi)`.
+  - "Save at page" is unchanged.
+- **Why:** measured live by blurby-6b on the release build `97527896`. Page-turn saves (PAGE-POSITION-SAVE-1) never raise `furthestPositionRef`, so the prompt offers the open position. The regression came in with this release's PAGE-POSITION-SAVE line. On `08f4b948~1`, turns didn't save, so the prompt could not be reached.
+- **Where** (prototype: blurby-6b's `keep-furthest-fix.diff`, 118 lines, two files):
+  - `src/components/ReaderContainer.tsx`: the persistence port's Page-turn save raises the mark and its cfi.
+  - `src/hooks/useProgressTracker.ts`:
+    - add `furthestCfiRef`;
+    - `_persistAndLog(finalPos, cfiOverride?)`;
+    - `finishReading(finalPos, cfi?)`;
+    - Keep's call site.
+- **Owner question (tier 3, with the owner through Blurby.Brain):** after Keep, does the reopen show the furthest page (the prototype) or the on-screen page? This changes only which cfi Keep sends: `furthestCfiRef.current` or the last relocate's. Build it so either answer is a one-line choice. Merge waits for the answer.
+- **Done when:**
+  1. **Red first:** a test of the 1290/2673 scenario. Open at 1290, turn pages forward to 2673, back up, then Keep. It saves 2673, with the cfi the owner picks. On `97527896` it saves 1290. The test is committed before the fix.
+  2. "Save at page" still saves the on-screen page, pinned by an existing or new test.
+  3. Live, on a `--dir` build and a scratch profile: run the scenario, Keep, close and reopen. The reopen lands per the owner's answer, and `library.json` holds the furthest position.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  5. **Fence:** `ReaderContainer.tsx`, `useProgressTracker.ts`, the test file or files, `docs/governance/BUG_REPORT.md` (a new BUG for this regression), the memo and the time log.
+- **Out of scope, after the release:** (a) page turns counted toward pages read; (b) persisting the furthest mark.
+- **Release effect:** the release-fix sha moves to this item's merge. Gate (1) targets the new sha, the installers built from `97527896` are superseded and are rebuilt, and the smoke re-checks add the backtrack-prompt scenario: in Page, open, turn ahead several pages, go back, choose Keep at furthest, then reopen.
+- **Branch:** `eb/keep-furthest-fix-1` from `refs/remotes/origin/main`. Ask for merge go.
+- **Lane:** Reader Engine. Execution surface A/C. Effort: S. **Path:** dispatch.
+- **Lessons applied:** standing rule 43 (red first); LL-161 (positions checked by word text and cfi); standing rule 45 (the owner's route is re-checked in the smoke).
 
 <a id="narrate-start-stack-1"></a>
 
