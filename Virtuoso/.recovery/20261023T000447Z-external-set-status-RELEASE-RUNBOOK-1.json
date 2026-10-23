@@ -1,0 +1,39 @@
+{
+  "id": "20261023T000447Z-external-set-status-RELEASE-RUNBOOK-1",
+  "operation": "external-set-status",
+  "item_id": "RELEASE-RUNBOOK-1",
+  "created": "2026-10-23T00:04:47Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/release-runbook-1",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. TECHNICAL_REFERENCE.md:945 still describes the deleted release workflow. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/release-runbook-1 from main after ELECTRON-42-UPGRADE-1 merged, 331fb81b)."
+    },
+    "expectedRevision": "b999db624c6f5899752f679d8b31dcb4b9330ec2e0c3754341d2b23af5ef1f02",
+    "idempotencyKey": "set-status:RELEASE-RUNBOOK-1:[('branch', 'eb/release-runbook-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. TECHNICAL_REFERENCE.md:945 still describes the deleted release workflow. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/release-runbook-1 from main after ELECTRON-42-UPGRADE-1 merged, 331fb81b).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RELEASE-RUNBOOK-1",
+      "idempotencyKey": "set-status:RELEASE-RUNBOOK-1:[('branch', 'eb/release-runbook-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. TECHNICAL_REFERENCE.md:945 still describes the deleted release workflow. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/release-runbook-1 from main after ELECTRON-42-UPGRADE-1 merged, 331fb81b).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T000447Z-external-set-status-RELEASE-RUNBOOK-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:05:07Z",
+  "outcome": "succeeded"
+}

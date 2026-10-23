@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:01:58Z",
+  "takenAt": "2026-10-23T00:05:08Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3027,8 +3027,8 @@
       "id": "RELEASE-RUNBOOK-1",
       "title": "Write the release runbook: build, sign, upload and verify the installers by hand",
       "sequence": 7,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -3039,13 +3039,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "",
-      "branch": "",
-      "started": "",
+      "branch": "eb/release-runbook-1",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "No workflow builds or uploads installers (release.yml was deleted in e9bbf56a), so the Stage 8 release is a manual step. Write a runbook in docs/governance/ for building the x64 and ARM64 installers with electron-builder, signing them if configured, uploading them to the GitHub release, and checking the latest.yml electron-updater reads for both architectures. Docs only.",
-      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. TECHNICAL_REFERENCE.md:945 still describes the deleted release workflow.",
-      "revision": "b999db624c6f5899752f679d8b31dcb4b9330ec2e0c3754341d2b23af5ef1f02",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding. Stage 8 release gate (12): must exist before the batched owner smoke. Docs only, no CI rebuild. TECHNICAL_REFERENCE.md:945 still describes the deleted release workflow. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/release-runbook-1 from main after ELECTRON-42-UPGRADE-1 merged, 331fb81b).",
+      "revision": "9600d3b038ef3ffcf2bd496ee4ee611dedc7646bcc28da67f0f591d1f127ed79",
       "extra": {}
     },
     {
