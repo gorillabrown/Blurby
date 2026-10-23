@@ -591,7 +591,8 @@ Completed 2026-10-14 (merge `d21009b3`). The quit saves run in the cancelled fir
 #### BAND-ALIGN-1 — The Focus/Flow reading band is sized from the real line step (Part A) *(built `105a07c1` on `eb/band-align-1`; In Flight, merge held for the Stage 8 freeze)*
 
 - **State:** built and pushed at `105a07c1` on `eb/band-align-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after the Stage 8 freeze lifts, and after the owner's tier-2 OK. It overlaps two Narrate items:
+- **Owner OK, 2026-10-23 (tier 2):** yes, the band grows to the real line count. The Lines choice becomes 3, 5, 7 or Off (BAND-ALIGN-2, R5).
+- **Merge order:** after the Stage 8 freeze lifts (the owner's tier-2 OK is given). It overlaps two Narrate items:
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#band-align-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="foliate-observer-leak-1"></a>
@@ -890,7 +891,7 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   - Bottom edge: the midpoint of the gap between the band's last line and the line below it.
   - At a section's first or last line, the edge is that line's box edge.
   - The mask's fade (`mode.css`, `calc(var(--flow-zone-top) - 2%)` and its bottom twin) lies outside the edges, so no glyph is cut by the bright band's edge.
-- **R2. The cursor line is the band's middle line.** The band covers `flowZoneLines` lines: the cursor line, `floor((n − 1) / 2)` lines above it and `ceil((n − 1) / 2)` lines below it. For odd n (3, 5, 7) the cursor is exactly centred. For even n (4, 6, 8) the extra line goes below, toward the text ahead. That is the planner's default; the owner left the even case open, so it can be revised at the smoke.
+- **R2. The cursor line is the band's middle line.** The band covers `flowZoneLines` lines: the cursor line, `floor((n − 1) / 2)` lines above it and `ceil((n − 1) / 2)` lines below it. n is always odd (3, 5 or 7; R5), so the cursor line is exactly centred: one line above and below at 3, two at 5, three at 7.
   - At a section's start or end, where fewer lines exist on one side, the band takes the lines that exist. It never covers blank space past the section's text.
 - **R3. The band belongs to the reading location.** Every move of the cursor (arrival, word tick, line change, key move, click, contents jump) places the band by one rule:
   1. **Scroll first.** Scroll so that the cursor line's centre sits at the anchor's y. The scroll is clamped to the container's range (`0` to `scrollHeight − clientHeight`), including any leading inset the mode already sets (`setFlowInsetsForRenderedDocs`).
@@ -906,6 +907,12 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   - **Wiring:** `ReaderContainer.tsx:815-816` passes `flowZonePosition={settings.flowZonePosition}` and `onSetFlowZonePosition={(v) => updateSettings({ flowZonePosition: v })}`, beside the existing `flowZoneLines` pair. **This is a shared-core touch** (see below).
   - A change of anchor re-places the band at once (R3) without moving the reading word.
 - **Removed from this item:** `FLOW_ZONE_INITIAL_TOP` (0.15) no longer places the band in Focus or Flow; R3 and R4 do. The constant stays for Narrate's band, which is out of scope.
+- **R5. Lines: 3, 5, 7 or Off (owner, 2026-10-23).** The reader chooses how many lines the band covers, or turns the band off.
+  - **Storage:** the existing `flowZoneLines` (`src/types.ts:170`, a number; a trusted key). `0` means Off. No new key and no `src/types.ts` edit.
+  - **Values:** `3`, `5`, `7` and `0` (Off). Legacy values read through one normaliser per mode helper, `normalizeBandLines(value)`: 4 → 5, 6 → 7, 8 → 7, `undefined` → 5, and any other value → 5. The default stays 5 (`FLOW_ZONE_LINES_DEFAULT`). Add `FLOW_ZONE_LINES_OPTIONS = [3, 5, 7]` and `FLOW_ZONE_LINES_OFF = 0` in `src/constants.ts` (constants separation rule).
+  - **Off:** no band and no dimming. The mask is removed (the zone host carries no `--flow-zone-*` properties, and a `--band-off` modifier class disables the gradient in each mode's `mode.css`). The reading cursor (the Focus highlight and the Flow underline) still shows, and R3's scroll to the anchor still runs, so the text still lands at the chosen spot.
+  - **Control:** the bottom bar's **Lines** slider (`ReaderBottomBar.tsx:351-360`, `min={3} max={8}`) becomes a four-button group, **3 · 5 · 7 · Off**, with `aria-pressed`, beside the anchor buttons (R4), in Focus and Flow. The existing `onSetFlowZoneLines` prop carries the value, so `ReaderContainer.tsx` needs no new prop for this.
+  - A change of lines re-places the band at once (R3) without moving the reading word.
 
 **Done when, amended:**
 
@@ -915,7 +922,8 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
     - the bottom edge is the gap midpoint (208 + 22 + 235) / 2.
 
     It is not 100 to 230, the line boxes themselves.
-  - **(r2) Centre.** n = 5 puts the cursor line third of five. n = 4 puts it second of four (the extra line below). At a section's first line with n = 5, the band covers lines 1–3 only, with no blank above.
+  - **(r2) Centre.** n = 3, 5 and 7 put the cursor line second of three, third of five and fourth of seven. At a section's first line with n = 5, the band covers lines 1–3 only, with no blank above.
+  - **(r6) Lines.** `normalizeBandLines` maps 3 → 3, 5 → 5, 7 → 7, 0 → 0, 4 → 5, 6 → 7, 8 → 7 and undefined → 5. The bottom bar renders **3 · 5 · 7 · Off** in Focus and Flow, and a press calls `onSetFlowZoneLines` with 3, 5, 7 or 0. With 0, the zone host has no `--flow-zone-top` and carries the band-off class, and the cursor highlight is still painted.
   - **(r3) Clamp.** In a 630 px view with the anchor at Top third and the cursor on a section's first line (y = 0, `scrollTop` already 0), the scroll stays 0 and the band's centre sits on the cursor line, not at 210 px.
   - **(r4) Anchor values.** `normalizeBandAnchor` maps 0 → 0, 1/3 → 1/3, 0.5 → 0.5, and 0.25, 0.15 and undefined → 1/3. Each anchor puts the cursor line's centre at 0 + half the band, 210 px and 315 px in a 630 px view when unclamped.
   - **(r5) Control.** The bottom bar renders the three buttons in Focus and in Flow, and a press calls `onSetFlowZonePosition` with 0, 1/3 or 0.5.
@@ -926,12 +934,14 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   - **Centred:** with n = 5, the cursor line is the band's third line in every sample, except the first two and last two lines of a section.
   - **Top of a section:** after a contents jump to INTRODUCTION, then the switch to Focus, and again in Flow, the cursor word is inside the band, and the band's centre is on the cursor line even though the scroll is clamped. This is the owner's 2026-10-23 failure.
   - **Anchor:** for each of Top, Top third and Center, the cursor line's centre is within half a line of the anchor's y, measured at a mid-section word.
+  - **Lines:** at 3, 5 and 7, the band covers exactly that many lines, with the cursor line in the middle. At Off, there is no dimming anywhere on screen, and the cursor word is still marked.
 - **Owner (next smoke), replacing Done-when 7:** in Focus and Flow:
   - the band's edges sit between lines;
   - the cursor line is in the band's middle;
   - at the top of a section the band is on the cursor;
-  - each of the three anchor buttons moves the text to that spot.
-- **Fence, amended:** add `M src/constants.ts`, `M src/components/ReaderBottomBar.tsx`, `M src/components/ReaderContainer.tsx`, `M tests/flowReadingZone.test.ts`, `M src/test-harness/electron-api-stub.ts`, and `M src/styles/*.css` if the button group needs a rule (no inline styles). `src/types.ts`, `src/utils/`, Page and Narrate stay untouched.
+  - each of the three anchor buttons moves the text to that spot;
+  - Lines 3, 5 and 7 change the band's height, and Off removes it.
+- **Fence, amended:** add `M src/constants.ts`, `M src/components/ReaderBottomBar.tsx`, `M src/components/ReaderContainer.tsx`, `M tests/flowReadingZone.test.ts`, `M src/test-harness/electron-api-stub.ts`, `M src/reader/modes/focus/mode.css` and `M src/reader/modes/flow/mode.css` (the band-off modifier), and `M src/styles/*.css` if the button groups need a rule (no inline styles). `src/types.ts`, `src/utils/`, Page and Narrate stay untouched.
 - **Shared-core touches:** `src/components/ReaderContainer.tsx`, two props, in an integration window after the Stage 8 release. On 2026-10-23 no held branch edits it: `git diff --name-only origin/main...<branch> -- src/components/ReaderContainer.tsx` printed nothing for all 19. Re-check at dispatch; if a branch then edits it, that branch merges first.
 - **Effort:** L (was M).
 
