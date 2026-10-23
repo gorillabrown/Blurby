@@ -415,7 +415,7 @@ function register(ctx) {
   ipcMain.handle("regenerate-ws-pairing-token", () => {
     const token = wsServer.generatePairingToken();
     const settings = ctx.getSettings();
-    settings._wsPairingToken = token;
+    settings._wsPairingToken = wsServer.encodePairingToken(token); // the stored form startServer reads (WS-TOKEN-REGEN-1)
     ctx.saveSettings();
     // Restart server with new token
     wsServer.stopServer();

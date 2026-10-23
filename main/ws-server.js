@@ -434,6 +434,16 @@ function generatePairingToken() {
   return crypto.randomBytes(16).toString("hex");
 }
 
+/** The pairing token's stored form in settings: safeStorage ciphertext (base64) when available, else plaintext. */
+function encodePairingToken(token) {
+  return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString("base64") : token;
+}
+
+/** Reads the stored form back; throws when encryption is available and the stored value is not its ciphertext. */
+function decodePairingToken(stored) {
+  return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(stored, "base64")) : stored;
+}
+
 function startServer(ctx) {
   if (_server) return { port: WS_PORT, token: _pairingToken };
 
@@ -443,30 +453,17 @@ function startServer(ctx) {
   const settings = ctx.getSettings();
   if (settings._wsPairingToken) {
     try {
-      if (safeStorage.isEncryptionAvailable()) {
-        const buffer = Buffer.from(settings._wsPairingToken, "base64");
-        _pairingToken = safeStorage.decryptString(buffer);
-      } else {
-        _pairingToken = settings._wsPairingToken;
-      }
+      _pairingToken = decodePairingToken(settings._wsPairingToken);
     } catch {
       // Decryption failed (corrupted or was stored in plaintext) — regenerate
       console.warn("[ws-server] Pairing token decryption failed — regenerating");
       _pairingToken = generatePairingToken();
-      if (safeStorage.isEncryptionAvailable()) {
-        settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
-      } else {
-        settings._wsPairingToken = _pairingToken;
-      }
+      settings._wsPairingToken = encodePairingToken(_pairingToken);
       ctx.saveSettings();
     }
   } else {
     _pairingToken = generatePairingToken();
-    if (safeStorage.isEncryptionAvailable()) {
-      settings._wsPairingToken = safeStorage.encryptString(_pairingToken).toString("base64");
-    } else {
-      settings._wsPairingToken = _pairingToken;
-    }
+    settings._wsPairingToken = encodePairingToken(_pairingToken);
     ctx.saveSettings();
   }
 
@@ -572,6 +569,8 @@ module.exports = {
   decodeFrame,
   encodeFrame,
   generatePairingToken,
+  encodePairingToken,
+  decodePairingToken,
   generateShortCode,
   getShortCode,
   handleConnection,
