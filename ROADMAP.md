@@ -3009,6 +3009,10 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
        - (ii) after a click on a word about 20 lines further down the section;
        - (iii) after a TOC jump to the next entry after INTRODUCTION.
      - **Flow,** on READER-VISUAL-DIAG-1's scripted route (180 s of play, one sample a second): the underline is outside the band in at most 9 of 180 samples (5%), at 100% and at 120%.
+     - **Flow, E-ink on (once, at 100%),** because `syncToWord` takes over the e-ink path:
+       - Play for at least 60 s, logging the scroll container's `scrollTop` and the line pacer's `lineIndex` each time `scrollTop` changes.
+       - Each scroll lands when the line reaches the current chunk's start + `EINK_LINES_PER_PAGE` (20). There is no per-line scroll in between.
+       - The underlined word stays on screen throughout.
      - Record every figure beside the base figures in the staging memo.
      - Close every window. The live profile's hashes are unchanged.
   4. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
