@@ -70,6 +70,10 @@ const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;
 /** Largest total read by one archive operation (bytes, 512 MiB; a large illustrated EPUB can pass 256 MiB) */
 const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;
 
+// ── Error Log ───────────────────────────────────────────────────────────────
+/** error.log rotates to error.log.1 before an append would take it past this size (bytes, 10 MiB; ERROR-LOG-CAP-1) */
+const ERROR_LOG_MAX_BYTES = 10 * 1024 * 1024;
+
 // ── EPUB Converter ──────────────────────────────────────────────────────────
 /** Subdirectory for converted EPUBs in userData */
 const EPUB_CONVERTED_DIR = "converted";
@@ -233,6 +237,8 @@ module.exports = {
   EPUB_CHAPTER_CACHE_MAX,
   ZIP_ENTRY_MAX_BYTES,
   ZIP_OPERATION_MAX_BYTES,
+  // Error Log
+  ERROR_LOG_MAX_BYTES,
   // EPUB Converter
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,

@@ -13,13 +13,7 @@ const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
 const { pathKey } = require("../folder-sync");
 const { pickUserSettings } = require("../migrations");
-
-async function logToFile(message, errorLogPath) {
-  try {
-    const timestamp = new Date().toISOString();
-    await fsPromises.appendFile(errorLogPath, `[${timestamp}] ${message}\n`, "utf-8");
-  } catch { /* Intentional: error logging should never crash the app */ }
-}
+const { logToFile } = require("../error-log");
 
 // The first-run sample stores the bundled file's absolute path (main.js), which goes stale when the repo or install moves.
 function bundledSamplePath() {
