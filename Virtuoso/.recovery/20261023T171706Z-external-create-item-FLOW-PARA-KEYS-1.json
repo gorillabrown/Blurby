@@ -1,0 +1,50 @@
+{
+  "id": "20261023T171706Z-external-create-item-FLOW-PARA-KEYS-1",
+  "operation": "external-create-item",
+  "item_id": "FLOW-PARA-KEYS-1",
+  "created": "2026-10-23T17:17:06Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Flow paragraph keys step over whole-book paragraph starts on an EPUB",
+      "status": "Queued",
+      "sequence": 78,
+      "workstream": "Reader Engine",
+      "effort": "S",
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#flow-para-keys-1",
+      "branch": "eb/flow-para-keys-1",
+      "prerequisites": [
+        "FLOW-KEYS-FIX-1"
+      ],
+      "description": "Check, then fix if red: Flow paragraph keys on an EPUB with full-book words step over loaded-slice breaks; apply Brain ruling A as in FOCUS-KEYS-FIX-1.",
+      "id": "FLOW-PARA-KEYS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T17:12:10Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-PARA-KEYS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FLOW-PARA-KEYS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-PARA-KEYS-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T171706Z-external-create-item-FLOW-PARA-KEYS-1",
+      "detail": {},
+      "providerItemId": "4027c96c-c31e-810f-81d1-f1e130603abe",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T17:17:31Z",
+  "outcome": "succeeded"
+}

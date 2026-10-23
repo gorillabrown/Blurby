@@ -184,6 +184,10 @@ export const FOLIATE_BROWSING_CHECK_INTERVAL_MS = 500;
 // ── Foliate Renderer ─────────────────────────────────────────────────────────
 /** Base font size (px) injected into EPUB iframe — scaled by focusTextSize percentage */
 export const FOLIATE_BASE_FONT_SIZE_PX = 18;
+/** BOOK-TYPE-SCALE-1: book header sizes in rem of the reader's text size (owner design 2026-10-23); body text is 1rem */
+export const BOOK_TYPE_SCALE = { h1: 1.5, h2: 1.3, h3: 1.15, h4: 1, h5: 1, h6: 1 } as const;
+/** BOOK-TYPE-SCALE-1: line-height of book headers */
+export const BOOK_HEADING_LINE_HEIGHT = 1.3;
 /** Height margin subtracted from container when setting max-block-size on the EPUB renderer (px) */
 export const FOLIATE_RENDERER_HEIGHT_MARGIN_PX = 20;
 /** Side margin for the EPUB renderer — maps to foliate's vertical (top/bottom) grid rows (px) */

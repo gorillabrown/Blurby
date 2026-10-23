@@ -65,6 +65,7 @@ import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWo
 import { NarrateEngine, type EngineFailure, type EngineState, type ProducerPort, type ProducerResult } from "./engine/narrateEngine";
 import { WebAudioOutput, type AudioOutput } from "./engine/playbackClock";
 import type { ChunkTable } from "./engine/wordTable";
+import { logNarrateStartError } from "./helpers/logStartError";
 
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
 const NARRATE_SURFACE_LOAD_DELAY_MS = 200;
@@ -694,6 +695,7 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.state.failure = failure;
     this.state.loading = false;
     this.ports.diagnostics.record("narrate:F4", `${failure.reason} at word ${failure.atWord}${failure.detail ? ": " + failure.detail : ""}`);
+    if (failure.reason === "producer-error") logNarrateStartError(`F4 producer-error at word ${failure.atWord}`, failure.stack ?? failure.detail);
     this.state.notify();
   }
 

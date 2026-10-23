@@ -1,0 +1,40 @@
+{
+  "id": "20261023T010740Z-external-set-status-WS-PAIR-LOG-1",
+  "operation": "external-set-status",
+  "item_id": "WS-PAIR-LOG-1",
+  "created": "2026-10-23T01:07:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "prerequisites": [
+        "WS-TOKEN-REGEN-1"
+      ],
+      "description": "The pair flow in `main/ws-server.js` keeps session-only pairing without safeStorage, as Brain ruled. It logs `pairing not saved: OS encryption unavailable`, and logs the error message when the encrypted save throws, where it is silent today."
+    },
+    "expectedRevision": "a83034860ba99d0f594ddaa5b5a3d93891286ddd11f9415c4f2631a929daa6c8",
+    "idempotencyKey": "set-status:WS-PAIR-LOG-1:[('description', 'The pair flow in `main/ws-server.js` keeps session-only pairing without safeStorage, as Brain ruled. It logs `pairing not saved: OS encryption unavailable`, and logs the error message when the encrypted save throws, where it is silent today.'), ('prerequisites', ['WS-TOKEN-REGEN-1']), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WS-PAIR-LOG-1",
+      "idempotencyKey": "set-status:WS-PAIR-LOG-1:[('description', 'The pair flow in `main/ws-server.js` keeps session-only pairing without safeStorage, as Brain ruled. It logs `pairing not saved: OS encryption unavailable`, and logs the error message when the encrypted save throws, where it is silent today.'), ('prerequisites', ['WS-TOKEN-REGEN-1']), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T010740Z-external-set-status-WS-PAIR-LOG-1",
+      "detail": {
+        "readBack": "SQL: fields equal (code spans as plain text)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T01:08:38Z",
+  "outcome": "succeeded"
+}

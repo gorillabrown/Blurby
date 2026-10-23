@@ -1,0 +1,35 @@
+{
+  "id": "20261023T054331Z-external-set-status-BOOK-TYPE-SCALE-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TYPE-SCALE-1",
+  "created": "2026-10-23T05:43:31Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "Status": "In Flight",
+      "Started": "2026-10-23"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BOOK-TYPE-SCALE-1:[('Started', '2026-10-23'), ('Status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TYPE-SCALE-1",
+      "idempotencyKey": "set-status:BOOK-TYPE-SCALE-1:[('Started', '2026-10-23'), ('Status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T054331Z-external-set-status-BOOK-TYPE-SCALE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T05:43:55Z",
+  "outcome": "succeeded"
+}

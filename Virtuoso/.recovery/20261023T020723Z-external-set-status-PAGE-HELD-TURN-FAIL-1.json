@@ -1,0 +1,39 @@
+{
+  "id": "20261023T020723Z-external-set-status-PAGE-HELD-TURN-FAIL-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-HELD-TURN-FAIL-1",
+  "created": "2026-10-23T02:07:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/page-held-turn-fail-1",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/page-held-turn-fail-1). Stacked on eb/toc-jump-save-1; merges after TOC-JUMP-SAVE-1 once the freeze lifts."
+    },
+    "expectedRevision": "68812def9d012ff2260b18ee57fe76e75fb11f6919a2b9bb42061eaf29c1e5a5",
+    "idempotencyKey": "set-status:PAGE-HELD-TURN-FAIL-1:[('branch', 'eb/page-held-turn-fail-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/page-held-turn-fail-1). Stacked on eb/toc-jump-save-1; merges after TOC-JUMP-SAVE-1 once the freeze lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-HELD-TURN-FAIL-1",
+      "idempotencyKey": "set-status:PAGE-HELD-TURN-FAIL-1:[('branch', 'eb/page-held-turn-fail-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/page-held-turn-fail-1). Stacked on eb/toc-jump-save-1; merges after TOC-JUMP-SAVE-1 once the freeze lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020723Z-external-set-status-PAGE-HELD-TURN-FAIL-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:08:03Z",
+  "outcome": "succeeded"
+}

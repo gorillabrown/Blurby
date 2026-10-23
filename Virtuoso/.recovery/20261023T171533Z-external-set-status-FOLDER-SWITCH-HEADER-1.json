@@ -1,0 +1,35 @@
+{
+  "id": "20261023T171533Z-external-set-status-FOLDER-SWITCH-HEADER-1",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-SWITCH-HEADER-1",
+  "created": "2026-10-23T17:15:33Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "branch": "eb/folder-switch-header-1",
+      "description": "BUG-202 release fix: the library header follows a folder switch at once."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOLDER-SWITCH-HEADER-1:[('branch', 'eb/folder-switch-header-1'), ('description', 'BUG-202 release fix: the library header follows a folder switch at once.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-SWITCH-HEADER-1",
+      "idempotencyKey": "set-status:FOLDER-SWITCH-HEADER-1:[('branch', 'eb/folder-switch-header-1'), ('description', 'BUG-202 release fix: the library header follows a folder switch at once.')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171533Z-external-set-status-FOLDER-SWITCH-HEADER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:16:34Z",
+  "outcome": "succeeded"
+}

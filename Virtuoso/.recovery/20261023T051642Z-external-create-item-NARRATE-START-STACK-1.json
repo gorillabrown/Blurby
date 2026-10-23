@@ -1,0 +1,49 @@
+{
+  "id": "20261023T051642Z-external-create-item-NARRATE-START-STACK-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-START-STACK-1",
+  "created": "2026-10-23T05:16:42Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "Sprint Code": "NARRATE-START-STACK-1",
+      "title": "Log the full stack when Narrate fails to start",
+      "Status": "Queued",
+      "Seq": 6.4,
+      "Lane": "TTS / Narration Engine",
+      "Effort": "XS",
+      "Spec State": "Full Spec",
+      "Spec Reference": "ROADMAP.md#narrate-start-stack-1",
+      "id": "NARRATE-START-STACK-1",
+      "status": "Queued",
+      "written_status": "Stub",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:26:55Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-START-STACK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-START-STACK-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-START-STACK-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T051642Z-external-create-item-NARRATE-START-STACK-1",
+      "detail": {},
+      "providerItemId": "",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T05:17:14Z",
+  "outcome": "succeeded"
+}

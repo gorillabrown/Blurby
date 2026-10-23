@@ -1,0 +1,37 @@
+{
+  "id": "20261023T172320Z-external-record-completion-UI-SWEEP-1",
+  "operation": "external-record-completion",
+  "item_id": "UI-SWEEP-1",
+  "created": "2026-10-23T17:23:20Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md",
+      "sequence": null
+    },
+    "expectedRevision": "d1dc3f9602ee891d9b852316a2033645dbd996ee3e4ffdbcc74408047843ad17",
+    "idempotencyKey": "record-completion:UI-SWEEP-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "UI-SWEEP-1",
+      "idempotencyKey": "record-completion:UI-SWEEP-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T172320Z-external-record-completion-UI-SWEEP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:23:30Z",
+  "outcome": "succeeded"
+}

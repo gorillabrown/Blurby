@@ -1,0 +1,34 @@
+{
+  "id": "20261023T172641Z-external-set-status-BOOK-TEXT-COLOUR-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TEXT-COLOUR-1",
+  "created": "2026-10-23T17:26:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 2
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BOOK-TEXT-COLOUR-1:[('sequence', 2)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TEXT-COLOUR-1",
+      "idempotencyKey": "set-status:BOOK-TEXT-COLOUR-1:[('sequence', 2)]",
+      "actualRevision": "",
+      "recoveryId": "20261023T172641Z-external-set-status-BOOK-TEXT-COLOUR-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:27:06Z",
+  "outcome": "succeeded"
+}

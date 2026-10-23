@@ -942,12 +942,12 @@ Artifact naming: `Blurby-Setup-{version}-{arch}.exe`
 3. `installUpdate` IPC triggers download and quitAndInstall
 4. Delta updates supported for smaller download sizes
 
-The release workflow produces a single `latest.yml` containing both x64 and ARM64 entries (BUG-081 fix: previously two jobs overwrote each other).
+There is no release workflow (`release.yml` was deleted in `e9bbf56a`; `ci.yml` only tests). Releases are built and uploaded by hand following `docs/governance/RELEASE_RUNBOOK.md`. It builds one full NSIS installer per architecture (`Blurby-Setup-<version>-<arch>.exe`, with `-c.win.target=nsis` on the command line; `package.json` still names `nsis-web`). It then merges the two `latest.yml` files into one that lists both installers, and electron-updater picks the one matching `process.arch`. The last release before the runbook, v1.1.2 (nsis-web), listed only x64, so ARM64 machines were offered the x64 build, which runs emulated. The runbook says how such a machine moves to the native ARM64 build.
 
 ### Version Tagging
 
-- Version in `package.json`: currently `2.1.0`
-- Git tags: `v2.1.0` format triggers release workflow
+- Version in `package.json`: `1.75.1` on `main` (2026-10-22); the latest published release is `v1.1.2`. A release's version is the owner's decision at release time and is set by the runbook's Version bump step.
+- Git tags: `v<version>`, created by GitHub when the release draft is published (`docs/governance/RELEASE_RUNBOOK.md`); a tag triggers nothing
 - Branch naming: `sprint/<N>-<name>` (e.g., `sprint/td1-tech-debt`)
 
 ---

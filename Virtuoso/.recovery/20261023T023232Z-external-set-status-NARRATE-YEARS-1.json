@@ -1,0 +1,38 @@
+{
+  "id": "20261023T023232Z-external-set-status-NARRATE-YEARS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-YEARS-1",
+  "created": "2026-10-23T02:32:32Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "title": "Narrate reads 1000–1099 as years too, and keeps comma numbers as counts",
+      "description": "A `preNormalize` step in `main/narrate/normalize.js`, applied before `tts.generate` in `main/narrate/capture.js` and inside `spokenWordsOf`, reads 1001–1099 in kokoro's year form. Comma numbers stay counts, and the producer's word mapping stays exact."
+    },
+    "expectedRevision": "2ab45d33cea1150672648175b09f58704146af62633002dc4d879cb17a7173ab",
+    "idempotencyKey": "set-status:NARRATE-YEARS-1:[('description', \"A `preNormalize` step in `main/narrate/normalize.js`, applied before `tts.generate` in `main/narrate/capture.js` and inside `spokenWordsOf`, reads 1001–1099 in kokoro's year form. Comma numbers stay counts, and the producer's word mapping stays exact.\"), ('title', 'Narrate reads 1000–1099 as years too, and keeps comma numbers as counts'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-YEARS-1",
+      "idempotencyKey": "set-status:NARRATE-YEARS-1:[('description', \"A `preNormalize` step in `main/narrate/normalize.js`, applied before `tts.generate` in `main/narrate/capture.js` and inside `spokenWordsOf`, reads 1001–1099 in kokoro's year form. Comma numbers stay counts, and the producer's word mapping stays exact.\"), ('title', 'Narrate reads 1000–1099 as years too, and keeps comma numbers as counts'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T023232Z-external-set-status-NARRATE-YEARS-1",
+      "detail": {
+        "readBack": "SQL: Full Spec, Name, Description equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:33:01Z",
+  "outcome": "succeeded"
+}

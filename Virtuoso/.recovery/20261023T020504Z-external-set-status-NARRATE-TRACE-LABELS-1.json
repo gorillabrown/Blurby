@@ -1,0 +1,38 @@
+{
+  "id": "20261023T020504Z-external-set-status-NARRATE-TRACE-LABELS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TRACE-LABELS-1",
+  "created": "2026-10-23T02:05:04Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "title": "Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate",
+      "description": "`main.js`'s eval-trace writer labels traces Kokoro/Narrate instead of MOSS-Nano. `p5-latency-e2e.mjs` rejects a `--rates` value off Narrate's 0.80–2.00 grid before launching, and writes `latency-e2e.json` into its `--out` folder."
+    },
+    "expectedRevision": "c1e0e24217f6403c93c01658c3abd5d3ccac5d3bcec150443a7deeb13157fbf7",
+    "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('description', \"`main.js`'s eval-trace writer labels traces Kokoro/Narrate instead of MOSS-Nano. `p5-latency-e2e.mjs` rejects a `--rates` value off Narrate's 0.80–2.00 grid before launching, and writes `latency-e2e.json` into its `--out` folder.\"), ('title', \"Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate\"), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TRACE-LABELS-1",
+      "idempotencyKey": "set-status:NARRATE-TRACE-LABELS-1:[('description', \"`main.js`'s eval-trace writer labels traces Kokoro/Narrate instead of MOSS-Nano. `p5-latency-e2e.mjs` rejects a `--rates` value off Narrate's 0.80–2.00 grid before launching, and writes `latency-e2e.json` into its `--out` folder.\"), ('title', \"Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate\"), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020504Z-external-set-status-NARRATE-TRACE-LABELS-1",
+      "detail": {
+        "readBack": "SQL: fields equal (written just before the plan was recorded; plan recorded retroactively, same content)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:05:27Z",
+  "outcome": "succeeded"
+}

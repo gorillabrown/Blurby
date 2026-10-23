@@ -1,0 +1,49 @@
+{
+  "id": "20261023T021511Z-external-create-item-FOLIATE-OBSERVER-LEAK-1",
+  "operation": "external-create-item",
+  "item_id": "FOLIATE-OBSERVER-LEAK-1",
+  "created": "2026-10-23T02:15:11Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Leaked foliate View observers stop flooding error.log",
+      "status": "Queued",
+      "sequence": 67,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "description": "BUG-187. Two leaked foliate-js View ResizeObservers on 0x0 bodies flood error.log; disconnecting them stops it (shown by intervention). Disconnect them when their view is torn down.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze.",
+      "id": "FOLIATE-OBSERVER-LEAK-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T02:08:04Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLIATE-OBSERVER-LEAK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOLIATE-OBSERVER-LEAK-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOLIATE-OBSERVER-LEAK-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T021511Z-external-create-item-FOLIATE-OBSERVER-LEAK-1",
+      "detail": {
+        "readBack": "SQL: fields equal"
+      },
+      "providerItemId": "4027c96c-c31e-810f-816f-dc1d0bd16e6e",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T02:15:47Z",
+  "outcome": "succeeded"
+}

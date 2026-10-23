@@ -1,0 +1,49 @@
+{
+  "id": "20261023T021510Z-external-create-item-BAND-ALIGN-1",
+  "operation": "external-create-item",
+  "item_id": "BAND-ALIGN-1",
+  "created": "2026-10-23T02:15:10Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "The Focus/Flow reading band is sized from the real line step",
+      "status": "Queued",
+      "sequence": 66,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "description": "BUG-188. Part A: size the reading zone from the loaded section's real body line step, so a 5-line band covers 5 lines at any text size. Part B (where the band sits) is held for the owner.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. Part A is tier 2 (owner OK pending), Part B tier 3 (owner decision). After the Stage 8 freeze.",
+      "id": "BAND-ALIGN-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T02:08:04Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BAND-ALIGN-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BAND-ALIGN-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BAND-ALIGN-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T021510Z-external-create-item-BAND-ALIGN-1",
+      "detail": {
+        "readBack": "SQL: fields equal"
+      },
+      "providerItemId": "4027c96c-c31e-81e6-928b-ecae47372876",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T02:15:45Z",
+  "outcome": "succeeded"
+}

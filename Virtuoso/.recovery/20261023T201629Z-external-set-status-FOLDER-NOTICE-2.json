@@ -1,0 +1,37 @@
+{
+  "id": "20261023T201629Z-external-set-status-FOLDER-NOTICE-2",
+  "operation": "external-set-status",
+  "item_id": "FOLDER-NOTICE-2",
+  "created": "2026-10-23T20:16:29Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "dissolved",
+      "completed": "2026-10-23",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-23-3-audit.md",
+      "sequence": null
+    },
+    "expectedRevision": "dc056408b0e5ff71a7c50ec8e68a6a56a4c8c668fefb84782091e986c611d015",
+    "idempotencyKey": "set-status:FOLDER-NOTICE-2:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-3-audit.md'), ('sequence', None), ('status', 'dissolved')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLDER-NOTICE-2",
+      "idempotencyKey": "set-status:FOLDER-NOTICE-2:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-3-audit.md'), ('sequence', None), ('status', 'dissolved')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T201629Z-external-set-status-FOLDER-NOTICE-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:16:45Z",
+  "outcome": "succeeded"
+}
