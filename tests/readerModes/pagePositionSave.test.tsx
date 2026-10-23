@@ -795,7 +795,8 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       const { runtime, doc } = await mountWiredClicks();
       await clickWord(doc, 1);
       expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1);
-      runtime.navigateTo(4);
+      // JUMP-LANDING-SAVE-1: navigateTo no longer commits on an EPUB, so the anchor is moved on directly.
+      (runtime as any).state.explicitSelectionAnchor = 4;
       runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" });
       expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(4);
     });

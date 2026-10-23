@@ -804,8 +804,15 @@ export default function PageFoliateView({
           onLoadRef.current?.();
         };
         view.addEventListener("load", onSectionLoad);
-        // An internal link: foliate goes to it after this event (view.js:337-352).
-        view.addEventListener("link", () => { pendingTurnRef.current = null; }); // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
+        // TOC-JUMP-SAVE-1, JUMP-LANDING-SAVE-1: a jump's landing relocate fires inside view.goTo (after awaits, before it
+        // resolves), so counting the jump as a turn in flight saves the landed page, as a turn does.
+        const goToLanding = (target: any) => {
+          pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
+          pageTurnsInFlightRef.current += 1;
+          return Promise.resolve(view.goTo(target)).finally(() => { pageTurnsInFlightRef.current -= 1; });
+        };
+        // An internal link or footnote reference (view.js:337-353): go to it through goToLanding instead of foliate's own goTo.
+        view.addEventListener("link", (e: any) => { e.preventDefault(); void goToLanding(e.detail.href); });
 
         view.addEventListener("relocate", (e: any) => {
           if (cancelled) return;
@@ -991,12 +998,7 @@ export default function PageFoliateView({
             foliateWordsRef.current = extracted.words;
             return extracted.words;
           },
-          goTo: (target) => {
-            pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
-            // TOC-JUMP-SAVE-1: the relocate this jump fires (after awaits inside view.goTo, before it resolves) saves the landed page, as a turn does.
-            pageTurnsInFlightRef.current += 1;
-            return Promise.resolve(view.goTo(target)).finally(() => { pageTurnsInFlightRef.current -= 1; });
-          },
+          goTo: (target) => goToLanding(target),
           next: () => view.renderer.next(),
           prev: () => view.renderer.prev(),
           highlightWordByIndex: (wordIndex, styleHint, options) =>

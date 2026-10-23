@@ -351,6 +351,9 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** Chapter prev/next/jump (legacy commitSharedWordAnchor, explicit-navigation). */
   navigateTo(wordIndex: number): void {
     if (!this.alive) return;
+    // JUMP-LANDING-SAVE-1: on an EPUB the shell follows with go-to-href, whose landing saves the page. Committing here
+    // would save the entry's word with the old page's cfi, and a jump that never lands would keep it.
+    if (this.document.useFoliate) return;
     this.commitShared(wordIndex, "explicit-navigation", undefined);
     this.state.notify();
   }
