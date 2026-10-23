@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:41:52Z",
+  "takenAt": "2026-10-23T02:53:50Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2126,8 +2126,8 @@
       "id": "NARRATE-SENTENCE-RESUME-1",
       "title": "Narrate starts at the beginning of the current sentence",
       "sequence": 40,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2139,12 +2139,12 @@
       "group": "Narration Rebuild",
       "spec_link": "ROADMAP.md#narrate-sentence-resume-1",
       "branch": "eb/narrate-sentence-resume-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "Play, Space, reopening and resume start at the first word of the sentence containing the start word, per the owner's decision; word clicks and jumps keep their word. Adds sentenceStartAt in chunkPlan.ts, a rewind in ModeRuntime.start() and narrateEngine.resume(), and updates the exact-resume test.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "3ba3363beda66bddac26568027c424a0d5627a70edca075c76a98caf514e3bee",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-sentence-resume-1 stacked on eb/narrate-token-cap-1), built during the Stage 8 freeze and merged after NARRATE-TOKEN-CAP-1.",
+      "revision": "ad29ea10e2aa8fd5fdfb3d3a44149f3cacb35dc6a119d551a9a93e7aeecf6dd8",
       "extra": {}
     },
     {
