@@ -138,3 +138,8 @@ These items merge after the freeze lifts, so their checks run on a later build:
 - **TOC-JUMP-SAVE-1:** in Page mode, jump from the contents list to a later chapter, quit and reopen. It reopens on that chapter's page.
 - **READER-VISUAL-DIAG-1:** an owner-observed look at the reading band against the word cursor, in Focus and Flow (standing rule 45).
 - Any owner checks from WS-TOKEN-REGEN-1, RENAME-TMP-RACE-1 and NARRATE-KEY-REPEAT-1, if their close-outs add any.
+
+## Planner notes (Blurby.Roadmap, 2026-10-22)
+
+- **UX-POLISH-1 (a), (b), (d):** these passed at G2 on 2026-10-14 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md`, "G2 workaround and UX smoke", The Raven), so only (c), (e) and (f) are checked here (#19, #16, #17). That matches gate (2)'s list.
+- **One build, not per-item builds:** where an item's own spec names its C2 or worktree `--dir` build (PACKAGING-FIX-1 DW10, LARGE-FOLDER-SYNC-1 DW9, UX-POLISH-2 DW12), this checklist follows gate (2) and uses the one production build of `47ae6e1f`. Gate (2) supersedes the per-item build named in each spec, and the close-outs record it so.
