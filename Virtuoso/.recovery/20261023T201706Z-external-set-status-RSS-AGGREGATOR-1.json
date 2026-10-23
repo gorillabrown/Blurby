@@ -1,0 +1,38 @@
+{
+  "id": "20261023T201706Z-external-set-status-RSS-AGGREGATOR-1",
+  "operation": "external-set-status",
+  "item_id": "RSS-AGGREGATOR-1",
+  "created": "2026-10-23T20:17:06Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 99,
+      "prerequisites": [
+        "APP-TABS-1",
+        "BLURBY-SERVER-1"
+      ]
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:RSS-AGGREGATOR-1:[('prerequisites', ['APP-TABS-1', 'BLURBY-SERVER-1']), ('sequence', 99)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "RSS-AGGREGATOR-1",
+      "idempotencyKey": "set-status:RSS-AGGREGATOR-1:[('prerequisites', ['APP-TABS-1', 'BLURBY-SERVER-1']), ('sequence', 99)]",
+      "actualRevision": "",
+      "recoveryId": "20261023T201706Z-external-set-status-RSS-AGGREGATOR-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:17:46Z",
+  "outcome": "succeeded"
+}

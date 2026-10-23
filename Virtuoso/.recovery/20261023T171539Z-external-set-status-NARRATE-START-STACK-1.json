@@ -1,0 +1,35 @@
+{
+  "id": "20261023T171539Z-external-set-status-NARRATE-START-STACK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-START-STACK-1",
+  "created": "2026-10-23T17:15:39Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "branch": "eb/narrate-start-stack-1",
+      "description": "BUG-206 release fix: when Narrate shows a start error, the full stack is logged once to the error log."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-START-STACK-1:[('branch', 'eb/narrate-start-stack-1'), ('description', 'BUG-206 release fix: when Narrate shows a start error, the full stack is logged once to the error log.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-START-STACK-1",
+      "idempotencyKey": "set-status:NARRATE-START-STACK-1:[('branch', 'eb/narrate-start-stack-1'), ('description', 'BUG-206 release fix: when Narrate shows a start error, the full stack is logged once to the error log.')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171539Z-external-set-status-NARRATE-START-STACK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:16:37Z",
+  "outcome": "succeeded"
+}

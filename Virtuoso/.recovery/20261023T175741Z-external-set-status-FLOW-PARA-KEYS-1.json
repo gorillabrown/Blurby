@@ -1,0 +1,34 @@
+{
+  "id": "20261023T175741Z-external-set-status-FLOW-PARA-KEYS-1",
+  "operation": "external-set-status",
+  "item_id": "FLOW-PARA-KEYS-1",
+  "created": "2026-10-23T17:57:41Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Flow paragraph keys: the check settled red live 2026-10-23 (187 to 5290 to the last word). Fix mirrors the amended FOCUS-KEYS-FIX-1 collector (case-insensitive block lookup) plus book-wide paragraph starts."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FLOW-PARA-KEYS-1:[('description', 'Flow paragraph keys: the check settled red live 2026-10-23 (187 to 5290 to the last word). Fix mirrors the amended FOCUS-KEYS-FIX-1 collector (case-insensitive block lookup) plus book-wide paragraph starts.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FLOW-PARA-KEYS-1",
+      "idempotencyKey": "set-status:FLOW-PARA-KEYS-1:[('description', 'Flow paragraph keys: the check settled red live 2026-10-23 (187 to 5290 to the last word). Fix mirrors the amended FOCUS-KEYS-FIX-1 collector (case-insensitive block lookup) plus book-wide paragraph starts.')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T175741Z-external-set-status-FLOW-PARA-KEYS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:58:53Z",
+  "outcome": "succeeded"
+}

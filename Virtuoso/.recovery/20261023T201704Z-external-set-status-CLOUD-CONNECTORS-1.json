@@ -1,0 +1,38 @@
+{
+  "id": "20261023T201704Z-external-set-status-CLOUD-CONNECTORS-1",
+  "operation": "external-set-status",
+  "item_id": "CLOUD-CONNECTORS-1",
+  "created": "2026-10-23T20:17:04Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 102,
+      "prerequisites": [
+        "BLURBY-SERVER-1"
+      ],
+      "description": "Rescoped 2026-10-23 (owner): book and article sources only (Drive, OneDrive, Box, Dropbox, iCloud), after BLURBY-SERVER-1; imports go through the server intake and plan limits. Cross-device sync moved to BLURBY-SERVER-1."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:CLOUD-CONNECTORS-1:[('description', 'Rescoped 2026-10-23 (owner): book and article sources only (Drive, OneDrive, Box, Dropbox, iCloud), after BLURBY-SERVER-1; imports go through the server intake and plan limits. Cross-device sync moved to BLURBY-SERVER-1.'), ('prerequisites', ['BLURBY-SERVER-1']), ('sequence', 102)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CLOUD-CONNECTORS-1",
+      "idempotencyKey": "set-status:CLOUD-CONNECTORS-1:[('description', 'Rescoped 2026-10-23 (owner): book and article sources only (Drive, OneDrive, Box, Dropbox, iCloud), after BLURBY-SERVER-1; imports go through the server intake and plan limits. Cross-device sync moved to BLURBY-SERVER-1.'), ('prerequisites', ['BLURBY-SERVER-1']), ('sequence', 102)]",
+      "actualRevision": "",
+      "recoveryId": "20261023T201704Z-external-set-status-CLOUD-CONNECTORS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:17:43Z",
+  "outcome": "succeeded"
+}
