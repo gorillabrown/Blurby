@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:09:27Z",
+  "takenAt": "2026-10-23T00:14:20Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3052,8 +3052,8 @@
       "id": "CI-AUDIT-ALLOWLIST-1",
       "title": "CI fails on a new high advisory, not on the reviewed ones",
       "sequence": 30,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -3064,13 +3064,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "",
-      "branch": "",
-      "started": "",
+      "branch": "eb/ci-audit-allowlist-1",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "Replace npm audit --audit-level=high in .github/workflows/ci.yml with scripts/ci/audit-gate.mjs. It fails on any high or critical advisory not in .github/audit-allowlist.json, or past its review-by date. It also fixes the new follow-redirects advisories.",
-      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass.",
-      "revision": "11ee7021fc82d6b43fd142cf32d7eb0fc9065bf87486f51cf7826ec1fe3fe204",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ci-audit-allowlist-1 from main). Its merge starts the Stage 8 code freeze for gate (1).",
+      "revision": "eac5065339f1e5f89eb02086d1c6588d5103328f01f45351a2c3c5b47cf4bf07",
       "extra": {}
     }
   ],
