@@ -10,7 +10,7 @@
  * one generation per epoch is in flight, and nothing from an earlier epoch is ever scheduled).
  * No React, no DOM, no sibling-runtime imports, no estimated timing anywhere.
  */
-import { planChunks, type ChunkPlanEntry } from "./chunkPlan";
+import { planChunks, sentenceStartAt, type ChunkPlanEntry } from "./chunkPlan";
 import { lookupUnit, verifyTable, type ChunkTable, type TableRejection } from "./wordTable";
 import { firstVoicedSample, type AudioOutput, type ScheduledSource } from "./playbackClock";
 import type {
@@ -214,20 +214,36 @@ export class NarrateEngine {
     this.setState("paused");
   }
 
-  /** Resume at the exact sample the pause stopped at: no word is dropped or repeated. */
+  /**
+   * Resume at the first word of the sentence the pause stopped in (NARRATE-SENTENCE-RESUME-1, the owner's decision of
+   * 2026-10-14). Paused at a sentence's first word, it resumes at the exact paused sample: nothing dropped or repeated.
+   * Mid-sentence, the paused chunk replays from the unit holding the sentence's first word; a sentence that began in an
+   * earlier chunk is played again from that word as a new epoch.
+   */
   resume(cause: EngineRequestCause = "resume"): void {
     if (this.state !== "paused") return;
     if (this.failure && !this.pausedAt) return;
-    this.setState("playing");
     // A pause in a gap has no paused sample; a chunk that arrived during the pause is where speech continues.
-    const at = this.pausedAt ?? this.firstUnscheduled();
+    let at = this.pausedAt ?? this.firstUnscheduled();
+    const word = at ? this.wordAt(at) : this.inFlight > 0 ? this.inFlightStart : this.nextWord;
+    const start = sentenceStartAt(this.words, word, this.breaks);
+    if (start < word) {
+      const c = at ? this.chunks[at.index] : null;
+      if (!at || !c || start < c.entry.startWord) { this.play(start, cause); return; }
+      // The unit holding the sentence's first word (a unit fused across the sentence start begins at its own first word).
+      const off = start - c.entry.startWord;
+      let u = 0;
+      while (u + 1 < c.unitWord.length && c.unitWord[u + 1] <= off) u++;
+      at = { index: at.index, sample: u === 0 ? c.trim : c.table.units[u].sampleStart };
+    }
+    this.setState("playing");
     this.pausedAt = null;
     // Nothing to replay: speech restarts like a Play, with the ramp's short first chunk as a request. A prefetch still
     // generating from before the pause (long, and no one is waiting on it) is abandoned: its epoch is stale, so it is
     // dropped on arrival and the producer drops what of it is still queued. A first chunk still generating is already
     // that request and is kept.
     if (!at && this.inFlight > 0 && !this.inFlightIsRequest) { this.epoch += 1; this.inFlight = 0; this.nextWord = this.inFlightStart; }
-    this.request(cause, at ? this.chunks[at.index].entry.startWord + this.chunks[at.index].unitWord[Math.max(0, lookupUnit(this.chunks[at.index].table.units, at.sample))] : this.nextWord);
+    this.request(cause, at ? this.wordAt(at) : this.nextWord);
     if (!at) { if (this.inFlight === 0) this.chunkSeq = 0; this.fill(); return; } // the next chunk planned answers the request
     let startAt = this.output.now() + this.lead;
     for (let i = at.index; i < this.chunks.length; i++) {
@@ -474,6 +490,12 @@ export class NarrateEngine {
       }
     }
     return null;
+  }
+
+  /** The book word of the unit at a chunk sample (the chunk's first unit when the sample is in leading silence). */
+  private wordAt(at: { readonly index: number; readonly sample: number }): number {
+    const c = this.chunks[at.index];
+    return c.entry.startWord + c.unitWord[Math.max(0, lookupUnit(c.table.units, at.sample))];
   }
 
   /** Paused in a gap: resume from the first chunk not yet started, at its trim. */

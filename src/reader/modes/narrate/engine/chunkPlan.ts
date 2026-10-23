@@ -65,6 +65,17 @@ function isSentenceEnd(words: readonly string[], i: number): boolean {
   return NEW_SENTENCE.test(next);
 }
 
+/**
+ * The first word of the sentence holding word `i` (NARRATE-SENTENCE-RESUME-1): Narrate starts and resumes there. It
+ * never goes back across a chunk break, and an index outside the words is returned as it is.
+ */
+export function sentenceStartAt(words: readonly string[], i: number, breaks: ReadonlySet<number>): number {
+  if (i <= 0 || i >= words.length) return i;
+  let j = i;
+  while (j > 0 && !isSentenceEnd(words, j - 1) && !breaks.has(j - 1)) j--;
+  return j;
+}
+
 export interface ChunkPlanEntry {
   readonly startWord: number;
   /** Exclusive. */
