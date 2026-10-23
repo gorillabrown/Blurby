@@ -9,7 +9,7 @@ const {
   TXT_CHAPTER_MIN_LINES,
   PDF_MIN_EXTRACTABLE_WORDS,
 } = require("./constants");
-const { createEntryReader } = require("./zip-read");
+const { createEntryReader, openZip } = require("./zip-read");
 const { extractPdfText } = require("./pdf-text");
 
 // Lazy-loaded heavy dependencies
@@ -1050,8 +1050,7 @@ async function convertToEpub(inputPath, outputDir, docId, meta = {}) {
 async function validateEpub(epubPath) {
   const errors = [];
   try {
-    const Zip = getAdmZip();
-    const zip = new Zip(epubPath);
+    const zip = await openZip(epubPath);
     const entries = zip.getEntries().map((e) => e.entryName);
     const readEntry = createEntryReader();
     const readText = (name) => { const e = zip.getEntry(name); return e ? readEntry(e).toString("utf8") : ""; };

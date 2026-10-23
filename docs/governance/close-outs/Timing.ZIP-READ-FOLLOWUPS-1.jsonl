@@ -5,3 +5,5 @@
 {"event": "start", "row": 6, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:25:09Z"}
 {"event": "end", "row": 6, "evidence": "base tree 44a914ad: vitest 2428 passed/1 skipped/2 failed under load (31 node procs): epub-2b-pipeline 'extractArticleFromHtml returns contentHtml...' (timeout STACK_TRACE_ERROR) and folderWatcher BUG-193 guard (77 ms vs 50); both pass alone 2/2 (27/27); pre-existing load list", "result": "done", "at": "2026-10-23T02:27:19Z"}
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:27:20Z"}
+{"event": "end", "row": 1, "evidence": "tests (o)+(p) committed alone; 'vitest -t archive size cap' on base: exit 1, (o) fails at extractWords (read the whole file), (p) passes", "result": "done", "at": "2026-10-23T02:27:52Z"}
+{"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:27:53Z"}

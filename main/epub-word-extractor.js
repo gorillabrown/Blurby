@@ -9,10 +9,9 @@
 "use strict";
 
 // ── Lazy-loaded heavy modules ─────────────────────────────────────────────
-let _cheerio, _admZip;
+let _cheerio;
 function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
-function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
-const { createEntryReader } = require("./zip-read");
+const { createEntryReader, openZip } = require("./zip-read");
 
 /** Trailing punctuation regex — must match FoliatePageView.tsx line 72 exactly */
 const TRAILING_PUNCT_RE = /^[.!?,;:'"»)\]\u201D\u2019\u2026]+$/;
@@ -162,12 +161,11 @@ function extractBlockPlans($, $root) {
  * @returns {{ words: string[], sections: Array<{ sectionIndex: number, startWordIdx: number, endWordIdx: number, wordCount: number }>, footnoteCues: Array<{ afterWordIdx: number, text: string }>, totalWords: number }}
  */
 async function extractWords(epubPath) {
-  const AdmZip = getAdmZip();
   const cheerio = getCheerio();
 
   let zip;
   try {
-    zip = new AdmZip(epubPath);
+    zip = await openZip(epubPath);
   } catch (err) {
     console.error(`[epub-word-extractor] Failed to open EPUB: ${err.message}`);
     return { words: [], sections: [], footnoteCues: [], totalWords: 0 };

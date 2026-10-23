@@ -122,6 +122,26 @@ describe("EPUB reads at the default caps", () => {
   }, 60_000);
 });
 
+// ZIP-READ-FOLLOWUPS-1 (N3): the per-operation cap, at parser level. extractWords reads container.xml, the OPF
+// and the spine (not the cover), so the OPF is padded: every entry is under the entry cap, together they are over.
+describe("operation cap, parser level", () => {
+  let savedOpCap;
+  beforeAll(() => { savedOpCap = constants.ZIP_OPERATION_MAX_BYTES; });
+  afterAll(() => { constants.ZIP_OPERATION_MAX_BYTES = savedOpCap; });
+
+  it("(q) extractWords rejects when its entries together pass the operation cap", async () => {
+    const file = buildEpub({ chapterBytes: 4096, coverBytes: 4096, opfPadBytes: 2048 });
+    expect(constants.ZIP_ENTRY_MAX_BYTES).toBe(savedCap);
+    constants.ZIP_OPERATION_MAX_BYTES = 6144;
+    try {
+      await expect(extractWords(file)).rejects.toThrow(/too large/);
+    } finally {
+      constants.ZIP_OPERATION_MAX_BYTES = savedOpCap;
+    }
+    expect((await extractWords(file)).totalWords).toBeGreaterThan(0); // control: the default cap reads it
+  });
+});
+
 // ZIP-READ-FOLLOWUPS-1 (N1): an archive over ZIP_FILE_MAX_BYTES is refused before adm-zip reads the whole file.
 describe("archive size cap", () => {
   const OPEN_ERROR = "Could not open this EPUB — the file may be corrupted.";

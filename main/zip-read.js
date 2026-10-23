@@ -2,7 +2,19 @@
 // CommonJS only — Electron main process
 "use strict";
 const zlib = require("zlib");
+const fsPromises = require("fs/promises");
 const constants = require("./constants"); // read at call time so tests can lower the caps
+
+// The one way main/ opens an archive from disk: adm-zip reads the whole file into memory before any
+// entry cap applies, so its size on disk is checked first. adm-zip stays lazy-loaded.
+async function openZip(filePath) {
+  const { size } = await fsPromises.stat(filePath);
+  if (size > constants.ZIP_FILE_MAX_BYTES) {
+    throw Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
+  }
+  const AdmZip = require("adm-zip");
+  return new AdmZip(filePath);
+}
 
 // Reads around adm-zip's getData(): adm-zip <=0.6.0 sizes its output from the entry's declared
 // size (GHSA-xcpc-8h2w-3j85, GHSA-7q85-xj36-vmfc, GHSA-rcw4-f5rp-g42v). The caps here are ours.
@@ -35,4 +47,4 @@ function createEntryReader() {
   };
 }
 
-module.exports = { createEntryReader };
+module.exports = { createEntryReader, openZip };

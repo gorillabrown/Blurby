@@ -69,6 +69,8 @@ const EPUB_CHAPTER_CACHE_MAX = 50;
 const ZIP_ENTRY_MAX_BYTES = 64 * 1024 * 1024;
 /** Largest total read by one archive operation (bytes, 512 MiB; a large illustrated EPUB can pass 256 MiB) */
 const ZIP_OPERATION_MAX_BYTES = 512 * 1024 * 1024;
+/** Largest EPUB/ZIP archive opened from disk (bytes, 512 MiB = ZIP_OPERATION_MAX_BYTES); adm-zip reads the whole file into memory */
+const ZIP_FILE_MAX_BYTES = 512 * 1024 * 1024;
 
 // ── EPUB Converter ──────────────────────────────────────────────────────────
 /** Subdirectory for converted EPUBs in userData */
@@ -233,6 +235,7 @@ module.exports = {
   EPUB_CHAPTER_CACHE_MAX,
   ZIP_ENTRY_MAX_BYTES,
   ZIP_OPERATION_MAX_BYTES,
+  ZIP_FILE_MAX_BYTES,
   // EPUB Converter
   EPUB_CONVERTED_DIR,
   TXT_CHAPTER_MIN_LINES,
