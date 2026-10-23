@@ -434,29 +434,50 @@ function generatePairingToken() {
   return crypto.randomBytes(16).toString("hex");
 }
 
-/** The pairing token's stored form in settings: safeStorage ciphertext (base64) when available, else plaintext. */
+// The plaintext form generatePairingToken returns; a stored value of this shape is a legacy plaintext token.
+const PLAINTEXT_PAIRING_TOKEN = /^[0-9a-f]{32}$/;
+
+/**
+ * The pairing token's stored form in settings: safeStorage ciphertext (base64). Never plaintext: when
+ * safeStorage is unavailable there is no stored form (null), and the token lives for the session only.
+ */
 function encodePairingToken(token) {
-  return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString("base64") : token;
+  return safeStorage.isEncryptionAvailable() ? safeStorage.encryptString(token).toString("base64") : null;
 }
 
-/** Reads the stored form back; throws when encryption is available and the stored value is not its ciphertext. */
+/** Reads the stored ciphertext back; throws when the stored value is not safeStorage ciphertext. */
 function decodePairingToken(stored) {
-  return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(stored, "base64")) : stored;
+  return safeStorage.decryptString(Buffer.from(stored, "base64"));
 }
 
-/** Generate or restore the session's pairing token from settings (encrypted via safeStorage); returns it. */
+/**
+ * Generate or restore the session's pairing token; returns it. A credential is never written in plaintext
+ * (Blurby.Brain, 2026-10-22): a legacy plaintext token is re-encrypted in place when safeStorage is available,
+ * and deleted (kept in memory for this session) when it is not. `token` seeds a fresh token (regenerate).
+ */
 function loadPairingToken(ctx, { token } = {}) {
   const settings = ctx.getSettings();
-  if (settings._wsPairingToken) {
-    try {
-      return decodePairingToken(settings._wsPairingToken);
-    } catch {
-      // Decryption failed (corrupted or was stored in plaintext) — regenerate
-      console.warn("[ws-server] Pairing token decryption failed — regenerating");
-      const fresh = token || generatePairingToken();
-      settings._wsPairingToken = encodePairingToken(fresh);
+  const stored = settings._wsPairingToken;
+  if (!safeStorage.isEncryptionAvailable()) {
+    const sessionToken = token || (stored && PLAINTEXT_PAIRING_TOKEN.test(stored) ? stored : generatePairingToken());
+    if ("_wsPairingToken" in settings) {
+      delete settings._wsPairingToken;
       ctx.saveSettings();
-      return fresh;
+    }
+    return sessionToken;
+  }
+  if (stored && !token) {
+    try {
+      return decodePairingToken(stored);
+    } catch {
+      if (PLAINTEXT_PAIRING_TOKEN.test(stored)) {
+        // Legacy plaintext: re-encrypt in place so the existing pairing survives.
+        settings._wsPairingToken = encodePairingToken(stored);
+        ctx.saveSettings();
+        return stored;
+      }
+      // Corrupted ciphertext — regenerate
+      console.warn("[ws-server] Pairing token decryption failed — regenerating");
     }
   }
   const fresh = token || generatePairingToken();
@@ -498,7 +519,7 @@ function startServer(ctx, options = {}) {
       console.error(`[ws-server] Port ${WS_PORT} is in use. Retry ${_retryCount}/${WS_MAX_RETRY_COUNT} in ${WS_RETRY_DELAY_MS}ms.`);
       setTimeout(() => {
         _server = null;
-        startServer(ctx);
+        startServer(ctx, { token: _pairingToken }); // keep this session's token (it may exist in memory only)
       }, WS_RETRY_DELAY_MS);
     }
   });

@@ -415,11 +415,14 @@ function register(ctx) {
   ipcMain.handle("regenerate-ws-pairing-token", () => {
     const token = wsServer.generatePairingToken();
     const settings = ctx.getSettings();
-    settings._wsPairingToken = wsServer.encodePairingToken(token); // the stored form startServer reads (WS-TOKEN-REGEN-1)
+    // The stored form startServer reads (WS-TOKEN-REGEN-1); without safeStorage nothing is stored (never plaintext).
+    const stored = wsServer.encodePairingToken(token);
+    if (stored) settings._wsPairingToken = stored;
+    else delete settings._wsPairingToken;
     ctx.saveSettings();
-    // Restart server with new token
+    // Restart server with new token (passed through: without safeStorage it exists in memory only)
     wsServer.stopServer();
-    const { port } = wsServer.startServer(ctx);
+    const { port } = wsServer.startServer(ctx, { token });
     return { port };
   });
 
