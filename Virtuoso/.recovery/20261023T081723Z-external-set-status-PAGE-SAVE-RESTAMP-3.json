@@ -1,0 +1,34 @@
+{
+  "id": "20261023T081723Z-external-set-status-PAGE-SAVE-RESTAMP-3",
+  "operation": "external-set-status",
+  "item_id": "PAGE-SAVE-RESTAMP-3",
+  "created": "2026-10-23T08:17:23Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "Spec State": "Full Spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:PAGE-SAVE-RESTAMP-3:[('Spec State', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-SAVE-RESTAMP-3",
+      "idempotencyKey": "set-status:PAGE-SAVE-RESTAMP-3:[('Spec State', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T081723Z-external-set-status-PAGE-SAVE-RESTAMP-3",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T08:17:44Z",
+  "outcome": "succeeded"
+}
