@@ -11,7 +11,15 @@ const GATED = new Set(["high", "critical"]);
 
 function option(name, fallback) {
   const i = process.argv.indexOf(name);
-  return i >= 0 && i + 1 < process.argv.length ? process.argv[i + 1] : fallback;
+  if (i < 0) return fallback;
+  if (i + 1 >= process.argv.length || process.argv[i + 1].startsWith("--")) fail(`${name} needs a value`);
+  return process.argv[i + 1];
+}
+
+function isCalendarDate(s) {
+  if (typeof s !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  const d = new Date(`${s}T00:00:00Z`);
+  return !Number.isNaN(d.getTime()) && d.toISOString().slice(0, 10) === s;
 }
 
 function fail(message) {
@@ -35,7 +43,7 @@ function readAudit(input) {
 
 const allowlistPath = option("--allowlist", ".github/audit-allowlist.json");
 const today = option("--today", new Date().toISOString().slice(0, 10));
-if (!/^\d{4}-\d{2}-\d{2}$/.test(today)) fail(`--today must be YYYY-MM-DD, got ${today}`);
+if (!isCalendarDate(today)) fail(`--today must be a YYYY-MM-DD date, got ${today}`);
 
 let allowlist;
 try {
@@ -43,10 +51,12 @@ try {
 } catch (err) {
   fail(`cannot read allowlist ${allowlistPath}: ${err.message}`);
 }
-if (!Array.isArray(allowlist) || !allowlist.every((e) => e && typeof e.id === "string" && /^\d{4}-\d{2}-\d{2}$/.test(e.reviewBy || ""))) {
+const isEntry = (e) => e && ["id", "package", "reachability"].every((k) => typeof e[k] === "string" && e[k].trim()) && isCalendarDate(e.reviewBy);
+if (!Array.isArray(allowlist) || !allowlist.every(isEntry)) {
   fail(`allowlist ${allowlistPath} must be an array of { id, package, reachability, reviewBy: "YYYY-MM-DD" }`);
 }
 const allowed = new Map(allowlist.map((e) => [e.id, e]));
+if (allowed.size !== allowlist.length) fail(`allowlist ${allowlistPath} lists an advisory id more than once`);
 
 let audit;
 try {
@@ -54,14 +64,18 @@ try {
 } catch (err) {
   fail(`cannot parse npm audit output: ${err.message}`);
 }
-if (!audit || typeof audit.vulnerabilities !== "object" || audit.vulnerabilities === null) fail("npm audit output has no vulnerabilities map");
+if (!audit || typeof audit.vulnerabilities !== "object" || audit.vulnerabilities === null) {
+  const npmError = audit && audit.error ? `: ${audit.error.summary || audit.error.code || JSON.stringify(audit.error)}` : "";
+  fail(`npm audit output has no vulnerabilities map${npmError}`);
+}
 
-// Every high or critical advisory, keyed by the GHSA ID at the end of its url.
+// Every high or critical advisory, keyed by the GHSA ID at the end of its url. A gated advisory without one fails closed.
 const found = new Map();
 for (const [pkg, vuln] of Object.entries(audit.vulnerabilities)) {
   for (const via of vuln.via || []) {
-    if (!via || typeof via !== "object" || !GATED.has(via.severity) || typeof via.url !== "string") continue;
-    const id = via.url.split("/").pop();
+    if (!via || typeof via !== "object" || !GATED.has(via.severity)) continue;
+    const id = typeof via.url === "string" ? via.url.split("/").pop() : "";
+    if (!id) fail(`a ${via.severity} advisory under ${pkg} has no advisory url`);
     if (!found.has(id)) found.set(id, { id, package: via.name || pkg, severity: via.severity, title: via.title || "" });
   }
 }

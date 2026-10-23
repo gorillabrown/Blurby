@@ -85,6 +85,26 @@ describe("CI audit gate (scripts/ci/audit-gate.mjs)", () => {
     expect(r.code).toBe(2);
   });
 
+  it("(h) a high advisory with no url fails closed: exit 2", async () => {
+    const noUrl = { ...advisory("GHSA-ffff-ffff-ffff", "zeta", "high"), url: undefined };
+    const r = await run(auditOf(...REVIEWED, noUrl));
+    expect(r.code).toBe(2);
+    expect(r.out).toContain("has no advisory url");
+  });
+
+  it("(i) an impossible reviewBy date or a duplicate id makes the allowlist malformed: exit 2", async () => {
+    const badDate = await run(auditOf(...REVIEWED), { allowlist: [ALLOW[0], { ...ALLOW[1], reviewBy: "2027-13-45" }] });
+    expect(badDate.code).toBe(2);
+    const dup = await run(auditOf(...REVIEWED), { allowlist: [...ALLOW, ALLOW[0]] });
+    expect(dup.code).toBe(2);
+  });
+
+  it("(j) npm's own error (no vulnerabilities map) exits 2 and shows it", async () => {
+    const r = await run({ error: { code: "ECONNREFUSED", summary: "request to registry failed" } });
+    expect(r.code).toBe(2);
+    expect(r.out).toContain("request to registry failed");
+  });
+
   it("control: the committed allowlist has the 9 reviewed entries, each with a reachability note and reviewBy 2027-01-22", async () => {
     const entries = JSON.parse(await fs.readFile(path.join(ROOT, ".github", "audit-allowlist.json"), "utf8"));
     expect(entries).toHaveLength(9);
