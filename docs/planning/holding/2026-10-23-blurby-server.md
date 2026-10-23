@@ -12,6 +12,7 @@
 |---|---|---|---|
 | 2026-10-23 | storyboarded | storyboard | aligned; epic-scale; 1 item (BLURBY-SERVER-1, provisional); 4 phases |
 | 2026-10-23 | planned | write-plan | epic-scale: 4 phase specs written as an epic charter draft beside the entry (`2026-10-23-blurby-server/charter-draft.md`); 11 owner questions with recommendations; prerequisites pending: Stage 8 release, post-freeze merge train |
+| 2026-10-23 | storyboarded | write-plan | epic-scale stays held (corrects the hand-written planned row above): 4 phase specs as an epic charter draft at 2026-10-23-blurby-server/charter-draft.md for /roadmap-review then /epic; 11 owner questions |
 
 ## Storyboard
 
@@ -231,6 +232,6 @@ Origin: held plan — 2026-10-23-blurby-server, not yet on the roadmap
 Placement: after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9 — for the review to apply
 Path: epic (4 phases) | Effort: max
 Specification: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md
-Status: planned — held | Prerequisites: Stage 8 release ✗; merge train ✗
+Status: storyboarded — held for roadmap review (epic-scale; never `planned` here) | Prerequisites: Stage 8 release ✗; merge train ✗
 Readiness: specification ✓ (draft) · prerequisites ✗ (wait encoded) · owner questions 11 open · register not touched
 ```
