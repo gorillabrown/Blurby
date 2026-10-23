@@ -1,0 +1,38 @@
+{
+  "id": "20261023T010734Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-READ-FOLLOWUPS-1",
+  "created": "2026-10-23T01:07:34Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "title": "Every EPUB archive is opened through one size-checked door",
+      "description": "A new async `openZip` in `main/zip-read.js` checks the archive's size on disk against `ZIP_FILE_MAX_BYTES` (512 MiB) before adm-zip reads it. All five EPUB opens use it. It adds tests for a STORED entry with a lying header and for the per-operation cap at parser level."
+    },
+    "expectedRevision": "ba084b4deaa7d0bfce129525e7d10e33763a56e988be09300fc5040a265cef7b",
+    "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('description', \"A new async `openZip` in `main/zip-read.js` checks the archive's size on disk against `ZIP_FILE_MAX_BYTES` (512 MiB) before adm-zip reads it. All five EPUB opens use it. It adds tests for a STORED entry with a lying header and for the per-operation cap at parser level.\"), ('title', 'Every EPUB archive is opened through one size-checked door'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-READ-FOLLOWUPS-1",
+      "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('description', \"A new async `openZip` in `main/zip-read.js` checks the archive's size on disk against `ZIP_FILE_MAX_BYTES` (512 MiB) before adm-zip reads it. All five EPUB opens use it. It adds tests for a STORED entry with a lying header and for the per-operation cap at parser level.\"), ('title', 'Every EPUB archive is opened through one size-checked door'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T010734Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+      "detail": {
+        "readBack": "SQL: fields equal (code spans as plain text)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T01:08:34Z",
+  "outcome": "succeeded"
+}

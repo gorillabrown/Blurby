@@ -1,0 +1,38 @@
+{
+  "id": "20261023T020502Z-external-set-status-NARRATE-TOKEN-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-TOKEN-CAP-1",
+  "created": "2026-10-23T02:05:02Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "title": "Digit-dense passages are planned under the 400-id token cap",
+      "description": "The chunk planner's `estimateTokens` (`src/reader/modes/narrate/engine/chunkPlan.ts`) counts each digit at its spoken cost (`DIGIT_TOKEN_WEIGHT` 13), so digit-dense passages such as chess notation are planned into chunks under the 400-id cap instead of failing closed. Text without digits is planned as today."
+    },
+    "expectedRevision": "6165e69d1c2d7b0454d5064b1ca902c33f3464070dc029a84947f06fb3a067f8",
+    "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('description', \"The chunk planner's `estimateTokens` (`src/reader/modes/narrate/engine/chunkPlan.ts`) counts each digit at its spoken cost (`DIGIT_TOKEN_WEIGHT` 13), so digit-dense passages such as chess notation are planned into chunks under the 400-id cap instead of failing closed. Text without digits is planned as today.\"), ('title', 'Digit-dense passages are planned under the 400-id token cap'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-TOKEN-CAP-1",
+      "idempotencyKey": "set-status:NARRATE-TOKEN-CAP-1:[('description', \"The chunk planner's `estimateTokens` (`src/reader/modes/narrate/engine/chunkPlan.ts`) counts each digit at its spoken cost (`DIGIT_TOKEN_WEIGHT` 13), so digit-dense passages such as chess notation are planned into chunks under the 400-id cap instead of failing closed. Text without digits is planned as today.\"), ('title', 'Digit-dense passages are planned under the 400-id token cap'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020502Z-external-set-status-NARRATE-TOKEN-CAP-1",
+      "detail": {
+        "readBack": "SQL: fields equal (written just before the plan was recorded; plan recorded retroactively, same content)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:05:26Z",
+  "outcome": "succeeded"
+}

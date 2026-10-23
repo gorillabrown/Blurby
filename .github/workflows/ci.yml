@@ -21,6 +21,6 @@ jobs:
       - run: npm ci
       # Electron 42 no longer downloads its binary at install; fetch it here so a download failure is its own step.
       - run: node node_modules/electron/install.js
-      - run: npm audit --audit-level=high
+      - run: node scripts/ci/audit-gate.mjs
       - run: npm test
       - run: npm run build

@@ -1,0 +1,49 @@
+{
+  "id": "20261023T002122Z-external-create-item-RENAME-TMP-RACE-1",
+  "operation": "external-create-item",
+  "item_id": "RENAME-TMP-RACE-1",
+  "created": "2026-10-23T00:21:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "The sync-state and token saves use the serialized JSON writer",
+      "status": "Queued",
+      "sequence": 60,
+      "written_status": "Full Spec",
+      "effort": "XS",
+      "workstream": "Platform & Maintenance",
+      "description": "`saveSyncState` and `saveTokens` write through `writeJSON` from `main/json-store.js`, which serializes per path, instead of a fixed `.tmp` file. Overlapping saves no longer collide, and both now join the quit flush.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from RENAME-RETRY-1's review (low finding). Full Spec 2026-10-22 (U9/U10 pass). Not a release gate; merges after the Stage 8 freeze lifts.",
+      "id": "RENAME-TMP-RACE-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T00:16:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RENAME-TMP-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "RENAME-TMP-RACE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RENAME-TMP-RACE-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T002122Z-external-create-item-RENAME-TMP-RACE-1",
+      "detail": {
+        "readBack": "SQL: fields equal"
+      },
+      "providerItemId": "4027c96c-c31e-81b3-ad61-e4583c31729b",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T00:22:10Z",
+  "outcome": "succeeded"
+}

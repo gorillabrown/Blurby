@@ -8179,3 +8179,454 @@ This is a stub; `/epic` applies the full set in the charter.
 - **Standing rules 47 and 48:** the suite, typecheck and build are in Done-when 5 and run on the owner's machine.
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
+
+## Archived at close-out 2026-10-22: KF2-WAIVER-RETIRE-1
+
+#### KF2-WAIVER-RETIRE-1 — Retire the KF-2 rename waiver *(position 28 — Full Spec; authored 2026-10-14 on main @ `0f285836`)*
+
+- **What:** Governance only, with no product or test code.
+  - Record that the KF-2 waiver is retired.
+  - Write Brain's closed list into the Stage 8 note, naming each admitted load failure exactly, so a real Windows rename failure can never be waived as load.
+  - Edits:
+    - Stage 8's release-gate paragraph (`ROADMAP.md:535`, after "Full-suite failures under load on this machine follow Brain's closed-list rule.") gains the sentence in *Edit sites*.
+    - `docs/governance/LESSONS_LEARNED.md` gains a `### LL-156 — status (KF2-WAIVER-RETIRE-1, <date>)` entry at the end of the file.
+  - The close-out (the ceremony, not this run) records that this completes the SETTINGS-WRITE-DURABLE-1 follow-up "KF-2 waiver → propose retirement at the next roadmap review after clean full runs" (`docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md:65`, `:77`).
+- **Why:**
+  - **The waiver:** KF-2 (READER-MODE-SEPARATION-2 Decision #25, `docs/planning/epics/2026-10-09-reader-mode-separation-2/state.md:208`) waived a Windows `EPERM` on `rename(tmp, queuePath)` in `tests/sync-queue.test.js` under full-suite load. The cause was a scanner handle racing an immediate rename of a fresh `.tmp` file.
+  - **The fix:** SETTINGS-WRITE-DURABLE-1 (merge `b728a3e8`, 2026-10-13) moved that writer into `main/json-store.js`; `main/sync-queue.js:11` now requires `writeJSON` from it. It also added `renameWithRetry` (`main/json-store.js:10-19`), which retries EPERM, EBUSY and EACCES after `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` (`main/constants.js:145`) and then rethrows. LL-156 records how the waiver followed its code.
+  - **Trace of every KF-2 reference** (`git grep -n -I -E 'KF-?2\b|KF2'` on `0f285836`; `tests/**` has none):
+    - **Live, and not waiver text** (left to the ceremonies):
+      - the item's own stub (`ROADMAP.md:2541`), replaced by this specification at fold-in;
+      - the queue and lane mentions of the item ID (`ROADMAP.md:6`, `:27`, `:2584`; `CLAUDE.md:367`);
+      - the register snapshot and recovery records (`Virtuoso/work-register.snapshot.json:451-467` and five `Virtuoso/.recovery/*KF2-WAIVER-RETIRE-1.json` files; standing rule 46).
+    - **Live successor of the waiver** (restated by this item): Brain's closed-list rule.
+      - It is cited at `ROADMAP.md:535`, `:1846` (DEPS-AUDIT-1 Done-when 12, "the three timing-sensitive tests, outside this diff, each pass twice when re-run alone"), `:2141` and `:2361`. Four staging memos cite it as "closed environmental list, in-scope exclusion, two isolated re-runs".
+      - It never says "KF-2", but it admits `tests/jsonStore.test.js` failures under load, and that file holds the KF-2 race.
+      - Its members appear in no repository file.
+    - **Historical** (leave unedited):
+      - LL-156 itself (`docs/governance/LESSONS_LEARNED.md:2935`).
+      - The issue files: `Issue.READER-MODE-SEPARATION-2-S1.2026-10-10-2.md:17`, `:44`, `:54`; `Issue.SETTINGS-WRITE-DURABLE-1.2026-10-13.md:3`, `:18`, `:22`, `:26`.
+      - The close-outs: SETTINGS-WRITE-DURABLE-1 `:57`, `:65`, `:73`, `:77`; READER-MODE-SEPARATION-2 `:96`; CLEANUP-MODE-BARREL-1 `:27`, `:47`; QUIT-FLUSH-1 `:170`.
+      - The CLEANUP-MODE-BARREL-1 memo `:24` and `Timing.CLEANUP-MODE-BARREL-1.jsonl:7`.
+      - The archive, `docs/planning/.Archive/ROADMAP_legacy.md`: `:5259`, `:5263`, `:5330`, `:6177`, `:6182`, `:7195`, `:7299`, `:7335`, `:7346`, `:7349`, `:7350`.
+      - The completed separation epic packet: `done.md:35`; `state.md:208`, `:234`.
+      - The roadmap reviews: `docs/planning/roadmap-reviews/reader-mode-separation-2/verification.json:645`; `docs/planning/roadmap-reviews/2026-10-14-plan.md:41`.
+      - `docs/planning/holding/2026-10-11-narrate-rebuild.md:795`: NARRATE-REMOVE-1's failure handling, completed 2026-10-12. Its Trail changes only through the registry.
+      - The OutsideAudit.10 snapshot: `docs/studies/audit/OutsideAudit.10.2026-10-11/remediation/d4-evidence/gates-final/out/roadmap-section.snapshot.txt:462`, `:467`.
+    - The in-flight epic packet (`docs/planning/epics/2026-10-12-narrate-rebuild/`, on `main` and on `eb/narrate-rebuild-1-p6` @ `445fac5d`) has no KF-2 reference. Its `second-machine.md` D11 row requires an unwaived `npm test` exit 0.
+  - **Run evidence since the retry existed** (Done-when evidence, ruling Q3). All runs are on the owner's machine in local sessions. Each tree contains `b728a3e8` or is SETTINGS-WRITE-DURABLE-1's amended tree. Absorbed retries are silent by design (`renameWithRetry` does not log), so "no EPERM rename" means no run rejected one; test (a) rejects if a retry runs out.
+
+    | # | Run (tree) | Result | jsonStore | Source |
+    |---|---|---|---|---|
+    | 1 | SETTINGS-WRITE-DURABLE-1, amended tree | exit 0, 2,054 passed; log grepped: no EPERM/EBUSY/EACCES | pass | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md:42` |
+    | 2 | FOLDER-SCAN-PERF-1 base `978b5fa6` | exit 0, 2,058 | pass | `CloseOut.FOLDER-SCAN-PERF-1.2026-10-14.md:35` |
+    | 3 | FOLDER-SCAN-PERF-1 C2 | exit 0, 2,068 | pass | `Memo.FOLDER-SCAN-PERF-1…:215` |
+    | 4 | QUIT-FLUSH-1 `00dbba06` (measurement window cleared) | exit 0, 2,076 | pass | `Memo.QUIT-FLUSH-1.GovernanceStaging.2026-10-14.md:50` |
+    | 5 | QUIT-FLUSH-1 `cfd07f9d` | exit 0, 2,076 | pass | same memo `:62` |
+    | 6 | QUIT-FLUSH-1 `bd1216fc` | exit 0, 2,080 | pass | same memo `:126` |
+    | 7 | PACKAGING-FIX-1 `cf5d10ef`, run 1 (100% CPU, two reviewers running vitest) | **exit 1** | **3 failed: (a) concurrent writes, (d) and (e) retry; file 10.4 s against about 0.5 s alone; error text not recorded** | `Memo.PACKAGING-FIX-1.GovernanceStaging.2026-10-14.md:46` |
+    | 8 | PACKAGING-FIX-1 `cf5d10ef`, after 3 × 6/6 isolated jsonStore runs | exit 0, 2,087 | pass | same memo `:47` |
+    | 9 | PACKAGING-FIX-1 merge `cc36182b` (loaded) | exit 1: folderWatcher 50 ms budget, readerModeBoundaries 31 s | pass | same memo `:48` |
+    | 10 | UX-POLISH-2 `bff2e60f` (loaded) | exit 0, 2,099 | pass | `Memo.UX-POLISH-2…:50` |
+    | 11 | LIBRARY-READ-ALLOW-1 (loaded) | exit 0, 2,092 | pass | `Memo.LIBRARY-READ-ALLOW-1…:36` |
+    | 12 | LARGE-FOLDER-SYNC-1 (loaded) | exit 1: readFileBufferLibrary (e) `afterEach` ENOTEMPTY (cause removed in `f7b78b0e`) | pass | `Memo.LARGE-FOLDER-SYNC-1…:55-58`, `:74` |
+    | 13 | PAGE-POSITION-SAVE-1 (loaded) | exit 0, 2,142 | pass | `Memo.PAGE-POSITION-SAVE-1…:73` |
+    | 14 | DEPS-AUDIT-1 `a6383286` (loaded) | exit 0, 2,157 | pass | `Memo.DEPS-AUDIT-1…:48` (on `eb/deps-audit-1` only) |
+    | 15 | SAVE-LIBRARY-TRUST-1 `f0155f4b` (loaded) | exit 0, 2,153 | pass | `Memo.SAVE-LIBRARY-TRUST-1…:38` (on its branch only) |
+    | 16 | IPC-PATH-TRUST-1 `f45c2eaf` (loaded) | exit 0, 2,168 | pass | `Memo.IPC-PATH-TRUST-1…:74` (on its branch only) |
+
+    Pre-retry runs are not counted: CLEANUP-MODE-BARREL-1's `sync-queue` clearQueue failure (`03e218bd`), TEST-BUDGET-WORDINDEX-1 and UX-POLISH-1.
+  - **Reading of row 7 (inference):** most likely a timeout cascade.
+    - `vite.config.js:83` sets `testTimeout: 10000`, and the file took 10.4 s.
+    - Tests (d) and (e) spy on the shared CommonJS `fs/promises.rename` and count its calls (`tests/jsonStore.test.js:36-64`). The in-flight real renames of a timed-out (a) would therefore break their counts.
+    - The error text was not kept, so the restated rule makes the next such run record it.
+  - **The admitted failures, from the memos and the tests:**
+    - **jsonStore:** test (a) is `writeJSON — concurrent writes to one path > 20 rounds of 8 concurrent writes: none rejects, the last payload lands, no .tmp remains` (`tests/jsonStore.test.js:23-24`). Its in-file cascade is (d) and (e) (`:36`, `:54`) (row 7).
+    - **folderWatcher:** `startWatcher — does not starve the main process (BUG-193) > a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 50 ms, and no event-loop gap exceeds 250 ms in the next second` (`tests/folderWatcher.test.js:262-263`). Its admitted failure is the 50 ms read budget (row 9: "the 1 MB read-within-50 ms budget").
+    - **readerModeBoundaries:** `reader mode boundaries (G1) > production mode graphs share only declared data and ports` (`tests/readerModeBoundaries.test.ts:202-203`). It carries the only per-test timeout in the file, `30_000` (`:222`, TEST-TIMEOUT-HEADROOM-1). Row 9's "a 31 s run" is read as that timeout firing.
+- **Technical rulings (Blurby.Brain, 2026-10-14, Rule 11 tier 1):**
+  - **Q1:** a real EPERM, EBUSY or EACCES rename message is always a product failure, even under load. jsonStore stays on the closed list only for a timeout in its test (a) and that test's in-file cascade.
+  - **Q2:** this item writes the closed list into the Stage 8 note, with the three files and the exact admitted failure for each.
+  - **Q3:** the recorded runs are the evidence: 16 full runs, none with an EPERM rename. There are no fresh runs, and the table above is the Done-when evidence.
+  - **Q4:** Blurby.Roadmap files both follow-ups as stubs, outside this item: JSONSTORE-TIMEOUT-1 and RENAME-RETRY-1 (see *Out of scope*).
+  - **Position:** 26; Blurby.Roadmap renumbers at fold-in.
+- **Design decisions (planner, 2026-10-14):**
+  - **One sentence on the existing line.** The rule is restated by error type, not by file (LL-156): the waiver moved with its code once, and a file-scoped allowance would let it move again.
+  - **Telling real errors from the tests' fakes.** The synthetic error in tests (d) and (e) (`"EPERM: operation not permitted, rename"`, with no path) stays distinguishable from a real Node error, which quotes the paths (`rename '…'`).
+  - **The shared conditions are kept.** The sentence restates the conditions the memos already apply to every admitted failure: outside the item's diff, and passing twice when re-run alone.
+  - **First error lines.** Every failing full run records each failing test's first error line, so a cascade like row 7 can be classified.
+- **Out of scope:**
+  - Any change to `main/json-store.js`, `main/constants.js` or any test file.
+  - **JSONSTORE-TIMEOUT-1** (stub, filed by Blurby.Roadmap): a 30 s timeout for jsonStore test (a). Once it lands, jsonStore comes off the closed list.
+  - **RENAME-RETRY-1** (stub, filed by Blurby.Roadmap): reuse `json-store.js`'s existing retry helper for the six raw renames, starting with `main/sync-engine.js:97`. The others are `main/auth.js:110`, `main/ipc/reader.js:187` and `:244`, `main/ipc/stats.js:206` and `main/tts-cache.js:197`. No waiver names them, so LL-156 has nothing to move.
+  - Editing any historical record listed above, or the holding file.
+  - The register, Seq and status (standing rule 46).
+- **Prerequisites:** SETTINGS-WRITE-DURABLE-1 is merged (`b728a3e8`), and Brain's rulings are folded in (above). No Stage 8 merge is required. If another item changes the `ROADMAP.md:535` paragraph first, re-read it and re-run Done-when 4–5.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+  - A command passes only on the exact exit code stated. Any other code, any stderr text, or a command that did not run fails it.
+  - A `git grep` check that "prints nothing" passes only when it exits exactly 1 with empty stdout and stderr (standing rule 44).
+  - Dry-runs were taken on `0f285836` (2026-10-14) as `git grep … refs/remotes/origin/main -- <path>`, so their output carries the `refs/remotes/origin/main:` prefix.
+  - Controls ran on a one-line scratch `ROADMAP.md` holding the prescribed sentence, with `git grep --no-index`.
+    1. **Clean-run evidence, row 4:** `git grep -n -F 'Tests 2076 passed | 1 skipped (2077)' -- docs/governance/close-outs/Memo.QUIT-FLUSH-1.GovernanceStaging.2026-10-14.md` prints one line, `…:50:`, and exits 0.
+       - Dry-run: `:50:`, exit 0.
+    2. **Clean-run evidence, row 5 (the next run):** ``git grep -n -F 'npm test` 153 files, 2,076 passed / 1 skipped / 0 failed, exit 0' -- docs/governance/close-outs/Memo.QUIT-FLUSH-1.GovernanceStaging.2026-10-14.md`` prints one line, `…:62:`, and exits 0. The staging memo copies the run table above, rows 1–16.
+       - Dry-run: `:62:`, exit 0. Row 6 (`:126:`) also matches `2,080 passed / 1 skipped / 0 failed`.
+    3. **The stub's condition is gone** (true from fold-in onward): `git grep -c -E 'show no EPERM[ ]rename' -- ROADMAP.md` prints nothing. The `[ ]` keeps this line from matching itself.
+       - Dry-run: `ROADMAP.md:1`, exit 0, so the gate can fail.
+    4. **KF-2 is restated as retired:** `git grep -n -E '^\*\*Release gate .*closed-list rule\. KF-2 is retired' -- ROADMAP.md` prints exactly one line and exits 0.
+       - Dry-run: exit 1, empty.
+       - Control: `ROADMAP.md:1`, exit 0.
+    5. **The closed list is written down:** ``git grep -n -E '^\*\*Release gate .*admits exactly three load failures.*`tests/jsonStore\.test\.js`.*`tests/folderWatcher\.test\.js`.*`tests/readerModeBoundaries\.test\.ts`' -- ROADMAP.md`` prints exactly one line, the same line as Done-when 4, and exits 0.
+       - Dry-run: exit 1, empty.
+       - Control: `ROADMAP.md:1`, exit 0.
+    6. **The LL-156 status is recorded:** `git grep -c -F '### LL-156 — status (KF2-WAIVER-RETIRE-1' -- docs/governance/LESSONS_LEARNED.md` prints `docs/governance/LESSONS_LEARNED.md:1` and exits 0.
+       - Dry-run: exit 1, empty.
+    7. **No live KF-2 waiver text outside history** (outside `ROADMAP.md`): this prints nothing.
+
+       ```
+       $ex = @(':!docs/planning/.Archive/**', ':!docs/governance/close-outs/**', ':!docs/governance/bug-reports/**', ':!docs/planning/epics/2026-10-09-reader-mode-separation-2/**', ':!docs/planning/roadmap-reviews/**', ':!docs/studies/audit/**', ':!docs/planning/holding/**', ':!Virtuoso/**', ':!docs/governance/LESSONS_LEARNED.md', ':!ROADMAP.md')
+       git grep -n -I -F 'KF-2' -- . @ex
+       ```
+
+       - Dry-run: exit 1, empty. The trace found no live waiver text there, so this gate guards against adding any.
+       - Control: `git grep -c -I -F 'KF-2' -- .` without `@ex` lists at least 17 files and exits 0. (Roadmap review 2026-10-22: `docs/planning/.Archive/ROADMAP_snapshot_2026-10-22.md` and this review's records add files, and both live in paths `@ex` excludes, so Done-when 7 itself is unchanged.)
+    8. **In `ROADMAP.md`, every KF-2 line is inside this specification or is the restated Stage 8 line:** this script exits 0 and prints nothing.
+
+       ```
+       $lines = Get-Content -LiteralPath ROADMAP.md
+       $start = ($lines | Select-String -Pattern '^(- )?<a id="kf2-waiver-retire-1"></a>' | Select-Object -First 1).LineNumber
+       if (-not $start) { 'NO ANCHOR'; exit 2 }
+       $end = ($lines | Select-String -Pattern '^(- )?<a id="' | Where-Object LineNumber -gt $start | Select-Object -First 1).LineNumber
+       $bad = $lines | Select-String -SimpleMatch 'KF-2' | Where-Object { ($_.LineNumber -lt $start -or ($end -and $_.LineNumber -ge $end)) -and $_.Line -notmatch '^\*\*Release gate .*closed-list rule\. KF-2 is retired' }
+       $bad | ForEach-Object { "{0}:{1}" -f $_.LineNumber, $_.Line }
+       if ($bad) { exit 1 } else { exit 0 }
+       ```
+
+       - Dry-run on `0f285836`'s `ROADMAP.md`: exit 0, empty. The only KF-2 line is the stub at `:2541`; the next anchor is `:2542`.
+       - Control: the same file with an appended line `A stray KF-2 waiver line.` prints `2587:…` and exits 1.
+    9. **Diff fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M ROADMAP.md` and `M docs/governance/LESSONS_LEARNED.md`.
+       - Also allowed, if kept (standing rule 41): the time log `docs/governance/close-outs/Timing.KF2-WAIVER-RETIRE-1.jsonl` and the staging memo `docs/governance/close-outs/Memo.KF2-WAIVER-RETIRE-1.GovernanceStaging.<date>.md`.
+       - `git diff --name-only refs/remotes/origin/main -- main src tests scripts preload.js main.js package.json` prints nothing.
+  - No `npm test`, typecheck or build: this item is docs-only (test tier None; ruling Q3). Standing rule 48 does not apply, because no TypeScript changes. Standing rule 47 does not bind, because every gate is platform-neutral.
+- **Effort:** XS.
+- **Owners:** Blurby.Roadmap (governance session) executes, merges and runs the close-out. Blurby.Brain has ruled (above). The owner has no part.
+- **Lane:** Platform & Maintenance. Execution surface E (governance/planning).
+- **Source:**
+  - `docs/governance/close-outs/CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md:65`, `:77`.
+  - `docs/governance/LESSONS_LEARNED.md:2934-2940` (LL-156).
+  - The Stage 8 release-gate paragraph (`ROADMAP.md:535`).
+  - Blurby.Brain's closed-list ruling and the technical rulings of 2026-10-14.
+  - This trace on `0f285836`, and the branch memos on `eb/deps-audit-1` @ `048fbfcb`, `eb/save-library-trust-1` @ `0df26183` and `eb/ipc-path-trust-1` @ `e1b72949`.
+- **Path:** dispatch.
+- **Edit sites** (on `main` @ `0f285836`):
+  - **`ROADMAP.md:535`:** after `Full-suite failures under load on this machine follow Brain's closed-list rule.`, on the same line and separated by one space, append this sentence exactly. `<date>` is the merge date, as `yyyy-mm-dd`.
+    - `KF-2 is retired (KF2-WAIVER-RETIRE-1, <date>): a failing test whose message reports a real rename error (`EPERM`, `EBUSY` or `EACCES` with `rename '<path>'`) is always a product failure, even under load, and goes to Blurby.Brain. The closed list admits exactly three load failures, each only when the test is outside the item's diff and passes twice when re-run alone: (1) `tests/jsonStore.test.js`, a timeout in test (a), "20 rounds of 8 concurrent writes: none rejects, the last payload lands, no .tmp remains", and the failures that follow it in that file; (2) `tests/folderWatcher.test.js`, the 50 ms budget in "a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 50 ms, and no event-loop gap exceeds 250 ms in the next second"; (3) `tests/readerModeBoundaries.test.ts`, the 30 s timeout of "production mode graphs share only declared data and ports". Every failing full run records each failing test's first error line.`
+  - **`docs/governance/LESSONS_LEARNED.md`**, after the last line (`:2988`, the end of `### LL-158 — status (QUIT-FLUSH-1, 2026-10-14)`): one blank line, then these two lines.
+    - `### LL-156 — status (KF2-WAIVER-RETIRE-1, <date>)`
+    - `**Status:** Observation — held: KF-2 followed its writer into `main/json-store.js`, the bounded rename retry absorbed it, and the waiver was retired on 16 recorded owner-machine runs; the Stage 8 closed list was written down and restated by error type, so a load allowance cannot readmit a real rename error.`
+- **Branch:** `eb/kf2-waiver-retire-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\kf2-waiver-retire-1`. Write refs in full, because a `main/` directory exists. No `npm ci` is needed.
+- **Staging plan:**
+  - C1: both edits (gate: Done-when 1–9).
+  - Then `git merge refs/remotes/origin/main` into the branch and re-run Done-when 4, 5, 7, 8 and 9.
+  - Merge to `main` with `--no-ff` and push (Rule 5b).
+  - Never stage `tests/perf-baseline-results.json`, `release/` or `dist/`.
+- **Failure handling:**
+  - **Done-when 1 or 2 finds no line:** the memo has changed. Stop and send it to Blurby.Roadmap; do not substitute another run.
+  - **Done-when 7 or 8 lists a line:** it is new live waiver text. Restate it as retired (LL-156), or stop if it is in a file outside the fence.
+  - **The Stage 8 paragraph has changed since `0f285836`:** re-read it and re-anchor the sentence. Never drop another item's text.
+  - **A quoted test name no longer matches its test file:** stop and send it to Blurby.Brain; do not edit the test.
+  - **Retry ceiling:** two corrections, then BLOCKER to Blurby.Brain.
+  - **Rollback:** `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface E only: the one `ROADMAP.md:535` line and the appended `docs/governance/LESSONS_LEARNED.md` entry.
+  - **Forbidden:**
+    - every file under `main/`, `src/`, `tests/` and `scripts/`, plus `preload.js`, `main.js` and `package.json`;
+    - every other `ROADMAP.md` line;
+    - the register (standing rule 46);
+    - every file NARRATE-REBUILD-1 owns: `main/narrate/**`, `main/ipc/narrate.js`, `src/reader/modes/narrate/**` and `docs/planning/epics/2026-10-12-narrate-rebuild/`.
+  - **Shared-core touches:** none.
+  - **Merge order:** any time. It is file-disjoint from every Stage 8 code item. Every ceremony also edits `ROADMAP.md`, so the second to merge takes `refs/remotes/origin/main` in first. JSONSTORE-TIMEOUT-1, when it lands, removes item (1) from this sentence.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Stage 8 sentence appended (KF-2 retired; closed list of three, each admitted failure named); LL-156 status entry appended; staging memo copies the run table | calculable | governance edit | mechanical | low | 10m (two text edits, one memo) | — | — |
+| 2 | Done-when 1–9 run and recorded; origin/main merged in; merged `--no-ff` and pushed | calculable | merge and verify | mechanical | low | 10m (nine grep or script gates, one merge) | — | — |
+
+**Total:** chain 1m · sum 1m; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 41 (LL-136):** the Done-when 9 fence exempts the time log and the staging memo.
+- **Standing rule 44 (LL-143):** every gate names `pwsh` and an exact exit code, and each was dry-run on `0f285836`.
+  - Gates 1–6 find, or fail to find, their lines on the base as stated. Gates 4 and 5 were also controlled against the prescribed sentence.
+  - Gates 7 and 8 are empty on the base by finding, not by construction. Each has a control proving that the pattern matches: 17 files, and a planted line.
+  - Two earlier drafts were vacuous and were replaced:
+    - "`KF-2` lines without the word 'retired'" was empty because the stub itself says "restated as retired".
+    - A fixed-string stub gate matched its own text once folded in.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register; Seq, status and completion stay with the ceremonies.
+- **LL-156:** every KF-2 reference was traced and classified. The waiver's only live successor, the closed list, moved with the writer into `main/json-store.js`. It is now written down and restated by error type.
+- **LL-136:** the time log is named `Timing.KF2-WAIVER-RETIRE-1.jsonl`, as the fence expects.
+- **LL-143:** anchor and gate patterns are line-start (`^(- )?<a id="`, `^\*\*Release gate`), so this specification's own quoted text and code blocks cannot satisfy or break them once folded in.
+
+
+##### Mid-Dispatch Amendment — 2026-10-22 (Done-when 8 exemption; Blurby.Brain, tier 1, option (a) with a condition)
+
+The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines added after this specification was written. RENAME-RETRY-1's close-out archived two of them, its specification's Prerequisites and Lessons applied. The third is standing rule 50's text (LL-156, promoted at the 2026-10-22 review). It is history and grants no waiver, and standing rules are never reworded to satisfy a grep. Done-when 8 changes as follows:
+
+- **Exemption, exact line only:** the script also skips the one line whose UTF-8 text, without its line ending, has SHA-256 `c8b70300bf4ef864e19963383769de86482a40bb76da5d27331d002e55392b43`. That is standing rule 50's line, `ROADMAP.md:189` on `main` @ `bf48dda0`. A prefix match is not enough: Brain's condition requires that the exemption cannot cover a second line starting `50. **LL-156`.
+- **New control:** plant a second line elsewhere in `ROADMAP.md`, outside this specification, reading `50. **LL-156 — A waiver moves with its code.** KF-2 is waived again for this run.` The script must print that line and exit 1. Remove the plant.
+- **Existing control:** the planted `A stray KF-2 waiver line.` still prints and exits 1.
+- **Result on the merge base:** exit 0, empty.
+- **If rule 50's line changes before the merge:** for example, a review rewraps it. Stop and report the new hash; never update the hash to make the gate pass.
+
+## Archived at close-out 2026-10-22: JSONSTORE-TIMEOUT-1
+
+#### JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom *(position 34 — Full Spec; authored 2026-10-22 on main @ `4193338a`; test-only; not a release gate)*
+
+- **What:** `tests/jsonStore.test.js` test (a) runs 20 rounds of 8 concurrent real writes (`:24-33`) under the default 10 s Vitest timeout (`vite.config.js:83`). Under full-suite load on Windows it can run out of time. When it does, its writes keep running after Vitest moves on, and test (d) (`:36-52`) and test (e) (`:54-63`) install a global spy on `fs/promises.rename` that counts every call. A rename left over from (a) then counts as theirs, so they fail for a reason that is not theirs.
+  - This item gives (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did for other load-sensitive tests.
+  - It makes (d) and (e) wait for every earlier write to settle (`whenWritesSettled()`, exported at `main/json-store.js:62`) before spying.
+  - It makes their spies count only renames of their own `.tmp` path, passing every other call through.
+  - The test file's assertions do not change.
+- **Why:** Blurby.Brain's ruling of 2026-10-14. With this change, a jsonStore failure under load means a real defect again. That lets the file leave Stage 8's closed list of load-tolerated failures (the list KF2-WAIVER-RETIRE-1 writes into the release-gate line). Done by the close-out's fold-in, below.
+- **Evidence (read on `4193338a`):** `npx vitest run tests/jsonStore.test.js` passes 6 of 6 in 1.19 s with no load. The file has no per-test timeout. (d) counts with `expect(spy).toHaveBeenCalledTimes(3)` (`:47`) and (e) with `toHaveBeenCalledTimes(4)` (`:59`). Both spies replace `rename` for every caller.
+- **Out of scope:** `main/json-store.js`; any other test file; the closed-list text itself, which the close-out edits through the staging memo; RENAME-RETRY-1.
+- **Prerequisites:** none in code. **Merge order:** after KF2-WAIVER-RETIRE-1 (position 28), whose Done-when 5 writes the closed list that names `tests/jsonStore.test.js`.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** before any edit, temporarily give (a) a 1 ms timeout (local only, never committed). Run `npx vitest run tests/jsonStore.test.js` three times and record in the staging memo whether (d) or (e) failed on a call-count mismatch. Then revert the temporary change; `git diff -- tests` is empty.
+    2. **Isolation holds:** with the change applied, repeat the same temporary 1 ms timeout on (a) three times. Each run shows (a) failing with "Test timed out" and (d), (e), the `saveJSON` tests and (g) passing. Record the three outputs, then revert the temporary timeout.
+    3. `npx vitest run tests/jsonStore.test.js` exits 0 with 6 of 6 passing.
+    4. **Mechanical checks:**
+       - `git grep -n -F "30_000" -- tests/jsonStore.test.js` prints exactly one line, on (a)'s `it(`.
+       - `git grep -c -F "await whenWritesSettled()" -- tests/jsonStore.test.js` prints 3 or more: (d), (e) and the existing (g).
+    5. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0 (standing rule 48; `tests/` is in its scope).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M tests/jsonStore.test.js`, plus the time log and staging memo (standing rule 41).
+    7. **Staging memo fold-in for the close-out:** remove `tests/jsonStore.test.js` from the closed list in Stage 8's release-gate line, which then admits two load failures. The memo names the exact old and new text.
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** Platform & Maintenance. Execution surface B (test harness).
+- **Source:** the JSONSTORE-TIMEOUT-1 stub (Blurby.Brain ruling 2026-10-14); `tests/jsonStore.test.js`; `vite.config.js:83`; TEST-TIMEOUT-HEADROOM-1's close-out (precedent for per-test headroom).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `4193338a`; re-grep first, standing rule 36):
+  - `tests/jsonStore.test.js:11`: import `whenWritesSettled`, which is already imported.
+  - **(a), `:24`:** add `30_000` as the third argument of `it(...)`.
+  - **(d), `:36-52`:**
+    - Add `await whenWritesSettled();` as the first line.
+    - The spy implementation counts a call only when `args[0] === file + ".tmp"`. Every call passes through to `realRename` unless it is one of the first two counted calls, which throw.
+    - Replace `expect(spy).toHaveBeenCalledTimes(3)` with an assertion on that own-path count, which must equal 3.
+  - **(e), `:54-63`:**
+    - Add `await whenWritesSettled();` as the first line.
+    - The spy throws EPERM only for its own `.tmp` path and passes others through.
+    - The count assertion is on its own-path count, which must equal 4.
+- **Tests:** the file itself; Done-when 1 to 3.
+- **Constants:** none in `main/`. The 30 s figure is the test's own, matching TEST-TIMEOUT-HEADROOM-1.
+- **Branch:** `eb/jsonstore-timeout-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\jsonstore-timeout-1`. Run `npm ci` first. Write refs in full.
+- **Staging plan:** exactly `tests/jsonStore.test.js`, the time log and the staging memo. Merge with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If Done-when 2 shows (d) or (e) failing while (a) times out, the isolation is incomplete. Report the failing assertion. Do not raise (a)'s timeout further to hide it.
+  - If Done-when 1 never shows interference on the base, record that it did not reproduce in three runs and continue. The change is still the ruled hardening.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface B.
+  - **Forbidden:** every file but `tests/jsonStore.test.js`, the time log and the memo.
+  - **Shared-core touches:** none.
+  - **Merge order:** after KF2-WAIVER-RETIRE-1. Independent of RENAME-RETRY-1, which does not touch this file. Its full suite waits for ELECTRON-42-UPGRADE-1's crash gates if those are still running.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Interference control recorded on the base | calculable | positive control | bounded | low | 15m (three timed runs, recorded) | — | — |
+| 2 | The concurrency test has headroom and the retry tests ignore other tests' writes | calculable | test hardening | bounded | low | 20m (one timeout, two spies narrowed) | — | — |
+| 3 | Isolation proven; full suite and typecheck pass; merged and pushed | calculable | merge and verify | mechanical | medium | 25m (three control runs, suite, typecheck, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 records the interference on the base, and Done-when 2 proves the isolation with (a) timing out on purpose.
+- **Standing rule 50 (LL-156):** the closed-list entry for this file leaves with its cause, through the close-out's fold-in, not before.
+- **LL-152:** like-for-like runs (three before, three after) before claiming the interference is gone.
+- **Standing rule 44 (LL-143):** Done-when 3 was dry-run on the base (6 of 6 pass in 1.19 s). Done-when 4's greps print 0 lines and 1 line there.
+- **Standing rules 47 and 48:** the suite and typecheck are in Done-when 5.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+
+## Archived at close-out 2026-10-22: CI-AUDIT-ALLOWLIST-1
+
+#### CI-AUDIT-ALLOWLIST-1 — CI fails on a new high advisory, not on the reviewed ones *(position 30 — Full Spec; authored 2026-10-22 on main @ `4193338a`; Blurby.Brain ruling 2026-10-22; not a release gate)*
+
+- **What:** CI's audit step (`.github/workflows/ci.yml:22`, `npm audit --audit-level=high`) fails on `main` today and on every pull request, because of advisories DEPS-AUDIT-1 reviewed and kept (`docs/governance/DEPENDENCY_ADVISORIES.md`). A step that always fails hides a new one. This item replaces it with `node scripts/ci/audit-gate.mjs`, which:
+  - runs `npm audit --json` (the same population as today: all dependencies);
+  - fails on any high or critical advisory that `.github/audit-allowlist.json` does not list;
+  - fails on any allowlisted advisory whose review-by date has passed.
+  Each allowlist entry carries the advisory ID, the package, its reachability note from `DEPENDENCY_ADVISORIES.md` and a review-by date. The two follow-redirects advisories are new since DEPS-AUDIT-1 and have a non-major fix, so they are fixed, not allowlisted.
+- **Why:** Blurby.Brain's ruling of 2026-10-22, recorded by ELECTRON-42-UPGRADE-1's run. It is not a release gate: no workflow builds installers, because `release.yml` was deleted in `e9bbf56a`.
+- **Evidence (`npm audit --json` and `npm audit --omit=dev --json` on `4193338a`, 2026-10-22, read-only):**
+  - All dependencies: 0 critical, 10 high, 6 moderate.
+  - The high advisories by ID:
+    - adm-zip: GHSA-7q85-xj36-vmfc, GHSA-8238-w5pm-2374, GHSA-j5f4-cc29-5x44, GHSA-rcw4-f5rp-g42v, GHSA-xcpc-8h2w-3j85 (prod, direct; reviewed, not reached).
+    - sharp: GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c, GHSA-wq5f-xc86-pv6w (prod, under the Kokoro stack; reviewed, not reached).
+    - braces: GHSA-vfj7-8cjw-p6xm (dev, install time, via patch-package; reviewed, kept by ruling Q4).
+    - follow-redirects 1.16.0: GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8 (dev, via axios; **not reviewed**; `fixAvailable: true`, 1.16.1 is within axios's `^1.16.0`).
+  - `--omit=dev` lists the 8 adm-zip and sharp IDs only.
+  - `npm audit --audit-level=high` exits 1 on the base.
+- **Out of scope:**
+  - Moving adm-zip, sharp, the Kokoro pins or patch-package.
+  - Any fix needing a major version.
+  - Moderates: `DEPENDENCY_ADVISORIES.md`'s moderates table stays, and the gate ignores moderate and lower.
+  - Release workflows.
+- **Prerequisites:** ELECTRON-42-UPGRADE-1 merged. It edits `ci.yml:19` (Node 20 to 24) and regenerates `package-lock.json`, so this item cuts from a `main` that has it. Re-run the audit there: if the high and critical ID set differs from the 10 above, stop and report the difference. Do not allowlist an advisory this specification did not review.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** on the base, `npm audit --audit-level=high; $LASTEXITCODE` prints 1. Record it in the staging memo.
+    2. **follow-redirects fixed, lockfile only:**
+       - `npm update follow-redirects` resolves `node_modules/follow-redirects` to 1.16.1 or a later 1.16.x in `package-lock.json`.
+       - A comparison script in a scratch directory parses `refs/remotes/origin/main:package-lock.json` and the branch's lockfile. It prints exactly one changed key under `packages`, `node_modules/follow-redirects`, and exits 0.
+       - `git diff refs/remotes/origin/main -- package.json` is empty.
+    3. **The gate exists:** `scripts/ci/audit-gate.mjs` uses Node built-ins only and takes these options:
+       - `--input <file>` reads saved `npm audit --json` output instead of running npm. Otherwise it runs `npm audit --json` itself (`npm.cmd` on Windows).
+       - `--allowlist <file>` defaults to `.github/audit-allowlist.json`.
+       - `--today <YYYY-MM-DD>` defaults to today's UTC date.
+       Its exit codes:
+       - 0: every high and critical advisory, keyed by the GHSA ID at the end of its `via[].url`, is allowlisted and in date.
+       - 1: one or more advisories are not allowlisted or are past their review-by date. Each is printed with its package, severity and title.
+       - 2: the allowlist or the audit output cannot be parsed.
+       An allowlisted ID that the audit no longer reports prints a `stale:` line and does not change the exit code.
+    4. **The allowlist:** `.github/audit-allowlist.json` is an array of exactly 9 entries: the adm-zip, sharp and braces IDs above. Each entry is `{ "id", "package", "reachability", "reviewBy": "2027-01-22" }`, and `reachability` quotes the matching `DEPENDENCY_ADVISORIES.md` row's *Reached by Blurby?* and *Evidence* in one sentence.
+    5. **Gate tests:** `tests/auditGate.test.js` runs the script through `child_process` with `--input`, `--allowlist` and `--today` pointing at temp files, and covers:
+       - (a) everything allowlisted, exit 0;
+       - (b) a new high ID, exit 1, naming it;
+       - (c) a new critical ID, exit 1;
+       - (d) a new moderate, exit 0;
+       - (e) an allowlisted ID past `reviewBy`, exit 1;
+       - (f) a stale entry, exit 0 with a `stale:` line;
+       - (g) a malformed allowlist, exit 2.
+       `npx vitest run tests/auditGate.test.js` exits 0.
+    6. **Live gate:** `node scripts/ci/audit-gate.mjs; $LASTEXITCODE` prints 0 on the branch. Record its output.
+    7. **CI uses it:**
+       - `git grep -n -F "npm audit --audit-level" -- .github` exits 1 (no match).
+       - `git grep -n -F "node scripts/ci/audit-gate.mjs" -- .github/workflows/ci.yml` prints one line.
+    8. **Advisories document:**
+       - `docs/governance/DEPENDENCY_ADVISORIES.md` gains follow-redirects in *Fixed*, with the version and the date.
+       - It gains a short *CI audit gate* section that names the allowlist file and the review-by date, and says that renewing an entry needs a fresh reachability check.
+    9. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+    10. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and staging memo (standing rule 41):
+        - `A scripts/ci/audit-gate.mjs`
+        - `A .github/audit-allowlist.json`
+        - `M .github/workflows/ci.yml`
+        - `M package-lock.json`
+        - `A tests/auditGate.test.js`
+        - `M docs/governance/DEPENDENCY_ADVISORIES.md`
+    11. **Open check after merge (the executing agent's, reported to Blurby.Roadmap):** `gh run list --workflow CI --branch main --limit 1 --json conclusion` shows `success` for the merge's push, on both matrix legs.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** Platform & Maintenance. Execution surface D (platform and CI).
+- **Source:** Blurby.Brain's ruling of 2026-10-22 (ELECTRON-42-UPGRADE-1 run report); `docs/governance/DEPENDENCY_ADVISORIES.md` (DEPS-AUDIT-1, `a6383286`); this specification's audit reads on `4193338a`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `.github/workflows/ci.yml:22`: `- run: npm audit --audit-level=high` becomes `- run: node scripts/ci/audit-gate.mjs`. Re-grep after ELECTRON-42-UPGRADE-1, which changes `:19` only.
+  - `scripts/ci/audit-gate.mjs` (new, ESM, no dependencies). It parses the `vulnerabilities` map: for each `via` entry that is an object with `severity` `high` or `critical`, the key is `url.split("/").pop()`.
+  - `.github/audit-allowlist.json` (new).
+  - `package-lock.json`: through `npm update follow-redirects` only; no hand edit.
+  - `docs/governance/DEPENDENCY_ADVISORIES.md`: the two additions of Done-when 8.
+- **Tests:** Done-when 5. The script is under `scripts/`, not `tests/`, so the test runner does not collect it (LL-146).
+- **Constants:** `reviewBy` is 2027-01-22, 90 days from authoring. It lives in the allowlist, not in code.
+- **Branch:** `eb/ci-audit-allowlist-1` from `refs/remotes/origin/main` after ELECTRON-42-UPGRADE-1 merges, in worktree `C:\Projects\Blurby\.worktrees\ci-audit-allowlist-1`. Run `npm ci` first. Write refs in full.
+- **Staging plan:** the exact paths of Done-when 10. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If the audit on the base lists an ID not in this specification, stop and report it with its package and path. Allowlisting a new advisory needs a reachability review first.
+  - If `npm update follow-redirects` moves any other key in the lockfile (Done-when 2), revert the lockfile and stop.
+  - If `npm audit` needs the network and has none, Done-when 6 is an infrastructure failure: re-run when online. It is not a product failure.
+  - Rollback: `git revert -m 1 <merge>`. CI then fails on the audit step again, as it does today.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** `package.json`; every application file under `main/`, `src/` and `preload.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after ELECTRON-42-UPGRADE-1 (same `ci.yml` and lockfile). Before any later item that moves the lockfile.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control and the advisory set re-read on the post-upgrade base | calculable | positive control | bounded | low | 15m (two audit runs, one comparison) | — | — |
+| 2 | CI fails on a new high or critical advisory and allows the reviewed ones; follow-redirects fixed | calculable | feature | bounded | medium | 45m (one script, one allowlist, one CI line, one lockfile update, seven tests) | — | — |
+| 3 | Live gate, full suite, typecheck and build pass; merged, pushed, first CI run green | calculable | merge and verify | mechanical | medium | 30m (gate run, suite, typecheck, build, merge, one CI run) | — | — |
+
+**Total:** chain 9m · sum 9m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 shows the bare audit failing on the base, and gate test (b) shows the new gate failing on a new advisory.
+- **LL-142:** the advisory set is read from the installed lockfile on the item's own base, not copied from this specification. A difference stops the item.
+- **LL-146:** the gate script lives under `scripts/ci/`, never under a collectable test name.
+- **Standing rule 36:** `ci.yml`'s lines are re-grepped after ELECTRON-42-UPGRADE-1 edits the same file.
+- **Standing rule 44 (LL-143):** every gate names its exit code. Done-when 1's command was dry-run on the base (exit 1).
+- **Standing rules 47 and 48:** the suite, typecheck and build are in Done-when 9.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+
+## Archived at close-out 2026-10-23: READER-VISUAL-DIAG-1
+
+#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 10 — Full Spec)*
+
+- **What:** A read-only diagnosis, measured live, of two pre-existing reader defects. It confirms or refutes the static findings below and ends with a diagnosis report and a fix specification for each bug. No product code is committed.
+  - **BUG-188:** the Focus/Flow "band" sits apart from the word cursor.
+  - **BUG-187:** "ResizeObserver loop completed with undelivered notifications" floods the profile `error.log`.
+- **Why:** both bugs are Low but visible in every Focus and Flow session, and the rebuilt Narrate will sit beside the same Flow surface. Rule 6a forbids specifying a fix before the cause is known.
+- **Static findings to test** (read-only census of `a0e09189`, 2026-10-12; none measured live yet):
+  - **The band is the reading-zone mask.** It is the `mask-image` gradient on `.rm-focus-view` and `.rm-flow-view` (`src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), placed by `--flow-zone-top` and `--flow-zone-bottom`. `.flow-shrink-cursor` is hidden (`src/styles/flow.css:49`, `flow/mode.css:113`), so BUG-188's Location is wrong.
+  - **H1 — The band is about 3 lines when it should be 5.** `applyZoneProperties` (`focus/FoliateView.tsx:1170-1184`, `flow/FoliateView.tsx:1246-1260`) and `onZoneTopChange` (`flow/useModeBindings.ts:34-44`) compute the zone height as `parseFloat(getComputedStyle(container).lineHeight) || 24` on the outer view. No rule sets that line-height, so Chromium's `normal` gives the 24 px fallback. The EPUB lines are 18 px × zoom × 1.8, which is 38.9 px at 120%, so 5 × 24 px covers about 3.1 lines.
+  - **H2 — In Focus nothing ties the band to the word cursor.** The band is fixed at 15% (`FLOW_ZONE_INITIAL_TOP`). The arrival scroll centres the cursor word (`scrollIntoView({ block: "center" })`, `focus/FoliateView.tsx:1047-1060`).
+  - **H3 — In Flow two clocks drive the band and the underline.** The `FlowMode` word timer paints the underline (`flow/ModeRuntime.ts:1181-1213`). The `FlowScrollEngine` line pacer scrolls its own line under the band (`flow/helpers/FlowScrollEngine.ts:746-753`, `stableWindowScroll` branch, untested). The pacer starts later and adds 150 ms per line, and a chunk follow scrolls to the band's middle instead (`flow/FoliateView.tsx:642-672`, `:495-505`).
+  - **H4 — BUG-187 is an observer loop.** Five observers exist: `page/FoliateView.tsx:1018`, `focus/FoliateView.tsx:1188` and `:1212`, `flow/FoliateView.tsx:1264` and `:1288`. Their callbacks rewrite renderer attributes and iframe padding with no equality check, on `overflow: auto` containers. Every window `error` event reaches `error.log` unfiltered (`src/App.tsx:130-143` → `preload.js:122` → `main/ipc/misc.js:334-336`). About 22 lines a second suggests a sustained frame-by-frame loop. StrictMode double effects apply in dev only.
+- **Out of scope:** any committed product-code change (the fixes are separate items, specified by this one); BUG-169 (a different defect, a React update-depth loop whose cited files no longer exist); BUG-189 (dev-mode speed; DEV-PERF-MEASURE-1).
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` exists, and for each of H1–H4 records a verdict (confirmed, refuted or partly confirmed) with the measurement behind it. The measurements:
+       - **H1:** in Focus and Flow at 100% and 120% zoom, the outer view's computed line-height, the zone height in px and the rendered EPUB line height in px.
+       - **H2:** in Focus, paused after opening a book, the band's top and bottom against the cursor word's rect.
+       - **H3:** in Flow, playing for 2 minutes at the default speed, the word-timer index against the pacer's line index, sampled once a second (count of samples where the underline word is outside the band).
+       - **H4:** `error.log` lines per minute in two equal-length sessions (5 minutes each, same book and actions) on `612d03f5` (before the Narrate removal) and on this item's base, in dev; the same on a production build (`npm run build`, then the built app); and, with temporary counters, which observer callback fires per frame and which attribute or size changes each time.
+    2. The report ends with one fix specification per bug, in the roadmap's D.5.2 format (What, Why, Done when, Edit sites, Tests), ready for the next roadmap review.
+    3. The report corrects BUG-188's Location (the zone mask, not `.flow-shrink-cursor`) and states whether BUG-188 is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2).
+    4. `git diff --name-status refs/remotes/origin/main` lists exactly `A docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` and `M docs/governance/BUG_REPORT.md` (BUG-187 and BUG-188 updated with the verdict and a pointer to the report), plus the time log and staging memo if kept (standing rule 41). Temporary instrumentation is never committed: `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing.
+- **Effort:** S.
+- **Owners:** implementation agent (read-only diagnosis, Aristotle role); owner for the live sessions; reviewer re-reads the measurements.
+- **Lane:** Reader Engine. Execution surface B (evaluation).
+- **Source:** [BUG_REPORT.md BUG-187, BUG-188](docs/governance/BUG_REPORT.md); the read-only census of 2026-10-12 for this review; the owner's screenshot (`C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png`); `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json` S2; the NARRATE-REMOVE-1 smoke record.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** none in product code. Temporary instrumentation (console counters in the five observer callbacks, a sampler of the Flow word and line indexes) lives in the worktree only and is reverted before the commit; record the exact temporary diff in the report.
+- **Tests:** none (diagnosis). Measurement scripts, if any, are saved outside the repository or under a name the test runner does not collect (LL-146).
+- **Constants:** none.
+- **Branch:** `eb/reader-visual-diag-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\reader-visual-diag-1`. Write refs in full.
+- **Staging plan:** one commit with exactly the report and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
+- **Failure handling:**
+  - If H4 does not reproduce in either 5-minute session on the base or the branch, record "not reproduced" with the session details, extend once to 10 minutes, and then report the negative result; do not invent a cause.
+  - If a measurement needs a product-code change to be possible, stop with BLOCKER(USER) and describe the change; it is not this item's to make.
+  - Rollback: `git revert -m 1 <merge>` (docs only).
+- **Lane ownership (parallel run):** surface B; read-only on code.
+  - **Forbidden:** committing any path outside the two documents; the live user profile's settings (use a copied profile or the test profile for sessions).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent; may run beside any item.
+  - **Measurement windows (2026-10-13):** every live session, dev or production, and the production build follow the [parallel run plan](#parallel-run-plan-2026-10-13); they never overlap the epic's D3 or D6/T7 trials. Re-audit on `d21ad58e`: the cited Focus and Flow files are unchanged since `a0e09189`, and `preload.js:122` is still `logError`.
+  - **BUG-193 confound (roadmap review 2026-10-14):** every live session runs with the profile's `sourceFolder` empty (the owner's G2 setting, backed up in `%APPDATA%\blurby\blurby-data\g2-backup-20261014\`) or after FOLDER-SCAN-PERF-1 has merged. With the 120,000-file source folder set, each launch floods the main process for about 2 minutes (BUG-193), which would distort H3's timer sampling and H4's per-minute counts and make the base-against-branch comparison meaningless. Record the `sourceFolder` value in the report for every session. Re-audit on `66f15981`: the cited files are unchanged since `a0e09189` apart from `preload.js` (+5 lines, `logError` still at `:122`), and `main/ipc/misc.js:334` is still the `log-error` handler; the lessons check passes.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Band hypotheses H1–H3 measured live in Focus and Flow | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 2 | Observer flood H4 reproduced with equal sessions on base, branch and production, and its oscillating observer named | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 3 | Report and two fix specifications written; bug records updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, two bug updates, one --no-ff merge) | — | — |
+
+**Total:** chain 5m · sum 5m + 2 timeboxed ≤4h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-152** — like-for-like A/B sessions on the base, and a production-build measurement, before attributing the flood.
+- **LL-142** — every verdict rests on a measurement on the running app, not on the static reading above.
+- **LL-146** — measurement scripts are never committed under a collectable test name.
+- **Standing rule 45 (LL-141)** — the live sessions are owner-observed, with the session length and actions recorded.
+- **Standing rule 38** — measure the signal chain before proposing a rewrite of cursor behaviour.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.

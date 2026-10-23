@@ -1,0 +1,38 @@
+{
+  "id": "20261023T002119Z-external-set-status-WS-TOKEN-REGEN-1",
+  "operation": "external-set-status",
+  "item_id": "WS-TOKEN-REGEN-1",
+  "created": "2026-10-23T00:21:19Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "title": "Regenerating the pairing code stores one encrypted token",
+      "description": "`regenerate-ws-pairing-token` stores the token through a new `encodePairingToken` in `main/ws-server.js`, which `startServer` also uses with a matching `decodePairingToken`. One token exists, with no plaintext under safeStorage. Fold-ins: `schemaVersion` becomes optional in `BlurbySettings`, and a parity test checks `BlurbySettings` against `SETTINGS_DEFAULTS`."
+    },
+    "expectedRevision": "080a1633f1527fc290bc31b42ee4616209105a4ec937d1039673a5a38a551558",
+    "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('description', '`regenerate-ws-pairing-token` stores the token through a new `encodePairingToken` in `main/ws-server.js`, which `startServer` also uses with a matching `decodePairingToken`. One token exists, with no plaintext under safeStorage. Fold-ins: `schemaVersion` becomes optional in `BlurbySettings`, and a parity test checks `BlurbySettings` against `SETTINGS_DEFAULTS`.'), ('title', 'Regenerating the pairing code stores one encrypted token'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WS-TOKEN-REGEN-1",
+      "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('description', '`regenerate-ws-pairing-token` stores the token through a new `encodePairingToken` in `main/ws-server.js`, which `startServer` also uses with a matching `decodePairingToken`. One token exists, with no plaintext under safeStorage. Fold-ins: `schemaVersion` becomes optional in `BlurbySettings`, and a parity test checks `BlurbySettings` against `SETTINGS_DEFAULTS`.'), ('title', 'Regenerating the pairing code stores one encrypted token'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T002119Z-external-set-status-WS-TOKEN-REGEN-1",
+      "detail": {
+        "readBack": "SQL: written fields equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:22:07Z",
+  "outcome": "succeeded"
+}

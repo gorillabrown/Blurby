@@ -47,6 +47,7 @@ The `protobufjs` move (7.5.6 to 7.6.6) is inside the Kokoro subtree, under `onnx
 | concurrently | 9.2.5 | dev (was critical) |
 | shell-quote | 1.12.0 | dev (was critical) |
 | tar | 7.5.22 | dev (was critical) |
+| follow-redirects | 1.16.1 (CI-AUDIT-ALLOWLIST-1, 2026-10-22, `npm update follow-redirects`; GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8) | dev (via axios) |
 
 `electron-updater` <=6.8.8 could leak a `PRIVATE-TOKEN` or `Authorization` header on a cross-origin redirect (GHSA-p2f4-r6v6-j797). It was not exploitable here (Blurby sets no updater token or request headers) and is fixed anyway.
 
@@ -60,3 +61,7 @@ None is reached, so no follow-up is filed (ruling Q5). If a later audit adds a r
 | argparse, sprintf-js (via mammoth) | `mammoth` 0.3.29 (major downgrade) | Required only by `mammoth/bin/mammoth`, its command-line tool. |
 | global-agent, roarr, sprintf-js (via onnxruntime-node, @electron/get) | none offered | `onnxruntime-node` install script only; `@electron/get` is the build-time Electron download. |
 | @electron/get, app-builder-lib, dmg-builder, electron-builder, electron-builder-squirrel-windows | major (27 alpha) | Build tooling only; nothing ships in the app. |
+
+## CI audit gate
+
+CI runs `node scripts/ci/audit-gate.mjs` (CI-AUDIT-ALLOWLIST-1, 2026-10-22) instead of `npm audit --audit-level=high`. It fails on any high or critical advisory that `.github/audit-allowlist.json` does not list, and on any listed one past its `reviewBy` date. Moderate and lower are tracked in this document, not gated. The allowlist holds the 9 reviewed high advisories above (adm-zip, sharp, braces), each with its reachability note and `reviewBy` 2027-01-22. Renewing an entry needs a fresh reachability check against this document, not only a new date; a new advisory is reviewed here before it is allowlisted.

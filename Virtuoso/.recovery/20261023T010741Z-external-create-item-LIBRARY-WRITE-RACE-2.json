@@ -1,0 +1,51 @@
+{
+  "id": "20261023T010741Z-external-create-item-LIBRARY-WRITE-RACE-2",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-WRITE-RACE-2",
+  "created": "2026-10-23T01:07:41Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Library writes: the renderer-side and policy follow-ups",
+      "status": "Queued",
+      "sequence": 64,
+      "written_status": "Stub",
+      "effort": "M",
+      "workstream": "Library & Content",
+      "prerequisites": [
+        "LIBRARY-WRITE-RACE-1"
+      ],
+      "description": "Split from LIBRARY-WRITE-RACE-1. Covers `save-library` id de-duplication, malformed-element tests and type checks; the Edit form's fire-and-forget save, whose failure UX is an owner decision; renderer edits not bumping `modified` (a Brain sync ruling); and the cloud sync's `setLibrary` (deferred Cloud lane).",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap when LIBRARY-WRITE-RACE-1 was specified. Stub; needs an owner decision (Edit-form failure UX) and a Brain ruling (modified bump). Not a release gate.",
+      "id": "LIBRARY-WRITE-RACE-2"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T00:57:53Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-WRITE-RACE-2",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:LIBRARY-WRITE-RACE-2",
+      "actualRevision": "",
+      "recoveryId": "20261023T010741Z-external-create-item-LIBRARY-WRITE-RACE-2",
+      "detail": {
+        "readBack": "SQL: fields equal"
+      },
+      "providerItemId": "4027c96c-c31e-8151-8972-d9d03a4f221a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T01:08:40Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,49 @@
+{
+  "id": "20261023T003648Z-external-create-item-WS-PAIR-LOG-1",
+  "operation": "external-create-item",
+  "item_id": "WS-PAIR-LOG-1",
+  "created": "2026-10-23T00:36:48Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Say why a pairing is not saved when OS encryption is unavailable",
+      "status": "Queued",
+      "sequence": 62,
+      "written_status": "Stub",
+      "effort": "XS",
+      "workstream": "Platform & Maintenance",
+      "description": "When safeStorage encryption is unavailable, the pair flow in `main/ws-server.js` keeps the pairing for the session only. Keep that, and log one clear line (pairing not saved: OS encryption unavailable) so the user can tell why.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from WS-TOKEN-REGEN-1's review. Blurby.Brain ruling (tier 1): never write a credential in plaintext; session-only pairing is the secure default. Not a release gate.",
+      "id": "WS-PAIR-LOG-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T00:35:45Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WS-PAIR-LOG-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "WS-PAIR-LOG-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WS-PAIR-LOG-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T003648Z-external-create-item-WS-PAIR-LOG-1",
+      "detail": {
+        "readBack": "create response echoes every written field"
+      },
+      "providerItemId": "4027c96c-c31e-8109-8836-c15f95df0d1f",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T00:37:04Z",
+  "outcome": "succeeded"
+}
