@@ -2916,6 +2916,45 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - LL-142 (classified from measurement: the playing failure is the word timer overwriting the line pacer, not "acts only while running");
   - reading-mode separation (no sibling import).
 
+<a id="flow-para-keys-1"></a>
+
+#### FLOW-PARA-KEYS-1 — Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(position 78 — Check-then-fix; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*
+
+- **What:** on an EPUB with full-book words, Flow's Shift+←/→ and Shift+↑/↓ (`paragraph`) go to the previous or next paragraph start in the whole book. They never jump past paragraphs or into another chapter.
+- **Why (suspected; this item checks it first):**
+  - FOCUS-KEYS-FIX-1's live re-run on `4ea05617` measured Shift+→ in Focus jumping from word 187 to 5290. The surface's paragraph breaks are indices into the loaded slice; the words the keys step over are book-wide. Blurby.Brain's ruling A fixed Focus (`703a5b89`): `findBookParagraphStart` (`src/utils/text.ts`) over the rendered block starts of book-stamped sections plus the book's section starts.
+  - Flow has the same mismatch on `eb/flow-keys-fix-1` @ `60b86aff`:
+    - `src/reader/modes/flow/ModeRuntime.ts:1412` `effectiveWords()` returns `document.bookWords.words` (book-wide) when full-book words exist;
+    - `:933` the `paragraph` case steps over `this.surface.getParagraphBreaks()`, which is `FoliateView.tsx:1058` `foliateParagraphBreaksRef` (loaded slice).
+  - FLOW-KEYS-FIX-1's red test uses a tokenized document, so it can't see this.
+- **Done when:**
+  1. **Check (red first):** a test in `tests/readerModes/flowParagraphStarts.test.ts` drives Flow's `paragraph` command with full-book words (`document.bookWords` with two sections) and a surface whose `getParagraphBreaks()` returns loaded-slice indices that differ from book-wide ones. Expected: Shift+→ from a word in section 2 lands on the next book-wide paragraph start in section 2. Commit it alone.
+     - **If it fails by assertion:** the bug is confirmed. Record the failure, then do (2).
+     - **If it passes:** record why in the memo (the evidence that Flow's breaks are book-wide), keep the test as a guard, skip (2), and close the item with that evidence.
+  2. **The fix (only if (1) is red), per ruling A:**
+     - `src/reader/modes/flow/ModeRuntime.ts`: a `paragraphTarget(direction)` like Focus's (`focus/ModeRuntime.ts`, FOCUS-KEYS-FIX-1): tokenized → `document.paragraphBreaks`; foliate without full-book words → `surface.getParagraphBreaks()`; full-book words → `findBookParagraphStart(surface.getParagraphStarts(), sectionStarts, current, direction, lastIndex)`, doing nothing on `null`.
+     - `src/reader/modes/flow/helpers/foliateParagraphStarts.ts` (new): Flow's own copy of Focus's collector. No sibling import (reading-mode separation); if Brain prefers one shared helper, it moves under a declared `allowedShared` path in `boundary-policy.json` instead.
+     - `src/reader/modes/flow/FoliateView.tsx`: track book-stamped section documents and expose `getParagraphStartWordIndexes`, as Focus's does.
+     - `src/reader/modes/flow/surface.ts`: `getParagraphStarts()` passes it through.
+  3. **Live, as for FLOW-KEYS-FIX-1** (a `--dir` build of the branch tip, a fresh scratch profile, `scripts/ui-sweep/triage.mjs` with its preflight): on the sample book from INTRODUCTION in Flow, Shift+→ three times, paused and playing. Each press lands on the next paragraph start within a few hundred words (the first word of a rendered block), never a jump of thousands (the Focus failure was 187 → 5290), never word 0 or −1. Shift+← returns to the previous start. Live profile hashes unchanged.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47, 48).
+  5. **Fence:** `A tests/readerModes/flowParagraphStarts.test.ts`; if (2) runs, `M src/reader/modes/flow/ModeRuntime.ts`, `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/flow/surface.ts`, `A src/reader/modes/flow/helpers/foliateParagraphStarts.ts`; `M docs/governance/BUG_REPORT.md` (the next free bug number if confirmed); the memo and time log.
+- **Out of scope:** Focus (fixed by FOCUS-KEYS-FIX-1); Flow's line, word and sentence keys (FLOW-KEYS-FIX-1); paused line keys (FLOW-PAUSED-LINE-1, IDEAS A5).
+- **Shared-core touches:** none. Not `ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts` or `src/types.ts`.
+- **Merge order:** after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1.
+- **Release effect:** none. Merges after the Stage 8 release.
+- **Branch:** `eb/flow-para-keys-1` from `refs/remotes/origin/eb/flow-keys-fix-1` while FLOW-KEYS-FIX-1 is unmerged, else from `refs/remotes/origin/main`. Push, and ask Blurby.Roadmap for merge go.
+- **Lane:** Reader Engine. Execution surface A. Effort: S. **Path:** dispatch.
+
+  | # | Task | Tier | Effort |
+  |---|---|---|---|
+  | 1 | Red test with full-book words; commit alone; record red or green | bounded | medium |
+  | 2 | If red: `paragraphTarget`, Flow's collector, FoliateView and surface, per ruling A | bounded | medium |
+  | 3 | Targeted suites, then `npm test`, typecheck and build | mechanical | low |
+  | 4 | `--dir` build and the live Shift+→/← check on a scratch profile with the preflight | bounded | medium |
+  | 5 | Bug entry (if confirmed), memo and time log; push; ask for merge go | mechanical | low |
+- **Lessons applied:** standing rule 43 (red first, with a control); LL-142 (classified from measurement: check before fixing); reading-mode separation (no sibling import).
+
 <a id="narrate-start-stack-1"></a>
 
 #### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(position 6.4 — Full Spec; authored 2026-10-23 from Blurby.Brain's BUG-206 ruling; release fix)*
