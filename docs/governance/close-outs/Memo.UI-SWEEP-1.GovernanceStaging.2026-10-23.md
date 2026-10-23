@@ -27,7 +27,7 @@
    - The report lists 104 NO-EFFECT bug candidates for the planner's triage. Many are text inputs, where a press only focuses the field.
    - Screenshots are in `C:\Projects\Blurby-artifacts\ui-sweep-1\full4\`, referenced by file name and not committed.
 6. **Live profile untouched:** `library.json` `d4b884bd…cffbdf6` and `settings.json` `1a4a40c6…818debd4` are equal before and after.
-7. **Fence:** `scripts/ui-sweep/sweep.mjs`, `scripts/ui-sweep/README.md`, the report and this memo. There is no time log.
+7. **Fence:** `scripts/ui-sweep/sweep.mjs`, `scripts/ui-sweep/README.md`, the report, the time log `Timing.UI-SWEEP-1.jsonl` and this memo.
 8. **No product code.** The suite, typecheck and build are not gates. The `--dir` package of `97527896` was the run's own step.
 
 **A note on the report:** the report's title and its BUG-187 label were written by the harness while it still hard-coded `47ae6e1f`. Both were corrected by hand to `97527896`, and the report says so in its opening Base line. The harness now takes `--build <sha>`, so a rerun prints the base itself. Nothing else in the report was edited.
