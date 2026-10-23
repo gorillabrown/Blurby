@@ -2644,6 +2644,16 @@ The owner answered both questions this specification left out of scope: "1060s y
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
+
+##### Mid-Dispatch Amendment — 2026-10-23 (Blurby.Brain, tier 1)
+
+- **Gate (1) waits for the fix sha** and runs once, on the final tree. The freeze moves to that sha.
+- **BUG-201:** reproduce it in a test or a scratch profile before any fix. Name which writer reverts the cfi while the position stays, and give its timeline. The candidates: a held-turn replay, the restamp guard's cfi-only save, a full-library save from the renderer, or the quit flush. The fix spec must carry a regression test that fails on `47ae6e1f`.
+- **BUG-207 is added to scope** (the 13.9 s quit with Narrate paused, against 2.3 s while playing, plus the RADAR memory warning). Find where the time goes: QUIT-FLUSH-1 awaits the Narrate producer's shutdown uncapped. Report the timeline of each quit step. Brain rules gate or not on the cause; it is likely a gate if a normal paused-Narrate quit routinely takes more than about 3 s.
+- **BUG-202:** unchanged. It needs a real-click reproduction. If it reproduces, the fix joins the same release fix.
+- **BUG-206 (drop cap):** not a gate, but measure how often it breaks Narrate. Over the bundled sample, the repo's EPUB fixtures and a read-only copy of a sample of the owner's library, count how many books' first chapters hit the `setEnd` failure. If many first chapters fail, report it, and the planner takes it back to Brain as a gate candidate.
+- BUG-203, BUG-204 and BUG-205 are not gates and are out of this item's scope.
+- New Done-when rows: (8) BUG-207's quit timeline, with each step's duration, paused and playing, 3 runs each; (9) BUG-206's frequency count, with the book list (hashes, not titles, for the owner's books).
 - <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
 - <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 38 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
