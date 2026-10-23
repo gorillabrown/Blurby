@@ -2599,6 +2599,100 @@ The owner answered both questions this specification left out of scope: "1060s y
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **LL-164:** no lesson-status line is appended.
 
+<a id="book-type-scale-1"></a>
+
+#### BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(position 72 — Full Spec; authored 2026-10-23 on main @ `6dd452e4` from the owner's design decision; not a release gate; merges after the BUG-208 fix, which edits the same four files)*
+
+- **What:** Book pages in all four modes use the reader's font and one fixed size ratio for every header, sub-header and paragraph. This replaces each publisher's own fonts and sizes.
+  - **Font:** every element in the book's body uses the reading font (`settings.fontFamily`, today's fallback `Georgia, serif`), except `pre`, `code`, `kbd` and `samp`, which keep a monospace font.
+  - **Body size:** block text (`p`, `div`, `li`, `blockquote`, `dd`, `dt`, `td`, `th`, `figcaption`, `section`, `article`) is `1rem`. The root size is the reader's size, so `1rem` is exactly the body size, and nesting never compounds it.
+  - **Header sizes:**
+
+    | Element | Size | Line-height |
+    |---|---|---|
+    | `h1` | `1.5rem` | 1.3 |
+    | `h2` | `1.3rem` | 1.3 |
+    | `h3` | `1.15rem` | 1.3 |
+    | `h4`–`h6` | `1rem` | 1.3 |
+
+    All headers are `font-weight: 700`. Every size, line-height and weight is `!important`.
+  - **Kept from the book:** italics, bold inside text, `small`, `sup`, `sub`, small caps, indents, margins, alignment and letter spacing. No rule sets `font-size` on `span`, `small`, `sup`, `sub`, `em`, `i`, `b` or `strong`.
+  - **Constants:** the ratios go in `src/constants.ts` as `BOOK_TYPE_SCALE` (`{ h1: 1.5, h2: 1.3, h3: 1.15, h4: 1, h5: 1, h6: 1 }`) and `BOOK_HEADING_LINE_HEIGHT` (1.3), under the Constants Separation Rule. Each mode's injector reads them.
+- **Where:** the `style.textContent` block of `injectStyles` in each mode's private copy:
+  - `src/reader/modes/page/helpers/foliateStyles.ts`
+  - `src/reader/modes/focus/helpers/foliateStyles.ts`
+  - `src/reader/modes/flow/helpers/foliateStyles.ts`
+  - `src/reader/modes/narrate/helpers/foliateStyles.ts`
+
+  The four files are byte-identical on `6dd452e4` (76 lines each). Apply the same edit to each, so they stay identical. Each mode keeps its own copy and imports no sibling (CLAUDE.md, reading-mode separation). The legacy `src/utils/foliateStyles.ts` is not edited.
+- **Why:** owner decision of 2026-10-23 (tier 3), after the *Meditations* screenshot: "We have to standardize the text across headers, sub headers, and body text". The owner chose:
+  - inside books, not the app interface;
+  - font and size only, not a full normalisation;
+  - headers in the same font as the body, bolder.
+
+  Today `injectStyles` forces font and size only on `html, body` (`:39-45`), so any publisher rule on `h1`–`h6`, `p` or `div` wins.
+- **Out of scope:**
+  - The app interface's type scale.
+  - Margins, indents, alignment and spacing.
+  - A setting to turn the scale off.
+  - The legacy `src/utils/foliateStyles.ts`.
+  - BUG-208's colour fix.
+- **Prerequisites:** the BUG-208 fix (release fix, from SMOKE8-DIAG-1's diagnosis) merges first. It is expected to edit the same `injectStyles` blocks. Branch from `main` after it lands, or rebase onto it.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Re-grep on the base:** `git grep -n "html, body {" -- src/reader/modes/*/helpers/foliateStyles.ts` prints 4 lines. `Get-FileHash src/reader/modes/*/helpers/foliateStyles.ts` gives one hash. If either differs (for example after the BUG-208 fix), re-anchor the edit before changing anything.
+    2. **Positive control (tests only, committed first):**
+       - Add a `describe("book type scale")` to `tests/foliateChunkHighlight.test.ts`, run against each of the four mode copies.
+       - It injects into a jsdom document that carries a publisher stylesheet: `h2 { font-size: 2.5em; font-family: Arial }`, `p { font-size: 0.8em; font-family: Courier }` and `pre { font-family: monospace }`.
+       - It asserts that the injected style text holds a `font-size: 1.3rem !important` rule for `h2`, a `1rem !important` rule for `p`, and a font-family rule that excludes `pre`.
+       - It asserts that no injected rule sets `font-size` on `span`, `sup`, `sub` or `small`.
+       - On the base this fails, exit 1, for all 4 copies.
+    3. **The change:** the same test passes for all 4 copies. `Get-FileHash` on the four files gives one hash.
+    4. **Live check, on a `--dir` build with a scratch profile** (`BLURBY_USER_DATA_DIR`) holding the bundled `resources/sample-meditations.epub`, over CDP:
+       - Inside the foliate iframe, record the computed `font-family`, `font-size` and `font-weight` of the first `h2`, the first body `p` or `div`, and one `.page-word` span. Do it in Page, Focus, Flow and Narrate.
+       - **Expected:** every family is the reading font. The `h2` size is 1.3 × the `p` size, ±0.5 px. The span size equals its paragraph's size, and `h2` is 700.
+       - Repeat at text size 150%; the ratios hold.
+       - Screenshot each mode. Screenshots go to `C:\Projects\Blurby-artifacts\book-type-scale-1\`, not committed.
+    5. **Narrate and Page still work:** Narrate's word table and cursor are untouched, because only layout changes. In the live run, Narrate plays from a clicked word, and the cursor sits on the playing word (one screenshot). Page turns forward and back three times, and the saved position updates.
+    6. **Suite, typecheck and build** on the final tree: `npm test` reports 0 failed, `npm run typecheck` exits 0, `npm run build` exits 0 (standing rules 47 and 48).
+    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly the four `helpers/foliateStyles.ts` files, `src/constants.ts` and `tests/foliateChunkHighlight.test.ts`, plus the time log and staging memo (standing rule 41). `git diff --name-only refs/remotes/origin/main -- src/utils src/components/ReaderContainer.tsx src/types.ts` prints nothing.
+- **Effort:** S.
+- **Owners:** implementation agent.
+- **Lane:** UX polish. Execution surface C.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Rules to append** inside the existing template string, after the `html, body` block. `${fontFamily}` is the value already computed at `:23`.
+  - `body *:not(pre):not(code):not(kbd):not(samp) { font-family: ${fontFamily} !important; }`
+  - `p, div, li, blockquote, dd, dt, td, th, figcaption, section, article { font-size: 1rem !important; }`
+  - `h1 { font-size: ${BOOK_TYPE_SCALE.h1}rem !important; }`, and the same for `h2`–`h6`.
+  - `h1, h2, h3, h4, h5, h6 { font-weight: 700 !important; line-height: ${BOOK_HEADING_LINE_HEIGHT} !important; }`
+- **`rem` resolves to the iframe's root.** The `html` font size is set by the existing `html, body` rule, so `1rem` equals the reader's size at any text size.
+- **Branch:** `eb/book-type-scale-1` from `refs/remotes/origin/main` after the BUG-208 fix merges. Worktree `C:\Projects\Blurby\.worktrees\book-type-scale-1`, then `npm ci`.
+- **Failure handling:**
+  - If the live check shows a header still at the publisher's size, record its matched rule from CDP `CSS.getMatchedStylesForNode` and stop.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** the four `helpers/foliateStyles.ts`, `src/constants.ts` (one new export block) and the test file.
+  - **Forbidden:** `src/utils/`, `ReaderContainer.tsx`, `src/types.ts`, each mode's `FoliateView.tsx` (BAND-ALIGN-1 owns them), and Narrate's engine.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the BUG-208 fix. Independent of BAND-ALIGN-1.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive-control test red on all four copies | calculable | test | bounded | low | 15m (one describe across four imports) | — | — |
+| 2 | Type-scale rules and constants in the four injectors, test green, hashes equal | calculable | feature | bounded | low | 20m (one edit applied four times) | — | — |
+| 3 | Live check in four modes at two text sizes; suite, typecheck and build; merge on go | calculable | verification | bounded | medium | 45m (one --dir build, CDP reads, one suite) | — | — |
+
+**Total:** 80m (3 calculable tasks).
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** the test is red on the base for every copy before the change.
+- **LL-142:** the live check measures computed sizes in the iframe, never the injected text alone.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rules 47 and 48:** the full suite, typecheck and build gate the final tree.
+- **LL-164:** no lesson-status line is appended.
+
 <a id="smoke8-diag-1"></a>
 
 #### SMOKE8-DIAG-1 — Diagnose the two smoke failures: Page reopen position (BUG-201) and the stale folder header (BUG-202) *(position 6, the head — Full Spec; authored 2026-10-23 on main @ `a3ff7003`; release blocker for gate (2))*
@@ -2663,7 +2757,8 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="page-save-restamp-3"></a>**PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard** *(position 45 — stub; not a release gate)*. From PAGE-SAVE-RESTAMP-GUARD-1's quality review (Blurby.Brain ruling 2026-10-15): (2) the double-wrap race: if bookWords arrives during the first wrap of a section of more than 50 groups, the re-stamp can remove the document from the guard set mid-wrap, and the load's wrap keeps stamping provisional numbers, so a turn onto those spans saves unheld; (4) the failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's one-liner, if more is needed. Also (PAGE-SAVE-RESTAMP-2 live check, 2026-10-15): the held-turn cancel fires on foliate's `link` event before the jump lands, so a link within about 20 ms of a turn can cancel the held turn while the view stays on the turned page (the turn goes unsaved; the stored position stays older but correct). Move the cancel to after the jump lands. From PAGE-SAVE-RESTAMP-2's quality review (2026-10-15): W2, after a failed-words turn the relocate save writes a fraction-estimated position (as before); W4, a held turn from another section can outlive a click on a stamped section; N2, `bookWordsFailedRef` is never reset in a view; N4, no test for the open-without-cfi cancel; and a click whose spans are unstamped when failure is already known is dropped without a diagnostic. From PAGE-SAVE-RESTAMP-2's fix-round review (2026-10-15): no test pins the negative side of fr1's guard (a held click followed by a turn or a second click, then the re-stamp, must leave the newer state alone; deleting `=== provisional` keeps every test green); `holdWordClick`'s resolve check in the view can never reject a click; `heldClickAnchor` is not reset when a turn replaces a held click. Lane: Reader Engine.
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
 - <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(position 47 — stub; not a release gate)*. From FOLDER-NOTICE-1's quality review (2026-10-15): (3) within one sync the banner follows whichever of the root check and the scan answers last, so a null scan after a true check, or the reverse, flaps it (and a root holding only directories clears then re-sets `root-empty-suspect`); make the banner follow the scan's verdict; (6) Retry has no in-flight guard in main, so a banner remount mid-attempt allows a second root check; (7) a same-folder re-select through `switch-folder` resets the toast flag, so a second watcher error in the same episode toasts again; (8) the banner's Retry button loses focus when disabled and on success, and a failed Retry is not announced (`role="alert"` fires only on mount): use `aria-busy`/`aria-disabled` and a short status line. From the fix-round review of FOLDER-NOTICE-1 (2026-10-15): (9) `syncAll`'s catch checks only the folder string, so an abandoned same-folder run (A hung, switch to B and back to A) can report `sync-failed` on a healthy A after the new run's clear; add the run-generation check the `.finally` already uses; (10) `retry()`'s folder guard compares raw strings where `state.js` uses `pathKey`; (11) test gaps: a toast is sent once the window finishes loading, and a failed (null) watcher restart does not toast twice. Lane: UX polish.
-- <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transferelease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
+- <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transfer
+elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
 - <a id="jump-landing-save-1"></a>**JUMP-LANDING-SAVE-1 — Other jumps in Page mode save the page they land on** *(position 63 — stub; not a release gate)*. From TOC-JUMP-SAVE-1's run (2026-10-22, note 4). The same defect class remains for internal-link jumps, footnote jumps, and next/previous chapter: each leaves the saved position on the page it jumped from. Also note 3: a jump foliate drops during a turn's lock, an unresolvable href, and an anchor with no pages still keep the early commit. Fix direction: route each through the same in-flight-turn counting TOC-JUMP-SAVE-1 gives the API `goTo`. Lane: Reader Engine.
 - <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1 — Build full NSIS installers per architecture by default** *(position 65 — stub; S; not a release gate)*. The owner's decision for RELEASE-RUNBOOK-1 (2026-10-22, option B) is separate full x64 and ARM64 installers. This release does it with CLI overrides. Move `package.json`'s `build.win.target` from `nsis-web` to `nsis` (artifact name and `latest.yml` per architecture), update the runbook to drop the overrides, and check that electron-updater picks the right architecture's installer for both. Lane: Platform & Maintenance.
 - <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups** *(position 64 — stub; M; after LIBRARY-WRITE-RACE-1; not a release gate)*. Split from LIBRARY-WRITE-RACE-1 (2026-10-22). Four parts. (1) `save-library` id de-duplication, a test for malformed elements, and type checks. (2) The Edit form's fire-and-forget save: how a failed save looks is an **open owner decision** (recommended: the form stays open with an inline "Couldn't save — try again" and keeps the typed values). (3) Renderer edits and sync freshness, **ruled by Blurby.Brain 2026-10-22 (tier 1): main stamps, but never the doc-level `modified`.** For folder docs, `modified` holds the source file's mtime (`syncLibraryWithFolder` writes `modified: file.modified`, and rescans compare against it). The spec first traces what cloud sync's last-writer-wins compares: `sync-state.json` carries a `fieldTimestamps` map. If per-field stamps exist, main stamps the edited field there. If sync only compares `modified`, add a separate main-stamped `editedAt` and have the merge use it for renderer-owned fields. Stamp only when a value actually changes (`markDocsSeen` and other no-op saves stamp nothing). Tests: a title edit beats a staler cloud copy; a folder rescan neither clobbers the edit stamp nor treats an edit as a file change; a no-op save stamps nothing. (4) Cloud sync's `setLibrary(gcd)` stays in the deferred Cloud lane. Lane: Library & Content.
