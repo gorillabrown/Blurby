@@ -13,7 +13,7 @@
 
 const crypto = require("crypto");
 const fsPromises = require("fs/promises");
-const { renameWithRetry } = require("./json-store");
+const { writeJSON } = require("./json-store");
 const path = require("path");
 const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
@@ -94,9 +94,7 @@ async function loadSyncState() {
 
 async function saveSyncState() {
   if (!syncStatePath) return;
-  const tmp = syncStatePath + ".tmp";
-  await fsPromises.writeFile(tmp, JSON.stringify(syncState, null, 2), "utf-8");
-  await renameWithRetry(tmp, syncStatePath);
+  await writeJSON(syncStatePath, syncState); // serialized per path: overlapping saves never share a .tmp (RENAME-TMP-RACE-1)
 }
 
 // ── 19A: Revision Counter ─────────────────────────────────────────────────
