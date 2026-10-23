@@ -1,4 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
+// @vitest-environment jsdom
+import React, { act } from "react";
+import { createRoot, type Root } from "react-dom/client";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import type { BlurbyDoc } from "../src/types";
 
 /**
@@ -212,5 +215,50 @@ describe("useLibrary — default settings", () => {
 
   it("default readingMode is focus", () => {
     expect("focus").toBe("focus");
+  });
+});
+
+// FOLDER-SWITCH-HEADER-1 (BUG-202): main resolves switch-folder only after the folder's sync. On 47ae6e1f the renderer
+// set sourceFolder only after that, so the header kept the old folder for the whole sync (minutes on a Drive folder).
+describe("useLibrary — switchFolder updates the header at once (FOLDER-SWITCH-HEADER-1)", () => {
+  let root: Root | null = null;
+  afterEach(() => { act(() => root?.unmount()); root = null; vi.resetModules(); });
+
+  async function renderLibrary(switchFolderImpl: (folder: string) => Promise<{ folder?: string; error?: string }>) {
+    (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true;
+    const settings = { sourceFolder: "C:/A", recentFolders: ["C:/A", "C:/B"] };
+    (window as any).electronAPI = {
+      getState: vi.fn().mockResolvedValue({ library: [], settings }),
+      getPlatform: vi.fn().mockResolvedValue("win32"),
+      onLibraryUpdated: vi.fn(() => () => {}),
+      switchFolder: vi.fn(switchFolderImpl),
+    };
+    vi.resetModules();
+    const useLibrary = (await import("../src/hooks/useLibrary")).default;
+    const box: { current: ReturnType<typeof useLibrary> | null } = { current: null };
+    function Harness() { box.current = useLibrary(); return null; }
+    root = createRoot(document.createElement("div"));
+    await act(async () => { root!.render(React.createElement(Harness)); });
+    await act(async () => { await Promise.resolve(); });
+    return box;
+  }
+
+  it("sourceFolder is the new folder before switch-folder resolves", async () => {
+    let resolveSwitch!: (v: { folder: string }) => void;
+    const lib = await renderLibrary(() => new Promise((r) => { resolveSwitch = r; }));
+    expect(lib.current!.settings.sourceFolder).toBe("C:/A");
+    let pending!: Promise<void>;
+    await act(async () => { pending = lib.current!.switchFolder("C:/B"); });
+    expect(lib.current!.settings.sourceFolder).toBe("C:/B");
+    expect(lib.current!.settings.recentFolders[0]).toBe("C:/B");
+    await act(async () => { resolveSwitch({ folder: "C:/B" }); await pending; });
+  });
+
+  it("when switch-folder refuses, the old folder comes back and the error shows", async () => {
+    const lib = await renderLibrary(async () => ({ error: "That folder is not in your recent folders." }));
+    await act(async () => { await lib.current!.switchFolder("C:/B"); });
+    expect(lib.current!.settings.sourceFolder).toBe("C:/A");
+    expect(lib.current!.settings.recentFolders).toEqual(["C:/A", "C:/B"]);
+    expect(lib.current!.toast?.message).toBe("That folder is not in your recent folders.");
   });
 });
