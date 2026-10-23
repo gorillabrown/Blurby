@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:05:08Z",
+  "takenAt": "2026-10-23T00:09:27Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1962,9 +1962,9 @@
     {
       "id": "KF2-WAIVER-RETIRE-1",
       "title": "Retire the KF-2 rename waiver",
-      "sequence": 28,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1975,11 +1975,11 @@
       "spec_link": "ROADMAP.md#kf2-waiver-retire-1",
       "branch": "eb/kf2-waiver-retire-1",
       "started": "2026-10-22",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-22",
+      "evidence": "docs/governance/close-outs/CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md",
       "description": "The bounded rename retry from SETTINGS-WRITE-DURABLE-1 removes the Windows rename failure KF-2 waived. Retire the waiver after two clean full runs on the owner's machine.",
       "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/kf2-waiver-retire-1 from main).",
-      "revision": "62aa067b3dc93006b5ad42a68129769e2a703d9bd505878db8b38e8774babf9f",
+      "revision": "fdd733d4a1c1b78ba1ac36a0805fa8b92f082ff29e8353c78ab6a1607f7eff3c",
       "extra": {}
     },
     {
@@ -2431,8 +2431,8 @@
       "id": "JSONSTORE-TIMEOUT-1",
       "title": "Give the jsonStore concurrency test real headroom",
       "sequence": 34,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2444,12 +2444,12 @@
       "group": "Test Health",
       "spec_link": "ROADMAP.md#jsonstore-timeout-1",
       "branch": "eb/jsonstore-timeout-1",
-      "started": "",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "Give test (a) in tests/jsonStore.test.js a 30 s timeout. Make (d) and (e) wait for earlier writes and count only their own .tmp renames, so a timed-out (a) cannot fail them. The file then leaves Stage 8's closed list.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only.",
-      "revision": "2710c921b810a31f9a8dac594db20d973cb8dedf68843c65f232a7da38432f22",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/jsonstore-timeout-1 from main after KF2-WAIVER-RETIRE-1 merged, 3f4798b2).",
+      "revision": "9ca19530e9fd638935d616b0c58dba2d7c6cec17d025d2547858327f294645a9",
       "extra": {}
     },
     {

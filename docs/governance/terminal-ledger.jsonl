@@ -74,3 +74,4 @@
 {"recordId": "TR-074", "itemId": "NARRATE-REBUILD-1", "completed": "2026-10-15", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.NARRATE-REBUILD-1.2026-10-15.md", "corrects": "", "effort": "XL"}
 {"recordId": "TR-075", "itemId": "GOV-NOTION-MAPPING-1", "completed": "2026-10-22", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.GOV-NOTION-MAPPING-1.2026-10-22.md", "corrects": "", "effortEstimate": "8m", "effortActual": "5m", "effort": "M"}
 {"recordId": "TR-076", "itemId": "RENAME-RETRY-1", "completed": "2026-10-22", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md", "corrects": "", "effortEstimate": "9m", "effortActual": "6m", "effort": "S"}
+{"recordId": "TR-077", "itemId": "KF2-WAIVER-RETIRE-1", "completed": "2026-10-22", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md", "corrects": "", "effort": "S"}

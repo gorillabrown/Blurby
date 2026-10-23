@@ -3027,3 +3027,14 @@ Related: LL-155.
 
 ### LL-156 — status (KF2-WAIVER-RETIRE-1, 2026-10-22)
 **Status:** Observation — held: KF-2 followed its writer into `main/json-store.js`, the bounded rename retry absorbed it, and the waiver was retired on 16 recorded owner-machine runs; the Stage 8 closed list was written down and restated by error type, so a load allowance cannot readmit a real rename error.
+
+### LL-156 — status (KF2-WAIVER-RETIRE-1, 2026-10-23)
+**Status:** Promoted -> ROADMAP standing rule 50 (restated after KF2-WAIVER-RETIRE-1's held record, which its 2026-10-14 specification required before the promotion existed)
+
+### LL-164 — A lesson-status write in an older specification can silently undo a newer promotion (KF2-WAIVER-RETIRE-1, 2026-10-22)
+**Verdict:** KF2-WAIVER-RETIRE-1's specification (written 2026-10-14) told the run to append `### LL-156 — status … Observation — held`. The 2026-10-22 roadmap review had already promoted LL-156 to standing rule 50 the same day. Because the latest status record wins, the run's correct-per-spec append turned the promoted lesson back into a live observation, and nothing failed: every Done-when passed.
+**Evidence:** `docs/governance/LESSONS_LEARNED.md` after merge `3f4798b2`: `lessons --open` listed LL-156 as live "Observation — held"; the close-out appended a restating `Promoted -> ROADMAP standing rule 50` record.
+**Recommendation:** At dispatch, and again before close-out, compare every lesson-status line a specification asks the run to append against that lesson's current status (`lessons --open`). If the lesson was promoted or retired since the specification was written, change the line to a plain outcome note that names the current status, or drop it. Never append a status that ranks below the current one.
+**Applies to:** specifications that append to `LESSONS_LEARNED.md`; roadmap reviews that promote or retire lessons while dispatch-ready specifications are queued; close-out lessons checks.
+**Status:** Observation
+Related: LL-156, standing rule 50.

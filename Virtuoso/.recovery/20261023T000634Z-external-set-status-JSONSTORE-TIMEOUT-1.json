@@ -1,0 +1,39 @@
+{
+  "id": "20261023T000634Z-external-set-status-JSONSTORE-TIMEOUT-1",
+  "operation": "external-set-status",
+  "item_id": "JSONSTORE-TIMEOUT-1",
+  "created": "2026-10-23T00:06:34Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/jsonstore-timeout-1",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/jsonstore-timeout-1 from main after KF2-WAIVER-RETIRE-1 merged, 3f4798b2)."
+    },
+    "expectedRevision": "2710c921b810a31f9a8dac594db20d973cb8dedf68843c65f232a7da38432f22",
+    "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('branch', 'eb/jsonstore-timeout-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/jsonstore-timeout-1 from main after KF2-WAIVER-RETIRE-1 merged, 3f4798b2).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "JSONSTORE-TIMEOUT-1",
+      "idempotencyKey": "set-status:JSONSTORE-TIMEOUT-1:[('branch', 'eb/jsonstore-timeout-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/jsonstore-timeout-1 from main after KF2-WAIVER-RETIRE-1 merged, 3f4798b2).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T000634Z-external-set-status-JSONSTORE-TIMEOUT-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:06:59Z",
+  "outcome": "succeeded"
+}
