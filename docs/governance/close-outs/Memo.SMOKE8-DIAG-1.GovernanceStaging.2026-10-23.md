@@ -32,9 +32,10 @@
      - (a) stop read-ahead on pause;
      - (b) smaller head chunks;
      - (c) accept the lingering process.
-2. **BUG-208's fix rule.**
-   - **Recommended:** the general `body *:not(a) { color: inherit !important }`. Book text colours give way to the theme colour.
-   - **Narrower alternative:** a Gutenberg-only rule.
+2. **BUG-208's fix rule.** **Decided by the owner (2026-10-23, relayed by Blurby.Brain), verbatim:** "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour."
+   - BOOK-TEXT-COLOUR-1 uses the general `body *:not(a) { color: inherit !important }` in each mode's injected foliate styles.
+   - Brain added a test that a link's descendants inherit the link colour, not the body `fg`.
+   - The acceptance test is unchanged: 4.5:1 contrast under every theme, with E-ink on and off, failing on `47ae6e1f`.
 3. **BUG-206, next step.**
    - **Recommended:** a `logError` of the stack where Narrate surfaces start errors, shipped with the release fix. The alternative is an owner repro with DevTools open.
 
