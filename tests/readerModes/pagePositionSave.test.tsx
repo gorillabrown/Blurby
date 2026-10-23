@@ -393,6 +393,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(String(lost[0].args[1]).startsWith("reason=section-load")).toBe(true);
     expect(lost[0].args[1]).toContain("section=5");
     expect(lost[0].args[1]).toContain("sectionStart=-1");
+    expect(lost[0].args[1]).toContain(" kind=turn"); // PAGE-HELD-TURN-FAIL-1
   });
 
   it("(n4b) control: a held turn that the section load stamps records no loss", async () => {
@@ -559,7 +560,9 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await render(BOOK_WORDS);
     await settle();
     expect(saves(fake)).toEqual([]);
-    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"))).toHaveLength(1);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"));
+    expect(lost).toHaveLength(1);
+    expect(lost[0].args[1]).toContain(" kind=turn"); // PAGE-HELD-TURN-FAIL-1
   });
 
   // PAGE-HELD-TURN-FAIL-1: a held turn the failed word count cannot save is reported, not left held in silence.

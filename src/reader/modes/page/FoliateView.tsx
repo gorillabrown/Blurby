@@ -587,8 +587,12 @@ export default function PageFoliateView({
             if (cancelled) return;
             bookWordsFailedRef.current = true;
             const held = pendingTurnRef.current;
-            if (held && rendererNumberedDocsRef.current.has(held.doc) && reportFirstWordOnPage(held.doc, held.start, held.end, held.click)) {
+            if (held && rendererNumberedDocsRef.current.has(held.doc)) {
               pendingTurnRef.current = null;
+              // PAGE-HELD-TURN-FAIL-1: nothing re-tries a turn the failed count cannot save, so report it rather than keep it held.
+              if (!reportFirstWordOnPage(held.doc, held.start, held.end, held.click)) {
+                recordDiagnosticRef.current("page-turn-lost", `reason=book-words-failed start=${held.start} end=${held.end} kind=${held.click ? "click" : "turn"}`);
+              }
             }
           };
           void ensureBookWordsRef.current?.().then((value) => { if (!value?.sections.length) fail(); }, fail);
@@ -631,7 +635,7 @@ export default function PageFoliateView({
           const held = pendingTurnRef.current;
           if (!held || held.doc !== doc) return;
           pendingTurnRef.current = null;
-          if (!reportFirstWordOnPage(doc, held.start, held.end, held.click)) recordDiagnosticRef.current("page-turn-lost", `reason=restamp start=${held.start} end=${held.end}`);
+          if (!reportFirstWordOnPage(doc, held.start, held.end, held.click)) recordDiagnosticRef.current("page-turn-lost", `reason=restamp start=${held.start} end=${held.end} kind=${held.click ? "click" : "turn"}`);
         };
 
         // Attach load listener BEFORE open() — events may fire during init
@@ -671,7 +675,7 @@ export default function PageFoliateView({
             pendingTurnRef.current = null;
             // PAGE-POSITION-SAVE-2 (N4): a held turn this load cannot stamp is lost; say so rather than drop it silently.
             if (!reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end, pendingTurn.click)) {
-              recordDiagnosticRef.current("page-turn-lost", `reason=section-load section=${index} sectionStart=${sectionStart} start=${pendingTurn.start} end=${pendingTurn.end}`);
+              recordDiagnosticRef.current("page-turn-lost", `reason=section-load section=${index} sectionStart=${sectionStart} start=${pendingTurn.start} end=${pendingTurn.end} kind=${pendingTurn.click ? "click" : "turn"}`);
             }
           }
 
