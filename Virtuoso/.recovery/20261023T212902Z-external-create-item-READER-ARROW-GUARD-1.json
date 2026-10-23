@@ -1,0 +1,49 @@
+{
+  "id": "20261023T212902Z-external-create-item-READER-ARROW-GUARD-1",
+  "operation": "external-create-item",
+  "item_id": "READER-ARROW-GUARD-1",
+  "created": "2026-10-23T21:29:02Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Narrate and Page ignore modified arrows in their page-turn listeners",
+      "status": "Queued",
+      "sequence": 91,
+      "workstream": "Reader Engine",
+      "effort": "S",
+      "written_status": "Stub",
+      "spec_link": "ROADMAP.md#reader-arrow-guard-1",
+      "prerequisites": [
+        "FLOW-KEYS-FIX-1"
+      ],
+      "description": "Narrate and Page book views turn a page (and Narrate pauses) on Shift or Ctrl with arrow keys, like Flow did. Probe live first, then copy FLOW-KEYS-FIX-1 amendment guard.",
+      "id": "READER-ARROW-GUARD-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T20:18:13Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:READER-ARROW-GUARD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "READER-ARROW-GUARD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:READER-ARROW-GUARD-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T212902Z-external-create-item-READER-ARROW-GUARD-1",
+      "detail": {},
+      "providerItemId": "4027c96c-c31e-8120-9126-c44f69373b07",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T21:29:22Z",
+  "outcome": "succeeded"
+}

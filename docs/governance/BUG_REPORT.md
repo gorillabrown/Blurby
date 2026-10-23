@@ -65,12 +65,14 @@
 - **Two pacers:** Flow moves its position with two pacers, the word timer (`FlowMode`) and the line pacer (`FlowScrollEngine`). `src/reader/modes/flow/ModeRuntime.ts:921` moved only the line pacer, so the word timer's next tick pulled the published word back (red test: 10, then 8).
 - **Paused:** the line pacer stops on pause, so there is no line to jump to.
 - **Dropped commands:** `seek-words`, `sentence` and `paragraph` reached `default: return` (`:929-930`), dropped by the READER-MODE-SEPARATION-2 cutover (`3dd4b504`).
+- **Playing ←/→ keys stop playback (live finding, 2026-10-23; diagnosed by Blurby.Brain):** Flow's book view has its own window keydown listener (`src/reader/modes/flow/FoliateView.tsx`, from `9fa253b0`). It marked browse-away, which pauses, and turned a page on ArrowLeft/Right and PageUp/Down whatever the modifiers. So after the key's own move, every ←/→ key paused (live on `60b86aff`: Ctrl+→ 191 → 192, then stopped).
 **Fix (FLOW-KEYS-FIX-1):**
 - **Line keys, playing:** the word timer jumps to the line pacer's new word.
 - **Word, sentence and paragraph keys:**
   - playing, they move both pacers, as a playing click does;
   - paused or before a play, they set the explicit start anchor that Flow's cold restart consumes.
-- **Tests:** `tests/readerModes/flowKeys.test.tsx`.
+- **Browse-away keys (amendment, owner ruling 2026-10-23):** the book view's listener reacts only to PageUp and PageDown with no modifier, through `isFlowBrowseKey` (`src/reader/modes/flow/helpers/flowBrowseKey.ts`). Plain ←/→ change speed only; PgUp/PgDn still pause and turn a page to look ahead.
+- **Tests:** `tests/readerModes/flowKeys.test.tsx`, `tests/readerModes/flowBrowseKey.test.ts`.
 **Not fixed here:** ↑/↓ while paused. There is no line map while paused, so this needs new design: IDEAS.md A5, FLOW-PAUSED-LINE-1.
 
 ### BUG-210 — Focus's word, sentence and paragraph keys don't move the reading word

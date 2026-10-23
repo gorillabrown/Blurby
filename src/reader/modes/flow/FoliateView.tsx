@@ -59,6 +59,7 @@ import {
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
 import { collectParagraphStartWordIndexes } from "./helpers/foliateParagraphStarts";
+import { isFlowBrowseKey } from "./helpers/flowBrowseKey";
 
 const FLOW_HIGHLIGHT_MODE = "flow";
 
@@ -1317,17 +1318,18 @@ export default function FlowFoliateView({
   }, [invalidateWordPositionIndex, scheduleWordPositionIndexRebuild]);
 
   // Keyboard (FLOW-3A / NARR-FIX-1): FlowScrollEngine drives pacing, but the user can still browse away
-  // manually. Page navigation keys set the browse-away flag AND navigate the renderer so the user can
-  // peek ahead/behind; jump-back returns to the active reading position.
+  // manually. Unmodified PageUp/PageDown set the browse-away flag AND navigate the renderer so the user can
+  // peek ahead/behind; jump-back returns to the active reading position. The arrows belong to useReaderKeys
+  // (FLOW-KEYS-FIX-1 amendment: plain ←/→ change speed only), so they never browse away here.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const view = viewRef.current;
       if (!view?.renderer) return;
-      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp") {
+      if (isFlowBrowseKey(e)) {
         markUserBrowsingAway();
         // Navigate the Foliate renderer so the user sees different content.
         // The iframe's native handler won't see this window-level event.
-        if (e.key === "ArrowRight" || e.key === "PageDown") {
+        if (e.key === "PageDown") {
           view.renderer.next();
         } else {
           view.renderer.prev();
