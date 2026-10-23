@@ -1,4 +1,4 @@
-import { FOLIATE_BASE_FONT_SIZE_PX } from "../../../../constants";
+import { BOOK_HEADING_LINE_HEIGHT, BOOK_TYPE_SCALE, FOLIATE_BASE_FONT_SIZE_PX } from "../../../../constants";
 import type { BlurbySettings } from "../../../../types";
 
 export interface FoliateStyleOptions {
@@ -48,6 +48,17 @@ export function injectStyles(
     /* BOOK-TEXT-COLOUR-1 (BUG-208): a book colour rule on a descendant (Gutenberg #pg-header div { color: initial })
        must not beat the theme colour; links keep the accent (a, below). Owner decision 2026-10-23. */
     body *:not(a) { color: inherit !important; }
+    /* BOOK-TYPE-SCALE-1: one type scale for the book. rem is the reader's size (html, above), so nesting never compounds;
+       inline elements (span, small, sup, sub, em, b) keep the book's sizing. Owner design 2026-10-23. */
+    body *:not(pre):not(code):not(kbd):not(samp) { font-family: ${fontFamily} !important; }
+    p, div, li, blockquote, dd, dt, td, th, figcaption, section, article { font-size: 1rem !important; }
+    h1 { font-size: ${BOOK_TYPE_SCALE.h1}rem !important; }
+    h2 { font-size: ${BOOK_TYPE_SCALE.h2}rem !important; }
+    h3 { font-size: ${BOOK_TYPE_SCALE.h3}rem !important; }
+    h4 { font-size: ${BOOK_TYPE_SCALE.h4}rem !important; }
+    h5 { font-size: ${BOOK_TYPE_SCALE.h5}rem !important; }
+    h6 { font-size: ${BOOK_TYPE_SCALE.h6}rem !important; }
+    h1, h2, h3, h4, h5, h6 { font-weight: 700 !important; line-height: ${BOOK_HEADING_LINE_HEIGHT} !important; }
     body {
       padding-block-start: var(--blurby-flow-leading-inset, 0px) !important;
       padding-block-end: var(--blurby-flow-trailing-inset, 0px) !important;
