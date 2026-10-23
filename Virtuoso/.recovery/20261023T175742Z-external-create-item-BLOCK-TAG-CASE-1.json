@@ -1,0 +1,51 @@
+{
+  "id": "20261023T175742Z-external-create-item-BLOCK-TAG-CASE-1",
+  "operation": "external-create-item",
+  "item_id": "BLOCK-TAG-CASE-1",
+  "created": "2026-10-23T17:57:42Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks)",
+      "status": "Queued",
+      "sequence": 85,
+      "workstream": "Reader Engine",
+      "effort": "M",
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#block-tag-case-1",
+      "branch": "eb/block-tag-case-1",
+      "prerequisites": [
+        "FOCUS-KEYS-FIX-1",
+        "FLOW-PARA-KEYS-1"
+      ],
+      "description": "Every renderer block helper compares lowercase XHTML tag names with an uppercase set, so a whole EPUB section is one block. Measure before and after on two books; the owner decides before it merges (tier 2).",
+      "id": "BLOCK-TAG-CASE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T17:31:00Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLOCK-TAG-CASE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BLOCK-TAG-CASE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLOCK-TAG-CASE-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T175742Z-external-create-item-BLOCK-TAG-CASE-1",
+      "detail": {},
+      "providerItemId": "4027c96c-c31e-810d-84d7-d52ab59bbbbc",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T17:58:54Z",
+  "outcome": "succeeded"
+}

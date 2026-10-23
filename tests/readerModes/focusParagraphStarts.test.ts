@@ -50,3 +50,27 @@ describe("FOCUS-KEYS-FIX-1: rendered paragraph starts", () => {
     expect(collect([{ doc: sectionDoc([[0, 1]]), index: 0 }], () => false)).toEqual([]);
   });
 });
+
+// Amendment 2026-10-23: an EPUB section is application/xhtml+xml, so its tagName is lowercase ("p", not "P").
+const SECTION_MARKUP = `<html xmlns="http://www.w3.org/1999/xhtml"><head><title>s</title></head><body>`
+  + `<h2><span data-word-index="187">INTRODUCTION</span></h2>`
+  + `<p>“<span data-word-index="188">The</span> <span data-word-index="189">first</span> <em><span data-word-index="190">book</span></em></p>`
+  + `<div><p><span data-word-index="572">Of</span> <span data-word-index="573">my</span></p></div>`
+  + `<blockquote><span data-word-index="600">Quoted</span></blockquote>`
+  + `</body></html>`;
+
+describe("FOCUS-KEYS-FIX-1 amendment: block lookup is case-insensitive", () => {
+  it("finds each block of an XHTML section (lowercase tagName)", async () => {
+    const collect = await loadCollector();
+    const doc = new DOMParser().parseFromString(SECTION_MARKUP, "application/xhtml+xml");
+    expect(doc.body?.firstElementChild?.tagName).toBe("h2");
+    expect(collect([{ doc, index: 0 }], () => true)).toEqual([187, 188, 572, 600]);
+  });
+
+  it("control: the same markup parsed as text/html (uppercase tagName)", async () => {
+    const collect = await loadCollector();
+    const doc = new DOMParser().parseFromString(SECTION_MARKUP, "text/html");
+    expect(doc.body.firstElementChild?.tagName).toBe("H2");
+    expect(collect([{ doc, index: 0 }], () => true)).toEqual([187, 188, 572, 600]);
+  });
+});

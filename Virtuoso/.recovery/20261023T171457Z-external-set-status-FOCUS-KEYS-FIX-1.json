@@ -1,0 +1,27 @@
+{
+  "id": "20261023T171457Z-external-set-status-FOCUS-KEYS-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-KEYS-FIX-1",
+  "created": "2026-10-23T17:14:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "branch": "eb/focus-keys-fix-1",
+      "started": "2026-10-23"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOCUS-KEYS-FIX-1:[('branch', 'eb/focus-keys-fix-1'), ('started', '2026-10-23'), ('status', 'In Flight')]"
+  },
+  "resolved": "2026-10-23T17:15:49Z",
+  "outcome": "abandoned",
+  "reason": "superseded by 20261023T171532Z, which adds the description"
+}

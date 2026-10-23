@@ -8,6 +8,41 @@
 
 ## Incomplete
 
+### BUG-216 — The note popover is never shown: Shift+N in Page dispatches an event nobody listens to
+**Reported:** 2026-10-23 (UI-SWEEP-1 W3, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
+**Severity:** LOW (a listed shortcut does nothing visible)
+**Status:** OPEN, unscheduled (whether notes keep a popover is an owner question). Lane: UX polish.
+**Location:** `src/components/ReaderContainer.tsx:710` (`handleMakeNote` dispatches `blurby:make-note`); no `addEventListener` for it in `src`; `NotePopover` is imported nowhere.
+**Description:** Page's Shift+N calls `handleMakeNote`, which dispatches `blurby:make-note`. Nothing listens, and `NotePopover` is dead code. Evidence: `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`, row W3.
+
+### BUG-215 — The quick-settings popover has no working route: Ctrl+Shift+, never reaches its branch
+**Reported:** 2026-10-23 (UI-SWEEP-1 W2, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
+**Severity:** LOW (a listed shortcut does nothing; the popover is unreachable)
+**Status:** OPEN, unscheduled; related to BUG-200 (the popover's "Sort by"), so the owner question there covers both. Lane: UX polish.
+**Location:** `src/hooks/useKeyboardShortcuts.ts:323` (Ctrl with `e.key === ","` opens Settings) before the Shift branch at `:330`; `LibraryContainer.tsx:601`, `:734` render the popover only on `activeOverlay === "quickSettings"`.
+**Description:** On a US layout Shift+, gives `e.key === "<"`, so neither branch matches, and no button or palette entry opens the popover. Evidence: triage report, row W2.
+
+### BUG-214 — "Skip to content" moves neither focus nor scroll
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #1 and #5, list and grid views; filed at its close-out)
+**Severity:** LOW (accessibility: the skip link is inert)
+**Status:** OPEN, unscheduled. Lane: UX polish.
+**Location:** `src/App.tsx:147-148` (the link targets `#main-content`, the App wrapper holding the whole page); `src/components/LibraryView.tsx:354` repeats the id.
+**Description:** The skip link's target is the first of two elements with id `main-content`, which wraps the whole page, so neither focus nor scroll moves (#1: 2 runs; #5: 1 run). Evidence: triage report, rows 1 and 5.
+
+### BUG-213 — Ctrl+=, Ctrl+− and Ctrl+0 do nothing in the library, though the Hotkey Map lists them as Global
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #79, #80 and #87; filed at its close-out)
+**Severity:** LOW (the listed scope is wrong, or the keys are)
+**Status:** OPEN, unscheduled; the fix is either the Hotkey Map label or a library binding (owner question: which text size the library keys would change). Lane: UX polish.
+**Location:** `src/hooks/useKeyboardShortcuts.ts:225-227`, inside `useReaderKeys`, which returns unless the view is the reader (`:186`).
+**Description:** In the library the three text-size keys do nothing (2 runs each). Evidence: triage report, rows 79, 80 and 87.
+
+### BUG-212 — Shift+E never restores a document from the archive
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 row #89; filed at its close-out)
+**Severity:** MEDIUM (a listed library action does nothing)
+**Status:** OPEN, unscheduled. Lane: Library & Content.
+**Location:** `src/components/LibraryContainer.tsx:289-298`, `:397` (the keyboard hook focuses into a list built from its own `activeFilter`); `src/components/LibraryView.tsx:58` keeps a separate tab state. The full path from G then A was not traced.
+**Description:** Restore from archive (Shift+E) changed no flag in 2 runs from the archived tab and 2 runs from G then A. Evidence: triage report, row 89.
+
 ### BUG-211 — Flow's line, word, sentence and paragraph keys don't move the reading word
 **Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103, two runs each on the `97527896` x64 `--dir` build; Ctrl+←/→ measured by FLOW-KEYS-FIX-1's red test)
 **Severity:** MEDIUM (keyboard navigation in Flow is dead). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
@@ -42,6 +77,12 @@
 - A move jumps the engine (`FocusMode.jumpTo`) once it exists. Before the first play, the move sets the explicit start anchor.
 - Sentence targets use `findSentenceBoundary`, and paragraph targets use the new `findParagraphStart`, both in `src/utils/text.ts`.
 - Tests: `tests/readerModes/focusKeys.test.tsx`.
+**Amendment (2026-10-23, owner):**
+- **Live failure on `48203707`:** Shift+→ jumped from section start to section start (187 → 5480 → 9431), and Shift+← from 187 landed on 0.
+- **Cause:** an EPUB section is `application/xhtml+xml`, so `tagName` is lowercase. The uppercase `BLOCK_TAGS` check in `getBlockParent` (`focus/helpers/foliateHelpers.ts`) never matched, and each section became one block.
+- **Fix (`568acc60`):** `foliateParagraphStarts.ts` walks the block elements with `isParagraphBlock` (`BLOCK_TAGS.has(el.localName.toUpperCase())`). `getBlockParent` is unchanged; BLOCK-TAG-CASE-1 owns it.
+- **Tests:** `tests/readerModes/focusParagraphStarts.test.ts`, with an XHTML section test and a `text/html` control.
+- **Live check on `568acc60`:** passed (the x64 `--dir` package, scratch profile; `C:\Projects\Blurby-artifacts\keys-fix\focus-568acc60-para.*`). Shift+→ moves 187 → 188 → 572 → 610, Shift+← moves 610 → 572 → 188 → 187, and while playing Shift+→ moves 195 → 572. All 7 presses match the probe's DOM block list, and the live profile was unchanged.
 
 ### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
 **Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)

@@ -1,0 +1,37 @@
+{
+  "id": "20261023T182259Z-external-set-status-EINK-CONTROLS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-23T18:22:59Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#eink-controls-1",
+      "branch": "eb/eink-controls-1",
+      "description": "Owner 2026-10-23: drop the E-ink theme; the E-ink switch carries both the colours and the behaviour. Saved E-ink theme migrates to Light with the switch on (settings schema 14)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:EINK-CONTROLS-1:[('branch', 'eb/eink-controls-1'), ('description', 'Owner 2026-10-23: drop the E-ink theme; the E-ink switch carries both the colours and the behaviour. Saved E-ink theme migrates to Light with the switch on (settings schema 14).'), ('spec_link', 'ROADMAP.md#eink-controls-1'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "set-status:EINK-CONTROLS-1:[('branch', 'eb/eink-controls-1'), ('description', 'Owner 2026-10-23: drop the E-ink theme; the E-ink switch carries both the colours and the behaviour. Saved E-ink theme migrates to Light with the switch on (settings schema 14).'), ('spec_link', 'ROADMAP.md#eink-controls-1'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T182259Z-external-set-status-EINK-CONTROLS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T18:23:09Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261023T172643Z-external-set-status-NARRATE-START-STACK-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-START-STACK-1",
+  "created": "2026-10-23T17:26:43Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 4
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-START-STACK-1:[('sequence', 4)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-START-STACK-1",
+      "idempotencyKey": "set-status:NARRATE-START-STACK-1:[('sequence', 4)]",
+      "actualRevision": "",
+      "recoveryId": "20261023T172643Z-external-set-status-NARRATE-START-STACK-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:27:08Z",
+  "outcome": "succeeded"
+}

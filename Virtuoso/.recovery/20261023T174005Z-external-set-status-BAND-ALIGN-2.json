@@ -1,0 +1,35 @@
+{
+  "id": "20261023T174005Z-external-set-status-BAND-ALIGN-2",
+  "operation": "external-set-status",
+  "item_id": "BAND-ALIGN-2",
+  "created": "2026-10-23T17:40:05Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "effort": "L",
+      "description": "Owner amendment 2026-10-23: the band edges sit on line boxes, the cursor line is the band middle, the band follows the reading location when the scroll clamps, and the reader picks the anchor (Top, Top third, Center). Flow runs on one clock."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BAND-ALIGN-2:[('description', 'Owner amendment 2026-10-23: the band edges sit on line boxes, the cursor line is the band middle, the band follows the reading location when the scroll clamps, and the reader picks the anchor (Top, Top third, Center). Flow runs on one clock.'), ('effort', 'L')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BAND-ALIGN-2",
+      "idempotencyKey": "set-status:BAND-ALIGN-2:[('description', 'Owner amendment 2026-10-23: the band edges sit on line boxes, the cursor line is the band middle, the band follows the reading location when the scroll clamps, and the reader picks the anchor (Top, Top third, Center). Flow runs on one clock.'), ('effort', 'L')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T174005Z-external-set-status-BAND-ALIGN-2",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:40:15Z",
+  "outcome": "succeeded"
+}

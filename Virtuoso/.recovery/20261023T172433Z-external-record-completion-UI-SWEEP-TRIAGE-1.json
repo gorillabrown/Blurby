@@ -1,0 +1,37 @@
+{
+  "id": "20261023T172433Z-external-record-completion-UI-SWEEP-TRIAGE-1",
+  "operation": "external-record-completion",
+  "item_id": "UI-SWEEP-TRIAGE-1",
+  "created": "2026-10-23T17:24:33Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md",
+      "sequence": null
+    },
+    "expectedRevision": "024142579b5dd1dea0d9661d80aafe598e3b49bb4de9b723b1a44200c9a17296",
+    "idempotencyKey": "record-completion:UI-SWEEP-TRIAGE-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "UI-SWEEP-TRIAGE-1",
+      "idempotencyKey": "record-completion:UI-SWEEP-TRIAGE-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T172433Z-external-record-completion-UI-SWEEP-TRIAGE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:24:43Z",
+  "outcome": "succeeded"
+}

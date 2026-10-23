@@ -1,0 +1,34 @@
+{
+  "id": "20261023T171529Z-external-set-status-ERROR-LOG-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "ERROR-LOG-CAP-1",
+  "created": "2026-10-23T17:15:29Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "The error log is size-capped and rotated instead of growing without bound."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:ERROR-LOG-CAP-1:[('description', 'The error log is size-capped and rotated instead of growing without bound.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ERROR-LOG-CAP-1",
+      "idempotencyKey": "set-status:ERROR-LOG-CAP-1:[('description', 'The error log is size-capped and rotated instead of growing without bound.')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171529Z-external-set-status-ERROR-LOG-CAP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:16:32Z",
+  "outcome": "succeeded"
+}
