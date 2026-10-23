@@ -64,6 +64,12 @@
 - A move jumps the engine (`FocusMode.jumpTo`) once it exists. Before the first play, the move sets the explicit start anchor.
 - Sentence targets use `findSentenceBoundary`, and paragraph targets use the new `findParagraphStart`, both in `src/utils/text.ts`.
 - Tests: `tests/readerModes/focusKeys.test.tsx`.
+**Amendment (2026-10-23, owner):**
+- **Live failure on `48203707`:** Shift+→ jumped from section start to section start (187 → 5480 → 9431), and Shift+← from 187 landed on 0.
+- **Cause:** an EPUB section is `application/xhtml+xml`, so `tagName` is lowercase. The uppercase `BLOCK_TAGS` check in `getBlockParent` (`focus/helpers/foliateHelpers.ts`) never matched, and each section became one block.
+- **Fix (`568acc60`):** `foliateParagraphStarts.ts` walks the block elements with `isParagraphBlock` (`BLOCK_TAGS.has(el.localName.toUpperCase())`). `getBlockParent` is unchanged; BLOCK-TAG-CASE-1 owns it.
+- **Tests:** `tests/readerModes/focusParagraphStarts.test.ts`, with an XHTML section test and a `text/html` control.
+- **Live check on `568acc60`:** passed (the x64 `--dir` package, scratch profile; `C:\Projects\Blurby-artifacts\keys-fix\focus-568acc60-para.*`). Shift+→ moves 187 → 188 → 572 → 610, Shift+← moves 610 → 572 → 188 → 187, and while playing Shift+→ moves 195 → 572. All 7 presses match the probe's DOM block list, and the live profile was unchanged.
 
 ### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
 **Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)
