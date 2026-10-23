@@ -720,4 +720,71 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
     });
   });
+
+  // PAGE-SAVE-RESTAMP-3 Wave A: rare page-save edge cases after the restamp guard.
+  describe("PAGE-SAVE-RESTAMP-3", () => {
+    // (pr1) the double-wrap race: the book's words arrive while the load's wrap is still yielding.
+    it("(pr1) book words arriving mid-wrap number every span of a long section", async () => {
+      const { view, renderer, render } = await mount();
+      const doc = document.implementation.createHTMLDocument();
+      doc.body.innerHTML = Array.from({ length: 160 }, (_, i) => `<p>Word${i}</p>`).join("");
+      renderer.contents = [{ doc, index: 3 }];
+      const words = Array.from({ length: 160 }, (_, i) => `Word${i}`);
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); }); // not settled
+      await render({
+        bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: 160 }],
+        getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined),
+      });
+      await settle();
+      await settle();
+      const spans = Array.from(doc.querySelectorAll("[data-word-index]")) as HTMLElement[];
+      expect(spans).toHaveLength(160);
+      expect(spans.map((s) => [s.textContent, Number(s.getAttribute("data-word-index"))]))
+        .toEqual(words.map((w, i) => [w, 20 + i]));
+    });
+
+    // (pc1) a word click after the word count is known to have failed still saves its cfi.
+    it("(pc1) a second word click after a known word-count failure saves its cfi", async () => {
+      const { fake, doc } = await mountWiredClicks({ ensureBookWords: () => Promise.reject(new Error("x")) });
+      await clickWord(doc, 1);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"]]);
+      await clickWord(doc, 2);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"], ["doc-1", -1, "cfi:3:gamma"]]);
+      expect(fake.effects.filter((e) => e.method === "persistence.updateProgress")).toEqual([]);
+    });
+
+    // (pn4) pin: opening without a cfi cancels a turn held during init.
+    it("(pn4) a held turn from a snap during init is cancelled when the book opens without a cfi", async () => {
+      const original = FakeFoliateView.prototype.init;
+      FakeFoliateView.prototype.init = async function (this: FakeFoliateView) {
+        const { doc, range } = rawDoc();
+        this.renderer.contents = [{ doc, index: 0 }];
+        this.renderer.page = 2;
+        this.renderer.dispatchEvent(new CustomEvent("relocate", { detail: { reason: "snap", cfi: "snap-cfi", fraction: 0.5, range } }));
+      };
+      try {
+        const { fake, view, renderer } = await mount({ initialCfi: undefined, bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }],
+          getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
+        const { doc } = rawDoc();
+        renderer.contents = [{ doc, index: 0 }];
+        await loadSection(view, doc, 0);
+        await settle();
+        expect(saves(fake)).toEqual([]);
+      } finally {
+        FakeFoliateView.prototype.init = original;
+      }
+    });
+
+    // (fr1n) pin: fr1's guard, negative side. A held-click save after the anchor moved on leaves the anchor alone.
+    it("(fr1n) a held-click save after the anchor moved on does not overwrite it", async () => {
+      const { runtime, doc } = await mountWiredClicks();
+      await clickWord(doc, 1);
+      expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1);
+      runtime.navigateTo(4);
+      runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" });
+      expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(4);
+    });
+  });
 });
