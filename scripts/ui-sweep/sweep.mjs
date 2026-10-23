@@ -14,9 +14,11 @@ import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
 import os from "node:os";
+import { fileURLToPath } from "node:url";
 
 // ── arguments ───────────────────────────────────────────────────────────────────────────────────────────────────
-const args = parseArgs(process.argv.slice(2));
+const isMain = !!process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const args = isMain ? parseArgs(process.argv.slice(2)) : {};
 function parseArgs(argv) {
   const out = { port: 9350, timeboxMin: 120 };
   for (let i = 0; i < argv.length; i++) {
@@ -210,7 +212,9 @@ class Session {
     } else {
       const env = { ...process.env, BLURBY_USER_DATA_DIR: this.opts.profile, ...(this.opts.modelsRoot ? { NARRATE_MODELS_ROOT: this.opts.modelsRoot } : {}) };
       delete env.ELECTRON_RUN_AS_NODE;
-      this.proc = spawn(this.opts.exe, [`--remote-debugging-port=${port}`], { env, stdio: ["ignore", "pipe", "pipe"] });
+      // --inspect opens the main process to the profile preflight below (it does not pause the app). An older build
+      // that cannot take BLURBY_USER_DATA_DIR also gets --user-data-dir; the preflight proves which one it honoured.
+      this.proc = spawn(this.opts.exe, [`--remote-debugging-port=${port}`, `--inspect=${port + 1000}`, `--user-data-dir=${path.resolve(this.opts.profile)}`], { env, stdio: ["ignore", "pipe", "pipe"] });
       this.proc.stdout.on("data", () => {}); this.proc.stderr.on("data", () => {});
     }
     this.pid = this.proc.pid;
@@ -221,6 +225,7 @@ class Session {
       if (!target) await sleep(500);
     }
     if (!target) throw new Error("no CDP page target");
+    if (!this.opts.dryRun) await this.profilePreflight();
     this.cdp = new Cdp(target.webSocketDebuggerUrl);
     await this.cdp.open();
     this.cdp.on("Runtime.exceptionThrown", (p) => this.errors.push({ kind: "exception", text: (p.exceptionDetails.exception?.description || p.exceptionDetails.text || "").split("\n")[0] }));
@@ -234,6 +239,40 @@ class Session {
     // A swept window may sit behind other windows: emulate focus so focus-gated APIs (the clipboard) and keys work.
     await this.cdp.send("Emulation.setFocusEmulationEnabled", { enabled: true }).catch(() => {});
     await this.helpers();
+  }
+  // Profile preflight (Blurby.Brain standing guardrail, 2026-10-23: a v1.28.0 build ignored BLURBY_USER_DATA_DIR and
+  // opened the owner's live profile). Before the driver's first action, both checks must pass, or the app is quit and
+  // the driver exits 4:
+  //   (b) main process, over the Node inspector: app.getPath('userData') is the scratch profile, and not under
+  //       %APPDATA%lurby;
+  //   (a) evidence: the scratch profile's blurby-data/covers exists (main creates it at launch), and the live
+  //       profile's library.json and settings.json hashes have not moved since the first launch of this run.
+  async profilePreflight() {
+    const fail = async (why) => { console.error(`profile preflight FAILED: ${why}`); try { this.proc.kill(); } catch { /* gone */ } process.exit(4); };
+    const want = path.resolve(this.opts.profile).toLowerCase();
+    const live = path.join(process.env.APPDATA || "", "blurby").toLowerCase();
+    let userData = null;
+    for (let i = 0; i < 40 && userData === null; i++) {
+      try {
+        const node = (await (await fetch(`http://127.0.0.1:${this.opts.port + 1000}/json/list`)).json())[0];
+        const insp = new Cdp(node.webSocketDebuggerUrl); await insp.open();
+        const r = await insp.send("Runtime.evaluate", { expression: "process.mainModule.require('electron').app.getPath('userData')", returnByValue: true });
+        insp.close(); userData = r?.result?.value ?? null;
+      } catch { await sleep(250); }
+    }
+    if (!userData) return fail("could not read app.getPath('userData') over the main-process inspector");
+    const ud = path.resolve(userData).toLowerCase();
+    if (ud === live || ud.startsWith(live + path.sep)) return fail(`userData is the live profile (${userData})`);
+    if (ud !== want) return fail(`userData is ${userData}, not the scratch profile ${this.opts.profile}`);
+    let covers = false;
+    for (let i = 0; i < 60 && !covers; i++) { covers = fs.existsSync(path.join(this.opts.profile, "blurby-data", "covers")); if (!covers) await sleep(500); }
+    if (!covers) return fail("the scratch profile's blurby-data/covers did not appear");
+    if (this.opts.liveProfile) {
+      const now = JSON.stringify(hashLive(this.opts.liveProfile));
+      Session.liveBaseline ??= now;
+      if (now !== Session.liveBaseline) return fail("the live profile's hashes changed during this run");
+    }
+    this.userData = userData;
   }
   async helpers() { await this.cdp.eval(PAGE_HELPERS); this.helpersOk = true; }
   async sw(call, timeoutMs) { if (!this.helpersOk) await this.helpers(); return this.cdp.eval(`window.__sweep ? window.__sweep.${call} : (${PAGE_HELPERS}, window.__sweep.${call})`, timeoutMs); }
@@ -681,4 +720,6 @@ function blurbyPlan(a) {
   };
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+// UI-SWEEP-TRIAGE-1 imports the session, routes and plan from this module (triage.mjs); run main only when invoked.
+export { Session, DialogWatcher, PAGE_HELPERS, runSteps, home, enter, blurbyPlan, sleep, log, logSize, logSince, hashLive };
+if (isMain) main().catch((e) => { console.error(e); process.exit(1); });
