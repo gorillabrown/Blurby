@@ -647,12 +647,12 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="focus-keys-fix-1"></a>
 
-#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **reopened 2026-10-23: live paragraph keys failed, amendment below**; merge held for the Stage 8 freeze)*
+#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **rebuilt 2026-10-23 at `3bfb016e`, all gates and the live check pass**; merge held for the Stage 8 freeze)*
 
 - **State:** built and pushed at `48203707` on `eb/focus-keys-fix-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
 - **Merge order:** first. FLOW-KEYS-FIX-1 builds on this item's `findParagraphStart` and policy line.
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#focus-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-- **Reopened, owner ruling 2026-10-23: Done-when 3 failed live; amendment below.** Do not merge `48203707` as it stands.
+- **Rebuilt to the amendment, 2026-10-23: built and held at `3bfb016e` (code `568acc60`).** Red first `e513db58`. `npm test` 2,470 passed / 1 skipped / 0 failed; typecheck and build 0. Live: Shift+→ 187 → 188 → 572 → 610 and Shift+← back to 187, never 0, all equal to the DOM block list (`C:\Projects\Blurby-artifacts\keys-fixocus-568acc60-para.*`). Form deviation, tier 1: `BLOCK_TAGS.has(el.localName.toUpperCase())` instead of a new lowercase Set, because the mode-ownership gate counts a new module Set as a singleton. Merging with `eb/flow-keys-fix-1` conflicts only in `docs/governance/BUG_REPORT.md`; keep both entries.
 
 ##### Amendment — 2026-10-23 (owner; the paragraph keys use a case-insensitive block lookup)
 
