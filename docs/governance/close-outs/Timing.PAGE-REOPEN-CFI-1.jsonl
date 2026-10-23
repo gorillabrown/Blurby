@@ -1,0 +1,5 @@
+{"event":"open","rows":[{"id":1,"title":"Renderer copy keeps the saved cfi; exit save sends the last relocate cfi or none; tests fail on 47ae6e1f","class":"calculable","item":"PAGE-REOPEN-CFI-1","tier":"cross-cutting","effort":"high","kind":"bug-fix","estimate":60,"basis":"three source files, two test files"},{"id":2,"title":"Gates and live three-session check on a build of the fix","class":"calculable","item":"PAGE-REOPEN-CFI-1","tier":"bounded","effort":"medium","kind":"verification","estimate":45,"basis":"suite, typecheck, build, --dir package, one live route"}],"at":"2026-10-23T05:58:00Z"}
+{"event":"start","row":1,"model":"claude-opus-5-5","host":"claude-code","at":"2026-10-23T05:58:00Z"}
+{"event":"end","row":1,"evidence":"5 new tests fail on 47ae6e1f (control passes); 6 pass on the fix","result":"done","at":"2026-10-23T06:21:00Z"}
+{"event":"start","row":2,"model":"claude-opus-5-5","host":"claude-code","at":"2026-10-23T06:21:00Z"}
+{"event":"end","row":2,"evidence":"npm test 2436 passed/1 skipped/0 failed in 178 files; typecheck 0; build 0; live S2 reopen and S3 relaunch land on page 31 (/40,/300), disk keeps it","result":"done","at":"2026-10-23T05:27:11Z"}

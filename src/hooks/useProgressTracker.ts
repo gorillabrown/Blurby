@@ -20,7 +20,7 @@ interface UseProgressTrackerParams {
   sessionStartWordRef: React.MutableRefObject<number>;
   activeReadingMsRef: React.MutableRefObject<number>;
   activeReadingStartRef: React.MutableRefObject<number | null>;
-  onUpdateProgress: (docId: string, position: number) => void;
+  onUpdateProgress: (docId: string, position: number, cfi?: string) => void;
   onArchiveDoc: (docId: string) => void;
   onExitReader: (pos: number) => void;
   onPagesRead?: (pages: number) => void;
@@ -59,6 +59,8 @@ export interface UseProgressTrackerReturn {
   hasEngagedRef: React.MutableRefObject<boolean>;
   /** The furthest position ref */
   furthestPositionRef: React.MutableRefObject<number>;
+  /** The cfi of the last relocate the view reported, with its doc (PAGE-REOPEN-CFI-1); set by the relocate save */
+  lastRelocateCfiRef: React.MutableRefObject<{ docId: string; cfi: string } | null>;
 }
 
 /**
@@ -91,6 +93,7 @@ export function useProgressTracker({
   // Debounced save timer
   const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedPosRef = useRef(activeDoc.position || 0);
+  const lastRelocateCfiRef = useRef<{ docId: string; cfi: string } | null>(null);
   const readingModeRef = useRef(readingMode);
   readingModeRef.current = readingMode;
   const goalReportedActiveReadingMsRef = useRef(0);
@@ -227,8 +230,12 @@ export function useProgressTracker({
       : Math.max(normalizedFinalPos, fractionPos);
     (activeDoc as any).furthestPosition = Math.max(furthestPositionRef.current, savePos);
     lastSavedPosRef.current = savePos;
-    onUpdateProgress(activeDoc.id, savePos);
-    api.updateDocProgress(activeDoc.id, savePos, (activeDoc as any).cfi || undefined);
+    // PAGE-REOPEN-CFI-1: only the cfi of a relocate in this book, the page last on screen. With none since the open,
+    // send no cfi, so main keeps the stored one rather than a landing the reader never turned from.
+    const relocated = lastRelocateCfiRef.current;
+    const cfi = relocated && relocated.docId === activeDoc.id ? relocated.cfi : undefined;
+    onUpdateProgress(activeDoc.id, savePos, cfi);
+    api.updateDocProgress(activeDoc.id, savePos, cfi);
     // Use active reading time, not total elapsed
     if (activeReadingStartRef.current) {
       activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
@@ -322,5 +329,6 @@ export function useProgressTracker({
     lastSavedPosRef,
     hasEngagedRef,
     furthestPositionRef,
+    lastRelocateCfiRef,
   };
 }
