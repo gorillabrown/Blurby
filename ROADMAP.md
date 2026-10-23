@@ -2743,6 +2743,15 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
     5. **Narrate and Page still work:** Narrate's word table and cursor are untouched, because only layout changes. In the live run, Narrate plays from a clicked word, and the cursor sits on the playing word (one screenshot). Page turns forward and back three times, and the saved position updates.
     6. **Suite, typecheck and build** on the final tree: `npm test` reports 0 failed, `npm run typecheck` exits 0, `npm run build` exits 0 (standing rules 47 and 48).
     7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly the four `helpers/foliateStyles.ts` files, `src/constants.ts` and `tests/foliateChunkHighlight.test.ts`, plus the time log and staging memo (standing rule 41). `git diff --name-only refs/remotes/origin/main -- src/utils src/components/ReaderContainer.tsx src/types.ts` prints nothing.
+- **Release amendment (Blurby.Brain, 2026-10-23), adding Done-when 8–13:**
+    8. **Word numbering unchanged:** under the app's Electron, *Meditations* is still 80,493 words, with the anchors 2970 "ancient", 5480 "HIS" and 9431 "THE", on the base and on the change. Layout must never change word indices, because saved positions depend on them.
+    9. **Saved place survives:** take a book saved on the base at the first word of a Page-mode page. On the change it reopens on the page that holds that same word, checked by word text (LL-161).
+    10. **Text size on top of the scale:** the reader's text size (A−/A+, `focusTextSize`) still applies at its minimum, default and maximum. There are no clipped or overlapping headings in any of the four modes: a screenshot per mode at each size, with the `h2` and `p` computed sizes recorded.
+    11. **Contrast on the combined tree:** BOOK-TEXT-COLOUR-1's 4.5:1 contrast test passes on this branch (the two items share four files).
+    12. **Narrate on the combined tree:** the cursor-on-playing-word suites (`tests/narrate/`) pass. Gate (1)'s D3 and D5 rows re-run on the release-fix sha, as planned: heading sizes change section layout, which those rows measure.
+    13. **App chrome untouched:** `git diff --name-only refs/remotes/origin/main -- src/styles src/components` prints nothing. Only the injected iframe styles change.
+
+    Smoke re-check (added): the owner's usual book, at the owner's usual text size, looks right in Page, Focus, Flow and Narrate, and the Narrate highlight lands on the spoken word.
 - **Effort:** S.
 - **Owners:** implementation agent.
 - **Lane:** UX polish. Execution surface C.
