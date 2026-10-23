@@ -2,11 +2,34 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-23
 
 ---
 
 ## Incomplete
+
+### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
+**Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)
+**Severity:** HIGH (reading progress is lost, and the reopen lands further back). **Release blocker** (Blurby.Brain, 2026-10-23): fixed by KEEP-FURTHEST-FIX-1, a release gate.
+**Status:** RESOLVED in source (KEEP-FURTHEST-FIX-1, branch `eb/keep-furthest-fix-1`; merge waits for the owner's answer on which page Keep reopens). Lane: Reader Engine.
+**Description:**
+- **The scenario:** a book saved at word 1290 is opened. The reader turns forward to word 2673, then back 8 pages to word 416, and leaves the book.
+- **The prompt** offers "Save at page 2 | Keep at page 6". Page 6 is the opening position, not the furthest one reached.
+- **Keep at page 6** saves word 1290 with the cfi of the word-416 page, so the reopen shows that page.
+- "Save at page 2" is correct (416, reopening there).
+- **Regression:** this came in with this release's PAGE-POSITION-SAVE line. On `08f4b948~1`, page turns saved nothing, and the prompt did not appear.
+**Cause:**
+- Since PAGE-POSITION-SAVE-1, a Page turn saves through `ModeRuntime.onPageTurned` → `commitPersistentWordIndex` → the persistence port's `updateDocProgress`. That path never raises the furthest mark (`useProgressTracker`'s `furthestPositionRef`).
+- The relocate save, which does raise it (`scheduleRelocateSave`, `ReaderContainer.tsx`), is skipped once the turn's commit has set the resume anchor.
+- So the mark stays at the open position. `handleKeepFurthest` sends it, and `_persistAndLog` pairs it with the on-screen cfi (PAGE-REOPEN-CFI-1).
+**Fix (KEEP-FURTHEST-FIX-1):**
+- The port's `updateDocProgress` calls a new `noteHighWater(wordIndex, cfi)`, and so does the relocate save. It raises the mark to a saved page past it and records that page's cfi in `furthestCfiRef`. It never saves.
+- Keep sends the furthest position with the furthest page's cfi. One constant, `KEEP_FURTHEST_REOPENS_AT_FURTHEST`, chooses the on-screen cfi instead if the owner prefers.
+- Tests: `tests/keepFurthest.test.tsx`.
+- Live, on the fix's `--dir` build: the prompt offers "Keep at page 11". Keep saves 2673 with its own cfi, and the reopen lands there.
+**Not fixed here (after the release):**
+- Page turns are not counted toward pages read: `recordPages` runs only on the skipped relocate path.
+- The furthest mark is not persisted: it lives on the in-memory doc, so a relaunch resets it to the saved position.
 
 ### BUG-208 — Book text renders black on the dark Blurby background
 **Reported:** 2026-10-23 (owner, screenshot, Narrate mode on *Meditations*; installed ARM64 build `47ae6e1f`, settings left by the Stage 8 smoke: `theme: blurby`, `einkMode: true`)

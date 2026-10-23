@@ -266,6 +266,7 @@ export default function ReaderContainer({
     // useProgressTracker's refs (stable objects), bound after the tracker runs.
     pageSaveTimerRef: { current: null } as React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
     furthestPositionRef: { current: 0 } as React.MutableRefObject<number>,
+    noteHighWater: (_wordIndex: number, _cfi?: string | null) => {},
     lastSavedPosRef: { current: 0 } as React.MutableRefObject<number>,
     lastRelocateCfiRef: { current: null } as React.MutableRefObject<{ docId: string; cfi: string } | null>,
   });
@@ -310,6 +311,8 @@ export default function ReaderContainer({
       updateDocProgress: (docId, wordIndex, cfi) => {
         void api.updateDocProgress(docId, wordIndex, cfi);
         if (cfi) shellRef.current.onUpdateProgress(docId, wordIndex, cfi);
+        // KEEP-FURTHEST-FIX-1: a Page turn's save raises the furthest mark (no extra save).
+        if (docId === shellRef.current.activeDoc.id) shellRef.current.noteHighWater(wordIndex, cfi);
       },
       updateProgress: (docId, wordIndex) => shellRef.current.onUpdateProgress(docId, wordIndex),
       // Legacy `activeDoc.cfi = cfi` (position restoration on reopen).
@@ -320,7 +323,7 @@ export default function ReaderContainer({
       scheduleRelocateSave: ({ wordIndex, cfi }) => {
         const live = shellRef.current;
         const pageDelta = calculateHighWaterPagesReadDelta(live.furthestPositionRef.current, wordIndex);
-        live.furthestPositionRef.current = pageDelta.highWater;
+        live.noteHighWater(pageDelta.highWater, cfi);
         if (pageDelta.pages > 0) live.recordPages(pageDelta.pages);
         // Debounced save of CFI for resume on reopen
         const docId = live.activeDoc.id;
@@ -485,6 +488,7 @@ export default function ReaderContainer({
     requestCompletionToPage,
     pageSaveTimerRef: progress.pageSaveTimerRef,
     furthestPositionRef: progress.furthestPositionRef,
+    noteHighWater: progress.noteHighWater,
     lastSavedPosRef: progress.lastSavedPosRef,
     lastRelocateCfiRef: progress.lastRelocateCfiRef,
   };
