@@ -1422,11 +1422,34 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="focus-keys-fix-1"></a>
 
-#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight, merge held for the Stage 8 freeze)*
+#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **reopened 2026-10-23: live paragraph keys failed, amendment below**; merge held for the Stage 8 freeze)*
 
 - **State:** built and pushed at `48203707` on `eb/focus-keys-fix-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
 - **Merge order:** first. FLOW-KEYS-FIX-1 builds on this item's `findParagraphStart` and policy line.
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#focus-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
+- **Reopened, owner ruling 2026-10-23: Done-when 3 failed live; amendment below.** Do not merge `48203707` as it stands.
+
+##### Amendment — 2026-10-23 (owner; the paragraph keys use a case-insensitive block lookup)
+
+- **Live result on `703a5b89` / `48203707`** (Blurby.Roadmap's re-run; scratch profile with preflight; live hashes unchanged; `C:\Projects\Blurby-artifacts\keys-fix\focus-48203707-para.*` and `-words.*`):
+  - **Pass:** Ctrl+→ (187 → 188), Ctrl+↓ (→ 199) and playing Ctrl+← (steps back, then rises).
+  - **Fail:** Shift+→ goes 187 → 5480 → 9431 → 11652 → 14979, and playing 14984 → 20389 → 25788. Those are the book's section starts. Shift+← from 187 lands on 0.
+- **Root cause (live diagnostic, Blurby.Brain's five readings, `focus-703a5b89-diag*.json`):**
+  - The stamped-doc WeakSet is correct (filtered and unfiltered give the same result).
+  - The spans exist (5,293 from word 187).
+  - `collectParagraphStartWordIndexes` returns one start per section (`[187]`, then `[5480]`), because `getBlockParent` never finds a block. EPUB section documents are `application/xhtml+xml`, so `tagName` is lowercase (`"p"`). `BLOCK_TAGS` is uppercase (`focus/helpers/foliateHelpers.ts:20`), and `:78` does `BLOCK_TAGS.has(el.tagName)`. Every text node falls back to `body`, and the whole section becomes one block.
+  - Shift+← landing on 0 has the same cause: the Introduction is in section 0, which starts at word 0 (Brain).
+- **The fix, local to the key path (owner, 2026-10-23).** The shared `getBlockParent` is not changed here; BLOCK-TAG-CASE-1 does that.
+  - `src/reader/modes/focus/helpers/foliateParagraphStarts.ts`: stop using `collectBlockTextNodes` to find blocks. Walk the stamped document's block elements by a case-insensitive match instead. Add `isParagraphBlock(el)`: `PARAGRAPH_BLOCK_TAGS.has(el.localName.toLowerCase())`, over a lowercase set with the same members as `BLOCK_TAGS`. For each block, take its first `[data-word-index]` descendant that is not inside a nested block, and keep the existing sort and dedupe.
+  - Nothing else in FOCUS-KEYS-FIX-1 changes: `paragraphTarget`, `findBookParagraphStart`, the WeakSet and the surface pass-through stay.
+- **Done-when additions:**
+  - **(p1) Red first (standing rule 43).** A test in `tests/readerModes/focusParagraphStarts.test.ts` parses a section with `new DOMParser().parseFromString(xhtml, "application/xhtml+xml")`, with lowercase `<p>` and `<h2>`, stamped from 187. The collector returns each block's first word (for example 187, 188, 572), not `[187]` alone. It fails by assertion on `48203707`. A control parses the same markup as `text/html` and passes on both.
+  - **Live, replacing Done-when 3's Shift+→ row:** on the same route (*Meditations*, a TOC jump to INTRODUCTION, Focus, word 187), Shift+→ three times paused and once playing. Each press lands on the next rendered block's first word: 188, then the next block start (572 on the 2026-10-23 build). Use `word-probe.mjs`'s DOM block list as the expected value. Shift+← returns to the previous block start, never 0 from inside INTRODUCTION.
+- **Fence:** add `M src/reader/modes/focus/helpers/foliateParagraphStarts.ts` (already in the fence) and `M tests/readerModes/focusParagraphStarts.test.ts`.
+- **Lessons:**
+  - LL-166: the verdict comes from the runtime's own state through the probe, not from a screenshot.
+  - LL-142: the cause was measured live before this amendment was written.
+  - A new lesson is due at close-out: an XHTML document's `tagName` is lowercase, so a tag check must be case-insensitive; a CSS selector hid the difference in the first probe.
 
 <a id="flow-keys-fix-1"></a>
 
@@ -1642,7 +1665,7 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 
 <a id="flow-para-keys-1"></a>
 
-#### FLOW-PARA-KEYS-1 — Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(position 78 — Check-then-fix; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*
+#### FLOW-PARA-KEYS-1 — Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(position 84 — Full Spec; check settled red live 2026-10-23, amendment below; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*
 
 - **What:** on an EPUB with full-book words, Flow's Shift+←/→ and Shift+↑/↓ (`paragraph`) go to the previous or next paragraph start in the whole book. They never jump past paragraphs or into another chapter.
 - **Why (suspected; this item checks it first):**
@@ -1678,13 +1701,146 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   | 4 | `--dir` build and the live Shift+→/← check on a scratch profile with the preflight | bounded | medium |
   | 5 | Bug entry (if confirmed), memo and time log; push; ask for merge go | mechanical | low |
 
+##### Amendment — 2026-10-23 (owner; the check is settled red, and the fix follows FOCUS-KEYS-FIX-1's amendment)
+
+- **The check is settled: red, live.** On `eb/flow-keys-fix-1` @ `60b86aff` (a clean `--dir` build; scratch profile with preflight; live hashes unchanged; `C:\Projects\Blurby-artifacts\keys-fix\flow-60b86aff-para.*`):
+  - Shift+→ paused goes 187 → 5290 → 80492 (the book's last word), then stays there.
+  - Playing goes 424 → 5290 → 80492, and playback stops.
+  - Shift+↑ can land on 0.
+  - Done-when 1 still writes the red test, and it must fail by assertion. The "if it passes" branch no longer applies.
+- **Two causes, both fixed here:**
+  1. The loaded-slice breaks against book-wide words (`:933` against `:1412`), as written above.
+  2. The block lookup is case-sensitive. Flow's `helpers/foliateHelpers.ts:20` and `:78` have the same uppercase `BLOCK_TAGS` as Focus. On XHTML sections it finds no block (FOCUS-KEYS-FIX-1's amendment, the live diagnostic).
+- **The fix (2) is amended:** Flow's new `helpers/foliateParagraphStarts.ts` is a copy of Focus's **amended** collector, with the case-insensitive `isParagraphBlock`, not of the `48203707` version. There is no sibling import.
+- **Red test addition (fr2):** the same XHTML fixture as FOCUS-KEYS-FIX-1's (p1). Flow's collector returns each block's first word, and the `text/html` control passes.
+- **Live expected values (Done-when 3):** from word 187 in INTRODUCTION, Shift+→ lands on 188, then the next block start (572 on the 2026-10-23 build), using `word-probe.mjs`'s DOM block list. It never lands on 5290, 80492 or 0.
+- **Merge order:** after FOCUS-KEYS-FIX-1's amended fix merges, so both modes ship one approach (Blurby.Brain, 2026-10-23).
+
 ##### Lessons applied
 - **Standing rule 43 (LL-138):** the red test with full-book words is committed alone first, and its result decides whether (2) runs.
-- **LL-142:** the defect is suspected from code (`:933` against `:1412`), not yet measured in Flow, so the item checks first and fixes only on a red result.
+- **LL-142:** suspected from code (`:933` against `:1412`), then measured live on 2026-10-23 (187 → 5290 → 80492). The live diagnostic found the second cause, the case-sensitive block lookup, before the fix was specified.
 - **LL-152:** the live step measures Shift+→ the same way FOCUS-KEYS-FIX-1's live run did (same build recipe, book, start point and probe), so the jump sizes compare like for like.
 - **Standing rule 52 (LL-146):** the test lives in `tests/readerModes/`. Any evidence copy of a probe script is saved as `.txt`.
 - **Reading-mode separation:** Flow gets its own collector copy, with no sibling import from `focus/`.
 - **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+
+<a id="block-tag-case-1"></a>
+
+#### BLOCK-TAG-CASE-1 — The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*
+
+- **What:** every renderer copy of the block helpers recognises a block element whatever the case of its tag name. On EPUB pages, the renderer then sees each paragraph, heading and list item as its own block, as the main-process extractor already does. The item measures the change before and after, and it ships only on the owner's OK.
+- **Why:**
+  - EPUB section documents load as `application/xhtml+xml`, so `Element.tagName` is lowercase (`"p"`), measured live on *Meditations* (FOCUS-KEYS-FIX-1 diagnostic, `C:\Projects\Blurby-artifacts\keys-fix\focus-703a5b89-diag-r2.json`).
+  - Every renderer copy compares that against an uppercase set:
+    - `BLOCK_TAGS = new Set(["P", "DIV", "H1", …])`, and `getBlockParent` does `BLOCK_TAGS.has(el.tagName)`;
+    - the same text-node filter rejects `parent.tagName === "SCRIPT" || "STYLE"`.
+  - **Sites** (on `origin/main` @ `cee2183e`):
+    - `src/reader/modes/focus/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
+    - `src/reader/modes/flow/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
+    - `src/reader/modes/narrate/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
+    - `src/reader/modes/page/helpers/foliateHelpers.ts:20`, `:99`, `:109`;
+    - `src/utils/foliateHelpers.ts:20`, `:78`, `:88` (no runtime importer: `git grep -n "utils/foliateHelpers\"" -- src` prints only type or test imports).
+  - So on XHTML pages `getBlockParent` returns `null`, and `collectBlockTextNodes` puts a whole section into one block (`:98`, the `body` fallback). Script and style text in the body is not filtered.
+  - **What this probably affects (inferred from code; this item measures it):**
+    - `paragraphBreakAfter` (`foliateHelpers.ts:242`, `:260`): one paragraph break per section. Flow's rhythm paragraph pauses (`flow/ModeRuntime.ts:503`), Focus's paragraph pause and the natural reading chunks all read it.
+    - Word wrapping groups text per block (`foliateWordWrapping.ts:100`). Where two blocks' text meets with no whitespace between them, the renderer may make one word where the main extractor makes two.
+    - **The main extractor is already case-correct:** `main/epub-word-extractor.js:19` uses a lowercase set under cheerio. A renderer/main word-count mismatch per section would follow, and that would explain the per-section count differences FOCUS-KEYS-FIX-1's first fix ran into (Blurby.Brain, ruling A). That is a hypothesis; Done-when 1 measures it.
+- **Prerequisites:**
+  - FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1, whose local case-insensitive collectors this item folds into the shared fix (each mode's own copy; no sibling import);
+  - the owner's tier-2 OK after Done-when 4's before/after table.
+- **Done when** (run every command in `pwsh` from the worktree root):
+  1. **Base measurement first, with no code change (LL-142).** On a packaged `--dir` build of the base, with a fresh scratch profile, the profile preflight, and live-profile hashes unchanged:
+     - **Books:**
+       - `resources/sample-meditations.epub` (*Meditations*);
+       - `docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-chapters.epub` (Blurby's own converter output, structurally different).
+     - **For every section of both books, through a probe that reads each mode's runtime, as `C:\Projects\Blurby-artifacts\keys-fix\word-probe.mjs` does:**
+       - (a) blocks found by `collectBlockTextNodes`;
+       - (b) `paragraphBreakAfter` count;
+       - (c) the renderer's wrapped-word count, against the main extractor's word count for that section (`bookWords.sections`);
+       - (d) Flow's natural-chunk count;
+       - (e) for Narrate, the paragraph boundaries its plan uses for the first two sections.
+     - Save the table to `docs/studies/investigations/BLOCK-TAG-CASE-1.base.2026-MM-DD.md`.
+  2. **Red first (standing rule 43).** A new `tests/readerModes/blockTagCase.test.ts` is committed alone, before any fix. Run each case against every mode's copy (focus, flow, narrate and page) and `src/utils/foliateHelpers.ts`:
+     - **(t1)** A document from `new DOMParser().parseFromString(xhtml, "application/xhtml+xml")` with `<p>`, `<h2>` and `<li>`: `collectBlockTextNodes` returns one group per element, and `blockTag` is `p`, `h2`, `li`. It fails by assertion on the base.
+     - **(t2)** An XHTML `<style>` text node inside the body is rejected. It fails on the base.
+     - **(t3) Control:** the same markup parsed as `text/html` gives the same groups. It passes on the base.
+  3. **The change.** In each of the five copies:
+     - `BLOCK_TAGS` becomes lowercase;
+     - `getBlockParent` tests `BLOCK_TAGS.has(el.localName.toLowerCase())`;
+     - the script/style filter tests `localName.toLowerCase()` against `"script"` and `"style"`.
+
+     FOCUS-KEYS-FIX-1's and FLOW-PARA-KEYS-1's local `isParagraphBlock` then call their mode's `getBlockParent` rule, so each mode keeps one block rule. Their tests stay green and unedited, or are named under standing rule 50.
+  4. **After measurement, the same build recipe, route and probe as (1) (LL-152).** Record the same five figures per section beside the base figures, with the change per section.
+     - Expected:
+       - (a) and (b) rise to about the number of `<p>`/heading elements (*Meditations* INTRODUCTION has 26 `<p>`, measured);
+       - (c) matches main's count per section, or moves closer to it.
+     - Any section where (c) moves *away* from main's count stops the item, with that section's text at the boundary.
+  5. **Owner decision (tier 2).** The before/after table goes to the owner, through Blurby.Roadmap, with a recommendation. It covers:
+     - paragraph pauses in Flow and Focus;
+     - the size of Flow's chunks;
+     - Narrate's paragraph handling.
+
+     The merge waits for the owner's OK. If the owner declines a consequence (for example, the new paragraph pauses), the item keeps the block fix and states which consumer is held back, as a separate owner decision. It does not quietly drop it.
+  6. **Live, after the owner's OK,** on both books, in Focus and Flow:
+     - Shift+→ lands on the next block start;
+     - Flow pauses at paragraph ends at the rhythm setting's length;
+     - Narrate starts each paragraph after its pause, judged by ear, as the owner-observed check at the next smoke (standing rule 45).
+
+     The word index of a fixed anchor word is the same before and after (LL-161: checked by the word's text).
+  7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48). `npm run perf` shows no benchmark worse than its baseline by more than 10%.
+  8. **Fence:** `git diff --name-status <base>` lists exactly these, plus the measurement files, staging memo and time log (standing rule 41):
+     - the five `foliateHelpers.ts` copies;
+     - `A tests/readerModes/blockTagCase.test.ts`;
+     - `M docs/governance/BUG_REPORT.md`, with a new bug: "renderer finds no paragraph blocks on XHTML pages".
+
+     Nothing in `main/`, `src/types.ts`, `src/components/ReaderContainer.tsx` or `src/utils/FlowScrollEngine.ts`.
+- **Effort:** M.
+- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; the owner for the tier-2 decision and the next smoke.
+- **Source:** FOCUS-KEYS-FIX-1's live diagnostic (2026-10-23; `C:\Projects\Blurby-artifacts\keys-fix\focus-703a5b89-diag*.json`, `para-diag-probe.mjs`), Blurby.Brain's five readings, the owner's direction of 2026-10-23.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** the fifteen lines listed under Why. Re-grep at dispatch (standing rule 36):
+
+  ```
+  git grep -n -E "BLOCK_TAGS|tagName (===|!==) \"[A-Z]" -- src
+  ```
+
+  After the change, `git grep -n -E "tagName (===|!==) \"[A-Z]|\.has\([a-z]+\.tagName\)" -- src` prints nothing.
+- **Tests:** `tests/readerModes/blockTagCase.test.ts` (t1–t3), plus the existing `tests/readerModes/`, `tests/flowReadingZone.test.ts`, `tests/foliate*.test.*` and the FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 tests, all unedited.
+- **Constants:** none. `BLOCK_TAGS` stays in each mode's helper (reading-mode separation).
+- **Branch:** `eb/block-tag-case-1` from `refs/remotes/origin/main`, after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 have merged.
+- **Staging plan:** explicit paths only. `tests/perf-baseline-results.json` stays unstaged.
+- **Failure handling:**
+  - If (c) diverges anywhere, stop with the boundary text.
+  - If `npm run perf` regresses by more than 10%, stop with the benchmark.
+  - If a pinned test asserts a section-sized block, name it (standing rule 50) and stop.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Shared-core touches:** none.
+- **Merge order:** after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1. It waits for the owner's tier-2 OK.
+- **Lane:** Reader Engine. Execution surface A.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate |
+|---|---|---|---|---|---|---|
+| 1 | Base measurement on both books, every section, five figures, saved | calculable | measurement | bounded | medium | 45m |
+| 2 | Red file (t1–t3) committed alone; failures recorded | calculable | positive control | bounded | low | 20m |
+| 3 | Case-insensitive block and script/style checks in all five copies; the keys collectors folded in | calculable | bug fix | bounded | medium | 30m |
+| 4 | After measurement, same recipe; the before/after table to the owner via Blurby.Roadmap | calculable | measurement | bounded | medium | 40m |
+| 5 | After the owner's OK: live checks, suite, typecheck, build, perf | calculable | verify | bounded | medium | 40m |
+| 6 | Bug entry, memo and time log; push; ask for merge go | mechanical | close | mechanical | low | 15m |
+
+##### Lessons applied
+- **LL-142:** the cause was measured live (the five-reading diagnostic) before this item was written, and the change is measured before and after, not argued.
+- **LL-152:** the base and after figures use the same build recipe, route and probe.
+- **LL-161:** the anchor-word check compares the word's text, not only its index.
+- **LL-165:** every live launch proves its scratch profile before the first input.
+- **LL-166:** each verdict reads runtime state through the probe, not a screenshot.
+- **Standing rule 43 (LL-138):** red first, with a `text/html` control.
+- **Standing rule 50 (LL-156):** a test that pins a section-sized block is named, not silently edited.
+- **Standing rule 45 (LL-141):** Narrate's change keeps an owner-observed check.
+- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+
 
 <a id="narrate-start-stack-1"></a>
 
