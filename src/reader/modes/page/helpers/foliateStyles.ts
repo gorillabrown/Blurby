@@ -45,6 +45,9 @@ export function injectStyles(
       margin: 0 !important;
       padding: 0 !important;
     }
+    /* BOOK-TEXT-COLOUR-1 (BUG-208): a book colour rule on a descendant (Gutenberg #pg-header div { color: initial })
+       must not beat the theme colour; links keep the accent (a, below). Owner decision 2026-10-23. */
+    body *:not(a) { color: inherit !important; }
     body {
       padding-block-start: var(--blurby-flow-leading-inset, 0px) !important;
       padding-block-end: var(--blurby-flow-trailing-inset, 0px) !important;
