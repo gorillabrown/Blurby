@@ -65,7 +65,7 @@ interface ReaderContainerProps {
   onSiteLogin: (url: string) => Promise<void>;
   onSiteLogout: (domain: string) => Promise<void>;
   onExitReader: (finalPos: number) => void;
-  onUpdateProgress: (docId: string, position: number) => void;
+  onUpdateProgress: (docId: string, position: number, cfi?: string) => void;
   onArchiveDoc: (docId: string) => void;
   onToggleFavorite: (docId: string) => void;
   onOpenDocById: (docId: string) => void;
@@ -267,6 +267,7 @@ export default function ReaderContainer({
     pageSaveTimerRef: { current: null } as React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
     furthestPositionRef: { current: 0 } as React.MutableRefObject<number>,
     lastSavedPosRef: { current: 0 } as React.MutableRefObject<number>,
+    lastRelocateCfiRef: { current: null } as React.MutableRefObject<{ docId: string; cfi: string } | null>,
   });
 
   const ensureBookWords = useCallback((): Promise<ReaderBookWordsValue | null> => {
@@ -305,7 +306,11 @@ export default function ReaderContainer({
       setWpm: (value) => shellRef.current.setWpm(value),
     },
     persistence: {
-      updateDocProgress: (docId, wordIndex, cfi) => { void api.updateDocProgress(docId, wordIndex, cfi); },
+      // PAGE-REOPEN-CFI-1: a saved cfi also reaches the library copy a reopen opens from.
+      updateDocProgress: (docId, wordIndex, cfi) => {
+        void api.updateDocProgress(docId, wordIndex, cfi);
+        if (cfi) shellRef.current.onUpdateProgress(docId, wordIndex, cfi);
+      },
       updateProgress: (docId, wordIndex) => shellRef.current.onUpdateProgress(docId, wordIndex),
       // Legacy `activeDoc.cfi = cfi` (position restoration on reopen).
       recordCfi: (cfi) => { shellRef.current.activeDoc.cfi = cfi; },
@@ -319,10 +324,11 @@ export default function ReaderContainer({
         if (pageDelta.pages > 0) live.recordPages(pageDelta.pages);
         // Debounced save of CFI for resume on reopen
         const docId = live.activeDoc.id;
+        live.lastRelocateCfiRef.current = cfi ? { docId, cfi } : null;
         if (live.pageSaveTimerRef.current) clearTimeout(live.pageSaveTimerRef.current);
         live.pageSaveTimerRef.current = setTimeout(() => {
           void api.updateDocProgress(docId, wordIndex, cfi);
-          live.onUpdateProgress(docId, wordIndex);
+          live.onUpdateProgress(docId, wordIndex, cfi);
           live.lastSavedPosRef.current = wordIndex;
         }, FOLIATE_PROGRESS_SAVE_DEBOUNCE_MS);
       },
@@ -480,6 +486,7 @@ export default function ReaderContainer({
     pageSaveTimerRef: progress.pageSaveTimerRef,
     furthestPositionRef: progress.furthestPositionRef,
     lastSavedPosRef: progress.lastSavedPosRef,
+    lastRelocateCfiRef: progress.lastRelocateCfiRef,
   };
 
   // ── Document identity: a new document opens a new generation in Page ──────────

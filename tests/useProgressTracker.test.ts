@@ -324,3 +324,52 @@ describe("useProgressTracker — page calculation", () => {
     expect(pct).toBe(17);
   });
 });
+
+// PAGE-REOPEN-CFI-1 (BUG-201): the exit save sends the cfi of the last relocate in this book, or none. On 47ae6e1f it
+// sent `activeDoc.cfi`, which `recordCfi` had set to a reopen's (stale) landing, reverting the stored cfi.
+describe("useProgressTracker — the exit save's cfi (PAGE-REOPEN-CFI-1)", () => {
+  type Tracker = ReturnType<typeof import("../src/hooks/useProgressTracker").useProgressTracker>;
+  let root: Root | null = null;
+  beforeEach(() => { (globalThis as any).IS_REACT_ACT_ENVIRONMENT = true; mockApi.updateDocProgress.mockClear(); });
+  afterEach(() => { act(() => root?.unmount()); root = null; });
+
+  async function renderTracker(onUpdateProgress = vi.fn()) {
+    const { useProgressTracker } = await import("../src/hooks/useProgressTracker");
+    const doc = { id: "book", title: "Book", wordCount: 80493, position: 7272, cfi: "epubcfi(/6/6!/4/2/38,/874,/874)", created: 1, source: "folder" } as any;
+    const box: { current: Tracker | null } = { current: null };
+    function Harness() {
+      box.current = useProgressTracker({
+        activeDoc: doc, wordIndex: 7272, anchorWordIndex: 7272, readingMode: "page", useFoliate: true,
+        foliateFractionRef: { current: 0 }, wpm: 300, wordsLength: 80493, totalWords: 80493,
+        sessionStartWordRef: { current: 7272 }, activeReadingMsRef: { current: 0 }, activeReadingStartRef: { current: null },
+        onUpdateProgress, onArchiveDoc: vi.fn(), onExitReader: vi.fn(),
+      } as any);
+      return null;
+    }
+    root = createRoot(document.createElement("div"));
+    flushSync(() => root!.render(React.createElement(Harness)));
+    return { box, onUpdateProgress };
+  }
+
+  it("with no relocate since the open, it sends the position with no cfi", async () => {
+    const { box, onUpdateProgress } = await renderTracker();
+    act(() => box.current!.finishReading(7272));
+    expect(mockApi.updateDocProgress).toHaveBeenCalledWith("book", 7272, undefined);
+    expect(onUpdateProgress).toHaveBeenCalledWith("book", 7272, undefined);
+  });
+
+  it("after a relocate, it sends that relocate's cfi", async () => {
+    const { box, onUpdateProgress } = await renderTracker();
+    box.current!.lastRelocateCfiRef.current = { docId: "book", cfi: "epubcfi(/6/8!/4/2/40,/300,/300)" };
+    act(() => box.current!.finishReading(7272));
+    expect(mockApi.updateDocProgress).toHaveBeenCalledWith("book", 7272, "epubcfi(/6/8!/4/2/40,/300,/300)");
+    expect(onUpdateProgress).toHaveBeenCalledWith("book", 7272, "epubcfi(/6/8!/4/2/40,/300,/300)");
+  });
+
+  it("a relocate recorded for another book is not sent", async () => {
+    const { box } = await renderTracker();
+    box.current!.lastRelocateCfiRef.current = { docId: "other", cfi: "epubcfi(/6/2!/4/2,/2,/2)" };
+    act(() => box.current!.finishReading(7272));
+    expect(mockApi.updateDocProgress).toHaveBeenCalledWith("book", 7272, undefined);
+  });
+});

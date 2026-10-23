@@ -21,7 +21,11 @@
 ### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
 **Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
 **Severity:** HIGH (the reader loses their place); **release blocker** (release gate (2) failed on it)
-**Status:** OPEN, reproduced and root-caused (SMOKE8-DIAG-1, 2026-10-23); fix specified as PAGE-REOPEN-CFI-1 in `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Lane: Reader Engine.
+**Status:** FIXED in source by PAGE-REOPEN-CFI-1 (2026-10-23, branch `eb/page-reopen-cfi-1`); close after the smoke re-run on the release-fix sha (#8). Reproduced and root-caused by SMOKE8-DIAG-1. Lane: Reader Engine.
+**Fix (PAGE-REOPEN-CFI-1):**
+- Every cfi saved through the reader's persistence port also updates the renderer's library copy (`useLibrary.updateProgress(docId, position, cfi?)`; a −1 position leaves the stored position alone).
+- The exit save sends only the cfi of a relocate in the same book, or none, so main keeps the stored cfi.
+- Live, on the smoke's three-session route (with a full relaunch): the in-session reopen and the post-relaunch open both landed on the last exit page (page 31, `/40,/300`), and `library.json` kept that cfi throughout. On `47ae6e1f` the reopen landed on page 18 and the cfi reverted.
 **Description:** Turned to p79 (saved position 16581, cfi `/210,/492,/492`), closed and reopened: the book opened on p77, at an older cfi (`epubcfi(/6/16!/4,/206/308,/208/76/1:12)`). Later the saved cfi itself reverted to `/206/308` while the position stayed 16581. Reproduced twice, on the owner's profile (*Why Nations Fail*).
 **Cause (measured live, the smoke's two-session route):** the renderer's library copy never receives a saved cfi:
 - `ReaderContainer.tsx:308` and `:323-325` send the cfi to main only;
