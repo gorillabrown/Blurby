@@ -8378,3 +8378,76 @@ The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines
 - **Existing control:** the planted `A stray KF-2 waiver line.` still prints and exits 1.
 - **Result on the merge base:** exit 0, empty.
 - **If rule 50's line changes before the merge:** for example, a review rewraps it. Stop and report the new hash; never update the hash to make the gate pass.
+
+## Archived at close-out 2026-10-22: JSONSTORE-TIMEOUT-1
+
+#### JSONSTORE-TIMEOUT-1 — Give the jsonStore concurrency test real headroom *(position 34 — Full Spec; authored 2026-10-22 on main @ `4193338a`; test-only; not a release gate)*
+
+- **What:** `tests/jsonStore.test.js` test (a) runs 20 rounds of 8 concurrent real writes (`:24-33`) under the default 10 s Vitest timeout (`vite.config.js:83`). Under full-suite load on Windows it can run out of time. When it does, its writes keep running after Vitest moves on, and test (d) (`:36-52`) and test (e) (`:54-63`) install a global spy on `fs/promises.rename` that counts every call. A rename left over from (a) then counts as theirs, so they fail for a reason that is not theirs.
+  - This item gives (a) a 30 s timeout, as TEST-TIMEOUT-HEADROOM-1 did for other load-sensitive tests.
+  - It makes (d) and (e) wait for every earlier write to settle (`whenWritesSettled()`, exported at `main/json-store.js:62`) before spying.
+  - It makes their spies count only renames of their own `.tmp` path, passing every other call through.
+  - The test file's assertions do not change.
+- **Why:** Blurby.Brain's ruling of 2026-10-14. With this change, a jsonStore failure under load means a real defect again. That lets the file leave Stage 8's closed list of load-tolerated failures (the list KF2-WAIVER-RETIRE-1 writes into the release-gate line). Done by the close-out's fold-in, below.
+- **Evidence (read on `4193338a`):** `npx vitest run tests/jsonStore.test.js` passes 6 of 6 in 1.19 s with no load. The file has no per-test timeout. (d) counts with `expect(spy).toHaveBeenCalledTimes(3)` (`:47`) and (e) with `toHaveBeenCalledTimes(4)` (`:59`). Both spies replace `rename` for every caller.
+- **Out of scope:** `main/json-store.js`; any other test file; the closed-list text itself, which the close-out edits through the staging memo; RENAME-RETRY-1.
+- **Prerequisites:** none in code. **Merge order:** after KF2-WAIVER-RETIRE-1 (position 28), whose Done-when 5 writes the closed list that names `tests/jsonStore.test.js`.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** before any edit, temporarily give (a) a 1 ms timeout (local only, never committed). Run `npx vitest run tests/jsonStore.test.js` three times and record in the staging memo whether (d) or (e) failed on a call-count mismatch. Then revert the temporary change; `git diff -- tests` is empty.
+    2. **Isolation holds:** with the change applied, repeat the same temporary 1 ms timeout on (a) three times. Each run shows (a) failing with "Test timed out" and (d), (e), the `saveJSON` tests and (g) passing. Record the three outputs, then revert the temporary timeout.
+    3. `npx vitest run tests/jsonStore.test.js` exits 0 with 6 of 6 passing.
+    4. **Mechanical checks:**
+       - `git grep -n -F "30_000" -- tests/jsonStore.test.js` prints exactly one line, on (a)'s `it(`.
+       - `git grep -c -F "await whenWritesSettled()" -- tests/jsonStore.test.js` prints 3 or more: (d), (e) and the existing (g).
+    5. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0 (standing rule 48; `tests/` is in its scope).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `M tests/jsonStore.test.js`, plus the time log and staging memo (standing rule 41).
+    7. **Staging memo fold-in for the close-out:** remove `tests/jsonStore.test.js` from the closed list in Stage 8's release-gate line, which then admits two load failures. The memo names the exact old and new text.
+- **Effort:** XS.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** Platform & Maintenance. Execution surface B (test harness).
+- **Source:** the JSONSTORE-TIMEOUT-1 stub (Blurby.Brain ruling 2026-10-14); `tests/jsonStore.test.js`; `vite.config.js:83`; TEST-TIMEOUT-HEADROOM-1's close-out (precedent for per-test headroom).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `4193338a`; re-grep first, standing rule 36):
+  - `tests/jsonStore.test.js:11`: import `whenWritesSettled`, which is already imported.
+  - **(a), `:24`:** add `30_000` as the third argument of `it(...)`.
+  - **(d), `:36-52`:**
+    - Add `await whenWritesSettled();` as the first line.
+    - The spy implementation counts a call only when `args[0] === file + ".tmp"`. Every call passes through to `realRename` unless it is one of the first two counted calls, which throw.
+    - Replace `expect(spy).toHaveBeenCalledTimes(3)` with an assertion on that own-path count, which must equal 3.
+  - **(e), `:54-63`:**
+    - Add `await whenWritesSettled();` as the first line.
+    - The spy throws EPERM only for its own `.tmp` path and passes others through.
+    - The count assertion is on its own-path count, which must equal 4.
+- **Tests:** the file itself; Done-when 1 to 3.
+- **Constants:** none in `main/`. The 30 s figure is the test's own, matching TEST-TIMEOUT-HEADROOM-1.
+- **Branch:** `eb/jsonstore-timeout-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\jsonstore-timeout-1`. Run `npm ci` first. Write refs in full.
+- **Staging plan:** exactly `tests/jsonStore.test.js`, the time log and the staging memo. Merge with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If Done-when 2 shows (d) or (e) failing while (a) times out, the isolation is incomplete. Report the failing assertion. Do not raise (a)'s timeout further to hide it.
+  - If Done-when 1 never shows interference on the base, record that it did not reproduce in three runs and continue. The change is still the ruled hardening.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface B.
+  - **Forbidden:** every file but `tests/jsonStore.test.js`, the time log and the memo.
+  - **Shared-core touches:** none.
+  - **Merge order:** after KF2-WAIVER-RETIRE-1. Independent of RENAME-RETRY-1, which does not touch this file. Its full suite waits for ELECTRON-42-UPGRADE-1's crash gates if those are still running.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Interference control recorded on the base | calculable | positive control | bounded | low | 15m (three timed runs, recorded) | — | — |
+| 2 | The concurrency test has headroom and the retry tests ignore other tests' writes | calculable | test hardening | bounded | low | 20m (one timeout, two spies narrowed) | — | — |
+| 3 | Isolation proven; full suite and typecheck pass; merged and pushed | calculable | merge and verify | mechanical | medium | 25m (three control runs, suite, typecheck, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 records the interference on the base, and Done-when 2 proves the isolation with (a) timing out on purpose.
+- **Standing rule 50 (LL-156):** the closed-list entry for this file leaves with its cause, through the close-out's fold-in, not before.
+- **LL-152:** like-for-like runs (three before, three after) before claiming the interference is gone.
+- **Standing rule 44 (LL-143):** Done-when 3 was dry-run on the base (6 of 6 pass in 1.19 s). Done-when 4's greps print 0 lines and 1 line there.
+- **Standing rules 47 and 48:** the suite and typecheck are in Done-when 5.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
