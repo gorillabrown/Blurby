@@ -50,7 +50,37 @@ The build is the x64 `--dir` package of `5fb00ab5` (`eb-out-5fb00ab5\win-unpacke
 
 No press landed on 5290, 80492, 0 or −1, or jumped thousands of words.
 
-## Finding for Blurby.Roadmap (not fixed here; outside the fence)
+## Follow-up: the amended FLOW-KEYS-FIX-1 taken in (2026-10-23)
+
+- **Merges:** in the worktree `C:\Projects\Blurby\.claude\worktrees\admiring-khorana-8019ef` (a local branch tracking `origin/eb/flow-para-keys-1`, because `sweet-jemison-965819` still has the branch checked out).
+  - `--no-ff` merge of `refs/remotes/origin/eb/flow-keys-fix-1` (`1d2ee3a4`): merge `b7992f54`.
+  - Then `refs/remotes/origin/main` (`1d055c8a`): merge `f78a3b28`, with no conflict.
+- **Conflicts:**
+  - `docs/governance/BUG_REPORT.md`: every entry kept. BUG-217 (resolved) comes from this branch. BUG-211 (resolved) takes the amendment's live-finding bullet, its browse-away bullet and its two test files.
+  - `src/reader/modes/flow/FoliateView.tsx`: only the import lines conflicted. Both imports are kept: `collectParagraphStartWordIndexes` and `isFlowBrowseKey`. The keydown listener is the amendment's (`isFlowBrowseKey`, unmodified PageUp/PageDown only). The stamped-doc tracking (`bookStampedDocsRef`, at its three wrap sites and its re-wrap delete) is unchanged.
+- **Gates**, in a clean `git archive` copy of `f78a3b28` with its own `npm ci` (`C:\Projects\Blurby-artifacts\keys-fix\src-f78a3b28`):
+  - `npm test`: 187 files, 2,511 passed, 1 skipped, 0 failed.
+  - `npm run typecheck` and `npm run build`: exit 0.
+  - `electron-builder --win dir --x64`: exit 0 (`eb-out-f78a3b28`).
+  - Logs: `flowpara-f78a3b28-test.log`, `-typecheck.log`, `build-f78a3b28.log`.
+- **Live** on `eb-out-f78a3b28\win-unpacked\Blurby.exe`. Each run used a fresh copy of `profile-pristine`, and the preflight passed. Route: *Meditations*, TOC jump to INTRODUCTION, Flow at word 187. `liveUnchanged: true` on both runs.
+  - **Paused, `word-probe.mjs` `PARA=amend` (`flow-f78a3b28-para.*`):** Shift+→ 187 → 188 → 572 → 610, then Shift+← 610 → 572 → 188 → 187.
+  - **Playing, the same run:** Shift+→ 196 → 572 (word timer, line pacer and cursor all 572). It kept playing: 573, 574, 575, 576, 577.
+  - **Playing, `flow-k2-probe.mjs` (`flow-f78a3b28-k2.*`; keys `Shift+Right,Ctrl+Right,Shift+Left,Ctrl+Left,Right,Left,PageDown`, 2 s after each):**
+
+| Key, playing | Before → at | After (word timer) | Still playing | Speed change | Browsed away |
+|---|---|---|---|---|---|
+| Shift+→ | 191 → 572 | 572 … 579 | yes | 0 | no |
+| Ctrl+→ | 584 → 585 | 585 … 591 | yes | 0 | no |
+| Shift+← | 596 → 572 | 572 … 579 | yes | 0 | no |
+| Ctrl+← | 584 → 583 | 583 … 589 | yes | 0 | no |
+| → | 594 (no move) | 594 … 601 | yes | +25 | no |
+| ← | 606 (no move) | 606 … 612 | yes | −25 | no |
+| PageDown | 614 → 615 | 615 | no (paused, by design) | 0 | yes |
+
+  The playback stop found below is gone on this tip. Only unmodified PageDown pauses and browses away, as the amendment says.
+
+## Finding for Blurby.Roadmap (resolved by the FLOW-KEYS-FIX-1 amendment `1d2ee3a4`; see the follow-up above)
 
 Any Flow navigation key pressed while playing stops playback live. This holds for Shift+→ and Ctrl+→, on the base `60b86aff` and on this branch. FLOW-KEYS-FIX-1's unit tests say playing keys move both pacers and continue (`flowKeys.test.tsx`), so the live app disagrees with them. That item's live check was held for f0's installer build. The likely place is the keyboard path above the runtime, but this run did not investigate it. Suggested home: FLOW-KEYS-FIX-1's live re-run, or a new item.
 
