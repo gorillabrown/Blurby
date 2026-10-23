@@ -101,6 +101,37 @@ export function findParagraphStart(paragraphBreaks: readonly number[], currentIn
   return 0;
 }
 
+/**
+ * Paragraph breaks in book-wide word indices, for an EPUB whose words are the full book while its view's breaks
+ * index the loaded slice. Every section's last word is a break. A loaded section's own breaks are added only when
+ * its loaded word count equals the book's count for that section, so the mapping is exact, never estimated.
+ * loadedWordSections holds each loaded word's section index, in loaded order.
+ */
+export function bookParagraphBreaks(
+  loadedWordSections: readonly number[],
+  loadedBreaks: readonly number[],
+  sections: readonly { sectionIndex: number; startWordIdx: number; endWordIdx: number }[],
+): number[] {
+  const breaks = new Set<number>();
+  for (const section of sections) {
+    if (section.endWordIdx > section.startWordIdx) breaks.add(section.endWordIdx - 1);
+  }
+  const firstLoaded = new Map<number, number>();
+  const loadedCount = new Map<number, number>();
+  loadedWordSections.forEach((sectionIndex, i) => {
+    if (!firstLoaded.has(sectionIndex)) firstLoaded.set(sectionIndex, i);
+    loadedCount.set(sectionIndex, (loadedCount.get(sectionIndex) ?? 0) + 1);
+  });
+  for (const local of loadedBreaks) {
+    const sectionIndex = loadedWordSections[local];
+    if (sectionIndex === undefined) continue;
+    const section = sections.find((entry) => entry.sectionIndex === sectionIndex);
+    if (!section || loadedCount.get(sectionIndex) !== section.endWordIdx - section.startWordIdx) continue;
+    breaks.add(section.startWordIdx + (local - firstLoaded.get(sectionIndex)!));
+  }
+  return [...breaks].sort((a, b) => a - b);
+}
+
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",

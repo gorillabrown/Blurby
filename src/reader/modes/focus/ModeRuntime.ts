@@ -67,7 +67,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
-import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
+import { bookParagraphBreaks, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 
 /**
  * FocusMode — RSVP (Rapid Serial Visual Presentation). (Relocated from src/modes/FocusMode.ts.)
@@ -753,11 +753,9 @@ export class FocusModeRuntime implements ReaderModeRuntime {
       case "sentence":
         this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
         break;
-      case "paragraph": {
-        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
-        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
+      case "paragraph":
+        this.moveReadingWord(findParagraphStart(this.navigationParagraphBreaks(), this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
         break;
-      }
       case "go-to-href":
         // Legacy handleJumpToChapter foliate branch.
         this.markEngaged();
@@ -773,6 +771,17 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   /** The word the navigation keys step from: the engine's word once it exists, else the highlighted word. */
   private navigationWord(): number {
     return this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
+  }
+
+  /**
+   * Paragraph breaks in the index space of effectiveWords(): with full-book words, the view's loaded-slice breaks
+   * are mapped book-wide (bookParagraphBreaks); otherwise the view's or the document's breaks as they are.
+   */
+  private navigationParagraphBreaks(): readonly number[] {
+    if (!this.document.useFoliate) return this.document.paragraphBreaks;
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return this.surface.getParagraphBreaks();
+    return bookParagraphBreaks(this.surface.getWordSections(), this.surface.getParagraphBreaks(), bookWords.sections);
   }
 
   /**
