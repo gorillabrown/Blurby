@@ -8,18 +8,17 @@ Run everything in PowerShell 7.3 or later (`pwsh`), from the root of a checkout 
 
 ## Inputs
 
-Set these values first; every later step reads them. After a shell restart, set them again and re-derive `$ReleaseSha` (Version bump).
+Set these values first; every later step reads them. After a shell restart, set them again.
 
 ```powershell
-$Version   = '<x.y.z>'            # the release version: the owner decides it at release time
-$Tag       = "v$Version"          # keep this exact form: electron-updater's GitHub provider downloads from releases/download/v<version>/
-$SmokedSha = '<40-char sha>'      # the main commit the owner smoked in gate (2); the build is that commit plus the version bump only
+$SmokedSha = '<40-char sha>'      # the main commit the owner smoked in gate (2); the build is exactly that commit
+$Tag       = "build-$($SmokedSha.Substring(0, 8))"   # GitHub release tag, one per build; electron-updater downloads from releases/download/<tag>/
 $Notes     = '<path to release-notes.md>'
 $Overrides = @('-c.win.target=nsis', '-c.win.artifactName=${productName}-Setup-${version}-${arch}.${ext}',
                '-c.publish.provider=github', '-c.publish.owner=gorillabrown', '-c.publish.repo=Blurby')
 ```
 
-`$Version` must be greater than every installed version. The last published release is `v1.1.2`; `main`'s `package.json` says `1.75.1`. Otherwise electron-updater offers nothing.
+**No version bump** (owner direction, 2026-10-22: "We don't have to keep versioning. This is not released publicly. Drop this aspect."). The build uses `package.json`'s version as it stands on `$SmokedSha` and never changes it; Preflight reads it into `$Version`. Consequence for updates: see Verify.
 
 **Why the publish overrides.** `package.json` has no `repository` field. electron-builder otherwise reads the GitHub owner from `.git/config`, which a git worktree does not have (its `.git` is a file). Without the overrides, the installed app's `app-update.yml` has no `provider`, `owner` or `repo`, and the app can never find an update. Both build sections check for this.
 
@@ -37,25 +36,11 @@ git merge-base --is-ancestor $SmokedSha refs/remotes/origin/main; if ($LASTEXITC
 if (git ls-remote --tags origin "refs/tags/$Tag") { throw "tag $Tag already exists (a bare tag with no release counts)" }
 gh release view $Tag *> $null; if (-not $LASTEXITCODE) { throw "release $Tag already exists" }
 if (-not (Test-Path $Notes)) { throw 'release notes missing' }
+$Version = node -p "require('./package.json').version"; if ($LASTEXITCODE -or -not $Version) { throw 'cannot read the version' }
+"building $Version at $SmokedSha as $Tag"
 ```
 
-The full suite, typecheck and build must already be green on `$SmokedSha`. That evidence is release gate (1), the quiet-machine run, and gate (2), the owner smoke on a production build of that commit. This runbook builds what was proven; it does not re-prove it.
-
-## Version bump
-
-The only change between the smoked commit and the build is the version.
-
-```powershell
-git switch -c "eb/release-$Version"; if ($LASTEXITCODE) { throw 'branch exists' }
-npm version $Version --no-git-tag-version; if ($LASTEXITCODE) { throw 'npm version failed (is $Version already the current version? it must be new)' }
-$changed = (git diff --name-only $SmokedSha | Sort-Object) -join ','
-if ($changed -ne 'package-lock.json,package.json') { throw "unexpected changes: $changed" }
-git commit -am "Release $Version"; if ($LASTEXITCODE) { throw 'commit failed' }
-$ReleaseSha = git rev-parse HEAD
-git push origin "HEAD:refs/heads/eb/release-$Version"
-```
-
-After a shell restart: `$ReleaseSha = git rev-parse "eb/release-$Version"`. Merge `eb/release-$Version` into `main` with `--no-ff` after Publish succeeds, so `main` carries the published version. GitHub creates the tag when the draft is published, so never create it by hand.
+The full suite, typecheck and build must already be green on `$SmokedSha`. That evidence is release gate (1), the quiet-machine run, and gate (2), the owner smoke on a production build of that commit. This runbook builds what was proven; it does not re-prove it. GitHub creates the tag `$Tag` at `$SmokedSha` when the draft is published, so never create it by hand.
 
 ## Build x64
 
@@ -140,12 +125,12 @@ foreach ($a in 'x64', 'arm64') {
 Seven assets: two installers, two blockmaps, two checksum files and `latest.yml`. Never re-run the upload after Publish: `--clobber` deletes before it re-uploads.
 
 ```powershell
-if ((git rev-parse HEAD) -ne $ReleaseSha -or (git status --porcelain)) { throw 'tree moved since the version bump; rebuild' }
+if ((git rev-parse HEAD) -ne $SmokedSha -or (git status --porcelain)) { throw 'tree moved since Preflight; rebuild' }
 $Assets = @("release/Blurby-Setup-$Version-x64.exe", "release/Blurby-Setup-$Version-x64.exe.blockmap",
             "release/Blurby-Setup-$Version-arm64.exe", "release/Blurby-Setup-$Version-arm64.exe.blockmap",
             'release/checksums-x64.sha256', 'release/checksums-arm64.sha256', 'release/latest.yml')
 $Assets | ForEach-Object { if (-not (Test-Path $_)) { throw "missing $_" } }
-gh release create $Tag --draft --target $ReleaseSha --title "Blurby $Version" --notes-file $Notes; if ($LASTEXITCODE) { throw 'create failed' }
+gh release create $Tag --draft --target $SmokedSha --title "Blurby $Version ($Tag)" --notes-file $Notes; if ($LASTEXITCODE) { throw 'create failed' }
 gh release upload $Tag @Assets --clobber; if ($LASTEXITCODE) { throw 'upload failed' }
 if (git ls-remote --tags origin "refs/tags/$Tag") { throw 'a draft must not create the tag' }
 ```
@@ -173,13 +158,15 @@ try {
 } finally { Pop-Location }
 ```
 
-Run it from the repo root (it reads `js-yaml` from the repo's `node_modules`). Expect: `isDraft` true, `targetCommitish` = `$ReleaseSha`, the seven assets, matching checksums, and `latest.yml` entries matching both installers.
+Run it from the repo root (it reads `js-yaml` from the repo's `node_modules`). Expect: `isDraft` true, `targetCommitish` = `$SmokedSha`, the seven assets, matching checksums, and `latest.yml` entries matching both installers.
 
-**Install tests, still before publishing.** Use the installers in `$Check`, on test machines, or a test user account, without the real profile you care about. Each installer installs per-user into `%LOCALAPPDATA%\Programs\blurby` and keeps the profile in `%APPDATA%\Blurby`.
+**Install tests, still before publishing.** Use the installers in `$Check`, on test machines, or a test user account, without the real profile you care about. Each installer installs per-user into `%LOCALAPPDATA%\Programs\blurby` and keeps the profile in `%APPDATA%\blurby\blurby-data`.
 1. On x64: run `Blurby-Setup-$Version-x64.exe`. Blurby starts, opens a book, and Narrate voices a word.
 2. On ARM64: run `Blurby-Setup-$Version-arm64.exe`, with the same checks. Confirm the app is native: Task Manager's Details tab shows `Blurby.exe` with architecture ARM64. Or check the installed `Blurby.exe`'s PE machine type: `0xAA64`, not `0x8664`.
 3. Signature prompt: both installers are unsigned (Unsigned builds).
-4. **Moving an ARM64 machine from the emulated x64 app to native**, on an ARM64 test machine with the previous release installed and a profile in use: run `Blurby-Setup-$Version-arm64.exe` over it. The installer replaces the x64 app in place. The profile (`%APPDATA%\Blurby`: library, settings, positions) is untouched, and the next launch is native ARM64.
+4. **Moving an ARM64 machine from the emulated x64 app to native**, on an ARM64 test machine with the previous release installed and a profile in use: run `Blurby-Setup-$Version-arm64.exe` over it. The installer replaces the x64 app in place. The profile (`%APPDATA%\blurby\blurby-data`: library, settings, positions) is untouched, and the next launch is native ARM64.
+
+**Versions and updates:** electron-updater offers an update only when `latest.yml`'s version is higher than the installed one. The first build published at `package.json`'s version (1.75.1, above the installed 1.1.2) is offered once; every later build at that unchanged version is not, so it is installed by hand from its installer.
 
 **Right after publishing** (update checks only see published releases): on an x64 machine and an ARM64 machine, each with the previous release installed, open Blurby and wait 10 seconds. The updater checks 10 s after launch (`main/window-manager.js` `setupAutoUpdater`), or use Settings > Help > Check for updates. Each must offer `$Version`, download it and install on quit, and the version shown afterwards must be `$Version`. If any check fails, go to Rollback.
 
@@ -188,16 +175,16 @@ Run it from the repo root (it reads `js-yaml` from the repo's `node_modules`). E
 ```powershell
 gh release edit $Tag --draft=false --latest; if ($LASTEXITCODE) { throw 'publish failed' }
 git fetch origin --tags
-if ((git rev-parse "$Tag^{commit}") -ne $ReleaseSha) { throw "tag $Tag does not point at $ReleaseSha: go to Rollback" }
+if ((git rev-parse "$Tag^{commit}") -ne $SmokedSha) { throw "tag $Tag does not point at $SmokedSha: go to Rollback" }
 ```
 
-Publishing creates the tag at `$ReleaseSha`, makes the release visible, and makes `latest.yml` the update feed for every installed copy. Then run Verify's "Right after publishing" checks, merge `eb/release-$Version` into `main` with `--no-ff`, and push.
+Publishing creates the tag at `$SmokedSha`, makes the release visible, and makes `latest.yml` the update feed for every installed copy. Then run Verify's "Right after publishing" checks. Nothing is merged: the build changed no file.
 
 ## Rollback
 
 - **Before publishing:** delete the draft with `gh release delete $Tag --yes`. Nothing reached users, and no tag exists.
 - **After publishing:** never edit a published `latest.yml` in place, because installs that already fetched it would hold a different file from the one now served. Stop the rollout first: `gh release edit $Tag --prerelease`. With `allowPrerelease` off (Blurby's default), electron-updater's GitHub provider follows GitHub's Latest release (`GitHubProvider.getLatestTagName`), and a prerelease is never Latest. Update checks therefore fall back to the previous release and stop offering `$Tag`. Check that `gh release list -L 3` shows the previous release as Latest. If it does not, run `gh release edit <previous tag> --latest`. If `$Tag` is still Latest after that, `gh release edit $Tag --draft=true` takes it out of every listing. Then ship the fix as a new, higher version through this whole runbook. Machines that already updated stay on `$Tag` until that release reaches them.
-- Never delete a published release's assets while it is Latest, and never reuse a version number.
+- Never delete a published release's assets while it is Latest, and never reuse a tag.
 
 ## Unsigned builds
 
