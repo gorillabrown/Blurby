@@ -84,6 +84,23 @@ export function findSentenceBoundary(words: string[], currentIndex: number, dire
   return 0;
 }
 
+/**
+ * The first word of the previous or next paragraph. paragraphBreaks hold each paragraph's last word, so a
+ * paragraph starts at break + 1. Previous: the nearest start before currentIndex (else 0). Next: the nearest
+ * start after it (else lastIndex).
+ */
+export function findParagraphStart(paragraphBreaks: readonly number[], currentIndex: number, direction: "forward" | "backward", lastIndex: number): number {
+  const starts = [...paragraphBreaks].sort((a, b) => a - b).map((b) => b + 1);
+  if (direction === "forward") {
+    const next = starts.find((start) => start > currentIndex);
+    return next === undefined ? lastIndex : Math.min(next, lastIndex);
+  }
+  for (let i = starts.length - 1; i >= 0; i--) {
+    if (starts[i] < currentIndex) return starts[i];
+  }
+  return 0;
+}
+
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",

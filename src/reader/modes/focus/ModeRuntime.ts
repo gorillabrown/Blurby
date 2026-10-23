@@ -67,6 +67,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
+import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 
 /**
  * FocusMode — RSVP (Rapid Serial Visual Presentation). (Relocated from src/modes/FocusMode.ts.)
@@ -746,10 +747,15 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   handleCommand(command: ReaderModeCommand): void {
     if (!this.alive) return;
     switch (command.kind) {
-      case "seek-words": {
-        // useReader.seekWords: moves the Focus display only (the engine keeps its own cursor).
-        const words = this.effectiveWords();
-        this.state.displayWordIndex = Math.max(0, Math.min(words.length - 1, this.state.displayWordIndex + command.delta));
+      case "seek-words":
+        this.moveReadingWord(this.navigationWord() + command.delta);
+        break;
+      case "sentence":
+        this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
+        break;
+      case "paragraph": {
+        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
+        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
         break;
       }
       case "go-to-href":
@@ -762,6 +768,29 @@ export class FocusModeRuntime implements ReaderModeRuntime {
         return; // flow-line / page keyboard commands belong to other modes.
     }
     this.state.notify();
+  }
+
+  /** The word the navigation keys step from: the engine's word once it exists, else the highlighted word. */
+  private navigationWord(): number {
+    return this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
+  }
+
+  /**
+   * FOCUS-KEYS-FIX-1: move the reading word. With an engine (playing or paused) the engine jumps, and its
+   * advance publishes the word; before the first play the word becomes the explicit start anchor.
+   */
+  private moveReadingWord(target: number): void {
+    const s = this.state;
+    const word = this.clampToEffectiveWordRange(target);
+    if (this.engine) {
+      this.engine.jumpTo(word);
+      return;
+    }
+    s.explicitSelectionAnchor = word;
+    s.currentWordIndex = word;
+    this.publishHighlight(word);
+    this.jumpDisplayToWord(word);
+    if (this.document.useFoliate) this.surface.highlight(word, "flow", { allowMotion: false });
   }
 
   // ── View events (bound by useModeBindings) ────────────────────────────────

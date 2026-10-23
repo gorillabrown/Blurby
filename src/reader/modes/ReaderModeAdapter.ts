@@ -156,8 +156,8 @@ export type ReaderModeCommand =
   | { readonly kind: "seek-words"; readonly delta: number }                                      // Focus
   | { readonly kind: "flow-line"; readonly direction: "prev" | "next" }                         // Flow
   | { readonly kind: "move-selection"; readonly direction: "left" | "right" | "up" | "down" } // Page
-  | { readonly kind: "paragraph"; readonly direction: "prev" | "next" }                         // Page
-  | { readonly kind: "sentence"; readonly direction: "prev" | "next" }                          // Page
+  | { readonly kind: "paragraph"; readonly direction: "prev" | "next" }                         // Page, Focus, Flow
+  | { readonly kind: "sentence"; readonly direction: "prev" | "next" }                          // Page, Focus, Flow
   | { readonly kind: "go-to-href"; readonly href: string };                                     // all (TOC jump)
 
 export interface ReaderHardSelectInput {
