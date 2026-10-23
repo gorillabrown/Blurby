@@ -1,0 +1,39 @@
+{
+  "id": "20261023T021508Z-external-record-completion-READER-VISUAL-DIAG-1",
+  "operation": "external-record-completion",
+  "item_id": "READER-VISUAL-DIAG-1",
+  "created": "2026-10-23T02:15:08Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md",
+      "sequence": null
+    },
+    "expectedRevision": "7c0c871b66c791655603656a07d928a0d90f33ab9d1758125414340c805104cf",
+    "idempotencyKey": "record-completion:READER-VISUAL-DIAG-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "READER-VISUAL-DIAG-1",
+      "idempotencyKey": "record-completion:READER-VISUAL-DIAG-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T021508Z-external-record-completion-READER-VISUAL-DIAG-1",
+      "detail": {
+        "readBack": "SQL: Completed, Evidence, Seq null"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:15:43Z",
+  "outcome": "succeeded"
+}
