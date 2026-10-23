@@ -3024,3 +3024,6 @@ Related: LL-155.
 
 ### LL-156 — status (2026-10-22, 2026-10-22)
 **Status:** Promoted -> ROADMAP standing rule 50
+
+### LL-156 — status (KF2-WAIVER-RETIRE-1, 2026-10-22)
+**Status:** Observation — held: KF-2 followed its writer into `main/json-store.js`, the bounded rename retry absorbed it, and the waiver was retired on 16 recorded owner-machine runs; the Stage 8 closed list was written down and restated by error type, so a load allowance cannot readmit a real rename error.
