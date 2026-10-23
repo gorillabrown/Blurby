@@ -77,6 +77,8 @@ export interface EngineFailure {
   /** The first word of the chunk that could not be timed. */
   readonly atWord: number;
   readonly detail?: string;
+  /** The producer error's stack, for error.log (NARRATE-START-STACK-1). */
+  readonly stack?: string;
 }
 
 export interface EngineEvents {
@@ -402,7 +404,7 @@ export class NarrateEngine {
   private onError(entry: ChunkPlanEntry, error: unknown, epoch: number): void {
     if (epoch !== this.epoch) return;
     this.inFlight -= 1;
-    this.fail({ kind: "F4", reason: "producer-error", atWord: entry.startWord, detail: error instanceof Error ? error.message : String(error) });
+    this.fail({ kind: "F4", reason: "producer-error", atWord: entry.startWord, detail: error instanceof Error ? error.message : String(error), stack: error instanceof Error ? error.stack : undefined });
   }
 
   private scheduleChunk(c: Chunk, startAt: number, offset: number): void {

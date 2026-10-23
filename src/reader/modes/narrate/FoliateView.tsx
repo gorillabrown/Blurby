@@ -59,6 +59,7 @@ import {
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { logNarrateStartError } from "./helpers/logStartError";
 
 const NARRATE_HIGHLIGHT_MODE = "narrate";
 /** Legacy narrate scroll-follow tuning (FoliatePageView, copied values). */
@@ -1192,6 +1193,7 @@ export default function NarrateFoliateView({
         setLoading(false);
       } catch (err: any) {
         if (!cancelled) {
+          logNarrateStartError("view load failed", err);
           setError(err.message || "Failed to load EPUB");
           setLoading(false);
         }
