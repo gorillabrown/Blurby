@@ -66,7 +66,9 @@ function isSentenceEnd(words: readonly string[], i: number): boolean {
   if (TITLE.test(words[i])) return false;
   if (!isAbbreviation(words, i)) return true;
   if (SINGLE_LETTER.test(words[i]) && LETTER_PIECE.test(next)) return false;
-  if (NAME_INITIAL.test(words[i]) && NEW_SENTENCE.test(next) && !SENTENCE_OPENER.test(next)) return false; // NARRATE-SENTENCE-INITIALS-1
+  // NARRATE-SENTENCE-INITIALS-1; the second piece of a dotted abbreviation ("B." "C.") keeps the rule below.
+  const completesAbbreviation = i > 0 && ABBREVIATION.test(words[i - 1] + words[i]);
+  if (NAME_INITIAL.test(words[i]) && !completesAbbreviation && NEW_SENTENCE.test(next) && !SENTENCE_OPENER.test(next)) return false;
   return NEW_SENTENCE.test(next);
 }
 

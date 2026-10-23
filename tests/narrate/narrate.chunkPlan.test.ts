@@ -96,6 +96,9 @@ describe("narrate chunk plan: a single-letter initial (NARRATE-SENTENCE-INITIALS
   it("control: \"I.\" still ends a sentence", () => {
     expect(sentenceStartAt(split("so do I. Then it rained."), 4, new Set())).toBe(3);
   });
+  it("a dotted era abbreviation still ends before a capital (\"250 B. C. Cyprus\", as Electron's ICU splits B.C.)", () => {
+    expect(sentenceStartAt(split("born 250 B. C. Cyprus has been"), 5, new Set())).toBe(4);
+  });
   it("control: a lowercase single letter still ends a sentence", () => {
     expect(sentenceStartAt(split("call it x. Then more."), 4, new Set())).toBe(3);
   });
