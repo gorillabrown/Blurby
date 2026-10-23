@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
+import { createRequire } from "module";
 
 // LARGE-FOLDER-SYNC-1 C1: positive controls for main/folder-sync.js.
 // Every library and I/O step is injected, so the tests run on fakes (main.js cannot be loaded by a test).
@@ -723,5 +724,185 @@ describe("createFolderSync (LARGE-FOLDER-SYNC-1)", () => {
     await s2.syncAll();
     expect(m2.deps.reportFolderProblem).toHaveBeenCalledWith("root-empty-suspect", ROOT);
     expect(m2.deps.reportFolderOk).not.toHaveBeenCalled();
+  });
+});
+
+// ── LARGE-FOLDER-SYNC-3 ─────────────────────────────────────────────────────
+// W2 drives the real rescan-folder handler (main/ipc/library.js) and W3a the real switch-folder handler
+// (main/ipc/state.js) under Module._load, as tests/folderUnreachableGuard.test.js and
+// tests/folderSwitchWatcherFirst.test.js do. W3b and the gaps use createFolderSync's fakes above.
+describe("LARGE-FOLDER-SYNC-3", () => {
+  const req = createRequire(import.meta.url);
+  const Module = req("module");
+  const originalLoad = Module._load;
+  const cjsFs = req("fs/promises");
+  const fw = req("../main/folder-watcher.js");
+
+  afterEach(() => {
+    Module._load = originalLoad;
+    for (const m of ["../main/ipc/library.js", "../main/ipc/state.js"]) {
+      try { delete req.cache[req.resolve(m)]; } catch {}
+    }
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it.runIf(process.platform === "win32")("LARGE-FOLDER-SYNC-3 (W2) rescan-folder keeps a Saved Articles document whose path differs only in case", async () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "lfs3-w2-"));
+    try {
+      const root = path.join(tmp, "books");
+      const book = path.join(root, "Books", "a.epub");
+      fs.mkdirSync(path.dirname(book), { recursive: true });
+      fs.writeFileSync(book, "x");
+      const handlers = new Map();
+      const electronMock = { ipcMain: { handle: vi.fn((channel, fn) => handlers.set(channel, fn)) }, dialog: {}, app: { isPackaged: false } };
+      const parsers = {
+        extractContent: vi.fn(async () => null),
+        extractDocMetadata: vi.fn(async () => ({ title: "T" })),
+        extractEpubMetadata: vi.fn(async () => ({ title: "T", author: null })),
+        extractEpubCover: vi.fn(async () => null),
+        countWords: () => 0,
+      };
+      Module._load = function patchedLoad(request, parent, isMain) {
+        if (request === "electron") return electronMock;
+        if (request === "../file-parsers") return new Proxy(parsers, { get: (t, k) => (k in t ? t[k] : vi.fn()) });
+        if (request === "../epub-converter") return { htmlToEpub: vi.fn(), convertToEpub: vi.fn() };
+        if (request === "../author-normalize") return { normalizeAuthor: (a) => a };
+        return originalLoad.call(this, request, parent, isMain);
+      };
+      const { register } = req("../main/ipc/library.js");
+      const dataDir = path.join(tmp, "data");
+      fs.mkdirSync(dataDir, { recursive: true });
+      // The same folder as root/Saved Articles on a case-insensitive file system, written in lower case.
+      const savedLower = path.join(root, "saved articles", "s.epub");
+      let library = [folderDoc("a", book), folderDoc("sa", savedLower)];
+      const ctxBase = {
+        getSettings: () => ({ sourceFolder: root }),
+        getLibrary: () => library,
+        setLibrary: (d) => { library = d; },
+        saveLibrary: vi.fn(),
+        broadcastLibrary: vi.fn(),
+        getDataPath: () => dataDir,
+        getUserDataPath: () => dataDir,
+        getErrorLogPath: () => path.join(dataDir, "error.log"),
+      };
+      register(new Proxy(ctxBase, { get: (t, k) => (k in t ? t[k] : vi.fn()) }));
+      const result = await handlers.get("rescan-folder")();
+      expect(result.error).toBeUndefined();
+      expect(library.map((d) => d.id).sort(), "the case-differing Saved Articles document was pruned").toEqual(["a", "sa"]);
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (W3a) switch-folder on a folder whose access never settles returns an error within FOLDER_LIST_TIMEOUT_MS", async () => {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "lfs3-w3a-"));
+    try {
+      const handlers = new Map();
+      const electronMock = { ipcMain: { handle: vi.fn((channel, fn) => handlers.set(channel, fn)) }, dialog: {} };
+      Module._load = function patchedLoad(request, parent, isMain) {
+        if (request === "electron") return electronMock;
+        if (request === "../window-manager") return { getSystemTheme: vi.fn(), updateWindowTheme: vi.fn() };
+        return originalLoad.call(this, request, parent, isMain);
+      };
+      const { register } = req("../main/ipc/state.js");
+      const settings = { sourceFolder: null, recentFolders: [dir] };
+      const syncLibraryWithFolder = vi.fn(async () => {});
+      register({ getSettings: () => settings, getMainWindow: () => null, saveSettings: vi.fn(), getLibrary: () => [], syncLibraryWithFolder, startWatcher: vi.fn(), resetFolderNotice: vi.fn() });
+      const realAccess = cjsFs.access;
+      vi.spyOn(cjsFs, "access").mockImplementation(function (p, ...rest) {
+        if (path.resolve(String(p)) === path.resolve(dir)) return new Promise(() => {}); // a hung mount
+        return realAccess.call(this, p, ...rest);
+      });
+      fakeTimers();
+      let result = null;
+      const pending = handlers.get("switch-folder")({}, dir).then((r) => { result = r; });
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([pending, realWait(2000)]);
+      expect(result, "switch-folder still waits on the hung access after FOLDER_LIST_TIMEOUT_MS").toEqual({ error: "Folder no longer exists." });
+      expect(settings.sourceFolder, "the hung folder became the source folder").toBeNull();
+      expect(syncLibraryWithFolder).not.toHaveBeenCalled();
+      expect(vi.getTimerCount(), "switch-folder left its timer behind").toBe(0);
+    } finally {
+      vi.useRealTimers();
+      fs.rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (W3b) a statFile that never settles counts as unreadable within the limit, so nothing is removed", async () => {
+    expect(typeof fw.timeLimit, "folder-watcher.js does not export timeLimit").toBe("function");
+    const src = fs.readFileSync(new URL("../main.js", import.meta.url), "utf8");
+    expect(src, "main.js does not bound the folder sync's per-file stat").toContain("statFile: (p) => timeLimit(fsPromises.stat(p))");
+    fakeTimers();
+    try {
+      const p = path.join(ROOT, "hung.epub");
+      const { state, deps, sync } = makeDeps({ lib: [folderDoc("h", p)], disk: [ROOT] });
+      deps.statFile = () => fw.timeLimit(new Promise(() => {})); // main.js's wiring, on a stat that never answers
+      const s2 = createFolderSync(deps);
+      let done = false;
+      const removal = Promise.resolve(s2.applyUnlink(p)).then(() => { done = true; });
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([removal, realWait(2000)]);
+      expect(done, "the per-file remove still waits on the hung stat").toBe(true);
+      expect(state.lib.map((d) => d.id), "a book was removed on a stat that never answered").toEqual(["h"]);
+      expect(vi.getTimerCount(), "the stat's time limit left a timer behind").toBe(0);
+      expect(sync).toBeDefined();
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (gap) a normal sync leaves no timer behind, and its prune saves once", async () => {
+    fakeTimers();
+    try {
+      const kept = path.join(ROOT, "kept.epub");
+      const { state, deps, sync } = makeDeps({ lib: [folderDoc("kept", kept), folderDoc("gone", path.join(ROOT, "gone.epub"))] });
+      deps.scanFolderAsync.mockImplementation(async () => [file(kept)]);
+      await sync.syncAll();
+      expect(state.lib.map((d) => d.id)).toEqual(["kept"]);
+      expect(deps.saveLibrary, "the prune saved more than once").toHaveBeenCalledTimes(1);
+      expect(deps.saveLibraryNow).not.toHaveBeenCalled();
+      expect(vi.getTimerCount(), "a sync left a timer behind").toBe(0);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (gap) a run abandoned while hung in an extraction applies nothing when it settles late", async () => {
+    fakeTimers();
+    try {
+      const a = path.join(ROOT, "a.epub");
+      const { state, deps, sync } = makeDeps({ disk: [ROOT, a] });
+      const hold = deferred();
+      let first = true;
+      state.hold = async () => { if (first) { first = false; await hold.promise; } };
+      deps.scanFolderAsync.mockImplementation(async () => [file(a)]);
+      const run1 = sync.syncAll();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(deps.extractNewFileDoc).toHaveBeenCalledTimes(1); // hung inside the extraction
+      sync.cancel();
+      let settled = false;
+      const run2 = sync.syncAll().then(() => { settled = true; });
+      await vi.advanceTimersByTimeAsync(LIST_MS);
+      await Promise.race([run2, realWait(2000)]);
+      expect(settled, "the re-sync waited on the run hung in an extraction").toBe(true);
+      expect(countPath(state.lib, a)).toBe(1);
+      hold.resolve();
+      await Promise.race([run1, realWait(2000)]);
+      expect(countPath(state.lib, a), "the abandoned run added its late extraction").toBe(1);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (gap) watcher first: after a folder switch, the new watcher's add applies during the sync and survives its prune", async () => {
+    const rootB = path.join(os.tmpdir(), "lfs3-B");
+    const added = path.join(rootB, "new.epub");
+    const listed = path.join(rootB, "b.epub");
+    const { state, deps, sync } = makeDeps({ disk: [rootB, added, listed] });
+    state.folder = rootB;
+    const scan = deferred();
+    deps.scanFolderAsync.mockImplementation(() => scan.promise);
+    const run = sync.syncAll();
+    await sync.applyAdd(added); // the watcher, started before the sync, reports a file copied in meanwhile
+    expect(countPath(state.lib, added), "the watcher's add did not apply during the sync").toBe(1);
+    scan.resolve([file(listed)]); // the scan began before the copy, so it does not list it
+    await run;
+    expect(countPath(state.lib, added), "the sync's prune dropped the watcher's add").toBe(1);
+    expect(countPath(state.lib, listed)).toBe(1);
   });
 });
