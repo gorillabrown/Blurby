@@ -8,6 +8,26 @@
 
 ## Incomplete
 
+### BUG-211 — Flow's line, word, sentence and paragraph keys don't move the reading word
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103, two runs each on the `97527896` x64 `--dir` build; Ctrl+←/→ measured by FLOW-KEYS-FIX-1's red test)
+**Severity:** MEDIUM (keyboard navigation in Flow is dead). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
+**Status:** RESOLVED in source except paused line keys (FLOW-KEYS-FIX-1, branch `eb/flow-keys-fix-1`, held for after the Stage 8 release). Lane: Reader Engine.
+**Description:**
+- **Playing, ↑/↓:** the cursor never jumps a line.
+- **Ctrl+↑/↓, Shift+↑/↓, Shift+←/→ and Ctrl+←/→:** nothing moves, paused or playing.
+- **At v1.28.0** (f0, `v128-flow-1..3.json`): paused ↓ changed speed; Ctrl+↓ jumped to word 0; Shift+↑/↓, Ctrl+↑ and playing ↑ did nothing.
+**Cause:**
+- **Two pacers:** Flow moves its position with two pacers, the word timer (`FlowMode`) and the line pacer (`FlowScrollEngine`). `src/reader/modes/flow/ModeRuntime.ts:921` moved only the line pacer, so the word timer's next tick pulled the published word back (red test: 10, then 8).
+- **Paused:** the line pacer stops on pause, so there is no line to jump to.
+- **Dropped commands:** `seek-words`, `sentence` and `paragraph` reached `default: return` (`:929-930`), dropped by the READER-MODE-SEPARATION-2 cutover (`3dd4b504`).
+**Fix (FLOW-KEYS-FIX-1):**
+- **Line keys, playing:** the word timer jumps to the line pacer's new word.
+- **Word, sentence and paragraph keys:**
+  - playing, they move both pacers, as a playing click does;
+  - paused or before a play, they set the explicit start anchor that Flow's cold restart consumes.
+- **Tests:** `tests/readerModes/flowKeys.test.tsx`.
+**Not fixed here:** ↑/↓ while paused. There is no line map while paused, so this needs new design: IDEAS.md A5, FLOW-PAUSED-LINE-1.
+
 ### BUG-210 — Focus's word, sentence and paragraph keys don't move the reading word
 **Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95, two runs each on the `97527896` x64 `--dir` build; `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`)
 **Severity:** MEDIUM (keyboard navigation in Focus is dead; the mouse and play still work). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
