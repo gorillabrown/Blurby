@@ -2601,7 +2601,7 @@ The owner answered both questions this specification left out of scope: "1060s y
 
 #### Release fix (from SMOKE8-DIAG-1, 2026-10-23)
 
-The four items below are the release fix. They land on `main` into the frozen release line, in this order, then gate (1) and the smoke re-run (#8, #9, #28–#30, the tray right-click, the BUG-208 checks) run on the new sha. Source: `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`.
+The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release fix. They land on `main` into the frozen release line, in this order, then gate (1) and the smoke re-run (#8, #9, #28–#30, the tray right-click, the BUG-208 checks, and book headings and body text in all four modes) run on the new sha. Source: `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`.
 
 <a id="page-reopen-cfi-1"></a>
 
@@ -2689,7 +2689,7 @@ The four items below are the release fix. They land on `main` into the frozen re
 
 <a id="book-type-scale-1"></a>
 
-#### BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(position 72 — Full Spec; authored 2026-10-23 on main @ `6dd452e4` from the owner's design decision; not a release gate; merges after the BUG-208 fix, which edits the same four files)*
+#### BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(position 6.5 — Full Spec; authored 2026-10-23 on main @ `6dd452e4` from the owner's design decision; **in the release line, owner decision 2026-10-23 ("In this release")**; merges after BOOK-TEXT-COLOUR-1, which edits the same four files; adds smoke re-check: book headings and body text in Page, Focus, Flow and Narrate)*
 
 - **What:** Book pages in all four modes use the reader's font and one fixed size ratio for every header, sub-header and paragraph. This replaces each publisher's own fonts and sizes.
   - **Font:** every element in the book's body uses the reading font (`settings.fontFamily`, today's fallback `Georgia, serif`), except `pre`, `code`, `kbd` and `samp`, which keep a monospace font.
