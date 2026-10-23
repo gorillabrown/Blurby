@@ -72,7 +72,18 @@ The app ran as build I, with `BLURBY_USER_DATA_DIR` set and CDP on port 9339. Th
 - Run 1: the copy-profile app quit by itself about 52 s after launch (its log ends "[ws-server] Stopped"), so the probe delete was never observed. The probe was found 28.4 s after it was copied.
 - Run 2: the probe was not seen within 30 s, and it was recorded after the file had already been deleted. The app logged `EADDRINUSE 127.0.0.1:48924` retries against the other session's instance.
 
-In both runs nothing was left in the Drive folder, and the live `library.json` and `settings.json` were unchanged. #31 is re-run after the other session goes quiet.
+In both runs nothing was left in the Drive folder, and the live `library.json` and `settings.json` were unchanged.
+
+Blurby.Roadmap then held the other executors. One foreign process was still present during run 3 and was not touched: PID 5888, `narrate-sentence-resume-1\release\win-unpacked\Blurby.exe --remote-debugging-port=9341`, started 22:08:03. It was gone by 22:14.
+
+### B2. Live folder sync
+
+| # | Result | Build | Evidence |
+|---|---|---|---|
+| 31 | PASS (UI criterion), with a margin note | I | Run 3 used a fresh DW9 profile, `%TEMP%\blurby-lfs1-20261022221003` (only `library.json` and `settings.json` copied), with `orig` = 131 folder books.<br>**(b) add:** the probe was copied 25 s after launch. At the 30 s mark the UI showed 134 readings and 5 *Meditations* cards, up from 133 and 4, so the entry appeared within 30 s. However, `library.json` did not yet hold it at 30 s; the save interval lags the UI. In run 1, the file had it at 28.4 s.<br>**(c) delete:** the entry left `library.json` within 1 s, and the UI went back to 4 cards.<br>**(d) quit:** WM_CLOSE; the process exited in 0.2 s.<br>**(e)** missing 0; 131 folder docs; no probe doc.<br>**(f)** no `.tmp` files.<br>**(g)** no `error.log`, so 0 `[folder-sync]` or `[watcher]` lines.<br>**(h)** live hashes unchanged.<br>**(i)** the probe is gone from the Drive folder. |
+| 32 | PASS | I | This used the B1 copy profile, at 841 readings on Readings. From the recent list (CDP DOM click) the executor switched to smoke8-folder2, then copied *THEO OF GOLDEN* into it 1 s later. Within 30 s the header read "6 readings · smoke8-folder2", and the book was still there 60 s later (`32-folder2-theo.png`). Here the header did update, unlike #28. |
+| 33 | PASS (on the smoke8-folder2 copies, not the Drive folder) | I | The executor deleted the BRIMSTONE copy. Within 2 s the cards went from 6 to 5, and only BRIMSTONE was gone. The executor did not delete a file in the owner's Drive folder, because the directive forbids deleting user data. |
+| 34 | PASS (on smoke8-folder2) | I | The executor opened *STOLEN IN DEATH*, turned 3 pages (CDP ArrowRight) and closed it. The saved state was id `1792724160740ffuriu`, position 20, cfi `/6/6!/4/20,/2,/2`. The file was renamed to `01. sTOLEN…`, and Rescan (⟳) was run. Afterwards there was the same id, position and cfi, 1 matching card of 5, and no second card. |
 
 ## Findings so far (not checklist failures)
 
