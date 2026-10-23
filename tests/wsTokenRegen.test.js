@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "module";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 // WS-TOKEN-REGEN-1: the extension-pairing token has one stored form, written and read through ws-server's
 // encodePairingToken / decodePairingToken (safeStorage ciphertext when encryption is available, plaintext when not).
@@ -50,11 +50,10 @@ describe("pairing token stored form (WS-TOKEN-REGEN-1)", () => {
     expect(wsServer.decodePairingToken(stored)).toBe("tok");
   });
 
-  it("(b) with encryption unavailable, both directions return the token unchanged", () => {
+  it("(b) with encryption unavailable, there is no stored form: encode returns null (amendment: never plaintext)", () => {
     fakeSafeStorage.available = false;
     try {
-      expect(wsServer.encodePairingToken("tok")).toBe("tok");
-      expect(wsServer.decodePairingToken("tok")).toBe("tok");
+      expect(wsServer.encodePairingToken("tok")).toBeNull();
     } finally {
       fakeSafeStorage.available = true;
     }
@@ -64,6 +63,50 @@ describe("pairing token stored form (WS-TOKEN-REGEN-1)", () => {
     fakeSafeStorage.available = true;
     expect(typeof wsServer.decodePairingToken).toBe("function"); // so the throw below is the decrypt failure, not a TypeError
     expect(() => wsServer.decodePairingToken("tok")).toThrow(/decrypt/);
+  });
+});
+
+// Amendment 2026-10-22 (Blurby.Brain): never write a credential in plaintext, anywhere.
+describe("pairing token is never stored in plaintext (WS-TOKEN-REGEN-1 amendment)", () => {
+  const LEGACY = "0123456789abcdef0123456789abcdef"; // the 32-hex form generatePairingToken returns
+  const ctxWith = (stored) => {
+    const settings = stored === undefined ? {} : { _wsPairingToken: stored };
+    return { settings, ctx: { getSettings: () => settings, saveSettings: vi.fn() } };
+  };
+
+  it("(r1) with safeStorage, a legacy plaintext token is re-encrypted in place and stays the session token", () => {
+    fakeSafeStorage.available = true;
+    const { settings, ctx } = ctxWith(LEGACY);
+    const token = wsServer.loadPairingToken(ctx);
+    expect(token).toBe(LEGACY); // the existing pairing still works
+    expect(settings._wsPairingToken).not.toBe(LEGACY);
+    expect(wsServer.decodePairingToken(settings._wsPairingToken)).toBe(LEGACY);
+    expect(ctx.saveSettings).toHaveBeenCalled();
+  });
+
+  it("(r2) without safeStorage, a stored legacy token is deleted and kept in memory only", () => {
+    fakeSafeStorage.available = false;
+    try {
+      const { settings, ctx } = ctxWith(LEGACY);
+      const token = wsServer.loadPairingToken(ctx);
+      expect(token).toBe(LEGACY);
+      expect("_wsPairingToken" in settings).toBe(false);
+      expect(ctx.saveSettings).toHaveBeenCalled();
+    } finally {
+      fakeSafeStorage.available = true;
+    }
+  });
+
+  it("(r3) after a launch without safeStorage, settings has no _wsPairingToken key", () => {
+    fakeSafeStorage.available = false;
+    try {
+      const { settings, ctx } = ctxWith(undefined);
+      const token = wsServer.loadPairingToken(ctx);
+      expect(token).toMatch(/^[0-9a-f]{32}$/);
+      expect("_wsPairingToken" in settings).toBe(false);
+    } finally {
+      fakeSafeStorage.available = true;
+    }
   });
 });
 
