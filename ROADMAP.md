@@ -2711,6 +2711,211 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Lane:** Reader Engine. Execution surface A/C. Effort: S. **Path:** dispatch.
 - **Lessons applied:** standing rule 43 (red first); LL-161 (positions checked by word text and cfi); standing rule 45 (the owner's route is re-checked in the smoke).
 
+<a id="focus-keys-fix-1"></a>
+
+#### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(position pending — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #92–95; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); no shared-core touch)*
+
+- **What:** in Focus (`FocusModeRuntime.handleCommand`), the navigation keys move the reading word: the word the RSVP engine shows next, and the word Focus starts from.
+  - **Keys** (`useKeyboardShortcuts.ts:229-236` and `:286-287`; the Hotkey Map's "Reader — Focus", `HotkeyMapSettings.tsx:64-86`):
+    - ←/→ move 5 words (`REWIND_WORDS`);
+    - Ctrl+←/→ move 1 word (`seek-words`);
+    - Ctrl+↑/↓ go to the previous or next sentence start (`sentence`);
+    - Shift+←/→ go to the previous or next paragraph start (`paragraph`).
+  - **The word moved from:** the engine's current word once the engine exists (playing, or paused after a play). Before the first play, the highlighted word.
+  - **Playing:** the engine jumps (`FocusMode.jumpTo`). The RSVP word changes at once, and the next tick continues from the new word.
+  - **Paused, after a play:** the engine jumps, and its advance callback publishes the word. Space resumes from that word.
+  - **Before the first play:** the word becomes the explicit start anchor (`explicitSelectionAnchor`, the same field a click sets). The highlight moves to it, and Play starts there.
+  - **Targets:**
+    - sentence: `findSentenceBoundary` (`src/utils/text.ts:47`), unchanged;
+    - paragraph: a new `findParagraphStart(paragraphBreaks, currentIndex, direction, lastIndex)` in `src/utils/text.ts`. `paragraphBreaks` holds each paragraph's last word, so a paragraph starts at break + 1. Previous is the nearest start before the word, else 0. Next is the nearest start after it, else the last word. This is v1.28.0's rule (`ReaderContainer.tsx` at `3dd4b504^`, lines 1121–1148), moved into a pure function;
+    - every target is clamped to the word range.
+  - **No new save:** a key move writes no progress, as at v1.28.0, where these keys only set the highlight. Saves follow the existing play, pause and exit paths.
+- **Why (UI-SWEEP-TRIAGE-1, two runs each on the `97527896` x64 `--dir` build):**
+  - **#92 (Ctrl+→):** nothing moves. The cause is `ModeRuntime.ts:749-754`: `seek-words` changes only `displayWordIndex`. Paused, nothing reads it (the RSVP overlay renders only while playing, `ModeView.tsx:47`). Playing, the engine's next word overwrites it.
+  - **#93–95 (Ctrl+↑/↓, Shift+→):** nothing moves. The cause is `ModeRuntime.ts:761-762`: `sentence` and `paragraph` reach `default: return`.
+  - **Same cause, not swept:** ←/→ (5 words) send `seek-words`, so they fail the same way.
+  - **Not new in this release.** f0 ran v1.28.0 (`bisect-ch-v1280`) on the sample book, from INTRODUCTION, on a scratch profile with live hashes unchanged (`C:\Projects\Blurby-artifacts\ui-sweep-triage-1\v128-focus-1..5.json`; `-4` cited). Every key was already broken:
+    - paused, Ctrl+→ left the word at 1109 and only turned the page;
+    - Ctrl+↓ jumped from 1109 to word 0, and a second press stayed at 0;
+    - Ctrl+↑ did nothing;
+    - Shift+→ set the word to −1;
+    - playing, Ctrl+← never stepped back (the RSVP word went 8, 9 → 9, 10).
+
+    The 0 and −1 results fit v1.28.0's handlers (`ReaderContainer.tsx` at `3dd4b504^`, lines 1121–1159). They computed over the tokenized text `words`, which an EPUB lacks, so `findSentenceBoundary` returned 0 and the paragraph target was `words.length - 1`, which is −1. The cutover (`3dd4b504`) then dropped the commands outright. This item does not restore v1.28.0's behaviour. It builds what the table below says.
+- **What each key must do in Focus** (any document; from the Hotkey Map, which the owner's build already shows):
+
+  | Key | Paused, or before the first play | Playing |
+  |---|---|---|
+  | ← / → | the reading word moves 5 words back or forward | the RSVP word moves 5 words; the next tick continues from there |
+  | Ctrl+← / Ctrl+→ | the reading word moves 1 word | the same, 1 word |
+  | Ctrl+↑ | to the start of the current sentence, or of the previous one if already at a start | the same, and playback continues from it |
+  | Ctrl+↓ | to the start of the next sentence | the same |
+  | Shift+← | to the start of the current paragraph, or of the previous one if already at a start | the same |
+  | Shift+→ | to the start of the next paragraph | the same |
+
+  - Space after a move plays from the moved word.
+  - A move never lands outside the book: it clamps to the first and last words. It never lands on word 0 or −1 unless the target really is the book's first word.
+  - ↑/↓ (speed), Shift+↑/↓ and the chapter keys are unchanged.
+- **Where** (re-grepped on `de453e64`):
+  - `src/reader/modes/focus/ModeRuntime.ts`:
+    - `:746-765` `handleCommand`: replace the `seek-words` case, and add `sentence` and `paragraph` cases;
+    - add two private methods beside it: `navigationWord()` and `moveReadingWord(target)`;
+    - `:69`: import `findParagraphStart` and `findSentenceBoundary` from `../../../utils/text`.
+  - `src/utils/text.ts`: add `findParagraphStart` after `findSentenceBoundary` (`:47-84`).
+  - `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json:375`: add `"findParagraphStart"` to `allowedShared["src/utils/text.ts"].exports`. Without it, `tests/readerModeBoundaries.test.ts` fails, as measured on the prototype.
+  - `src/reader/modes/ReaderModeAdapter.ts:159-160`: the comments on `paragraph` and `sentence` say `// Page`. Change them to `// Page, Focus, Flow`.
+  - **Prototype:** `docs/planning/specs/keys-fix-2026-10-23/keys-fix-prototype.diff.txt` (both items; this item's part is `text.ts`, `focus/ModeRuntime.ts` and the policy line). On it, the red test and 22 related test files (204 tests) pass, and `npm run typecheck` exits 0.
+- **Done when:**
+  1. **Red first:** copy `docs/planning/specs/keys-fix-2026-10-23/focusKeys.test.tsx.txt` to `tests/readerModes/focusKeys.test.tsx`, unchanged, and commit it alone, first. If `main` has moved, re-run it on the new base first; it must still fail by assertion.
+     - Measured on `36ac7466` (same `src` as `de453e64`): 6 of 7 fail, all by assertion; the control passes.
+     - The fixture is a 40-word tokenized document with sentence ends at 5, 11, 20 and 30, paragraph ends at 13 and 25, and the word 7 selected.
+     - Its expectations are:
+       - playing, Ctrl+← from 9 gives 8, and the next tick gives 9;
+       - paused, Ctrl+→ gives 8, and resume ticks to 9;
+       - before play, Ctrl+→ gives 8, and Play starts at 8;
+       - sentence next is 12, then previous is 6;
+       - paragraph next is 14, then 26, then previous is 14;
+       - playing, sentence next is 12, and the next tick gives 13.
+  2. **The change:** the red file passes. `tests/readerModeBoundaries.test.ts`, `tests/readerModeOwnership.test.ts`, `tests/readerModes/` and `tests/focusModeAdapter.test.ts` pass.
+  3. **Live, on a `--dir` build of the branch tip with a fresh scratch profile** (`BLURBY_USER_DATA_DIR`), driven by `scripts/ui-sweep/triage.mjs` (on main since `de453e64`):
+     - Its profile preflight must pass. `app.getPath('userData')` must be the scratch profile, and the live profile's hashes must be unchanged before and after.
+     - Rows #92–95 re-run from triage's state: the sample book, a TOC jump to INTRODUCTION in Page, then a switch to Focus. Each row reads WORKS twice, and each run's measured word is the expected target:
+       - Ctrl+→ is the word + 1;
+       - Ctrl+↓ is the next word after one ending in `.`, `!` or `?`;
+       - Shift+→ is the next paragraph start.
+     - No press lands on word 0 or −1. These were f0's v1.28.0 results; the start point is about word 1109.
+     - Playing, Ctrl+← twice gives an RSVP word index lower than before the presses, and the index rises again from there.
+     - Close every window. Read the live profile only for its hashes.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47, 48).
+  5. **Fence** (`git diff --name-status origin/main...HEAD`):
+     - `M src/reader/modes/focus/ModeRuntime.ts`, `M src/utils/text.ts`, `M src/reader/modes/ReaderModeAdapter.ts`, `M docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json`;
+     - `A tests/readerModes/focusKeys.test.tsx`;
+     - `M docs/governance/BUG_REPORT.md` (the planner's bug for #92–95, else the next free number, BUG-210 on `de453e64`), the memo and the time log.
+     - Plus any Rule 50 pinned-test update, named in the memo.
+     - `tests/perf-baseline-results.json` stays unstaged.
+- **Out of scope:**
+  - chapter keys (#96–99; JUMP-LANDING-SAVE-1 (B), pre-existing at v1.28.0);
+  - Narrate's keys;
+  - any key binding or Hotkey Map text.
+- **Shared-core touches:** none. Not `ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts` or `src/types.ts`.
+- **Merge order:** first. FLOW-KEYS-FIX-1 builds on this item's `findParagraphStart` and policy line.
+- **Release effect:** none. This item merges after the Stage 8 release and does not move the release-fix sha.
+- **Branch:** `eb/focus-keys-fix-1` from `refs/remotes/origin/main`, when dispatched after the release. Push, and ask Blurby.Roadmap for merge go.
+- **Lane:** Reader Engine. Execution surface A. Effort: S. **Path:** dispatch.
+
+  | # | Task | Tier | Effort |
+  |---|---|---|---|
+  | 1 | Copy the red file (minus dropped rows), commit it alone, and record the failures | mechanical | low |
+  | 2 | `findParagraphStart`, the policy line, the two `handleCommand` cases with the `seek-words` rewrite, `navigationWord` and `moveReadingWord`, per the prototype | bounded | medium |
+  | 3 | Targeted suites, then `npm test`, typecheck and build | mechanical | low |
+  | 4 | `--dir` build and the triage re-run of #92–95 on a scratch profile with the preflight | bounded | medium |
+  | 5 | Bug entry, memo and time log; push; ask for merge go | mechanical | low |
+- **Lessons applied:**
+  - standing rule 43 (red first, with a control);
+  - LL-142 (classified from measurement);
+  - reading-mode separation: no sibling import; the helper is shared through the declared `allowedShared` path.
+
+<a id="flow-keys-fix-1"></a>
+
+#### FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(position pending — Full Spec; authored 2026-10-23 on main @ `de453e64` from UI-SWEEP-TRIAGE-1 rows #100–103; **after the Stage 8 release**: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23); after FOCUS-KEYS-FIX-1; no shared-core touch)*
+
+- **What:** Flow has two pacers: the word timer (`FlowMode`, which owns the published word) and the line pacer (`FlowScrollEngine`, which owns the cursor bar and line scroll). A navigation key moves both of them.
+  - **Keys** (`useKeyboardShortcuts.ts:229-236` and `:273-277`; the Hotkey Map's "Reader — Flow", `HotkeyMapSettings.tsx:87-105`):
+    - ↑/↓ go to the previous or next line (`flow-line`);
+    - Ctrl+←/→ move 1 word (`seek-words`);
+    - Ctrl+↑/↓ go to the previous or next sentence start (`sentence`);
+    - Shift+↑/↓ and Shift+←/→ go to the previous or next paragraph start (`paragraph`).
+  - **Line, playing:** the line pacer jumps a line (`jumpToLine`, unchanged), then the word timer jumps to the line pacer's new word (`this.engine?.jumpTo(this.scrollEngine.getWordIndex())`).
+  - **Word, sentence and paragraph, playing:** the target is computed from the word timer's word. Both pacers jump, as a playing click already does (`hardSelect`, `ModeRuntime.ts:866-869`): `this.engine?.jumpTo(word)` and `this.scrollEngine?.jumpToWord(word)`.
+  - **Word, sentence and paragraph, paused or before the first play:** Flow's play is a cold restart from the start anchor (`togglePlay`, `:750-758`). So the word becomes `explicitSelectionAnchor`, the highlight moves to it, and Play starts there. Paused, the target is computed from the highlighted word.
+  - **Targets:** `findSentenceBoundary`, and `findParagraphStart` from FOCUS-KEYS-FIX-1, both in `src/utils/text.ts`. Every target is clamped to the word range.
+  - **No new save:** as for Focus.
+- **Why (UI-SWEEP-TRIAGE-1, two runs each):**
+  - **#100 (↑/↓) while playing:** the cursor never jumped a line (`196,197` → `197..200`). The red test shows why: the line pacer jumps (the highlight reads 10), then the word timer's next tick republishes its own next word (8). The line key moves only one of the two pacers. Blurby.Brain's read ("acts only while running") explains the paused case.
+  - **#100 paused:** `ModeRuntime.ts:921` acts only while the line pacer runs, and the pacer stops on pause (`pausePlayback`, `:1326-1331`).
+  - **#101–103 (Ctrl+↑/↓, Shift+↑):** nothing moves. `sentence` and `paragraph` reach `default: return` (`:929-930`), although the line pacer has `jumpToParagraph` (`helpers/FlowScrollEngine.ts:372`).
+  - **Ctrl+←/→:** listed for Flow in the Hotkey Map (`HotkeyMapSettings.tsx:93-94`) but also dropped by `default`. The sweep had no row for it, and it is measured here.
+  - **Not new in this release.** f0's v1.28.0 run (`C:\Projects\Blurby-artifacts\ui-sweep-triage-1\v128-flow-1..3.json`; `-2` cited) found:
+    - paused, ↓ changed the speed (300 → 275 wpm) instead of moving a line;
+    - Ctrl+↓ jumped from word 1800 to word 0, and a second press stayed at 0;
+    - Ctrl+↑, Shift+↓ and Shift+↑ did nothing;
+    - playing, ↑ left the Flow word at 1109.
+
+    The cause of the 0 is the one in FOCUS-KEYS-FIX-1: v1.28.0's handlers computed over the tokenized text, which an EPUB lacks. This item builds the table below, not v1.28.0's behaviour.
+- **What each key must do in Flow** (from the Hotkey Map):
+
+  | Key | Paused, or before the first play | Playing |
+  |---|---|---|
+  | ↑ / ↓ | nothing (no line map while paused; see "Paused line keys" below). Never a speed change: Flow's speed keys are ← / →. | the cursor moves to the previous or next line's first word, and the timer continues from there |
+  | Ctrl+← / Ctrl+→ | the reading word moves 1 word | the same, and the timer continues from it |
+  | Ctrl+↑ | to the start of the current sentence, or of the previous one if already at a start | the same |
+  | Ctrl+↓ | to the start of the next sentence | the same |
+  | Shift+↑ and Shift+← | to the start of the current paragraph, or of the previous one if already at a start | the same |
+  | Shift+↓ and Shift+→ | to the start of the next paragraph | the same |
+
+  - Space after a paused move plays from the moved word.
+  - A move clamps to the book. It never lands on word 0 or −1 unless the target really is the book's first word.
+  - ← / → (speed) and the chapter keys are unchanged.
+- **Where** (re-grepped on `de453e64`):
+  - `src/reader/modes/flow/ModeRuntime.ts`:
+    - `:916-933` `handleCommand`: rewrite the `flow-line` case; add `seek-words`, `sentence` and `paragraph`;
+    - add private `navigationWord()` and `moveReadingWord(target)` beside it;
+    - `:77`: import from `../../../utils/text`.
+  - Nothing else. `FlowScrollEngine.jumpToParagraph` stays unused: one paragraph rule serves Focus and Flow, and the line pacer follows through `jumpToWord`.
+  - **Prototype:** this item's part of `keys-fix-prototype.diff.txt` (`flow/ModeRuntime.ts`).
+- **Paused line keys are not in this item.** Paused, there is no line map: the line pacer builds one only while running, and the Flow surface has no line lookup (`flow/surface.ts:13-35`). A paused line jump needs one, which is new design. At v1.28.0, paused ↓ changed the speed, so a paused line jump never existed. File it as an idea (FLOW-PAUSED-LINE-1) in `docs/governance/IDEAS.md` with this evidence; the planner places it.
+- **Done when:**
+  1. **Red first:** copy `docs/planning/specs/keys-fix-2026-10-23/flowKeys.test.tsx.txt` to `tests/readerModes/flowKeys.test.tsx`, unchanged, and commit it alone, first. If `main` has moved, re-run it on the new base first; it must still fail by assertion.
+     - Measured on `36ac7466`: 8 of 9 fail, all by assertion; the control passes.
+     - The test plays Flow and starts the line pacer the way `useModeBindings` does, over a jsdom container of 40 word spans laid out five to a line.
+     - It reads each pacer's own word: the word timer through `exportHandoff("capture-current")`, the line pacer through its state. While playing, the line pacer republishes its line's first word on its own clock, so the published word alone can't tell the pacers apart. That republish happens today after a playing click too, and it stays out of scope.
+     - Expectations, from word 7:
+       - ↓ gives 10 on both pacers, and a tick gives 11;
+       - ↑ gives 0, and a tick gives 1;
+       - sentence next is 12, a tick gives 13, and previous is 12;
+       - paragraph next is 14, a tick gives 15, and previous is 14;
+       - Ctrl+→ is 8, a tick gives 9, and Ctrl+← is 8;
+       - paused, sentence next is 12 and paragraph next is 14, and Play starts at 14;
+       - before play, paragraph previous is 0 and sentence next is 6, and Play starts at 6.
+  2. **The change:** the red file and FOCUS-KEYS-FIX-1's file pass. `tests/readerModeBoundaries.test.ts`, `tests/readerModes/`, `tests/flowModeAdapter.test.ts` and `tests/readerSpeedDialog.test.tsx` pass.
+  3. **Live, as for Focus** (a `--dir` build of the branch tip, a fresh scratch profile, `triage.mjs` with its preflight):
+     - Rows #100–103 re-run from triage's state (a TOC jump to INTRODUCTION in Page, then a switch to Flow), and each reads WORKS twice.
+     - Playing ↓: the highlighted word jumps to a later line's first word, and the next two reads stay at or after it, with no snap back to the old line.
+     - Playing ↑: the word moves to an earlier line.
+     - Ctrl+↓, Shift+↓ and Ctrl+→, paused then played: Play starts at the moved word.
+     - Paused ↓ leaves the speed unchanged. No press lands on word 0 or −1 (f0's v1.28.0 result).
+     - Close every window; the live profile's hashes are unchanged.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  5. **Fence** (against `origin/main` after FOCUS-KEYS-FIX-1 merges):
+     - `M src/reader/modes/flow/ModeRuntime.ts`;
+     - `A tests/readerModes/flowKeys.test.tsx`;
+     - `M docs/governance/BUG_REPORT.md` (the planner's bug for #100–103, else the next free number, BUG-211 if FOCUS-KEYS-FIX-1 took BUG-210);
+     - `M docs/governance/IDEAS.md` (FLOW-PAUSED-LINE-1);
+     - the memo and time log;
+     - plus any Rule 50 pinned-test update, named in the memo.
+- **Out of scope:**
+  - paused line keys (the table above);
+  - the line pacer's republish of a line's first word after a mid-line jump (pre-existing, as after a playing click);
+  - Flow's chapter keys;
+  - key bindings.
+- **Shared-core touches:** none. Flow's line pacer is its own copy (`src/reader/modes/flow/helpers/FlowScrollEngine.ts`), not the frozen `src/utils/FlowScrollEngine.ts`, and it is not edited.
+- **Merge order:** after FOCUS-KEYS-FIX-1.
+- **Release effect:** none. This item merges after the Stage 8 release.
+- **Branch:** `eb/flow-keys-fix-1`, when dispatched after the release. Branch from `refs/remotes/origin/eb/focus-keys-fix-1` while FOCUS-KEYS-FIX-1 is unmerged, or from `refs/remotes/origin/main` once it has merged. Push, and ask Blurby.Roadmap for merge go.
+- **Lane:** Reader Engine. Execution surface A. Effort: S. **Path:** dispatch.
+
+  | # | Task | Tier | Effort |
+  |---|---|---|---|
+  | 1 | Copy the red file (minus dropped rows), commit it alone, and record the failures | mechanical | low |
+  | 2 | The `flow-line` rewrite, the three new cases, `navigationWord` and `moveReadingWord`, per the prototype | bounded | medium |
+  | 3 | Targeted suites, then `npm test`, typecheck and build | mechanical | low |
+  | 4 | `--dir` build and the triage re-run of #100–103 on a scratch profile with the preflight | bounded | medium |
+  | 5 | Bug entry, the FLOW-PAUSED-LINE-1 idea, memo and time log; push; ask for merge go | mechanical | low |
+- **Lessons applied:**
+  - standing rule 43 (red first, with a control);
+  - LL-142 (classified from measurement: the playing failure is the word timer overwriting the line pacer, not "acts only while running");
+  - reading-mode separation (no sibling import).
+
 <a id="narrate-start-stack-1"></a>
 
 #### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(position 6.4 — Full Spec; authored 2026-10-23 from Blurby.Brain's BUG-206 ruling; release fix)*
