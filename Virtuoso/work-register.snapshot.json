@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:53:50Z",
+  "takenAt": "2026-10-23T03:09:51Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3312,6 +3312,31 @@
       "description": "adm-zip's path constructor reads the archive with fs.readFileSync. In openZip (main/zip-read.js), read with fsPromises.readFile and pass the buffer to adm-zip, with the cap checked on the stat.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.",
       "revision": "bdb570b2cad0e43a2544c529f5b3a242f9bea7cec7a21864e0e009f0b1b65ade",
+      "extra": {}
+    },
+    {
+      "id": "BAND-ALIGN-2",
+      "title": "In Focus, the text scrolls the cursor's line into the fixed band",
+      "sequence": 70,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "BAND-ALIGN-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Owner decision (BAND-ALIGN-1 Part B): keep the band fixed. In Focus the reader scrolls the cursor word's line into the band on arrival and on every highlight move; in Flow the pacer scrolls the underlined word's line under it, with the word timer as the only clock.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.",
+      "revision": "aaba4072aab4624c772498de2c3c0a3b5d9cd92307ccec9e401534966e4bcf81",
       "extra": {}
     }
   ],

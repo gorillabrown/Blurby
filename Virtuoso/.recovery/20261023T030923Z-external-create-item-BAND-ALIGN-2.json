@@ -1,0 +1,51 @@
+{
+  "id": "20261023T030923Z-external-create-item-BAND-ALIGN-2",
+  "operation": "external-create-item",
+  "item_id": "BAND-ALIGN-2",
+  "created": "2026-10-23T03:09:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "In Focus, the text scrolls the cursor's line into the fixed band",
+      "status": "Queued",
+      "sequence": 70,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "BAND-ALIGN-1"
+      ],
+      "description": "Owner decision (BAND-ALIGN-1 Part B): keep the band fixed. In Focus the reader scrolls the cursor word's line into the band on arrival and on every highlight move; in Flow the pacer scrolls the underlined word's line under it, with the word timer as the only clock.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.",
+      "id": "BAND-ALIGN-2"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T02:53:50Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BAND-ALIGN-2",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BAND-ALIGN-2",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BAND-ALIGN-2",
+      "actualRevision": "",
+      "recoveryId": "20261023T030923Z-external-create-item-BAND-ALIGN-2",
+      "detail": {
+        "readBack": "create response echoes every field"
+      },
+      "providerItemId": "4027c96c-c31e-817d-ba0a-f8028d8f6b4e",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T03:09:50Z",
+  "outcome": "succeeded"
+}
