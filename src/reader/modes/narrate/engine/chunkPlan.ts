@@ -48,6 +48,10 @@ const LETTER_PIECE = /^[A-Za-z](?:\.|$)/;
 const WEB_START = /^www\.$/i;
 const WEB_PIECE = /^[a-z0-9-]+\.$/i;
 const NEW_SENTENCE = /^["'“‘(\[]*[A-Z]/;
+/** An uppercase initial other than "I.": before a capitalised name it is a name's initial ("M. Annius"), not an end. */
+const NAME_INITIAL = /^[A-HJ-Z]\.$/;
+/** Words that open sentences, so "Section B. The next" and "B. C. He" still end at the letter (not a name after it). */
+const SENTENCE_OPENER = /^["'“‘(\[]*(?:the|a|an|this|that|these|those|it|its|he|she|they|we|you|i|his|her|their|our|my|but|and|or|so|then|there|here|in|on|at|if|when|as|after|before|for|with|what|who|how|why|no|not|yet)\b/i;
 
 function isAbbreviation(words: readonly string[], i: number): boolean {
   if (SINGLE_LETTER.test(words[i]) || ABBREVIATION.test(words[i])) return true;
@@ -62,6 +66,7 @@ function isSentenceEnd(words: readonly string[], i: number): boolean {
   if (TITLE.test(words[i])) return false;
   if (!isAbbreviation(words, i)) return true;
   if (SINGLE_LETTER.test(words[i]) && LETTER_PIECE.test(next)) return false;
+  if (NAME_INITIAL.test(words[i]) && NEW_SENTENCE.test(next) && !SENTENCE_OPENER.test(next)) return false; // NARRATE-SENTENCE-INITIALS-1
   return NEW_SENTENCE.test(next);
 }
 
