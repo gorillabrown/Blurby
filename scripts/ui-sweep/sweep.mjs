@@ -368,6 +368,9 @@ async function home(s, plan) {
   await s.cdp.send("Page.reload", { ignoreCache: false }).catch(() => {});
   s.helpersOk = false; await sleep(800);
   for (let i = 0; i < 120; i++) { try { await s.helpers(); if (await s.sw(`has(${JSON.stringify(plan.homeSignature)})`)) break; } catch { /* loading */ } await sleep(250); }
+  // The onboarding surface clears firstRunCompleted; until a press completes it again, a reload shows the tour over
+  // the library and blocks every route. Skip it here so later surfaces start from the library.
+  if (plan.onboardingSkip) { try { if (await s.sw(`has(${JSON.stringify(plan.onboardingSkip)})`)) { const b = await s.sw(`box(${JSON.stringify(plan.onboardingSkip)})`); await s.click(b.x, b.y); await sleep(800); } } catch { /* no tour */ } }
   if (plan.homeSteps) await runSteps(s, plan.homeSteps, plan.vars);
 }
 async function enter(s, plan, surface) { await home(s, plan); await runSteps(s, surface.enter || [], plan.vars); if (surface.signature) await runSteps(s, [{ wait: surface.signature, waitMs: surface.waitMs ?? 30000 }], plan.vars); }
@@ -381,8 +384,11 @@ async function sweepSurface(sess, ctx, plan, surface, deferred) {
   out.walk.push(`entered: ${(surface.enter || []).map((st) => st.click || (st.key && "key " + st.key) || (st.wait && "wait " + st.wait) || "eval").join(" → ") || "(start state)"}`);
   let controls;
   if (surface.keys) {
-    controls = typeof surface.keys === "function" ? await surface.keys(sess.s, plan) : surface.keys;
+    try { controls = typeof surface.keys === "function" ? await surface.keys(sess.s, plan) : surface.keys; }
+    catch (e) { out.unreachable = `its key list could not be read (${e.message})`; return out; }
     controls = controls.map((k) => ({ key: k.key, label: k.label || k.key }));
+    // Reading the key list may have left the surface (the Hotkey Map is a settings pane): enter it again.
+    if (!(await onSurface(sess.s, surface, plan.vars))) { try { await enter(sess.s, plan, surface); } catch (e) { out.unreachable = `could not re-enter after reading its keys (${e.message})`; return out; } }
   } else {
     controls = (await sess.s.sw(`enumerate(${JSON.stringify(surface.scope || null)})`, 8000)) || [];
     const seen = new Set();
@@ -420,11 +426,19 @@ async function main() {
   };
   await sess.restart(false);
   if (!args.dryRun && plan.seed) { await plan.seed(sess.s, args); await sess.s.stop(); fs.rmSync(pristine, { recursive: true, force: true }); fs.cpSync(args.profile, pristine, { recursive: true }); await sess.restart(false); }
+  // Read what later surfaces need (the Hotkey Map's rows) once, from the clean start state.
+  if (!args.dryRun && plan.prefetch) { try { await plan.prefetch(sess.s, plan); log("prefetched hotkey rows"); } catch (e) { log(`prefetch failed: ${e.message}`); } }
   const results = []; const deferred = [];
   for (const surface of plan.surfaces) {
     if (args.only && !args.only.includes(surface.name)) continue;
     log(`surface ${surface.name}`);
-    results.push(await sweepSurface(sess, ctx, plan, surface, deferred));
+    // One surface's failure is recorded on that surface; the run goes on to the next.
+    try { results.push(await sweepSurface(sess, ctx, plan, surface, deferred)); }
+    catch (e) {
+      log(`surface ${surface.name} failed: ${e.message}`);
+      results.push({ surface, rows: [], walk: [], unreachable: `the sweep failed on this surface (${e.message})` });
+      try { await sess.restart(false); } catch (e2) { log(`restart failed: ${e2.message}`); }
+    }
   }
   // Destructive controls last, each on a freshly re-seeded scratch profile, so a delete cannot starve later surfaces.
   for (const { surface, c } of deferred) {
@@ -567,7 +581,8 @@ function blurbyPlan(a) {
   return {
     title: "UI-SWEEP-1 — every control on every screen (packaged build of 47ae6e1f)",
     preamble: "Method: each control is pressed over CDP at its box centre (or its key is sent), then classified from a DOM and state digest, uncaught exceptions, console errors and error.log growth (scripts/ui-sweep/sweep.mjs). Controls with destructive labels run last, each on a freshly re-seeded scratch profile. Escape resets after each press; when the surface is lost, the page reloads and the route is replayed.",
-    homeSignature: ".library-container", homeSteps: [toList], vars: {},
+    homeSignature: ".library-container", homeSteps: [toList], vars: {}, onboardingSkip: ".onboarding-btn-skip",
+    prefetch: (s, plan) => hotkeyRows(s, plan),
     known: [{ name: "BUG-187, ResizeObserver flood (FOLIATE-OBSERVER-LEAK-1 not merged at 47ae6e1f)", re: /ResizeObserver loop/i }],
     async seed(s, args) {
       for (let i = 0; i < 240; i++) { if (await s.sw('has(".onboarding-overlay")') || await s.sw('has(".library-container")')) break; await sleep(250); }
