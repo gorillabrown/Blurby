@@ -64,7 +64,15 @@ The app ran as build I, with `BLURBY_USER_DATA_DIR` set and CDP on port 9339. Th
 |---|---|---|---|
 | 26 | PASS | I | The header shows "· Readings". The folder menu lists RECENT FOLDERS: Readings (current), then Browse for folder… (screenshot). |
 | 27 | PASS | I | A real click on Browse for folder… opened the native dialog. The executor navigated to `smoke8-folder2` and chose Select Folder. About 15 s later the library showed "5 readings · smoke8-folder2", including BRIMSTONE, STOLEN IN DEATH and NOBODY'S GIRL. |
-| 28 | in progress | I | The executor chose Readings from the recent list (a CDP DOM click; the real click toggled the menu shut). `settings.sourceFolder` changed to the Drive path at once, and the count rose 143 → 599 over about 2 minutes, as the 120k-file Drive folder synced. The header label still read "smoke8-folder2" while the Drive books loaded (possible FAIL; being checked). |
+| 28 | **FAIL** | I | The executor chose Readings from the recent list (a CDP DOM click; the real click toggled the menu shut). The main-process `settings.sourceFolder` changed to the Drive path at once, and the library contents switched: the count rose 143 → 721 over about 6 minutes as the 120k-file Drive folder synced. But the renderer's folder state never followed. After more than 6 minutes, the header still read "· smoke8-folder2", and the folder menu still marked **smoke8-folder2 as current** (screenshot `28-stale-header.png`). The header is `LibraryView.tsx:414`, which renders `settings.sourceFolder` from the renderer copy. Group B1 was stopped here. |
+| 29 | not run (B1 stopped at #28) | | Covers did render in the grid view during #26 and #27 (screenshot); the list view was not checked. |
+| 30 | not run (B1 stopped at #28) | | |
+
+**Executor incident during B2 (F9):** another Claude session, `narrate-sentence-resume-1`, was running its own Blurby live checks on this machine at the same time. Its script is `C:\Projects\Blurby-artifacts\narrate-sentence-resume-1\run.ps1`; it uses ports 9341 and 48924 and its own scratch profiles. Two #31 runs at 22:04 and 22:06 local were contaminated:
+- Run 1: the copy-profile app quit by itself about 52 s after launch (its log ends "[ws-server] Stopped"), so the probe delete was never observed. The probe was found 28.4 s after it was copied.
+- Run 2: the probe was not seen within 30 s, and it was recorded after the file had already been deleted. The app logged `EADDRINUSE 127.0.0.1:48924` retries against the other session's instance.
+
+In both runs nothing was left in the Drive folder, and the live `library.json` and `settings.json` were unchanged. #31 is re-run after the other session goes quiet.
 
 ## Findings so far (not checklist failures)
 
