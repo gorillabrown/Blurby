@@ -444,28 +444,32 @@ function decodePairingToken(stored) {
   return safeStorage.isEncryptionAvailable() ? safeStorage.decryptString(Buffer.from(stored, "base64")) : stored;
 }
 
-function startServer(ctx) {
-  if (_server) return { port: WS_PORT, token: _pairingToken };
-
-  _ctx = ctx;
-
-  // Generate or restore pairing token (encrypted via safeStorage)
+/** Generate or restore the session's pairing token from settings (encrypted via safeStorage); returns it. */
+function loadPairingToken(ctx, { token } = {}) {
   const settings = ctx.getSettings();
   if (settings._wsPairingToken) {
     try {
-      _pairingToken = decodePairingToken(settings._wsPairingToken);
+      return decodePairingToken(settings._wsPairingToken);
     } catch {
       // Decryption failed (corrupted or was stored in plaintext) — regenerate
       console.warn("[ws-server] Pairing token decryption failed — regenerating");
-      _pairingToken = generatePairingToken();
-      settings._wsPairingToken = encodePairingToken(_pairingToken);
+      const fresh = token || generatePairingToken();
+      settings._wsPairingToken = encodePairingToken(fresh);
       ctx.saveSettings();
+      return fresh;
     }
-  } else {
-    _pairingToken = generatePairingToken();
-    settings._wsPairingToken = encodePairingToken(_pairingToken);
-    ctx.saveSettings();
   }
+  const fresh = token || generatePairingToken();
+  settings._wsPairingToken = encodePairingToken(fresh);
+  ctx.saveSettings();
+  return fresh;
+}
+
+function startServer(ctx, options = {}) {
+  if (_server) return { port: WS_PORT, token: _pairingToken };
+
+  _ctx = ctx;
+  _pairingToken = loadPairingToken(ctx, options);
 
   _server = http.createServer((_req, res) => {
     // Reject non-WebSocket HTTP requests
@@ -571,6 +575,7 @@ module.exports = {
   generatePairingToken,
   encodePairingToken,
   decodePairingToken,
+  loadPairingToken,
   generateShortCode,
   getShortCode,
   handleConnection,
