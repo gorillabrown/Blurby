@@ -1,0 +1,51 @@
+{
+  "id": "20261023T031215Z-external-create-item-NARRATE-SENTENCE-INITIALS-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-SENTENCE-INITIALS-1",
+  "created": "2026-10-23T03:12:15Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A single-letter initial does not end a sentence",
+      "status": "Queued",
+      "sequence": 71,
+      "written_status": "Stub",
+      "effort": "XS",
+      "workstream": "TTS / Narration Engine",
+      "prerequisites": [
+        "NARRATE-SENTENCE-RESUME-1"
+      ],
+      "description": "Sentence segmentation ends a sentence at a single-letter initial before a capitalised name (\"M. Annius Verus\"), so resume rewinds to the wrong word. Treat an initial plus a capitalised word as an abbreviation.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from NARRATE-SENTENCE-RESUME-1's live check. Stub. Not a release gate.",
+      "id": "NARRATE-SENTENCE-INITIALS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:09:51Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SENTENCE-INITIALS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-SENTENCE-INITIALS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-SENTENCE-INITIALS-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T031215Z-external-create-item-NARRATE-SENTENCE-INITIALS-1",
+      "detail": {
+        "readBack": "create response echoes every field"
+      },
+      "providerItemId": "4027c96c-c31e-8121-9f76-d30fe04ef747",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T03:12:30Z",
+  "outcome": "succeeded"
+}

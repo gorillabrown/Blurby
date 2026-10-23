@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T03:09:51Z",
+  "takenAt": "2026-10-23T03:12:32Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3247,8 +3247,8 @@
       "id": "FOLIATE-OBSERVER-LEAK-1",
       "title": "Leaked foliate View observers stop flooding error.log",
       "sequence": 67,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -3257,13 +3257,13 @@
       "deliverable": "",
       "group": "",
       "spec_link": "",
-      "branch": "",
-      "started": "",
+      "branch": "eb/foliate-observer-leak-1",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "A patch-package patch (patches/foliate-js+1.0.1.patch) makes foliate-js's View.destroy() and Paginator.destroy() call this.#observer.disconnect(). The leaked observers on dead section bodies stop flooding error.log (14,428 lines a session on the base, 0 after).",
-      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze.",
-      "revision": "6265d32db73af5f6ab92f76f3688ba17849d075a64fc711180390fe274c68c59",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.",
+      "revision": "33995e049024a4ceffecf3d0a27c48a9ac22b409ffc6ee7580c415d00b1ed8c1",
       "extra": {}
     },
     {
@@ -3337,6 +3337,31 @@
       "description": "Owner decision (BAND-ALIGN-1 Part B): keep the band fixed. In Focus the reader scrolls the cursor word's line into the band on arrival and on every highlight move; in Flow the pacer scrolls the underlined word's line under it, with the word timer as the only clock.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.",
       "revision": "aaba4072aab4624c772498de2c3c0a3b5d9cd92307ccec9e401534966e4bcf81",
+      "extra": {}
+    },
+    {
+      "id": "NARRATE-SENTENCE-INITIALS-1",
+      "title": "A single-letter initial does not end a sentence",
+      "sequence": 71,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-SENTENCE-RESUME-1"
+      ],
+      "effort": "XS",
+      "workstream": "TTS / Narration Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Sentence segmentation ends a sentence at a single-letter initial before a capitalised name (\"M. Annius Verus\"), so resume rewinds to the wrong word. Treat an initial plus a capitalised word as an abbreviation.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from NARRATE-SENTENCE-RESUME-1's live check. Stub. Not a release gate.",
+      "revision": "4012987567ce24069ff05f491a62cfb527c90027b0fe4516cd8e322a746dc6cc",
       "extra": {}
     }
   ],
