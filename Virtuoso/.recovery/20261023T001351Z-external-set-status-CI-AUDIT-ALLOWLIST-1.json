@@ -1,0 +1,39 @@
+{
+  "id": "20261023T001351Z-external-set-status-CI-AUDIT-ALLOWLIST-1",
+  "operation": "external-set-status",
+  "item_id": "CI-AUDIT-ALLOWLIST-1",
+  "created": "2026-10-23T00:13:51Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/ci-audit-allowlist-1",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ci-audit-allowlist-1 from main). Its merge starts the Stage 8 code freeze for gate (1)."
+    },
+    "expectedRevision": "11ee7021fc82d6b43fd142cf32d7eb0fc9065bf87486f51cf7826ec1fe3fe204",
+    "idempotencyKey": "set-status:CI-AUDIT-ALLOWLIST-1:[('branch', 'eb/ci-audit-allowlist-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ci-audit-allowlist-1 from main). Its merge starts the Stage 8 code freeze for gate (1).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CI-AUDIT-ALLOWLIST-1",
+      "idempotencyKey": "set-status:CI-AUDIT-ALLOWLIST-1:[('branch', 'eb/ci-audit-allowlist-1'), ('notes', \"Created 2026-10-22 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1), from blurby-6b's ELECTRON-42-UPGRADE-1 finding: the CI audit step already fails on main. Not a release gate (no workflow builds installers). After ELECTRON-42-UPGRADE-1 (same ci.yml and lockfile). Full Spec: U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ci-audit-allowlist-1 from main). Its merge starts the Stage 8 code freeze for gate (1).\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T001351Z-external-set-status-CI-AUDIT-ALLOWLIST-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:14:18Z",
+  "outcome": "succeeded"
+}
