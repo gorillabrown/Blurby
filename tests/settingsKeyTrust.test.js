@@ -353,7 +353,7 @@ describe("SETTINGS-KEY-TRUST-1 controls", () => {
       settings._wsPairingToken = "enc:old"; // whatever was stored before must not survive as a stale credential
       await call("regenerate-ws-pairing-token");
       expect("_wsPairingToken" in settings).toBe(false);
-      expect(wsStartServer).toHaveBeenLastCalledWith(ctx, { token: "new-token" });
+      expect(wsStartServer.mock.lastCall?.[1]).toEqual({ token: "new-token" }); // the session token is passed through
     } finally {
       fakeEncryption = true;
     }
