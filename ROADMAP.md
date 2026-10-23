@@ -103,6 +103,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | CI-AUDIT-ALLOWLIST-1 | 2026-10-22 | CI's audit step fails only on a new or out-of-date high/critical advisory (9 reviewed entries allowlisted); follow-redirects 1.16.1; main CI green again (merge `47ae6e1f`) | `CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md` |
 | READER-VISUAL-DIAG-1 | 2026-10-23 | BUG-188 band sized from a 24 px fallback and untied to the cursor; BUG-187 flood is two leaked foliate View observers (causal by intervention); two fix specs drafted (merge `22d4f7b3`) | `CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md` |
 | UI-SWEEP-1 | 2026-10-23 | 369 controls on 57 surfaces pressed on the release-fix build `97527896`; the only errors are BUG-187's flood (the positive control); 104 NO-EFFECT candidates and W1–W3 went to triage (merge `420efa85`) | `CloseOut.UI-SWEEP-1.2026-10-23.md` |
+| UI-SWEEP-TRIAGE-1 | 2026-10-23 | 107 candidates classified: 42 WORKS, 40 BY-DESIGN, 25 DEFECT (none release-blocking); BUG-210–BUG-216 filed; FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1 specified; LL-165, LL-166 (merge `de453e64`) | `CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md` |
 | TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 → 1,000 ms; BUG-186 resolved (merge `76956729`) | `CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md` |
 | CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` |
@@ -3062,28 +3063,9 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="ui-sweep-triage-1"></a>
 
-#### UI-SWEEP-TRIAGE-1 — Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates *(position 74 — Full Spec; authored 2026-10-23 on main from UI-SWEEP-1's report; diagnosis only, non-shipping; not a release gate unless a candidate is confirmed as a release-blocking defect)*
+#### UI-SWEEP-TRIAGE-1 — Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates ✅ COMPLETED 2026-10-23 *(TR-082; merge `de453e64`; spec archived)*
 
-- **What:** re-test every candidate in UI-SWEEP-1's report (`docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`, "Bug candidates") on the same `--dir` build of `97527896`. That is the 104 NO-EFFECT rows plus W1–W3. Use a detector that sees what the sweep's DOM digest cannot:
-  - **Style and settings:** the computed style hash of `:root` and the reader iframe body, plus the `settings` object read through the renderer (themes, accents, fonts, layout and library-layout options change styles or settings, not DOM text).
-  - **Focus:** the active element (text fields take focus and change nothing else).
-  - **Reader state:** the scroll position and the reader's word index (`wordIndex`), read before and after (keyboard seeks, chapters, lines).
-  - **Library state:** the selected row and each document's archived and trashed flags (J/K, Ctrl+Up/Down, E, Shift+E, #), with a row selected first where the action needs one.
-  - **Preconditions:** each press is retried from a state where it should act (for example "Previous chapter" from chapter 2, not from the first).
-- **Classify each candidate:**
-  - **WORKS:** the stronger detector saw the effect. It was a sweep blind spot.
-  - **BY-DESIGN:** there is nothing to do in that state, and none is expected (for example "Close menu" on a closed menu).
-  - **DEFECT:** it should act and does not. Give the steps, the evidence, and a suspected `file:line` from a read of the handler.
-- **Done when:**
-  1. A triage table in a new report, `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`, has one row per candidate (107 rows) and no unclassified row.
-  2. **Positive control:** before the run, the stronger detector must detect at least one effect that the sweep's digest marked NO-EFFECT and that is known to work, for example the dark theme changing `--bg`. If it can't, stop and report.
-  3. Every DEFECT row gives its severity (release-blocking, High, Medium or Low) and is reproduced twice.
-  4. W1–W3 are confirmed or refuted by reading the code (the route, the key comparison, the listener), with `file:line`.
-  5. Fence: the report, the memo, the time log, and any `scripts/ui-sweep/` change (non-shipping). No product code. The live profile's hashes are unchanged.
-- **Branch:** `eb/ui-sweep-triage-1` from `refs/remotes/origin/main`. Reuse `C:\Projects\Blurby-artifacts\ui-sweep-1\build-97527896-x64` and a scratch profile.
-- **Merge:** non-shipping (docs and scripts), so it may merge during the freeze. The planner files the DEFECT rows as bugs at close-out. Any release-blocking defect goes to Blurby.Brain before it is filed.
-- **Lane:** Platform & Maintenance. Execution surface B. Effort: M. **Path:** dispatch.
-- **Lessons applied:** standing rule 43 (positive control); LL-142 (classified from measurement, never from a label).
+- Closed out: [`CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md). Report: `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`. Bugs: BUG-210–BUG-216. Fixes: [FOCUS-KEYS-FIX-1](#focus-keys-fix-1), [FLOW-KEYS-FIX-1](#flow-keys-fix-1); chapter navigation in [JUMP-LANDING-SAVE-1](#jump-landing-save-1).
 
 <a id="error-log-cap-1"></a>
 

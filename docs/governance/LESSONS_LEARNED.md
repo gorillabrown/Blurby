@@ -3038,3 +3038,19 @@ Related: LL-155.
 **Applies to:** specifications that append to `LESSONS_LEARNED.md`; roadmap reviews that promote or retire lessons while dispatch-ready specifications are queued; close-out lessons checks.
 **Status:** Observation
 Related: LL-156, standing rule 50.
+
+### LL-165 — A driver must prove which profile the app opened before its first action (UI-SWEEP-TRIAGE-1, 2026-10-23)
+**Verdict:** The triage's chapter bisect launched a v1.28.0 `--dir` build with `BLURBY_USER_DATA_DIR` set to a scratch profile. v1.28.0 predates that variable (it landed in `238f47ec`, 2026-10-13), so the build opened the live `%APPDATA%\blurby` profile while the owner's app was running on it. The script's `saveSettings` then rewrote the owner's `settings.json` at 03:24:45 (hash `1a4a40c6…` → `2e1d5245…`; readingMode and lastReadingMode set to "flow") and wrote `sync-queue.json`. `library.json` was unchanged. Setting the variable proved nothing about what the build honoured.
+**Evidence:** `docs/governance/close-outs/Memo.UI-SWEEP-TRIAGE-1.GovernanceStaging.2026-10-23.md` (lesson candidate 1); `scripts/ui-sweep/sweep.mjs` `Session.profilePreflight` (merge `de453e64`), which now exits 4 unless `app.getPath('userData')`, read over the Node inspector, is the scratch profile and not under `%APPDATA%\blurby`, the scratch `blurby-data/covers` appears, and the live hashes do not move.
+**Recommendation:** Any harness that launches a Blurby build reads back, before its first press or IPC call, the profile path the running app actually uses, and aborts if it is the live profile. Launch with `--user-data-dir=<scratch>` as well as `BLURBY_USER_DATA_DIR`. A build older than `238f47ec` runs only if that read-back proves it honoured `--user-data-dir`. Hash the live profile before and after every run.
+**Applies to:** UI sweeps, bisects and live checks on old or packaged builds; any CDP or computer-use driver; release smoke harnesses.
+**Status:** Observation (Blurby.Brain made it a standing guardrail for drivers on 2026-10-23; it is not yet a ROADMAP standing rule)
+Related: standing rule 43, LL-151.
+
+### LL-166 — A no-effect verdict needs a detector that reads state and a press made where the control should act (UI-SWEEP-TRIAGE-1, 2026-10-23)
+**Verdict:** UI-SWEEP-1's digest read DOM text, aria state and root attributes. Of its 104 NO-EFFECT candidates, the triage's stronger detector found 42 that work: they changed classes, CSS custom properties, settings, focus or form values, which the digest never read. Another 39 did nothing only because the sweep pressed them where they had nothing to do (an already-selected theme, a closed flap, the first page). That left 23 DEFECT rows out of 104. The sweep's positive control (BUG-187's ERROR rows) proved it could see errors, not that it could see effects.
+**Evidence:** `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md` (Totals; positive control: "dark theme" from light, `--bg` `#f5f3ef` → `#0f0f0f`, unseen by the sweep's digest); `docs/studies/investigations/UI-SWEEP-1.2026-10-23.md` (Bug candidates).
+**Recommendation:** A detector that reports "nothing happened" carries a positive control for that verdict too: a control known to work, whose effect it must see. Read state (computed styles of `:root` and the reader body, settings, the active element, scroll and word index, the selection and document flags), not only text. Before calling a press NO-EFFECT, set up a state where the control should act.
+**Applies to:** UI sweeps and any harness that classifies presses or actions; null results in live checks.
+**Status:** Observation. It is the null-verdict side of LL-151 (a recorder proven able to record a failure); the next roadmap review decides whether this second occurrence promotes that pattern.
+Related: LL-151, standing rule 43, LL-142.

@@ -8720,3 +8720,30 @@ The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines
 - **Standing rule 46 (LL-153):** the run writes nothing to the register. The planner files the bugs.
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **LL-164:** no lesson-status line is appended.
+
+
+## Archived at close-out 2026-10-23: UI-SWEEP-TRIAGE-1
+
+
+#### UI-SWEEP-TRIAGE-1 — Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates *(position 74 — Full Spec; authored 2026-10-23 on main from UI-SWEEP-1's report; diagnosis only, non-shipping; not a release gate unless a candidate is confirmed as a release-blocking defect)*
+
+- **What:** re-test every candidate in UI-SWEEP-1's report (`docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`, "Bug candidates") on the same `--dir` build of `97527896`. That is the 104 NO-EFFECT rows plus W1–W3. Use a detector that sees what the sweep's DOM digest cannot:
+  - **Style and settings:** the computed style hash of `:root` and the reader iframe body, plus the `settings` object read through the renderer (themes, accents, fonts, layout and library-layout options change styles or settings, not DOM text).
+  - **Focus:** the active element (text fields take focus and change nothing else).
+  - **Reader state:** the scroll position and the reader's word index (`wordIndex`), read before and after (keyboard seeks, chapters, lines).
+  - **Library state:** the selected row and each document's archived and trashed flags (J/K, Ctrl+Up/Down, E, Shift+E, #), with a row selected first where the action needs one.
+  - **Preconditions:** each press is retried from a state where it should act (for example "Previous chapter" from chapter 2, not from the first).
+- **Classify each candidate:**
+  - **WORKS:** the stronger detector saw the effect. It was a sweep blind spot.
+  - **BY-DESIGN:** there is nothing to do in that state, and none is expected (for example "Close menu" on a closed menu).
+  - **DEFECT:** it should act and does not. Give the steps, the evidence, and a suspected `file:line` from a read of the handler.
+- **Done when:**
+  1. A triage table in a new report, `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`, has one row per candidate (107 rows) and no unclassified row.
+  2. **Positive control:** before the run, the stronger detector must detect at least one effect that the sweep's digest marked NO-EFFECT and that is known to work, for example the dark theme changing `--bg`. If it can't, stop and report.
+  3. Every DEFECT row gives its severity (release-blocking, High, Medium or Low) and is reproduced twice.
+  4. W1–W3 are confirmed or refuted by reading the code (the route, the key comparison, the listener), with `file:line`.
+  5. Fence: the report, the memo, the time log, and any `scripts/ui-sweep/` change (non-shipping). No product code. The live profile's hashes are unchanged.
+- **Branch:** `eb/ui-sweep-triage-1` from `refs/remotes/origin/main`. Reuse `C:\Projects\Blurby-artifacts\ui-sweep-1\build-97527896-x64` and a scratch profile.
+- **Merge:** non-shipping (docs and scripts), so it may merge during the freeze. The planner files the DEFECT rows as bugs at close-out. Any release-blocking defect goes to Blurby.Brain before it is filed.
+- **Lane:** Platform & Maintenance. Execution surface B. Effort: M. **Path:** dispatch.
+- **Lessons applied:** standing rule 43 (positive control); LL-142 (classified from measurement, never from a label).
