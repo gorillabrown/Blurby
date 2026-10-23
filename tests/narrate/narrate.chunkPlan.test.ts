@@ -83,3 +83,20 @@ describe("narrate chunk plan: sentence start (NARRATE-SENTENCE-RESUME-1)", () =>
     expect(sentenceStartAt(words, -1, new Set())).toBe(-1);
   });
 });
+
+describe("narrate chunk plan: a single-letter initial (NARRATE-SENTENCE-INITIALS-1)", () => {
+  const split = (s: string) => s.split(" ");
+  it("\"M. Annius Verus\": an uppercase initial before a capitalised name does not end a sentence", () => {
+    expect(sentenceStartAt(split("He met M. Annius Verus there."), 4, new Set())).toBe(0);
+  });
+  it("\"J. R. R. Tolkien wrote.\": no sentence end inside the initials", () => {
+    const w = split("J. R. R. Tolkien wrote.");
+    for (let i = 1; i < w.length; i++) expect(sentenceStartAt(w, i, new Set())).toBe(0);
+  });
+  it("control: \"I.\" still ends a sentence", () => {
+    expect(sentenceStartAt(split("so do I. Then it rained."), 4, new Set())).toBe(3);
+  });
+  it("control: a lowercase single letter still ends a sentence", () => {
+    expect(sentenceStartAt(split("call it x. Then more."), 4, new Set())).toBe(3);
+  });
+});
