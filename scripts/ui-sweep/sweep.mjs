@@ -4,7 +4,7 @@
 //
 //   node scripts/ui-sweep/sweep.mjs --exe <copy of release\win-*-unpacked\Blurby.exe> --profile <scratch dir>
 //        --seed <file>[,<file>...] --artifacts <dir> --report <report.md> [--port 9350] [--only <surface,...>]
-//        [--live-profile <dir with library.json/settings.json to hash, never opened>] [--timebox-min 120]
+//        [--live-profile <dir with library.json/settings.json to hash, never opened>] [--timebox-min 120] [--build <sha named in the report>]
 //   node scripts/ui-sweep/sweep.mjs --dry-run --browser <msedge.exe> --artifacts <dir> --report <report.md>
 //
 // Results per control: OK (DOM/state changed or navigation, no error), ERROR (exception, console error or error.log
@@ -33,6 +33,7 @@ function parseArgs(argv) {
     else if (a === "--timebox-min") out.timeboxMin = Number(val());
     else if (a === "--dry-run") out.dryRun = true;
     else if (a === "--browser") out.browser = val();
+    else if (a === "--build") out.build = val();
     else if (a === "--models") out.modelsRoot = val();
     else throw new Error(`unknown argument ${a}`);
   }
@@ -582,11 +583,11 @@ function blurbyPlan(a) {
     .flatMap((sec) => sec.rows.flatMap((r) => toKeys(r.key).map((k) => ({ key: k, label: `${r.action} (${k}) [${sec.title}]` })))).concat(extra);
   const reader = (m, label, files) => ({ name: `Reader — ${label}`, how: `open the sample book, ${m === "page" ? "Page (the default)" : `press "${label} mode"`}`, enter: mode(m, label), signature: `.rm-${m}-root`, scope: ".reader-layout", files: `${C}ReaderBottomBar.tsx, src/reader/modes/${m}/`, ...files });
   return {
-    title: "UI-SWEEP-1 — every control on every screen (packaged build of 47ae6e1f)",
+    title: `UI-SWEEP-1 — every control on every screen (packaged build of ${a.build || "47ae6e1f"})`,
     preamble: "Method: each control is pressed over CDP at its box centre (or its key is sent), then classified from a DOM and state digest, uncaught exceptions, console errors and error.log growth (scripts/ui-sweep/sweep.mjs). Controls with destructive labels run last, each on a freshly re-seeded scratch profile. Escape resets after each press; when the surface is lost, the page reloads and the route is replayed.",
     homeSignature: ".library-container", homeSteps: [toList], vars: {}, onboardingSkip: ".onboarding-btn-skip",
     prefetch: (s, plan) => hotkeyRows(s, plan),
-    known: [{ name: "BUG-187, ResizeObserver flood (FOLIATE-OBSERVER-LEAK-1 not merged at 47ae6e1f)", re: /ResizeObserver loop/i }],
+    known: [{ name: `BUG-187, ResizeObserver flood (FOLIATE-OBSERVER-LEAK-1 not merged at ${a.build || "47ae6e1f"})`, re: /ResizeObserver loop/i }],
     async seed(s, args) {
       for (let i = 0; i < 240; i++) { if (await s.sw('has(".onboarding-overlay")') || await s.sw('has(".library-container")')) break; await sleep(250); }
       // The onboarding overlay is swept as its own surface later; first run here takes "Skip tour".
