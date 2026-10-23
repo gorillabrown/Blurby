@@ -2316,7 +2316,7 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 - **Effort:** S.
 - **Owners:** implementation agent; reviewers in parallel.
 - **Lane:** Reader Engine.
-- **Source:** READER-VISUAL-DIAG-1's report, H4 and its fix specification; BUG-187; `C:\Projects\Blurby-artifactseader-visual-diag-1\` (`session.mjs`, `ro-wrap.js`, `s1-prod-base.json`, `s13-bisect.json`).
+- **Source:** READER-VISUAL-DIAG-1's report, H4 and its fix specification; BUG-187; `C:\Projects\Blurby-artifacts\reader-visual-diag-1\` (`session.mjs`, `ro-wrap.js`, `s1-prod-base.json`, `s13-bisect.json`).
 - **Path:** dispatch.
 
 ##### Implementation detail
