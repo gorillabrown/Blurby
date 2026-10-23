@@ -84,9 +84,11 @@ describe("narrate recorded output (D3 at the engine seam)", () => {
     expect(pauseStops.every((s) => Math.abs(s.at - 0.5) < 1e-9)).toBe(true);
     h.output.advance(1);
     h.engine.resume();
-    expect(h.of("narrate-request").at(-1)).toMatchObject({ cause: "resume", ctxAtRequest: 1.5, word: h.cursor.at(-1) });
+    // NARRATE-SENTENCE-RESUME-1: paused mid-sentence, the resume asks for the sentence's first word, "Of" (word 0).
+    expect(h.cursor.at(-1)).toBeGreaterThan(0);
+    expect(h.of("narrate-request").at(-1)).toMatchObject({ cause: "resume", ctxAtRequest: 1.5, word: 0 });
     const resumed = h.of("narrate-first-voiced").at(-1)!;
-    expect(resumed).toMatchObject({ cause: "resume", word: h.cursor.at(-1) });
+    expect(resumed).toMatchObject({ cause: "resume", word: 0 });
     expect(resumed.startAt).toBeCloseTo(1.5 + LEAD, 9);
     expect(resumed.latencyS).toBeCloseTo(LEAD, 9);
     run(h, 0.3);

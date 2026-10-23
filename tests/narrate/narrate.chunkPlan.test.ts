@@ -3,7 +3,7 @@
 // "www." "gutenberg." "org" (plain Node's ICU keeps them whole; that form is covered too). The first chunk of an epoch is
 // one sentence (at most 15 words), so its end shows where the plan saw the sentence end.
 import { describe, expect, it } from "vitest";
-import { estimateTokens, PACK_TARGET_TOKENS, planChunks } from "../../src/reader/modes/narrate/engine/chunkPlan";
+import { estimateTokens, PACK_TARGET_TOKENS, planChunks, sentenceStartAt } from "../../src/reader/modes/narrate/engine/chunkPlan";
 
 const firstEnd = (text: string) => planChunks(text.split(" "), 0, { maxChunks: 1 })[0].endWord;
 
@@ -56,5 +56,30 @@ describe("narrate chunk plan: digits (NARRATE-TOKEN-CAP-1)", () => {
     for (const text of ["", "The quick brown fox jumps over the lazy dog.", "Twenty-one, twenty-two; and so on — to the end!"]) {
       expect(estimateTokens(text)).toBe(Math.ceil(text.length * 1.15) + 2);
     }
+  });
+});
+
+// NARRATE-SENTENCE-RESUME-1 — Narrate starts and resumes at the first word of the sentence it is in, never across a break.
+describe("narrate chunk plan: sentence start (NARRATE-SENTENCE-RESUME-1)", () => {
+  const words = "He came home. She met Mr. Smith at the gate today. Then they left.".split(" ");
+  // 0 He 1 came 2 home. 3 She 4 met 5 Mr. 6 Smith 7 at 8 the 9 gate 10 today. 11 Then 12 they 13 left.
+  it("a sentence start is its own sentence start", () => {
+    expect(sentenceStartAt(words, 3, new Set())).toBe(3);
+    expect(words[3]).toBe("She");
+    expect(sentenceStartAt(words, 0, new Set())).toBe(0);
+  });
+  it("a word mid-sentence gives the sentence's first word (a title is not a sentence end)", () => {
+    expect(sentenceStartAt(words, 8, new Set())).toBe(3);
+    expect(words[sentenceStartAt(words, 8, new Set())]).toBe("She");
+    expect(sentenceStartAt(words, 13, new Set())).toBe(11);
+    expect(words[11]).toBe("Then");
+  });
+  it("never goes back across a chunk break", () => {
+    expect(sentenceStartAt(words, 8, new Set([5]))).toBe(6); // a break after "Mr." (word 5)
+    expect(words[6]).toBe("Smith");
+  });
+  it("an index outside the words is returned unchanged", () => {
+    expect(sentenceStartAt(words, words.length + 4, new Set())).toBe(words.length + 4);
+    expect(sentenceStartAt(words, -1, new Set())).toBe(-1);
   });
 });
