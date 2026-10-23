@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:14:20Z",
+  "takenAt": "2026-10-23T00:16:28Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2430,9 +2430,9 @@
     {
       "id": "JSONSTORE-TIMEOUT-1",
       "title": "Give the jsonStore concurrency test real headroom",
-      "sequence": 34,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2445,11 +2445,11 @@
       "spec_link": "ROADMAP.md#jsonstore-timeout-1",
       "branch": "eb/jsonstore-timeout-1",
       "started": "2026-10-22",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-22",
+      "evidence": "docs/governance/close-outs/CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md",
       "description": "Give test (a) in tests/jsonStore.test.js a 30 s timeout. Make (d) and (e) wait for earlier writes and count only their own .tmp renames, so a timed-out (a) cannot fail them. The file then leaves Stage 8's closed list.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). Test-only. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/jsonstore-timeout-1 from main after KF2-WAIVER-RETIRE-1 merged, 3f4798b2).",
-      "revision": "9ca19530e9fd638935d616b0c58dba2d7c6cec17d025d2547858327f294645a9",
+      "revision": "9a33303e7859867c6d0c4d5abb6c9049e6df4eb00f04239b4683b1487ce180dc",
       "extra": {}
     },
     {
