@@ -2599,6 +2599,94 @@ The owner answered both questions this specification left out of scope: "1060s y
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **LL-164:** no lesson-status line is appended.
 
+#### Release fix (from SMOKE8-DIAG-1, 2026-10-23)
+
+The four items below are the release fix. They land on `main` into the frozen release line, in this order, then gate (1) and the smoke re-run (#8, #9, #28–#30, the tray right-click, the BUG-208 checks) run on the new sha. Source: `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`.
+
+<a id="page-reopen-cfi-1"></a>
+
+#### PAGE-REOPEN-CFI-1 — Reopen from the cfi last saved, and save only the cfi on screen *(position 6.1 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-201)*
+
+
+- **What:** keep the renderer's library copy's `cfi` equal to the cfi main last saved, so a reopen in the same session opens where the reader left off. The exit save must not send a cfi the view has not shown since the last relocate.
+- **Why:** BUG-201, a release blocker. Measured route above.
+- **Done when:**
+  1. **Regression test (fails on `47ae6e1f`):** `tests/pageReopenCfi.test.ts`.
+     - Render `useLibrary` with a stubbed `electronAPI` holding one doc with cfi `A`.
+     - Call the persistence path the relocate save uses with position `n` and cfi `B`.
+     - Assert that the library entry's cfi is `B`, which a later `handleOpenDocById` hands to `openDoc`.
+     - On `47ae6e1f` the entry keeps `A`.
+  2. **Second test:** `_persistAndLog` sends `(position, cfi)` from the same relocate, the last one the view reported. When no relocate happened since the open, it sends the position with no cfi (`undefined`), so main keeps the stored cfi (`documents.js:24`). This goes in `tests/useProgressTracker.test.ts`.
+  3. **Live check:** attempt 3's route on a scratch profile. The S2 reopen lands on the S2 exit page (the same word text as the saved position), and `library.json` keeps that exit's cfi through the reopen and the exit after it.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47, 48).
+- **Tasks:**
+  1. `src/hooks/useLibrary.ts:146-148`: `updateProgress(docId, position, cfi?)` sets `cfi` when one is given.
+  2. `src/components/ReaderContainer.tsx`:
+     - Change the port's `updateProgress` (`:309`) and the relocate save (`:323-325`) to pass the cfi to `onUpdateProgress`.
+     - Have the port's `updateDocProgress` (`:308`) also update the renderer copy when it carries a cfi (it is used by `page/ModeRuntime.ts:586` and `:611`).
+     - Keep position −1 (`KEEP_STORED_POSITION`) out of the renderer copy's `position`.
+  3. `src/hooks/useProgressTracker.ts:231`: send the cfi of the last relocate (a ref set by `scheduleRelocateSave`) instead of `activeDoc.cfi`, or none.
+  4. The shared-core freeze set: `ReaderContainer.tsx` is in it, so this item claims the integration window.
+- **Lessons applied:** LL-161 (positions are checked by word text and cfi); LL-142 (verdict by measurement); standing rule 45 (the owner's route is re-checked in the re-run smoke).
+- **Lane:** Reader Engine. Execution surface A/C.
+- **Branch:** `eb/page-reopen-cfi-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\page-reopen-cfi-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
+- **Scope:** Shared-core touches: `src/components/ReaderContainer.tsx` — this item holds the shared-core integration window (no other open item edits it). Fence: `src/hooks/useLibrary.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `tests/pageReopenCfi.test.ts` (A), `tests/useProgressTracker.test.ts`, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo (standing rule 41). The live check includes a full relaunch between sessions (planner amendment).
+- **Path:** dispatch.
+
+<a id="folder-switch-header-1"></a>
+
+#### FOLDER-SWITCH-HEADER-1 — The header follows the folder switch at once *(position 6.2 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-202)*
+
+
+- **What:** in `useLibrary.switchFolder`, set the renderer's `sourceFolder` and `recentFolders` before awaiting `api.switchFolder`. Keep the previous settings, and restore them with the error toast if the call returns `{ error }`. The `getState()` refresh after it stays.
+- **Done when:**
+  1. **Regression test (fails on `47ae6e1f`)** in `tests/useLibrary.test.ts`. The stubbed `switchFolder` returns a promise the test holds unresolved. After calling `switchFolder("B")`, `settings.sourceFolder` is `"B"` before the promise resolves. On `47ae6e1f` it stays the old folder.
+  2. A second test: when the stub resolves `{ error }`, `sourceFolder` returns to the old folder and the toast shows.
+  3. **Live:** `run202`'s route. The header reads B within 200 ms of the real click, with 1,500 files in B.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+- **Not in scope:** making main's `switch-folder` resolve before the sync. Other callers rely on the library being synced when it resolves.
+- **Lessons applied:** the real-click rule (Done-when 3); LL-142.
+- **Lane:** Library & Content. Execution surface C.
+- **Branch:** `eb/folder-switch-header-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\folder-switch-header-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
+- **Scope:** Fence: `src/hooks/useLibrary.ts`, `tests/useLibrary.test.ts`, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo. Branch from PAGE-REOPEN-CFI-1 (both edit `useLibrary.ts`); merges after it.
+- **Path:** dispatch.
+
+<a id="book-text-colour-1"></a>
+
+#### BOOK-TEXT-COLOUR-1 — Book text takes the theme's text colour *(position 6.3 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-208)*
+
+
+- **What:** after the `html, body` rule in each mode's injected theme, add `body *:not(a) { color: inherit !important; }`. The places:
+  - `src/reader/modes/page/helpers/foliateStyles.ts`, after the rule at `:39-47`;
+  - the same place in `focus/`, `flow/` and `narrate/helpers/foliateStyles.ts`;
+  - `src/utils/foliateStyles.ts` is imported by nothing at `47ae6e1f` and needs no change.
+
+  Links keep the accent through the existing `a { color: ${accent} !important; }` (`:54`). The word-state classes set backgrounds, and `.page-word--chunk-active` sets `fg`, so they are unaffected.
+- **Hybrid (tier 2), for Brain:** a book's own text colours (a coloured rubric, say) become the theme colour under every theme. That is the usual reader behaviour, and the only rule that measured readable here. The narrower alternative is to override only the Gutenberg ids (`#pg-header *, #pg-footer *`). It fixes the reported book and nothing else, so other books with `color: initial` or a black text rule stay unreadable.
+- **Done when:**
+  1. **Brain's acceptance test** (BUG_REPORT): a contrast of at least 4.5:1 between the computed text and background colours inside the foliate iframe, under light, dark, blurby and system with E-ink on and off. It must include the `#pg-header` page of the bundled sample. This fails on `47ae6e1f` (black on rgb(26,42,74) is 1.5:1).
+  2. A unit test per mode's `injectStyles` that the style text contains the inherit rule after `html, body`.
+  3. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+- **Lessons applied:** LL-142 (cause by measurement: the first hypothesis was refuted live); mode isolation (each mode's helper is changed in its own runtime, with no shared import added).
+- **Lane:** UX polish. Execution surface C.
+- **Branch:** `eb/book-text-colour-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\book-text-colour-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
+- **Scope:** Fence: the four `src/reader/modes/*/helpers/foliateStyles.ts`, the per-mode test, the contrast test, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo. Rule choice: **owner decision 2026-10-23 (via Blurby.Brain): the general rule.** "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour." Extra Done-when (Brain): a `<span>` inside an `<a>` computes to the accent, not the body text colour. BOOK-TYPE-SCALE-1 stacks on this branch.
+- **Path:** dispatch.
+
+<a id="narrate-start-stack-1"></a>
+
+#### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(position 6.4 — Full Spec; authored 2026-10-23 from Blurby.Brain's BUG-206 ruling; release fix)*
+
+- **What:** wherever Narrate shows a start error to the reader, also call `logError` once with the error's full stack (`err.stack`, falling back to `String(err)`). That way the next BUG-206 occurrence (`setEnd` on a drop-cap page) leaves its call site in `error.log`. Change nothing else.
+- **Why:** BUG-206 did not reproduce live in SMOKE8-DIAG-1 (the positive control failed). Its static exposure is 15 of 40 owner books (38%). Brain ruled (2026-10-23) that a stack capture ships in the release fix.
+- **Done when:**
+  1. **Re-grep:** list every site in `src/reader/modes/narrate/` where a start error reaches the reader (toast, status or error state), with `git grep -n` evidence, in the memo.
+  2. **Test (fails on the base):** in `tests/narrate/`, a start that throws an `Error` whose `.stack` is `"S"` makes `logError` receive a message containing `"S"`. On the base it does not.
+  3. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  4. **Fence:** the narrate files named in (1), one test file, `docs/governance/BUG_REPORT.md` (BUG-206: "stack capture shipped; frequency still unmeasured; static exposure 38%"), and the staging memo.
+- **Branch:** `eb/narrate-start-stack-1` from `refs/remotes/origin/main`. Ask for merge go.
+- **Lane:** TTS / Narration Engine. Effort: XS. **Path:** dispatch.
+
 <a id="book-type-scale-1"></a>
 
 #### BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(position 72 — Full Spec; authored 2026-10-23 on main @ `6dd452e4` from the owner's design decision; not a release gate; merges after the BUG-208 fix, which edits the same four files)*
@@ -2765,6 +2853,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - <a id="zip-async-read-1"></a>**ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously** *(position 69 — stub; S; not a release gate)*. From ZIP-READ-FOLLOWUPS-1 (Blurby.Brain, 2026-10-23). adm-zip's path constructor reads the file synchronously (`fs.readFileSync`), which breaks the standing rule that main-process file I/O is async. Fix: in `openZip` (`main/zip-read.js`), read with `fsPromises.readFile` and hand the buffer to adm-zip, with the cap checked on the stat. That also closes the gap between the stat and the read. After ZIP-READ-FOLLOWUPS-1 and the Stage 8 freeze. Lane: Library & Content.
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — In Focus, the text scrolls the cursor's line into the fixed band** *(position 70 — stub; S; after BAND-ALIGN-1; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". In Focus, the band stays at its place. On arrival, and on every highlight move, the reader scrolls so that the cursor word's line sits inside the band. In Flow, the pacer scrolls the underlined word's line under the band, with the word timer as the only clock (READER-VISUAL-DIAG-1 H3). It needs BAND-ALIGN-1's line step. The spec must re-measure H2 and H3 after the change (60–77% out of band on the base). Lane: Reader Engine.
 - <a id="narrate-sentence-initials-1"></a>**NARRATE-SENTENCE-INITIALS-1 — A single-letter initial does not end a sentence** *(position 71 — stub; XS; after NARRATE-SENTENCE-RESUME-1; not a release gate)*. From NARRATE-SENTENCE-RESUME-1's live check (2026-10-23). The engine's sentence segmentation ends a sentence at a single-letter initial before a capitalised name ("M. Annius Verus"), so a resume rewinds to "Annius" instead of the sentence start. Fix direction: treat a single uppercase letter followed by a period and a capitalised word as an abbreviation, not a sentence end, in the segmentation `sentenceStartAt` uses; with tests for "M. Annius", "J. R. R. Tolkien" and a true one-letter sentence end. Lane: TTS / Narration Engine.
+- <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
