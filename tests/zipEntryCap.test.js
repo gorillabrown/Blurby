@@ -121,3 +121,43 @@ describe("EPUB reads at the default caps", () => {
     expect(await validateEpub(file)).toEqual({ valid: true, errors: [] });
   }, 60_000);
 });
+
+// ZIP-READ-FOLLOWUPS-1 (N1): an archive over ZIP_FILE_MAX_BYTES is refused before adm-zip reads the whole file.
+describe("archive size cap", () => {
+  const OPEN_ERROR = "Could not open this EPUB — the file may be corrupted.";
+  let savedFileCap;
+  beforeAll(() => { savedFileCap = constants.ZIP_FILE_MAX_BYTES; });
+  afterAll(() => { constants.ZIP_FILE_MAX_BYTES = savedFileCap; });
+
+  it("(o) every EPUB open refuses an archive over the cap and takes its open-failure path", async () => {
+    const file = buildEpub();
+    expect(fs.statSync(file).size).toBeGreaterThan(1024);
+    constants.ZIP_FILE_MAX_BYTES = 1024;
+    try {
+      expect(await extractWords(file)).toEqual({ words: [], sections: [], footnoteCues: [], totalWords: 0 });
+      expect(await extractContent(file)).toEqual({ userError: OPEN_ERROR });
+      const dataPath = fs.mkdtempSync(path.join(tmp, "cover-o-"));
+      expect(await extractEpubCover(file, "doc1", dataPath)).toBeNull();
+      const coversDir = path.join(dataPath, "covers");
+      expect(fs.existsSync(coversDir) ? fs.readdirSync(coversDir) : []).toEqual([]);
+      expect(await extractEpubMetadata(file)).toEqual({ title: null, author: null });
+      const r = await validateEpub(file);
+      expect(r.valid).toBe(false);
+      expect(r.errors.join("\n")).toMatch(/too large/);
+    } finally {
+      constants.ZIP_FILE_MAX_BYTES = savedFileCap;
+    }
+  });
+
+  it("(p) control: with the cap restored, the same file reads as (f) does", async () => {
+    const file = buildEpub();
+    expect((await extractWords(file)).totalWords).toBeGreaterThan(0);
+    const text = await extractContent(file);
+    expect(typeof text).toBe("string");
+    expect(text).toContain("word");
+    const dataPath = fs.mkdtempSync(path.join(tmp, "cover-p-"));
+    expect(fs.statSync(await extractEpubCover(file, "doc1", dataPath)).size).toBe(1028);
+    expect((await extractEpubMetadata(file)).title).toBe("Bomb");
+    expect(await validateEpub(file)).toEqual({ valid: true, errors: [] });
+  });
+});
