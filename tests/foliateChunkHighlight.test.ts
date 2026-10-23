@@ -8,6 +8,7 @@ import * as focusWordHighlight from "../src/reader/modes/focus/helpers/foliateWo
 import * as focusStyles from "../src/reader/modes/focus/helpers/foliateStyles";
 import * as flowWordHighlight from "../src/reader/modes/flow/helpers/foliateWordHighlight";
 import * as flowStyles from "../src/reader/modes/flow/helpers/foliateStyles";
+import * as narrateStyles from "../src/reader/modes/narrate/helpers/foliateStyles";
 import type { ChunkReadingVisualState } from "../src/types/chunkReading";
 import type { FlowRenderedWordRootDescriptor } from "../src/utils/FlowScrollEngine";
 import type { BlurbySettings } from "../src/types";
@@ -496,4 +497,45 @@ describe.each([
   ["flow", flowWordHighlight, flowStyles],
 ] as const)("Foliate chunk visual state rendering (%s mode helper copy)", (_mode, wordHighlight, styles) => {
   chunkVisualStateCases(wordHighlight, styles);
+});
+
+// BOOK-TYPE-SCALE-1: one type scale for book headers and body text, in every mode's injector copy.
+function cssRules(css: string): { selectors: string[]; body: string }[] {
+  const rules: { selectors: string[]; body: string }[] = [];
+  for (const m of css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    rules.push({ selectors: m[1].split(",").map((sel) => sel.trim()), body: m[2] });
+  }
+  return rules;
+}
+
+describe.each([
+  ["page", pageStyles],
+  ["focus", focusStyles],
+  ["flow", flowStyles],
+  ["narrate", narrateStyles],
+] as const)("book type scale (%s mode helper copy)", (_mode, styles) => {
+  it("sizes headers and body text from the reader's root size and keeps monospace", () => {
+    const doc = document.implementation.createHTMLDocument("book-type-scale");
+    const publisher = doc.createElement("style");
+    publisher.textContent = "h2 { font-size: 2.5em; font-family: Arial } p { font-size: 0.8em; font-family: Courier } pre { font-family: monospace }";
+    doc.head.appendChild(publisher);
+
+    styles.injectStyles(doc, {
+      fontFamily: "Georgia, serif",
+      layoutSpacing: { line: 1.8, paragraph: 1 },
+    } as unknown as BlurbySettings);
+
+    const rules = cssRules(doc.getElementById("blurby-theme")?.textContent ?? "");
+    const sized = (sel: string, size: string) =>
+      rules.some((r) => r.selectors.includes(sel) && r.body.includes(`font-size: ${size} !important`));
+    expect(sized("h2", "1.3rem")).toBe(true);
+    expect(sized("p", "1rem")).toBe(true);
+    expect(
+      rules.some(
+        (r) => r.selectors.some((sel) => sel.includes(":not(pre)")) && r.body.includes("font-family: Georgia, serif !important"),
+      ),
+    ).toBe(true);
+    const inline = ["span", "sup", "sub", "small"];
+    expect(rules.filter((r) => /font-size/.test(r.body) && r.selectors.some((sel) => inline.includes(sel)))).toEqual([]);
+  });
 });
