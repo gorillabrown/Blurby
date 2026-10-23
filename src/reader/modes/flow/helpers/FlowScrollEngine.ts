@@ -83,8 +83,23 @@ export type FlowRenderedWordRootsProvider = () => FlowRenderedWordRootDescriptor
 
 export const FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY = "__blurbyRenderedWordRoots";
 
+/**
+ * BAND-ALIGN-2: the scroll position, when the container is not the element that scrolls. Foliate's scrolled paginator
+ * scrolls an element inside a closed shadow root; its renderer exposes the position (containerPosition), the visible
+ * height (size) and the content height (viewSize). Without a provider the container's own scrollTop is used.
+ */
+export interface FlowScrollPositionProvider {
+  get(): number;
+  set(value: number): void;
+  viewportHeight(): number;
+  contentHeight(): number;
+}
+
+export const FLOW_SCROLL_POSITION_PROVIDER_KEY = "__blurbyScrollPosition";
+
 type FlowRenderedWordRootHost = HTMLElement & {
   [FLOW_RENDERED_WORD_ROOTS_PROVIDER_KEY]?: FlowRenderedWordRootsProvider;
+  [FLOW_SCROLL_POSITION_PROVIDER_KEY]?: FlowScrollPositionProvider;
 };
 
 export class FlowScrollEngine {
@@ -142,7 +157,7 @@ export class FlowScrollEngine {
 
     return {
       left: (left - this.container.scrollLeft) + (containerRect.left - parentRect.left),
-      top: (top - this.container.scrollTop) + (containerRect.top - parentRect.top),
+      top: (top - this.getScrollTop()) + (containerRect.top - parentRect.top),
     };
   }
 
@@ -330,6 +345,7 @@ export class FlowScrollEngine {
 
   jumpToWord(wordIndex: number): void {
     this.wordIndex = wordIndex;
+    this.completeSent = false;
     if (!this.running) return;
     if (this.followerMode) {
       this.followWord(wordIndex);
@@ -395,7 +411,7 @@ export class FlowScrollEngine {
       }
       return;
     }
-    const lineIdx = this.findLineForWord(wordIndex);
+    const lineIdx = this.lineAtOrBefore(wordIndex);
     const line = this.lines[lineIdx];
     this.wordIndex = wordIndex;
     if (lineIdx !== this.lineIdx) {
@@ -406,6 +422,8 @@ export class FlowScrollEngine {
         } else if (lineIdx < this.einkPageStart || lineIdx >= this.einkPageStart + EINK_LINES_PER_PAGE || this.isLineBelowView(line)) {
           this.einkPageStart = lineIdx;
           this.advanceZone(lineIdx);
+        } else {
+          this.reportBand(lineIdx); // an e-ink page holds still; the band moves to the line
         }
       }
       this.callbacks.onLineChange?.(lineIdx, line);
@@ -437,14 +455,45 @@ export class FlowScrollEngine {
     this.cursor.style.display = "block";
   }
 
+  /** The line holding the word, else the last line starting before it (a word with no span stays on its line). */
+  private lineAtOrBefore(wordIndex: number): number {
+    let at = 0;
+    for (let i = 0; i < this.lines.length; i++) {
+      if (this.lines[i].firstWord > wordIndex) break;
+      at = i;
+    }
+    return at;
+  }
+
+  /** BAND-ALIGN-2 R1/R2: report the band around a line, in the top window's client px, at the current scroll. */
+  private reportBand(lineIdx: number): void {
+    if (!this.container) return;
+    const ch = this.getViewportHeight();
+    if (ch <= 0) return;
+    const bandLines = normalizeBandLines(this.bandLinesSetting);
+    const scrollTop = this.getScrollTop();
+    // The band's lines plus one either side (for the gap midpoints), as glyph boxes in content space.
+    const reach = Math.ceil((Math.max(bandLines, 1) - 1) / 2) + 1;
+    const from = Math.max(0, lineIdx - reach);
+    const window = this.lines.slice(from, lineIdx + reach + 1).map((entry) => ({ top: entry.y, bottom: entry.bottom }));
+    const band = computeBandEdges(window, lineIdx - from, bandLines);
+    const clientTop = this.container.getBoundingClientRect().top;
+    this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
+    this.onZoneTopChange?.(
+      this.currentZoneTopFrac,
+      band ? { top: band.top - scrollTop + clientTop, bottom: band.bottom - scrollTop + clientTop } : undefined,
+    );
+  }
+
   /** Whether a line's bottom is below the scroll container's view (an e-ink page steps early rather than lose the cursor). */
   private isLineBelowView(line: LineInfo): boolean {
     if (!this.container) return false;
-    return line.bottom - this.container.scrollTop > this.container.clientHeight;
+    return line.bottom - this.getScrollTop() > this.getViewportHeight();
   }
 
   jumpToLine(direction: "prev" | "next"): void {
     if (!this.running) return;
+    this.completeSent = false;
     this.clearTimers();
     if (direction === "prev" && this.lineIdx > 0) this.lineIdx--;
     else if (direction === "next" && this.lineIdx < this.lines.length - 1) this.lineIdx++;
@@ -465,6 +514,7 @@ export class FlowScrollEngine {
 
   jumpToParagraph(direction: "prev" | "next"): void {
     if (!this.running || this.paragraphBreaks.size === 0) return;
+    this.completeSent = false;
     this.clearTimers();
     const breaks = Array.from(this.paragraphBreaks).sort((a, b) => a - b);
     let targetWord: number;
@@ -536,6 +586,7 @@ export class FlowScrollEngine {
     const wordEls = this.getWordElements();
     if (wordEls.length === 0) return [];
     const cRect = this.container.getBoundingClientRect();
+    const scrollTop = this.getScrollTop();
     const lines: LineInfo[] = [];
     let cur: LineInfo | null = null;
 
@@ -560,8 +611,8 @@ export class FlowScrollEngine {
       const rect = el.getBoundingClientRect();
       const idx = parseInt(el.getAttribute("data-word-index") || "0", 10);
       const ifOff = getIframeOffset(el);
-      const top = rect.top + ifOff.top - cRect.top + this.container!.scrollTop;
-      const bottom = rect.bottom + ifOff.top - cRect.top + this.container!.scrollTop;
+      const top = rect.top + ifOff.top - cRect.top + scrollTop;
+      const bottom = rect.bottom + ifOff.top - cRect.top + scrollTop;
       const left = rect.left + ifOff.left - cRect.left + this.container!.scrollLeft;
       const right = rect.right + ifOff.left - cRect.left + this.container!.scrollLeft;
 
@@ -834,7 +885,7 @@ export class FlowScrollEngine {
   private advanceZone(lineIdx: number, forceReset = false): void {
     if (!this.container || lineIdx < 0 || lineIdx >= this.lines.length) return;
     const line = this.lines[lineIdx];
-    const ch = this.container.clientHeight;
+    const ch = this.getViewportHeight();
     if (ch <= 0) return;
 
     // Flow-only "wheel" mode: keep the reading window stationary and roll text through it. BAND-ALIGN-2 R3: scroll the
@@ -843,7 +894,7 @@ export class FlowScrollEngine {
     // legacy behavior unchanged.
     if (this.stableWindowScroll && !this.followerMode) {
       const bandLines = normalizeBandLines(this.bandLinesSetting);
-      const maxScrollTop = Math.max(0, this.container.scrollHeight - ch);
+      const maxScrollTop = Math.max(0, this.getScrollHeight() - ch);
       const targetScrollTop = this.isEink && this.wordClock
         ? Math.min(maxScrollTop, Math.max(0, line.y))
         : computeAnchorScrollTop({
@@ -856,37 +907,26 @@ export class FlowScrollEngine {
           bandHeightPx: readZoneLineStepPx(this.container) * Math.max(bandLines, 1),
           maxScrollTop,
         });
-      if (Math.abs(this.container.scrollTop - targetScrollTop) > 0.5) {
-        this.container.scrollTop = targetScrollTop;
+      if (Math.abs(this.getScrollTop() - targetScrollTop) > 0.5) {
+        this.setScrollTop(targetScrollTop);
       }
-      const scrollTop = this.container.scrollTop;
-      // The band's lines plus one either side (for the gap midpoints), as glyph boxes in content space.
-      const reach = Math.ceil((Math.max(bandLines, 1) - 1) / 2) + 1;
-      const from = Math.max(0, lineIdx - reach);
-      const window = this.lines.slice(from, lineIdx + reach + 1).map((entry) => ({ top: entry.y, bottom: entry.bottom }));
-      const band = computeBandEdges(window, lineIdx - from, bandLines);
-      const clientTop = this.container.getBoundingClientRect().top;
-      this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
-      this.onZoneTopChange?.(
-        this.currentZoneTopFrac,
-        band ? { top: band.top - scrollTop + clientTop, bottom: band.bottom - scrollTop + clientTop } : undefined,
-      );
+      this.reportBand(lineIdx);
       return;
     }
 
-    const lineViewportFrac = (line.y - this.container.scrollTop) / ch;
+    const lineViewportFrac = (line.y - this.getScrollTop()) / ch;
     const zoneBotFrac = lineViewportFrac + this.zoneHeightFrac;
     const shouldJump = forceReset
       || zoneBotFrac > this.zoneResetThreshold
       || lineViewportFrac < 0;
 
     if (shouldJump) {
-      const isContainerScrollable = this.container.scrollHeight > ch + 1
-        || this.container.scrollHeight === 0;
+      const isContainerScrollable = this.getScrollHeight() > ch + 1
+        || this.getScrollHeight() === 0;
       if (isContainerScrollable) {
         // Instant page-jump: place the line at the initial zone top.
         const newScrollTop = Math.max(0, line.y - ch * this.initialZoneTop);
-        this.container.scrollTop = newScrollTop;
+        this.setScrollTop(newScrollTop);
         this.currentZoneTopFrac = Math.min(this.initialZoneTop, (line.y - newScrollTop) / ch);
       } else {
         // Non-scrollable container (short Foliate section): scrollIntoView fallback.
@@ -904,10 +944,35 @@ export class FlowScrollEngine {
   /** Recompute the zone height (in viewport fractions) from line height × zone lines. */
   private computeZoneHeightFrac(): void {
     if (!this.container) { this.zoneHeightFrac = 0; return; }
-    const ch = this.container.clientHeight;
+    const ch = this.getViewportHeight();
     if (ch <= 0) { this.zoneHeightFrac = 0; return; }
     const lineHeight = readZoneLineStepPx(this.container); // BAND-ALIGN-1: inherited from the zone host
     this.zoneHeightFrac = (lineHeight * this.zoneLines) / ch;
+  }
+
+  private scrollPosition(): FlowScrollPositionProvider | null {
+    return (this.container as FlowRenderedWordRootHost | null)?.[FLOW_SCROLL_POSITION_PROVIDER_KEY] ?? null;
+  }
+
+  private getScrollTop(): number {
+    const provider = this.scrollPosition();
+    return provider ? provider.get() : this.container?.scrollTop ?? 0;
+  }
+
+  private setScrollTop(value: number): void {
+    const provider = this.scrollPosition();
+    if (provider) provider.set(value);
+    else if (this.container) this.container.scrollTop = value;
+  }
+
+  private getViewportHeight(): number {
+    const provider = this.scrollPosition();
+    return provider ? provider.viewportHeight() : this.container?.clientHeight ?? 0;
+  }
+
+  private getScrollHeight(): number {
+    const provider = this.scrollPosition();
+    return provider ? provider.contentHeight() : this.container?.scrollHeight ?? 0;
   }
 
   private scrollToWord(wordIndex: number, forceReset = false): void {

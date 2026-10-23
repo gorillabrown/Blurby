@@ -499,6 +499,8 @@ export default function FocusFoliateView({
   const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), lines: normalizeBandLines(settings.flowZoneLines) };
   const bandLayoutRef = useRef(bandLayout);
   bandLayoutRef.current = bandLayout;
+  /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
+  const appliedBandLayoutRef = useRef<{ anchor: number; lines: number } | null>(null);
 
   /** R1/R2: put the band on the zone host around a word span's line, from the rendered line boxes (no scroll). */
   const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
@@ -537,30 +539,58 @@ export default function FocusFoliateView({
   }, []);
 
   /**
+   * BAND-ALIGN-2: where the view scrolls. Foliate's scrolled paginator scrolls an element inside a closed shadow root;
+   * its renderer exposes the position (containerPosition), the visible height (size) and the content height
+   * (viewSize). Otherwise the resolved scroll container's own scrollTop.
+   */
+  const getScrollPosition = useCallback(() => {
+    const el = resolveFoliateScrollContainer();
+    const renderer = viewRef.current?.renderer;
+    if (renderer && typeof renderer.containerPosition === "number" && typeof renderer.size === "number" && typeof renderer.viewSize === "number") {
+      return {
+        topPx: (el ?? containerRef.current)?.getBoundingClientRect().top ?? 0,
+        viewportHeightPx: renderer.size as number,
+        contentHeightPx: renderer.viewSize as number,
+        get: (): number => renderer.containerPosition as number,
+        set: (value: number): void => { renderer.containerPosition = value; },
+      };
+    }
+    if (!el) return null;
+    return {
+      topPx: el.getBoundingClientRect().top,
+      viewportHeightPx: getFlowViewportHeightPx() || el.clientHeight,
+      contentHeightPx: el.scrollHeight,
+      get: (): number => el.scrollTop,
+      set: (value: number): void => { el.scrollTop = value; },
+    };
+  }, [resolveFoliateScrollContainer, getFlowViewportHeightPx]);
+
+  /**
    * R3: scroll so that the span's line centre sits at the anchor, clamped to the scroll range (the leading inset
    * included), then place the band around the line wherever it ended up.
    */
   const alignSpanToBand = useCallback((span: Element): void => {
-    const scroller = resolveFoliateScrollContainer();
+    const scroll = getScrollPosition();
     const around = collectLineBoxesAround(span, 0);
-    if (scroller && around) {
+    if (scroll && around) {
       const line = around.lines[around.cursor];
       const { anchor, lines } = bandLayoutRef.current;
       const host = containerRef.current;
+      const scrollTop = scroll.get();
       const target = computeAnchorScrollTop({
-        scrollTop: scroller.scrollTop,
+        scrollTop,
         lineTopPx: line.top,
         lineBottomPx: line.bottom,
-        containerTopPx: scroller.getBoundingClientRect().top,
-        viewportHeightPx: getFlowViewportHeightPx() || scroller.clientHeight,
+        containerTopPx: scroll.topPx,
+        viewportHeightPx: scroll.viewportHeightPx,
         anchor,
         bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * Math.max(lines, 1),
-        maxScrollTop: scroller.scrollHeight - scroller.clientHeight,
+        maxScrollTop: scroll.contentHeightPx - scroll.viewportHeightPx,
       });
-      if (Math.abs(scroller.scrollTop - target) > 0.5) scroller.scrollTop = target;
+      if (Math.abs(scrollTop - target) > 0.5) scroll.set(target);
     }
     placeBandAroundSpan(span);
-  }, [resolveFoliateScrollContainer, getFlowViewportHeightPx, placeBandAroundSpan]);
+  }, [getScrollPosition, placeBandAroundSpan]);
 
   /** The painted reading cursor's span in the loaded sections, if any. */
   const findCursorSpan = useCallback((): Element | null => {
@@ -1258,18 +1288,22 @@ export default function FocusFoliateView({
     const applyZoneProperties = () => {
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
-      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3), re-placed at once on an anchor or Lines change
-      // without moving the reading word; before a cursor is painted it sits at the anchor. It never moves while the
-      // reader is browsing away.
-      if (!userBrowsingRef.current) {
-        const cursorSpan = findCursorSpan();
-        if (cursorSpan) alignSpanToBand(cursorSpan);
-        else placeBandAtAnchor(viewportHeight);
-      }
       setFlowInsetsForRenderedDocs(
         viewportHeight * FLOW_ZONE_INITIAL_TOP,
         viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP),
       );
+      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3); before a cursor is painted it sits at the anchor.
+      // An anchor or Lines change re-places it at once (scrolling the cursor line to the new anchor) without moving
+      // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
+      const layout = bandLayoutRef.current;
+      const layoutChanged = appliedBandLayoutRef.current !== null
+        && (appliedBandLayoutRef.current.anchor !== layout.anchor || appliedBandLayoutRef.current.lines !== layout.lines);
+      appliedBandLayoutRef.current = layout;
+      if (userBrowsingRef.current) return;
+      const cursorSpan = findCursorSpan();
+      if (!cursorSpan) placeBandAtAnchor(viewportHeight);
+      else if (layoutChanged) alignSpanToBand(cursorSpan);
+      else placeBandAroundSpan(cursorSpan);
     };
 
     applyZoneProperties();
@@ -1297,6 +1331,7 @@ export default function FocusFoliateView({
     scheduleWordPositionIndexRebuild,
     findCursorSpan,
     alignSpanToBand,
+    placeBandAroundSpan,
     placeBandAtAnchor,
   ]);
 
