@@ -117,20 +117,24 @@
 ### BUG-188 — Focus and Flow horizontal cursor band sits apart from the word cursor
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
 **Severity:** LOW (visual; reading stays possible)
-**Status:** OPEN — pre-existing; triage together with BUG-169 and the "Flow band" item the removal spec lists as out of scope. Lane: Reader Engine.
+**Status:** OPEN — measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as BAND-ALIGN-1 (in that report). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
 **Location:** corrected 2026-10-12 (roadmap review static census): the visible "band" is the reading-zone mask (`mask-image` on `.rm-focus-view` / `.rm-flow-view`, `src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), positioned by `applyZoneProperties` and the Flow line pacer; `.flow-shrink-cursor` is hidden and is not the band.
 **Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
-**Root cause:** Undetermined. The base build (`main` @ `612d03f5`, same profile, A/B 2026-10-12) shows the same placement, so the removal did not cause it. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
+**Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):**
+- **Height:** the band is always 5 × 24 px = 120 px, because the outer view's line-height is `normal` and `applyZoneProperties` falls back to 24. It covers 4.4 body lines at 100% text size and 3.6 at 120%.
+- **Position:** it is fixed at 15% of the view, and nothing places the cursor's line in it. The Focus cursor was outside it in every check.
+- **Flow:** the underline was outside the band in 60–77% of one-second samples over 3 minutes of play; after an early 15–19 s in-band run the band rarely holds it again. That fits the word timer and the line pacer drifting apart (inferred; the pacer was not read).
+- **Not the removal:** the base build (`main` @ `612d03f5`) shows the same. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
 **Evidence:** Owner screenshot 1250x849, `C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png` (kept outside the repository: `docs/governance/bug-reports/.gitignore` excludes screenshots); the staging memo's observation and evidence paragraph.
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) measures hypotheses H1–H3 live and writes the fix specification. Static census: not BUG-169 (a React update-depth loop); the same defect as the owner's 2026-10-10 "Flow band" sighting.
 
 ### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (log noise and possible render cost; no visible failure reported)
-**Status:** OPEN — cause undetermined; needs a read-only diagnosis. Lane: Reader Engine.
-**Location:** the five `ResizeObserver` instances in the Page, Focus and Flow Foliate view files, which NARRATE-REMOVE-1 did not touch.
+**Status:** OPEN — root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as FOLIATE-OBSERVER-LEAK-1 (in that report). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
+**Location (corrected 2026-10-23):** not the app's `ResizeObserver`s. It is foliate-js 1.0.1's `View` observer (`node_modules/foliate-js/paginator.js:201`, observed on load `:265`), which `View.destroy()` (`:410-411`) fails to unobserve. Our mode views detach the book frame before the deferred `view.close()` runs (`src/reader/modes/focus/FoliateView.tsx:1086-1096`; Flow and Page are the same).
 **Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
-**Root cause:** Undetermined. A base session of about one minute the same day logged none, but the sessions differ in length and actions, so a pre-existing pattern and a change of this sprint are both still open.
+**Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):** after a mode switch, foliate `View` observers are left watching dead 0×0 section bodies, and Chromium reports "loop completed with undelivered notifications" every frame. Leaving Focus then entering Flow on the packaged build gave 60 errors a second for the rest of the session (14,428 in 328.7 s). Disconnecting the leaked `View` observers mid-loop dropped the rate from 60 to 0 a second; how they drive the loop is not established (their callbacks ran once each). The app's own observers write equal values and do not loop.
 **Evidence:** The staging memo's smoke note and observation (counts, timestamps).
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) reproduces it with equal-length sessions on the base, the branch and a production build, names the oscillating observer (hypothesis H4) and writes the fix specification.
 
