@@ -8,6 +8,14 @@
 
 ## Incomplete
 
+### BUG-208 — With E-ink display mode on and a dark theme, reader text is black on black
+**Reported:** 2026-10-23 (owner, screenshot, Narrate mode on *Meditations*; installed ARM64 build `47ae6e1f`, settings left by the Stage 8 smoke: `theme: blurby`, `einkMode: true`)
+**Severity:** HIGH (the book is unreadable). Gate status: for Blurby.Brain to rule.
+**Status:** OPEN. The cause is suspected and is being confirmed by the owner turning E-ink Display Mode off. Lane: UX polish.
+**Description:** the page text renders near-black on the dark reader background. Only the highlighted word and the links are readable.
+**Suspected cause:** `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
+**Fix path:** EINK-CONTROLS-1. Make E-ink one control (owner decision pending; recommended), or force a light reader background whenever `einkMode` is on.
+
 ### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
 **Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
 **Severity:** HIGH (the reader loses their place); **release blocker** (release gate (2) failed on it)
