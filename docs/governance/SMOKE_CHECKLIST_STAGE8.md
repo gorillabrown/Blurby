@@ -28,7 +28,7 @@ Run it only after gate (1) has passed on the quiet machine. The build you test m
 ### A1. Install and launch
 - [ ] 1. Install the ARM64 build and launch it. The Blurby tray icon appears in the notification area, and right-clicking it opens its menu. *(PACKAGING-FIX-1 DW10a)*
 - [ ] 2. The window's taskbar icon is Blurby's, not Electron's default icon. *(PACKAGING-FIX-1 DW10b)*
-- [ ] 3. Open Task Manager → Details, or Settings → Help, and check Blurby's architecture: it reports **arm64**, native, not x64 under emulation. *(RELEASE-RUNBOOK-1, owner decision B)*
+- [ ] 3. Open Task Manager → Details, add the **Architecture** column (right-click a column header → Select columns), and find Blurby: it reports **ARM64**, not x64 (emulated). *(RELEASE-RUNBOOK-1, owner decision B)*
 
 ### A2. Library
 - [ ] 4. Open the sample *Meditations* from the library. It opens and renders at its saved position. *(PACKAGING-FIX-1 DW10c)*
@@ -61,7 +61,7 @@ Do these before Narrate: UX-POLISH-2's checks must run before the voice model wa
 - [ ] 22. Settings → Connectors shows a pairing code, and **New Code** shows a new one. *(GET-STATE-SECRET-1 DW13b; SETTINGS-KEY-TRUST-1 DW12)*
 
 ### A7. Quit and relaunch
-- [ ] 23. Start Narrate playing, then quit (Alt+F4). Relaunch, pause Narrate, and quit again. Neither quit shows a crash dialog, and no new crash report appears in `%APPDATA%\blurby\Crashpad\reports`. *(ELECTRON-42-UPGRADE-1 DW13; NARRATE-EXIT-CRASH-1; release gate (11))*
+- [ ] 23. Start Narrate playing, then quit (Alt+F4). Relaunch, pause Narrate, and quit again. Neither quit shows a crash dialog, and no new crash report appears in the profile's Crashpad folder (`%APPDATA%\blurby\Crashpad\reports`; the executor checks it). *(ELECTRON-42-UPGRADE-1 DW13; NARRATE-EXIT-CRASH-1; release gate (11))*
 - [ ] 24. Relaunch. The title you changed in #7 is shown. *(SAVE-LIBRARY-MERGE-1 DW13b)*
 - [ ] 25. The theme, Focus text size and card size from #21 are kept. *(SETTINGS-KEY-TRUST-1 DW12)*
 
@@ -108,7 +108,7 @@ The executor quits every Blurby, copies `library.json` and `settings.json` into 
 | Held item | Checks |
 |---|---|
 | PACKAGING-FIX-1 | 1, 2, 4, 40 |
-| UX-POLISH-1 | 16, 17, 19 (gate (2) names (c), (e), (f); (a), (b), (d) were taken at G2) |
+| UX-POLISH-1 | 16, 17, 19 (gate (2) names only (c), (e) and (f); its memo deferred Done-when 8 to the G2 build, where the rest were taken) |
 | UX-POLISH-2 | 10, 11, 13, 14, 15, 17, 18 |
 | LARGE-FOLDER-SYNC-1 | 31, 39 |
 | LIBRARY-READ-ALLOW-1 | 5 |
