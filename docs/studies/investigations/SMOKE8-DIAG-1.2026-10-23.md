@@ -322,11 +322,13 @@ The book's own stylesheet sets `color: initial` on the Gutenberg header and foot
   - `src/utils/foliateStyles.ts` is imported by nothing at `47ae6e1f` and needs no change.
 
   Links keep the accent through the existing `a { color: ${accent} !important; }` (`:54`). The word-state classes set backgrounds, and `.page-word--chunk-active` sets `fg`, so they are unaffected.
-- **Hybrid (tier 2), for Brain:** a book's own text colours (a coloured rubric, say) become the theme colour under every theme. That is the usual reader behaviour, and the only rule that measured readable here. The narrower alternative is to override only the Gutenberg ids (`#pg-header *, #pg-footer *`). It fixes the reported book and nothing else, so other books with `color: initial` or a black text rule stay unreadable.
+- **Owner decision (tier 2, 2026-10-23, relayed by Blurby.Brain), verbatim:** "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour." The general rule is therefore fixed. The Gutenberg-only alternative (`#pg-header *, #pg-footer *`) is rejected.
+- **Links keep their colour:** `a` is excluded from the rule and keeps `a { color: ${accent} !important; }`. An element inside a link (for example `<a><span>…</span></a>`) matches `*:not(a)`, so it gets `color: inherit` from the link, which is the accent, not the body `fg`.
 - **Done when:**
   1. **Brain's acceptance test** (BUG_REPORT): a contrast of at least 4.5:1 between the computed text and background colours inside the foliate iframe, under light, dark, blurby and system with E-ink on and off. It must include the `#pg-header` page of the bundled sample. This fails on `47ae6e1f` (black on rgb(26,42,74) is 1.5:1).
   2. A unit test per mode's `injectStyles` that the style text contains the inherit rule after `html, body`.
-  3. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  3. **Link descendants (Brain, 2026-10-23):** a test, in a rendered document with the injected style, that a `<span>` inside an `<a>` computes to the link's accent colour, not the body `fg`. A plain `<a>` keeps the accent as well.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
 - **Lessons applied:** LL-142 (cause by measurement: the first hypothesis was refuted live); mode isolation (each mode's helper is changed in its own runtime, with no shared import added).
 - **Lane:** UX polish. Execution surface C.
 
