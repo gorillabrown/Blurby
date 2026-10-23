@@ -154,7 +154,7 @@
 ### BUG-188 — Focus and Flow horizontal cursor band sits apart from the word cursor
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
 **Severity:** LOW (visual; reading stays possible)
-**Status:** OPEN — measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as BAND-ALIGN-1 (in that report). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
+**Status:** band height RESOLVED in source (BAND-ALIGN-1); band placement open (Part B, BAND-ALIGN-2). The band is now sized from the loaded section's body line step, 5 body lines at any text size. Measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
 **Location:** corrected 2026-10-12 (roadmap review static census): the visible "band" is the reading-zone mask (`mask-image` on `.rm-focus-view` / `.rm-flow-view`, `src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), positioned by `applyZoneProperties` and the Flow line pacer; `.flow-shrink-cursor` is hidden and is not the band.
 **Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
 **Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):**
