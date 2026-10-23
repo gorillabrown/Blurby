@@ -54,6 +54,12 @@
   );
 }
 
+/* BAND-ALIGN-2 R5: Lines Off — no band and no dimming */
+.rm-focus-root .rm-focus-view.rm-focus-view--band-off {
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+
 /* STAB-1A (BUG-162a): Loading indicator shown while EPUB word-wrapping runs */
 .rm-focus-root .rm-focus-loading {
   position: absolute;

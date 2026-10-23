@@ -814,6 +814,8 @@ export default function ReaderContainer({
           foliateFraction={useFoliate ? foliateFraction : undefined}
           flowZoneLines={settings.flowZoneLines}
           onSetFlowZoneLines={(lines) => updateSettings({ flowZoneLines: lines })}
+          flowZonePosition={settings.flowZonePosition}
+          onSetFlowZonePosition={(v) => updateSettings({ flowZonePosition: v })}
         />
       </div>
 

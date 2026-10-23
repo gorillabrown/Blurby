@@ -860,7 +860,11 @@ export class FlowScrollEngine {
         this.container.scrollTop = targetScrollTop;
       }
       const scrollTop = this.container.scrollTop;
-      const band = computeBandEdges(this.lines, lineIdx, bandLines);
+      // The band's lines plus one either side (for the gap midpoints), as glyph boxes in content space.
+      const reach = Math.ceil((Math.max(bandLines, 1) - 1) / 2) + 1;
+      const from = Math.max(0, lineIdx - reach);
+      const window = this.lines.slice(from, lineIdx + reach + 1).map((entry) => ({ top: entry.y, bottom: entry.bottom }));
+      const band = computeBandEdges(window, lineIdx - from, bandLines);
       const clientTop = this.container.getBoundingClientRect().top;
       this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
       this.onZoneTopChange?.(

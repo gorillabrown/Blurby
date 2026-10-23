@@ -6,9 +6,10 @@
 // Effect 3 (WPM) is runtime.applySettings; effect 2 (cross-book auto-resume) runs while Page is active,
 // so it is the router's resumeFlowAfterBookOpen; effect 6 (Flow+narration follower) is not copied (LL-125).
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
-import { FLOW_ZONE_LINES_DEFAULT, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
+import { FLOW_ZONE_LINES_DEFAULT, FLOW_ZONE_LINES_OFF, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
 import type { FlowFoliateViewProps } from "./FoliateView";
-import { readZoneLineStepPx } from "./helpers/foliateLayout";
+import type { FlowBandEdges } from "./helpers/FlowScrollEngine";
+import { normalizeBandLines, readZoneLineStepPx } from "./helpers/foliateLayout";
 import type { FlowModeRuntime } from "./ModeRuntime";
 
 /** useFlowScrollSync startWhenReady: the surface refs can attach a tick after play flips. */
@@ -32,9 +33,24 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
 
   // FLOW-ZONE-AUTO: the engine reports the descending zone's top fraction per line advance. Write it
   // straight to the masked element's CSS vars (line-advance rate is too fast for React state).
-  const onZoneTopChange = useCallback((topFrac: number) => {
+  // BAND-ALIGN-2: in the stable window the engine reports the band's edges (client px) around the cursor line, or
+  // none for Lines Off (no band, no dimming).
+  const onZoneTopChange = useCallback((topFrac: number, band?: FlowBandEdges) => {
     const host = runtime.viewApiRef.current?.getFlowZoneHost() ?? null;
     if (!host) return;
+    if (normalizeBandLines(flowZoneLines) === FLOW_ZONE_LINES_OFF) {
+      host.style.removeProperty("--flow-zone-top");
+      host.style.removeProperty("--flow-zone-bottom");
+      return;
+    }
+    if (band) {
+      const rect = host.getBoundingClientRect();
+      if (rect.height <= 0) return;
+      const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - rect.top) / rect.height) * 100))}%`;
+      host.style.setProperty("--flow-zone-top", pct(band.top));
+      host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
+      return;
+    }
     const ch = host.clientHeight;
     if (ch <= 0) return;
     const lineHeight = readZoneLineStepPx(host); // BAND-ALIGN-1

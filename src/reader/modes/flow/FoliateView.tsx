@@ -29,13 +29,24 @@ import {
 import {
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_LINES_DEFAULT,
+  FLOW_ZONE_LINES_OFF,
   FOLIATE_RENDERER_HEIGHT_MARGIN_PX,
   FOLIATE_MARGIN_PX,
   FOLIATE_MAX_INLINE_SIZE_PX,
   FOLIATE_SECTION_READY_TIMEOUT_MS,
 } from "../../../constants";
 import { injectStyles } from "./helpers/foliateStyles";
-import { getFoliateMaxColumnCount, readZoneLineStepPx, writeZoneLineStepPx } from "./helpers/foliateLayout";
+import {
+  bandAnchorY,
+  collectLineBoxesAround,
+  computeAnchorScrollTop,
+  computeBandEdges,
+  getFoliateMaxColumnCount,
+  normalizeBandAnchor,
+  normalizeBandLines,
+  readZoneLineStepPx,
+  writeZoneLineStepPx,
+} from "./helpers/foliateLayout";
 import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
@@ -527,6 +538,87 @@ export default function FlowFoliateView({
     }
   }, []);
 
+  // BAND-ALIGN-2 (owner amendment 2026-10-23): the band belongs to the reading location. Its anchor (R4) and line
+  // count (R5) come from settings.flowZonePosition and settings.flowZoneLines.
+  const bandLayout = { anchor: normalizeBandAnchor(settings.flowZonePosition), lines: normalizeBandLines(settings.flowZoneLines) };
+  const bandLayoutRef = useRef(bandLayout);
+  bandLayoutRef.current = bandLayout;
+
+  /** R1/R2: put the band on the zone host around a word span's line, from the rendered line boxes (no scroll). */
+  const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
+    const host = containerRef.current;
+    if (!host) return false;
+    const { lines } = bandLayoutRef.current;
+    if (lines === FLOW_ZONE_LINES_OFF) {
+      host.style.removeProperty("--flow-zone-top");
+      host.style.removeProperty("--flow-zone-bottom");
+      return true;
+    }
+    const around = span ? collectLineBoxesAround(span, Math.ceil((lines - 1) / 2)) : null;
+    const band = around ? computeBandEdges(around.lines, around.cursor, lines) : null;
+    const hostRect = host.getBoundingClientRect();
+    if (!band || hostRect.height <= 0) return false;
+    const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - hostRect.top) / hostRect.height) * 100))}%`;
+    host.style.setProperty("--flow-zone-top", pct(band.top));
+    host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
+    return true;
+  }, []);
+
+  /** Before any cursor is painted, the band sits at the anchor: n line steps, centred on the anchor's y. */
+  const placeBandAtAnchor = useCallback((viewportHeightPx: number): void => {
+    const host = containerRef.current;
+    if (!host || viewportHeightPx <= 0) return;
+    const { anchor, lines } = bandLayoutRef.current;
+    if (lines === FLOW_ZONE_LINES_OFF) {
+      host.style.removeProperty("--flow-zone-top");
+      host.style.removeProperty("--flow-zone-bottom");
+      return;
+    }
+    const heightPx = readZoneLineStepPx(host) * lines;
+    const topPx = Math.max(0, bandAnchorY(anchor, viewportHeightPx, heightPx) - heightPx / 2);
+    host.style.setProperty("--flow-zone-top", `${(topPx / viewportHeightPx) * 100}%`);
+    host.style.setProperty("--flow-zone-bottom", `${(Math.min(viewportHeightPx, topPx + heightPx) / viewportHeightPx) * 100}%`);
+  }, []);
+
+  /**
+   * R3: scroll so that the span's line centre sits at the anchor, clamped to the scroll range (the leading inset
+   * included), then place the band around the line wherever it ended up.
+   */
+  const alignSpanToBand = useCallback((span: Element): void => {
+    const scroller = resolveFoliateScrollContainer();
+    const around = collectLineBoxesAround(span, 0);
+    if (scroller && around) {
+      const line = around.lines[around.cursor];
+      const { anchor, lines } = bandLayoutRef.current;
+      const host = containerRef.current;
+      const target = computeAnchorScrollTop({
+        scrollTop: scroller.scrollTop,
+        lineTopPx: line.top,
+        lineBottomPx: line.bottom,
+        containerTopPx: scroller.getBoundingClientRect().top,
+        viewportHeightPx: getFlowViewportHeightPx() || scroller.clientHeight,
+        anchor,
+        bandHeightPx: (host ? readZoneLineStepPx(host) : 24) * Math.max(lines, 1),
+        maxScrollTop: scroller.scrollHeight - scroller.clientHeight,
+      });
+      if (Math.abs(scroller.scrollTop - target) > 0.5) scroller.scrollTop = target;
+    }
+    placeBandAroundSpan(span);
+  }, [resolveFoliateScrollContainer, getFlowViewportHeightPx, placeBandAroundSpan]);
+
+  /** The painted reading cursor's span in the loaded sections, if any. */
+  const findCursorSpan = useCallback((): Element | null => {
+    for (const { doc } of viewRef.current?.renderer?.getContents?.() ?? []) {
+      try {
+        const span = doc?.querySelector?.(".page-word--highlighted, .page-word--flow-cursor");
+        if (span) return span;
+      } catch {
+        // Detached Foliate iframe documents can disappear during section changes.
+      }
+    }
+    return null;
+  }, []);
+
   const clearWordPositionRebuildTimer = useCallback(() => {
     if (wordPositionRebuildTimerRef.current) {
       clearTimeout(wordPositionRebuildTimerRef.current);
@@ -600,11 +692,11 @@ export default function FlowFoliateView({
       el.classList.add(highlightClass);
     });
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
+    // BAND-ALIGN-2 R3: every cursor move places the band by one rule; a move without motion places the band only.
+    if (state.doc && !userBrowsingRef.current) {
       try {
-        const range = state.doc.createRange();
-        range.selectNodeContents(state.span);
-        view.renderer.scrollToAnchor?.(range);
+        if (allowMotion) alignSpanToBand(state.span);
+        else placeBandAroundSpan(state.span);
       } catch {
         // Safe to ignore.
       }
@@ -614,35 +706,23 @@ export default function FlowFoliateView({
     // relies on explicit jump-back to clear (legacy: auto-clear only in page mode).
 
     return true;
-  }, [clearVisualWordClasses, viewApiRef]);
+  }, [clearVisualWordClasses, viewApiRef, alignSpanToBand, placeBandAroundSpan]);
 
   const centerResolvedTokenInReadingWindow = useCallback((
     doc: Document,
     resolution: RenderedTokenResolution,
   ): boolean => {
-    const view = viewRef.current;
-    const range = buildResolvedTokenRange(doc, resolution);
-    if (!view?.renderer?.scrollToAnchor || !range) return false;
-
+    // BAND-ALIGN-2 R3: the clicked or selected word's line goes to the anchor, and the band around it.
+    const span = getResolvedTokenHighlightSpans(doc, resolution)[0] ?? null;
+    if (!span) return false;
     userBrowsingRef.current = false;
-    const zoneOffset = getFlowFollowOffsetPx();
-
-    (async () => {
-      try {
-        await view.renderer.scrollToAnchor(range);
-        if (zoneOffset > 0) {
-          const renderer = viewRef.current?.renderer;
-          if (renderer && typeof renderer.containerPosition === "number") {
-            renderer.containerPosition = Math.max(0, renderer.containerPosition - zoneOffset);
-          }
-        }
-      } catch {
-        // The section can unload while a click/selection scroll is in flight.
-      }
-    })();
-
+    try {
+      alignSpanToBand(span);
+    } catch {
+      // The section can unload while a click/selection scroll is in flight.
+    }
     return true;
-  }, [getFlowFollowOffsetPx]);
+  }, [alignSpanToBand]);
   const centerResolvedTokenInReadingWindowRef = useRef(centerResolvedTokenInReadingWindow);
   centerResolvedTokenInReadingWindowRef.current = centerResolvedTokenInReadingWindow;
 
@@ -1146,8 +1226,8 @@ export default function FlowFoliateView({
             const roots = getRenderedWordRoots();
             for (const { root } of roots) {
               const el = root.querySelector?.(`[data-word-index="${targetIdx}"]`) as HTMLElement | null;
-              if (el?.scrollIntoView) {
-                el.scrollIntoView({ block: "center", behavior: "auto" });
+              if (el) {
+                alignSpanToBand(el); // BAND-ALIGN-2 R3: the arrival places the band by the same rule
                 return;
               }
             }
@@ -1269,18 +1349,19 @@ export default function FlowFoliateView({
     if (!container) return;
 
     const applyZoneProperties = () => {
-      const lineHeight = readZoneLineStepPx(container); // BAND-ALIGN-1: the body text's line step, not the outer view's
-      const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
-      const zoneHeightFrac = (lineHeight * zoneLines) / viewportHeight;
-      const zoneTop = FLOW_ZONE_INITIAL_TOP;
-      const zoneBottom = Math.min(zoneTop + zoneHeightFrac, 0.95);
-      container.style.setProperty("--flow-zone-top", `${zoneTop * 100}%`);
-      container.style.setProperty("--flow-zone-bottom", `${zoneBottom * 100}%`);
+      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3), re-placed at once on an anchor or Lines change
+      // without moving the reading word; before a cursor is painted it sits at the anchor. It never moves while the
+      // reader is browsing away.
+      if (!userBrowsingRef.current) {
+        const cursorSpan = findCursorSpan();
+        if (cursorSpan) alignSpanToBand(cursorSpan);
+        else placeBandAtAnchor(viewportHeight);
+      }
       setFlowInsetsForRenderedDocs(
-        viewportHeight * zoneTop,
-        viewportHeight * (1 - zoneTop),
+        viewportHeight * FLOW_ZONE_INITIAL_TOP,
+        viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP),
       );
     };
 
@@ -1303,9 +1384,13 @@ export default function FlowFoliateView({
   }, [
     getFlowViewportHeightPx,
     settings.flowZoneLines,
+    settings.flowZonePosition,
     setFlowInsetsForRenderedDocs,
     invalidateWordPositionIndex,
     scheduleWordPositionIndexRebuild,
+    findCursorSpan,
+    alignSpanToBand,
+    placeBandAtAnchor,
   ]);
 
   // Reflow text when the container resizes (window maximize/restore/drag)
@@ -1362,7 +1447,7 @@ export default function FlowFoliateView({
   }, [markUserBrowsingAway]);
 
   return (
-    <div className="rm-flow-view" ref={containerRef}>
+    <div className={`rm-flow-view${bandLayout.lines === FLOW_ZONE_LINES_OFF ? " rm-flow-view--band-off" : ""}`} ref={containerRef}>
       {/* Jump back to persistent last-read word — shown when user has browsed away */}
       {showJumpBackToAnchor && (
         <button
