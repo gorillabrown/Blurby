@@ -645,8 +645,12 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       const { fake, runtime, view, renderer } = await mount();
       const { doc, range } = stampedDoc();
       renderer.contents = [{ doc, index: 0 }];
-      (view as any).goTo = async () => { view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } })); };
+      (view as any).goTo = async () => {
+        await new Promise((r) => setTimeout(r, 0)); // like foliate: the landing relocate comes after awaits, before goTo resolves
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      };
       await tocJump(runtime);
+      await settle(); // go-to-href does not await the jump; let its landing relocate run
       expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
     });
 
@@ -666,8 +670,12 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       renderer.contents = [{ doc, index: 3 }];
       await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
       const range = spanRange(doc, 2, 3);
-      (view as any).goTo = async () => { view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } })); };
+      (view as any).goTo = async () => {
+        await new Promise((r) => setTimeout(r, 0)); // like foliate: the landing relocate comes after awaits, before goTo resolves
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      };
       await tocJump(runtime);
+      await settle(); // go-to-href does not await the jump; let its landing relocate run
       expect(saves(fake)).toEqual([]);
       await render(BOOK_WORDS);
       await settle();
