@@ -3,3 +3,4 @@
 {"event": "start", "row": 4, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:43:02Z"}
 {"event": "end", "row": 4, "evidence": "spec read; worktree 78f8e2ef; detached 47ae6e1f worktree: npm ci 0, vite 0, electron-builder --dir arm64 0 (release/win-arm64-unpacked); surface map from source", "result": "done", "at": "2026-10-23T02:54:34Z"}
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:54:35Z"}
+{"event": "wait", "row": 1, "reason": "blocked", "at": "2026-10-23T02:55:30Z"}

@@ -462,6 +462,13 @@ function writeReport({ results, plan, live, liveAfter, minutes }) {
     const hit = rows.filter((x) => knownOnly(x, k));
     if (hit.length) L.push(`**Known, reported once (${k.name}):** ${hit.length} row(s) whose only error evidence matches \`${k.re.source}\`: ${[...new Set(hit.map((x) => x.surface))].join(", ")}. Those rows are not repeated below.`, "");
   }
+  // A surface unreachable for a code reason (dead code or broken wiring) is a bug candidate in its own right.
+  const wiring = results.filter((r) => r.surface.candidate && r.unreachable);
+  if (wiring.length) {
+    L.push("**Unreachable for a code reason (dead code or broken wiring):**", "", "| # | Surface | Code reason | Suspected file |", "|---|---|---|---|");
+    wiring.forEach((r, i) => L.push(`| W${i + 1} | ${esc(r.surface.name)} | ${esc(r.unreachable)} | ${esc(r.surface.files || "")} |`));
+    L.push("");
+  }
   const cands = rows.filter((x) => (x.result === "ERROR" && !(plan.known || []).some((k) => knownOnly(x, k)))
     || (x.result === "NO-EFFECT" && !/disabled/.test(x.evidence) && !/^\(input|^\(select|^\(textarea/.test(x.label)));
   if (!cands.length) L.push("None.", "");
@@ -589,7 +596,7 @@ function blurbyPlan(a) {
       { name: "Settings — menu (with HelpSettings inline)", how: 'MenuFlap, then "Go to settings"', enter: settings, signature: ".settings-menu", scope: ".menu-flap.open", files: `${C}SettingsMenu.tsx, ${C}settings/HelpSettings.tsx` },
       { name: "Settings — HelpSettings", note: "HelpSettings has no sub-page: it renders inline at the bottom of the settings menu (SettingsMenu.tsx), so its controls are rows of **Settings — menu (with HelpSettings inline)** above." },
       { name: "Settings — LayoutSettings (Reading Layout)", how: 'Settings, then "Reading Layout"', enter: pane("Reading Layout"), signature: ".settings-subpage", scope: ".menu-flap.open", files: `${C}settings/LayoutSettings.tsx` },
-      { name: "Settings — TextSizeSettings", unreachable: "not routed: TextSizeSettings.tsx is defined but no menu item opens it; its text-size sliders are part of LayoutSettings (Reading Layout)", files: `${C}settings/TextSizeSettings.tsx` },
+      { name: "Settings — TextSizeSettings", candidate: true, unreachable: "not routed: TextSizeSettings.tsx is defined but no menu item opens it; its text-size sliders are part of LayoutSettings (Reading Layout)", files: `${C}settings/TextSizeSettings.tsx` },
       { name: "Settings — SpeedReadingSettings", how: 'Settings, then "Speed Reading"', enter: pane("Speed Reading"), signature: ".settings-subpage", scope: ".menu-flap.open", files: `${C}settings/SpeedReadingSettings.tsx` },
       { name: "Settings — ThemeSettings", how: 'Settings, then "Theme"', enter: pane("Theme"), signature: ".settings-subpage", scope: ".menu-flap.open", files: `${C}settings/ThemeSettings.tsx` },
       { name: "Settings — LibraryLayoutSettings", how: 'Settings, then "Library Layout"', enter: pane("Library Layout"), signature: ".settings-subpage", scope: ".menu-flap.open", files: `${C}settings/LibraryLayoutSettings.tsx` },
@@ -607,10 +614,10 @@ function blurbyPlan(a) {
       { name: "Reader — HighlightsOverlay", how: "Page, then ; (Escape also leaves the reader here, so the route is replayed)", enter: [...mode("page", "Page"), { key: ";", sleep: 400 }], signature: ".highlights-overlay", scope: ".highlights-overlay", files: `${C}HighlightsOverlay.tsx` },
       { name: "Reader — BacktrackPrompt", how: "Page: next page ×4, previous ×2, then Escape", enter: [...mode("page", "Page"), ...Array(4).fill({ click: '[aria-label="Next page"]', sleep: 700 }), ...Array(2).fill({ click: '[aria-label="Previous page"]', sleep: 700 }), { key: "Escape", sleep: 500 }], signature: ".backtrack-prompt", scope: ".backtrack-prompt", files: `${C}BacktrackPrompt.tsx, src/hooks/useProgressTracker.ts` },
       { name: "Reader — ReturnToReadingPill", how: "Flow, then scroll the text well away from the cursor", enter: [...mode("flow", "Flow"), { eval: "(() => { const r = document.querySelector('.rm-flow-root'); const sc = [r, ...r.querySelectorAll('*')].find((e) => e.scrollHeight > e.clientHeight + 50); if (sc) sc.scrollTop += 4000; return !!sc; })()", sleep: 1200 }], signature: ".return-to-reading-pill", scope: ".return-to-reading-pill", unreachableIfMissing: "scrolling Flow's text did not show the pill", files: `${C}ReturnToReadingPill.tsx` },
-      { name: "Reader — QuickSettingsPopover", unreachable: "no working route: its shortcut Ctrl+Shift+, tests e.key === ',' but Shift makes e.key '<' on a US layout (useKeyboardShortcuts.ts), and no button or palette entry opens it. The keyboard pass presses Ctrl+Shift+, and records what happens (bug candidate)", files: `${C}QuickSettingsPopover.tsx, src/hooks/useKeyboardShortcuts.ts` },
+      { name: "Reader — QuickSettingsPopover", candidate: true, unreachable: "no working route: its shortcut Ctrl+Shift+, tests e.key === ',' but Shift makes e.key '<' on a US layout (useKeyboardShortcuts.ts), and no button or palette entry opens it. The keyboard pass presses Ctrl+Shift+, and records what happens (bug candidate)", files: `${C}QuickSettingsPopover.tsx, src/hooks/useKeyboardShortcuts.ts` },
       { name: "Reader — HighlightMenu", unreachable: "not reachable in the main window: the Focus view never sets highlightWord; it renders only in the standalone reader window (PausedTextView)", files: `${C}HighlightMenu.tsx` },
       { name: "Reader — DefinitionPopup", unreachable: "not reachable in the main window (as HighlightMenu); its define action also fetches dictionaryapi.dev, which the denylist excludes", files: `${C}DefinitionPopup.tsx` },
-      { name: "Reader — NotePopover", unreachable: "never rendered: the blurby:make-note event (ReaderContainer.tsx) has no listener", files: `${C}NotePopover.tsx, ${C}ReaderContainer.tsx` },
+      { name: "Reader — NotePopover", candidate: true, unreachable: "never rendered: the blurby:make-note event (ReaderContainer.tsx) has no listener", files: `${C}NotePopover.tsx, ${C}ReaderContainer.tsx` },
       { name: "Reader — GoToIndicator", note: "GoToIndicator is library-only (the G sequences are library keys); see **Library — GoToIndicator**." },
       { name: "Reader — SnoozePickerOverlay and TagPickerOverlay", note: "Not rendered in the reader; they are library surfaces (see **Library — SnoozePickerOverlay** and **Library — TagPickerOverlay**)." },
       // Onboarding: re-armed by clearing firstRunCompleted on the scratch profile, then the page reloads.
