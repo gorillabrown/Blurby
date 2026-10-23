@@ -66,7 +66,9 @@ Expected: `release/Blurby-Setup-$Version-x64.exe` (about 248 MB) and `release/Bl
 ```powershell
 npm ci; if ($LASTEXITCODE) { throw 'npm ci (arm64) failed' }                   # on an x64 host: npm ci --os=win32 --cpu=arm64
 npm run build; if ($LASTEXITCODE) { throw 'renderer build failed' }
-npx electron-builder --win --arm64 --publish never @Overrides; if ($LASTEXITCODE) { throw 'ARM64 build failed' }
+$env:ELECTRON_BUILDER_7Z_FILTER = 'BCJ'                                         # required for ARM64: see below
+try { npx electron-builder --win --arm64 --publish never @Overrides; if ($LASTEXITCODE) { throw 'ARM64 build failed' } }
+finally { Remove-Item Env:ELECTRON_BUILDER_7Z_FILTER -ErrorAction SilentlyContinue }
 Move-Item -Force release/latest.yml release/latest-arm64.yml
 $natives = (Get-ChildItem release/win-arm64-unpacked/resources/app.asar.unpacked -Recurse -Filter *.node).FullName -join "`n"
 foreach ($need in '@img\sharp-win32-arm64\', 'onnxruntime-node\bin\napi-v6\win32\arm64\') { if (-not $natives.Contains($need)) { throw "ARM64 package lacks $need" } }
@@ -74,6 +76,8 @@ if ($natives.Contains('@img\sharp-win32-x64\')) { throw 'ARM64 package carries x
 $upd = Get-Content -Raw release/win-arm64-unpacked/resources/app-update.yml
 foreach ($line in 'provider: github', 'owner: gorillabrown', 'repo: Blurby') { if ($upd -notmatch "(?m)^$line\r?$") { throw "app-update.yml lacks '$line'" } }
 ```
+
+**Why `ELECTRON_BUILDER_7Z_FILTER=BCJ`.** Without it, electron-builder's 7-Zip compresses every ARM64 executable and DLL with 7-Zip's newer `ARM64` branch filter. The installer's own extractor (the Nsis7z plugin) cannot decode that filter and silently skips those files. The installer then exits 0 with no `Blurby.exe`, no `ffmpeg.dll`, and none of onnxruntime's or sharp's ARM64 DLLs (17 files; RELEASE-RUNBOOK-1 issue file, 2026-10-22). Forcing the `BCJ` filter, which Nsis7z supports, installs all 681 files. The x64 build needs nothing, because its filter is `BCJ2`. Leave the variable unset for x64. The `try`/`finally` above removes it again. The install test in Verify (step 2) catches a regression.
 
 Expected: `release/Blurby-Setup-$Version-arm64.exe` (about 232 MB) and its `.blockmap`, beside the x64 files. There is no `@napi-rs/canvas` ARM64 binding, because the lockfile pins only `@napi-rs/canvas-win32-x64-msvc`. So PDF import on ARM64 uses pdf-parse's polyfills, which convert both owner test PDFs (PDF-IMPORT-DIAG-1). That is accepted until the lockfile gains the ARM64 package.
 
@@ -162,9 +166,14 @@ Run it from the repo root (it reads `js-yaml` from the repo's `node_modules`). E
 
 **Install tests, still before publishing.** Use the installers in `$Check`, on test machines, or a test user account, without the real profile you care about. Each installer installs per-user into `%LOCALAPPDATA%\Programs\blurby` and keeps the profile in `%APPDATA%\blurby\blurby-data`.
 1. On x64: run `Blurby-Setup-$Version-x64.exe`. Blurby starts, opens a book, and Narrate voices a word.
-2. On ARM64: run `Blurby-Setup-$Version-arm64.exe`, with the same checks. Confirm the app is native: Task Manager's Details tab shows `Blurby.exe` with architecture ARM64. Or check the installed `Blurby.exe`'s PE machine type: `0xAA64`, not `0x8664`.
+2. On ARM64: run `Blurby-Setup-$Version-arm64.exe`, with the same checks. Confirm the app is native: Task Manager's Details tab shows `Blurby.exe` with architecture ARM64. Or check the installed `Blurby.exe`'s PE machine type: `0xAA64`, not `0x8664`. Confirm nothing was dropped (the `ELECTRON_BUILDER_7Z_FILTER` failure). On the build machine, every file of `release/win-arm64-unpacked` must exist under the install folder:
+   ```powershell
+   $ref = (Resolve-Path release/win-arm64-unpacked).Path; $inst = "$env:LOCALAPPDATA\Programs\blurby"
+   $lost = @(Get-ChildItem $ref -Recurse -File | Where-Object { -not (Test-Path ($inst + $_.FullName.Substring($ref.Length))) })
+   if ($lost.Count) { $lost.FullName; throw "$($lost.Count) files missing from the ARM64 install" }
+   ```
 3. Signature prompt: both installers are unsigned (Unsigned builds).
-4. **Moving an ARM64 machine from the emulated x64 app to native**, on an ARM64 test machine with the previous release installed and a profile in use: run `Blurby-Setup-$Version-arm64.exe` over it. The installer replaces the x64 app in place. The profile (`%APPDATA%\blurby\blurby-data`: library, settings, positions) is untouched, and the next launch is native ARM64.
+4. **Moving an ARM64 machine from the emulated x64 app to native**, on an ARM64 test machine with the previous release installed and a profile in use: run `Blurby-Setup-$Version-arm64.exe` over it. The installer replaces the x64 app in place, with one uninstall entry now at `$Version`. Validated by RELEASE-RUNBOOK-1 on a test identity: from an x64 nsis-web install, as v1.1.2 is, to the ARM64 full installer. The profile (`%APPDATA%\blurby\blurby-data`: library, settings, positions) is untouched, and the next launch is native ARM64.
 
 **Versions and updates:** electron-updater offers an update only when `latest.yml`'s version is higher than the installed one. The first build published at `package.json`'s version (1.75.1, above the installed 1.1.2) is offered once; every later build at that unchanged version is not, so it is installed by hand from its installer.
 
