@@ -8,13 +8,14 @@
 
 ## Incomplete
 
-### BUG-208 — With E-ink display mode on and a dark theme, reader text is black on black
+### BUG-208 — Book text renders black on the dark Blurby background
 **Reported:** 2026-10-23 (owner, screenshot, Narrate mode on *Meditations*; installed ARM64 build `47ae6e1f`, settings left by the Stage 8 smoke: `theme: blurby`, `einkMode: true`)
-**Severity:** HIGH (the book is unreadable). Gate status: for Blurby.Brain to rule.
-**Status:** OPEN. The cause is suspected and is being confirmed by the owner turning E-ink Display Mode off. Lane: UX polish.
+**Severity:** HIGH (the book is unreadable). **Release blocker** (Blurby.Brain, 2026-10-23): it ships in the release fix with BUG-201.
+**Status:** OPEN. Diagnosis: live, in SMOKE8-DIAG-1 (added 2026-10-23). Lane: UX polish.
 **Description:** the page text renders near-black on the dark reader background. Only the highlighted word and the links are readable.
-**Suspected cause:** `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
-**Fix path:** EINK-CONTROLS-1. Make E-ink one control (owner decision pending; recommended), or force a light reader background whenever `einkMode` is on.
+**Cause (unconfirmed; first hypothesis contradicted):** the screenshot shows the dark Blurby background, Blurby chrome and coral links, so E-ink styling is not visibly applied. The book's `pgepub.css` sets `body { color: black; background-color: white }`. The injected `html, body { color: ${fg} !important }` (each mode's `helpers/foliateStyles.ts:39-41`, fg = `--text`, `#ffffff` for blurby) should beat it, so nothing static explains it. The live diagnosis reads the injected style and the computed colours inside the foliate iframe. First hypothesis: `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
+**Acceptance test (Blurby.Brain, 2026-10-23, holds whatever the cause):** the computed text-on-background contrast is at least 4.5:1, inside the foliate iframe and on the main overlays, under each theme (light, dark, blurby, system) with E-ink on and off. The test fails on `47ae6e1f`.
+**Fix path:** to be specified from the diagnosis. Previously: EINK-CONTROLS-1. Make E-ink one control (owner decision pending; recommended), or force a light reader background whenever `einkMode` is on.
 
 ### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
 **Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
