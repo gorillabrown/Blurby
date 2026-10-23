@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-23, second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
+**Last updated**: 2026-10-23, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: **The Stage 8 release** (owner ruling, 2026-10-22): a published build of `main` once release gates (1) to (11) hold. The 17 merged Stage 8 items then close out on that build's evidence. No dated deadline. Scope: the release gate's eleven conditions ([Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14)); the open gate item is ELECTRON-42-UPGRADE-1 (gate 11), after which gate (1) re-runs on the quiet machine and the batched owner smoke (gate 2) follows. History: the previous finish line, Narration rebuilt, was met on 2026-10-15 (NARRATE-REBUILD-1, TR-074); the reading-mode separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`).
-**Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`), held for gate (1) and the smoke re-check. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Dispatch buffer (Queued, Full Spec, post-release): PAGE-SAVE-RESTAMP-3 (80) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84). Then BLOCK-TAG-CASE-1 (85, Full Spec, owner tier-2 OK before merge), stubs 86–96 and Stage 9 (97–103).
+**Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`), held for gate (1) and the smoke re-check. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Dispatch buffer (Queued, Full Spec, post-release): PAGE-SAVE-RESTAMP-3 (80) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84). Then BLOCK-TAG-CASE-1 (85, Full Spec, owner tier-2 OK before merge), stubs 86–96, BLURBY-SERVER-1 (97, `Path: epic`) and Stage 9 (98–104).
 **Last sprint**: SMOKE8-DIAG-1, UI-SWEEP-TRIAGE-1 and UI-SWEEP-1, all completed 2026-10-23 (TR-083, TR-082, TR-081; close-outs in `docs/governance/close-outs/`). Before them, READER-VISUAL-DIAG-1 (TR-080, 2026-10-23) and CI-AUDIT-ALLOWLIST-1 (TR-079, 2026-10-22).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -623,102 +623,27 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="page-reopen-cfi-1"></a>
 
-#### PAGE-REOPEN-CFI-1 — Reopen from the cfi last saved, and save only the cfi on screen *(position 6.1 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-201)*
+#### PAGE-REOPEN-CFI-1 — Reopen from the cfi last saved, and save only the cfi on screen *(release fix, merged; In Flight, close-out held for gate (1) on `36ac7466` and the owner's smoke re-check)*
 
-
-- **What:** keep the renderer's library copy's `cfi` equal to the cfi main last saved, so a reopen in the same session opens where the reader left off. The exit save must not send a cfi the view has not shown since the last relocate.
-- **Why:** BUG-201, a release blocker. Measured route above.
-- **Done when:**
-  1. **Regression test (fails on `47ae6e1f`):** `tests/pageReopenCfi.test.ts`.
-     - Render `useLibrary` with a stubbed `electronAPI` holding one doc with cfi `A`.
-     - Call the persistence path the relocate save uses with position `n` and cfi `B`.
-     - Assert that the library entry's cfi is `B`, which a later `handleOpenDocById` hands to `openDoc`.
-     - On `47ae6e1f` the entry keeps `A`.
-  2. **Second test:** `_persistAndLog` sends `(position, cfi)` from the same relocate, the last one the view reported. When no relocate happened since the open, it sends the position with no cfi (`undefined`), so main keeps the stored cfi (`documents.js:24`). This goes in `tests/useProgressTracker.test.ts`.
-  3. **Live check:** attempt 3's route on a scratch profile. The S2 reopen lands on the S2 exit page (the same word text as the saved position), and `library.json` keeps that exit's cfi through the reopen and the exit after it.
-  4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47, 48).
-- **Tasks:**
-  1. `src/hooks/useLibrary.ts:146-148`: `updateProgress(docId, position, cfi?)` sets `cfi` when one is given.
-  2. `src/components/ReaderContainer.tsx`:
-     - Change the port's `updateProgress` (`:309`) and the relocate save (`:323-325`) to pass the cfi to `onUpdateProgress`.
-     - Have the port's `updateDocProgress` (`:308`) also update the renderer copy when it carries a cfi (it is used by `page/ModeRuntime.ts:586` and `:611`).
-     - Keep position −1 (`KEEP_STORED_POSITION`) out of the renderer copy's `position`.
-  3. `src/hooks/useProgressTracker.ts:231`: send the cfi of the last relocate (a ref set by `scheduleRelocateSave`) instead of `activeDoc.cfi`, or none.
-  4. The shared-core freeze set: `ReaderContainer.tsx` is in it, so this item claims the integration window.
-- **Lessons applied:** LL-161 (positions are checked by word text and cfi); LL-142 (verdict by measurement); standing rule 45 (the owner's route is re-checked in the re-run smoke).
-- **Lane:** Reader Engine. Execution surface A/C.
-- **Branch:** `eb/page-reopen-cfi-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\page-reopen-cfi-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
-- **Scope:** Shared-core touches: `src/components/ReaderContainer.tsx` — this item holds the shared-core integration window (no other open item edits it). Fence: `src/hooks/useLibrary.ts`, `src/components/ReaderContainer.tsx`, `src/hooks/useProgressTracker.ts`, `tests/pageReopenCfi.test.ts` (A), `tests/useProgressTracker.test.ts`, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo (standing rule 41). The live check includes a full relaunch between sessions (planner amendment).
-- **Path:** dispatch.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#page-reopen-cfi-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="folder-switch-header-1"></a>
 
-#### FOLDER-SWITCH-HEADER-1 — The header follows the folder switch at once *(position 6.2 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-202)*
+#### FOLDER-SWITCH-HEADER-1 — The header follows the folder switch at once *(release fix, merged; In Flight, close-out held for gate (1) on `36ac7466` and the owner's smoke re-check)*
 
-
-- **What:** in `useLibrary.switchFolder`, set the renderer's `sourceFolder` and `recentFolders` before awaiting `api.switchFolder`. Keep the previous settings, and restore them with the error toast if the call returns `{ error }`. The `getState()` refresh after it stays.
-- **Done when:**
-  1. **Regression test (fails on `47ae6e1f`)** in `tests/useLibrary.test.ts`. The stubbed `switchFolder` returns a promise the test holds unresolved. After calling `switchFolder("B")`, `settings.sourceFolder` is `"B"` before the promise resolves. On `47ae6e1f` it stays the old folder.
-  2. A second test: when the stub resolves `{ error }`, `sourceFolder` returns to the old folder and the toast shows.
-  3. **Live:** `run202`'s route. The header reads B within 200 ms of the real click, with 1,500 files in B.
-  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
-- **Not in scope:** making main's `switch-folder` resolve before the sync. Other callers rely on the library being synced when it resolves.
-- **Lessons applied:** the real-click rule (Done-when 3); LL-142.
-- **Lane:** Library & Content. Execution surface C.
-- **Branch:** `eb/folder-switch-header-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\folder-switch-header-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
-- **Scope:** Fence: `src/hooks/useLibrary.ts`, `tests/useLibrary.test.ts`, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo. Branch from PAGE-REOPEN-CFI-1 (both edit `useLibrary.ts`); merges after it.
-- **Path:** dispatch.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#folder-switch-header-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="book-text-colour-1"></a>
 
-#### BOOK-TEXT-COLOUR-1 — Book text takes the theme's text colour *(position 6.3 — Full Spec; authored 2026-10-23 by SMOKE8-DIAG-1 on main @ `47ae6e1f`; release fix for BUG-208)*
+#### BOOK-TEXT-COLOUR-1 — Book text takes the theme's text colour *(release fix, merged; In Flight, close-out held for gate (1) on `36ac7466` and the owner's smoke re-check)*
 
-
-- **What:** after the `html, body` rule in each mode's injected theme, add `body *:not(a) { color: inherit !important; }`. The places:
-  - `src/reader/modes/page/helpers/foliateStyles.ts`, after the rule at `:39-47`;
-  - the same place in `focus/`, `flow/` and `narrate/helpers/foliateStyles.ts`;
-  - `src/utils/foliateStyles.ts` is imported by nothing at `47ae6e1f` and needs no change.
-
-  Links keep the accent through the existing `a { color: ${accent} !important; }` (`:54`). The word-state classes set backgrounds, and `.page-word--chunk-active` sets `fg`, so they are unaffected.
-- **Hybrid (tier 2), for Brain:** a book's own text colours (a coloured rubric, say) become the theme colour under every theme. That is the usual reader behaviour, and the only rule that measured readable here. The narrower alternative is to override only the Gutenberg ids (`#pg-header *, #pg-footer *`). It fixes the reported book and nothing else, so other books with `color: initial` or a black text rule stay unreadable.
-- **Done when:**
-  1. **Brain's acceptance test** (BUG_REPORT): a contrast of at least 4.5:1 between the computed text and background colours inside the foliate iframe, under light, dark, blurby and system with E-ink on and off. It must include the `#pg-header` page of the bundled sample. This fails on `47ae6e1f` (black on rgb(26,42,74) is 1.5:1).
-  2. A unit test per mode's `injectStyles` that the style text contains the inherit rule after `html, body`.
-  3. `npm test`, `npm run typecheck` and `npm run build` exit 0.
-- **Lessons applied:** LL-142 (cause by measurement: the first hypothesis was refuted live); mode isolation (each mode's helper is changed in its own runtime, with no shared import added).
-- **Lane:** UX polish. Execution surface C.
-- **Branch:** `eb/book-text-colour-1` from `refs/remotes/origin/main`, worktree `C:\Projects\Blurby\.worktrees\book-text-colour-1`, then `npm ci`. Push with an explicit refspec; ask for merge go (the freeze admits only the release fix).
-- **Scope:** Fence: the four `src/reader/modes/*/helpers/foliateStyles.ts`, the per-mode test, the contrast test, `docs/governance/BUG_REPORT.md`, plus the time log and staging memo. Rule choice: **owner decision 2026-10-23 (via Blurby.Brain): the general rule.** "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour." Extra Done-when (Brain): a `<span>` inside an `<a>` computes to the accent, not the body text colour. BOOK-TYPE-SCALE-1 stacks on this branch.
-- **Path:** dispatch.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#book-text-colour-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="keep-furthest-fix-1"></a>
 
-#### KEEP-FURTHEST-FIX-1 — "Keep at furthest" in Page mode keeps the furthest page the reader reached *(position 6.6 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; **release gate, added by Blurby.Brain 2026-10-23**; holds the shared-core window for `ReaderContainer.tsx`)*
+#### KEEP-FURTHEST-FIX-1 — "Keep at furthest" in Page mode keeps the furthest page the reader reached *(release fix, merged; In Flight, close-out held for gate (1) on `36ac7466` and the owner's smoke re-check)*
 
-- **What:** in Page mode, the backtrack prompt's "Keep at furthest" must save the furthest position the reader reached. Today it saves the stale open position, so progress is lost and the book reopens on the earlier page.
-  - Page-turn commits raise the furthest mark (`furthestPositionRef`) and record that page's cfi in a new `furthestCfiRef`, with no extra save.
-  - Keep sends the furthest mark through `finishReading(furthestPositionRef.current, cfi)`.
-  - "Save at page" is unchanged.
-- **Why:** measured live by blurby-6b on the release build `97527896`. Page-turn saves (PAGE-POSITION-SAVE-1) never raise `furthestPositionRef`, so the prompt offers the open position. The regression came in with this release's PAGE-POSITION-SAVE line. On `08f4b948~1`, turns didn't save, so the prompt could not be reached.
-- **Where** (prototype: blurby-6b's `keep-furthest-fix.diff`, 118 lines, two files):
-  - `src/components/ReaderContainer.tsx`: the persistence port's Page-turn save raises the mark and its cfi.
-  - `src/hooks/useProgressTracker.ts`:
-    - add `furthestCfiRef`;
-    - `_persistAndLog(finalPos, cfiOverride?)`;
-    - `finishReading(finalPos, cfi?)`;
-    - Keep's call site.
-- **Owner question (tier 3, with the owner through Blurby.Brain):** after Keep, does the reopen show the furthest page (the prototype) or the on-screen page? This changes only which cfi Keep sends: `furthestCfiRef.current` or the last relocate's. Build it so either answer is a one-line choice. Merge waits for the answer.
-- **Done when:**
-  1. **Red first:** a test of the 1290/2673 scenario. Open at 1290, turn pages forward to 2673, back up, then Keep. It saves 2673, with the cfi the owner picks. On `97527896` it saves 1290. The test is committed before the fix.
-  2. "Save at page" still saves the on-screen page, pinned by an existing or new test.
-  3. Live, on a `--dir` build and a scratch profile: run the scenario, Keep, close and reopen. The reopen lands per the owner's answer, and `library.json` holds the furthest position.
-  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
-  5. **Fence:** `ReaderContainer.tsx`, `useProgressTracker.ts`, the test file or files, `docs/governance/BUG_REPORT.md` (a new BUG for this regression), the memo and the time log.
-- **Out of scope, after the release:** (a) page turns counted toward pages read; (b) persisting the furthest mark.
-- **Release effect:** the release-fix sha moves to this item's merge. Gate (1) targets the new sha, the installers built from `97527896` are superseded and are rebuilt, and the smoke re-checks add the backtrack-prompt scenario: in Page, open, turn ahead several pages, go back, choose Keep at furthest, then reopen.
-- **Branch:** `eb/keep-furthest-fix-1` from `refs/remotes/origin/main`. Ask for merge go.
-- **Lane:** Reader Engine. Execution surface A/C. Effort: S. **Path:** dispatch.
-- **Lessons applied:** standing rule 43 (red first); LL-161 (positions checked by word text and cfi); standing rule 45 (the owner's route is re-checked in the smoke).
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#keep-furthest-fix-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="focus-keys-fix-1"></a>
 
@@ -1231,17 +1156,9 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 
 <a id="narrate-start-stack-1"></a>
 
-#### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(position 6.4 — Full Spec; authored 2026-10-23 from Blurby.Brain's BUG-206 ruling; release fix)*
+#### NARRATE-START-STACK-1 — Log the full stack when Narrate fails to start *(release fix, merged; In Flight, close-out held for gate (1) on `36ac7466` and the owner's smoke re-check)*
 
-- **What:** wherever Narrate shows a start error to the reader, also call `logError` once with the error's full stack (`err.stack`, falling back to `String(err)`). That way the next BUG-206 occurrence (`setEnd` on a drop-cap page) leaves its call site in `error.log`. Change nothing else.
-- **Why:** BUG-206 did not reproduce live in SMOKE8-DIAG-1 (the positive control failed). Its static exposure is 15 of 40 owner books (38%). Brain ruled (2026-10-23) that a stack capture ships in the release fix.
-- **Done when:**
-  1. **Re-grep:** list every site in `src/reader/modes/narrate/` where a start error reaches the reader (toast, status or error state), with `git grep -n` evidence, in the memo.
-  2. **Test (fails on the base):** in `tests/narrate/`, a start that throws an `Error` whose `.stack` is `"S"` makes `logError` receive a message containing `"S"`. On the base it does not.
-  3. `npm test`, `npm run typecheck` and `npm run build` exit 0.
-  4. **Fence:** the narrate files named in (1), one test file, `docs/governance/BUG_REPORT.md` (BUG-206: "stack capture shipped; frequency still unmeasured; static exposure 38%"), and the staging memo.
-- **Branch:** `eb/narrate-start-stack-1` from `refs/remotes/origin/main`. Ask for merge go.
-- **Lane:** TTS / Narration Engine. Effort: XS. **Path:** dispatch.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md#narrate-start-stack-1) (moved by roadmap review 2026-10-23-3). The close-out verifies its Done-when rows there and moves the section to `ROADMAP_legacy.md`.
 
 <a id="narrate-sentence-initials-1"></a>
 
@@ -1287,7 +1204,7 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 38 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
 
-- **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. **Owner decision, 2026-10-23: no limit on the local import, and no subfolder picker.** Blurby is moving to a server-hosted model (storyboard opened 2026-10-23), and limits will come from future plan tiers (free and paid), not from the desktop import. So the design half is closed with no work item. Residual technical risk, for the server model to remove: `broadcastLibrary` sends the whole library on every save, which a very large local library makes slow. The owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
+- **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(superseded by BLURBY-SERVER-1, roadmap review 2026-10-23-3; was an open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. **Owner decision, 2026-10-23: no limit on the local import, and no subfolder picker.** Blurby is moving to a server-hosted model (storyboard opened 2026-10-23), and limits will come from future plan tiers (free and paid), not from the desktop import. So the design half is closed with no work item. Residual technical risk, for the server model to remove: `broadcastLibrary` sends the whole library on every save, which a very large local library makes slow. The owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
 - <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 43 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
 
 <a id="page-save-restamp-3"></a>
@@ -1542,7 +1459,7 @@ Lines are on `48ce4db9`. TOC-JUMP-SAVE-1 and PAGE-HELD-TURN-FAIL-1 move them, so
 - **LL-151 (live drivers that miss the window):** B is tested by construction in the harness. The live L9 timing is not used as the gate.
 
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
-- <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(position 47 — stub; not a release gate)*. From FOLDER-NOTICE-1's quality review (2026-10-15): (3) within one sync the banner follows whichever of the root check and the scan answers last, so a null scan after a true check, or the reverse, flaps it (and a root holding only directories clears then re-sets `root-empty-suspect`); make the banner follow the scan's verdict; (6) Retry has no in-flight guard in main, so a banner remount mid-attempt allows a second root check; (7) a same-folder re-select through `switch-folder` resets the toast flag, so a second watcher error in the same episode toasts again; (8) the banner's Retry button loses focus when disabled and on success, and a failed Retry is not announced (`role="alert"` fires only on mount): use `aria-busy`/`aria-disabled` and a short status line. From the fix-round review of FOLDER-NOTICE-1 (2026-10-15): (9) `syncAll`'s catch checks only the folder string, so an abandoned same-folder run (A hung, switch to B and back to A) can report `sync-failed` on a healthy A after the new run's clear; add the run-generation check the `.finally` already uses; (10) `retry()`'s folder guard compares raw strings where `state.js` uses `pathKey`; (11) test gaps: a toast is sent once the window finishes loading, and a failed (null) watcher restart does not toast twice. Lane: UX polish.
+- <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(dissolved, roadmap review 2026-10-23-3)*. The owner approved dissolving it: BLURBY-SERVER-1 retires the watched source folder in its Phase 2 (ruling Q2), so the banner it polished goes away. FOLDER-UNREACHABLE-GUARD-1 and FOLDER-NOTICE-1 are merged and still ship.
 - <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transfer
 elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
 
@@ -1967,13 +1884,57 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
 
 
+<a id="blurby-server-1"></a>
+
+#### BLURBY-SERVER-1 — One library on every device (blrby.app server) *(position 97 — Path: epic; absorbed by roadmap review 2026-10-23-3 from held storyboard `2026-10-23-blurby-server`; after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9)*
+
+- **What:** a Blurby server on Cloudflare (blrby.app) holds each account's books, reading positions, highlights, notes and settings.
+  - The desktop gains sign-in (Google, Microsoft, Apple or email) and a drag-and-drop window, the only way books come in. The watched source folder stops importing (owner ruling Q2).
+  - Plan limits (Free, Plus, Unlimited) are adjustable server data.
+  - Payments follow, with no ads on the desktop: AdSense does not allow ads in software applications, so ads return later with the phone apps or a web reader.
+  - Then Kokoro narration on the server (Kokoro only, no fallback engine).
+- **Why:** one library across devices (owner, 2026-10-23: "remove barriers to access between devices"). It is the foundation the phone apps, Newsroom, Podcasts and the browser extension depend on, and it removes the local large-folder bottleneck (`broadcastLibrary` resends the whole library on every save).
+- **Phases** (specified in the charter draft):
+  1. Server foundation and plan limits (server-only; may open in parallel with the merge train once the release ships).
+  2. Desktop sign-in, drag-and-drop, sync and offline books. It edits `src/types.ts`, so it needs a declared integration window.
+  3. Payments only (Paddle or Stripe Managed Payments, chosen at the Phase 3 gate).
+  4. Server narration on Kokoro: the speed-and-cost test, then hosting when the first phone app needs it.
+- **Done when (epic level):** the storyboard's frames 1–6 hold, and blrby.app publishes terms of use and a takedown contact before uploads open. The full Definition of Done and per-phase rows are in the charter draft.
+- **Owner rulings (2026-10-23, all closed):**
+  - Kokoro-only server narration;
+  - no desktop ads for now;
+  - a 200 MB per-file upload cap;
+  - drag-and-drop as the only intake;
+  - a fourth device on Free gets Remove one, Upgrade or Cancel;
+  - export-only highlights and notes files;
+  - a downgrade deletes nothing;
+  - at the Narrate limit, it pauses at the end of the sentence with Upgrade or Cancel;
+  - the plan tiers as approved.
+
+  See the alignment record.
+- **Prerequisites:**
+  - the Stage 8 release;
+  - the post-freeze merge train, in particular the `main/ws-server.js` chain, RENAME-TMP-RACE-1 and LARGE-FOLDER-SYNC-3 (Phase 2's files).
+- **Source:**
+  - the held storyboard [`docs/planning/holding/2026-10-23-blurby-server.md`](docs/planning/holding/2026-10-23-blurby-server.md) (alignment record, frames, tiers, rulings);
+  - the epic charter draft [`docs/planning/holding/2026-10-23-blurby-server/charter-draft.md`](docs/planning/holding/2026-10-23-blurby-server/charter-draft.md).
+- **Effort:** max (epic). **Lane:** Platform & Maintenance (primary), Library & Content (secondary).
+- **Path:** epic — four phases across many sessions, with owner gates between them (Cloudflare account, payment provider, Kokoro speed-and-cost). It cannot be one dispatch. `/next-dispatch` routes it to `/epic`, which turns the charter draft into the launched charter.
+- **Effects on other items (applied by roadmap review 2026-10-23-3):**
+  - CLOUD-CONNECTORS-1 is rescoped to book sources only, after this epic; its sync-target role moves here.
+  - The deferred Cloud Sync lane is absorbed.
+  - LARGE-FOLDER-SYNC-1's design half is superseded.
+  - FOLDER-NOTICE-2 is dissolved.
+  - APP-TABS-1, RSS-AGGREGATOR-1, PODCAST-SOURCE-1 and BROWSER-EXT-FINALIZE-1 gain sign-in and per-tab plan limits.
+  - ANDROID-APP-1 and IOS-APP-1 sync through this server.
+
 #### Stage 9 — Product expansion (owner direction, 2026-10-15)
 
 Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs investigation and owner design decisions before it can be specified (Rule 6a), and none is a Stage 8 release gate. Order follows the owner's list; Library and Newsroom are built first, Podcasts and Marketplace ship as "Coming Soon" banners.
 
-- <a id="app-tabs-1"></a>**APP-TABS-1 — Four tabs: Library, Newsroom, Podcasts, Marketplace** *(position 48 — stub)*. The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a "Coming Soon" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highlights or sync state. Needs a design pass with the owner before it is specified: the tab bar's placement and look, what moves from the current library (Saved Articles, URL imports, the sources view), and where settings and search live. Lane: UX polish.
-- <a id="rss-aggregator-1"></a>**RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom** *(position 49 — stub)*. Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane. After APP-TABS-1. Open questions for the owner: feed discovery (paste a URL, OPML import), refresh cadence, how long items are kept, and full-text fetch versus feed summary. Lane: Library & Content.
-- <a id="podcast-source-1"></a>**PODCAST-SOURCE-1 — Podcast source service integration** *(position 50 — stub)*. After APP-TABS-1, replace the Podcasts tab's "Coming Soon" banner with directory search, show profiles, episode lists and built-in audio streaming. **Owner direction added 2026-10-15: use an aggregator API for discovery and metadata; stream episodes directly from the publisher's host.** Lane: Library & Content.
+- <a id="app-tabs-1"></a>**APP-TABS-1 — Four tabs: Library, Newsroom, Podcasts, Marketplace** *(position 48 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a "Coming Soon" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highlights or sync state. Needs a design pass with the owner before it is specified: the tab bar's placement and look, what moves from the current library (Saved Articles, URL imports, the sources view), and where settings and search live. Lane: UX polish.
+- <a id="rss-aggregator-1"></a>**RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom** *(position 49 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane. After APP-TABS-1. Open questions for the owner: feed discovery (paste a URL, OPML import), refresh cadence, how long items are kept, and full-text fetch versus feed summary. Lane: Library & Content.
+- <a id="podcast-source-1"></a>**PODCAST-SOURCE-1 — Podcast source service integration** *(position 50 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. After APP-TABS-1, replace the Podcasts tab's "Coming Soon" banner with directory search, show profiles, episode lists and built-in audio streaming. **Owner direction added 2026-10-15: use an aggregator API for discovery and metadata; stream episodes directly from the publisher's host.** Lane: Library & Content.
 
   **Provider strategy:** Evaluate [Podcast Index](https://podcastindex-org.github.io/docs-api/) first: an open podcast directory with free API access, show search, trending feeds and episode metadata. Access requires an API key/secret and signed requests; do not assume complete global coverage or unrestricted usage. Keep [Apple's iTunes Search API](https://performance-partners.apple.com/search-api) as an alternative for podcast discovery and RSS feed lookup (Apple documents approximately 20 calls per minute, subject to change). [Listen Notes / PodcastAPI.com](https://www.listennotes.com/api/) is the commercial alternative if its search capabilities justify the cost; check quotas, attribution and [caching terms](https://www.listennotes.com/api/terms/) before choosing it. These are candidates, not a requirement to integrate all three.
 
@@ -1982,10 +1943,10 @@ Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs
   **Desktop architecture direction:** Directory and RSS requests go through the main process and narrowly exposed IPC; credentials must stay out of renderer code, logs and committed files. A shared provider secret must not be embedded in a distributed desktop build: decide between user-supplied credentials and a backend credential service before specification. Audio streams directly to the player; a metadata service does not imply an audio proxy. Podcast playback must preserve reading-mode isolation and remain separate from Narrate's speech-generation runtime.
 
   **Before this stub becomes dispatch-ready:** Confirm provider and credential model, search/browse UI and playback controls, metadata refresh/cache policy within provider terms, and handling for empty searches, rate limits, offline state, unavailable feeds and broken audio links. Specify validation of remote URLs and untrusted feed descriptions. Acceptance must demonstrate search -> show -> episodes -> playback from a real public feed, with no hosted audio and no exposed secrets. Transcripts and offline downloads remain separate scope decisions. Full WHERE, tasks, execution sequence and test criteria still require investigation under Rule 6a. Provider documentation reviewed 2026-10-15; no authenticated podcast API or playback test executed.
-- <a id="cloud-connectors-1"></a>**CLOUD-CONNECTORS-1 — Connections to the mainstream cloud services** *(position 51 — stub)*. Connect Google Drive, OneDrive, Box, Dropbox and iCloud as book and article sources (and, where the owner wants it, sync targets). Builds on the existing Microsoft (@azure/msal-node) and Google (googleapis) auth and the deferred Phase 7 Cloud Sync lane, which it supersedes. Likely splits into one item per service. Open questions for the owner: source only, or sync too; which service first; and iCloud on Windows (no first-party API, so likely iCloud Drive's local folder). Lane: Platform & Maintenance. **Path:** epic — four providers, each with its own auth, sync and conflict design, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
-- <a id="android-app-1"></a>**ANDROID-APP-1 — Establish the Android app** *(position 52 — stub)*. Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md. Needs an architecture decision first (native, React Native, a Capacitor/WebView shell around the renderer, or another route) and depends on how sync is settled (CLOUD-CONNECTORS-1). Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and release track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
-- <a id="ios-app-1"></a>**IOS-APP-1 — Establish the iOS app** *(position 53 — stub)*. Stand up Blurby on iOS and iPadOS: reading modes, library, and sync with the desktop app. Shares the architecture decision with ANDROID-APP-1; Apple's developer account, signing and App Store review are prerequisites. Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and App Store track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
-- <a id="browser-ext-finalize-1"></a>**BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions** *(position 54 — stub)*. Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond). After APP-TABS-1, so saved pages land in Newsroom. Needs the owner's list of what "finalized" covers (features, store publishing, accounts). Lane: Chrome Extension.
+- <a id="cloud-connectors-1"></a>**CLOUD-CONNECTORS-1 — Connections to the mainstream cloud services** *(position 51 — stub)*. **Rescoped by roadmap review 2026-10-23-3 (owner): book and article sources only, after BLURBY-SERVER-1.** Cross-device sync and the sync-target role belong to the server epic. Each import goes through the server intake and its plan limits (owner ruling Q2). Connect Google Drive, OneDrive, Box, Dropbox and iCloud as book and article sources. Builds on the existing Microsoft (@azure/msal-node) and Google (googleapis) auth and the deferred Phase 7 Cloud Sync lane, which it supersedes. Likely splits into one item per service. Open questions for the owner: source only, or sync too; which service first; and iCloud on Windows (no first-party API, so likely iCloud Drive's local folder). Lane: Platform & Maintenance. **Path:** epic — four providers, each with its own auth, sync and conflict design, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
+- <a id="android-app-1"></a>**ANDROID-APP-1 — Establish the Android app** *(position 52 — stub; after BLURBY-SERVER-1: syncs through BLURBY-SERVER-1 (not CLOUD-CONNECTORS-1) (roadmap review 2026-10-23-3))*. Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md. Needs an architecture decision first (native, React Native, a Capacitor/WebView shell around the renderer, or another route) and depends on how sync is settled (CLOUD-CONNECTORS-1). Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and release track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
+- <a id="ios-app-1"></a>**IOS-APP-1 — Establish the iOS app** *(position 53 — stub; after BLURBY-SERVER-1: syncs through BLURBY-SERVER-1 (not CLOUD-CONNECTORS-1) (roadmap review 2026-10-23-3))*. Stand up Blurby on iOS and iPadOS: reading modes, library, and sync with the desktop app. Shares the architecture decision with ANDROID-APP-1; Apple's developer account, signing and App Store review are prerequisites. Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and App Store track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
+- <a id="browser-ext-finalize-1"></a>**BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions** *(position 54 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1; `add-article` goes through the server's intake (roadmap review 2026-10-23-3))*. Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond). After APP-TABS-1, so saved pages land in Newsroom. Needs the owner's list of what "finalized" covers (features, store publishing, accounts). Lane: Chrome Extension.
 
 ---
 
@@ -1997,7 +1958,7 @@ Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs
 - **Playback-buffered-seconds backpressure** — `scheduler.getBufferedSeconds()` throttle. Revisit if TTS-EVAL-3 soak run reveals buffer pressure.
 - **Track B** — Chrome Extension (EXT-ENR-C and beyond): now BROWSER-EXT-FINALIZE-1 (Stage 9)
 - **Track C** — Android APK (APK-0 through APK-4): now ANDROID-APP-1 (Stage 9)
-- **Phase 7** — Cloud Sync: now CLOUD-CONNECTORS-1 (Stage 9)
+- **Phase 7** — Cloud Sync: absorbed by BLURBY-SERVER-1 (2026-10-23-3); book sources remain CLOUD-CONNECTORS-1 (Stage 9)
 - **Phase 8** — RSS/News: now RSS-AGGREGATOR-1 and APP-TABS-1's Newsroom (Stage 9)
 - **Idea Themes A-K** — See `docs/governance/IDEAS.md`
 
@@ -2013,6 +1974,8 @@ See `docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md` for full deferred sp
 - SSML as internal format explicitly **rejected** per research consensus — structured text + normalizer trace is cleaner than SSML payload. (2026-05-17)
 
 ### Non-Blocking Follow-Ups (from 2026-07-02 roadmap-review)
+- **Ads on Free (owner, 2026-10-23; from BLURBY-SERVER-1).** Deferred off the desktop: AdSense does not allow ads in software applications, and AdMob has no desktop SDK. Revisit with the phone apps (AdMob, in the library and between books only, never on the reading page or in Narrate) or a future web reader.
+- **Unlimited trial for new users (owner, 2026-10-23: "Add to future roadmap, holding").** A time-limited Unlimited plan for new accounts. At expiry, it asks the user to remove books down to their plan's limit, or upgrade. After BLURBY-SERVER-1 Phase 3.
 - **Lessons-source split (governance debt).** The registry resolves lessons to docs/governance/LESSONS_LEARNED.md; newer SRL evidence also lives in the registered close-outs directory. The 2026-09-23 review appended a cross-reference/correction note, disambiguated SRL-090 in the active roadmap, and preserved the pre-existing dirty retrospective. Physical consolidation remains a separate governance task.
 - **Missing A5 close-out.** `NARRATE-A5-RATE-RESEED-1` merged (`145c385`) without a formal `CloseOut.*.md`; interim evidence is `docs/studies/investigations/NARRATE-A5-RATE-RESEED-liveqa-gate-report.md`. Author one via `/pointer-closeout` if a formal record is wanted.
 - **Historical COLLAPSE scope.** The former 14-versus-6 path-count wording is preserved only in the archive. The current title describes the remaining behavior; re-specification follows mode separation.

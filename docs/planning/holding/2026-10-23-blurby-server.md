@@ -14,6 +14,7 @@
 | 2026-10-23 | planned | write-plan | epic-scale: 4 phase specs written as an epic charter draft beside the entry (`2026-10-23-blurby-server/charter-draft.md`); 11 owner questions with recommendations; prerequisites pending: Stage 8 release, post-freeze merge train |
 | 2026-10-23 | storyboarded | write-plan | epic-scale stays held (corrects the hand-written planned row above): 4 phase specs as an epic charter draft at 2026-10-23-blurby-server/charter-draft.md for /roadmap-review then /epic; 11 owner questions |
 | 2026-10-23 | storyboarded | write-plan | owner rulings 2026-10-23 folded into the alignment record: server narration Kokoro only (MeloTTS dropped); no desktop ads for now; Q1-Q8, Q10, Q11 as recommended; charter draft updated; 0 open questions |
+| 2026-10-23 | absorbed | roadmap-review | as BLURBY-SERVER-1 (queued, Path: epic, Seq 97) |
 
 ## Storyboard
 
