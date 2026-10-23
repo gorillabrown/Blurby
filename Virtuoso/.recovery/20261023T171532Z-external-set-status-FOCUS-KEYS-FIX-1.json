@@ -1,0 +1,37 @@
+{
+  "id": "20261023T171532Z-external-set-status-FOCUS-KEYS-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-KEYS-FIX-1",
+  "created": "2026-10-23T17:15:32Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "branch": "eb/focus-keys-fix-1",
+      "started": "2026-10-23",
+      "description": "BUG-210: in Focus, the word, sentence and paragraph keys move the reading word (UI-SWEEP-TRIAGE-1 rows 92 to 95). Post-release."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOCUS-KEYS-FIX-1:[('branch', 'eb/focus-keys-fix-1'), ('description', 'BUG-210: in Focus, the word, sentence and paragraph keys move the reading word (UI-SWEEP-TRIAGE-1 rows 92 to 95). Post-release.'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOCUS-KEYS-FIX-1",
+      "idempotencyKey": "set-status:FOCUS-KEYS-FIX-1:[('branch', 'eb/focus-keys-fix-1'), ('description', 'BUG-210: in Focus, the word, sentence and paragraph keys move the reading word (UI-SWEEP-TRIAGE-1 rows 92 to 95). Post-release.'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171532Z-external-set-status-FOCUS-KEYS-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:16:33Z",
+  "outcome": "succeeded"
+}
