@@ -7,7 +7,13 @@
  * LL-016: All state is internal (no React state), passed via refs.
  */
 
-import { readZoneLineStepPx } from "./foliateLayout";
+import {
+  computeAnchorScrollTop,
+  computeBandEdges,
+  normalizeBandAnchor,
+  normalizeBandLines,
+  readZoneLineStepPx,
+} from "./foliateLayout";
 import {
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_RESET_THRESHOLD,
@@ -49,6 +55,12 @@ export interface FlowProgress {
   totalWords: number;
   estimatedMinutesLeft: number;
   bookPct: number;
+}
+
+/** BAND-ALIGN-2: the band's edges in the top window's client px, placed around the cursor line (R1–R3). */
+export interface FlowBandEdges {
+  top: number;
+  bottom: number;
 }
 
 export interface FlowScrollEngineCallbacks {
@@ -98,8 +110,15 @@ export class FlowScrollEngine {
   private currentZoneTopFrac: number = FLOW_ZONE_INITIAL_TOP;
   private zoneHeightFrac = 0;
   private zoneLines: number = FLOW_ZONE_LINES_DEFAULT;
-  private onZoneTopChange: ((topFrac: number) => void) | null = null;
+  private onZoneTopChange: ((topFrac: number, band?: FlowBandEdges) => void) | null = null;
   private stableWindowScroll = false;
+  // BAND-ALIGN-2: the word timer is the only clock; the pacer follows its word (syncToWord).
+  private wordClock = false;
+  private completeSent = false;
+  // The stored settings, normalized where the band is placed (the engine's constants mock carries no band constants).
+  private bandAnchorSetting: unknown = undefined;
+  private bandLinesSetting: unknown = undefined;
+  private einkPageStart = 0;
   private totalWords = 0;
   private bookPct = 0;
   private chunks: ReadingChunk[] = [];
@@ -135,8 +154,9 @@ export class FlowScrollEngine {
     paragraphBreaks: Set<number> = new Set(),
     isEink = false,
     zoneLines?: number,
-    onZoneTopChange?: (topFrac: number) => void,
+    onZoneTopChange?: (topFrac: number, band?: FlowBandEdges) => void,
     stableWindowScroll = false,
+    wordClock = false,
   ): void {
     this.stop();
     this.container = container;
@@ -148,6 +168,8 @@ export class FlowScrollEngine {
     this.zoneLines = zoneLines !== undefined && zoneLines > 0 ? zoneLines : FLOW_ZONE_LINES_DEFAULT;
     this.onZoneTopChange = onZoneTopChange ?? null;
     this.stableWindowScroll = stableWindowScroll;
+    this.wordClock = wordClock;
+    this.completeSent = false;
     this.currentZoneTopFrac = this.initialZoneTop;
     this.computeZoneHeightFrac();
     this.running = true;
@@ -175,9 +197,11 @@ export class FlowScrollEngine {
         this.lines = this.buildLineMap();
         if (this.lines.length > 0) {
           this.lineIdx = this.findLineForWord(wordIndex);
+          this.einkPageStart = this.lineIdx;
           this.scrollActiveChunkOrLine(wordIndex, true);
           this.emitChunkChangeForWord(wordIndex);
-          setTimeout(() => {
+          if (this.wordClock) this.placeCursorBar(wordIndex);
+          else setTimeout(() => {
             if (this.running && !this.paused) this.animateLine();
           }, FLOW_LINE_ADVANCE_BUFFER_MS);
           this.container!.addEventListener("wheel", this.handleWheel, { passive: true });
@@ -198,10 +222,12 @@ export class FlowScrollEngine {
     }
 
     this.lineIdx = this.findLineForWord(wordIndex);
+    this.einkPageStart = this.lineIdx;
     this.scrollActiveChunkOrLine(wordIndex, true);
     this.emitChunkChangeForWord(wordIndex);
 
-    setTimeout(() => {
+    if (this.wordClock) this.placeCursorBar(wordIndex);
+    else setTimeout(() => {
       if (this.running && !this.paused) this.animateLine();
     }, FLOW_LINE_ADVANCE_BUFFER_MS);
 
@@ -269,13 +295,13 @@ export class FlowScrollEngine {
     if (!this.running || !this.paused) return;
     this.paused = false;
     this.manualScrollPaused = false;
-    if (this.followerMode) return;
+    if (this.followerMode || this.wordClock) return;
     this.animateLine();
   }
 
   setWpm(wpm: number): void {
     this.wpm = wpm;
-    if (this.running && !this.paused && !this.followerMode) {
+    if (this.running && !this.paused && !this.followerMode && !this.wordClock) {
       this.clearTimers();
       this.animateLine();
     }
@@ -297,7 +323,7 @@ export class FlowScrollEngine {
     }
     const wasFollower = this.followerMode;
     this.followerMode = false;
-    if (wasFollower && !this.paused) {
+    if (wasFollower && !this.paused && !this.wordClock) {
       this.animateLine();
     }
   }
@@ -311,9 +337,11 @@ export class FlowScrollEngine {
     }
     this.clearTimers();
     this.lineIdx = this.findLineForWord(wordIndex);
+    this.einkPageStart = this.lineIdx;
     this.scrollActiveChunkOrLine(wordIndex);
     this.emitChunkChangeForWord(wordIndex);
-    if (!this.paused) {
+    if (this.wordClock) this.placeCursorBar(wordIndex);
+    else if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
@@ -352,6 +380,69 @@ export class FlowScrollEngine {
     this.callbacks.onProgressUpdate?.(this.getProgress());
   }
 
+  /**
+   * BAND-ALIGN-2: the word timer's word moved (one clock). While the pacer runs under `wordClock`, it follows that
+   * word: on a line change it places the line by the band rule (advanceZone; in e-ink only at a page step), and it
+   * moves its cursor bar. A word past the last line hands off once (onComplete, the section handoff). It never
+   * publishes the word: the word timer already did.
+   */
+  syncToWord(wordIndex: number): void {
+    if (!this.running || !this.wordClock || this.lines.length === 0) return;
+    if (wordIndex > this.lines[this.lines.length - 1].lastWord) {
+      if (!this.completeSent) {
+        this.completeSent = true;
+        this.callbacks.onComplete();
+      }
+      return;
+    }
+    const lineIdx = this.findLineForWord(wordIndex);
+    const line = this.lines[lineIdx];
+    this.wordIndex = wordIndex;
+    if (lineIdx !== this.lineIdx) {
+      this.lineIdx = lineIdx;
+      if (!this.manualScrollPaused) {
+        if (!this.isEink) {
+          this.advanceZone(lineIdx);
+        } else if (lineIdx < this.einkPageStart || lineIdx >= this.einkPageStart + EINK_LINES_PER_PAGE || this.isLineBelowView(line)) {
+          this.einkPageStart = lineIdx;
+          this.advanceZone(lineIdx);
+        }
+      }
+      this.callbacks.onLineChange?.(lineIdx, line);
+    }
+    this.placeCursorBar(wordIndex);
+    this.emitChunkChangeForWord(wordIndex);
+    this.callbacks.onProgressUpdate?.(this.getProgress());
+  }
+
+  /** BAND-ALIGN-2 R4/R5: the band's anchor and line count (settings.flowZonePosition, flowZoneLines); re-places the band at once. */
+  setBandLayout(anchor: unknown, lines: unknown): void {
+    this.bandAnchorSetting = anchor;
+    this.bandLinesSetting = lines;
+    if (this.running && this.lines.length > 0 && !this.manualScrollPaused) this.advanceZone(this.lineIdx);
+  }
+
+  /** The cursor bar under the word's line at the remaining-words width (as followWord). */
+  private placeCursorBar(wordIndex: number): void {
+    if (!this.cursor) return;
+    const line = this.lines[this.findLineForWord(wordIndex)];
+    if (!line) return;
+    const lineWidth = Math.max(line.right - line.left, 1);
+    const fraction = Math.max(0, Math.min(1, (wordIndex - line.firstWord) / Math.max(1, line.lastWord - line.firstWord + 1)));
+    const mapped = this.mapContainerPointToCursorSpace(line.left, line.bottom);
+    this.cursor.style.transition = "none";
+    this.cursor.style.left = mapped.left + "px";
+    this.cursor.style.top = mapped.top + "px";
+    this.cursor.style.width = Math.max(1, lineWidth * (1 - fraction)) + "px";
+    this.cursor.style.display = "block";
+  }
+
+  /** Whether a line's bottom is below the scroll container's view (an e-ink page steps early rather than lose the cursor). */
+  private isLineBelowView(line: LineInfo): boolean {
+    if (!this.container) return false;
+    return line.bottom - this.container.scrollTop > this.container.clientHeight;
+  }
+
   jumpToLine(direction: "prev" | "next"): void {
     if (!this.running) return;
     this.clearTimers();
@@ -363,9 +454,11 @@ export class FlowScrollEngine {
       this.callbacks.onWordAdvance(this.wordIndex);
       this.emitChunkChangeForWord(this.wordIndex);
       this.callbacks.onLineChange?.(this.lineIdx, line);
+      this.einkPageStart = this.lineIdx;
       this.scrollActiveChunkOrLine(this.wordIndex);
+      if (this.wordClock) this.placeCursorBar(this.wordIndex);
     }
-    if (!this.paused) {
+    if (!this.paused && !this.wordClock) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
@@ -388,8 +481,10 @@ export class FlowScrollEngine {
     this.lineIdx = this.findLineForWord(targetWord);
     this.callbacks.onWordAdvance(this.wordIndex);
     this.emitChunkChangeForWord(this.wordIndex);
+    this.einkPageStart = this.lineIdx;
     this.scrollActiveChunkOrLine(this.wordIndex);
-    if (!this.paused) {
+    if (this.wordClock) this.placeCursorBar(this.wordIndex);
+    else if (!this.paused) {
       setTimeout(() => this.animateLine(), FLOW_LINE_ADVANCE_BUFFER_MS);
     }
   }
@@ -426,6 +521,7 @@ export class FlowScrollEngine {
   }
 
   rebuildLineMap(): void {
+    this.completeSent = false;
     this.lines = this.buildLineMap();
     this.computeZoneHeightFrac();
     if (this.lines.length > 0) this.lineIdx = this.findLineForWord(this.wordIndex);
@@ -741,16 +837,36 @@ export class FlowScrollEngine {
     const ch = this.container.clientHeight;
     if (ch <= 0) return;
 
-    // Flow-only "wheel" mode: keep the reading window stationary and roll text
-    // through it by continuously aligning the active line to the fixed zone top.
-    // Narration follower mode keeps legacy behavior unchanged.
+    // Flow-only "wheel" mode: keep the reading window stationary and roll text through it. BAND-ALIGN-2 R3: scroll the
+    // line's centre to the band's anchor (clamped to the container's range), then place the band around the line
+    // wherever it ended up. An e-ink page puts its first line at the view's top instead. Narration follower mode keeps
+    // legacy behavior unchanged.
     if (this.stableWindowScroll && !this.followerMode) {
-      const targetScrollTop = Math.max(0, line.y - (ch * this.initialZoneTop));
+      const bandLines = normalizeBandLines(this.bandLinesSetting);
+      const maxScrollTop = Math.max(0, this.container.scrollHeight - ch);
+      const targetScrollTop = this.isEink && this.wordClock
+        ? Math.min(maxScrollTop, Math.max(0, line.y))
+        : computeAnchorScrollTop({
+          scrollTop: 0,
+          lineTopPx: line.y,
+          lineBottomPx: line.bottom,
+          containerTopPx: 0,
+          viewportHeightPx: ch,
+          anchor: normalizeBandAnchor(this.bandAnchorSetting),
+          bandHeightPx: readZoneLineStepPx(this.container) * Math.max(bandLines, 1),
+          maxScrollTop,
+        });
       if (Math.abs(this.container.scrollTop - targetScrollTop) > 0.5) {
         this.container.scrollTop = targetScrollTop;
       }
-      this.currentZoneTopFrac = this.initialZoneTop;
-      this.onZoneTopChange?.(this.currentZoneTopFrac);
+      const scrollTop = this.container.scrollTop;
+      const band = computeBandEdges(this.lines, lineIdx, bandLines);
+      const clientTop = this.container.getBoundingClientRect().top;
+      this.currentZoneTopFrac = band ? Math.max(0, (band.top - scrollTop) / ch) : this.initialZoneTop;
+      this.onZoneTopChange?.(
+        this.currentZoneTopFrac,
+        band ? { top: band.top - scrollTop + clientTop, bottom: band.bottom - scrollTop + clientTop } : undefined,
+      );
       return;
     }
 

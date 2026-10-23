@@ -248,8 +248,14 @@ export const NON_FOLIATE_PROGRESS_SAVE_MS = 2000;
 export const MIN_ACTIVE_READING_MS = 1000;
 
 // ── Flow Scroll Mode (FLOW-3A) ─────────────────────────────────────────────
-/** Fraction of viewport height where the active line sits (reading zone) */
-export const FLOW_READING_ZONE_POSITION = 0.25;
+/** The reading band's default anchor, Top third (BAND-ALIGN-2 R4; stored in settings.flowZonePosition) */
+export const FLOW_READING_ZONE_POSITION = 1 / 3;
+/** Band anchor Top: the band's top edge at the view's top */
+export const FLOW_BAND_ANCHOR_TOP = 0;
+/** Band anchor Top third: the band's centre at one third of the view height */
+export const FLOW_BAND_ANCHOR_TOP_THIRD = 1 / 3;
+/** Band anchor Center: the band's centre at half the view height */
+export const FLOW_BAND_ANCHOR_CENTER = 0.5;
 /** Default cursor height in pixels for flow scroll mode */
 export const FLOW_CURSOR_HEIGHT_PX = 3;
 /** Cursor height in pixels for e-ink mode (thicker for visibility) */
@@ -266,6 +272,10 @@ export const FLOW_ZONE_LINES_DEFAULT = 5;
 export const FLOW_ZONE_LINES_MIN = 3;
 /** Maximum lines for flow reading zone */
 export const FLOW_ZONE_LINES_MAX = 8;
+/** The band's line counts the reader can choose (BAND-ALIGN-2 R5); any other stored value reads as the default */
+export const FLOW_ZONE_LINES_OPTIONS = [3, 5, 7] as const;
+/** flowZoneLines value for Lines Off: no band and no dimming */
+export const FLOW_ZONE_LINES_OFF = 0;
 /** Opacity for de-emphasized content outside reading zone (0-1) */
 export const FLOW_ZONE_OPACITY = 0.35;
 /** Soft edge transition width as percentage of container */

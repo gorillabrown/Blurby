@@ -820,6 +820,9 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     this.settingsSnapshot = own(next) as ReaderSettingsSnapshot;
     this.wpm = ownFlowWpm(this.settingsSnapshot);
     if (this.getEffectiveWpm() !== previousEffectiveWpm) this.scrollEngine?.setWpm(this.getEffectiveWpm());
+    // BAND-ALIGN-2 R4/R5: an anchor or Lines change re-places the band at once, without moving the word.
+    const { flowZonePosition, flowZoneLines } = this.settingsSnapshot.settings;
+    this.scrollEngine?.setBandLayout(flowZonePosition, flowZoneLines);
     this.state.notify();
   }
 
@@ -1161,6 +1164,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     engine.setChunks(this.readingChunks());
     this.publishFlowVisualState(this.state.highlightedWordIndex);
     const settings = this.settingsSnapshot.settings;
+    engine.setBandLayout(settings.flowZonePosition, settings.flowZoneLines); // BAND-ALIGN-2 R4/R5
     engine.start(
       container,
       cursor,
@@ -1171,6 +1175,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT,
       onZoneTopChange,
       true,
+      true, // BAND-ALIGN-2: one clock; the line pacer follows the word timer (syncToWord)
     );
     this.state.notify();
   };
@@ -1254,8 +1259,9 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     });
     this.publishHighlight(idx);
     s.currentWordIndex = idx;
+    let found = true;
     if (this.document.useFoliate && this.surface.isReady()) {
-      const found = this.surface.highlight(idx, "flow", { allowMotion: false });
+      found = this.surface.highlight(idx, "flow", { allowMotion: false });
       if (!found) {
         // Word not in loaded sections — pause, turn page, wait for section load (onWordsReextracted resumes).
         this.engine?.pause();
@@ -1263,6 +1269,8 @@ export class FlowModeRuntime implements ReaderModeRuntime {
         this.surface.next();
       }
     }
+    // BAND-ALIGN-2: one clock. The line pacer follows this word, unless Flow paused to turn the page.
+    if (found) this.scrollEngine?.syncToWord(idx);
     s.notify();
   }
 
@@ -1315,7 +1323,9 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     const currentWord = this.state.highlightedWordIndex;
     const meta = this.document.bookWords;
     const totalWords = meta?.totalWords || this.document.wordCount || this.engineWords.length;
-    const nextSection = meta?.sections.find((section) => section.startWordIdx > currentWord);
+    // BAND-ALIGN-2: under one clock the word timer's word is already the next section's first word when the line pacer
+    // hands off (the old line clock handed off on the last rendered word), so a section starting at it is the next one.
+    const nextSection = meta?.sections.find((section) => section.startWordIdx >= currentWord);
     if (nextSection && currentWord < totalWords - 1) {
       Promise.resolve(this.surface.goToSection(nextSection.sectionIndex))
         .then(() => this.surface.waitForSectionReady(nextSection.sectionIndex))
