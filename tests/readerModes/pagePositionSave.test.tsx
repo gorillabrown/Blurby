@@ -636,4 +636,42 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     const doc = stubControl.getLibrary().find((d) => d.id === "sample-meditations")!;
     expect([doc.position, doc.cfi]).toEqual([12, "c13"]);
   });
+
+  // TOC-JUMP-SAVE-1: foliate fires the jump's relocate synchronously inside view.goTo, so the jump saves its landing.
+  describe("TOC-JUMP-SAVE-1 TOC jump", () => {
+    const tocJump = (runtime: any) => act(async () => { await runtime.handleCommand({ kind: "go-to-href", href: "ch2.xhtml" }); });
+
+    it("(tj1) a TOC jump saves the landed page's first word and cfi", async () => {
+      const { fake, runtime, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      (view as any).goTo = async () => { view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } })); };
+      await tocJump(runtime);
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
+    });
+
+    it("(tj2) control: the same relocate after the jump has settled saves nothing", async () => {
+      const { fake, runtime, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      await tocJump(runtime); // the fake goTo fires no relocate
+      const before = saves(fake).length;
+      await relocate(view, { cfi: "jump-cfi", fraction: 0.5, range });
+      expect(saves(fake).slice(before)).toEqual([]);
+    });
+
+    it("(tj3) control: a jump onto renderer-numbered words is held, then saved once the book's numbers apply", async () => {
+      const { fake, runtime, view, renderer, render } = await mount();
+      const { doc } = rawDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+      const range = spanRange(doc, 2, 3);
+      (view as any).goTo = async () => { view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } })); };
+      await tocJump(runtime);
+      expect(saves(fake)).toEqual([]);
+      await render(BOOK_WORDS);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    });
+  });
 });
