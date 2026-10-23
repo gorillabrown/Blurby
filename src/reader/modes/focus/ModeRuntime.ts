@@ -67,7 +67,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
-import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
+import { findBookParagraphStart, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 
 /**
  * FocusMode — RSVP (Rapid Serial Visual Presentation). (Relocated from src/modes/FocusMode.ts.)
@@ -754,8 +754,9 @@ export class FocusModeRuntime implements ReaderModeRuntime {
         this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
         break;
       case "paragraph": {
-        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
-        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
+        const target = this.paragraphTarget(command.direction === "next" ? "forward" : "backward");
+        if (target == null) return; // no book sections known yet: the key does nothing
+        this.moveReadingWord(target);
         break;
       }
       case "go-to-href":
@@ -773,6 +774,22 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   /** The word the navigation keys step from: the engine's word once it exists, else the highlighted word. */
   private navigationWord(): number {
     return this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
+  }
+
+  /**
+   * The paragraph start to move to, in the index space of effectiveWords(). With full-book words (book-wide indices)
+   * it comes from the rendered block starts of book-stamped sections and the book's section starts (Blurby.Brain,
+   * ruling A); null when no section is known. Otherwise the view's loaded-slice breaks or the document's breaks
+   * index the same words the keys step over.
+   */
+  private paragraphTarget(direction: "forward" | "backward"): number | null {
+    const current = this.navigationWord();
+    const lastIndex = this.effectiveWords().length - 1;
+    if (!this.document.useFoliate) return findParagraphStart(this.document.paragraphBreaks, current, direction, lastIndex);
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return findParagraphStart(this.surface.getParagraphBreaks(), current, direction, lastIndex);
+    const sectionStarts = bookWords.sections.map((section) => section.startWordIdx);
+    return findBookParagraphStart(this.surface.getParagraphStarts(), sectionStarts, current, direction, lastIndex);
   }
 
   /**

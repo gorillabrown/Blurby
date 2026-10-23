@@ -101,6 +101,32 @@ export function findParagraphStart(paragraphBreaks: readonly number[], currentIn
   return 0;
 }
 
+/**
+ * The previous or next paragraph start in book-wide word indices, for an EPUB with full-book words. renderedStarts
+ * are the rendered block-start words of sections stamped against the book; sectionStarts are the book's section
+ * starts, which are paragraph starts too and cover the sections not rendered (or still provisionally numbered).
+ * Next: the nearest start after currentIndex, else lastIndex. Previous: the nearest start before it, else 0.
+ * With no sections known it returns null, and the caller does not move.
+ */
+export function findBookParagraphStart(
+  renderedStarts: readonly number[],
+  sectionStarts: readonly number[],
+  currentIndex: number,
+  direction: "forward" | "backward",
+  lastIndex: number,
+): number | null {
+  if (sectionStarts.length === 0) return null;
+  const starts = [...new Set([...renderedStarts, ...sectionStarts])].sort((a, b) => a - b);
+  if (direction === "forward") {
+    const next = starts.find((start) => start > currentIndex);
+    return next === undefined ? lastIndex : Math.min(next, lastIndex);
+  }
+  for (let i = starts.length - 1; i >= 0; i--) {
+    if (starts[i] < currentIndex) return starts[i];
+  }
+  return 0;
+}
+
 // Title case minor words that should stay lowercase (unless first/last word)
 const MINOR_WORDS = new Set([
   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",

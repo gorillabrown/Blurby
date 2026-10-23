@@ -42,6 +42,7 @@ import {
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { collectParagraphStartWordIndexes } from "./helpers/foliateParagraphStarts";
 
 const FOCUS_HIGHLIGHT_MODE = "focus";
 
@@ -216,6 +217,8 @@ export interface FocusWordState {
 export interface FocusFoliateViewAPI {
   getWords: () => FoliateWord[];
   getParagraphBreaks: () => Set<number>;
+  /** FOCUS-KEYS-FIX-1: book-wide block-start words of the sections stamped against the book (provisional ones left out). */
+  getParagraphStartWordIndexes: () => number[];
   goTo: (target: string | number) => Promise<unknown>;
   next: () => void;
   prev: () => void;
@@ -293,6 +296,9 @@ export default function FocusFoliateView({
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
   const foliateParagraphBreaksRef = useRef<Set<number>>(new Set());
+  // FOCUS-KEYS-FIX-1: section documents whose spans carry the book's numbering (wrapped, or re-stamped, against the
+  // book's sections). A document wrapped before those arrived carries provisional numbering and is not in the set.
+  const bookStampedDocsRef = useRef(new WeakSet<Document>());
   const wordPositionIndexRef = useRef<WordPositionIndex>(new WordPositionIndex());
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
@@ -693,7 +699,11 @@ export default function FocusFoliateView({
             if (sectionStart >= 0) {
               const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+              // FOCUS-KEYS-FIX-1: book-stamped only once a wrap against the book's sections completes.
+              const stampsWithBook = Boolean(liveSections()?.some((section) => section.sectionIndex === index));
+              bookStampedDocsRef.current.delete(doc);
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              if (stampsWithBook) bookStampedDocsRef.current.add(doc);
             }
           }
 
@@ -981,6 +991,8 @@ export default function FocusFoliateView({
             return extracted.words;
           },
           getParagraphBreaks: () => foliateParagraphBreaksRef.current,
+          getParagraphStartWordIndexes: () =>
+            collectParagraphStartWordIndexes(view.renderer?.getContents?.() ?? [], (d) => bookStampedDocsRef.current.has(d)),
           goTo: (target) => view.goTo(target),
           next: () => view.renderer.next(),
           prev: () => view.renderer.prev(),
@@ -1115,10 +1127,13 @@ export default function FocusFoliateView({
         if (!doc?.body) continue;
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;
+        const stampsWithBook = (bookWordSections as SectionBoundary[]).some((section) => section.sectionIndex === index);
+        bookStampedDocsRef.current.delete(doc); // FOCUS-KEYS-FIX-1: not book-stamped while it is re-wrapped
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
         await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        if (stampsWithBook) bookStampedDocsRef.current.add(doc);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);
