@@ -137,3 +137,7 @@ No crash dialog and no crash report appeared (#23), so release gate (11) did not
 ## Live profile
 
 The live profile changed during Part A. These were intended: the #7 title edit, the #21 settings, the #20 einkMode on, the DNC conversion, and the reverted cfi for *Why Nations Fail*. The step-0 hashes will therefore not match. The backup above is the restore point.
+
+## Owner-observed addendum (Blurby.Roadmap, 2026-10-23)
+
+- **#1, tray right-click menu: OWNER-OBSERVED PASS.** The owner right-clicked the tray icon of the installed ARM64 build. The menu appears, with **Open Blurby** and **Quit** (owner's screenshot, 2026-10-23). With this, #1 passes in full on the BCJ-rebuilt installer.
