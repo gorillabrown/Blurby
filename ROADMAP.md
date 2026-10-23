@@ -2970,15 +2970,670 @@ Each stub needs investigation or an owner decision before it can be specified (R
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
 - <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 43 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
-- <a id="page-save-restamp-3"></a>**PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard** *(position 45 — stub; not a release gate)*. From PAGE-SAVE-RESTAMP-GUARD-1's quality review (Blurby.Brain ruling 2026-10-15): (2) the double-wrap race: if bookWords arrives during the first wrap of a section of more than 50 groups, the re-stamp can remove the document from the guard set mid-wrap, and the load's wrap keeps stamping provisional numbers, so a turn onto those spans saves unheld; (4) the failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's one-liner, if more is needed. Also (PAGE-SAVE-RESTAMP-2 live check, 2026-10-15): the held-turn cancel fires on foliate's `link` event before the jump lands, so a link within about 20 ms of a turn can cancel the held turn while the view stays on the turned page (the turn goes unsaved; the stored position stays older but correct). Move the cancel to after the jump lands. From PAGE-SAVE-RESTAMP-2's quality review (2026-10-15): W2, after a failed-words turn the relocate save writes a fraction-estimated position (as before); W4, a held turn from another section can outlive a click on a stamped section; N2, `bookWordsFailedRef` is never reset in a view; N4, no test for the open-without-cfi cancel; and a click whose spans are unstamped when failure is already known is dropped without a diagnostic. From PAGE-SAVE-RESTAMP-2's fix-round review (2026-10-15): no test pins the negative side of fr1's guard (a held click followed by a turn or a second click, then the re-stamp, must leave the newer state alone; deleting `=== provisional` keeps every test green); `holdWordClick`'s resolve check in the view can never reject a click; `heldClickAnchor` is not reset when a turn replaces a held click. Lane: Reader Engine.
+
+<a id="page-save-restamp-3"></a>
+
+#### PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard, and "Keep at furthest" *(position 45 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; not a release gate)*
+
+- **What:** close the page-save edge cases left by PAGE-SAVE-RESTAMP-GUARD-1 and -2 that still reproduce on `48ce4db9`, and make "Keep at furthest" reopen the book at the furthest page. The work runs in three waves, because they depend on different things:
+  - **Wave A** (the view and the Page runtime; no ruling needed):
+    - (A1) the double-wrap race;
+    - (A2) a word click after the word count is known to have failed saves nothing;
+    - (A3) pin tests for the open cancel and for the negative side of fr1's guard;
+    - (A4) `heldClickAnchor` is reset when a turn replaces a held click.
+  - **Wave B** (after JUMP-LANDING-SAVE-1): (B1) the held-turn cancel moves off foliate's `link` event.
+  - **Wave C** (needs a tier 2 ruling and a shared-core integration window): (C1) "Keep at furthest" reopens at the furthest page, and the high-water mark follows page turns.
+    - **Held (2026-10-23).** Blurby.Brain has taken the reopen page to the owner, recommending the furthest page.
+    - **The live measurement on the release-fix sha `97527896`** (blurby-6b, scratch profile, CDP; reported to Blurby.Brain as a possible release fix) found the loss is real:
+      - after reading from 1290 to 2673, then back to 416, the prompt offered "Keep at page 6";
+      - choosing it saved 1290 with the 416 page's cfi, and a reopen showed the 416 page;
+      - on `08f4b948~1`, page turns saved nothing and no prompt appeared.
+    - **A two-file prototype was proven live** (`ReaderContainer.tsx` port plus `useProgressTracker.ts`): Keep then saved 2673 with its own cfi and reopened there.
+    - If that lands as a release fix, Wave C shrinks to what it leaves: the Page pages-read count, and storing the mark in `library.json`. Re-scope Wave C then.
+- **Why:** the stub's review notes (PAGE-SAVE-RESTAMP-GUARD-1 and -2 quality reviews, Blurby.Brain ruling 2026-10-15), PAGE-SAVE-RESTAMP-2's live check L9, and PAGE-REOPEN-CFI-1's finding (its memo, line 32). Each item was re-traced on `48ce4db9`, and each still-live item was reproduced by a red test in a scratch worktree at `48ce4db9` (2026-10-23). The probe file and the candidate diff are kept in the investigator's scratchpad (`…\scratchpad\psr3-probe\`) and are not committed.
+
+##### Investigation results, item by item (main @ `48ce4db9`)
+
+| Stub item | Status | Evidence |
+|---|---|---|
+| (2) The double-wrap race | **Reproduces → A1** | Probe PR1: a 160-paragraph section loads with no book words; the book's words arrive while the load's wrap is yielding. 60 of 160 spans (`Word100`–`Word159`) keep the renderer's provisional numbers (`Word100=100`, not 120), and the document has already left `rendererNumberedDocsRef`, so a turn onto them saves unheld. The probe goes green with A1's fix. |
+| (4) The failed-replay diagnostic | **Covered elsewhere; excluded** | PAGE-HELD-TURN-FAIL-1 (position 61) reports the held turn that `fail()` cannot save (`reason=book-words-failed`) and adds ` kind=turn\|click` to all three loss lines. Nothing more is needed. |
+| The held-turn cancel fires on `link` before the jump lands | **Reproduces live (PAGE-SAVE-RESTAMP-2, L9: a link at +203 ms dropped the turn; the view stayed on the turned page); → B1** | `FoliateView.tsx:795`. The red test (lc1) is the (y) "internal link" row with the expectation inverted. That row asserts `[]` on main, so (lc1) is red by construction. |
+| W2: after a failed-words turn, the relocate save writes a fraction-estimated position | **Dropped (tier 1)** | When the words have failed, no exact index exists. The fraction estimate from the turn's own relocate (`ModeRuntime.ts:471-486`) is newer than the stored index, which may be from an older session, so it is the better of the two. PAGE-SAVE-RESTAMP-2's "keep the stored index" was written so that the renderer's *provisional* numbers are never saved, and a fraction estimate is not one of them. |
+| W4: a held turn from another section outlives a click on a stamped section | **Does not reproduce; dropped** | Every click first calls `centerResolvedTokenInReadingWindow` (`:697` and `:754`), which clears the held slot at `:508` whenever the renderer has `scrollToAnchor` (foliate's paginator always has it). Also, any book words that stamp section B re-stamp every visible document first, which saves or drops A's held turn (`:1092-1103`). The probe PW4 could not reach W4's state; it saved A's turn at the re-stamp instead. |
+| N2: `bookWordsFailedRef` is never reset in a view | **Dropped: no reachable effect** | The flag is read only together with `rendererNumberedDocsRef.has(doc)` (`:604`, `:618/:621`, `:670`). Once the words arrive, the re-stamp removes every visible document (`:1101`), and later loads never add one, because `liveSections()` is no longer empty (`:663`). |
+| N4: no test for the open-without-cfi cancel | **Pin test → A3** | Probe PN4 (a held turn from a snap during `init`, then `initialCfi` undefined): green on main, `saves = []`. With `:864` deleted it fails, saving `["doc-1", 2, "cfi:0:gamma"]` (mutation control run). |
+| A click on unstamped spans, when the failure is already known, is dropped without a diagnostic | **The unstamped case is unreachable from the handlers, so the diagnostic is added as defensive. The real defect is wider → A2** | Probe PC1. Once the word count is known to have failed, **every** word click on a renderer-numbered page saves nothing, stamped or not. The cause is order: `holdWordClick` runs before `onWordClick` (`:719-727`, `:770-778`). Its failure branch reports at once (`:621-622` → `onHeldClickSave`), while `heldClickAnchor` is still `null` or stale, so `onHeldClickSave` returns at `ModeRuntime.ts:609`. `hardSelect` then commits with `persist: false` (`:326-327`), because `holdSave` is true. On main the second click's save is missing (`[["doc-1",-1,"cfi:3:beta"]]` only). The probe goes green with A2's fix. |
+| fr1's negative side (`=== provisional`) is untested | **Pin test → A3** | Only `ModeRuntime.ts:616` decides it. A direct runtime test pins it, with a mutation control. |
+| `holdWordClick`'s resolve check can never reject | **Confirmed dead → removed in A2** | `wordOffsetInSection` is `exactIdx - sectionBase` when both are known, else `Math.max(0, …)` (`:716-718`, `:766-768`), so `exactIdx != null \|\| wordOffsetInSection >= 0` is always true. The runtime's own guard (`ModeRuntime.ts:338`, `:609`; test FR3) stays. |
+| `heldClickAnchor` is not reset when a turn replaces a held click | **Tidy → A4** | After A2, a stale value can no longer be read, because every `onHeldClickSave` follows its own `hardSelect`. It is reset in `onPageTurned` so that the state is not left misleading. |
+| PAGE-REOPEN-CFI-1: "Keep at furthest" pairs the furthest *position* with the on-screen *cfi* | **Reproduces → C1 (tier 2)** | Probe PKF: `handleKeepFurthest` sends `["book", 7272, "epubcfi(SCREEN-p3000)"]`, and a reopen opens on the cfi, the backtracked page. **Second finding (probe PHW):** in Page mode no page turn reaches `scheduleRelocateSave`. Three turns give 0 calls, because `onPageTurned`'s commit sets `resumeAnchor` and `onRelocate` then skips (`ModeRuntime.ts:448`, `:471-477`). So `furthestPositionRef` never rises after the open, and `recordPages` (`ReaderContainer.tsx:324`) counts no Page-mode turns. The likely cause is PAGE-POSITION-SAVE-1; Done-when C-1 measures it on `08f4b948~1`. |
+
+- **Out of scope:**
+  - The failed-word-count release and the `kind=` loss lines (PAGE-HELD-TURN-FAIL-1).
+  - Landing saves for link, footnote and chapter jumps (JUMP-LANDING-SAVE-1).
+  - Focus, Flow and Narrate.
+  - W2, W4 and N2 (dropped above, with reasons).
+- **Prerequisites:**
+  - Wave A: TOC-JUMP-SAVE-1 (`db03f2f5`) and PAGE-HELD-TURN-FAIL-1 merged, because both edit `FoliateView.tsx`. A2's new diagnostic uses PAGE-HELD-TURN-FAIL-1's `kind=` form.
+  - Wave B: JUMP-LANDING-SAVE-1 merged.
+  - Wave C: the ruling below, and a declared integration window for `ReaderContainer.tsx`.
+- **Ruling needed (Wave C only; CLAUDE.md Rule 11 tier 2, because it has a user-visible effect):** which page a reopen shows after "Keep at furthest".
+  - **Recommendation: the furthest page.** That is what the button says.
+  - Record a cfi with the high-water mark wherever the mark rises, and have Keep at furthest send that cfi.
+  - With no cfi recorded (the furthest point is where the book opened), send the cfi the book opened with.
+  - Let Page turns raise the mark, which also restores Page's pages-read count.
+  - Alternative: send no cfi and reopen by position, through `goToFraction`. That is approximate, and main keeps the stored on-screen cfi anyway (`main/ipc/documents.js:24`), so it does not work without an IPC change. Not recommended.
+  - **Roadmap may split Wave C into its own item.** It touches shared core and a hook outside the view.
+
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. All test additions go in `tests/readerModes/pagePositionSave.test.tsx` (new `describe("PAGE-SAVE-RESTAMP-3")`, reusing `mount`, `mountWiredClicks`, `spanRange`, `settle`) unless stated.
+
+  **Wave A**
+  - **A-1. Positive control (standing rule 43).** Commit (pr1) and (pc1) alone first. `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "PAGE-SAVE-RESTAMP-3"` exits 1 on the base:
+    - (pr1) fails with 60 provisional spans;
+    - (pc1) fails with the second save missing.
+    - Record the output in the memo.
+    - (pn4) and (fr1n) pass on the base. They are pins; each gets its mutation control in A-3.
+  - **A-2. Tests:**
+    - **(pr1) The double-wrap race:**
+      - Mount with no book words. A section document holds 160 `<p>Word{i}</p>` paragraphs, and `renderer.contents` is `[{ doc, index: 3 }]`.
+      - Dispatch `load` in one `act` and do not settle, so the wrap yields after its first batches.
+      - Then `render({ bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: 160 }], getCanonicalSectionWords: i => i === 3 ? words : undefined })`, then `settle()` twice.
+      - Assert all 160 `[data-word-index]` spans, and that each `Word{i}`'s index is `20 + i`.
+    - **(pc1) A click after a known failure:**
+      - `mountWiredClicks({ ensureBookWords: () => Promise.reject(new Error("x")) })`.
+      - Click word 1, then settle. Saves are `[["doc-1", -1, "cfi:3:beta"]]`.
+      - Click word 2, then settle. Saves are `[["doc-1", -1, "cfi:3:beta"], ["doc-1", -1, "cfi:3:gamma"]]`, and there is no `persistence.updateProgress` call.
+    - **No test for the unstamped-click diagnostic.** Both handlers pass only a resolved, stamped token's range. The click handler needs `[data-word-index]` (`:683`), and the selection handler needs a resolved token (`:746`). So `reportFirstWordOnPage` returning `false` there is defensive. A-5's grep checks the line.
+    - **(pn4) The open-without-cfi cancel (pin):**
+      - Stub `FakeFoliateView.prototype.init` to set `renderer.contents = [{ doc, index: 0 }]` and `page = 2`, and to dispatch a renderer `relocate` with `reason: "snap"` and `rawDoc()`'s range. Restore the stub in `finally`.
+      - Mount with `initialCfi: undefined` and section 0's book words, then `loadSection(view, doc, 0)`.
+      - Saves are `[]`.
+    - **(fr1n) fr1's guard, negative side (pin):**
+      - `mountWiredClicks()`, then click word 1, which is held, with `heldClickAnchor` 1.
+      - `runtime.navigateTo(4)`, then `runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" })`.
+      - `runtime.exportHandoff("persistent").explicitSelectionAnchor` stays `4`.
+    - **(hc1) A turn clears the held click's anchor:**
+      - Click word 1, which is held. Turn onto `spanRange(doc, 2, 3)`, which is held and replaces the click. Then `render(BOOK_WORDS)` and settle.
+      - Saves are `[["doc-1", 22, "cfi:3:gamma"]]`, and `(runtime as any).heldClickAnchor` is `null`.
+    - Every existing test passes unchanged, including (u), (v), (WC1)–(WC4), (FR1) and (FR3), and `tests/foliate-bridge.test.ts`.
+  - **A-3. Mutation controls (run, record, then revert in the working tree; never committed):**
+    - deleting `FoliateView.tsx:864`'s cancel makes (pn4) fail;
+    - deleting `=== provisional` from `ModeRuntime.ts:616` (making the condition always true) makes (fr1n) fail.
+  - **A-4.** `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/foliate-bridge.test.ts` exits 0.
+  - **A-5. Greps:**
+    - `git grep -n "sectionWrapsRef" -- src/reader/modes/page/FoliateView.tsx` prints exactly 4 lines: the declaration, the set, and the await in the load, plus the await in the re-stamp.
+    - `git grep -n -F "wordOffsetInSection >= 0)) return false" -- src/reader/modes/page/FoliateView.tsx` exits 1. On the base it prints `:618`.
+    - `git grep -n -F "kind=click" -- src/reader/modes/page/FoliateView.tsx` prints at least one line inside `holdWordClick`.
+  - **A-6. Live check** (owner's machine, `electron-builder --dir`, scratch profile `BLURBY_USER_DATA_DIR`, CDP):
+    - Use PAGE-SAVE-RESTAMP-2's main hook that rejects `extract-epub-words` (its memo, the L4 row and the driver description).
+    - Open the bundled *Meditations*. Wait until the rejection is recorded.
+    - Click one word on the page, then a second word, then quit through the app.
+    - `library.json`'s `cfi` for the book is the second click's cfi, and its `position` is unchanged from before the open.
+    - Record the probe output in the memo.
+  - **A-7.** `npm test` exits 0 on the owner's machine (standing rule 47; the closed-list rule). `npm run typecheck` and `npm run build` exit 0 (rule 48).
+  - **A-8. Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly:
+    - `M src/reader/modes/page/FoliateView.tsx`;
+    - `M src/reader/modes/page/ModeRuntime.ts`;
+    - `M tests/readerModes/pagePositionSave.test.tsx`;
+    - plus the time log and memo.
+
+  **Wave B** (after JUMP-LANDING-SAVE-1 has merged)
+  - **B-0. Re-check first.** If JUMP-LANDING-SAVE-1 already removed or moved the `link` cancel, then:
+    - run (lc1) and (lc2) as pins;
+    - record "covered by JUMP-LANDING-SAVE-1";
+    - make no code change.
+  - **B-1. Positive control:** commit (lc1) alone. It exits 1 on the base, saving `[]`.
+  - **B-2. Tests:**
+    - **(lc1) A link jump that never lands:** a held turn on `spanRange(doc, 2, 3)`, then a `link` event with no relocate after it (foliate dropped or could not resolve the jump). Then `render(BOOK_WORDS)` and settle. Saves are `[["doc-1", 22, "cfi:3:gamma"]]`.
+    - **(lc2) A link jump that lands:** the same, but the landing relocate follows on another page. The landing's save, or its hold if provisional, replaces the held turn, and the older turned page is never saved. The landing is reported as a turn, through JUMP-LANDING-SAVE-1's path.
+    - **(y), "internal link" row, Rule 50 update, named in the memo:** the row's jump becomes "a `link` event followed by its landing relocate", and it still asserts that the older turn is not saved.
+  - **B-3.** The pagePositionSave suite exits 0, then the full suite, typecheck and build, as in A-7.
+  - **B-4. Fence:** `M src/reader/modes/page/FoliateView.tsx`, `M tests/readerModes/pagePositionSave.test.tsx`, plus the time log and memo.
+
+  **Wave C** (after the ruling, in a declared `ReaderContainer.tsx` integration window)
+  - **C-1. Positive controls:**
+    - Commit (kf1) and (hw1) alone. Both exit 1 on the base.
+    - Run (hw1) also on `08f4b948~1`, the commit before PAGE-POSITION-SAVE-1, in a scratch worktree, and record whether turns reached `scheduleRelocateSave` there. That records whether the pages-read gap is a regression.
+  - **C-2. Tests:**
+    - **(kf1)**, in `tests/useProgressTracker.test.ts`, next to the PAGE-REOPEN-CFI-1 describe:
+      - The opening cfi is `"epubcfi(OPEN)"`, with position 7272. A relocate sets the on-screen cfi to `"epubcfi(SCREEN)"`, at word 3000.
+      - `handleKeepFurthest()` sends `["book", 7272, "epubcfi(OPEN)"]`.
+      - (kf2): after `noteHighWater(9000, "epubcfi(FAR)")`, it sends `["book", 9000, "epubcfi(FAR)"]`.
+    - **(kf3) control:** `handleSaveAtCurrent()` still sends the on-screen relocate's cfi.
+    - **(hw1)**, in `pagePositionSave.test.tsx`: three Next-page turns on `stampedDoc()` give exactly three `persistence.recordHighWater` effects, each with the landed word and cfi.
+    - Every PAGE-REOPEN-CFI-1 test passes unchanged.
+  - **C-3. Live check** (`--dir`, scratch profile, CDP):
+    - Open a book, turn forward 6 pages, then back 4, then exit. The backtrack prompt shows.
+    - Choose **Keep at furthest**, then reopen. The book opens on the furthest page, and `library.json`'s `position` and `cfi` match the probe's word and cfi for that page.
+    - Repeat with **Save at current**. It reopens on the current page.
+  - **C-4.** Full suite, typecheck and build, as in A-7.
+  - **C-5. Fence:**
+    - `M src/hooks/useProgressTracker.ts`;
+    - `M src/components/ReaderContainer.tsx` (shared core, in the window);
+    - `M src/reader/ports/ReaderPorts.ts`;
+    - `M src/reader/ports/createReaderPorts.ts`;
+    - `M src/reader/modes/page/ModeRuntime.ts`;
+    - `M tests/readerModes/harness/fakePorts.ts`;
+    - `M tests/useProgressTracker.test.ts`;
+    - `M tests/readerModes/pagePositionSave.test.tsx`;
+    - plus the time log and memo.
+- **Effort:**
+  - Wave A: M (S code, plus the live check).
+  - Wave B: S.
+  - Wave C: M.
+- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel per wave; Blurby.Brain gives the Wave C ruling; Blurby.Roadmap gives each merge go.
+- **Lane:** Reader Engine. Execution surface C; Wave C also D-adjacent through the persistence port.
+- **Source:** the stub; the PAGE-SAVE-RESTAMP-GUARD-1 and -2 memos (review notes, L9); PAGE-REOPEN-CFI-1's memo line 32; this trace and these probes on `48ce4db9`.
+- **Path:** dispatch, one dispatch per wave.
+
+##### Implementation detail
+Lines are on `48ce4db9`. TOC-JUMP-SAVE-1 and PAGE-HELD-TURN-FAIL-1 move them, so re-grep each anchor after taking main in.
+
+- **A1, `FoliateView.tsx`.**
+  - Next to `bookWordsFailedRef` (`:316`), declare `const sectionWrapsRef = useRef(new WeakMap<Document, Promise<number>>());`.
+  - In the section load (`:664`), keep the wrap's promise:
+
+    ```ts
+    const wrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+    sectionWrapsRef.current.set(doc, wrap); // PAGE-SAVE-RESTAMP-3: the re-stamp waits for this wrap
+    await wrap;
+    ```
+
+  - In the re-stamp loop, after `if (sectionStart < 0) continue;` (`:1095`) and before `unwrapWordSpans(doc)` (`:1096`):
+
+    ```ts
+    await sectionWrapsRef.current.get(doc)?.catch(() => {}); // PAGE-SAVE-RESTAMP-3: never interleave with the load's wrap
+    ```
+
+  - The load's own post-wrap check (`:669-676`) runs first and still sees the document as renderer-numbered, so it leaves a held turn for the re-stamp. That order was confirmed by (pr1) and (u) passing.
+- **A2, `FoliateView.tsx`.**
+  - `holdWordClick` (`:617-628`) becomes `(doc: Document, range: Range): void`:
+    - it drops the dead resolve clause and the `return true`;
+    - its failure branch becomes:
+
+      ```ts
+      if (!reportFirstWordOnPage(doc, start, end, true)) recordDiagnosticRef.current("page-turn-lost", `reason=book-words-failed start=${start} end=${end} kind=click`);
+      ```
+
+  - In both handlers (`:719-727`, `:770-778`):
+    - `const holdSave = rendererNumberedDocsRef.current.has(doc); // PAGE-SAVE-RESTAMP-2`;
+    - then `onWordClickRef.current?.(…, holdSave)` as now;
+    - then `holdWordClick(doc, tokenRange ?? fallbackRange)` (the selection handler passes `tokenRange ?? range`).
+  - So the click's `hardSelect` sets `heldClickAnchor` before any immediate report reaches `onHeldClickSave`.
+  - This was dry-run in scratch: (pc1) and (pr1) green, and the 38 existing pagePositionSave tests and `foliate-bridge.test.ts` (6) green. The only type error was the leftover `return true`, which this removes.
+- **A4, `ModeRuntime.ts`.** In `onPageTurned` (`:576-595`), add `this.heldClickAnchor = null; // PAGE-SAVE-RESTAMP-3: a saved turn replaces any held click` after the `alive` check.
+- **A3:** tests only.
+- **B1, `FoliateView.tsx:795`.**
+  - Remove the `link` listener's cancel.
+  - The link's landing, reported as a turn by JUMP-LANDING-SAVE-1, replaces the held slot (`reportTurn`, `:597-613`). A jump that never lands leaves the held turn, which then saves. That is correct, because the view never left the turned page.
+  - Keep the comment line explaining why there is no cancel.
+- **C1:**
+  - **`useProgressTracker.ts`:**
+    - Add `furthestCfiRef` (`{ docId, cfi } | null`), set from `activeDoc.cfi` where `furthestPositionRef` is set (`:141-145`).
+    - Add `noteHighWater(wordIndex, cfi)`. It wraps `calculateHighWaterPagesReadDelta`, sets both refs when the mark rises, and returns the pages delta.
+    - `_persistAndLog(finalPos, cfiOverride?)` sends `cfiOverride` when it is given.
+    - `handleKeepFurthest` (`:311-314`) passes the furthest cfi for this document.
+    - Export `noteHighWater` and `furthestCfiRef`.
+  - **`ReaderContainer.tsx`:**
+    - `scheduleRelocateSave` (`:320-325`) calls `live.noteHighWater(wordIndex, cfi)` instead of its inline high-water lines.
+    - A new port method `recordHighWater({ wordIndex, cfi })` calls `noteHighWater`, then `recordPages` when the delta is positive. It never saves.
+  - **`ReaderPorts.ts`:** add the method after `scheduleRelocateSave` (`:29`).
+  - **`createReaderPorts.ts:60`:** add `"recordHighWater"` to the persistence allow-list.
+  - **`fakePorts.ts`:** add `recordHighWater: rec("persistence.recordHighWater")` (`:71`).
+  - **`ModeRuntime.onPageTurned`:** when `first.wordIndex != null`, call `this.ports.persistence.recordHighWater({ wordIndex: first.wordIndex, cfi: first.cfi })`.
+  - No new debounced save: the turn's own save already ran, and a second, delayed save could overwrite a later click or jump.
+- **Constants:** none.
+- **Branch:** `eb/page-save-restamp-3` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\page-save-restamp-3`.
+  - Run `npm ci`. Push with `HEAD:refs/heads/eb/page-save-restamp-3`.
+  - Waves B and C continue on the same branch after taking main in, or on `-b`/`-c` branches if Wave A has merged already.
+- **Staging plan:** each wave's fence paths. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - **If A-1's (pr1) passes on the base:** the act timing changed. Raise the paragraph count to 400 and re-run. If it still passes, stop and report; don't change the code to fit the test.
+  - **If any existing test fails after A2:** stop and report. (WC1)–(WC4) and (FR1) pin the held-click rules.
+  - **If B-0 finds the link path changed in a way this spec does not cover:** stop and send it to Blurby.Brain.
+  - **If C-1 shows turns reaching `scheduleRelocateSave` on `08f4b948~1`:** record it as a regression from PAGE-POSITION-SAVE-1 in the memo and in BUG_REPORT; the fix is unchanged.
+  - **Rollback:** `git revert -m 1 <merge>`, per wave.
+- **Lane ownership (parallel run):** surface C.
+  - **Forbidden:** the other modes' views and runtimes, `main/`, and `preload.js`. In Waves A and B, also `ReaderContainer.tsx`.
+  - **Shared-core touches:**
+    - Waves A and B: none.
+    - Wave C: `src/components/ReaderContainer.tsx`, which needs an integration window declared in ROADMAP Stage 8 before dispatch.
+  - **Merge order:**
+    - all waves after the Stage 8 freeze lifts;
+    - Wave A after TOC-JUMP-SAVE-1 and PAGE-HELD-TURN-FAIL-1 (same file);
+    - Wave B after JUMP-LANDING-SAVE-1 (it overlaps the link path in `FoliateView.tsx`);
+    - Wave C after the ruling, in its window. It is independent of B.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive controls (pr1, pc1) red on the base; pins (pn4, fr1n) green | calculable | positive control | bounded | low | 20m (four tests, one red run) | — | Wave A |
+| 2 | The re-stamp waits for the load's wrap (A1) | calculable | bug fix | bounded | medium | 15m (one ref, two edits) | — | Wave A |
+| 3 | A click reports after `hardSelect`, and an unsaved one is logged (A2); `heldClickAnchor` reset on a turn (A4); test hc1 | calculable | bug fix | bounded | medium | 20m (two handlers, one helper, one runtime line, one test) | — | Wave A |
+| 4 | Mutation controls; live click-after-failure check; suite, typecheck and build; merged | calculable | merge and verify | bounded | medium | 50m (two mutations, `--dir` build, CDP probe, gates, one --no-ff merge) | — | Wave A |
+| 5 | Link cancel removed after JUMP-LANDING-SAVE-1 (lc1, lc2, the (y) row update); gates; merged | calculable | bug fix | bounded | medium | 35m (one edit, two tests, one row update, gates, merge) | — | Wave B |
+| 6 | Keep at furthest reopens at the furthest page; Page turns raise the high-water mark (kf1–kf3, hw1); live check; gates; merged | calculable | bug fix | cross-cutting | high | 80m (hook, port, shell, runtime, four tests, CDP check, gates, merge) | — | Wave C |
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** each wave is red first. The pins carry mutation controls instead.
+- **Standing rule 44 (LL-143):** A-5's greps were dry-run on the base. `sectionWrapsRef` exits 1 there, and the dead-clause grep prints `:618`.
+- **Standing rule 50 (LL-156):** the (y) internal-link row is updated in Wave B and named in the memo.
+- **LL-151 (live drivers that miss the window):** B is tested by construction in the harness. The live L9 timing is not used as the gate.
+
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
 - <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(position 47 — stub; not a release gate)*. From FOLDER-NOTICE-1's quality review (2026-10-15): (3) within one sync the banner follows whichever of the root check and the scan answers last, so a null scan after a true check, or the reverse, flaps it (and a root holding only directories clears then re-sets `root-empty-suspect`); make the banner follow the scan's verdict; (6) Retry has no in-flight guard in main, so a banner remount mid-attempt allows a second root check; (7) a same-folder re-select through `switch-folder` resets the toast flag, so a second watcher error in the same episode toasts again; (8) the banner's Retry button loses focus when disabled and on success, and a failed Retry is not announced (`role="alert"` fires only on mount): use `aria-busy`/`aria-disabled` and a short status line. From the fix-round review of FOLDER-NOTICE-1 (2026-10-15): (9) `syncAll`'s catch checks only the folder string, so an abandoned same-folder run (A hung, switch to B and back to A) can report `sync-failed` on a healthy A after the new run's clear; add the run-generation check the `.finally` already uses; (10) `retry()`'s folder guard compares raw strings where `state.js` uses `pathKey`; (11) test gaps: a toast is sent once the window finishes loading, and a failed (null) watcher restart does not toast twice. Lane: UX polish.
 - <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transfer
 elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
-- <a id="jump-landing-save-1"></a>**JUMP-LANDING-SAVE-1 — Other jumps in Page mode save the page they land on** *(position 63 — stub; not a release gate)*. From TOC-JUMP-SAVE-1's run (2026-10-22, note 4). The same defect class remains for internal-link jumps, footnote jumps, and next/previous chapter: each leaves the saved position on the page it jumped from. Also note 3: a jump foliate drops during a turn's lock, an unresolvable href, and an anchor with no pages still keep the early commit. Fix direction: route each through the same in-flight-turn counting TOC-JUMP-SAVE-1 gives the API `goTo`. Lane: Reader Engine.
+
+<a id="jump-landing-save-1"></a>
+
+#### JUMP-LANDING-SAVE-1 — Link, footnote and chapter jumps in Page mode save the page they land on *(position 63 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*
+
+- **What:** in Page mode, a jump saves the first word and cfi of the page it lands on, as a page turn does, for three kinds of jump:
+  - an internal link;
+  - a footnote reference;
+  - Previous or Next chapter.
+
+  A contents jump that never lands saves nothing, so the stored position stays on the page still shown.
+- **Why:** the same defect class as TOC-JUMP-SAVE-1, plus two findings from this trace.
+  - **Links and footnotes.** Live, on `48ce4db9`, with the built renderer, a scratch profile and CDP, opening the sample *Meditations* in Page:
+    - four turns saved `position` 146;
+    - clicking the in-book link "THE SECOND BOOK" showed section 4 page 1, first word 9431 "THE";
+    - `library.json` still held 146 and the old cfi `epubcfi(/6/4!/4/16[pgepubid00002],/2,/2)`, 4 s and 12 s later and after a normal quit.
+  - **Previous and Next chapter do nothing at all on an EPUB.** This is new; the stub assumed they move the page.
+    - Same session: three presses of the bottom bar's "Next chapter", at book start and mid-book, and one `]` key.
+    - The section, page, cfi and `library.json` were all unchanged, and the button was enabled.
+    - This is in every mode, because the handler is shared.
+  - **TOC-JUMP-SAVE-1's note 3.** A contents jump that never lands keeps the early commit. The saved position becomes the entry's word, while the view stays where it was:
+    - a jump foliate drops while a turn holds the paginator's lock;
+    - an unresolvable href.
+- **Root cause (traced 2026-10-23 on `48ce4db9`; TOC-JUMP-SAVE-1's branch `db03f2f5` changes only the API `goTo`, at `FoliateView.tsx:981-984`; Rule 6a cleared):**
+  1. **Links and footnotes are one path.** Page has no footnote pop-up: `git grep -n -i footnote -- src` finds nothing, and the extractor only reads footnote text for Narrate. A footnote reference is an `<a href>` like any internal link.
+     - foliate's `#handleLinks` (`node_modules/foliate-js/view.js:337-353`) emits a cancelable `link`. It then calls `this.goTo(href)` unless a listener called `preventDefault()` (`:350-352`).
+     - Page's listener (`src/reader/modes/page/FoliateView.tsx:795`) only cancels a held turn. foliate's own `goTo` then runs outside any turn count.
+     - That `goTo` (`view.js:447-457`, then `paginator.js` `goTo` `:1057-1061`, `#goTo`, `#display`, `#scrollToAnchor` `:956-979`, `#afterScroll` `:987-1004`) fires `relocate` before its promise resolves, exactly as for the contents jump. The reason is `anchor`; only `snap` or a smooth scroll animates (`#scrollTo`).
+     - The view's relocate handler (`:797-808`) reports a turn only while `pageTurnsInFlightRef.current > 0`. The runtime's `onRelocate` (`ModeRuntime.ts:436-487`) skips the save, because the last turn's commit set `resumeAnchor` (`helpers/usePersistentReadingAnchor.ts:59-71`).
+  2. **Chapter steps compute no chapters.**
+     - `handlePrevChapter` and `handleNextChapter` (`src/components/ReaderContainer.tsx:644-663`) rebuild the chapters with `chaptersFromCharOffsets(activeDoc.content, docChapters)` or `detectChapters(activeDoc.content, words)` (`src/utils/text.ts:176`, `:227`). Both return `[]` for empty content (`:177`, `:231`).
+     - A foliate EPUB has no `content`, so `chs.length < 2` and the handler returns.
+     - For a foliate book, `docChapters[i].charOffset` already holds a **word index** (`resolveTocWordIndex`, `ReaderContainer.tsx:100`, filled at `:374-380` and re-mapped at `:580-592`).
+     - Even with chapters, the step calls `handleNavigateTo` only. Page's `navigateTo` (`ModeRuntime.ts:351-356`) commits and persists the word with the old page's cfi and never moves the view: its `jumpDisplayToWord` is a no-op (`:698`).
+  3. **The early commit (note 3).** `handleJumpToChapter` (`ReaderContainer.tsx:665-684`) calls `handleNavigateTo(entry word)` before `go-to-href`.
+     - Page's `navigateTo` persists `[doc, entry word, state.cfi]` at once (`commitPersistentWordIndex`, `usePersistentReadingAnchor.ts:79-106`).
+     - When the jump lands, TOC-JUMP-SAVE-1's landing save overwrites it. When it never lands, nothing does:
+       - the paginator's `goTo` returns at once while `#locked` (`paginator.js:1058`; a turn holds the lock for its scroll plus 100 ms, `:1095-1106`);
+       - `view.goTo` catches an unresolvable target and resolves `undefined` (`view.js:447-457`).
+- **Fix:**
+  - **(A) Links and footnotes.** In the view, one counted jump helper, `goToLanding(target)`. It cancels a held turn, as today. It counts the jump as a turn in flight for the life of `view.goTo(target)`, which is TOC-JUMP-SAVE-1's body, moved. Then:
+    - the API `goTo` returns `goToLanding(target)`;
+    - the `link` listener calls `e.preventDefault()` and `goToLanding(e.detail.href)`.
+
+    foliate then skips its own `goTo`, so a link makes exactly one jump. `e.detail.href` is already resolved against the section (`view.js:345`). External links are a separate event (`external-link`) and are untouched.
+  - **(B) Chapter steps.**
+    - A new pure `tocChapterStep(chapters, wordIndex, dir)` in `src/utils/text.ts` finds the current entry: the last one whose `charOffset` (a word index) is at or before `wordIndex`.
+      - Next returns the following entry, or -1 at the last one.
+      - Previous returns the entry before, or 0 at the first one. This keeps the legacy rule at `ReaderContainer.tsx:650`.
+    - For a foliate book, `handlePrevChapter` and `handleNextChapter` call `handleJumpToChapter(tocChapterStep(docChapters, canonicalWordAnchor, ∓1))` when the result is not -1, and return. A chapter step is then exactly a contents jump: `go-to-href` in every mode. In Page, its landing saves through (A) and TOC-JUMP-SAVE-1.
+    - `handleJumpToChapter` moves above the two handlers, because their dependency lists now name it.
+    - The non-foliate branch is unchanged.
+  - **(C) No early commit in Page for an EPUB.** Page's `navigateTo` returns at once when `this.document.useFoliate`.
+    - On an EPUB its only caller is `handleJumpToChapter`, which always follows with `go-to-href`, whose landing commits.
+    - A jump that never lands now saves nothing, and the stored position stays on the page shown.
+    - Page shows no view for a non-EPUB (`ModeView.tsx`), so its commit there stays as it is.
+  - The prototype of (A)–(C) on `48ce4db9` + TOC-JUMP-SAVE-1's hunk passed:
+    - the full suite (181 files, 2,457 passed / 1 skipped), with the new tests and no change to any existing test;
+    - typecheck.
+
+    Live, on the same build and a fresh scratch profile:
+    - the link to "THE SECOND BOOK" saved `9431` and `epubcfi(/6/10!/4/2[pgepubid00007]/2,/4,/4)`;
+    - "Next chapter" went to section 5 and saved `11652`;
+    - "Previous chapter" went back to section 4 and saved `9431`;
+    - after a quit and a reopen, the book opened on section 4, first word 9431.
+
+    The prototype was discarded; nothing is committed.
+- **Out of scope:**
+  - **Where a jump cancels a held turn.** It stays at the jump's start, in `goToLanding`. PAGE-SAVE-RESTAMP-3 moves it to after the jump lands. Its "link within about 20 ms of a turn" case is the lock-dropped jump above, and it edits `goToLanding`.
+  - **A jump onto an anchor with no rects or pages.** `#scrollToAnchor` returns before `#afterScroll` (`paginator.js:965`, `:975`). No relocate fires, so nothing is saved, and the view may show the new section. This is recorded, as TOC-JUMP-SAVE-1's blank-edge case is.
+  - **Focus, Flow and Narrate.** They get working chapter steps through (B), with their own existing `go-to-href` and early commit, which are unchanged. Their landing saves are not part of this item.
+  - **`goToSection`** (`FoliateView.tsx:1022-1035`): jump-back and restore are not reading jumps, and the JUMPS test pins them.
+- **Prerequisites:**
+  - **TOC-JUMP-SAVE-1 merged.** This builds on its counter and edits the same lines (`eb/toc-jump-save-1` @ `db03f2f5`).
+  - **The Stage 8 freeze lifted.**
+  - **A shared-core window for `ReaderContainer.tsx`.** See "Shared-core touches" below.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the tests of Done-when 2 are committed alone first.
+       - `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "JUMP-LANDING-SAVE-1"` exits 1.
+       - `npx vitest run tests/chapterStep.test.ts` exits 1.
+       - Expected on the base, as measured 2026-10-23: 7 failures by assertion, on `48ce4db9` and again with TOC-JUMP-SAVE-1's hunk applied:
+         - (jl1) ×2 and (jl3): `expected [] to deeply equal [[…]]`;
+         - (jl4) ×2: `expected [{ method: "persistence.updateDocProgress", args: ["doc-1", 20, undefined] }] to deeply equal []`;
+         - chapter step: Next and Previous give `-1`.
+       - The controls (jl2) and "Next at the last entry" pass on the base.
+       - Record the output in the staging memo.
+    2. **Tests:**
+       - **In `tests/readerModes/pagePositionSave.test.tsx`, a new `describe("JUMP-LANDING-SAVE-1 link and chapter jumps")` inside the existing one.**
+         - Helpers:
+           - `followLink(view, href)` mirrors `view.js:350-352`: dispatch a cancelable `link` with `{ a: null, href }`, and if it was not prevented, `await view.goTo(href)`. Cast the fake's no-argument `goTo` for typecheck.
+           - `landingGoTo(view, range)` is a `vi.fn` async `goTo` that dispatches `relocate` `{ cfi: "jump-cfi", fraction: 0.5, range }` on the view before it resolves.
+         - **(jl1)** `it.each` over an internal link `"ch2.xhtml#sec-2"` and a footnote reference `"notes.xhtml#fn-1"`. On a `stampedDoc()` at index 0 with `landingGoTo`, assert:
+           - saves `[["doc-1", 12, "cfi:0:twelve"]]`;
+           - `view.goTo` called exactly once, with the href.
+         - **(jl2) control:** a link with the fake's plain `goTo`, settled, then a relocate: saves `[]`.
+         - **(jl3) control:** on a renderer-numbered section (`rawDoc()` at index 3, loaded), a link landing on `spanRange(doc, 2, 3)`:
+           - it is held (`[]`);
+           - after `render(BOOK_WORDS)`, it saves `[["doc-1", 22, "cfi:3:gamma"]]`.
+         - **(jl4)** `it.each` over "dropped while a turn holds the paginator's lock" and "an unresolvable href". Both use a `goTo` that resolves with no relocate. `runtime.navigateTo(20)` then `handleCommand({ kind: "go-to-href", href: "ch9.xhtml" })`, settled. Assert saves `[]`.
+       - **New `tests/chapterStep.test.ts`.** It reads `tocChapterStep` from `src/utils/text.ts` through a variable name, so it runs on the base. There, the fallback is the base's computation, `chaptersFromCharOffsets("", …)`, and gives -1. Over entries `[0, 136, 140, 2100, 9431]`:
+         - Next from 146 gives 3;
+         - Previous from 2500 gives 2, and from 0 gives 0;
+         - Next from 9500 gives -1 (control).
+       - Every existing test passes unchanged, including JUMPS row "internal link" (`:95`), (y) (`:519-531`), (WC3), and TOC-JUMP-SAVE-1's (tj1)–(tj3). No Rule 50 update.
+    3. **Code checks:**
+       - `git grep -n -F 'pageTurnsInFlightRef.current += 1' -- src/reader/modes/page/FoliateView.tsx` prints exactly 2 lines: `turnPage`, and `goToLanding`. With TOC-JUMP-SAVE-1 merged, it prints 2: `turnPage` and the API `goTo`.
+       - `git grep -n -F 'e.preventDefault(); void goToLanding' -- src/reader/modes/page/FoliateView.tsx` prints 1 line.
+       - `git grep -n "chaptersFromCharOffsets(activeDoc.content" -- src/components/ReaderContainer.tsx` still prints 3 lines (the non-foliate branches are unchanged).
+    4. `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/chapterStep.test.ts` exits 0.
+    5. **Live check (owner's machine, CDP, scratch profile):** `electron-builder --dir`, then on the sample *Meditations*:
+       - **(a)** Page, four turns, then click the in-book link "THE SECOND BOOK" (section 1's list). The probe's first word and cfi, and `library.json`'s `position` and `cfi`, agree. The base saved nothing: 146 stayed.
+       - **(b)** Press "Next chapter". The view moves to the next contents entry's page, and `library.json` agrees with the probe.
+       - **(c)** Press "Previous chapter". The same checks apply.
+       - **(d)** Quit through the app (no kill), then reopen. The book opens on (c)'s page.
+       - **(e)** Switch to Focus and press "Next chapter" once. The word shown moves to the next entry's first word (the existing `go-to-href` path).
+       - **(f)** Follow a footnote reference in any book that has one, and run (a)'s checks. If no owner-library copy has one, record "none available" and rely on (jl1)'s footnote row.
+
+       Record each probe's output in the memo, as TOC-JUMP-SAVE-1 did. The 2026-10-23 prototype probe is the expected shape.
+    6. `npm test` exits 0 on the owner's machine (standing rule 47; the Stage 8 closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly:
+       - `M src/reader/modes/page/FoliateView.tsx`, `M src/reader/modes/page/ModeRuntime.ts`, `M src/utils/text.ts`, `M src/components/ReaderContainer.tsx`;
+       - `M tests/readerModes/pagePositionSave.test.tsx`, `A tests/chapterStep.test.ts`;
+       - the time log and staging memo (standing rule 41).
+- **Effort:** M (S–M code, plus the CDP live check).
+- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel; Blurby.Roadmap gives the merge go.
+- **Lane:** Reader Engine. Execution surface C.
+- **Source:** the stub (TOC-JUMP-SAVE-1 notes 3 and 4, 2026-10-22); this trace and live repro on `48ce4db9` (2026-10-23); the prototype run on the same base.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (lines on `48ce4db9`; take `refs/remotes/origin/main` in after TOC-JUMP-SAVE-1 merges and re-grep each before editing):
+  - **`src/reader/modes/page/FoliateView.tsx:794-795`.** The `link` listener becomes:
+
+    ```ts
+    // TOC-JUMP-SAVE-1, JUMP-LANDING-SAVE-1: a jump's landing relocate fires inside view.goTo, so counting the jump as a
+    // turn in flight saves the landed page, as a turn does.
+    const goToLanding = (target: any) => {
+      pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
+      pageTurnsInFlightRef.current += 1;
+      return Promise.resolve(view.goTo(target)).finally(() => { pageTurnsInFlightRef.current -= 1; });
+    };
+    // An internal link or footnote reference (view.js:337-353): go to it through goToLanding instead of foliate's own goTo.
+    view.addEventListener("link", (e: any) => { e.preventDefault(); void goToLanding(e.detail.href); });
+    ```
+
+  - **`:981-984`, the API `goTo`.** After TOC-JUMP-SAVE-1 it is the same three statements. It becomes `goTo: (target) => goToLanding(target),`, with TOC-JUMP-SAVE-1's comment moved to the helper.
+  - **`src/reader/modes/page/ModeRuntime.ts:351-356`, `navigateTo`.** After `if (!this.alive) return;` add:
+
+    ```ts
+    // JUMP-LANDING-SAVE-1: on an EPUB the shell follows with go-to-href, whose landing saves the page. Committing here
+    // would save the entry's word with the old page's cfi, and a jump that never lands would keep it.
+    if (this.document.useFoliate) return;
+    ```
+
+  - **`src/utils/text.ts`, after `currentChapterIndex` (`:217-223`).** Add `export function tocChapterStep(chapters: ReadonlyArray<{ charOffset: number }>, wordIndex: number, dir: 1 | -1): number`, as specified in Fix (B), with a one-paragraph doc comment.
+  - **`src/components/ReaderContainer.tsx`.**
+    - At `:10`, add `tocChapterStep` to the `../utils/text` import.
+    - Move `handleJumpToChapter` (`:665-684`) above `handlePrevChapter` (`:644`).
+    - In each of `handlePrevChapter` and `handleNextChapter`, insert this first line, with `-1` and `1` respectively:
+
+      ```ts
+      if (useFoliate) { const t = tocChapterStep(docChapters, canonicalWordAnchor, -1); if (t >= 0) handleJumpToChapter(t); return; }
+      ```
+
+      Add `useFoliate` and `handleJumpToChapter` to both dependency lists.
+    - Nothing else in the file changes.
+- **Tests:** Done-when 2. The red run for Done-when 1 has been made already (2026-10-23, scratch worktree, discarded). Re-run it on the branch.
+- **Constants:** none.
+- **Branch:** `eb/jump-landing-save-1` from `refs/remotes/origin/main` after TOC-JUMP-SAVE-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\jump-landing-save-1`. Run `npm ci` first. Push with the explicit refspec `HEAD:refs/heads/eb/jump-landing-save-1`.
+- **Staging plan:** the fence paths only. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If Done-when 1 passes on the base, stop and report: the cause has moved.
+  - If (jl1) shows `view.goTo` called twice, stop: the listener's `preventDefault` is not reaching foliate (for example, a non-cancelable `link`). Report the foliate version.
+  - If the live check shows a link's relocate arriving after `view.goTo` resolves, stop and send the trace to Blurby.Brain. Do not widen the counter with a timer.
+  - If live (b) moves the view but the save disagrees with the probe, stop and report.
+  - If any existing test fails, stop and report. Do not edit it to pass.
+  - Rollback: `git revert -m 1 <merge>`. If the revert conflicts with PAGE-SAVE-RESTAMP-3 in `goToLanding`, revert that item first.
+- **Lane ownership (parallel run):** surface C.
+  - **Forbidden:** the other modes' views and runtimes, `main/`, `preload.js`, and every other part of `ReaderContainer.tsx`.
+  - **Shared-core touches:** `src/components/ReaderContainer.tsx`, in one place: the import at `:10` and the three chapter handlers at `:644-684`. This needs an integration window with no other sprint editing that file.
+  - **Merge order:**
+    - after the Stage 8 freeze and after TOC-JUMP-SAVE-1;
+    - independent of PAGE-HELD-TURN-FAIL-1, which edits `:586-674`, so either can go first, with a re-grep;
+    - **before PAGE-SAVE-RESTAMP-3**, which moves the held-turn cancel inside `goToLanding`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control: link, footnote and never-landing jumps, and the chapter step, red on the base | calculable | positive control | bounded | low | 20m (seven tests across two files, one red run) | — | — |
+| 2 | Links and footnotes jump through `goToLanding`; Page's `navigateTo` makes no early commit on an EPUB | calculable | bug fix | bounded | medium | 20m (one helper, two call sites, one guard) | — | — |
+| 3 | Chapter steps on an EPUB go through the contents list (`tocChapterStep`, `ReaderContainer` shared-core window) | calculable | bug fix | bounded | medium | 20m (one pure helper, two handlers, one move) | — | — |
+| 4 | Live link, chapter, quit-reopen and Focus checks on a `--dir` build; full suite, typecheck and build; merged and pushed | calculable | merge and verify | bounded | medium | 50m (build, CDP probes a–f, suite, one --no-ff merge) | — | — |
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 was run red on the base, by assertion, before the specification was written.
+- **Standing rule 44 (LL-143):** the stub's premise for chapter steps (that they move the page) was checked live and found wrong. Done-when 5 (b) and (c) check the corrected premise.
+- **TOC-JUMP-SAVE-1's root cause:** a navigation's relocate fires inside `view.goTo`, so counting the jump is enough. The same holds for the link path, by the same paginator code.
+
 - <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1 — Build full NSIS installers per architecture by default** *(position 65 — stub; S; not a release gate)*. The owner's decision for RELEASE-RUNBOOK-1 (2026-10-22, option B) is separate full x64 and ARM64 installers. This release does it with CLI overrides. Move `package.json`'s `build.win.target` from `nsis-web` to `nsis` (artifact name and `latest.yml` per architecture), update the runbook to drop the overrides, and check that electron-updater picks the right architecture's installer for both. Lane: Platform & Maintenance.
 - <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups** *(position 64 — stub; M; after LIBRARY-WRITE-RACE-1; not a release gate)*. Split from LIBRARY-WRITE-RACE-1 (2026-10-22). Four parts. (1) `save-library` id de-duplication, a test for malformed elements, and type checks. (2) The Edit form's fire-and-forget save: how a failed save looks is an **open owner decision** (recommended: the form stays open with an inline "Couldn't save — try again" and keeps the typed values). (3) Renderer edits and sync freshness, **ruled by Blurby.Brain 2026-10-22 (tier 1): main stamps, but never the doc-level `modified`.** For folder docs, `modified` holds the source file's mtime (`syncLibraryWithFolder` writes `modified: file.modified`, and rescans compare against it). The spec first traces what cloud sync's last-writer-wins compares: `sync-state.json` carries a `fieldTimestamps` map. If per-field stamps exist, main stamps the edited field there. If sync only compares `modified`, add a separate main-stamped `editedAt` and have the merge use it for renderer-owned fields. Stamp only when a value actually changes (`markDocsSeen` and other no-op saves stamp nothing). Tests: a title edit beats a staler cloud copy; a folder rescan neither clobbers the edit stamp nor treats an edit as a file change; a no-op save stamps nothing. (4) Cloud sync's `setLibrary(gcd)` stays in the deferred Cloud lane. Lane: Library & Content.
-- <a id="zip-async-read-1"></a>**ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously** *(position 69 — stub; S; not a release gate)*. From ZIP-READ-FOLLOWUPS-1 (Blurby.Brain, 2026-10-23). adm-zip's path constructor reads the file synchronously (`fs.readFileSync`), which breaks the standing rule that main-process file I/O is async. Fix: in `openZip` (`main/zip-read.js`), read with `fsPromises.readFile` and hand the buffer to adm-zip, with the cap checked on the stat. That also closes the gap between the stat and the read. After ZIP-READ-FOLLOWUPS-1 and the Stage 8 freeze. Lane: Library & Content.
+
+<a id="zip-async-read-1"></a>
+
+#### ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously *(position 69 — Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*
+
+- **What:** `openZip` (`main/zip-read.js`) reads the archive with `fsPromises.readFile` and hands the buffer to adm-zip. adm-zip no longer reads the file synchronously. The archive cap (`ZIP_FILE_MAX_BYTES`) is checked twice:
+  - on the stat, before the read, as now;
+  - on the bytes actually read, which closes the gap between the stat and the read.
+
+  Every caller's behaviour and messages stay the same.
+- **Why:**
+  - adm-zip's path constructor reads the whole file with `fs.readFileSync` (`node_modules/adm-zip/adm-zip.js:55-63`, adm-zip 0.5.18). That breaks the standing rule that main-process file I/O is async: for a large EPUB it blocks the main process, and with it every window and IPC reply, for the length of the read.
+  - The stat-then-read order leaves a gap. A file that grows between `fsPromises.stat` and adm-zip's read is read whole, past the cap (ZIP-READ-FOLLOWUPS-1, Blurby.Brain 2026-10-23).
+- **Root cause (traced 2026-10-23 on `29b3e7e5`; Rule 6a cleared):**
+  1. `openZip` (`main/zip-read.js:12-19`):
+     - stats the path (`:13`, a stat failure gives size 0);
+     - refuses a size over the cap with `code: "ZIP_FILE_TOO_LARGE"` (`:14-16`);
+     - then returns `new AdmZip(filePath)` (`:18`).
+  2. **adm-zip's constructor:**
+     - **String input:** it calls `filetools.fs.existsSync(input)`, then `readFileSync(input)` (`adm-zip.js:55-63`). A path that `existsSync` cannot see throws `ADM-ZIP: Invalid filename` (`util/errors.js:39`, prefixed by `E()` at `:50-57`).
+     - **Buffer input:** it uses the buffer as it is, with `opts.method = BUFFER` (`:37-41`). It reads nothing from disk.
+  3. **Callers (re-grepped, `git grep -n "openZip" -- main`)**, all of them `await openZip(path)` inside a try/catch that maps the error:
+     - `main/epub-converter.js:1053`, `validateEpub`;
+     - `main/epub-word-extractor.js:168`, `extractWords`;
+     - `main/file-parsers.js:359`, `extractContent`. Its message depends on the error text: an error containing "invalid" or "zip" gives "…appears to be a corrupted ZIP archive." (`:360-365`), and any other gives "…may be corrupted.";
+     - `main/file-parsers.js:547`, `extractEpubCover`;
+     - `main/file-parsers.js:624`, `extractEpubMetadata`.
+  4. **The entry reader (`createEntryReader`, `:24-50`) is unaffected.** It reads entries through `getCompressedData()`, which works the same on a buffer-backed archive.
+- **Fix:** in `openZip`:
+  1. Keep the stat and its cap check.
+  2. Then `await fsPromises.readFile(filePath)`.
+  3. If the read fails with `ENOENT` or `ENOTDIR`, throw `new Error("ADM-ZIP: Invalid filename")`, carrying the original `code`. This is adm-zip's own wording for a path it cannot see, so `extractContent`'s message for a missing file is unchanged. ZIP-READ-FOLLOWUPS-1's test (s) pins that. Rethrow any other read error as it is: its text has the same `CODE: message, open '<path>'` shape `readFileSync` gave.
+  4. If `buffer.length > ZIP_FILE_MAX_BYTES`, throw the same `ZIP_FILE_TOO_LARGE` error: the file grew after the stat.
+  5. Return `new AdmZip(buffer)`.
+
+  The cap is 2 GiB − 1 (`main/constants.js:75`), which is also the most `fs.readFile` can read. So the read never needs a size of its own, and the post-read check is exact.
+- **Out of scope:**
+  - A bounded read through a file handle (`fh.stat` and a read to the stat's size). The post-read check gives the same guarantee: nothing over the cap reaches adm-zip. The memory a growing file can briefly take is bounded by `readFile`'s own 2 GiB limit.
+  - adm-zip's other synchronous paths. `addLocalFile` and folder adds (`adm-zip.js:312`) are not used in `main/` (`git grep -n "addLocalFile\|addLocalFolder" -- main` prints nothing).
+  - Any other synchronous I/O in `main/`.
+- **Prerequisites:**
+  - ZIP-READ-FOLLOWUPS-1 merged to `main`. It adds `openZip` and `ZIP_FILE_MAX_BYTES` and routes every EPUB open through them. It is held at `29b3e7e5` for the Stage 8 freeze.
+  - The Stage 8 freeze lifted.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Re-grep on the base:**
+       - `git grep -n "new AdmZip(" -- main` prints exactly `main/zip-read.js:18: return new AdmZip(filePath);`.
+       - `git grep -n "openZip(" -- main` prints the five call sites above, plus the definition.
+       - If either differs, re-trace before editing.
+    2. **Positive control (standing rule 43):** the new `tests/zipAsyncRead.test.js` is committed alone first. `npx vitest run tests/zipAsyncRead.test.js` exits 1 on the base, with both failures by assertion:
+       - (za1): `expected [ Array(1) ] to deeply equal []` (adm-zip's `readFileSync` of the file);
+       - (za2): `promise resolved … instead of rejecting`.
+
+       (za3) passes. Record the output in the staging memo. This was checked on `29b3e7e5` while specifying: exactly these two failures, and 1 passed.
+    3. **Tests**, in `tests/zipAsyncRead.test.js`. Take the test file under *Implementation detail* (Tests) as written. Real EPUBs are built with adm-zip under `os.tmpdir()`.
+       - **(za1)** `openZip(file)` returns an archive listing `OEBPS/c1.xhtml`, with two spies set:
+         - `vi.spyOn(fs, "readFileSync")` records no call for the file;
+         - `vi.spyOn(fsp, "readFile")` records exactly one.
+       - **(za2)** With `ZIP_FILE_MAX_BYTES` lowered to 256, and `fsp.stat` stubbed to report 10 bytes for a file larger than 256, `openZip` rejects with `code: "ZIP_FILE_TOO_LARGE"`. This is the stat-to-read gap.
+       - **(za3) control:** `extractWords` reads 400 words from the file, and `extractContent` returns its text.
+       - Unchanged in `tests/zipEntryCap.test.js`, and still passing:
+         - (o): its `readFileSync` assertion becomes vacuous but stays true;
+         - (r), (s) and (p).
+       - **(s) is load-bearing for step 3 of the Fix.** While specifying, the fix without the `ENOENT` mapping failed (s) with "…may be corrupted.".
+
+       `npx vitest run tests/zipAsyncRead.test.js tests/zipEntryCap.test.js` exits 0. On the prototype fix this gave 16 passed in 2 files.
+    4. **Greps on the fix:**
+       - `git grep -n "new AdmZip(" -- main` prints exactly `main/zip-read.js:<n>: return new AdmZip(buffer);`.
+       - `git grep -n "readFileSync" -- main/zip-read.js` prints nothing.
+    5. **Gates:**
+       - `npm test` exits 0 on the owner's machine (standing rule 47; the Stage 8 closed-list rule governs load-timing failures).
+       - `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+       - The prototype's full suite on `29b3e7e5` passed: 178 files, 2,439 passed / 1 skipped / 0 failed.
+    6. **No live check.** Nothing user-visible changes: the same archives open, with the same messages, and only the read becomes async. Done-when 3's real-EPUB parser tests cover the import path.
+    7. **Fence (standing rule 41):** `git diff --name-status refs/remotes/origin/main` lists exactly:
+       - `M main/zip-read.js`;
+       - `A tests/zipAsyncRead.test.js`;
+       - the time log and staging memo.
+- **Effort:** S.
+- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel; Blurby.Roadmap gives the merge go.
+- **Lane:** Library & Content. Execution surface D.
+- **Source:**
+  - the stub (ZIP-READ-FOLLOWUPS-1, Blurby.Brain 2026-10-23);
+  - this trace on `29b3e7e5`;
+  - a prototype run in a scratch worktree (not committed).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit site:** `main/zip-read.js:12-19`, `openZip`. Its header comment (`:8-11`) changes to match:
+
+  ```js
+  // The one way main/ opens an archive from disk. Its size is checked on the stat, then the file is read with
+  // fs.promises (never adm-zip's synchronous read) and checked again on the bytes read, so a file that grew after the
+  // stat is refused too. A path stat cannot see keeps adm-zip's "Invalid filename" error, and so each caller's message
+  // for it. adm-zip stays lazy-loaded.
+  async function openZip(filePath) {
+    const tooLarge = (size) => Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
+    const size = await fsPromises.stat(filePath).then((s) => s.size, () => 0);
+    if (size > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(size);
+    let buffer;
+    try {
+      buffer = await fsPromises.readFile(filePath);
+    } catch (err) {
+      // adm-zip's own wording for a path it cannot see, so each caller's message for it stays as it was.
+      if (err.code === "ENOENT" || err.code === "ENOTDIR") throw Object.assign(new Error("ADM-ZIP: Invalid filename"), { code: err.code });
+      throw err;
+    }
+    if (buffer.length > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(buffer.length); // it grew after the stat
+    const AdmZip = require("adm-zip");
+    return new AdmZip(buffer);
+  }
+  ```
+
+  No caller changes.
+- **Tests:** `tests/zipAsyncRead.test.js`, as run red on `29b3e7e5` while specifying:
+
+  ```js
+  // ZIP-ASYNC-READ-1: openZip reads the archive with fs.promises and hands adm-zip the buffer; adm-zip never reads the
+  // file synchronously, and the cap holds on the bytes actually read.
+  import { describe, it, expect, afterAll, vi } from "vitest";
+  
+  const os = require("os");
+  const fs = require("fs");
+  const fsp = require("fs/promises");
+  const path = require("path");
+  const AdmZip = require("adm-zip");
+  const constants = require("../main/constants");
+  const { openZip } = require("../main/zip-read.js");
+  const { extractWords } = require("../main/epub-word-extractor.js");
+  const { extractContent } = require("../main/file-parsers.js");
+  
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "zip-async-read-"));
+  afterAll(() => fs.rmSync(tmp, { recursive: true, force: true }));
+  
+  let n = 0;
+  function buildEpub() {
+    const zip = new AdmZip();
+    zip.addFile("mimetype", Buffer.from("application/epub+zip"));
+    zip.addFile("META-INF/container.xml", Buffer.from('<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'));
+    zip.addFile("OEBPS/content.opf", Buffer.from('<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>T</dc:title></metadata><manifest><item id="c1" href="c1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="c1"/></spine></package>'));
+    zip.addFile("OEBPS/c1.xhtml", Buffer.from(`<html xmlns="http://www.w3.org/1999/xhtml"><body><p>${"word ".repeat(400)}</p></body></html>`));
+    const file = path.join(tmp, `book-${n++}.epub`);
+    zip.writeZip(file);
+    return file;
+  }
+  
+  describe("ZIP-ASYNC-READ-1 async archive read", () => {
+    it("(za1) opening an EPUB never reads it with fs.readFileSync, and reads it once through fs.promises.readFile", async () => {
+      const file = buildEpub();
+      const syncReads = vi.spyOn(fs, "readFileSync");
+      const asyncReads = vi.spyOn(fsp, "readFile");
+      try {
+        const zip = await openZip(file);
+        expect(zip.getEntries().map((e) => e.entryName)).toContain("OEBPS/c1.xhtml");
+        expect(syncReads.mock.calls.filter(([p]) => p === file)).toEqual([]);
+        expect(asyncReads.mock.calls.filter(([p]) => p === file)).toHaveLength(1);
+      } finally {
+        syncReads.mockRestore();
+        asyncReads.mockRestore();
+      }
+    });
+  
+    it("(za2) the cap holds on the bytes read: a file that grew past the cap after its stat is refused", async () => {
+      const file = buildEpub();
+      const saved = constants.ZIP_FILE_MAX_BYTES;
+      constants.ZIP_FILE_MAX_BYTES = 256;
+      expect(fs.statSync(file).size).toBeGreaterThan(256);
+      const stat = vi.spyOn(fsp, "stat").mockImplementation(async () => ({ size: 10 })); // stat saw it small
+      try {
+        await expect(openZip(file)).rejects.toMatchObject({ code: "ZIP_FILE_TOO_LARGE" });
+      } finally {
+        stat.mockRestore();
+        constants.ZIP_FILE_MAX_BYTES = saved;
+      }
+    });
+  
+    it("(za3) control: the parsers still read the archive", async () => {
+      const file = buildEpub();
+      expect((await extractWords(file)).totalWords).toBe(400);
+      expect(await extractContent(file)).toContain("word");
+    });
+  });
+  ```
+- **Constants:** none new. `ZIP_FILE_MAX_BYTES` (`main/constants.js:75`) is reused.
+- **Branch:** `eb/zip-async-read-1` from `refs/remotes/origin/main`, after ZIP-READ-FOLLOWUPS-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\zip-async-read-1`. Run `npm ci` first. Push with the explicit refspec `HEAD:refs/heads/eb/zip-async-read-1`.
+- **Staging plan:** the fence paths only. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If Done-when 1 differs (another `new AdmZip(` in `main/`, or a moved call site), stop and report. Do not widen the fence.
+  - If Done-when 2 passes on the base, stop and report: the cause has moved.
+  - If (s) fails, the error mapping is wrong. Fix the mapping, never the test.
+  - If any other existing test fails, stop and report it with its output.
+  - Rollback: `git revert -m 1 <merge>`. If the revert conflicts, stop and send the conflict to Blurby.Brain. Do not hand-merge `main/zip-read.js`.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:**
+    - `main/epub-converter.js`, `main/epub-word-extractor.js` and `main/file-parsers.js` (callers stay as they are);
+    - `main/constants.js`;
+    - `src/`, `preload.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts, and after ZIP-READ-FOLLOWUPS-1, whose file this edits. Independent of PAGE-SAVE-RESTAMP-3 and JUMP-LANDING-SAVE-1.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Re-grep; positive control: (za1) and (za2) red by assertion on the base | calculable | positive control | mechanical | low | 10m (one test file as drafted, one red run) | — | — |
+| 2 | `openZip` reads with `fsPromises.readFile`, re-checks the cap on the bytes read, and keeps adm-zip's missing-path error | calculable | bug fix | bounded | low | 10m (one function, two test files green) | — | — |
+| 3 | Greps; full suite, typecheck and build; merged and pushed | calculable | merge and verify | mechanical | low | 25m (full `npm test` + typecheck + build + one --no-ff merge) | — | — |
+
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — In Focus, the text scrolls the cursor's line into the fixed band** *(position 70 — stub; S; after BAND-ALIGN-1; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". In Focus, the band stays at its place. On arrival, and on every highlight move, the reader scrolls so that the cursor word's line sits inside the band. In Flow, the pacer scrolls the underlined word's line under the band, with the word timer as the only clock (READER-VISUAL-DIAG-1 H3). It needs BAND-ALIGN-1's line step. The spec must re-measure H2 and H3 after the change (60–77% out of band on the base). Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
