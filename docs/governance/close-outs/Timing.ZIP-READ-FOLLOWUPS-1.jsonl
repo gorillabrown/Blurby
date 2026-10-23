@@ -9,3 +9,6 @@
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:27:53Z"}
 {"event": "end", "row": 2, "evidence": "openZip + ZIP_FILE_MAX_BYTES; five callers via openZip; DW2 grep one line (zip-read.js:16); DW6 19/19; (n) mutation control: mutant fails, restored; DW4 literal recipe resolves (820 words), padded recipe used (opfPadBytes 2048) and rejects", "result": "done", "at": "2026-10-23T02:30:14Z"}
 {"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:30:15Z"}
+{"event": "start", "row": 5, "model": "claude-sonnet-5-5", "host": "claude-code", "at": "2026-10-23T02:39:13Z"}
+{"event": "end", "row": 5, "evidence": "combined review MINOR_FIXES no blockers; S1 ruled by Brain (2 GiB - 1); S2/N1/N2/N3 fixed in 8e5dd781; four mutation controls fail as expected; DW4 deviation judged intent-preserving", "result": "done", "at": "2026-10-23T02:39:14Z"}
+{"event": "end", "row": 3, "evidence": "tree 64a66fd9: vitest 2436 passed/1 skipped/0 failed (727 files), typecheck 0, build 0; base 44a914ad pre-existing load list (epub-2b-pipeline timeout, folderWatcher BUG-193); merge held for the freeze", "result": "blocked", "at": "2026-10-23T02:39:15Z"}
