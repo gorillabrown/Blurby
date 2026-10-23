@@ -11,6 +11,7 @@
 | Date | State | By | Note |
 |---|---|---|---|
 | 2026-10-23 | storyboarded | storyboard | aligned; epic-scale; 1 item (BLURBY-SERVER-1, provisional); 4 phases |
+| 2026-10-23 | planned | write-plan | epic-scale: 4 phase specs written as an epic charter draft beside the entry (`2026-10-23-blurby-server/charter-draft.md`); 11 owner questions with recommendations; prerequisites pending: Stage 8 release, post-freeze merge train |
 
 ## Storyboard
 
@@ -201,3 +202,35 @@ Aligned — 2026-10-23. The user approved: "a".
 ## Plan
 
 <!-- Epic-scale: never planned here. The next roadmap review places it as Path: epic, and /epic charters it from this alignment record. -->
+
+Written by `/write-plan` on 2026-10-23 against `main` @ `ac9dc539`, at the owner's request for the full plan while they are offline. The entry is epic-scale, so it gets no HB number and no in-entry specification. The four phase specifications are written as an **epic charter draft** beside this entry: [`2026-10-23-blurby-server/charter-draft.md`](2026-10-23-blurby-server/charter-draft.md). `/roadmap-review` places the item as `Path: epic`, and `/epic` adopts, tightens or re-cuts the draft.
+
+### Readiness
+
+| Finding | Result |
+|---|---|
+| **Specification** | The charter draft has: the epic DoD (E1–E9); planner decisions T1–T15 (tier 1); and four phases, each with What, Why, Done when, edit sites, tests, failure handling, a task list and Lessons applied. Edit-site anchors were grep-verified on `ac9dc539` (2026-10-23). Cloudflare, auth, payments and ads facts come from the vendors' docs, read 2026-10-23. |
+| **Owner questions** | 11 open (Q1–Q11), each with a recommendation. None blocks Phase 1's start except Q1 (file size), which blocks only P1 task 4. |
+| **Prerequisites** | **Pending, with the wait encoded:** the Stage 8 release and the post-freeze merge train. Phase 1 is server-only and may overlap the train. |
+| **External** | Owner actions: Cloudflare Workers Paid; Google, Microsoft and Apple registrations; the email domain; terms and takedown text. Later: a payment provider and an ad source (draft → External prerequisites). |
+| **Register** | Not read or written by this plan (planning only). |
+
+**Not executable now:** the item is not on the roadmap, the Stage 8 release has not shipped, and the merge train has not run.
+
+### Roadmap placement
+
+`Placement: after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9 — Path: epic; Lane: Platform & Maintenance (primary), Library & Content (secondary); no declared deadline; placed by the owner 2026-10-23 ("a").`
+
+Inside the epic, phases run P1 → P2 → P3 → P4a, then P4b when the first phone epic needs it (Q11). The storyboard's impact actions stand unchanged.
+
+### Pointer
+
+```
+One library on every device (blrby.app server)  (BLURBY-SERVER-1, provisional)
+Origin: held plan — 2026-10-23-blurby-server, not yet on the roadmap
+Placement: after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9 — for the review to apply
+Path: epic (4 phases) | Effort: max
+Specification: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md
+Status: planned — held | Prerequisites: Stage 8 release ✗; merge train ✗
+Readiness: specification ✓ (draft) · prerequisites ✗ (wait encoded) · owner questions 11 open · register not touched
+```
