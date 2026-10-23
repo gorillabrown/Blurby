@@ -26,8 +26,10 @@ function timeLimit(promise) {
 }
 
 // LARGE-FOLDER-SYNC-3 (W3): after a listing times out, the mount is taken as hung for a while: a root check answers null at
-// once instead of starting another listing that would pin a libuv thread. A root listing that answers (a root check or the scan) clears it.
-let rootBreakerUntil = 0;
+// once instead of starting another listing that would pin a libuv thread. It covers only the folder that hung, and a listing of
+// that folder that answers (a root check or the scan) clears it. The banner Retry forces a fresh check (FOLDER-NOTICE-1).
+let rootBreaker = null; // { key, until }
+const breakerKey = (dir) => path.resolve(dir).toLowerCase();
 
 // ── Symlink-safe path validation ───────────────────────────────────────────
 
@@ -65,7 +67,7 @@ async function scanFolderAsync(folderPath, report = {}) {
       else report.skipped.push(dir);
       return;
     }
-    if (dir === folderPath) rootBreakerUntil = 0; // the root answered: the mount is not hung (LARGE-FOLDER-SYNC-3)
+    if (dir === folderPath && rootBreaker && rootBreaker.key === breakerKey(dir)) rootBreaker = null; // the root answered: not hung
     for (const entry of entries) {
       if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));
       const fullPath = path.join(dir, entry.name);
@@ -107,16 +109,17 @@ async function scanFolderAsync(folderPath, report = {}) {
 
 // true: the folder lists a subfolder (not a system folder) or a supported file. false: it lists neither (an unmounted
 // Drive's mount point may keep only desktop.ini). null: it cannot be listed, or not in time. A per-file remove is trusted only on true (BUG-195).
-async function rootHasContent(dir) {
-  if (Date.now() < rootBreakerUntil) return null;
+async function rootHasContent(dir, { force = false } = {}) {
+  const key = breakerKey(dir);
+  if (!force && rootBreaker && rootBreaker.key === key && Date.now() < rootBreaker.until) return null;
   let entries;
   try {
     entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true }));
   } catch (err) {
-    if (err && err.code === "ETIMEDOUT") rootBreakerUntil = Date.now() + FOLDER_ROOT_BREAKER_MS;
+    if (err && err.code === "ETIMEDOUT") rootBreaker = { key, until: Date.now() + FOLDER_ROOT_BREAKER_MS };
     return null;
   }
-  rootBreakerUntil = 0;
+  if (rootBreaker && rootBreaker.key === key) rootBreaker = null;
   return entries.some((e) => (e.isDirectory() && !isSystemFolder(e.name)) || (e.isFile() && SUPPORTED_EXT.includes(path.extname(e.name).toLowerCase())));
 }
 

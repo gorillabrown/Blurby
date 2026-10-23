@@ -836,7 +836,7 @@ describe("LARGE-FOLDER-SYNC-3", () => {
     fakeTimers();
     try {
       const p = path.join(ROOT, "hung.epub");
-      const { state, deps, sync } = makeDeps({ lib: [folderDoc("h", p)], disk: [ROOT] });
+      const { state, deps } = makeDeps({ lib: [folderDoc("h", p)], disk: [ROOT] });
       deps.statFile = () => fw.timeLimit(new Promise(() => {})); // main.js's wiring, on a stat that never answers
       const s2 = createFolderSync(deps);
       let done = false;
@@ -846,7 +846,6 @@ describe("LARGE-FOLDER-SYNC-3", () => {
       expect(done, "the per-file remove still waits on the hung stat").toBe(true);
       expect(state.lib.map((d) => d.id), "a book was removed on a stat that never answered").toEqual(["h"]);
       expect(vi.getTimerCount(), "the stat's time limit left a timer behind").toBe(0);
-      expect(sync).toBeDefined();
     } finally { vi.useRealTimers(); }
   });
 

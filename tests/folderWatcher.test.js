@@ -386,7 +386,8 @@ describe("LARGE-FOLDER-SYNC-3: system folders and the root breaker", () => {
     const { rootHasContent } = await import("../main/folder-watcher.js");
     const C = createRequire(import.meta.url)("../main/constants.js");
     const LIST_MS = C.FOLDER_LIST_TIMEOUT_MS;
-    const BREAKER_MS = C.FOLDER_ROOT_BREAKER_MS ?? 60000;
+    const BREAKER_MS = C.FOLDER_ROOT_BREAKER_MS;
+    expect(BREAKER_MS, "FOLDER_ROOT_BREAKER_MS is not defined in main/constants.js").toBe(60000);
     const root = path.join(await makeBase(), "hung");
     await fs.mkdir(path.join(root, "Books"), { recursive: true });
     const realReaddir = cjsFs.readdir;
@@ -418,6 +419,43 @@ describe("LARGE-FOLDER-SYNC-3: system folders and the root breaker", () => {
     } finally {
       vi.useRealTimers();
       spy.mockRestore();
+      await rootHasContent(root, { force: true }); // a listing that answers: no breaker leaks into later tests
+    }
+  });
+
+  it("LARGE-FOLDER-SYNC-3 (W3d) the breaker covers only the hung folder, and a forced check (the banner Retry) lists afresh inside the window", async () => {
+    const { rootHasContent } = await import("../main/folder-watcher.js");
+    const C = createRequire(import.meta.url)("../main/constants.js");
+    const base0 = await makeBase();
+    const hungRoot = path.join(base0, "hung");
+    const other = path.join(base0, "other");
+    await fs.mkdir(path.join(hungRoot, "Books"), { recursive: true });
+    await fs.mkdir(path.join(other, "Books"), { recursive: true });
+    const realReaddir = cjsFs.readdir;
+    let hung = true;
+    const spy = vi.spyOn(cjsFs, "readdir").mockImplementation(function (dir, ...rest) {
+      if (path.resolve(String(dir)) === path.resolve(hungRoot) && hung) return new Promise(() => {});
+      return realReaddir.call(this, dir, ...rest);
+    });
+    const callsFor = (d) => spy.mock.calls.filter(([x]) => path.resolve(String(x)) === path.resolve(d)).length;
+    vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout", "Date"] });
+    try {
+      const first = rootHasContent(hungRoot);
+      await vi.advanceTimersByTimeAsync(C.FOLDER_LIST_TIMEOUT_MS);
+      await expect(first).resolves.toBeNull();
+      // Another folder is not behind the hung one's breaker.
+      await expect(rootHasContent(other)).resolves.toBe(true);
+      expect(callsFor(other)).toBe(1);
+      // The drive came back: a Retry inside the window lists afresh, answers, and clears the breaker.
+      hung = false;
+      await expect(rootHasContent(hungRoot, { force: true })).resolves.toBe(true);
+      expect(callsFor(hungRoot), "a forced check did not list").toBe(2);
+      await expect(rootHasContent(hungRoot)).resolves.toBe(true);
+      expect(callsFor(hungRoot), "the breaker stayed open after a listing answered").toBe(3);
+    } finally {
+      vi.useRealTimers();
+      spy.mockRestore();
+      await rootHasContent(hungRoot, { force: true });
     }
   });
 });

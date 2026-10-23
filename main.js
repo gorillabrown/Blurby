@@ -320,7 +320,7 @@ let watcherFailed = false; // the watcher failed this episode, toast sent or not
 const folderNotice = createFolderNotice({
   send: (code) => { if (mainWindow && !mainWindow.isDestroyed()) mainWindow.webContents.send("folder-problem", code); },
   getFolder: () => settings.sourceFolder,
-  checkRoot: rootHasContent,
+  checkRoot: (dir) => rootHasContent(dir, { force: true }), // Retry always checks afresh, outside the hung-mount breaker (LARGE-FOLDER-SYNC-3)
   sync: () => syncLibraryWithFolder(),
   // On a clear: restart a watcher that failed this episode. A failed restart toasts only if this episode's toast was not sent.
   resumeWatcher: () => { if (folderWorkStopped || !watcherFailed) return; startWatcherFn(); },
