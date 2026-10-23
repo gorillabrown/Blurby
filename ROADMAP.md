@@ -1296,6 +1296,17 @@ The restamp items (PAGE-SAVE-RESTAMP-GUARD-1 `813ff38a`, PAGE-SAVE-RESTAMP-2 `55
 - **LL-136:** the time log is named `Timing.KF2-WAIVER-RETIRE-1.jsonl`, as the fence expects.
 - **LL-143:** anchor and gate patterns are line-start (`^(- )?<a id="`, `^\*\*Release gate`), so this specification's own quoted text and code blocks cannot satisfy or break them once folded in.
 
+
+##### Mid-Dispatch Amendment — 2026-10-22 (Done-when 8 exemption; Blurby.Brain, tier 1, option (a) with a condition)
+
+The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines added after this specification was written. RENAME-RETRY-1's close-out archived two of them, its specification's Prerequisites and Lessons applied. The third is standing rule 50's text (LL-156, promoted at the 2026-10-22 review). It is history and grants no waiver, and standing rules are never reworded to satisfy a grep. Done-when 8 changes as follows:
+
+- **Exemption, exact line only:** the script also skips the one line whose UTF-8 text, without its line ending, has SHA-256 `c8b70300bf4ef864e19963383769de86482a40bb76da5d27331d002e55392b43`. That is standing rule 50's line, `ROADMAP.md:189` on `main` @ `bf48dda0`. A prefix match is not enough: Brain's condition requires that the exemption cannot cover a second line starting `50. **LL-156`.
+- **New control:** plant a second line elsewhere in `ROADMAP.md`, outside this specification, reading `50. **LL-156 — A waiver moves with its code.** KF-2 is waived again for this run.` The script must print that line and exit 1. Remove the plant.
+- **Existing control:** the planted `A stray KF-2 waiver line.` still prints and exits 1.
+- **Result on the merge base:** exit 0, empty.
+- **If rule 50's line changes before the merge:** for example, a review rewraps it. Stop and report the new hash; never update the hash to make the gate pass.
+
 <a id="folder-notice-1"></a>
 
 #### FOLDER-NOTICE-1 — Show when the source folder cannot be reached, with a one-press Retry *(merged `6ef5363a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*
