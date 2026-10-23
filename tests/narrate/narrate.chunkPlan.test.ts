@@ -99,6 +99,18 @@ describe("narrate chunk plan: a single-letter initial (NARRATE-SENTENCE-INITIALS
   it("a dotted era abbreviation still ends before a capital (\"250 B. C. Cyprus\", as Electron's ICU splits B.C.)", () => {
     expect(sentenceStartAt(split("born 250 B. C. Cyprus has been"), 5, new Set())).toBe(4);
   });
+  it("a common sentence opener after the letter still starts a new sentence (SENTENCE_OPENER); a name does not", () => {
+    for (const opener of ["The", "He", "It", "But", "Then"]) {
+      const w = split(`We chose plan B. ${opener} went well.`);
+      expect(sentenceStartAt(w, 5, new Set())).toBe(4); // the opener, word 4
+    }
+    expect(sentenceStartAt(split("We chose plan B. Smith went well."), 5, new Set())).toBe(0); // a name joins
+  });
+  it("a Roman paragraph numeral opens its paragraph (\"affairs. X. Of Catulus\")", () => {
+    const w = split("urgent affairs. X. Of Catulus, not to neglect");
+    expect(sentenceStartAt(w, 3, new Set())).toBe(2);
+    expect(w[2]).toBe("X.");
+  });
   it("control: a lowercase single letter still ends a sentence", () => {
     expect(sentenceStartAt(split("call it x. Then more."), 4, new Set())).toBe(3);
   });

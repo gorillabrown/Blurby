@@ -16,7 +16,11 @@ An uppercase single letter other than `I.` (`NAME_INITIAL`, `/^[A-HJ-Z]\.$/`) do
 - the next word is not a common sentence opener (`SENTENCE_OPENER`: determiners, pronouns, conjunctions, some prepositions);
 - the letter does not complete a known dotted abbreviation with the word before it (`ABBREVIATION` on `words[i-1] + words[i]`, which is "B." "C.", "A." "D." as Electron's ICU segments them).
 
-### Deviations from the spec's literal rule (tier 1; decided, recorded here)
+**The opener list (`SENTENCE_OPENER`), in full:** the, a, an, this, that, these, those, it, its, he, she, they, we, you, i, his, her, their, our, my, but, and, or, so, then, there, here, in, on, at, if, when, as, after, before, for, with, what, who, how, why, no, not, yet.
+- The match is case-insensitive, on the whole word (`\b`), after any opening quote or bracket.
+- It is pinned by the test "a common sentence opener after the letter still starts a new sentence": The, He, It, But and Then each start a new sentence after "plan B.", and "Smith" joins.
+
+### Deviations from the spec's literal rule (tier 1; accepted by Blurby.Roadmap 2026-10-23)
 
 - **The opener exclusion.** The literal rule ("before any capitalised word") breaks two pinned tests whose expected behaviour is correct English: "in Section B. The next…" and "B. C. He" still end at the letter. With the exclusion, both pinned tests are unchanged (no Rule 50 update).
 - **The dotted-abbreviation guard.** The bound diff (below) showed the literal rule also joined "250 B. C. Cyprus has been". The spec requires the dotted case to stay unchanged, so a red test was added first (it failed on `68916c45`), then the guard.
@@ -57,7 +61,10 @@ The text examples here come from the public-domain sample only.
   - "the house of P. Calvisius";
   - translators' names ("R. Graves", "G. H. Rendall", "J. Jackson");
   - "Professor Michael S. Hart".
-- **Roman paragraph numbers**, 47 of 65 in *Meditations*, for example "affairs. X. Of Catulus" and "approve themselves. V. Do nothing". Before the fix, the numeral stood as its own one-word sentence. Now it opens the paragraph it numbers, so a resume inside the paragraph starts at its number. This is not the spec's expected class ("chunks that split at an initial only"). It is reported for the planner: it changes chunk bounds in books with lettered Roman numbering, and it does not fail closed.
+- **Roman paragraph numbers**, 47 of 65 in *Meditations*, for example "affairs. X. Of Catulus" and "approve themselves. V. Do nothing".
+  - Before the fix, the numeral stood as its own one-word sentence. Now it opens the paragraph it numbers, so a resume inside the paragraph starts at its number.
+  - **This is the second expected class, "initials and paragraph numerals"** (Blurby.Roadmap, 2026-10-23): resuming at "X." is the paragraph's start, the right place.
+  - Pinned by the test "a Roman paragraph numeral opens its paragraph": `sentenceStartAt` at "Of" returns "X.".
 - **A few outline or reference letters**, which stay joined as harmless:
   - the licence's "1. A. By reading", "1. E. Unless";
   - "p. 486 A. XXV.";
