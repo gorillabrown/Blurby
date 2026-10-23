@@ -7,3 +7,5 @@
 {"event": "start", "row": 1, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:27:20Z"}
 {"event": "end", "row": 1, "evidence": "tests (o)+(p) committed alone; 'vitest -t archive size cap' on base: exit 1, (o) fails at extractWords (read the whole file), (p) passes", "result": "done", "at": "2026-10-23T02:27:52Z"}
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:27:53Z"}
+{"event": "end", "row": 2, "evidence": "openZip + ZIP_FILE_MAX_BYTES; five callers via openZip; DW2 grep one line (zip-read.js:16); DW6 19/19; (n) mutation control: mutant fails, restored; DW4 literal recipe resolves (820 words), padded recipe used (opfPadBytes 2048) and rejects", "result": "done", "at": "2026-10-23T02:30:14Z"}
+{"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T02:30:15Z"}

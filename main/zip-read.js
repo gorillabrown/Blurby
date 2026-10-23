@@ -6,9 +6,11 @@ const fsPromises = require("fs/promises");
 const constants = require("./constants"); // read at call time so tests can lower the caps
 
 // The one way main/ opens an archive from disk: adm-zip reads the whole file into memory before any
-// entry cap applies, so its size on disk is checked first. adm-zip stays lazy-loaded.
+// entry cap applies, so its size on disk is checked first. A file stat cannot see (missing, bad path)
+// goes on to adm-zip, so its open error, and each caller's message for it, stay as they were.
+// adm-zip stays lazy-loaded.
 async function openZip(filePath) {
-  const { size } = await fsPromises.stat(filePath);
+  const size = await fsPromises.stat(filePath).then((s) => s.size, () => 0);
   if (size > constants.ZIP_FILE_MAX_BYTES) {
     throw Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
   }

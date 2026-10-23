@@ -14,9 +14,8 @@ const { createEntryReader, openZip } = require("./zip-read");
 const { extractPdfText } = require("./pdf-text");
 
 // ── Lazy-loaded heavy modules (cached after first require) ─────────────────
-let _cheerio, _admZip;
+let _cheerio;
 function getCheerio() { if (!_cheerio) { _cheerio = require("cheerio"); } return _cheerio; }
-function getAdmZip() { if (!_admZip) { _admZip = require("adm-zip"); } return _admZip; }
 
 // ── Image validation helpers ───────────────────────────────────────────────
 
@@ -366,7 +365,6 @@ async function extractContent(filepath) {
         console.error(`EPUB ZIP open failed for ${filepath}:`, msg);
         return { userError: userMessage };
       }
-      const AdmZip = getAdmZip();
       const cheerio = getCheerio();
       const entries = zip.getEntries();
       const readEntry = createEntryReader();

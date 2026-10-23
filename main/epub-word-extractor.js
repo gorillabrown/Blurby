@@ -1,7 +1,7 @@
 // main/epub-word-extractor.js — Extract words from EPUB spine sections
 // CommonJS only — Electron main process
 //
-// Opens the EPUB via AdmZip, reads the OPF spine for section order,
+// Opens the EPUB via openZip (main/zip-read.js), reads the OPF spine for section order,
 // parses each section's XHTML with cheerio, and tokenizes with
 // Intl.Segmenter. Produces the same word array that foliate's
 // extractWordsFromSection would, but without navigating the visible view.
