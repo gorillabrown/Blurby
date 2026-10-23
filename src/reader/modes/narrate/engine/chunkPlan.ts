@@ -16,8 +16,20 @@ export const FIRST_CHUNK_MAX_WORDS = 15;
  * 400 itself, a chunk came out at 405 ids in the D6 warm run (2026-10-13) and failed closed (F4) on ordinary text.
  */
 export const PACK_TARGET_TOKENS = 360;
-/** Phoneme characters per text character measured on the Phase 0 smoke run (1.04), padded. */
-export const estimateTokens = (text: string): number => Math.ceil(text.length * 1.15) + 2;
+/**
+ * Input ids per digit. A digit is spoken as a whole word ("1974" → "nineteen seventy four", "e4" → "e four"), so it
+ * costs far more than a letter: 5.6–12.5 ids per digit on the owner library's class-E chunks (NARRATE-TOKEN-CAP-1 probe,
+ * 2026-10-23), padded to the top of that range so a digit-dense chunk is planned under the cap.
+ */
+export const DIGIT_TOKEN_WEIGHT = 13;
+/**
+ * Phoneme characters per text character measured on the Phase 0 smoke run (1.04), padded; each digit at its own weight (above).
+ * The estimate only packs; the producer enforces the exact cap.
+ */
+export const estimateTokens = (text: string): number => {
+  const digits = (text.match(/\d/g) || []).length;
+  return Math.ceil((text.length - digits) * 1.15 + digits * DIGIT_TOKEN_WEIGHT) + 2;
+};
 
 const SENTENCE_END = /[.!?]["'”’)\]]*$/;
 const PAUSE_MARK = /[,;:—]["'”’)\]]*$/;
