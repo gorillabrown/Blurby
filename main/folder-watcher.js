@@ -25,6 +25,10 @@ function timeLimit(promise) {
   return Promise.race([promise, cap]).finally(() => clearTimeout(timer));
 }
 
+// LARGE-FOLDER-SYNC-3 (W3): after a listing times out, the mount is taken as hung for a while: a root check answers null at
+// once instead of starting another listing that would pin a libuv thread. A root listing that answers (a root check or the scan) clears it.
+let rootBreakerUntil = 0;
+
 // ── Symlink-safe path validation ───────────────────────────────────────────
 
 async function isPathWithinFolder(filepath, folderPath, realFolder) {
@@ -61,6 +65,7 @@ async function scanFolderAsync(folderPath, report = {}) {
       else report.skipped.push(dir);
       return;
     }
+    if (dir === folderPath) rootBreakerUntil = 0; // the root answered: the mount is not hung (LARGE-FOLDER-SYNC-3)
     for (const entry of entries) {
       if (++walked % FOLDER_SCAN_YIELD_EVERY === 0) await new Promise((resolve) => setImmediate(resolve));
       const fullPath = path.join(dir, entry.name);
@@ -102,9 +107,6 @@ async function scanFolderAsync(folderPath, report = {}) {
 
 // true: the folder lists a subfolder (not a system folder) or a supported file. false: it lists neither (an unmounted
 // Drive's mount point may keep only desktop.ini). null: it cannot be listed, or not in time. A per-file remove is trusted only on true (BUG-195).
-// LARGE-FOLDER-SYNC-3 (W3): after a listing times out, the mount is taken as hung for a while: a root check answers null at
-// once instead of starting another listing that would pin a libuv thread. A listing that answers clears the breaker.
-let rootBreakerUntil = 0;
 async function rootHasContent(dir) {
   if (Date.now() < rootBreakerUntil) return null;
   let entries;
