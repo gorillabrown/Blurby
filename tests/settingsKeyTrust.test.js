@@ -73,6 +73,7 @@ function setup() {
     // startServer and getStatus return what the real server's do: the live token included (GET-STATE-SECRET-1).
     "../ws-server": new Proxy({
       generatePairingToken: () => "new-token",
+      encodePairingToken: (t) => `enc:${t}`, // WS-TOKEN-REGEN-1: the stored form startServer reads
       startServer: () => ({ port: 48924, token: "live-token" }),
       getStatus: () => ({ running: true, port: 48924, clients: 0, token: "live-token" }),
       getShortCode: () => ({ code: "123456", expiresAt: 1 }),
@@ -336,9 +337,9 @@ describe("SETTINGS-KEY-TRUST-1 controls", () => {
     expect(ctx.saveSettings).toHaveBeenCalledTimes(1);
   });
 
-  it("(o) regenerate-ws-pairing-token still writes main's secret", async () => {
+  it("(o) regenerate-ws-pairing-token still writes main's secret, in its stored (encoded) form", async () => {
     await call("regenerate-ws-pairing-token");
-    expect(settings._wsPairingToken).toBe("new-token");
+    expect(settings._wsPairingToken).toBe("enc:new-token"); // WS-TOKEN-REGEN-1: never the raw token
     expect(ctx.saveSettings).toHaveBeenCalled();
   });
 });
