@@ -182,15 +182,15 @@ function setupTtsEvalTraceCapture() {
 
     const trace = {
       schemaVersion: "1.0",
-      evidenceSource: "real-app-selected-nano",
+      evidenceSource: "real-app-narrate-kokoro",
       provenance: {
-        source: "real-app-selected-nano",
+        source: "real-app-narrate-kokoro",
         producer: "electron-preload-tts-eval-trace",
       },
       selectedEngine: selectionEvent?.selectedEngine ?? null,
       explicitFallback,
-      runId: config.runId || `moss-nano-13d-${safeTraceSlug(mode)}`,
-      scenarioId: config.scenarioId || `moss-nano-13c-${safeTraceSlug(mode)}-live-evidence`,
+      runId: config.runId || `narrate-kokoro-${safeTraceSlug(mode)}`,
+      scenarioId: config.scenarioId || `narrate-kokoro-${safeTraceSlug(mode)}-live-evidence`,
       createdAt: capture.createdAt,
       fixture: config.fixture || {
         id: `live-${safeTraceSlug(mode)}`,
