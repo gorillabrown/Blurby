@@ -8,6 +8,16 @@
 
 ## Incomplete
 
+### BUG-217 — On an EPUB, Flow's paragraph keys jump thousands of words, to the book's last word or to 0
+**Reported:** 2026-10-23 (FLOW-PARA-KEYS-1's live check on `eb/flow-keys-fix-1` @ `60b86aff`, `C:\Projects\Blurby-artifacts\keys-fix\flow-60b86aff-para.*`)
+**Severity:** MEDIUM (listed reader keys land in the wrong place). Pre-existing; not a release gate.
+**Status:** RESOLVED in source (FLOW-PARA-KEYS-1, branch `eb/flow-para-keys-1`, held for after the Stage 8 release; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1). Lane: Reader Engine.
+**Description:** on *Meditations* from INTRODUCTION (word 187), Flow's Shift+→ went 187 → 5290 → 80492 (the book's last word) paused, and 424 → 5290 → 80492 playing; Shift+↑ could land on 0.
+**Cause:**
+- `src/reader/modes/flow/ModeRuntime.ts`, the `paragraph` case: with full-book words, `effectiveWords()` is book-wide, but the breaks came from `surface.getParagraphBreaks()`, indices into the loaded slice.
+- The block lookup is case-sensitive: an EPUB section is XHTML, so `BLOCK_TAGS.has(el.tagName)` finds no lowercase block (the same cause as BUG-210's amendment; the shared `getBlockParent` is BLOCK-TAG-CASE-1).
+**Fix (FLOW-PARA-KEYS-1, Blurby.Brain ruling A, as Focus):** `paragraphTarget` uses `findBookParagraphStart` over the rendered block starts of book-stamped sections plus the book's section starts; Flow's own `helpers/foliateParagraphStarts.ts` collector matches blocks by `localName.toUpperCase()`. Tests: `tests/readerModes/flowParagraphStarts.test.ts`. Live on `5fb00ab5`: 187 → 188 → 572 → 610 and back, each the DOM's next or previous block start.
+
 ### BUG-216 — The note popover is never shown: Shift+N in Page dispatches an event nobody listens to
 **Reported:** 2026-10-23 (UI-SWEEP-1 W3, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
 **Severity:** LOW (a listed shortcut does nothing visible)
