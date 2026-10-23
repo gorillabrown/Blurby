@@ -1,0 +1,39 @@
+{
+  "id": "20261023T000128Z-external-record-completion-RENAME-RETRY-1",
+  "operation": "external-record-completion",
+  "item_id": "RENAME-RETRY-1",
+  "created": "2026-10-23T00:01:28Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-22",
+      "evidence": "docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md",
+      "sequence": null
+    },
+    "expectedRevision": "f2c91fa6be486b72124d596bcd1bd1bcf1ff2bc3516b51243a88c6da4f24395e",
+    "idempotencyKey": "record-completion:RENAME-RETRY-1:[('completed', '2026-10-22'), ('evidence', 'docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "RENAME-RETRY-1",
+      "idempotencyKey": "record-completion:RENAME-RETRY-1:[('completed', '2026-10-22'), ('evidence', 'docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T000128Z-external-record-completion-RENAME-RETRY-1",
+      "detail": {
+        "readBack": "SQL: Completed, 2026-10-22, Evidence set, Seq null"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:01:57Z",
+  "outcome": "succeeded"
+}
