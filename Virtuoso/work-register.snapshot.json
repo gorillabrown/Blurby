@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:57:53Z",
+  "takenAt": "2026-10-23T01:08:42Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2287,14 +2287,17 @@
     },
     {
       "id": "LIBRARY-WRITE-RACE-1",
-      "title": "Library writers that mutate a document across an await",
+      "title": "Main-side library writers update the live record, never a copy",
       "sequence": 36,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
-      "prerequisites": [],
-      "effort": "S",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "WS-TOKEN-REGEN-1",
+        "WS-PAIR-LOG-1"
+      ],
+      "effort": "M",
       "workstream": "Library & Content",
       "deliverable": "",
       "group": "Platform Health",
@@ -2303,19 +2306,19 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Remaining main-side writers in the save-race class, orphaned converted files, payload id dedupe and malformed-element tests.",
+      "description": "delete-doc, the three queue handlers and apply-metadata-updates update records in place instead of building replacement arrays. The URL import, the extension import and the lazy conversion write through a new writeConversionResult in main/library-write.js, which never resurrects a deleted record and removes the orphaned converted EPUB.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub.",
-      "revision": "d367ce37f91d86480b00c0555c86c44c598a2a57a2c8e095444228a229059d39",
+      "revision": "746870bd9357a25566b469fbb60999c2a6b5183df89718e26dd347829154a661",
       "extra": {}
     },
     {
       "id": "ZIP-READ-FOLLOWUPS-1",
-      "title": "Follow-ups from DEPS-AUDIT-1's capped zip reader",
+      "title": "Every EPUB archive is opened through one size-checked door",
       "sequence": 35,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
       "effort": "S",
       "workstream": "Library & Content",
@@ -2326,9 +2329,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Import file-size check, a lying STORED-header test, and a parser-level operation-cap test.",
+      "description": "A new async openZip in main/zip-read.js checks the archive's size on disk against ZIP_FILE_MAX_BYTES (512 MiB) before adm-zip reads it. All five EPUB opens use it. It adds tests for a STORED entry with a lying header and for the per-operation cap at parser level.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews.",
-      "revision": "ba084b4deaa7d0bfce129525e7d10e33763a56e988be09300fc5040a265cef7b",
+      "revision": "fbe8d27af69635b49fc6864d4406f90843b31140267492218e59cba790adf7e7",
       "extra": {}
     },
     {
@@ -3098,13 +3101,15 @@
     },
     {
       "id": "PAGE-HELD-TURN-FAIL-1",
-      "title": "A held page turn is dropped silently when the word count fails",
+      "title": "A held page turn the word count cannot place is reported, not dropped",
       "sequence": 61,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
-      "prerequisites": [],
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "TOC-JUMP-SAVE-1"
+      ],
       "effort": "S",
       "workstream": "Reader Engine",
       "deliverable": "",
@@ -3114,9 +3119,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "checkBookWords' fail() path keeps a held turn it cannot report, so the turn is never saved and nothing is logged. Also, the reason=section-load line does not say whether the held thing was a turn or a word click.",
+      "description": "When the book's word count fails, checkBookWords' fail() releases a held turn on a renderer-numbered page and records page-turn-lost reason=book-words-failed if it cannot be saved. All three loss lines gain  kind=turn|click.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate.",
-      "revision": "d5e05813bc2c61d13ca1ce724003f02ec0860337389668dde682d3bbf0fe1ebd",
+      "revision": "68812def9d012ff2260b18ee57fe76e75fb11f6919a2b9bb42061eaf29c1e5a5",
       "extra": {}
     },
     {
@@ -3125,9 +3130,11 @@
       "sequence": 62,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
-      "prerequisites": [],
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [
+        "WS-TOKEN-REGEN-1"
+      ],
       "effort": "XS",
       "workstream": "Platform & Maintenance",
       "deliverable": "",
@@ -3137,9 +3144,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "When safeStorage encryption is unavailable, the pair flow in main/ws-server.js keeps the pairing for the session only. Keep that, and log one clear line (pairing not saved: OS encryption unavailable) so the user can tell why.",
+      "description": "The pair flow in main/ws-server.js keeps session-only pairing without safeStorage, as Brain ruled. It logs pairing not saved: OS encryption unavailable, and logs the error message when the encrypted save throws, where it is silent today.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from WS-TOKEN-REGEN-1's review. Blurby.Brain ruling (tier 1): never write a credential in plaintext; session-only pairing is the secure default. Not a release gate.",
-      "revision": "a83034860ba99d0f594ddaa5b5a3d93891286ddd11f9415c4f2631a929daa6c8",
+      "revision": "56643f3c160ef5cac17034fea27a7da578fba9c599e77496aeb82fdb0d8aab5c",
       "extra": {}
     },
     {
@@ -3163,6 +3170,31 @@
       "description": "Internal-link jumps, footnote jumps and next/previous chapter still leave the saved position on the page they jumped from. Route each through the in-flight-turn counting TOC-JUMP-SAVE-1 gives the API goTo.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from TOC-JUMP-SAVE-1's run (notes 3 and 4). Stub. Not a release gate.",
       "revision": "3ec135958b22155f5c8859c3c39cee2319c213e51396faf0883f602fc242e168",
+      "extra": {}
+    },
+    {
+      "id": "LIBRARY-WRITE-RACE-2",
+      "title": "Library writes: the renderer-side and policy follow-ups",
+      "sequence": 64,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "LIBRARY-WRITE-RACE-1"
+      ],
+      "effort": "M",
+      "workstream": "Library & Content",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Split from LIBRARY-WRITE-RACE-1. Covers save-library id de-duplication, malformed-element tests and type checks; the Edit form's fire-and-forget save, whose failure UX is an owner decision; renderer edits not bumping modified (a Brain sync ruling); and the cloud sync's setLibrary (deferred Cloud lane).",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap when LIBRARY-WRITE-RACE-1 was specified. Stub; needs an owner decision (Edit-form failure UX) and a Brain ruling (modified bump). Not a release gate.",
+      "revision": "d4f3550358a9af4205b7fd660b78727005f3af2771e8e6d5c9f7cd63bc598940",
       "extra": {}
     }
   ],
