@@ -1259,18 +1259,19 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     });
     this.publishHighlight(idx);
     s.currentWordIndex = idx;
-    let found = true;
     if (this.document.useFoliate && this.surface.isReady()) {
-      found = this.surface.highlight(idx, "flow", { allowMotion: false });
+      const found = this.surface.highlight(idx, "flow", { allowMotion: false });
       if (!found) {
         // Word not in loaded sections — pause, turn page, wait for section load (onWordsReextracted resumes).
         this.engine?.pause();
         s.pendingResume = idx;
         this.surface.next();
+        s.notify();
+        return;
       }
     }
-    // BAND-ALIGN-2: one clock. The line pacer follows this word, unless Flow paused to turn the page.
-    if (found) this.scrollEngine?.syncToWord(idx);
+    // BAND-ALIGN-2: one clock. The line pacer follows this word (not when Flow paused above to turn the page).
+    this.scrollEngine?.syncToWord(idx);
     s.notify();
   }
 
