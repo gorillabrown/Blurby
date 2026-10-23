@@ -2750,6 +2750,33 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Lane:** Platform & Maintenance. Execution surface B. Effort: M. **Path:** dispatch.
 - **Lessons applied:** standing rule 43 (positive control); LL-142 (classified from measurement, never from a label).
 
+<a id="error-log-cap-1"></a>
+
+#### ERROR-LOG-CAP-1 — error.log is size-capped and rotated *(position 75 — Full Spec; authored 2026-10-23 on main @ `420efa85` from Blurby.Brain's FOLIATE-OBSERVER-LEAK-1 ruling; not a release gate; merges after the Stage 8 release, after FOLIATE-OBSERVER-LEAK-1)*
+
+- **What:** `error.log` (`main.js:52`, `getErrorLogPath`) stops growing without bound.
+  - Before each append, if the file is at least `ERROR_LOG_MAX_BYTES` (new, in `main/constants.js`: 10 MB), rename it to `error.log.1` and start a new `error.log`. Any older `error.log.1` is replaced, so one rotated file is kept.
+  - The two duplicate appenders, `logToFile` in `main/ipc/library.js:17-22` and in `main/ipc/misc.js:18-23`, become one shared async helper in a new `main/error-log.js` (CommonJS, `fs.promises` only). Both modules use it.
+  - Logging still never throws.
+- **Why:** the owner's `error.log` had reached about 26 MB. BUG-187's flood alone added 14,428 lines per session, and nothing caps the file (Blurby.Brain, 2026-10-23).
+- **Done when:**
+  1. **Re-grep on the base:** `git grep -n "appendFile(errorLogPath" -- main` prints exactly the two sites.
+  2. **Red first:** `tests/errorLogCap.test.js` writes a file one byte under the cap, appends one line, and expects `error.log.1` to exist and the new `error.log` to hold only that line. On the base no rotation happens, and the test fails.
+  3. Also tested:
+     - a second rotation replaces `error.log.1`;
+     - an append under the cap does not rotate;
+     - a rename failure (a stubbed `fs.promises.rename` that throws) still appends and does not throw.
+  4. `git grep -n "appendFile(errorLogPath" -- main` prints only `main/error-log.js`.
+  5. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  6. **Fence:** the fence is:
+     - `A main/error-log.js`, `M main/ipc/library.js`, `M main/ipc/misc.js`, `M main/constants.js`;
+     - `A tests/errorLogCap.test.js`;
+     - the memo and time log.
+     - Plus any Rule 50 pinned-test update, named in the memo.
+- **Branch:** `eb/error-log-cap-1` from `refs/remotes/origin/main`. Built during the freeze and held, so ask for merge go after the release.
+- **Lane:** Platform & Maintenance. Execution surface D. Effort: XS. **Path:** dispatch.
+- **Lessons applied:** standing rule 43 (red first); all main-process I/O async (CLAUDE.md standing rule); constants separation.
+
 <a id="book-type-scale-1"></a>
 
 #### BOOK-TYPE-SCALE-1 — Books use one type scale for headers, sub-headers and body text *(position 6.5 — Full Spec; authored 2026-10-23 on main @ `6dd452e4` from the owner's design decision; **in the release line, owner decision 2026-10-23 ("In this release")**; merges after BOOK-TEXT-COLOUR-1, which edits the same four files; adds smoke re-check: book headings and body text in Page, Focus, Flow and Narrate)*
