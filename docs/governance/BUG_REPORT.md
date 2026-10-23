@@ -8,6 +8,34 @@
 
 ## Incomplete
 
+### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
+**Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
+**Severity:** HIGH (the reader loses their place); **release blocker** (release gate (2) failed on it)
+**Status:** OPEN. Diagnosis: SMOKE8-DIAG-1. Lane: Reader Engine.
+**Description:** Turned to p79 (saved position 16581, cfi `/210,/492,/492`), closed and reopened: the book opened on p77, at an older cfi (`epubcfi(/6/16!/4,/206/308,/208/76/1:12)`). Later the saved cfi itself reverted to `/206/308` while the position stayed 16581. Reproduced twice, on the owner's profile (*Why Nations Fail*).
+**Suspected area:** the Page save path shipped by PAGE-POSITION-SAVE-1/2 and PAGE-SAVE-RESTAMP-GUARD-1/-2 (cfi and position saved apart; a later relocate or restamp save overwrites the cfi).
+
+### BUG-202 — After switching to a recent folder, the library header keeps the old folder's name
+**Reported:** 2026-10-23 (Stage 8 owner smoke, check #28)
+**Severity:** MEDIUM (wrong folder shown; the menu marks the wrong folder current). Release-blocking status is set by the diagnosis (SMOKE8-DIAG-1).
+**Status:** OPEN. Lane: Library & Content.
+**Description:** Chose Readings from the recent list: main's `settings.sourceFolder` changed at once and the library switched (143 → 721 books as the Drive folder synced), but after more than 6 minutes the header (`LibraryView.tsx:414`, the renderer's settings copy) still read "smoke8-folder2", and the folder menu still marked it current. Switching back (#32) did update the header. **Caveat:** the run used a CDP DOM click, because the real click closed the menu; the diagnosis must reproduce it with a real click first.
+
+### BUG-203 — The tray icon renders as a tiny dot
+**Reported:** 2026-10-23 (Stage 8 smoke notes). **Severity:** LOW. **Status:** OPEN, unscheduled. Lane: Platform & Maintenance. **Location:** `assets/tray-icon.png` and its sizing (PACKAGING-FIX-1 shipped it).
+
+### BUG-204 — The converted 223-page DNC PDF keeps the reader busy for over 6 minutes
+**Reported:** 2026-10-23 (Stage 8 smoke notes, after PDF-IMPORT-DIAG-1's fix). **Severity:** MEDIUM (the book opens, but the reader is busy for minutes). **Status:** OPEN, unscheduled. Lane: Library & Content. Measure where the time goes (word extraction or rendering of a one-chapter 223-page EPUB) before speccing.
+
+### BUG-205 — Narrate's chapter label reads "Copyright"
+**Reported:** 2026-10-23 (Stage 8 smoke notes). **Severity:** LOW. **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine.
+
+### BUG-206 — Narrate will not start on a page that opens with a small-caps drop cap
+**Reported:** 2026-10-23 (Stage 8 smoke notes; also seen by NARRATE-SENTENCE-RESUME-1's live check (c) after a relaunch). **Severity:** MEDIUM. **Status:** OPEN. Lane: TTS / Narration Engine. **Description:** the app shows "Failed to execute 'setEnd' on 'Range': The offset 7 is larger than the node's length (4)" and Play does not start until two page turns later. **Location:** `setEnd(endPos.node, endPos.offset)` at `src/reader/modes/narrate/helpers/foliateHelpers.ts:165`. Present on the frozen build `47ae6e1f`, so it predates NARRATE-SENTENCE-RESUME-1.
+
+### BUG-207 — Quitting with Narrate paused takes 13.9 s
+**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
+
 ### BUG-200 — The quick-settings "Sort by" does not change the library order
 **Reported:** 2026-10-14 (code trace while specifying SETTINGS-KEY-TRUST-1, on `eb/ipc-path-trust-1` @ `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
 **Severity:** LOW (a visible control that does nothing)
