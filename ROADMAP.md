@@ -1438,8 +1438,9 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="band-align-2-spec"></a>
 
-#### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(position 70 — Full Spec; authored 2026-10-23 by blurby-f0 on main @ `b99d9c06`, edit sites re-grepped on the stacked base below; BUG-188 Part B; owner decision 2026-10-23 "keep band fixed" (tier 3); **after the Stage 8 release**; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; no shared-core touch)*
+#### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(position 70 — Full Spec; authored 2026-10-23 by blurby-f0 on main @ `b99d9c06`, edit sites re-grepped on the stacked base below; BUG-188 Part B; owner decision 2026-10-23 "keep band fixed" (tier 3), **amended by the owner 2026-10-23: band on line edges, cursor centred, band follows the reading location, anchor setting Top / Top third / Center (see the Owner amendment below)**; **after the Stage 8 release**; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; shared-core touch: `ReaderContainer.tsx`, two props)*
 
+- **Read the Owner amendment (2026-10-23) below first:** it replaces this item's band placement (R1–R4). The text here still governs Flow's one-clock change.
 - **What:** the reading band stays where it is: top at `FLOW_ZONE_INITIAL_TOP` (15%) of the view, height `flowZoneLines` × the body line step (BAND-ALIGN-1). The text moves so that the cursor word's line is inside the band.
   - **Focus.** On arrival, and on every highlight move that may move the view, the view scrolls so that the cursor word's line top sits at the band's top. A line already inside the band is left alone. "Highlight moves" means every path that paints the Focus cursor with motion allowed: arrival, a word click, jump-back, an anchor jump (`jumpFoliateToWordAnchor`), and the FOCUS-KEYS-FIX-1 moves that call it. Nothing scrolls while the reader is browsing away (`userBrowsingRef`), as today.
   - **Flow, playing: one clock.** The word timer (`FlowMode`) is the only clock. The line pacer (`FlowScrollEngine`) no longer times lines. It follows the word timer's word: when the word's line changes, it scrolls that line to the band's top (its existing stable-window rule, `advanceZone`) and moves its cursor bar. The underline and the band can no longer drift apart.
@@ -1558,6 +1559,60 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; repository operator merges on Blurby.Roadmap's go; owner in the next smoke batch.
 - **Lane:** Reader Engine. Execution surface A (Flow's pacer) and C (the band). **Shared-core touches:** none. **Effort:** M. **Path:** dispatch.
 
+##### Owner amendment — 2026-10-23 (supersedes the band placement above)
+
+The owner reviewed the band live on 2026-10-23 and ruled three requirements, plus a user setting for the anchor (tier 3, owner). Where this amendment and the text above disagree, this amendment governs. Flow's one-clock change (`wordClock`, `syncToWord`) stands unchanged.
+
+- **R1. Edges between lines, never through text.** The band's top and bottom come from the rendered line boxes of the lines it covers, not from fractions of the view height.
+  - Top edge: the midpoint of the gap between the band's first line and the line above it.
+  - Bottom edge: the midpoint of the gap between the band's last line and the line below it.
+  - At a section's first or last line, the edge is that line's box edge.
+  - The mask's fade (`mode.css`, `calc(var(--flow-zone-top) - 2%)` and its bottom twin) lies outside the edges, so no glyph is cut by the bright band's edge.
+- **R2. The cursor line is the band's middle line.** The band covers `flowZoneLines` lines: the cursor line, `floor((n − 1) / 2)` lines above it and `ceil((n − 1) / 2)` lines below it. For odd n (3, 5, 7) the cursor is exactly centred. For even n (4, 6, 8) the extra line goes below, toward the text ahead. That is the planner's default; the owner left the even case open, so it can be revised at the smoke.
+  - At a section's start or end, where fewer lines exist on one side, the band takes the lines that exist. It never covers blank space past the section's text.
+- **R3. The band belongs to the reading location.** Every move of the cursor (arrival, word tick, line change, key move, click, contents jump) places the band by one rule:
+  1. **Scroll first.** Scroll so that the cursor line's centre sits at the anchor's y. The scroll is clamped to the container's range (`0` to `scrollHeight − clientHeight`), including any leading inset the mode already sets (`setFlowInsetsForRenderedDocs`).
+  2. **Then place the band around the cursor line, wherever it ended up.** It is computed from R1 and R2 against the line boxes after the scroll. When the scroll was clamped (the top or end of a section), the band moves off the anchor to follow the cursor. It is never left at the anchor with the cursor outside it.
+  - This replaces "the cursor line's top at the band's top" in Focus (`computeBandScrollTop`) and in Flow's stable-window branch (`advanceZone`, `FlowScrollEngine.ts:748`). Flow's (f2) expectation changes accordingly (below).
+  - The band never moves while the reader is browsing away (`userBrowsingRef`), as today.
+- **R4. Anchor setting: Top, Top third or Center.** The reader chooses where the band sits. On arrival the text is pulled to it, and that is the starting spot.
+  - **Storage:** reuse the existing, currently unread setting `flowZonePosition` (`src/types.ts:169`, a number; a trusted key per `tests/settingsKeyTrustKeys.test.ts:17`). No new key and no `src/types.ts` edit.
+  - **Values:** `0` = Top (the band's top edge at the view's top), `1/3` = Top third (the band's centre at one third of the view height), `0.5` = Center (the band's centre at half).
+  - **Legacy values** (0.15, 0.25, 0.35, 0.55, or anything else) read as Top third, through one normaliser per mode helper, `normalizeBandAnchor(value)`.
+  - **Default:** Top third. `FLOW_READING_ZONE_POSITION` in `src/constants.ts:252` becomes `1 / 3`. Add `FLOW_BAND_ANCHOR_TOP = 0`, `FLOW_BAND_ANCHOR_TOP_THIRD = 1 / 3` and `FLOW_BAND_ANCHOR_CENTER = 0.5` beside it (constants separation rule).
+  - **Control:** in the bottom bar's zone controls (`src/components/ReaderBottomBar.tsx:345-362`), beside **Lines**, a three-button group, **Top · Top third · Center**, with `aria-pressed`. The zone controls show in Focus as well as Flow, because both have the band; today they show in Flow only (`:345`).
+  - **Wiring:** `ReaderContainer.tsx:815-816` passes `flowZonePosition={settings.flowZonePosition}` and `onSetFlowZonePosition={(v) => updateSettings({ flowZonePosition: v })}`, beside the existing `flowZoneLines` pair. **This is a shared-core touch** (see below).
+  - A change of anchor re-places the band at once (R3) without moving the reading word.
+- **Removed from this item:** `FLOW_ZONE_INITIAL_TOP` (0.15) no longer places the band in Focus or Flow; R3 and R4 do. The constant stays for Narrate's band, which is out of scope.
+
+**Done when, amended:**
+
+- **Red file additions** (to `tests/readerModes/bandAlign2.test.tsx`, red by assertion on the base):
+  - **(r1) Edges.** A fake line map has seven lines with tops at y = 73, 100, 127, 154, 181, 208 and 235 (step 27, box height 22). With the cursor on the 154 line and n = 5, the band covers the lines at 100–208. It runs from 97.5 to 232.5 px:
+    - the top edge is the gap midpoint (73 + 22 + 100) / 2;
+    - the bottom edge is the gap midpoint (208 + 22 + 235) / 2.
+
+    It is not 100 to 230, the line boxes themselves.
+  - **(r2) Centre.** n = 5 puts the cursor line third of five. n = 4 puts it second of four (the extra line below). At a section's first line with n = 5, the band covers lines 1–3 only, with no blank above.
+  - **(r3) Clamp.** In a 630 px view with the anchor at Top third and the cursor on a section's first line (y = 0, `scrollTop` already 0), the scroll stays 0 and the band's centre sits on the cursor line, not at 210 px.
+  - **(r4) Anchor values.** `normalizeBandAnchor` maps 0 → 0, 1/3 → 1/3, 0.5 → 0.5, and 0.25, 0.15 and undefined → 1/3. Each anchor puts the cursor line's centre at 0 + half the band, 210 px and 315 px in a 630 px view when unclamped.
+  - **(r5) Control.** The bottom bar renders the three buttons in Focus and in Flow, and a press calls `onSetFlowZonePosition` with 0, 1/3 or 0.5.
+  - **(f2) is replaced:** on each line change, the cursor line's centre is at the anchor's y (unclamped), or the band sits around it (clamped).
+- **Pinned tests (standing rule 50), updated in scope and named in the memo:** `tests/flowReadingZone.test.ts:73-74` and `:99-100` (the 0.25 default) and `:204-206` (the old dropdown options), and `src/test-harness/electron-api-stub.ts:72` (0.25 → 1/3).
+- **Live (Done-when 3) additions,** on the same build, route and probe, at 100% and 120%, in Focus and in Flow:
+  - **Edges:** the probe's band top and bottom each fall within a line gap. Measure each edge's distance from the nearest line box; it is 0 inside a glyph box. Record the figures.
+  - **Centred:** with n = 5, the cursor line is the band's third line in every sample, except the first two and last two lines of a section.
+  - **Top of a section:** after a contents jump to INTRODUCTION, then the switch to Focus, and again in Flow, the cursor word is inside the band, and the band's centre is on the cursor line even though the scroll is clamped. This is the owner's 2026-10-23 failure.
+  - **Anchor:** for each of Top, Top third and Center, the cursor line's centre is within half a line of the anchor's y, measured at a mid-section word.
+- **Owner (next smoke), replacing Done-when 7:** in Focus and Flow:
+  - the band's edges sit between lines;
+  - the cursor line is in the band's middle;
+  - at the top of a section the band is on the cursor;
+  - each of the three anchor buttons moves the text to that spot.
+- **Fence, amended:** add `M src/constants.ts`, `M src/components/ReaderBottomBar.tsx`, `M src/components/ReaderContainer.tsx`, `M tests/flowReadingZone.test.ts`, `M src/test-harness/electron-api-stub.ts`, and `M src/styles/*.css` if the button group needs a rule (no inline styles). `src/types.ts`, `src/utils/`, Page and Narrate stay untouched.
+- **Shared-core touches:** `src/components/ReaderContainer.tsx`, two props, in an integration window after the Stage 8 release. On 2026-10-23 no held branch edits it: `git diff --name-only origin/main...<branch> -- src/components/ReaderContainer.tsx` printed nothing for all 19. Re-check at dispatch; if a branch then edits it, that branch merges first.
+- **Effort:** L (was M).
+
 ##### Task list
 
 | # | Task | Class | Kind | Tier | Effort | Estimate |
@@ -1565,6 +1620,7 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 | 1 | Red file (f1–f4, c1, m1, m2) committed alone; the failures recorded | calculable | positive control | bounded | medium | 40m |
 | 2 | Flow: `wordClock`, `syncToWord`, the eight scheduling gates, and the two runtime call sites | calculable | bug fix | bounded | high | 60m |
 | 3 | Focus and Flow arrival: the band helpers and `alignSpanToBand` at the arrival, highlight and click sites | calculable | bug fix | bounded | medium | 45m |
+| 3a | R1–R4: line-box band edges, cursor-centred band, band follows the cursor when the scroll clamps, the anchor setting and its bottom-bar control (Focus and Flow), pinned tests updated | calculable | feature | bounded | high | 60m |
 | 4 | Targeted suites unchanged and green; `npm test`, typecheck and build | mechanical | verify | mechanical | low | 20m |
 | 5 | `--dir` build; live Focus (i)–(iii) and Flow 180 s at two sizes under the profile preflight | calculable | live check | bounded | medium | 45m |
 | 6 | BUG-188 line, memo and time log; push; ask Blurby.Roadmap for merge go | mechanical | close | mechanical | low | 15m |
@@ -1578,6 +1634,10 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **Standing rules 41, 46, 47, 48, 49 and 50:** the fence exempts the memo and time log; nothing is written to the register; the suite, typecheck and build run on the owner's machine; BUG-188's line names no sha; pinned tests are named, not edited.
 - **Profile guardrail (Blurby.Brain, 2026-10-23):** every live launch proves its scratch profile before any input.
 - **Reading-mode separation:** each mode has its own helper copy, and there is no sibling import.
+- **Standing rule 50 (LL-156):** `tests/flowReadingZone.test.ts` pins the 0.25 default and the old options, and the test-harness stub pins 0.25. They are named here and updated in scope.
+- **LL-165:** every live launch proves its scratch profile before the first input (already the profile guardrail above).
+- **LL-166:** the live checks read state (line boxes, band edges and the cursor line) through the probe. They do not infer "no effect" from a screenshot.
+- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
 
 
 <a id="flow-para-keys-1"></a>
@@ -2454,7 +2514,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - **Standing rules 47 and 48:** the full suite runs on the owner's machine, and typecheck and build are in Done-when.
 - **LL-164 / standing rule 51:** this specification appends no lesson-status line.
 
-- <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); M; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
+- <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); L, amended by the owner 2026-10-23; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
