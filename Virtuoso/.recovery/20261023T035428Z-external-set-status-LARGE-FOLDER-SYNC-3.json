@@ -1,0 +1,36 @@
+{
+  "id": "20261023T035428Z-external-set-status-LARGE-FOLDER-SYNC-3",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-23T03:54:28Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "Status": "In Flight",
+      "Started": "2026-10-23",
+      "Branch": "eb/large-folder-sync-3"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('Branch', 'eb/large-folder-sync-3'), ('Started', '2026-10-23'), ('Status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-3",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('Branch', 'eb/large-folder-sync-3'), ('Started', '2026-10-23'), ('Status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T035428Z-external-set-status-LARGE-FOLDER-SYNC-3",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T03:54:43Z",
+  "outcome": "succeeded"
+}

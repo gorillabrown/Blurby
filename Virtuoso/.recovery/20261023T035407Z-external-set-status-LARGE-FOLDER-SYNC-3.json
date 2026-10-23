@@ -1,0 +1,26 @@
+{
+  "id": "20261023T035407Z-external-set-status-LARGE-FOLDER-SYNC-3",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-23T03:54:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "Status": "In Flight",
+      "Agent": "blurby-f0"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('Agent', 'blurby-f0'), ('Status', 'In Flight')]"
+  },
+  "resolved": "2026-10-23T03:54:27Z",
+  "outcome": "abandoned",
+  "reason": "Agent is not a register column"
+}
