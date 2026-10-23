@@ -80,3 +80,4 @@
 {"recordId": "TR-080", "itemId": "READER-VISUAL-DIAG-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md", "corrects": "", "effort": "S"}
 {"recordId": "TR-081", "itemId": "UI-SWEEP-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-1.2026-10-23.md", "corrects": "", "effort": "M"}
 {"recordId": "TR-082", "itemId": "UI-SWEEP-TRIAGE-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md", "corrects": "", "effort": "M"}
+{"recordId": "TR-083", "itemId": "SMOKE8-DIAG-1", "completed": "2026-10-23", "result": "completed", "evidence": "docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md", "corrects": "", "effort": "M"}

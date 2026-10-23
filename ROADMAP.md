@@ -104,6 +104,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | READER-VISUAL-DIAG-1 | 2026-10-23 | BUG-188 band sized from a 24 px fallback and untied to the cursor; BUG-187 flood is two leaked foliate View observers (causal by intervention); two fix specs drafted (merge `22d4f7b3`) | `CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md` |
 | UI-SWEEP-1 | 2026-10-23 | 369 controls on 57 surfaces pressed on the release-fix build `97527896`; the only errors are BUG-187's flood (the positive control); 104 NO-EFFECT candidates and W1–W3 went to triage (merge `420efa85`) | `CloseOut.UI-SWEEP-1.2026-10-23.md` |
 | UI-SWEEP-TRIAGE-1 | 2026-10-23 | 107 candidates classified: 42 WORKS, 40 BY-DESIGN, 25 DEFECT (none release-blocking); BUG-210–BUG-216 filed; FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1 specified; LL-165, LL-166 (merge `de453e64`) | `CloseOut.UI-SWEEP-TRIAGE-1.2026-10-23.md` |
+| SMOKE8-DIAG-1 | 2026-10-23 | BUG-201, BUG-202 and BUG-208 reproduced with causes and fix specs (all merged into the release line); BUG-207 slow quit is the in-flight Kokoro wait; BUG-206 not reproduced (control failed) (merges `0625f9df`, `67678dbb`) | `CloseOut.SMOKE8-DIAG-1.2026-10-23.md` |
 | TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 → 1,000 ms; BUG-186 resolved (merge `76956729`) | `CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md` |
 | CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` |
@@ -3199,59 +3200,15 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 <a id="smoke8-diag-1"></a>
 
-#### SMOKE8-DIAG-1 — Diagnose the two smoke failures: Page reopen position (BUG-201) and the stale folder header (BUG-202) *(position 6, the head — Full Spec; authored 2026-10-23 on main @ `a3ff7003`; release blocker for gate (2))*
+#### SMOKE8-DIAG-1 — Diagnose the two smoke failures: Page reopen position (BUG-201) and the stale folder header (BUG-202) ✅ COMPLETED 2026-10-23 *(TR-083; merges `0625f9df`, `67678dbb`; spec and its 2026-10-23 amendment archived)*
 
-- **What:** A read-only diagnosis of the two product failures in the Stage 8 owner smoke (`docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`, checks #8 and #28). It finds each root cause by measurement on a build of the frozen `47ae6e1f`, and ends with a D.5.2 fix specification for each. It commits no product code.
-- **Why:** release gate (2) failed. BUG-201 (the reader loses their place on reopen) is a release blocker. BUG-202 needs a real-click reproduction before its severity is known.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-    1. **Report:** `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md` gives each bug a verdict (reproduced, or not reproduced, with the conditions), the measurement behind it, and the root cause with file and line.
-    2. **BUG-201, reproduce on a scratch profile** (`BLURBY_USER_DATA_DIR`), on an installed or `--dir` build of `47ae6e1f`. Turn about 30 pages in a long EPUB in Page mode, close, and reopen. Record each save from `library.json` (position and cfi, with timestamps) and every `page-turn-lost` diagnostic. Name the write that overwrites the cfi or leaves it stale: which handler, which line, and which event order. Use the owner's book only as a copy.
-    3. **BUG-202, reproduce with a real click** (computer-use or a CDP mouse event at the element's box, never a DOM `.click()`). If it does not reproduce with a real click, record it as a harness artifact, with both results, and downgrade BUG-202 to that finding. If it does reproduce, trace why the renderer's settings copy misses the `sourceFolder` change: which IPC event fires, and who listens.
-    4. **Fix specs:** one D.5.2 fix specification per reproduced bug, with the task list and lessons applied. Each one's merge order is "into the frozen release line": it lands on `main` as the release fix, and gate (1) and the smoke re-run on the new sha.
-    5. **Fence:** `git diff --name-status refs/remotes/origin/main` lists the report and `BUG_REPORT.md` (BUG-201 and BUG-202 updated with the verdicts), plus the time log and memo. `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing. Temporary instrumentation stays in the worktree and is never committed.
-- **Effort:** M. **Owners:** implementation agent (read-only diagnosis); the planner registers the fix items.
-- **Lane:** Reader Engine and Library & Content. Execution surface B.
-- **Source:** the smoke results file (checks #8 and #28, with screenshots under `smoke-stage8/`); `src/components/LibraryView.tsx:414`; the Page save path (PAGE-POSITION-SAVE-1/2, PAGE-SAVE-RESTAMP-GUARD-1/-2 in `ROADMAP_snapshot_2026-10-22.md` and `ROADMAP.md`).
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Branch:** `eb/smoke8-diag-1` from `refs/remotes/origin/main`. Build `47ae6e1f` in a separate detached worktree, or reuse the smoke's build at `.worktrees/smoke-47ae6e1f`.
-- **Sandbox:** scratch profiles only. Never open the owner's live profile. Close every Blurby window you start.
-- **Failure handling:** if BUG-201 does not reproduce in 3 attempts, record the conditions of each attempt and widen once: a longer book, a mid-chapter reopen, and a reopen after a mode switch. Then report what you found. Don't invent a cause.
-- **Merge:** docs only, so it may merge during the freeze.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | BUG-201 reproduced and its overwriting write named, by measurement | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements so far | — |
-| 2 | BUG-202 reproduced with a real click, or recorded as a harness artifact | frontier | diagnosis | bounded | medium | — | ≤1h — stop and report | — |
-| 3 | Report and fix specifications written; bugs updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, one --no-ff merge) | — | — |
-
-**Total:** chain 3m · sum 3m + 2 timeboxed ≤3h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **LL-142:** each verdict rests on a measurement on the running build, not on reading the code.
-- **LL-161:** a position is checked by its word's text and its cfi, not by index alone.
-- **Standing rule 45 (LL-141):** the smoke's owner-observed route is preserved. The fix is re-checked in the re-run smoke.
-- **LL-146:** measurement scripts are never committed under a collectable test name.
-- **Standing rule 46 (LL-153):** the run writes nothing to the register.
-- **LL-164:** no lesson-status line is appended.
+- Closed out: [`CloseOut.SMOKE8-DIAG-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md). Report: `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Release fixes (In Flight, held for the release gate): [PAGE-REOPEN-CFI-1](#page-reopen-cfi-1), [FOLDER-SWITCH-HEADER-1](#folder-switch-header-1), [BOOK-TEXT-COLOUR-1](#book-text-colour-1), [NARRATE-START-STACK-1](#narrate-start-stack-1), [BOOK-TYPE-SCALE-1](#book-type-scale-1), [KEEP-FURTHEST-FIX-1](#keep-furthest-fix-1); BUG-207 to [NARRATE-QUIT-LINGER-1](#narrate-quit-linger-1).
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
 
-##### Mid-Dispatch Amendment — 2026-10-23 (Blurby.Brain, tier 1)
-
-- **Gate (1) waits for the fix sha** and runs once, on the final tree. The freeze moves to that sha.
-- **BUG-201:** reproduce it in a test or a scratch profile before any fix. Name which writer reverts the cfi while the position stays, and give its timeline. The candidates: a held-turn replay, the restamp guard's cfi-only save, a full-library save from the renderer, or the quit flush. The fix spec must carry a regression test that fails on `47ae6e1f`.
-- **BUG-207 is added to scope** (the 13.9 s quit with Narrate paused, against 2.3 s while playing, plus the RADAR memory warning). Find where the time goes: QUIT-FLUSH-1 awaits the Narrate producer's shutdown uncapped. Report the timeline of each quit step. Brain rules gate or not on the cause; it is likely a gate if a normal paused-Narrate quit routinely takes more than about 3 s.
-- **BUG-202:** unchanged. It needs a real-click reproduction. If it reproduces, the fix joins the same release fix.
-- **BUG-206 (drop cap):** not a gate, but measure how often it breaks Narrate. Over the bundled sample, the repo's EPUB fixtures and a read-only copy of a sample of the owner's library, count how many books' first chapters hit the `setEnd` failure. If many first chapters fail, report it, and the planner takes it back to Brain as a gate candidate.
-- BUG-203, BUG-204 and BUG-205 are not gates and are out of this item's scope.
-- New Done-when rows: (8) BUG-207's quit timeline, with each step's duration, paused and playing, 3 runs each; (9) BUG-206's frequency count, with the book list (hashes, not titles, for the owner's books).
 - <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
 - <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 38 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
 
