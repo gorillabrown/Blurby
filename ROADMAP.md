@@ -682,7 +682,31 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **State:** built and pushed at `60b86aff` on `eb/flow-keys-fix-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
 - **Merge order:** after FOCUS-KEYS-FIX-1.
-- **Live finding, 2026-10-23 (FLOW-PARA-KEYS-1's build), open: in Flow, any navigation key pressed while playing stops playback.** It reproduces on this branch's own tip `60b86aff`: Ctrl+→ goes 191 → 192, then playback stops. The spec's table (and its unit tests) says "the timer continues from it", so this item's Done-when 3 does not hold live for the playing rows. Evidence: `C:\Projects\Blurby-artifacts\keys-fix\flow-5fb00ab5-ctrlright.*` and `flow-60b86aff-playing.*`. The cause is not yet diagnosed (Rule 6a). It goes to Blurby.Brain for a diagnosis and fix ruling before this branch merges, and this item's live re-run includes it.
+- **Live finding, 2026-10-23 (FLOW-PARA-KEYS-1's build), open: in Flow, any navigation key pressed while playing stops playback.** It reproduces on this branch's own tip `60b86aff`: Ctrl+→ goes 191 → 192, then playback stops. The spec's table (and its unit tests) says "the timer continues from it", so this item's Done-when 3 does not hold live for the playing rows. Evidence: `C:\Projects\Blurby-artifacts\keys-fix\flow-5fb00ab5-ctrlright.*` and `flow-60b86aff-playing.*`. Diagnosed and ruled by Blurby.Brain, 2026-10-23 (tier 1): amend this item, with no new item.
+
+##### Amendment — 2026-10-23 (Blurby.Brain: the browse-away listener ignores modified arrows)
+
+- **Cause:** Flow's book view has its own window keydown listener (`src/reader/modes/flow/FoliateView.tsx:1301-1320` at `60b86aff`, from `9fa253b0`, 2026-10-09). It treats ArrowRight, ArrowLeft, PageDown and PageUp the same, whatever the modifiers.
+  - It calls `markUserBrowsingAway()`, which runs `onUserBrowseAway` → `setBrowsedAway(true)` → `pausePlayback()`, and then `view.renderer.next()`/`prev()`, which turns a page.
+  - `useReaderKeys` runs first, so the playing jump lands (Ctrl+→ 191 → 192), and then this listener pauses and turns the page.
+  - Every key with ←/→ stops playback; the ↑/↓ keys continue (live: Ctrl+↓ 191 → 199, then 200 to 203, still playing; plain → stays on 191 and stops).
+  - `flowKeys.test.tsx` does not mount Flow's FoliateView, which is why the unit tests passed.
+  - Evidence: `C:\Projects\Blurby-artifacts\keys-fix\brain-flow-60b86aff-playing-ctrldown.json` and `brain-flow-60b86aff-playing-right.json`.
+- **Fix:**
+  1. In that listener, return early when `e.shiftKey || e.ctrlKey || e.altKey || e.metaKey`. Modified arrows belong to `useReaderKeys`'s navigation. Plain ←/→ and PgUp/PgDn are unchanged here, pending the owner's question below.
+  2. Move the key test into a pure exported helper, `isFlowBrowseKey(e)`, in Flow's own helpers (no sibling import).
+- **Done-when additions:**
+  - **(k1) Red first (standing rule 43):** a unit test for `isFlowBrowseKey`. Shift, Ctrl, Alt or Meta with ArrowLeft/Right return false; plain ArrowLeft/Right and PageUp/PageDown return true. Commit it alone against a helper that keeps today's condition, show the modifier cases failing by assertion, record that, then add the guard.
+  - **(k2) Live, on the rebuilt `--dir` package** (a clean `git archive` copy with real `node_modules`; scratch profile with the preflight; `C:\Projects\Blurby-artifacts\keys-fix\flow-play-para-probe.mjs.txt`):
+    - Ctrl+→, Ctrl+←, Shift+→ and Shift+← while playing: `atPlaying` is true, and `afterEngine` shows at least 3 distinct increasing words;
+    - Ctrl+↓ still continues (the control);
+    - plain → still stops, recorded as unchanged pending the owner;
+    - the live profile is unchanged.
+  - `npm test`, `npm run typecheck` and `npm run build` exit 0.
+- **Fence additions:** `M src/reader/modes/flow/FoliateView.tsx`, the helper if it gets its own file, and its test. No shared-core file.
+- **Merge order:** the amended FLOW-KEYS-FIX-1 lands first. FLOW-PARA-KEYS-1 (`68504ba5`, built on `60b86aff`) then takes the amended tip in and re-runs its live Shift+→ check.
+- **Open owner question (tier 3), with Blurby.Brain:** plain ←/→ in Flow while playing both changes speed and pauses and turns a page. Brain's recommendation: ←/→ changes speed only, and PgUp/PgDn stay as the look-ahead keys. Folded in here when the owner rules.
+- **Related, filed separately:** READER-ARROW-GUARD-1 (the same unguarded listener in Narrate and Page).
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#flow-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="band-align-2-spec"></a>
@@ -1881,6 +1905,11 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); L, amended by the owner 2026-10-23; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
+- <a id="reader-arrow-guard-1"></a>**READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners** *(position 91 — stub; filed 2026-10-23 from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; not probed live; after FLOW-KEYS-FIX-1's amendment, whose `isFlowBrowseKey` pattern it copies)*.
+  - **Narrate:** its book view (`src/reader/modes/narrate/FoliateView.tsx:1426`) has the same unguarded window keydown listener as Flow, so Shift or Ctrl with ←/→ probably pauses Narrate and turns a page.
+  - **Page:** its listener (`src/reader/modes/page/FoliateView.tsx:1179`) also turns pages on Shift or Ctrl with ←/→.
+  - **First step:** a live probe in each mode (Rule 6a). Then a per-mode guard and a helper with a red test, as in FLOW-KEYS-FIX-1's amendment.
+  - **Lane:** Reader Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
 
