@@ -2282,6 +2282,11 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 - **Standing rules 41, 46, 47 and 48:** the fence exempts the time log and memo; the run writes nothing to the register; the suite, typecheck and build run on the owner's machine.
 - **LL-164:** the specification appends no lesson-status line.
 
+
+##### Owner decisions — 2026-10-23
+
+- **Part A approved (tier 2):** "Band yes". The band grows to cover the 5 lines the setting promises. Dispatch is cleared; the waiting line above no longer applies.
+- **Part B decided (tier 3):** "keep band fixed". In Focus the band stays where it is, and the text scrolls the cursor's line into it. Part B is specified separately as [BAND-ALIGN-2](#band-align-2), which merges after this item.
 <a id="foliate-observer-leak-1"></a>
 
 #### FOLIATE-OBSERVER-LEAK-1 — Leaked foliate View observers stop flooding error.log *(position 67 — Full Spec; authored 2026-10-23 on main @ `216698d7`, from READER-VISUAL-DIAG-1's drafted fix spec; fixes BUG-187; merges after the Stage 8 freeze lifts)*
@@ -2492,6 +2497,18 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 - **Standing rules 41, 46, 47 and 48:** the fence exempts the time log and memo; the run writes nothing to the register; the suite, typecheck and build run on the owner's machine.
 - **LL-164:** the specification appends no lesson-status line.
 
+
+##### Pre-dispatch Amendment — 2026-10-23 (owner decisions on the two out-of-scope questions)
+
+The owner answered both questions this specification left out of scope: "1060s yes, en dash yes". Both are now in scope, using the same `preNormalize` step and the same exact-mapping rule:
+- **Decades before 1100:** "the 1060s" is read "the ten sixties", the decade form of kokoro's year reading, for 1000s to 1090s. Decades from 1100 up are read as today.
+- **En-dash ranges:** "1914–1918" is read "nineteen fourteen to nineteen eighteen", the same as hyphen ranges already are. Only an en dash (U+2013) between two numbers in the year range counts. Other en dashes are unchanged.
+- **New Done-when rows:**
+  - (y7) `1060s` and `the 1000s` are read in decade form;
+  - (y8) `1914–1918` and `1066–1087` are read as "… to …";
+  - (y9) an en dash between non-years (`pages 10–12`) is unchanged;
+  - (y10) the reconcile sweep's word mapping stays exact on all three cases (LL-162).
+- The out-of-scope list drops both questions.
 <a id="ui-sweep-1"></a>
 
 #### UI-SWEEP-1 — Press every control on every screen and report what breaks *(position 68 — Full Spec; authored 2026-10-23 on main @ `4913d6c8` at the owner's request; not a release gate)*
@@ -2598,6 +2615,7 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1 — Build full NSIS installers per architecture by default** *(position 65 — stub; S; not a release gate)*. The owner's decision for RELEASE-RUNBOOK-1 (2026-10-22, option B) is separate full x64 and ARM64 installers. This release does it with CLI overrides. Move `package.json`'s `build.win.target` from `nsis-web` to `nsis` (artifact name and `latest.yml` per architecture), update the runbook to drop the overrides, and check that electron-updater picks the right architecture's installer for both. Lane: Platform & Maintenance.
 - <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups** *(position 64 — stub; M; after LIBRARY-WRITE-RACE-1; not a release gate)*. Split from LIBRARY-WRITE-RACE-1 (2026-10-22). Four parts. (1) `save-library` id de-duplication, a test for malformed elements, and type checks. (2) The Edit form's fire-and-forget save: how a failed save looks is an **open owner decision** (recommended: the form stays open with an inline "Couldn't save — try again" and keeps the typed values). (3) Renderer edits and sync freshness, **ruled by Blurby.Brain 2026-10-22 (tier 1): main stamps, but never the doc-level `modified`.** For folder docs, `modified` holds the source file's mtime (`syncLibraryWithFolder` writes `modified: file.modified`, and rescans compare against it). The spec first traces what cloud sync's last-writer-wins compares: `sync-state.json` carries a `fieldTimestamps` map. If per-field stamps exist, main stamps the edited field there. If sync only compares `modified`, add a separate main-stamped `editedAt` and have the merge use it for renderer-owned fields. Stamp only when a value actually changes (`markDocsSeen` and other no-op saves stamp nothing). Tests: a title edit beats a staler cloud copy; a folder rescan neither clobbers the edit stamp nor treats an edit as a file change; a no-op save stamps nothing. (4) Cloud sync's `setLibrary(gcd)` stays in the deferred Cloud lane. Lane: Library & Content.
 - <a id="zip-async-read-1"></a>**ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously** *(position 69 — stub; S; not a release gate)*. From ZIP-READ-FOLLOWUPS-1 (Blurby.Brain, 2026-10-23). adm-zip's path constructor reads the file synchronously (`fs.readFileSync`), which breaks the standing rule that main-process file I/O is async. Fix: in `openZip` (`main/zip-read.js`), read with `fsPromises.readFile` and hand the buffer to adm-zip, with the cap checked on the stat. That also closes the gap between the stat and the read. After ZIP-READ-FOLLOWUPS-1 and the Stage 8 freeze. Lane: Library & Content.
+- <a id="band-align-2"></a>**BAND-ALIGN-2 — In Focus, the text scrolls the cursor's line into the fixed band** *(position 70 — stub; S; after BAND-ALIGN-1; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". In Focus, the band stays at its place. On arrival, and on every highlight move, the reader scrolls so that the cursor word's line sits inside the band. In Flow, the pacer scrolls the underlined word's line under the band, with the word timer as the only clock (READER-VISUAL-DIAG-1 H3). It needs BAND-ALIGN-1's line step. The spec must re-measure H2 and H3 after the change (60–77% out of band on the base). Lane: Reader Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
 
