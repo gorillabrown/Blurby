@@ -1,0 +1,49 @@
+{
+  "id": "20261023T002124Z-external-create-item-PAGE-HELD-TURN-FAIL-1",
+  "operation": "external-create-item",
+  "item_id": "PAGE-HELD-TURN-FAIL-1",
+  "created": "2026-10-23T00:21:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "A held page turn is dropped silently when the word count fails",
+      "status": "Queued",
+      "sequence": 61,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "description": "`checkBookWords`' `fail()` path keeps a held turn it cannot report, so the turn is never saved and nothing is logged. Also, the `reason=section-load` line does not say whether the held thing was a turn or a word click.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate.",
+      "id": "PAGE-HELD-TURN-FAIL-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T00:16:28Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-HELD-TURN-FAIL-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "PAGE-HELD-TURN-FAIL-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:PAGE-HELD-TURN-FAIL-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T002124Z-external-create-item-PAGE-HELD-TURN-FAIL-1",
+      "detail": {
+        "readBack": "SQL: fields equal"
+      },
+      "providerItemId": "4027c96c-c31e-817f-8cb9-fe2d995fcff5",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T00:22:11Z",
+  "outcome": "succeeded"
+}
