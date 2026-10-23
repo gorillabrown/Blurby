@@ -692,21 +692,23 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - Every key with ←/→ stops playback; the ↑/↓ keys continue (live: Ctrl+↓ 191 → 199, then 200 to 203, still playing; plain → stays on 191 and stops).
   - `flowKeys.test.tsx` does not mount Flow's FoliateView, which is why the unit tests passed.
   - Evidence: `C:\Projects\Blurby-artifacts\keys-fix\brain-flow-60b86aff-playing-ctrldown.json` and `brain-flow-60b86aff-playing-right.json`.
-- **Fix:**
-  1. In that listener, return early when `e.shiftKey || e.ctrlKey || e.altKey || e.metaKey`. Modified arrows belong to `useReaderKeys`'s navigation. Plain ←/→ and PgUp/PgDn are unchanged here, pending the owner's question below.
-  2. Move the key test into a pure exported helper, `isFlowBrowseKey(e)`, in Flow's own helpers (no sibling import).
+- **Owner ruling (tier 3, 2026-10-23), verbatim:** "In Flow, plain ← and → should change speed only, without pausing or turning a page. PgUp and PgDn stay the keys to look ahead."
+- **Fix (Blurby.Brain, tier 1, folding in the owner's ruling):**
+  1. Flow's FoliateView keydown listener reacts only to PageDown and PageUp, with no Shift, Ctrl, Alt or Meta held. ArrowLeft and ArrowRight, plain or modified, no longer mark browse-away or turn a page. `useReaderKeys` alone owns them: speed, word and paragraph.
+  2. The key test is a pure exported helper, `isFlowBrowseKey(e)`, in Flow's own helpers (no sibling import).
+  3. If the shortcuts overlay or any key documentation describes ←/→ in Flow as look-ahead, correct it to speed in this amendment, and name the file in the memo.
 - **Done-when additions:**
-  - **(k1) Red first (standing rule 43):** a unit test for `isFlowBrowseKey`. Shift, Ctrl, Alt or Meta with ArrowLeft/Right return false; plain ArrowLeft/Right and PageUp/PageDown return true. Commit it alone against a helper that keeps today's condition, show the modifier cases failing by assertion, record that, then add the guard.
-  - **(k2) Live, on the rebuilt `--dir` package** (a clean `git archive` copy with real `node_modules`; scratch profile with the preflight; `C:\Projects\Blurby-artifacts\keys-fix\flow-play-para-probe.mjs.txt`):
-    - Ctrl+→, Ctrl+←, Shift+→ and Shift+← while playing: `atPlaying` is true, and `afterEngine` shows at least 3 distinct increasing words;
-    - Ctrl+↓ still continues (the control);
-    - plain → still stops, recorded as unchanged pending the owner;
+  - **(k1) Red first (standing rule 43):** a unit test for `isFlowBrowseKey`. ArrowLeft and ArrowRight return false, plain or with any modifier. Plain PageUp and PageDown return true. PageUp and PageDown with a modifier return false. Commit it alone against a helper that keeps today's condition, show the arrow cases failing by assertion, record that, then change the helper.
+  - **(k2) Live, while playing, on the rebuilt `--dir` package** (a clean `git archive` copy with real `node_modules`; scratch profile with the preflight; `C:\Projects\Blurby-artifacts\keys-fix\flow-play-para-probe.mjs.txt`):
+    - Ctrl+→, Ctrl+←, Shift+→, Shift+←, plain → and plain ←: `atPlaying` is true, and `afterEngine` shows at least 3 distinct increasing words;
+    - plain → and ← move the speed by +25 and −25 (`WPM_STEP`), read from the runtime or settings;
+    - Ctrl+↓ continues (the control);
+    - PgDn still pauses and turns a page, as before;
     - the live profile is unchanged.
   - `npm test`, `npm run typecheck` and `npm run build` exit 0.
 - **Fence additions:** `M src/reader/modes/flow/FoliateView.tsx`, the helper if it gets its own file, and its test. No shared-core file.
 - **Merge order:** the amended FLOW-KEYS-FIX-1 lands first. FLOW-PARA-KEYS-1 (`68504ba5`, built on `60b86aff`) then takes the amended tip in and re-runs its live Shift+→ check.
-- **Open owner question (tier 3), with Blurby.Brain:** plain ←/→ in Flow while playing both changes speed and pauses and turns a page. Brain's recommendation: ←/→ changes speed only, and PgUp/PgDn stay as the look-ahead keys. Folded in here when the owner rules.
-- **Related, filed separately:** READER-ARROW-GUARD-1 (the same unguarded listener in Narrate and Page).
+- **Related, filed separately:** READER-ARROW-GUARD-1 (the same unguarded listener in Narrate and Page). Whether Narrate's plain ←/→ should also change speed only is a later owner question, not part of this ruling.
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#flow-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
 
 <a id="band-align-2-spec"></a>
