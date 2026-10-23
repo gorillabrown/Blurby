@@ -800,4 +800,75 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(4);
     });
   });
+
+  // JUMP-LANDING-SAVE-1: an internal link or footnote reference saves the page it lands on, as a TOC jump does;
+  // a contents jump that never lands saves nothing.
+  describe("JUMP-LANDING-SAVE-1 link and chapter jumps", () => {
+    /** As foliate's #handleLinks (view.js:350-352): a cancelable link event, then its own goTo unless prevented. */
+    const followLink = (view: FakeFoliateView, href: string) =>
+      act(async () => {
+        const event = new CustomEvent("link", { detail: { a: null, href }, cancelable: true });
+        if (view.dispatchEvent(event)) await (view.goTo as (target: string) => Promise<void>)(href);
+      });
+    /** A goTo whose landing relocate fires on the view after an await, before it resolves (as foliate's does). */
+    const landingGoTo = (view: FakeFoliateView, range: Range) =>
+      vi.fn(async (_target: unknown) => {
+        await new Promise((r) => setTimeout(r, 0));
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      });
+
+    it.each([
+      { name: "an internal link", href: "ch2.xhtml#sec-2" },
+      { name: "a footnote reference", href: "notes.xhtml#fn-1" },
+    ])("(jl1) $name saves the landed page's first word and cfi, through one goTo", async ({ href }) => {
+      const { fake, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      const goTo = landingGoTo(view, range);
+      (view as any).goTo = goTo;
+      await followLink(view, href);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
+      expect(goTo).toHaveBeenCalledTimes(1);
+      expect(goTo).toHaveBeenCalledWith(href);
+    });
+
+    it("(jl2) control: a relocate after a link has settled saves nothing", async () => {
+      const { fake, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      await followLink(view, "ch2.xhtml#sec-2"); // the fake goTo fires no relocate
+      await settle();
+      await relocate(view, { cfi: "jump-cfi", fraction: 0.5, range });
+      expect(saves(fake)).toEqual([]);
+    });
+
+    it("(jl3) control: a link onto renderer-numbered words is held, then saved once the book's numbers apply", async () => {
+      const { fake, view, renderer, render } = await mount();
+      const { doc } = rawDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+      (view as any).goTo = landingGoTo(view, spanRange(doc, 2, 3));
+      await followLink(view, "ch2.xhtml#sec-2");
+      await settle();
+      expect(saves(fake)).toEqual([]);
+      await render(BOOK_WORDS);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    });
+
+    it.each([
+      { name: "dropped while a turn holds the paginator's lock", goTo: () => vi.fn(async () => {}) },
+      { name: "an unresolvable href", goTo: () => vi.fn(() => Promise.resolve(undefined)) },
+    ])("(jl4) a contents jump that never lands saves nothing: $name", async ({ goTo }) => {
+      const { fake, runtime, view } = await mount();
+      (view as any).goTo = goTo();
+      await act(async () => {
+        runtime.navigateTo(20); // the shell's handleJumpToChapter: the entry's word, then go-to-href
+        runtime.handleCommand({ kind: "go-to-href", href: "ch9.xhtml" });
+      });
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([]);
+    });
+  });
 });
