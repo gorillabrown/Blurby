@@ -1,0 +1,51 @@
+{
+  "id": "20261023T024118Z-external-create-item-UI-SWEEP-1",
+  "operation": "external-create-item",
+  "item_id": "UI-SWEEP-1",
+  "created": "2026-10-23T02:41:18Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Press every control on every screen and report what breaks",
+      "status": "In Flight",
+      "started": "2026-10-23",
+      "branch": "eb/ui-sweep-1",
+      "sequence": 68,
+      "written_status": "Full Spec",
+      "effort": "M",
+      "workstream": "Platform & Maintenance",
+      "description": "A CDP-driven sweep (`scripts/ui-sweep/sweep.mjs`) presses every clickable control on every screen of a `--dir` build of 47ae6e1f, on a scratch profile, and reports each press as OK, ERROR, NO-EFFECT or skipped, with evidence. Bug candidates are filed by the planner.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner's request (\"are you testing every button?\"). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/ui-sweep-1). Live run waits for the Stage 8 smoke agent to finish. Not a release gate.",
+      "id": "UI-SWEEP-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T02:33:02Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UI-SWEEP-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "UI-SWEEP-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:UI-SWEEP-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T024118Z-external-create-item-UI-SWEEP-1",
+      "detail": {
+        "readBack": "create response echoes every field"
+      },
+      "providerItemId": "4027c96c-c31e-81b6-814d-ee50c237629e",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T02:41:49Z",
+  "outcome": "succeeded"
+}

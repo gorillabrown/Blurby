@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:33:02Z",
+  "takenAt": "2026-10-23T02:41:52Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3264,6 +3264,54 @@
       "description": "A patch-package patch (patches/foliate-js+1.0.1.patch) makes foliate-js's View.destroy() and Paginator.destroy() call this.#observer.disconnect(). The leaked observers on dead section bodies stop flooding error.log (14,428 lines a session on the base, 0 after).",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze.",
       "revision": "6265d32db73af5f6ab92f76f3688ba17849d075a64fc711180390fe274c68c59",
+      "extra": {}
+    },
+    {
+      "id": "UI-SWEEP-1",
+      "title": "Press every control on every screen and report what breaks",
+      "sequence": 68,
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "M",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "eb/ui-sweep-1",
+      "started": "2026-10-23",
+      "completed": "",
+      "evidence": "",
+      "description": "A CDP-driven sweep (scripts/ui-sweep/sweep.mjs) presses every clickable control on every screen of a --dir build of 47ae6e1f, on a scratch profile, and reports each press as OK, ERROR, NO-EFFECT or skipped, with evidence. Bug candidates are filed by the planner.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner's request (\"are you testing every button?\"). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/ui-sweep-1). Live run waits for the Stage 8 smoke agent to finish. Not a release gate.",
+      "revision": "d1dc3f9602ee891d9b852316a2033645dbd996ee3e4ffdbcc74408047843ad17",
+      "extra": {}
+    },
+    {
+      "id": "ZIP-ASYNC-READ-1",
+      "title": "Read EPUB archives asynchronously",
+      "sequence": 69,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "ZIP-READ-FOLLOWUPS-1"
+      ],
+      "effort": "S",
+      "workstream": "Library & Content",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "adm-zip's path constructor reads the archive with fs.readFileSync. In openZip (main/zip-read.js), read with fsPromises.readFile and pass the buffer to adm-zip, with the cap checked on the stat.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.",
+      "revision": "bdb570b2cad0e43a2544c529f5b3a242f9bea7cec7a21864e0e009f0b1b65ade",
       "extra": {}
     }
   ],
