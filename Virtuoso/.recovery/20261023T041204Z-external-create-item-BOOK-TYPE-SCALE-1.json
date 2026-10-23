@@ -1,0 +1,51 @@
+{
+  "id": "20261023T041204Z-external-create-item-BOOK-TYPE-SCALE-1",
+  "operation": "external-create-item",
+  "item_id": "BOOK-TYPE-SCALE-1",
+  "created": "2026-10-23T04:12:04Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "Sprint Code": "BOOK-TYPE-SCALE-1",
+      "Status": "Queued",
+      "Seq": 72,
+      "Lane": "UX polish",
+      "Effort": "S",
+      "Spec State": "Full Spec",
+      "Spec Reference": "ROADMAP.md#book-type-scale-1",
+      "Prerequisites": "BUG-208 fix (release fix) merges first; same four files",
+      "Branch": "eb/book-type-scale-1",
+      "title": "Books use one type scale for headers, sub-headers and body text",
+      "id": "BOOK-TYPE-SCALE-1",
+      "status": "Queued",
+      "written_status": "Stub",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:26:55Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BOOK-TYPE-SCALE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BOOK-TYPE-SCALE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BOOK-TYPE-SCALE-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T041204Z-external-create-item-BOOK-TYPE-SCALE-1",
+      "detail": {},
+      "providerItemId": "",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T04:12:23Z",
+  "outcome": "succeeded"
+}
