@@ -85,7 +85,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.2",
-    "electron": "^41.1.0",
+    "electron": "^42.11.14",
     "electron-builder": "^26.8.1",
     "patch-package": "^8.0.1",
     "typescript": "^5.9.3",
