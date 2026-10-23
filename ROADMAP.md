@@ -2180,58 +2180,111 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 
 <a id="band-align-1"></a>
 
-#### BAND-ALIGN-1 — The Focus/Flow reading band is sized from the real line step (Part A); where it sits is the owner's (Part B) *(drafted spec, not yet dispatch-ready: it needs a Task list and a Lessons applied section; authored 2026-10-23 by READER-VISUAL-DIAG-1 on main @ `77f1502c`, moved into the roadmap at its close-out; merges after the Stage 8 freeze lifts)*
+#### BAND-ALIGN-1 — The Focus/Flow reading band is sized from the real line step (Part A) *(position 66 — Full Spec for Part A; authored 2026-10-23 on main @ `216698d7`, from READER-VISUAL-DIAG-1's drafted fix spec; fixes BUG-188's band height; merges after the Stage 8 freeze lifts)*
 
+**Dispatch waits for the owner's tier-2 OK (queued on the next-smoke list).** Part A changes the band's size visibly, toward the 5 lines the setting already promises (Rule 11 tier 2). The recommendation is to do it.
 
-- **What, in two parts:**
-  - **Part A (technical): the band's height.** The zone is sized from the loaded section's real body line step, so a 5-line band covers 5 body lines at any text size.
-  - **Part B (design): where the band sits.** This part is held for the owner (below). In Focus, the band's top would follow the cursor's line on arrival and on every highlight move. In Flow, the pacer would scroll the **underlined word's** line under the band, with the word timer as the only clock, instead of keeping its own line index.
-- **Why:** BUG-188, measured here.
-  - The band is 120 px whatever the text size (24 px fallback), so it covers 4.4 or 3.6 body lines, never 5.
-  - The Focus cursor is outside the band in every measurement.
-  - In Flow, the underline is outside the band 60–77% of the time.
-- **Rule 11, and the decision held for the owner:**
-  - Part A is hybrid: the band's size changes visibly, toward the 5 lines the setting already promises. Recommendation: do it.
-  - Part B is tier 3, front of house, and is **held for the owner's decision before dispatch**. A band that moves with the cursor in Focus is a different design from today's fixed band at 15%. The owner's S2 observation ("the horizontal highlight cursor didn't follow the word cursor") says the band should contain the cursor. It does not say whether the band should move to the cursor or the text should scroll the cursor into a fixed band.
-  - Recommendation: keep the band fixed. In Focus, scroll the cursor's line into it, the way Flow already scrolls. In Flow, give the pacer the word timer's line. This keeps today's look and still meets the owner's expectation.
-  - Part B's Done-when and edit sites below assume that recommendation. If the owner rules the other way, they are rewritten before dispatch.
-  - Band height and line count stay the owner's call: `FLOW_ZONE_LINES_DEFAULT` (5) is unchanged.
-- **Done when:**
-  1. **Positive control.** New tests in `tests/readerModes/` fail on the base:
-     - **(b1)** With a fake section frame whose body `<p>` line step is 27 px, and the outer view at `line-height: normal`, the zone height is 135 px (5 × 27), not 120. Repeated at 33 px, the zone height is 165 px.
-     - **(b2)** In Focus, after the highlight moves to a word whose line top is at 400 px in a 630 px view, the cursor's line lies inside the band (band top ≤ line top, and line bottom ≤ band bottom).
-     - **(b3)** In Flow, a fake word timer and pacer on a fixed line map run 200 ticks at the default speed. After every tick, the line under the band is the underlined word's line. The test fails if any of the 200 ticks differs.
-  2. Those tests pass, and `tests/readerModes/` and `tests/flowScroll*` pass.
-  3. **Live, packaged build.** This report's probes, on *Meditations* at 100% and 120%:
-     - **Zone height:** at least 4.5 × the body line step, at both sizes.
-     - **Focus, three checks:** (i) after the contents jump to INTRODUCTION; (ii) after 20 highlight steps forward; (iii) after a contents jump to the next contents entry after INTRODUCTION. The cursor word is inside the band in all 3.
-     - **Flow:** the underline is outside the band in at most 9 of 180 one-second samples (5%), on the scripted route.
-  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
-  5. **Owner (next smoke):** the confirmation row above passes.
-- **Edit sites** (line numbers on `77f1502c`; re-grep at dispatch):
-  - **Part A, the zone line height.** It comes from the loaded section's body line step, through a helper in each mode's `helpers/` (no shared module, per the mode-isolation rules). The helper replaces `parseFloat(getComputedStyle(…).lineHeight) || 24` at:
-    - `src/reader/modes/focus/FoliateView.tsx:469` and `:1171`;
-    - `src/reader/modes/flow/FoliateView.tsx:499` (in `getFlowFollowOffsetPx`, `:495-505`) and `:1247`;
-    - `src/reader/modes/flow/useModeBindings.ts:39`;
-    - `src/reader/modes/flow/helpers/FlowScrollEngine.ts:788`;
-    - `src/reader/modes/narrate/FoliateView.tsx:530` and `:1300`.
-  - **Shared core: `src/utils/FlowScrollEngine.ts:788`** carries the same `|| 24`. That file is in the shared-core freeze set.
-    - On `77f1502c`, nothing imports it at run time. Its only importers are `import type` lines, in `focus/helpers/foliateWordHighlight.ts:2`, `page/helpers/foliateWordHighlight.ts:2` and `src/utils/foliateWordHighlight.ts:2`, and the Flow runtime uses `flow/helpers/FlowScrollEngine.ts` (`flow/ModeRuntime.ts:79`).
-    - **This item does not edit it.** Shared-Core Touches: none.
-    - At dispatch, `git grep -n "from \"[./]*utils/FlowScrollEngine\"" -- src | grep -v "import type"` must print nothing. If it prints anything, the item stops and asks for a shared-core window.
-  - **Part B, Focus:** scroll the cursor's line into the fixed band.
-    - On arrival: `focus/FoliateView.tsx:1054-1055`, which today uses `scrollIntoView({ block: "center" })`.
-    - On each highlight: the `highlightWordByIndex` path at `:987`.
-  - **Part B, Flow:** one clock.
-    - `flow/helpers/FlowScrollEngine.ts:746`: in the `stableWindowScroll` branch, the pacer takes its line from the underlined word's index, not from its own `lineIdx`.
-    - `flow/FoliateView.tsx:495-505` (`getFlowFollowOffsetPx`).
-- **Tests:** b1–b3 as above, plus the existing Flow and Focus suites.
-- **Lane ownership:** Reader Engine. **Forbidden:** `src/utils/FlowScrollEngine.ts`, `src/components/ReaderContainer.tsx` and `src/types.ts`.
-- **Merge order:** after the Stage 8 freeze lifts, and after the owner rules on Part B. Part A may ship alone if Part B waits. Independent of FOLIATE-OBSERVER-LEAK-1.
+- **What (Part A only):** the reading zone's height comes from the loaded section's real body line step, so a 5-line band covers 5 body lines at any text size. Today every site uses `parseFloat(getComputedStyle(container).lineHeight) || 24`. The outer view's `line-height` is `normal`, which parses to `NaN`, so the zone is always 5 × 24 px = 120 px.
+  - Each mode's `FoliateView` measures the step from the first loaded section's body `<p>`, through `view.renderer.getContents()` (LL-032).
+  - It writes the step to a CSS custom property, `--zone-line-step-px`, on its container. This is the element `getFlowZoneHost()` returns (`flow/FoliateView.tsx:1113`), the masked element that already carries `--flow-zone-top` and `--flow-zone-bottom`.
+  - It re-measures after every `injectStyles` call, at section load and when the text size changes.
+  - Every zone-height site reads the custom property first, then today's computed `line-height`, then 24.
+- **Why:** BUG-188, measured by READER-VISUAL-DIAG-1 (`docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`, H1). The band is 120.0 px in Focus and Flow at 100% and 120% text size. The body `<p>` steps there are 27 px and 33 px, so the band covers 4.4 or 3.6 lines, never 5.
+- **Out of scope:**
+  - **Part B, where the band sits (Rule 11 tier 3, held for the owner).** In Focus, should the band move to the cursor's line, or should the text scroll the cursor into a fixed band? In Flow, should the pacer take its line from the word timer? The report recommends a fixed band with the text scrolled, and the owner's decision is queued on the next-smoke list. Part B becomes its own item (BAND-ALIGN-2) once the owner rules. None of its Focus scroll or Flow pacer changes are made here.
+  - `FLOW_ZONE_LINES_DEFAULT` (5) and `FLOW_ZONE_INITIAL_TOP` (0.15) are unchanged.
+  - **`src/utils/FlowScrollEngine.ts` (shared core) is not edited.** It carries the same `|| 24` at `:788`. Nothing imports it at run time: its importers are `import type` lines only, and Flow's runtime uses `flow/helpers/FlowScrollEngine.ts` (`flow/ModeRuntime.ts:79`). Dispatch-time guard: `git grep -n "from \"[./]*utils/FlowScrollEngine\"" -- src | grep -v "import type"` must print nothing (on `216698d7` it prints nothing, exit 1). If it prints anything, the item stops and asks for a shared-core window.
+  - Page mode has no reading band.
+- **Prerequisites:** none in code. The owner's tier-2 OK first (see the top).
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43).** A new `tests/readerModes/zoneLineStep.test.ts` is committed alone first and fails on the base. It covers:
+       - **(b1a)** `measureBodyLineStepPx(doc)` (Focus's helper) returns 27 for a fake section document whose first body `<p>` has computed `line-height: 27px`. It returns 33 at `33px`. For `line-height: normal` with `font-size: 18px`, it returns 21.6 (1.2 × font size). For a body with no `<p>`, it returns `null`.
+       - **(b1b)** `readZoneLineStepPx(el)` returns 27 when `el` carries `--zone-line-step-px: 27px`. With no property and `line-height: normal`, it returns 24.
+       - **(b1c)** The same two cases for Flow's and Narrate's copies of the helpers, imported from each mode's own `helpers/foliateLayout.ts` (mode isolation: no shared module).
+       - **(b1d)** Focus's zone, applied through the fixture harness (`tests/readerModes/harness/fixtureReplay.tsx`) with a section whose `<p>` step is 27 px in a 630 px view, sets `--flow-zone-bottom` to `15% + (5 × 27 / 630)`, which is 36.43% (± 0.01), not 34.05%.
+
+       `npx vitest run tests/readerModes/zoneLineStep.test.ts` exits 1 on the base.
+    2. Those tests pass. `npx vitest run tests/readerModes tests/flowReadingZone.test.ts tests/flowZoneAuto.test.ts tests/flow-scroll-engine.test.js` exits 0.
+    3. **No zone site uses the bare fallback any more:**
+       - `git grep -n "lineHeight) || 24" -- src/reader/modes` prints nothing and exits 1. On `216698d7` it prints 8 lines.
+       - `git grep -n "lineHeight) || 24" -- src/utils/FlowScrollEngine.ts` still prints its one line `:788`, which is not edited.
+    4. **Live, packaged `--dir` build.**
+       - **Setup:** a scratch profile; *Meditations*; INTRODUCTION; paused.
+       - **Probe:** run `band-probe.js` from `C:\Projects\Blurby-artifacts\reader-visual-diag-1\` in Focus and in Flow, at 100% and at 120% text size.
+       - **Pass mark:** the zone height is at least 4.5 × the body `<p>` line step in all four cases. The base gives 120 px against 27 px and 33 px.
+       - Record each zone height, line step and ratio in the staging memo.
+    5. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and staging memo (standing rule 41):
+       - `M src/reader/modes/focus/FoliateView.tsx`, `M src/reader/modes/focus/helpers/foliateLayout.ts`;
+       - `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/flow/useModeBindings.ts`, `M src/reader/modes/flow/helpers/FlowScrollEngine.ts`, `M src/reader/modes/flow/helpers/foliateLayout.ts`;
+       - `M src/reader/modes/narrate/FoliateView.tsx`, `M src/reader/modes/narrate/helpers/foliateLayout.ts`;
+       - `A tests/readerModes/zoneLineStep.test.ts`, `M docs/governance/BUG_REPORT.md`.
+
+       `git diff --name-only refs/remotes/origin/main -- src/utils src/components/ReaderContainer.tsx src/types.ts` prints nothing.
+    7. `docs/governance/BUG_REPORT.md` BUG-188 reads "band height RESOLVED in source (BAND-ALIGN-1); band placement open (Part B)". It names no merge sha (standing rule 49).
+    8. **Owner (next smoke):** in Focus and Flow at 100% and 120%, the band is about 5 lines tall.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; owner in the next smoke batch.
+- **Lane:** Reader Engine. Execution surface C.
+- **Source:** READER-VISUAL-DIAG-1's report, H1 and its fix specification; BUG-188; the session artifacts in `C:\Projects\Blurby-artifacts\reader-visual-diag-1\`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified on `216698d7`; re-grep at dispatch, standing rule 36):
+  - **Helpers, one copy per mode,** in `focus/helpers/foliateLayout.ts`, `flow/helpers/foliateLayout.ts` and `narrate/helpers/foliateLayout.ts`. Each file today exports only `getFoliateMaxColumnCount` (`:8`).
+    - `measureBodyLineStepPx(doc: Document): number | null` takes the first `body p` with text and returns its computed `line-height` in px. For `normal` it returns 1.2 × its `font-size`. With no `<p>` it returns `null`.
+    - `readZoneLineStepPx(el: HTMLElement): number` reads `--zone-line-step-px`, then `line-height`, then 24.
+  - **Writers.** After each `injectStyles` call, the mode's `FoliateView` measures the first loaded section and sets `--zone-line-step-px` on `containerRef.current`, then re-applies the zone:
+    - Focus: section load at `:677` (inside `onSectionLoad`, `:674`) and the settings effect at `:1146`.
+    - Flow and Narrate: their equivalents. Re-grep `injectStyles(` in each file.
+  - **Readers,** where `parseFloat(getComputedStyle(…).lineHeight) || 24` becomes `readZoneLineStepPx(…)`:
+    - `focus/FoliateView.tsx:469` and `:1171`;
+    - `flow/FoliateView.tsx:499` and `:1247`;
+    - `flow/useModeBindings.ts:39`;
+    - `flow/helpers/FlowScrollEngine.ts:788` (`computeZoneHeightFrac`). Its `container` is the Flow zone host or inside it, so the custom property is read through inheritance; the executor confirms which;
+    - `narrate/FoliateView.tsx:530` and `:1300`.
+- **Tests:** Done-when 1 and 2.
+- **Constants:** the fallback stays 24, as today. The custom property's name is a CSS identifier, not a tunable, so it stays in the helper.
+- **Branch:** `eb/band-align-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\band-align-1`. Run `npm ci` first.
+- **Staging plan:** the exact paths of Done-when 6. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If `getComputedStyle` in jsdom does not return the custom property for (b1d), assert on the inline `style` the writer sets, and record why.
+  - If a section has no body `<p>` (an image-only section), keep the previous step. The test covers this through `measureBodyLineStepPx`'s `null`.
+  - If the live probe shows a ratio below 4.5 for one case and not the others, stop with the measurements. Don't widen the item.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface C.
+  - **Forbidden:** `src/utils/FlowScrollEngine.ts`, `src/components/ReaderContainer.tsx`, `src/types.ts`, and Page mode.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts, and after the owner's tier-2 OK. It overlaps two Narrate items:
+    - It merges after NARRATE-KEY-REPEAT-1 (held, `narrate/FoliateView.tsx:934`): take it in and re-grep `:530` and `:1300`.
+    - NARRATE-SENTENCE-RESUME-1 (specified) also edits `narrate/FoliateView.tsx`, and whichever merges second re-greps.
+  - Independent of FOLIATE-OBSERVER-LEAK-1.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows the zone sized from the 24 px fallback on the base | calculable | positive control | bounded | low | 15m (one test file, one red run) | — | — |
+| 2 | Every Focus, Flow and Narrate zone site reads the measured body line step | calculable | bug fix | bounded | medium | 45m (three helper copies, three writers, eight readers) | — | — |
+| 3 | Live zone heights measured on a packaged build; suite, typecheck and build pass; merged and pushed | calculable | merge and verify | bounded | medium | 40m (one --dir build, four probe runs, the suite, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 fails on the base, for the named reason, before any edit.
+- **Standing rule 44 (LL-143):** every gate was dry-run on `216698d7`: the fallback grep prints 8 lines, and the shared-core guard prints nothing.
+- **LL-142:** the fix is proven on the packaged app by READER-VISUAL-DIAG-1's own probe, not by reading the CSS.
+- **LL-146:** the probe script stays in the artifacts folder, never under a collectable test name.
+- **LL-152:** the live check measures base and fix like for like (same book, section, text sizes and probe).
+- **Standing rule 45 (LL-141):** Done-when 8 keeps an owner-observed route.
+- **Standing rule 49 (LL-148):** BUG-188's status line names the item, not a sha.
+- **Standing rule 50 (LL-156):** no waiver or known failure covers these edit sites.
+- **Standing rules 41, 46, 47 and 48:** the fence exempts the time log and memo; the run writes nothing to the register; the suite, typecheck and build run on the owner's machine.
+- **LL-164:** the specification appends no lesson-status line.
 
 <a id="foliate-observer-leak-1"></a>
 
-#### FOLIATE-OBSERVER-LEAK-1 — Leaked foliate View observers stop flooding error.log *(drafted spec, not yet dispatch-ready: it needs a Task list and a Lessons applied section; authored 2026-10-23 by READER-VISUAL-DIAG-1 on main @ `77f1502c`, moved into the roadmap at its close-out; merges after the Stage 8 freeze lifts)*
+#### FOLIATE-OBSERVER-LEAK-1 — Leaked foliate View observers stop flooding error.log *(position 67 — Full Spec; authored 2026-10-23 on main @ `216698d7`, from READER-VISUAL-DIAG-1's drafted fix spec; fixes BUG-187; merges after the Stage 8 freeze lifts)*
 
 
 - **What:**
@@ -2244,7 +2297,8 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
   - In production that is about 2,634 lines a minute, through every minute of Flow after leaving Focus.
   - Disconnecting them mid-loop stopped it (60 → 0 errors a second). The loop's mechanism is open (H4), but the intervention is decisive.
   - The flood predates the Narrate removal (`612d03f5`).
-- **Done when:**
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
   1. **Positive control.**
      - **The test:** a new `tests/foliateObserverPatch.test.js` reads the installed `node_modules/foliate-js/paginator.js` as text.
      - **What it checks:** that the body of `View`'s `destroy()` (the method after `class View {`) and the body of `Paginator`'s `destroy()` (after `class Paginator extends HTMLElement {`) each contain `this.#observer.disconnect()`.
@@ -2258,13 +2312,185 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
      - **Also recorded, without a pass mark:** the count of `Cannot destructure property 'style'` lines.
   4. **Live census, with `ro-wrap.js` injected.** After Page → Focus → Flow, no ResizeObserver has a target that is disconnected or a 0×0 `body`.
   5. `npm test`, `npm run typecheck` and `npm run build` exit 0. The packaged app opens a book in all four modes.
+    6. **Fence and status line:** see the staging plan; `docs/governance/BUG_REPORT.md` BUG-187 reads `RESOLVED in source (FOLIATE-OBSERVER-LEAK-1)`.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers in parallel.
+- **Lane:** Reader Engine.
+- **Source:** READER-VISUAL-DIAG-1's report, H4 and its fix specification; BUG-187; `C:\Projects\Blurby-artifacts\reader-visual-diag-1\` (`session.mjs`, `ro-wrap.js`, `s1-prod-base.json`, `s13-bisect.json`).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (verified 2026-10-23 against the installed `foliate-js` 1.0.1, `package-lock.json:5313-5316`):
+  - **`View`** (`node_modules/foliate-js/paginator.js:200`) creates `#observer` at `:201` and observes `doc.body` at `:265`. Its `destroy()` at `:410-411` only calls `if (this.document) this.#observer.unobserve(this.document.body)`. The patch adds `this.#observer.disconnect()`.
+  - **`Paginator`** (`:416`) creates `#observer` at `:422` and observes `this.#container` at `:550`. Its `destroy()` at `:1157-1158` calls `this.#observer.unobserve(this)`, an element it never observed. The patch adds `this.#observer.disconnect()`.
+  - **Dry run on the base:** `this.#observer.disconnect()` appears 0 times in `paginator.js`, so Done-when 1 fails on the base.
+  - **The patch file:** `patches/foliate-js+1.0.1.patch`, new. The `patches/` folder does not exist on the base. Generate it with `npx patch-package foliate-js` after editing `node_modules/foliate-js/paginator.js` in the worktree.
+  - **How it applies:** `package.json`'s `postinstall` is already `patch-package && node scripts/patch-onnxruntime.js` (`:17`), and `patch-package` ^8.0.1 is a dev dependency (`:90`), so `package.json` is unchanged.
+  - **The renderer** imports `foliate-js/view.js` (`src/foliate-js.d.ts:1`), and `view.js` imports `paginator.js`. Vite bundles the patched file, so the packaged app carries the fix.
+  - **`tests/foliateObserverPatch.test.js`,** new. It reads `node_modules/foliate-js/paginator.js` as text, slices each class's `destroy()` body, and asserts that each contains `this.#observer.disconnect()`.
+- **Tests:** Done-when 1, plus the reader-mode suites, `tests/readerModes/foliateViewTeardown.test.tsx` included.
+- **Constants:** none.
+- **Branch:** `eb/foliate-observer-leak-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\foliate-observer-leak-1`. Run `npm ci` first.
+- **Staging plan:**
+  - Commit exactly `patches/foliate-js+1.0.1.patch`, `tests/foliateObserverPatch.test.js` and `docs/governance/BUG_REPORT.md` (BUG-187 reads `RESOLVED in source (FOLIATE-OBSERVER-LEAK-1)`, per standing rule 49), plus the time log and memo.
+  - **Fence check:** `git diff --name-status refs/remotes/origin/main` lists exactly those (standing rule 41).
+  - Never stage `node_modules` or `tests/perf-baseline-results.json`.
+  - Merge to `main` with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If `patch-package` fails to apply on a clean `npm ci`, for example because the version drifted, stop with its output. Don't hand-edit `node_modules` in CI.
+  - If Done-when 3 still counts `ResizeObserver loop` lines, stop and record the count and the census from Done-when 4. The mechanism is open (H4), so the item needs a ruling, not a guess.
+  - Rollback: `git revert -m 1 <merge>`. The next `npm ci` un-patches.
+- **Lane ownership (parallel run):** Reader Engine, execution surface C, installed dependency.
+  - **Forbidden:** our teardown order, `src/components/ReaderContainer.tsx`, `src/types.ts`, `package.json` and the lockfile.
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. No held or in-flight branch touches `patches/` or this test.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows neither destroy() disconnects its observer on the base | calculable | positive control | bounded | low | 10m (one text-read test, one red run) | — | — |
+| 2 | Both foliate destroy() methods disconnect their observers through a patch-package patch | calculable | bug fix | bounded | medium | 25m (two one-line edits, one generated patch, a clean npm ci) | — | — |
+| 3 | The flood is gone on a packaged build; suite, typecheck and build pass; merged and pushed | calculable | merge and verify | bounded | medium | 45m (one --dir build, the scripted session, the census, the suite, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 fails on the base, for the named reason, before the patch exists.
+- **Standing rule 44 (LL-143):** every gate was dry-run: `disconnect()` appears 0 times in the installed `paginator.js`, and the base session gives 14,428 lines (READER-VISUAL-DIAG-1, S1).
+- **LL-142:** the fix is proven on the installed artifact. The text test reads the real `node_modules` file, and the live session runs the packaged app.
+- **LL-152:** the live session is like for like: same script, route and book as the base measurement.
+- **LL-146:** `session.mjs` and `ro-wrap.js` stay in the artifacts folder, never under a collectable test name.
+- **Standing rule 49 (LL-148):** BUG-187's status line names the item, not a sha.
+- **Standing rule 50 (LL-156):** no waiver or known failure covers these sites.
+- **Standing rules 41, 46, 47 and 48:** the fence exempts the time log and memo; the run writes nothing to the register; the suite, typecheck and build run on the owner's machine.
+- **LL-164:** the specification appends no lesson-status line.
+
+<a id="narrate-years-1"></a>
+
+#### NARRATE-YEARS-1 — Narrate reads 1000–1099 as years too, and keeps comma numbers as counts *(position 39 — Full Spec; authored 2026-10-23 on main @ `216698d7`, from the owner's decisions of 2026-10-22; fixes the rest of BUG-191; merges after the Stage 8 freeze lifts)*
+
+- **What:** a pre-normalization step, `preNormalize(text)`, runs before kokoro's own normalizer, and the producer's verbatim word mapping reproduces it.
+  - It rewrites a bare four-digit number from 1001 to 1099 into kokoro's own year form: "1066" becomes "10 66" (spoken "ten sixty-six"), and "1005" becomes "10 oh 5".
+  - Everything else is left exactly as kokoro-js 1.2.1 already reads it:
+    - 1100–2099 are years ("1974" becomes "19 74");
+    - "1000", and 2000–2009, are cardinals, matching kokoro's own `a % 1e3 < 10` rule;
+    - a number written with a thousands separator is a count ("1,974" becomes "1974", a cardinal, because kokoro strips the comma after its year step).
+- **Why:**
+  - BUG-191: "1974" was read as a cardinal. The rebuilt Narrate already fixes 1100–2099, because it runs kokoro's normalizer, which `main/narrate/normalize.js:10-17` and `:40` reproduce verbatim.
+  - **Owner decisions (2026-10-22):**
+    1. A bare four-digit number from 1000 to 1099 is read as a year ("1066" → "ten sixty-six").
+    2. Counts and years are told apart by the comma: "1,974 coins" is a count, and a bare year-range number stays a year.
+  - Kokoro returns any number below 1100 unchanged (`normalize.js:13`), so "1066" is read "one thousand sixty-six".
+- **Evidence (dry run of `normalize()` on `216698d7`; plain Node, which is fine here because normalization is ICU-free string work):**
+
+  | Input | Today | After |
+  |---|---|---|
+  | "In 1066 the" | "In 1066 the" | "In 10 66 the" |
+  | "1099" | "1099" | "10 99" |
+  | "1005" | "1005" | "10 oh 5" |
+  | "1000" | "1000" | "1000" (unchanged) |
+  | "1100" | "11 hundred" | unchanged |
+  | "1974 coins" | "19 74 coins" | unchanged |
+  | "2025" | "20 25" | unchanged |
+  | "1,974 coins" | "1974 coins" | unchanged |
+  | "1914–1918" | "19 14–19 18" | unchanged |
+  | "the 1990s" | "the 19 90s" | unchanged |
+  | "1066-1087" | "1066 to 1087" | "10 66 to 10 87" |
+  | "$1066" | "1066 dollars" | unchanged |
+  | "1066.5" | "1066 point 5" | unchanged |
+  | "1066,000" | "1066000" | unchanged |
+  | "c.1066" | "c point 1 0 6 6" | unchanged (a "." before the number is excluded) |
+  | "(1066)" | "«1066»" | "«10 66»" |
+- **Out of scope, with owner questions:**
+  - **Decades before 1100** ("the 1060s") stay as kokoro reads them. *Owner question:* should they be read "ten sixties"?
+  - **En-dash ranges** ("1914–1918") are read as two years with the dash spoken by espeak, not as "to". Hyphen ranges already become "to". *Owner question:* should an en-dash range read "to" as well?
+  - **"1000" as a year** ("in the year 1000") stays "one thousand", which is also how that year is usually said.
+  - **No context rule:** "1974 coins" stays a year, as the owner ruled. A bare number is a year; a comma marks a count.
+- **Prerequisites:** none. Independent of NARRATE-TOKEN-CAP-1 (in flight; it edits `chunkPlan.ts` only), but both use the reconcile sweep as a gate, so whichever merges second re-runs Done-when 4.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43).** The new tests in Done-when 2 are committed alone first. `npx vitest run tests/narrate/narrate.normalize.test.js tests/narrate/narrate.reconcile.test.js` exits 1 on the base. The failures name `preNormalize` (not exported), and the reconcile chunk "In 1066 the Normans came." gives spoken words "1066", not "10 66".
+    2. **Tests.**
+       - `tests/narrate/narrate.normalize.test.js` gains a `preNormalize` table test asserting every row of the Evidence table, through `normalize(preNormalize(x))`.
+       - It gains a `spokenCounts` test: `["1066,", "1,974", "1914–1918", "1990s"]` gives `[2, 1, 3, 2]`.
+       - It gains a `mapUnitsToSourceWords` test: "In 1066 the" maps "1066" onto one source-word unit merged from "10" and "66", with the span carried through.
+       - `tests/narrate/narrate.reconcile.test.js` gains a test that the chunk "In 1066 the Normans came, and 1,974 coins were struck." reconciles (no throw), using the real espeak phonemizer through `synthesize`. Each source word's spoken words are checked by text (LL-161): "1066" → ["10", "66"], "1,974" → ["1974"].
+       - The existing tests stay unchanged and pass, `1634; 1701; 1906.` included.
+       - The command in Done-when 1 exits 0.
+    3. **One step, used everywhere:** `git grep -n "preNormalize" -- main` prints exactly these lines, and the base prints nothing:
+       - in `main/narrate/normalize.js`: the definition, its use in `spokenWordsOf`, and the export;
+       - in `main/narrate/capture.js`: the require, and its use in `synthesize` before `tts.generate`.
+    4. **The sweep stays exact, under the app's Electron (LL-160, LL-162).** The owner corpus is the owner library's `.epub` copies in a scratch folder, never the profile. TOKEN-CAP-1's spec names one copy folder; if it is gone, copy the profile's `.epub` files first.
+       - `pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --gate` exits 0.
+       - `… --gate --from 2970 --to 6700` exits 0.
+       - `… --gate --control` exits 1.
+       - `… --owner <copy>` prints the same counts of class E, ruled residual and other failures as on the base. Run it on the base first and record both. It adds no "other" failure; an exit of 0 alone does not tell base from fix.
+    5. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and staging memo (standing rule 41):
+       - `M main/narrate/normalize.js`, `M main/narrate/capture.js`;
+       - `M tests/narrate/narrate.normalize.test.js`, `M tests/narrate/narrate.reconcile.test.js`;
+       - `M docs/governance/BUG_REPORT.md`.
+    7. **`BUG_REPORT.md`:** BUG-191 reads `RESOLVED in source (NARRATE-YEARS-1)`, naming NARRATE-REBUILD-1 for 1100–2099 and this item for 1001–1099. It names no merge sha (standing rule 49).
+    8. **Owner (next smoke, listening):** Narrate a passage containing "1066", "1974" and "1,974 coins". They are heard as "ten sixty-six", "nineteen seventy-four" and "one thousand nine hundred seventy-four coins".
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers in parallel; owner for Done-when 8.
+- **Lane:** TTS / Narration Engine.
+- **Source:**
+  - BUG-191, and the owner decisions of 2026-10-22 (recorded on the former stub);
+  - `main/narrate/normalize.js:1-48`, the verbatim kokoro-js 1.2.1 normalizer, and `:60-137`, the source-word mapping;
+  - `main/narrate/capture.js:50-53` (`synthesize`, which calls `tts.generate(text, …)`);
+  - `main/narrate/producer-worker.js:97-103`, where `mapUnitsToSourceWords(text, rec.segments, wm.units)` runs on the original chunk text;
+  - `scripts/narrate-rebuild/reconcile-sweep.mjs`, the producer's text side, plus the gates.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **How the mapping stays exact:**
+  - The producer still maps onto the *original* chunk text's source words (`text.split(" ")` in `mapUnitsToSourceWords`).
+  - kokoro receives `preNormalize(text)`, so its phonemizer segments (`rec.segments`) are of the pre-normalized text.
+  - `spokenWordsOf(text)` becomes `wordsOf(segments(normalize(preNormalize(text))))`. Both the whole-chunk spoken words and each source word's `spokenCounts` therefore go through the same step, and "1066" counts as 2 spoken words for 1 source word, as a year above 1100 already does.
+  - The existing checks still fail closed on any disagreement: the spoken words must equal the captured ones, and the counts must add up.
+- **The step,** `preNormalize(e)` in `main/narrate/normalize.js`:
+  - It applies `e.replace(/(?<![\d$£.,])\b10(\d\d)\b(?![.,]\d)/g, (m, d) => …)` and returns `m` when `d === "00"`.
+  - It returns ``10 oh ${Number(d)}`` when `Number(d) < 10`, and ``10 ${Number(d)}`` otherwise.
+  - The look-arounds leave decimals, thousands-separated numbers, currency and longer numbers alone (the Evidence table).
+  - A comment states the owner's rule and that kokoro's own rule covers 1100 and up.
 - **Edit sites:**
-  - `patches/foliate-js+1.0.1.patch` (new). It changes `node_modules/foliate-js/paginator.js` at `View.destroy` (`:410-411`) and `Paginator.destroy` (`:1157-1158`).
-  - `tests/foliateObserverPatch.test.js` (new).
-  - `package.json` is unchanged: `postinstall` already runs `patch-package`, and `patch-package` is already a dev dependency.
-  - **Optional, and out of scope unless ruled in:** rate-limiting identical `logError` lines in `App.tsx:130-137`, so a future loop cannot flood the log. That would be a separate defence, not the fix.
-- **Tests:** Done-when 1, plus the reader-mode suites.
-- **Merge order:** after the Stage 8 freeze lifts, because it changes installed code. Independent of BAND-ALIGN-1.
+  - `main/narrate/normalize.js`: add `preNormalize` after `normalize` (`:47`); change `spokenWordsOf` at `:65`; add it to `module.exports` at `:137`.
+  - `main/narrate/capture.js`: require `preNormalize`, and at `:53` call `tts.generate(preNormalize(text), { voice, speed })`. Keep the returned `text` as the original (the record's `text` field).
+- **Tests:** Done-when 1 and 2.
+- **Constants:** none (the rule is the owner's, written once in `preNormalize`).
+- **Branch:** `eb/narrate-years-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\narrate-years-1`. Run `npm ci` first.
+- **Staging plan:** the exact paths of Done-when 6. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If the reconcile test or the sweep throws `normalizer mismatch`, espeak's segments differ from the reproduction. Stop with the chunk's counts (no text). Never loosen the check.
+  - If `--owner` reports a new "other" failure, stop with its chunk id and class.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** TTS / Narration Engine, execution surface A (main-process producer).
+  - **Forbidden:** `src/reader/modes/narrate/**` (NARRATE-TOKEN-CAP-1, NARRATE-KEY-REPEAT-1 and NARRATE-SENTENCE-RESUME-1 own those files), `main/narrate/wordmap.js`, and `main/narrate/producer-worker.js` (unchanged).
+  - **Shared-core touches:** none.
+  - **Merge order:** after the Stage 8 freeze lifts. File-disjoint from every held or in-flight branch. It shares the reconcile sweep gate with NARRATE-TOKEN-CAP-1, whose fence excludes `normalize.js` and `capture.js`: whichever merges second re-runs Done-when 4 on the combined tree.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows 1066 spoken as a cardinal on the base | calculable | positive control | bounded | low | 15m (the new tests alone, one red run) | — | — |
+| 2 | One pre-normalization step reads 1001–1099 as years, and the word mapping reproduces it | calculable | bug fix | bounded | medium | 30m (one function, two call sites, four tests) | — | — |
+| 3 | The reconcile sweep stays exact under the app's Electron; suite, typecheck and build pass; merged and pushed | calculable | merge and verify | bounded | medium | 40m (four sweep runs, the suite, one --no-ff merge) | — | — |
+
+**Total:** chain 8m · sum 8m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-160:** the sweep runs under the app's Electron through `app-node.ps1`; plain Node is refused (exit 3).
+- **LL-161:** the reconcile test checks each source word's spoken words by text ("1066" → "10", "66"), not by index.
+- **LL-162:** the whole owner corpus is swept offline before trust (Done-when 4), and every class the mapper accepts stays validated, the year's merged unit included.
+- **LL-142:** the step is proven against the real espeak phonemizer through `synthesize`, not by reading kokoro's source.
+- **Standing rule 43 (LL-138):** Done-when 1 fails on the base for the named reason.
+- **Standing rule 44 (LL-143):** every gate was dry-run on `216698d7`. The Evidence table is `normalize()`'s real output, and `git grep preNormalize` exits 1 on the base.
+- **Standing rule 49 (LL-148):** BUG-191's status line names the items, not a sha.
+- **Standing rule 50 (LL-156):** no waiver covers these sites. The ruled-residual owner chunks stay ruled and are counted, not hidden.
+- **Standing rules 41, 46, 47 and 48:** the fence exempts the time log and memo; the run writes nothing to the register; the suite, typecheck and build run on the owner's machine.
+- **LL-164:** the specification appends no lesson-status line.
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
@@ -2275,7 +2501,6 @@ Each stub needs investigation or an owner decision before it can be specified (R
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. Not a register item until the owner decides; the owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="narrate-years-1"></a>**NARRATE-YEARS-1 — Read four-digit years as years in Narrate** *(position 39 — stub; blocked until NARRATE-REBUILD-1 closes)*. BUG-191: "1974" is spoken as a cardinal number. The fix belongs in the rebuilt Narrate's text normalization (`src/reader/modes/narrate/**` or `main/narrate/**`, whichever owns normalization when the epic closes): four-digit numbers 1100–2099 in year contexts are read as paired digits, with a regression fixture. Blocked on the epic, which owns those files until it closes. Lane: TTS / Narration Engine. **Roadmap backfill 2026-10-23, evidence: NARRATE-REBUILD-1 already reads years in paired form.** The rebuilt Narrate runs kokoro-js 1.2.1's own normalization (reproduced verbatim in `main/narrate/normalize.js:10-17`, `:40`). Under the app's Electron 42, espeak phonemizes "In 1974 he left." as `ɪn nˈaɪntiːn sˈɛvənti fˈoːɹ hiː lˈɛft` ("nineteen seventy-four"), "1905" as "nineteen oh five" and "2019" as "twenty nineteen". `tests/narrate/narrate.normalize.test.js:31` already pins `1634; 1701; 1906.` → `16 34; 17 oh 1; 19 oh 6.`. BUG-191 is fixed by NARRATE-REBUILD-1 for 1100–2099, which is the bug's fix path. Recommendation for the next roadmap review: retire this item as superseded by NARRATE-REBUILD-1 and mark BUG-191 resolved. **Owner questions left (design, not specified):** (1) years before 1100 ("1066") are still read as cardinals ("one thousand sixty-six"), because kokoro converts only 1100–2099; should they read "ten sixty-six"? (2) kokoro treats every standalone four-digit number in that range as a year, so "1974 coins" is read "nineteen seventy-four coins". Should counts be told apart from years, and by what rule? Either change needs pre-normalization before kokoro, which the producer's verbatim word mapping must then reproduce. **Owner decisions (2026-10-22):** (1) a bare four-digit number from 1000 to 1099 is read as a year too ("1066" → "ten sixty-six"); (2) counts and years are told apart by the comma: a number written with a thousands separator ("1,974 coins") is read as a count, and a bare four-digit number in the year range is read as a year, as today. Now specifiable: a pre-normalization step before kokoro, which the producer's verbatim word mapping must reproduce (LL-161, LL-162).
 - <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 43 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
 - <a id="page-save-restamp-3"></a>**PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard** *(position 45 — stub; not a release gate)*. From PAGE-SAVE-RESTAMP-GUARD-1's quality review (Blurby.Brain ruling 2026-10-15): (2) the double-wrap race: if bookWords arrives during the first wrap of a section of more than 50 groups, the re-stamp can remove the document from the guard set mid-wrap, and the load's wrap keeps stamping provisional numbers, so a turn onto those spans saves unheld; (4) the failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's one-liner, if more is needed. Also (PAGE-SAVE-RESTAMP-2 live check, 2026-10-15): the held-turn cancel fires on foliate's `link` event before the jump lands, so a link within about 20 ms of a turn can cancel the held turn while the view stays on the turned page (the turn goes unsaved; the stored position stays older but correct). Move the cancel to after the jump lands. From PAGE-SAVE-RESTAMP-2's quality review (2026-10-15): W2, after a failed-words turn the relocate save writes a fraction-estimated position (as before); W4, a held turn from another section can outlive a click on a stamped section; N2, `bookWordsFailedRef` is never reset in a view; N4, no test for the open-without-cfi cancel; and a click whose spans are unstamped when failure is already known is dropped without a diagnostic. From PAGE-SAVE-RESTAMP-2's fix-round review (2026-10-15): no test pins the negative side of fr1's guard (a held click followed by a turn or a second click, then the re-stamp, must leave the newer state alone; deleting `=== provisional` keeps every test green); `holdWordClick`'s resolve check in the view can never reject a click; `heldClickAnchor` is not reset when a turn replaces a held click. Lane: Reader Engine.
 - <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
