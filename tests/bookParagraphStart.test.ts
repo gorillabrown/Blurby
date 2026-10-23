@@ -1,39 +1,43 @@
-// FOCUS-KEYS-FIX-1 (live check, 2026-10-23): on an EPUB with full-book words, the surface's paragraph breaks are
-// loaded-slice indices while the words the keys step over are book-wide, so Shift+Right jumped 187 → 5290.
-// bookParagraphBreaks maps the loaded breaks to book-wide indices, exactly, section by section.
+// FOCUS-KEYS-FIX-1 (live check, 2026-10-23): on an EPUB with full-book words, the view's paragraph breaks index the
+// loaded slice while the keys step over book-wide words, so Shift+Right jumped 187 → 5290. Blurby.Brain's ruling
+// (option A): paragraph starts come from the rendered block-start spans of book-stamped sections; past them, the
+// book's section starts; with no sections known, no move. findBookParagraphStart merges the two.
 import { describe, expect, it } from "vitest";
 import * as text from "../src/utils/text";
 
-type Sections = readonly { sectionIndex: number; startWordIdx: number; endWordIdx: number }[];
-type Fn = (loadedWordSections: readonly number[], loadedBreaks: readonly number[], sections: Sections) => number[];
-const bookParagraphBreaks = (text as unknown as { bookParagraphBreaks?: Fn }).bookParagraphBreaks;
-const map: Fn = (a, b, c) => bookParagraphBreaks?.(a, b, c) ?? [];
+type Fn = (renderedStarts: readonly number[], sectionStarts: readonly number[], currentIndex: number, direction: "forward" | "backward", lastIndex: number) => number | null;
+const findBookParagraphStart = (text as unknown as { findBookParagraphStart?: Fn }).findBookParagraphStart;
+const find: Fn = (...a) => (findBookParagraphStart ? findBookParagraphStart(...a) : -999);
 
-// Book: section 0 = words 0–99, section 3 = words 100–159, section 4 = words 160–199.
-const SECTIONS: Sections = [
-  { sectionIndex: 0, startWordIdx: 0, endWordIdx: 100 },
-  { sectionIndex: 3, startWordIdx: 100, endWordIdx: 160 },
-  { sectionIndex: 4, startWordIdx: 160, endWordIdx: 200 },
-];
+// Book: sections start at 0, 100 and 160; the last word is 199. Section 100's rendered blocks start at 100, 112 and 140.
+const SECTION_STARTS = [0, 100, 160];
+const RENDERED = [100, 112, 140];
 
-describe("bookParagraphBreaks", () => {
-  it("maps a loaded section's breaks to book-wide indices and keeps every section end", () => {
-    // Only section 3 is loaded: 60 loaded words (local 0–59), paragraphs end at local 9, 29 and 59.
-    const loaded = Array.from({ length: 60 }, () => 3);
-    expect(map(loaded, [9, 29, 59], SECTIONS)).toEqual([99, 109, 129, 159, 199]);
+describe("findBookParagraphStart", () => {
+  it("next and previous use the rendered block starts inside a stamped section", () => {
+    expect(find(RENDERED, SECTION_STARTS, 105, "forward", 199)).toBe(112);
+    expect(find(RENDERED, SECTION_STARTS, 120, "backward", 199)).toBe(112);
+    expect(find(RENDERED, SECTION_STARTS, 112, "backward", 199)).toBe(100);
   });
 
-  it("maps two loaded sections, each from its own first loaded word", () => {
-    const loaded = [...Array.from({ length: 60 }, () => 3), ...Array.from({ length: 40 }, () => 4)];
-    expect(map(loaded, [29, 59, 79, 99], SECTIONS)).toEqual([99, 129, 159, 179, 199]);
+  it("past the rendered starts, next is the next section start (Brain test 3)", () => {
+    expect(find(RENDERED, SECTION_STARTS, 145, "forward", 199)).toBe(160);
   });
 
-  it("skips a loaded section whose word count differs from the book's (no estimated mapping)", () => {
-    const loaded = Array.from({ length: 58 }, () => 3); // the book says 60
-    expect(map(loaded, [9, 29, 57], SECTIONS)).toEqual([99, 159, 199]);
+  it("before the rendered starts, previous is the previous section start", () => {
+    expect(find(RENDERED, SECTION_STARTS, 100, "backward", 199)).toBe(0);
   });
 
-  it("with nothing loaded, the section ends are the breaks", () => {
-    expect(map([], [], SECTIONS)).toEqual([99, 159, 199]);
+  it("with nothing rendered, it moves by section starts only", () => {
+    expect(find([], SECTION_STARTS, 105, "forward", 199)).toBe(160);
+  });
+
+  it("past the last start, next is the last word; before the first, previous is 0", () => {
+    expect(find(RENDERED, SECTION_STARTS, 170, "forward", 199)).toBe(199);
+    expect(find(RENDERED, SECTION_STARTS, 0, "backward", 199)).toBe(0);
+  });
+
+  it("with no sections known, it returns null (the key does nothing)", () => {
+    expect(find(RENDERED, [], 105, "forward", 199)).toBeNull();
   });
 });
