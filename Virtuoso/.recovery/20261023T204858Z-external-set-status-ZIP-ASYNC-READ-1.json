@@ -1,0 +1,35 @@
+{
+  "id": "20261023T204858Z-external-set-status-ZIP-ASYNC-READ-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-ASYNC-READ-1",
+  "created": "2026-10-23T20:48:58Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-23"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:ZIP-ASYNC-READ-1:[('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-ASYNC-READ-1",
+      "idempotencyKey": "set-status:ZIP-ASYNC-READ-1:[('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T204858Z-external-set-status-ZIP-ASYNC-READ-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:49:16Z",
+  "outcome": "succeeded"
+}

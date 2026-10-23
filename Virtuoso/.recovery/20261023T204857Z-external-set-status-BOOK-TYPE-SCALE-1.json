@@ -1,0 +1,36 @@
+{
+  "id": "20261023T204857Z-external-set-status-BOOK-TYPE-SCALE-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TYPE-SCALE-1",
+  "created": "2026-10-23T20:48:57Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": [
+        "BOOK-TEXT-COLOUR-1"
+      ]
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BOOK-TYPE-SCALE-1:[('prerequisites', ['BOOK-TEXT-COLOUR-1'])]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TYPE-SCALE-1",
+      "idempotencyKey": "set-status:BOOK-TYPE-SCALE-1:[('prerequisites', ['BOOK-TEXT-COLOUR-1'])]",
+      "actualRevision": "",
+      "recoveryId": "20261023T204857Z-external-set-status-BOOK-TYPE-SCALE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:49:15Z",
+  "outcome": "succeeded"
+}
