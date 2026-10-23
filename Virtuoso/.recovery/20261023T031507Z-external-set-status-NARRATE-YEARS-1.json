@@ -1,0 +1,39 @@
+{
+  "id": "20261023T031507Z-external-set-status-NARRATE-YEARS-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-YEARS-1",
+  "created": "2026-10-23T03:15:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-23",
+      "branch": "eb/narrate-years-1",
+      "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-23 with the owner's pre-dispatch amendment (decades and en-dash ranges). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-years-1 from main), built during the Stage 8 freeze and merged after it lifts."
+    },
+    "expectedRevision": "9b3910ea41303801d7039c4660065963e2508e721e7603f2373c78bdcab617d4",
+    "idempotencyKey": "set-status:NARRATE-YEARS-1:[('branch', 'eb/narrate-years-1'), ('notes', \"Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-23 with the owner's pre-dispatch amendment (decades and en-dash ranges). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-years-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-YEARS-1",
+      "idempotencyKey": "set-status:NARRATE-YEARS-1:[('branch', 'eb/narrate-years-1'), ('notes', \"Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-23 with the owner's pre-dispatch amendment (decades and en-dash ranges). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-years-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-23'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T031507Z-external-set-status-NARRATE-YEARS-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T03:15:33Z",
+  "outcome": "succeeded"
+}

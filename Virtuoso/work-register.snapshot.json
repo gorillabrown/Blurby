@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T03:12:32Z",
+  "takenAt": "2026-10-23T03:15:34Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1938,8 +1938,8 @@
       "id": "NARRATE-YEARS-1",
       "title": "Narrate reads 1000–1099 as years too, and keeps comma numbers as counts",
       "sequence": 39,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -1951,12 +1951,12 @@
       "group": "Narration Rebuild",
       "spec_link": "ROADMAP.md#narrate-years-1",
       "branch": "eb/narrate-years-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "A preNormalize step in main/narrate/normalize.js, applied before tts.generate in main/narrate/capture.js and inside spokenWordsOf, reads 1001–1099 in kokoro's year form. Comma numbers stay counts, and the producer's word mapping stays exact.",
-      "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "9b3910ea41303801d7039c4660065963e2508e721e7603f2373c78bdcab617d4",
+      "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-23 with the owner's pre-dispatch amendment (decades and en-dash ranges). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-years-1 from main), built during the Stage 8 freeze and merged after it lifts.",
+      "revision": "0fb32e278d7b09b56c67b7c06ba0dc82103dc7624e4552da1934f1d036a73abd",
       "extra": {}
     },
     {
