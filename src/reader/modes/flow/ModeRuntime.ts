@@ -75,6 +75,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
+import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 import { createChunkReadingVisualState } from "./helpers/chunkReadingVisualState";
 import { FlowScrollEngine, type FlowProgress } from "./helpers/FlowScrollEngine";
 import type { FoliateWord } from "./helpers/foliateHelpers";
@@ -917,9 +918,22 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (!this.alive) return;
     switch (command.kind) {
       case "flow-line":
-        // Legacy handleFlowPrevLine / handleFlowNextLine.
-        if (this.scrollEngine?.getState().running) this.scrollEngine.jumpToLine(command.direction);
-        return;
+        // Legacy handleFlowPrevLine / handleFlowNextLine; the word timer follows the line pacer's new word.
+        if (!this.scrollEngine?.getState().running) return;
+        this.scrollEngine.jumpToLine(command.direction);
+        this.engine?.jumpTo(this.scrollEngine.getWordIndex());
+        break;
+      case "seek-words":
+        this.moveReadingWord(this.navigationWord() + command.delta);
+        break;
+      case "sentence":
+        this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
+        break;
+      case "paragraph": {
+        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
+        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
+        break;
+      }
       case "go-to-href":
         // Legacy handleJumpToChapter foliate branch.
         this.markEngaged();
@@ -930,6 +944,29 @@ export class FlowModeRuntime implements ReaderModeRuntime {
         return; // seek-words / page keyboard commands belong to other modes.
     }
     this.state.notify();
+  }
+
+  /** The word the navigation keys step from: the playing word timer's word, else the highlighted word. */
+  private navigationWord(): number {
+    return this.state.playing && this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
+  }
+
+  /**
+   * FLOW-KEYS-FIX-1: move the reading word. Playing, both pacers jump (as a playing hard selection does);
+   * paused or before a play, the word becomes the explicit start anchor that Flow's cold restart consumes.
+   */
+  private moveReadingWord(target: number): void {
+    const s = this.state;
+    const word = this.clampToEffectiveWordRange(target);
+    if (s.playing && this.engine) {
+      this.engine.jumpTo(word);
+      this.scrollEngine?.jumpToWord(word);
+      return;
+    }
+    s.explicitSelectionAnchor = word;
+    s.currentWordIndex = word;
+    this.publishHighlight(word);
+    if (this.document.useFoliate && this.surface.isReady()) this.surface.highlight(word, "flow", { allowMotion: false });
   }
 
   // ── View events (bound by useModeBindings) ────────────────────────────────
