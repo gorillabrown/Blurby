@@ -161,7 +161,8 @@ class DialogWatcher {
     if (process.platform !== "win32") return;
     this.ps = spawn("pwsh", ["-NoProfile", "-NonInteractive", "-Command", "-"], { stdio: ["pipe", "pipe", "inherit"] });
     this.buf = ""; this.waiters = [];
-    this.ps.stdout.on("data", (d) => { this.buf += d; let i; while ((i = this.buf.indexOf("@@END\n")) >= 0) { const chunk = this.buf.slice(0, i); this.buf = this.buf.slice(i + 6); const w = this.waiters.shift(); if (w) w(chunk.trim()); } });
+    // pwsh writes CRLF on Windows: the marker line is "@@END\r\n" there, "@@END\n" elsewhere.
+    this.ps.stdout.on("data", (d) => { this.buf += d; let m; while ((m = /@@END\r?\n/.exec(this.buf))) { const chunk = this.buf.slice(0, m.index); this.buf = this.buf.slice(m.index + m[0].length); const w = this.waiters.shift(); if (w) w(chunk.trim()); } });
     this.run(`Add-Type @'
 using System; using System.Text; using System.Collections.Generic; using System.Runtime.InteropServices;
 public static class SweepWin {
@@ -182,7 +183,17 @@ public static class SweepWin {
 }
 '@`);
   }
-  run(cmd) { if (!this.ps) return Promise.resolve(""); return new Promise((res) => { this.waiters.push(res); this.ps.stdin.write(`${cmd}\nWrite-Output '@@END'\n`); }); }
+  // A helper that never answers must not hang the sweep: after 20 s the call resolves empty (no dialog seen).
+  run(cmd) {
+    if (!this.ps) return Promise.resolve("");
+    return new Promise((res) => {
+      let done = false;
+      const finish = (v) => { if (!done) { done = true; res(v); } };
+      this.waiters.push(finish);
+      setTimeout(() => { const i = this.waiters.indexOf(finish); if (i >= 0) this.waiters.splice(i, 1); finish(""); }, 20000);
+      this.ps.stdin.write(`${cmd}\nWrite-Output '@@END'\n`);
+    });
+  }
   async dialogs(pid, close) { return pid ? (await this.run(`[SweepWin]::Dialogs(${pid}, $${close ? "true" : "false"})`)).split(/\r?\n/).pop() : ""; }
   stop() { try { this.ps?.stdin.end(); this.ps?.kill(); } catch { /* gone */ } }
 }
@@ -565,10 +576,23 @@ function blurbyPlan(a) {
       if (args.seed?.length) await s.cdp.eval(`window.electronAPI.importDroppedFiles(${JSON.stringify(args.seed)})`, 120000);
       let docs = [];
       for (let i = 0; i < 120; i++) { const st = await s.cdp.eval("window.electronAPI.getState()", 20000); docs = st.library || st.docs || []; if (docs.length >= 1 + (args.seed?.length || 0)) break; await sleep(500); }
-      const byExt = (re) => docs.find((d) => re.test(d.filepath || d.path || d.originalPath || d.title || ""))?.id;
-      this.vars = { epub: byExt(/\.epub$/i) && docs.find((d) => d.id !== "sample-meditations" && /\.epub$/i.test(d.filepath || d.path || d.originalPath || ""))?.id, pdf: byExt(/\.pdf$/i), txt: byExt(/\.txt$/i) };
-      this.seeded = docs.map((d) => `${d.id}: ${d.title}`);
-      log(`seeded ${docs.length} docs: ${JSON.stringify(this.vars)}`);
+      // importDroppedFiles called over CDP skips the renderer's own add, so the library view shows the imports only
+      // after a reload (main already holds them). Reload, then wait for the library to list them.
+      if (args.seed?.length) {
+        await s.cdp.send("Page.reload", {}); s.helpersOk = false; await sleep(1500);
+        for (let i = 0; i < 120; i++) { try { if (await s.sw('has(".library-container")')) break; } catch { /* reloading */ } await sleep(250); }
+      }
+      // Every import is stored as <id>.epub (a PDF or text file is converted), so a seed is found by its own file name,
+      // which the import keeps as the title.
+      const find = (ext) => {
+        const file = (args.seed || []).find((f) => path.extname(f).toLowerCase() === ext);
+        if (!file) return undefined;
+        const base = path.basename(file, path.extname(file));
+        return docs.find((d) => d.id !== "sample-meditations" && [d.title, d.filename, d.originalFilename].filter(Boolean).some((n) => n.includes(base)))?.id;
+      };
+      this.vars = { epub: find(".epub"), pdf: find(".pdf"), txt: find(".txt") };
+      this.seeded = docs.map((d) => `${d.id}: ${d.title} (${path.basename(d.filepath || d.filename || "")})`);
+      log(`seeded ${docs.length} docs: ${JSON.stringify(this.vars)}; ${this.seeded.join(" | ")}`);
     },
     surfaces: [
       // Library
