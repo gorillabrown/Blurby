@@ -40,7 +40,7 @@ import {
   FOLIATE_SECTION_READY_TIMEOUT_MS,
 } from "../../../constants";
 import { injectStyles } from "./helpers/foliateStyles";
-import { getFoliateMaxColumnCount } from "./helpers/foliateLayout";
+import { getFoliateMaxColumnCount, readZoneLineStepPx, writeZoneLineStepPx } from "./helpers/foliateLayout";
 import {
   applyChunkReadingVisualStateToRoots,
   buildChunkReadingScrollKey,
@@ -326,6 +326,8 @@ export default function NarrateFoliateView({
   // injectStyles only reads settings; the frozen snapshot is passed through its legacy parameter type.
   const settings = frozenSettings as BlurbySettings;
   const containerRef = useRef<HTMLDivElement>(null);
+  /** BAND-ALIGN-1: the zone effect's apply, re-run when the measured body line step changes. */
+  const applyZoneRef = useRef<(() => void) | null>(null);
   const foliateHostRef = useRef<HTMLDivElement | null>(null);
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
@@ -527,7 +529,7 @@ export default function NarrateFoliateView({
     const viewportHeight = getFlowViewportHeightPx();
     if (viewportHeight <= 0) return 0;
     const container = containerRef.current;
-    const lineHeight = container ? parseFloat(getComputedStyle(container).lineHeight) || 24 : 24;
+    const lineHeight = container ? readZoneLineStepPx(container) : 24;
     const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
     return Math.max(0, Math.round((viewportHeight * FLOW_ZONE_INITIAL_TOP) + ((lineHeight * zoneLines) / 2)));
   }, [
@@ -766,6 +768,8 @@ export default function NarrateFoliateView({
             flowLeadingInsetPx: getFlowLeadingInsetPx(),
             flowTrailingInsetPx: getFlowTrailingInsetPx(),
           });
+          // BAND-ALIGN-1: the zone's line step from the first loaded section's body text
+          if (containerRef.current && writeZoneLineStepPx(containerRef.current, view.renderer?.getContents?.()?.[0]?.doc ?? doc)) applyZoneRef.current?.();
           invalidateWordPositionIndex();
 
           // P5 diagnostic: span count and wrap time for the narrate-section-load record.
@@ -1277,6 +1281,8 @@ export default function NarrateFoliateView({
         flowTrailingInsetPx: getFlowTrailingInsetPx(),
       });
     }
+    // BAND-ALIGN-1: the text size or font may have changed the body line step
+    if (containerRef.current && writeZoneLineStepPx(containerRef.current, view.renderer.getContents?.()?.[0]?.doc)) applyZoneRef.current?.();
     invalidateWordPositionIndex();
     scheduleWordPositionIndexRebuild("font-or-layout-change");
   }, [
@@ -1297,7 +1303,7 @@ export default function NarrateFoliateView({
     if (!container) return;
 
     const applyZoneProperties = () => {
-      const lineHeight = parseFloat(getComputedStyle(container).lineHeight) || 24;
+      const lineHeight = readZoneLineStepPx(container); // BAND-ALIGN-1: the body text's line step, not the outer view's
       const zoneLines = settings.flowZoneLines ?? FLOW_ZONE_LINES_DEFAULT;
       const viewportHeight = getFlowViewportHeightPx() || container.clientHeight;
       if (viewportHeight <= 0) return;
@@ -1313,6 +1319,7 @@ export default function NarrateFoliateView({
     };
 
     applyZoneProperties();
+    applyZoneRef.current = applyZoneProperties;
 
     const observer = new ResizeObserver(() => {
       applyZoneProperties();
@@ -1324,6 +1331,7 @@ export default function NarrateFoliateView({
       observer.disconnect();
       container.style.removeProperty("--flow-zone-top");
       container.style.removeProperty("--flow-zone-bottom");
+      applyZoneRef.current = null;
       setFlowInsetsForRenderedDocs(0, 0);
     };
   }, [
