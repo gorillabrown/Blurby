@@ -8,6 +8,21 @@
 
 ## Incomplete
 
+### BUG-210 — Focus's word, sentence and paragraph keys don't move the reading word
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95, two runs each on the `97527896` x64 `--dir` build; `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`)
+**Severity:** MEDIUM (keyboard navigation in Focus is dead; the mouse and play still work). Not a release gate: f0's v1.28.0 check found every row already broken at v1.28.0 (Blurby.Roadmap, 2026-10-23).
+**Status:** RESOLVED in source (FOCUS-KEYS-FIX-1, branch `eb/focus-keys-fix-1`, held for after the Stage 8 release). Lane: Reader Engine.
+**Description:**
+- In Focus, Ctrl+←/→ and ←/→ (`seek-words`), Ctrl+↑/↓ (`sentence`) and Shift+←/→ (`paragraph`) move nothing, paused or playing. Playing, the RSVP word never steps back.
+- At v1.28.0 (f0, `v128-focus-1..5.json`) they misbehaved differently. Ctrl+↓ jumped to word 0 and Shift+→ set word −1, because v1.28.0's handlers computed over the tokenized text, which an EPUB lacks. Ctrl+→ and Ctrl+↑ moved nothing.
+**Cause:**
+- `src/reader/modes/focus/ModeRuntime.ts:749-754`: `seek-words` changed only `displayWordIndex`. Nothing reads it while paused, and the engine's next word overwrites it while playing.
+- `:761-762`: `sentence` and `paragraph` reached `default: return`. The READER-MODE-SEPARATION-2 cutover (`3dd4b504`) dropped them.
+**Fix (FOCUS-KEYS-FIX-1):**
+- A move jumps the engine (`FocusMode.jumpTo`) once it exists. Before the first play, the move sets the explicit start anchor.
+- Sentence targets use `findSentenceBoundary`, and paragraph targets use the new `findParagraphStart`, both in `src/utils/text.ts`.
+- Tests: `tests/readerModes/focusKeys.test.tsx`.
+
 ### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
 **Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)
 **Severity:** HIGH (reading progress is lost, and the reopen lands further back). **Release blocker** (Blurby.Brain, 2026-10-23): fixed by KEEP-FURTHEST-FIX-1, a release gate.
