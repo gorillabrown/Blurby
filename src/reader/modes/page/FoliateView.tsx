@@ -980,7 +980,9 @@ export default function PageFoliateView({
           },
           goTo: (target) => {
             pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
-            return view.goTo(target);
+            // TOC-JUMP-SAVE-1: the relocate this jump fires (synchronously inside view.goTo) saves the landed page, as a turn does.
+            pageTurnsInFlightRef.current += 1;
+            return Promise.resolve(view.goTo(target)).finally(() => { pageTurnsInFlightRef.current -= 1; });
           },
           next: () => view.renderer.next(),
           prev: () => view.renderer.prev(),
