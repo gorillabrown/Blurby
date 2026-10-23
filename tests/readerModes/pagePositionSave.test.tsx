@@ -757,9 +757,10 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
 
     // (pn4) pin: opening without a cfi cancels a turn held during init.
     it("(pn4) a held turn from a snap during init is cancelled when the book opens without a cfi", async () => {
+      const shared = rawDoc();
       const original = FakeFoliateView.prototype.init;
       FakeFoliateView.prototype.init = async function (this: FakeFoliateView) {
-        const { doc, range } = rawDoc();
+        const { doc, range } = shared;
         this.renderer.contents = [{ doc, index: 0 }];
         this.renderer.page = 2;
         this.renderer.dispatchEvent(new CustomEvent("relocate", { detail: { reason: "snap", cfi: "snap-cfi", fraction: 0.5, range } }));
@@ -767,7 +768,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       try {
         const { fake, view, renderer } = await mount({ initialCfi: undefined, bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }],
           getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
-        const { doc } = rawDoc();
+        const { doc } = shared;
         renderer.contents = [{ doc, index: 0 }];
         await loadSection(view, doc, 0);
         await settle();
