@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:16:56Z",
+  "takenAt": "2026-10-23T02:23:19Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2508,8 +2508,8 @@
       "id": "NARRATE-TOKEN-CAP-1",
       "title": "Digit-dense passages are planned under the 400-id token cap",
       "sequence": 41,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2521,12 +2521,12 @@
       "group": "Narration Rebuild",
       "spec_link": "ROADMAP.md#narrate-token-cap-1",
       "branch": "eb/narrate-token-cap-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "The chunk planner's estimateTokens (src/reader/modes/narrate/engine/chunkPlan.ts) counts each digit at its spoken cost (DIGIT_TOKEN_WEIGHT 13), so digit-dense passages such as chess notation are planned into chunks under the 400-id cap instead of failing closed. Text without digits is planned as today.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate.",
-      "revision": "a8de722fd3c57289c9daf04e2a66941339388978320d93b11d9d1ef5912381bd",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-token-cap-1 from main), built during the Stage 8 freeze and merged after it lifts.",
+      "revision": "e9641fef0740197c52293ef172f5432065d00050ac77798967e01c488611a31c",
       "extra": {}
     },
     {
@@ -2913,8 +2913,8 @@
       "id": "NARRATE-TRACE-LABELS-1",
       "title": "Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate",
       "sequence": 56,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2926,12 +2926,12 @@
       "group": "Narration Rebuild",
       "spec_link": "ROADMAP.md#narrate-trace-labels-1",
       "branch": "eb/narrate-trace-labels-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "main.js's eval-trace writer labels traces Kokoro/Narrate instead of MOSS-Nano. p5-latency-e2e.mjs rejects a --rates value off Narrate's 0.80–2.00 grid before launching, and writes latency-e2e.json into its --out folder.",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "633b57286cfc326b8707a19793b7d2d9dbc15e2e971fa8358bfd75c51301ec1e",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-trace-labels-1 from main), built during the Stage 8 freeze and merged after it lifts.",
+      "revision": "daf5c21295a2d3973bf3bce5551487c1eef0cd16af95f4ae08fa4dee1b327e92",
       "extra": {}
     },
     {
