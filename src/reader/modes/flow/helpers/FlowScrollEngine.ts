@@ -7,6 +7,7 @@
  * LL-016: All state is internal (no React state), passed via refs.
  */
 
+import { readZoneLineStepPx } from "./foliateLayout";
 import {
   FLOW_ZONE_INITIAL_TOP,
   FLOW_ZONE_RESET_THRESHOLD,
@@ -785,7 +786,7 @@ export class FlowScrollEngine {
     if (!this.container) { this.zoneHeightFrac = 0; return; }
     const ch = this.container.clientHeight;
     if (ch <= 0) { this.zoneHeightFrac = 0; return; }
-    const lineHeight = parseFloat(getComputedStyle(this.container).lineHeight) || 24;
+    const lineHeight = readZoneLineStepPx(this.container); // BAND-ALIGN-1: inherited from the zone host
     this.zoneHeightFrac = (lineHeight * this.zoneLines) / ch;
   }
 

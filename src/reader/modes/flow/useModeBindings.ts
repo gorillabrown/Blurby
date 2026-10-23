@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useRef, useSyncExternalStore } from "react";
 import { FLOW_ZONE_LINES_DEFAULT, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../../constants";
 import type { FlowFoliateViewProps } from "./FoliateView";
+import { readZoneLineStepPx } from "./helpers/foliateLayout";
 import type { FlowModeRuntime } from "./ModeRuntime";
 
 /** useFlowScrollSync startWhenReady: the surface refs can attach a tick after play flips. */
@@ -36,7 +37,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
     if (!host) return;
     const ch = host.clientHeight;
     if (ch <= 0) return;
-    const lineHeight = parseFloat(getComputedStyle(host).lineHeight) || 24;
+    const lineHeight = readZoneLineStepPx(host); // BAND-ALIGN-1
     const zoneHeightFrac = (lineHeight * flowZoneLines) / ch;
     const botFrac = Math.min(topFrac + zoneHeightFrac, 0.95);
     host.style.setProperty("--flow-zone-top", `${topFrac * 100}%`);
