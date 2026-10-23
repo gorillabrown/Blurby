@@ -1,0 +1,37 @@
+{
+  "id": "20261023T023231Z-external-set-status-BAND-ALIGN-1",
+  "operation": "external-set-status",
+  "item_id": "BAND-ALIGN-1",
+  "created": "2026-10-23T02:32:31Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "description": "Each mode measures the loaded section's body paragraph line step into `--zone-line-step-px`, and all 8 zone sites read it instead of the 24 px fallback, so a 5-line band covers 5 lines at any text size. Dispatch waits for the owner's tier-2 OK. Part B (where the band sits) is the owner's decision."
+    },
+    "expectedRevision": "623183cb4ed1317483d43771fbcaeada6ab69984db7acc6fd749029f0eb512cb",
+    "idempotencyKey": "set-status:BAND-ALIGN-1:[('description', \"Each mode measures the loaded section's body paragraph line step into `--zone-line-step-px`, and all 8 zone sites read it instead of the 24 px fallback, so a 5-line band covers 5 lines at any text size. Dispatch waits for the owner's tier-2 OK. Part B (where the band sits) is the owner's decision.\"), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BAND-ALIGN-1",
+      "idempotencyKey": "set-status:BAND-ALIGN-1:[('description', \"Each mode measures the loaded section's body paragraph line step into `--zone-line-step-px`, and all 8 zone sites read it instead of the 24 px fallback, so a 5-line band covers 5 lines at any text size. Dispatch waits for the owner's tier-2 OK. Part B (where the band sits) is the owner's decision.\"), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T023231Z-external-set-status-BAND-ALIGN-1",
+      "detail": {
+        "readBack": "SQL: Full Spec, Name, Description equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:33:01Z",
+  "outcome": "succeeded"
+}
