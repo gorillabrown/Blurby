@@ -11,23 +11,31 @@
 ### BUG-208 — Book text renders black on the dark Blurby background
 **Reported:** 2026-10-23 (owner, screenshot, Narrate mode on *Meditations*; installed ARM64 build `47ae6e1f`, settings left by the Stage 8 smoke: `theme: blurby`, `einkMode: true`)
 **Severity:** HIGH (the book is unreadable). **Release blocker** (Blurby.Brain, 2026-10-23): it ships in the release fix with BUG-201.
-**Status:** OPEN. Diagnosis: live, in SMOKE8-DIAG-1 (added 2026-10-23). Lane: UX polish.
+**Status:** OPEN, root cause found (SMOKE8-DIAG-1, 2026-10-23); fix specified as BOOK-TEXT-COLOUR-1 in `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Lane: UX polish.
 **Description:** the page text renders near-black on the dark reader background. Only the highlighted word and the links are readable.
-**Cause (unconfirmed; first hypothesis contradicted):** the screenshot shows the dark Blurby background, Blurby chrome and coral links, so E-ink styling is not visibly applied. The book's `pgepub.css` sets `body { color: black; background-color: white }`. The injected `html, body { color: ${fg} !important }` (each mode's `helpers/foliateStyles.ts:39-41`, fg = `--text`, `#ffffff` for blurby) should beat it, so nothing static explains it. The live diagnosis reads the injected style and the computed colours inside the foliate iframe. First hypothesis: `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
+**Cause (measured live, SMOKE8-DIAG-1):** not E-ink and not the theme. Inside the foliate iframe the injected `fg` is the theme's text colour under blurby (E-ink on and off) and dark, in Page and Narrate alike. The book's own Project Gutenberg rule `#pg-header div, #pg-footer div { color: initial }` computes to black. The injected `html, body { color: fg !important }` (each mode's `helpers/foliateStyles.ts:39-47`) does not reach a descendant that has its own colour rule. Every Gutenberg EPUB's header and licence pages are affected. Live-tested fix: `body *:not(a) { color: inherit !important; }` gives `fg` under all three combinations. `color-scheme` has no effect.
+**Earlier hypothesis (refuted live):** the screenshot shows the dark Blurby background, Blurby chrome and coral links, so E-ink styling is not visibly applied. The book's `pgepub.css` sets `body { color: black; background-color: white }`. The injected `html, body { color: ${fg} !important }` (each mode's `helpers/foliateStyles.ts:39-41`, fg = `--text`, `#ffffff` for blurby) should beat it, so nothing static explains it. The live diagnosis reads the injected style and the computed colours inside the foliate iframe. First hypothesis: `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
 **Acceptance test (Blurby.Brain, 2026-10-23, holds whatever the cause):** the computed text-on-background contrast is at least 4.5:1, inside the foliate iframe and on the main overlays, under each theme (light, dark, blurby, system) with E-ink on and off. The test fails on `47ae6e1f`.
-**Fix path:** to be specified from the diagnosis. Previously: EINK-CONTROLS-1. Make E-ink one control (owner decision pending; recommended), or force a light reader background whenever `einkMode` is on.
+**Fix path:** BOOK-TEXT-COLOUR-1 (the inherit rule in each mode's injected theme; tier 2 for Blurby.Brain, because a book's own text colours give way to the theme colour). EINK-CONTROLS-1 remains a separate owner decision, not this bug's fix.
 
 ### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
 **Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
 **Severity:** HIGH (the reader loses their place); **release blocker** (release gate (2) failed on it)
-**Status:** OPEN. Diagnosis: SMOKE8-DIAG-1. Lane: Reader Engine.
+**Status:** OPEN, reproduced and root-caused (SMOKE8-DIAG-1, 2026-10-23); fix specified as PAGE-REOPEN-CFI-1 in `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Lane: Reader Engine.
 **Description:** Turned to p79 (saved position 16581, cfi `/210,/492,/492`), closed and reopened: the book opened on p77, at an older cfi (`epubcfi(/6/16!/4,/206/308,/208/76/1:12)`). Later the saved cfi itself reverted to `/206/308` while the position stayed 16581. Reproduced twice, on the owner's profile (*Why Nations Fail*).
-**Suspected area:** the Page save path shipped by PAGE-POSITION-SAVE-1/2 and PAGE-SAVE-RESTAMP-GUARD-1/-2 (cfi and position saved apart; a later relocate or restamp save overwrites the cfi).
+**Cause (measured live, the smoke's two-session route):** the renderer's library copy never receives a saved cfi:
+- `ReaderContainer.tsx:308` and `:323-325` send the cfi to main only;
+- `useLibrary.ts:146-148` updates the position only.
+
+A reopen in the same session opens from that copy (`LibraryContainer.tsx:259-267` → `page/ModeRuntime.ts:167`). It lands on the launch-time cfi, or, with none, on a `goToFraction(position / wordCount)` estimate. The exit save `_persistAndLog` (`useProgressTracker.ts:231`) then writes that landing cfi (`activeDoc.cfi`, set by `recordCfi`) with the unchanged position. That is the revert.
+
+Ruled out by measurement: the restamp guard's cfi-only save, the renderer's full-library save (`mergeRendererEdits` copies no progress fields) and the quit flush.
 
 ### BUG-202 — After switching to a recent folder, the library header keeps the old folder's name
 **Reported:** 2026-10-23 (Stage 8 owner smoke, check #28)
 **Severity:** MEDIUM (wrong folder shown; the menu marks the wrong folder current). Release-blocking status is set by the diagnosis (SMOKE8-DIAG-1).
-**Status:** OPEN. Lane: Library & Content.
+**Status:** OPEN, reproduced with a real click (SMOKE8-DIAG-1, 2026-10-23); not a harness artifact; fix specified as FOLDER-SWITCH-HEADER-1 in `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`. Lane: Library & Content.
+**Cause (measured):** with real CDP mouse events, main's `sourceFolder` changed at +9 ms, but the header changed only at +679 ms, when the 1,500-file sync finished. `useLibrary.switchFolder` (`src/hooks/useLibrary.ts:86-93`) sets the renderer's settings only after `switch-folder` resolves, and main resolves it only after `syncLibraryWithFolder` (`main/ipc/state.js:87-100`), with no settings broadcast. On a Drive folder that syncs for minutes, the header stays on the old folder for minutes.
 **Description:** Chose Readings from the recent list: main's `settings.sourceFolder` changed at once and the library switched (143 → 721 books as the Drive folder synced), but after more than 6 minutes the header (`LibraryView.tsx:414`, the renderer's settings copy) still read "smoke8-folder2", and the folder menu still marked it current. Switching back (#32) did update the header. **Caveat:** the run used a CDP DOM click, because the real click closed the menu; the diagnosis must reproduce it with a real click first.
 
 ### BUG-203 — The tray icon renders as a tiny dot
@@ -41,8 +49,18 @@
 
 ### BUG-206 — Narrate will not start on a page that opens with a small-caps drop cap
 **Reported:** 2026-10-23 (Stage 8 smoke notes; also seen by NARRATE-SENTENCE-RESUME-1's live check (c) after a relaunch). **Severity:** MEDIUM. **Status:** OPEN. Lane: TTS / Narration Engine. **Description:** the app shows "Failed to execute 'setEnd' on 'Range': The offset 7 is larger than the node's length (4)" and Play does not start until two page turns later. **Location:** `setEnd(endPos.node, endPos.offset)` at `src/reader/modes/narrate/helpers/foliateHelpers.ts:165`. Present on the frozen build `47ae6e1f`, so it predates NARRATE-SENTENCE-RESUME-1.
+**SMOKE8-DIAG-1 (2026-10-23):** not reproduced on a scratch profile. That includes the smoke's own book (copy `c070d8a3dbea`), at chapter 1's first page by `goTo`, by reopening at the saved cfi (with the owner's `einkMode`/`theme` too) and after a relaunch. The live check therefore gives no frequency. Static exposure: 15 of 40 random owner books (38%) open sections with a word split across inline elements, as the smoke's book does; the sample and the repo fixtures have none. `foliateHelpers.ts:165` cannot overflow (`locateTextOffset` clamps). The likely site is foliate's cfi resolution, `node_modules/foliate-js/epubcfi.js:308` (inferred). Next step: capture the stack. The renderer does not log this error; the owner's `error.log` has no `setEnd` line.
 
 ### BUG-207 — Quitting with Narrate paused takes 13.9 s
+**Diagnosis (SMOKE8-DIAG-1, 2026-10-23):** slow, but not paused-specific. The quit's save steps finish in ≤ 50 ms. The rest is the uncapped wait for the Narrate producer's workers to finish their in-flight Kokoro generations (`main/narrate/producer.js:51-58`, `producer-worker.js:157-160`); read-ahead keeps generating while paused.
+
+| Quit | Times (s) |
+|---|---|
+| Paused, uninstrumented | 4.78, 6.08, 2.45 |
+| Playing, uninstrumented | 5.76, 5.32, 4.46 |
+| Producer done, instrumented | 1.86–8.01 |
+
+No run hit the 30 s terminate, and every exit code was 0. Gate status and fix direction are for Blurby.Brain (the report's BUG-207 section).
 **Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
 
 ### BUG-200 — The quick-settings "Sort by" does not change the library order
