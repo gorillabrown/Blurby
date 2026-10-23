@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:49:24Z",
+  "takenAt": "2026-10-23T00:57:53Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1744,8 +1744,8 @@
       "id": "READER-VISUAL-DIAG-1",
       "title": "Diagnose the Focus/Flow reading band and the ResizeObserver flood",
       "sequence": 10,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1755,12 +1755,12 @@
       "group": "Reader Polish",
       "spec_link": "ROADMAP.md#reader-visual-diag-1",
       "branch": "eb/reader-visual-diag-1",
-      "started": "",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "Read-only live diagnosis of BUG-188 (reading-zone mask sized from a 24 px fallback, not tied to the word cursor; two clocks in Flow) and BUG-187 (observer loop flooding error.log), ending in two fix specifications. No product code committed.",
-      "notes": "Created by roadmap review 2026-10-12 (BUG-187, BUG-188). Full Spec: U9/U10 pass.",
-      "revision": "db101e695403900c73e78a4b0cbab0c5508bae93e7f0fb23da299c7d6cb7cfbc",
+      "notes": "Created by roadmap review 2026-10-12 (BUG-187, BUG-188). Full Spec: U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/reader-visual-diag-1 from main); docs-only, so it may merge during the Stage 8 freeze.",
+      "revision": "7c0c871b66c791655603656a07d928a0d90f33ab9d1758125414340c805104cf",
       "extra": {}
     },
     {
