@@ -101,6 +101,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 | KF2-WAIVER-RETIRE-1 | 2026-10-22 | KF-2 waiver retired on 16 recorded runs; Stage 8's closed list written down by error type (merge `3f4798b2`) | `CloseOut.KF2-WAIVER-RETIRE-1.2026-10-22.md` |
 | JSONSTORE-TIMEOUT-1 | 2026-10-22 | jsonStore test (a) gets a 30 s timeout; (d) and (e) count only their own renames; the file leaves Stage 8's closed list (merge `8e834ea3`) | `CloseOut.JSONSTORE-TIMEOUT-1.2026-10-22.md` |
 | CI-AUDIT-ALLOWLIST-1 | 2026-10-22 | CI's audit step fails only on a new or out-of-date high/critical advisory (9 reviewed entries allowlisted); follow-redirects 1.16.1; main CI green again (merge `47ae6e1f`) | `CloseOut.CI-AUDIT-ALLOWLIST-1.2026-10-22.md` |
+| READER-VISUAL-DIAG-1 | 2026-10-23 | BUG-188 band sized from a 24 px fallback and untied to the cursor; BUG-187 flood is two leaked foliate View observers (causal by intervention); two fix specs drafted (merge `22d4f7b3`) | `CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md` |
 | TEST-BUDGET-WORDINDEX-1 | 2026-10-13 | Word-index build-time test budget 200 → 1,000 ms; BUG-186 resolved (merge `76956729`) | `CloseOut.TEST-BUDGET-WORDINDEX-1.2026-10-13.md` |
 | CLEANUP-MODE-BARREL-1 | 2026-10-13 | Unused mode barrel and legacy Page/Focus/Flow engines deleted; structural test guards their return (merge `03e218bd`) | `CloseOut.CLEANUP-MODE-BARREL-1.2026-10-13.md` |
 | SETTINGS-WRITE-DURABLE-1 | 2026-10-13 | Serialized, non-rejecting JSON writes with a rename retry; settings flush at quit (cut off at exit, BUG-192); no ENOENT (merge `b728a3e8`) | `CloseOut.SETTINGS-WRITE-DURABLE-1.2026-10-13.md` |
@@ -279,69 +280,9 @@ Added by the 2026-10-12 roadmap review to refill the dispatch buffer from real d
 
 <a id="reader-visual-diag-1"></a>
 
-#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 10 — Full Spec)*
+#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood ✅ COMPLETED 2026-10-23 *(TR-080; merge `22d4f7b3`; spec archived)*
 
-- **What:** A read-only diagnosis, measured live, of two pre-existing reader defects. It confirms or refutes the static findings below and ends with a diagnosis report and a fix specification for each bug. No product code is committed.
-  - **BUG-188:** the Focus/Flow "band" sits apart from the word cursor.
-  - **BUG-187:** "ResizeObserver loop completed with undelivered notifications" floods the profile `error.log`.
-- **Why:** both bugs are Low but visible in every Focus and Flow session, and the rebuilt Narrate will sit beside the same Flow surface. Rule 6a forbids specifying a fix before the cause is known.
-- **Static findings to test** (read-only census of `a0e09189`, 2026-10-12; none measured live yet):
-  - **The band is the reading-zone mask.** It is the `mask-image` gradient on `.rm-focus-view` and `.rm-flow-view` (`src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), placed by `--flow-zone-top` and `--flow-zone-bottom`. `.flow-shrink-cursor` is hidden (`src/styles/flow.css:49`, `flow/mode.css:113`), so BUG-188's Location is wrong.
-  - **H1 — The band is about 3 lines when it should be 5.** `applyZoneProperties` (`focus/FoliateView.tsx:1170-1184`, `flow/FoliateView.tsx:1246-1260`) and `onZoneTopChange` (`flow/useModeBindings.ts:34-44`) compute the zone height as `parseFloat(getComputedStyle(container).lineHeight) || 24` on the outer view. No rule sets that line-height, so Chromium's `normal` gives the 24 px fallback. The EPUB lines are 18 px × zoom × 1.8, which is 38.9 px at 120%, so 5 × 24 px covers about 3.1 lines.
-  - **H2 — In Focus nothing ties the band to the word cursor.** The band is fixed at 15% (`FLOW_ZONE_INITIAL_TOP`). The arrival scroll centres the cursor word (`scrollIntoView({ block: "center" })`, `focus/FoliateView.tsx:1047-1060`).
-  - **H3 — In Flow two clocks drive the band and the underline.** The `FlowMode` word timer paints the underline (`flow/ModeRuntime.ts:1181-1213`). The `FlowScrollEngine` line pacer scrolls its own line under the band (`flow/helpers/FlowScrollEngine.ts:746-753`, `stableWindowScroll` branch, untested). The pacer starts later and adds 150 ms per line, and a chunk follow scrolls to the band's middle instead (`flow/FoliateView.tsx:642-672`, `:495-505`).
-  - **H4 — BUG-187 is an observer loop.** Five observers exist: `page/FoliateView.tsx:1018`, `focus/FoliateView.tsx:1188` and `:1212`, `flow/FoliateView.tsx:1264` and `:1288`. Their callbacks rewrite renderer attributes and iframe padding with no equality check, on `overflow: auto` containers. Every window `error` event reaches `error.log` unfiltered (`src/App.tsx:130-143` → `preload.js:122` → `main/ipc/misc.js:334-336`). About 22 lines a second suggests a sustained frame-by-frame loop. StrictMode double effects apply in dev only.
-- **Out of scope:** any committed product-code change (the fixes are separate items, specified by this one); BUG-169 (a different defect, a React update-depth loop whose cited files no longer exist); BUG-189 (dev-mode speed; DEV-PERF-MEASURE-1).
-- **Prerequisites:** none.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-    1. `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` exists, and for each of H1–H4 records a verdict (confirmed, refuted or partly confirmed) with the measurement behind it. The measurements:
-       - **H1:** in Focus and Flow at 100% and 120% zoom, the outer view's computed line-height, the zone height in px and the rendered EPUB line height in px.
-       - **H2:** in Focus, paused after opening a book, the band's top and bottom against the cursor word's rect.
-       - **H3:** in Flow, playing for 2 minutes at the default speed, the word-timer index against the pacer's line index, sampled once a second (count of samples where the underline word is outside the band).
-       - **H4:** `error.log` lines per minute in two equal-length sessions (5 minutes each, same book and actions) on `612d03f5` (before the Narrate removal) and on this item's base, in dev; the same on a production build (`npm run build`, then the built app); and, with temporary counters, which observer callback fires per frame and which attribute or size changes each time.
-    2. The report ends with one fix specification per bug, in the roadmap's D.5.2 format (What, Why, Done when, Edit sites, Tests), ready for the next roadmap review.
-    3. The report corrects BUG-188's Location (the zone mask, not `.flow-shrink-cursor`) and states whether BUG-188 is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2).
-    4. `git diff --name-status refs/remotes/origin/main` lists exactly `A docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` and `M docs/governance/BUG_REPORT.md` (BUG-187 and BUG-188 updated with the verdict and a pointer to the report), plus the time log and staging memo if kept (standing rule 41). Temporary instrumentation is never committed: `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing.
-- **Effort:** S.
-- **Owners:** implementation agent (read-only diagnosis, Aristotle role); owner for the live sessions; reviewer re-reads the measurements.
-- **Lane:** Reader Engine. Execution surface B (evaluation).
-- **Source:** [BUG_REPORT.md BUG-187, BUG-188](docs/governance/BUG_REPORT.md); the read-only census of 2026-10-12 for this review; the owner's screenshot (`C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png`); `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json` S2; the NARRATE-REMOVE-1 smoke record.
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites:** none in product code. Temporary instrumentation (console counters in the five observer callbacks, a sampler of the Flow word and line indexes) lives in the worktree only and is reverted before the commit; record the exact temporary diff in the report.
-- **Tests:** none (diagnosis). Measurement scripts, if any, are saved outside the repository or under a name the test runner does not collect (LL-146).
-- **Constants:** none.
-- **Branch:** `eb/reader-visual-diag-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\reader-visual-diag-1`. Write refs in full.
-- **Staging plan:** one commit with exactly the report and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
-- **Failure handling:**
-  - If H4 does not reproduce in either 5-minute session on the base or the branch, record "not reproduced" with the session details, extend once to 10 minutes, and then report the negative result; do not invent a cause.
-  - If a measurement needs a product-code change to be possible, stop with BLOCKER(USER) and describe the change; it is not this item's to make.
-  - Rollback: `git revert -m 1 <merge>` (docs only).
-- **Lane ownership (parallel run):** surface B; read-only on code.
-  - **Forbidden:** committing any path outside the two documents; the live user profile's settings (use a copied profile or the test profile for sessions).
-  - **Shared-core touches:** none.
-  - **Merge order:** independent; may run beside any item.
-  - **Measurement windows (2026-10-13):** every live session, dev or production, and the production build follow the [parallel run plan](#parallel-run-plan-2026-10-13); they never overlap the epic's D3 or D6/T7 trials. Re-audit on `d21ad58e`: the cited Focus and Flow files are unchanged since `a0e09189`, and `preload.js:122` is still `logError`.
-  - **BUG-193 confound (roadmap review 2026-10-14):** every live session runs with the profile's `sourceFolder` empty (the owner's G2 setting, backed up in `%APPDATA%\blurby\blurby-data\g2-backup-20261014\`) or after FOLDER-SCAN-PERF-1 has merged. With the 120,000-file source folder set, each launch floods the main process for about 2 minutes (BUG-193), which would distort H3's timer sampling and H4's per-minute counts and make the base-against-branch comparison meaningless. Record the `sourceFolder` value in the report for every session. Re-audit on `66f15981`: the cited files are unchanged since `a0e09189` apart from `preload.js` (+5 lines, `logError` still at `:122`), and `main/ipc/misc.js:334` is still the `log-error` handler; the lessons check passes.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Band hypotheses H1–H3 measured live in Focus and Flow | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
-| 2 | Observer flood H4 reproduced with equal sessions on base, branch and production, and its oscillating observer named | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
-| 3 | Report and two fix specifications written; bug records updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, two bug updates, one --no-ff merge) | — | — |
-
-**Total:** chain 5m · sum 5m + 2 timeboxed ≤4h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
-
-##### Lessons applied
-- **LL-152** — like-for-like A/B sessions on the base, and a production-build measurement, before attributing the flood.
-- **LL-142** — every verdict rests on a measurement on the running app, not on the static reading above.
-- **LL-146** — measurement scripts are never committed under a collectable test name.
-- **Standing rule 45 (LL-141)** — the live sessions are owner-observed, with the session length and actions recorded.
-- **Standing rule 38** — measure the signal chain before proposing a rewrite of cursor behaviour.
-- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+- Closed out: [`CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md`](docs/governance/close-outs/CloseOut.READER-VISUAL-DIAG-1.2026-10-23.md). Report: `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`. Fixes: [BAND-ALIGN-1](#band-align-1), [FOLIATE-OBSERVER-LEAK-1](#foliate-observer-leak-1).
 
 #### Stage 8 — Launch, quit and packaging defects found at G2 (roadmap review 2026-10-14)
 
@@ -351,7 +292,7 @@ Added by the 2026-10-14 roadmap review from the defects the epic's G2 preparatio
 
 **Release gate (Blurby.Brain, 2026-10-14, Rule 11 tier 1; widened the same day).** Stage 8 items merge on automated gates while the owner is away (option A): each stays In Flight with its close-out held, and nothing is released (no tag, no published build, no CI upload) until all five hold: (1) the batched quiet full suite on `main` passes on the second machine ("Quiet blurby test machine") after the last Stage 8 merge, together with a re-run of NARRATE-REBUILD-1's D3 and D6 on that final `main` (DEPS-AUDIT-1 moves the Electron runtime); (2) the batched owner smoke on one production build of that `main` passes, covering every deferred owner check (PACKAGING-FIX-1 Done-when 10, UX-POLISH-1 (c), (e), (f), UX-POLISH-2 Done-when 12, LIBRARY-READ-ALLOW-1, LARGE-FOLDER-SYNC-1's real-folder check, PAGE-POSITION-SAVE-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1, a quit with Narrate playing and then paused showing no crash dialog and no crash dump (NARRATE-EXIT-CRASH-1; a crash makes it a release gate), FOLDER-UNREACHABLE-GUARD-1 Done-when 15 with its toast check (D), FOLDER-NOTICE-1's banner and one-press Retry check when it has merged, PDF-IMPORT-DIAG-1 Done-when 10 (open `DNC. May-20-2026` in Page mode with no new `conversion failed` line in `error.log`; added 2026-10-22), PAGE-POSITION-SAVE-2's optional touch-device swipe row (added 2026-10-22), the installed release build on the owner's ARM64 machine reports native `arm64` (RELEASE-RUNBOOK-1, owner decision B; added 2026-10-22), and the later items' deferred checks); (3) DEPS-AUDIT-1 is merged (a crafted EPUB can crash main through `adm-zip`); (4) SAVE-LIBRARY-TRUST-1 is merged; (5) IPC-PATH-TRUST-1 is merged (both close renderer-supplied paths that defeat `read-file-buffer`'s boundary). **Widened again (2026-10-14, Blurby.Brain):** (6) SAVE-LIBRARY-MERGE-1 is merged (SAVE-LIBRARY-TRUST-1 alone would lose a non-EPUB conversion, and a stale save drops tombstones, BUG-199); (7) SETTINGS-KEY-TRUST-1 is merged (the renderer can overwrite the extension pairing secret, and cloud sync carries it and folder paths); (8) FOLDER-UNREACHABLE-GUARD-1 is merged (BUG-195, and LARGE-FOLDER-SYNC-1's per-file remove deletes books on any read error). **Widened 2026-10-15 (Blurby.Brain):** (9) GET-STATE-SECRET-1 is merged (no secret reaches the renderer through `get-state` or the extension-pairing handlers; the renderer displays imported third-party HTML). (10) PAGE-SAVE-RESTAMP-GUARD-1 is merged or closed on evidence (PAGE-POSITION-SAVE-1 saves on every page turn, so a turn before the book's word numbers apply could save a position up to 91 words off; Blurby.Brain 2026-10-15). (11) ELECTRON-42-UPGRADE-1 is merged (the fix for NARRATE-EXIT-CRASH-1's upstream cause) and gate (1) re-runs with 0 crashed launches (gate (1) on 2026-10-15, main `1da81be2`, passed every measurement but 57 of 121 cold-trial launches exited 0x80000003 after the quit flush; Blurby.Brain). **Widened 2026-10-22 (Blurby.Brain):** (12) a written release runbook exists ([RELEASE-RUNBOOK-1](#release-runbook-1)): no workflow builds or uploads installers (`release.yml` was deleted in `e9bbf56a`), so the release is a manual step, and the runbook must exist before the batched owner smoke. Full-suite failures under load on this machine follow Brain's closed-list rule. KF-2 is retired (KF2-WAIVER-RETIRE-1, 2026-10-22): a failing test whose message reports a real rename error (`EPERM`, `EBUSY` or `EACCES` with `rename '<path>'`) is always a product failure, even under load, and goes to Blurby.Brain. The closed list admits exactly two load failures, each only when the test is outside the item's diff and passes twice when re-run alone: (1) `tests/folderWatcher.test.js`, the 50 ms budget in "a 1 MB read started 20 ms after startWatcher on a 3,000-file tree resolves within 50 ms, and no event-loop gap exceeds 250 ms in the next second"; (2) `tests/readerModeBoundaries.test.ts`, the 30 s timeout of "production mode graphs share only declared data and ports". `tests/jsonStore.test.js` left the list with JSONSTORE-TIMEOUT-1 (2026-10-22): any failure in it is a product failure. Every failing full run records each failing test's first error line. NARRATE-REBUILD-1's completion runs on the second machine after LARGE-FOLDER-SYNC-1 and PAGE-POSITION-SAVE-1 merge (both merged 2026-10-14: `0eb46e33`, `309f2390`), from the handoff package on `eb/narrate-rebuild-1-p6` (`second-machine.md`, hash-checked inputs).
 
-**Gate (1) sequencing and freeze (Blurby.Brain, 2026-10-22, tier 1).** **Freeze in force from `47ae6e1f` (CI-AUDIT-ALLOWLIST-1's merge, 2026-10-22); gate (1)'s target sha is `47ae6e1f`.** Gate (1) re-runs on the quiet machine once CI-AUDIT-ALLOWLIST-1 has merged, because its lockfile change ships in `node_modules` and the tested tree must be the shipped tree. JSONSTORE-TIMEOUT-1 merges before it. From CI-AUDIT-ALLOWLIST-1's merge, code and lockfile merges to `main` are frozen. The freeze holds until gate (1) passes and the owner's batched smoke is done on a build of that same sha. Docs-only merges (RELEASE-RUNBOOK-1) may still land. **Built during the freeze, merged after it lifts:** WS-TOKEN-REGEN-1 (`7a0d36d4`) and TOC-JUMP-SAVE-1 (`db03f2f5`). Their owner checks go to the next smoke batch, not gate (2), because gate (2) runs on a build of the frozen `47ae6e1f`. TOC-JUMP-SAVE-1's check: in Page mode, jump from the contents list to a later chapter, quit and reopen; it reopens on that chapter's page.
+**Gate (1) sequencing and freeze (Blurby.Brain, 2026-10-22, tier 1).** **Freeze in force from `47ae6e1f` (CI-AUDIT-ALLOWLIST-1's merge, 2026-10-22); gate (1)'s target sha is `47ae6e1f`.** Gate (1) re-runs on the quiet machine once CI-AUDIT-ALLOWLIST-1 has merged, because its lockfile change ships in `node_modules` and the tested tree must be the shipped tree. JSONSTORE-TIMEOUT-1 merges before it. From CI-AUDIT-ALLOWLIST-1's merge, code and lockfile merges to `main` are frozen. The freeze holds until gate (1) passes and the owner's batched smoke is done on a build of that same sha. Docs-only merges (RELEASE-RUNBOOK-1) may still land. **Built during the freeze, merged after it lifts:** WS-TOKEN-REGEN-1 (`7a0d36d4`) and TOC-JUMP-SAVE-1 (`db03f2f5`). Their owner checks go to the next smoke batch, not gate (2), because gate (2) runs on a build of the frozen `47ae6e1f`. TOC-JUMP-SAVE-1's check: in Page mode, jump from the contents list to a later chapter, quit and reopen; it reopens on that chapter's page. READER-VISUAL-DIAG-1's owner-observed confirmation (standing rule 45): in Focus (paused) and Flow (playing for at least 1 minute) on *Meditations* from INTRODUCTION, does the bright band contain the underlined word? Before BAND-ALIGN-1 it should not; after it, it should. Owner decisions queued with it: BAND-ALIGN-1 Part A (tier 2: the band visibly grows toward the 5 lines the setting promises; recommendation: do it) and Part B (tier 3: in Focus, move the band or scroll the text? Recommendation: keep the band fixed and scroll the cursor's line into it).
 
 **Order from roadmap review 2026-10-22.** The 17 merged Stage 8 items stay In Flight, each shown as a card whose full specification is in [`ROADMAP_snapshot_2026-10-22.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-22.md). Their close-outs wait for gates (1), (2) and (11). The belt's head is ELECTRON-42-UPGRADE-1 (8, gate 11), then [PDF-IMPORT-DIAG-1](#pdf-import-diag-1) (9, BUG-190; file-disjoint from 8, so it may run beside it), then READER-VISUAL-DIAG-1 (10, read-only). After them come PAGE-POSITION-SAVE-2 (27) and KF2-WAIVER-RETIRE-1 (28). Once gate (11) holds, gate (1) re-runs on the quiet machine. Then the batched owner smoke (gate (2)) runs on one production build of that `main`, after RELEASE-RUNBOOK-1 (position 7, gate (12)) has written the release steps down. That build also carries PDF-IMPORT-DIAG-1's Done-when 10 if it has merged.
 
@@ -2236,6 +2177,94 @@ The planner added the LIBRARY-WRITE-RACE-2 stub to ROADMAP.md, with Blurby.Brain
 - **Standing rule 36:** every site was re-grepped on `04af780f`; the stub's `main.js ~:326` and `~:453-455, :494` moved to the lines above.
 - **Standing rules 43, 44, 41, 46, 47 and 48** apply as usual.
 - **LL-164:** no lesson-status line is appended.
+
+<a id="band-align-1"></a>
+
+#### BAND-ALIGN-1 — The Focus/Flow reading band is sized from the real line step (Part A); where it sits is the owner's (Part B) *(drafted spec, not yet dispatch-ready: it needs a Task list and a Lessons applied section; authored 2026-10-23 by READER-VISUAL-DIAG-1 on main @ `77f1502c`, moved into the roadmap at its close-out; merges after the Stage 8 freeze lifts)*
+
+
+- **What, in two parts:**
+  - **Part A (technical): the band's height.** The zone is sized from the loaded section's real body line step, so a 5-line band covers 5 body lines at any text size.
+  - **Part B (design): where the band sits.** This part is held for the owner (below). In Focus, the band's top would follow the cursor's line on arrival and on every highlight move. In Flow, the pacer would scroll the **underlined word's** line under the band, with the word timer as the only clock, instead of keeping its own line index.
+- **Why:** BUG-188, measured here.
+  - The band is 120 px whatever the text size (24 px fallback), so it covers 4.4 or 3.6 body lines, never 5.
+  - The Focus cursor is outside the band in every measurement.
+  - In Flow, the underline is outside the band 60–77% of the time.
+- **Rule 11, and the decision held for the owner:**
+  - Part A is hybrid: the band's size changes visibly, toward the 5 lines the setting already promises. Recommendation: do it.
+  - Part B is tier 3, front of house, and is **held for the owner's decision before dispatch**. A band that moves with the cursor in Focus is a different design from today's fixed band at 15%. The owner's S2 observation ("the horizontal highlight cursor didn't follow the word cursor") says the band should contain the cursor. It does not say whether the band should move to the cursor or the text should scroll the cursor into a fixed band.
+  - Recommendation: keep the band fixed. In Focus, scroll the cursor's line into it, the way Flow already scrolls. In Flow, give the pacer the word timer's line. This keeps today's look and still meets the owner's expectation.
+  - Part B's Done-when and edit sites below assume that recommendation. If the owner rules the other way, they are rewritten before dispatch.
+  - Band height and line count stay the owner's call: `FLOW_ZONE_LINES_DEFAULT` (5) is unchanged.
+- **Done when:**
+  1. **Positive control.** New tests in `tests/readerModes/` fail on the base:
+     - **(b1)** With a fake section frame whose body `<p>` line step is 27 px, and the outer view at `line-height: normal`, the zone height is 135 px (5 × 27), not 120. Repeated at 33 px, the zone height is 165 px.
+     - **(b2)** In Focus, after the highlight moves to a word whose line top is at 400 px in a 630 px view, the cursor's line lies inside the band (band top ≤ line top, and line bottom ≤ band bottom).
+     - **(b3)** In Flow, a fake word timer and pacer on a fixed line map run 200 ticks at the default speed. After every tick, the line under the band is the underlined word's line. The test fails if any of the 200 ticks differs.
+  2. Those tests pass, and `tests/readerModes/` and `tests/flowScroll*` pass.
+  3. **Live, packaged build.** This report's probes, on *Meditations* at 100% and 120%:
+     - **Zone height:** at least 4.5 × the body line step, at both sizes.
+     - **Focus, three checks:** (i) after the contents jump to INTRODUCTION; (ii) after 20 highlight steps forward; (iii) after a contents jump to the next contents entry after INTRODUCTION. The cursor word is inside the band in all 3.
+     - **Flow:** the underline is outside the band in at most 9 of 180 one-second samples (5%), on the scripted route.
+  4. `npm test`, `npm run typecheck` and `npm run build` exit 0.
+  5. **Owner (next smoke):** the confirmation row above passes.
+- **Edit sites** (line numbers on `77f1502c`; re-grep at dispatch):
+  - **Part A, the zone line height.** It comes from the loaded section's body line step, through a helper in each mode's `helpers/` (no shared module, per the mode-isolation rules). The helper replaces `parseFloat(getComputedStyle(…).lineHeight) || 24` at:
+    - `src/reader/modes/focus/FoliateView.tsx:469` and `:1171`;
+    - `src/reader/modes/flow/FoliateView.tsx:499` (in `getFlowFollowOffsetPx`, `:495-505`) and `:1247`;
+    - `src/reader/modes/flow/useModeBindings.ts:39`;
+    - `src/reader/modes/flow/helpers/FlowScrollEngine.ts:788`;
+    - `src/reader/modes/narrate/FoliateView.tsx:530` and `:1300`.
+  - **Shared core: `src/utils/FlowScrollEngine.ts:788`** carries the same `|| 24`. That file is in the shared-core freeze set.
+    - On `77f1502c`, nothing imports it at run time. Its only importers are `import type` lines, in `focus/helpers/foliateWordHighlight.ts:2`, `page/helpers/foliateWordHighlight.ts:2` and `src/utils/foliateWordHighlight.ts:2`, and the Flow runtime uses `flow/helpers/FlowScrollEngine.ts` (`flow/ModeRuntime.ts:79`).
+    - **This item does not edit it.** Shared-Core Touches: none.
+    - At dispatch, `git grep -n "from \"[./]*utils/FlowScrollEngine\"" -- src | grep -v "import type"` must print nothing. If it prints anything, the item stops and asks for a shared-core window.
+  - **Part B, Focus:** scroll the cursor's line into the fixed band.
+    - On arrival: `focus/FoliateView.tsx:1054-1055`, which today uses `scrollIntoView({ block: "center" })`.
+    - On each highlight: the `highlightWordByIndex` path at `:987`.
+  - **Part B, Flow:** one clock.
+    - `flow/helpers/FlowScrollEngine.ts:746`: in the `stableWindowScroll` branch, the pacer takes its line from the underlined word's index, not from its own `lineIdx`.
+    - `flow/FoliateView.tsx:495-505` (`getFlowFollowOffsetPx`).
+- **Tests:** b1–b3 as above, plus the existing Flow and Focus suites.
+- **Lane ownership:** Reader Engine. **Forbidden:** `src/utils/FlowScrollEngine.ts`, `src/components/ReaderContainer.tsx` and `src/types.ts`.
+- **Merge order:** after the Stage 8 freeze lifts, and after the owner rules on Part B. Part A may ship alone if Part B waits. Independent of FOLIATE-OBSERVER-LEAK-1.
+
+<a id="foliate-observer-leak-1"></a>
+
+#### FOLIATE-OBSERVER-LEAK-1 — Leaked foliate View observers stop flooding error.log *(drafted spec, not yet dispatch-ready: it needs a Task list and a Lessons applied section; authored 2026-10-23 by READER-VISUAL-DIAG-1 on main @ `77f1502c`, moved into the roadmap at its close-out; merges after the Stage 8 freeze lifts)*
+
+
+- **What:**
+  - **`View.destroy()`:** foliate-js's `View.destroy()` disconnects its ResizeObserver (`this.#observer.disconnect()`) unconditionally. Today it calls `if (this.document) unobserve(this.document.body)`.
+  - **`Paginator.destroy()`:** it disconnects its own observer. Today it calls `unobserve(this)`, on an element it never observed.
+  - **How:** both changes ship as a `patch-package` patch, `patches/foliate-js+1.0.1.patch`, which the existing `postinstall` (`patch-package && …`) already applies.
+  - **Not changed:** our teardown order (host cleared, `close()` one frame later; the S1 G6 change) stays as it is.
+- **Why:** BUG-187, measured here.
+  - The `View` observers left on dead 0×0 section bodies after a mode switch go with a "ResizeObserver loop completed with undelivered notifications" error every frame.
+  - In production that is about 2,634 lines a minute, through every minute of Flow after leaving Focus.
+  - Disconnecting them mid-loop stopped it (60 → 0 errors a second). The loop's mechanism is open (H4), but the intervention is decisive.
+  - The flood predates the Narrate removal (`612d03f5`).
+- **Done when:**
+  1. **Positive control.**
+     - **The test:** a new `tests/foliateObserverPatch.test.js` reads the installed `node_modules/foliate-js/paginator.js` as text.
+     - **What it checks:** that the body of `View`'s `destroy()` (the method after `class View {`) and the body of `Paginator`'s `destroy()` (after `class Paginator extends HTMLElement {`) each contain `this.#observer.disconnect()`.
+     - **Why a text test:** `View` is not exported (`paginator.js:200`), and jsdom has no `ResizeObserver`, so a mounted test cannot reach it.
+     - **On the base:** the test fails.
+  2. With the patch, that test passes, and `npx patch-package` exits 0 on a clean `npm ci`.
+  3. **Live, packaged build, uninstrumented.**
+     - **The route:** this report's scripted route. Open the first library card and wait 15 s. Make the contents jump to INTRODUCTION and wait 8 s. Then Focus paused for 60 s, Flow playing for 180 s, and paused for 60 s.
+     - **The script:** `session.mjs` in `C:\Projects\Blurby-artifacts\reader-visual-diag-1\`. The item's close-out records the script's SHA-256 and copies the session JSON.
+     - **The pass mark:** `error.log` gains **0** `ResizeObserver loop` lines during the session. The base gives 14,428.
+     - **Also recorded, without a pass mark:** the count of `Cannot destructure property 'style'` lines.
+  4. **Live census, with `ro-wrap.js` injected.** After Page → Focus → Flow, no ResizeObserver has a target that is disconnected or a 0×0 `body`.
+  5. `npm test`, `npm run typecheck` and `npm run build` exit 0. The packaged app opens a book in all four modes.
+- **Edit sites:**
+  - `patches/foliate-js+1.0.1.patch` (new). It changes `node_modules/foliate-js/paginator.js` at `View.destroy` (`:410-411`) and `Paginator.destroy` (`:1157-1158`).
+  - `tests/foliateObserverPatch.test.js` (new).
+  - `package.json` is unchanged: `postinstall` already runs `patch-package`, and `patch-package` is already a dev dependency.
+  - **Optional, and out of scope unless ruled in:** rate-limiting identical `logError` lines in `App.tsx:130-137`, so a future loop cannot flood the log. That would be a separate defence, not the fix.
+- **Tests:** Done-when 1, plus the reader-mode suites.
+- **Merge order:** after the Stage 8 freeze lifts, because it changes installed code. Independent of BAND-ALIGN-1.
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
