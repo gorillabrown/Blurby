@@ -2915,6 +2915,149 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
   - standing rule 43 (red first, with a control);
   - LL-142 (classified from measurement: the playing failure is the word timer overwriting the line pacer, not "acts only while running");
   - reading-mode separation (no sibling import).
+<a id="band-align-2-spec"></a>
+
+#### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(position 70 — Full Spec; authored 2026-10-23 by blurby-f0 on main @ `b99d9c06`, edit sites re-grepped on the stacked base below; BUG-188 Part B; owner decision 2026-10-23 "keep band fixed" (tier 3); **after the Stage 8 release**; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; no shared-core touch)*
+
+- **What:** the reading band stays where it is: top at `FLOW_ZONE_INITIAL_TOP` (15%) of the view, height `flowZoneLines` × the body line step (BAND-ALIGN-1). The text moves so that the cursor word's line is inside the band.
+  - **Focus.** On arrival, and on every highlight move that may move the view, the view scrolls so that the cursor word's line top sits at the band's top. A line already inside the band is left alone. "Highlight moves" means every path that paints the Focus cursor with motion allowed: arrival, a word click, jump-back, an anchor jump (`jumpFoliateToWordAnchor`), and the FOCUS-KEYS-FIX-1 moves that call it. Nothing scrolls while the reader is browsing away (`userBrowsingRef`), as today.
+  - **Flow, playing: one clock.** The word timer (`FlowMode`) is the only clock. The line pacer (`FlowScrollEngine`) no longer times lines. It follows the word timer's word: when the word's line changes, it scrolls that line to the band's top (its existing stable-window rule, `advanceZone`) and moves its cursor bar. The underline and the band can no longer drift apart.
+  - **Flow, paused arrival:** the arrival scroll uses the same band rule as Focus, instead of centring the word.
+  - **Consistency with FLOW-KEYS-FIX-1.** That item makes a navigation key move both pacers: `flow-line` moves the line pacer, then the word timer jumps to its word, and word, sentence and paragraph moves jump both. That stays as it is. With one clock, the line pacer's word always equals the word timer's word after any move or tick. That also removes the pre-existing republish FLOW-KEYS-FIX-1 left out of scope, where the line pacer re-published its line's first word on its own clock after a mid-line jump.
+- **Why:** BUG-188 Part B, measured by READER-VISUAL-DIAG-1 (`docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`, H2 and H3), and confirmed by code read on the stacked base:
+  - **H2, Focus.** The cursor word was outside the band in all 4 measurements. The arrival scroll centres the word (`focus/FoliateView.tsx:1059`, `scrollIntoView({ block: "center" })`). Highlight motion uses `renderer.scrollToAnchor` (`:589`) only when the word is off screen (`:585`). Nothing places the line in the band.
+  - **H3, Flow.** While playing, the underline was outside the band in 60–77% of 177–178 one-second samples across 4 sessions. There are two clocks:
+    - The word timer, `FlowMode.scheduleNext` (`flow/ModeRuntime.ts:197-232`): 60000/wpm per word plus half-length rhythm pauses. It paints the underline through `onEngineWordAdvance` → `surface.highlight` (`:1218-1250`).
+    - The line pacer, `FlowScrollEngine.animateLine` (`flow/helpers/FlowScrollEngine.ts:552-629`): wordCount/wpm per line, plus a 100 ms flash (`FLOW_LINE_COMPLETE_FLASH_MS`) and a 50 ms buffer (`FLOW_LINE_ADVANCE_BUFFER_MS`) per line, with no rhythm pauses. It alone calls `advanceZone` (`:738`), which scrolls the text, and it also publishes highlights (`ModeRuntime.ts:1263-1269`).
+    - At 300 wpm a 5-word line takes the word timer 1,000 ms plus pauses, and the line pacer 1,150 ms, so the two drift apart line by line.
+  - **Base on this item's stacked base:** *re-measure pending; the planner holds the merge until it is recorded here.* It uses READER-VISUAL-DIAG-1's probe and route on a `--dir` build of the stacked base, after blurby-6b's heavy gates. To record: Focus (i)–(iii) in or out of band at 100% and 120%, and Flow's out-of-band count in 180 samples at 100% and 120%.
+- **Base and merge order:**
+  - **Merge order:** after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1. All four are post-release.
+  - **Branch:** `eb/band-align-2`, in worktree `C:\Projects\Blurby\.worktrees\band-align-2`. Run `npm ci` first. Which base:
+    - If all three have merged, branch from `refs/remotes/origin/main`.
+    - Otherwise, branch from `refs/remotes/origin/eb/flow-keys-fix-1` (it carries FOCUS-KEYS-FIX-1), then `git merge --no-ff refs/remotes/origin/eb/band-align-1`.
+  - **Checked:** `28ba822d` (flow-keys-fix-1) plus `105a07c1` (band-align-1) merges with no conflict (local check `280d3b48`, not pushed). Every line number below is on that stacked base. Re-grep them at dispatch (standing rule 36).
+- **Where** (on the stacked base):
+  - **Flow: the line pacer follows the word timer.** In `src/reader/modes/flow/helpers/FlowScrollEngine.ts`:
+    - **A `wordClock` flag.** `start(...)` (`:130`) takes an 11th parameter, `wordClock = false`, and stores it. While it is set, the pacer schedules no `animateLine`, `animateChunkVisualLine` or `animateEinkChunk` of its own. Gate each scheduling site:
+      - the retry path `:180-182`;
+      - the first line `:204-206`;
+      - `resume` `:273`;
+      - `setWpm` `:278-281`;
+      - `setFollowerMode` `:300-302`;
+      - `jumpToWord` `:316-318`;
+      - `jumpToLine` `:368-370`;
+      - `jumpToParagraph` `:392-394`.
+
+      The default, `false`, keeps today's behaviour for every other caller, and `tests/flow-scroll-engine.test.js` passes unchanged.
+    - **A new public method, `syncToWord(wordIndex)`,** beside `followWord` (`:321`). It runs only while the pacer is running and `wordClock` is set.
+      1. `lineIdx = findLineForWord(wordIndex)`.
+      2. If the word is past the last line's `lastWord`, call `callbacks.onComplete()` once, then return. The once-flag resets in `start` and in `rebuildLineMap` (`:428`). This keeps the section handoff, `onScrollEngineComplete` (`ModeRuntime.ts:1296-1315`).
+      3. Set `wordIndex`. If the line changed, set `lineIdx` and call `advanceZone(lineIdx)`. The stable-window branch (`:747-755`) puts the line at the band's top. Then call `onLineChange`.
+      4. In e-ink, advance only when the line reaches the current chunk's start + `EINK_LINES_PER_PAGE`. That keeps today's 20-line page steps, and so e-ink refreshes.
+      5. Place the cursor bar under the line at the remaining-words width, as `followWord` does (`:334-346`).
+      6. Call `emitChunkChangeForWord` and `onProgressUpdate`.
+
+      It never calls `onWordAdvance`: the word timer already published the word.
+  - **Flow: `src/reader/modes/flow/ModeRuntime.ts`.**
+    - `startScrollEngine` (`:1139-1159`): pass `true` as `wordClock` in `engine.start(...)` (`:1147`).
+    - `onEngineWordAdvance` (`:1218-1250`): after the surface highlight is found (`:1241`), call `this.scrollEngine?.syncToWord(idx)`. When the highlight misses and Flow pauses to turn the page, don't call it.
+    - **Unchanged:**
+      - `handleCommand`'s `flow-line` case (`:920-925`): `jumpToLine` then `engine.jumpTo`, whose word is on the same line, so `syncToWord` does nothing.
+      - `moveReadingWord` (`:958-964`) and the playing click (`:869-872`).
+      - `createScrollEngine`'s `onWordAdvance` (`:1263-1269`). It now fires only from `jumpToLine` and `jumpToParagraph`.
+  - **Flow arrival: `src/reader/modes/flow/FoliateView.tsx:1128-1134`.** Replace `scrollIntoView({ block: "center" })` (`:1134`) with the band alignment below, using Flow's own copy of the helper.
+  - **Focus: band alignment.**
+    - **`src/reader/modes/focus/helpers/foliateLayout.ts`:** add pure `computeBandScrollTop({ scrollTop, lineTopPx, containerTopPx, viewportHeightPx, zoneTopFrac })`. It returns `max(0, scrollTop + (lineTopPx − containerTopPx) − zoneTopFrac × viewportHeightPx)`. Add `isLineInBand(lineTopPx, lineBottomPx, bandTopPx, bandBottomPx)`. Flow gets its own copy in `flow/helpers/foliateLayout.ts`: mode isolation, no shared module.
+    - **`src/reader/modes/focus/FoliateView.tsx`:** add `alignSpanToBand(span)`.
+      - It uses `resolveFoliateScrollContainer` (`:419`), `getFlowViewportHeightPx` (`:449`), `FLOW_ZONE_INITIAL_TOP`, and the band height from `readZoneLineStepPx(container)` × `flowZoneLines`.
+      - If the span's line is not inside the band, it sets the container's `scrollTop` to `computeBandScrollTop(...)`.
+      - The span's rect is offset by its iframe's rect, as `band-probe.js` does.
+    - **Call sites:**
+      - arrival (`:1053-1062`): replace `:1059`;
+      - `applyVisualHighlightByIndex` (`:585-593`): when motion is allowed and the reader is not browsing, align when `forceMotion` is set or the line is outside the band, instead of `scrollToAnchor` when the word is off screen;
+      - `centerResolvedTokenInReadingWindow` (`:601-627`), the click and selection scroll: align the resolved token's span, instead of `scrollToAnchor` minus `getFlowFollowOffsetPx`.
+  - **Not edited:**
+    - `src/utils/FlowScrollEngine.ts` (shared core). Guard at dispatch: `git grep -n "from \"[./]*utils/FlowScrollEngine\"" -- src | grep -v "import type"` prints nothing.
+    - `ReaderContainer.tsx`, `src/types.ts`, Page, and Narrate (its own band copy, out of scope).
+    - `FLOW_ZONE_INITIAL_TOP`, `FLOW_ZONE_LINES_DEFAULT`.
+- **Done when** (run every command in `pwsh` from the worktree root):
+  1. **Red first (standing rule 43).** A new `tests/readerModes/bandAlign2.test.tsx` is committed alone first, and fails by assertion on the base:
+     - **(f1) One clock.** Flow is played and its line pacer started the way `flowKeys.test.tsx` does, over a jsdom container of 200 word spans laid out five to a line. Run 195 word ticks at 300 wpm. After every tick, the line pacer's `lineIndex` equals the line of the word timer's word (`exportHandoff("capture-current")`). On the base the two drift, so a tick differs.
+     - **(f2) Scroll follows the word.** On each line change in (f1), the container's `scrollTop` equals that line's `y − clientHeight × FLOW_ZONE_INITIAL_TOP`, floored at 0.
+     - **(f3) No own clock.** With the word timer paused (`engine.pause()` only), advancing 5 s of timers leaves the line pacer's `lineIndex` and `wordIndex` unchanged.
+     - **(f4) Section end.** A word timer word past the last line calls the pacer's `onComplete` exactly once, as `goToSection` with the next section's index.
+     - **(c1) Control.** It passes on the base: `FlowScrollEngine.start(...)` without `wordClock` still times its own lines, as `tests/flow-scroll-engine.test.js` asserts.
+     - **(m1) Focus helper.** `computeBandScrollTop` gives 305.5 for a line top at 400 px in a 630 px view with `scrollTop` 0 and the band top at 15%, which puts the line top at 94.5. `isLineInBand` is true for 94.5–121.5 against a 94.5–229.5 band, and false for 300–327.
+     - **(m2) Focus wiring,** through the fixture harness as BAND-ALIGN-1's (b1d). On arrival with a highlighted word whose mocked line top is 400 px, the view sets the scroll container's `scrollTop` from `computeBandScrollTop`, and does not call `scrollIntoView({ block: "center" })`. On the base, it calls `scrollIntoView`.
+
+     `npx vitest run tests/readerModes/bandAlign2.test.tsx` exits 1 on the base, with (c1) passing.
+  2. **The change.** That file passes, and these exit 0 with no file in them edited:
+     - `npx vitest run tests/readerModes tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowZoneAuto.test.ts`;
+     - FLOW-KEYS-FIX-1's `tests/readerModes/flowKeys.test.tsx` and FOCUS-KEYS-FIX-1's `tests/readerModes/focusKeys.test.tsx` are among them.
+
+     If one of them fails because it asserts the line pacer's own clock, stop and report it (standing rule 50: name the pinned test). Do not edit it unasked.
+  3. **Live, on a packaged `--dir` build of the branch tip,** with the same build, route and probe as the base re-measure above (LL-152).
+     - **Setup:**
+       - a fresh scratch profile;
+       - a driver with the profile preflight (`scripts/ui-sweep/sweep.mjs` `Session.profilePreflight`): `app.getPath('userData')` is proven to be the scratch profile before any input;
+       - *Meditations*;
+       - `band-probe.js` from `C:\Projects\Blurby-artifacts\reader-visual-diag-1\`;
+       - 100% and 120% text size.
+     - **Focus, cursor word inside the band in all three cases, at both sizes:**
+       - (i) after a Page TOC jump to INTRODUCTION, then the switch to Focus;
+       - (ii) after a click on a word about 20 lines further down the section;
+       - (iii) after a TOC jump to the next entry after INTRODUCTION.
+     - **Flow,** on READER-VISUAL-DIAG-1's scripted route (180 s of play, one sample a second): the underline is outside the band in at most 9 of 180 samples (5%), at 100% and at 120%.
+     - **Flow, E-ink on (once, at 100%),** because `syncToWord` takes over the e-ink path:
+       - Play for at least 60 s, logging the scroll container's `scrollTop` and the line pacer's `lineIndex` each time `scrollTop` changes.
+       - Each scroll lands when the line reaches the current chunk's start + `EINK_LINES_PER_PAGE` (20). There is no per-line scroll in between.
+       - The underlined word stays on screen throughout.
+     - Record every figure beside the base figures in the staging memo.
+     - Close every window. The live profile's hashes are unchanged.
+  4. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+  5. **Fence:** `git diff --name-status <base>` lists exactly these, plus the staging memo and time log (standing rule 41):
+     - `M src/reader/modes/flow/helpers/FlowScrollEngine.ts`, `M src/reader/modes/flow/ModeRuntime.ts`;
+     - `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/flow/helpers/foliateLayout.ts`;
+     - `M src/reader/modes/focus/FoliateView.tsx`, `M src/reader/modes/focus/helpers/foliateLayout.ts`;
+     - `A tests/readerModes/bandAlign2.test.tsx`, `M docs/governance/BUG_REPORT.md`.
+
+     `git diff --name-only <base> -- src/utils src/components/ReaderContainer.tsx src/types.ts src/reader/modes/narrate src/reader/modes/page` prints nothing.
+  6. `docs/governance/BUG_REPORT.md` BUG-188 reads "band height and band placement RESOLVED in source (BAND-ALIGN-1, BAND-ALIGN-2)". It names no merge sha (standing rule 49).
+  7. **Owner (next smoke):** in Focus after a contents jump and after a click, and in Flow while playing for a minute, the cursor word stays inside the bright band.
+- **Failure handling:**
+  - If the section start cannot scroll the first line up to the band's top (`computeBandScrollTop` floors at 0), check that the leading inset applies in Focus: `--blurby-flow-leading-inset`, set at `focus/FoliateView.tsx:1186` and used at `focus/helpers/foliateStyles.ts:63`. If it does not, stop with the measurement and don't widen the item.
+  - If Flow's live count is over 9 at one size only, stop with the per-second log.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Out of scope:**
+  - Narrate's band;
+  - Flow's paused line keys (FLOW-PAUSED-LINE-1);
+  - the band's height or line count;
+  - Page mode.
+- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; repository operator merges on Blurby.Roadmap's go; owner in the next smoke batch.
+- **Lane:** Reader Engine. Execution surface A (Flow's pacer) and C (the band). **Shared-core touches:** none. **Effort:** M. **Path:** dispatch.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate |
+|---|---|---|---|---|---|---|
+| 1 | Red file (f1–f4, c1, m1, m2) committed alone; the failures recorded | calculable | positive control | bounded | medium | 40m |
+| 2 | Flow: `wordClock`, `syncToWord`, the eight scheduling gates, and the two runtime call sites | calculable | bug fix | bounded | high | 60m |
+| 3 | Focus and Flow arrival: the band helpers and `alignSpanToBand` at the arrival, highlight and click sites | calculable | bug fix | bounded | medium | 45m |
+| 4 | Targeted suites unchanged and green; `npm test`, typecheck and build | mechanical | verify | mechanical | low | 20m |
+| 5 | `--dir` build; live Focus (i)–(iii) and Flow 180 s at two sizes under the profile preflight | calculable | live check | bounded | medium | 45m |
+| 6 | BUG-188 line, memo and time log; push; ask Blurby.Roadmap for merge go | mechanical | close | mechanical | low | 15m |
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** red first, with a control (c1) that keeps the line pacer's own clock for other callers.
+- **LL-142:** the H3 cause was inferred in READER-VISUAL-DIAG-1. Here it is read from code (the two schedules above), and it is proven by (f1) and the live count, not by reading the CSS.
+- **LL-152:** base and fix are measured like for like (the same build recipe, route, probe and sizes).
+- **Standing rule 36:** every line number was re-grepped on the stacked base `28ba822d` + `105a07c1`, and is re-grepped again at dispatch.
+- **Standing rule 45 (LL-141):** Done-when 7 keeps an owner-observed route.
+- **Standing rules 41, 46, 47, 48, 49 and 50:** the fence exempts the memo and time log; nothing is written to the register; the suite, typecheck and build run on the owner's machine; BUG-188's line names no sha; pinned tests are named, not edited.
+- **Profile guardrail (Blurby.Brain, 2026-10-23):** every live launch proves its scratch profile before any input.
+- **Reading-mode separation:** each mode has its own helper copy, and there is no sibling import.
+
 
 <a id="flow-para-keys-1"></a>
 
@@ -3878,7 +4021,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 | 2 | `openZip` reads with `fsPromises.readFile`, re-checks the cap on the bytes read, and keeps adm-zip's missing-path error | calculable | bug fix | bounded | low | 10m (one function, two test files green) | — | — |
 | 3 | Greps; full suite, typecheck and build; merged and pushed | calculable | merge and verify | mechanical | low | 25m (full `npm test` + typecheck + build + one --no-ff merge) | — | — |
 
-- <a id="band-align-2"></a>**BAND-ALIGN-2 — In Focus, the text scrolls the cursor's line into the fixed band** *(position 70 — stub; S; after BAND-ALIGN-1; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". In Focus, the band stays at its place. On arrival, and on every highlight move, the reader scrolls so that the cursor word's line sits inside the band. In Flow, the pacer scrolls the underlined word's line under the band, with the word timer as the only clock (READER-VISUAL-DIAG-1 H3). It needs BAND-ALIGN-1's line step. The spec must re-measure H2 and H3 after the change (60–77% out of band on the base). Lane: Reader Engine.
+- <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 70 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); M; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
 - <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
