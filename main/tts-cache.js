@@ -16,6 +16,7 @@ const {
   TTS_CACHE_SCHEMA_VERSION,
   TTS_TIMING_SIDECAR_EXTENSION,
 } = require("./constants");
+const { renameWithRetry } = require("./json-store");
 const ttsOpus = require("./tts-opus");
 
 const TTS_TIMING_SIDECAR_SCHEMA_VERSION = 1;
@@ -194,7 +195,7 @@ async function writeFileAtomic(filePath, data, encoding) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   const tempPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
   await fs.writeFile(tempPath, data, encoding);
-  await fs.rename(tempPath, filePath);
+  await renameWithRetry(tempPath, filePath);
 }
 
 function isValidWordTimestamp(timestamp) {

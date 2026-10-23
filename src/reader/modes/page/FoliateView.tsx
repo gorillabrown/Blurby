@@ -294,8 +294,6 @@ export default function PageFoliateView({
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
   const lastLoadedSectionIndexRef = useRef<number | null>(null);
-  // Track when the user has manually browsed away from the anchor
-  const userBrowsingRef = useRef(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -486,7 +484,7 @@ export default function PageFoliateView({
       el.classList.add(highlightClass);
     });
 
-    if (allowMotion && state.doc && !userBrowsingRef.current && (!state.visible || forceMotion)) {
+    if (allowMotion && state.doc && (!state.visible || forceMotion)) {
       try {
         const range = state.doc.createRange();
         range.selectNodeContents(state.span);
@@ -495,12 +493,6 @@ export default function PageFoliateView({
       } catch {
         // Safe to ignore.
       }
-    }
-
-    // Auto-clear the browsed-away flag when the highlighted word becomes visible again
-    // (paginated visibility detection is meaningful in Page).
-    if (userBrowsingRef.current && state.visible) {
-      userBrowsingRef.current = false;
     }
 
     return true;
@@ -514,8 +506,6 @@ export default function PageFoliateView({
     const range = buildResolvedTokenRange(doc, resolution);
     if (!view?.renderer?.scrollToAnchor || !range) return false;
     pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
-
-    userBrowsingRef.current = false;
 
     (async () => {
       try {
@@ -655,6 +645,7 @@ export default function PageFoliateView({
           invalidateWordPositionIndex();
 
           // Extract words and wrap in spans (Page: full re-extraction on every section load)
+          let sectionStart = -1; // -1: this load stamps no spans
           const v2 = viewRef.current;
           if (v2) {
             const extracted = extractWordsFromView(v2);
@@ -662,7 +653,7 @@ export default function PageFoliateView({
             onWordsReextractedRef.current?.();
             // TTS selection-start fix: when full-book extraction boundaries exist,
             // stamp DOM spans with the global section offset, not the local loaded-slice offset.
-            const sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections());
+            sectionStart = getSectionGlobalOffset(index, extracted.words, liveSections());
             if (sectionStart >= 0) {
               const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
@@ -678,7 +669,10 @@ export default function PageFoliateView({
           const pendingTurn = pendingTurnRef.current;
           if (pendingTurn && pendingTurn.doc === doc && (!rendererNumberedDocsRef.current.has(doc) || bookWordsFailedRef.current)) {
             pendingTurnRef.current = null;
-            reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end, pendingTurn.click);
+            // PAGE-POSITION-SAVE-2 (N4): a held turn this load cannot stamp is lost; say so rather than drop it silently.
+            if (!reportFirstWordOnPage(doc, pendingTurn.start, pendingTurn.end, pendingTurn.click)) {
+              recordDiagnosticRef.current("page-turn-lost", `reason=section-load section=${index} sectionStart=${sectionStart} start=${pendingTurn.start} end=${pendingTurn.end}`);
+            }
           }
 
           lastLoadedSectionIndexRef.current = index;
@@ -1024,7 +1018,7 @@ export default function PageFoliateView({
             }
             return -1; // No visible words (e.g., cover page with only images)
           },
-          isUserBrowsing: () => userBrowsingRef.current,
+          isUserBrowsing: () => false, // Page never browses away by itself; browse-away is runtime state (PAGE-POSITION-SAVE-2)
           goToSection: async (sectionIndex: number) => {
             const sections = view.book?.sections;
             if (!sections || sectionIndex >= sections.length) return;
@@ -1042,9 +1036,7 @@ export default function PageFoliateView({
           waitForSectionReady,
           applySoftHighlight: (wordIndex: number): boolean => applySoftHighlight(wordIndex),
           clearSoftHighlight: () => clearSoftHighlight(),
-          clearUserBrowsing: () => {
-            userBrowsingRef.current = false;
-          },
+          clearUserBrowsing: () => {},
         };
 
         setLoading(false);

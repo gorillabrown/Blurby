@@ -6,11 +6,12 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { DEFAULT_SETTINGS } from "../../src/constants";
+import { DEFAULT_SETTINGS, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../src/constants";
 import { createInitialHandoff } from "../../src/reader/document/ReaderDocumentSnapshot";
 import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { pageMode } from "../../src/reader/modes/page";
 import PageFoliateView from "../../src/reader/modes/page/FoliateView";
+import { usePageModeBindings } from "../../src/reader/modes/page/useModeBindings";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { electronAPIStub, stubControl } from "../../src/test-harness/electron-api-stub";
 
@@ -111,7 +112,7 @@ const settle = () => act(async () => { await new Promise((resolve) => setTimeout
 let container: HTMLElement;
 let root: Root;
 
-async function mount(extra: Record<string, unknown> = {}) {
+function makeRuntime() {
   const fake = createFakeInfrastructure({ document: createFakeDocument() });
   const broker = createReaderPorts(fake.infra);
   const snapshot = fake.infra.document.snapshot();
@@ -125,6 +126,11 @@ async function mount(extra: Record<string, unknown> = {}) {
     handoff: createInitialHandoff(snapshot, snapshot.wordCount),
     arrival: "silent",
   }) as any;
+  return { fake, runtime, snapshot };
+}
+
+async function mount(extra: Record<string, unknown> = {}) {
+  const { fake, runtime, snapshot } = makeRuntime();
 
   const render = async (more: Record<string, unknown> = {}) => {
     await act(async () => {
@@ -357,6 +363,47 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(runtime.getSnapshot().isBrowsedAway).toBe(false);
     await render();
     expect(jumpBackButton()).toBeNull();
+  });
+
+  it("(p1) a browse-away the runtime sets is not cleared by a timer (PAGE-POSITION-SAVE-2)", async () => {
+    vi.useFakeTimers();
+    try {
+      const { runtime } = makeRuntime();
+      function Probe() { usePageModeBindings(runtime); return null; }
+      await act(async () => { root.render(createElement(Probe)); });
+      runtime.onUserBrowseAway();
+      await act(async () => { vi.advanceTimersByTime(FOLIATE_BROWSING_CHECK_INTERVAL_MS * 3); });
+      expect(runtime.getSnapshot().isBrowsedAway).toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("(n4a) a held turn that the section load cannot stamp records page-turn-lost (PAGE-POSITION-SAVE-2)", async () => {
+    const { fake, view, renderer } = await mount();
+    const { doc, range } = rawDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    expect(fake.diagnostics.some((d) => d.args[0] === "page-turn-deferred")).toBe(true);
+    await loadSection(view, doc, 5); // the loaded words are section 0's, so section 5's start is -1 and nothing is stamped
+    expect(saves(fake)).toEqual([]);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost");
+    expect(lost).toHaveLength(1);
+    expect(String(lost[0].args[1]).startsWith("reason=section-load")).toBe(true);
+    expect(lost[0].args[1]).toContain("section=5");
+    expect(lost[0].args[1]).toContain("sectionStart=-1");
+  });
+
+  it("(n4b) control: a held turn that the section load stamps records no loss", async () => {
+    const { fake, view, renderer } = await mount({ bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }], getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
+    const { doc, range } = rawDoc();
+    renderer.contents = [{ doc, index: 0 }];
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await loadSection(view, doc, 0);
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 2, "cfi:0:gamma"]]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=section-load"))).toHaveLength(0);
   });
 
   it("(r) a turn before the book's word numbers apply saves the re-stamped index once they do", async () => {
