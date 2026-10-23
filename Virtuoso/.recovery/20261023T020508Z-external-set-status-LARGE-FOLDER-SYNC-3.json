@@ -1,0 +1,38 @@
+{
+  "id": "20261023T020508Z-external-set-status-LARGE-FOLDER-SYNC-3",
+  "operation": "external-set-status",
+  "item_id": "LARGE-FOLDER-SYNC-3",
+  "created": "2026-10-23T02:05:08Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "effort": "M",
+      "description": "The folder watcher skips system folders such as `$Recycle.Bin`; `rescan-folder` matches Saved Articles by `pathKey`; `switch-folder`'s access and per-file `statFile` are bounded by `FOLDER_LIST_TIMEOUT_MS`; and a `FOLDER_ROOT_BREAKER_MS` (60 s) breaker stops `rootHasContent` re-listing a hung mount."
+    },
+    "expectedRevision": "65db2a8737537e7d50ea11ef8c32e3666d51fccc820e18483177a801eeedf574",
+    "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('description', \"The folder watcher skips system folders such as `$Recycle.Bin`; `rescan-folder` matches Saved Articles by `pathKey`; `switch-folder`'s access and per-file `statFile` are bounded by `FOLDER_LIST_TIMEOUT_MS`; and a `FOLDER_ROOT_BREAKER_MS` (60 s) breaker stops `rootHasContent` re-listing a hung mount.\"), ('effort', 'M'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LARGE-FOLDER-SYNC-3",
+      "idempotencyKey": "set-status:LARGE-FOLDER-SYNC-3:[('description', \"The folder watcher skips system folders such as `$Recycle.Bin`; `rescan-folder` matches Saved Articles by `pathKey`; `switch-folder`'s access and per-file `statFile` are bounded by `FOLDER_LIST_TIMEOUT_MS`; and a `FOLDER_ROOT_BREAKER_MS` (60 s) breaker stops `rootHasContent` re-listing a hung mount.\"), ('effort', 'M'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020508Z-external-set-status-LARGE-FOLDER-SYNC-3",
+      "detail": {
+        "readBack": "SQL: fields equal (written just before the plan was recorded; plan recorded retroactively, same content)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:05:29Z",
+  "outcome": "succeeded"
+}
