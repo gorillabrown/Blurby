@@ -8451,3 +8451,116 @@ The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines
 - **Standing rules 47 and 48:** the suite and typecheck are in Done-when 5.
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
+
+## Archived at close-out 2026-10-22: CI-AUDIT-ALLOWLIST-1
+
+#### CI-AUDIT-ALLOWLIST-1 — CI fails on a new high advisory, not on the reviewed ones *(position 30 — Full Spec; authored 2026-10-22 on main @ `4193338a`; Blurby.Brain ruling 2026-10-22; not a release gate)*
+
+- **What:** CI's audit step (`.github/workflows/ci.yml:22`, `npm audit --audit-level=high`) fails on `main` today and on every pull request, because of advisories DEPS-AUDIT-1 reviewed and kept (`docs/governance/DEPENDENCY_ADVISORIES.md`). A step that always fails hides a new one. This item replaces it with `node scripts/ci/audit-gate.mjs`, which:
+  - runs `npm audit --json` (the same population as today: all dependencies);
+  - fails on any high or critical advisory that `.github/audit-allowlist.json` does not list;
+  - fails on any allowlisted advisory whose review-by date has passed.
+  Each allowlist entry carries the advisory ID, the package, its reachability note from `DEPENDENCY_ADVISORIES.md` and a review-by date. The two follow-redirects advisories are new since DEPS-AUDIT-1 and have a non-major fix, so they are fixed, not allowlisted.
+- **Why:** Blurby.Brain's ruling of 2026-10-22, recorded by ELECTRON-42-UPGRADE-1's run. It is not a release gate: no workflow builds installers, because `release.yml` was deleted in `e9bbf56a`.
+- **Evidence (`npm audit --json` and `npm audit --omit=dev --json` on `4193338a`, 2026-10-22, read-only):**
+  - All dependencies: 0 critical, 10 high, 6 moderate.
+  - The high advisories by ID:
+    - adm-zip: GHSA-7q85-xj36-vmfc, GHSA-8238-w5pm-2374, GHSA-j5f4-cc29-5x44, GHSA-rcw4-f5rp-g42v, GHSA-xcpc-8h2w-3j85 (prod, direct; reviewed, not reached).
+    - sharp: GHSA-f88m-g3jw-g9cj, GHSA-rgj7-g3m4-5g8c, GHSA-wq5f-xc86-pv6w (prod, under the Kokoro stack; reviewed, not reached).
+    - braces: GHSA-vfj7-8cjw-p6xm (dev, install time, via patch-package; reviewed, kept by ruling Q4).
+    - follow-redirects 1.16.0: GHSA-8r9p-f939-6h3c, GHSA-q3jh-wrc6-jgq8 (dev, via axios; **not reviewed**; `fixAvailable: true`, 1.16.1 is within axios's `^1.16.0`).
+  - `--omit=dev` lists the 8 adm-zip and sharp IDs only.
+  - `npm audit --audit-level=high` exits 1 on the base.
+- **Out of scope:**
+  - Moving adm-zip, sharp, the Kokoro pins or patch-package.
+  - Any fix needing a major version.
+  - Moderates: `DEPENDENCY_ADVISORIES.md`'s moderates table stays, and the gate ignores moderate and lower.
+  - Release workflows.
+- **Prerequisites:** ELECTRON-42-UPGRADE-1 merged. It edits `ci.yml:19` (Node 20 to 24) and regenerates `package-lock.json`, so this item cuts from a `main` that has it. Re-run the audit there: if the high and critical ID set differs from the 10 above, stop and report the difference. Do not allowlist an advisory this specification did not review.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** on the base, `npm audit --audit-level=high; $LASTEXITCODE` prints 1. Record it in the staging memo.
+    2. **follow-redirects fixed, lockfile only:**
+       - `npm update follow-redirects` resolves `node_modules/follow-redirects` to 1.16.1 or a later 1.16.x in `package-lock.json`.
+       - A comparison script in a scratch directory parses `refs/remotes/origin/main:package-lock.json` and the branch's lockfile. It prints exactly one changed key under `packages`, `node_modules/follow-redirects`, and exits 0.
+       - `git diff refs/remotes/origin/main -- package.json` is empty.
+    3. **The gate exists:** `scripts/ci/audit-gate.mjs` uses Node built-ins only and takes these options:
+       - `--input <file>` reads saved `npm audit --json` output instead of running npm. Otherwise it runs `npm audit --json` itself (`npm.cmd` on Windows).
+       - `--allowlist <file>` defaults to `.github/audit-allowlist.json`.
+       - `--today <YYYY-MM-DD>` defaults to today's UTC date.
+       Its exit codes:
+       - 0: every high and critical advisory, keyed by the GHSA ID at the end of its `via[].url`, is allowlisted and in date.
+       - 1: one or more advisories are not allowlisted or are past their review-by date. Each is printed with its package, severity and title.
+       - 2: the allowlist or the audit output cannot be parsed.
+       An allowlisted ID that the audit no longer reports prints a `stale:` line and does not change the exit code.
+    4. **The allowlist:** `.github/audit-allowlist.json` is an array of exactly 9 entries: the adm-zip, sharp and braces IDs above. Each entry is `{ "id", "package", "reachability", "reviewBy": "2027-01-22" }`, and `reachability` quotes the matching `DEPENDENCY_ADVISORIES.md` row's *Reached by Blurby?* and *Evidence* in one sentence.
+    5. **Gate tests:** `tests/auditGate.test.js` runs the script through `child_process` with `--input`, `--allowlist` and `--today` pointing at temp files, and covers:
+       - (a) everything allowlisted, exit 0;
+       - (b) a new high ID, exit 1, naming it;
+       - (c) a new critical ID, exit 1;
+       - (d) a new moderate, exit 0;
+       - (e) an allowlisted ID past `reviewBy`, exit 1;
+       - (f) a stale entry, exit 0 with a `stale:` line;
+       - (g) a malformed allowlist, exit 2.
+       `npx vitest run tests/auditGate.test.js` exits 0.
+    6. **Live gate:** `node scripts/ci/audit-gate.mjs; $LASTEXITCODE` prints 0 on the branch. Record its output.
+    7. **CI uses it:**
+       - `git grep -n -F "npm audit --audit-level" -- .github` exits 1 (no match).
+       - `git grep -n -F "node scripts/ci/audit-gate.mjs" -- .github/workflows/ci.yml` prints one line.
+    8. **Advisories document:**
+       - `docs/governance/DEPENDENCY_ADVISORIES.md` gains follow-redirects in *Fixed*, with the version and the date.
+       - It gains a short *CI audit gate* section that names the allowlist file and the review-by date, and says that renewing an entry needs a fresh reachability check.
+    9. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+    10. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and staging memo (standing rule 41):
+        - `A scripts/ci/audit-gate.mjs`
+        - `A .github/audit-allowlist.json`
+        - `M .github/workflows/ci.yml`
+        - `M package-lock.json`
+        - `A tests/auditGate.test.js`
+        - `M docs/governance/DEPENDENCY_ADVISORIES.md`
+    11. **Open check after merge (the executing agent's, reported to Blurby.Roadmap):** `gh run list --workflow CI --branch main --limit 1 --json conclusion` shows `success` for the merge's push, on both matrix legs.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer.
+- **Lane:** Platform & Maintenance. Execution surface D (platform and CI).
+- **Source:** Blurby.Brain's ruling of 2026-10-22 (ELECTRON-42-UPGRADE-1 run report); `docs/governance/DEPENDENCY_ADVISORIES.md` (DEPS-AUDIT-1, `a6383286`); this specification's audit reads on `4193338a`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:**
+  - `.github/workflows/ci.yml:22`: `- run: npm audit --audit-level=high` becomes `- run: node scripts/ci/audit-gate.mjs`. Re-grep after ELECTRON-42-UPGRADE-1, which changes `:19` only.
+  - `scripts/ci/audit-gate.mjs` (new, ESM, no dependencies). It parses the `vulnerabilities` map: for each `via` entry that is an object with `severity` `high` or `critical`, the key is `url.split("/").pop()`.
+  - `.github/audit-allowlist.json` (new).
+  - `package-lock.json`: through `npm update follow-redirects` only; no hand edit.
+  - `docs/governance/DEPENDENCY_ADVISORIES.md`: the two additions of Done-when 8.
+- **Tests:** Done-when 5. The script is under `scripts/`, not `tests/`, so the test runner does not collect it (LL-146).
+- **Constants:** `reviewBy` is 2027-01-22, 90 days from authoring. It lives in the allowlist, not in code.
+- **Branch:** `eb/ci-audit-allowlist-1` from `refs/remotes/origin/main` after ELECTRON-42-UPGRADE-1 merges, in worktree `C:\Projects\Blurby\.worktrees\ci-audit-allowlist-1`. Run `npm ci` first. Write refs in full.
+- **Staging plan:** the exact paths of Done-when 10. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` and push on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If the audit on the base lists an ID not in this specification, stop and report it with its package and path. Allowlisting a new advisory needs a reachability review first.
+  - If `npm update follow-redirects` moves any other key in the lockfile (Done-when 2), revert the lockfile and stop.
+  - If `npm audit` needs the network and has none, Done-when 6 is an infrastructure failure: re-run when online. It is not a product failure.
+  - Rollback: `git revert -m 1 <merge>`. CI then fails on the audit step again, as it does today.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** `package.json`; every application file under `main/`, `src/` and `preload.js`.
+  - **Shared-core touches:** none.
+  - **Merge order:** after ELECTRON-42-UPGRADE-1 (same `ci.yml` and lockfile). Before any later item that moves the lockfile.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control and the advisory set re-read on the post-upgrade base | calculable | positive control | bounded | low | 15m (two audit runs, one comparison) | — | — |
+| 2 | CI fails on a new high or critical advisory and allows the reviewed ones; follow-redirects fixed | calculable | feature | bounded | medium | 45m (one script, one allowlist, one CI line, one lockfile update, seven tests) | — | — |
+| 3 | Live gate, full suite, typecheck and build pass; merged, pushed, first CI run green | calculable | merge and verify | mechanical | medium | 30m (gate run, suite, typecheck, build, merge, one CI run) | — | — |
+
+**Total:** chain 9m · sum 9m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 shows the bare audit failing on the base, and gate test (b) shows the new gate failing on a new advisory.
+- **LL-142:** the advisory set is read from the installed lockfile on the item's own base, not copied from this specification. A difference stops the item.
+- **LL-146:** the gate script lives under `scripts/ci/`, never under a collectable test name.
+- **Standing rule 36:** `ci.yml`'s lines are re-grepped after ELECTRON-42-UPGRADE-1 edits the same file.
+- **Standing rule 44 (LL-143):** every gate names its exit code. Done-when 1's command was dry-run on the base (exit 1).
+- **Standing rules 47 and 48:** the suite, typecheck and build are in Done-when 9.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.

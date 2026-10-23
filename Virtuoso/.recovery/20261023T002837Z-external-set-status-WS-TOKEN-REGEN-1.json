@@ -1,0 +1,39 @@
+{
+  "id": "20261023T002837Z-external-set-status-WS-TOKEN-REGEN-1",
+  "operation": "external-set-status",
+  "item_id": "WS-TOKEN-REGEN-1",
+  "created": "2026-10-23T00:28:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/ws-token-regen-1",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ws-token-regen-1 from main 47ae6e1f), built during the Stage 8 freeze and merged after it lifts."
+    },
+    "expectedRevision": "0c39aadd19e195405881d95b87e379f2500f4d17403b8a6260c90592c45ac42c",
+    "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('branch', 'eb/ws-token-regen-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ws-token-regen-1 from main 47ae6e1f), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WS-TOKEN-REGEN-1",
+      "idempotencyKey": "set-status:WS-TOKEN-REGEN-1:[('branch', 'eb/ws-token-regen-1'), ('notes', \"Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From GET-STATE-SECRET-1's security review. Pre-existing; not a release gate. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/ws-token-regen-1 from main 47ae6e1f), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T002837Z-external-set-status-WS-TOKEN-REGEN-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T00:29:02Z",
+  "outcome": "succeeded"
+}
