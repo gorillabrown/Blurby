@@ -14,7 +14,7 @@ import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { createReaderModeRouter } from "../../src/reader/useReaderModeOrchestrator";
 import { pageMode } from "../../src/reader/modes/page/index";
 import { flowMode } from "../../src/reader/modes/flow/index";
-import { FlowScrollEngine } from "../../src/reader/modes/flow/helpers/FlowScrollEngine";
+import { FLOW_SCROLL_POSITION_PROVIDER_KEY, FlowScrollEngine } from "../../src/reader/modes/flow/helpers/FlowScrollEngine";
 import * as focusLayout from "../../src/reader/modes/focus/helpers/foliateLayout";
 import * as flowLayout from "../../src/reader/modes/flow/helpers/foliateLayout";
 import FocusFoliateView from "../../src/reader/modes/focus/FoliateView";
@@ -174,6 +174,23 @@ describe("BAND-ALIGN-2 Flow: one clock", () => {
     r.destroy();
   });
 
+  it("(p1) live 2026-10-23: the line pacer scrolls through the container's scroll-position provider (Foliate's scroller is out of reach)", () => {
+    const { container, cursor, scroll } = layout(200);
+    Object.defineProperty(container, "scrollTop", { configurable: true, get: () => 0, set: () => {} }); // the element itself never scrolls
+    const writes: number[] = [];
+    (container as unknown as Record<string, unknown>)[FLOW_SCROLL_POSITION_PROVIDER_KEY] = {
+      get: () => scroll.top,
+      set: (v: number) => { scroll.top = v; writes.push(v); },
+      viewportHeight: () => VIEW_PX,
+      contentHeight: () => 2000,
+    };
+    const engine = new FlowScrollEngine({ onWordAdvance: () => {}, onComplete: () => {} });
+    engine.start(container, cursor, 0, 300, new Set(), false, 5, () => {}, true, true);
+    engine.syncToWord(100); // line 20: centre 408 px, anchor 133.3 px
+    expect(writes.at(-1), "no write reached the provider").toBeCloseTo(20 * LINE_PX + GLYPH_PX / 2 - VIEW_PX / 3, 6);
+    engine.stop();
+  });
+
   it("(c1) control: FlowScrollEngine.start(...) without wordClock still times its own lines", () => {
     const { container, cursor } = layout(40);
     const engine = new FlowScrollEngine({ onWordAdvance: () => {}, onComplete: () => {} });
@@ -315,8 +332,14 @@ describe("BAND-ALIGN-2 bottom bar", () => {
 });
 
 // ── Focus's view: arrival scroll (m2) and Lines Off (r6) through the fixture harness, as BAND-ALIGN-1's (b1d) ──
+/** (p2): when set, the fake paginator scrolls like Foliate's: through containerPosition, size and viewSize. */
+const rendererScroll = { enabled: false, position: 0, writes: [] as number[] };
 class FakePaginator {
   contents: Array<{ doc: Document; index: number }> = [];
+  get containerPosition(): number | undefined { return rendererScroll.enabled ? rendererScroll.position : undefined; }
+  set containerPosition(v: number | undefined) { if (rendererScroll.enabled && typeof v === "number") { rendererScroll.position = v; rendererScroll.writes.push(v); } }
+  get size(): number | undefined { return rendererScroll.enabled ? 630 : undefined; }
+  get viewSize(): number | undefined { return rendererScroll.enabled ? 5000 : undefined; }
   setStyles(): void {}
   destroy(): void {}
   remove(): void {}
@@ -413,6 +436,9 @@ describe("BAND-ALIGN-2 Focus view", () => {
     restoreClientHeight = () => { if (desc) Object.defineProperty(HTMLElement.prototype, "clientHeight", desc); };
     fakeScroll.top = 0;
     fakeScroll.writes = [];
+    rendererScroll.enabled = false;
+    rendererScroll.position = 0;
+    rendererScroll.writes = [];
   });
   afterEach(() => {
     restoreClientHeight?.();
@@ -428,6 +454,16 @@ describe("BAND-ALIGN-2 Focus view", () => {
     expect(section.scrollIntoView, "the arrival centred the word with scrollIntoView").not.toHaveBeenCalled();
     expect(fakeScroll.writes.length, "the arrival wrote no scrollTop").toBeGreaterThan(0);
     expect(fakeScroll.writes[0]).toBeCloseTo(411 - VIEW_H / 3, 6);
+    act(() => root.unmount());
+  });
+
+  it("(p2) live 2026-10-23: with Foliate's renderer scroll, the arrival scrolls through containerPosition (201), not the element", async () => {
+    rendererScroll.enabled = true;
+    const section = sectionDoc();
+    nextSection = section.doc;
+    const { root } = await renderFocus({ flowZonePosition: 1 / 3, flowZoneLines: 5 });
+    expect(rendererScroll.writes.length, "the arrival wrote no containerPosition").toBeGreaterThan(0);
+    expect(rendererScroll.writes[0]).toBeCloseTo(411 - VIEW_H / 3, 6);
     act(() => root.unmount());
   });
 
