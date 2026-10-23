@@ -91,7 +91,7 @@ describe("narrate F4 negative controls (D4)", () => {
     h.engine.play(0);
     await flush();
     expect(h.output.sources).toHaveLength(0);
-    expect(h.failures).toEqual([{ kind: "F4", reason: "producer-error", atWord: 0, detail: "producer failed" }]);
+    expect(h.failures).toEqual([{ kind: "F4", reason: "producer-error", atWord: 0, detail: "producer failed", stack: expect.stringContaining("producer failed") }]); // NARRATE-START-STACK-1: the stack rides along for error.log
     expect(h.states.at(-1)).toBe("paused");
   });
 
