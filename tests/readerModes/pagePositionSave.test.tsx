@@ -562,6 +562,41 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"))).toHaveLength(1);
   });
 
+  // PAGE-HELD-TURN-FAIL-1: a held turn the failed word count cannot save is reported, not left held in silence.
+  it("(hf1) a held turn the failed word count cannot report records page-turn-lost", async () => {
+    const { fake, view, renderer } = await mount({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+    const gap = doc.querySelector('[data-word-index="0"]')!.nextSibling!;
+    expect(gap.textContent).toBe(" "); // the space after "Alpha"
+    const range = doc.createRange();
+    range.setStart(gap, 0);
+    range.setEnd(gap, 1);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await settle();
+    expect(saves(fake)).toEqual([]);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost");
+    expect(lost).toHaveLength(1);
+    expect(String(lost[0].args[1]).startsWith("reason=book-words-failed")).toBe(true);
+    expect(lost[0].args[1]).toContain("start=");
+    expect(lost[0].args[1]).toContain("end=");
+    expect(lost[0].args[1]).toContain(" kind=turn");
+  });
+
+  it("(hf2) control: a held turn on a word saves its cfi when the word count fails, and records no loss", async () => {
+    const { fake, view, renderer } = await mount({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=book-words-failed"))).toHaveLength(0);
+  });
+
   // Rulings at registration (Blurby.Brain, 2026-10-15): a word click on provisional numbering holds its save like a turn.
   const clickWord = (doc: Document, index: number) =>
     act(async () => { (doc.querySelector(`[data-word-index="${index}"]`) as HTMLElement).click(); });
