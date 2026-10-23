@@ -8093,3 +8093,89 @@ This is a stub; `/epic` applies the full set in the charter.
 - **Merge order:** before ELECTRON-42-UPGRADE-1 resumes (owner direction, 2026-10-15). It touches no file that ELECTRON-42-UPGRADE-1 owns.
 - **Lane Ownership:** E (`Virtuoso/workspace-layout.json` `fieldMappings`, the snapshot and recovery records). **Forbidden During Parallel Run:** all application code, `package.json`, the lockfile. **Shared-Core Touches:** none.
 
+## Archived at close-out 2026-10-22: RENAME-RETRY-1
+
+#### RENAME-RETRY-1 — Every atomic rename in the main process retries a transient Windows lock *(position 33 — Full Spec; authored 2026-10-22 on main @ `4193338a`; not a release gate)*
+
+- **What:** `main/json-store.js` already retries a `.tmp` rename that Windows refuses for a moment (`EPERM`, `EBUSY` or `EACCES`, from an antivirus scanner or indexer briefly holding the target). It does this in `renameWithRetry` (`:10-19`, delays `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` at `main/constants.js:149`). Seven other temp-then-rename writes in `main/` call `fsPromises.rename` directly, so the same transient lock fails them outright. This item exports `renameWithRetry` and routes all seven through it. No new retry code is written. The user-visible change: a save that a scanner touched at the wrong moment now succeeds instead of failing.
+- **Why:** Blurby.Brain's ruling of 2026-10-14, from KF2-WAIVER-RETIRE-1's trace, names six raw renames. This review found a seventh, `main/narrate/expose-durations.js:76`. The order of harm:
+  - `main/sync-engine.js:98` (`saveSyncState`): a dropped rename loses sync state, so it goes first.
+  - `main/auth.js:110` (`saveTokens`): sign-in tokens.
+  - `main/ipc/reader.js:187` and `:244`: the reading-notes JSON sidecar and its `.docx`.
+  - `main/ipc/stats.js:206`: the reading-log `.xlsx`.
+  - `main/tts-cache.js:197` (`writeFileAtomic`): Kokoro cache files.
+  - `main/narrate/expose-durations.js:76` (`ensureExposedModel`): the one-time duration-exposed model copy. It was not in the ruling's list because it landed with NARRATE-REBUILD-1 P3; it is the same class of write.
+- **Evidence (read on `4193338a`):**
+  - `git grep -n "\.rename(" -- main` prints these seven sites, plus `main/json-store.js:13` (the helper itself) and two comment lines in `main/cloud-google.js:436` and `main/cloud-onedrive.js:330`, which are Drive and OneDrive API moves, not `fs` calls.
+  - Every one of the seven sites writes a temp file and then renames it over the target: `sync-engine.js:96-98`, `auth.js:108-110`, `reader.js:185-187` and `:242-244`, `stats.js:204-206`, `tts-cache.js:195-197`, `expose-durations.js:74-76`.
+  - Today only `main/sync-queue.js:11` imports from `main/json-store.js`. That module requires only `fs/promises` and `./constants`, so importing it from any of the seven files adds no cycle.
+- **Out of scope:**
+  - The cloud providers' `rename` API moves.
+  - Making a long lock succeed: a `.docx` or `.xlsx` the user has open in Word or Excel stays locked past the 140 ms of retries and fails as it does today.
+  - Any change to the delays or the transient codes.
+  - Any change to `writeJSON`'s serialization.
+- **Prerequisites:** none. Standing rule 50 re-read: the KF-2 waiver (`tests/sync-queue.test.js` EPERM) already moved into `main/json-store.js` with SETTINGS-WRITE-DURABLE-1, and this item does not touch that writer. KF2-WAIVER-RETIRE-1 (position 28) is independent of it.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Positive control (standing rule 43):** the new test file of Done-when 2 is committed alone first. `npx vitest run tests/renameRetrySites.test.js` exits 1 on the base, and its failure lists the seven raw call sites. Record the output in the staging memo.
+    2. **Every site goes through the helper:** `tests/renameRetrySites.test.js` has two tests:
+       - A source scan. For each of the seven files, the file contains no `.rename(` call other than through `renameWithRetry`, and it imports `renameWithRetry` from the json-store module.
+       - A behaviour test of the exported `renameWithRetry`. With `fs/promises.rename` spied to throw `EBUSY` once and then pass through, it resolves and the target holds the payload. With it spied to throw `ENOENT`, it rejects at once after exactly 1 call.
+       `npx vitest run tests/renameRetrySites.test.js tests/jsonStore.test.js` exits 0.
+    3. **No raw rename left:** `git grep -n -E "(fsPromises|fs)\.rename\(" -- main` prints exactly one line, `main/json-store.js:13`, and exits 0.
+    4. **The helper is exported, unchanged:** `git diff refs/remotes/origin/main -- main/json-store.js` changes only the `module.exports` line, which adds `renameWithRetry`.
+    5. `npm test` exits 0 on the owner's machine (standing rule 47; Stage 8's closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+    6. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly these, plus the time log and staging memo (standing rule 41):
+       - `M main/json-store.js`
+       - `M main/sync-engine.js`
+       - `M main/auth.js`
+       - `M main/ipc/reader.js`
+       - `M main/ipc/stats.js`
+       - `M main/tts-cache.js`
+       - `M main/narrate/expose-durations.js`
+       - `A tests/renameRetrySites.test.js`
+- **Effort:** S.
+- **Owners:** implementation agent; reviewer. No owner check: the behaviour change is only visible under a transient lock.
+- **Lane:** Platform & Maintenance. Execution surface D (main process).
+- **Source:** the RENAME-RETRY-1 stub (Blurby.Brain ruling, KF2-WAIVER-RETIRE-1 trace, 2026-10-14); `main/json-store.js:7-19`; this specification's grep on `4193338a`.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (line numbers on `4193338a`; re-grep before editing, standing rule 36):
+  - `main/json-store.js:62`: `module.exports = { readJSON, writeJSON, saveJSON, whenWritesSettled, renameWithRetry };`.
+  - `main/sync-engine.js:98`: `await renameWithRetry(tmp, syncStatePath);`, with `const { renameWithRetry } = require("./json-store");` among the requires.
+  - `main/auth.js:110`: the same pattern, with `tokensPath`.
+  - `main/ipc/reader.js:187` and `:244`: the same, with `require("../json-store")`.
+  - `main/ipc/stats.js:206`: the same, with `require("../json-store")`.
+  - `main/tts-cache.js:197`: `await renameWithRetry(tempPath, filePath);`. `tts-cache.js` names its module `fs` (`:11`); keep that name for its other calls.
+  - `main/narrate/expose-durations.js:76`: the same, with `require("../json-store")`.
+- **Tests:** Done-when 1 and 2. The source scan reads the files with `fs.readFile` and matches `\.rename\(`; it does not import the modules. The behaviour test imports `../main/json-store.js` and spies on the CommonJS `fs/promises` object, as `tests/jsonStore.test.js:12-13` does.
+- **Constants:** `JSON_RENAME_RETRY_DELAYS_MS = [20, 40, 80]` (`main/constants.js:149`), unchanged.
+- **Branch:** `eb/rename-retry-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\rename-retry-1`. Run `npm ci` before the first vitest run. Write refs in full.
+- **Staging plan:** the exact paths of Done-when 6. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b), on Blurby.Roadmap's go.
+- **Failure handling:**
+  - If the grep finds a site this specification does not name, stop and report it. Do not widen the item silently.
+  - If requiring `json-store` from a file creates a cycle (a test fails with a partially initialised export), stop and report the chain.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surface D.
+  - **Forbidden:** `package.json` and the lockfile; `.github/**`; the renderer; `preload.js`; `main/json-store.js` beyond its `module.exports` line.
+  - **Shared-core touches:** none.
+  - **Merge order:** after ELECTRON-42-UPGRADE-1 if both are open (it runs the crash gates on this machine; this item's suite waits for them). Independent of JSONSTORE-TIMEOUT-1, which edits only `tests/jsonStore.test.js`.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Positive control shows the seven raw renames on the base | calculable | positive control | bounded | low | 15m (one test file, one red run) | — | — |
+| 2 | Every atomic rename in the main process goes through the shared retry helper | calculable | bug fix | bounded | medium | 30m (one export, seven one-line edits, one behaviour test) | — | — |
+| 3 | Full suite, typecheck and build pass; merged and pushed | calculable | merge and verify | mechanical | medium | 25m (suite, typecheck, build, one --no-ff merge) | — | — |
+
+**Total:** chain 9m · sum 9m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** Done-when 1 shows the seven raw renames on the base before any edit.
+- **Standing rule 36:** every line number was read on `4193338a`, and the agent re-greps before editing. The seventh site was found this way.
+- **Standing rule 50 (LL-156):** the KF-2 waiver was re-read against these edit sites. It lives with `main/json-store.js`'s own writer, which this item leaves unchanged.
+- **Standing rule 44 (LL-143):** Done-when 3's grep was dry-run on the base and prints 8 lines there.
+- **Standing rules 47 and 48:** the suite, typecheck and build are in Done-when 5 and run on the owner's machine.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.

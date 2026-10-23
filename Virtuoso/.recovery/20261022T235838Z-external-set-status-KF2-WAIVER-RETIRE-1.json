@@ -1,0 +1,39 @@
+{
+  "id": "20261022T235838Z-external-set-status-KF2-WAIVER-RETIRE-1",
+  "operation": "external-set-status",
+  "item_id": "KF2-WAIVER-RETIRE-1",
+  "created": "2026-10-22T23:58:38Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/kf2-waiver-retire-1",
+      "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/kf2-waiver-retire-1 from main)."
+    },
+    "expectedRevision": "b4c0d2195782a67f12e9564a9d44dd940a761458d9a1b111c04124958b243c28",
+    "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('branch', 'eb/kf2-waiver-retire-1'), ('notes', 'Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/kf2-waiver-retire-1 from main).'), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "KF2-WAIVER-RETIRE-1",
+      "idempotencyKey": "set-status:KF2-WAIVER-RETIRE-1:[('branch', 'eb/kf2-waiver-retire-1'), ('notes', 'Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/kf2-waiver-retire-1 from main).'), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261022T235838Z-external-set-status-KF2-WAIVER-RETIRE-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-22T23:58:56Z",
+  "outcome": "succeeded"
+}
