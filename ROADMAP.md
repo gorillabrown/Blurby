@@ -909,7 +909,7 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 - **Removed from this item:** `FLOW_ZONE_INITIAL_TOP` (0.15) no longer places the band in Focus or Flow; R3 and R4 do. The constant stays for Narrate's band, which is out of scope.
 - **R5. Lines: 3, 5, 7 or Off (owner, 2026-10-23).** The reader chooses how many lines the band covers, or turns the band off.
   - **Storage:** the existing `flowZoneLines` (`src/types.ts:170`, a number; a trusted key). `0` means Off. No new key and no `src/types.ts` edit.
-  - **Values:** `3`, `5`, `7` and `0` (Off). Legacy values read through one normaliser per mode helper, `normalizeBandLines(value)`: 4 → 5, 6 → 7, 8 → 7, `undefined` → 5, and any other value → 5. The default stays 5 (`FLOW_ZONE_LINES_DEFAULT`). Add `FLOW_ZONE_LINES_OPTIONS = [3, 5, 7]` and `FLOW_ZONE_LINES_OFF = 0` in `src/constants.ts` (constants separation rule).
+  - **Values:** `3`, `5`, `7` and `0` (Off). Legacy values read through one normaliser per mode helper, `normalizeBandLines(value)`: any value other than 3, 5, 7 or 0 (including 4, 6, 8 and `undefined`) reads as 5 (owner, 2026-10-23). The default stays 5 (`FLOW_ZONE_LINES_DEFAULT`). Add `FLOW_ZONE_LINES_OPTIONS = [3, 5, 7]` and `FLOW_ZONE_LINES_OFF = 0` in `src/constants.ts` (constants separation rule).
   - **Off:** no band and no dimming. The mask is removed (the zone host carries no `--flow-zone-*` properties, and a `--band-off` modifier class disables the gradient in each mode's `mode.css`). The reading cursor (the Focus highlight and the Flow underline) still shows, and R3's scroll to the anchor still runs, so the text still lands at the chosen spot.
   - **Control:** the bottom bar's **Lines** slider (`ReaderBottomBar.tsx:351-360`, `min={3} max={8}`) becomes a four-button group, **3 · 5 · 7 · Off**, with `aria-pressed`, beside the anchor buttons (R4), in Focus and Flow. The existing `onSetFlowZoneLines` prop carries the value, so `ReaderContainer.tsx` needs no new prop for this.
   - A change of lines re-places the band at once (R3) without moving the reading word.
@@ -923,7 +923,7 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 
     It is not 100 to 230, the line boxes themselves.
   - **(r2) Centre.** n = 3, 5 and 7 put the cursor line second of three, third of five and fourth of seven. At a section's first line with n = 5, the band covers lines 1–3 only, with no blank above.
-  - **(r6) Lines.** `normalizeBandLines` maps 3 → 3, 5 → 5, 7 → 7, 0 → 0, 4 → 5, 6 → 7, 8 → 7 and undefined → 5. The bottom bar renders **3 · 5 · 7 · Off** in Focus and Flow, and a press calls `onSetFlowZoneLines` with 3, 5, 7 or 0. With 0, the zone host has no `--flow-zone-top` and carries the band-off class, and the cursor highlight is still painted.
+  - **(r6) Lines.** `normalizeBandLines` maps 3 → 3, 5 → 5, 7 → 7, 0 → 0, and 4, 6, 8 and undefined → 5. The bottom bar renders **3 · 5 · 7 · Off** in Focus and Flow, and a press calls `onSetFlowZoneLines` with 3, 5, 7 or 0. With 0, the zone host has no `--flow-zone-top` and carries the band-off class, and the cursor highlight is still painted.
   - **(r3) Clamp.** In a 630 px view with the anchor at Top third and the cursor on a section's first line (y = 0, `scrollTop` already 0), the scroll stays 0 and the band's centre sits on the cursor line, not at 210 px.
   - **(r4) Anchor values.** `normalizeBandAnchor` maps 0 → 0, 1/3 → 1/3, 0.5 → 0.5, and 0.25, 0.15 and undefined → 1/3. Each anchor puts the cursor line's centre at 0 + half the band, 210 px and 315 px in a 630 px view when unclamped.
   - **(r5) Control.** The bottom bar renders the three buttons in Focus and in Flow, and a press calls `onSetFlowZonePosition` with 0, 1/3 or 0.5.
@@ -1150,6 +1150,83 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 - **Standing rule 45 (LL-141):** Narrate's change keeps an owner-observed check.
 - **LL-164 / standing rule 51:** this specification appends no lesson-status line.
 
+
+<a id="eink-controls-1"></a>
+
+#### EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*
+
+- **What:** Settings has one E-ink control, the **Display Mode → E-ink** switch (`einkMode`). Turning it on gives both the E-ink behaviour (today's switch: no animations, page-sized scroll steps, the speed cap, refreshes) and the E-ink colours (today's theme: high-contrast black on a paper background). The **E-ink theme choice is removed** from every theme picker. The other themes (Blurby, Dark, Light, System) are unchanged when the switch is off.
+- **Why:** the 2026-10-13 smoke found two controls that set different fields, `theme: "eink"` and `einkMode`, so a reader could get the E-ink colours without the behaviour, or the reverse. Owner decision, 2026-10-23: "Drop the theme, and merge the two on the switch."
+- **Behaviour:**
+  - **Switch on:** the document root carries `data-theme="eink"` and `data-eink="true"`, whatever `theme` is saved. Every existing `[data-theme="eink"]` rule applies unchanged (`src/styles/themes.css:22`, `:134-353`; `src/reader/modes/focus/mode.css:358`). The title bar and native theme use the E-ink colours (`main/window-manager.js:18-19`, `:195`).
+  - **Switch off:** the root takes the saved `theme` as today. The saved theme is never overwritten by the switch, so turning E-ink off returns the reader's own theme.
+  - **Migration (settings schema 13 → 14, `main/migrations.js:6`):** a saved `theme: "eink"` becomes `theme: "light"` with `einkMode: true`. Any other theme is unchanged, and an already-set `einkMode` is kept. The migration is idempotent.
+  - **Theme pickers lose "E-ink":**
+    - `src/components/settings/ThemeSettings.tsx:30`;
+    - `src/components/QuickSettingsPopover.tsx:24-29`;
+    - the theme cycle `src/components/ThemeProvider.tsx:136` (`nextTheme`).
+
+    `themeLabel` keeps its `"eink"` branch for any legacy caller.
+  - **`src/types.ts` is not edited.** The `theme` union keeps `"eink"` (`:149`), so an old settings file still type-checks before it migrates. The pickers simply stop offering it.
+- **Prerequisites:** none in code. Merges after the Stage 8 release.
+- **Done when:**
+  1. **Red first (standing rule 43):** a new `tests/einkControls.test.ts(x)`, committed alone, fails by assertion on the base.
+     - **(e1)** With `einkMode: true` and `theme: "dark"`, the provider sets `data-theme="eink"` and `data-eink="true"`.
+     - **(e2)** With `einkMode: false` and `theme: "dark"`, it sets `data-theme="dark"` and no `data-eink`.
+     - **(e3)** `ThemeSettings` and `QuickSettingsPopover` render no "E-ink" theme option.
+     - **(e4)** `nextTheme` never returns `"eink"`.
+     - **(e5)** Migration 13 → 14 maps `{ theme: "eink", einkMode: false }` to `{ theme: "light", einkMode: true }`. It leaves `{ theme: "dark", einkMode: true }` unchanged, and running it twice changes nothing more.
+     - **(e6)** The window manager's title-bar colours are the E-ink ones when `einkMode` is true and the theme is `dark`.
+     - **Control:** `{ theme: "light", einkMode: false }` renders exactly as on the base, and passes on the base.
+  2. The change: the red file passes. The existing theme, settings, migration and settings-key-trust tests pass. Any test that pins the five-theme list or schema 13 is named under standing rule 50 and updated in scope (re-grep: `git grep -n "\"eink\"\|CURRENT_SETTINGS_SCHEMA\|themeOrder" -- tests`).
+  3. **Live, on a `--dir` build with a scratch profile and the profile preflight (LL-165):**
+     - Settings shows one E-ink control, and no theme picker lists E-ink.
+     - Turning the switch on turns the library and a book (Page, Focus, Flow) black on paper, and E-ink behaviour applies (Flow scrolls in page steps).
+     - Turning it off restores the previously chosen theme.
+     - A scratch profile seeded with `theme: "eink"` at schema 13 opens migrated: E-ink on, with Light underneath.
+     - Live profile hashes unchanged.
+  4. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
+  5. **Fence** (standing rule 41), plus the memo and time log:
+     - `M src/components/ThemeProvider.tsx`, `M src/components/settings/ThemeSettings.tsx`, `M src/components/QuickSettingsPopover.tsx`, `M main/window-manager.js`, `M main/migrations.js`;
+     - `A` the test file, and named pinned-test updates.
+
+     `src/types.ts`, `ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts` are untouched.
+  6. **Owner (next smoke):** one E-ink switch; on gives E-ink colours and behaviour; off gives your own theme back.
+- **Effort:** S.
+- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; the owner at the next smoke.
+- **Source:** the 2026-10-13 smoke; the owner's decision of 2026-10-23.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites** (on `origin/main` @ `cdb55b24`; re-grep at dispatch, standing rule 36):
+  - `ThemeProvider.tsx:187-197`: compute `appliedTheme = einkMode ? "eink" : resolvedTheme`, and use it for the CSS variables and `data-theme`. Keep `data-eink`. Remove `"eink"` from `themeOrder` (`:136`).
+  - `ThemeSettings.tsx:30`: drop `"eink"` from the list. The E-ink switch (`:57-69`) keeps its sub-settings.
+  - `QuickSettingsPopover.tsx:24-29`: drop the E-ink entry.
+  - `main/window-manager.js:10-12` and `:194-195`: treat `settings.einkMode === true` as the `eink` theme for the title bar and `nativeTheme`.
+  - `main/migrations.js`: schema 14 step, as above. Bump `CURRENT_SETTINGS_SCHEMA` to 14 (`:6`).
+- **Constants:** none new.
+- **Branch:** `eb/eink-controls-1` from `refs/remotes/origin/main` after the release.
+- **Staging plan:** explicit paths. `tests/perf-baseline-results.json` stays unstaged.
+- **Failure handling:**
+  - If another item has taken schema 14 by dispatch time, use the next free number and say so in the memo.
+  - If a reader-mode injected theme reads `settings.theme` directly rather than the root attribute, list it and stop.
+  - Rollback: `git revert -m 1 <merge>`. The migration is one-way, but a reverted build reads `einkMode: true` with `theme: "light"` correctly.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate |
+|---|---|---|---|---|---|---|
+| 1 | Red file (e1–e6, control) committed alone; failures recorded | calculable | positive control | bounded | low | 25m |
+| 2 | One switch drives the E-ink colours; the theme option removed from three pickers; title bar; migration 13 → 14 | calculable | feature | bounded | medium | 40m |
+| 3 | Suites, pinned tests named; `npm test`, typecheck, build | mechanical | verify | mechanical | low | 20m |
+| 4 | `--dir` build; live checks including a migrated schema-13 profile | calculable | live check | bounded | medium | 30m |
+| 5 | Memo and time log; push; ask for merge go | mechanical | close | mechanical | low | 10m |
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** red first, with a light-theme control.
+- **Standing rule 50 (LL-156):** tests that pin the five-theme list or schema 13 are named and updated in scope.
+- **LL-165:** live launches prove the scratch profile first, including the seeded schema-13 profile.
+- **LL-166:** the live verdict reads `data-theme` and `data-eink` from the root, not a screenshot alone.
+- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
 
 <a id="narrate-start-stack-1"></a>
 
@@ -1886,7 +1963,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); L, amended by the owner 2026-10-23; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
 - <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
-- <a id="eink-controls-1"></a>**EINK-CONTROLS-1 — One E-ink control, not two** *(position 32 — stub; needs an owner decision)*. The 2026-10-13 smoke found both an E-ink theme button and a Display Mode switch (`einkMode`) in Settings. They set different fields (`theme: "eink"` and `einkMode`), so the owner can turn one on and leave the other off. Owner decision needed: merge them into one control, or keep both and label the difference. Lane: UX polish.
+- **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
 
 
 #### Stage 9 — Product expansion (owner direction, 2026-10-15)
