@@ -29,22 +29,22 @@ describe("writeJSON — concurrent writes to one path", () => {
       expect(JSON.parse(await fs.readFile(file, "utf-8"))).toEqual(payloads[payloads.length - 1]);
       expect((await fs.readdir(TEST_DIR)).filter((n) => n.endsWith(".tmp"))).toEqual([]);
     }
-  });
+  }, 30_000); // JSONSTORE-TIMEOUT-1: 160 real writes need headroom under full-suite load
 });
 
 describe("writeJSON — transient rename locks (Windows EPERM/EBUSY/EACCES)", () => {
   it("(d) rename fails with EPERM twice, then succeeds: resolves, file holds the payload, 3 rename calls", async () => {
+    await whenWritesSettled(); // JSONSTORE-TIMEOUT-1: no earlier test's write reaches this spy
     const file = path.join(TEST_DIR, "retry-ok.json");
     const realRename = cjsFs.rename;
-    let calls = 0;
+    let calls = 0; // renames of this test's own .tmp only
     const spy = vi.spyOn(cjsFs, "rename").mockImplementation(async (...args) => {
-      calls++;
-      if (calls <= 2) throw epermError();
+      if (args[0] === file + ".tmp" && ++calls <= 2) throw epermError();
       return realRename.apply(cjsFs, args);
     });
     try {
       await expect(writeJSON(file, { retried: true })).resolves.toBeUndefined();
-      expect(spy).toHaveBeenCalledTimes(3);
+      expect(calls).toBe(3);
     } finally {
       spy.mockRestore();
     }
@@ -52,11 +52,17 @@ describe("writeJSON — transient rename locks (Windows EPERM/EBUSY/EACCES)", ()
   });
 
   it("(e) rename fails with EPERM every time: rejects with code EPERM after 4 rename calls", async () => {
+    await whenWritesSettled(); // JSONSTORE-TIMEOUT-1: no earlier test's write reaches this spy
     const file = path.join(TEST_DIR, "retry-fail.json");
-    const spy = vi.spyOn(cjsFs, "rename").mockImplementation(async () => { throw epermError(); });
+    const realRename = cjsFs.rename;
+    let calls = 0; // renames of this test's own .tmp only
+    const spy = vi.spyOn(cjsFs, "rename").mockImplementation(async (...args) => {
+      if (args[0] === file + ".tmp") { calls++; throw epermError(); }
+      return realRename.apply(cjsFs, args);
+    });
     try {
       await expect(writeJSON(file, { never: true })).rejects.toMatchObject({ code: "EPERM" });
-      expect(spy).toHaveBeenCalledTimes(4);
+      expect(calls).toBe(4);
     } finally {
       spy.mockRestore();
     }
