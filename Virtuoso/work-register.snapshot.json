@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:02:26Z",
+  "takenAt": "2026-10-23T02:05:30Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2124,16 +2124,16 @@
     },
     {
       "id": "NARRATE-SENTENCE-RESUME-1",
-      "title": "Narrate restarts at the beginning of the current sentence",
+      "title": "Narrate starts at the beginning of the current sentence",
       "sequence": 40,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
-        "NARRATE-REBUILD-1"
+        "NARRATE-TOKEN-CAP-1"
       ],
-      "effort": "S",
+      "effort": "M",
       "workstream": "TTS / Narration Engine",
       "deliverable": "",
       "group": "Narration Rebuild",
@@ -2142,9 +2142,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "When Narrate starts from a position that is not a sentence start (resume, reopen, after a page turn), playback, cursor and saved position rewind to the first word of that sentence. Owner decision 2026-10-14.",
+      "description": "Play, Space, reopening and resume start at the first word of the sentence containing the start word, per the owner's decision; word clicks and jumps keep their word. Adds sentenceStartAt in chunkPlan.ts, a rewind in ModeRuntime.start() and narrateEngine.resume(), and updates the exact-resume test.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "32d1d975318ad16e1407dff7788ed7efc78f70c2d3ed03b84b0f4ca8b52c5ee6",
+      "revision": "3ba3363beda66bddac26568027c424a0d5627a70edca075c76a98caf514e3bee",
       "extra": {}
     },
     {
@@ -2506,12 +2506,12 @@
     },
     {
       "id": "NARRATE-TOKEN-CAP-1",
-      "title": "Narrate passages that exceed the 400-id token cap",
+      "title": "Digit-dense passages are planned under the 400-id token cap",
       "sequence": 41,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "NARRATE-REBUILD-1"
       ],
@@ -2524,9 +2524,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "A few chunks in the owner's books exceed Kokoro's 400-id token cap and pause with F4's notice; fix the chunk planner's token estimate (changes chunk timing).",
+      "description": "The chunk planner's estimateTokens (src/reader/modes/narrate/engine/chunkPlan.ts) counts each digit at its spoken cost (DIGIT_TOKEN_WEIGHT 13), so digit-dense passages such as chess notation are planned into chunks under the 400-id cap instead of failing closed. Text without digits is planned as today.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From the reconciliation sweep (class E). Fails safe. Not a release gate.",
-      "revision": "6165e69d1c2d7b0454d5064b1ca902c33f3464070dc029a84947f06fb3a067f8",
+      "revision": "a8de722fd3c57289c9daf04e2a66941339388978320d93b11d9d1ef5912381bd",
       "extra": {}
     },
     {
@@ -2583,10 +2583,10 @@
       "sequence": 44,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
-      "effort": "S",
+      "effort": "M",
       "workstream": "Library & Content",
       "deliverable": "",
       "group": "Platform Health",
@@ -2595,9 +2595,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Watcher skips system folders (no recycle-bin ghost books); rescan's Saved Articles check by path key; switch-folder access and per-file stat bounded with a breaker; test gaps; stale comment; scale benchmark under 2x.",
+      "description": "The folder watcher skips system folders such as $Recycle.Bin; rescan-folder matches Saved Articles by pathKey; switch-folder's access and per-file statFile are bounded by FOLDER_LIST_TIMEOUT_MS; and a FOLDER_ROOT_BREAKER_MS (60 s) breaker stops rootHasContent re-listing a hung mount.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling (Rule 11 tier 1). From LARGE-FOLDER-SYNC-2's quality review. Not a release gate.",
-      "revision": "65db2a8737537e7d50ea11ef8c32e3666d51fccc820e18483177a801eeedf574",
+      "revision": "b344adf60709e4dd06875f4fe3240f0f66692739c4828379c7e82c1861d73f12",
       "extra": {}
     },
     {
@@ -2911,12 +2911,12 @@
     },
     {
       "id": "NARRATE-TRACE-LABELS-1",
-      "title": "Narrate harness hygiene: legacy trace labels and rate validation",
+      "title": "Narrate's eval traces say Kokoro, and the latency launcher rejects a bad rate",
       "sequence": 56,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "NARRATE-REBUILD-1"
       ],
@@ -2929,9 +2929,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "Rename the pre-NARRATE-REMOVE-1 moss-nano trace labels, and make p5-latency-e2e reject a malformed --rates value (NaN ran a session and reported PASS) before launching.",
+      "description": "main.js's eval-trace writer labels traces Kokoro/Narrate instead of MOSS-Nano. p5-latency-e2e.mjs rejects a --rates value off Narrate's 0.80–2.00 grid before launching, and writes latency-e2e.json into its --out folder.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Cosmetic. After NARRATE-REBUILD-1; not a release gate.",
-      "revision": "c1e0e24217f6403c93c01658c3abd5d3ccac5d3bcec150443a7deeb13157fbf7",
+      "revision": "633b57286cfc326b8707a19793b7d2d9dbc15e2e971fa8358bfd75c51301ec1e",
       "extra": {}
     },
     {

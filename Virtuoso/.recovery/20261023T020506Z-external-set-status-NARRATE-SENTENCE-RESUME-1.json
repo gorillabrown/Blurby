@@ -1,0 +1,42 @@
+{
+  "id": "20261023T020506Z-external-set-status-NARRATE-SENTENCE-RESUME-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-SENTENCE-RESUME-1",
+  "created": "2026-10-23T02:05:06Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "effort": "M",
+      "prerequisites": [
+        "NARRATE-TOKEN-CAP-1"
+      ],
+      "title": "Narrate starts at the beginning of the current sentence",
+      "description": "Play, Space, reopening and resume start at the first word of the sentence containing the start word, per the owner's decision; word clicks and jumps keep their word. Adds `sentenceStartAt` in `chunkPlan.ts`, a rewind in `ModeRuntime.start()` and `narrateEngine.resume()`, and updates the exact-resume test."
+    },
+    "expectedRevision": "32d1d975318ad16e1407dff7788ed7efc78f70c2d3ed03b84b0f4ca8b52c5ee6",
+    "idempotencyKey": "set-status:NARRATE-SENTENCE-RESUME-1:[('description', \"Play, Space, reopening and resume start at the first word of the sentence containing the start word, per the owner's decision; word clicks and jumps keep their word. Adds `sentenceStartAt` in `chunkPlan.ts`, a rewind in `ModeRuntime.start()` and `narrateEngine.resume()`, and updates the exact-resume test.\"), ('effort', 'M'), ('prerequisites', ['NARRATE-TOKEN-CAP-1']), ('title', 'Narrate starts at the beginning of the current sentence'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-SENTENCE-RESUME-1",
+      "idempotencyKey": "set-status:NARRATE-SENTENCE-RESUME-1:[('description', \"Play, Space, reopening and resume start at the first word of the sentence containing the start word, per the owner's decision; word clicks and jumps keep their word. Adds `sentenceStartAt` in `chunkPlan.ts`, a rewind in `ModeRuntime.start()` and `narrateEngine.resume()`, and updates the exact-resume test.\"), ('effort', 'M'), ('prerequisites', ['NARRATE-TOKEN-CAP-1']), ('title', 'Narrate starts at the beginning of the current sentence'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020506Z-external-set-status-NARRATE-SENTENCE-RESUME-1",
+      "detail": {
+        "readBack": "SQL: fields equal (written just before the plan was recorded; plan recorded retroactively, same content)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:05:28Z",
+  "outcome": "succeeded"
+}
