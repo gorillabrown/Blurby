@@ -1,6 +1,6 @@
 # Stage 8 batched owner smoke: results (2026-10-23 UTC)
 
-**Status:** checkpoint 1, in progress. Part A is done. Part B is running.
+**Status:** complete. 33 PASS, 3 FAIL (#1 first installer, #8, #28), 3 not run, 1 skipped.
 
 **Checklist:** `docs/governance/SMOKE_CHECKLIST_STAGE8.md` (origin/main).
 
@@ -98,7 +98,32 @@ This group used a fresh FN1/FUG1 copy profile, `%TEMP%\blurby-fn1-owner-20261022
 | 37 | PASS | I | Drive was started again at 22:20:19 and the path was reachable at 22:20:25. With nothing pressed, the banner was still shown at 22:21:00. Retry was then pressed (real click): the banner cleared within 1 s, with one `Retry: one root check: true` line. |
 | 38 | PASS | I | With Drive running, the app was relaunched and *Theo of Golden* (a Drive book) opened and rendered its cover page (`38-drive-book-renders.jpg`). The executor then quit: 33 s open in total, missing 0, 131 folder books. |
 
-## Findings so far (not checklist failures)
+### B3 (cont.)
+
+| # | Result | Build | Evidence |
+|---|---|---|---|
+| 39 | PASS (Part B) | I | Comparing the live profile before Part B (21:52) with the end: `library.json` and `settings.json` are unchanged. Only `sync-queue.json` differs, from the F7 stray live instance, not from Part B. There are 0 `LFS1-probe-*` files left in `G:\My Drive\Personal\Readings`. Drive moved the 3 deleted probes to Drive **trash**, and they are still there. The smoke8-folder2 copies live only under `C:\Projects\Blurby-artifacts\`.<br>Against step 0, the live profile **is changed** by Part A's intended edits. Final values: `library.json` `d4b884bd…cffbdf6`, `settings.json` `1a4a40c6…18debd4`. |
+
+### B4. Relink a missing sample
+
+| # | Result | Build | Evidence |
+|---|---|---|---|
+| 40 | PASS | I | The fresh scratch profile is `%TEMP%\blurby-pf1-sample-20261022222229`. On first run the entry was `sample-meditations`, with its filepath at the install's `resources\resources\sample-meditations.epub`. With the app closed, the executor set that filepath to the missing `C:\Users\estra\Projects\Blurby\resources\sample-meditations.epub` and the position to 1000. On relaunch, *Meditations* opened and rendered (INTRODUCTION). 5 s later the entry's filepath was `<profile>\blurby-data\sample-meditations.epub`, sha256 `8be2ab1e…a6c2beb` (as expected). |
+
+## Totals (40 checks)
+
+| Result | Count | Checks |
+|---|---|---|
+| PASS | 33 | 2–7, 10, 11, 13–27, 31–40 |
+| FAIL | 3 | #1 (first installer; it passes when rebuilt with BCJ), #8, #28 |
+| Not run (group stopped) | 3 | #9, #29, #30 |
+| SKIPPED | 1 | #12 (no touch device) |
+| OWNER-OBSERVED | 0 | The owner was not watching. #13, #14 and #20 are executor-observed via CDP, and the flicker look is still owed. |
+| BLOCKED (partial) | — | #1's tray right-click menu (Explorer is click-tier for the executor) |
+
+No crash dialog and no crash report appeared (#23), so release gate (11) did not fail on this smoke. All Blurby windows were closed at the end, and Google Drive for desktop is running again.
+
+## Findings (not checklist failures)
 
 - **F1:** the tray icon renders as a tiny dot. `assets/tray-icon.png` is 1024×1024 with heavy padding.
 - **F2:** opening the converted DNC PDF left the renderer busy for more than 6 minutes, with CDP unresponsive and no log lines.
