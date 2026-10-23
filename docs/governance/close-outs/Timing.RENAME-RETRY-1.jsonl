@@ -7,3 +7,5 @@
 {"event": "wait", "row": 3, "reason": "blocked", "at": "2026-10-22T23:38:17Z"}
 {"event": "resume", "row": 3, "at": "2026-10-22T23:55:49Z"}
 {"event": "wait", "row": 3, "reason": "approval", "at": "2026-10-22T23:57:58Z"}
+{"event": "resume", "row": 3, "at": "2026-10-22T23:58:29Z"}
+{"event": "end", "row": 3, "evidence": "merge 40c01ceb pushed to origin/main (82b05269..40c01ceb); suite 2419/1/0 on combined tree 09274a74; typecheck 0; build 0", "result": "done", "at": "2026-10-22T23:58:47Z"}

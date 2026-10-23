@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-22T23:32:40Z",
+  "takenAt": "2026-10-23T00:01:58Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1963,8 +1963,8 @@
       "id": "KF2-WAIVER-RETIRE-1",
       "title": "Retire the KF-2 rename waiver",
       "sequence": 28,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -1974,12 +1974,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#kf2-waiver-retire-1",
       "branch": "eb/kf2-waiver-retire-1",
-      "started": "",
+      "started": "2026-10-22",
       "completed": "",
       "evidence": "",
       "description": "The bounded rename retry from SETTINGS-WRITE-DURABLE-1 removes the Windows rename failure KF-2 waived. Retire the waiver after two clean full runs on the owner's machine.",
-      "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass.",
-      "revision": "b4c0d2195782a67f12e9564a9d44dd940a761458d9a1b111c04124958b243c28",
+      "notes": "Created by roadmap review 2026-10-14. Proposed by the SETTINGS-WRITE-DURABLE-1 close-out. Full Spec on main 0f285836 (Blurby.Brain rulings 2026-10-14); retires KF-2 on recorded runs and writes the closed list into Stage 8. U9/U10 pass. Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/kf2-waiver-retire-1 from main).",
+      "revision": "62aa067b3dc93006b5ad42a68129769e2a703d9bd505878db8b38e8774babf9f",
       "extra": {}
     },
     {
@@ -2334,9 +2334,9 @@
     {
       "id": "RENAME-RETRY-1",
       "title": "Every atomic rename in the main process retries a transient Windows lock",
-      "sequence": 33,
-      "status": "in-flight",
-      "raw_status": "In Flight",
+      "sequence": null,
+      "status": "completed",
+      "raw_status": "Completed",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2347,11 +2347,11 @@
       "spec_link": "ROADMAP.md#rename-retry-1",
       "branch": "eb/rename-retry-1",
       "started": "2026-10-22",
-      "completed": "",
-      "evidence": "",
+      "completed": "2026-10-22",
+      "evidence": "docs/governance/close-outs/CloseOut.RENAME-RETRY-1.2026-10-22.md",
       "description": "Seven temp-then-rename writes in main/ call fsPromises.rename directly, so a scanner's brief lock fails them outright. Export renameWithRetry from main/json-store.js and route all seven through it, with no new retry code.",
       "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From the KF2-WAIVER-RETIRE-1 trace. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/rename-retry-1 from main); code and targeted tests first, heavy gates after ELECTRON-42-UPGRADE-1's crash-count runs.",
-      "revision": "f2c91fa6be486b72124d596bcd1bd1bcf1ff2bc3516b51243a88c6da4f24395e",
+      "revision": "d528c684fff972ca2302fab130c85af957555c7922a0d767d6b02993ef0c7021",
       "extra": {}
     },
     {
