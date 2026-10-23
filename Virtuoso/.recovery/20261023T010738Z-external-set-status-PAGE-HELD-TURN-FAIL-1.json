@@ -1,0 +1,41 @@
+{
+  "id": "20261023T010738Z-external-set-status-PAGE-HELD-TURN-FAIL-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-HELD-TURN-FAIL-1",
+  "created": "2026-10-23T01:07:38Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "prerequisites": [
+        "TOC-JUMP-SAVE-1"
+      ],
+      "title": "A held page turn the word count cannot place is reported, not dropped",
+      "description": "When the book's word count fails, `checkBookWords`' `fail()` releases a held turn on a renderer-numbered page and records `page-turn-lost reason=book-words-failed` if it cannot be saved. All three loss lines gain ` kind=turn|click`."
+    },
+    "expectedRevision": "d5e05813bc2c61d13ca1ce724003f02ec0860337389668dde682d3bbf0fe1ebd",
+    "idempotencyKey": "set-status:PAGE-HELD-TURN-FAIL-1:[('description', \"When the book's word count fails, `checkBookWords`' `fail()` releases a held turn on a renderer-numbered page and records `page-turn-lost reason=book-words-failed` if it cannot be saved. All three loss lines gain ` kind=turn|click`.\"), ('prerequisites', ['TOC-JUMP-SAVE-1']), ('title', 'A held page turn the word count cannot place is reported, not dropped'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-HELD-TURN-FAIL-1",
+      "idempotencyKey": "set-status:PAGE-HELD-TURN-FAIL-1:[('description', \"When the book's word count fails, `checkBookWords`' `fail()` releases a held turn on a renderer-numbered page and records `page-turn-lost reason=book-words-failed` if it cannot be saved. All three loss lines gain ` kind=turn|click`.\"), ('prerequisites', ['TOC-JUMP-SAVE-1']), ('title', 'A held page turn the word count cannot place is reported, not dropped'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T010738Z-external-set-status-PAGE-HELD-TURN-FAIL-1",
+      "detail": {
+        "readBack": "SQL: fields equal (code spans as plain text)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T01:08:37Z",
+  "outcome": "succeeded"
+}
