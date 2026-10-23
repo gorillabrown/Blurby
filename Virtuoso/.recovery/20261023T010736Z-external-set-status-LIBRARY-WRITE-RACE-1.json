@@ -1,0 +1,43 @@
+{
+  "id": "20261023T010736Z-external-set-status-LIBRARY-WRITE-RACE-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-1",
+  "created": "2026-10-23T01:07:36Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "effort": "M",
+      "prerequisites": [
+        "WS-TOKEN-REGEN-1",
+        "WS-PAIR-LOG-1"
+      ],
+      "title": "Main-side library writers update the live record, never a copy",
+      "description": "`delete-doc`, the three queue handlers and `apply-metadata-updates` update records in place instead of building replacement arrays. The URL import, the extension import and the lazy conversion write through a new `writeConversionResult` in `main/library-write.js`, which never resurrects a deleted record and removes the orphaned converted EPUB."
+    },
+    "expectedRevision": "d367ce37f91d86480b00c0555c86c44c598a2a57a2c8e095444228a229059d39",
+    "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('description', '`delete-doc`, the three queue handlers and `apply-metadata-updates` update records in place instead of building replacement arrays. The URL import, the extension import and the lazy conversion write through a new `writeConversionResult` in `main/library-write.js`, which never resurrects a deleted record and removes the orphaned converted EPUB.'), ('effort', 'M'), ('prerequisites', ['WS-TOKEN-REGEN-1', 'WS-PAIR-LOG-1']), ('title', 'Main-side library writers update the live record, never a copy'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-1",
+      "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-1:[('description', '`delete-doc`, the three queue handlers and `apply-metadata-updates` update records in place instead of building replacement arrays. The URL import, the extension import and the lazy conversion write through a new `writeConversionResult` in `main/library-write.js`, which never resurrects a deleted record and removes the orphaned converted EPUB.'), ('effort', 'M'), ('prerequisites', ['WS-TOKEN-REGEN-1', 'WS-PAIR-LOG-1']), ('title', 'Main-side library writers update the live record, never a copy'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T010736Z-external-set-status-LIBRARY-WRITE-RACE-1",
+      "detail": {
+        "readBack": "SQL: fields equal (code spans as plain text)"
+      }
+    }
+  },
+  "resolved": "2026-10-23T01:08:35Z",
+  "outcome": "succeeded"
+}

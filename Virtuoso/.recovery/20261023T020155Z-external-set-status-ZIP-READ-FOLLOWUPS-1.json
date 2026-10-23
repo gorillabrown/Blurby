@@ -1,0 +1,39 @@
+{
+  "id": "20261023T020155Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-READ-FOLLOWUPS-1",
+  "created": "2026-10-23T02:01:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-22",
+      "branch": "eb/zip-read-followups-1",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/zip-read-followups-1 from main), built during the Stage 8 freeze and merged after it lifts."
+    },
+    "expectedRevision": "fbe8d27af69635b49fc6864d4406f90843b31140267492218e59cba790adf7e7",
+    "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('branch', 'eb/zip-read-followups-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/zip-read-followups-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-READ-FOLLOWUPS-1",
+      "idempotencyKey": "set-status:ZIP-READ-FOLLOWUPS-1:[('branch', 'eb/zip-read-followups-1'), ('notes', \"Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From DEPS-AUDIT-1's reviews. Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-22 by Blurby.Roadmap to an implementation agent (blurby-6b; branch eb/zip-read-followups-1 from main), built during the Stage 8 freeze and merged after it lifts.\"), ('started', '2026-10-22'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T020155Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Started, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:02:25Z",
+  "outcome": "succeeded"
+}
