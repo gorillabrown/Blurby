@@ -241,7 +241,12 @@ async function handleMessage(client, text) {
           const settings = _ctx.getSettings();
           settings._wsPairingToken = encrypted;
           _ctx.saveSettings();
-        } catch { /* best-effort persist */ }
+        } catch (err) {
+          console.warn(`[ws-server] pairing not saved: ${err && err.message}`);
+        }
+      } else if (_ctx) {
+        // Session-only pairing: never written in plaintext (Blurby.Brain, 2026-10-22); say why it won't survive a restart.
+        console.warn("[ws-server] pairing not saved: OS encryption unavailable");
       }
       client.authenticated = true;
       if (client.authTimer) { clearTimeout(client.authTimer); client.authTimer = null; }
