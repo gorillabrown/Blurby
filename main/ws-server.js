@@ -6,6 +6,7 @@ const crypto = require("crypto");
 const { safeStorage } = require("electron");
 const { WS_PORT, HEARTBEAT_INTERVAL_MS, WS_RETRY_DELAY_MS, SHORT_CODE_TTL_MS, WS_MAX_RETRY_COUNT, WS_AUTH_TIMEOUT_MS, WS_PAIRING_TIMEOUT_MS, WS_CONNECTION_ATTEMPT_CHANNEL, WS_PAIRING_SUCCESS_CHANNEL } = require("./constants");
 const { normalizeAuthor } = require("./author-normalize");
+const { writeConversionResult } = require("./library-write");
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const WS_PATH = "/blurby";
@@ -408,20 +409,22 @@ async function handleAddArticle(client, article, messageId) {
       });
       await fsPromises.unlink(tempHtmlPath).catch(() => {});
 
-      doc.convertedEpubPath = convResult.epubPath;
-      doc.filepath = convResult.epubPath;
-      doc.ext = ".epub";
-      doc.originalSourceUrl = article.sourceUrl || null;
-
-      // Update doc in library
-      const docs = _ctx.getLibrary();
-      _ctx.setLibrary(docs.map((d) => (d.id === doc.id ? doc : d)));
-      _ctx.saveLibrary();
+      // LIBRARY-WRITE-RACE-1: write to the live record; an article deleted during the conversion is not put back
+      const written = await writeConversionResult(_ctx, docId, {
+        convertedEpubPath: convResult.epubPath,
+        filepath: convResult.epubPath,
+        ext: ".epub",
+        originalSourceUrl: article.sourceUrl || null,
+      }, convResult.epubPath);
+      if (written) _ctx.saveLibrary();
     } catch (convErr) {
       console.error("[ws-server] EPUB conversion failed:", convErr.message);
       // Keep doc without EPUB — will be converted on-demand by load-doc-content
-      doc.content = article.textContent;
-      _ctx.saveLibrary();
+      const live = _ctx.getLibrary().find((d) => d.id === docId);
+      if (live && !live.deleted) {
+        live.content = article.textContent;
+        _ctx.saveLibrary();
+      }
     }
 
     _ctx.broadcastLibrary();

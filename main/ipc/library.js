@@ -13,6 +13,7 @@ const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
 const { pathKey } = require("../folder-sync");
 const { pickUserSettings } = require("../migrations");
+const { writeConversionResult } = require("../library-write");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -112,24 +113,12 @@ function register(ctx) {
     const deviceId = syncQueue.getDeviceId();
     const revision = syncStatus.revision || 0;
 
-    const library = ctx.getLibrary();
-    const docExists = library.some((d) => d.id === docId);
-    if (docExists) {
-      const now = Date.now();
-      const updated = library.map((d) => {
-        if (d.id !== docId) return d;
-        // Apply tombstone fields
-        return {
-          ...d,
-          deleted: true,
-          deletedAt: revision,
-          deletedBy: deviceId,
-          deletedAtTimestamp: now,
-          // Clear heavy content to keep library.json lean
-          content: undefined,
-        };
-      });
-      ctx.setLibrary(updated);
+    // LIBRARY-WRITE-RACE-1: tombstone the live record in place, so a writer holding it across an await still sees it
+    const existing = ctx.getLibrary().find((d) => d.id === docId);
+    if (existing) {
+      Object.assign(existing, { deleted: true, deletedAt: revision, deletedBy: deviceId, deletedAtTimestamp: Date.now() });
+      // Clear heavy content to keep library.json lean
+      delete existing.content;
     } else if (ctx.removeDocFromLibrary) {
       ctx.removeDocFromLibrary(docId);
     }
@@ -185,11 +174,8 @@ function register(ctx) {
           title: doc.title,
           author: doc.author || "Unknown",
         });
-        // Update the CURRENT record: a concurrent save-library may have replaced `doc` during the await
-        const current = ctx.getLibrary().find((d) => d.id === docId) || doc;
-        current.convertedEpubPath = convResult.epubPath;
-        current.ext = ".epub";
-        if (current.needsEpubConversion) delete current.needsEpubConversion;
+        // LIBRARY-WRITE-RACE-1: write to the live record; a doc deleted during the await is not resurrected
+        if (!(await writeConversionResult(ctx, docId, { convertedEpubPath: convResult.epubPath, ext: ".epub", needsEpubConversion: undefined }, convResult.epubPath))) return null;
         ctx.saveLibrary();
         return { filepath: convResult.epubPath, ext: ".epub" };
       } catch (convErr) {
@@ -603,10 +589,8 @@ function register(ctx) {
         maxPos = d.queuePosition;
       }
     }
-    const updated = library.map((d) =>
-      d.id === docId ? { ...d, queuePosition: maxPos + 1 } : d
-    );
-    ctx.setLibrary(updated);
+    const doc = library.find((d) => d.id === docId);
+    if (doc) doc.queuePosition = maxPos + 1;
     ctx.saveLibrary();
     ctx.broadcastLibrary();
   });
@@ -615,18 +599,13 @@ function register(ctx) {
     const library = ctx.getLibrary();
     const removedDoc = library.find((d) => d.id === docId);
     const removedPos = removedDoc?.queuePosition;
-    const updated = library.map((d) => {
-      if (d.id === docId) {
-        const { queuePosition, ...rest } = d;
-        return rest;
+    if (removedDoc) delete removedDoc.queuePosition;
+    // Compact: shift down docs that were above the removed position
+    if (removedPos !== undefined) {
+      for (const d of library) {
+        if (d.queuePosition !== undefined && d.queuePosition > removedPos) d.queuePosition -= 1;
       }
-      // Compact: shift down docs that were above the removed position
-      if (removedPos !== undefined && d.queuePosition !== undefined && d.queuePosition > removedPos) {
-        return { ...d, queuePosition: d.queuePosition - 1 };
-      }
-      return d;
-    });
-    ctx.setLibrary(updated);
+    }
     ctx.saveLibrary();
     ctx.broadcastLibrary();
   });
@@ -638,24 +617,18 @@ function register(ctx) {
     const oldPosition = doc.queuePosition;
     if (oldPosition === newPosition) return;
 
-    const updated = library.map((d) => {
-      if (d.id === docId) return { ...d, queuePosition: newPosition };
-      if (d.queuePosition === undefined) return d;
+    for (const d of library) {
+      if (d === doc || d.queuePosition === undefined) continue;
       // Shift items between old and new positions
       if (oldPosition < newPosition) {
         // Moving down: shift items in (old, new] up by 1
-        if (d.queuePosition > oldPosition && d.queuePosition <= newPosition) {
-          return { ...d, queuePosition: d.queuePosition - 1 };
-        }
+        if (d.queuePosition > oldPosition && d.queuePosition <= newPosition) d.queuePosition -= 1;
       } else {
         // Moving up: shift items in [new, old) down by 1
-        if (d.queuePosition >= newPosition && d.queuePosition < oldPosition) {
-          return { ...d, queuePosition: d.queuePosition + 1 };
-        }
+        if (d.queuePosition >= newPosition && d.queuePosition < oldPosition) d.queuePosition += 1;
       }
-      return d;
-    });
-    ctx.setLibrary(updated);
+    }
+    doc.queuePosition = newPosition;
     ctx.saveLibrary();
     ctx.broadcastLibrary();
   });
@@ -754,14 +727,13 @@ function register(ctx) {
     if (updateMap.size === 0) return { updated: 0 };
 
     let count = 0;
-    const updatedLibrary = library.map((doc) => {
+    for (const doc of library) {
       const fields = updateMap.get(doc.id);
-      if (!fields) return doc;
+      if (!fields) continue;
       count++;
-      return { ...doc, ...fields, modified: Date.now() };
-    });
+      Object.assign(doc, fields, { modified: Date.now() });
+    }
 
-    ctx.setLibrary(updatedLibrary);
     ctx.saveLibrary();
     ctx.broadcastLibrary();
     return { updated: count };

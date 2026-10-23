@@ -157,3 +157,50 @@ describe("main-side library writers update the live record (LIBRARY-WRITE-RACE-1
     expect(seeded[0].modified).toBeUndefined();
   });
 });
+
+describe("writeConversionResult writes to the live record or nowhere (LIBRARY-WRITE-RACE-1)", () => {
+  const converted = () => {
+    const p = path.join(dataDir, "converted.epub");
+    fs.writeFileSync(p, "epub-bytes");
+    return p;
+  };
+  const helper = () => require("../main/library-write.js").writeConversionResult;
+
+  it("writes the fields to the record the library holds now, not the caller's object", async () => {
+    const callers = { id: "a", title: "A", ext: ".txt", needsEpubConversion: true };
+    const live = { id: "a", title: "A (edited)", ext: ".txt", needsEpubConversion: true };
+    seed([live]);
+    const file = converted();
+    await expect(helper()(ctx, "a", { convertedEpubPath: file, ext: ".epub", needsEpubConversion: undefined }, file)).resolves.toBe(true);
+    expect(live.convertedEpubPath).toBe(file);
+    expect(live.ext).toBe(".epub");
+    expect("needsEpubConversion" in live).toBe(false);
+    expect(live.title).toBe("A (edited)");
+    expect(callers.convertedEpubPath).toBeUndefined();
+    expect(fs.existsSync(file)).toBe(true);
+  });
+
+  it("a deleted record: writes nothing and removes the converted file", async () => {
+    const live = { id: "a", deleted: true };
+    seed([live]);
+    const file = converted();
+    await expect(helper()(ctx, "a", { convertedEpubPath: file, ext: ".epub" }, file)).resolves.toBe(false);
+    expect(live).toEqual({ id: "a", deleted: true });
+    expect(fs.existsSync(file)).toBe(false);
+  });
+
+  it("a record that is gone: resolves false and removes the converted file", async () => {
+    seed([{ id: "b" }]);
+    const file = converted();
+    await expect(helper()(ctx, "a", { ext: ".epub" }, file)).resolves.toBe(false);
+    expect(fs.existsSync(file)).toBe(false);
+    expect(library).toEqual([{ id: "b" }]);
+  });
+
+  it("a file that cannot be removed does not throw; it is logged", async () => {
+    seed([]);
+    const missing = path.join(dataDir, "never-written.epub");
+    await expect(helper()(ctx, "a", { ext: ".epub" }, missing)).resolves.toBe(false);
+    expect(fs.readFileSync(errorLog, "utf-8")).toContain(`converted file for removed doc "a" not deleted (${missing})`);
+  });
+});
