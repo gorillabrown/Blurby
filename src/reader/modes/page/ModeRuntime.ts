@@ -575,6 +575,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
   onPageTurned = (first: { readonly wordIndex: number | null; readonly cfi: string }): void => {
     if (!this.alive) return;
+    this.heldClickAnchor = null; // PAGE-SAVE-RESTAMP-3: a saved turn replaces any held click
     const s = this.state;
     this.markEngaged();
     this.ports.persistence.markPageActivity();

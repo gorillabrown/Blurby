@@ -314,6 +314,7 @@ export default function PageFoliateView({
   // PAGE-SAVE-RESTAMP-2: set once the book's words cannot arrive (extraction rejected, or no or empty sections). A turn on a
   // renderer-numbered document is then not held: it saves its cfi and keeps the stored word index.
   const bookWordsFailedRef = useRef(false);
+  const sectionWrapsRef = useRef(new WeakMap<Document, Promise<number>>());
   // A swipe that snapped onto the blank edge page: the next relocate (the adjacent section's) is the turn's.
   const swipeCrossingRef = useRef(false);
   const onLoadRef = useRef(onLoad);
@@ -616,19 +617,18 @@ export default function PageFoliateView({
           if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
         };
         // PAGE-SAVE-RESTAMP-2 (ruling): a word click on renderer-numbered spans holds its save like a turn, in the same slot
-        // (the latest held action wins; a jump cancels it). Returns true when the click's index is provisional. Only a
-        // click hardSelect resolves is held (review fr3): an exact index, or a section offset of 0 or more.
-        const holdWordClick = (doc: Document, range: Range, exactIdx: number | null, wordOffsetInSection: number): boolean => {
-          if (!rendererNumberedDocsRef.current.has(doc) || !(exactIdx != null || wordOffsetInSection >= 0)) return false;
+        // (the latest held action wins; a jump cancels it). Called only for a click on a renderer-numbered document
+        // (the caller's holdSave); the runtime's own guard drops a click hardSelect did not resolve (review fr3).
+        const holdWordClick = (doc: Document, range: Range): void => {
+          if (!rendererNumberedDocsRef.current.has(doc)) return;
           const start = textOffsetBefore(doc.body, range.startContainer, range.startOffset);
           const end = textOffsetBefore(doc.body, range.endContainer, range.endOffset);
           if (bookWordsFailedRef.current) {
-            reportFirstWordOnPage(doc, start, end, true);
+            if (!reportFirstWordOnPage(doc, start, end, true)) recordDiagnosticRef.current("page-turn-lost", `reason=book-words-failed start=${start} end=${end} kind=click`);
           } else {
             pendingTurnRef.current = { doc, start, end, click: true };
             checkBookWords();
           }
-          return true;
         };
         // PAGE-SAVE-RESTAMP-GUARD-1: lets the re-stamp effect (outside this closure) save the turn it held.
         reportHeldTurnRef.current = (doc: Document) => {
@@ -665,7 +665,9 @@ export default function PageFoliateView({
               // the re-stamp effect replaces them (and removes the document). Added before the wrap, which yields
               // between batches, so a turn onto a page stamped mid-wrap is held too.
               if (!liveSections()?.length) rendererNumberedDocsRef.current.add(doc);
-              await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              const wrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              sectionWrapsRef.current.set(doc, wrap); // PAGE-SAVE-RESTAMP-3: the re-stamp waits for this wrap
+              await wrap;
             }
           }
 
@@ -720,7 +722,7 @@ export default function PageFoliateView({
                 const wordOffsetInSection = exactIdx != null && sectionBase >= 0
                   ? exactIdx - sectionBase
                   : Math.max(0, resolvedToken.renderedWordIndex);
-                const holdSave = holdWordClick(doc, tokenRange ?? fallbackRange, exactIdx, wordOffsetInSection); // PAGE-SAVE-RESTAMP-2
+                const holdSave = rendererNumberedDocsRef.current.has(doc); // PAGE-SAVE-RESTAMP-2
                 onWordClickRef.current?.(
                   cfi,
                   resolvedToken.canonicalWord,
@@ -729,6 +731,8 @@ export default function PageFoliateView({
                   exactIdx ?? undefined,
                   holdSave,
                 );
+                // PAGE-SAVE-RESTAMP-3: report after hardSelect has set the held anchor.
+                holdWordClick(doc, tokenRange ?? fallbackRange);
               }
             }
           });
@@ -771,7 +775,7 @@ export default function PageFoliateView({
                   ? exactIdx - sectionBase
                   : Math.max(0, resolvedToken.renderedWordIndex);
                 const canonicalWord = resolvedToken.canonicalWord || word;
-                const holdSave = holdWordClick(doc, tokenRange ?? range, exactIdx, wordOffsetInSection); // PAGE-SAVE-RESTAMP-2
+                const holdSave = rendererNumberedDocsRef.current.has(doc); // PAGE-SAVE-RESTAMP-2
                 onWordClickRef.current?.(
                   cfi,
                   canonicalWord,
@@ -780,6 +784,8 @@ export default function PageFoliateView({
                   exactIdx ?? undefined,
                   holdSave,
                 );
+                // PAGE-SAVE-RESTAMP-3: report after hardSelect has set the held anchor.
+                holdWordClick(doc, tokenRange ?? range);
               }
             }
           });
@@ -1099,6 +1105,7 @@ export default function PageFoliateView({
         if (!doc?.body) continue;
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;
+        await sectionWrapsRef.current.get(doc)?.catch(() => {}); // PAGE-SAVE-RESTAMP-3: never interleave with the load's wrap
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);

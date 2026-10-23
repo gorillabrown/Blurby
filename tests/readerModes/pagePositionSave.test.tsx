@@ -777,6 +777,18 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       }
     });
 
+    // (hc1) a turn that replaces a held click clears the click's anchor.
+    it("(hc1) a held turn replacing a held click saves the turn and clears heldClickAnchor", async () => {
+      const { fake, runtime, renderer, render, wired, doc } = await mountWiredClicks();
+      await clickWord(doc, 1);
+      renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+      await click("Next page");
+      await render({ ...wired, ...BOOK_WORDS });
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+      expect((runtime as any).heldClickAnchor).toBeNull();
+    });
+
     // (fr1n) pin: fr1's guard, negative side. A held-click save after the anchor moved on leaves the anchor alone.
     it("(fr1n) a held-click save after the anchor moved on does not overwrite it", async () => {
       const { runtime, doc } = await mountWiredClicks();
