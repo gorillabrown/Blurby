@@ -70,8 +70,9 @@ function computeZoneProperties(
 describe("FLOW-INF-A: Flow reading zone", () => {
 
   // (a) Constants exported with correct values
-  it("FLOW_READING_ZONE_POSITION constant equals 0.25", () => {
-    expect(FLOW_READING_ZONE_POSITION).toBe(0.25);
+  // BAND-ALIGN-2 R4 (pinned test, rule 50): the default anchor is Top third, not the 0.25 zone position.
+  it("FLOW_READING_ZONE_POSITION constant equals 1/3 (Top third)", () => {
+    expect(FLOW_READING_ZONE_POSITION).toBe(1 / 3);
   });
 
   it("FLOW_ZONE_LINES_DEFAULT constant equals 5", () => {
@@ -201,9 +202,10 @@ describe("FLOW-INF-A: Flow reading zone", () => {
     }
   });
 
-  it("FLOW_READING_ZONE_POSITION (0.25) is one of the valid dropdown option values", () => {
-    const zonePositionOptions = [0.15, 0.25, 0.35, 0.55];
-    expect(zonePositionOptions).toContain(FLOW_READING_ZONE_POSITION);
+  // BAND-ALIGN-2 R4 (pinned test, rule 50): the anchor options are Top, Top third and Center.
+  it("FLOW_READING_ZONE_POSITION (1/3) is one of the band anchor options (0, 1/3, 0.5)", () => {
+    const bandAnchorOptions = [0, 1 / 3, 0.5];
+    expect(bandAnchorOptions).toContain(FLOW_READING_ZONE_POSITION);
   });
 
   // Extra: CSS gradient is a linear-gradient to bottom (vertical mask)

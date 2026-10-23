@@ -104,7 +104,9 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
     document.body.innerHTML = "";
   });
 
-  it("(b1d) --flow-zone-bottom is 15% + 5 x 27 / 630 (36.43%), not the 24 px fallback's 34.05%", async () => {
+  // BAND-ALIGN-2 (pinned test edited under Blurby.Roadmap's ruling, 2026-10-23): the band's top is no longer at
+  // FLOW_ZONE_INITIAL_TOP but at the anchor (R4, Top third by default), so b1d asserts the band's height and top.
+  it("(b1d) the band is 5 x 27 / 630 (21.43%) tall, not the 24 px fallback's 19.05%, with its centre at the Top third anchor", async () => {
     nextSection = sectionDoc("line-height: 27px; font-size: 18px");
     const viewApiRef = { current: null as unknown };
     const props = {
@@ -139,9 +141,12 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
     const zoneHost = Array.from(host.querySelectorAll<HTMLElement>("*")).find((el) => el.style.getPropertyValue("--flow-zone-bottom"));
     expect(zoneHost, "no element carries --flow-zone-bottom").toBeTruthy();
+    const top = parseFloat(zoneHost!.style.getPropertyValue("--flow-zone-top"));
     const bottom = parseFloat(zoneHost!.style.getPropertyValue("--flow-zone-bottom"));
-    const expected = (FLOW_ZONE_INITIAL_TOP + (FLOW_ZONE_LINES_DEFAULT * 27) / VIEW_H) * 100; // 36.43
-    expect(bottom, `zone bottom ${bottom}% (the 24 px fallback gives 34.05%)`).toBeCloseTo(expected, 2);
+    const height = ((FLOW_ZONE_LINES_DEFAULT * 27) / VIEW_H) * 100; // 21.43
+    expect(bottom - top, `zone height ${bottom - top}% (the 24 px fallback gives 19.05%)`).toBeCloseTo(height, 2);
+    const anchorTop = ((VIEW_H / 3 - (FLOW_ZONE_LINES_DEFAULT * 27) / 2) / VIEW_H) * 100; // 22.62: centred on 210 px
+    expect(top, `zone top ${top}% (FLOW_ZONE_INITIAL_TOP gave ${FLOW_ZONE_INITIAL_TOP * 100}%)`).toBeCloseTo(anchorTop, 2);
     act(() => root.unmount());
   });
 });
