@@ -14,10 +14,10 @@ status: draft   # not a launched charter; /epic sets active when it scaffolds th
      in the entry itself, so the plan is this charter draft beside it. It is not a launched
      charter: /roadmap-review places the item as Path: epic, and /epic adopts, tightens or
      re-cuts this draft. Until then nothing here is on the roadmap or the register.
-     Owner decisions come from the storyboard and are not reopened here. Items marked
-     "Open question" are the owner's (CLAUDE.md Rule 11, tiers 2 and 3); each carries a
-     recommendation. Technical choices (tier 1) are decided here and logged under
-     "Planner decisions". -->
+     Owner decisions come from the storyboard and are not reopened here. The plan's
+     owner questions (CLAUDE.md Rule 11, tiers 2 and 3) were all ruled on 2026-10-23 and
+     are recorded in the storyboard's alignment record and under "Owner rulings" below.
+     Technical choices (tier 1) are decided here and logged under "Planner decisions". -->
 
 ## Outcome
 
@@ -25,7 +25,7 @@ A reader signs in to blrby.app on any device and sees the same books, reading po
 
 1. Server foundation and plan limits.
 2. Desktop sign-in, the drag-and-drop window, sync and offline books.
-3. Payments, with ads on Free.
+3. Payments. Ads are off the desktop for now (owner, 2026-10-23).
 4. Server narration: the Kokoro speed-and-cost test, then hosting.
 
 The alignment record in `../2026-10-23-blurby-server.md` (Storyboard) is the source of every owner decision, frame, plan value and out-of-scope line. Where this draft is shorter, the storyboard governs. Where they conflict, the storyboard governs until the owner amends it.
@@ -89,7 +89,7 @@ This is what the edit sites hold now. Phase specs cite it. Each run re-greps its
 | T7 | **What a book is on the server:** one record per book. It stores the original file plus the canonical reading EPUB the desktop produces at intake (`convertToEpub`, unchanged), and it counts as one book. Dedupe within an account is by the SHA-256 of the original; a duplicate drop reports "already in your library" and does not count twice. Covers are uploaded as a separate small object. Local absolute paths (`filepath`, `coverPath`, `convertedEpubPath`) become device-local cache fields and never sync. | Every device reads the same bytes, so a word index means the same word everywhere (LL-160). |
 | T8 | **Sync model: ordered change log, not file snapshots.** Each change is an op `{opId (UUID), deviceId, kind, target, payload, changedAt}`. The client persists an op to a local journal (`sync-journal.json`, atomic, serialized writer) **before** applying it to its local state. The server applies ops idempotently by `opId` and gives each accepted op an account sequence number. Clients pull `GET /v1/changes?since=<seq>` (paged). Rules: positions and settings fields go to the most recent `changedAt` (owner rule), with ties broken by server sequence. Highlights, notes and reading sessions are records with their own ids, never merged by value: every device's records are kept, and a delete is a tombstone op. `changedAt` later than the server's receive time is clamped to the receive time, so a fast clock cannot win forever. | Must-never #2 and frame 3. It replaces the dead merge branches and the never-replayed queue. Paged pulls also remove the whole-library transfer the storyboard names. |
 | T9 | **Position payload** is `{wordIndex, cfi, anchorText (≤ 12 words around the word), furthestWordIndex}`. A receiver that does not share the sender's word numbering lands by `cfi`, then by `anchorText`. | LL-160 and LL-161: the phone epics will run another runtime and ICU, so word indices alone are not portable. |
-| T10 | **Highlights and notes become records** in a local `annotations.json` (per doc, each with an id), and that file is the authority. `Blurby Highlights.md` and the Reading Notes `.docx` become exports generated from the records, written only to `<data>` and never into `sourceFolder`. *(The look of the export is unchanged; whether it keeps being written automatically is open question Q4.)* | Today's markdown append cannot be synced without loss. |
+| T10 | **Highlights and notes become records** in a local `annotations.json` (per doc, each with an id), and that file is the authority. `Blurby Highlights.md` and the Reading Notes `.docx` become exports generated from the records, written only to `<data>` and never into `sourceFolder`. *(The look of the export is unchanged; it is written by an Export action, not automatically (owner ruling Q4).)* | Today's markdown append cannot be synced without loss. |
 | T11 | **The quit path never syncs over the network.** The "cloud sync" step at `main.js:647` becomes "journal flush": the journal and the debounced library save are drained (LL-157, LL-159), and the upload happens on next launch or reconnect. | A network call inside a 3 s cap either loses ops or blocks quit. The journal makes it safe to wait. |
 | T12 | **Plan limits are server data**: a `plans` table (`free`, `plus`, `unlimited`) holding the storyboard's approved values, plus a per-account `plan_override` (the owner's account is permanently `unlimited`). Until Phase 3 every new account's plan is `unlimited` (storyboard assumption). The enforcement code is still built and tested in Phase 1 against `free` and `plus` fixtures. Values change through `wrangler d1 execute` on an audited admin script (`server/scripts/set-plan.ts`), never in code. | "Adjustable starting settings" (storyboard). |
 | T13 | **Intake rules** (supported types) come from one shared list, `server/src/contract/fileTypes.ts`, which generates `main/server-contract.js`. `main/folder-watcher.js:9`, `DropZone.tsx:3` and the server all import it, which removes today's two-list disagreement. | Frame 2 ("unsupported types are named and refused"). |
@@ -107,7 +107,7 @@ Commands name their shell and pass only on their exact exit code (standing rule 
 | E3 | Frame 3: offline highlights and position survive reconnect; the most recent position wins; every device's highlights are kept. | P2-D4 | Test output, including the kill-mid-write case |
 | E4 | Frame 4: a sixth personal book on Free is blocked with upgrade, delete or cancel; Marketplace books are owned and never counted. | P1-D4, P2-D3; P3-D2 for the upgrade path | Test output; the test-mode purchase recorded |
 | E5 | Frame 5 (must never): no account reaches another's books or data, even by a guessed link; deleting an account removes everything. | P1-D3 (route matrix), P1-D6 (deletion) | Matrix output, including its broken-route control exiting 1; the deletion test output |
-| E6 | Frame 6: Narrate minutes count on every device; the reading page and Narrate never show ads. | P2-D6 (counting), P3-D4 (no ads on reading or Narrate surfaces) | Test output, including the injected-slot control exiting 1 |
+| E6 | Frame 6: Narrate minutes count on every device; the reading page and Narrate never show ads. The desktop shows no ads on any plan for now (owner, 2026-10-23). | P2-D6 (counting), P3-D4 (no ad element anywhere in the desktop app) | Test output, including the injected-slot control exiting 1 |
 | E7 | blrby.app publishes terms of use and a takedown contact before uploads open. | P1-D7 (the uploads flag cannot be turned on without them) | The gate test output; production `/terms` and `/takedown` returning 200 |
 | E8 | Own-cloud sync is gone: `main/sync-engine.js`, `main/cloud-onedrive.js`, `main/cloud-google.js`, `main/cloud-storage.js`, `main/cloud-retry.js` and their IPC, preload and UI are deleted, with no dangling import. | P2-D7 | The census in the phase's first commit; the grep exits 1 (it exits 0 on the base) |
 | E9 | Project gates: `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine; `npm --prefix server test` and `npm --prefix server run typecheck` exit 0 (LL-149). | Every phase | Exit 0 for each command, with the suite counts recorded |
@@ -143,11 +143,11 @@ Commands name their shell and pass only on their exact exit code (standing rule 
 
 ## Escalation triggers (STOP and surface to the owner)
 
-- Any open question below that blocks the current phase.
+- Any reality that contradicts an owner ruling below.
 - Gate G-P1: before the first production deploy (the owner provides the Cloudflare account access, domains and terms text).
 - Gate G-P2: the two-device owner smoke (P2-D1).
-- Gate G-P3: the payment provider and ad source choices (Q6, Q7), then a live test purchase.
-- Gate G-P4: the Kokoro measurement verdict (P4-D1), and the MeloTTS conflict (Q9).
+- Gate G-P3: the owner picks the merchant of record (Paddle or Stripe Managed Payments, Q6) and opens its test mode, then a live test purchase.
+- Gate G-P4: the Kokoro measurement verdict (P4-D1). On FAIL, server narration goes back to the owner; there is no fallback engine (Q9).
 - A must-never row failing after one repair attempt.
 - Any change to Page, Focus, Flow or Narrate runtime behaviour beyond the save and position calls named in Phase 2.
 
@@ -169,7 +169,7 @@ Commands name their shell and pass only on their exact exit code (standing rule 
 | LL-159 — a flush must drain timer-armed writes | P2's quit step list names the journal's debounced write and the library save; a source-text test pins the list |
 | LL-158 — trace a live row at the real data size | P2's sync rows are sized at 5,000 books and 50,000 ops, not 10 |
 | LL-160, LL-161 — word numbering depends on the runtime; check words by text | T9; P2-D1 compares the landed word by text |
-| LL-142 — a timing label is a declaration, not evidence | P4: server Kokoro must return the model's own durations, proven against the deployed image by hash; MeloTTS cannot (Q9) |
+| LL-142 — a timing label is a declaration, not evidence | P4: server Kokoro must return the model's own durations, proven against the deployed image by hash; Kokoro is the only server engine (Q9) |
 | LL-138 / standing rule 43 — positive controls | Every must-never test is first seen failing against a deliberately broken route or merge |
 | LL-143 / standing rule 44 — dry-run gates, exact exit codes | Every DoD row names its shell and exit code |
 | LL-151, LL-166 — prove a recorder can record failure and effect | The isolation matrix test fails on a route with the ownership check removed |
@@ -266,7 +266,7 @@ Each has a deliberately broken control, first seen failing (standing rule 43).
 
 **What:**
 - **Sign-in:** the desktop requires an account. The first launch shows sign-in (Google, Microsoft, Apple, email) through the system browser (T3). Later launches use the stored session, offline too (T4).
-- **Drag-and-drop window:** the onboarding drag-and-drop window, reachable at any time from the library, does the intake (T6, T7). It refuses unsupported types by name. It refuses an over-limit drop whole, with Upgrade and Cancel. Before Phase 3, Upgrade opens the plans page on blrby.app. The extension's `add-article` goes through the same intake as an article.
+- **Drag-and-drop window:** the onboarding drag-and-drop window, reachable at any time from the library, does the intake (T6, T7). It refuses unsupported types by name. It refuses an over-limit drop whole, with Upgrade and Cancel. Before Phase 3, Upgrade opens the plans page on blrby.app. The extension's `add-article` goes through the same intake as an article. Drag-and-drop is the only way books come in; the watched source folder no longer imports (Q2).
 - **Sync:** the old own-cloud sync is deleted, and the journal and change-log client replaces it (T8–T11).
 - **Highlights and notes:** they become synced records (T10).
 - **Offline books:** books download for offline reading, and position and annotation changes made offline sync on reconnect.
@@ -282,7 +282,7 @@ Each has a deliberately broken control, first seen failing (standing rule 43).
 | P2-D3 | Frame 2 and frame 4 on the desktop: the window shows at the first signed-in launch and from the library at any time. Unsupported files are listed by name and refused. A Free-fixture drop over the limit adds nothing and offers Upgrade or Cancel. A sixth book on Free offers Upgrade, Delete or Cancel. Nothing already uploaded changes. `ws-server` articles go through the same intake. | `npx vitest run tests/intakeWindow.test.tsx tests/intakeService.test.js` exits 0; owner-observed at G-P2 |
 | P2-D4 | Frame 3: offline, two highlights and a new position are journaled before they are applied. On reconnect they upload exactly once. If another device moved the position in the meantime, the most recent change wins, and both devices' highlights are kept. | `npx vitest run tests/syncJournal.test.js tests/serverSync.twoDevice.test.js` exits 0, including a kill-mid-write case (the journal is read back after a simulated crash) |
 | P2-D5 | Quit drains the journal and library writes and makes no network call (T11, LL-157, LL-159). | The rewritten `tests/quitSequence.test.js` exits 0. Its source-text check lists every deferred writer, and it fails when one is removed (control). |
-| P2-D6 | Narrate playback seconds are journaled as `narrate-usage` and appear in the server's monthly balance. The reading page and Narrate show no ad surface (structural test). | `npx vitest run tests/narrateUsage.test.js` exits 0 |
+| P2-D6 | Narrate playback seconds are journaled as `narrate-usage` and appear in the server's monthly balance. The reading page and Narrate show no ad surface (the structural test is P3-D4). | `npx vitest run tests/narrateUsage.test.js` exits 0 |
 | P2-D7 | E8: the old sync is deleted without dangling imports. The supported-type lists are one list. | Import census (LL-139) committed in the phase's first commit. `git grep -n -e sync-engine -e cloud-onedrive -e cloud-google -e cloud-storage -e cloud-retry -- main src preload.js main.js` exits 1 (on the base it finds them, exit 0). `npx vitest run tests/fileTypesSingleSource.test.js` exits 0. |
 | P2-D8 | Large library: 5,000 books list, page and open without the whole library being sent on every save. The first sync of 5,000 books completes. | `npx vitest run tests/serverSync.scale.test.js` exits 0 (LL-158) |
 | P2-D9 | Project gates on the owner's machine | `npm test`, `npm run typecheck` and `npm run build` exit 0 (pwsh) |
@@ -302,6 +302,7 @@ Each has a deliberately broken control, first seen failing (standing rule 43).
 - **`main/migrations.js`:** library schema 7 adds the server id, device-local path fields and download state, and drops `syncContent`, `contentHash`, `deletedBy` and `deletedAtTimestamp`. Settings schema 14 drops `syncIntervalMinutes` and `syncOnMeteredConnection` from `SETTINGS_DEFAULTS` (`:299-321`). Tests: `tests/migrations.test.js`.
 - **`main.js`:** startup at `:510`, `:538-543` and `:611-615` (auth init, then the sign-in gate, then sync start); the quit steps at `:647-648` become the journal flush (T11).
 - **`main/folder-watcher.js:9`** imports the shared type list.
+- **Watched source folder retired as an intake path (owner ruling Q2):** the folder watcher and folder sync (`main.js:15,18,322-351`, `main/folder-watcher.js`, `main/folder-sync.js`, `rescan-folder` and `cancel-sync` in `main/ipc/library.js:359,663`) stop importing books. The import census (task 1) decides what is deleted and what stays for CLOUD-CONNECTORS-1. The `sourceFolder` setting goes in settings schema 14. Folder notices (FOLDER-NOTICE-1/-2) and LARGE-FOLDER-SYNC-1/-2/-3 code are inside this census, and the review marks their open follow-ups superseded.
 - **`preload.js`:** remove `:132-133`, `:153-162` and `:198-203`; add the `account*`, `intake*` and `onSyncStatus` methods. Three-way contract with `src/types.ts:301-366` (LL-106).
 - **Renderer:**
   - New: `src/components/IntakeWindow.tsx`.
@@ -351,7 +352,7 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 
 ---
 
-### Phase 3 — Payments and ads
+### Phase 3 — Payments (ads off the desktop for now)
 
 **What:**
 - **Plans become real:** new accounts start on Free.
@@ -360,10 +361,10 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
   - The payment provider's webhooks set the account's plan.
   - The desktop shows the plan and usage, with Upgrade and Manage.
   - Over-limit states follow Q5.
-- **Ads (Free only):** a sponsor or house ad slot in the library and between books, served by the Worker, never on the reading page or in Narrate.
+- **No ads on the desktop (owner, 2026-10-23).** AdSense bans ads integrated into software, and its WebView exception needs Google's mobile-only SDK; packaging as a "Chromium app" changes nothing, because Blurby already is one. Free keeps its limits. Ads return with a surface that allows them (the phone apps with AdMob, or a future web reader): a follow-up flag.
 - **Narrate time is enforced** at the plan's monthly limit (Q8).
 
-**Why:** the plans the owner approved. It is placed after Phase 2, so payments are never the first thing built (storyboard).
+**Why:** the plans the owner approved, minus desktop ads (ruled 2026-10-23). It is placed after Phase 2, so payments are never the first thing built (storyboard).
 
 **Done when:**
 
@@ -372,44 +373,43 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 | P3-D1 | Webhooks are verified on the raw body and processed idempotently. Plan changes apply within one sync. A forged or replayed webhook changes nothing. | `npm --prefix server test -- billing` exits 0 (forged-signature and replay controls) |
 | P3-D2 | Frame 4's Upgrade path: an over-limit drop → Upgrade → test-mode checkout → the plan becomes Plus, and the same drop then succeeds. Cancel adds nothing. | Owner-observed in the provider's test mode at G-P3, plus `tests/planUpgrade.test.js` exits 0 |
 | P3-D3 | Downgrade and lapse follow the owner's Q5 ruling. Nothing is deleted without the user choosing it. | `npm --prefix server test -- downgrade` exits 0 |
-| P3-D4 | Must-never #3: no ad element can render on the reading surfaces (Page, Focus, Flow, Narrate) on any plan. Plus and Unlimited render no ad element anywhere. | `npx vitest run tests/adPlacement.test.tsx` exits 0. The structural test enumerates the reader components; control: an ad slot injected into `ReaderContainer`'s tree makes it exit 1. |
+| P3-D4 | Must-never #3, held structurally while desktop ads are off: the desktop app contains no ad element or ad-network script on any plan. | `npx vitest run tests/noAds.test.tsx` exits 0. The test renders the library and reader trees on a Free account, and greps the built bundle for ad-network hosts. Control: an injected ad element makes it exit 1. |
 | P3-D5 | The Narrate limit stops at the limit as Q8 rules, and shows upgrade or cancel. The owner's account is never limited. | `npx vitest run tests/narrateLimit.test.js` exits 0 |
 | P3-D6 | Project gates: desktop `npm test`, `typecheck` and `build`; server `typecheck` and `test` | exit 0 each |
 
 **Edit sites:**
-- Server (new): `server/src/routes/billing.ts`, `server/src/billing/<provider>.ts`, `server/src/routes/ads.ts`, and `server/migrations/0002_billing.sql` (subscriptions, ad inventory).
-- Desktop: `src/components/settings/AccountSettings.tsx` (plan, Upgrade, Manage), `src/components/IntakeWindow.tsx` (Upgrade wiring), a new `src/components/AdSlot.tsx` (mounted only in `LibraryView.tsx` and the between-books surface), and `main/ipc/account.js` (open checkout or portal in the system browser through `shell.openExternal` on an allow-listed blrby.app URL).
+- Server (new): `server/src/routes/billing.ts`, `server/src/billing/<provider>.ts` (the merchant of record picked at G-P3), and `server/migrations/0002_billing.sql` (subscriptions).
+- Desktop: `src/components/settings/AccountSettings.tsx` (plan, Upgrade, Manage), `src/components/IntakeWindow.tsx` (Upgrade wiring) and `main/ipc/account.js` (open checkout or portal in the system browser through `shell.openExternal` on an allow-listed blrby.app URL).
 - Narrate enforcement: the usage check at the Narrate runtime's Play entry (`src/reader/modes/narrate/`). The Narrate runtime is touched only at its start gate (isolation rule).
 
-**Tests:** `server/test/billing.webhooks.test.ts`, `server/test/downgrade.test.ts`, `tests/planUpgrade.test.js`, `tests/adPlacement.test.tsx`, `tests/narrateLimit.test.js`.
+**Tests:** `server/test/billing.webhooks.test.ts`, `server/test/downgrade.test.ts`, `tests/planUpgrade.test.js`, `tests/noAds.test.tsx`, `tests/narrateLimit.test.js`.
 
 **Failure handling:**
 - A webhook outage → the plan is reconciled hourly from the provider's API (cron).
 - A provider outage → existing plans keep working, and checkout shows "try again later".
-- An ad source outage → the slot collapses, never blank-boxes.
 - Webhooks go through a dead-letter queue with alerts to the owner.
 
 **Task list:**
 
 | # | Task | Class | Kind | Tier | Effort | Estimate | Group |
 |---|---|---|---|---|---|---|---|
-| 1 | G-P3a: owner rulings Q5–Q8; provider account in test mode | calculable | owner gate | mechanical | low | 20m (+ owner) | — |
+| 1 | G-P3a: owner picks the merchant of record and opens its test mode | calculable | owner gate | mechanical | low | 20m (+ owner) | — |
 | 2 | Billing: checkout, portal, webhooks, reconcile cron, plan application | calculable | payments | cross-cutting | high | 5h | — |
 | 3 | Downgrade and lapse rules (Q5) | calculable | feature | bounded | medium | 2h | — |
-| 4 | Ad slot and serving route; placement structural test | calculable | feature | bounded | medium | 2h30m | — |
+| 4 | No-ads structural test with its control | calculable | test | mechanical | low | 30m | — |
 | 5 | Narrate limit at Play (Q8) | calculable | feature | bounded | medium | 1h30m | — |
 | 6 | Reviews (parallel); G-P3b live test-mode purchase by the owner | calculable | review + owner | bounded | medium | 1h (+ owner) | R |
 
-**Lessons applied:** LL-138 (forged and replayed controls); LL-151 (the ad placement test fails on an injected slot); LL-141 (owner-observed purchase); LL-149.
+**Lessons applied:** LL-138 (forged and replayed controls); LL-151 (the no-ads test fails on an injected ad element); LL-141 (owner-observed purchase); LL-149.
 
 ---
 
-### Phase 4 — Server narration (the Kokoro speed-and-cost test, then hosting; MeloTTS fallback)
+### Phase 4 — Server narration on Kokoro (the speed-and-cost test, then hosting)
 
 **What:**
 - **4a, measure.** Package the existing Narrate producer (`main/narrate/capture.js`, `expose-durations.js`, `normalize.js`, `wordmap.js`, `chunker.js`; Kokoro q4 plus the exposed durations) in a linux/amd64 Cloudflare Container. Measure its speed and cost per audio hour on standard-2, standard-3 and standard-4 (CPU only; Containers have no GPU, research 2026-10-23). Report against fixed thresholds.
 - **4b, host.** If 4a passes, serve `POST /v1/narrate/chunk` from the Worker through a Container class. It returns audio plus the model's own durations, with provenance, and fails closed exactly as the desktop does (F4). Usage counts against the plan.
-- **MeloTTS:** the fallback is gated by Q9, because MeloTTS returns no word timing.
+- **Kokoro only (owner, 2026-10-23).** MeloTTS is dropped, and no other engine is planned. A 4a FAIL goes back to the owner.
 
 **Why:** tablets and phones get Narrate from the server (frame 6). The owner's decision is desktop first, with server narration later and measured first.
 
@@ -420,17 +420,17 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 | P4-D1 | **4a verdict:** the container image's model and durations-exposed copy hash-match the desktop's pinned artefacts. The durations output is present and used on the production path (LL-142). Each instance type reports real-time factor, cold start to first voiced sample, warm first-chunk latency, and cost per audio hour, with the worst case reported, never a mean. The verdict is PASS only if every threshold in Q10 is met. | `server/narrate/measure.mjs` summary exits 0 on PASS and 1 on FAIL. Control: a container with the durations output stripped exits 1. The evidence is `docs/studies/blurby-server-1/phase4/VERDICT.md`. |
 | P4-D2 | **4b:** the server's word table for the gate corpus is identical to the desktop producer's for the same text, voice and rate (same model bytes). Missing or mismatched durations fail closed. | `npm --prefix server test -- narrate` exits 0 (an identity check against tables the desktop produced, plus negative controls) |
 | P4-D3 | Usage is counted from audio actually served. Cold instances sleep after `sleepAfter`, and idle cost is zero. | `npm --prefix server test -- narrateUsage` exits 0; the billing dashboard is checked at G-P4 |
-| P4-D4 | The fallback behaves as the owner's Q9 ruling says. Under no ruling is an estimated table labelled exact. | `npm --prefix server test -- narrateFallback` exits 0 |
+| P4-D4 | No server path produces audio without Kokoro's own durations: no second engine, and no estimated table. | `npm --prefix server test -- narrateOnlyKokoro` exits 0. A source-text check finds no TTS engine or Workers AI binding other than the Kokoro container; control: a stub second engine makes it exit 1. |
 
 **Edit sites:**
 - New: `server/narrate/Dockerfile`, `server/narrate/server.mjs` (an HTTP wrapper over the producer), `server/narrate/measure.mjs`, `server/src/routes/narrate.ts`, a Container class in `server/src/narrate/container.ts`, and `wrangler.jsonc` `containers` with `max_instances`.
 - The desktop producer files are **read and copied at build time**, never forked: `server/narrate/sync-producer.mjs` copies `main/narrate/*.js` into the image, and a test asserts the copies are byte-identical.
 
-**Tests:** `server/test/narrate.identity.test.ts`, `server/test/narrate.failClosed.test.ts`, `server/test/narrate.usage.test.ts`, `server/test/narrate.fallback.test.ts`. Measurement scripts are not `*.test.*` (LL-146).
+**Tests:** `server/test/narrate.identity.test.ts`, `server/test/narrate.failClosed.test.ts`, `server/test/narrate.usage.test.ts`, `server/test/narrate.onlyKokoro.test.ts`. Measurement scripts are not `*.test.*` (LL-146).
 
 **Failure handling:**
 - The producer cannot run in the container (A4): repair it as a harness problem, twice, then BLOCKER(USER).
-- 4a FAIL: stop and report. Server narration goes back to the owner with the measured numbers, and the options in Q9.
+- 4a FAIL: stop and report. Server narration goes back to the owner with the measured numbers. There is no fallback engine (Q9); tablets and phones run without server Narrate until the owner decides.
 - Kokoro's licence (Apache-2.0) and the voice files' terms are re-checked before hosting.
 
 **Task list:**
@@ -439,7 +439,7 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 |---|---|---|---|---|---|---|---|
 | 1 | Container image with the copied producer; hash checks; durations present (A4, LL-142) | investigative | harness | cross-cutting | high | 4h | — |
 | 2 | Measurement harness and runs on standard-2/3/4; VERDICT.md | investigative | measurement | bounded | high | 3h | — |
-| 3 | G-P4: owner reads the verdict; Q9 and Q10 confirmed | calculable | owner gate | mechanical | low | 20m (+ owner) | — |
+| 3 | G-P4: owner reads the verdict against the Q10 thresholds | calculable | owner gate | mechanical | low | 20m (+ owner) | — |
 | 4 | 4b route, Container class, fail-closed, identity test, usage | calculable | feature | cross-cutting | high | 4h | — |
 | 5 | Reviews (parallel) | calculable | review | bounded | medium | 40m | R |
 
@@ -447,19 +447,21 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 
 ---
 
-## Open questions for the owner (each with a recommendation)
+## Owner rulings (2026-10-23)
 
-| # | Question | Tier | Recommendation | Blocks |
+The owner ruled on every question the plan raised: Q9 and Q7 as below, and "Agree with the rest", so the others stand as recommended. Each ruling is recorded in the storyboard's alignment record.
+
+| # | Question | Tier | Ruling | Applies to |
 |---|---|---|---|---|
 | Q1 | **Largest single file accepted?** | 3 | 200 MB per file. It covers illustrated EPUBs and most PDFs; larger files are refused by name with the limit shown. | P1 task 4 |
 | Q2 | **What happens to the watched source folder (`sourceFolder`) once accounts exist?** Today it auto-imports, and the owner keeps it cleared. | 3 | Retire it as an intake path in Phase 2: drag-and-drop is the only way books come in (the owner's direction). Drive and OneDrive sources return with CLOUD-CONNECTORS-1, each import going through the same limits. | P2 wave C |
 | Q3 | **The fourth device on Free (limit 3).** | 3 | Sign-in on the fourth device shows the three devices with "Remove one" or "Upgrade", or Cancel, mirroring the drop refusal. | P2 task 4 |
 | Q4 | **Highlights markdown and Reading Notes `.docx`:** keep writing them automatically, or make them an Export action? | 2 | Make them an Export button (library and book menu). Auto-writing into a synced folder caused today's file sprawl, and records are now the authority (T10). | P2 task 3 |
 | Q5 | **Downgrade or lapsed payment with more books than the new plan allows.** | 3 | Nothing is deleted or hidden. All books stay readable and downloadable, and new uploads are blocked until the count is under the limit, with "Remove books or upgrade". This matches the trial follow-up's wording. | P3 task 3 |
-| Q6 | **Payment provider.** Stripe (2.9% + 30¢; Blurby files sales tax itself, or uses Stripe Tax at 0.5%) or a merchant of record (Paddle at 5% + 50¢, or Stripe Managed Payments at +3.5%) that handles global tax. | 3 (business and legal) | A merchant of record (Paddle or Stripe Managed Payments) for launch. At $4.99 the fee difference is about 15¢ a month, and it removes sales-tax and VAT registration across countries. | P3 |
-| Q7 | **Ad source.** AdSense forbids ads in software applications, and AdMob has no desktop SDK (research 2026-10-23). | 3 | House ads and directly sold sponsor slots served by the Worker (for example Blurby's own Plus upsell and Marketplace titles), with an ad network only after a desktop-compatible one is confirmed in writing. | P3 task 4 |
+| Q6 | **Payment provider.** Stripe (2.9% + 30¢; Blurby files sales tax itself, or uses Stripe Tax at 0.5%) or a merchant of record (Paddle at 5% + 50¢, or Stripe Managed Payments at +3.5%) that handles global tax. | 3 (business and legal) | A merchant of record for launch; the owner picks Paddle or Stripe Managed Payments at G-P3. At $4.99 the fee difference is about 15¢ a month, and it removes sales-tax and VAT registration across countries. | P3 |
+| Q7 | **Ad source.** AdSense forbids ads in software applications, and AdMob has no desktop SDK (research 2026-10-23). | 3 | **No ads on the desktop for now.** The owner asked whether a Chromium app would work; it would not (Blurby already is one, and the policy judges where the ad sits, not the engine). Ads return with the phone apps (AdMob) or a future web reader: a follow-up flag. | Phase 3 |
 | Q8 | **At the Narrate monthly limit.** | 3 | Narrate finishes the current sentence, pauses, and shows "Narrate time for this month is used up" with Upgrade or Cancel. The balance resets on the 1st, and remaining time shows in Account settings. | P3 task 5 |
-| Q9 | **The MeloTTS fallback conflicts with Narrate's core rule** (the cursor is the word at the playing sample, from an exact table, with no estimated timing). MeloTTS and Aura return MP3 only, with no word timing. This does not reopen the decision; the plan needs the owner's reading of it. | 3 | Keep the decision's intent (an affordable fallback), but do not use MeloTTS for Narrate's word-following cursor. If Kokoro fails 4a, the fallback is a short bake-off of engines that expose predicted durations and can run on CPU (for example Piper or a smaller Kokoro quantization), measured against the same thresholds. MeloTTS stays available only if the owner wants a separate audio-only listening feature with no word cursor. | P4 task 3 |
+| Q9 | **The MeloTTS fallback conflicts with Narrate's core rule** (the cursor is the word at the playing sample, from an exact table, with no estimated timing). MeloTTS and Aura return MP3 only, with no word timing. This does not reopen the decision; the plan needs the owner's reading of it. | 3 | **Kokoro only.** MeloTTS is dropped, and there is no fallback engine. If Kokoro fails 4a, server narration returns to the owner. | Phase 4 |
 | Q10 | **Phase 4 pass thresholds.** | 2 | Real-time factor ≥ 3× on the chosen instance. Warm request to first voiced sample ≤ 2.5 s (the desktop's mainstream budget, D6 of NARRATE-REBUILD-1). Cold start to first voiced sample ≤ 8 s. Cost ≤ 5¢ per audio hour at the measured factor. At 5¢, a 100-hour Unlimited user costs $5 a month against $9.99. | P4 task 2 |
 | Q11 | **When Phase 4b is hosted.** No tablet or phone client exists until the phone epics. | 2 | Run 4a (the measurement) right after Phase 3 so the numbers are known. Build 4b when the first phone epic reaches its Narrate phase, so containers are never paid for with no client. | Placement |
 
@@ -485,7 +487,7 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
   - Apple Developer Program (about $99/yr; Services ID, domain verification, the private-relay email domain).
   - The email-sending domain (Cloudflare Email Sending is in public beta; SPF and DKIM on blrby.app).
   - Terms-of-use and takedown text, and the takedown contact address.
-- **P3:** a payment provider account (Q6) and the ad source (Q7).
+- **P3:** a merchant-of-record account (Paddle or Stripe Managed Payments, Q6).
 - **P4:** Containers enabled on the account (GA since 2026-04-13), and a spending alert.
 
 ## Research behind the technical choices (2026-10-23; third-party figures to re-check before launch)
@@ -494,8 +496,8 @@ Rewritten: `tests/quitSequence.test.js`, `tests/auth.test.js`, `tests/sync-queue
 - **D1:** 10 GB per database; `batch()` is one transaction; foreign keys enforced; Time Travel 30 days.
 - **R2:** presigned SigV4 URLs, up to 7 days; zero egress; $0.015/GB-month.
 - **Containers:** GA 2026-04-13; up to 4 vCPU and 12 GiB; no GPU; 1–3 s cold start; `sleepAfter` scale to zero.
-- **Workers AI:** MeloTTS $0.000205 per audio minute, MP3 only, no word timestamps; Aura MPEG only.
+- **Workers AI:** MeloTTS ($0.000205 per audio minute) and Aura return audio only, with no word timestamps. This is why the owner kept Kokoro as the only engine.
 - **Auth:** Better Auth runs on Hono and D1. Auth.js is in maintenance. Lucia is deprecated. OpenAuth is still beta.
-- **Payments and ads:** AdSense forbids software apps.
+- **Ads:** AdSense forbids ads "integrated into a software application". Its WebView exception (the WebView API for Ads) needs the Google Mobile Ads SDK, which is for Android, iOS and Flutter. So a desktop app, Chromium-based or not, does not qualify.
 
-Sources: developers.cloudflare.com (Workers limits and pricing, D1 limits, R2 pricing and presigned URLs, Containers pricing, limits and changelog 2026-04-13, Workers AI MeloTTS and Aura), better-auth.com, RFC 8252 and Google's native-app OAuth guide, Apple's Sign in with Apple configuration docs, stripe.com/pricing, and support.google.com/adsense/answer/48182.
+Sources: developers.cloudflare.com (Workers limits and pricing, D1 limits, R2 pricing and presigned URLs, Containers pricing, limits and changelog 2026-04-13, Workers AI MeloTTS and Aura), better-auth.com, RFC 8252 and Google's native-app OAuth guide, Apple's Sign in with Apple configuration docs, stripe.com/pricing, and support.google.com/adsense/answer/48182, developers.google.com/admob/flutter/webview.
