@@ -314,6 +314,7 @@ export default function PageFoliateView({
   // PAGE-SAVE-RESTAMP-2: set once the book's words cannot arrive (extraction rejected, or no or empty sections). A turn on a
   // renderer-numbered document is then not held: it saves its cfi and keeps the stored word index.
   const bookWordsFailedRef = useRef(false);
+  // PAGE-SAVE-RESTAMP-3: the wrap in flight on each section document; a re-stamp waits for it before unwrapping.
   const sectionWrapsRef = useRef(new WeakMap<Document, Promise<number>>());
   // A swipe that snapped onto the blank edge page: the next relocate (the adjacent section's) is the turn's.
   const swipeCrossingRef = useRef(false);
@@ -617,8 +618,10 @@ export default function PageFoliateView({
           if (!saved) recordDiagnosticRef.current("page-turn-deferred", `start=${start} end=${end}`);
         };
         // PAGE-SAVE-RESTAMP-2 (ruling): a word click on renderer-numbered spans holds its save like a turn, in the same slot
-        // (the latest held action wins; a jump cancels it). Called only for a click on a renderer-numbered document
-        // (the caller's holdSave); the runtime's own guard drops a click hardSelect did not resolve (review fr3).
+        // (the latest held action wins; a jump cancels it). Holds (or, once the words have failed, reports) a click on a
+        // renderer-numbered document and returns at once for any other; the caller's holdSave uses the same test. No
+        // resolve precondition is needed: every handler passes a resolved token (wordOffsetInSection is clamped to 0 or
+        // more), and the runtime's own guard drops an unresolved click (review fr3).
         const holdWordClick = (doc: Document, range: Range): void => {
           if (!rendererNumberedDocsRef.current.has(doc)) return;
           const start = textOffsetBefore(doc.body, range.startContainer, range.startOffset);
