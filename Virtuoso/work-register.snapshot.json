@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:15:48Z",
+  "takenAt": "2026-10-23T02:16:56Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -2289,8 +2289,8 @@
       "id": "LIBRARY-WRITE-RACE-1",
       "title": "Main-side library writers update the live record, never a copy",
       "sequence": 36,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -2303,12 +2303,12 @@
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#library-write-race-1",
       "branch": "eb/library-write-race-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "delete-doc, the three queue handlers and apply-metadata-updates update records in place instead of building replacement arrays. The URL import, the extension import and the lazy conversion write through a new writeConversionResult in main/library-write.js, which never resurrects a deleted record and removes the orphaned converted EPUB.",
-      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub.",
-      "revision": "746870bd9357a25566b469fbb60999c2a6b5183df89718e26dd347829154a661",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap on Blurby.Brain's rulings (Rule 11 tier 1). From SAVE-LIBRARY-TRUST-1 and SAVE-LIBRARY-MERGE-1. 2026-10-15: SAVE-LIBRARY-MERGE-1's quality-review notes added to the stub. Full Spec 2026-10-22 (U9/U10 pass; pre-dispatch amendment: no ROADMAP.md edit). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/library-write-race-1 stacked on eb/ws-pair-log-1), built during the Stage 8 freeze and merged after WS-PAIR-LOG-1.",
+      "revision": "df8e19ec3e5612d29e4d77e54d3d56724fae65cdaf697536c2440a9e444859dc",
       "extra": {}
     },
     {
