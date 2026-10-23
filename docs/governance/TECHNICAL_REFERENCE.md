@@ -117,11 +117,11 @@ Main process event
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
-| Electron | 41 | Desktop shell, BrowserWindow, IPC, native APIs |
+| Electron | 42 (`^42.11.14`, resolves 42.11.18: Node 24.19.0, Chromium 148, ICU 78.2; ELECTRON-42-UPGRADE-1, 2026-10-22) | Desktop shell, BrowserWindow, IPC, native APIs. 42 carries the Node fix for the x64 quit crash (nodejs/node#61999). It no longer downloads its binary at install: the first `require("electron")`, or `node node_modules/electron/install.js`, fetches it |
 | React | 19 | UI rendering with hooks and functional components |
 | Vite | 6 | Dev server and production bundler (ESM) |
 | TypeScript | 5.9 | Type safety in renderer code |
-| Node.js | 22 LTS (recommended) | Main process runtime |
+| Node.js | 24 (the `electron` package declares Node 22.12 or later, and from 42 its binary download runs on that Node; CI runs 24) | Tooling runtime; the main process runs Electron's bundled Node 24.19 |
 
 ### Production Dependencies
 

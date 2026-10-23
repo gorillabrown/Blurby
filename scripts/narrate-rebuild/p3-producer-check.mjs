@@ -45,7 +45,7 @@ async function run(label, threadsEnv) {
   const status = await producer.ensureReady();
   const readyMs = Math.round(performance.now() - t0);
   const r = await producer.generate(ref.text, { voice: "af_bella", speed: 1.0 });
-  producer.shutdown();
+  await producer.shutdown();
   if (BREAK && label === "A") r.table.durations[5] += 1;
   const envA = envelope(r.pcm), envB = envelope(wav.pcm);
   const peakA = Math.max(...envA), peakB = Math.max(...envB);
