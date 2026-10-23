@@ -3054,3 +3054,9 @@ Related: standing rule 43, LL-151.
 **Applies to:** UI sweeps and any harness that classifies presses or actions; null results in live checks.
 **Status:** Observation. It is the null-verdict side of LL-151 (a recorder proven able to record a failure); the next roadmap review decides whether this second occurrence promotes that pattern.
 Related: LL-151, standing rule 43, LL-142.
+
+### LL-164 — status (2026-10-23, 2026-10-23)
+**Status:** Promoted -> ROADMAP standing rule 51
+
+### LL-146 — status (2026-10-23, 2026-10-23)
+**Status:** Promoted -> ROADMAP standing rule 52
