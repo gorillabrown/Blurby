@@ -1,0 +1,51 @@
+{
+  "id": "20261023T032639Z-external-create-item-SMOKE8-DIAG-1",
+  "operation": "external-create-item",
+  "item_id": "SMOKE8-DIAG-1",
+  "created": "2026-10-23T03:26:39Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Diagnose the two smoke failures: Page reopen position and the stale folder header",
+      "status": "In Flight",
+      "started": "2026-10-23",
+      "branch": "eb/smoke8-diag-1",
+      "sequence": 6,
+      "written_status": "Full Spec",
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "description": "Read-only diagnosis of BUG-201 (reopening a Page-mode book lands on an older page; the saved cfi reverts) and BUG-202 (the folder header keeps the old name after a recent-folder switch) on a build of 47ae6e1f, ending in a fix specification for each.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap after release gate (2) failed on the owner smoke (checks #8, #28). Release blocker (BUG-201). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/smoke8-diag-1). Docs-only; may merge during the freeze.",
+      "id": "SMOKE8-DIAG-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:15:34Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:SMOKE8-DIAG-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "SMOKE8-DIAG-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:SMOKE8-DIAG-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T032639Z-external-create-item-SMOKE8-DIAG-1",
+      "detail": {
+        "readBack": "create response echoes every field"
+      },
+      "providerItemId": "4027c96c-c31e-816b-b54d-d19e21f5c676",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T03:26:54Z",
+  "outcome": "succeeded"
+}

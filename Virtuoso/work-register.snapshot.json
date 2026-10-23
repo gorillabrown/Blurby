@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T03:15:34Z",
+  "takenAt": "2026-10-23T03:26:55Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3362,6 +3362,29 @@
       "description": "Sentence segmentation ends a sentence at a single-letter initial before a capitalised name (\"M. Annius Verus\"), so resume rewinds to the wrong word. Treat an initial plus a capitalised word as an abbreviation.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from NARRATE-SENTENCE-RESUME-1's live check. Stub. Not a release gate.",
       "revision": "4012987567ce24069ff05f491a62cfb527c90027b0fe4516cd8e322a746dc6cc",
+      "extra": {}
+    },
+    {
+      "id": "SMOKE8-DIAG-1",
+      "title": "Diagnose the two smoke failures: Page reopen position and the stale folder header",
+      "sequence": 6,
+      "status": "in-flight",
+      "raw_status": "In Flight",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "M",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "eb/smoke8-diag-1",
+      "started": "2026-10-23",
+      "completed": "",
+      "evidence": "",
+      "description": "Read-only diagnosis of BUG-201 (reopening a Page-mode book lands on an older page; the saved cfi reverts) and BUG-202 (the folder header keeps the old name after a recent-folder switch) on a build of 47ae6e1f, ending in a fix specification for each.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap after release gate (2) failed on the owner smoke (checks #8, #28). Release blocker (BUG-201). Full Spec (U9/U10 pass). Dispatched 2026-10-23 to an implementation agent (blurby-6b; branch eb/smoke8-diag-1). Docs-only; may merge during the freeze.",
+      "revision": "bba4c0541cf25b85419b40e1b5c41006c29bc2bf8d415584131506d0a271b3db",
       "extra": {}
     }
   ],
