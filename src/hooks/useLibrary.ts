@@ -143,8 +143,14 @@ export default function useLibrary() {
     } finally { setLoadingContent(false); }
   }, [showToast]);
 
-  const updateProgress = useCallback((docId: string, position: number) => {
-    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, position } : d)));
+  // PAGE-REOPEN-CFI-1: the copy a reopen opens from keeps the cfi main last saved. A negative position is
+  // Page's cfi-only save (KEEP_STORED_POSITION), which leaves the stored position alone.
+  const updateProgress = useCallback((docId: string, position: number, cfi?: string) => {
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? {
+      ...d,
+      ...(position >= 0 ? { position } : {}),
+      ...(cfi ? { cfi } : {}),
+    } : d)));
   }, []);
 
   const toggleFavorite = useCallback(async (docId: string) => {
