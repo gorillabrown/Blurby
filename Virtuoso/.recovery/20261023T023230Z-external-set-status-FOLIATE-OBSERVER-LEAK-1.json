@@ -1,0 +1,37 @@
+{
+  "id": "20261023T023230Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+  "operation": "external-set-status",
+  "item_id": "FOLIATE-OBSERVER-LEAK-1",
+  "created": "2026-10-23T02:32:30Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "full-spec",
+      "description": "A `patch-package` patch (`patches/foliate-js+1.0.1.patch`) makes foliate-js's `View.destroy()` and `Paginator.destroy()` call `this.#observer.disconnect()`. The leaked observers on dead section bodies stop flooding `error.log` (14,428 lines a session on the base, 0 after)."
+    },
+    "expectedRevision": "17680d1ceab125cfb606d01df3061e7a5ea1df7a15bfe02c8ca3d1cf5c028e25",
+    "idempotencyKey": "set-status:FOLIATE-OBSERVER-LEAK-1:[('description', \"A `patch-package` patch (`patches/foliate-js+1.0.1.patch`) makes foliate-js's `View.destroy()` and `Paginator.destroy()` call `this.#observer.disconnect()`. The leaked observers on dead section bodies stop flooding `error.log` (14,428 lines a session on the base, 0 after).\"), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLIATE-OBSERVER-LEAK-1",
+      "idempotencyKey": "set-status:FOLIATE-OBSERVER-LEAK-1:[('description', \"A `patch-package` patch (`patches/foliate-js+1.0.1.patch`) makes foliate-js's `View.destroy()` and `Paginator.destroy()` call `this.#observer.disconnect()`. The leaked observers on dead section bodies stop flooding `error.log` (14,428 lines a session on the base, 0 after).\"), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T023230Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+      "detail": {
+        "readBack": "SQL: Full Spec, Name, Description equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:33:00Z",
+  "outcome": "succeeded"
+}

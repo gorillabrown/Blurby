@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T02:23:19Z",
+  "takenAt": "2026-10-23T02:33:02Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -1936,12 +1936,12 @@
     },
     {
       "id": "NARRATE-YEARS-1",
-      "title": "Read four-digit years as years in Narrate",
+      "title": "Narrate reads 1000–1099 as years too, and keeps comma numbers as counts",
       "sequence": 39,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [
         "NARRATE-REBUILD-1"
       ],
@@ -1954,9 +1954,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "BUG-191: years such as 1974 are spoken as cardinal numbers. Fix in the rebuilt Narrate's text normalization with a regression fixture.",
+      "description": "A preNormalize step in main/narrate/normalize.js, applied before tts.generate in main/narrate/capture.js and inside spokenWordsOf, reads 1001–1099 in kokoro's year form. Comma numbers stay counts, and the producer's word mapping stays exact.",
       "notes": "Created by roadmap review 2026-10-14. BUG-191. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files).",
-      "revision": "2ab45d33cea1150672648175b09f58704146af62633002dc4d879cb17a7173ab",
+      "revision": "9b3910ea41303801d7039c4660065963e2508e721e7603f2373c78bdcab617d4",
       "extra": {}
     },
     {
@@ -3226,8 +3226,8 @@
       "sequence": 66,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
       "effort": "S",
       "workstream": "Reader Engine",
@@ -3238,9 +3238,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "BUG-188. Part A: size the reading zone from the loaded section's real body line step, so a 5-line band covers 5 lines at any text size. Part B (where the band sits) is held for the owner.",
+      "description": "Each mode measures the loaded section's body paragraph line step into --zone-line-step-px, and all 8 zone sites read it instead of the 24 px fallback, so a 5-line band covers 5 lines at any text size. Dispatch waits for the owner's tier-2 OK. Part B (where the band sits) is the owner's decision.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. Part A is tier 2 (owner OK pending), Part B tier 3 (owner decision). After the Stage 8 freeze.",
-      "revision": "623183cb4ed1317483d43771fbcaeada6ab69984db7acc6fd749029f0eb512cb",
+      "revision": "ee97748f68a99a3e5e48eedf7e80eee954eb920a44debbd0dad8e908808d277f",
       "extra": {}
     },
     {
@@ -3249,8 +3249,8 @@
       "sequence": 67,
       "status": "queued",
       "raw_status": "Queued",
-      "written_status": "stub",
-      "raw_written_status": "Stub",
+      "written_status": "full-spec",
+      "raw_written_status": "Full Spec",
       "prerequisites": [],
       "effort": "S",
       "workstream": "Reader Engine",
@@ -3261,9 +3261,9 @@
       "started": "",
       "completed": "",
       "evidence": "",
-      "description": "BUG-187. Two leaked foliate-js View ResizeObservers on 0x0 bodies flood error.log; disconnecting them stops it (shown by intervention). Disconnect them when their view is torn down.",
+      "description": "A patch-package patch (patches/foliate-js+1.0.1.patch) makes foliate-js's View.destroy() and Paginator.destroy() call this.#observer.disconnect(). The leaked observers on dead section bodies stop flooding error.log (14,428 lines a session on the base, 0 after).",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze.",
-      "revision": "17680d1ceab125cfb606d01df3061e7a5ea1df7a15bfe02c8ca3d1cf5c028e25",
+      "revision": "6265d32db73af5f6ab92f76f3688ba17849d075a64fc711180390fe274c68c59",
       "extra": {}
     }
   ],
