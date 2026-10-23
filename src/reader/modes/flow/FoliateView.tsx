@@ -58,6 +58,7 @@ import {
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { collectParagraphStartWordIndexes } from "./helpers/foliateParagraphStarts";
 
 const FLOW_HIGHLIGHT_MODE = "flow";
 
@@ -232,6 +233,8 @@ export interface FlowWordState {
 export interface FlowFoliateViewAPI {
   getWords: () => FoliateWord[];
   getParagraphBreaks: () => Set<number>;
+  /** FLOW-PARA-KEYS-1: book-wide block-start words of the sections stamped against the book (provisional ones left out). */
+  getParagraphStartWordIndexes: () => number[];
   goTo: (target: string | number) => Promise<unknown>;
   next: () => void;
   prev: () => void;
@@ -315,6 +318,9 @@ export default function FlowFoliateView({
   const viewRef = useRef<any>(null);
   const foliateWordsRef = useRef<FoliateWord[]>([]);
   const foliateParagraphBreaksRef = useRef<Set<number>>(new Set());
+  // FLOW-PARA-KEYS-1: section documents whose spans carry the book's numbering (wrapped, or re-stamped, against the
+  // book's sections). A document wrapped before those arrived carries provisional numbering and is not in the set.
+  const bookStampedDocsRef = useRef(new WeakSet<Document>());
   const wordPositionIndexRef = useRef<WordPositionIndex>(new WordPositionIndex());
   const wordPositionRebuildTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastHandledRenderVersionRef = useRef(renderVersion);
@@ -743,7 +749,10 @@ export default function FlowFoliateView({
               const sectionStart = bookSection ? bookSection.startWordIdx : existingEnd;
               const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
               // Wrap this section's words with correct indices (STAB-1A: now async)
+              // FLOW-PARA-KEYS-1: book-stamped only when the wrap is against the book's section.
+              bookStampedDocsRef.current.delete(doc);
               await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+              if (bookSection) bookStampedDocsRef.current.add(doc);
               // Replace (not append) — deduped base + fresh section words
               const newSectionWords = sectionWords.map(w => ({ ...w, sectionIndex: index }));
               const prevTotal = foliateWordsRef.current.length;
@@ -767,7 +776,11 @@ export default function FlowFoliateView({
               if (sectionStart >= 0) {
                 const sectionWords = extracted.words.filter((word) => word.sectionIndex === index);
                 const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
+                // FLOW-PARA-KEYS-1: book-stamped only once a wrap against the book's sections completes.
+                const stampsWithBook = Boolean(liveSections()?.some((section) => section.sectionIndex === index));
+                bookStampedDocsRef.current.delete(doc);
                 await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+                if (stampsWithBook) bookStampedDocsRef.current.add(doc);
               }
             }
           }
@@ -1056,6 +1069,8 @@ export default function FlowFoliateView({
             return extracted.words;
           },
           getParagraphBreaks: () => foliateParagraphBreaksRef.current,
+          getParagraphStartWordIndexes: () =>
+            collectParagraphStartWordIndexes(view.renderer?.getContents?.() ?? [], (d) => bookStampedDocsRef.current.has(d)),
           goTo: (target) => view.goTo(target),
           next: () => view.renderer.next(),
           prev: () => view.renderer.prev(),
@@ -1191,10 +1206,13 @@ export default function FlowFoliateView({
         if (!doc?.body) continue;
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;
+        const stampsWithBook = (bookWordSections as SectionBoundary[]).some((section) => section.sectionIndex === index);
+        bookStampedDocsRef.current.delete(doc); // FLOW-PARA-KEYS-1: not book-stamped while it is re-wrapped
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
         await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        if (stampsWithBook) bookStampedDocsRef.current.add(doc);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);

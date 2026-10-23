@@ -19,6 +19,8 @@ export interface FlowSurface {
   extractWords(): void;
   /** Legacy getEffectiveParagraphBreaks (foliate branch) as a sorted array; [] while no view is mounted. */
   getParagraphBreaks(): readonly number[];
+  /** FLOW-PARA-KEYS-1: book-wide block-start words of book-stamped sections (provisional ones left out); [] with no view. */
+  getParagraphStarts(): readonly number[];
   /** Legacy foliateApiRef.current.highlightWordByIndex; false while no view is mounted. */
   highlight(wordIndex: number, kind?: "flow" | "narrate", options?: { allowMotion?: boolean; forceMotion?: boolean }): boolean;
   /** Legacy foliateApiRef.current.next() (empty-words retry, pause-on-miss page turn). */
@@ -46,6 +48,7 @@ export function createFlowSurface(viewApiRef: MutableRefObject<FlowFoliateViewAP
       const breaks = api()?.getParagraphBreaks();
       return breaks ? [...breaks].sort((a, b) => a - b) : [];
     },
+    getParagraphStarts: () => api()?.getParagraphStartWordIndexes() ?? [],
     highlight: (wordIndex, kind, options) => api()?.highlightWordByIndex(wordIndex, kind, options) ?? false,
     next: () => api()?.next(),
     goToSection: (sectionIndex) => Promise.resolve(api()?.goToSection(sectionIndex)),
