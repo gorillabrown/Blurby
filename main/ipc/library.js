@@ -454,6 +454,8 @@ function register(ctx) {
       const savedArticlesPath = settings.sourceFolder
         ? path.join(path.resolve(settings.sourceFolder), "Saved Articles")
         : null;
+      // Compared by key, as the rest of this handler is: a case-only path difference is the same folder (LARGE-FOLDER-SYNC-3)
+      const savedArticlesKey = savedArticlesPath ? pathKey(savedArticlesPath) + path.sep : null;
       for (const doc of docs) {
         const k = keyOf.get(doc);
         if (doc.source === "url" && doc.content && !doc.convertedEpubPath) {
@@ -492,7 +494,7 @@ function register(ctx) {
           }
         } else if (doc.source !== "folder") {
           synced.push(doc);
-        } else if (savedArticlesPath && doc.filepath && path.resolve(doc.filepath).startsWith(savedArticlesPath)) {
+        } else if (savedArticlesKey && keyOf.get(doc) && keyOf.get(doc).startsWith(savedArticlesKey)) {
           synced.push(doc);
         } else if (doc.filepath && skipped.some((s) => k === s || k.startsWith(s + path.sep))) {
           synced.push(doc); // under a folder or file the scan could not read (BUG-195)

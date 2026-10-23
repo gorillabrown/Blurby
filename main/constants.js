@@ -173,6 +173,8 @@ const FOLDER_WATCHER_STABILITY_MS = 500;
 const FOLDER_SCAN_YIELD_EVERY = 500;
 /** A folder listing or file stat in the scan, or a root check, that has not settled by then counts as unreadable; a folder switch also waits no longer than this for a cancelled sync (ms) */
 const FOLDER_LIST_TIMEOUT_MS = 30000;
+/** After a root listing times out, root checks report "cannot be listed" at once for this long instead of starting another listing on a hung mount (ms) */
+const FOLDER_ROOT_BREAKER_MS = 60000;
 
 // ── Window Dimensions ───────────────────────────────────────────────────
 /** Default main window width (px) */
@@ -285,6 +287,7 @@ module.exports = {
   FOLDER_WATCHER_STABILITY_MS,
   FOLDER_SCAN_YIELD_EVERY,
   FOLDER_LIST_TIMEOUT_MS,
+  FOLDER_ROOT_BREAKER_MS,
   // Window Dimensions
   MAIN_WINDOW_WIDTH,
   MAIN_WINDOW_HEIGHT,

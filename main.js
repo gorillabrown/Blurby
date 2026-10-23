@@ -12,7 +12,7 @@ const { CURRENT_SETTINGS_SCHEMA, CURRENT_LIBRARY_SCHEMA, SETTINGS_DEFAULTS,
 const { registerIpcHandlers, formatHighlightEntry, parseDefinitionResponse } = require("./main/ipc-handlers");
 const { createMainWindow, createTray, setupAutoUpdater,
         updateWindowTheme, broadcastSystemTheme } = require("./main/window-manager");
-const { startWatcher, scanFolderAsync, rootHasContent } = require("./main/folder-watcher");
+const { startWatcher, scanFolderAsync, rootHasContent, timeLimit } = require("./main/folder-watcher");
 const { readJSON, writeJSON, saveJSON, whenWritesSettled } = require("./main/json-store");
 const { createWillQuitHandler } = require("./main/quit-sequence");
 const { createFolderSync } = require("./main/folder-sync");
@@ -332,7 +332,7 @@ function resetFolderNotice() { folderToastShown = false; folderNotice.reset(); }
 const folderSync = createFolderSync({
   getSourceFolder: () => settings.sourceFolder,
   getLibrary, setLibrary, addDoc: addDocToLibrary,
-  scanFolderAsync, rootHasContent, statFile: (p) => fsPromises.stat(p),
+  scanFolderAsync, rootHasContent, statFile: (p) => timeLimit(fsPromises.stat(p)),
   extractNewFileDoc, extractContent, countWords,
   isFailed: (p) => failedExtractions.has(p), addFailed: addFailedExtraction,
   saveLibrary, saveLibraryNow, broadcastLibrary, emitProgress: emitSyncProgress, reportFolderProblem, reportFolderOk,

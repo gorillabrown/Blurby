@@ -4,7 +4,7 @@
 const path = require("path");
 const fs = require("fs");
 const fsPromises = require("fs/promises");
-const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY, FOLDER_LIST_TIMEOUT_MS } = require("./constants");
+const { FOLDER_WATCHER_STABILITY_MS, FOLDER_SCAN_YIELD_EVERY, FOLDER_LIST_TIMEOUT_MS, FOLDER_ROOT_BREAKER_MS } = require("./constants");
 
 const SUPPORTED_EXT = [".txt", ".md", ".markdown", ".text", ".rst", ".html", ".htm", ".epub", ".pdf", ".mobi", ".azw3", ".azw", ".docx"];
 const FORMAT_PRIORITY = { ".epub": 0, ".pdf": 1, ".mobi": 2, ".azw3": 2, ".azw": 2, ".docx": 3, ".html": 3, ".htm": 3, ".txt": 4, ".md": 4, ".markdown": 4, ".text": 4, ".rst": 4 };
@@ -102,9 +102,19 @@ async function scanFolderAsync(folderPath, report = {}) {
 
 // true: the folder lists a subfolder (not a system folder) or a supported file. false: it lists neither (an unmounted
 // Drive's mount point may keep only desktop.ini). null: it cannot be listed, or not in time. A per-file remove is trusted only on true (BUG-195).
+// LARGE-FOLDER-SYNC-3 (W3): after a listing times out, the mount is taken as hung for a while: a root check answers null at
+// once instead of starting another listing that would pin a libuv thread. A listing that answers clears the breaker.
+let rootBreakerUntil = 0;
 async function rootHasContent(dir) {
+  if (Date.now() < rootBreakerUntil) return null;
   let entries;
-  try { entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true })); } catch { return null; }
+  try {
+    entries = await timeLimit(fsPromises.readdir(dir, { withFileTypes: true }));
+  } catch (err) {
+    if (err && err.code === "ETIMEDOUT") rootBreakerUntil = Date.now() + FOLDER_ROOT_BREAKER_MS;
+    return null;
+  }
+  rootBreakerUntil = 0;
   return entries.some((e) => (e.isDirectory() && !isSystemFolder(e.name)) || (e.isFile() && SUPPORTED_EXT.includes(path.extname(e.name).toLowerCase())));
 }
 
@@ -148,7 +158,7 @@ function startWatcher(sourceFolder, callbacks) {
   function onEvent(eventType, rel) {
     if (closed || !rel) return;
     const parts = rel.split(/[\\/]/);
-    if (parts.some((p) => p.startsWith(".")) || parts[0] === "Saved Articles") return;
+    if (parts.some((p) => p.startsWith(".")) || parts.some(isSystemFolder) || parts[0] === "Saved Articles") return;
     const prev = pending.get(rel);
     if (prev) clearTimeout(prev.timer);
     const renamed = (prev && prev.renamed) || eventType === "rename";
@@ -190,4 +200,5 @@ module.exports = {
   scanFolderAsync,
   rootHasContent,
   startWatcher,
+  timeLimit,
 };
