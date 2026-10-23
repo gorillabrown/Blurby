@@ -1,0 +1,49 @@
+{
+  "id": "20261023T011002Z-external-create-item-WIN-TARGET-NSIS-1",
+  "operation": "external-create-item",
+  "item_id": "WIN-TARGET-NSIS-1",
+  "created": "2026-10-23T01:10:02Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Build full NSIS installers per architecture by default",
+      "status": "Queued",
+      "sequence": 65,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Platform & Maintenance",
+      "description": "Move `package.json`'s `build.win.target` from `nsis-web` to `nsis`, so each architecture gets a full installer and its own `latest.yml` without CLI overrides. Update the release runbook, and check that electron-updater picks the right architecture.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from the owner's RELEASE-RUNBOOK-1 decision (option B, separate full installers), relayed by Blurby.Brain. Not a release gate: CLI overrides cover this release.",
+      "id": "WIN-TARGET-NSIS-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T01:08:42Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WIN-TARGET-NSIS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "WIN-TARGET-NSIS-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:WIN-TARGET-NSIS-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T011002Z-external-create-item-WIN-TARGET-NSIS-1",
+      "detail": {
+        "readBack": "create response echoes all fields"
+      },
+      "providerItemId": "4027c96c-c31e-8125-b455-d0a0e9a8d04a",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T01:10:18Z",
+  "outcome": "succeeded"
+}
