@@ -1,0 +1,37 @@
+{
+  "id": "20261023T201702Z-external-set-status-IOS-APP-1",
+  "operation": "external-set-status",
+  "item_id": "IOS-APP-1",
+  "created": "2026-10-23T20:17:02Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 104,
+      "prerequisites": [
+        "BLURBY-SERVER-1"
+      ]
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:IOS-APP-1:[('prerequisites', ['BLURBY-SERVER-1']), ('sequence', 104)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "IOS-APP-1",
+      "idempotencyKey": "set-status:IOS-APP-1:[('prerequisites', ['BLURBY-SERVER-1']), ('sequence', 104)]",
+      "actualRevision": "",
+      "recoveryId": "20261023T201702Z-external-set-status-IOS-APP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T20:17:41Z",
+  "outcome": "succeeded"
+}

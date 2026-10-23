@@ -1,0 +1,34 @@
+{
+  "id": "20261023T175740Z-external-set-status-FOCUS-KEYS-FIX-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-KEYS-FIX-1",
+  "created": "2026-10-23T17:57:40Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Reopened 2026-10-23 (owner): the live paragraph keys failed (section-sized jumps). Cause: case-sensitive block lookup on XHTML pages. Amendment in ROADMAP.md (FOCUS-KEYS-FIX-1 card)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOCUS-KEYS-FIX-1:[('notes', 'Reopened 2026-10-23 (owner): the live paragraph keys failed (section-sized jumps). Cause: case-sensitive block lookup on XHTML pages. Amendment in ROADMAP.md (FOCUS-KEYS-FIX-1 card).')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOCUS-KEYS-FIX-1",
+      "idempotencyKey": "set-status:FOCUS-KEYS-FIX-1:[('notes', 'Reopened 2026-10-23 (owner): the live paragraph keys failed (section-sized jumps). Cause: case-sensitive block lookup on XHTML pages. Amendment in ROADMAP.md (FOCUS-KEYS-FIX-1 card).')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T175740Z-external-set-status-FOCUS-KEYS-FIX-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:58:52Z",
+  "outcome": "succeeded"
+}

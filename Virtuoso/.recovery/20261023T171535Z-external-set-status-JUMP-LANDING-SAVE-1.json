@@ -1,0 +1,34 @@
+{
+  "id": "20261023T171535Z-external-set-status-JUMP-LANDING-SAVE-1",
+  "operation": "external-set-status",
+  "item_id": "JUMP-LANDING-SAVE-1",
+  "created": "2026-10-23T17:15:35Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "branch": "eb/jump-landing-save-1"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:JUMP-LANDING-SAVE-1:[('branch', 'eb/jump-landing-save-1')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "JUMP-LANDING-SAVE-1",
+      "idempotencyKey": "set-status:JUMP-LANDING-SAVE-1:[('branch', 'eb/jump-landing-save-1')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171535Z-external-set-status-JUMP-LANDING-SAVE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:16:35Z",
+  "outcome": "succeeded"
+}
