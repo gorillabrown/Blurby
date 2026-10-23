@@ -28,3 +28,7 @@
 {"event": "end", "row": 4, "evidence": "x64 42.11.18: control 0/100 (41: 18/50); cold pattern 0/56, 56 trials clean; E42 suite 2409/1/0 tree 840d0eb3; typecheck 0; build 0; --dir x64+arm64 exit 0; packaged quits arm64 play/pause + x64 play x2/pause all 0x0, no dumps; canvas x64 binding loads; memo written", "result": "done", "at": "2026-10-22T23:53:35Z"}
 {"event": "end", "row": 8, "evidence": "Plato MINOR_FIXES (fixed 626c66ab); Solon COMPLIANT WITH NOTES: DW1-11 met, 12-13 not this run's, 0 fail; notes applied to memo (build tree, canvas/sharp verdicts, unrun checkers, isDestroyed, auth.js, lockfile range, time log committed)", "result": "done", "at": "2026-10-23T00:00:59Z"}
 {"event": "start", "row": 10, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T00:00:59Z"}
+{"event": "wait", "row": 10, "reason": "owner", "at": "2026-10-23T00:01:31Z"}
+{"event": "resume", "row": 10, "at": "2026-10-23T00:01:51Z"}
+{"event": "add", "rows": [{"id": 14, "title": "Final take-in of origin/main fa0c48d7, quiet-machine suite/typecheck/build, merge --no-ff to main and push", "owner": "Zeus", "tier": "mechanical", "effort": "low", "kind": "merge-and-verify", "class": "repeat", "parallel": false, "predicted": 2, "basis": "median of 14 runs"}], "origin": "added", "at": "2026-10-23T00:03:11Z"}
+{"event": "start", "row": 14, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T00:03:13Z"}
