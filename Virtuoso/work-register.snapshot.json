@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T00:35:45Z",
+  "takenAt": "2026-10-23T00:37:06Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -3117,6 +3117,29 @@
       "description": "checkBookWords' fail() path keeps a held turn it cannot report, so the turn is never saved and nothing is logged. Also, the reason=section-load line does not say whether the held thing was a turn or a word click.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from PAGE-POSITION-SAVE-2's quality review (NOTEs 1 and 2). Stub. Not a release gate.",
       "revision": "d5e05813bc2c61d13ca1ce724003f02ec0860337389668dde682d3bbf0fe1ebd",
+      "extra": {}
+    },
+    {
+      "id": "WS-PAIR-LOG-1",
+      "title": "Say why a pairing is not saved when OS encryption is unavailable",
+      "sequence": 62,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [],
+      "effort": "XS",
+      "workstream": "Platform & Maintenance",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "When safeStorage encryption is unavailable, the pair flow in main/ws-server.js keeps the pairing for the session only. Keep that, and log one clear line (pairing not saved: OS encryption unavailable) so the user can tell why.",
+      "notes": "Created 2026-10-22 by Blurby.Roadmap from WS-TOKEN-REGEN-1's review. Blurby.Brain ruling (tier 1): never write a credential in plaintext; session-only pairing is the secure default. Not a release gate.",
+      "revision": "a83034860ba99d0f594ddaa5b5a3d93891286ddd11f9415c4f2631a929daa6c8",
       "extra": {}
     }
   ],
