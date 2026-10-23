@@ -54,3 +54,34 @@ On `47ae6e1f`, every site matches the specification:
   - Test (c) is not vacuous.
   - **Note for follow-up, outside this item's fence:** the pair flow (`ws-server.js:237-245`) does not persist the token when encryption is unavailable, so a paired token is lost on restart there. Switching it to `encodePairingToken` would start writing plaintext in that case. That is a behaviour change, correctly left out of scope.
   - The parity parser suits today's interface: no nested braces and no braces in comments.
+
+## Mid-dispatch amendment — no plaintext token anywhere (Blurby.Brain, 2026-10-22, tier 1)
+
+Recorded in ROADMAP.md after this item's specification. Done on the existing branch before merge, in three commits so each new test is red against the pre-amendment behaviour:
+
+1. **`ea9c0032`, pure refactor:** the restore logic moves into an exported `loadPairingToken(ctx, { token })`, which `startServer(ctx, options)` calls. 117/117 ws tests stay green.
+2. **`cc028528`, tests alone, red on step 1's tree:**
+   - (r1): `expected '7d2d0bca…' to be '0123456789abcdef0123456789abcdef'`; the legacy token was replaced, so the pairing was lost.
+   - (r2), (r3): `expected true to be false`; a `_wsPairingToken` key was present.
+   - (r4): the key was present after regenerate.
+   - (b), updated: it pinned the forbidden plaintext form, and failed with `expected 'tok' to be null`.
+3. **`a38cc994`, the change:**
+   - `encodePairingToken` returns `null` without safeStorage.
+   - `decodePairingToken` always decrypts.
+   - **`loadPairingToken`:**
+     - Without safeStorage, it deletes any stored value and keeps the token in memory: the legacy 32-hex value if present, else a new token.
+     - With safeStorage, a stored value that fails to decrypt and has the 32-hex `generatePairingToken` shape is re-encrypted in place (the pairing survives). A value that fails to decrypt without that shape is regenerated, as before.
+   - The regenerate handler stores only a non-null form, deletes the key otherwise, and passes `{ token }` to `startServer`.
+   - The `EADDRINUSE` retry passes the session token through.
+
+`274a2270` corrects (r4) to assert the passed token rather than the harness's `ctx` object. (r4) is still red against the pre-amendment handler.
+
+- **Legacy detection:** stored ciphertext has no `enc:` prefix (`enc:` is only the test fake's form), so a legacy plaintext token is recognised by decrypt failure plus the 32-hex shape. Today's ciphertext format is unchanged.
+- **Every remaining `_wsPairingToken` write stores ciphertext only:** `misc.js:420`, `ws-server.js:242` (pair flow, already guarded), `:475`, `:484`.
+- **Consequence of session-only tokens, by design of the ruling:** without safeStorage, a manual server stop/start or an app restart issues a new token, and the extension must pair again.
+- **Gates on `274a2270`:**
+  - `tests/wsTokenRegen.test.js` and `tests/settingsKeyTrust.test.js`: 82/82.
+  - `npm test`: `Test Files 178 passed (178)`, `Tests 2439 passed | 1 skipped (2440)`, exit 0.
+  - Typecheck and build: exit 0.
+  - Done-when 3–5 unchanged: the `_wsPairingToken = token` grep exits 1; `encodePairingToken` appears once in `misc.js`; `encryptString(_pairingToken)` appears only at `ws-server.js:240`; `schemaVersion?: number;` is at `src/types.ts:140`.
+- **Fence:** unchanged. The same 5 paths plus this memo.
