@@ -3,3 +3,4 @@
 {"event": "end", "row": 1, "evidence": "DW1 both gates pass; DW4 status line exact; fence exact", "result": "done", "at": "2026-10-14T02:52:30Z"}
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-14T02:56:34Z"}
 {"event": "end", "row": 2, "evidence": "npm test exit 0 (2048 pass); DW2 exit 0 5/5; tsc 0; merged --no-ff", "result": "done", "at": "2026-10-14T02:56:34Z"}
+{"event": "cost", "source": "backfilled", "window": ["2026-10-14T02:52:29Z", "2026-10-14T02:56:34Z"], "attribution": "session-window", "perRow": {"computable": false, "missing": ["a row N in each subagent's spawn (the dispatch predates the row rule)"]}, "computable": false, "missing": ["a transcript of this project, still kept by the host, that works a row of TEST-BUDGET-WORDINDEX-1 (`timing --dispatch TEST-BUDGET-WORDINDEX-1 --start|--end`) inside its work"], "at": "2026-10-23T20:52:11Z"}

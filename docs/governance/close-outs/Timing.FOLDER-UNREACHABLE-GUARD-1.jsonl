@@ -8,3 +8,4 @@
 {"event": "start", "row": 3, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-15T06:22:41Z"}
 {"event": "end", "row": 3, "evidence": "C1 build (06:17:48Z) and C2 build of f4ecb6bc, both electron-builder exit 0; instrument control lost the books on C1; C2 (a)-(g) pass; log lines root-unlistable (d) and root-empty-suspect (e); no .tmp; owner hashes unchanged", "result": "done", "at": "2026-10-15T06:26:33Z"}
 {"event": "close", "at": "2026-10-15T06:26:55Z"}
+{"event": "cost", "source": "backfilled", "window": ["2026-10-15T06:13:15Z", "2026-10-15T06:26:33Z"], "attribution": "session-window", "perRow": {"computable": false, "missing": ["a row N in each subagent's spawn (the dispatch predates the row rule)"]}, "computable": false, "missing": ["a transcript of this project, still kept by the host, that works a row of FOLDER-UNREACHABLE-GUARD-1 (`timing --dispatch FOLDER-UNREACHABLE-GUARD-1 --start|--end`) inside its work"], "at": "2026-10-23T20:52:11Z"}
