@@ -22,7 +22,7 @@ const TYPE_KEYS = {
   syncIntervalMinutes: true, syncOnMeteredConnection: true, firstRunCompleted: true, defaultSort: true,
   defaultViewMode: true, libraryCardSize: true, libraryCardSpacing: true, useLegacyRenderer: true,
   ttsCacheEnabled: true, pronunciationOverrides: true, narrationProfiles: true, activeNarrationProfileId: true,
-  readingGoals: true, sortBy: true,
+  readingGoals: true, sortBy: true, libraryTab: true,
 } satisfies Record<keyof BlurbySettings, true>;
 
 // main.js's settings literal before this item; a first-run settings.json must stay byte-identical (ruled).
