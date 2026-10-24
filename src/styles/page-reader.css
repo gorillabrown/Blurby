@@ -470,7 +470,7 @@
 }
 
 .rbb-mode-btn:hover {
-  background: var(--color-border, #444);
+  background: var(--border);
 }
 
 .rbb-mode-btn:focus {
