@@ -1,0 +1,38 @@
+{
+  "id": "20261024T030912Z-external-set-status-FOCUS-TOC-JUMP-WORD-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-TOC-JUMP-WORD-1",
+  "created": "2026-10-24T03:09:12Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "Superseded",
+      "sequence": null,
+      "completed": "2026-10-23",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-23-5-phase-brief.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FOCUS-TOC-JUMP-WORD-1:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-5-phase-brief.md'), ('sequence', None), ('status', 'Superseded')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOCUS-TOC-JUMP-WORD-1",
+      "idempotencyKey": "set-status:FOCUS-TOC-JUMP-WORD-1:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-5-phase-brief.md'), ('sequence', None), ('status', 'Superseded')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T030912Z-external-set-status-FOCUS-TOC-JUMP-WORD-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81ed9f65f0bb2545e519"
+    }
+  },
+  "resolved": "2026-10-24T03:10:22Z",
+  "outcome": "succeeded"
+}

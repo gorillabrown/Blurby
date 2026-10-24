@@ -3060,3 +3060,11 @@ Related: LL-151, standing rule 43, LL-142.
 
 ### LL-146 — status (2026-10-23, 2026-10-23)
 **Status:** Promoted -> ROADMAP standing rule 52
+
+### LL-167 — A dispatch is not done until its packaged build is verified (owner directive, 2026-10-23)
+**Verdict:** Dispatches were closing on dev-mode tests, a suite and a build exit code, with live checks run on packages only when a spec asked. The owner directed Blurby.Brain on 2026-10-23: "You need to verify packages at conclusions of all dispatches." A green suite does not prove the shipped `app.asar` carries the change, that the packaged app launches clean, or that a Done-when holds outside dev mode; worktree junctions have already produced incomplete asars in this project.
+**Evidence:** Blurby.Brain's message to Blurby.Roadmap, 2026-10-23 (owner directive relayed; the owner confirmed codifying it the same day in Blurby.Roadmap).
+**Recommendation:** Every dispatch ends with package verification before its merge go: a `--dir` build from the final commit with `origin/main` merged in, in its own worktree; a `BLURBY_USER_DATA_DIR` grep of the built `main.js`; a 25 s scratch-profile launch with no error, unhandled-rejection or crash line and no crash dump; `npx asar list` showing every changed `main/` file and the renderer bundle matching `dist/`; the automatable Done-when re-run on the packaged exe; a "Package verification" section in the close-out; and Blurby.Brain's confirmation. A dispatch that changes nothing under `build.files` records "package unchanged" with its diff.
+**Applies to:** every dispatch's close-out and merge go, In Flight items included; release gates.
+**Status:** Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23)
+Related: LL-165, standing rules 47 and 48.

@@ -1,0 +1,39 @@
+{
+  "id": "20261024T020406Z-external-set-status-FLOW-PARA-PAUSE-INDEX-1",
+  "operation": "external-set-status",
+  "item_id": "FLOW-PARA-PAUSE-INDEX-1",
+  "created": "2026-10-24T02:04:06Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "written_status": "Full Spec",
+      "started": "2026-10-23",
+      "branch": "eb/flow-para-pause-index-1",
+      "spec_link": "ROADMAP.md#flow-para-pause-index-1-spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:FLOW-PARA-PAUSE-INDEX-1:[('branch', 'eb/flow-para-pause-index-1'), ('spec_link', 'ROADMAP.md#flow-para-pause-index-1-spec'), ('started', '2026-10-23'), ('status', 'In Flight'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FLOW-PARA-PAUSE-INDEX-1",
+      "idempotencyKey": "set-status:FLOW-PARA-PAUSE-INDEX-1:[('branch', 'eb/flow-para-pause-index-1'), ('spec_link', 'ROADMAP.md#flow-para-pause-index-1-spec'), ('started', '2026-10-23'), ('status', 'In Flight'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T020406Z-external-set-status-FLOW-PARA-PAUSE-INDEX-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81fbbccced3552d9af43"
+    }
+  },
+  "resolved": "2026-10-24T02:04:30Z",
+  "outcome": "succeeded"
+}
