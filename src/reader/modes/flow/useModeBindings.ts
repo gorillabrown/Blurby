@@ -49,6 +49,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
       const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - rect.top) / rect.height) * 100))}%`;
       host.style.setProperty("--flow-zone-top", pct(band.top));
       host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
+      host.classList.remove("rm-flow-view--band-off"); // R6: a band on the cursor line ends a no-cursor state
       return;
     }
     const ch = host.clientHeight;
