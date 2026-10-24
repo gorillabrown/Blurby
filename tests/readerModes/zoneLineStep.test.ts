@@ -104,10 +104,28 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
     document.body.innerHTML = "";
   });
 
-  // BAND-ALIGN-2 (pinned test edited under Blurby.Roadmap's ruling, 2026-10-23): the band's top is no longer at
-  // FLOW_ZONE_INITIAL_TOP but at the anchor (R4, Top third by default), so b1d asserts the band's height and top.
-  it("(b1d) the band is 5 x 27 / 630 (21.43%) tall, not the 24 px fallback's 19.05%, with its centre at the Top third anchor", async () => {
-    nextSection = sectionDoc("line-height: 27px; font-size: 18px");
+  // BAND-ALIGN-2 (pinned test edited under Blurby.Roadmap's rulings, 2026-10-23): the band's top is no longer at
+  // FLOW_ZONE_INITIAL_TOP but around the cursor line (R1-R3), and with no cursor painted there is no band (R6). So b1d
+  // asserts no band before a word is painted, then, with word 17 painted (two lines above and below it), the measured 27 px step on the zone host and a
+  // band 5 x 27 / 630 tall that contains the cursor line.
+  it("(b1d) no band before a word is painted; then the band is 5 x 27 / 630 (21.43%) tall, not the 24 px fallback's 19.05%, around the cursor line", async () => {
+    const PITCH = Number(process.env.B1D_PITCH_PX ?? 27); // rule 43: B1D_PITCH_PX=24 shows the assertions red
+    nextSection = sectionDoc(`line-height: ${PITCH}px; font-size: 18px`);
+    nextSection.body.innerHTML = `<p style="line-height: ${PITCH}px; font-size: 18px">${Array.from({ length: 40 }, (_, i) => `w${i}`).join(" ")}</p>`;
+    const win = nextSection.defaultView as unknown as { HTMLElement: typeof HTMLElement };
+    const baseRect = win.HTMLElement.prototype.getBoundingClientRect;
+    win.HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      const idx = this.getAttribute?.("data-word-index");
+      if (idx == null) return baseRect.call(this);
+      const i = Number(idx); const top = 100 + Math.floor(i / 5) * PITCH;
+      return { top, left: (i % 5) * 60, width: 50, height: 22, bottom: top + 22, right: (i % 5) * 60 + 50, x: (i % 5) * 60, y: top, toJSON: () => ({}) } as DOMRect;
+    };
+    const restoreHostRect = HTMLElement.prototype.getBoundingClientRect;
+    HTMLElement.prototype.getBoundingClientRect = function (this: HTMLElement) {
+      return this.classList?.contains("rm-focus-view")
+        ? ({ top: 0, left: 0, width: 800, height: VIEW_H, bottom: VIEW_H, right: 800, x: 0, y: 0, toJSON: () => ({}) } as DOMRect)
+        : restoreHostRect.call(this);
+    };
     const viewApiRef = { current: null as unknown };
     const props = {
       document: createFakeDocument(),
@@ -139,14 +157,20 @@ describe("BAND-ALIGN-1 (b1d): Focus sizes its zone from the loaded section's bod
       await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
     }
     await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
-    const zoneHost = Array.from(host.querySelectorAll<HTMLElement>("*")).find((el) => el.style.getPropertyValue("--flow-zone-bottom"));
-    expect(zoneHost, "no element carries --flow-zone-bottom").toBeTruthy();
-    const top = parseFloat(zoneHost!.style.getPropertyValue("--flow-zone-top"));
-    const bottom = parseFloat(zoneHost!.style.getPropertyValue("--flow-zone-bottom"));
+    const zoneHost = host.querySelector<HTMLElement>(".rm-focus-view")!;
+    expect(zoneHost.style.getPropertyValue("--flow-zone-top"), "a band before any word is painted (R6)").toBe("");
+    expect(zoneHost.style.getPropertyValue("--flow-zone-bottom"), "a band before any word is painted (R6)").toBe("");
+    const api = viewApiRef.current as { highlightWordByIndex(i: number, s?: string, o?: { allowMotion?: boolean }): boolean };
+    expect(api.highlightWordByIndex(17, undefined, { allowMotion: false })).toBe(true);
+    expect(parseFloat(zoneHost.style.getPropertyValue("--zone-line-step-px")), "the zone host's line step (24 is the fallback)").toBe(27);
+    const top = parseFloat(zoneHost.style.getPropertyValue("--flow-zone-top"));
+    const bottom = parseFloat(zoneHost.style.getPropertyValue("--flow-zone-bottom"));
     const height = ((FLOW_ZONE_LINES_DEFAULT * 27) / VIEW_H) * 100; // 21.43
     expect(bottom - top, `zone height ${bottom - top}% (the 24 px fallback gives 19.05%)`).toBeCloseTo(height, 2);
-    const anchorTop = ((VIEW_H / 3 - (FLOW_ZONE_LINES_DEFAULT * 27) / 2) / VIEW_H) * 100; // 22.62: centred on 210 px
-    expect(top, `zone top ${top}% (FLOW_ZONE_INITIAL_TOP gave ${FLOW_ZONE_INITIAL_TOP * 100}%)`).toBeCloseTo(anchorTop, 2);
+    const cursorTop = ((100 + 3 * PITCH) / VIEW_H) * 100; // word 17 is on the fourth line
+    const cursorBottom = ((100 + 3 * PITCH + 22) / VIEW_H) * 100;
+    expect(top <= cursorTop && bottom >= cursorBottom, `band ${top}-${bottom}% misses the cursor line ${cursorTop}-${cursorBottom}%`).toBe(true);
+    HTMLElement.prototype.getBoundingClientRect = restoreHostRect;
     act(() => root.unmount());
   });
 });
