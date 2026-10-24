@@ -485,5 +485,17 @@
   "os1Paths": [
     "docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-checklist.md",
     "docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json"
+  ],
+  "g6ParityPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/live/matrix-g6.mjs",
+    "src/reader/modes/narrate/ModeRuntime.ts",
+    "tests/readerModes/narrateChunkCache.test.ts",
+    "src/utils/audioScheduler.ts",
+    "tests/audioSchedulerUnderrun.test.ts",
+    "src/reader/modes/flow/ModeRuntime.ts",
+    "tests/readerModes/flowChunkCache.test.ts",
+    "src/utils/naturalChunks.ts",
+    "tests/naturalChunksBoundaryScan.test.ts"
   ]
 }

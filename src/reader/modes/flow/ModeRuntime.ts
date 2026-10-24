@@ -46,6 +46,7 @@ import {
   createReaderModeHandoff,
   freezeValue,
   numberArrayToSet,
+  type ReaderBookWordsValue,
   type ReaderDocumentSnapshot,
   type ReaderModeHandoff,
   type ReaderSessionKey,
@@ -456,6 +457,27 @@ function sectionIndexForGlobalWord(
   return section?.sectionIndex;
 }
 
+/**
+ * sectionIndexForGlobalWord for ascending word indices (one natural-chunk source pass). When the sections are
+ * sorted and disjoint the containing section is the only match, so a forward cursor returns what the legacy
+ * scan's find() returns; otherwise the legacy scan runs. (80k words x 18 sections: the scan was most of a
+ * full-book chunk build once buildNaturalChunks stopped rescanning.)
+ */
+function createSectionLookup(
+  sections: readonly Readonly<SectionBoundary>[] | undefined,
+): (globalWordIndex: number) => number | undefined {
+  if (!sections?.length) return () => undefined;
+  const ordered = sections.every((section, i) => section.startWordIdx <= section.endWordIdx
+    && (i === 0 || sections[i - 1].endWordIdx <= section.startWordIdx));
+  if (!ordered) return (globalWordIndex) => sectionIndexForGlobalWord(sections, globalWordIndex);
+  let k = 0;
+  return (globalWordIndex) => {
+    while (k < sections.length && sections[k].endWordIdx <= globalWordIndex) k++;
+    const section = sections[k];
+    return section && globalWordIndex >= section.startWordIdx ? section.sectionIndex : undefined;
+  };
+}
+
 /** Legacy ReaderContainer createChunkSourceWords. */
 function createChunkSourceWords(params: {
   words: readonly string[];
@@ -465,13 +487,14 @@ function createChunkSourceWords(params: {
 }): ChunkSourceWord[] {
   const { words, foliateWords = [], paragraphBreaks = new Set<number>(), sections } = params;
   const canUseFoliateMetadata = foliateWords.length === words.length;
+  const sectionAt = createSectionLookup(sections);
 
   return words.map((word, index) => {
     const foliateWord = canUseFoliateMetadata ? foliateWords[index] : undefined;
     return {
       word,
       globalWordIndex: index,
-      sectionIndex: foliateWord?.sectionIndex ?? sectionIndexForGlobalWord(sections, index),
+      sectionIndex: foliateWord?.sectionIndex ?? sectionAt(index),
       tokenId: foliateWord?.tokenId,
       blockId: foliateWord?.blockId,
       blockTag: foliateWord?.blockTag,
@@ -519,7 +542,13 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   /** The words the engine runs over (legacy wordsRef). */
   private engineWords: string[] = [];
   /** Legacy naturalReadingChunks memo, keyed by the render version. */
-  private chunkCache: { readonly renderVersion: number; readonly chunks: ReadingChunk[] } | null = null;
+  /** Legacy naturalReadingChunks memo: keyed by the word source and paragraph breaks, and by the render version only without full-book words. */
+  private chunkCache: {
+    readonly renderVersion: number;
+    readonly bookWords: ReaderBookWordsValue | null;
+    readonly paragraphBreaks: readonly number[];
+    readonly chunks: ReadingChunk[];
+  } | null = null;
   private readonly timers = new Set<ReturnType<typeof setTimeout>>();
   private readonly rafs = new Set<number>();
   private alive = true;
@@ -616,7 +645,10 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     const next = own(snapshot) as ReaderDocumentSnapshot;
     if (next === this.documentSnapshot) return;
     this.documentSnapshot = next;
-    this.chunkCache = null; // the chunks read this.document.bookWords
+    // With full-book words the chunk memo is keyed by them and the paragraph breaks (B0 memo deps); without
+    // them the chunks read this snapshot's own words, so a new snapshot rebuilds as before.
+    if (!next.bookWords) this.chunkCache = null;
+    this.warmReadingChunks();
     this.state.notify();
   };
 
@@ -636,6 +668,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       this.ports.settings.update({ readingMode: "flow", lastReadingMode: "flow", isNarrating: false });
       this.queuePostModeAnchorSync();
     }
+    if (!reselect) this.warmReadingChunks();
     this.state.notify();
   }
 
@@ -1255,10 +1288,21 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       : createChunkReadingVisualState({ mode: "flow", chunks, wordIndex, syncLevel: "wpm" });
   }
 
-  /** Legacy naturalReadingChunks (memo over the effective words and the render version). */
+  /**
+   * Legacy naturalReadingChunks: B0's memo chain (effectiveWords [foliateRenderVersion] → chunkSourceWords
+   * [effectiveWords, paragraphBreaks, sections] → buildNaturalChunks) recomputed on a render bump only while
+   * the loaded foliate slice was the source; once full-book words existed effectiveWords returned that same
+   * array, so the chunks were built once.
+   */
   private readingChunks(): ReadingChunk[] {
     const renderVersion = this.state.renderVersion;
-    if (this.chunkCache?.renderVersion === renderVersion) return this.chunkCache.chunks;
+    const bookWords = this.document.bookWords;
+    const paragraphBreaks = this.document.paragraphBreaks;
+    const cache = this.chunkCache;
+    if (cache && cache.bookWords === bookWords && cache.paragraphBreaks === paragraphBreaks
+      && (bookWords || cache.renderVersion === renderVersion)) {
+      return cache.chunks;
+    }
     const foliateWords = (this.document.useFoliate && !this.document.bookWords ? this.surface.getFoliateWords() : null) ?? [];
     const chunks = buildNaturalChunks(createChunkSourceWords({
       words: this.effectiveWords(),
@@ -1266,8 +1310,19 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       paragraphBreaks: numberArrayToSet(this.document.paragraphBreaks),
       sections: this.document.bookWords?.sections,
     }));
-    this.chunkCache = { renderVersion, chunks };
+    this.chunkCache = { renderVersion, bookWords, paragraphBreaks, chunks };
     return chunks;
+  }
+
+  /**
+   * B0 built that memo during the render after full-book words arrived, before any playback: build it then
+   * (this session's own timer), not on the first pacer or render callback.
+   */
+  private warmReadingChunks(): void {
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return;
+    if (this.chunkCache?.bookWords === bookWords && this.chunkCache.paragraphBreaks === this.document.paragraphBreaks) return;
+    this.setTimer(() => { this.readingChunks(); }, 0);
   }
 
   /** Flow's playing flag owns both pacers: legacy modeInstance.pauseMode() + setFlowPlaying(false). */

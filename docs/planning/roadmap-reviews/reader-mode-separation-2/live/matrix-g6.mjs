@@ -319,6 +319,16 @@ async function moveSpeedTo(target) {
   for (let v = from + dir; ok && v !== target + dir; v += dir) { await press(dir > 0 ? "ArrowRight" : "ArrowLeft"); const w = await waitUi((u) => u.slider?.value === v); ok = w.ok; ui = w.ui; }
   return { ok, ui, keys: `${dir > 0 ? "ArrowRight" : "ArrowLeft"} x${Math.abs(target - from)}` };
 }
+// Candidate speed settle: NARRATE_SPEED_SETTLE_MS read from this checkout's own src/constants.ts (the harness runs
+// from the candidate worktree), never a second hardcoded number. Throws if the constant is missing.
+let settleCache = null;
+async function narrateSpeedSettleMs() {
+  if (settleCache) return settleCache;
+  const file = new URL("../../../../../src/constants.ts", import.meta.url);
+  const m = /export const NARRATE_SPEED_SETTLE_MS = (\d+);/.exec(await fs.readFile(file, "utf8"));
+  if (!m) throw new Error("NARRATE_SPEED_SETTLE_MS not found in src/constants.ts");
+  return (settleCache = { ms: Number(m[1]), source: "src/constants.ts NARRATE_SPEED_SETTLE_MS" });
+}
 const rateNum = (label) => { const m = /(\d+(?:\.\d+)?)x/.exec(label ?? ""); return m ? Number(m[1]) : null; };
 async function mouseClick(x, y) {
   await c.send("Input.dispatchMouseEvent", { type: "mouseMoved", x, y });
@@ -496,12 +506,12 @@ async function caseRun(category, dest, fn) {
     id, documentKind, category, fixture, docId,
     expectedCanonicalIndex: row.expected, actualCanonicalIndex: row.actual,
     owner: s ? owner(s) : "unmeasured", playback: s ? playback(s) : "unmeasured",
-    visibleCursorCount: s ? s.visibleCursorCount : null,
+    visibleCursorCount: row.cursorMeasure ? row.cursorMeasure.visibleCursorCount : s ? s.visibleCursorCount : null,
     staleEffectCount: row.stale ? row.stale.count : null,
     result: row.result,
     lastAudioWord: row.lastAudio ?? null, // Decision #24: baseline-equal measure where B0 itself misses the ideal
     checks: row.checks,
-    measurement: { target, expectedRule: row.methods.expected ?? null, actualMethod: row.methods.actual ?? null, ownerMethod: HOW.owner, playbackMethod: HOW.playback, visibleCursorMethod: HOW.visibleCursorCount, staleBreakdown: row.stale ? { trace: row.stale.trace.length, console: row.stale.console.length, dom: row.stale.dom.length } : null },
+    measurement: { target, expectedRule: row.methods.expected ?? null, actualMethod: row.methods.actual ?? null, ownerMethod: HOW.owner, playbackMethod: HOW.playback, visibleCursorMethod: row.cursorMeasure ? `${HOW.visibleCursorCount}; ${row.cursorMeasure.method}` : HOW.visibleCursorCount, staleBreakdown: row.stale ? { trace: row.stale.trace.length, console: row.stale.console.length, dom: row.stale.dom.length } : null },
     ...(row.error ? { notes: `harness error: ${row.error}` } : {}),
     ...(row.throttledSteps ? { invalidReason: "page throttled (hidden/occluded): re-run required", throttledSteps: row.throttledSteps } : {}),
     screenshot: row.screenshot ? `captures/${run}/${row.screenshot}` : null,
@@ -673,8 +683,15 @@ async function narrateRate(row) {
         steps.push({ index: ui.slider?.value ?? null, valuetext: ui.slider?.valuetext ?? null, traceFrom: tr, lastBefore: L, keyAt: Date.now() });
       }
       clickAt = Date.now();
+      // The candidate applies a dialog speed to audio NARRATE_SPEED_SETTLE_MS after the last change (on purpose:
+      // one re-seed per settle). The measurement point is that settle moment: lastBefore and the trace window
+      // are taken there, so firstAfter is the first audio word after the re-seed, not plain continuation.
+      const settle = await narrateSpeedSettleMs();
+      await sleep(Math.max(0, clickAt + settle.ms - Date.now()));
+      const settleAt = Date.now();
+      tr = await traceLen(); L = lastAudioWord(await traceSince(t0));
       const closed = await closeSpeedDialog();
-      dialog = { opened: open.ok, fromIndex: from, toIndex: ui.slider?.value ?? null, reachedTarget: ok, valuetext: ui.slider?.valuetext ?? null, closedFocusOnTrigger: closed.ok, keysMs: clickAt - firstKeyAt, steps };
+      dialog = { opened: open.ok, fromIndex: from, toIndex: ui.slider?.value ?? null, reachedTarget: ok, valuetext: ui.slider?.valuetext ?? null, closedFocusOnTrigger: closed.ok, keysMs: clickAt - firstKeyAt, settleMs: settle.ms, settleSource: settle.source, settleAt, settleAfterLastKeyMs: settleAt - clickAt, steps };
     }
     // The re-seed's first audio word can take > 2.5 s (seen on B0 and the candidate); wait for it, record the gap.
     const firstWord = await waitTrace(tr, (e) => e.kind === "word" && e.source === "audio", 10000);
@@ -692,8 +709,8 @@ async function narrateRate(row) {
   const [up, down] = row.rate;
   // A rate change re-seeds narration at the word being spoken (NARRATE-A5-RATE-RESEED-1); the rate-response
   // trace fires only on the same-bucket live-tempo path, so it is recorded but not required.
-  row.expected = up.lastBefore; row.methods.expected = `the word being spoken at the ${legacyButtons ? "1.0->1.4 click" : "8th ArrowRight (1.35->1.40)"} (last audio word event before it; the rate re-seed restarts that word)`;
-  row.actual = up.firstAfter; row.methods.actual = `first audio word trace event after the ${legacyButtons ? "1.0->1.4 click" : "8th ArrowRight"}`;
+  row.expected = up.lastBefore; row.methods.expected = `the word being spoken at the ${legacyButtons ? "1.0->1.4 click" : "speed settle (NARRATE_SPEED_SETTLE_MS after the 8th ArrowRight, 1.35->1.40)"} (last audio word event before it; the rate re-seed restarts that word)`;
+  row.actual = up.firstAfter; row.methods.actual = `first audio word trace event after the ${legacyButtons ? "1.0->1.4 click" : "speed settle"}`;
   row.checks.readout14 = rateNum(up.readout) === 1.4; // "1.4x speed" (B0) or "Speed 1.40x" (candidate)
   row.checks.downReseedsAtSpokenWord = down.lastBefore != null && down.firstAfter === down.lastBefore;
   row.checks.noColdRestart = up.startEvents === 0 && down.startEvents === 0;
@@ -787,13 +804,38 @@ async function narrateBook(row) {
   const s0 = await step(row, "narrate-paused");
   const t0 = await traceLen(); await play();
   const st = await waitTrace(t0, (e) => e.kind === "lifecycle" && e.state === "start" && e.wordIndex != null, 30000);
-  let s = s0, overlay = null; const deadline = Date.now() + 90000;
+  // Book-end cursor (Decision #28): B0's post-end cursor is nondeterministic (its last visual write after the
+  // stop is word- or chunk-synced) and settled long before the post-end samples, so the measurement is the
+  // cursor while the last word plays: from that word's audio trace event until the play button shows Play,
+  // sampled ~100 ms apart, max kept (sampledMeasure's rule). The post-end samples stay as evidence.
+  const lastWord = end.max; let lastWordEvent = null;
+  for (const until = Date.now() + 60000; !lastWordEvent && Date.now() < until;) {
+    lastWordEvent = (await traceSince(t0)).find((e) => e.kind === "word" && e.source === "audio" && e.wordIndex === lastWord) ?? null;
+    if (!lastWordEvent) await sleep(50);
+  }
+  const tail = [];
+  if (lastWordEvent) {
+    for (const until = Date.now() + 15000; Date.now() < until;) {
+      const ts = await state(); tail.push(ts);
+      if (ts.play === "Play") break;
+      await sleep(100);
+    }
+  }
+  const tailBest = tail.reduce((b, x) => (!b || x.visibleCursorCount > b.visibleCursorCount ? x : b), null);
+  row.bookEndCursor = {
+    lastWord, lastWordEventSeen: Boolean(lastWordEvent), sampleIntervalMs: 100,
+    samples: tail.map((x) => ({ at: x.at, play: x.play, visibleCursorCount: x.visibleCursorCount, cursors: Object.fromEntries(Object.entries(x.cursors).filter(([, v]) => v.length)) })),
+    stoppedSeen: tail.at(-1)?.play === "Play", preStopSamples: tail.filter((x) => x.play !== "Play").length, max: tailBest ? tailBest.visibleCursorCount : null,
+  };
+  row.cursorMeasure = tailBest ? { visibleCursorCount: tailBest.visibleCursorCount, method: `book-end window: max over ${tail.length} samples ~100 ms apart from the last word's (${lastWord}) audio trace event until the play button shows Play` } : { visibleCursorCount: null, method: `book-end window: no audio trace event for the last word (${lastWord}); unmeasured` };
+  let s = tail.at(-1) ?? s0, overlay = null; const deadline = Date.now() + 90000;
   while (Date.now() < deadline) { await sleep(300); s = await state(); if (s.crossBookNext && !overlay) { overlay = s.crossBookNext; await step(row, "overlay"); } if (s.bookTitle && s.bookTitle !== s0.bookTitle) break; }
   row.bookTitles = { before: s0.bookTitle, after: s.bookTitle };
   // the next book's start: the first lifecycle start after the one that started this book's narration
   const startIdx = async () => { const ev = await traceSince(t0); const starts = ev.filter((e) => e.kind === "lifecycle" && e.state === "start"); return starts.length > 1 ? starts[1] : null; };
   let st2 = null; for (let i = 0; i < 60 && !st2; i++) { st2 = await startIdx(); if (!st2) await sleep(500); }
   row.measure = await sampledMeasure(row, "next-book");
+  row.postEndCursorSamples = row.cursorSamples; // evidence only (not the case's visibleCursorCount)
   const ev = await traceSince(t0);
   row.lastAudio = lastAudioWord(ev);
   row.book = { firstStart: st?.wordIndex ?? null, overlay, nextStart: st2?.wordIndex ?? null, bookTransitionEvents: ev.filter((e) => e.kind === "transition" && (e.transition === "book" || e.transition === "handoff")).map((e) => ({ transition: e.transition, context: e.context, latencyMs: e.latencyMs })), flowWordsAfterOverlay: ev.filter((e) => e.kind === "word" && e.source === "flow").length };
