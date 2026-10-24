@@ -145,7 +145,7 @@ describe("update install gating", () => {
     expect(container.querySelector(".toast-action")).toBeNull();
     expect(container.textContent).not.toContain("Install");
     expect(electronApiMock.api.installUpdate).not.toHaveBeenCalled();
-  });
+  }, 30_000); // first dynamic import of LibraryContainer is slow under full-suite load (KF-3)
 
   it("wires update-downloaded library banner to installUpdate", async () => {
     const { default: LibraryContainer } = await import("../src/components/LibraryContainer");
@@ -173,5 +173,5 @@ describe("update install gating", () => {
     });
 
     expect(electronApiMock.api.installUpdate).toHaveBeenCalledTimes(1);
-  });
+  }, 30_000); // first dynamic import of LibraryContainer is slow under full-suite load (KF-3)
 });

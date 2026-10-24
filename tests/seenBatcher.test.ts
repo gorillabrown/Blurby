@@ -5,12 +5,12 @@ const dwellMs = 1000;
 const flushDelayMs = 400;
 
 describe("LIBRARY-SETTINGS-FIX-1: seen batcher", () => {
-  let onFlush: ReturnType<typeof vi.fn>;
+  let onFlush: ReturnType<typeof vi.fn<(ids: string[]) => void>>;
   let batcher: ReturnType<typeof createSeenBatcher>;
 
   beforeEach(() => {
     vi.useFakeTimers();
-    onFlush = vi.fn();
+    onFlush = vi.fn<(ids: string[]) => void>();
     batcher = createSeenBatcher({ dwellMs, flushDelayMs, onFlush });
   });
 
