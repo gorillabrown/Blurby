@@ -8,6 +8,13 @@
 
 ## Incomplete
 
+### BUG-218 — Escape in the highlights and quick-settings overlays also exits the reader; five panels and the mode-button hover read undefined theme tokens
+**Reported:** 2026-10-23 (OVERLAY-THEME-SWEEP-1 stub, from UX-POLISH-2's quality review W1; confirmed live on the packaged base 2026-10-24)
+**Severity:** LOW (Escape leaves the book; the panels show dark navy in Light and E-ink)
+**Status:** RESOLVED in source (OVERLAY-THEME-SWEEP-1)
+**Location:** `src/components/HighlightsOverlay.tsx` and `src/components/QuickSettingsPopover.tsx` (bubble-phase window keydown listeners); `src/styles/keyboard.css` (go-to indicator, highlights overlay, snooze and tag pickers, quick-settings popover); `src/styles/page-reader.css` (`.rbb-mode-btn:hover`).
+**Description:** The reader's window listener (`useReaderKeys`) registers first and runs `exitReader()` on Escape, so Escape in either overlay also left the reader. The five panels and the hovered mode button read `--color-bg`, `--color-border`, `--color-text` and `--color-text-secondary`, which no theme defines, so every theme got the dark fallbacks (`rgb(26, 26, 46)` panels, `rgb(68, 68, 68)` hover). Both overlays now listen in the capture phase and stop Escape (ShortcutsOverlay pattern), and the reads use `--bg-raised`, `--border`, `--text` and `--text-dim`. Evidence: `docs/studies/investigations/OVERLAY-THEME-SWEEP-1.base.2026-10-24.md` and `.after.2026-10-24.md`.
+
 ### BUG-217 — First launch on a fresh profile logs a library backup failure
 **Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
 **Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.

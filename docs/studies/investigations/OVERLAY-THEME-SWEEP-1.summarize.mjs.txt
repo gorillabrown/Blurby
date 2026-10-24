@@ -1,0 +1,23 @@
+import fs from "node:fs";
+const r = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const out = [];
+out.push(`label=${r.label} liveUnchanged=${r.liveUnchanged} exit=${r.exitCode} pageErrors=${(r.pageErrors||[]).length} appLogErrors=${(r.appLogErrors||[]).length}`);
+out.push(`c1 ${JSON.stringify(r.c1)}`);
+out.push(`c2 pass=${r.c2?.pass} before.modeBtn=${r.c2?.before.modeBtn} after.modeBtn=${r.c2?.after.modeBtn}`);
+for (const b of ["b1","b2"]) out.push(`${b} before=${JSON.stringify(r[b]?.before)} after=${JSON.stringify(r[b]?.after)} route=${r[b]?.route ?? "key"}`);
+out.push("| Theme | data-theme / data-eink | --bg-raised | --border | --text | Panel | background | border-top | color | bg=raised | border=border | color=text |");
+out.push("|---|---|---|---|---|---|---|---|---|---|---|---|");
+for (const t of r.themes || []) {
+  for (const [k, p] of Object.entries(t.panels)) {
+    const m = t.match[k];
+    out.push(`| ${t.label} | ${t.root.dataTheme} / ${t.root.dataEink ?? "-"} | ${t.root.bgRaised.rgb} | ${t.root.border.rgb} | ${t.root.text.rgb} | ${k}${k==="goto"&&t.gotoRoute?" †":""} | ${p?.backgroundColor} | ${p?.borderTopColor} | ${p?.color} | ${m?.bg} | ${m?.border} | ${m?.text} |`);
+  }
+}
+out.push("");
+out.push("| Theme | hovered button | :hover | backgroundColor | --border | equal |");
+out.push("|---|---|---|---|---|---|");
+for (const t of r.themes || []) out.push(`| ${t.label} | ${t.hover.label} | ${t.hover.hovered} | ${t.hover.backgroundColor} | ${t.root.border.rgb} | ${t.match.hover} |`);
+out.push("goto routes: " + (r.themes||[]).map((t)=>`${t.label}:${t.gotoVisibleAfterKey?"key":"key+event"}`).join(" "));
+out.push("pageErrors: " + JSON.stringify(r.pageErrors));
+out.push("appLogErrors: " + JSON.stringify(r.appLogErrors));
+console.log(out.join("\n"));
