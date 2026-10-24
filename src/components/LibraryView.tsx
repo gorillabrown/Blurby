@@ -312,9 +312,18 @@ export default function LibraryView({
     }
     if (!newTitle.trim()) return;
     setSaveFailed(false); setSaving(true);
-    const ok = await onAddDoc(newTitle.trim(), newText.trim(), editingId);
-    setSaving(false);
-    if (editingId && ok === false) { setSaveFailed(true); return; }
+    let ok: boolean | void = false;
+    let threw = false;
+    try {
+      ok = await onAddDoc(newTitle.trim(), newText.trim(), editingId);
+    } catch (err) {
+      threw = true; // addDoc's own failure path can throw (its getState refresh); Save must not stay disabled
+      api.logError?.(`addDoc error: ${err}`);
+    } finally {
+      setSaving(false);
+    }
+    if (editingId && (threw || ok === false)) { setSaveFailed(true); return; }
+    if (threw) return;
     setNewTitle(""); setNewText(""); setShowAdd(false); setEditingId(null);
   };
 
