@@ -68,7 +68,7 @@ const CLASS_ARG = String(arg("--class", "auto"));
 if (!["auto", "reference", "mainstream"].includes(CLASS_ARG)) { console.error(`--class must be auto, reference or mainstream (got ${CLASS_ARG})`); process.exit(2); }
 const PHYSICAL_CORES = physicalCores();
 const D6CLASS = CLASS_ARG === "auto" ? (PHYSICAL_CORES === null ? "below-mainstream" : d6ClassOf(PHYSICAL_CORES)) : CLASS_ARG;
-if (D6CLASS === "below-mainstream") { console.error(`D6 class below-mainstream (${PHYSICAL_CORES ?? "unknown"} physical cores): no launch`); process.exit(2); }
+if (D6CLASS === "below-mainstream" && !ANALYZE_ONLY) { console.error(`D6 class below-mainstream (${PHYSICAL_CORES ?? "unknown"} physical cores): no launch`); process.exit(2); }
 const WARM_BUDGET_MS = D6CLASS === "reference" ? REFERENCE_WARM_BUDGET_MS : MAINSTREAM_WARM_BUDGET_MS;
 
 // The live profile (LL-165): hashed before the first launch and after the last; any change fails the run. The app
@@ -176,7 +176,12 @@ const failures = [];
 const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, physicalCores: PHYSICAL_CORES, d6class: D6CLASS, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS, foreignCeilingPct: 25, cycleCap: 40 }, rates: RATES, types: TYPES, runs: [], warm: {}, cold: {}, sessions: {} };
 const liveBefore = ANALYZE_ONLY ? null : liveHashes();
 // A launch that exits 4 opened a profile other than its scratch one (main/narrate/trial.js profileMismatch, LL-165).
-const launchChecked = async (label, trial) => { const run = await launch(label, trial); if (run.code === 4) failures.push(`${label}: profile mismatch`); return run; };
+// The run stops at once (spec, failure handling): the app may already have loaded the live profile.
+const launchChecked = async (label, trial) => {
+  const run = await launch(label, trial);
+  if (run.code === 4) { report.runs.push(run); failures.push(`${label}: profile mismatch (see ${path.join(OUT, "summaries")})`); finish(); }
+  return run;
+};
 
 const want = (k) => !ONLY || ONLY === k;
 
@@ -263,12 +268,14 @@ if (want("cold")) {
           // NARRATE-HARNESS-COLDCLICK-1: the class comes from engine state (the traced requests and the first voiced
           // cause) beside the driver's step; only an attributed trial can count.
           const summaryPath = path.join(OUT, "summaries", `trial-${label}.json`);
-          const summary = fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath, "utf8")) : null;
+          let summary = null;
+          try { summary = fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath, "utf8")) : null; } catch { /* half-written: no step, class no-click or no-voice */ }
           const step = clickStepOf(summary);
           const events = fs.existsSync(tracePathFor(label)) ? readTraceEvents(tracePathFor(label)) : [];
           const d = (step && step.detail) || {};
           Object.assign(row, {
             class: classifyColdClick({ events, step }), playWord: d.playWord ?? null, clicked: d.clicked ?? null,
+            clickOffset: typeof d.clicked === "number" && typeof d.playWord === "number" ? d.clicked - d.playWord : null,
             spansReadyMs: d.spansReadyMs ?? null, voicedBeforeClick: d.voicedBeforeClick ?? null, clickRequested: d.clickRequested ?? null,
             clickLatencyMs: voiced.find((x) => x.cause === "click")?.latencyMs ?? null, error: summary && summary.error ? String(summary.error).split("\n")[0] : null,
           });
@@ -284,7 +291,11 @@ if (want("cold")) {
         rows.push(row);
         // Ten errored launches in a row stop the type: the harness, not the hardware, is failing (spec, failure handling).
         erroredInRow = run && run.code !== 0 ? erroredInRow + 1 : 0;
-        if (erroredInRow >= 10) { failures.push(`cold ${type} ${r}: ten errored launches in a row (last ${label}) - stop and report to Blurby.Brain`); break; }
+        if (erroredInRow >= 10) {
+          failures.push(`cold ${type} ${r}: ten errored launches in a row (last ${label}) - run stopped, report to Blurby.Brain`);
+          report.cold[r][type] = { n: rows.length, counting: rows.filter((x) => x.counts).length, worstMs: null, stopped: true, trials: rows };
+          finish();
+        }
       }
       const counting = rows.filter((x) => x.counts);
       if (counting.length < COLD) failures.push(`cold ${type} ${r}: only ${counting.length} counting trials (< ${COLD}) within ${CYCLE_CAP} launches - ask the owner for a quiet window`);
@@ -297,14 +308,20 @@ if (want("cold")) {
   }
 }
 
-if (liveBefore) {
-  report.liveProfile = { path: LIVE_PROFILE, before: liveBefore, after: liveHashes() };
-  if (JSON.stringify(report.liveProfile.before) !== JSON.stringify(report.liveProfile.after)) failures.push("live profile changed");
+finish();
+
+// Writes the records and exits; also the early stop (a profile mismatch, ten errored launches in a row), so a stopped
+// run still leaves its rows and the live-profile check.
+function finish() {
+  if (liveBefore) {
+    report.liveProfile = { path: LIVE_PROFILE, before: liveBefore, after: liveHashes() };
+    if (JSON.stringify(report.liveProfile.before) !== JSON.stringify(report.liveProfile.after)) failures.push("live profile changed");
+  }
+  report.verdict = failures.length ? "FAIL" : "PASS";
+  report.failures = failures;
+  fs.mkdirSync(RECORDS_DIR, { recursive: true });
+  if (want("warm") || want("cold")) fs.writeFileSync(path.join(RECORDS_DIR, "latency-e2e.json"), JSON.stringify(report, null, 2));
+  if (want("session")) fs.writeFileSync(path.join(RECORDS_DIR, "recorded-output.json"), JSON.stringify({ generatedAt: report.generatedAt, host: report.host, minutes: MINUTES, sessions: report.sessions, runs: report.runs.filter((r) => r.label.startsWith("session")) }, null, 2));
+  console.log(JSON.stringify({ verdict: report.verdict, failures, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v?.worstMs ?? null]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v?.worstMs ?? null]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
+  process.exit(failures.length ? 1 : 0);
 }
-report.verdict = failures.length ? "FAIL" : "PASS";
-report.failures = failures;
-fs.mkdirSync(RECORDS_DIR, { recursive: true });
-if (want("warm") || want("cold")) fs.writeFileSync(path.join(RECORDS_DIR, "latency-e2e.json"), JSON.stringify(report, null, 2));
-if (want("session")) fs.writeFileSync(path.join(RECORDS_DIR, "recorded-output.json"), JSON.stringify({ generatedAt: report.generatedAt, host: report.host, minutes: MINUTES, sessions: report.sessions, runs: report.runs.filter((r) => r.label.startsWith("session")) }, null, 2));
-console.log(JSON.stringify({ verdict: report.verdict, failures, warm: Object.fromEntries(Object.entries(report.warm).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), cold: Object.fromEntries(Object.entries(report.cold).map(([r, c]) => [r, Object.fromEntries(Object.entries(c).map(([t, v]) => [t, v.worstMs]))])), sessions: Object.fromEntries(Object.entries(report.sessions).map(([r, s]) => [r, s.verdict])) }, null, 1));
-process.exit(failures.length ? 1 : 0);
