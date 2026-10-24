@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-23, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
+**Last updated**: 2026-10-23, fourth review (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
 **Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
 **Finish line**: **The Stage 8 release** (owner ruling, 2026-10-22): a published build of `main` once release gates (1) to (11) hold. The 17 merged Stage 8 items then close out on that build's evidence. No dated deadline. Scope: the release gate's eleven conditions ([Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14)); the open gate item is ELECTRON-42-UPGRADE-1 (gate 11), after which gate (1) re-runs on the quiet machine and the batched owner smoke (gate 2) follows. History: the previous finish line, Narration rebuilt, was met on 2026-10-15 (NARRATE-REBUILD-1, TR-074); the reading-mode separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`).
-**Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`). Gate (1) passed on it on 2026-10-23 (run 4: 0 of 51 launches crashed; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`), so the owner's smoke re-check, gate (2), is the one release gate still open. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Dispatch buffer (Queued, Full Spec, post-release): PAGE-SAVE-RESTAMP-3 (80) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84). Then BLOCK-TAG-CASE-1 (85, Full Spec, owner tier-2 OK before merge), stubs 86–96, BLURBY-SERVER-1 (97, `Path: epic`) and Stage 9 (98–104).
+**Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`). Gate (1) passed on it on 2026-10-23 (run 4: 0 of 51 launches crashed; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`), so the owner's smoke re-check, gate (2), is the one release gate still open. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Built and held for the release (In Flight): PAGE-SAVE-RESTAMP-3 (80, Wave A) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84); BLOCK-TAG-CASE-1 (85) is building Wave A. Dispatch buffer after review 2026-10-23-4 (Queued, Full Spec, post-release): NARRATE-QUIT-LINGER-1 (86) → OVERLAY-THEME-SWEEP-1 (90) → READER-ARROW-GUARD-1 (91) → WIN-TARGET-NSIS-1 (92) → EINK-CONTROLS-1 (96). Stubs 87, 88, 93–95 and 97–99; NARRATE-EXIT-CRASH-1 (89) superseded by ELECTRON-42-UPGRADE-1. BLURBY-SERVER-1 (100, `Path: epic`) and Stage 9 (101–107).
 **Last sprint**: SMOKE8-DIAG-1, UI-SWEEP-TRIAGE-1 and UI-SWEEP-1, all completed 2026-10-23 (TR-083, TR-082, TR-081; close-outs in `docs/governance/close-outs/`). Before them, READER-VISUAL-DIAG-1 (TR-080, 2026-10-23) and CI-AUDIT-ALLOWLIST-1 (TR-079, 2026-10-22).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -196,6 +196,7 @@ See [lane mapping and verification](docs/planning/roadmap-reviews/2026-09-23-lan
 50. **LL-156 — A waiver moves with its code.** Before dispatch, every Out-of-scope line, waiver and known-failure entry is re-read against the specification's own edit sites. A waiver whose code the item moves, merges or replaces is brought into scope or restated against the new location. **Why:** SETTINGS-WRITE-DURABLE-1's KF-2 exclusion silently became an exclusion of its own new writer; the rule then held in two close-outs. (Promoted at the 2026-10-22 roadmap review.)
 51. **LL-164 — A lesson status is never set back.** At dispatch and again before close-out, every lesson-status line a specification asks the run to append is compared with that lesson's current status (`lessons --open`). If the lesson was promoted or retired since the specification was written, the line becomes a plain outcome note naming the current status, or is dropped. Never append a status that ranks below the current one. **Why:** KF2-WAIVER-RETIRE-1's correct-per-spec append turned LL-156, promoted to rule 50 that same day, back into a live observation, and every Done-when still passed. The rule held in three close-outs. (Promoted at the 2026-10-23 roadmap review.)
 52. **LL-146 — Evidence that looks like a test is a test.** A script or test copied into the repository as evidence or as a spec's red test is saved under a name the test runner does not collect (append `.txt`), until the run copies it into `tests/`. Before merging a docs commit that adds code-like files, confirm with `npx vitest list` that the collected set did not change. **Why:** two `*.test.*` evidence files under `docs/` broke `main`'s full suite on 2026-10-12, and two dispatches stopped or merged red on failures outside their scope. The rule held in two close-outs, and every spec carrying a red test since depends on it. (Promoted at the 2026-10-23 roadmap review.)
+53. **LL-167 — No dispatch merges or closes until its packaged build is verified (owner directive, 2026-10-23, through Blurby.Brain).** (a) Build `npx electron-builder --win --dir` with an explicit arch flag (`--arm64` on this ARM64 machine, the build the owner runs; amended by Blurby.Brain 2026-10-23) from the final commit with `origin/main` merged in, in the dispatch's own worktree, never over another build. (b) Grep the built `main.js` for `BLURBY_USER_DATA_DIR` (builds before `238f47ec` open the live profile), then run `release\win-unpacked\Blurby.exe` on a fresh scratch profile for 25 s on the verifying machine's native arch (arm64 here, so the arm64 native modules in `app.asar.unpacked` load; an x64 build under emulation is optional extra evidence): it stays alive; stdout, stderr and `error.log` hold no error, unhandled-rejection or crash line; no crash dump appears. Known noise in (b), recorded and not a failure: `Backup failed for …library.json: ENOENT` on a fresh profile's first launch (BUG-217, until fixed), and an `EADDRINUSE` on `127.0.0.1:48924` when the owner's installed Blurby (`AppData\Local\Programs\blurby`) is running; check the port's owner with `Get-NetTCPConnection -LocalPort 48924` and record it. (c) `npx asar list` shows each changed `main/` file, and the renderer bundle in `app.asar` matches `dist/`. (d) The automatable Done-when checks re-run against the packaged exe, not dev mode. (e) The outputs go in a "Package verification" section of the close-out; the dispatch sends Blurby.Brain the package path, commit and logs; Blurby.Roadmap gives the merge go only after Brain confirms. A dispatch that changes nothing under `package.json` `build.files` records "package unchanged" with `git diff --name-only` against the last verified commit. It applies to every item not yet closed, In Flight ones included. For a branch built before the rule (Blurby.Brain, 2026-10-23): an earlier packaged `--dir` live check counts toward (b) and (d) only if it was built from the exact commit that will merge, with current `origin/main` already merged in; otherwise rebuild and re-run (a)–(e). (c) and (e) are always required. A `release/` output is never deleted before its dispatch's package is verified.
 
 **Rule provenance:** Existing numbered rules above retain their historical source labels; registry policy.standingRules.ids declares no additional IDs. Ref ownership in SRL-074 was an intermediate extraction boundary: this approved stage moves the refs together with the owning implementation. User-mandated complete mode separation governs the target architecture.
 
@@ -657,537 +658,1049 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 #### FOCUS-KEYS-FIX-1 — Focus's word, sentence and paragraph keys move the reading word *(built `48203707` on `eb/focus-keys-fix-1`; In Flight; **rebuilt 2026-10-23 at `3bfb016e`, all gates and the live check pass**; merge held for the Stage 8 freeze)*
 
-- **State:** built and pushed at `48203707` on `eb/focus-keys-fix-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** first. FLOW-KEYS-FIX-1 builds on this item's `findParagraphStart` and policy line.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#focus-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
-- **Rebuilt to the amendment, 2026-10-23: built and held at `3bfb016e` (code `568acc60`).** Red first `e513db58`. `npm test` 2,470 passed / 1 skipped / 0 failed; typecheck and build 0. Live: Shift+→ 187 → 188 → 572 → 610 and Shift+← back to 187, never 0, all equal to the DOM block list (`C:\Projects\Blurby-artifacts\keys-fix/focus-568acc60-para.*`, in the folder above). Form deviation, tier 1: `BLOCK_TAGS.has(el.localName.toUpperCase())` instead of a new lowercase Set, because the mode-ownership gate counts a new module Set as a singleton. Merging with `eb/flow-keys-fix-1` conflicts only in `docs/governance/BUG_REPORT.md`; keep both entries.
-
-##### Amendment — 2026-10-23 (owner; the paragraph keys use a case-insensitive block lookup)
-
-- **Live result on `703a5b89` / `48203707`** (Blurby.Roadmap's re-run; scratch profile with preflight; live hashes unchanged; `C:\Projects\Blurby-artifacts\keys-fix\focus-48203707-para.*` and `-words.*`):
-  - **Pass:** Ctrl+→ (187 → 188), Ctrl+↓ (→ 199) and playing Ctrl+← (steps back, then rises).
-  - **Fail:** Shift+→ goes 187 → 5480 → 9431 → 11652 → 14979, and playing 14984 → 20389 → 25788. Those are the book's section starts. Shift+← from 187 lands on 0.
-- **Root cause (live diagnostic, Blurby.Brain's five readings, `focus-703a5b89-diag*.json`):**
-  - The stamped-doc WeakSet is correct (filtered and unfiltered give the same result).
-  - The spans exist (5,293 from word 187).
-  - `collectParagraphStartWordIndexes` returns one start per section (`[187]`, then `[5480]`), because `getBlockParent` never finds a block. EPUB section documents are `application/xhtml+xml`, so `tagName` is lowercase (`"p"`). `BLOCK_TAGS` is uppercase (`focus/helpers/foliateHelpers.ts:20`), and `:78` does `BLOCK_TAGS.has(el.tagName)`. Every text node falls back to `body`, and the whole section becomes one block.
-  - Shift+← landing on 0 has the same cause: the Introduction is in section 0, which starts at word 0 (Brain).
-- **The fix, local to the key path (owner, 2026-10-23).** The shared `getBlockParent` is not changed here; BLOCK-TAG-CASE-1 does that.
-  - `src/reader/modes/focus/helpers/foliateParagraphStarts.ts`: stop using `collectBlockTextNodes` to find blocks. Walk the stamped document's block elements by a case-insensitive match instead. Add `isParagraphBlock(el)`: `PARAGRAPH_BLOCK_TAGS.has(el.localName.toLowerCase())`, over a lowercase set with the same members as `BLOCK_TAGS`. For each block, take its first `[data-word-index]` descendant that is not inside a nested block, and keep the existing sort and dedupe.
-  - Nothing else in FOCUS-KEYS-FIX-1 changes: `paragraphTarget`, `findBookParagraphStart`, the WeakSet and the surface pass-through stay.
-- **Done-when additions:**
-  - **(p1) Red first (standing rule 43).** A test in `tests/readerModes/focusParagraphStarts.test.ts` parses a section with `new DOMParser().parseFromString(xhtml, "application/xhtml+xml")`, with lowercase `<p>` and `<h2>`, stamped from 187. The collector returns each block's first word (for example 187, 188, 572), not `[187]` alone. It fails by assertion on `48203707`. A control parses the same markup as `text/html` and passes on both.
-  - **Live, replacing Done-when 3's Shift+→ row:** on the same route (*Meditations*, a TOC jump to INTRODUCTION, Focus, word 187), Shift+→ three times paused and once playing. Each press lands on the next rendered block's first word: 188, then the next block start (572 on the 2026-10-23 build). Use `word-probe.mjs`'s DOM block list as the expected value. Shift+← returns to the previous block start, never 0 from inside INTRODUCTION.
-- **Fence:** add `M src/reader/modes/focus/helpers/foliateParagraphStarts.ts` (already in the fence) and `M tests/readerModes/focusParagraphStarts.test.ts`.
-- **Lessons:**
-  - LL-166: the verdict comes from the runtime's own state through the probe, not from a screenshot.
-  - LL-142: the cause was measured live before this amendment was written.
-  - A new lesson is due at close-out: an XHTML document's `tagName` is lowercase, so a tag check must be case-insensitive; a CSS selector hid the difference in the first probe.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#focus-keys-fix-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
 <a id="flow-keys-fix-1"></a>
 
 #### FLOW-KEYS-FIX-1 — Flow's line, word, sentence and paragraph keys move both pacers *(**rebuilt to its amendment 2026-10-23 at `1d2ee3a4`** on `eb/flow-keys-fix-1`, carrying FOCUS-KEYS-FIX-1 `3bfb016e` and `main`: k1 red `79909736`, fix `64c2c0b6` (`flow/helpers/flowBrowseKey.ts`); `npm test` 2,504 passed / 1 skipped / 0 failed, typecheck and build 0; live k2: every arrow key keeps playing, → and ← move the speed 300 → 325 → 300, Ctrl+↓ continues, PgDn still pauses and turns the page, against Ctrl+→ stopping at 192 on `60b86aff`; In Flight, merge held for the Stage 8 freeze, after FOCUS-KEYS-FIX-1)*
 
-- **State:** built and pushed at `60b86aff` on `eb/flow-keys-fix-1`; its staging memo records which pre-merge gates have run. It merges after the Stage 8 freeze lifts, in the post-freeze merge train ([plan](docs/planning/roadmap-reviews/2026-10-23-plan.md#post-freeze-merge-train-for-blurbyroadmap-merge-go-stays-with-it)).
-- **Merge order:** after FOCUS-KEYS-FIX-1.
-- **Live finding, 2026-10-23 (FLOW-PARA-KEYS-1's build), open: in Flow, any navigation key pressed while playing stops playback.** It reproduces on this branch's own tip `60b86aff`: Ctrl+→ goes 191 → 192, then playback stops. The spec's table (and its unit tests) says "the timer continues from it", so this item's Done-when 3 does not hold live for the playing rows. Evidence: `C:\Projects\Blurby-artifacts\keys-fix\flow-5fb00ab5-ctrlright.*` and `flow-60b86aff-playing.*`. Diagnosed and ruled by Blurby.Brain, 2026-10-23 (tier 1): amend this item, with no new item.
-
-##### Amendment — 2026-10-23 (Blurby.Brain: the browse-away listener ignores modified arrows)
-
-- **Cause:** Flow's book view has its own window keydown listener (`src/reader/modes/flow/FoliateView.tsx:1301-1320` at `60b86aff`, from `9fa253b0`, 2026-10-09). It treats ArrowRight, ArrowLeft, PageDown and PageUp the same, whatever the modifiers.
-  - It calls `markUserBrowsingAway()`, which runs `onUserBrowseAway` → `setBrowsedAway(true)` → `pausePlayback()`, and then `view.renderer.next()`/`prev()`, which turns a page.
-  - `useReaderKeys` runs first, so the playing jump lands (Ctrl+→ 191 → 192), and then this listener pauses and turns the page.
-  - Every key with ←/→ stops playback; the ↑/↓ keys continue (live: Ctrl+↓ 191 → 199, then 200 to 203, still playing; plain → stays on 191 and stops).
-  - `flowKeys.test.tsx` does not mount Flow's FoliateView, which is why the unit tests passed.
-  - Evidence: `C:\Projects\Blurby-artifacts\keys-fix\brain-flow-60b86aff-playing-ctrldown.json` and `brain-flow-60b86aff-playing-right.json`.
-- **Owner ruling (tier 3, 2026-10-23), verbatim:** "In Flow, plain ← and → should change speed only, without pausing or turning a page. PgUp and PgDn stay the keys to look ahead."
-- **Fix (Blurby.Brain, tier 1, folding in the owner's ruling):**
-  1. Flow's FoliateView keydown listener reacts only to PageDown and PageUp, with no Shift, Ctrl, Alt or Meta held. ArrowLeft and ArrowRight, plain or modified, no longer mark browse-away or turn a page. `useReaderKeys` alone owns them: speed, word and paragraph.
-  2. The key test is a pure exported helper, `isFlowBrowseKey(e)`, in Flow's own helpers (no sibling import).
-  3. If the shortcuts overlay or any key documentation describes ←/→ in Flow as look-ahead, correct it to speed in this amendment, and name the file in the memo.
-- **Done-when additions:**
-  - **(k1) Red first (standing rule 43):** a unit test for `isFlowBrowseKey`. ArrowLeft and ArrowRight return false, plain or with any modifier. Plain PageUp and PageDown return true. PageUp and PageDown with a modifier return false. Commit it alone against a helper that keeps today's condition, show the arrow cases failing by assertion, record that, then change the helper.
-  - **(k2) Live, while playing, on the rebuilt `--dir` package** (a clean `git archive` copy with real `node_modules`; scratch profile with the preflight; `C:\Projects\Blurby-artifacts\keys-fix\flow-play-para-probe.mjs.txt`):
-    - Ctrl+→, Ctrl+←, Shift+→, Shift+←, plain → and plain ←: `atPlaying` is true, and `afterEngine` shows at least 3 distinct increasing words;
-    - plain → and ← move the speed by +25 and −25 (`WPM_STEP`), read from the runtime or settings;
-    - Ctrl+↓ continues (the control);
-    - PgDn still pauses and turns a page, as before;
-    - the live profile is unchanged.
-  - `npm test`, `npm run typecheck` and `npm run build` exit 0.
-- **Fence additions:** `M src/reader/modes/flow/FoliateView.tsx`, the helper if it gets its own file, and its test. No shared-core file.
-- **Merge order:** the amended FLOW-KEYS-FIX-1 lands first. FLOW-PARA-KEYS-1 (`68504ba5`, built on `60b86aff`) then takes the amended tip in and re-runs its live Shift+→ check.
-- **Related, filed separately:** READER-ARROW-GUARD-1 (the same unguarded listener in Narrate and Page). Whether Narrate's plain ←/→ should also change speed only is a later owner question, not part of this ruling.
-- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#flow-keys-fix-1) (moved by roadmap review 2026-10-23; byte-identical to `ROADMAP.md` @ `6bd428e6`). Before merging, the run re-reads it there; the close-out moves it to `ROADMAP_legacy.md`.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#flow-keys-fix-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
 <a id="band-align-2-spec"></a>
 
-#### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(position 70 — Full Spec; authored 2026-10-23 by blurby-f0 on main @ `b99d9c06`, edit sites re-grepped on the stacked base below; BUG-188 Part B; owner decision 2026-10-23 "keep band fixed" (tier 3), **amended by the owner 2026-10-23: band on line edges, cursor centred, band follows the reading location, anchor setting Top / Top third / Center (see the Owner amendment below)**; **after the Stage 8 release**; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; shared-core touch: `ReaderContainer.tsx`, two props)*
+#### BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock *(**Built and held 2026-10-23 at `508be445` on `eb/band-align-2`**, base `f96552bd` = FLOW-PARA-KEYS-1 `100b41dd` + BAND-ALIGN-1 `105a07c1` + `main` `7c4a7a88`. Red first (`368dcc15`); `npm test` 2,542 passed / 1 skipped / 0 failed, typecheck and build 0. Live (scratch-profile `--dir` builds), base → tip: Flow's underline outside the band went from 99/178 to 0/178 at 100% and from 128/178 to 0/178 at 120%; the cursor is the band's middle line; the anchors are within 0.4 px; Lines 3, 5 and 7 show that many lines; Off removes the mask; e-ink keeps the cursor on screen for 1,361 of 1,361 samples. **Fixed in scope:** a defect that was already there. Foliate scrolls a closed shadow root, so the line pacer's `scrollTop` writes never moved the text; the pacer now scrolls through `renderer.containerPosition`. **Roadmap rulings (tier 1):**
+- Accepted outside the fence: `src/reader/modes/flow/useModeBindings.ts` (writes the engine's band edges), `docs/.../census/boundary-policy.json` (declares the new constants) and `tests/readerModes/zoneLineStep.test.ts` b1d (pinned test; it now checks the band height and the anchor).
+- Accepted: e-ink steps early when the next line would fall below the view (it landed at line 18, not 20), so the cursor stays on screen. Added to the owner's smoke list.
 
-- **Read the Owner amendment (2026-10-23) below first:** it replaces this item's band placement (R1–R4). The text here still governs Flow's one-clock change.
-- **What:** the reading band stays where it is: top at `FLOW_ZONE_INITIAL_TOP` (15%) of the view, height `flowZoneLines` × the body line step (BAND-ALIGN-1). The text moves so that the cursor word's line is inside the band.
-  - **Focus.** On arrival, and on every highlight move that may move the view, the view scrolls so that the cursor word's line top sits at the band's top. A line already inside the band is left alone. "Highlight moves" means every path that paints the Focus cursor with motion allowed: arrival, a word click, jump-back, an anchor jump (`jumpFoliateToWordAnchor`), and the FOCUS-KEYS-FIX-1 moves that call it. Nothing scrolls while the reader is browsing away (`userBrowsingRef`), as today.
-  - **Flow, playing: one clock.** The word timer (`FlowMode`) is the only clock. The line pacer (`FlowScrollEngine`) no longer times lines. It follows the word timer's word: when the word's line changes, it scrolls that line to the band's top (its existing stable-window rule, `advanceZone`) and moves its cursor bar. The underline and the band can no longer drift apart.
-  - **Flow, paused arrival:** the arrival scroll uses the same band rule as Focus, instead of centring the word.
-  - **Consistency with FLOW-KEYS-FIX-1.** That item makes a navigation key move both pacers: `flow-line` moves the line pacer, then the word timer jumps to its word, and word, sentence and paragraph moves jump both. That stays as it is. With one clock, the line pacer's word always equals the word timer's word after any move or tick. That also removes the pre-existing republish FLOW-KEYS-FIX-1 left out of scope, where the line pacer re-published its line's first word on its own clock after a mid-line jump.
-- **Why:** BUG-188 Part B, measured by READER-VISUAL-DIAG-1 (`docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`, H2 and H3), and confirmed by code read on the stacked base:
-  - **H2, Focus.** The cursor word was outside the band in all 4 measurements. The arrival scroll centres the word (`focus/FoliateView.tsx:1059`, `scrollIntoView({ block: "center" })`). Highlight motion uses `renderer.scrollToAnchor` (`:589`) only when the word is off screen (`:585`). Nothing places the line in the band.
-  - **H3, Flow.** While playing, the underline was outside the band in 60–77% of 177–178 one-second samples across 4 sessions. There are two clocks:
-    - The word timer, `FlowMode.scheduleNext` (`flow/ModeRuntime.ts:197-232`): 60000/wpm per word plus half-length rhythm pauses. It paints the underline through `onEngineWordAdvance` → `surface.highlight` (`:1218-1250`).
-    - The line pacer, `FlowScrollEngine.animateLine` (`flow/helpers/FlowScrollEngine.ts:552-629`): wordCount/wpm per line, plus a 100 ms flash (`FLOW_LINE_COMPLETE_FLASH_MS`) and a 50 ms buffer (`FLOW_LINE_ADVANCE_BUFFER_MS`) per line, with no rhythm pauses. It alone calls `advanceZone` (`:738`), which scrolls the text, and it also publishes highlights (`ModeRuntime.ts:1263-1269`).
-    - At 300 wpm a 5-word line takes the word timer 1,000 ms plus pauses, and the line pacer 1,150 ms, so the two drift apart line by line.
-  - **Base on this item's stacked base:** *re-measure pending; the planner holds the merge until it is recorded here.* It uses READER-VISUAL-DIAG-1's probe and route on a `--dir` build of the stacked base, after blurby-6b's heavy gates. To record: Focus (i)–(iii) in or out of band at 100% and 120%, and Flow's out-of-band count in 180 samples at 100% and 120%.
-- **Base and merge order:**
-  - **Merge order:** after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1. All four are post-release.
-  - **Branch:** `eb/band-align-2`, in worktree `C:\Projects\Blurby\.worktrees\band-align-2`. Run `npm ci` first. Which base:
-    - If all three have merged, branch from `refs/remotes/origin/main`.
-    - Otherwise, branch from `refs/remotes/origin/eb/flow-keys-fix-1` (it carries FOCUS-KEYS-FIX-1), then `git merge --no-ff refs/remotes/origin/eb/band-align-1`.
-  - **Checked:** `28ba822d` (flow-keys-fix-1) plus `105a07c1` (band-align-1) merges with no conflict (local check `280d3b48`, not pushed). Every line number below is on that stacked base. Re-grep them at dispatch (standing rule 36).
-- **Where** (on the stacked base):
-  - **Flow: the line pacer follows the word timer.** In `src/reader/modes/flow/helpers/FlowScrollEngine.ts`:
-    - **A `wordClock` flag.** `start(...)` (`:130`) takes an 11th parameter, `wordClock = false`, and stores it. While it is set, the pacer schedules no `animateLine`, `animateChunkVisualLine` or `animateEinkChunk` of its own. Gate each scheduling site:
-      - the retry path `:180-182`;
-      - the first line `:204-206`;
-      - `resume` `:273`;
-      - `setWpm` `:278-281`;
-      - `setFollowerMode` `:300-302`;
-      - `jumpToWord` `:316-318`;
-      - `jumpToLine` `:368-370`;
-      - `jumpToParagraph` `:392-394`.
+**Ruled by the owner 2026-10-23 (roadmap review 2026-10-23-4):** the chapter's first word becomes the reading word, in [FOCUS-TOC-JUMP-WORD-1](#focus-toc-jump-word-1). Originally open: in Focus, after a contents jump, no cursor is painted in the new section (on the base too). Which word becomes the reading word is a behaviour question, so Done-when 7's "after a contents jump" check cannot pass until it is ruled. It goes to the next review. FLOW-PAUSED-LINE-1's citation of `advanceZone` is now stale (next review). **Merge order:** JUMP-LANDING-SAVE-1 also edits `ReaderContainer.tsx`, so it merges first. `git merge-tree` of the two branches is clean. Then BAND-ALIGN-1 → FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 / FLOW-PARA-KEYS-1 → this branch, in the `ReaderContainer.tsx` integration window. Memo: `docs/governance/close-outs/Memo.BAND-ALIGN-2.GovernanceStaging.2026-10-23.md` on the branch. Position 70 — Full Spec; authored 2026-10-23 by blurby-f0 on main @ `b99d9c06`, edit sites re-grepped on the stacked base below; BUG-188 Part B; owner decision 2026-10-23 "keep band fixed" (tier 3), **amended by the owner 2026-10-23: band on line edges, cursor centred, band follows the reading location, anchor setting Top / Top third / Center (see the Owner amendment below)**; **after the Stage 8 release**; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; shared-core touch: `ReaderContainer.tsx`, two props)*
 
-      The default, `false`, keeps today's behaviour for every other caller, and `tests/flow-scroll-engine.test.js` passes unchanged.
-    - **A new public method, `syncToWord(wordIndex)`,** beside `followWord` (`:321`). It runs only while the pacer is running and `wordClock` is set.
-      1. `lineIdx = findLineForWord(wordIndex)`.
-      2. If the word is past the last line's `lastWord`, call `callbacks.onComplete()` once, then return. The once-flag resets in `start` and in `rebuildLineMap` (`:428`). This keeps the section handoff, `onScrollEngineComplete` (`ModeRuntime.ts:1296-1315`).
-      3. Set `wordIndex`. If the line changed, set `lineIdx` and call `advanceZone(lineIdx)`. The stable-window branch (`:747-755`) puts the line at the band's top. Then call `onLineChange`.
-      4. In e-ink, advance only when the line reaches the current chunk's start + `EINK_LINES_PER_PAGE`. That keeps today's 20-line page steps, and so e-ink refreshes.
-      5. Place the cursor bar under the line at the remaining-words width, as `followWord` does (`:334-346`).
-      6. Call `emitChunkChangeForWord` and `onProgressUpdate`.
-
-      It never calls `onWordAdvance`: the word timer already published the word.
-  - **Flow: `src/reader/modes/flow/ModeRuntime.ts`.**
-    - `startScrollEngine` (`:1139-1159`): pass `true` as `wordClock` in `engine.start(...)` (`:1147`).
-    - `onEngineWordAdvance` (`:1218-1250`): after the surface highlight is found (`:1241`), call `this.scrollEngine?.syncToWord(idx)`. When the highlight misses and Flow pauses to turn the page, don't call it.
-    - **Unchanged:**
-      - `handleCommand`'s `flow-line` case (`:920-925`): `jumpToLine` then `engine.jumpTo`, whose word is on the same line, so `syncToWord` does nothing.
-      - `moveReadingWord` (`:958-964`) and the playing click (`:869-872`).
-      - `createScrollEngine`'s `onWordAdvance` (`:1263-1269`). It now fires only from `jumpToLine` and `jumpToParagraph`.
-  - **Flow arrival: `src/reader/modes/flow/FoliateView.tsx:1128-1134`.** Replace `scrollIntoView({ block: "center" })` (`:1134`) with the band alignment below, using Flow's own copy of the helper.
-  - **Focus: band alignment.**
-    - **`src/reader/modes/focus/helpers/foliateLayout.ts`:** add pure `computeBandScrollTop({ scrollTop, lineTopPx, containerTopPx, viewportHeightPx, zoneTopFrac })`. It returns `max(0, scrollTop + (lineTopPx − containerTopPx) − zoneTopFrac × viewportHeightPx)`. Add `isLineInBand(lineTopPx, lineBottomPx, bandTopPx, bandBottomPx)`. Flow gets its own copy in `flow/helpers/foliateLayout.ts`: mode isolation, no shared module.
-    - **`src/reader/modes/focus/FoliateView.tsx`:** add `alignSpanToBand(span)`.
-      - It uses `resolveFoliateScrollContainer` (`:419`), `getFlowViewportHeightPx` (`:449`), `FLOW_ZONE_INITIAL_TOP`, and the band height from `readZoneLineStepPx(container)` × `flowZoneLines`.
-      - If the span's line is not inside the band, it sets the container's `scrollTop` to `computeBandScrollTop(...)`.
-      - The span's rect is offset by its iframe's rect, as `band-probe.js` does.
-    - **Call sites:**
-      - arrival (`:1053-1062`): replace `:1059`;
-      - `applyVisualHighlightByIndex` (`:585-593`): when motion is allowed and the reader is not browsing, align when `forceMotion` is set or the line is outside the band, instead of `scrollToAnchor` when the word is off screen;
-      - `centerResolvedTokenInReadingWindow` (`:601-627`), the click and selection scroll: align the resolved token's span, instead of `scrollToAnchor` minus `getFlowFollowOffsetPx`.
-  - **Not edited:**
-    - `src/utils/FlowScrollEngine.ts` (shared core). Guard at dispatch: `git grep -n "from \"[./]*utils/FlowScrollEngine\"" -- src | grep -v "import type"` prints nothing.
-    - `ReaderContainer.tsx`, `src/types.ts`, Page, and Narrate (its own band copy, out of scope).
-    - `FLOW_ZONE_INITIAL_TOP`, `FLOW_ZONE_LINES_DEFAULT`.
-- **Done when** (run every command in `pwsh` from the worktree root):
-  1. **Red first (standing rule 43).** A new `tests/readerModes/bandAlign2.test.tsx` is committed alone first, and fails by assertion on the base:
-     - **(f1) One clock.** Flow is played and its line pacer started the way `flowKeys.test.tsx` does, over a jsdom container of 200 word spans laid out five to a line. Run 195 word ticks at 300 wpm. After every tick, the line pacer's `lineIndex` equals the line of the word timer's word (`exportHandoff("capture-current")`). On the base the two drift, so a tick differs.
-     - **(f2) Scroll follows the word.** On each line change in (f1), the container's `scrollTop` equals that line's `y − clientHeight × FLOW_ZONE_INITIAL_TOP`, floored at 0.
-     - **(f3) No own clock.** With the word timer paused (`engine.pause()` only), advancing 5 s of timers leaves the line pacer's `lineIndex` and `wordIndex` unchanged.
-     - **(f4) Section end.** A word timer word past the last line calls the pacer's `onComplete` exactly once, as `goToSection` with the next section's index.
-     - **(c1) Control.** It passes on the base: `FlowScrollEngine.start(...)` without `wordClock` still times its own lines, as `tests/flow-scroll-engine.test.js` asserts.
-     - **(m1) Focus helper.** `computeBandScrollTop` gives 305.5 for a line top at 400 px in a 630 px view with `scrollTop` 0 and the band top at 15%, which puts the line top at 94.5. `isLineInBand` is true for 94.5–121.5 against a 94.5–229.5 band, and false for 300–327.
-     - **(m2) Focus wiring,** through the fixture harness as BAND-ALIGN-1's (b1d). On arrival with a highlighted word whose mocked line top is 400 px, the view sets the scroll container's `scrollTop` from `computeBandScrollTop`, and does not call `scrollIntoView({ block: "center" })`. On the base, it calls `scrollIntoView`.
-
-     `npx vitest run tests/readerModes/bandAlign2.test.tsx` exits 1 on the base, with (c1) passing.
-  2. **The change.** That file passes, and these exit 0 with no file in them edited:
-     - `npx vitest run tests/readerModes tests/flow-scroll-engine.test.js tests/flowReadingZone.test.ts tests/flowZoneAuto.test.ts`;
-     - FLOW-KEYS-FIX-1's `tests/readerModes/flowKeys.test.tsx` and FOCUS-KEYS-FIX-1's `tests/readerModes/focusKeys.test.tsx` are among them.
-
-     If one of them fails because it asserts the line pacer's own clock, stop and report it (standing rule 50: name the pinned test). Do not edit it unasked.
-  3. **Live, on a packaged `--dir` build of the branch tip,** with the same build, route and probe as the base re-measure above (LL-152).
-     - **Setup:**
-       - a fresh scratch profile;
-       - a driver with the profile preflight (`scripts/ui-sweep/sweep.mjs` `Session.profilePreflight`): `app.getPath('userData')` is proven to be the scratch profile before any input;
-       - *Meditations*;
-       - `band-probe.js` from `C:\Projects\Blurby-artifacts\reader-visual-diag-1\`;
-       - 100% and 120% text size.
-     - **Focus, cursor word inside the band in all three cases, at both sizes:**
-       - (i) after a Page TOC jump to INTRODUCTION, then the switch to Focus;
-       - (ii) after a click on a word about 20 lines further down the section;
-       - (iii) after a TOC jump to the next entry after INTRODUCTION.
-     - **Flow,** on READER-VISUAL-DIAG-1's scripted route (180 s of play, one sample a second): the underline is outside the band in at most 9 of 180 samples (5%), at 100% and at 120%.
-     - **Flow, E-ink on (once, at 100%),** because `syncToWord` takes over the e-ink path:
-       - Play for at least 60 s, logging the scroll container's `scrollTop` and the line pacer's `lineIndex` each time `scrollTop` changes.
-       - Each scroll lands when the line reaches the current chunk's start + `EINK_LINES_PER_PAGE` (20). There is no per-line scroll in between.
-       - The underlined word stays on screen throughout.
-     - Record every figure beside the base figures in the staging memo.
-     - Close every window. The live profile's hashes are unchanged.
-  4. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
-  5. **Fence:** `git diff --name-status <base>` lists exactly these, plus the staging memo and time log (standing rule 41):
-     - `M src/reader/modes/flow/helpers/FlowScrollEngine.ts`, `M src/reader/modes/flow/ModeRuntime.ts`;
-     - `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/flow/helpers/foliateLayout.ts`;
-     - `M src/reader/modes/focus/FoliateView.tsx`, `M src/reader/modes/focus/helpers/foliateLayout.ts`;
-     - `A tests/readerModes/bandAlign2.test.tsx`, `M docs/governance/BUG_REPORT.md`.
-
-     `git diff --name-only <base> -- src/utils src/components/ReaderContainer.tsx src/types.ts src/reader/modes/narrate src/reader/modes/page` prints nothing.
-  6. `docs/governance/BUG_REPORT.md` BUG-188 reads "band height and band placement RESOLVED in source (BAND-ALIGN-1, BAND-ALIGN-2)". It names no merge sha (standing rule 49).
-  7. **Owner (next smoke):** in Focus after a contents jump and after a click, and in Flow while playing for a minute, the cursor word stays inside the bright band.
-- **Failure handling:**
-  - If the section start cannot scroll the first line up to the band's top (`computeBandScrollTop` floors at 0), check that the leading inset applies in Focus: `--blurby-flow-leading-inset`, set at `focus/FoliateView.tsx:1186` and used at `focus/helpers/foliateStyles.ts:63`. If it does not, stop with the measurement and don't widen the item.
-  - If Flow's live count is over 9 at one size only, stop with the per-second log.
-  - Rollback: `git revert -m 1 <merge>`.
-- **Out of scope:**
-  - Narrate's band;
-  - Flow's paused line keys (FLOW-PAUSED-LINE-1);
-  - the band's height or line count;
-  - Page mode.
-- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; repository operator merges on Blurby.Roadmap's go; owner in the next smoke batch.
-- **Lane:** Reader Engine. Execution surface A (Flow's pacer) and C (the band). **Shared-core touches:** none. **Effort:** M. **Path:** dispatch.
-
-##### Owner amendment — 2026-10-23 (supersedes the band placement above)
-
-The owner reviewed the band live on 2026-10-23 and ruled three requirements, plus a user setting for the anchor (tier 3, owner). Where this amendment and the text above disagree, this amendment governs. Flow's one-clock change (`wordClock`, `syncToWord`) stands unchanged.
-
-- **R1. Edges between lines, never through text.** The band's top and bottom come from the rendered line boxes of the lines it covers, not from fractions of the view height.
-  - Top edge: the midpoint of the gap between the band's first line and the line above it.
-  - Bottom edge: the midpoint of the gap between the band's last line and the line below it.
-  - At a section's first or last line, the edge is that line's box edge.
-  - The mask's fade (`mode.css`, `calc(var(--flow-zone-top) - 2%)` and its bottom twin) lies outside the edges, so no glyph is cut by the bright band's edge.
-- **R2. The cursor line is the band's middle line.** The band covers `flowZoneLines` lines: the cursor line, `floor((n − 1) / 2)` lines above it and `ceil((n − 1) / 2)` lines below it. n is always odd (3, 5 or 7; R5), so the cursor line is exactly centred: one line above and below at 3, two at 5, three at 7.
-  - At a section's start or end, where fewer lines exist on one side, the band takes the lines that exist. It never covers blank space past the section's text.
-- **R3. The band belongs to the reading location.** Every move of the cursor (arrival, word tick, line change, key move, click, contents jump) places the band by one rule:
-  1. **Scroll first.** Scroll so that the cursor line's centre sits at the anchor's y. The scroll is clamped to the container's range (`0` to `scrollHeight − clientHeight`), including any leading inset the mode already sets (`setFlowInsetsForRenderedDocs`).
-  2. **Then place the band around the cursor line, wherever it ended up.** It is computed from R1 and R2 against the line boxes after the scroll. When the scroll was clamped (the top or end of a section), the band moves off the anchor to follow the cursor. It is never left at the anchor with the cursor outside it.
-  - This replaces "the cursor line's top at the band's top" in Focus (`computeBandScrollTop`) and in Flow's stable-window branch (`advanceZone`, `FlowScrollEngine.ts:748`). Flow's (f2) expectation changes accordingly (below).
-  - The band never moves while the reader is browsing away (`userBrowsingRef`), as today.
-- **R4. Anchor setting: Top, Top third or Center.** The reader chooses where the band sits. On arrival the text is pulled to it, and that is the starting spot.
-  - **Storage:** reuse the existing, currently unread setting `flowZonePosition` (`src/types.ts:169`, a number; a trusted key per `tests/settingsKeyTrustKeys.test.ts:17`). No new key and no `src/types.ts` edit.
-  - **Values:** `0` = Top (the band's top edge at the view's top), `1/3` = Top third (the band's centre at one third of the view height), `0.5` = Center (the band's centre at half).
-  - **Legacy values** (0.15, 0.25, 0.35, 0.55, or anything else) read as Top third, through one normaliser per mode helper, `normalizeBandAnchor(value)`.
-  - **Default:** Top third. `FLOW_READING_ZONE_POSITION` in `src/constants.ts:252` becomes `1 / 3`. Add `FLOW_BAND_ANCHOR_TOP = 0`, `FLOW_BAND_ANCHOR_TOP_THIRD = 1 / 3` and `FLOW_BAND_ANCHOR_CENTER = 0.5` beside it (constants separation rule).
-  - **Control:** in the bottom bar's zone controls (`src/components/ReaderBottomBar.tsx:345-362`), beside **Lines**, a three-button group, **Top · Top third · Center**, with `aria-pressed`. The zone controls show in Focus as well as Flow, because both have the band; today they show in Flow only (`:345`).
-  - **Wiring:** `ReaderContainer.tsx:815-816` passes `flowZonePosition={settings.flowZonePosition}` and `onSetFlowZonePosition={(v) => updateSettings({ flowZonePosition: v })}`, beside the existing `flowZoneLines` pair. **This is a shared-core touch** (see below).
-  - A change of anchor re-places the band at once (R3) without moving the reading word.
-- **Removed from this item:** `FLOW_ZONE_INITIAL_TOP` (0.15) no longer places the band in Focus or Flow; R3 and R4 do. The constant stays for Narrate's band, which is out of scope.
-- **R5. Lines: 3, 5, 7 or Off (owner, 2026-10-23).** The reader chooses how many lines the band covers, or turns the band off.
-  - **Storage:** the existing `flowZoneLines` (`src/types.ts:170`, a number; a trusted key). `0` means Off. No new key and no `src/types.ts` edit.
-  - **Values:** `3`, `5`, `7` and `0` (Off). Legacy values read through one normaliser per mode helper, `normalizeBandLines(value)`: any value other than 3, 5, 7 or 0 (including 4, 6, 8 and `undefined`) reads as 5 (owner, 2026-10-23). The default stays 5 (`FLOW_ZONE_LINES_DEFAULT`). Add `FLOW_ZONE_LINES_OPTIONS = [3, 5, 7]` and `FLOW_ZONE_LINES_OFF = 0` in `src/constants.ts` (constants separation rule).
-  - **Off:** no band and no dimming. The mask is removed (the zone host carries no `--flow-zone-*` properties, and a `--band-off` modifier class disables the gradient in each mode's `mode.css`). The reading cursor (the Focus highlight and the Flow underline) still shows, and R3's scroll to the anchor still runs, so the text still lands at the chosen spot.
-  - **Control:** the bottom bar's **Lines** slider (`ReaderBottomBar.tsx:351-360`, `min={3} max={8}`) becomes a four-button group, **3 · 5 · 7 · Off**, with `aria-pressed`, beside the anchor buttons (R4), in Focus and Flow. The existing `onSetFlowZoneLines` prop carries the value, so `ReaderContainer.tsx` needs no new prop for this.
-  - A change of lines re-places the band at once (R3) without moving the reading word.
-
-**Done when, amended:**
-
-- **Red file additions** (to `tests/readerModes/bandAlign2.test.tsx`, red by assertion on the base):
-  - **(r1) Edges.** A fake line map has seven lines with tops at y = 73, 100, 127, 154, 181, 208 and 235 (step 27, box height 22). With the cursor on the 154 line and n = 5, the band covers the lines at 100–208. It runs from 97.5 to 232.5 px:
-    - the top edge is the gap midpoint (73 + 22 + 100) / 2;
-    - the bottom edge is the gap midpoint (208 + 22 + 235) / 2.
-
-    It is not 100 to 230, the line boxes themselves.
-  - **(r2) Centre.** n = 3, 5 and 7 put the cursor line second of three, third of five and fourth of seven. At a section's first line with n = 5, the band covers lines 1–3 only, with no blank above.
-  - **(r6) Lines.** `normalizeBandLines` maps 3 → 3, 5 → 5, 7 → 7, 0 → 0, and 4, 6, 8 and undefined → 5. The bottom bar renders **3 · 5 · 7 · Off** in Focus and Flow, and a press calls `onSetFlowZoneLines` with 3, 5, 7 or 0. With 0, the zone host has no `--flow-zone-top` and carries the band-off class, and the cursor highlight is still painted.
-  - **(r3) Clamp.** In a 630 px view with the anchor at Top third and the cursor on a section's first line (y = 0, `scrollTop` already 0), the scroll stays 0 and the band's centre sits on the cursor line, not at 210 px.
-  - **(r4) Anchor values.** `normalizeBandAnchor` maps 0 → 0, 1/3 → 1/3, 0.5 → 0.5, and 0.25, 0.15 and undefined → 1/3. Each anchor puts the cursor line's centre at 0 + half the band, 210 px and 315 px in a 630 px view when unclamped.
-  - **(r5) Control.** The bottom bar renders the three buttons in Focus and in Flow, and a press calls `onSetFlowZonePosition` with 0, 1/3 or 0.5.
-  - **(f2) is replaced:** on each line change, the cursor line's centre is at the anchor's y (unclamped), or the band sits around it (clamped).
-- **Pinned tests (standing rule 50), updated in scope and named in the memo:** `tests/flowReadingZone.test.ts:73-74` and `:99-100` (the 0.25 default) and `:204-206` (the old dropdown options), and `src/test-harness/electron-api-stub.ts:72` (0.25 → 1/3).
-- **Live (Done-when 3) additions,** on the same build, route and probe, at 100% and 120%, in Focus and in Flow:
-  - **Edges:** the probe's band top and bottom each fall within a line gap. Measure each edge's distance from the nearest line box; it is 0 inside a glyph box. Record the figures.
-  - **Centred:** with n = 5, the cursor line is the band's third line in every sample, except the first two and last two lines of a section.
-  - **Top of a section:** after a contents jump to INTRODUCTION, then the switch to Focus, and again in Flow, the cursor word is inside the band, and the band's centre is on the cursor line even though the scroll is clamped. This is the owner's 2026-10-23 failure.
-  - **Anchor:** for each of Top, Top third and Center, the cursor line's centre is within half a line of the anchor's y, measured at a mid-section word.
-  - **Lines:** at 3, 5 and 7, the band covers exactly that many lines, with the cursor line in the middle. At Off, there is no dimming anywhere on screen, and the cursor word is still marked.
-- **Owner (next smoke), replacing Done-when 7:** in Focus and Flow:
-  - the band's edges sit between lines;
-  - the cursor line is in the band's middle;
-  - at the top of a section the band is on the cursor;
-  - each of the three anchor buttons moves the text to that spot;
-  - Lines 3, 5 and 7 change the band's height, and Off removes it.
-- **Fence, amended:** add `M src/constants.ts`, `M src/components/ReaderBottomBar.tsx`, `M src/components/ReaderContainer.tsx`, `M tests/flowReadingZone.test.ts`, `M src/test-harness/electron-api-stub.ts`, `M src/reader/modes/focus/mode.css` and `M src/reader/modes/flow/mode.css` (the band-off modifier), and `M src/styles/*.css` if the button groups need a rule (no inline styles). `src/types.ts`, `src/utils/`, Page and Narrate stay untouched.
-- **Shared-core touches:** `src/components/ReaderContainer.tsx`, two props, in an integration window after the Stage 8 release. On 2026-10-23 no held branch edits it: `git diff --name-only origin/main...<branch> -- src/components/ReaderContainer.tsx` printed nothing for all 19. Re-check at dispatch; if a branch then edits it, that branch merges first.
-- **Effort:** L (was M).
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate |
-|---|---|---|---|---|---|---|
-| 1 | Red file (f1–f4, c1, m1, m2) committed alone; the failures recorded | calculable | positive control | bounded | medium | 40m |
-| 2 | Flow: `wordClock`, `syncToWord`, the eight scheduling gates, and the two runtime call sites | calculable | bug fix | bounded | high | 60m |
-| 3 | Focus and Flow arrival: the band helpers and `alignSpanToBand` at the arrival, highlight and click sites | calculable | bug fix | bounded | medium | 45m |
-| 3a | R1–R4: line-box band edges, cursor-centred band, band follows the cursor when the scroll clamps, the anchor setting and its bottom-bar control (Focus and Flow), pinned tests updated | calculable | feature | bounded | high | 60m |
-| 4 | Targeted suites unchanged and green; `npm test`, typecheck and build | mechanical | verify | mechanical | low | 20m |
-| 5 | `--dir` build; live Focus (i)–(iii) and Flow 180 s at two sizes under the profile preflight | calculable | live check | bounded | medium | 45m |
-| 6 | BUG-188 line, memo and time log; push; ask Blurby.Roadmap for merge go | mechanical | close | mechanical | low | 15m |
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** red first, with a control (c1) that keeps the line pacer's own clock for other callers.
-- **LL-142:** the H3 cause was inferred in READER-VISUAL-DIAG-1. Here it is read from code (the two schedules above), and it is proven by (f1) and the live count, not by reading the CSS.
-- **LL-152:** base and fix are measured like for like (the same build recipe, route, probe and sizes).
-- **Standing rule 36:** every line number was re-grepped on the stacked base `28ba822d` + `105a07c1`, and is re-grepped again at dispatch.
-- **Standing rule 45 (LL-141):** Done-when 7 keeps an owner-observed route.
-- **Standing rules 41, 46, 47, 48, 49 and 50:** the fence exempts the memo and time log; nothing is written to the register; the suite, typecheck and build run on the owner's machine; BUG-188's line names no sha; pinned tests are named, not edited.
-- **Profile guardrail (Blurby.Brain, 2026-10-23):** every live launch proves its scratch profile before any input.
-- **Reading-mode separation:** each mode has its own helper copy, and there is no sibling import.
-- **Standing rule 50 (LL-156):** `tests/flowReadingZone.test.ts` pins the 0.25 default and the old options, and the test-harness stub pins 0.25. They are named here and updated in scope.
-- **LL-165:** every live launch proves its scratch profile before the first input (already the profile guardrail above).
-- **LL-166:** the live checks read state (line boxes, band edges and the cursor line) through the probe. They do not infer "no effect" from a screenshot.
-- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
-
+- **R6 built and held 2026-10-23 at `8de4536e` (code `df80e5dc`) on `eb/band-align-2`:** the cover is image-only (0 stamped words), so no title-page ruling is needed; red `2f44528f`; live on the packaged tip, no band on the cover in Focus or Flow, and the band returns on the cursor line in the first text section; pinned b1d updated under Blurby.Roadmap's ruling (rule 50, `89862a91`). **Rule 53 package verification passed (Blurby.Brain, 2026-10-23):** asar byte-identical to the commit, Done-when re-checked by probe. Held for the Stage 8 release; merges in the keys and band order.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#band-align-2) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
+- **Owner amendment R6, 2026-10-23 (tier 3): "we can't have the horizontal highlight on the cover page".**
+  - **What the owner saw:** in Flow, on *Meditations*' cover, an image section with no reading words, the band dims the page from the top-third anchor down.
+  - **Rule:**
+    - The band and its dimming appear only while the cursor word is on screen.
+    - A section with no reading words shows no band: the cover, other image-only pages, and any section where the cursor has no line.
+    - This holds in Focus and Flow, at every Lines setting.
+    - It matches Lines Off: no mask, nothing dimmed.
+  - **Built-and-held fix before merge** (BAND-ALIGN-2 Wave 2 on `eb/band-align-2`, from `508be445`):
+    - **Red test first:** a section document with no stamped words leaves `--flow-zone-top` and `--flow-zone-bottom` unset, and sets no band mask, in both modes.
+    - **Control:** a text section keeps the band.
+    - **Live:** open *Meditations* at its cover in Focus and Flow. Read the mask state (LL-166): no band. Then step to the first text section: the band is back on the cursor line.
+    - **To verify before any edit:** whether the cover is image-only, or its title is real text. Settle this by reading the section's stamped words through the probe. If the title is stamped words, stop and report to Blurby.Roadmap: the rule then needs the owner's line on title pages.
 
 <a id="flow-para-keys-1"></a>
 
 #### FLOW-PARA-KEYS-1 — Flow's paragraph keys step over whole-book paragraph starts on an EPUB *(**re-checked 2026-10-23 at `100b41dd` with the amended FLOW-KEYS-FIX-1 `1d2ee3a4` taken in: `npm test` 2,511 passed / 1 skipped / 0 failed, typecheck, build and the x64 package 0; live Shift+→ paused 187 → 188 → 572 → 610 and back, playing 191 → 572 and keeps playing (572 to 579), Ctrl+→ and Ctrl+← keep playing, plain ←/→ change speed only, only PgDn pauses; held, merge order FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → this item.** First built at `68504ba5` on `eb/flow-para-keys-1`, which carries FLOW-KEYS-FIX-1 `60b86aff` plus FOCUS-KEYS-FIX-1 `3bfb016e`: red first `16d2114f`, fix `5fb00ab5`, BUG-217; `npm test` 2,486 passed / 1 skipped / 0 failed, typecheck and build 0; live Shift+→ paused 187 → 188 → 572 → 610 and back, playing 191 → 572 with both pacers on 572, against 191 → 5290 on the base; merges after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1**; Seq 84 — Full Spec; check settled red live 2026-10-23, amendment below; authored 2026-10-23 at the owner's request, from the FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 merge (`eec479ce`); after FLOW-KEYS-FIX-1; no shared-core touch)*
 
-- **What:** on an EPUB with full-book words, Flow's Shift+←/→ and Shift+↑/↓ (`paragraph`) go to the previous or next paragraph start in the whole book. They never jump past paragraphs or into another chapter.
-- **Why (suspected; this item checks it first):**
-  - FOCUS-KEYS-FIX-1's live re-run on `4ea05617` measured Shift+→ in Focus jumping from word 187 to 5290. The surface's paragraph breaks are indices into the loaded slice; the words the keys step over are book-wide. Blurby.Brain's ruling A fixed Focus (`703a5b89`): `findBookParagraphStart` (`src/utils/text.ts`) over the rendered block starts of book-stamped sections plus the book's section starts.
-  - Flow has the same mismatch on `eb/flow-keys-fix-1` @ `60b86aff`:
-    - `src/reader/modes/flow/ModeRuntime.ts:1412` `effectiveWords()` returns `document.bookWords.words` (book-wide) when full-book words exist;
-    - `:933` the `paragraph` case steps over `this.surface.getParagraphBreaks()`, which is `FoliateView.tsx:1058` `foliateParagraphBreaksRef` (loaded slice).
-  - FLOW-KEYS-FIX-1's red test uses a tokenized document, so it can't see this.
-- **Done when:**
-  1. **Check (red first):** a test in `tests/readerModes/flowParagraphStarts.test.ts` drives Flow's `paragraph` command with full-book words (`document.bookWords` with two sections) and a surface whose `getParagraphBreaks()` returns loaded-slice indices that differ from book-wide ones. Expected: Shift+→ from a word in section 2 lands on the next book-wide paragraph start in section 2. Commit it alone.
-     - **If it fails by assertion:** the bug is confirmed. Record the failure, then do (2).
-     - **If it passes:** record why in the memo (the evidence that Flow's breaks are book-wide), keep the test as a guard, skip (2), and close the item with that evidence.
-  2. **The fix (only if (1) is red), per ruling A:**
-     - `src/reader/modes/flow/ModeRuntime.ts`: a `paragraphTarget(direction)` like Focus's (`focus/ModeRuntime.ts`, FOCUS-KEYS-FIX-1): tokenized → `document.paragraphBreaks`; foliate without full-book words → `surface.getParagraphBreaks()`; full-book words → `findBookParagraphStart(surface.getParagraphStarts(), sectionStarts, current, direction, lastIndex)`, doing nothing on `null`.
-     - `src/reader/modes/flow/helpers/foliateParagraphStarts.ts` (new): Flow's own copy of Focus's collector. No sibling import (reading-mode separation); if Brain prefers one shared helper, it moves under a declared `allowedShared` path in `boundary-policy.json` instead.
-     - `src/reader/modes/flow/FoliateView.tsx`: track book-stamped section documents and expose `getParagraphStartWordIndexes`, as Focus's does.
-     - `src/reader/modes/flow/surface.ts`: `getParagraphStarts()` passes it through.
-  3. **Live, as for FLOW-KEYS-FIX-1** (a `--dir` build of the branch tip, a fresh scratch profile, `scripts/ui-sweep/triage.mjs` with its preflight): on the sample book from INTRODUCTION in Flow, Shift+→ three times, paused and playing. Each press lands on the next paragraph start within a few hundred words (the first word of a rendered block), never a jump of thousands (the Focus failure was 187 → 5290), never word 0 or −1. Shift+← returns to the previous start. Live profile hashes unchanged.
-  4. `npm test`, `npm run typecheck` and `npm run build` exit 0 (standing rules 47, 48).
-  5. **Fence:** `A tests/readerModes/flowParagraphStarts.test.ts`; if (2) runs, `M src/reader/modes/flow/ModeRuntime.ts`, `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/flow/surface.ts`, `A src/reader/modes/flow/helpers/foliateParagraphStarts.ts`; `M docs/governance/BUG_REPORT.md` (the next free bug number if confirmed); the memo and time log.
-- **Out of scope:** Focus (fixed by FOCUS-KEYS-FIX-1); Flow's line, word and sentence keys (FLOW-KEYS-FIX-1); paused line keys (FLOW-PAUSED-LINE-1, IDEAS A5).
-- **Shared-core touches:** none. Not `ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts` or `src/types.ts`.
-- **Merge order:** after FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1.
-- **Release effect:** none. Merges after the Stage 8 release.
-- **Branch:** `eb/flow-para-keys-1` from `refs/remotes/origin/eb/flow-keys-fix-1` while FLOW-KEYS-FIX-1 is unmerged, else from `refs/remotes/origin/main`. Push, and ask Blurby.Roadmap for merge go.
-- **Lane:** Reader Engine. Execution surface A. Effort: S. **Path:** dispatch.
-
-  | # | Task | Tier | Effort |
-  |---|---|---|---|
-  | 1 | Red test with full-book words; commit alone; record red or green | bounded | medium |
-  | 2 | If red: `paragraphTarget`, Flow's collector, FoliateView and surface, per ruling A | bounded | medium |
-  | 3 | Targeted suites, then `npm test`, typecheck and build | mechanical | low |
-  | 4 | `--dir` build and the live Shift+→/← check on a scratch profile with the preflight | bounded | medium |
-  | 5 | Bug entry (if confirmed), memo and time log; push; ask for merge go | mechanical | low |
-
-##### Amendment — 2026-10-23 (owner; the check is settled red, and the fix follows FOCUS-KEYS-FIX-1's amendment)
-
-- **The check is settled: red, live.** On `eb/flow-keys-fix-1` @ `60b86aff` (a clean `--dir` build; scratch profile with preflight; live hashes unchanged; `C:\Projects\Blurby-artifacts\keys-fix\flow-60b86aff-para.*`):
-  - Shift+→ paused goes 187 → 5290 → 80492 (the book's last word), then stays there.
-  - Playing goes 424 → 5290 → 80492, and playback stops.
-  - Shift+↑ can land on 0.
-  - Done-when 1 still writes the red test, and it must fail by assertion. The "if it passes" branch no longer applies.
-- **Two causes, both fixed here:**
-  1. The loaded-slice breaks against book-wide words (`:933` against `:1412`), as written above.
-  2. The block lookup is case-sensitive. Flow's `helpers/foliateHelpers.ts:20` and `:78` have the same uppercase `BLOCK_TAGS` as Focus. On XHTML sections it finds no block (FOCUS-KEYS-FIX-1's amendment, the live diagnostic).
-- **The fix (2) is amended:** Flow's new `helpers/foliateParagraphStarts.ts` is a copy of Focus's **amended** collector, with the case-insensitive `isParagraphBlock`, not of the `48203707` version. There is no sibling import.
-- **Red test addition (fr2):** the same XHTML fixture as FOCUS-KEYS-FIX-1's (p1). Flow's collector returns each block's first word, and the `text/html` control passes.
-- **Live expected values (Done-when 3):** from word 187 in INTRODUCTION, Shift+→ lands on 188, then the next block start (572 on the 2026-10-23 build), using `word-probe.mjs`'s DOM block list. It never lands on 5290, 80492 or 0.
-- **Merge order:** after FOCUS-KEYS-FIX-1's amended fix merges, so both modes ship one approach (Blurby.Brain, 2026-10-23).
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** the red test with full-book words is committed alone first, and its result decides whether (2) runs.
-- **LL-142:** suspected from code (`:933` against `:1412`), then measured live on 2026-10-23 (187 → 5290 → 80492). The live diagnostic found the second cause, the case-sensitive block lookup, before the fix was specified.
-- **LL-152:** the live step measures Shift+→ the same way FOCUS-KEYS-FIX-1's live run did (same build recipe, book, start point and probe), so the jump sizes compare like for like.
-- **Standing rule 52 (LL-146):** the test lives in `tests/readerModes/`. Any evidence copy of a probe script is saved as `.txt`.
-- **Reading-mode separation:** Flow gets its own collector copy, with no sibling import from `focus/`.
-- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#flow-para-keys-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
 <a id="block-tag-case-1"></a>
 
 #### BLOCK-TAG-CASE-1 — The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks) *(position 85 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the FOCUS-KEYS-FIX-1 live diagnostic; owner direction 2026-10-23: measure before and after, and the owner decides before it ships (tier 2); after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1; post-release; no shared-core touch)*
 
-- **What:** every renderer copy of the block helpers recognises a block element whatever the case of its tag name. On EPUB pages, the renderer then sees each paragraph, heading and list item as its own block, as the main-process extractor already does. The item measures the change before and after, and it ships only on the owner's OK.
+- **Wave A built and held 2026-10-23 at `61cbbf7e` on `eb/block-tag-case-1`** (base `19658798` = `100b41dd` + `main` `644f01d2`; verified by Blurby.Roadmap: ancestry, unmerged, fence = the five `foliateHelpers.ts` copies, both `foliateParagraphStarts.ts`, the new test, measurement files, probe copies as `.txt`, memo and time log). Red: (t1) and (t2) fail by assertion on all five copies, (t3) control passes; targeted 356/356. Before/after: blocks and paragraph breaks *Meditations* 18 → 1,185, g0 2 → 62; wrapped words equal main's in every section before and after (the word-count hypothesis is not supported); Flow chunks and Narrate unchanged. **Found:** Flow and Focus place paragraph pauses with section-local word numbers while reading in whole-book numbers, so pauses land mid-sentence (base 1, after 27 in INTRODUCTION). **Owner tier-2 decision 2026-10-23: hold the merge; fix the pauses first ([FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1)) and merge the two together.** Wave B (live, suite, typecheck, build, perf, BUG_REPORT entry) runs after that item is built. **Merge-train step (Blurby.Brain and Blurby.Roadmap, 2026-10-23):** `tests/readerModeOwnership.test.ts` fails once on this branch, because `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json` still pins the uppercase `BLOCK_TAGS` lines. FLOW-PARA-PAUSE-INDEX-1, which carries this branch and merges with it, updates those entries (rule 50 carry-over). Any re-stack keeps that fix, and the suite must be at 0 failures before the merge go. Both branches also need a rule 53 arm64 launch at merge, and expect a docs-only `BUG_REPORT.md` conflict against `main`.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### BLOCK-TAG-CASE-1`). The builder, the merge and the close-out read it there.
+
+<a id="narrate-quit-linger-1-spec"></a>
+
+#### NARRATE-QUIT-LINGER-1 — Pause stops new Kokoro work, and a relaunch during the quit linger reopens Blurby *(position 86 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
+
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### NARRATE-QUIT-LINGER-1`). The builder, the merge and the close-out read it there.
+
+<a id="overlay-theme-sweep-1-spec"></a>
+
+#### OVERLAY-THEME-SWEEP-1 — Escape closes only the highlights and quick-settings overlays, and five panels and the mode-button hover use real theme tokens *(position 90 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
+
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### OVERLAY-THEME-SWEEP-1`). The builder, the merge and the close-out read it there.
+
+<a id="reader-arrow-guard-1-spec"></a>
+
+#### READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners *(position 91 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; copies FLOW-KEYS-FIX-1's amendment (`isFlowBrowseKey`, held tip `1d2ee3a4`); build-and-hold under the Stage 8 freeze; tier 2 for Page's Ctrl/Alt+←/→ (see Prerequisites); no shared-core touch)*
+
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### READER-ARROW-GUARD-1`). The builder, the merge and the close-out read it there.
+
+<a id="win-target-nsis-1-spec"></a>
+
+#### WIN-TARGET-NSIS-1 — `package.json` builds the full per-architecture NSIS installers the release uses, and the runbook drops its overrides *(position 92 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-4 on main @ 644f01d2; not a release gate)*
+
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### WIN-TARGET-NSIS-1`). The builder, the merge and the close-out read it there.
+
+<a id="flow-para-pause-index-1-spec"></a>
+
+#### FLOW-PARA-PAUSE-INDEX-1 — Flow and Focus paragraph pauses land at real paragraph ends *(position 108 — Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*
+
+- **Built and held 2026-10-23 at `b57b0925` on `eb/flow-para-pause-index-1`** (stacked on BLOCK-TAG-CASE-1 `61cbbf7e`, with `main` merged in). After the fix, 0 of 216 pauses fall off a paragraph end in Flow and Focus on both books, and in every loaded section the pauses equal the paragraphs. It carries the BLOCK-TAG-CASE-1 census fix (`boundary-policy.json` `BLOCK_TAGS` entries; rule 50). Suite 2,537 passed / 0 failed; typecheck 0. **Rule 53 package verification passed (Blurby.Brain, 2026-10-23)**, package `e41f6edc`, native arm64 launch included. Held for the Stage 8 release; it merges together with BLOCK-TAG-CASE-1 after BAND-ALIGN-2. A fresh rule 53 check is needed if `main` moves past docs before then.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### FLOW-PARA-PAUSE-INDEX-1`). The builder, the merge and the close-out read it there.
+
+<a id="library-write-race-2-spec"></a>
+
+#### LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups *(position 87 — Full Spec; authored 2026-10-23 for roadmap review 2026-10-23-5, on `main` @ `d2a70ff1` and `eb/library-write-race-1` @ `3b7aaa6f`; part 2 written to the owner's tier-3 ruling of 2026-10-23, "Stay open, inline retry"; part 3 written to Blurby.Brain's tier-1 ruling of 2026-10-22; build-and-hold (Stage 8 freeze); not a release gate)*
+
+- **What:** four parts.
+  1. **`save-library` hygiene.** A renderer save that names one id more than once changes nothing for that id. An element that is not a plain object with a string id is ignored. Each renderer field is applied only if its value has the right type: `unread` is a boolean, `seenAt` a finite number, `tags` an array of strings, `collection` a string or `null`. A field that fails keeps main's value, and the record's other fields still apply.
+  2. **The Edit form waits for its save (owner ruling, 2026-10-23, tier 3: "Stay open, inline retry").** On Save, the Edit form waits for main's answer. If the save fails, the form stays open, keeps the typed values, and shows **"Couldn't save — try again"** next to Save. Pressing Save again retries. On success, the form closes as today. The form no longer writes the new title into the renderer's copy of the record before main has saved it. This covers both of the form's save paths: the metadata form for file-based books (`apply-metadata-updates`) and the content form for manual documents (`update-doc`). The Add form (no record being edited) is unchanged and keeps its toast.
+  3. **Edits carry their own time stamp, and cloud sync honours it (Blurby.Brain ruling, 2026-10-22, tier 1: "main stamps, but never the doc-level `modified`").** When an edit changes a value, main records the time per field in a new record field, `editedAt` (`{ title?, author?, unread?, seenAt?, tags?, collection?: ms }`). Main never writes the doc-level `modified` for these edits, because for folder books `modified` is the source file's mtime. Cloud sync's library merge takes each of those six fields from the side with the later `editedAt` stamp, whichever side wins the record as a whole. A save that changes nothing stamps nothing.
+  4. **Not in this item:** cloud sync's `ctx.setLibrary(gcd)` (`main/sync-engine.js:841`) and `ctx.setLibrary(cloudLibrary.docs || [])` (`:1074`) after an `await` stay in the deferred Cloud Sync lane.
 - **Why:**
-  - EPUB section documents load as `application/xhtml+xml`, so `Element.tagName` is lowercase (`"p"`), measured live on *Meditations* (FOCUS-KEYS-FIX-1 diagnostic, `C:\Projects\Blurby-artifacts\keys-fix\focus-703a5b89-diag-r2.json`).
-  - Every renderer copy compares that against an uppercase set:
-    - `BLOCK_TAGS = new Set(["P", "DIV", "H1", …])`, and `getBlockParent` does `BLOCK_TAGS.has(el.tagName)`;
-    - the same text-node filter rejects `parent.tagName === "SCRIPT" || "STYLE"`.
-  - **Sites** (on `origin/main` @ `cee2183e`):
-    - `src/reader/modes/focus/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
-    - `src/reader/modes/flow/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
-    - `src/reader/modes/narrate/helpers/foliateHelpers.ts:20`, `:78`, `:88`;
-    - `src/reader/modes/page/helpers/foliateHelpers.ts:20`, `:99`, `:109`;
-    - `src/utils/foliateHelpers.ts:20`, `:78`, `:88` (no runtime importer: `git grep -n "utils/foliateHelpers\"" -- src` prints only type or test imports).
-  - So on XHTML pages `getBlockParent` returns `null`, and `collectBlockTextNodes` puts a whole section into one block (`:98`, the `body` fallback). Script and style text in the body is not filtered.
-  - **What this probably affects (inferred from code; this item measures it):**
-    - `paragraphBreakAfter` (`foliateHelpers.ts:242`, `:260`): one paragraph break per section. Flow's rhythm paragraph pauses (`flow/ModeRuntime.ts:503`), Focus's paragraph pause and the natural reading chunks all read it.
-    - Word wrapping groups text per block (`foliateWordWrapping.ts:100`). Where two blocks' text meets with no whitespace between them, the renderer may make one word where the main extractor makes two.
-    - **The main extractor is already case-correct:** `main/epub-word-extractor.js:19` uses a lowercase set under cheerio. A renderer/main word-count mismatch per section would follow, and that would explain the per-section count differences FOCUS-KEYS-FIX-1's first fix ran into (Blurby.Brain, ruling A). That is a hypothesis; Done-when 1 measures it.
-- **Prerequisites:**
-  - FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1, whose local case-insensitive collectors this item folds into the shared fix (each mode's own copy; no sibling import);
-  - the owner's tier-2 OK after Done-when 4's before/after table.
-- **Done when** (run every command in `pwsh` from the worktree root):
-  1. **Base measurement first, with no code change (LL-142).** On a packaged `--dir` build of the base, with a fresh scratch profile, the profile preflight, and live-profile hashes unchanged:
-     - **Books:**
-       - `resources/sample-meditations.epub` (*Meditations*);
-       - `docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-chapters.epub` (Blurby's own converter output, structurally different).
-     - **For every section of both books, through a probe that reads each mode's runtime, as `C:\Projects\Blurby-artifacts\keys-fix\word-probe.mjs` does:**
-       - (a) blocks found by `collectBlockTextNodes`;
-       - (b) `paragraphBreakAfter` count;
-       - (c) the renderer's wrapped-word count, against the main extractor's word count for that section (`bookWords.sections`);
-       - (d) Flow's natural-chunk count;
-       - (e) for Narrate, the paragraph boundaries its plan uses for the first two sections.
-     - Save the table to `docs/studies/investigations/BLOCK-TAG-CASE-1.base.2026-MM-DD.md`.
-  2. **Red first (standing rule 43).** A new `tests/readerModes/blockTagCase.test.ts` is committed alone, before any fix. Run each case against every mode's copy (focus, flow, narrate and page) and `src/utils/foliateHelpers.ts`:
-     - **(t1)** A document from `new DOMParser().parseFromString(xhtml, "application/xhtml+xml")` with `<p>`, `<h2>` and `<li>`: `collectBlockTextNodes` returns one group per element, and `blockTag` is `p`, `h2`, `li`. It fails by assertion on the base.
-     - **(t2)** An XHTML `<style>` text node inside the body is rejected. It fails on the base.
-     - **(t3) Control:** the same markup parsed as `text/html` gives the same groups. It passes on the base.
-  3. **The change.** In each of the five copies:
-     - `BLOCK_TAGS` becomes lowercase;
-     - `getBlockParent` tests `BLOCK_TAGS.has(el.localName.toLowerCase())`;
-     - the script/style filter tests `localName.toLowerCase()` against `"script"` and `"style"`.
+  - **Part 1.** `mergeRendererEdits` (`main/ipc/library.js:54-63` on the base) builds `new Map(... [doc.id, doc])`. A repeated id silently keeps the last copy. It then writes `held[key] = doc[key]` for every key the copy holds, whatever the value's type, so `tags: "x"` or `unread: "yes"` reaches `library.json`. Both were left out of SAVE-LIBRARY-MERGE-1 and listed in LIBRARY-WRITE-RACE-1's Out of scope.
+  - **Part 2.** The metadata save (`src/components/LibraryView.tsx:288-297`) writes `doc.title` and `doc.author` straight into the React state's record (`:291-292`). It then sends `void api.applyMetadataUpdates?.(...)` (`:294`) and closes the form (`:296`) without waiting. If main rejects the call, the user sees the new title and loses it on the next `library-updated` broadcast, and the rejection is unhandled. The content save (`useLibrary.ts:37-52`) catches its own failure, shows a toast, and returns normally. `LibraryView.tsx:300-301` then closes the form and discards the typed text.
+  - **Part 3, traced on the base.**
+    - Cloud sync's library merge (`mergeLibrary`, `main/sync-engine.js:253-357`) picks one whole record per id. It takes the higher `revision` when either side has one, otherwise the later `modified` (`:311-322`). It then merges only `position` and `highlights` (`:326-352`).
+    - `sync-state.json`'s `fieldTimestamps` (`sync-engine.js:42`) is used only for settings (`mergeSettings`, `:373-389`). Records have no per-field stamps, so the stub's second branch applies: a separate main-stamped field the merge reads for the renderer-owned fields.
+    - Renderer edits (`save-library`) bump nothing, so a stale cloud copy with a higher `revision` undoes them.
+    - The Edit form's metadata save bumps `modified` (`main/ipc/library.js:734` on the base). For a folder book that overwrites the file's mtime. The next folder scan writes the mtime back (`main/folder-sync.js:110`; the rescan `main/ipc/library.js:384`), so the edit loses its freshness, and `modified` stops meaning "the file's mtime" until that scan.
+- **Prerequisites:** LIBRARY-WRITE-RACE-1 (built and held at `3b7aaa6f`). This item stacks on it: it edits the in-place `apply-metadata-updates` loop and `main/library-write.js` that LIBRARY-WRITE-RACE-1 adds, and one assertion in its test file.
+- **Done when** (every command in PowerShell 7, `pwsh`, from the worktree root; `$BASE` is the commit made by merging `refs/remotes/origin/main` into the branch cut from `refs/remotes/origin/eb/library-write-race-1`, recorded in the staging memo):
+  1. **Red first (standing rule 43).** Commit `tests/libraryWriteRace2.test.js` and `tests/editFormSave.test.tsx` alone, on top of `$BASE`. `npx vitest run tests/libraryWriteRace2.test.js tests/editFormSave.test.tsx` exits 1. Every row marked *red* below fails by assertion, not by an import or render error. Every row marked *control* passes. Record the output in the staging memo.
+  2. **`tests/libraryWriteRace2.test.js`** (main process). Use the harness of `tests/saveLibraryMerge.test.js:13-118`, which mocks the cloud and sync modules and registers the real `main/ipc/library.js`. Use fake timers so `Date.now()` is fixed.
+     - **Part 1, `save-library`:**
+       - **(s1) red:** seed `d1` with `unread: true`. Saving `[{ id: "d1", unread: false }, { id: "d1", unread: true, tags: ["x"] }]` leaves `d1` exactly as seeded: no `unread` change, no `tags`, no `editedAt`.
+       - **(s2) control:** `[null, "x", 42, [], {}, { id: 5, unread: false }, { id: "d1", unread: false }]` does not throw, and only `d1.unread` changes.
+       - **(s3) red:** `{ id: "d1", tags: "x", unread: "yes", seenAt: "now", collection: 5 }` changes none of the four fields.
+       - **(s4) red:** `{ id: "d1", tags: ["a", 2] }` leaves `tags` unchanged, and `{ id: "d1", seenAt: NaN }` leaves `seenAt` unchanged.
+       - **(s5) control:** `{ id: "d1", tags: "x", unread: false }` sets `unread: false`, and `{ id: "d1", collection: null }` clears `collection`.
+     - **Part 3, stamps:**
+       - **(t1) red:** a save that changes `d1.tags` sets `d1.editedAt.tags` to `Date.now()` and leaves `d1.modified` as seeded.
+       - **(t2) control:** a save of an unchanged copy of the whole library creates no `editedAt` on any record. Write it as a control that passes on the base, where no record has `editedAt`.
+       - **(t3) red:** a save shaped like `markDocsSeen` (`LibraryContainer.tsx:442-450`) over three records, which changes `seenAt` and `unread` on one, stamps `editedAt.seenAt` and `editedAt.unread` on that one only.
+       - **(t4) red:** `apply-metadata-updates` with `[{ docId: "f1", updates: { title: "New", author: "Who" } }]` on a folder record seeded with `modified: 111` resolves `{ updated: 1 }`. The record has `title: "New"`, `author: "Who"`, `editedAt: { title: <now>, author: <now> }`, and `modified` still `111`.
+       - **(t5) control:** `apply-metadata-updates` with the same title as seeded stamps nothing for `title`.
+       - **(t6) red:** `apply-metadata-updates` with `[null, 5, { docId: "f1", updates: null }, { docId: "f1", updates: { title: "T" } }]` does not throw, and `f1.title` becomes `"T"`. With `{ title: "" }` or `{ title: 3 }`, the title is unchanged.
+       - **(t7) red:** `apply-metadata-updates` on a record with `deleted: true` resolves `{ updated: 0 }` and changes nothing.
+       - **(t8) red:** `update-doc("m1", "Renamed", "one two")` on a manual record sets `editedAt.title`. As today, it also sets `modified`, `revision`, `content` and `wordCount`.
+       - **(t9) control:** a folder scan keeps the edit. Seed a folder record with `title: "Edited"`, `editedAt: { title: 5 }` and `modified: 1`. Run `createFolderSync(deps).syncAll()` (`main/folder-sync.js`, minimal `deps` as in `tests/folderSync.test.js:33-67`) over a scan returning that file with `modified: 2`. The record keeps `title` and `editedAt`, and `modified` becomes `2`.
+     - **Part 3, cloud merge** (`mergeLibrary` imported from `main/sync-engine.js`, as `tests/sync-hardening.test.js` does):
+       - **(m1) red:** local `{ id, title: "New", revision: 3, editedAt: { title: 200 } }` and cloud `{ id, title: "Old", revision: 5 }`. The merged record has `title: "New"` and `editedAt.title: 200`, and its other fields are the cloud copy's.
+       - **(m2) control:** with (m1)'s revisions, cloud `editedAt.title: 300` beats local `200`, so the merged title is the cloud's.
+       - **(m3) red:** local `tags` stamped at `200`, and cloud `title` stamped at `250` with a higher `revision`. The merged record has both edits and `editedAt: { tags: 200, title: 250 }`.
+       - **(m4) red:** a field stamped on the losing side only and absent from it (`collection` cleared locally, with `editedAt.collection: 200`) is absent from the merged record.
+       - **(m5) control:** with no `editedAt` on either side, the result equals today's merge for the same pair.
+  3. **`tests/editFormSave.test.tsx`** (renderer, jsdom). Render the real `LibraryContainer` with the electron API mock of `tests/folderNoticeBanner.test.tsx:25-52`, plus `applyMetadataUpdates`, `updateDoc` and `logError`. Seed `settings.viewMode: "list"` and the library:
+     - `f1`: a file book (`source: "file"`, `filepath`, `title: "Old"`, `author: "Ann"`). Its card's **Edit** button (`DocCard.tsx:195`, `title="Edit"`) opens the metadata form.
+     - `m1`: a manual document (`source: "manual"`, `content: "one two"`). Its Edit button opens the content form.
 
-     FOCUS-KEYS-FIX-1's and FLOW-PARA-KEYS-1's local `isParagraphBlock` then call their mode's `getBlockParent` rule, so each mode keeps one block rule. Their tests stay green and unedited, or are named under standing rule 50.
-  4. **After measurement, the same build recipe, route and probe as (1) (LL-152).** Record the same five figures per section beside the base figures, with the change per section.
-     - Expected:
-       - (a) and (b) rise to about the number of `<p>`/heading elements (*Meditations* INTRODUCTION has 26 `<p>`, measured);
-       - (c) matches main's count per section, or moves closer to it.
-     - Any section where (c) moves *away* from main's count stops the item, with that section's text at the boundary.
-  5. **Owner decision (tier 2).** The before/after table goes to the owner, through Blurby.Roadmap, with a recommendation. It covers:
-     - paragraph pauses in Flow and Focus;
-     - the size of Flow's chunks;
-     - Narrate's paragraph handling.
+     Rows:
+     - **(ef1) red:** `applyMetadataUpdates` rejects. After Save and settle:
+       - the form (`.add-edit-panel`) is still shown, and the title input holds the typed `"Typed"`;
+       - an element with `role="alert"` inside `.add-edit-actions` reads exactly "Couldn't save — try again";
+       - the `f1` card still shows "Old";
+       - no unhandled rejection is recorded (`process.on("unhandledRejection")` spy).
+     - **(ef2) red:** `applyMetadataUpdates` resolves `{ updated: 0 }`. Same as (ef1).
+     - **(ef3) red:** after (ef1), the next Save resolves `{ updated: 1 }`. The form closes, the alert is gone, and `applyMetadataUpdates` was called twice with the same payload, `[{ docId: "f1", updates: { title: "Typed", author: "Ann" } }]`.
+     - **(ef4) red:** while the first call is pending (a deferred promise), Save is disabled, and a second click makes no second call.
+     - **(ef5) red:** `updateDoc` rejects on the `m1` content form. The form stays open with the typed title and text and shows the alert. No toast reads "Could not save document".
+     - **(ef6) control:** `applyMetadataUpdates` resolves `{ updated: 1 }` on the first Save, and the form closes.
+     - **(ef7) control:** the Add form (`+ add`) with `addManualDoc` rejecting still shows today's toast, "Could not save document — please try again."
+  4. **The change** (Implementation detail) makes both files pass. `npx vitest run tests/libraryWriteRace2.test.js tests/editFormSave.test.tsx tests/libraryWriteThrough.test.js tests/saveLibraryMerge.test.js tests/saveLibraryTrust.test.js tests/sync-hardening.test.js tests/folderSync.test.js tests/useLibrary.test.ts` exits 0.
+     - The one pinned assertion this item changes is `tests/libraryWriteThrough.test.js:155`, `expect(typeof seeded[1].modified).toBe("number")` (standing rule 50). It becomes `expect(seeded[1].modified).toBeUndefined()` and `expect(seeded[1].editedAt).toEqual({ title: expect.any(Number), author: expect.any(Number) })`.
+     - `tests/saveLibraryMerge.test.js` (k), (n) and (o) pass unedited. (o) slices `LibraryView.tsx` from `if (editMetaMode && editingId) {` to the first `return;` and needs `applyMetadataUpdates` inside that slice.
+     - Any other pinned test that fails is named in the memo and stops the run.
+  5. **Source gates** (each dry-run on the base; standing rule 44):
+     - `git grep -n -F "Object.assign(doc, fields, { modified" -- main/ipc/library.js` exits 1. On the base it prints `:734`.
+     - `git grep -n -F "void api.applyMetadataUpdates" -- src/components/LibraryView.tsx` exits 1. On the base it prints `:294`.
+     - `git grep -n -E "doc\.(title|author) = " -- src/components/LibraryView.tsx` exits 1. On the base it prints `:291` and `:292`.
+     - `git grep -c -F "mergeEditedFields(" -- main/sync-engine.js` prints `main/sync-engine.js:1`. On the base it exits 1.
+  6. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
+  7. **Package verification (standing rule 53), checked by Blurby.Brain:**
+     - Build `npx electron-builder --win --dir --arm64` from the final commit with `refs/remotes/origin/main` merged in, in this item's worktree.
+     - Grep the built `main.js` for `BLURBY_USER_DATA_DIR`. Run `release\win-unpacked\Blurby.exe` natively for 25 s on a fresh scratch profile, proved before the first input (LL-165). Check that the live-profile hashes are unchanged.
+     - Run (c), the `npx asar list` check for `main/ipc/library.js`, `main/library-write.js` and `main/sync-engine.js` and the renderer bundle against `dist/`.
+     - Re-run Done-when 4 against the packaged tree (d).
+     - Record it all in the memo's "Package verification" section (e). Blurby.Brain confirms before any merge go.
+  8. **Fence:** `git diff --name-status $BASE` lists exactly the following, plus the staging memo and `docs/governance/close-outs/Timing.LIBRARY-WRITE-RACE-2.jsonl` (standing rule 41):
+     - `M main/ipc/library.js`, `M main/library-write.js`, `M main/sync-engine.js`;
+     - `M src/components/LibraryView.tsx`, `M src/components/AddEditPanel.tsx`, `M src/hooks/useLibrary.ts`, `M src/styles/base.css`;
+     - `A tests/libraryWriteRace2.test.js`, `A tests/editFormSave.test.tsx`, `M tests/libraryWriteThrough.test.js` (the one named assertion).
 
-     The merge waits for the owner's OK. If the owner declines a consequence (for example, the new paragraph pauses), the item keeps the block fix and states which consumer is held back, as a separate owner decision. It does not quietly drop it.
-  6. **Live, after the owner's OK,** on both books, in Focus and Flow:
-     - Shift+→ lands on the next block start;
-     - Flow pauses at paragraph ends at the rhythm setting's length;
-     - Narrate starts each paragraph after its pause, judged by ear, as the owner-observed check at the next smoke (standing rule 45).
-
-     The word index of a fixed anchor word is the same before and after (LL-161: checked by the word's text).
-  7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48). `npm run perf` shows no benchmark worse than its baseline by more than 10%.
-  8. **Fence:** `git diff --name-status <base>` lists exactly these, plus the measurement files, staging memo and time log (standing rule 41):
-     - the five `foliateHelpers.ts` copies;
-     - `A tests/readerModes/blockTagCase.test.ts`;
-     - `M docs/governance/BUG_REPORT.md`, with a new bug: "renderer finds no paragraph blocks on XHTML pages".
-
-     Nothing in `main/`, `src/types.ts`, `src/components/ReaderContainer.tsx` or `src/utils/FlowScrollEngine.ts`.
+     Nothing in `src/types.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `preload.js`, `main/folder-sync.js` or any reading mode.
+  9. **Owner (next smoke, added to release gate (2)'s list):** edit a file book's title and author, then a manual document's title. Each saves and closes, and survives a restart. The failure display is covered by (ef1)–(ef5): no live route can make main reject on demand (standing rule 45).
 - **Effort:** M.
-- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; the owner for the tier-2 decision and the next smoke.
-- **Source:** FOCUS-KEYS-FIX-1's live diagnostic (2026-10-23; `C:\Projects\Blurby-artifacts\keys-fix\focus-703a5b89-diag*.json`, `para-diag-probe.mjs`), Blurby.Brain's five readings, the owner's direction of 2026-10-23.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel; Blurby.Brain for package verification; Blurby.Roadmap gives the merge go after the freeze; the owner at the next smoke.
+- **Source:** LIBRARY-WRITE-RACE-1's Out of scope (snapshot `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md#library-write-race-1`); Blurby.Brain's ruling of 2026-10-22 (main stamps, never the doc-level `modified`); the owner's tier-3 ruling of 2026-10-23 (part 2, "Stay open, inline retry"); this trace on `d2a70ff1` and `3b7aaa6f`.
+- **Path:** dispatch.
+
+##### Decisions taken here (tier 1, technical)
+- **Repeated id:** skip every entry for that id and `console.warn` once per save, listing the ids. Keeping the first or last copy would be a guess about which one the renderer meant, so neither is kept.
+- **`editedAt` is one map per record, keyed by field, not one time stamp.** With a single stamp, a tags edit on one device and a title edit on another would lose one of them. The six fields are those the renderer or the Edit form can set: `RENDERER_FIELDS` plus `title` and `author`.
+- **Stamp only on a real change:** compare arrays element by element, and anything else with `===`. A `markDocsSeen` save sends the whole library: the records it does not change stamp nothing, and the one or two it marks stamp `seenAt` and `unread`. Brain's "no-op saves stamp nothing" holds per record.
+- **`update-doc` keeps setting `modified` and `revision`.** A manual document has no source file, so its `modified` is not an mtime, and its content did change. It also stamps `editedAt.title` when the title changes, so the merge treats it like the metadata form.
+- **Merge tie-break:** when both sides carry the same stamp for a field, the record-level winner's value stays. A stamped edit beats an unstamped one, including a copy from a device that has not yet upgraded. Stamps are wall-clock `Date.now()`, so the comparison has the same clock-skew exposure as today's `modified` fallback.
+- **The metadata save counts as failed when the call rejects, returns an `error`, returns `updated` below 1, or the API member is missing.** A record deleted meanwhile is then a failure that Cancel dismisses.
+- **The alert clears** when Save is pressed again and when the form closes. Typing does not clear it. This is a detail inside the owner's ruling.
+- **Deleted records:** `apply-metadata-updates` skips records with `deleted`. Today it edits tombstones.
+
+##### Owner questions
+None open. Part 2 was pending the owner. The owner ruled on 2026-10-23 (tier 3): "Stay open, inline retry". The form stays open with the typed values kept and shows "Couldn't save — try again" next to Save. It is written to that ruling.
+
+##### Implementation detail
+- **Edit sites** (`main/ipc/library.js` and `main/library-write.js` lines are on `3b7aaa6f`; the renderer and `sync-engine.js` lines are on `d2a70ff1`, which `3b7aaa6f` has not changed. Re-grep each at `$BASE` before editing, standing rule 36):
+
+  ```
+  git grep -n -E "RENDERER_FIELDS|function mergeRendererEdits|\"save-library\"|\"update-doc\"|\"apply-metadata-updates\"|Object.assign\(doc, fields" -- main/ipc/library.js
+  git grep -n -E "function mergeLibrary|const mergedDoc = \{ \.\.\.winner \}" -- main/sync-engine.js
+  git grep -n -E "const handleAddDoc|editMetaMode && editingId|await onAddDoc|onAddDoc: |<AddEditPanel" -- src/components/LibraryView.tsx
+  ```
+  - **`main/library-write.js` (LIBRARY-WRITE-RACE-1's module):** add and export the following, keeping `writeConversionResult` unchanged.
+    - `EDITED_FIELDS = ["title", "author", "unread", "seenAt", "tags", "collection"]`.
+    - `sameValue(a, b)`: element-wise for two arrays, `===` otherwise.
+    - `setEditedField(doc, key, value, now)`: returns `false` and writes nothing if `sameValue(doc[key], value)`. Otherwise it writes `doc[key] = value` and `doc.editedAt = { ...(doc.editedAt || {}), [key]: now }`, and returns `true`.
+    - `mergeEditedFields(merged, local, cloud)`, for each of `EDITED_FIELDS`:
+      - Let `l = local.editedAt?.[key] || 0` and `c = cloud.editedAt?.[key] || 0`. Skip the field when both are 0.
+      - When `l !== c`, the later side's value is copied to `merged`. If that side lacks the key, delete it from `merged`.
+      - Set `merged.editedAt[key] = Math.max(l, c)`, building `merged.editedAt` as a new object.
+  - **`main/ipc/library.js`:**
+    - **`mergeRendererEdits` (`:54-63`):**
+      - Count the ids of elements that are non-null, non-array objects with a string `id`. Ids seen more than once are skipped and warned once.
+      - Validate each `RENDERER_FIELDS` key with a per-field check: `unread` must be a boolean, `seenAt` a finite number, `tags` an array of strings, `collection` a string or `null`.
+      - Apply a valid value through `setEditedField(held, key, value, now)`, with `now = Date.now()` taken once per save.
+      - The `lastReadAt` rule (`:60-61`) is unchanged and not stamped.
+    - **`update-doc` (`:135-149`):** replace `doc.title = title;` with `if (typeof title === "string") setEditedField(doc, "title", title, Date.now());`. The rest is unchanged.
+    - **`apply-metadata-updates` (`:711-740`):**
+      - Skip an element that is not an object, or has no string `docId`, or has `updates` that are not an object.
+      - Accept `title` only as a string with non-empty `trim()`, and `author` only as a string.
+      - In the loop (`:731-735`), skip `doc.deleted`. Count each matched live record, and apply each field with `setEditedField(doc, key, value, now)`. Remove `{ modified: Date.now() }`.
+      - The save and broadcast are unchanged.
+  - **`main/sync-engine.js`:** after `const mergedDoc = { ...winner };` (`:324`), call `mergeEditedFields(mergedDoc, localDoc, cloudDoc);`, required from `./library-write`. Leave the tombstone branches (`:273-308`), `position` and `highlights` unchanged.
+  - **`src/components/AddEditPanel.tsx`:**
+    - Add the optional props `saving?: boolean` and `saveFailed?: boolean`.
+    - Save is disabled when `!canSave || saving` (`:81`).
+    - When `saveFailed`, render `<span className="add-edit-error" role="alert">Couldn't save — try again</span>` as the first child of `.add-edit-actions` (`:77`), so it sits beside the buttons.
+  - **`src/styles/base.css`:** after `.add-edit-actions` (`:197-202`), add `.add-edit-error { margin-right: auto; align-self: center; font-size: 12px; color: var(--danger); }`. No inline style.
+  - **`src/hooks/useLibrary.ts` `addDoc` (`:37-52`):**
+    - Return `true` on success.
+    - On failure with `editingId`, return `false` without the toast. Keep the `logError` and the `getState` refresh.
+    - On failure without `editingId` (Add), keep today's toast and return `false`.
+  - **`src/components/LibraryView.tsx`:**
+    - The `onAddDoc` prop type (`:29`) returns `Promise<boolean> | void`.
+    - Add `const [saving, setSaving] = useState(false)` and `const [saveFailed, setSaveFailed] = useState(false)`. Pass both to `<AddEditPanel>` (`:631`). Reset `saveFailed` in `startEdit` (`:317`) and in the panel's `onCancel` (`:635`).
+    - **Metadata branch (`:288-297`):**
+      - Keep the shape `if (editMetaMode && editingId) { const doc = ...; if (doc) { ... } ... return; }`, with no `return;` before the `applyMetadataUpdates` call (test (o)).
+      - Inside `if (doc)`: compute `title = newTitle.trim() || doc.title` and `author = newAuthor.trim() || doc.author` without assigning them to `doc`.
+      - Then `setSaveFailed(false); setSaving(true);` and await `api.applyMetadataUpdates?.([{ docId: doc.id, updates: { title, author } }])` in a `try`/`catch`. Set `ok` per Decisions, then `setSaving(false)`.
+      - If `!ok`, run `setSaveFailed(true); return;`. Otherwise close as today (`:296`).
+    - **Content branch (`:299-301`):** `if (saving) return;`, set `saving` around `const ok = await onAddDoc(...)`. If `editingId && ok === false`, run `setSaveFailed(true)` and return with the fields kept. Otherwise close as today.
+- **Tests:** Done-when 1–4.
+- **Constants:** none. The alert text is a UI string in `AddEditPanel.tsx`, and `EDITED_FIELDS` is a field list, not a tunable.
+- **Branch:** `eb/library-write-race-2`, cut from `refs/remotes/origin/eb/library-write-race-1` @ `3b7aaa6f` with `refs/remotes/origin/main` merged in (that merge commit is `$BASE`), in worktree `C:\Projects\Blurby\.worktrees\library-write-race-2`. Run `npm ci`. Push with `git push origin HEAD:refs/heads/eb/library-write-race-2`. Do not merge (Stage 8 freeze).
+- **Merge order (after the freeze):**
+  - It goes after LIBRARY-WRITE-RACE-1, which follows WS-TOKEN-REGEN-1 and WS-PAIR-LOG-1. This branch carries LIBRARY-WRITE-RACE-1's commits, so it merges after that branch or in its place, never before it.
+  - Its `main/ipc/library.js` hunks do not overlap those of ERROR-LOG-CAP-1 (`:16`) or LARGE-FOLDER-SYNC-3 (`:457`, `:497`). Its `main/sync-engine.js` hunk does not overlap RENAME-TMP-RACE-1's (`:16`, `:97`).
+  - Whichever merges second takes `refs/remotes/origin/main` in, re-greps, and re-runs Done-when 4.
+- **Staging plan:** explicit paths only, the fence list. `tests/perf-baseline-results.json` and any Timing backfill stay unstaged.
+- **Failure handling:**
+  - If the mounted `LibraryContainer` cannot reach the Edit button under the folder-banner mock, stop and report the missing mock member. Do not swap to a source-text test.
+  - If any reader of `modified` depends on `apply-metadata-updates` bumping it, stop and name the site. On the base, `git grep -n "\.modified\b" -- src` finds no renderer reader.
+  - If `tests/sync-hardening.test.js` changes result, stop.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** execution surfaces D (main) and C (the Edit form).
+  - **Forbidden:** `main/folder-sync.js`; `preload.js`; the cloud sync's `setLibrary` sites (`sync-engine.js:841`, `:1074`); the reading modes.
+  - **Shared-core touches:** none.
+- **Lane:** Library & Content.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red files for save hygiene, stamps, merge and the Edit form committed alone, failures recorded | calculable | positive-control | bounded | medium | 35m (two test files, one red run) | — | — |
+| 2 | `save-library` skips repeated ids, malformed elements and wrongly typed fields | calculable | main-process-fix | bounded | low | 20m (one function) | — | — |
+| 3 | Edit form waits for its save and shows the inline retry on failure, values kept | calculable | renderer-fix | bounded | medium | 40m (two components, one hook, one CSS rule) | — | — |
+| 4 | Edits stamp `editedAt` per field, never `modified`, and the cloud merge honours it | calculable | main-process-fix | cross-cutting | medium | 45m (one helper, three handlers, one merge call) | — | — |
+| 5 | Targeted tests, suite, typecheck, build; rule 53 package build and launch; memo, time log, push | calculable | merge-and-verify | bounded | medium | 50m (suite, build, arm64 package, 25 s launch) | — | — |
+
+##### Lessons applied
+- **LL-142:** the claim that records have no per-field sync stamps was measured on the base: `fieldTimestamps` is read only by `mergeSettings`, and `mergeLibrary` chooses whole records. The red rows record today's behaviour before any change.
+- **LL-165:** the rule 53 launch proves its scratch profile before the first input and checks the live-profile hashes.
+- **LL-166:** each verdict reads state, either the test's record objects or the packaged run's logs and `library.json`, not a screenshot.
+- **Standing rule 43:** red first, with controls (s2), (s5), (t2), (t5), (t9), (m2), (m5), (ef6) and (ef7).
+- **Standing rule 44 (LL-143):** each source gate was dry-run on the base (`:734`; `:294`; `:291`–`:292`; exit 1).
+- **Standing rule 50:** LIBRARY-WRITE-RACE-1's Out of scope was re-read against these edit sites. Its first three rows are this item's parts 1–3, and the fourth stays out (part 4). The pinned assertion `libraryWriteThrough.test.js:155` is named and changed in scope.
+- **Standing rules 36, 41, 45, 47, 48 and 53:** in the Done-when list.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="word-index-unify-1-spec"></a>
+
+#### WORD-INDEX-UNIFY-1 — One word numbering in every runtime *(position 43, Seq 88 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from Blurby.Brain's tier-1 ruling of 2026-10-15; cut from `eb/flow-para-pause-index-1` @ `f61ae02d`; build-and-hold under the Stage 8 freeze; not a release gate)*
+
+- **Dispatch hold (roadmap review 2026-10-23-5):** the shared `main/shared/wordSegments.mjs` (Done-when, "The shared function") loads ESM into the CommonJS main process, against CLAUDE.md's "never cross the boundary". Blurby.Roadmap asked Blurby.Brain for a ruling, recommending two copies (CJS in `main/`, TS in `src/`) with a parity test over *Meditations* and g0. Do not dispatch until the ruling is recorded here. The stub's "LL-136" one-counter citation means standing rule 29.
+
+- **What:**
+  - The main-process extractor (`main/epub-word-extractor.js`) numbers a book's words the same way under every runtime: the app's Electron, plain Node and Vitest.
+  - It segments whole blocks, so punctuation after an inline element stays on its word ("Imitation,"). It also joins adjacent word segments with no whitespace between them ("B.C.", "www.gutenberg.org"), through **one** function shared with the renderer's `segmentWordSpans`.
+  - A guard makes any later change in word-break data (an Electron upgrade) fail loudly instead of silently moving saved places.
+  - Every saved reading position in `library.json` is remapped once, so it names the same word after the change as before.
+- **Why:**
+  - The extractor segments each text node on its own (`main/epub-word-extractor.js:249`, inside the per-part loop `:236-267`). It attaches only trailing punctuation (`:255-263`) and never joins two word segments. So its numbering depends on the runtime's ICU.
+  - The renderer's `segmentWordSpans` (`src/utils/segmentWords.ts:27-64`) joins word segments that touch (`:42-47`) over a whole block's text (`src/reader/modes/*/helpers/foliateHelpers.ts:153-155`).
+  - LL-160: *Meditations* is 80,493 words under the app's Electron and 80,426 under plain Node. Electron's ICU splits "B.C." and web addresses.
+  - **Planning measurement (Blurby.Roadmap, 2026-10-23, read-only, scratch script):** a prototype of the ruled extractor gives the same count under both runtimes. Every word index below is 0-based.
+
+    | Runtime | Book | Today's extractor | Ruled extractor |
+    |---|---|---|---|
+    | Electron 41.1.0 as Node (ICU 77.1) | *Meditations* | 80,493 | **80,352** |
+    | Node 24.14 (ICU 78.2) | *Meditations* | 80,426 | **80,352** |
+    | both | g0 (`g0-converted-chapters.epub`) | 1,676 | 1,676 |
+
+    - **App-numbering shift on *Meditations*:** 0 at the start, growing to 141 at the end.
+    - **Anchors, old → new:** "ancient" 2970 → 2963; "HIS" (HIS FIRST BOOK) 5480 → 5473; "casting" 8723 → 8715; "THE" (THE SECOND BOOK) 9431 → 9423.
+    - **Kinds of difference:**
+      - dotted words joined: "B.C.", "A.D.", "i.e.", "www.gutenberg.org" (57 words);
+      - punctuation after inline elements restored: "Title:", "Imitation,", "Criterion.";
+      - 6 section numbers joined to the quoted word that follows them: "10]'What", "14]O". The renderer's Page spans already join these the same way (see owner question 1).
+  - **Saved positions are in today's main numbering.** Page stamps its spans by aligning the extractor's words (`src/reader/modes/page/helpers/foliateWordWrapping.ts:84-115`, SRL-067). Focus, Flow and Narrate read `bookWords`. So the numbering change moves every saved position by 0–141 words in books with abbreviations, unless the positions are remapped.
+  - **Citation correction:** the stub cites "LL-136's one-counter rule". LL-136 is the time-log fence lesson (standing rule 41). The one-numbering principle is standing rule 29 (SRL-067: visual and audio share raw indexes only when they share tokenization), together with LL-160.
+- **The safeguard for saved places (decided, tier 1 inside the ruling):**
+  - **The cfi is never rewritten.** Page reopens from it as today (`tests/pageReopenCfi.test.ts`). The word index is re-derived so it names the same word: "the word index rides with the cfi".
+  - **How the index moves.** Take the saved index in today's numbering. Find that word's block and its character offset in the book. The new index is the word in the new numbering that contains that character.
+  - **The cfi checks the move.** Its spine step (`/6/N!` → section `N/2 − 1`) must name the same section as the new index. A disagreement is recorded, not acted on.
+  - **Why the cfi does not choose the word.** In Focus, Flow and Narrate the saved cfi is the last page relocation, not the word (`src/reader/modes/flow/helpers/usePersistentReadingAnchor.ts:99`, `options.cfi ?? state.cfi`). Choosing the word from the cfi would move those readers back to their page start.
+  - **No other persisted state is word-indexed:**
+    - Narrate keeps no audio cache (`main/narrate/producer.js:4-5`, R10).
+    - The dormant Kokoro cache (`main/ipc/tts.js:180-222`, keyed by `startIdx`) has no preload path.
+    - Highlights store their text, and their index is display-only (`main/ipc/reader.js:16-25`).
+  - **Backup.** `main.js:281` already backs up `library.json` before any library schema migration. The schema step in this item triggers that backup, so the pre-remap file is kept.
+- **Prerequisites:**
+  - FLOW-PARA-PAUSE-INDEX-1 (held at `f61ae02d`, carrying BLOCK-TAG-CASE-1). This item stacks on it, because the parity check compares against the renderer's block grouping after BLOCK-TAG-CASE-1, and both items edit `boundary-policy.json`.
+  - NARRATE-REBUILD-1 is complete.
+- **Done when** (every command in `pwsh` from the worktree root; each passes only on the exit code named; "app-node" means `pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1`, the app's Electron 42 as Node, LL-160):
+  1. **Base measurement, no code change (LL-142).**
+     - Commit the probe as `scripts/word-index-unify/measure.cjs`. Run it under app-node and under plain `node` on `resources/sample-meditations.epub` and `docs/planning/roadmap-reviews/reader-mode-separation-2/live/fixtures/g0-converted-chapters.epub`.
+     - Record, per runtime and book: `process.versions` (electron, node, icu), total words, per-section counts, and the words at 2963, 2970, 5473, 5480, 8715, 8723, 9423 and 9431.
+     - Expected at the base: app-node 80,493 and 1,676; node 80,426 and 1,676. A different base count stops the item until the planning numbers are re-derived.
+     - Save the results to `docs/studies/investigations/WORD-INDEX-UNIFY-1.base.<date>.md`.
+  2. **Characterize before extracting (standing rule 39).** Commit `tests/segmentWordsCharacterization.test.ts` on its own, green on the unmodified `segmentWordSpans`. It pins spans `{word, start, end}` for:
+     - "B.C. 121", "A.D.", "i.e. nobly", "www.gutenberg.org.", "don't", "rock-and-roll", "3.14 and 1,000", "[10]'What words", "a\u200Bb", "a  b\n\nc", "", "   ";
+     - an em-dash run, a CJK run and a soft hyphen.
+
+     The refactor in step 4 passes it unedited.
+  3. **Red first (standing rule 43).** Commit `tests/wordIndexUnify.test.js` on its own. It fails by assertion on the base, and the failing output is recorded.
+     - **(u1)** `extractWords` on an in-memory EPUB whose section is `<p>About 121 B.C. the <i>Imitation</i>, he said.</p>` returns `["About", "121", "B.C.", "the", "Imitation,", "he", "said."]`. To make it ICU-independent, the test injects a segmenter stub that splits "B.C." the way Electron's ICU does, through the extractor's new optional `{ segmenter }` parameter.
+     - **(u2)** For the same text and either segmenter (the real one and the stub), `extractWords(...).words` equals `segmentWords` of the block text.
+     - **(u3)** Nested blocks never join: `<div>end.<p>Start</p></div>` gives `["end.", "Start"]`.
+     - **(u4)** A footnote cue keeps its place: the existing Metaphysic fixture gives a cue `afterWordIdx` at "Metaphysic".
+     - **(u5)** `remapPosition` maps a legacy index to the new word containing it. Under the stub, legacy "B." (index 2) and legacy "C." (index 3) both map to new "B.C." (index 2). Legacy "said." maps to new 6.
+     - **(u6)** The library migration 6 → 7 marks `wordIndexRemap: "pending"` only on EPUB docs with `position > 0`, and running it twice changes nothing more.
+     - **(u7)** `update-doc-progress` and `reset-progress` clear a pending mark.
+     - **(u8)** `resolveLoadedDocResult` copies a numeric `position` from the payload into `activeDoc` and `libraryUpdates`.
+     - **Controls (pass on the base):** a text-only block with no touching segments numbers the same before and after. A non-EPUB doc is never marked.
+
+     Name new functions through a variable so the file loads on the base.
+  4. **The numbering change:**
+     - **The shared function.** Add `main/shared/wordSegments.mjs`, the one shared function: `joinWordSegments(text, segments)`. It is the loop now at `src/utils/segmentWords.ts:27-64`, moved verbatim, with `TRAILING_PUNCT_RE`, `REAL_WHITESPACE_RE`, `STITCHABLE_GAP_RE`, `hasRealWhitespaceBoundary` and `shouldStitchWithoutWhitespace`.
+       - It takes the segments as data, so it has no ICU, Node or DOM dependency.
+       - Pure ESM, with no imports, and JSDoc types for `allowJs`.
+     - **The renderer.** `src/utils/segmentWords.ts` keeps its exports and their behaviour. It builds the segments with its module segmenter and calls `joinWordSegments`; `hasRealWhitespaceBoundary` and `shouldStitchWithoutWhitespace` are re-exported.
+     - **The extractor** (`main/epub-word-extractor.js`):
+       - **Whole blocks.** `walkInline` (`:111-128`) pushes `{ type: "break" }` before and after a nested element whose tag is in `BLOCK_TAGS`.
+       - **One run at a time.** In `extractWords` (`:236-268`), split each block plan at breaks into runs. Each run's text is the concatenation of its text parts, and footnote cues are kept with their character offsets.
+       - **Segment and join.** Segment each run with `joinWordSegments(runText, Array.from(segmenter.segment(runText)))`. The shared module is loaded once with `await import("./shared/wordSegments.mjs")`; precedent `main/tts-worker.js:65`.
+       - **Cues.** A cue at offset `c` gets `afterWordIdx` = (book words before this run) + (run words whose start < `c`) − 1.
+       - **Constant and tests.** Delete the local `TRAILING_PUNCT_RE` (`:18`). `extractBlockTexts` keeps its output, and `tests/epubWordExtractor.test.js` stays green and unedited.
+     - **Optional segmenter.** `extractWords(epubPath, { segmenter } = {})` takes an optional segmenter, used for tests only. The default is today's `new Intl.Segmenter(undefined, { granularity: "word" })` (`:213`).
+     - **Why the shared file is ESM in `main/` (tier 1, decided).** One file has to load in both runtimes. A CommonJS file cannot be imported by the Vite renderer, and `src/` is not packaged (`package.json` `build.files`: `main/**/*`, `dist/**/*`). So the shared file is the one ESM file under `main/`. Main's own modules stay CommonJS and load it with a dynamic import. It has no imports and no Node or DOM use, so the renderer's no-Node rule holds.
+  5. **The guard** (scope item (e)):
+     - **The module.** `main/word-numbering.js` (CommonJS) exports:
+       - `WORD_NUMBERING_PROBE`, a fixed list of probe strings (the step-2 cases plus "U.S.A.", "e.g.", "https://example.com/a?b=c", "naïve", "Mr. Smith");
+       - `wordNumberingFingerprint(segmenter?)`, the sha256 of the JSON of every probe's joined words.
+     - **Constants.** `main/constants.js` gains `WORD_NUMBERING_VERSION = 2` and `WORD_NUMBERING_FINGERPRINT`, the value measured under app-node in this step and recorded in the after-measurement file.
+     - **Startup check.** `main.js` `loadState` (`:274-291`), after the library loads, computes the fingerprint. On a mismatch it writes `[word-numbering] fingerprint mismatch: expected … got …; saved positions were numbered by a different word-break table` to stderr and `error.log` through `logToFile`. It does not remap and does not exit. Under standing rule 53(b), that line fails any package verification, so an Electron upgrade that changes word breaks cannot merge silently.
+     - **Test.** `tests/wordNumberingGuard.test.js`:
+       - **(g1)** Under Vitest (plain Node), the fingerprint equals `WORD_NUMBERING_FINGERPRINT`, and `extractWords(resources/sample-meditations.epub).totalWords` is the step-6 count (expected 80,352).
+       - **(g2)** It spawns the app's Electron binary (`require("electron")`, as `scripts/narrate-rebuild/lib/app-icu.cjs:7` resolves it) with `ELECTRON_RUN_AS_NODE=1` on `scripts/word-index-unify/fingerprint.cjs`. That run prints the same fingerprint and count. If the binary is missing, the test fails with the `install.js` instruction; it is never skipped.
+       - **(g3) Control:** a segmenter stub that splits differently gives a different fingerprint.
+  6. **After measurement on the two books (LL-152:** same probe, same runtimes as step 1):
+     - app-node and node both report the same total for each book (expected *Meditations* 80,352, g0 1,676) and identical per-section counts.
+     - The anchor words sit at their new indices: 2963 "ancient", 5473 "HIS", 8715 "casting", 9423 "THE".
+     - The difference census (classes and counts, with no other book text) is recorded.
+
+     Any runtime disagreement stops the item. Save the results to `docs/studies/investigations/WORD-INDEX-UNIFY-1.after.<date>.md`.
+  7. **The one-time remap** (scope: saved positions):
+     - **The migration.** `main/migrations.js`: `CURRENT_LIBRARY_SCHEMA` 6 → 7 (`:7`). A new v6 → v7 step after `:273` sets `doc.wordIndexRemap = "pending"` on each doc with `position > 0` and (`ext === ".epub"` or `convertedEpubPath`).
+     - **`remapPosition(epubPath, legacyIndex, cfi)`** in `main/word-numbering.js`:
+       - One parse of the book gives both numberings with each word's (section, block run, start, end).
+       - The legacy numbering is a frozen copy of today's per-part loop (`main/epub-word-extractor.js:249-266`), kept only here and marked for removal by a later item.
+       - It returns `{ newIndex, sameWord, cfiSection, indexSection }`. `sameWord` is true when the new word's text, read at the legacy word's character offsets, equals the legacy word.
+       - A legacy index past the end clamps to the last word.
+     - **The hook, `ensureWordNumbering(doc, ctx)`:** one promise per doc id. After the await, re-find the current record by id (the pattern at `main/ipc/library.js:185-186`). Write only while it is still pending, then:
+       - set `position = newIndex`;
+       - delete the mark;
+       - `saveLibrary()` and `broadcastLibrary()`.
+
+       Call it:
+       - in `load-doc-content` (`main/ipc/library.js:162-176`) on both EPUB branches, before the return. When it changed the position, the return becomes `{ filepath, ext, position }`;
+       - in `extract-epub-words` (`main/ipc/tts.js:162-174`) before extracting.
+     - **The renderer.** `src/utils/loadDocResult.ts:17-25` adds `position` to `libraryUpdates` when `"position" in result && typeof result.position === "number"`. Every open awaits `load-doc-content` before it shows the book (`src/components/LibraryContainer.tsx:231-235`, `src/App.tsx:54`). `src/types.ts` is not edited; the narrowing is local.
+     - **Fresh saves clear the mark.** `update-doc-progress` (`main/ipc/documents.js:15-31`), when it writes a position, and `reset-progress` (`:35-40`) delete `wordIndexRemap`. A position written by this build is already in the new numbering.
+     - **Failure.** If the EPUB cannot be read or parsed, the position is untouched, the mark becomes `"failed"`, and one `error.log` line names the doc id.
+  8. **Owner-library check, offline, on copies only:**
+     - Copy `library.json` and every EPUB that a pending doc points to (`convertedEpubPath` or `filepath`) into `C:\Projects\Blurby-artifacts\word-index-unify-1\owner-copy\`. Write a manifest of doc id → copy. The live profile is only read, and its `library.json` and `settings.json` hashes are recorded before and after; they must be unchanged.
+     - Run `scripts/word-index-unify/remap-check.cjs --library <copy> --manifest <manifest>` under app-node. It applies the v6 → v7 step and `remapPosition` to every pending doc. It prints only sha256(doc id)[0:8], the old and new index, the shift, `sameWord`, and cfi agreement, never book text. It exits 0 only if every doc has `sameWord: true`.
+     - Record the counts (docs, shifted docs, largest shift, cfi agreements, disagreements, absent cfis) and the run time per book in `docs/studies/investigations/WORD-INDEX-UNIFY-1.remap.<date>.md`.
+     - A `sameWord: false` stops the item with those hashed ids. A cfi disagreement is recorded, not a failure.
+  9. **Parity sweep (LL-162).** `tests/wordIndexParity.test.ts` runs, under jsdom, on every section of *Meditations* and g0:
+     - the renderer's own grouping, `collectBlockTextNodes` + `segmentWordSpans` from `src/reader/modes/page/helpers/foliateHelpers.ts`;
+     - main's `extractWords` for that section.
+
+     Their word lists are equal on both books (0 mismatched sections).
+
+     The same file, with `WIU_OWNER_DIR` set to the copies' directory, reports the owner-copy counts of mismatched sections by cause. It prints counts only, and its exit code ignores them; the counts are recorded in the remap file. Without the variable, that case is `it.skip` with its reason in the name. It is the only skip the item adds.
+  10. **Live, packaged** (standing rule 53(a) recipe, `--arm64`; a fresh scratch profile proved before the first input, LL-165; live-profile hashes unchanged). Seed the scratch profile with a schema-6 `library.json` holding:
+      - the sample *Meditations* at position 2970 (today's "ancient") with a cfi in section 2;
+      - g0 at position 900 with a cfi in section 1.
+
+      Launch, open *Meditations* in Focus, and read the runtime state through a probe (LL-166): the current word index is 2963 and its text is "ancient". Then check:
+      - `library.json` shows position 2963, the same cfi string, no `wordIndexRemap`, `schemaVersion` 7, and the pre-migration backup file;
+      - g0's position is unchanged at 900, and its mark is cleared on open;
+      - Page reopens *Meditations* on the cfi's page;
+      - stdout, stderr and `error.log` hold no `[word-numbering]` line.
+  11. **Standing rule 50, named and updated in scope:**
+      - `tests/zipEntryCap.test.js:106` (`80426` → the step-6 count; the same number now holds under every runtime);
+      - `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json`: an `allowedShared` entry for `main/shared/wordSegments.mjs` with its exports, needed by `tests/readerModeBoundaries.test.ts`;
+      - any test that pins library schema 6 (re-grep: `git grep -n "CURRENT_LIBRARY_SCHEMA\|schemaVersion: 6" -- tests`).
+
+      **Named, not edited:** the NARRATE-REBUILD-1 checkers pin today's numbering. These are `scripts/narrate-rebuild/d2-crossing-check.cjs` with the P6b trace `2970 ancient 5480 HIS`, `p5-latency-e2e.mjs:41` (8723 and 9431), and `reconcile-sweep.mjs` `--from 2970`.
+      - Their recorded traces are historical evidence in the old numbering. The anchor table from step 6 is their translation, and the step-5 guard replaces `d2-crossing-check` as the numbering probe for upgrades.
+      - `reconcile-sweep.mjs --gate` still runs under app-node and exits 0 (0 fail-closed chunks).
+      - `sync-engine.js:339` (cloud merge takes the larger position) is named as a residual: Cloud Sync is deferred to BLURBY-SERVER-1.
+  12. **Tests:**
+      - `npx vitest run tests/segmentWordsCharacterization.test.ts tests/wordIndexUnify.test.js tests/wordNumberingGuard.test.js tests/wordIndexParity.test.ts tests/epubWordExtractor.test.js tests/segmentWords.test.ts tests/zipEntryCap.test.js tests/readerModeBoundaries.test.ts tests/pageReopenCfi.test.ts` exits 0.
+      - `npx vitest run tests/readerModes tests/narrate` exits 0.
+  13. `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine (standing rules 47 and 48).
+  14. **Package verification (standing rule 53):** (a)–(e) on the final commit with `origin/main` merged in.
+      - (c) `npx asar list` shows `main/shared/wordSegments.mjs`, `main/word-numbering.js` and each changed `main/` file.
+      - (d) re-runs step 6's count under the packaged exe as Node, plus step 10.
+      - Blurby.Brain confirms.
+  15. **Fence** (standing rule 41): `git diff --name-status <base>` lists exactly the following, plus the measurement files, staging memo and time log:
+      - `A main/shared/wordSegments.mjs`, `A main/word-numbering.js`;
+      - `M main/epub-word-extractor.js`, `M src/utils/segmentWords.ts`;
+      - `M main/migrations.js`, `M main/constants.js`, `M main.js`;
+      - `M main/ipc/library.js`, `M main/ipc/tts.js`, `M main/ipc/documents.js`;
+      - `M src/utils/loadDocResult.ts`;
+      - `A scripts/word-index-unify/measure.cjs`, `A scripts/word-index-unify/fingerprint.cjs`, `A scripts/word-index-unify/remap-check.cjs`;
+      - `A tests/segmentWordsCharacterization.test.ts`, `A tests/wordIndexUnify.test.js`, `A tests/wordNumberingGuard.test.js`, `A tests/wordIndexParity.test.ts`;
+      - `M tests/zipEntryCap.test.js`, `M` `boundary-policy.json`, and the named schema-pin tests.
+
+      Nothing in `src/types.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, `src/reader/modes/**` or `scripts/narrate-rebuild/**`.
+  16. **Owner (next smoke, added to gate (2)'s list):** a book left mid-way before this build reopens on the same word in Focus and on the same page in Page. In Focus, "B.C." shows as one word.
+- **Effort:** L (two waves).
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel; Blurby.Brain for package verification; the owner at the next smoke.
+- **Source:** Blurby.Brain's tier-1 ruling of 2026-10-15 (the offset diagnosis, LL-160); the stub at `#word-index-unify-1`; the planning measurement above.
+- **Path:** dispatch.
+
+##### Owner ruling (2026-10-23, roadmap review 2026-10-23-5): option (b), split them
+- In the shared join function, a closing section bracket followed by an opening quote is a word boundary. "10]'What" becomes two words, in every runtime and in Page's spans. Rewrite the probe expectations and the step-6 counts to the split numbering, measured on the base and the tip. The six places are listed under Done-when. The remap carries saved positions across this change like any other boundary shift.
+
+##### Owner questions
+1. **Section numbers joined to the next word (6 places in *Meditations*: "10]'What", "14]O").** The ruled join puts a closing bracket and the quoted word that touches it into one word. Page's spans already join these, and the extractor now matches them, so Focus shows "10]'What" as one flash.
+   - **(a) Accept it, as the ruling reads.** Recommended: it is rare, it already matches Page, and it keeps one rule in one function.
+   - (b) Treat a closing bracket followed by an opening quote as a boundary in the shared function. This also changes Page's spans and the numbering again.
+   - (c) Strip leading section-number brackets in Focus display only.
+
+   The spec is dispatch-ready on (a). Choosing (b) changes only the probe expectations and the step-6 count.
+
+##### Implementation detail
+- **Edit sites** (grep-verified on `main` @ `d2a70ff1`, 2026-10-23; none of these files differs on `origin/eb/flow-para-pause-index-1` except `boundary-policy.json`; re-grep at the cut, standing rule 36):
+
+  ```
+  git grep -n -E "TRAILING_PUNCT_RE|function walkInline|segmenter.segment\(part.text\)|new Intl.Segmenter" -- main/epub-word-extractor.js
+  git grep -n -E "export function segmentWordSpans|const segmenter" -- src/utils/segmentWords.ts
+  git grep -n -E "load-doc-content|extract-epub-words|update-doc-progress|reset-progress" -- main/ipc
+  git grep -n -E "CURRENT_LIBRARY_SCHEMA = |v5 → v6" -- main/migrations.js
+  git grep -n -E "async function loadState|backupFile\(getLibraryPath" -- main.js
+  ```
+- **Tests:** listed in Done-when 2, 3, 5, 9 and 12. Existing extractor, segmenter, cfi-reopen and mode tests stay unedited, apart from the rule-50 list in step 11.
+- **Constants:** `WORD_NUMBERING_VERSION = 2` and `WORD_NUMBERING_FINGERPRINT` in `main/constants.js`. `CURRENT_LIBRARY_SCHEMA` becomes 7 in `main/migrations.js:7`.
+- **Branch:** `eb/word-index-unify-1`, cut from `origin/eb/flow-para-pause-index-1` (`f61ae02d` when written) with `origin/main` merged in. Push with `git push origin HEAD:refs/heads/eb/word-index-unify-1`, and do not merge (Stage 8 freeze).
+- **Merge order:** after FLOW-PARA-PAUSE-INDEX-1 and BLOCK-TAG-CASE-1, in the post-freeze train (`docs/planning/roadmap-reviews/2026-10-23-plan.md`). It is a separate merge, and it needs a fresh rule 53 check if `main` has moved past docs.
+- **Waves (dispatch sizing):**
+  - **Wave A:** tasks 1–5, the numbering and its guard. It stops after step 6 with the counts recorded.
+  - **Wave B:** tasks 6–9, the remap, sweeps, live check and package.
+
+  Wave B starts only if Wave A's step 6 shows one count across runtimes.
+- **Staging plan:** explicit paths only. Leave `tests/perf-baseline-results.json`, the Timing backfills, every owner-copy file and anything under `C:\Projects\Blurby-artifacts\` unstaged. Probes that look like tests are committed under `scripts/` as `.cjs`, never as `*.test.*` under `docs/` (standing rule 52).
+- **Failure handling:**
+  - **Runtimes disagree after the change (step 6):** stop. Record the words where they differ. Do not pin a fingerprint.
+  - **`sameWord: false` for any owner doc (step 8):** stop and list the hashed ids. Do not ship the remap.
+  - **Dynamic import of the `.mjs` fails in the packaged app (step 14(c) or (d)):** stop. Report to Blurby.Brain with the asar listing; the fallback is a ruling, not an improvisation.
+  - **Owner-copy remap time:** above 3 s for any single book, record it. The remap is lazy per book at open, so it never delays launch.
+  - **Rollback:** `git revert -m 1 <merge>`. A library already migrated to schema 7 keeps positions in the new numbering, so a downgrade restores the `library.json` backup that `main.js:281` wrote.
+- **Shared-core touches:** none. The `LoadedDocFilePayload` narrowing stays in `src/utils/loadDocResult.ts`.
+- **Lane:** Reader Engine. Execution surfaces D (main process) and A (numbering). Cross-lane: Narrate reads `bookWords`; no Narrate file changes.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Base counts and anchors on both books under app-node and node, saved | calculable | measurement | bounded | medium | 35m | — | — |
+| 2 | Characterization file for segmentWordSpans committed alone, green | calculable | positive control | bounded | low | 20m | — | — |
+| 3 | Red file (u1–u8 and controls) committed alone, failures recorded | calculable | positive control | bounded | medium | 35m | — | — |
+| 4 | Shared join module; renderer and extractor on it; whole-block runs; after counts equal across runtimes | calculable | feature | cross-cutting | high | 1h15m | — | — |
+| 5 | Numbering fingerprint, startup check and Electron-run guard test | calculable | feature | bounded | medium | 45m | — | — |
+| 6 | Library schema 7, remapPosition, open-time remap hook, progress handlers clear the mark, loadDocResult | calculable | feature | cross-cutting | high | 1h30m | — | — |
+| 7 | Owner-copy remap check and parity sweep run and recorded | calculable | measurement | bounded | medium | 50m | — | — |
+| 8 | Packaged live remap check on a seeded scratch profile, read from state | calculable | live verification | bounded | medium | 50m | — | — |
+| 9 | Suite, typecheck, build; rule 53 package verification; memo, time log, push | calculable | verify | bounded | medium | 1h | — | — |
+
+##### Lessons applied
+- **LL-160:** every count and fingerprint is measured under the app's Electron (app-node) and under plain Node. After the change they must agree, which is the item's purpose.
+- **LL-142:** the counts and anchors were measured before this spec was written. The run measures them again before and after.
+- **LL-152:** the before and after measurements use the same probe and runtimes, and the live check uses the rule 53 build recipe.
+- **LL-161:** the remap and the live check compare word text at the position, not only the index.
+- **LL-162:** the remap and parity are swept over the whole owner corpus offline, not a few sampled books.
+- **LL-165:** the live launch proves its scratch profile before the first input, and the live-profile hashes stay unchanged.
+- **LL-166:** the live verdict reads the runtime's current word, not a screenshot.
+- **Standing rule 53:** the item is not done until the packaged arm64 build is verified and Blurby.Brain confirms.
+- **Standing rule 29 (SRL-067):** the stub's "one-counter rule" is this rule, not standing rule 41 (the time-log fence exemption) that it cites.
+- **Standing rule 39:** characterization goes first, before moving `segmentWordSpans` into the shared module.
+- **Standing rule 43:** the red file goes first, with controls.
+- **Standing rule 50:** the pinned count, census and schema tests are named, and the Narrate checkers are named, not edited.
+- **Standing rule 52:** probes live under `scripts/` as `.cjs`.
+- **Standing rule 36:** every cited line is re-grepped at the cut.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="narrate-reconcile-residual-1-spec"></a>
+
+#### NARRATE-RECONCILE-RESIDUAL-1 — A two-word name that espeak reads differently on its own is identified by reading the two words together *(position 93 — Full Spec; authored 2026-10-23 by roadmap review 2026-10-23-5 on main @ `d2a70ff1`; from NARRATE-REBUILD-1 P6b's owner-library sweep and Blurby.Brain's ruling of 2026-10-15; build-and-hold under the Stage 8 freeze; not a release gate; no shared-core touch)*
+
+- **What:** in Narrate, a passage whose two-word capitalised name espeak reads one way inside the passage and another way word by word plays through instead of pausing. Both words of the name are highlighted together for exactly the frames the model spent on them. The cost limit (0.5) and every other check stay as they are.
+- **Why:**
+  - The producer's word map (`main/narrate/wordmap.js`) decides which source words each espeak phoneme group holds. It compares each word's *isolated* phonemes with the group (`relCost`, `wordmap.js:60-64`). The isolated forms are evidence only: no frame or sample ever comes from them (MAPPING_POLICY.md §4).
+  - The P6b owner-library sweep (`docs/studies/narrate-rebuild-1/phase6/reconcile-owner.txt`, 2026-10-15) found one chunk that still fails: books `dab1d9d7`, `58ed7188` and `3c6f42b3` (three copies of one 16,718-word book), at word 12529, class `D:ruled`. The chunk text hash is `4e7915ce2410e10e`; no text is stored.
+  - espeak reads that passage's two-word name as one fused group, with [tʃ] where the second word read alone has [k]. The fused unit's cost is 0.67 against the 0.5 limit (`ACCEPT_UNIT_COST`, `wordmap.js:66`; the check at `:185`). So `reconciled` is false, `verifyTable` rejects the table as `unreconciled` (`src/reader/modes/narrate/engine/wordTable.ts:69`), and Narrate pauses with "This passage couldn't be timed" (`src/reader/modes/narrate/ModeRuntime.ts:217`). That is safe, but the owner hears the narration stop.
+  - The rule P6b used for all-caps words carries over. An all-caps word gets a second piece of evidence: its letters read one by one (F5, `wordmap.js:77-80`, `:155-156`). A fused unit has no second piece of evidence. Here the natural one is the unit's own words read together by espeak, with nothing around them. That reading is still identification evidence: it decides which words the group holds and never supplies a span.
+  - Measured on the base with a synthetic word map (the planner's probe, 2026-10-23): words `Ab` `Chy`, isolated `ˈæb` and `kˈaɪ`, captured group `æbtʃˈaɪ`. The base fails with exactly `fused unit evidence cost 0.67 > 0.5: Ab Chy ~ æbtʃˈaɪ` and calls `isolated` only with the single words. This is the red test's shape (Done-when 3, r1).
+- **Rule (tier 1, decided by the planner; Rule 11):** **phrase evidence for fused units, as a second pass only.**
+  - Within a segment, the first pass runs the alignment exactly as today.
+  - Only if its plan has a non-diagonal unit over the limit does a second pass run, on that segment alone. The second pass phonemizes each run of 2 to `MAX_FUSE` (4) consecutive source words together (`isolated(words.join(" "))`, through the same `groupsOf` path). A fused candidate then takes the lower of two costs: its isolated forms, or its phrase form. One-word and split-word candidates are unchanged.
+  - The limit, the syllable weight, the linking-r rule and both cost checks are unchanged. A segment that passes today is never re-planned, so its table is byte-identical (Done-when 6).
+  - **Rejected:** treating k ~ tʃ as a free substitution (it loosens the check for every word); an elimination rule that accepts the leftover group because its neighbours are exact (it accepts without evidence); and keeping the residual ruled (the stub asks for a rule).
+- **Prerequisites:** NARRATE-REBUILD-1 (complete 2026-10-15). No held branch touches `main/narrate/wordmap.js`, `scripts/narrate-rebuild/reconcile-sweep.mjs` or `MAPPING_POLICY.md` (checked with `git diff --name-only origin/main...origin/eb/<branch>` over every `eb/narrate-*` branch, 2026-10-23). The owner's EPUB copies are needed on the machine that runs the sweep. P6b's copy (`…\bbe4b04a-…\scratchpad\owner-epub-copy`) no longer exists, so Done-when 1 makes a fresh copy.
+- **Done when** (every command runs in `pwsh` from the worktree root; each passes only on the exit code stated, with no stderr text; standing rule 44):
+  1. **Measured repro on the base, no code change (LL-142).**
+     - Copy every `.epub` named in the live profile's `library.json` into `<scratchpad>\owner-epub-copy` with `Copy-Item`, reading the profile only. Then run `pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/reconcile-sweep.mjs --owner <scratchpad>\owner-epub-copy`. It exits 0 and reports `D:ruled` at 12529 in each copy of the 16,718-word book. If the copies' file names changed, the book ids differ; the chunk hash still matches.
+     - With RULED_RESIDUALS emptied **in a scratch copy of the script only**, the same command exits 1 with those chunks counted as `other`. This proves the gate can fail (LL-151).
+     - Run the probe `docs/studies/investigations/NARRATE-RECONCILE-RESIDUAL-1.probe.mjs.txt` (committed as `.txt`, standing rule 52; copied to the scratchpad to run under `app-node.ps1`). For the chunk whose `sha256(text)[0:16]` is `4e7915ce2410e10e`, it writes the words, forms and groups to a scratch file outside the repository. The committed measurement holds only fields with no text:
+       - book id, word position and chunk hash;
+       - the failing unit's kind, word count k and group count;
+       - its consonant counts, edit distance, syllable difference and cost;
+       - the edit operations as phoneme symbols (for example `k→t, +ʃ`);
+       - the phrase-evidence cost of the unit's own words read together, and of the windows one word wider on each side.
+     - Save it to `docs/studies/investigations/NARRATE-RECONCILE-RESIDUAL-1.base.2026-MM-DD.md`.
+     - **Decision gate:** the item continues only if the unit's phrase-evidence cost is ≤ 0.5. Otherwise it stops: the run records the numbers and returns the item to planning (Failure handling).
+  2. **Sweep extensions** in `scripts/narrate-rebuild/reconcile-sweep.mjs`, committed before the rule:
+     - `--base <sha>` sets the commit that `controlModules()` loads (`:82-88`; default `CONTROL_BASE`, `:35`).
+     - `--changed` accepts `--owner <dir>`, taking the books from it as owner mode does (`:158-163`). With owner books, no output carries chunk text: the `text: e.text` fields at `:189` and `:198` are dropped whenever the books are the owner's.
+     - The usage line (`:61`) and the header comment name both.
+     - Check: `… reconcile-sweep.mjs --changed --base <base sha>` exits 0 on the unchanged tree (0 changed, 0 newly failing). With `--break` added it exits 1.
+  3. **Red first (standing rule 43).** Commit `tests/narrate/narrate.reconcileResidual.test.js` on its own. It calls `buildWordMap` with a synthetic record and a stub `isolated`, the shape the planner measured:
+     - **(r1)** Words `Ab` `Chy` in one segment, group `æbtʃˈaɪ`, isolated `ˈæb` / `kˈaɪ`, phrase `Ab Chy` → `æbtʃˈaɪ`: `reconciled` is true. There is one `fused` unit covering both words, with frames equal to the whole group's, and its evidence is the phrase form. On the base this fails by assertion: `fused unit evidence cost 0.67 > 0.5`.
+     - **(r2) Control, the limit holds:** the same, but the phrase stub returns `æbkˈaɪ` (espeak agrees with the isolated forms). It fails closed with `fused unit evidence cost 0.67 > 0.5`. This passes on the base and after.
+     - **(r3) Control, the first pass is unchanged:** a segment that reconciles on the first pass, with mixed-case words and one fused unit under the limit, never calls `isolated` with a string containing a space, and its units equal the base's. This passes on the base and after.
+     - **(r4)** If Task 2 finds a public-domain phrase that reproduces the effect through real espeak, add it to `tests/narrate/narrate.reconcile.test.js` in the existing `reconcile()` style. Otherwise the staging memo records "no public analog found in the timebox".
+
+     Record the base failures in the staging memo.
+  4. **The change**, in `main/narrate/wordmap.js` only:
+     - `align` (`:74-103`) takes an optional `phrase` table; `phrase[i][k]` holds the groups of words i…i+k−1 read together.
+     - `cost` (`:78-81`): for k > 1 with a phrase entry, use the minimum of the isolated cost and `relCost(phrase[i][k], gs, lang)`. The back pointer records which evidence won.
+     - In `buildWordMap`, after `plan = align(…)` (`:161`): if the plan exists and any unit has `!(u.c <= ACCEPT_UNIT_COST)`, build the phrase table for that segment with `groupsOf` (`:151`) and re-plan. Use the new plan when it is not null.
+     - Each unit records `evidence` (`"isolated"`, `"spelled"` or `"phrase"`), plus `phrase` (the form) when the phrase won, next to `isolated` (`:172`).
+     - `ACCEPT_UNIT_COST`, `SYLLABLE_WEIGHT`, `MAX_FUSE`, `MIN_SPLIT`, `LINKING_R`, `relCost` and the two failure checks (`:184-185`) are unchanged. Check with `git diff <base> -- main/narrate/wordmap.js`: no removed line contains `ACCEPT_UNIT_COST`, `SYLLABLE_WEIGHT`, `failures.push` or `const relCost`.
+     - `RULED_RESIDUALS` (`reconcile-sweep.mjs:43`) becomes the empty set. Its comment names this item as the one that emptied it.
+     - MAPPING_POLICY.md §4 gains a bullet after line 41 stating the phrase-evidence rule. Line 43's sentence on what each unit records names `evidence` and `phrase`.
+  5. **Gates on the final tree** (each through `app-node.ps1`, recorded as `docs/studies/narrate-rebuild-1/phase6/residual-*.txt` with command, exit code and stderr byte count):
+     - `--check-tokenizer`: exit 0.
+     - `--gate`: exit 0.
+     - `--gate --control`: exit 1.
+     - `--owner <copy>`: exit 0, printing `0 ruled residual, 0 other`. The class E count equals Done-when 1's (18 on P6b's copy).
+  6. **No passing table changes.**
+     - `--changed --base <base sha>`: exit 0, with 0 changed and 0 newly failing on the gate corpus.
+     - `--changed --base <base sha> --owner <copy>`: exit 0, 0 changed, 0 newly failing. The residual chunk failed on the base, so it is not compared.
+     - `--changed --base <base sha> --break`: exit 1.
+  7. **The word table at the playing sample, real model.** On the machine that holds the exposed model (`NARRATE_MODELS_ROOT`; standing rule 47), run the probe with `--real` on the residual chunk through the product path: `synthesize`, `buildWordMap`, `mapUnitsToSourceWords`, then `verifyTable`.
+     - `verifyTable` returns `{ ok: true }`.
+     - The fused unit holds the two source words. `lookupUnit` returns its index at its `sampleStart`, at its midpoint and at `sampleEnd − 1`, and returns the previous unit at `sampleStart − 1`.
+     - Durations come from the model's own output (`provenance.source` is `model-output`); no timing is estimated.
+     - The committed record holds the frame and sample numbers and the verdicts, with no text.
+     - If the artifacts are not on the machine, the row is run on the one that has them before the merge go. It is never skipped.
+  8. **Tests and builds.** `npx vitest run tests/narrate` passes, and the existing narrate tests are green and unedited (standing rule 50). `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine (standing rules 47 and 48).
+  9. **Package verification (standing rule 53).** Run `npx electron-builder --win --dir --arm64` from the final commit with `origin/main` merged in, in this worktree. Grep the built `main.js` for `BLURBY_USER_DATA_DIR`. Launch `release\win-unpacked\Blurby.exe` natively for 25 s on a proved scratch profile (LL-165): no error, rejection or crash line, and no dump. Check that `app.asar` carries the new `main/narrate/wordmap.js` (an asar extract from the scratchpad, never a worktree root). Write a "Package verification" section in the staging memo. Blurby.Brain confirms before any merge go.
+  10. **Fence:** `git diff --name-status <base>` lists exactly the following, plus the time log (standing rule 41):
+      - `M main/narrate/wordmap.js`;
+      - `M scripts/narrate-rebuild/reconcile-sweep.mjs`;
+      - `M docs/studies/narrate-rebuild-1/phase0/MAPPING_POLICY.md`;
+      - `A tests/narrate/narrate.reconcileResidual.test.js`;
+      - `M tests/narrate/narrate.reconcile.test.js`, only if r4 found an analog;
+      - `A docs/studies/investigations/NARRATE-RECONCILE-RESIDUAL-1.probe.mjs.txt` and `.base.2026-MM-DD.md`;
+      - `A docs/studies/narrate-rebuild-1/phase6/residual-*.txt`;
+      - the staging memo `docs/governance/close-outs/Memo.NARRATE-RECONCILE-RESIDUAL-1.GovernanceStaging.2026-MM-DD.md`.
+
+      Nothing in `src/`, `preload.js`, `main/narrate/` other than `wordmap.js`, or the shared-core set. No committed file holds text from an owner book: `git grep -n` for each of the two name words, run from the private scratch file, finds no hit in the diff.
+  11. **Owner listening check (standing rule 45; added to gate (2)'s list, not run per item).** In the owner's book (the private note names it), start Narrate a sentence before word 12529 on the packaged build. Pass when:
+      - the passage plays through, with no "This passage couldn't be timed" notice;
+      - both words of the name are highlighted together while the name is heard, and not before;
+      - the highlight moves to the next word as the name ends.
+
+      This needs a human ear and eye; nothing automated stands in for it (SRL-070, rule 32).
+- **Effort:** M.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel; Blurby.Brain for the package check; the owner at the next smoke.
+- **Source:** ROADMAP.md stub `narrate-reconcile-residual-1`; `docs/planning/epics/2026-10-12-narrate-rebuild/plan.md:364` and `state.md:222` (Brain's ruling of 2026-10-15, Q1); `reconcile-owner.txt`.
 - **Path:** dispatch.
 
 ##### Implementation detail
-- **Edit sites:** the fifteen lines listed under Why. Re-grep at dispatch (standing rule 36):
+- **Edit sites** (grep-verified on `main` @ `d2a70ff1`, 2026-10-23; re-grep at the base, standing rule 36):
 
   ```
-  git grep -n -E "BLOCK_TAGS|tagName (===|!==) \"[A-Z]" -- src
+  git grep -n -E "ACCEPT_UNIT_COST =|function align|const cost = |plan = align|const groupsOf|isolated: iso.slice|failures.push\(.(fused )?unit evidence" -- main/narrate/wordmap.js
+  git grep -n -E "CONTROL_BASE =|RULED_RESIDUALS = |function controlModules|const books =|const mode =|text: e.text" -- scripts/narrate-rebuild/reconcile-sweep.mjs
   ```
-
-  After the change, `git grep -n -E "tagName (===|!==) \"[A-Z]|\.has\([a-z]+\.tagName\)" -- src` prints nothing.
-- **Tests:** `tests/readerModes/blockTagCase.test.ts` (t1–t3), plus the existing `tests/readerModes/`, `tests/flowReadingZone.test.ts`, `tests/foliate*.test.*` and the FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 tests, all unedited.
-- **Constants:** none. `BLOCK_TAGS` stays in each mode's helper (reading-mode separation).
-- **Branch:** `eb/block-tag-case-1` from `refs/remotes/origin/main`, after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 have merged.
-- **Staging plan:** explicit paths only. `tests/perf-baseline-results.json` stays unstaged.
+  - `main/narrate/wordmap.js`: `:66` limit, `:74-103` `align`, `:78-81` `cost`, `:151` `groupsOf`, `:155-156` spelled evidence, `:160-162` plan, `:166-173` unit record, `:184-185` cost checks.
+  - `scripts/narrate-rebuild/reconcile-sweep.mjs`: `:35` `CONTROL_BASE`, `:43` `RULED_RESIDUALS`, `:61` mode and usage, `:82-89` `controlModules` and `BASE`, `:158-165` books and `priv`, `:189` and `:198` the `text` fields.
+  - `docs/studies/narrate-rebuild-1/phase0/MAPPING_POLICY.md`: §4, lines 33-43.
+- **Read, not edited:** `main/narrate/producer-worker.js:97-118` (the table copies only `words`, `spoken`, `kind` and the frame and sample fields, so the new unit fields stay in the producer); `main/narrate/capture.js:42` (`phonemizeIsolated` is espeak itself); `src/reader/modes/narrate/engine/wordTable.ts:61-100` (`verifyTable`, `lookupUnit`).
+- **Tests:** the new red file (r1–r3, plus r4 when an analog exists); every existing `tests/narrate/` test unedited.
+- **Constants:** none new. The phrase window reuses `MAX_FUSE`.
+- **Cost:** the second pass runs only on a segment whose first plan fails. It adds at most 3·W espeak calls there and none elsewhere. The owner sweep's wall time is recorded next to P6b's 462 s.
+- **Branch:** `eb/narrate-reconcile-residual-1`, cut from `origin/main` (re-read the sha at dispatch; `d2a70ff1` when written). Push with `HEAD:refs/heads/eb/narrate-reconcile-residual-1` and do not merge (Stage 8 freeze).
+- **Merge order:** after the freeze, in the post-freeze train. It is file-disjoint from every held branch. NARRATE-TOKEN-CAP-1, NARRATE-SENTENCE-RESUME-1 and NARRATE-SENTENCE-INITIALS-1 change chunk plans (`chunkPlan.ts`), and NARRATE-YEARS-1 changes normalization. Any of them can move the name into a chunk with a different hash, which would turn the ruled entry into an `other` failure in their own owner sweep. **Recommended: this item merges before them.** Whichever merges later re-runs Done-when 5's owner sweep on the combined tree.
+- **Staging plan:** stage explicit paths only. `tests/perf-baseline-results.json`, the Timing backfills, the owner EPUB copies and every private scratch file stay unstaged.
 - **Failure handling:**
-  - If (c) diverges anywhere, stop with the boundary text.
-  - If `npm run perf` regresses by more than 10%, stop with the benchmark.
-  - If a pinned test asserts a section-sized block, name it (standing rule 50) and stop.
+  - If the decision gate (Done-when 1) finds the phrase cost > 0.5, stop. Record the numbers, including the wider windows, and return the item to planning with them. Do not widen the window past one word on each side or change any cost term in this item.
+  - If the second pass changes any table that passed on the base (Done-when 6), stop and name the chunk by book id and position.
+  - If `--owner` reports any `other` failure, stop with its class and position.
   - Rollback: `git revert -m 1 <merge>`.
 - **Shared-core touches:** none.
-- **Merge order:** after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1. It waits for the owner's tier-2 OK.
-- **Lane:** Reader Engine. Execution surface A.
+- **Lane:** TTS / Narration Engine. Execution surfaces A (the producer's word map) and B (the sweep harness).
+- **Owner questions:** none. The rule is technical (tier 1). The only user-visible effect is that a passage now plays where Narrate used to pause, which is what Brain's 2026-10-15 ruling asked this stub to deliver. A fused name is highlighted as one unit, as fused runs have been since G1.
 
 ##### Task list
-| # | Task | Class | Kind | Tier | Effort | Estimate |
-|---|---|---|---|---|---|---|
-| 1 | Base measurement on both books, every section, five figures, saved | calculable | measurement | bounded | medium | 45m |
-| 2 | Red file (t1–t3) committed alone; failures recorded | calculable | positive control | bounded | low | 20m |
-| 3 | Case-insensitive block and script/style checks in all five copies; the keys collectors folded in | calculable | bug fix | bounded | medium | 30m |
-| 4 | After measurement, same recipe; the before/after table to the owner via Blurby.Roadmap | calculable | measurement | bounded | medium | 40m |
-| 5 | After the owner's OK: live checks, suite, typecheck, build, perf | calculable | verify | bounded | medium | 40m |
-| 6 | Bug entry, memo and time log; push; ask for merge go | mechanical | close | mechanical | low | 15m |
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Owner copies made; base sweep and its failing control recorded; private probe measures the residual unit and its phrase cost; decision gate passed | calculable | measurement | bounded | medium | 1h | — | — |
+| 2 | A public-domain phrase that reproduces the effect through real espeak, or "none found" recorded | frontier | | bounded | low | — | ≤30m — record "no public analog" and continue | — |
+| 3 | Sweep gains `--base` and owner books for `--changed`, with no text in owner output; unchanged-tree check 0 and `--break` 1 | calculable | harness extension | bounded | medium | 40m | — | — |
+| 4 | Red file (r1–r3) committed alone, base failures recorded | calculable | positive control | bounded | low | 25m | — | — |
+| 5 | Phrase evidence as a second pass in `wordmap.js`; ruled set emptied; mapping policy updated | calculable | bug fix | bounded | medium | 45m | — | — |
+| 6 | Gate, control, owner and no-change sweeps recorded on the final tree | calculable | measurement | bounded | medium | 45m | — | — |
+| 7 | Real-model table at the playing sample verified on the residual chunk | calculable | measurement | bounded | medium | 30m | — | — |
+| 8 | Suite, typecheck, build, arm64 package verification, memo, time log, push | calculable | verify | bounded | medium | 1h | — | — |
+
+**Waves** (standing dispatch-sizing rule): Wave A is tasks 1–6, Wave B is tasks 7–8. Wave A stops at the decision gate if it fails.
 
 ##### Lessons applied
-- **LL-142:** the cause was measured live (the five-reading diagnostic) before this item was written, and the change is measured before and after, not argued.
-- **LL-152:** the base and after figures use the same build recipe, route and probe.
-- **LL-161:** the anchor-word check compares the word's text, not only its index.
-- **LL-165:** every live launch proves its scratch profile before the first input.
-- **LL-166:** each verdict reads runtime state through the probe, not a screenshot.
-- **Standing rule 43 (LL-138):** red first, with a `text/html` control.
-- **Standing rule 50 (LL-156):** a test that pins a section-sized block is named, not silently edited.
-- **Standing rule 45 (LL-141):** Narrate's change keeps an owner-observed check.
-- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+- **LL-142:** the residual is measured on the base before any rule is written. The real-model row reads durations from the model's own output and never estimates.
+- **LL-151:** each sweep gate is shown to fail before its pass is trusted: the emptied ruled set on the base, `--gate --control`, and `--changed --break`.
+- **LL-152:** the before and after sweeps use the same copies, script and runtime.
+- **LL-160:** every sweep and probe runs under the app's Electron through `app-node.ps1`, so word 12529 is the app's numbering.
+- **LL-161:** the residual is found by its chunk hash, not by its index alone.
+- **LL-162:** the whole owner corpus and the gate corpus are re-swept, and the no-change check covers every chunk that passed.
+- **LL-165:** the package launch proves its scratch profile before any input. The EPUB copy step only reads the live profile.
+- **LL-166:** the listening-check verdict and the real-model row read state (the table, `lookupUnit` and the notice), not screenshots.
+- **Standing rule 43:** the red file goes first, with two controls: one shows the limit still holds, one shows the first pass is unchanged.
+- **Standing rule 45:** the owner listening check is named up front and batched into gate (2).
+- **Standing rule 52:** the probe is committed as `.mjs.txt`.
+- **Standing rule 53:** arm64 package verification, with Blurby.Brain's confirmation before the merge go.
+- **Standing rule 36:** every cited line is re-grepped at the base.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="narrate-harness-coldclick-1-spec"></a>
+
+#### NARRATE-HARNESS-COLDCLICK-1 — Cold click is measured on mainstream hardware *(Seq 94 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub, Decision #22 and gate (1) run 4; build-and-hold under the Stage 8 freeze; not a release gate)*
+
+- **What:** the D6 harness's cold-click trial clicks a word only once the playing section's word spans exist, confirms the click reached the engine, and classifies every trial. Then one run on the quiet machine (mainstream class) judges cold click against the 8,000 ms cold budget, or shows with numbers why it cannot be measured on that hardware.
+- **Why:**
+  - Decision #22 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md:221`): "Cold click on mainstream hardware stays unmeasured until follow-up NARRATE-HARNESS-COLDCLICK-1; until then cold click is judged on the reference run only."
+  - **Evidence of the defect:**
+    - On the quiet machine (i7-1185G7, 4 cores / 8 threads, Electron 41), the completion run `docs/studies/narrate-rebuild-1/phase5/latency-e2e.completion-1.json` counted 0 of 40 cold-click trials at each rate. All 80 first voiced samples answered `play` (1.00x 1,572–2,075 ms; 2.00x 752–1,043 ms).
+    - Gate (1) run 4 on `36ac7466` (Electron 42.11.18; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`, Notes) attributed some trials. It missed 1.00x trials 3 and 5, and 2.00x trials 4, 5 and 6.
+    - The reference Snapdragon run (`latency-e2e.completion-2-reference.json`) attributed 10 of 11.
+  - **The sequencing it depends on** (`main/narrate/trial.js:294-299`):
+    - The driver waits only for the engine's `narrate-request` with cause `play`, then calls `clickWord(60)`.
+    - `clickWord` (`:59-70`, fallback `:196-201`) clicks the 61st span of whatever section document is loaded. It returns `null` when no document has spans yet. Nothing then checks that the click became an engine request.
+    - Play moves the view to the start word's section (`src/reader/modes/narrate/ModeRuntime.ts:295`, `jumpDisplayToWord`, then the engine at `:301`) and starts the engine in the same call. The spans of that section are wrapped asynchronously afterwards (`src/reader/modes/narrate/FoliateView.tsx:794`, `:821`; click handler `:834`).
+    - The click becomes a `click` request only through `hardSelect` while `s.playing` (`ModeRuntime.ts:427`). Each request replaces the engine's pending request (`src/reader/modes/narrate/engine/narrateEngine.ts:437-440`), so the first voiced sample answers the click only if the click request is traced before Play's first chunk is scheduled (`:425-433`).
+    - On slower hardware the section's spans can appear after Play's first voiced sample, or the click can land on the outgoing section's document. Either way the trial records `play`.
+  - **Not decidable from the repo:** the per-trial summaries (`trial-cold-click*.json`, step "clicked while playing") stay on the quiet machine. So which of the two failures happened is measured first (Done-when 2), not assumed (LL-142).
+  - **Definition kept:** a user can click only a word that is on screen. So "click after the playing section's spans exist, before Play's first voiced sample" is the trial Decision #22 deferred, measured honestly. No budget or trial definition changes here.
+- **Prerequisites:** NARRATE-REBUILD-1 (completed 2026-10-15). The mainstream run (Done-when 6) waits for Blurby.Brain's quiet machine to be free of release gate (1) and smoke work.
+- **Done when** (every command in `pwsh` 7 from the worktree root; launcher and checkers through `scripts/narrate-rebuild/app-node.ps1` where they import `lib/app-icu-guard.mjs`, LL-160):
+  1. **Red first (standing rule 43).** Commit `tests/narrate/narrate.coldClickAttribution.test.ts` on its own. Hold the module path in a variable and import it inside each test, so the file collects and fails by assertion on the base.
+     - **(c1) Classifier.** `classifyColdClick({ events, step })` is exported from `scripts/narrate-rebuild/lib/coldclick.mjs`. Its inputs are the trace events and the summary step "clicked while playing". It returns the following for four fixtures built in the test, using events with `kind`, `cause` and `ts`:
+       - `"attributed"`: a `narrate-request` click at ts 1,000, then a `narrate-first-voiced` click at ts 1,900;
+       - `"lost-race"`: a `narrate-first-voiced` play at ts 900, with the click step at t 1,000;
+       - `"undelivered"`: the click step at t 1,000, no click request, then a `narrate-first-voiced` play at ts 1,800;
+       - `"no-voice"`: no `narrate-first-voiced`.
+
+       On the base it fails because the module does not exist.
+     - **(c2) Driver helpers.** In a jsdom environment (`// @vitest-environment jsdom`), the test evaluates `HELPERS` from `main/narrate/trial.js` against a `foliate-view` element whose `renderer.getContents()` returns one document with spans `data-word-index` 8723–8800. Then:
+       - `window.__narrateTrial.hasWord(8723)` is `true` and `hasWord(9000)` is `false`;
+       - `window.__narrateTrial.clickWordAt(8783)` returns 8783, and a click listener on that span fires once;
+       - `clickWordAt(8900)` returns 8800, the highest index in the document holding the playing word.
+
+       On the base both helpers are undefined, so it fails by assertion.
+     - **(c3) Control.** The existing `clickWord(60)` still returns the 61st span's index on the same fixture, both before and after the change.
+
+     Record the failing output in the staging memo.
+  2. **Base classification, no driver change (LL-142).**
+     - The classifier CLI `scripts/narrate-rebuild/coldclick-attribution.mjs <outDir>` reads `<outDir>/traces/cold-click-*.trace.json` and `<outDir>/summaries/trial-*.json`. It matches a summary to a trace when the summary's "clicked while playing" step `t` lies between the trace's first and last event `ts`. It prints one row per trial: label, class, play word, clicked word, voiced-before-click, and the ms from the play request to the click. It exits 0.
+     - Blurby.Brain runs it on the quiet machine over gate (1) run 4's evidence, `C:\Projects\Blurby-artifacts\narrate-rebuild-1\final-main-d3d6-run4\` (base `36ac7466`).
+     - Save the output as `docs/studies/narrate-rebuild-1/coldclick/base-run4.classification.txt`, ending with the command, its exit code and the stderr byte count.
+     - Run it once with `--break`, which relabels the first attributed trial as lost-race. It must print a different class count and exit 1 (LL-151).
+  3. **The driver change** (`main/narrate/trial.js` only; nothing in `src/`):
+     - **Two helpers in `HELPERS`** (`:35-103`, beside `h.clickWord` at `:59`):
+       - `h.hasWord(w)`: true when a loaded document (`h.docs()`) holds `[data-word-index="w"]`;
+       - `h.clickWordAt(target)`: in the document that holds the smallest index ≥ `target`, else the one with the largest index, scroll that span into view and dispatch the same `MouseEvent("click")` as `clickWord`. It returns the span's index, or `null` if there is none.
+     - **The cold-click block** (`:294-299`) becomes:
+       1. Wait (every 20 ms, `timeoutMs`) for the first `narrate-request` with cause `play`, and read its `word` W from `window.__narrateTrial.events()`. Return it as JSON, so word 0 is not falsy.
+       2. Wait (every 20 ms) until `hasWord(W)`, and record `spansReadyMs` from the request.
+       3. Read `voicedBeforeClick`.
+       4. Call `clickWordAt(W + 60)`.
+       5. Wait up to `COLDCLICK_REQUEST_WAIT_MS` (2,000 ms) for a `narrate-request` with cause `click`, and record `clickRequested`.
+       6. Write the step "clicked while playing" with `{ playWord, clicked, spansReadyMs, voicedBeforeClick, clickRequested }`.
+     - **Summary file name.** When `cfg.label` is set, the summary is written as `trial-<label>.json` (`:329`). Without a label the name stays as today.
+     - **Profile proof (LL-165).** First thing in `run` (`:130`): when `BLURBY_USER_DATA_DIR` is set and `app.getPath("userData")` differs from its resolved value, or lies under `%APPDATA%\blurby`, record the step "profile mismatch", skip every action and exit with code 4.
+  4. **The launcher change** (`scripts/narrate-rebuild/p5-latency-e2e.mjs`):
+     - `launch` (`:84-118`) passes `label` inside `BLURBY_NARRATE_TRIAL` (`:97`).
+     - **`--types`** filters `TYPES` (`:47`; default all four).
+     - **`--class auto|reference|mainstream`** (default `auto`):
+       - `auto` reads the physical core count the way `epic-window.ps1:25-28` does, with `spawnSync("pwsh", …)` over `Get-CimInstance Win32_Processor`.
+       - 8 or more physical cores is `reference`, with a warm budget of 2,000 ms. 4 to 7 is `mainstream`, at 2,500 ms. Below 4 the class is `below-mainstream` and the launcher exits 2 before any launch.
+       - The warm budget replaces the fixed `WARM_BUDGET_MS` (`:46`) in the warm checks (`:198`, `:203`). `report.host` records `physicalCores` and `d6class`. The cold budget stays 8,000 ms.
+     - **Cold click rows** (`:222-229`): each row reads the trial's `trial-<label>.json` and runs `classifyColdClick`. It records `class`, `spansReadyMs`, `clickRequested` and `clickLatencyMs`. `clickLatencyMs` is the first `firstVoiced` entry with cause `click`, if any; it is for information only.
+       - A row counts only when the class is `attributed` and the foreign-CPU rule holds.
+       - An `undelivered` row is a failure: `cold click <rate> trial <i>: click sent before the first voice and never requested`.
+     - **Live-profile guard (LL-165):**
+       - Before the first launch, hash `%APPDATA%\blurby\settings.json` and `library.json` when they exist, and hash them again after the last.
+       - Any change is a failure, `live profile changed`.
+       - A launch exit code of 4 is a failure, `profile mismatch`.
+  5. **Reference smoke, this machine** (Snapdragon X Elite, 12 cores; implementation agent; LL-147):
+     - Build with `npm run build`, then run `p5-latency-e2e.mjs --only cold --types click --cold 3 --rates 1.0,2.0 --out C:\Projects\Blurby-artifacts\narrate-harness-coldclick-1\reference`.
+     - **Pass:** every launch exits 0. Every trial's class is `attributed` or `lost-race`, never `undelivered`. At least 3 `attributed` trials at each rate. The live-profile hashes are unchanged.
+     - Counting under the foreign-CPU rule is not required here, because this machine carries background load.
+     - Move the record to `docs/studies/narrate-rebuild-1/coldclick/latency-e2e.reference-smoke-1.json`. Afterwards no tracked file is changed (`git status --porcelain -- docs/studies/narrate-rebuild-1/phase5` is empty).
+  6. **Mainstream run, quiet machine** (i7-1185G7, 4 cores / 8 threads; run by Blurby.Brain on the pushed branch after `npm ci` and `npm run build`; nothing else heavy running):
+     - Run `p5-latency-e2e.mjs --only cold --types click --cold 5 --rates 1.0,2.0 --class auto --out C:\Projects\Blurby-artifacts\narrate-harness-coldclick-1\mainstream`.
+     - The report's `d6class` must read `mainstream`, or the run is void. Move the record to `docs/studies/narrate-rebuild-1/coldclick/latency-e2e.mainstream-1.json`.
+     - **Decision rule, per rate, applied in this order:**
+       - **(R1) Undelivered:** any `undelivered` trial stops the item with that trial's label and the last 12 non-commit trace events. A click sent before the first voice that never reached the engine is a driver or product defect; it goes to Blurby.Brain for an Aristotle diagnosis.
+       - **(R2) Latency fail:** any counting trial at or over 8,000 ms is a product finding. File it in `BUG_REPORT.md` through Blurby.Roadmap, report it to Blurby.Brain, and record cold click on mainstream as FAIL.
+       - **(R3) Pass:** at least 5 counting trials within 40 launches, all under 8,000 ms. Cold click on mainstream is PASS, and the worst counting trial is recorded.
+       - **(R4) Unreachable:** fewer than 5 counting trials within 40 launches, with every non-counting trial `lost-race` or above the foreign-CPU ceiling. On this hardware the playing section's words appear only after Play's first voiced sample, so no user can make this click.
+         - Record the median and worst `spansReadyMs` against Play's first-voice latency, and `clickLatencyMs` for information.
+         - Cold click on mainstream stays judged on the reference run, and **Owner question 1** is raised.
+  7. **Output file:** `docs/studies/narrate-rebuild-1/coldclick/NARRATE-HARNESS-COLDCLICK-1.<YYYY-MM-DD>.md` holds:
+     - the base classification table (Done-when 2);
+     - the reference smoke table and the mainstream table, one row per launch: label, class, play word, `spansReadyMs`, voiced-before-click, `clickRequested`, latency, `clickLatencyMs`, foreign CPU % and counts;
+     - the outcome R1–R4 per rate, and each command with its exit code.
+  8. **Instructions follow the outcome.** On R3, `docs/planning/epics/2026-10-12-narrate-rebuild/second-machine.md:22` drops "and cold click is judged on a reference-class run only until NARRATE-HARNESS-COLDCLICK-1" and says cold click is judged on both classes. On R1, R2 or R4 the line is unchanged.
+  9. **Tests and gates.**
+     - `npx vitest run tests/narrate` exits 0.
+     - `npx vitest list` collects exactly one more file than on the base (standing rule 52).
+     - `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine (standing rules 47 and 48).
+  10. **Package verification (standing rule 53):** `main/narrate/trial.js` is under `build.files` (`main/**/*`).
+      - `npx electron-builder --win --dir --arm64` builds from the final commit with `origin/main` merged in. `release\win-unpacked\resources\app.asar` lists `main/narrate/trial.js`, and its bytes equal the commit's.
+      - A 25 s native arm64 launch on a fresh scratch profile, with no `BLURBY_NARRATE_TRIAL` set, stays alive with no error or crash line.
+      - The outputs go in a "Package verification" section of the staging memo. Blurby.Brain confirms.
+  11. **Fence:** `git diff --name-status origin/main...HEAD` lists exactly the following, plus the staging memo and time log (standing rule 41):
+      - `M main/narrate/trial.js`, `M scripts/narrate-rebuild/p5-latency-e2e.mjs`;
+      - `A scripts/narrate-rebuild/lib/coldclick.mjs`, `A scripts/narrate-rebuild/coldclick-attribution.mjs`, `A tests/narrate/narrate.coldClickAttribution.test.ts`;
+      - `A docs/studies/narrate-rebuild-1/coldclick/` (the classification, the two records and the report);
+      - `M docs/planning/epics/2026-10-12-narrate-rebuild/second-machine.md`, on R3 only.
+
+      Nothing in `src/`, `main/narrate/` other than `trial.js`, `main.js`, `preload.js` or the shared-core set.
+- **Effort:** M (driver and launcher change S; two machine runs and a package check).
+- **Owners:**
+  - the implementation agent: Done-when 1, 3–5 and 9–11;
+  - Blurby.Brain: Done-when 2, 6 and 10's confirmation, on the quiet machine;
+  - spec-compliance and quality reviewers, in parallel;
+  - Blurby.Roadmap: the record and the R2 bug filing.
+- **Source:** the stub (ROADMAP.md, `narrate-harness-coldclick-1`); Decision #22 (`state.md:221`); `latency-e2e.completion-1.json` and `completion-2-reference.json`; `Gate1.STAGE8-RUN4.2026-10-23.md`.
+- **Path:** dispatch.
+
+##### Owner questions
+1. **Only if Done-when 6 ends in R4** (tier 2: it changes an owner-amended D6 trial definition). On mainstream hardware, Play speaks before the words are on screen, so a "click before the first voice" cannot happen there.
+   - **(A)** Cold click stays judged on the reference class only, permanently, and the D6 row says so.
+   - **(B)** On mainstream, cold click is redefined as the first click in a fresh process made while playing, as soon as the playing section's words are on screen, timed from its own request against the 8,000 ms cold budget. The run already records it as `clickLatencyMs`, so no re-run is needed.
+   - **(C)** Drop cold click from D6. Warm click already covers a click while playing.
+
+   **Recommendation: (B).** It is the click a mainstream user actually makes, it is already measured, and (A) leaves the most common hardware class unjudged. Nothing else in this item waits on the answer.
+
+##### Implementation detail
+- **Edit sites** (grep-verified 2026-10-23 at `origin/main` `1937e999`; these files are unchanged since `d2a70ff1`; re-grep at dispatch, standing rule 36):
+  - `main/narrate/trial.js`:
+    - `:35-103` (`HELPERS`; `h.clickWord` at `:59-70`; `window.__narrateTrial = h` at `:100`);
+    - `:130-131` (`run`, `readConfig`);
+    - `:196-201` (`clickWord` with the frame fallback);
+    - `:276-303` (cold branch; click block `:294-299`);
+    - `:326-331` (summary write; file name at `:329`).
+  - `scripts/narrate-rebuild/p5-latency-e2e.mjs`:
+    - `:29-39` (arguments);
+    - `:46` (`WARM_BUDGET_MS`), `:47` (`TYPES`);
+    - `:84-118` (`launch`; `BLURBY_NARRATE_TRIAL` at `:97`);
+    - `:143` (`report`);
+    - `:198`, `:203` (warm budget checks);
+    - `:209-240` (cold block; row at `:222-229`).
+  - Read only: `scripts/narrate-rebuild/epic-window.ps1:25-28` (class rule); `main.js:29` (`app.setPath("userData", …)`) and `:530-535` (trial load); `src/reader/modes/narrate/ModeRuntime.ts:427`; `src/reader/modes/narrate/engine/narrateEngine.ts:425-445`; `src/reader/modes/narrate/helpers/foliateHelpers.ts:209` (`data-word-index` is the global index).
+
+  ```
+  git grep -n -E "h.clickWord = |type === \"click\"|trial-\\$\{cfg.kind\}|WARM_BUDGET_MS|const TYPES|BLURBY_NARRATE_TRIAL:|label = .cold-" -- main/narrate/trial.js scripts/narrate-rebuild/p5-latency-e2e.mjs
+  ```
+- **Tests:** the new `tests/narrate/narrate.coldClickAttribution.test.ts` (c1–c3). The existing `tests/narrate/` files stay unedited.
+- **Constants:**
+  - `COLDCLICK_REQUEST_WAIT_MS = 2000` and `COLDCLICK_OFFSET_WORDS = 60`, at the top of `main/narrate/trial.js` next to its other harness values. The driver is a harness, not product behaviour, so not `main/narrate/constants.js`.
+  - The class thresholds (8 and 4 physical cores) and the budgets (2,000, 2,500 and 8,000 ms) are named constants at the top of `p5-latency-e2e.mjs`, citing Decision #22.
+- **Branch:** `eb/narrate-harness-coldclick-1`, cut from `origin/main` (`1937e999` or later). Push with `git push origin HEAD:refs/heads/eb/narrate-harness-coldclick-1`. Do not merge (Stage 8 freeze). NARRATE-CPU-PROFILE-1 stacks on this branch, and this branch merges first.
+- **Staging plan:** explicit paths only (the fence list).
+  - `tests/perf-baseline-results.json`, `docs/studies/narrate-rebuild-1/phase5/recorded-output.json` and any `latency-e2e.json` the launcher writes in `phase5/` stay unstaged.
+  - Records are moved into `coldclick/`, not copied.
+- **Failure handling:**
+  - **The waits.** If `hasWord(W)` never becomes true within `timeoutMs`, the trial errors (exit 1). The launcher records the trial as `no-voice` or with its error, and the next launch replaces it (cycle cap 40). Ten such errors in a row stop the run and go to Blurby.Brain.
+  - **Done-when 5 (reference smoke):**
+    - If it shows any `undelivered` trial, stop before Done-when 6 with the trial's events. The driver fix is wrong on the reference machine.
+    - If it shows fewer than 3 `attributed` trials at a rate, re-run it once. Still short, stop and report.
+  - **Profile mismatch** (exit 4): stop at once and report the path.
+  - **The mainstream run** is not re-run to get a better answer. One void run (wrong class, live profile changed) may be repeated once.
+  - **Rollback:** delete the unmerged branch's commits by reverting them on the branch; after a merge, `git revert -m 1 <merge>`.
+- **Shared-core touches:** none.
+- **Lane:** TTS / Narration Engine. Execution surfaces B (evaluation harness) and D (`main/narrate/trial.js`).
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red file (c1–c3) committed alone, failures recorded | calculable | positive control | bounded | low | 25m | — | — |
+| 2 | Classifier library and CLI, with the `--break` control | calculable | harness script | bounded | medium | 35m | — | — |
+| 3 | Base classification of run 4 on the quiet machine, saved | calculable | measurement | bounded | low | 20m | — | — |
+| 4 | Driver waits for the playing section's spans, clicks in it and confirms the request; profile proof | calculable | harness script | bounded | medium | 40m | — | — |
+| 5 | Launcher: types filter, hardware class budgets, click classification, live-profile guard | calculable | harness script | bounded | medium | 40m | — | — |
+| 6 | Reference smoke on this machine, record moved | calculable | measurement | bounded | medium | 30m | — | — |
+| 7 | Mainstream run on the quiet machine, outcome R1–R4 per rate | calculable | measurement | bounded | medium | 50m | — | — |
+| 8 | Targeted tests, suite, typecheck, build; package verification; report, memo, time log, push | calculable | verify | bounded | medium | 50m | — | — |
+
+##### Lessons applied
+- **LL-142:** the cause of the misses is measured on run 4's own evidence (Done-when 2) before the driver changes, and the item measures again after the change.
+- **LL-151:** the classifier proves it can report a failure (`--break`, exit 1), and the launcher's new `undelivered` and `live profile changed` failures are covered by c1 and by an exit code, not by a summary count.
+- **LL-152:** the base classification and the mainstream run use the same machine, book, start word (8723) and launcher, so before and after compare like for like.
+- **LL-160:** the launcher and the classifier run under the app's Electron through `app-node.ps1`, because the start word is chosen by index.
+- **LL-165:** the driver reads `app.getPath("userData")` before its first action and exits 4 on a mismatch, and the launcher hashes the live profile before and after.
+- **LL-166:** attribution is read from engine state (the traced `narrate-request` click and the first voiced cause), not from the driver's belief that it clicked. The `attributed` fixture is the detector's positive control.
+- **Standing rule 43:** the red file goes first, with a control for the unchanged `clickWord`.
+- **Standing rule 45:** no owner-observed check is needed. Every row is read from traces, and the owner sees only Owner question 1, if R4.
+- **Standing rules 47 and 48:** the suite, typecheck and build run on the owner's machine. The timed run is on the quiet machine, by Blurby.Brain.
+- **Standing rule 52:** the classification and the records are `.txt`, `.json` and `.md` under `docs/`, and `npx vitest list` confirms one new collected file.
+- **Standing rule 53:** `trial.js` ships under `main/**/*`, so the package is verified on arm64 and confirmed by Blurby.Brain.
+- **Standing rule 36:** every cited line was grep-verified at `1937e999` and is re-grepped at dispatch.
+- **Standing rule 41:** the fence exempts the time log.
+- **Standing rule 50:** the launcher's known exit-1 waiver in gate (1) run 4 ("judges warm trials against the reference class's 2,000 ms") moves with the budget code this item edits. The class-aware budget replaces it, and the run 4 Notes stay as history.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="narrate-cpu-profile-1-spec"></a>
+
+#### NARRATE-CPU-PROFILE-1 — Where Narrate's CPU goes on a 4-core machine, and whether the thread count should follow the core count *(Seq 95 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub; stacks on NARRATE-HARNESS-COLDCLICK-1; build-and-hold under the Stage 8 freeze; measurement only, no product change; not a release gate)*
+
+- **What:** a measured profile of the rebuilt Narrate's warm requests on the quiet machine (mainstream class). It records:
+  - how much of the machine Blurby uses;
+  - which process uses it;
+  - how each request's latency splits into waiting, generation and delivery;
+  - how latency and CPU change when onnxruntime's intra-op thread count per producer worker is 4 (today), 3, 2 or 1.
+
+  A fixed decision rule turns the sweep into one of two verdicts: keep 4 threads, or adapt the thread count on hosts with fewer than 8 physical cores (to a measured value).
+- **Why:**
+  - The stub (ROADMAP.md, `narrate-cpu-profile-1`): on the quiet machine (i7-1185G7, 4 cores / 8 threads), Blurby alone drove the host to 78–84 % during warm D6 requests, and to 95–98 % with foreign load.
+  - The committed mainstream record agrees (`docs/studies/narrate-rebuild-1/phase5/latency-e2e.completion-1.json`):
+    - each warm run's own app share was 49–55 % of all 8 logical processors;
+    - within click and speed trials the app share reached 89–94 %, and the host 100 %.
+  - The reference Snapdragon record (`latency-e2e.completion-2-reference.json`) peaks at 61–65 %.
+  - **The likely cause is measurable, not assumed (LL-142).** The producer runs `NARRATE_PRODUCER_WORKERS` = 2 workers (`main/narrate/constants.js:21`). Each opens an onnxruntime session with `NARRATE_INTRA_OP_THREADS` = 4 intra-op threads (`:17`, applied at `main/narrate/producer-worker.js:64-67`).
+  - That count was chosen by Decision #7 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md:205`) from a sweep on the 12-core reference machine with one worker. The second worker came later (Decision #17, `:215`).
+  - On 4 cores, a request generated while the other worker runs a prefetch asks for 8 compute threads at once.
+  - The override already exists, so no product code is needed to sweep it: `NARRATE_INTRA_OP_THREADS` (`main/narrate/producer.js:29-35`) is read when each worker loads (`:128`).
+- **Out of scope, with reasons:**
+  - **Worker count is not swept.** One worker was the configuration Decision #17 replaced, after requests queued behind stale generations (`state.md:215`). Going back would re-test a measured failure.
+  - **The chunk ramp `NARRATE_CHUNK_RAMP` is not swept.** It is a renderer constant (`src/constants.ts`) with no override, and it shapes first-chunk latency, which D6 owns. The profile still records generation time against chunk size, so a ramp effect can be computed from this item's data.
+  - No product default changes here. A change, if the rule calls for one, is a separate follow-up item (Done-when 7).
+- **Prerequisites:**
+  - NARRATE-REBUILD-1 (completed 2026-10-15).
+  - **NARRATE-HARNESS-COLDCLICK-1**, built and pushed. This item uses its trial labels (`trial-<label>.json`), the `--class auto` mainstream budget and the live-profile guard, and edits the same launcher. Until that branch exists, this item waits.
+  - Blurby.Brain's quiet machine is free of release gate (1) and smoke work for about 90 minutes.
+- **Done when** (every command in `pwsh` 7 from the worktree root; the launcher and the summary through `scripts/narrate-rebuild/app-node.ps1`, LL-160):
+  1. **Red first (standing rule 43).** Commit `tests/narrate/narrate.cpuProfile.test.ts` on its own. Hold the module path in a variable and import it inside each test, so the file collects and fails by assertion on the base.
+     - **(d1) Request breakdown.** `requestBreakdown(events)` is exported from `scripts/narrate-rebuild/lib/cpuprofile.mjs`. It is given a fixture with:
+       - a `narrate-request` (cause `click`, `t` 1,000);
+       - a `narrate-schedule` with `requestedT` 1,000, `genMs` 600, `chunkStart` 100, `chunkEnd` 106, `busyAtAssign.pool` 1, and `hops.stages` `{ queued: 5,000, posted: 5,040, received: 5,700 }`;
+       - a `narrate-first-voiced` with `requestT` 1,000.
+
+       It returns `{ cause: "click", waitMs: 40, genMs: 600, words: 6, genMsPerWord: 100, otherBusy: true }`.
+     - **(d2) Decision: adapt.**
+       - `profileDecision(configs)` gets a fixture with baselines `t4-1` and `t4-2`: worst per type 1,800 and 1,900 ms, and median app CPU 52 and 54 %.
+       - The other configs: `t3` (worst 1,950, CPU 40 %), `t2` (worst 2,600, CPU 30 %) and `t1` (worst 3,400, CPU 18 %).
+       - It returns `{ verdict: "adapt", threads: 3 }`. `t2` and `t1` are not admissible, because they go over 2,500.
+     - **(d3) Decision: keep.** The same fixture with `t3` at CPU 46 % (not 10 points below 53) returns `{ verdict: "keep", threads: 4 }`.
+     - **(d4) Decision: noisy.** Baselines whose worst trials differ by more than 500 ms in any type and rate return `{ verdict: "noisy" }`.
+
+     On the base each test fails because the module does not exist. Record the failing output in the staging memo.
+  2. **Per-process CPU in the launcher** (`scripts/narrate-rebuild/p5-latency-e2e.mjs`, on top of NARRATE-HARNESS-COLDCLICK-1):
+     - **`--cpu-by-process`** extends the sampler (`:58-67`). Every 500 ms, one long-lived `pwsh` loop reads `Get-CimInstance Win32_Process` for the `electron.exe` processes whose `ExecutablePath` starts with the worktree root.
+       - It sums `KernelModeTime + UserModeTime` (100 ns units) per type, read from `CommandLine`:
+         - `--type=renderer` is `renderer`;
+         - `--type=gpu-process` is `gpu`;
+         - `--type=utility` with `audio` in the line is `audio`;
+         - any other `--type=` is `other`;
+         - no `--type=` is `main` (the main thread and both producer workers).
+       - The series is saved with the run's CPU file (`:113`), and `cpuShare` (`:70-79`) gains a per-type share over the same window.
+     - Without the flag, nothing changes.
+     - **Thread label.** `report` (`:143`) records `intraOpThreads`: the `NARRATE_INTRA_OP_THREADS` value, or `"constant"` when it is unset.
+     - **Proof the setting took effect (LL-166).** The warm trial's summary already records the producer status at "warm-up done" (`main/narrate/trial.js:253`, `runtime.threads`).
+       - The launcher reads `trial-<label>.json` after each warm run and records `runtimeThreads`.
+       - When `intraOpThreads` is set and differs from `runtimeThreads`, that is a failure: `threads <set> requested, <runtime> loaded`.
+  3. **The summary** `scripts/narrate-rebuild/cpu-profile-summary.mjs <recordsDir> <artifactsRoot>` reads `<recordsDir>/latency-e2e.t<T>-<n>.json` and each run's traces and CPU files under `<artifactsRoot>/t<T>-<n>/`. It writes `<recordsDir>/cpu-profile.summary.json` and prints:
+     - **per config, rate and request type:** worst counting warm latency, counting trials, and the median and maximum app CPU % over the counting trials' windows;
+     - **per config:** run-level app CPU % (wall-weighted over the warm runs); the median per-process-type share; the median `waitMs`, `genMs` and `genMsPerWord` of request chunks; the fraction of requests with `otherBusy`; and `genMs` against chunk words (slope and intercept, least squares);
+     - **the verdict of `profileDecision`**, with each config's admissibility and CPU gain.
+
+     It exits 0 when a verdict is computed, and 1 when any record is invalid: `d6class` is not `mainstream`, a thread failure, or fewer than 20 counting trials in a cell. Run once with `--break`, which raises one baseline's worst click by 600 ms; it must print `noisy` and exit 1 (LL-151).
+  4. **The sweep, quiet machine** (i7-1185G7; run by Blurby.Brain on the pushed branch after `npm ci` and `npm run build`; nothing else heavy running; the foreign-CPU ≤ 25 % rule and the 40-cycle cap unchanged):
+     - Five configurations, in this order: T = 4, 3, 2, 1, 4. The two runs at 4 are baselines `t4-1` and `t4-2`, and their spread is the noise.
+     - Each one is:
+
+       ```
+       $env:NARRATE_INTRA_OP_THREADS = '<T>'
+       pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 scripts/narrate-rebuild/p5-latency-e2e.mjs --only warm --warm 20 --rates 1.0,2.0 --class auto --cpu-by-process --out C:\Projects\Blurby-artifacts\narrate-cpu-profile-1\t<T>-<n>
+       Move-Item docs/studies/narrate-rebuild-1/phase5/latency-e2e.json docs/studies/narrate-rebuild-1/cpu-profile/latency-e2e.t<T>-<n>.json
+       ```
+
+     - Each record reads `d6class: "mainstream"` and `runtimeThreads` = T. The launcher's own exit code is recorded, not judged: T = 1 may exceed the budget, and the decision rule judges.
+     - Afterwards `git status --porcelain -- docs/studies/narrate-rebuild-1/phase5` is empty, and the live-profile hashes are unchanged.
+  5. **The decision rule** (`profileDecision`, applied to the five records):
+     - **(N) Noisy:** if `t4-1` and `t4-2` differ by more than 500 ms in the worst counting trial of any type and rate, or either has a counting trial at or over 2,500 ms, the sweep is re-run once in full. If it is noisy again, stop and report to Blurby.Brain.
+     - **Admissible:** a config T in {3, 2, 1} is admissible when, at both rates and for every type, its worst counting trial is under 2,500 ms. It must also be at most the larger baseline worst plus the larger of the baselines' spread and 100 ms.
+     - **CPU gain:** T has a gain when its median app CPU %, pooled over every counting warm trial at both rates, is at least 10 percentage points below the mean of the two baselines' medians.
+     - **(A) Adapt:** some admissible config has a gain. The verdict is `adapt` to the admissible T with the lowest median app CPU (on a tie, the larger T), on hosts with fewer than 8 physical cores. The reference class keeps 4, because it was not swept here and its D6 row stays as measured.
+     - **(K) Keep:** otherwise the verdict is `keep` 4. The saturation is the cost of meeting the mainstream budget, recorded with its numbers.
+  6. **Output file:** `docs/studies/narrate-rebuild-1/cpu-profile/NARRATE-CPU-PROFILE-1.<YYYY-MM-DD>.md` holds:
+     - the summary's tables;
+     - the baseline restated in the stub's terms: the host busy % and app CPU % over the warm request windows at T = 4, against the stub's 78–84 %;
+     - the per-process split ("where the time goes");
+     - the request breakdown and the `genMs` slope;
+     - the verdict with the rule's arithmetic shown;
+     - each command with its exit code.
+
+     The five records and `cpu-profile.summary.json` sit beside it.
+  7. **Follow-up by verdict:**
+     - **On A:** Blurby.Roadmap registers a stub, NARRATE-THREADS-ADAPT-1: on hosts with fewer than 8 physical cores, `getThreads()` (`main/narrate/producer.js:29-35`) returns the measured T, and D6 re-runs on both classes before it merges. This is a tier 1 technical decision (Rule 11), ruled by Blurby.Brain. Latency stays inside the owner's mainstream budget and the reference class is unchanged.
+     - **On K:** the item closes with no follow-up.
+
+     Either way, the verdict line is quoted in the close-out.
+  8. **Tests and gates.**
+     - `npx vitest run tests/narrate` exits 0.
+     - `npx vitest list` collects exactly one more file than on NARRATE-HARNESS-COLDCLICK-1's tip (standing rule 52).
+     - `npm test` and `npm run typecheck` exit 0 on the owner's machine (standing rules 47 and 48). `npm run build` exits 0 too, because the launcher runs the built `dist`.
+  9. **Package (standing rule 53):** nothing under `build.files` changes. `git diff --name-only origin/eb/narrate-harness-coldclick-1...HEAD` lists no `main.js`, `preload.js`, `main/` or `dist/` path. Record "package unchanged" with that output in the staging memo, against NARRATE-HARNESS-COLDCLICK-1's verified package.
+  10. **Fence:** `git diff --name-status origin/eb/narrate-harness-coldclick-1...HEAD` lists exactly the following, plus the staging memo and time log (standing rule 41). It may also list the merge of `origin/main`, if one is made.
+      - `M scripts/narrate-rebuild/p5-latency-e2e.mjs`;
+      - `A scripts/narrate-rebuild/lib/cpuprofile.mjs`, `A scripts/narrate-rebuild/cpu-profile-summary.mjs`, `A tests/narrate/narrate.cpuProfile.test.ts`;
+      - `A docs/studies/narrate-rebuild-1/cpu-profile/` (the five records, the summary JSON and the report).
+
+      Nothing in `main/`, `src/`, `preload.js` or the shared-core set.
+- **Effort:** S–M (scripts S; the sweep is about 90 minutes of quiet-machine time).
+- **Owners:**
+  - the implementation agent: Done-when 1–3 and 8–10;
+  - Blurby.Brain: Done-when 4 on the quiet machine, and the A or K ruling;
+  - spec-compliance and quality reviewers, in parallel;
+  - Blurby.Roadmap: the follow-up stub on A.
+- **Source:**
+  - the stub; Decisions #7, #17 and #22 (`state.md:205`, `:215`, `:221`);
+  - `latency-e2e.completion-1.json` (run-level app CPU 49–55 %, trial maxima 89–94 %) and `latency-e2e.completion-2-reference.json`;
+  - `main/narrate/constants.js:17-21`; `main/narrate/producer.js:29-35`, `:128`.
+- **Path:** dispatch.
+
+##### Owner questions
+None. The thread count is a back-end tuning value inside the owner's D6 budgets (Rule 11 tier 1). The hardware is the quiet machine, which Decision #22 names as the mainstream class. If the sweep showed that a lower thread count needs a looser budget, that would be tier 2, but the rule never selects such a config: admissibility requires the 2,500 ms budget.
+
+##### Implementation detail
+- **Edit sites** (grep-verified 2026-10-23 at `origin/main` `1937e999`; NARRATE-HARNESS-COLDCLICK-1 edits the same launcher, so re-grep on its tip at dispatch, standing rule 36):
+  - `scripts/narrate-rebuild/p5-latency-e2e.mjs`:
+    - `:29-39` (arguments);
+    - `:58-67` (`startCpuSampler`);
+    - `:70-79` (`cpuShare`);
+    - `:112-115` (the CPU file and the run's share);
+    - `:143` (`report`);
+    - `:169-207` (warm block, where `runtimeThreads` is read after each run).
+  - Read only:
+    - `main/narrate/trial.js:248-253` (warm-up and the "warm-up done" status);
+    - `main/narrate/producer-worker.js:64-75` (`runtime.threads`);
+    - `src/reader/modes/narrate/engine/narrateEngine.ts:410-433` (`narrate-schedule` fields: `genMs`, `busyAtAssign`, `hops.stages`) and `:437-445` (`narrate-request`).
+
+  ```
+  git grep -n -E "function startCpuSampler|export function cpuShare|const report = |cpu.json|kind: \"narrate-schedule\"|threads: threads === null" -- scripts/narrate-rebuild/p5-latency-e2e.mjs main/narrate/producer-worker.js src/reader/modes/narrate/engine/narrateEngine.ts
+  ```
+- **Tests:** the new `tests/narrate/narrate.cpuProfile.test.ts` (d1–d4). Existing tests stay unedited.
+- **Constants:** the rule's values are named constants at the top of `lib/cpuprofile.mjs`, each citing this specification:
+  - `MAINSTREAM_WARM_BUDGET_MS = 2500` (Decision #22);
+  - `NOISE_FLOOR_MS = 100`;
+  - `NOISY_SPREAD_MS = 500`;
+  - `CPU_GAIN_POINTS = 10`;
+  - `SWEEP_THREADS = [4, 3, 2, 1]`.
+
+  No product constant changes.
+- **Branch:** `eb/narrate-cpu-profile-1`, cut from `origin/eb/narrate-harness-coldclick-1` with `origin/main` merged in. Push with `git push origin HEAD:refs/heads/eb/narrate-cpu-profile-1`. Do not merge (Stage 8 freeze). Merge order: NARRATE-HARNESS-COLDCLICK-1, then this branch.
+- **Staging plan:** explicit paths only (the fence list). `tests/perf-baseline-results.json`, `docs/studies/narrate-rebuild-1/phase5/recorded-output.json` and any `phase5/latency-e2e.json` stay unstaged. Records are moved into `cpu-profile/`, not copied.
+- **Failure handling:**
+  - **Bad configuration.** A `runtimeThreads` mismatch, a `d6class` other than mainstream, or a live-profile change voids that configuration. Re-run it once; a second void stops the sweep and goes to Blurby.Brain.
+  - **Too few counting trials.** A cell under 20 counting trials after 40 cycles (foreign load) gives the same verdict as the launcher's: ask for a quiet window, re-run that configuration once, then stop.
+  - **Silent producer.** A worker stall like Decision #21's (`state.md`, the P5 final-run blocker) shows as a trial over 2,500 ms in a baseline. That makes the sweep noisy under (N). It is reported with the producer log (`NARRATE_PRODUCER_LOG=1` on the re-run), not explained away.
+  - **The `--cpu-by-process` loop.** Its own CPU is counted as foreign, as the existing sampler's is. If its cost pushes foreign CPU over 25 % in more than a quarter of trials, the sweep drops the flag, and the per-process split is reported as not measured.
+  - **Rollback:** revert the branch's commits; after a merge, `git revert -m 1 <merge>`.
+- **Shared-core touches:** none.
+- **Lane:** TTS / Narration Engine. Execution surface B (evaluation harness).
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Red file (d1–d4) committed alone, failures recorded | calculable | positive control | bounded | low | 25m | — | — |
+| 2 | Launcher records CPU per process type, the thread label and the loaded thread count | calculable | harness script | bounded | medium | 40m | — | — |
+| 3 | Profile library and summary, with the `--break` control | calculable | harness script | bounded | medium | 40m | — | — |
+| 4 | Five-configuration thread sweep on the quiet machine, records moved | calculable | measurement | bounded | medium | 1h30m | — | — |
+| 5 | Summary, verdict and report written; follow-up stub on A | calculable | measurement | bounded | medium | 35m | — | — |
+| 6 | Targeted tests, suite, typecheck, build; package-unchanged record; memo, time log, push | calculable | verify | bounded | low | 35m | — | — |
+
+##### Lessons applied
+- **LL-142:** the stub's 78–84 % and the over-subscription cause are measured, not assumed. The baseline restates the stub's figure in a defined metric before any setting is judged.
+- **LL-151:** the summary proves it can return a failing verdict (`--break` prints `noisy`, exit 1). The launcher's thread mismatch is a failure with its own message.
+- **LL-152:** every configuration uses the same build, machine, start word, rates and trial schedule. The baseline runs twice, first and last, so drift during the sweep shows as noise rather than as an effect.
+- **LL-160:** the launcher and the summary run under the app's Electron through `app-node.ps1`.
+- **LL-165:** every run keeps NARRATE-HARNESS-COLDCLICK-1's profile proof (the driver's exit 4 and the launcher's live-profile hashes).
+- **LL-166:** a configuration counts only when the loaded producer reports the thread count asked for (`runtime.threads`), read from state rather than inferred from the environment variable.
+- **LL-162:** not applied. This is a live timing profile, not a correctness gate over a corpus.
+- **Standing rule 43:** the red file goes first, with keep, adapt and noisy fixtures for the rule.
+- **Standing rules 47 and 48:** suite, typecheck and build on the owner's machine; the timed sweep on the quiet machine, by Blurby.Brain.
+- **Standing rule 52:** the records are `.json` and `.md` under `docs/`, and `npx vitest list` confirms one new collected file.
+- **Standing rule 53:** no `build.files` path changes, so the package is recorded as unchanged against NARRATE-HARNESS-COLDCLICK-1's verified package.
+- **Standing rule 36:** every cited line was grep-verified at `1937e999` and is re-grepped on the base branch at dispatch.
+- **Standing rule 41:** the fence exempts the time log.
+- **Standing rule 50:** the launcher's warm-budget waiver moved to NARRATE-HARNESS-COLDCLICK-1's class-aware budget, and this item judges against that, not against the old fixed 2,000 ms.
+- **Standing rule 51:** this specification appends no lesson-status line.
+
+
+<a id="chapter-step-cfi-1-spec"></a>
+
+#### CHAPTER-STEP-CFI-1 — Contents jumps and chapter steps in Focus, Flow and Narrate save the landed word with the landed cfi, and Focus shows the chapter's first word as the reading word *(position 97 — Full Spec; absorbs FOCUS-TOC-JUMP-WORD-1 (position 99); authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on the stacked base `origin/eb/band-align-2` @ `85e32777` + `origin/eb/jump-landing-save-1` @ `8a7c9db6`, edit sites read on both; owner ruling 2026-10-23 (tier 3): "First word of chapter"; after JUMP-LANDING-SAVE-1 and BAND-ALIGN-2; build-and-hold; not a release gate)*
+
+- **Full specification:** [`docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md`](docs/planning/specs/2026-10-23-5/CHAPTER-STEP-CFI-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
+
+
+<a id="restamp-rerun-race-1-spec"></a>
+
+#### RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document: reproduce first, then fix or close as not reachable *(position 98 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) on `eb/jump-landing-save-1` @ `8a7c9db6`; build-and-hold under the Stage 8 freeze; not a release gate)*
+
+- **Full specification:** [`docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md`](docs/planning/specs/2026-10-23-5/RESTAMP-RERUN-RACE-1.md) (kept outside ROADMAP.md by roadmap review 2026-10-23-5 because it sits beyond the five-item dispatch buffer and the roadmap is at its length ceiling; it moves inline when it enters the buffer). Dispatch-ready: U9 and U10 pass.
 
 
 <a id="eink-controls-1"></a>
 
 #### EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*
 
-- **What:** Settings has one E-ink control, the **Display Mode → E-ink** switch (`einkMode`). Turning it on gives both the E-ink behaviour (today's switch: no animations, page-sized scroll steps, the speed cap, refreshes) and the E-ink colours (today's theme: high-contrast black on a paper background). The **E-ink theme choice is removed** from every theme picker. The other themes (Blurby, Dark, Light, System) are unchanged when the switch is off.
-- **Why:** the 2026-10-13 smoke found two controls that set different fields, `theme: "eink"` and `einkMode`, so a reader could get the E-ink colours without the behaviour, or the reverse. Owner decision, 2026-10-23: "Drop the theme, and merge the two on the switch."
-- **Behaviour:**
-  - **Switch on:** the document root carries `data-theme="eink"` and `data-eink="true"`, whatever `theme` is saved. Every existing `[data-theme="eink"]` rule applies unchanged (`src/styles/themes.css:22`, `:134-353`; `src/reader/modes/focus/mode.css:358`). The title bar and native theme use the E-ink colours (`main/window-manager.js:18-19`, `:195`).
-  - **Switch off:** the root takes the saved `theme` as today. The saved theme is never overwritten by the switch, so turning E-ink off returns the reader's own theme.
-  - **Migration (settings schema 13 → 14, `main/migrations.js:6`):** a saved `theme: "eink"` becomes `theme: "light"` with `einkMode: true`. Any other theme is unchanged, and an already-set `einkMode` is kept. The migration is idempotent.
-  - **Theme pickers lose "E-ink":**
-    - `src/components/settings/ThemeSettings.tsx:30`;
-    - `src/components/QuickSettingsPopover.tsx:24-29`;
-    - the theme cycle `src/components/ThemeProvider.tsx:136` (`nextTheme`).
-
-    `themeLabel` keeps its `"eink"` branch for any legacy caller.
-  - **Dark is pure black (owner, 2026-10-23).** The Dark theme's background `--bg` becomes `#000000` (`ThemeProvider.tsx:27`, was `#0f0f0f`). Its raised and secondary surfaces stay slightly lighter (`#181818`, `#1a1a1a`, `:28`, `:30`), so panels and menus stay distinct. The title bar's dark background (`main/window-manager.js`, the `default` case: `bg: "#0f0f0f"`) becomes `#000000` to match. The theme keeps its name, Dark. Add a test row (e7): with `theme: "dark"` and `einkMode: false`, `--bg` is `#000000`. Owner check at the next smoke: Dark's background is pure black.
-  - **`src/types.ts` is not edited.** The `theme` union keeps `"eink"` (`:149`), so an old settings file still type-checks before it migrates. The pickers simply stop offering it.
-- **Prerequisites:** none in code. Merges after the Stage 8 release.
-- **Done when:**
-  1. **Red first (standing rule 43):** a new `tests/einkControls.test.ts(x)`, committed alone, fails by assertion on the base.
-     - **(e1)** With `einkMode: true` and `theme: "dark"`, the provider sets `data-theme="eink"` and `data-eink="true"`.
-     - **(e2)** With `einkMode: false` and `theme: "dark"`, it sets `data-theme="dark"` and no `data-eink`.
-     - **(e3)** `ThemeSettings` and `QuickSettingsPopover` render no "E-ink" theme option.
-     - **(e4)** `nextTheme` never returns `"eink"`.
-     - **(e5)** Migration 13 → 14 maps `{ theme: "eink", einkMode: false }` to `{ theme: "light", einkMode: true }`. It leaves `{ theme: "dark", einkMode: true }` unchanged, and running it twice changes nothing more.
-     - **(e6)** The window manager's title-bar colours are the E-ink ones when `einkMode` is true and the theme is `dark`.
-     - **Control:** `{ theme: "light", einkMode: false }` renders exactly as on the base, and passes on the base.
-  2. The change: the red file passes. The existing theme, settings, migration and settings-key-trust tests pass. Any test that pins the five-theme list or schema 13 is named under standing rule 50 and updated in scope (re-grep: `git grep -n "\"eink\"\|CURRENT_SETTINGS_SCHEMA\|themeOrder" -- tests`).
-  3. **Live, on a `--dir` build with a scratch profile and the profile preflight (LL-165):**
-     - Settings shows one E-ink control, and no theme picker lists E-ink.
-     - Turning the switch on turns the library and a book (Page, Focus, Flow) black on paper, and E-ink behaviour applies (Flow scrolls in page steps).
-     - Turning it off restores the previously chosen theme.
-     - A scratch profile seeded with `theme: "eink"` at schema 13 opens migrated: E-ink on, with Light underneath.
-     - Live profile hashes unchanged.
-  4. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
-  5. **Fence** (standing rule 41), plus the memo and time log:
-     - `M src/components/ThemeProvider.tsx`, `M src/components/settings/ThemeSettings.tsx`, `M src/components/QuickSettingsPopover.tsx`, `M main/window-manager.js`, `M main/migrations.js`;
-     - `A` the test file, and named pinned-test updates.
-
-     `src/types.ts`, `ReaderContainer.tsx` and `src/utils/FlowScrollEngine.ts` are untouched.
-  6. **Owner (next smoke):** one E-ink switch; on gives E-ink colours and behaviour; off gives your own theme back.
-- **Effort:** S.
-- **Owners:** implementation agent; reviewers for spec compliance and quality, in parallel; the owner at the next smoke.
-- **Source:** the 2026-10-13 smoke; the owner's decision of 2026-10-23.
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites** (on `origin/main` @ `cdb55b24`; re-grep at dispatch, standing rule 36):
-  - `ThemeProvider.tsx:187-197`: compute `appliedTheme = einkMode ? "eink" : resolvedTheme`, and use it for the CSS variables and `data-theme`. Keep `data-eink`. Remove `"eink"` from `themeOrder` (`:136`).
-  - `ThemeSettings.tsx:30`: drop `"eink"` from the list. The E-ink switch (`:57-69`) keeps its sub-settings.
-  - `QuickSettingsPopover.tsx:24-29`: drop the E-ink entry.
-  - `main/window-manager.js:10-12` and `:194-195`: treat `settings.einkMode === true` as the `eink` theme for the title bar and `nativeTheme`.
-  - `main/migrations.js`: schema 14 step, as above. Bump `CURRENT_SETTINGS_SCHEMA` to 14 (`:6`).
-- **Constants:** none new.
-- **Branch:** `eb/eink-controls-1` from `refs/remotes/origin/main` after the release.
-- **Staging plan:** explicit paths. `tests/perf-baseline-results.json` stays unstaged.
-- **Failure handling:**
-  - If another item has taken schema 14 by dispatch time, use the next free number and say so in the memo.
-  - If a reader-mode injected theme reads `settings.theme` directly rather than the root attribute, list it and stop.
-  - Rollback: `git revert -m 1 <merge>`. The migration is one-way, but a reverted build reads `einkMode: true` with `theme: "light"` correctly.
-
-##### Task list
-| # | Task | Class | Kind | Tier | Effort | Estimate |
-|---|---|---|---|---|---|---|
-| 1 | Red file (e1–e6, control) committed alone; failures recorded | calculable | positive control | bounded | low | 25m |
-| 2 | One switch drives the E-ink colours; the theme option removed from three pickers; title bar; migration 13 → 14 | calculable | feature | bounded | medium | 40m |
-| 3 | Suites, pinned tests named; `npm test`, typecheck, build | mechanical | verify | mechanical | low | 20m |
-| 4 | `--dir` build; live checks including a migrated schema-13 profile | calculable | live check | bounded | medium | 30m |
-| 5 | Memo and time log; push; ask for merge go | mechanical | close | mechanical | low | 10m |
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** red first, with a light-theme control.
-- **Standing rule 50 (LL-156):** tests that pin the five-theme list or schema 13 are named and updated in scope.
-- **LL-165:** live launches prove the scratch profile first, including the seeded schema-13 profile.
-- **LL-166:** the live verdict reads `data-theme` and `data-eink` from the root, not a screenshot alone.
-- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-5.md) (moved by roadmap review 2026-10-23-5 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `574f20ef`; search for `#### EINK-CONTROLS-1`). The builder, the merge and the close-out read it there.
 
 <a id="narrate-start-stack-1"></a>
 
@@ -1235,698 +1748,54 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
 Each stub needs investigation or an owner decision before it can be specified (Rule 6a).
 
 
-- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1 — Measure cold click on mainstream hardware** *(position 37 — stub; after NARRATE-REBUILD-1; not a release gate)*. Owner decision on D6 (2026-10-14) and Blurby.Brain's calibration: on the 4-core quiet machine, cold click counted 0 of 80 (every trial attributed to play), because the harness's cold-click sequencing depends on word spans rendering before play's first voiced sample. Make the click fire only after the first word spans exist AND before play's first voiced sample, or measure the click from a paused state, so it attributes on slower hardware. Until then cold click is judged on the reference (Snapdragon) run only. Lane: TTS / Narration Engine.
-- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1 — Narrate saturates a 4-core CPU during warm requests** *(position 38 — stub; after NARRATE-REBUILD-1; not a release gate)*. On the quiet machine (i7-1185G7, 4C/8T) Blurby alone drove the host to 78–84% during warm D6 requests (95–98% with foreign load). A profile pass: where the producer and worker time goes, and whether chunk ramp or worker count should adapt to core count. Lane: TTS / Narration Engine.
+- <a id="narrate-harness-coldclick-1"></a>**NARRATE-HARNESS-COLDCLICK-1** is now a full specification: [NARRATE-HARNESS-COLDCLICK-1](#narrate-harness-coldclick-1-spec) (roadmap review 2026-10-23-5).
+- <a id="narrate-cpu-profile-1"></a>**NARRATE-CPU-PROFILE-1** is now a full specification: [NARRATE-CPU-PROFILE-1](#narrate-cpu-profile-1-spec) (roadmap review 2026-10-23-5).
 
 
 - **LARGE-FOLDER-SYNC-1, design half — what Blurby does with a very large source folder** *(superseded by BLURBY-SERVER-1, roadmap review 2026-10-23-3; was an open owner decision, CLAUDE.md Rule 11 tier 3; split from the technical half, which is the Full Spec at position 14 above, 2026-10-14)*. On the owner’s 120,190-file Drive folder (120,166 EPUBs, mostly under `Books` and `BooksBooks`; a full scan takes 93.6 s), the startup sync would import every file the library lacks (about 120,000). The technical half makes that import safe (one sync at a time, progress saved every 30 s, nothing dropped) but does not limit it. Options to put to the owner: (1) import everything; (2) cap the import and say so; (3) ask the user to choose subfolders when a folder is very large. Related cost the choice must settle: `broadcastLibrary` sends the whole library to the renderer on every save. **Owner decision, 2026-10-23: no limit on the local import, and no subfolder picker.** Blurby is moving to a server-hosted model (storyboard opened 2026-10-23), and limits will come from future plan tiers (free and paid), not from the desktop import. So the design half is closed with no work item. Residual technical risk, for the server model to remove: `broadcastLibrary` sends the whole library on every save, which a very large local library makes slow. The owner keeps `sourceFolder` cleared until the technical half lands. Evidence: `docs/governance/close-outs/Memo.FOLDER-SCAN-PERF-1.GovernanceStaging.2026-10-14.md`. Lane: Library & Content.
-- <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1 — One word numbering in every runtime** *(position 43 — stub; after NARRATE-REBUILD-1; not a release gate)*. From the 2026-10-15 offset diagnosis (Blurby.Brain ruling, tier 1): `main/epub-word-extractor.js` numbers words by the runtime's ICU (plain Node 78.2: Meditations 80,426; Electron 41's Chromium ICU 77.1: 80,493, which splits "B.C." and web addresses), while `src/utils/segmentWords.ts` rejoins adjacent word segments, breaking LL-136's one-counter rule. Scope: (1) the extractor joins adjacent word segments with no whitespace, through one ICU-independent function shared with `segmentWordSpans`; (c) it segments whole blocks rather than single text nodes, restoring punctuation after inline elements ("Imitation,"); (e) a guard so an Electron upgrade that changes word-break data cannot silently shift saved positions. Saved positions move 0–141 words in books with abbreviations, so a one-time remap goes through each saved cfi. The main Done-when: every saved position's word text is the same before and after the remap, across the owner-library copies. Lane: Reader Engine.
+- <a id="word-index-unify-1"></a>**WORD-INDEX-UNIFY-1** is now a full specification: [WORD-INDEX-UNIFY-1](#word-index-unify-1-spec) (roadmap review 2026-10-23-5).
 
 <a id="page-save-restamp-3"></a>
 
 #### PAGE-SAVE-RESTAMP-3 — Rare page-save edge cases after the restamp guard, and "Keep at furthest" *(**Wave A built and held 2026-10-23 at `c3510303` (code `88c1dae7`) on `eb/page-save-restamp-3`, cut from the TOC-JUMP-SAVE-1 → PAGE-HELD-TURN-FAIL-1 chain tip `7ca5a4b7` plus `main`: A1, A2 and A4; `npm test` 2,462 passed / 1 skipped / 0 failed, typecheck and build 0; live, both clicks save in order, each with its own cfi. Merge order: TOC-JUMP-SAVE-1 → PAGE-HELD-TURN-FAIL-1 → this branch. Wave B waits for JUMP-LANDING-SAVE-1. Wave C needs re-scoping at the next review: KEEP-FURTHEST-FIX-1 did most of it; left over are page turns not adding to the pages-read count, and the furthest page's cfi not saved to `library.json`. The memo stages a follow-up stub, RESTAMP-RERUN-RACE-1, for the quality review's unreproduced races W1 and W2. Spec corrections: A-5's grep count is 3, not 4; A-6's pass mark is "both clicks saved, in order"**; Seq 80 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; not a release gate)*
 
-- **What:** close the page-save edge cases left by PAGE-SAVE-RESTAMP-GUARD-1 and -2 that still reproduce on `48ce4db9`, and make "Keep at furthest" reopen the book at the furthest page. The work runs in three waves, because they depend on different things:
-  - **Wave A** (the view and the Page runtime; no ruling needed):
-    - (A1) the double-wrap race;
-    - (A2) a word click after the word count is known to have failed saves nothing;
-    - (A3) pin tests for the open cancel and for the negative side of fr1's guard;
-    - (A4) `heldClickAnchor` is reset when a turn replaces a held click.
-  - **Wave B** (after JUMP-LANDING-SAVE-1): (B1) the held-turn cancel moves off foliate's `link` event.
-  - **Wave C** (needs a tier 2 ruling and a shared-core integration window): (C1) "Keep at furthest" reopens at the furthest page, and the high-water mark follows page turns.
-    - **Held (2026-10-23).** Blurby.Brain has taken the reopen page to the owner, recommending the furthest page.
-    - **The live measurement on the release-fix sha `97527896`** (blurby-6b, scratch profile, CDP; reported to Blurby.Brain as a possible release fix) found the loss is real:
-      - after reading from 1290 to 2673, then back to 416, the prompt offered "Keep at page 6";
-      - choosing it saved 1290 with the 416 page's cfi, and a reopen showed the 416 page;
-      - on `08f4b948~1`, page turns saved nothing and no prompt appeared.
-    - **A two-file prototype was proven live** (`ReaderContainer.tsx` port plus `useProgressTracker.ts`): Keep then saved 2673 with its own cfi and reopened there.
-    - If that lands as a release fix, Wave C shrinks to what it leaves: the Page pages-read count, and storing the mark in `library.json`. Re-scope Wave C then.
-- **Why:** the stub's review notes (PAGE-SAVE-RESTAMP-GUARD-1 and -2 quality reviews, Blurby.Brain ruling 2026-10-15), PAGE-SAVE-RESTAMP-2's live check L9, and PAGE-REOPEN-CFI-1's finding (its memo, line 32). Each item was re-traced on `48ce4db9`, and each still-live item was reproduced by a red test in a scratch worktree at `48ce4db9` (2026-10-23). The probe file and the candidate diff are kept in the investigator's scratchpad (`…\scratchpad\psr3-probe\`) and are not committed.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#page-save-restamp-3) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
-##### Investigation results, item by item (main @ `48ce4db9`)
-
-| Stub item | Status | Evidence |
-|---|---|---|
-| (2) The double-wrap race | **Reproduces → A1** | Probe PR1: a 160-paragraph section loads with no book words; the book's words arrive while the load's wrap is yielding. 60 of 160 spans (`Word100`–`Word159`) keep the renderer's provisional numbers (`Word100=100`, not 120), and the document has already left `rendererNumberedDocsRef`, so a turn onto them saves unheld. The probe goes green with A1's fix. |
-| (4) The failed-replay diagnostic | **Covered elsewhere; excluded** | PAGE-HELD-TURN-FAIL-1 (position 61) reports the held turn that `fail()` cannot save (`reason=book-words-failed`) and adds ` kind=turn\|click` to all three loss lines. Nothing more is needed. |
-| The held-turn cancel fires on `link` before the jump lands | **Reproduces live (PAGE-SAVE-RESTAMP-2, L9: a link at +203 ms dropped the turn; the view stayed on the turned page); → B1** | `FoliateView.tsx:795`. The red test (lc1) is the (y) "internal link" row with the expectation inverted. That row asserts `[]` on main, so (lc1) is red by construction. |
-| W2: after a failed-words turn, the relocate save writes a fraction-estimated position | **Dropped (tier 1)** | When the words have failed, no exact index exists. The fraction estimate from the turn's own relocate (`ModeRuntime.ts:471-486`) is newer than the stored index, which may be from an older session, so it is the better of the two. PAGE-SAVE-RESTAMP-2's "keep the stored index" was written so that the renderer's *provisional* numbers are never saved, and a fraction estimate is not one of them. |
-| W4: a held turn from another section outlives a click on a stamped section | **Does not reproduce; dropped** | Every click first calls `centerResolvedTokenInReadingWindow` (`:697` and `:754`), which clears the held slot at `:508` whenever the renderer has `scrollToAnchor` (foliate's paginator always has it). Also, any book words that stamp section B re-stamp every visible document first, which saves or drops A's held turn (`:1092-1103`). The probe PW4 could not reach W4's state; it saved A's turn at the re-stamp instead. |
-| N2: `bookWordsFailedRef` is never reset in a view | **Dropped: no reachable effect** | The flag is read only together with `rendererNumberedDocsRef.has(doc)` (`:604`, `:618/:621`, `:670`). Once the words arrive, the re-stamp removes every visible document (`:1101`), and later loads never add one, because `liveSections()` is no longer empty (`:663`). |
-| N4: no test for the open-without-cfi cancel | **Pin test → A3** | Probe PN4 (a held turn from a snap during `init`, then `initialCfi` undefined): green on main, `saves = []`. With `:864` deleted it fails, saving `["doc-1", 2, "cfi:0:gamma"]` (mutation control run). |
-| A click on unstamped spans, when the failure is already known, is dropped without a diagnostic | **The unstamped case is unreachable from the handlers, so the diagnostic is added as defensive. The real defect is wider → A2** | Probe PC1. Once the word count is known to have failed, **every** word click on a renderer-numbered page saves nothing, stamped or not. The cause is order: `holdWordClick` runs before `onWordClick` (`:719-727`, `:770-778`). Its failure branch reports at once (`:621-622` → `onHeldClickSave`), while `heldClickAnchor` is still `null` or stale, so `onHeldClickSave` returns at `ModeRuntime.ts:609`. `hardSelect` then commits with `persist: false` (`:326-327`), because `holdSave` is true. On main the second click's save is missing (`[["doc-1",-1,"cfi:3:beta"]]` only). The probe goes green with A2's fix. |
-| fr1's negative side (`=== provisional`) is untested | **Pin test → A3** | Only `ModeRuntime.ts:616` decides it. A direct runtime test pins it, with a mutation control. |
-| `holdWordClick`'s resolve check can never reject | **Confirmed dead → removed in A2** | `wordOffsetInSection` is `exactIdx - sectionBase` when both are known, else `Math.max(0, …)` (`:716-718`, `:766-768`), so `exactIdx != null \|\| wordOffsetInSection >= 0` is always true. The runtime's own guard (`ModeRuntime.ts:338`, `:609`; test FR3) stays. |
-| `heldClickAnchor` is not reset when a turn replaces a held click | **Tidy → A4** | After A2, a stale value can no longer be read, because every `onHeldClickSave` follows its own `hardSelect`. It is reset in `onPageTurned` so that the state is not left misleading. |
-| PAGE-REOPEN-CFI-1: "Keep at furthest" pairs the furthest *position* with the on-screen *cfi* | **Reproduces → C1 (tier 2)** | Probe PKF: `handleKeepFurthest` sends `["book", 7272, "epubcfi(SCREEN-p3000)"]`, and a reopen opens on the cfi, the backtracked page. **Second finding (probe PHW):** in Page mode no page turn reaches `scheduleRelocateSave`. Three turns give 0 calls, because `onPageTurned`'s commit sets `resumeAnchor` and `onRelocate` then skips (`ModeRuntime.ts:448`, `:471-477`). So `furthestPositionRef` never rises after the open, and `recordPages` (`ReaderContainer.tsx:324`) counts no Page-mode turns. The likely cause is PAGE-POSITION-SAVE-1; Done-when C-1 measures it on `08f4b948~1`. |
-
-- **Out of scope:**
-  - The failed-word-count release and the `kind=` loss lines (PAGE-HELD-TURN-FAIL-1).
-  - Landing saves for link, footnote and chapter jumps (JUMP-LANDING-SAVE-1).
-  - Focus, Flow and Narrate.
-  - W2, W4 and N2 (dropped above, with reasons).
-- **Prerequisites:**
-  - Wave A: TOC-JUMP-SAVE-1 (`db03f2f5`) and PAGE-HELD-TURN-FAIL-1 merged, because both edit `FoliateView.tsx`. A2's new diagnostic uses PAGE-HELD-TURN-FAIL-1's `kind=` form.
-  - Wave B: JUMP-LANDING-SAVE-1 merged.
-  - Wave C: the ruling below, and a declared integration window for `ReaderContainer.tsx`.
-- **Ruling needed (Wave C only; CLAUDE.md Rule 11 tier 2, because it has a user-visible effect):** which page a reopen shows after "Keep at furthest".
-  - **Recommendation: the furthest page.** That is what the button says.
-  - Record a cfi with the high-water mark wherever the mark rises, and have Keep at furthest send that cfi.
-  - With no cfi recorded (the furthest point is where the book opened), send the cfi the book opened with.
-  - Let Page turns raise the mark, which also restores Page's pages-read count.
-  - Alternative: send no cfi and reopen by position, through `goToFraction`. That is approximate, and main keeps the stored on-screen cfi anyway (`main/ipc/documents.js:24`), so it does not work without an IPC change. Not recommended.
-  - **Roadmap may split Wave C into its own item.** It touches shared core and a hook outside the view.
-
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root. All test additions go in `tests/readerModes/pagePositionSave.test.tsx` (new `describe("PAGE-SAVE-RESTAMP-3")`, reusing `mount`, `mountWiredClicks`, `spanRange`, `settle`) unless stated.
-
-  **Wave A**
-  - **A-1. Positive control (standing rule 43).** Commit (pr1) and (pc1) alone first. `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "PAGE-SAVE-RESTAMP-3"` exits 1 on the base:
-    - (pr1) fails with 60 provisional spans;
-    - (pc1) fails with the second save missing.
-    - Record the output in the memo.
-    - (pn4) and (fr1n) pass on the base. They are pins; each gets its mutation control in A-3.
-  - **A-2. Tests:**
-    - **(pr1) The double-wrap race:**
-      - Mount with no book words. A section document holds 160 `<p>Word{i}</p>` paragraphs, and `renderer.contents` is `[{ doc, index: 3 }]`.
-      - Dispatch `load` in one `act` and do not settle, so the wrap yields after its first batches.
-      - Then `render({ bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: 160 }], getCanonicalSectionWords: i => i === 3 ? words : undefined })`, then `settle()` twice.
-      - Assert all 160 `[data-word-index]` spans, and that each `Word{i}`'s index is `20 + i`.
-    - **(pc1) A click after a known failure:**
-      - `mountWiredClicks({ ensureBookWords: () => Promise.reject(new Error("x")) })`.
-      - Click word 1, then settle. Saves are `[["doc-1", -1, "cfi:3:beta"]]`.
-      - Click word 2, then settle. Saves are `[["doc-1", -1, "cfi:3:beta"], ["doc-1", -1, "cfi:3:gamma"]]`, and there is no `persistence.updateProgress` call.
-    - **No test for the unstamped-click diagnostic.** Both handlers pass only a resolved, stamped token's range. The click handler needs `[data-word-index]` (`:683`), and the selection handler needs a resolved token (`:746`). So `reportFirstWordOnPage` returning `false` there is defensive. A-5's grep checks the line.
-    - **(pn4) The open-without-cfi cancel (pin):**
-      - Stub `FakeFoliateView.prototype.init` to set `renderer.contents = [{ doc, index: 0 }]` and `page = 2`, and to dispatch a renderer `relocate` with `reason: "snap"` and `rawDoc()`'s range. Restore the stub in `finally`.
-      - Mount with `initialCfi: undefined` and section 0's book words, then `loadSection(view, doc, 0)`.
-      - Saves are `[]`.
-    - **(fr1n) fr1's guard, negative side (pin):**
-      - `mountWiredClicks()`, then click word 1, which is held, with `heldClickAnchor` 1.
-      - `runtime.navigateTo(4)`, then `runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" })`.
-      - `runtime.exportHandoff("persistent").explicitSelectionAnchor` stays `4`.
-    - **(hc1) A turn clears the held click's anchor:**
-      - Click word 1, which is held. Turn onto `spanRange(doc, 2, 3)`, which is held and replaces the click. Then `render(BOOK_WORDS)` and settle.
-      - Saves are `[["doc-1", 22, "cfi:3:gamma"]]`, and `(runtime as any).heldClickAnchor` is `null`.
-    - Every existing test passes unchanged, including (u), (v), (WC1)–(WC4), (FR1) and (FR3), and `tests/foliate-bridge.test.ts`.
-  - **A-3. Mutation controls (run, record, then revert in the working tree; never committed):**
-    - deleting `FoliateView.tsx:864`'s cancel makes (pn4) fail;
-    - deleting `=== provisional` from `ModeRuntime.ts:616` (making the condition always true) makes (fr1n) fail.
-  - **A-4.** `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/foliate-bridge.test.ts` exits 0.
-  - **A-5. Greps:**
-    - `git grep -n "sectionWrapsRef" -- src/reader/modes/page/FoliateView.tsx` prints exactly 4 lines: the declaration, the set, and the await in the load, plus the await in the re-stamp.
-    - `git grep -n -F "wordOffsetInSection >= 0)) return false" -- src/reader/modes/page/FoliateView.tsx` exits 1. On the base it prints `:618`.
-    - `git grep -n -F "kind=click" -- src/reader/modes/page/FoliateView.tsx` prints at least one line inside `holdWordClick`.
-  - **A-6. Live check** (owner's machine, `electron-builder --dir`, scratch profile `BLURBY_USER_DATA_DIR`, CDP):
-    - Use PAGE-SAVE-RESTAMP-2's main hook that rejects `extract-epub-words` (its memo, the L4 row and the driver description).
-    - Open the bundled *Meditations*. Wait until the rejection is recorded.
-    - Click one word on the page, then a second word, then quit through the app.
-    - `library.json`'s `cfi` for the book is the second click's cfi, and its `position` is unchanged from before the open.
-    - Record the probe output in the memo.
-  - **A-7.** `npm test` exits 0 on the owner's machine (standing rule 47; the closed-list rule). `npm run typecheck` and `npm run build` exit 0 (rule 48).
-  - **A-8. Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly:
-    - `M src/reader/modes/page/FoliateView.tsx`;
-    - `M src/reader/modes/page/ModeRuntime.ts`;
-    - `M tests/readerModes/pagePositionSave.test.tsx`;
-    - plus the time log and memo.
-
-  **Wave B** (after JUMP-LANDING-SAVE-1 has merged)
-  - **B-0. Re-check first.** If JUMP-LANDING-SAVE-1 already removed or moved the `link` cancel, then:
-    - run (lc1) and (lc2) as pins;
-    - record "covered by JUMP-LANDING-SAVE-1";
-    - make no code change.
-  - **B-1. Positive control:** commit (lc1) alone. It exits 1 on the base, saving `[]`.
-  - **B-2. Tests:**
-    - **(lc1) A link jump that never lands:** a held turn on `spanRange(doc, 2, 3)`, then a `link` event with no relocate after it (foliate dropped or could not resolve the jump). Then `render(BOOK_WORDS)` and settle. Saves are `[["doc-1", 22, "cfi:3:gamma"]]`.
-    - **(lc2) A link jump that lands:** the same, but the landing relocate follows on another page. The landing's save, or its hold if provisional, replaces the held turn, and the older turned page is never saved. The landing is reported as a turn, through JUMP-LANDING-SAVE-1's path.
-    - **(y), "internal link" row, Rule 50 update, named in the memo:** the row's jump becomes "a `link` event followed by its landing relocate", and it still asserts that the older turn is not saved.
-  - **B-3.** The pagePositionSave suite exits 0, then the full suite, typecheck and build, as in A-7.
-  - **B-4. Fence:** `M src/reader/modes/page/FoliateView.tsx`, `M tests/readerModes/pagePositionSave.test.tsx`, plus the time log and memo.
-
-  **Wave C** (after the ruling, in a declared `ReaderContainer.tsx` integration window)
-  - **C-1. Positive controls:**
-    - Commit (kf1) and (hw1) alone. Both exit 1 on the base.
-    - Run (hw1) also on `08f4b948~1`, the commit before PAGE-POSITION-SAVE-1, in a scratch worktree, and record whether turns reached `scheduleRelocateSave` there. That records whether the pages-read gap is a regression.
-  - **C-2. Tests:**
-    - **(kf1)**, in `tests/useProgressTracker.test.ts`, next to the PAGE-REOPEN-CFI-1 describe:
-      - The opening cfi is `"epubcfi(OPEN)"`, with position 7272. A relocate sets the on-screen cfi to `"epubcfi(SCREEN)"`, at word 3000.
-      - `handleKeepFurthest()` sends `["book", 7272, "epubcfi(OPEN)"]`.
-      - (kf2): after `noteHighWater(9000, "epubcfi(FAR)")`, it sends `["book", 9000, "epubcfi(FAR)"]`.
-    - **(kf3) control:** `handleSaveAtCurrent()` still sends the on-screen relocate's cfi.
-    - **(hw1)**, in `pagePositionSave.test.tsx`: three Next-page turns on `stampedDoc()` give exactly three `persistence.recordHighWater` effects, each with the landed word and cfi.
-    - Every PAGE-REOPEN-CFI-1 test passes unchanged.
-  - **C-3. Live check** (`--dir`, scratch profile, CDP):
-    - Open a book, turn forward 6 pages, then back 4, then exit. The backtrack prompt shows.
-    - Choose **Keep at furthest**, then reopen. The book opens on the furthest page, and `library.json`'s `position` and `cfi` match the probe's word and cfi for that page.
-    - Repeat with **Save at current**. It reopens on the current page.
-  - **C-4.** Full suite, typecheck and build, as in A-7.
-  - **C-5. Fence:**
-    - `M src/hooks/useProgressTracker.ts`;
-    - `M src/components/ReaderContainer.tsx` (shared core, in the window);
-    - `M src/reader/ports/ReaderPorts.ts`;
-    - `M src/reader/ports/createReaderPorts.ts`;
-    - `M src/reader/modes/page/ModeRuntime.ts`;
-    - `M tests/readerModes/harness/fakePorts.ts`;
-    - `M tests/useProgressTracker.test.ts`;
-    - `M tests/readerModes/pagePositionSave.test.tsx`;
-    - plus the time log and memo.
-- **Effort:**
-  - Wave A: M (S code, plus the live check).
-  - Wave B: S.
-  - Wave C: M.
-- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel per wave; Blurby.Brain gives the Wave C ruling; Blurby.Roadmap gives each merge go.
-- **Lane:** Reader Engine. Execution surface C; Wave C also D-adjacent through the persistence port.
-- **Source:** the stub; the PAGE-SAVE-RESTAMP-GUARD-1 and -2 memos (review notes, L9); PAGE-REOPEN-CFI-1's memo line 32; this trace and these probes on `48ce4db9`.
-- **Path:** dispatch, one dispatch per wave.
-
-##### Implementation detail
-Lines are on `48ce4db9`. TOC-JUMP-SAVE-1 and PAGE-HELD-TURN-FAIL-1 move them, so re-grep each anchor after taking main in.
-
-- **A1, `FoliateView.tsx`.**
-  - Next to `bookWordsFailedRef` (`:316`), declare `const sectionWrapsRef = useRef(new WeakMap<Document, Promise<number>>());`.
-  - In the section load (`:664`), keep the wrap's promise:
-
-    ```ts
-    const wrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
-    sectionWrapsRef.current.set(doc, wrap); // PAGE-SAVE-RESTAMP-3: the re-stamp waits for this wrap
-    await wrap;
-    ```
-
-  - In the re-stamp loop, after `if (sectionStart < 0) continue;` (`:1095`) and before `unwrapWordSpans(doc)` (`:1096`):
-
-    ```ts
-    await sectionWrapsRef.current.get(doc)?.catch(() => {}); // PAGE-SAVE-RESTAMP-3: never interleave with the load's wrap
-    ```
-
-  - The load's own post-wrap check (`:669-676`) runs first and still sees the document as renderer-numbered, so it leaves a held turn for the re-stamp. That order was confirmed by (pr1) and (u) passing.
-- **A2, `FoliateView.tsx`.**
-  - `holdWordClick` (`:617-628`) becomes `(doc: Document, range: Range): void`:
-    - it drops the dead resolve clause and the `return true`;
-    - its failure branch becomes:
-
-      ```ts
-      if (!reportFirstWordOnPage(doc, start, end, true)) recordDiagnosticRef.current("page-turn-lost", `reason=book-words-failed start=${start} end=${end} kind=click`);
-      ```
-
-  - In both handlers (`:719-727`, `:770-778`):
-    - `const holdSave = rendererNumberedDocsRef.current.has(doc); // PAGE-SAVE-RESTAMP-2`;
-    - then `onWordClickRef.current?.(…, holdSave)` as now;
-    - then `holdWordClick(doc, tokenRange ?? fallbackRange)` (the selection handler passes `tokenRange ?? range`).
-  - So the click's `hardSelect` sets `heldClickAnchor` before any immediate report reaches `onHeldClickSave`.
-  - This was dry-run in scratch: (pc1) and (pr1) green, and the 38 existing pagePositionSave tests and `foliate-bridge.test.ts` (6) green. The only type error was the leftover `return true`, which this removes.
-- **A4, `ModeRuntime.ts`.** In `onPageTurned` (`:576-595`), add `this.heldClickAnchor = null; // PAGE-SAVE-RESTAMP-3: a saved turn replaces any held click` after the `alive` check.
-- **A3:** tests only.
-- **B1, `FoliateView.tsx:795`.**
-  - Remove the `link` listener's cancel.
-  - The link's landing, reported as a turn by JUMP-LANDING-SAVE-1, replaces the held slot (`reportTurn`, `:597-613`). A jump that never lands leaves the held turn, which then saves. That is correct, because the view never left the turned page.
-  - Keep the comment line explaining why there is no cancel.
-- **C1:**
-  - **`useProgressTracker.ts`:**
-    - Add `furthestCfiRef` (`{ docId, cfi } | null`), set from `activeDoc.cfi` where `furthestPositionRef` is set (`:141-145`).
-    - Add `noteHighWater(wordIndex, cfi)`. It wraps `calculateHighWaterPagesReadDelta`, sets both refs when the mark rises, and returns the pages delta.
-    - `_persistAndLog(finalPos, cfiOverride?)` sends `cfiOverride` when it is given.
-    - `handleKeepFurthest` (`:311-314`) passes the furthest cfi for this document.
-    - Export `noteHighWater` and `furthestCfiRef`.
-  - **`ReaderContainer.tsx`:**
-    - `scheduleRelocateSave` (`:320-325`) calls `live.noteHighWater(wordIndex, cfi)` instead of its inline high-water lines.
-    - A new port method `recordHighWater({ wordIndex, cfi })` calls `noteHighWater`, then `recordPages` when the delta is positive. It never saves.
-  - **`ReaderPorts.ts`:** add the method after `scheduleRelocateSave` (`:29`).
-  - **`createReaderPorts.ts:60`:** add `"recordHighWater"` to the persistence allow-list.
-  - **`fakePorts.ts`:** add `recordHighWater: rec("persistence.recordHighWater")` (`:71`).
-  - **`ModeRuntime.onPageTurned`:** when `first.wordIndex != null`, call `this.ports.persistence.recordHighWater({ wordIndex: first.wordIndex, cfi: first.cfi })`.
-  - No new debounced save: the turn's own save already ran, and a second, delayed save could overwrite a later click or jump.
-- **Constants:** none.
-- **Branch:** `eb/page-save-restamp-3` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\page-save-restamp-3`.
-  - Run `npm ci`. Push with `HEAD:refs/heads/eb/page-save-restamp-3`.
-  - Waves B and C continue on the same branch after taking main in, or on `-b`/`-c` branches if Wave A has merged already.
-- **Staging plan:** each wave's fence paths. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
-- **Failure handling:**
-  - **If A-1's (pr1) passes on the base:** the act timing changed. Raise the paragraph count to 400 and re-run. If it still passes, stop and report; don't change the code to fit the test.
-  - **If any existing test fails after A2:** stop and report. (WC1)–(WC4) and (FR1) pin the held-click rules.
-  - **If B-0 finds the link path changed in a way this spec does not cover:** stop and send it to Blurby.Brain.
-  - **If C-1 shows turns reaching `scheduleRelocateSave` on `08f4b948~1`:** record it as a regression from PAGE-POSITION-SAVE-1 in the memo and in BUG_REPORT; the fix is unchanged.
-  - **Rollback:** `git revert -m 1 <merge>`, per wave.
-- **Lane ownership (parallel run):** surface C.
-  - **Forbidden:** the other modes' views and runtimes, `main/`, and `preload.js`. In Waves A and B, also `ReaderContainer.tsx`.
-  - **Shared-core touches:**
-    - Waves A and B: none.
-    - Wave C: `src/components/ReaderContainer.tsx`, which needs an integration window declared in ROADMAP Stage 8 before dispatch.
-  - **Merge order:**
-    - all waves after the Stage 8 freeze lifts;
-    - Wave A after TOC-JUMP-SAVE-1 and PAGE-HELD-TURN-FAIL-1 (same file);
-    - Wave B after JUMP-LANDING-SAVE-1 (it overlaps the link path in `FoliateView.tsx`);
-    - Wave C after the ruling, in its window. It is independent of B.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Positive controls (pr1, pc1) red on the base; pins (pn4, fr1n) green | calculable | positive control | bounded | low | 20m (four tests, one red run) | — | Wave A |
-| 2 | The re-stamp waits for the load's wrap (A1) | calculable | bug fix | bounded | medium | 15m (one ref, two edits) | — | Wave A |
-| 3 | A click reports after `hardSelect`, and an unsaved one is logged (A2); `heldClickAnchor` reset on a turn (A4); test hc1 | calculable | bug fix | bounded | medium | 20m (two handlers, one helper, one runtime line, one test) | — | Wave A |
-| 4 | Mutation controls; live click-after-failure check; suite, typecheck and build; merged | calculable | merge and verify | bounded | medium | 50m (two mutations, `--dir` build, CDP probe, gates, one --no-ff merge) | — | Wave A |
-| 5 | Link cancel removed after JUMP-LANDING-SAVE-1 (lc1, lc2, the (y) row update); gates; merged | calculable | bug fix | bounded | medium | 35m (one edit, two tests, one row update, gates, merge) | — | Wave B |
-| 6 | Keep at furthest reopens at the furthest page; Page turns raise the high-water mark (kf1–kf3, hw1); live check; gates; merged | calculable | bug fix | cross-cutting | high | 80m (hook, port, shell, runtime, four tests, CDP check, gates, merge) | — | Wave C |
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** each wave is red first. The pins carry mutation controls instead.
-- **Standing rule 44 (LL-143):** A-5's greps were dry-run on the base. `sectionWrapsRef` exits 1 there, and the dead-clause grep prints `:618`.
-- **Standing rule 50 (LL-156):** the (y) internal-link row is updated in Wave B and named in the memo.
-- **LL-151 (live drivers that miss the window):** B is tested by construction in the harness. The live L9 timing is not used as the gate.
-
-- <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1 — A capitalised two-word name that espeak voices differently alone** *(position 46 — stub; after NARRATE-REBUILD-1; not a release gate)*. From NARRATE-REBUILD-1 P6b's owner-library sweep (Blurby.Brain ruling 2026-10-15): one chunk (word 12529 of one owner book, text hash 4e7915ce2410e10e; no text is stored) holds a two-word capitalised name whose second word espeak voices [k] alone but [tʃ] in the phrase, a fused cost of 0.67 over the 0.5 limit. It fails closed with F4's notice. Find a rule that reconciles it without loosening the cost check. Lane: TTS / Narration Engine.
+- <a id="narrate-reconcile-residual-1"></a>**NARRATE-RECONCILE-RESIDUAL-1** is now a full specification: [NARRATE-RECONCILE-RESIDUAL-1](#narrate-reconcile-residual-1-spec) (roadmap review 2026-10-23-5).
 - <a id="folder-notice-2"></a>**FOLDER-NOTICE-2 — Follow-ups from FOLDER-NOTICE-1** *(dissolved, roadmap review 2026-10-23-3)*. The owner approved dissolving it: BLURBY-SERVER-1 retires the watched source folder in its Phase 2 (ruling Q2), so the banner it polished goes away. FOLDER-UNREACHABLE-GUARD-1 and FOLDER-NOTICE-1 are merged and still ship.
-- <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transfer
+- <a id="narrate-exit-crash-1"></a>**NARRATE-EXIT-CRASH-1 — SUPERSEDED (roadmap review 2026-10-23-4, owner-approved): ELECTRON-42-UPGRADE-1 replaced its fix, and release gate (1) passed on Electron 42 with 0 of 51 launches crashing. The terminal record goes through /dispatch-closeout. Original stub follows.** A native crash on Narrate producer teardown under Electron** *(position 55 — stub; RELEASE GATE (11) since 2026-10-15)*. From NARRATE-REBUILD-1 P6b wave A (Blurby.Brain ruling 2026-10-15): `scripts/narrate-rebuild/p3-producer-check.mjs` prints `pass:true` under the app's Electron, then exits 0x40000015 at shutdown (twice; `--break` still exits 1). A native crash on producer teardown is close to the 0xC0000409 risk QUIT-FLUSH-1 guards. Check whether the real app crashes on quit while Narrate is playing and while it is paused (crash dialog, crash dump under the profile's Crashpad folder), find the teardown order that crashes, and fix it. **Confirmed 2026-10-15 (release gate (1) on the quiet machine, main `1da81be2`):** 57 of 121 launches exited 0x80000003 (STATUS_BREAKPOINT), all of them cold-trial launches, each after the measurement and after `flushed {ok:true}` (no data lost); the last log line in every crashed log and in no clean one is `PostQueuedCompletionStatus: (6) The handle is invalid.` Evidence in the owner's Drive, `Blurby-transfer
 elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Roadmap); the fix keeps QUIT-FLUSH-1's awaited producer shutdown; gate: 0 crashed launches on the quiet machine's full launcher run. Lane: TTS / Narration Engine. **Roadmap review 2026-10-22:** ELECTRON-42-UPGRADE-1 carries the fix (release gate (11)). When its Done-when 12 shows 0 crashed launches on the quiet machine, the next review retires this stub as superseded by ELECTRON-42-UPGRADE-1, with that run as the evidence. Until then it stays queued as the record of the defect.
 
 <a id="jump-landing-save-1"></a>
 
-#### JUMP-LANDING-SAVE-1 — Link, footnote and chapter jumps in Page mode save the page they land on *(position 63 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*
+#### JUMP-LANDING-SAVE-1 — Link, footnote and chapter jumps in Page mode save the page they land on *(**Built and held 2026-10-23 at `8a7c9db6` on `eb/jump-landing-save-1`**, cut from PAGE-SAVE-RESTAMP-3's tip `c3510303` plus `main` `7c4a7a88` (merge `075d10b0`). Red tests alone first (`d48f391e`: 7 failures as specified, controls green), then fixes A and C (`d031cc89`), and B (`6cdd51b9`). `npm test` 2,471 passed / 1 skipped / 0 failed; typecheck and build 0. Fence: the six spec files plus the memo and time log. Live, on scratch-profile `--dir` builds: the control fails a, b and c; fixed, link, chapter steps, quit and reopen, footnote and Focus chapter step all save the landing word and agree with `library.json`. Solon approved; Plato minor, none critical. **Roadmap ruling (tier 1):** (fr1n) in `pagePositionSave.test.tsx` now sets `explicitSelectionAnchor` directly instead of `runtime.navigateTo(4)`, which fix C makes a no-op on an EPUB; its assertion is unchanged and its mutation control stays red. Wave B note: fr1's negative branch is now only defensive on an EPUB. **Spec correction:** Done-when 3's third grep prints 4 lines, not 3: the base already had the chapter-label line (`:797`, now `:801`). Follow-ups in the memo: stub CHAPTER-STEP-CFI-1 (Focus's chapter step saves the entry's word with the old section's cfi); an attached CDP or `--inspect` client holds `app.quit()`, which answers PAGE-SAVE-RESTAMP-3's quit-flush risk. Merge order after the release: TOC-JUMP-SAVE-1 → PAGE-HELD-TURN-FAIL-1 → PAGE-SAVE-RESTAMP-3 → this branch, then PAGE-SAVE-RESTAMP-3 Wave B. Memo: `docs/governance/close-outs/Memo.JUMP-LANDING-SAVE-1.GovernanceStaging.2026-10-23.md` on the branch; position 63 — Full Spec; authored 2026-10-23 on main @ `48ce4db9`; pre-existing; not a release gate)*
 
-- **What:** in Page mode, a jump saves the first word and cfi of the page it lands on, as a page turn does, for three kinds of jump:
-  - an internal link;
-  - a footnote reference;
-  - Previous or Next chapter.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#jump-landing-save-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
-  A contents jump that never lands saves nothing, so the stored position stays on the page still shown.
-- **Why:** the same defect class as TOC-JUMP-SAVE-1, plus two findings from this trace.
-  - **Links and footnotes.** Live, on `48ce4db9`, with the built renderer, a scratch profile and CDP, opening the sample *Meditations* in Page:
-    - four turns saved `position` 146;
-    - clicking the in-book link "THE SECOND BOOK" showed section 4 page 1, first word 9431 "THE";
-    - `library.json` still held 146 and the old cfi `epubcfi(/6/4!/4/16[pgepubid00002],/2,/2)`, 4 s and 12 s later and after a normal quit.
-  - **Previous and Next chapter do nothing at all on an EPUB.** This is new; the stub assumed they move the page.
-    - Same session: three presses of the bottom bar's "Next chapter", at book start and mid-book, and one `]` key.
-    - The section, page, cfi and `library.json` were all unchanged, and the button was enabled.
-    - This is in every mode, because the handler is shared.
-  - **TOC-JUMP-SAVE-1's note 3.** A contents jump that never lands keeps the early commit. The saved position becomes the entry's word, while the view stays where it was:
-    - a jump foliate drops while a turn holds the paginator's lock;
-    - an unresolvable href.
-- **Root cause (traced 2026-10-23 on `48ce4db9`; TOC-JUMP-SAVE-1's branch `db03f2f5` changes only the API `goTo`, at `FoliateView.tsx:981-984`; Rule 6a cleared):**
-  1. **Links and footnotes are one path.** Page has no footnote pop-up: `git grep -n -i footnote -- src` finds nothing, and the extractor only reads footnote text for Narrate. A footnote reference is an `<a href>` like any internal link.
-     - foliate's `#handleLinks` (`node_modules/foliate-js/view.js:337-353`) emits a cancelable `link`. It then calls `this.goTo(href)` unless a listener called `preventDefault()` (`:350-352`).
-     - Page's listener (`src/reader/modes/page/FoliateView.tsx:795`) only cancels a held turn. foliate's own `goTo` then runs outside any turn count.
-     - That `goTo` (`view.js:447-457`, then `paginator.js` `goTo` `:1057-1061`, `#goTo`, `#display`, `#scrollToAnchor` `:956-979`, `#afterScroll` `:987-1004`) fires `relocate` before its promise resolves, exactly as for the contents jump. The reason is `anchor`; only `snap` or a smooth scroll animates (`#scrollTo`).
-     - The view's relocate handler (`:797-808`) reports a turn only while `pageTurnsInFlightRef.current > 0`. The runtime's `onRelocate` (`ModeRuntime.ts:436-487`) skips the save, because the last turn's commit set `resumeAnchor` (`helpers/usePersistentReadingAnchor.ts:59-71`).
-  2. **Chapter steps compute no chapters.**
-     - `handlePrevChapter` and `handleNextChapter` (`src/components/ReaderContainer.tsx:644-663`) rebuild the chapters with `chaptersFromCharOffsets(activeDoc.content, docChapters)` or `detectChapters(activeDoc.content, words)` (`src/utils/text.ts:176`, `:227`). Both return `[]` for empty content (`:177`, `:231`).
-     - A foliate EPUB has no `content`, so `chs.length < 2` and the handler returns.
-     - For a foliate book, `docChapters[i].charOffset` already holds a **word index** (`resolveTocWordIndex`, `ReaderContainer.tsx:100`, filled at `:374-380` and re-mapped at `:580-592`).
-     - Even with chapters, the step calls `handleNavigateTo` only. Page's `navigateTo` (`ModeRuntime.ts:351-356`) commits and persists the word with the old page's cfi and never moves the view: its `jumpDisplayToWord` is a no-op (`:698`).
-  3. **The early commit (note 3).** `handleJumpToChapter` (`ReaderContainer.tsx:665-684`) calls `handleNavigateTo(entry word)` before `go-to-href`.
-     - Page's `navigateTo` persists `[doc, entry word, state.cfi]` at once (`commitPersistentWordIndex`, `usePersistentReadingAnchor.ts:79-106`).
-     - When the jump lands, TOC-JUMP-SAVE-1's landing save overwrites it. When it never lands, nothing does:
-       - the paginator's `goTo` returns at once while `#locked` (`paginator.js:1058`; a turn holds the lock for its scroll plus 100 ms, `:1095-1106`);
-       - `view.goTo` catches an unresolvable target and resolves `undefined` (`view.js:447-457`).
-- **Fix:**
-  - **(A) Links and footnotes.** In the view, one counted jump helper, `goToLanding(target)`. It cancels a held turn, as today. It counts the jump as a turn in flight for the life of `view.goTo(target)`, which is TOC-JUMP-SAVE-1's body, moved. Then:
-    - the API `goTo` returns `goToLanding(target)`;
-    - the `link` listener calls `e.preventDefault()` and `goToLanding(e.detail.href)`.
-
-    foliate then skips its own `goTo`, so a link makes exactly one jump. `e.detail.href` is already resolved against the section (`view.js:345`). External links are a separate event (`external-link`) and are untouched.
-  - **(B) Chapter steps.**
-    - A new pure `tocChapterStep(chapters, wordIndex, dir)` in `src/utils/text.ts` finds the current entry: the last one whose `charOffset` (a word index) is at or before `wordIndex`.
-      - Next returns the following entry, or -1 at the last one.
-      - Previous returns the entry before, or 0 at the first one. This keeps the legacy rule at `ReaderContainer.tsx:650`.
-    - For a foliate book, `handlePrevChapter` and `handleNextChapter` call `handleJumpToChapter(tocChapterStep(docChapters, canonicalWordAnchor, ∓1))` when the result is not -1, and return. A chapter step is then exactly a contents jump: `go-to-href` in every mode. In Page, its landing saves through (A) and TOC-JUMP-SAVE-1.
-    - `handleJumpToChapter` moves above the two handlers, because their dependency lists now name it.
-    - The non-foliate branch is unchanged.
-  - **(C) No early commit in Page for an EPUB.** Page's `navigateTo` returns at once when `this.document.useFoliate`.
-    - On an EPUB its only caller is `handleJumpToChapter`, which always follows with `go-to-href`, whose landing commits.
-    - A jump that never lands now saves nothing, and the stored position stays on the page shown.
-    - Page shows no view for a non-EPUB (`ModeView.tsx`), so its commit there stays as it is.
-  - The prototype of (A)–(C) on `48ce4db9` + TOC-JUMP-SAVE-1's hunk passed:
-    - the full suite (181 files, 2,457 passed / 1 skipped), with the new tests and no change to any existing test;
-    - typecheck.
-
-    Live, on the same build and a fresh scratch profile:
-    - the link to "THE SECOND BOOK" saved `9431` and `epubcfi(/6/10!/4/2[pgepubid00007]/2,/4,/4)`;
-    - "Next chapter" went to section 5 and saved `11652`;
-    - "Previous chapter" went back to section 4 and saved `9431`;
-    - after a quit and a reopen, the book opened on section 4, first word 9431.
-
-    The prototype was discarded; nothing is committed.
-- **Out of scope:**
-  - **Where a jump cancels a held turn.** It stays at the jump's start, in `goToLanding`. PAGE-SAVE-RESTAMP-3 moves it to after the jump lands. Its "link within about 20 ms of a turn" case is the lock-dropped jump above, and it edits `goToLanding`.
-  - **A jump onto an anchor with no rects or pages.** `#scrollToAnchor` returns before `#afterScroll` (`paginator.js:965`, `:975`). No relocate fires, so nothing is saved, and the view may show the new section. This is recorded, as TOC-JUMP-SAVE-1's blank-edge case is.
-  - **Focus, Flow and Narrate.** They get working chapter steps through (B), with their own existing `go-to-href` and early commit, which are unchanged. Their landing saves are not part of this item.
-  - **`goToSection`** (`FoliateView.tsx:1022-1035`): jump-back and restore are not reading jumps, and the JUMPS test pins them.
-- **Prerequisites:**
-  - **TOC-JUMP-SAVE-1 merged.** This builds on its counter and edits the same lines (`eb/toc-jump-save-1` @ `db03f2f5`).
-  - **The Stage 8 freeze lifted.**
-  - **A shared-core window for `ReaderContainer.tsx`.** See "Shared-core touches" below.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-    1. **Positive control (standing rule 43):** the tests of Done-when 2 are committed alone first.
-       - `npx vitest run tests/readerModes/pagePositionSave.test.tsx -t "JUMP-LANDING-SAVE-1"` exits 1.
-       - `npx vitest run tests/chapterStep.test.ts` exits 1.
-       - Expected on the base, as measured 2026-10-23: 7 failures by assertion, on `48ce4db9` and again with TOC-JUMP-SAVE-1's hunk applied:
-         - (jl1) ×2 and (jl3): `expected [] to deeply equal [[…]]`;
-         - (jl4) ×2: `expected [{ method: "persistence.updateDocProgress", args: ["doc-1", 20, undefined] }] to deeply equal []`;
-         - chapter step: Next and Previous give `-1`.
-       - The controls (jl2) and "Next at the last entry" pass on the base.
-       - Record the output in the staging memo.
-    2. **Tests:**
-       - **In `tests/readerModes/pagePositionSave.test.tsx`, a new `describe("JUMP-LANDING-SAVE-1 link and chapter jumps")` inside the existing one.**
-         - Helpers:
-           - `followLink(view, href)` mirrors `view.js:350-352`: dispatch a cancelable `link` with `{ a: null, href }`, and if it was not prevented, `await view.goTo(href)`. Cast the fake's no-argument `goTo` for typecheck.
-           - `landingGoTo(view, range)` is a `vi.fn` async `goTo` that dispatches `relocate` `{ cfi: "jump-cfi", fraction: 0.5, range }` on the view before it resolves.
-         - **(jl1)** `it.each` over an internal link `"ch2.xhtml#sec-2"` and a footnote reference `"notes.xhtml#fn-1"`. On a `stampedDoc()` at index 0 with `landingGoTo`, assert:
-           - saves `[["doc-1", 12, "cfi:0:twelve"]]`;
-           - `view.goTo` called exactly once, with the href.
-         - **(jl2) control:** a link with the fake's plain `goTo`, settled, then a relocate: saves `[]`.
-         - **(jl3) control:** on a renderer-numbered section (`rawDoc()` at index 3, loaded), a link landing on `spanRange(doc, 2, 3)`:
-           - it is held (`[]`);
-           - after `render(BOOK_WORDS)`, it saves `[["doc-1", 22, "cfi:3:gamma"]]`.
-         - **(jl4)** `it.each` over "dropped while a turn holds the paginator's lock" and "an unresolvable href". Both use a `goTo` that resolves with no relocate. `runtime.navigateTo(20)` then `handleCommand({ kind: "go-to-href", href: "ch9.xhtml" })`, settled. Assert saves `[]`.
-       - **New `tests/chapterStep.test.ts`.** It reads `tocChapterStep` from `src/utils/text.ts` through a variable name, so it runs on the base. There, the fallback is the base's computation, `chaptersFromCharOffsets("", …)`, and gives -1. Over entries `[0, 136, 140, 2100, 9431]`:
-         - Next from 146 gives 3;
-         - Previous from 2500 gives 2, and from 0 gives 0;
-         - Next from 9500 gives -1 (control).
-       - Every existing test passes unchanged, including JUMPS row "internal link" (`:95`), (y) (`:519-531`), (WC3), and TOC-JUMP-SAVE-1's (tj1)–(tj3). No Rule 50 update.
-    3. **Code checks:**
-       - `git grep -n -F 'pageTurnsInFlightRef.current += 1' -- src/reader/modes/page/FoliateView.tsx` prints exactly 2 lines: `turnPage`, and `goToLanding`. With TOC-JUMP-SAVE-1 merged, it prints 2: `turnPage` and the API `goTo`.
-       - `git grep -n -F 'e.preventDefault(); void goToLanding' -- src/reader/modes/page/FoliateView.tsx` prints 1 line.
-       - `git grep -n "chaptersFromCharOffsets(activeDoc.content" -- src/components/ReaderContainer.tsx` still prints 3 lines (the non-foliate branches are unchanged).
-    4. `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/chapterStep.test.ts` exits 0.
-    5. **Live check (owner's machine, CDP, scratch profile):** `electron-builder --dir`, then on the sample *Meditations*:
-       - **(a)** Page, four turns, then click the in-book link "THE SECOND BOOK" (section 1's list). The probe's first word and cfi, and `library.json`'s `position` and `cfi`, agree. The base saved nothing: 146 stayed.
-       - **(b)** Press "Next chapter". The view moves to the next contents entry's page, and `library.json` agrees with the probe.
-       - **(c)** Press "Previous chapter". The same checks apply.
-       - **(d)** Quit through the app (no kill), then reopen. The book opens on (c)'s page.
-       - **(e)** Switch to Focus and press "Next chapter" once. The word shown moves to the next entry's first word (the existing `go-to-href` path).
-       - **(f)** Follow a footnote reference in any book that has one, and run (a)'s checks. If no owner-library copy has one, record "none available" and rely on (jl1)'s footnote row.
-
-       Record each probe's output in the memo, as TOC-JUMP-SAVE-1 did. The 2026-10-23 prototype probe is the expected shape.
-    6. `npm test` exits 0 on the owner's machine (standing rule 47; the Stage 8 closed-list rule governs load-timing failures). `npm run typecheck` exits 0, and `npm run build` exits 0 (standing rule 48).
-    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly:
-       - `M src/reader/modes/page/FoliateView.tsx`, `M src/reader/modes/page/ModeRuntime.ts`, `M src/utils/text.ts`, `M src/components/ReaderContainer.tsx`;
-       - `M tests/readerModes/pagePositionSave.test.tsx`, `A tests/chapterStep.test.ts`;
-       - the time log and staging memo (standing rule 41).
-- **Effort:** M (S–M code, plus the CDP live check).
-- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel; Blurby.Roadmap gives the merge go.
-- **Lane:** Reader Engine. Execution surface C.
-- **Source:** the stub (TOC-JUMP-SAVE-1 notes 3 and 4, 2026-10-22); this trace and live repro on `48ce4db9` (2026-10-23); the prototype run on the same base.
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites** (lines on `48ce4db9`; take `refs/remotes/origin/main` in after TOC-JUMP-SAVE-1 merges and re-grep each before editing):
-  - **`src/reader/modes/page/FoliateView.tsx:794-795`.** The `link` listener becomes:
-
-    ```ts
-    // TOC-JUMP-SAVE-1, JUMP-LANDING-SAVE-1: a jump's landing relocate fires inside view.goTo, so counting the jump as a
-    // turn in flight saves the landed page, as a turn does.
-    const goToLanding = (target: any) => {
-      pendingTurnRef.current = null; // PAGE-SAVE-RESTAMP-2: a jump cancels a held turn
-      pageTurnsInFlightRef.current += 1;
-      return Promise.resolve(view.goTo(target)).finally(() => { pageTurnsInFlightRef.current -= 1; });
-    };
-    // An internal link or footnote reference (view.js:337-353): go to it through goToLanding instead of foliate's own goTo.
-    view.addEventListener("link", (e: any) => { e.preventDefault(); void goToLanding(e.detail.href); });
-    ```
-
-  - **`:981-984`, the API `goTo`.** After TOC-JUMP-SAVE-1 it is the same three statements. It becomes `goTo: (target) => goToLanding(target),`, with TOC-JUMP-SAVE-1's comment moved to the helper.
-  - **`src/reader/modes/page/ModeRuntime.ts:351-356`, `navigateTo`.** After `if (!this.alive) return;` add:
-
-    ```ts
-    // JUMP-LANDING-SAVE-1: on an EPUB the shell follows with go-to-href, whose landing saves the page. Committing here
-    // would save the entry's word with the old page's cfi, and a jump that never lands would keep it.
-    if (this.document.useFoliate) return;
-    ```
-
-  - **`src/utils/text.ts`, after `currentChapterIndex` (`:217-223`).** Add `export function tocChapterStep(chapters: ReadonlyArray<{ charOffset: number }>, wordIndex: number, dir: 1 | -1): number`, as specified in Fix (B), with a one-paragraph doc comment.
-  - **`src/components/ReaderContainer.tsx`.**
-    - At `:10`, add `tocChapterStep` to the `../utils/text` import.
-    - Move `handleJumpToChapter` (`:665-684`) above `handlePrevChapter` (`:644`).
-    - In each of `handlePrevChapter` and `handleNextChapter`, insert this first line, with `-1` and `1` respectively:
-
-      ```ts
-      if (useFoliate) { const t = tocChapterStep(docChapters, canonicalWordAnchor, -1); if (t >= 0) handleJumpToChapter(t); return; }
-      ```
-
-      Add `useFoliate` and `handleJumpToChapter` to both dependency lists.
-    - Nothing else in the file changes.
-- **Tests:** Done-when 2. The red run for Done-when 1 has been made already (2026-10-23, scratch worktree, discarded). Re-run it on the branch.
-- **Constants:** none.
-- **Branch:** `eb/jump-landing-save-1` from `refs/remotes/origin/main` after TOC-JUMP-SAVE-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\jump-landing-save-1`. Run `npm ci` first. Push with the explicit refspec `HEAD:refs/heads/eb/jump-landing-save-1`.
-- **Staging plan:** the fence paths only. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
-- **Failure handling:**
-  - If Done-when 1 passes on the base, stop and report: the cause has moved.
-  - If (jl1) shows `view.goTo` called twice, stop: the listener's `preventDefault` is not reaching foliate (for example, a non-cancelable `link`). Report the foliate version.
-  - If the live check shows a link's relocate arriving after `view.goTo` resolves, stop and send the trace to Blurby.Brain. Do not widen the counter with a timer.
-  - If live (b) moves the view but the save disagrees with the probe, stop and report.
-  - If any existing test fails, stop and report. Do not edit it to pass.
-  - Rollback: `git revert -m 1 <merge>`. If the revert conflicts with PAGE-SAVE-RESTAMP-3 in `goToLanding`, revert that item first.
-- **Lane ownership (parallel run):** surface C.
-  - **Forbidden:** the other modes' views and runtimes, `main/`, `preload.js`, and every other part of `ReaderContainer.tsx`.
-  - **Shared-core touches:** `src/components/ReaderContainer.tsx`, in one place: the import at `:10` and the three chapter handlers at `:644-684`. This needs an integration window with no other sprint editing that file.
-  - **Merge order:**
-    - after the Stage 8 freeze and after TOC-JUMP-SAVE-1;
-    - independent of PAGE-HELD-TURN-FAIL-1, which edits `:586-674`, so either can go first, with a re-grep;
-    - **before PAGE-SAVE-RESTAMP-3**, which moves the held-turn cancel inside `goToLanding`.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Positive control: link, footnote and never-landing jumps, and the chapter step, red on the base | calculable | positive control | bounded | low | 20m (seven tests across two files, one red run) | — | — |
-| 2 | Links and footnotes jump through `goToLanding`; Page's `navigateTo` makes no early commit on an EPUB | calculable | bug fix | bounded | medium | 20m (one helper, two call sites, one guard) | — | — |
-| 3 | Chapter steps on an EPUB go through the contents list (`tocChapterStep`, `ReaderContainer` shared-core window) | calculable | bug fix | bounded | medium | 20m (one pure helper, two handlers, one move) | — | — |
-| 4 | Live link, chapter, quit-reopen and Focus checks on a `--dir` build; full suite, typecheck and build; merged and pushed | calculable | merge and verify | bounded | medium | 50m (build, CDP probes a–f, suite, one --no-ff merge) | — | — |
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** Done-when 1 was run red on the base, by assertion, before the specification was written.
-- **Standing rule 44 (LL-143):** the stub's premise for chapter steps (that they move the page) was checked live and found wrong. Done-when 5 (b) and (c) check the corrected premise.
-- **TOC-JUMP-SAVE-1's root cause:** a navigation's relocate fires inside `view.goTo`, so counting the jump is enough. The same holds for the link path, by the same paginator code.
-
-- <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1 — Build full NSIS installers per architecture by default** *(position 65 — stub; S; not a release gate)*. The owner's decision for RELEASE-RUNBOOK-1 (2026-10-22, option B) is separate full x64 and ARM64 installers. This release does it with CLI overrides. Move `package.json`'s `build.win.target` from `nsis-web` to `nsis` (artifact name and `latest.yml` per architecture), update the runbook to drop the overrides, and check that electron-updater picks the right architecture's installer for both. Lane: Platform & Maintenance.
-- <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2 — Library writes: the renderer-side and policy follow-ups** *(position 64 — stub; M; after LIBRARY-WRITE-RACE-1; not a release gate)*. Split from LIBRARY-WRITE-RACE-1 (2026-10-22). Four parts. (1) `save-library` id de-duplication, a test for malformed elements, and type checks. (2) The Edit form's fire-and-forget save: how a failed save looks is an **open owner decision** (recommended: the form stays open with an inline "Couldn't save — try again" and keeps the typed values). (3) Renderer edits and sync freshness, **ruled by Blurby.Brain 2026-10-22 (tier 1): main stamps, but never the doc-level `modified`.** For folder docs, `modified` holds the source file's mtime (`syncLibraryWithFolder` writes `modified: file.modified`, and rescans compare against it). The spec first traces what cloud sync's last-writer-wins compares: `sync-state.json` carries a `fieldTimestamps` map. If per-field stamps exist, main stamps the edited field there. If sync only compares `modified`, add a separate main-stamped `editedAt` and have the merge use it for renderer-owned fields. Stamp only when a value actually changes (`markDocsSeen` and other no-op saves stamp nothing). Tests: a title edit beats a staler cloud copy; a folder rescan neither clobbers the edit stamp nor treats an edit as a file change; a no-op save stamps nothing. (4) Cloud sync's `setLibrary(gcd)` stays in the deferred Cloud lane. Lane: Library & Content.
+- <a id="win-target-nsis-1"></a>**WIN-TARGET-NSIS-1** is now a full specification: [WIN-TARGET-NSIS-1](#win-target-nsis-1-spec) (roadmap review 2026-10-23-4).
+- <a id="library-write-race-2"></a>**LIBRARY-WRITE-RACE-2** is now a full specification: [LIBRARY-WRITE-RACE-2](#library-write-race-2-spec) (roadmap review 2026-10-23-5).
 
 <a id="zip-async-read-1"></a>
 
 #### ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 — Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*
 
-- **What:** `openZip` (`main/zip-read.js`) reads the archive with `fsPromises.readFile` and hands the buffer to adm-zip. adm-zip no longer reads the file synchronously. The archive cap (`ZIP_FILE_MAX_BYTES`) is checked twice:
-  - on the stat, before the read, as now;
-  - on the bytes actually read, which closes the gap between the stat and the read.
-
-  Every caller's behaviour and messages stay the same.
-- **Why:**
-  - adm-zip's path constructor reads the whole file with `fs.readFileSync` (`node_modules/adm-zip/adm-zip.js:55-63`, adm-zip 0.5.18). That breaks the standing rule that main-process file I/O is async: for a large EPUB it blocks the main process, and with it every window and IPC reply, for the length of the read.
-  - The stat-then-read order leaves a gap. A file that grows between `fsPromises.stat` and adm-zip's read is read whole, past the cap (ZIP-READ-FOLLOWUPS-1, Blurby.Brain 2026-10-23).
-- **Root cause (traced 2026-10-23 on `29b3e7e5`; Rule 6a cleared):**
-  1. `openZip` (`main/zip-read.js:12-19`):
-     - stats the path (`:13`, a stat failure gives size 0);
-     - refuses a size over the cap with `code: "ZIP_FILE_TOO_LARGE"` (`:14-16`);
-     - then returns `new AdmZip(filePath)` (`:18`).
-  2. **adm-zip's constructor:**
-     - **String input:** it calls `filetools.fs.existsSync(input)`, then `readFileSync(input)` (`adm-zip.js:55-63`). A path that `existsSync` cannot see throws `ADM-ZIP: Invalid filename` (`util/errors.js:39`, prefixed by `E()` at `:50-57`).
-     - **Buffer input:** it uses the buffer as it is, with `opts.method = BUFFER` (`:37-41`). It reads nothing from disk.
-  3. **Callers (re-grepped, `git grep -n "openZip" -- main`)**, all of them `await openZip(path)` inside a try/catch that maps the error:
-     - `main/epub-converter.js:1053`, `validateEpub`;
-     - `main/epub-word-extractor.js:168`, `extractWords`;
-     - `main/file-parsers.js:359`, `extractContent`. Its message depends on the error text: an error containing "invalid" or "zip" gives "…appears to be a corrupted ZIP archive." (`:360-365`), and any other gives "…may be corrupted.";
-     - `main/file-parsers.js:547`, `extractEpubCover`;
-     - `main/file-parsers.js:624`, `extractEpubMetadata`.
-  4. **The entry reader (`createEntryReader`, `:24-50`) is unaffected.** It reads entries through `getCompressedData()`, which works the same on a buffer-backed archive.
-- **Fix:** in `openZip`:
-  1. Keep the stat and its cap check.
-  2. Then `await fsPromises.readFile(filePath)`.
-  3. If the read fails with `ENOENT` or `ENOTDIR`, throw `new Error("ADM-ZIP: Invalid filename")`, carrying the original `code`. This is adm-zip's own wording for a path it cannot see, so `extractContent`'s message for a missing file is unchanged. ZIP-READ-FOLLOWUPS-1's test (s) pins that. Rethrow any other read error as it is: its text has the same `CODE: message, open '<path>'` shape `readFileSync` gave.
-  4. If `buffer.length > ZIP_FILE_MAX_BYTES`, throw the same `ZIP_FILE_TOO_LARGE` error: the file grew after the stat.
-  5. Return `new AdmZip(buffer)`.
-
-  The cap is 2 GiB − 1 (`main/constants.js:75`), which is also the most `fs.readFile` can read. So the read never needs a size of its own, and the post-read check is exact.
-- **Out of scope:**
-  - A bounded read through a file handle (`fh.stat` and a read to the stat's size). The post-read check gives the same guarantee: nothing over the cap reaches adm-zip. The memory a growing file can briefly take is bounded by `readFile`'s own 2 GiB limit.
-  - adm-zip's other synchronous paths. `addLocalFile` and folder adds (`adm-zip.js:312`) are not used in `main/` (`git grep -n "addLocalFile\|addLocalFolder" -- main` prints nothing).
-  - Any other synchronous I/O in `main/`.
-- **Prerequisites:**
-  - ZIP-READ-FOLLOWUPS-1 merged to `main`. It adds `openZip` and `ZIP_FILE_MAX_BYTES` and routes every EPUB open through them. It is held at `29b3e7e5` for the Stage 8 freeze.
-  - The Stage 8 freeze lifted.
-- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
-    1. **Re-grep on the base:**
-       - `git grep -n "new AdmZip(" -- main` prints exactly `main/zip-read.js:18: return new AdmZip(filePath);`.
-       - `git grep -n "openZip(" -- main` prints the five call sites above, plus the definition.
-       - If either differs, re-trace before editing.
-    2. **Positive control (standing rule 43):** the new `tests/zipAsyncRead.test.js` is committed alone first. `npx vitest run tests/zipAsyncRead.test.js` exits 1 on the base, with both failures by assertion:
-       - (za1): `expected [ Array(1) ] to deeply equal []` (adm-zip's `readFileSync` of the file);
-       - (za2): `promise resolved … instead of rejecting`.
-
-       (za3) passes. Record the output in the staging memo. This was checked on `29b3e7e5` while specifying: exactly these two failures, and 1 passed.
-    3. **Tests**, in `tests/zipAsyncRead.test.js`. Take the test file under *Implementation detail* (Tests) as written. Real EPUBs are built with adm-zip under `os.tmpdir()`.
-       - **(za1)** `openZip(file)` returns an archive listing `OEBPS/c1.xhtml`, with two spies set:
-         - `vi.spyOn(fs, "readFileSync")` records no call for the file;
-         - `vi.spyOn(fsp, "readFile")` records exactly one.
-       - **(za2)** With `ZIP_FILE_MAX_BYTES` lowered to 256, and `fsp.stat` stubbed to report 10 bytes for a file larger than 256, `openZip` rejects with `code: "ZIP_FILE_TOO_LARGE"`. This is the stat-to-read gap.
-       - **(za3) control:** `extractWords` reads 400 words from the file, and `extractContent` returns its text.
-       - Unchanged in `tests/zipEntryCap.test.js`, and still passing:
-         - (o): its `readFileSync` assertion becomes vacuous but stays true;
-         - (r), (s) and (p).
-       - **(s) is load-bearing for step 3 of the Fix.** While specifying, the fix without the `ENOENT` mapping failed (s) with "…may be corrupted.".
-
-       `npx vitest run tests/zipAsyncRead.test.js tests/zipEntryCap.test.js` exits 0. On the prototype fix this gave 16 passed in 2 files.
-    4. **Greps on the fix:**
-       - `git grep -n "new AdmZip(" -- main` prints exactly `main/zip-read.js:<n>: return new AdmZip(buffer);`.
-       - `git grep -n "readFileSync" -- main/zip-read.js` prints nothing.
-    5. **Gates:**
-       - `npm test` exits 0 on the owner's machine (standing rule 47; the Stage 8 closed-list rule governs load-timing failures).
-       - `npm run typecheck` and `npm run build` exit 0 (standing rule 48).
-       - The prototype's full suite on `29b3e7e5` passed: 178 files, 2,439 passed / 1 skipped / 0 failed.
-    6. **No live check.** Nothing user-visible changes: the same archives open, with the same messages, and only the read becomes async. Done-when 3's real-EPUB parser tests cover the import path.
-    7. **Fence (standing rule 41):** `git diff --name-status refs/remotes/origin/main` lists exactly:
-       - `M main/zip-read.js`;
-       - `A tests/zipAsyncRead.test.js`;
-       - the time log and staging memo.
-- **Effort:** S.
-- **Owners:** implementation agent; spec-compliance and quality reviewers in parallel; Blurby.Roadmap gives the merge go.
-- **Lane:** Library & Content. Execution surface D.
-- **Source:**
-  - the stub (ZIP-READ-FOLLOWUPS-1, Blurby.Brain 2026-10-23);
-  - this trace on `29b3e7e5`;
-  - a prototype run in a scratch worktree (not committed).
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit site:** `main/zip-read.js:12-19`, `openZip`. Its header comment (`:8-11`) changes to match:
-
-  ```js
-  // The one way main/ opens an archive from disk. Its size is checked on the stat, then the file is read with
-  // fs.promises (never adm-zip's synchronous read) and checked again on the bytes read, so a file that grew after the
-  // stat is refused too. A path stat cannot see keeps adm-zip's "Invalid filename" error, and so each caller's message
-  // for it. adm-zip stays lazy-loaded.
-  async function openZip(filePath) {
-    const tooLarge = (size) => Object.assign(new Error(`EPUB archive too large: ${size} bytes`), { code: "ZIP_FILE_TOO_LARGE" });
-    const size = await fsPromises.stat(filePath).then((s) => s.size, () => 0);
-    if (size > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(size);
-    let buffer;
-    try {
-      buffer = await fsPromises.readFile(filePath);
-    } catch (err) {
-      // adm-zip's own wording for a path it cannot see, so each caller's message for it stays as it was.
-      if (err.code === "ENOENT" || err.code === "ENOTDIR") throw Object.assign(new Error("ADM-ZIP: Invalid filename"), { code: err.code });
-      throw err;
-    }
-    if (buffer.length > constants.ZIP_FILE_MAX_BYTES) throw tooLarge(buffer.length); // it grew after the stat
-    const AdmZip = require("adm-zip");
-    return new AdmZip(buffer);
-  }
-  ```
-
-  No caller changes.
-- **Tests:** `tests/zipAsyncRead.test.js`, as run red on `29b3e7e5` while specifying:
-
-  ```js
-  // ZIP-ASYNC-READ-1: openZip reads the archive with fs.promises and hands adm-zip the buffer; adm-zip never reads the
-  // file synchronously, and the cap holds on the bytes actually read.
-  import { describe, it, expect, afterAll, vi } from "vitest";
-  
-  const os = require("os");
-  const fs = require("fs");
-  const fsp = require("fs/promises");
-  const path = require("path");
-  const AdmZip = require("adm-zip");
-  const constants = require("../main/constants");
-  const { openZip } = require("../main/zip-read.js");
-  const { extractWords } = require("../main/epub-word-extractor.js");
-  const { extractContent } = require("../main/file-parsers.js");
-  
-  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "zip-async-read-"));
-  afterAll(() => fs.rmSync(tmp, { recursive: true, force: true }));
-  
-  let n = 0;
-  function buildEpub() {
-    const zip = new AdmZip();
-    zip.addFile("mimetype", Buffer.from("application/epub+zip"));
-    zip.addFile("META-INF/container.xml", Buffer.from('<?xml version="1.0"?><container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>'));
-    zip.addFile("OEBPS/content.opf", Buffer.from('<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>T</dc:title></metadata><manifest><item id="c1" href="c1.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="c1"/></spine></package>'));
-    zip.addFile("OEBPS/c1.xhtml", Buffer.from(`<html xmlns="http://www.w3.org/1999/xhtml"><body><p>${"word ".repeat(400)}</p></body></html>`));
-    const file = path.join(tmp, `book-${n++}.epub`);
-    zip.writeZip(file);
-    return file;
-  }
-  
-  describe("ZIP-ASYNC-READ-1 async archive read", () => {
-    it("(za1) opening an EPUB never reads it with fs.readFileSync, and reads it once through fs.promises.readFile", async () => {
-      const file = buildEpub();
-      const syncReads = vi.spyOn(fs, "readFileSync");
-      const asyncReads = vi.spyOn(fsp, "readFile");
-      try {
-        const zip = await openZip(file);
-        expect(zip.getEntries().map((e) => e.entryName)).toContain("OEBPS/c1.xhtml");
-        expect(syncReads.mock.calls.filter(([p]) => p === file)).toEqual([]);
-        expect(asyncReads.mock.calls.filter(([p]) => p === file)).toHaveLength(1);
-      } finally {
-        syncReads.mockRestore();
-        asyncReads.mockRestore();
-      }
-    });
-  
-    it("(za2) the cap holds on the bytes read: a file that grew past the cap after its stat is refused", async () => {
-      const file = buildEpub();
-      const saved = constants.ZIP_FILE_MAX_BYTES;
-      constants.ZIP_FILE_MAX_BYTES = 256;
-      expect(fs.statSync(file).size).toBeGreaterThan(256);
-      const stat = vi.spyOn(fsp, "stat").mockImplementation(async () => ({ size: 10 })); // stat saw it small
-      try {
-        await expect(openZip(file)).rejects.toMatchObject({ code: "ZIP_FILE_TOO_LARGE" });
-      } finally {
-        stat.mockRestore();
-        constants.ZIP_FILE_MAX_BYTES = saved;
-      }
-    });
-  
-    it("(za3) control: the parsers still read the archive", async () => {
-      const file = buildEpub();
-      expect((await extractWords(file)).totalWords).toBe(400);
-      expect(await extractContent(file)).toContain("word");
-    });
-  });
-  ```
-- **Constants:** none new. `ZIP_FILE_MAX_BYTES` (`main/constants.js:75`) is reused.
-- **Branch:** `eb/zip-async-read-1` from `refs/remotes/origin/main`, after ZIP-READ-FOLLOWUPS-1 has merged, in worktree `C:\Projects\Blurby\.worktrees\zip-async-read-1`. Run `npm ci` first. Push with the explicit refspec `HEAD:refs/heads/eb/zip-async-read-1`.
-- **Staging plan:** the fence paths only. Never stage `tests/perf-baseline-results.json`. Merge with `--no-ff` on Blurby.Roadmap's go.
-- **Failure handling:**
-  - If Done-when 1 differs (another `new AdmZip(` in `main/`, or a moved call site), stop and report. Do not widen the fence.
-  - If Done-when 2 passes on the base, stop and report: the cause has moved.
-  - If (s) fails, the error mapping is wrong. Fix the mapping, never the test.
-  - If any other existing test fails, stop and report it with its output.
-  - Rollback: `git revert -m 1 <merge>`. If the revert conflicts, stop and send the conflict to Blurby.Brain. Do not hand-merge `main/zip-read.js`.
-- **Lane ownership (parallel run):** surface D.
-  - **Forbidden:**
-    - `main/epub-converter.js`, `main/epub-word-extractor.js` and `main/file-parsers.js` (callers stay as they are);
-    - `main/constants.js`;
-    - `src/`, `preload.js`.
-  - **Shared-core touches:** none.
-  - **Merge order:** after the Stage 8 freeze lifts, and after ZIP-READ-FOLLOWUPS-1, whose file this edits. Independent of PAGE-SAVE-RESTAMP-3 and JUMP-LANDING-SAVE-1.
-
-##### Task list
-
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Re-grep; positive control: (za1) and (za2) red by assertion on the base | calculable | positive control | mechanical | low | 10m (one test file as drafted, one red run) | — | — |
-| 2 | `openZip` reads with `fsPromises.readFile`, re-checks the cap on the bytes read, and keeps adm-zip's missing-path error | calculable | bug fix | bounded | low | 10m (one function, two test files green) | — | — |
-| 3 | Greps; full suite, typecheck and build; merged and pushed | calculable | merge and verify | mechanical | low | 25m (full `npm test` + typecheck + build + one --no-ff merge) | — | — |
-
-##### Lessons applied
-- **Standing rule 43 (LL-138):** (za1) and (za2) are committed alone first, and are red by assertion on the base.
-- **Standing rule 36:** every cited line is re-grepped on the base before editing (Done-when 1).
-- **LL-158:** the cap is checked on the bytes actually read, at the archive's real size, not only on the earlier stat.
-- **Standing rule 50 (LL-156):** DEPS-AUDIT-1's adm-zip reachability note (`docs/governance/DEPENDENCY_ADVISORIES.md`) is re-read against this edit site. It is unchanged, because it concerns entry sizes, which the existing caps handle.
-- **Standing rules 47 and 48:** the full suite runs on the owner's machine, and typecheck and build are in Done-when.
-- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+- **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md#zip-async-read-1) (moved by roadmap review 2026-10-23-4 to keep ROADMAP.md under its length ceiling; byte-identical to `ROADMAP.md` @ `c4dc306c`). The builder, the merge and the close-out read it there.
 
 - <a id="band-align-2"></a>**BAND-ALIGN-2 — The cursor word's line sits in the fixed band: Focus scrolls to it, Flow runs on one clock** *(position 83 — Full Spec, see [BAND-ALIGN-2](#band-align-2-spec); L, amended by the owner 2026-10-23; after BAND-ALIGN-1, FOCUS-KEYS-FIX-1 and FLOW-KEYS-FIX-1; post-release; not a release gate)*. Owner decision 2026-10-23 (BAND-ALIGN-1 Part B, tier 3): "keep band fixed". Lane: Reader Engine.
-- <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1 — Quit does not wait on a Kokoro job, and a quick relaunch is not lost** *(position 73 — stub; S–M; after the Stage 8 release; not a release gate)*. From BUG-207 (SMOKE8-DIAG-1: the save steps take ≤50 ms; the rest is the in-flight Kokoro wait, over 3 s in 11 of 13 quits). Blurby.Brain, 2026-10-23: option (c) for this release. The stub covers two changes. (a) On pause, stop starting new generations but keep the audio already generated; re-measure D6 resume. (b) A relaunch during the linger waits for, or takes over from, the old window-less process instead of doing nothing; test a relaunch within 2 s of quit. Lane: TTS / Narration Engine.
-- <a id="reader-arrow-guard-1"></a>**READER-ARROW-GUARD-1 — Narrate and Page ignore modified arrows in their page-turn listeners** *(position 91 — stub; filed 2026-10-23 from Blurby.Brain's FLOW-KEYS-FIX-1 diagnosis; not probed live; after FLOW-KEYS-FIX-1's amendment, whose `isFlowBrowseKey` pattern it copies)*.
-  - **Narrate:** its book view (`src/reader/modes/narrate/FoliateView.tsx:1426`) has the same unguarded window keydown listener as Flow, so Shift or Ctrl with ←/→ probably pauses Narrate and turns a page.
-  - **Page:** its listener (`src/reader/modes/page/FoliateView.tsx:1179`) also turns pages on Shift or Ctrl with ←/→.
-  - **First step:** a live probe in each mode (Rule 6a). Then a per-mode guard and a helper with a red test, as in FLOW-KEYS-FIX-1's amendment.
-  - **Lane:** Reader Engine.
-- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1 — The other overlays: Escape and undefined theme tokens** *(position 31 — stub; after UX-POLISH-2)*. Found while specifying UX-POLISH-2, not verified live. `HighlightsOverlay.tsx:113` and `QuickSettingsPopover.tsx:67` listen for Escape on `window` in the bubble phase, so Escape there probably also leaves the reader; UX-POLISH-2's capture-phase fix applies. Five panels read the undefined `--color-bg` (`src/styles/keyboard.css:141`, `:316`, `:370`, `:418`, `:461`: go-to indicator, highlights, snooze picker, tag picker, quick settings) and are probably unreadable in E-ink and light. Verify live first, then specify with UX-POLISH-2's tests as the pattern. **W1 (UX-POLISH-2 quality review, 2026-10-14; Blurby.Brain asked for it here):** `.rbb-mode-btn:hover { background: var(--color-border, #444); }` in `src/styles/page-reader.css` reads the undefined `--color-border` token, so hovering a mode button in the light and E-ink themes shows dark grey under dark text; fix with the same theme token UX-POLISH-2 used for the mode-button borders. Lane: UX polish.
+- <a id="narrate-quit-linger-1"></a>**NARRATE-QUIT-LINGER-1** is now a full specification: [NARRATE-QUIT-LINGER-1](#narrate-quit-linger-1-spec) (roadmap review 2026-10-23-4).
+- <a id="reader-arrow-guard-1"></a>**READER-ARROW-GUARD-1** is now a full specification: [READER-ARROW-GUARD-1](#reader-arrow-guard-1-spec) (roadmap review 2026-10-23-4).
+- <a id="chapter-step-cfi-1"></a>**CHAPTER-STEP-CFI-1** is now a full specification: [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec) (roadmap review 2026-10-23-5).
+- <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1** is now a full specification: [RESTAMP-RERUN-RACE-1](#restamp-rerun-race-1-spec) (roadmap review 2026-10-23-5).
+- <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — SUPERSEDED (roadmap review 2026-10-23-5):** folded into [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec). Both edit Focus's `navigateTo`, the `go-to-href` case and `onRelocate`, and the owner's "first word of chapter" ruling needs the landing hook that fix adds. The ruling is carried there.
+- <a id="flow-toc-jump-word-1"></a>**FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter's first word** *(position 110 — stub; owner ruling 2026-10-23: "Yes, as a follow-up" to CHAPTER-STEP-CFI-1; after CHAPTER-STEP-CFI-1)*. Flow gets the same paused cursor on the jumped-to chapter's first word that CHAPTER-STEP-CFI-1 gives Focus, using that item's landing hook. Specify it after CHAPTER-STEP-CFI-1's Done-when 1 has recorded what Flow shows today. Lane: Reader Engine.
+- <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
+- <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
 
 
 <a id="blurby-server-1"></a>
 
-#### BLURBY-SERVER-1 — One library on every device (blrby.app server) *(position 97 — Path: epic; absorbed by roadmap review 2026-10-23-3 from held storyboard `2026-10-23-blurby-server`; after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9)*
+#### BLURBY-SERVER-1 — One library on every device (blrby.app server) *(position 104 (97 until review 2026-10-23-4, then 100 until the owner moved Stage 9's tabs, feeds and extension ahead of it, 2026-10-23) — Path: epic; absorbed by roadmap review 2026-10-23-3 from held storyboard `2026-10-23-blurby-server`; after the Stage 8 release and the post-freeze merge train, ahead of the rest of Stage 9)*
 
 - **What:** a Blurby server on Cloudflare (blrby.app) holds each account's books, reading positions, highlights, notes and settings.
   - The desktop gains sign-in (Google, Microsoft, Apple or email) and a drag-and-drop window, the only way books come in. The watched source folder stops importing (owner ruling Q2).
@@ -1970,11 +1839,13 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 
 #### Stage 9 — Product expansion (owner direction, 2026-10-15)
 
+**Re-sequenced by the owner 2026-10-23 (tier 3): "Move ahead of the server".** APP-TABS-1 (100), RSS-AGGREGATOR-1 (101), PODCAST-SOURCE-1 (102) and BROWSER-EXT-FINALIZE-1 (103) now come before BLURBY-SERVER-1 (104). They are built as desktop features without sign-in or plan limits, and adapted when the server lands. Their BLURBY-SERVER-1 prerequisite is removed; RSS, Podcasts and the extension still follow APP-TABS-1. ANDROID-APP-1, IOS-APP-1 and CLOUD-CONNECTORS-1 still wait for the server.
+
 Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs investigation and owner design decisions before it can be specified (Rule 6a), and none is a Stage 8 release gate. Order follows the owner's list; Library and Newsroom are built first, Podcasts and Marketplace ship as "Coming Soon" banners.
 
-- <a id="app-tabs-1"></a>**APP-TABS-1 — Four tabs: Library, Newsroom, Podcasts, Marketplace** *(position 48 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a "Coming Soon" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highlights or sync state. Needs a design pass with the owner before it is specified: the tab bar's placement and look, what moves from the current library (Saved Articles, URL imports, the sources view), and where settings and search live. Lane: UX polish.
-- <a id="rss-aggregator-1"></a>**RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom** *(position 49 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane. After APP-TABS-1. Open questions for the owner: feed discovery (paste a URL, OPML import), refresh cadence, how long items are kept, and full-text fetch versus feed summary. Lane: Library & Content.
-- <a id="podcast-source-1"></a>**PODCAST-SOURCE-1 — Podcast source service integration** *(position 50 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1 (roadmap review 2026-10-23-3))*. After APP-TABS-1, replace the Podcasts tab's "Coming Soon" banner with directory search, show profiles, episode lists and built-in audio streaming. **Owner direction added 2026-10-15: use an aggregator API for discovery and metadata; stream episodes directly from the publisher's host.** Lane: Library & Content.
+- <a id="app-tabs-1"></a>**APP-TABS-1 — Four tabs: Library, Newsroom, Podcasts, Marketplace** *(position 100 — stub; ahead of BLURBY-SERVER-1 by owner decision 2026-10-23, desktop-only until the server adds sign-in and plan limits)*. The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a "Coming Soon" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highlights or sync state. Needs a design pass with the owner before it is specified: the tab bar's placement and look, what moves from the current library (Saved Articles, URL imports, the sources view), and where settings and search live. Lane: UX polish.
+- <a id="rss-aggregator-1"></a>**RSS-AGGREGATOR-1 — RSS feed aggregator for Newsroom** *(position 101 — stub; ahead of BLURBY-SERVER-1 by owner decision 2026-10-23, desktop-only until the server adds sign-in and plan limits)*. Subscribe to RSS and Atom feeds, fetch them on a schedule and on demand, and show new items in Newsroom as readable articles (the existing Readability extraction path). It supersedes the deferred Phase 8 RSS/News lane. After APP-TABS-1. Open questions for the owner: feed discovery (paste a URL, OPML import), refresh cadence, how long items are kept, and full-text fetch versus feed summary. Lane: Library & Content.
+- <a id="podcast-source-1"></a>**PODCAST-SOURCE-1 — Podcast source service integration** *(position 102 — stub; ahead of BLURBY-SERVER-1 by owner decision 2026-10-23, desktop-only until the server adds sign-in and plan limits)*. After APP-TABS-1, replace the Podcasts tab's "Coming Soon" banner with directory search, show profiles, episode lists and built-in audio streaming. **Owner direction added 2026-10-15: use an aggregator API for discovery and metadata; stream episodes directly from the publisher's host.** Lane: Library & Content.
 
   **Provider strategy:** Evaluate [Podcast Index](https://podcastindex-org.github.io/docs-api/) first: an open podcast directory with free API access, show search, trending feeds and episode metadata. Access requires an API key/secret and signed requests; do not assume complete global coverage or unrestricted usage. Keep [Apple's iTunes Search API](https://performance-partners.apple.com/search-api) as an alternative for podcast discovery and RSS feed lookup (Apple documents approximately 20 calls per minute, subject to change). [Listen Notes / PodcastAPI.com](https://www.listennotes.com/api/) is the commercial alternative if its search capabilities justify the cost; check quotas, attribution and [caching terms](https://www.listennotes.com/api/terms/) before choosing it. These are candidates, not a requirement to integrate all three.
 
@@ -1986,7 +1857,8 @@ Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs
 - <a id="cloud-connectors-1"></a>**CLOUD-CONNECTORS-1 — Connections to the mainstream cloud services** *(position 51 — stub)*. **Rescoped by roadmap review 2026-10-23-3 (owner): book and article sources only, after BLURBY-SERVER-1.** Cross-device sync and the sync-target role belong to the server epic. Each import goes through the server intake and its plan limits (owner ruling Q2). Connect Google Drive, OneDrive, Box, Dropbox and iCloud as book and article sources. Builds on the existing Microsoft (@azure/msal-node) and Google (googleapis) auth and the deferred Phase 7 Cloud Sync lane, which it supersedes. Likely splits into one item per service. Open questions for the owner: source only, or sync too; which service first; and iCloud on Windows (no first-party API, so likely iCloud Drive's local folder). Lane: Platform & Maintenance. **Path:** epic — four providers, each with its own auth, sync and conflict design, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
 - <a id="android-app-1"></a>**ANDROID-APP-1 — Establish the Android app** *(position 52 — stub; after BLURBY-SERVER-1: syncs through BLURBY-SERVER-1 (not CLOUD-CONNECTORS-1) (roadmap review 2026-10-23-3))*. Stand up Blurby on Android: reading modes, library, and sync with the desktop app. Supersedes the deferred Track C (APK-0 to APK-4) lane, whose earlier specs are in docs/planning/.Archive/ROADMAP_deferred_2026-05-15.md. Needs an architecture decision first (native, React Native, a Capacitor/WebView shell around the renderer, or another route) and depends on how sync is settled (CLOUD-CONNECTORS-1). Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and release track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
 - <a id="ios-app-1"></a>**IOS-APP-1 — Establish the iOS app** *(position 53 — stub; after BLURBY-SERVER-1: syncs through BLURBY-SERVER-1 (not CLOUD-CONNECTORS-1) (roadmap review 2026-10-23-3))*. Stand up Blurby on iOS and iPadOS: reading modes, library, and sync with the desktop app. Shares the architecture decision with ANDROID-APP-1; Apple's developer account, signing and App Store review are prerequisites. Lane: Platform & Maintenance. **Path:** epic — a new platform build, packaging and App Store track, over several sessions; it cannot be one dispatch (roadmap review 2026-10-22).
-- <a id="browser-ext-finalize-1"></a>**BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions** *(position 54 — stub; after BLURBY-SERVER-1: sign-in and per-tab plan limits from BLURBY-SERVER-1; `add-article` goes through the server's intake (roadmap review 2026-10-23-3))*. Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond). After APP-TABS-1, so saved pages land in Newsroom. Needs the owner's list of what "finalized" covers (features, store publishing, accounts). Lane: Chrome Extension.
+- <a id="car-audio-1"></a>**CAR-AUDIO-1 — Android Auto and Apple CarPlay compatibility** *(position 109 — stub; added 2026-10-23 at the owner's request; after ANDROID-APP-1 and IOS-APP-1)*. Narrated books (and, once they exist, podcasts) play through the car: a browsable library and now-playing screen in Android Auto and Apple CarPlay, with play, pause, skip and rate controls, and the reading position saved as it plays. Both platforms allow only their audio-app templates, so this is a listening surface, not a reader. Needs owner design decisions before specification: what the car shows (books, chapters, recently read), whether Kokoro runs on the phone or streams from the server, and Apple's CarPlay audio entitlement. Lane: TTS / Narration Engine.
+- <a id="browser-ext-finalize-1"></a>**BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions** *(position 103 — stub; ahead of BLURBY-SERVER-1 by owner decision 2026-10-23, desktop-only until the server adds sign-in and plan limits; once the server lands, `add-article` goes through its intake (roadmap review 2026-10-23-3))*. Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond). After APP-TABS-1, so saved pages land in Newsroom. Needs the owner's list of what "finalized" covers (features, store publishing, accounts). Lane: Chrome Extension.
 
 ---
 

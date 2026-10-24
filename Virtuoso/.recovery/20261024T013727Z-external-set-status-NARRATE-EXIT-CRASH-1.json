@@ -1,0 +1,38 @@
+{
+  "id": "20261024T013727Z-external-set-status-NARRATE-EXIT-CRASH-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-EXIT-CRASH-1",
+  "created": "2026-10-24T01:37:27Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "Superseded",
+      "sequence": null,
+      "completed": "2026-10-23",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-23-4-audit.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-EXIT-CRASH-1:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-4-audit.md'), ('sequence', None), ('status', 'Superseded')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-EXIT-CRASH-1",
+      "idempotencyKey": "set-status:NARRATE-EXIT-CRASH-1:[('completed', '2026-10-23'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-23-4-audit.md'), ('sequence', None), ('status', 'Superseded')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T013727Z-external-set-status-NARRATE-EXIT-CRASH-1",
+      "detail": {},
+      "providerItemId": "3fa7c96cc31e8161b7a0c30695c7ee60"
+    }
+  },
+  "resolved": "2026-10-24T01:37:38Z",
+  "outcome": "succeeded"
+}
