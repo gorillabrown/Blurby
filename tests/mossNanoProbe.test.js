@@ -9,6 +9,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const mossNanoProbeUrl = new URL("../scripts/moss_nano_probe.mjs", import.meta.url);
 const pythonProbePath = path.resolve("scripts", "moss_nano_probe.py");
 const execFileAsync = promisify(execFile);
+const HOST_SENSITIVE_MOSS_NANO_PROBE_ENV = "BLURBY_RUN_MOSS_NANO_PERF_TESTS";
+
+function shouldRunHostSensitiveMossNanoProbeTests(env = process.env) {
+  return env[HOST_SENSITIVE_MOSS_NANO_PROBE_ENV] === "1";
+}
+
+const hostSensitiveMossNanoIt = shouldRunHostSensitiveMossNanoProbeTests() ? it : it.skip;
 
 async function importMossNanoProbe() {
   const module = await import(`${mossNanoProbeUrl.href}?case=${Date.now()}-${Math.random()}`);
@@ -848,6 +855,12 @@ describe("MOSS Nano probe", () => {
     vi.restoreAllMocks();
   });
 
+  it("keeps direct Python probe execution behind an explicit host-sensitive opt-in", () => {
+    expect(shouldRunHostSensitiveMossNanoProbeTests({})).toBe(false);
+    expect(shouldRunHostSensitiveMossNanoProbeTests({ BLURBY_RUN_MOSS_NANO_PERF_TESTS: "0" })).toBe(false);
+    expect(shouldRunHostSensitiveMossNanoProbeTests({ BLURBY_RUN_MOSS_NANO_PERF_TESTS: "1" })).toBe(true);
+  });
+
   it("prints Node CLI help without running the probe", async () => {
     const { main } = await importMossNanoProbe();
     const write = vi.spyOn(process.stdout, "write").mockImplementation(() => true);
@@ -981,7 +994,7 @@ describe("MOSS Nano probe", () => {
     ]));
   });
 
-  it("blocks direct Python probes with empty passage text before runtime validation", async () => {
+  hostSensitiveMossNanoIt("blocks direct Python probes with empty passage text before runtime validation", async () => {
     const tempRoot = await makeTempProject();
     tempDirs.push(tempRoot);
     const outputRoot = path.join(tempRoot, "artifacts", "nano");
@@ -1017,7 +1030,7 @@ describe("MOSS Nano probe", () => {
     });
   });
 
-  it.each([
+  hostSensitiveMossNanoIt.each([
     ["short", "short-smoke", 9],
     ["punctuation", "punctuation-heavy-mid", 14],
   ])("resolves direct Python passage alias %s before runtime validation", async (alias, canonicalId, wordCount) => {

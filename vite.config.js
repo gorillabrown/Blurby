@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { readFileSync } from "fs";
+import path from "node:path";
 
 const pkg = JSON.parse(readFileSync("./package.json", "utf-8"));
 
@@ -63,7 +64,7 @@ export default defineConfig({
     strictPort: true,
   },
   test: {
-    setupFiles: ["./tests/setup.js"],
+    setupFiles: [path.resolve(process.cwd(), "tests/setup.js")],
     exclude: [".Backup/**", ".claude/**", ".runtime/**", ".tmp/**", "node_modules/**", "Example App/**", "tmp/**"],
     testTimeout: 10000,
   },

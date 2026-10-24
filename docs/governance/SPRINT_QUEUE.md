@@ -55,15 +55,30 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
-Queue depth: 1 prepared pointer (RED; stop signal after TTS-SYNC-1 closeout, backfill required before further code-changing dispatch)
-Next queue item: TTS-DIAG-1 — Provider-Neutral Narration Diagnostics Bundle
-Pre-dispatch gate: TTS-SYNC-1 must be committed, merged to `main`, and pushed before starting TTS-DIAG-1.
-Health: GREEN on Desktop v2 release closeout, post-v2 remediation, Kokoro preflight truth, Kokoro chunk/timing hardening, KOKORO-DEEPEN-3 evidence closeout, TTS-REGISTRY-1 provider capability truth, TTS-NORMALIZE-1 spoken segment normalization/cache identity truth, TTS-CACHE-TIMING-1 structured cache/timing sidecar truth, and TTS-SYNC-1 highlight sync policy truth. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled for Desktop v2. 2026-05-11 roadmap review promotes the Kokoro-centered architecture conveyor: provider registry → segment normalization → structured cache/timing sidecars → highlight sync → diagnostics.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation) → 2026-05-10 PM (Abogen Kokoro review; Kokoro Deepening Program queued) → 2026-05-11 PM (TTS synthesis review; architecture conveyor promoted).
+Finish line: TTS Architecture Complete — every implicit TTS architecture decision made explicit, tested, and debuggable.
+Queue depth: 5 prepared pointers (GREEN; 3 full specs + 2 stubs after TTS stack integration)
+Next queue item: TEST-HARNESS-1 — Stabilize Resource-Sensitive TTS Performance Probes
+Pre-dispatch gate: TTS-INTEGRATE-1 must be committed, pushed, and either merged to `main` or opened as the integration PR before downstream work starts from canonical main.
+Health: GREEN. Desktop v2.0 achieved. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in, and Qwen retired/disabled. TTS-SYNC-1 (`142dc24`) and TTS-DIAG-1 (`c97e446`) are integrated through `sprint/tts-integrate-1-sync-diag-main`; downstream work resumes with TEST-HARNESS-1.
+Roadmap reviews: 2026-05-02 AM → 2026-05-02 PM → 2026-05-04 PM → 2026-05-10 PM → 2026-05-11 PM → 2026-05-14 PM (TTS Architecture Complete finish line; adversarial review; conveyor established).
 ```
 
-## Desktop v2.0 Conveyor Belt (Active)
+## TTS Architecture Completion Conveyor Belt (Active)
+
+| Seq | Sprint | Stage | LOE | Deps | Status |
+|-----|--------|-------|-----|------|--------|
+| ~~1~~ | ~~TTS-SYNC-1~~ | ~~Stage 1: Sync & Diagnostics~~ | ~~L~~ | ~~TTS-CACHE-TIMING-1~~ | Integrated via `sprint/tts-integrate-1-sync-diag-main` |
+| ~~2~~ | ~~TTS-DIAG-1~~ | ~~Stage 1: Sync & Diagnostics~~ | ~~M~~ | ~~TTS-SYNC-1~~ | Integrated via `sprint/tts-integrate-1-sync-diag-main` |
+| ~~3~~ | ~~TTS-INTEGRATE-1~~ | ~~Stage 1: Sync & Diagnostics~~ | ~~S/M~~ | ~~TTS-SYNC-1, TTS-DIAG-1~~ | Integration branch prepared; verification in progress |
+| 4 | TEST-HARNESS-1 | Stage 2: Test Stability | S/M | TTS-INTEGRATE-1 | Full spec — NEXT |
+| 5 | TTS-PIPELINE-1 | Stage 2: Pipeline Truth | S | TTS-NORMALIZE-1 | Full spec |
+| 6 | TTS-CANARY-1 | Stage 3: UX Completeness | S | TTS-REGISTRY-1 | Full spec |
+| 7 | TTS-REGISTRY-DISPATCH-1 | Stage 3: Architecture | M | TTS-REGISTRY-1, TTS-SYNC-1 | Stub |
+| 8 | TTS-ARCH-DOC-1 | Stage 4: Governance | S | All above | Stub |
+
+Full specs: ROADMAP.md § "TTS Architecture Completion — Active Conveyor Belt".
+
+## Desktop v2.0 Conveyor Belt (Completed)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
@@ -102,40 +117,41 @@ Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
 ## Ready Queue Pointers
 
 ```text
-Sprint: TTS-DIAG-1 — Provider-Neutral Narration Diagnostics Bundle
-Status: Queued after TTS-SYNC-1; diagnostics should consolidate the explicit provider/normalizer/cache/timing/sync metadata.
-Type: tooling + docs; no audio payload export by default.
+Sprint: TEST-HARNESS-1 — Stabilize Resource-Sensitive TTS Performance Probes
+Status: Queued after TTS-INTEGRATE-1. The same MOSS Nano performance probe repeatedly destabilized full-suite verification independently of sprint-owned changes.
+Type: test harness stabilization; no product behavior change and no MOSS Nano posture change.
 
-WHAT: Add a provider-neutral diagnostics bundle for an active narration session, capturing provider capabilities, normalized segment identity, cache/timing metadata, scheduler truth events, and highlight sync decisions.
+WHAT: Stabilize `tests/mossNanoProbe.test.js` so default full-suite verification can distinguish real MOSS Nano contract regressions from host/resource-sensitive timeout or threshold noise.
 
-HYPOTHESIS: A single redacted diagnostic artifact will make future narration regressions debuggable without model churn or console-log archaeology.
+HYPOTHESIS: The probe can keep deterministic MOSS Nano readiness/audio-contract coverage while moving host-sensitive performance checks behind explicit opt-in gates or more stable thresholds.
 
 WHERE:
-  - `ROADMAP.md` § "Sprint TTS-DIAG-1: Provider-Neutral Narration Diagnostics Bundle"
-  - `src/utils/narrateDiagnostics.ts`, `src/utils/ttsEvalTrace.ts`
-  - `src/hooks/useNarration.ts`, `src/components/settings/TTSSettings.tsx` or dev-only diagnostics UI
-  - `scripts/tts_eval_runner.mjs`, `docs/testing/`
+  - `ROADMAP.md` § "Sprint TEST-HARNESS-1: Stabilize Resource-Sensitive TTS Performance Probes"
+  - `tests/mossNanoProbe.test.js`
+  - any local probe helpers it imports
+  - `package.json` only if a named opt-in perf command is needed
+  - `docs/testing/` or governance docs for verification policy
 
 HOW (Phase 0):
-  CLI [opus] {medium}: Inventory current eval/diagnostic traces and define redacted bundle schema.
+  CLI [sonnet] {medium}: Reproduce focused and full-suite failure shape, then split deterministic contract assertions from host-sensitive performance thresholds.
 
 HOW (Implementation):
-  Hephaestus [sonnet] {medium}: Add bundle producer/export action and eval-runner schema validation.
-  Hippocrates [haiku] {medium}: Add schema/redaction/Kokoro happy-path tests.
+  Hercules [sonnet] {medium}: Refactor the probe tests without touching production MOSS Nano runtime or product posture.
+  Hippocrates [haiku] {medium}: Add or update test helpers and any opt-in performance command.
 
 HOW (Verification):
-  Hippocrates [haiku] {low}: Run diagnostic/eval tests, focused narration tests, full tests, build, and diff checks.
+  Hippocrates [haiku] {medium}: Run focused MOSS Nano probe tests, default `npm test`, serialized `npm test -- --maxWorkers=1`, typecheck, build, and diff checks.
 
 HOW (Review / Closeout):
-  Herodotus + Plato [sonnet] {medium}: Document runbook, verify no audio/user text overexposure beyond intentional metadata, and reassess KOKORO-EXPORT-1 readiness.
+  Solon + Herodotus [sonnet] {medium}: Confirm the sprint does not weaken real contract coverage; document the new verification split.
 ```
 
-## Deferred Lanes (Not on Desktop v2.0 Critical Path)
+## Deferred Lanes (Beyond TTS Architecture Completion)
 
 | Lane | Status | Resume Condition |
 |------|--------|-----------------|
-| Kokoro Deepening Program | Completed first arc; architecture arc active | `KOKORO-DEEPEN-1`, `KOKORO-DEEPEN-2`, `KOKORO-DEEPEN-3`, `TTS-REGISTRY-1`, `TTS-NORMALIZE-1`, `TTS-CACHE-TIMING-1`, and `TTS-SYNC-1` landed. Next arc continues with `TTS-DIAG-1`; queue backfill needed before further dispatch. |
-| CHUNK-SYNC Narrate migration | Completed through Kokoro path | Flow visual Dispatch 3, `KOKORO-DEEPEN-2`, and `TTS-SYNC-1` ground Narrate chunk/word visualization in explicit timing truth. Future changes go through the diagnostics/export lanes. |
+| Kokoro Deepening Program | Completed first arc; architecture arc active | `KOKORO-DEEPEN-1`, `KOKORO-DEEPEN-2`, `KOKORO-DEEPEN-3`, `TTS-REGISTRY-1`, `TTS-NORMALIZE-1`, `TTS-CACHE-TIMING-1`, `TTS-SYNC-1`, and `TTS-DIAG-1` are integrated or landing through the stack integration branch. Next arc continues with `TEST-HARNESS-1`. |
+| CHUNK-SYNC Narrate migration | Completed through Kokoro path | Flow visual Dispatch 3, `KOKORO-DEEPEN-2`, `TTS-SYNC-1`, and `TTS-DIAG-1` ground Narrate chunk/word visualization in explicit timing truth and diagnostics. Future changes go through the test-harness, pipeline, readiness, and export lanes. |
 | KOKORO-EXPORT-1 | Optional future | Roadmap hook only; do not queue until provider registry, normalization, cache/timing sidecars, highlight sync, and diagnostics stabilize. |
 | KOKORO-RETIRE-1/2 | Not active | Superseded as a posture by Kokoro deepening; do not re-queue without a separate future product decision. |
 | Qwen Streaming | Retired/disabled for Desktop v2 (QWEN-STREAM-4 ITERATE) | Post-v2.0 only by separate approval |
@@ -150,6 +166,8 @@ HOW (Review / Closeout):
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
+| TTS-INTEGRATE-1 | 2026-05-15 | PASS / integration branch — `sprint/tts-integrate-1-sync-diag-main` merges `TTS-SYNC-1` first and stacked `TTS-DIAG-1` second from a clean worktree, preserving implementation facts while advancing the queue to `TEST-HARNESS-1`. Final status is merge-to-main or PR-pending based on verification and repository constraints. |
+| TTS-DIAG-1 | 2026-05-15 | PASS — Provider-neutral `tts-diagnostics-v1` narration diagnostics bundle is integrated through `sprint/tts-integrate-1-sync-diag-main`. Bundle captures provider capabilities, selected engine/voice/rate, segment IDs, original/normalized hashes, cache key components, timing sidecar summaries, scheduler truth events, highlight sync decisions, and relevant errors without exporting audio payloads or raw book text by default. Redaction guardrails recursively strip/reject `rawText`, `originalText`, `normalizedText`, and audio-shaped fields. |
 | TTS-SYNC-1 | 2026-05-15 | PASS — Timing metadata and highlight sync policy are centralized. `TimingMetadataStore` stores chunk timing metadata with trusted/heuristic/missing classification and queries by chunk, segment, word, or time; `HighlightSyncController` allows word-synced decisions only for trusted word-native timing and downgrades heuristic/missing timing to chunk/segment decisions with no active word. Scheduler/Kokoro/useNarration wiring publishes and stores timing metadata; `ReaderContainer` consumes controller decisions without changing Flow WPM timing, Narrate spoken timing, autoplay behavior, provider defaults, Qwen disablement, or `lastConfirmedAudioWordRef` ownership. Verification: focused pre-change sync baseline 8 files / 85 tests, focused sync regression 9 files / 93 tests, full `npm test` 181 files / 2598 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. |
 | TTS-CACHE-TIMING-1 | 2026-05-13 | PASS — Structured v2 TTS cache identity landed alongside legacy v1 compatibility. New entries carry schema/versioned provider, voice, rate bucket, model, source/normalized hashes, normalizer version, pronunciation override hash, document locator, chunk ID, sample rate, and timing truth; v2 disk paths are safe hashed directories under `tts-cache/v2/`. Manifest/audio/sidecar writes are atomic; `.timing.json` sidecars persist duration, trusted/heuristic classification, chunk boundaries, and trusted word timestamps only; corrupt sidecars do not discard readable audio. Verification: focused cache/timing/Kokoro/background suite 8 files / 75 tests, `npm run typecheck`, `npm run build` with existing circular chunk warning, and `git diff --check` passed. Full serialized `npm test -- --maxWorkers=1` reached 186 files / 2642 tests and failed only the pre-existing resource-sensitive MOSS Nano performance probe (`2641` passed / `1` failed); isolated rerun of that file remained unrelated with timeout/performance-threshold failures. |
 | TTS-NORMALIZE-1 | 2026-05-13 | PASS — Segment normalizer truth added via `src/utils/segmentNormalizer.ts` and `TTS_NORMALIZER_VERSION = "en-v1"`. Golden fixtures cover conservative English normalization, pronunciation overrides remain first transform and hash-visible, Kokoro receives normalized spoken text while scheduler/display words stay original, and cache identity now includes normalizer version plus source/normalized text hash pair without destructive migration. Verification: focused normalizer/Kokoro/pipeline slice 4 files / 38 tests; broader TTS/provider/settings slice 8 files / 56 tests; `npm run typecheck`; serialized full `npm test -- --maxWorkers=1` 184 files / 2634 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed. Default parallel `npm test` reruns were resource-sensitive in pre-existing MOSS Nano performance-threshold tests, which passed isolated. |
