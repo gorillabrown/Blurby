@@ -1,0 +1,54 @@
+{
+  "id": "20261011T225905Z-external-create-item-NARRATE-REMOVE-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-REMOVE-1",
+  "created": "2026-10-11T22:59:05Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-REMOVE-1",
+      "title": "Remove Narrate, keeping Kokoro dormant",
+      "status": "Queued",
+      "sequence": 8,
+      "written_status": "Full Spec",
+      "prerequisites": [
+        "TEST-TIMEOUT-HEADROOM-1",
+        "LIBRARY-SETTINGS-FIX-1",
+        "EINK-HOVER-FIX-1"
+      ],
+      "effort": "L",
+      "lane": "Reader Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-remove-1",
+      "branch": "eb/narrate-remove-1",
+      "description": "Delete the Narrate mode and all narration logic (hooks, strategies, scheduler, TTS settings UI, dormant MOSS/Pocket/Qwen engines, eval harness, CI quality-gate), keeping the Kokoro engine dormant with no renderer or preload path; v13 migration turns a saved narrate mode into flow. 3 waves; touches the shared-core freeze set, so it runs alone.",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (HB-1), revision 3 (two adversarial reviews). Absorbed by roadmap review 2026-10-11. Full Spec: U9/U10 pass."
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-11T21:21:53Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-REMOVE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-REMOVE-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-REMOVE-1",
+      "actualRevision": "2026-10-11T22:59:22Z",
+      "recoveryId": "20261011T225905Z-external-create-item-NARRATE-REMOVE-1",
+      "detail": {},
+      "providerItemId": "13261071931",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-11T22:59:39Z",
+  "outcome": "succeeded"
+}

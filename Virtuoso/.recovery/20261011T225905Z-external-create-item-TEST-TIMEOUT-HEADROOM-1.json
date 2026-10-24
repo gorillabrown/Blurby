@@ -1,0 +1,50 @@
+{
+  "id": "20261011T225905Z-external-create-item-TEST-TIMEOUT-HEADROOM-1",
+  "operation": "external-create-item",
+  "item_id": "TEST-TIMEOUT-HEADROOM-1",
+  "created": "2026-10-11T22:59:05Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "id": "TEST-TIMEOUT-HEADROOM-1",
+      "title": "Give the three slow tests explicit time limits",
+      "status": "Queued",
+      "sequence": 5,
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "XS",
+      "lane": "Platform & Maintenance",
+      "group": "Test Health",
+      "spec_link": "ROADMAP.md#test-timeout-headroom-1",
+      "branch": "eb/test-timeout-headroom-1",
+      "description": "Explicit 30 s per-test timeouts for the G1 boundary test and the two updateInstallGating tests, which exceed the 10 s default under full-suite load (KF-3). Retires the KF-3 exception; any other failure stays real.",
+      "notes": "Created by roadmap review 2026-10-11 (audit F2). Owner ruling 2026-10-11: fix the timeout before LIBRARY-SETTINGS-FIX-1 closes. Full Spec: U1-U10 pass."
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-11T21:21:53Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:TEST-TIMEOUT-HEADROOM-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "TEST-TIMEOUT-HEADROOM-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:TEST-TIMEOUT-HEADROOM-1",
+      "actualRevision": "2026-10-11T22:59:21Z",
+      "recoveryId": "20261011T225905Z-external-create-item-TEST-TIMEOUT-HEADROOM-1",
+      "detail": {},
+      "providerItemId": "13261060490",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-11T22:59:39Z",
+  "outcome": "succeeded"
+}

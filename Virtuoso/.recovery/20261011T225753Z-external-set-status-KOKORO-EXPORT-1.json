@@ -1,0 +1,39 @@
+{
+  "id": "20261011T225753Z-external-set-status-KOKORO-EXPORT-1",
+  "operation": "external-set-status",
+  "item_id": "KOKORO-EXPORT-1",
+  "created": "2026-10-11T22:57:53Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "status": "Dissolved",
+      "completed": "2026-10-11",
+      "sequence": "",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
+      "notes": "Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061."
+    },
+    "expectedRevision": "c0a74fe56f55eaa233ed55e80a9aabcbf80b08b84a1417ea888749b1097d141f",
+    "idempotencyKey": "set-status:KOKORO-EXPORT-1:[('completed', '2026-10-11'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-11-audit.md'), ('notes', \"Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061.\"), ('sequence', ''), ('status', 'Dissolved')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "KOKORO-EXPORT-1",
+      "idempotencyKey": "set-status:KOKORO-EXPORT-1:[('completed', '2026-10-11'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-11-audit.md'), ('notes', \"Dissolved 2026-10-11: outside the Narrate rebuild's day-one scope; returns later as a new item (roadmap review 2026-10-11). Ledger TR-061.\"), ('sequence', ''), ('status', 'Dissolved')]",
+      "actualRevision": "2026-10-11T22:58:09Z",
+      "recoveryId": "20261011T225753Z-external-set-status-KOKORO-EXPORT-1",
+      "detail": {},
+      "providerItemId": "13118856529"
+    }
+  },
+  "resolved": "2026-10-11T22:58:29Z",
+  "outcome": "succeeded"
+}

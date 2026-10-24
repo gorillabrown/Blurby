@@ -1,0 +1,39 @@
+{
+  "id": "20261011T225752Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+  "created": "2026-10-11T22:57:52Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "status": "Superseded",
+      "completed": "2026-10-11",
+      "sequence": "",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-11-audit.md",
+      "notes": "Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-059."
+    },
+    "expectedRevision": "9a4bb050df30471eb12d1dbf2ef1acbff9bbaafde356fe5b25155bf776c97aa6",
+    "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('completed', '2026-10-11'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-11-audit.md'), ('notes', 'Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-059.'), ('sequence', ''), ('status', 'Superseded')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "idempotencyKey": "set-status:NARRATE-APPLYRATECHANGE-COLLAPSE-1:[('completed', '2026-10-11'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-11-audit.md'), ('notes', 'Superseded 2026-10-11 by NARRATE-REBUILD-1 (owner ruling #31; roadmap review 2026-10-11). Ledger TR-059.'), ('sequence', ''), ('status', 'Superseded')]",
+      "actualRevision": "2026-10-11T22:58:06Z",
+      "recoveryId": "20261011T225752Z-external-set-status-NARRATE-APPLYRATECHANGE-COLLAPSE-1",
+      "detail": {},
+      "providerItemId": "13118840646"
+    }
+  },
+  "resolved": "2026-10-11T22:58:29Z",
+  "outcome": "succeeded"
+}

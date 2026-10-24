@@ -1,0 +1,38 @@
+{
+  "id": "20261011T225831Z-external-set-status-CLEANUP-MODE-BARREL-1",
+  "operation": "external-set-status",
+  "item_id": "CLEANUP-MODE-BARREL-1",
+  "created": "2026-10-11T22:58:31Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": [
+        "NARRATE-REMOVE-1"
+      ],
+      "notes": "Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer."
+    },
+    "expectedRevision": "60f9a0ec705ffcdad519996efefffb27aceb44593d22173f6a94f1b4f05e14f6",
+    "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer.\"), ('prerequisites', ['NARRATE-REMOVE-1'])]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CLEANUP-MODE-BARREL-1",
+      "idempotencyKey": "set-status:CLEANUP-MODE-BARREL-1:[('notes', \"Roadmap review 2026-10-11: waits on NARRATE-REMOVE-1, which deletes src/hooks/useReadingModeInstance.ts, the barrel's only importer.\"), ('prerequisites', ['NARRATE-REMOVE-1'])]",
+      "actualRevision": "2026-10-11T22:58:40Z",
+      "recoveryId": "20261011T225831Z-external-set-status-CLEANUP-MODE-BARREL-1",
+      "detail": {},
+      "providerItemId": "13122892318"
+    }
+  },
+  "resolved": "2026-10-11T22:59:04Z",
+  "outcome": "succeeded"
+}

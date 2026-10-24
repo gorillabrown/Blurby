@@ -1,0 +1,52 @@
+{
+  "id": "20261011T225905Z-external-create-item-NARRATE-REBUILD-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-REBUILD-1",
+  "created": "2026-10-11T22:59:05Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "id": "NARRATE-REBUILD-1",
+      "title": "Rebuild Narrate with the cursor attached to the playing word",
+      "status": "Blocked",
+      "sequence": 9,
+      "written_status": "Stub",
+      "prerequisites": [
+        "NARRATE-REMOVE-1"
+      ],
+      "effort": "XL",
+      "lane": "TTS / Narration Engine",
+      "group": "Narration Rebuild",
+      "spec_link": "ROADMAP.md#narrate-rebuild-1",
+      "branch": "",
+      "description": "Path: epic. Phase 0 proves Kokoro (word table exact vs its own audio; start and speed change within 2 s), then a deterministic core: per-chunk exact word table + playback clock, cursor = word at the current playback sample, no estimated timing, no stretching. Finish line: Narration rebuilt.",
+      "notes": "origin: held plan 2026-10-11-narrate-rebuild (rebuild draft stub). Absorbed by roadmap review 2026-10-11 as Path: epic; /epic charters it when it reaches the head."
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-11T21:21:53Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-REBUILD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-REBUILD-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:NARRATE-REBUILD-1",
+      "actualRevision": "2026-10-11T22:59:24Z",
+      "recoveryId": "20261011T225905Z-external-create-item-NARRATE-REBUILD-1",
+      "detail": {},
+      "providerItemId": "13261025969",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-11T22:59:40Z",
+  "outcome": "succeeded"
+}
