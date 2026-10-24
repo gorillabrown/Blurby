@@ -13,6 +13,9 @@ import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3) before anyt
 //   --changed [--break]       chunks that pass before and after P6b with different tables: each old table must hold a
 //                             wrong split unit that the new table replaces; exit 0 iff all do and no chunk newly fails.
 //                             --break plants one changed correct table and must exit 1 (LL-151)
+//   --changed --owner <dir>   the same over the owner copies instead of the gate corpus; no text in the output
+//   --base <sha>              with --changed or --control: the commit whose main/narrate/{normalize,wordmap}.js are the
+//                             "before" modules (default CONTROL_BASE; NARRATE-RECONCILE-RESIDUAL-1)
 //   --owner <dir> [--control] every .epub in <dir> (copies, never the profile); books named sha256(file name)[0:8],
 //                             counts and word positions only, never text; exit 0 iff every failure is class E (token cap)
 //   --check-tokenizer         the committed tokenizer fixture equals the artifacts copy; exit 0 / 1
@@ -58,7 +61,7 @@ if (has("--check-tokenizer")) {
   console.log(JSON.stringify({ fixture: ours, artifacts: theirs, pinned: TOKENIZER_SHA256 }));
   process.exit(ours === theirs && ours === TOKENIZER_SHA256 ? 0 : 1);
 }
-const mode = has("--gate") ? "gate" : has("--changed") ? "changed" : has("--owner") ? "owner" : die("usage: --gate [--control] | --changed [--break] | --owner <dir> [--control] | --check-tokenizer");
+const mode = has("--gate") ? "gate" : has("--changed") ? "changed" : has("--owner") ? "owner" : die("usage: --gate [--control] | --changed [--owner <dir>] [--break] | --owner <dir> [--control] | --check-tokenizer; --base <sha> with --changed or --control");
 if (sha256(fs.readFileSync(path.join(TOKENIZER_DIR, "tokenizer.json"))) !== TOKENIZER_SHA256) die("tokenizer fixture hash differs from TOKENIZER_SHA256");
 
 // ── The producer's text side, with a stub model ────────────────────────────────────────────────────────────────
@@ -80,9 +83,10 @@ const tts = new kokoro.KokoroTTS(stubModel, tokenizer);
 const capture = attachCapture(tts, ph);
 
 const CURRENT = { ...req("./wordmap"), ...req("./normalize") };
+const CONTROL = has("--base") ? (argOf("--base") ?? die("--base needs a commit")) : CONTROL_BASE;
 function controlModules() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "reconcile-control-"));
-  for (const f of ["normalize.js", "wordmap.js"]) fs.writeFileSync(path.join(dir, f), execFileSync("git", ["-C", ROOT, "show", `${CONTROL_BASE}:main/narrate/${f}`]));
+  for (const f of ["normalize.js", "wordmap.js"]) fs.writeFileSync(path.join(dir, f), execFileSync("git", ["-C", ROOT, "show", `${CONTROL}:main/narrate/${f}`]));
   const r = createRequire(path.join(dir, "x.js"));
   return { ...r("./wordmap"), ...r("./normalize") };
 }
@@ -155,14 +159,14 @@ const replacedSplits = (oldWm, newWm) => {
 // as D2's from "ancient"), chunks starting before <to>; same pass rule as --gate.
 const FROM = has("--from") ? Number(argOf("--from")) : null, TO = has("--to") ? Number(argOf("--to")) : Infinity;
 if (FROM !== null && !(Number.isInteger(FROM) && FROM >= 0 && TO > FROM)) die("--from <word> --to <word>: integers, from < to");
-const books = FROM !== null ? GATE.filter(([id]) => id === "meditations") : mode === "owner"
+const books = FROM !== null ? GATE.filter(([id]) => id === "meditations") : has("--owner")
   ? (() => {
       const dir = path.resolve(argOf("--owner") ?? die("--owner needs a directory"));
       if (process.env.APPDATA && dir.toLowerCase().startsWith(path.join(process.env.APPDATA, "Blurby").toLowerCase())) die("refusing the live profile; sweep copies");
       return fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith(".epub")).sort().map((f) => [sha256(f).slice(0, 8), path.join(dir, f)]);
     })()
   : GATE;
-const priv = mode === "owner";
+const priv = has("--owner"); // owner books: counts, positions and costs only, never text (detail and units name words)
 const mods = has("--control") ? BASE : CURRENT;
 let failed = 0, nonE = 0, ruledCount = 0, chunksPlanned = 0, chunksRecorded = 0, changedBad = 0, changedOk = 0, newlyFailing = 0;
 let planted = !has("--break");
@@ -179,14 +183,14 @@ for (const [id, file] of books) {
     chunksRecorded++;
     if (mode === "changed") {
       const old = await reconcile(e.text, src, BASE);
-      if (old.ok && !r.ok) { newlyFailing++; changed.push({ at: e.startWord, newlyFailing: r.reason, detail: r.detail }); continue; }
+      if (old.ok && !r.ok) { newlyFailing++; changed.push({ at: e.startWord, newlyFailing: r.reason, ...(priv ? {} : { detail: r.detail }) }); continue; }
       if (!old.ok || !r.ok) continue;
       let newTable = r.table;
       if (!planted && tableKey(old.table) === tableKey(r.table)) { newTable = { ...r.table, units: [{ ...r.table.units[0], frameEnd: r.table.units[0].frameEnd + 1 }, ...r.table.units.slice(1)] }; planted = true; } // --break
       if (tableKey(old.table) === tableKey(newTable)) continue;
       const replaced = newTable === r.table ? replacedSplits(old.wm, r.wm) : [];
       if (replaced.length) changedOk++; else changedBad++;
-      changed.push({ at: e.startWord, wrongSplitsReplaced: replaced.map((u) => ({ word: u.words.join(" "), group: u.group, cost: u.evidenceCost, overLimit: u.evidenceCost > 0.5 })), text: e.text });
+      changed.push({ at: e.startWord, wrongSplitsReplaced: replaced.map((u) => ({ ...(priv ? {} : { word: u.words.join(" "), group: u.group }), cost: u.evidenceCost, overLimit: u.evidenceCost > 0.5 })), ...(priv ? {} : { text: e.text }) });
       continue;
     }
     if (r.ok) continue;
@@ -201,8 +205,8 @@ for (const [id, file] of books) {
   else console.log(JSON.stringify(row));
 }
 if (chunksRecorded !== chunksPlanned || chunksPlanned === 0) { console.error(`recorder mismatch: ${chunksRecorded}/${chunksPlanned} chunks`); process.exit(2); } // LL-151
-const control = has("--control") ? ` (control: modules at ${CONTROL_BASE.slice(0, 8)})` : "";
+const control = has("--control") ? ` (control: modules at ${CONTROL.slice(0, 8)})` : "";
 if (mode === "gate") { console.log(`GATE${control}: ${failed} fail-closed chunks of ${chunksPlanned}`); process.exit(failed ? 1 : 0); }
 if (mode === "owner") { console.log(`OWNER${control}: ${failed} fail-closed chunks of ${chunksPlanned} in ${books.length} books; ${failed - nonE - ruledCount} class E, ${ruledCount} ruled residual, ${nonE} other`); process.exit(nonE ? 1 : 0); }
-console.log(`CHANGED${has("--break") ? " (--break)" : ""}: ${changedOk} changed tables replace a wrong split unit; ${changedBad} changed without one; ${newlyFailing} newly failing`);
+console.log(`CHANGED${has("--break") ? " (--break)" : ""} (before: modules at ${CONTROL.slice(0, 8)}): ${changedOk} changed tables replace a wrong split unit; ${changedBad} changed without one; ${newlyFailing} newly failing`);
 process.exit(changedBad || newlyFailing || !planted ? 1 : 0);
