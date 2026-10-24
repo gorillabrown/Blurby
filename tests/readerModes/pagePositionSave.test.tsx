@@ -3,7 +3,7 @@
 // page it lands on, at once, as a full anchor commit. Drives the real Page runtime and the real Page
 // FoliateView against a fake foliate view whose paginator is an EventTarget (as in
 // foliateViewTeardown.test.tsx, which this reuses).
-import { act, createElement } from "react";
+import { StrictMode, act, createElement, useEffect } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_SETTINGS, FOLIATE_BROWSING_CHECK_INTERVAL_MS } from "../../src/constants";
@@ -12,6 +12,7 @@ import { createReaderPorts } from "../../src/reader/ports/createReaderPorts";
 import { pageMode } from "../../src/reader/modes/page";
 import PageFoliateView from "../../src/reader/modes/page/FoliateView";
 import { usePageModeBindings } from "../../src/reader/modes/page/useModeBindings";
+import { getSectionGlobalOffset } from "../../src/reader/modes/page/helpers/foliateWordOffsets";
 import { createFakeDocument, createFakeInfrastructure } from "./harness/fakePorts";
 import { electronAPIStub, stubControl } from "../../src/test-harness/electron-api-stub";
 
@@ -129,12 +130,12 @@ function makeRuntime() {
   return { fake, runtime, snapshot };
 }
 
-async function mount(extra: Record<string, unknown> = {}) {
+async function mount(extra: Record<string, unknown> = {}, options: { strict?: boolean } = {}) {
   const { fake, runtime, snapshot } = makeRuntime();
 
   const render = async (more: Record<string, unknown> = {}) => {
     await act(async () => {
-      root.render(createElement(PageFoliateView as never, {
+      const element = createElement(PageFoliateView as never, {
         document: snapshot,
         settings: DEFAULT_SETTINGS,
         focusTextSize: DEFAULT_SETTINGS.focusTextSize,
@@ -156,7 +157,8 @@ async function mount(extra: Record<string, unknown> = {}) {
         renderVersion: 0,
         ...extra,
         ...more,
-      } as never));
+      } as never);
+      root.render(options.strict ? createElement(StrictMode, null, element) : element); // RESTAMP-RERUN-RACE-1 rr5
     });
   };
 
@@ -870,6 +872,182 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
       });
       await settle();
       expect(saves(fake).map((e) => e.args)).toEqual([]);
+    });
+  });
+  // RESTAMP-RERUN-RACE-1: can the re-stamp effect run twice at once on one section document (review W1, W2)?
+  // Evidence: docs/studies/investigations/RESTAMP-RERUN-RACE-1.repro.2026-10-23.md.
+  describe("RESTAMP-RERUN-RACE-1", () => {
+    const LONG = 160; // > WRAP_BATCH_SIZE (50): the wrap yields 3 times
+    const longWords = Array.from({ length: LONG }, (_, i) => `Word${i}`);
+    const longDoc = (n = LONG) => {
+      const doc = document.implementation.createHTMLDocument();
+      doc.body.innerHTML = Array.from({ length: n }, (_, i) => `<p>Word${i}</p>`).join("");
+      return doc;
+    };
+    const S1 = [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: LONG }];
+    const getCanonicalSectionWords = (i: number) => (i === 3 ? longWords : undefined);
+    const spansOf = (doc: Document) => Array.from(doc.querySelectorAll("span.page-word")) as HTMLElement[];
+    const indexOf = (span: Element) => Number(span.getAttribute("data-word-index"));
+    const fakeTimeouts = () => vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+    afterEach(() => { vi.useRealTimers(); }); // a failed check before drain() must not leave fake timers on
+    const drain = async () => {
+      await act(async () => { await vi.runAllTimersAsync(); });
+      vi.useRealTimers();
+      await settle();
+    };
+    /** o1–o4: one span per word, none nested, the book's numbering and text in document order, no index twice. */
+    function expectBookNumbering(doc: Document, start: number) {
+      const spans = spansOf(doc);
+      expect.soft(spans, "o1 span count").toHaveLength(LONG);
+      expect.soft(doc.querySelectorAll("span.page-word span.page-word"), "o2 nested spans").toHaveLength(0);
+      expect.soft(spans.map((s) => [indexOf(s), s.textContent]), "o3 numbering").toEqual(longWords.map((w, i) => [start + i, w]));
+      const indices = spans.map(indexOf);
+      expect.soft(new Set(indices).size, "o4 duplicate indices").toBe(indices.length);
+    }
+    /** o6: the last word-position index build reports no duplicate span. */
+    function expectNoIndexDuplicates(fake: ReturnType<typeof createFakeInfrastructure>) {
+      const builds = fake.diagnostics.filter((d) => d.args[0] === "word-position-index-build");
+      expect.soft(String(builds.at(-1)?.args[1]), "o6 index build").toContain(" duplicates=0 ");
+    }
+    /** rr1–rr3: the load's wrap has finished on renderer numbering; run 1 parks at its first yield (k1), then a new
+     *  identity cancels it and run 2 starts while run 1 is still parked. */
+    async function rerun(second: typeof S1, holdTurn = false) {
+      const mounted = await mount();
+      const { view, renderer, render } = mounted;
+      const doc = longDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3);
+      await settle();
+      expect(spansOf(doc).map(indexOf).slice(0, 3)).toEqual([0, 1, 2]); // the renderer's numbering
+      if (holdTurn) {
+        renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+        await click("Next page");
+        expect(saves(mounted.fake)).toEqual([]); // held: the section carries the renderer's numbering
+      }
+      fakeTimeouts();
+      await render({ bookWordSections: S1, getCanonicalSectionWords });
+      const window = spansOf(doc).length;
+      expect(window, "k1: run 1 is parked at its first yield").toBe(50);
+      spansOf(doc)[0].setAttribute("data-rr-probe", "run-1"); // only another run's unwrap removes run 1's span
+      await render({ bookWordSections: second, getCanonicalSectionWords });
+      await drain();
+      expect(doc.querySelector("[data-rr-probe]"), "run 2 ran on the document").toBeNull();
+      return { ...mounted, doc, window };
+    }
+
+    it("(rc0) census: the view receives one non-empty bookWordSections identity per document while it has contents", async () => {
+      const { fake, runtime } = makeRuntime();
+      runtime.select(7); // subscribes the runtime to its document port (Decision #19)
+      const seen: unknown[] = [];
+      let renderer: FakePaginator | null = null;
+      function Host() {
+        const { viewProps } = usePageModeBindings(runtime);
+        const sections = viewProps.bookWordSections;
+        useEffect(() => {
+          if (sections?.length && renderer?.contents.length && !seen.includes(sections)) seen.push(sections);
+        });
+        return createElement(PageFoliateView as never, viewProps as never);
+      }
+      await act(async () => { root.render(createElement(Host)); });
+      await act(async () => { fake.resolveBookBytes(new ArrayBuffer(8)); });
+      for (let i = 0; i < 50 && runtime.viewApiRef.current === null; i++) {
+        await act(async () => { await new Promise((resolve) => setTimeout(resolve, 0)); });
+      }
+      const view = container.querySelector("foliate-view") as FakeFoliateView;
+      renderer = view.renderer;
+      const { doc } = rawDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3);
+      // The book's words arrive: the view's own request resolves, and the shell emits the new snapshot.
+      const withWords = createFakeDocument({ bookWords: BOOK_VALUE as never });
+      await act(async () => { fake.resolveBookWords(BOOK_VALUE as never); });
+      await act(async () => { fake.publishDocument(withWords); });
+      await settle();
+      expect(seen).toHaveLength(1);
+      // A settings change.
+      await act(async () => { runtime.applySettings({ ...fake.infra.settings.read(), wpm: 420 } as never); });
+      // A page turn.
+      renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 22, 23) };
+      await click("Next page");
+      // A renderVersion bump.
+      const version = runtime.getRenderVersion();
+      await act(async () => { runtime.onWordsReextracted(); });
+      expect(runtime.getRenderVersion()).toBeGreaterThan(version);
+      // A second emission with the same book words: the shell's getDocument returns its cached snapshot
+      // (ReaderContainer.tsx:214), and the runtime keeps a frozen snapshot as-is (ModeRuntime.ts:121).
+      await act(async () => { fake.publishDocument(withWords); });
+      await settle();
+      // Measured: 1 (LL-142). A second identity would need the shell to build a new snapshot, which it does only
+      // when bookWords changes, and bookWords is set once per document (ReaderContainer.tsx:291-293).
+      expect(seen).toHaveLength(1);
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    });
+
+    it("(rr1) W1: a new identity with the same data while run 1 is parked mid-wrap converges on the book's numbering", async () => {
+      const { fake, doc, window } = await rerun(structuredClone(S1));
+      expect(window).toBe(50);
+      expectBookNumbering(doc, 20);
+      expectNoIndexDuplicates(fake);
+    });
+
+    it("(rr2) sensitivity control: a new identity with different data during run 1's wrap", async () => {
+      const second = [{ ...S1[0], startWordIdx: 40, endWordIdx: 200 }];
+      const { fake, doc, window } = await rerun(second);
+      expect(window).toBe(50);
+      expectBookNumbering(doc, 40);
+      expectNoIndexDuplicates(fake);
+    });
+
+    it("(rr3) a turn held across both runs is saved once, with its re-stamped index", async () => {
+      const { fake, window } = await rerun(structuredClone(S1), true);
+      expect(window).toBe(50);
+      expect.soft(saves(fake).map((e) => e.args), "o5 saved once").toEqual([["doc-1", 22, "cfi:3:Word2"]]);
+      expect.soft(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost"), "o5 no loss").toEqual([]);
+      expectNoIndexDuplicates(fake);
+    });
+
+    it("(rr4) W2: a section missing from the set is stamped from the words present when it wraps", async () => {
+      const { view, renderer, render } = await mount();
+      const doc0 = document.implementation.createHTMLDocument();
+      doc0.body.innerHTML = "<p>Zero one two three four</p>";
+      const doc1 = longDoc();
+      fakeTimeouts();
+      renderer.contents = [{ doc: doc1, index: 1 }];
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc: doc1, index: 1 } })); });
+      const window = spansOf(doc1).length;
+      expect(window, "k1: section 1's load wrap is parked at its first yield").toBe(50);
+      await render({ bookWordSections: S1, getCanonicalSectionWords }); // section 1 is not in the set
+      // While the re-stamp waits on section 1's wrap, a lower section loads: the loaded-slice offsets move by 5.
+      renderer.contents = [{ doc: doc0, index: 0 }, { doc: doc1, index: 1 }];
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc: doc0, index: 0 } })); });
+      await drain();
+      const words = [
+        ...["Zero", "one", "two", "three", "four"].map((word) => ({ sectionIndex: 0, word })),
+        ...longWords.map((word) => ({ sectionIndex: 1, word })),
+      ];
+      const expected = getSectionGlobalOffset(1, words as never, S1);
+      expect(expected).toBe(5);
+      const first = spansOf(doc1).map(indexOf);
+      const zero = spansOf(doc0).map(indexOf);
+      expect.soft(first[0], "o7 section 1 start").toBe(expected);
+      expect.soft(Math.min(...first) > Math.max(...zero), "o7 no overlap with section 0").toBe(true);
+    });
+
+    it("(rr5) StrictMode: the double run at mount touches no spans, and the load stamps the book's numbering", async () => {
+      // StrictMode's second open effect imports foliate while the first import is pending; that import misses vi.mock
+      // and evaluates the real view.js, whose define of foliate-view would throw. Keep the fake element (harness only).
+      const define = vi.spyOn(customElements, "define").mockImplementation(() => {});
+      const readBookBytes = vi.fn(() => Promise.resolve(new ArrayBuffer(8)));
+      const { fake, view, renderer } = await mount({ bookWordSections: S1, getCanonicalSectionWords, readBookBytes }, { strict: true })
+        .finally(() => define.mockRestore());
+      expect(readBookBytes, "StrictMode ran the open effect twice").toHaveBeenCalledTimes(2);
+      expect(renderer.getContents()).toEqual([]); // no contents while the re-stamp's double run happens
+      const doc = longDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3);
+      await settle();
+      expectBookNumbering(doc, 20);
+      expectNoIndexDuplicates(fake);
     });
   });
 });
