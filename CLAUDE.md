@@ -195,7 +195,7 @@ Before committing, verify ALL of these:
 - [ ] Changes are scoped to the files listed in the dispatch — no drive-by edits
 - [ ] Spec-compliance self-review passed (code matches dispatch spec line-by-line)
 - [ ] Quality self-review passed (architecture rules, known traps, code clarity)
-- [ ] Package verified (standing rule 53, LL-167; owner directive 2026-10-23): `--dir` build of the final commit plus `origin/main`, a 25 s scratch-profile launch with no error or crash, asar contents checked, automatable Done-when re-run on the packaged exe, a "Package verification" section in the close-out, and Blurby.Brain's confirmation before the merge go. If nothing under `build.files` changed, record "package unchanged" with the diff.
+- [ ] Package verified (standing rule 53, LL-167; owner directive 2026-10-23): `--dir --arm64` build of the final commit plus `origin/main`, a 25 s native-arm64 scratch-profile launch with no error or crash, asar contents checked, automatable Done-when re-run on the packaged exe, a "Package verification" section in the close-out, and Blurby.Brain's confirmation before the merge go. If nothing under `build.files` changed, record "package unchanged" with the diff.
 
 #### Mandatory MarcusAurelius Pass (After Every Sprint)
 
