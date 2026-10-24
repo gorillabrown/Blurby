@@ -8,6 +8,13 @@
 
 ## Incomplete
 
+### BUG-217 — First launch on a fresh profile logs a library backup failure
+**Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
+**Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.
+**Status:** OPEN; unscheduled. Known noise in standing rule 53 (b) until fixed. Lane: Platform & Maintenance.
+**Location:** the library backup step in `main/` (grep `Backup failed for`).
+**Description:** on a fresh profile the first launch prints `Backup failed for <profile>lurby-data\library.json: ENOENT … copyfile` to stderr: the backup treats a library that does not exist yet as a failure. **Fix:** skip the backup when `library.json` does not exist, with a red test on a missing file.
+
 ### BUG-216 — The note popover is never shown: Shift+N in Page dispatches an event nobody listens to
 **Reported:** 2026-10-23 (UI-SWEEP-1 W3, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
 **Severity:** LOW (a listed shortcut does nothing visible)
