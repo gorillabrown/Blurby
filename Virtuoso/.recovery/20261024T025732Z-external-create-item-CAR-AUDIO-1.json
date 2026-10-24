@@ -1,0 +1,51 @@
+{
+  "id": "20261024T025732Z-external-create-item-CAR-AUDIO-1",
+  "operation": "external-create-item",
+  "item_id": "CAR-AUDIO-1",
+  "created": "2026-10-24T02:57:32Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Android Auto and Apple CarPlay compatibility",
+      "status": "Queued",
+      "sequence": 109,
+      "written_status": "Stub",
+      "effort": "L",
+      "workstream": "TTS / Narration Engine",
+      "prerequisites": [
+        "ANDROID-APP-1",
+        "IOS-APP-1"
+      ],
+      "spec_link": "ROADMAP.md#car-audio-1",
+      "description": "Narrated books (and podcasts) play through Android Auto and Apple CarPlay: browsable library, now-playing screen, play/pause/skip/rate, position saved. A listening surface only (platform audio templates).",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub; needs owner design decisions (what the car shows, on-phone Kokoro vs server streaming, CarPlay audio entitlement).",
+      "id": "CAR-AUDIO-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CAR-AUDIO-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "CAR-AUDIO-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CAR-AUDIO-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T025732Z-external-create-item-CAR-AUDIO-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81f3b58df02b3b626a3b",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T02:57:59Z",
+  "outcome": "succeeded"
+}
