@@ -1,0 +1,3 @@
+{"event":"open","rows":[{"id":1,"title":"Log the full stack where Narrate surfaces a start error; test red on the base; gates","class":"calculable","item":"NARRATE-START-STACK-1","tier":"bounded","effort":"low","kind":"bug-fix","estimate":30,"basis":"XS: two sites, one helper, one test file"}],"at":"2026-10-23T06:47:00Z"}
+{"event":"start","row":1,"model":"claude-opus-5-5","host":"claude-code","at":"2026-10-23T06:47:00Z"}
+{"event":"end","row":1,"evidence":"2 sites (FoliateView load catch, engine F4 producer-error); test red on ba591572 by assertion, green on the fix; npm test 2444 passed/1 skipped/0 failed in 180 files; typecheck 0; build 0","result":"done","at":"2026-10-23T05:48:17Z"}

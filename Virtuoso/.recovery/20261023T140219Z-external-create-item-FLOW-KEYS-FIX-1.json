@@ -1,0 +1,49 @@
+{
+  "id": "20261023T140219Z-external-create-item-FLOW-KEYS-FIX-1",
+  "operation": "external-create-item",
+  "item_id": "FLOW-KEYS-FIX-1",
+  "created": "2026-10-23T14:02:19Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "Sprint Code": "FLOW-KEYS-FIX-1",
+      "title": "Flow's line, word, sentence and paragraph keys move both pacers",
+      "Status": "Queued",
+      "Seq": 77,
+      "Lane": "Reader Engine",
+      "Effort": "S",
+      "Spec State": "Full Spec",
+      "Spec Reference": "ROADMAP.md#flow-keys-fix-1",
+      "id": "FLOW-KEYS-FIX-1",
+      "status": "Queued",
+      "written_status": "Stub",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T03:26:55Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-KEYS-FIX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FLOW-KEYS-FIX-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-KEYS-FIX-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T140219Z-external-create-item-FLOW-KEYS-FIX-1",
+      "detail": {},
+      "providerItemId": "",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T14:02:31Z",
+  "outcome": "succeeded"
+}

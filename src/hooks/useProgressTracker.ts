@@ -6,6 +6,11 @@ import { calculateGoalActiveReadingFlush, calculateHighWaterPagesReadDelta } fro
 const api = window.electronAPI;
 const ACTIVE_READING_GOAL_FLUSH_INTERVAL_MS = 1_000;
 const PAGE_GOAL_ACTIVE_IDLE_TIMEOUT_MS = 60_000;
+/**
+ * KEEP-FURTHEST-FIX-1, the owner's choice: after "Keep at furthest", a reopen shows the furthest page (true) or the page
+ * on screen when the reader left (false). Either way the saved position is the furthest one.
+ */
+const KEEP_FURTHEST_REOPENS_AT_FURTHEST = true;
 
 interface UseProgressTrackerParams {
   activeDoc: BlurbyDoc & { content?: string; cfi?: string; furthestPosition?: number; wordCount?: number };
@@ -20,7 +25,7 @@ interface UseProgressTrackerParams {
   sessionStartWordRef: React.MutableRefObject<number>;
   activeReadingMsRef: React.MutableRefObject<number>;
   activeReadingStartRef: React.MutableRefObject<number | null>;
-  onUpdateProgress: (docId: string, position: number) => void;
+  onUpdateProgress: (docId: string, position: number, cfi?: string) => void;
   onArchiveDoc: (docId: string) => void;
   onExitReader: (pos: number) => void;
   onPagesRead?: (pages: number) => void;
@@ -48,7 +53,7 @@ export interface UseProgressTrackerReturn {
   /** Handle "keep at furthest position" from backtrack prompt */
   handleKeepFurthest: () => void;
   /** Finish reading session — flush saves, log session, handle completion */
-  finishReading: (finalPos: number) => void;
+  finishReading: (finalPos: number, cfi?: string) => void;
   /** Finish reading without exiting — persists progress, logs session, archives if complete, but does NOT call onExitReader */
   finishReadingWithoutExit: (finalPos: number) => void;
   /** The debounced save timer ref (for cleanup) */
@@ -59,6 +64,12 @@ export interface UseProgressTrackerReturn {
   hasEngagedRef: React.MutableRefObject<boolean>;
   /** The furthest position ref */
   furthestPositionRef: React.MutableRefObject<number>;
+  /** The cfi of the furthest position's page (KEEP-FURTHEST-FIX-1); null when unknown */
+  furthestCfiRef: React.MutableRefObject<string | null>;
+  /** Raise the furthest mark to a saved page past it, recording that page's cfi; never saves (KEEP-FURTHEST-FIX-1) */
+  noteHighWater: (wordIndex: number, cfi?: string | null) => void;
+  /** The cfi of the last relocate the view reported, with its doc (PAGE-REOPEN-CFI-1); set by the relocate save */
+  lastRelocateCfiRef: React.MutableRefObject<{ docId: string; cfi: string } | null>;
 }
 
 /**
@@ -91,6 +102,7 @@ export function useProgressTracker({
   // Debounced save timer
   const pageSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const lastSavedPosRef = useRef(activeDoc.position || 0);
+  const lastRelocateCfiRef = useRef<{ docId: string; cfi: string } | null>(null);
   const readingModeRef = useRef(readingMode);
   readingModeRef.current = readingMode;
   const goalReportedActiveReadingMsRef = useRef(0);
@@ -136,10 +148,20 @@ export function useProgressTracker({
 
   // High-water mark for backtrack detection
   const furthestPositionRef = useRef<number>((activeDoc as any)?.furthestPosition ?? activeDoc?.position ?? 0);
+  // KEEP-FURTHEST-FIX-1: the cfi of the furthest mark's page; at open, the page the book opens on.
+  const furthestCfiRef = useRef<string | null>((activeDoc as any)?.furthestCfi ?? activeDoc?.cfi ?? null);
 
   useEffect(() => {
     furthestPositionRef.current = (activeDoc as any)?.furthestPosition ?? activeDoc?.position ?? 0;
+    furthestCfiRef.current = (activeDoc as any)?.furthestCfi ?? activeDoc?.cfi ?? null;
   }, [activeDoc?.id]);
+
+  // KEEP-FURTHEST-FIX-1: Page-turn saves (PAGE-POSITION-SAVE-1) bypass the relocate save that used to raise the mark.
+  const noteHighWater = useCallback((wordIndex: number, cfi?: string | null) => {
+    if (wordIndex <= furthestPositionRef.current) return;
+    furthestPositionRef.current = wordIndex;
+    furthestCfiRef.current = cfi ?? null;
+  }, []);
 
   // Backtrack prompt state
   const [showBacktrackPrompt, setShowBacktrackPrompt] = useState(false);
@@ -218,7 +240,7 @@ export function useProgressTracker({
   }, [currentPos, activeDoc.id, markPageActivity, onPagesRead, onUpdateProgress, readingMode, useFoliate]);
 
   // Internal helper: persist progress, log session, archive if complete (shared by both finish variants)
-  const _persistAndLog = useCallback((finalPos: number) => {
+  const _persistAndLog = useCallback((finalPos: number, cfiOverride?: string) => {
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
     const normalizedFinalPos = Math.max(0, Math.trunc(finalPos));
     const fractionPos = Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0));
@@ -227,8 +249,14 @@ export function useProgressTracker({
       : Math.max(normalizedFinalPos, fractionPos);
     (activeDoc as any).furthestPosition = Math.max(furthestPositionRef.current, savePos);
     lastSavedPosRef.current = savePos;
-    onUpdateProgress(activeDoc.id, savePos);
-    api.updateDocProgress(activeDoc.id, savePos, (activeDoc as any).cfi || undefined);
+    // PAGE-REOPEN-CFI-1: only the cfi of a relocate in this book, the page last on screen. With none since the open,
+    // send no cfi, so main keeps the stored one rather than a landing the reader never turned from.
+    // KEEP-FURTHEST-FIX-1: a caller may name the cfi instead (Keep at furthest sends the furthest page's).
+    const relocated = lastRelocateCfiRef.current;
+    const cfi = cfiOverride ?? (relocated && relocated.docId === activeDoc.id ? relocated.cfi : undefined);
+    (activeDoc as any).furthestCfi = furthestPositionRef.current > savePos ? furthestCfiRef.current : (cfi ?? null);
+    onUpdateProgress(activeDoc.id, savePos, cfi);
+    api.updateDocProgress(activeDoc.id, savePos, cfi);
     // Use active reading time, not total elapsed
     if (activeReadingStartRef.current) {
       activeReadingMsRef.current += Date.now() - activeReadingStartRef.current;
@@ -265,8 +293,8 @@ export function useProgressTracker({
   ]);
 
   // Finish reading — persist, log, archive, then exit reader
-  const finishReading = useCallback((finalPos: number) => {
-    _persistAndLog(finalPos);
+  const finishReading = useCallback((finalPos: number, cfi?: string) => {
+    _persistAndLog(finalPos, cfi);
     onExitReader(finalPos);
   }, [_persistAndLog, onExitReader]);
 
@@ -303,7 +331,9 @@ export function useProgressTracker({
 
   const handleKeepFurthest = useCallback(() => {
     setShowBacktrackPrompt(false);
-    finishReading(furthestPositionRef.current);
+    // KEEP-FURTHEST-FIX-1: the furthest position, reopening on its page or (the other owner choice) the on-screen page.
+    const cfi = KEEP_FURTHEST_REOPENS_AT_FURTHEST ? furthestCfiRef.current ?? undefined : undefined;
+    finishReading(furthestPositionRef.current, cfi);
   }, [finishReading]);
 
   return {
@@ -322,5 +352,8 @@ export function useProgressTracker({
     lastSavedPosRef,
     hasEngagedRef,
     furthestPositionRef,
+    furthestCfiRef,
+    noteHighWater,
+    lastRelocateCfiRef,
   };
 }

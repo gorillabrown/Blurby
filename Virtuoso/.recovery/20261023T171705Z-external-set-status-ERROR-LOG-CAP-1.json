@@ -1,0 +1,35 @@
+{
+  "id": "20261023T171705Z-external-set-status-ERROR-LOG-CAP-1",
+  "operation": "external-set-status",
+  "item_id": "ERROR-LOG-CAP-1",
+  "created": "2026-10-23T17:17:05Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-23"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:ERROR-LOG-CAP-1:[('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ERROR-LOG-CAP-1",
+      "idempotencyKey": "set-status:ERROR-LOG-CAP-1:[('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T171705Z-external-set-status-ERROR-LOG-CAP-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:17:30Z",
+  "outcome": "succeeded"
+}

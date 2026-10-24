@@ -1,0 +1,5 @@
+{"event":"open","rows":[{"id":1,"title":"switchFolder sets sourceFolder before awaiting switch-folder; restores on error; test fails on 47ae6e1f","class":"calculable","item":"FOLDER-SWITCH-HEADER-1","tier":"bounded","effort":"medium","kind":"bug-fix","estimate":30,"basis":"one hook, one test file"},{"id":2,"title":"Gates and live real-click check","class":"calculable","item":"FOLDER-SWITCH-HEADER-1","tier":"bounded","effort":"low","kind":"verification","estimate":30,"basis":"suite, typecheck, build, --dir package, run202"}],"at":"2026-10-23T06:24:00Z"}
+{"event":"start","row":1,"model":"claude-opus-5-5","host":"claude-code","at":"2026-10-23T06:24:00Z"}
+{"event":"end","row":1,"evidence":"Done-when 1 test fails on 47ae6e1f, passes on the fix; error-path test passes","result":"done","at":"2026-10-23T06:33:00Z"}
+{"event":"start","row":2,"model":"claude-opus-5-5","host":"claude-code","at":"2026-10-23T06:33:00Z"}
+{"event":"end","row":2,"evidence":"npm test 2438 passed/1 skipped/0 failed in 178 files; typecheck 0; build 0; real click: header at +8 ms (base +679 ms)","result":"done","at":"2026-10-23T05:41:50Z"}

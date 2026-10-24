@@ -2,11 +2,150 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-14
+**Last updated:** 2026-10-23
 
 ---
 
 ## Incomplete
+
+### BUG-217 — First launch on a fresh profile logs a library backup failure
+**Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
+**Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.
+**Status:** OPEN; unscheduled. Known noise in standing rule 53 (b) until fixed. Lane: Platform & Maintenance.
+**Location:** the library backup step in `main/` (grep `Backup failed for`).
+**Description:** on a fresh profile the first launch prints `Backup failed for <profile>\blurby-data\library.json: ENOENT … copyfile` to stderr: the backup treats a library that does not exist yet as a failure. **Fix:** skip the backup when `library.json` does not exist, with a red test on a missing file.
+
+### BUG-216 — The note popover is never shown: Shift+N in Page dispatches an event nobody listens to
+**Reported:** 2026-10-23 (UI-SWEEP-1 W3, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
+**Severity:** LOW (a listed shortcut does nothing visible)
+**Status:** OPEN, unscheduled (whether notes keep a popover is an owner question). Lane: UX polish.
+**Location:** `src/components/ReaderContainer.tsx:710` (`handleMakeNote` dispatches `blurby:make-note`); no `addEventListener` for it in `src`; `NotePopover` is imported nowhere.
+**Description:** Page's Shift+N calls `handleMakeNote`, which dispatches `blurby:make-note`. Nothing listens, and `NotePopover` is dead code. Evidence: `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`, row W3.
+
+### BUG-215 — The quick-settings popover has no working route: Ctrl+Shift+, never reaches its branch
+**Reported:** 2026-10-23 (UI-SWEEP-1 W2, confirmed by code read in UI-SWEEP-TRIAGE-1; filed at its close-out)
+**Severity:** LOW (a listed shortcut does nothing; the popover is unreachable)
+**Status:** OPEN, unscheduled; related to BUG-200 (the popover's "Sort by"), so the owner question there covers both. Lane: UX polish.
+**Location:** `src/hooks/useKeyboardShortcuts.ts:323` (Ctrl with `e.key === ","` opens Settings) before the Shift branch at `:330`; `LibraryContainer.tsx:601`, `:734` render the popover only on `activeOverlay === "quickSettings"`.
+**Description:** On a US layout Shift+, gives `e.key === "<"`, so neither branch matches, and no button or palette entry opens the popover. Evidence: triage report, row W2.
+
+### BUG-214 — "Skip to content" moves neither focus nor scroll
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #1 and #5, list and grid views; filed at its close-out)
+**Severity:** LOW (accessibility: the skip link is inert)
+**Status:** OPEN, unscheduled. Lane: UX polish.
+**Location:** `src/App.tsx:147-148` (the link targets `#main-content`, the App wrapper holding the whole page); `src/components/LibraryView.tsx:354` repeats the id.
+**Description:** The skip link's target is the first of two elements with id `main-content`, which wraps the whole page, so neither focus nor scroll moves (#1: 2 runs; #5: 1 run). Evidence: triage report, rows 1 and 5.
+
+### BUG-213 — Ctrl+=, Ctrl+− and Ctrl+0 do nothing in the library, though the Hotkey Map lists them as Global
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #79, #80 and #87; filed at its close-out)
+**Severity:** LOW (the listed scope is wrong, or the keys are)
+**Status:** OPEN, unscheduled; the fix is either the Hotkey Map label or a library binding (owner question: which text size the library keys would change). Lane: UX polish.
+**Location:** `src/hooks/useKeyboardShortcuts.ts:225-227`, inside `useReaderKeys`, which returns unless the view is the reader (`:186`).
+**Description:** In the library the three text-size keys do nothing (2 runs each). Evidence: triage report, rows 79, 80 and 87.
+
+### BUG-212 — Shift+E never restores a document from the archive
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 row #89; filed at its close-out)
+**Severity:** MEDIUM (a listed library action does nothing)
+**Status:** OPEN, unscheduled. Lane: Library & Content.
+**Location:** `src/components/LibraryContainer.tsx:289-298`, `:397` (the keyboard hook focuses into a list built from its own `activeFilter`); `src/components/LibraryView.tsx:58` keeps a separate tab state. The full path from G then A was not traced.
+**Description:** Restore from archive (Shift+E) changed no flag in 2 runs from the archived tab and 2 runs from G then A. Evidence: triage report, row 89.
+
+### BUG-211 — Flow's line, sentence and paragraph keys move nothing
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #100–103; filed at its close-out)
+**Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
+**Status:** OPEN; fix specified as FLOW-KEYS-FIX-1 (`ROADMAP.md#flow-keys-fix-1`, position 77, after the Stage 8 release and after FOCUS-KEYS-FIX-1). Lane: Reader Engine.
+**Location:** `src/reader/modes/flow/ModeRuntime.ts:916-931` (only `flow-line` is routed, and only while running, `:921`; `sentence` and `paragraph` are dropped although `helpers/FlowScrollEngine.ts:373` has `jumpToParagraph`).
+**Description:** ArrowDown/Up, Ctrl+Up/Down and Shift+Up/Down do nothing (2 runs each); while playing, ArrowUp and ArrowDown never jump a line. Evidence: triage report, "DEFECTs", Flow group.
+
+### BUG-210 — Focus's word, sentence and paragraph keys move nothing
+**Reported:** 2026-10-23 (UI-SWEEP-TRIAGE-1 rows #92–95; filed at its close-out)
+**Severity:** MEDIUM (listed reader keys do nothing). Pre-existing: broken at v1.28.0 too (f0's check); not a release gate.
+**Status:** OPEN; fix specified as FOCUS-KEYS-FIX-1 (`ROADMAP.md#focus-keys-fix-1`, position 76, after the Stage 8 release). Lane: Reader Engine.
+**Location:** `src/reader/modes/focus/ModeRuntime.ts:746-764`: the seek moves `displayWordIndex` only (`:749-753`), which the engine's next word overwrites, and `handleCommand` has no `sentence` or `paragraph` case.
+**Description:** Ctrl+Right/Left, Ctrl+Up/Down and Shift+Left/Right do nothing, paused or playing (2 runs each). Evidence: triage report, "DEFECTs", Focus groups.
+
+### BUG-209 — In Page mode, "Keep at furthest" saves the page the book opened on, losing the pages read since
+**Reported:** 2026-10-23 (blurby-6b, a live measurement for Blurby.Brain on the release-fix build `97527896`, ARM64 `--dir` package, scratch profile, CDP, the sample *Meditations* in Page mode)
+**Severity:** HIGH (reading progress is lost, and the reopen lands further back). **Release blocker** (Blurby.Brain, 2026-10-23): fixed by KEEP-FURTHEST-FIX-1, a release gate.
+**Status:** RESOLVED in source (KEEP-FURTHEST-FIX-1, branch `eb/keep-furthest-fix-1`; merge waits for the owner's answer on which page Keep reopens). Lane: Reader Engine.
+**Description:**
+- **The scenario:** a book saved at word 1290 is opened. The reader turns forward to word 2673, then back 8 pages to word 416, and leaves the book.
+- **The prompt** offers "Save at page 2 | Keep at page 6". Page 6 is the opening position, not the furthest one reached.
+- **Keep at page 6** saves word 1290 with the cfi of the word-416 page, so the reopen shows that page.
+- "Save at page 2" is correct (416, reopening there).
+- **Regression:** this came in with this release's PAGE-POSITION-SAVE line. On `08f4b948~1`, page turns saved nothing, and the prompt did not appear.
+**Cause:**
+- Since PAGE-POSITION-SAVE-1, a Page turn saves through `ModeRuntime.onPageTurned` → `commitPersistentWordIndex` → the persistence port's `updateDocProgress`. That path never raises the furthest mark (`useProgressTracker`'s `furthestPositionRef`).
+- The relocate save, which does raise it (`scheduleRelocateSave`, `ReaderContainer.tsx`), is skipped once the turn's commit has set the resume anchor.
+- So the mark stays at the open position. `handleKeepFurthest` sends it, and `_persistAndLog` pairs it with the on-screen cfi (PAGE-REOPEN-CFI-1).
+**Fix (KEEP-FURTHEST-FIX-1):**
+- The port's `updateDocProgress` calls a new `noteHighWater(wordIndex, cfi)`, and so does the relocate save. It raises the mark to a saved page past it and records that page's cfi in `furthestCfiRef`. It never saves.
+- Keep sends the furthest position with the furthest page's cfi. One constant, `KEEP_FURTHEST_REOPENS_AT_FURTHEST`, chooses the on-screen cfi instead if the owner prefers.
+- Tests: `tests/keepFurthest.test.tsx`.
+- Live, on the fix's `--dir` build: the prompt offers "Keep at page 11". Keep saves 2673 with its own cfi, and the reopen lands there.
+**Not fixed here (after the release):**
+- Page turns are not counted toward pages read: `recordPages` runs only on the skipped relocate path.
+- The furthest mark is not persisted: it lives on the in-memory doc, so a relaunch resets it to the saved position.
+
+### BUG-208 — Book text renders black on the dark Blurby background
+**Reported:** 2026-10-23 (owner, screenshot, Narrate mode on *Meditations*; installed ARM64 build `47ae6e1f`, settings left by the Stage 8 smoke: `theme: blurby`, `einkMode: true`)
+**Severity:** HIGH (the book is unreadable). **Release blocker** (Blurby.Brain, 2026-10-23): it ships in the release fix with BUG-201.
+**Status:** RESOLVED in source (BOOK-TEXT-COLOUR-1): each mode's injected theme adds `body *:not(a) { color: inherit !important; }`, so book text takes the theme's text colour and links keep the accent. Blurby.Brain's contrast test, measured in the packaged app on the sample's `#pg-header` page: 8 of 8 theme × E-ink cases at least 14.25:1 (the base: 2 of 8, black at 1.1:1 and 1.47:1). Root cause found by SMOKE8-DIAG-1 (2026-10-23, `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md`). Lane: UX polish.
+**Description:** the page text renders near-black on the dark reader background. Only the highlighted word and the links are readable.
+**Cause (measured live, SMOKE8-DIAG-1):** not E-ink and not the theme. Inside the foliate iframe the injected `fg` is the theme's text colour under blurby (E-ink on and off) and dark, in Page and Narrate alike. The book's own Project Gutenberg rule `#pg-header div, #pg-footer div { color: initial }` computes to black. The injected `html, body { color: fg !important }` (each mode's `helpers/foliateStyles.ts:39-47`) does not reach a descendant that has its own colour rule. Every Gutenberg EPUB's header and licence pages are affected. Live-tested fix: `body *:not(a) { color: inherit !important; }` gives `fg` under all three combinations. `color-scheme` has no effect.
+**Earlier hypothesis (refuted live):** the screenshot shows the dark Blurby background, Blurby chrome and coral links, so E-ink styling is not visibly applied. The book's `pgepub.css` sets `body { color: black; background-color: white }`. The injected `html, body { color: ${fg} !important }` (each mode's `helpers/foliateStyles.ts:39-41`, fg = `--text`, `#ffffff` for blurby) should beat it, so nothing static explains it. The live diagnosis reads the injected style and the computed colours inside the foliate iframe. First hypothesis: `einkMode` (`data-eink="true"`, `src/components/ThemeProvider.tsx:193-197`) applies E-ink's black-and-white rules (`src/styles/themes.css:41+`), which assume a white page. Meanwhile the theme vars come from the dark Blurby theme (`ThemeProvider.tsx:188-191`). That is the two-controls conflict EINK-CONTROLS-1 names: `theme: "eink"` and `einkMode` are independent and can disagree.
+**Acceptance test (Blurby.Brain, 2026-10-23, holds whatever the cause):** the computed text-on-background contrast is at least 4.5:1, inside the foliate iframe and on the main overlays, under each theme (light, dark, blurby, system) with E-ink on and off. The test fails on `47ae6e1f`.
+**Fix path:** BOOK-TEXT-COLOUR-1: the general inherit rule in each mode's injected theme. Owner decision, 2026-10-23: "Yes: book text always uses the theme's text colour (the general rule). Readability beats a book's own coloured text. Links keep their colour." EINK-CONTROLS-1 remains a separate owner decision, not this bug's fix.
+
+### BUG-201 — Reopening a book in Page mode lands on an older page, and the saved location reverts
+**Reported:** 2026-10-23 (Stage 8 owner smoke, check #8, build `47ae6e1f`, installed ARM64; `docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`)
+**Severity:** HIGH (the reader loses their place); **release blocker** (release gate (2) failed on it)
+**Status:** FIXED in source by PAGE-REOPEN-CFI-1 (2026-10-23, branch `eb/page-reopen-cfi-1`); close after the smoke re-run on the release-fix sha (#8). Reproduced and root-caused by SMOKE8-DIAG-1. Lane: Reader Engine.
+**Fix (PAGE-REOPEN-CFI-1):**
+- Every cfi saved through the reader's persistence port also updates the renderer's library copy (`useLibrary.updateProgress(docId, position, cfi?)`; a −1 position leaves the stored position alone).
+- The exit save sends only the cfi of a relocate in the same book, or none, so main keeps the stored cfi.
+- Live, on the smoke's three-session route (with a full relaunch): the in-session reopen and the post-relaunch open both landed on the last exit page (page 31, `/40,/300`), and `library.json` kept that cfi throughout. On `47ae6e1f` the reopen landed on page 18 and the cfi reverted.
+**Description:** Turned to p79 (saved position 16581, cfi `/210,/492,/492`), closed and reopened: the book opened on p77, at an older cfi (`epubcfi(/6/16!/4,/206/308,/208/76/1:12)`). Later the saved cfi itself reverted to `/206/308` while the position stayed 16581. Reproduced twice, on the owner's profile (*Why Nations Fail*).
+**Cause (measured live, the smoke's two-session route):** the renderer's library copy never receives a saved cfi:
+- `ReaderContainer.tsx:308` and `:323-325` send the cfi to main only;
+- `useLibrary.ts:146-148` updates the position only.
+
+A reopen in the same session opens from that copy (`LibraryContainer.tsx:259-267` → `page/ModeRuntime.ts:167`). It lands on the launch-time cfi, or, with none, on a `goToFraction(position / wordCount)` estimate. The exit save `_persistAndLog` (`useProgressTracker.ts:231`) then writes that landing cfi (`activeDoc.cfi`, set by `recordCfi`) with the unchanged position. That is the revert.
+
+Ruled out by measurement: the restamp guard's cfi-only save, the renderer's full-library save (`mergeRendererEdits` copies no progress fields) and the quit flush.
+
+### BUG-202 — After switching to a recent folder, the library header keeps the old folder's name
+**Reported:** 2026-10-23 (Stage 8 owner smoke, check #28)
+**Severity:** MEDIUM (wrong folder shown; the menu marks the wrong folder current). Release-blocking status is set by the diagnosis (SMOKE8-DIAG-1).
+**Status:** FIXED in source by FOLDER-SWITCH-HEADER-1 (2026-10-23, branch `eb/folder-switch-header-1`); close after the smoke re-run on the release-fix sha (#28). Reproduced with a real click by SMOKE8-DIAG-1. `useLibrary.switchFolder` now sets `sourceFolder` and `recentFolders` before awaiting `switch-folder`, and restores them with the error toast if main refuses. Live, with a real click and 1,500 files in the new folder, the header changed at +8 ms (+679 ms on `47ae6e1f`). Lane: Library & Content.
+**Cause (measured):** with real CDP mouse events, main's `sourceFolder` changed at +9 ms, but the header changed only at +679 ms, when the 1,500-file sync finished. `useLibrary.switchFolder` (`src/hooks/useLibrary.ts:86-93`) sets the renderer's settings only after `switch-folder` resolves, and main resolves it only after `syncLibraryWithFolder` (`main/ipc/state.js:87-100`), with no settings broadcast. On a Drive folder that syncs for minutes, the header stays on the old folder for minutes.
+**Description:** Chose Readings from the recent list: main's `settings.sourceFolder` changed at once and the library switched (143 → 721 books as the Drive folder synced), but after more than 6 minutes the header (`LibraryView.tsx:414`, the renderer's settings copy) still read "smoke8-folder2", and the folder menu still marked it current. Switching back (#32) did update the header. **Caveat:** the run used a CDP DOM click, because the real click closed the menu; the diagnosis must reproduce it with a real click first.
+
+### BUG-203 — The tray icon renders as a tiny dot
+**Reported:** 2026-10-23 (Stage 8 smoke notes). **Severity:** LOW. **Status:** OPEN, unscheduled. Lane: Platform & Maintenance. **Location:** `assets/tray-icon.png` and its sizing (PACKAGING-FIX-1 shipped it).
+
+### BUG-204 — The converted 223-page DNC PDF keeps the reader busy for over 6 minutes
+**Reported:** 2026-10-23 (Stage 8 smoke notes, after PDF-IMPORT-DIAG-1's fix). **Severity:** MEDIUM (the book opens, but the reader is busy for minutes). **Status:** OPEN, unscheduled. Lane: Library & Content. Measure where the time goes (word extraction or rendering of a one-chapter 223-page EPUB) before speccing.
+
+### BUG-205 — Narrate's chapter label reads "Copyright"
+**Reported:** 2026-10-23 (Stage 8 smoke notes). **Severity:** LOW. **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine.
+
+### BUG-206 — Narrate will not start on a page that opens with a small-caps drop cap
+**Reported:** 2026-10-23 (Stage 8 smoke notes; also seen by NARRATE-SENTENCE-RESUME-1's live check (c) after a relaunch). **Severity:** MEDIUM. **Status:** OPEN. Lane: TTS / Narration Engine. **Description:** the app shows "Failed to execute 'setEnd' on 'Range': The offset 7 is larger than the node's length (4)" and Play does not start until two page turns later. **Location:** `setEnd(endPos.node, endPos.offset)` at `src/reader/modes/narrate/helpers/foliateHelpers.ts:165`. Present on the frozen build `47ae6e1f`, so it predates NARRATE-SENTENCE-RESUME-1.
+**SMOKE8-DIAG-1 (2026-10-23):** not reproduced on a scratch profile. That includes the smoke's own book (copy `c070d8a3dbea`), at chapter 1's first page by `goTo`, by reopening at the saved cfi (with the owner's `einkMode`/`theme` too) and after a relaunch. The live check therefore gives no frequency. Static exposure: 15 of 40 random owner books (38%) open sections with a word split across inline elements, as the smoke's book does; the sample and the repo fixtures have none. `foliateHelpers.ts:165` cannot overflow (`locateTextOffset` clamps). The likely site is foliate's cfi resolution, `node_modules/foliate-js/epubcfi.js:308` (inferred). Next step: capture the stack. The renderer does not log this error; the owner's `error.log` has no `setEnd` line.
+**NARRATE-START-STACK-1 (2026-10-23):** stack capture shipped; frequency still unmeasured; static exposure 38% (15 of 40 owner books). Narrate now writes the full stack of a start error to `error.log` (`[narrate] view load failed: …` from the view, `[narrate] F4 producer-error at word N: …` from the engine), so the next occurrence names its call site.
+
+### BUG-207 — Quitting with Narrate paused takes 13.9 s
+**Diagnosis (SMOKE8-DIAG-1, 2026-10-23):** slow, but not paused-specific. The quit's save steps finish in ≤ 50 ms. The rest is the uncapped wait for the Narrate producer's workers to finish their in-flight Kokoro generations (`main/narrate/producer.js:51-58`, `producer-worker.js:157-160`); read-ahead keeps generating while paused.
+
+| Quit | Times (s) |
+|---|---|
+| Paused, uninstrumented | 4.78, 6.08, 2.45 |
+| Playing, uninstrumented | 5.76, 5.32, 4.46 |
+| Producer done, instrumented | 1.86–8.01 |
+
+No run hit the 30 s terminate, and every exit code was 0. Gate status and fix direction are for Blurby.Brain (the report's BUG-207 section).
+**Reported:** 2026-10-23 (Stage 8 smoke check #23 notes; 2.3 s while playing). **Severity:** LOW (no crash, no data loss). **Status:** OPEN, unscheduled. Lane: TTS / Narration Engine. Windows also logged a `RADAR_PRE_LEAK_64` memory warning for Blurby in the same session; record it with this bug until measured.
 
 ### BUG-200 — The quick-settings "Sort by" does not change the library order
 **Reported:** 2026-10-14 (code trace while specifying SETTINGS-KEY-TRUST-1, on `eb/ipc-path-trust-1` @ `d0ef1f5d`; not yet seen live; filed for Blurby.Brain)
@@ -80,7 +219,7 @@
 **Severity:** MEDIUM (user data: the last settings change, and library state written by the quit flush, never reach disk)
 **Status:** RESOLVED (QUIT-FLUSH-1, merge `d21009b3`, 2026-10-14). The quit saves run in the cancelled first `will-quit` under `QUIT_FLUSH_TIMEOUT_MS` (3 s), each guarded, and the Narrate producer shutdown is awaited uncapped. Review fixes: the quit cloud sync's library merge is flushed (W1), no step starts after the cap (W2), and the flush cannot stay stuck (N1). Owner smoke on the production build (Done-when 9): the accent changed just before Alt+F4 was kept, no Blurby process remained after about 2 s, and no new `*.tmp` was left ((a)–(e) pass; (f) not testable as written, because Page-mode page turns do not commit a reading position).
 **Location:** was `main.js` `app.on("will-quit", async (event) => …)` (`:691` on `main` @ `15e9c2f1`); now `main/quit-sequence.js` (`createWillQuitHandler`, `runQuitSteps`) and the step list in `main.js`'s `will-quit` block (`main.js:682` on `d21009b3`).
-**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%lurbylurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
+**Description:** The owner changed the accent colour to pink and quit. On relaunch the accent was the previous purple. In the profile (`%APPDATA%\blurby\blurby-data`), the quit left `settings.json.tmp` holding the pink value (`accentColor: "#FF5B7F"`, written 23:21:13, never renamed) and a 0-byte `sync-queue.json.tmp`; `settings.json` kept the earlier value. A second quit at 23:27 left `library.json.tmp` (92,712 bytes, never renamed). Changes saved by the normal debounced save while the app was open (the theme, 10 s earlier) did survive.
 **Root cause:** Electron does not wait for an async `will-quit` listener. The handler cancels only the first quit (`event.preventDefault()`) to stop the Narrate producer, then calls `app.quit()`; on the second pass every `await` — `flushTtsEvalTraceCaptures()`, `saveLibraryNow()`, SETTINGS-WRITE-DURABLE-1's `saveSettingsFn()`, and the final cloud sync — runs after Electron has already decided to exit, so the process ends mid-write. The library flush had the same flaw before SETTINGS-WRITE-DURABLE-1; that item's quit flush inherits it.
 **Evidence:** owner smoke 2026-10-13 (planner session): file listing and diff of `settings.json` against `settings.json.tmp` (only `accentColor` differs); 0-byte `sync-queue.json.tmp`; 92,712-byte `library.json.tmp` after the second quit; no `ENOENT` in either terminal.
 **Fix path:** do the flushes inside the cancelled first pass: `event.preventDefault()`, then await the producer shutdown, the eval-trace flush, `saveLibraryNow()`, `saveSettingsFn()` and the sync-queue writer (each guarded so one failure does not block the rest, with an overall timeout), then `app.quit()`; the second pass only closes the watcher and the WebSocket server. Whether the final cloud sync belongs in the awaited pass (it can be slow) is a design decision for the spec. Needs a positive control that fails today: a main-process test (or the F7 harness) that quits during a pending write and finds the file unwritten.
@@ -117,20 +256,24 @@
 ### BUG-188 — Focus and Flow horizontal cursor band sits apart from the word cursor
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke; owner screenshot)
 **Severity:** LOW (visual; reading stays possible)
-**Status:** OPEN — pre-existing; triage together with BUG-169 and the "Flow band" item the removal spec lists as out of scope. Lane: Reader Engine.
+**Status:** OPEN — measured by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as BAND-ALIGN-1 (in that report). It is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2). Lane: Reader Engine.
 **Location:** corrected 2026-10-12 (roadmap review static census): the visible "band" is the reading-zone mask (`mask-image` on `.rm-focus-view` / `.rm-flow-view`, `src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), positioned by `applyZoneProperties` and the Flow line pacer; `.flow-shrink-cursor` is hidden and is not the band.
 **Description:** In Focus (owner screenshot: *The Raven*, speed chip 1.60x) a three-line dark band covers lines 3–5 of the visible page while the blue word underline sits under "borrow" on line 6. The horizontal cursor band is in the wrong place relative to the word cursor.
-**Root cause:** Undetermined. The base build (`main` @ `612d03f5`, same profile, A/B 2026-10-12) shows the same placement, so the removal did not cause it. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
+**Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):**
+- **Height:** the band is always 5 × 24 px = 120 px, because the outer view's line-height is `normal` and `applyZoneProperties` falls back to 24. It covers 4.4 body lines at 100% text size and 3.6 at 120%.
+- **Position:** it is fixed at 15% of the view, and nothing places the cursor's line in it. The Focus cursor was outside it in every check.
+- **Flow:** the underline was outside the band in 60–77% of one-second samples over 3 minutes of play; after an early 15–19 s in-band run the band rarely holds it again. That fits the word timer and the line pacer drifting apart (inferred; the pacer was not read).
+- **Not the removal:** the base build (`main` @ `612d03f5`) shows the same. Every rule in the deleted Narrate `mode.css` was scoped under `.rm-narrate-root`, and `.flow-shrink-cursor` was never copied into it.
 **Evidence:** Owner screenshot 1250x849, `C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png` (kept outside the repository: `docs/governance/bug-reports/.gitignore` excludes screenshots); the staging memo's observation and evidence paragraph.
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) measures hypotheses H1–H3 live and writes the fix specification. Static census: not BUG-169 (a React update-depth loop); the same defect as the owner's 2026-10-10 "Flow band" sighting.
 
 ### BUG-187 — Dev-mode `ResizeObserver loop completed with undelivered notifications` flood in error.log
 **Reported:** 2026-10-12 (NARRATE-REMOVE-1 live smoke)
 **Severity:** LOW (log noise and possible render cost; no visible failure reported)
-**Status:** OPEN — cause undetermined; needs a read-only diagnosis. Lane: Reader Engine.
-**Location:** the five `ResizeObserver` instances in the Page, Focus and Flow Foliate view files, which NARRATE-REMOVE-1 did not touch.
+**Status:** OPEN — root cause found by READER-VISUAL-DIAG-1 (2026-10-23, `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md`). Fix specified as FOLIATE-OBSERVER-LEAK-1 (in that report). Pre-existing (`612d03f5` floods too). Not a dev-only bug: production logs about 2,634 lines a minute. Lane: Reader Engine.
+**Location (corrected 2026-10-23):** not the app's `ResizeObserver`s. It is foliate-js 1.0.1's `View` observer (`node_modules/foliate-js/paginator.js:201`, observed on load `:265`), which `View.destroy()` (`:410-411`) fails to unobserve. Our mode views detach the book frame before the deferred `view.close()` runs (`src/reader/modes/focus/FoliateView.tsx:1086-1096`; Flow and Page are the same).
 **Description:** The profile `error.log` received 7,226 `ResizeObserver loop completed with undelivered notifications` lines between 22:50:46Z and 22:56:10Z (about five minutes) on the sprint build in dev mode. The same message flooded the log in May 2026 on earlier builds.
-**Root cause:** Undetermined. A base session of about one minute the same day logged none, but the sessions differ in length and actions, so a pre-existing pattern and a change of this sprint are both still open.
+**Root cause (READER-VISUAL-DIAG-1, measured 2026-10-23):** after a mode switch, foliate `View` observers are left watching dead 0×0 section bodies, and Chromium reports "loop completed with undelivered notifications" every frame. Leaving Focus then entering Flow on the packaged build gave 60 errors a second for the rest of the session (14,428 in 328.7 s). Disconnecting the leaked `View` observers mid-loop dropped the rate from 60 to 0 a second; how they drive the loop is not established (their callbacks ran once each). The app's own observers write equal values and do not loop.
 **Evidence:** The staging memo's smoke note and observation (counts, timestamps).
 **Fix path:** READER-VISUAL-DIAG-1 (roadmap position 12) reproduces it with equal-length sessions on the base, the branch and a production build, names the oscillating observer (hypothesis H4) and writes the fix specification.
 

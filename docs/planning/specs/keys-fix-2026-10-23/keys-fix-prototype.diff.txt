@@ -1,0 +1,170 @@
+diff --git a/docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json b/docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json
+index 0c64cfa1..228b745b 100644
+--- a/docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json
++++ b/docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json
+@@ -372,6 +372,7 @@
+         "countWords",
+         "currentChapterIndex",
+         "detectChapters",
++        "findParagraphStart",
+         "findSentenceBoundary",
+         "focusChar",
+         "formatDisplayTitle",
+diff --git a/src/reader/modes/flow/ModeRuntime.ts b/src/reader/modes/flow/ModeRuntime.ts
+index 9b763316..49c2b256 100644
+--- a/src/reader/modes/flow/ModeRuntime.ts
++++ b/src/reader/modes/flow/ModeRuntime.ts
+@@ -75,6 +75,7 @@ import {
+ import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
+ import { calculatePauseMs } from "./helpers/rhythm";
+ import { findSectionForWord } from "./helpers/narration";
++import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
+ import { createChunkReadingVisualState } from "./helpers/chunkReadingVisualState";
+ import { FlowScrollEngine, type FlowProgress } from "./helpers/FlowScrollEngine";
+ import type { FoliateWord } from "./helpers/foliateHelpers";
+@@ -917,9 +918,22 @@ export class FlowModeRuntime implements ReaderModeRuntime {
+     if (!this.alive) return;
+     switch (command.kind) {
+       case "flow-line":
+-        // Legacy handleFlowPrevLine / handleFlowNextLine.
+-        if (this.scrollEngine?.getState().running) this.scrollEngine.jumpToLine(command.direction);
+-        return;
++        // Legacy handleFlowPrevLine / handleFlowNextLine; the word timer follows the line pacer's new word.
++        if (!this.scrollEngine?.getState().running) return;
++        this.scrollEngine.jumpToLine(command.direction);
++        this.engine?.jumpTo(this.scrollEngine.getWordIndex());
++        break;
++      case "seek-words":
++        this.moveReadingWord(this.navigationWord() + command.delta);
++        break;
++      case "sentence":
++        this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
++        break;
++      case "paragraph": {
++        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
++        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
++        break;
++      }
+       case "go-to-href":
+         // Legacy handleJumpToChapter foliate branch.
+         this.markEngaged();
+@@ -932,6 +946,29 @@ export class FlowModeRuntime implements ReaderModeRuntime {
+     this.state.notify();
+   }
+ 
++  /** The word the navigation keys step from: the playing word timer's word, else the highlighted word. */
++  private navigationWord(): number {
++    return this.state.playing && this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
++  }
++
++  /**
++   * FLOW-KEYS-FIX-1: move the reading word. Playing, both pacers jump (as a playing hard selection does);
++   * paused or before a play, the word becomes the explicit start anchor that Flow's cold restart consumes.
++   */
++  private moveReadingWord(target: number): void {
++    const s = this.state;
++    const word = this.clampToEffectiveWordRange(target);
++    if (s.playing && this.engine) {
++      this.engine.jumpTo(word);
++      this.scrollEngine?.jumpToWord(word);
++      return;
++    }
++    s.explicitSelectionAnchor = word;
++    s.currentWordIndex = word;
++    this.publishHighlight(word);
++    if (this.document.useFoliate && this.surface.isReady()) this.surface.highlight(word, "flow", { allowMotion: false });
++  }
++
+   // ── View events (bound by useModeBindings) ────────────────────────────────
+   /** Legacy ReaderContainer onRelocate, flow branches (the word advance owns the highlight). */
+   onRelocate = (detail: { readonly cfi: string; readonly fraction: number }): void => {
+diff --git a/src/reader/modes/focus/ModeRuntime.ts b/src/reader/modes/focus/ModeRuntime.ts
+index f651b176..5faa1d7b 100644
+--- a/src/reader/modes/focus/ModeRuntime.ts
++++ b/src/reader/modes/focus/ModeRuntime.ts
+@@ -67,6 +67,7 @@ import {
+ import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
+ import { calculatePauseMs } from "./helpers/rhythm";
+ import { findSectionForWord } from "./helpers/narration";
++import { findParagraphStart, findSentenceBoundary } from "../../../utils/text";
+ 
+ /**
+  * FocusMode — RSVP (Rapid Serial Visual Presentation). (Relocated from src/modes/FocusMode.ts.)
+@@ -746,10 +747,15 @@ export class FocusModeRuntime implements ReaderModeRuntime {
+   handleCommand(command: ReaderModeCommand): void {
+     if (!this.alive) return;
+     switch (command.kind) {
+-      case "seek-words": {
+-        // useReader.seekWords: moves the Focus display only (the engine keeps its own cursor).
+-        const words = this.effectiveWords();
+-        this.state.displayWordIndex = Math.max(0, Math.min(words.length - 1, this.state.displayWordIndex + command.delta));
++      case "seek-words":
++        this.moveReadingWord(this.navigationWord() + command.delta);
++        break;
++      case "sentence":
++        this.moveReadingWord(findSentenceBoundary([...this.effectiveWords()], this.navigationWord(), command.direction === "next" ? "forward" : "backward"));
++        break;
++      case "paragraph": {
++        const breaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
++        this.moveReadingWord(findParagraphStart(breaks, this.navigationWord(), command.direction === "next" ? "forward" : "backward", this.effectiveWords().length - 1));
+         break;
+       }
+       case "go-to-href":
+@@ -764,6 +770,29 @@ export class FocusModeRuntime implements ReaderModeRuntime {
+     this.state.notify();
+   }
+ 
++  /** The word the navigation keys step from: the engine's word once it exists, else the highlighted word. */
++  private navigationWord(): number {
++    return this.engine ? this.engine.getCurrentWord() : this.state.highlightedWordIndex;
++  }
++
++  /**
++   * FOCUS-KEYS-FIX-1: move the reading word. With an engine (playing or paused) the engine jumps, and its
++   * advance publishes the word; before the first play the word becomes the explicit start anchor.
++   */
++  private moveReadingWord(target: number): void {
++    const s = this.state;
++    const word = this.clampToEffectiveWordRange(target);
++    if (this.engine) {
++      this.engine.jumpTo(word);
++      return;
++    }
++    s.explicitSelectionAnchor = word;
++    s.currentWordIndex = word;
++    this.publishHighlight(word);
++    this.jumpDisplayToWord(word);
++    if (this.document.useFoliate) this.surface.highlight(word, "flow", { allowMotion: false });
++  }
++
+   // ── View events (bound by useModeBindings) ────────────────────────────────
+   /** Legacy ReaderContainer onRelocate, focus branches (soft selection is page-only). */
+   onRelocate = (detail: { readonly cfi: string; readonly fraction: number }): void => {
+diff --git a/src/utils/text.ts b/src/utils/text.ts
+index 8b6c2f42..1355e3f9 100644
+--- a/src/utils/text.ts
++++ b/src/utils/text.ts
+@@ -84,6 +84,23 @@ export function findSentenceBoundary(words: string[], currentIndex: number, dire
+   return 0;
+ }
+ 
++/**
++ * The first word of the previous or next paragraph. paragraphBreaks hold each paragraph's last word, so a
++ * paragraph starts at break + 1. Previous: the nearest start before currentIndex (else 0). Next: the nearest
++ * start after it (else lastIndex).
++ */
++export function findParagraphStart(paragraphBreaks: readonly number[], currentIndex: number, direction: "forward" | "backward", lastIndex: number): number {
++  const starts = [...paragraphBreaks].sort((a, b) => a - b).map((b) => b + 1);
++  if (direction === "forward") {
++    const next = starts.find((start) => start > currentIndex);
++    return next === undefined ? lastIndex : Math.min(next, lastIndex);
++  }
++  for (let i = starts.length - 1; i >= 0; i--) {
++    if (starts[i] < currentIndex) return starts[i];
++  }
++  return 0;
++}
++
+ // Title case minor words that should stay lowercase (unless first/last word)
+ const MINOR_WORDS = new Set([
+   "a", "an", "the", "and", "but", "or", "nor", "for", "yet", "so",

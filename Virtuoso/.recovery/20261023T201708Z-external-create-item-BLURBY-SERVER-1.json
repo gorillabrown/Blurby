@@ -1,0 +1,48 @@
+{
+  "id": "20261023T201708Z-external-create-item-BLURBY-SERVER-1",
+  "operation": "external-create-item",
+  "item_id": "BLURBY-SERVER-1",
+  "created": "2026-10-23T20:17:08Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "One library on every device (blrby.app server)",
+      "status": "Queued",
+      "sequence": 97,
+      "workstream": "Platform & Maintenance",
+      "written_status": "Stub",
+      "spec_link": "ROADMAP.md#blurby-server-1",
+      "branch": "eb/blurby-server-1",
+      "description": "Path: epic. Server on Cloudflare (blrby.app): accounts, one library across devices, drag-and-drop intake, plan limits, then payments (no desktop ads) and Kokoro server narration. Charter draft: docs/planning/holding/2026-10-23-blurby-server/charter-draft.md.",
+      "notes": "origin: held storyboard 2026-10-23-blurby-server (absorbed by roadmap review 2026-10-23-3)",
+      "id": "BLURBY-SERVER-1",
+      "prerequisites": []
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-23T20:14:38Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLURBY-SERVER-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "BLURBY-SERVER-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:BLURBY-SERVER-1",
+      "actualRevision": "",
+      "recoveryId": "20261023T201708Z-external-create-item-BLURBY-SERVER-1",
+      "detail": {},
+      "providerItemId": "4027c96c-c31e-815a-a164-e4239b509875",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-23T20:17:48Z",
+  "outcome": "succeeded"
+}

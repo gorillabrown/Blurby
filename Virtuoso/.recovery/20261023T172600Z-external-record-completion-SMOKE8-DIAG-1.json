@@ -1,0 +1,37 @@
+{
+  "id": "20261023T172600Z-external-record-completion-SMOKE8-DIAG-1",
+  "operation": "external-record-completion",
+  "item_id": "SMOKE8-DIAG-1",
+  "created": "2026-10-23T17:26:00Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "record-completion",
+    "fields": {
+      "status": "completed",
+      "completed": "2026-10-23",
+      "evidence": "docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md",
+      "sequence": null
+    },
+    "expectedRevision": "bba4c0541cf25b85419b40e1b5c41006c29bc2bf8d415584131506d0a271b3db",
+    "idempotencyKey": "record-completion:SMOKE8-DIAG-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "SMOKE8-DIAG-1",
+      "idempotencyKey": "record-completion:SMOKE8-DIAG-1:[('completed', '2026-10-23'), ('evidence', 'docs/governance/close-outs/CloseOut.SMOKE8-DIAG-1.2026-10-23.md'), ('sequence', None), ('status', 'completed')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T172600Z-external-record-completion-SMOKE8-DIAG-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-23T17:26:14Z",
+  "outcome": "succeeded"
+}

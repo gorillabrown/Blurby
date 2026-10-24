@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { BlurbyDoc, BlurbySettings, ToastAction, ToastState } from "../types";
 import { DEFAULT_SETTINGS, TOAST_DEFAULT_DURATION_MS } from "../constants";
 
@@ -9,6 +9,8 @@ const defaultSettings = DEFAULT_SETTINGS as BlurbySettings;
 export default function useLibrary() {
   const [library, setLibrary] = useState<BlurbyDoc[]>([]);
   const [settings, setSettings] = useState<BlurbySettings>(defaultSettings);
+  const settingsRef = useRef(settings);
+  settingsRef.current = settings;
   const [loaded, setLoaded] = useState(false);
   const [platform, setPlatform] = useState("win32");
   const [loadingContent, setLoadingContent] = useState(false);
@@ -83,10 +85,18 @@ export default function useLibrary() {
     }
   }, []);
 
+  // FOLDER-SWITCH-HEADER-1: main resolves switch-folder only after the folder's sync, which can take minutes, so the
+  // header and the menu's current folder follow the switch at once, and go back if main refuses it.
   const switchFolder = useCallback(async (folder: string) => {
+    const { sourceFolder, recentFolders } = settingsRef.current;
+    const recent = recentFolders || [];
+    setSettings((prev) => ({ ...prev, sourceFolder: folder, recentFolders: [folder, ...recent.filter((f) => f !== folder)] }));
     const result = await api.switchFolder(folder);
-    if (result.error) { showToast(result.error); return; }
-    setSettings((prev) => ({ ...prev, sourceFolder: folder }));
+    if (result.error) {
+      setSettings((prev) => ({ ...prev, sourceFolder, recentFolders }));
+      showToast(result.error);
+      return;
+    }
     const state = await api.getState();
     setLibrary(state.library);
     setSettings(state.settings);
@@ -143,8 +153,14 @@ export default function useLibrary() {
     } finally { setLoadingContent(false); }
   }, [showToast]);
 
-  const updateProgress = useCallback((docId: string, position: number) => {
-    setLibrary((prev) => prev.map((d) => (d.id === docId ? { ...d, position } : d)));
+  // PAGE-REOPEN-CFI-1: the copy a reopen opens from keeps the cfi main last saved. A negative position is
+  // Page's cfi-only save (KEEP_STORED_POSITION), which leaves the stored position alone.
+  const updateProgress = useCallback((docId: string, position: number, cfi?: string) => {
+    setLibrary((prev) => prev.map((d) => (d.id === docId ? {
+      ...d,
+      ...(position >= 0 ? { position } : {}),
+      ...(cfi ? { cfi } : {}),
+    } : d)));
   }, []);
 
   const toggleFavorite = useCallback(async (docId: string) => {

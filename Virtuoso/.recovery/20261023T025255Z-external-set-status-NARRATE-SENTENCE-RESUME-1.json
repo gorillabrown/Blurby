@@ -1,0 +1,39 @@
+{
+  "id": "20261023T025255Z-external-set-status-NARRATE-SENTENCE-RESUME-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-SENTENCE-RESUME-1",
+  "created": "2026-10-23T02:52:55Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-23",
+      "branch": "eb/narrate-sentence-resume-1",
+      "notes": "Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-sentence-resume-1 stacked on eb/narrate-token-cap-1), built during the Stage 8 freeze and merged after NARRATE-TOKEN-CAP-1."
+    },
+    "expectedRevision": "3ba3363beda66bddac26568027c424a0d5627a70edca075c76a98caf514e3bee",
+    "idempotencyKey": "set-status:NARRATE-SENTENCE-RESUME-1:[('branch', 'eb/narrate-sentence-resume-1'), ('notes', 'Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-sentence-resume-1 stacked on eb/narrate-token-cap-1), built during the Stage 8 freeze and merged after NARRATE-TOKEN-CAP-1.'), ('started', '2026-10-23'), ('status', 'in-flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-SENTENCE-RESUME-1",
+      "idempotencyKey": "set-status:NARRATE-SENTENCE-RESUME-1:[('branch', 'eb/narrate-sentence-resume-1'), ('notes', 'Created 2026-10-14 by Blurby.Roadmap from the owner decision relayed by Blurby.Brain. Pairs with PAGE-POSITION-SAVE-1. Blocked until NARRATE-REBUILD-1 closes (the epic owns the files). Full Spec 2026-10-22 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/narrate-sentence-resume-1 stacked on eb/narrate-token-cap-1), built during the Stage 8 freeze and merged after NARRATE-TOKEN-CAP-1.'), ('started', '2026-10-23'), ('status', 'in-flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T025255Z-external-set-status-NARRATE-SENTENCE-RESUME-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes tail equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T02:53:49Z",
+  "outcome": "succeeded"
+}

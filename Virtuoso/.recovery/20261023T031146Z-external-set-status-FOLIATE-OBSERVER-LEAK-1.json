@@ -1,0 +1,40 @@
+{
+  "id": "20261023T031146Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+  "operation": "external-set-status",
+  "item_id": "FOLIATE-OBSERVER-LEAK-1",
+  "created": "2026-10-23T03:11:46Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-23",
+      "branch": "eb/foliate-observer-leak-1",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.",
+      "written_status": "full-spec"
+    },
+    "expectedRevision": "6265d32db73af5f6ab92f76f3688ba17849d075a64fc711180390fe274c68c59",
+    "idempotencyKey": "set-status:FOLIATE-OBSERVER-LEAK-1:[('branch', 'eb/foliate-observer-leak-1'), ('notes', 'Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.'), ('started', '2026-10-23'), ('status', 'in-flight'), ('written_status', 'full-spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOLIATE-OBSERVER-LEAK-1",
+      "idempotencyKey": "set-status:FOLIATE-OBSERVER-LEAK-1:[('branch', 'eb/foliate-observer-leak-1'), ('notes', 'Created 2026-10-23 by Blurby.Roadmap from READER-VISUAL-DIAG-1 (TR-080). Drafted spec in ROADMAP.md, needs a Task list and Lessons applied. After the Stage 8 freeze. Full Spec 2026-10-23 (U9/U10 pass). Dispatched 2026-10-23 by Blurby.Roadmap to an implementation agent (blurby-f0; branch eb/foliate-observer-leak-1 from main), built during the Stage 8 freeze and merged after it lifts.'), ('started', '2026-10-23'), ('status', 'in-flight'), ('written_status', 'full-spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261023T031146Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+      "detail": {
+        "readBack": "SQL: In Flight, Branch, Notes equal"
+      }
+    }
+  },
+  "resolved": "2026-10-23T03:12:12Z",
+  "outcome": "succeeded"
+}

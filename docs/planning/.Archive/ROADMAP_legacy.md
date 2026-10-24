@@ -8564,3 +8564,239 @@ The run on `40c01ceb` stopped at Done-when 8 because of three `ROADMAP.md` lines
 - **Standing rules 47 and 48:** the suite, typecheck and build are in Done-when 9.
 - **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
 - **Standing rule 46 (LL-153):** the run writes nothing to the register.
+
+## Archived at close-out 2026-10-23: READER-VISUAL-DIAG-1
+
+#### READER-VISUAL-DIAG-1 — Diagnose the Focus/Flow reading band and the ResizeObserver flood *(position 10 — Full Spec)*
+
+- **What:** A read-only diagnosis, measured live, of two pre-existing reader defects. It confirms or refutes the static findings below and ends with a diagnosis report and a fix specification for each bug. No product code is committed.
+  - **BUG-188:** the Focus/Flow "band" sits apart from the word cursor.
+  - **BUG-187:** "ResizeObserver loop completed with undelivered notifications" floods the profile `error.log`.
+- **Why:** both bugs are Low but visible in every Focus and Flow session, and the rebuilt Narrate will sit beside the same Flow surface. Rule 6a forbids specifying a fix before the cause is known.
+- **Static findings to test** (read-only census of `a0e09189`, 2026-10-12; none measured live yet):
+  - **The band is the reading-zone mask.** It is the `mask-image` gradient on `.rm-focus-view` and `.rm-flow-view` (`src/reader/modes/focus/mode.css:34-55`, `flow/mode.css:31-52`), placed by `--flow-zone-top` and `--flow-zone-bottom`. `.flow-shrink-cursor` is hidden (`src/styles/flow.css:49`, `flow/mode.css:113`), so BUG-188's Location is wrong.
+  - **H1 — The band is about 3 lines when it should be 5.** `applyZoneProperties` (`focus/FoliateView.tsx:1170-1184`, `flow/FoliateView.tsx:1246-1260`) and `onZoneTopChange` (`flow/useModeBindings.ts:34-44`) compute the zone height as `parseFloat(getComputedStyle(container).lineHeight) || 24` on the outer view. No rule sets that line-height, so Chromium's `normal` gives the 24 px fallback. The EPUB lines are 18 px × zoom × 1.8, which is 38.9 px at 120%, so 5 × 24 px covers about 3.1 lines.
+  - **H2 — In Focus nothing ties the band to the word cursor.** The band is fixed at 15% (`FLOW_ZONE_INITIAL_TOP`). The arrival scroll centres the cursor word (`scrollIntoView({ block: "center" })`, `focus/FoliateView.tsx:1047-1060`).
+  - **H3 — In Flow two clocks drive the band and the underline.** The `FlowMode` word timer paints the underline (`flow/ModeRuntime.ts:1181-1213`). The `FlowScrollEngine` line pacer scrolls its own line under the band (`flow/helpers/FlowScrollEngine.ts:746-753`, `stableWindowScroll` branch, untested). The pacer starts later and adds 150 ms per line, and a chunk follow scrolls to the band's middle instead (`flow/FoliateView.tsx:642-672`, `:495-505`).
+  - **H4 — BUG-187 is an observer loop.** Five observers exist: `page/FoliateView.tsx:1018`, `focus/FoliateView.tsx:1188` and `:1212`, `flow/FoliateView.tsx:1264` and `:1288`. Their callbacks rewrite renderer attributes and iframe padding with no equality check, on `overflow: auto` containers. Every window `error` event reaches `error.log` unfiltered (`src/App.tsx:130-143` → `preload.js:122` → `main/ipc/misc.js:334-336`). About 22 lines a second suggests a sustained frame-by-frame loop. StrictMode double effects apply in dev only.
+- **Out of scope:** any committed product-code change (the fixes are separate items, specified by this one); BUG-169 (a different defect, a React update-depth loop whose cited files no longer exist); BUG-189 (dev-mode speed; DEV-PERF-MEASURE-1).
+- **Prerequisites:** none.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. `docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` exists, and for each of H1–H4 records a verdict (confirmed, refuted or partly confirmed) with the measurement behind it. The measurements:
+       - **H1:** in Focus and Flow at 100% and 120% zoom, the outer view's computed line-height, the zone height in px and the rendered EPUB line height in px.
+       - **H2:** in Focus, paused after opening a book, the band's top and bottom against the cursor word's rect.
+       - **H3:** in Flow, playing for 2 minutes at the default speed, the word-timer index against the pacer's line index, sampled once a second (count of samples where the underline word is outside the band).
+       - **H4:** `error.log` lines per minute in two equal-length sessions (5 minutes each, same book and actions) on `612d03f5` (before the Narrate removal) and on this item's base, in dev; the same on a production build (`npm run build`, then the built app); and, with temporary counters, which observer callback fires per frame and which attribute or size changes each time.
+    2. The report ends with one fix specification per bug, in the roadmap's D.5.2 format (What, Why, Done when, Edit sites, Tests), ready for the next roadmap review.
+    3. The report corrects BUG-188's Location (the zone mask, not `.flow-shrink-cursor`) and states whether BUG-188 is the 2026-10-10 "Flow band" sighting (`os1-owner-observations.json` S2).
+    4. `git diff --name-status refs/remotes/origin/main` lists exactly `A docs/studies/investigations/READER-VISUAL-DIAG-1.2026-10-12.md` and `M docs/governance/BUG_REPORT.md` (BUG-187 and BUG-188 updated with the verdict and a pointer to the report), plus the time log and staging memo if kept (standing rule 41). Temporary instrumentation is never committed: `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing.
+- **Effort:** S.
+- **Owners:** implementation agent (read-only diagnosis, Aristotle role); owner for the live sessions; reviewer re-reads the measurements.
+- **Lane:** Reader Engine. Execution surface B (evaluation).
+- **Source:** [BUG_REPORT.md BUG-187, BUG-188](docs/governance/BUG_REPORT.md); the read-only census of 2026-10-12 for this review; the owner's screenshot (`C:\Projects\Blurby-artifacts\narrate-remove-1\owner-screenshot-2026-10-12-focus.png`); `docs/planning/roadmap-reviews/reader-mode-separation-2/os1-owner-observations.json` S2; the NARRATE-REMOVE-1 smoke record.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** none in product code. Temporary instrumentation (console counters in the five observer callbacks, a sampler of the Flow word and line indexes) lives in the worktree only and is reverted before the commit; record the exact temporary diff in the report.
+- **Tests:** none (diagnosis). Measurement scripts, if any, are saved outside the repository or under a name the test runner does not collect (LL-146).
+- **Constants:** none.
+- **Branch:** `eb/reader-visual-diag-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\reader-visual-diag-1`. Write refs in full.
+- **Staging plan:** one commit with exactly the report and `docs/governance/BUG_REPORT.md`. Never stage `tests/perf-baseline-results.json`. Merge to `main` with `--no-ff` and push (Rule 5b).
+- **Failure handling:**
+  - If H4 does not reproduce in either 5-minute session on the base or the branch, record "not reproduced" with the session details, extend once to 10 minutes, and then report the negative result; do not invent a cause.
+  - If a measurement needs a product-code change to be possible, stop with BLOCKER(USER) and describe the change; it is not this item's to make.
+  - Rollback: `git revert -m 1 <merge>` (docs only).
+- **Lane ownership (parallel run):** surface B; read-only on code.
+  - **Forbidden:** committing any path outside the two documents; the live user profile's settings (use a copied profile or the test profile for sessions).
+  - **Shared-core touches:** none.
+  - **Merge order:** independent; may run beside any item.
+  - **Measurement windows (2026-10-13):** every live session, dev or production, and the production build follow the [parallel run plan](#parallel-run-plan-2026-10-13); they never overlap the epic's D3 or D6/T7 trials. Re-audit on `d21ad58e`: the cited Focus and Flow files are unchanged since `a0e09189`, and `preload.js:122` is still `logError`.
+  - **BUG-193 confound (roadmap review 2026-10-14):** every live session runs with the profile's `sourceFolder` empty (the owner's G2 setting, backed up in `%APPDATA%\blurby\blurby-data\g2-backup-20261014\`) or after FOLDER-SCAN-PERF-1 has merged. With the 120,000-file source folder set, each launch floods the main process for about 2 minutes (BUG-193), which would distort H3's timer sampling and H4's per-minute counts and make the base-against-branch comparison meaningless. Record the `sourceFolder` value in the report for every session. Re-audit on `66f15981`: the cited files are unchanged since `a0e09189` apart from `preload.js` (+5 lines, `logError` still at `:122`), and `main/ipc/misc.js:334` is still the `log-error` handler; the lessons check passes.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Band hypotheses H1–H3 measured live in Focus and Flow | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 2 | Observer flood H4 reproduced with equal sessions on base, branch and production, and its oscillating observer named | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements taken so far | — |
+| 3 | Report and two fix specifications written; bug records updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, two bug updates, one --no-ff merge) | — | — |
+
+**Total:** chain 5m · sum 5m + 2 timeboxed ≤4h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-152** — like-for-like A/B sessions on the base, and a production-build measurement, before attributing the flood.
+- **LL-142** — every verdict rests on a measurement on the running app, not on the static reading above.
+- **LL-146** — measurement scripts are never committed under a collectable test name.
+- **Standing rule 45 (LL-141)** — the live sessions are owner-observed, with the session length and actions recorded.
+- **Standing rule 38** — measure the signal chain before proposing a rewrite of cursor behaviour.
+- **Standing rule 41 (LL-136)** — the fence exempts the time log and staging memo.
+
+
+## Archived at close-out 2026-10-23: UI-SWEEP-1
+
+
+#### UI-SWEEP-1 — Press every control on every screen and report what breaks *(position 68 — Full Spec; authored 2026-10-23 on main @ `4913d6c8` at the owner's request; not a release gate)*
+
+- **What:** Write a CDP-driven sweep that presses every clickable control on every screen of a packaged Blurby build, then records what each press did and any errors it produced. Run it once on a `--dir` build of `47ae6e1f`, the frozen tree that ships. The deliverables are the script, `scripts/ui-sweep/sweep.mjs` (dev tooling; `scripts/` is not in `package.json` `build.files`, so it never ships), and the report, `docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`. This item does not fix anything: every broken control becomes a bug candidate in the report, and the planner files the bugs at close-out.
+- **Why:** The owner asked on 2026-10-22 whether every button is tested, and nothing does that. The suite tests code paths, executors' live checks cover the flows their items changed, and the Stage 8 smoke covers deferred owner checks. A control nobody has pressed since an earlier release can be broken unseen.
+- **Surfaces to reach** (from `src/components/` and `src/components/settings/` on the base):
+  - **Library:** list and grid views, the toolbar, `MenuFlap`, the folder button with `RecentFolders`, `DocCard` and `DocGridCard` menus, `AddEditPanel`, `MetadataWizard`, `ImportConfirmDialog`, `DeleteConfirmation`, `BugReportModal`, `CommandPalette`, `StatsPanel`, `ReadingQueue`, `GoalProgressWidget`, `OnboardingOverlay`, `FolderNoticeBanner`, `PairingBanner`.
+  - **Settings:** every pane: `ThemeSettings`, `TextSizeSettings`, `LayoutSettings`, `LibraryLayoutSettings`, `SpeedReadingSettings`, `ReadingGoalsSettings`, `HotkeyMapSettings`, `ConnectorsSettings`, `CloudSyncSettings`, `HelpSettings`.
+  - **Reader, in Page, Focus, Flow and Narrate:** `ReaderBottomBar`, `QuickSettingsPopover`, `HighlightsOverlay`, `HighlightMenu`, `NotePopover`, `SnoozePickerOverlay`, `TagPickerOverlay`, `ShortcutsOverlay`, `ReaderSpeedDialog`, `GoToIndicator`, `DefinitionPopup`, `ReturnToReadingPill`, `BacktrackPrompt`.
+  - **Keyboard:** every shortcut `HotkeyMapSettings` lists, pressed once in each mode it applies to.
+- **Out of scope:**
+  - Fixing anything.
+  - Visual design judgements.
+  - Native OS dialogs (Browse for folder, file import): CDP cannot drive them, so they are recorded as SKIPPED-DIALOG.
+  - Anything that leaves the sandbox (below).
+  - Listening to Narrate's audio.
+- **Prerequisites:** none in code. **Run timing:** the sweep's live run starts only after the Stage 8 smoke agent on the owner's screen has finished, because a second Blurby window would steal focus from it. The planner sends the go. Writing and dry-running the script can start now.
+- **Sandbox (hard rules):**
+  - Run only on a scratch profile (`BLURBY_USER_DATA_DIR`, `main.js:29`). Seed it with copies: the bundled sample, one EPUB, one PDF and one `.txt` from the repo's test fixtures. No real library and no Drive folder.
+  - The owner's live profile is never opened. Hash its `library.json` and `settings.json` before and after the run; they must match.
+  - **Denylist, never pressed** (recorded SKIPPED-SAFETY with the control's label):
+    - anything that opens an external URL or mail client;
+    - OAuth, sign-in or connect for Google, Microsoft or cloud;
+    - Check for updates and Install update;
+    - Send or submit on the bug report. It may be opened, and its local save may be pressed only if it writes inside the scratch profile.
+    - anything whose label names publish, upload or share.
+  - Delete actions run only on the scratch copies. Run the build from a copy of `release\win-*-unpacked`, because BUG-194 means deleting the sample deletes the bundled file from the build.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **The script exists, with no new dependency.** `scripts/ui-sweep/sweep.mjs` uses Node 24 built-ins only: `fetch`, the global `WebSocket` for CDP and `child_process`. `node --check scripts/ui-sweep/sweep.mjs` exits 0. `git diff --name-only refs/remotes/origin/main -- package.json package-lock.json` prints nothing.
+    2. **Positive control:** the sweep must detect a known defect. On `47ae6e1f`, BUG-187's observer flood is still present (FOLIATE-OBSERVER-LEAK-1 has not merged). The run must record at least one ERROR row whose evidence is `error.log` growth with the ResizeObserver message while Flow is entered or played. If it records none, the detector is blind: stop and report.
+    3. **Method per control:**
+       - Before: a DOM digest of the surface (element count and text hash) and a screenshot.
+       - Press: `Input.dispatchMouseEvent` at the element's box centre, or a key event for shortcuts.
+       - Wait up to 1 s.
+       - After: the DOM digest, a screenshot, new console errors (`Runtime.exceptionThrown`; `Runtime.consoleAPICalled` with type error), and `error.log` bytes added since the press.
+       - Result:
+         - **OK** — the DOM changed or navigation happened, and no error;
+         - **ERROR** — an exception, a console error or `error.log` growth;
+         - **NO-EFFECT** — nothing changed and no error;
+         - **SKIPPED-SAFETY** — on the denylist;
+         - **SKIPPED-DIALOG** — a native dialog opened, which is then dismissed;
+         - **UNREACHABLE** — the surface could not be opened, with the reason.
+       - Then reset to the surface: Escape, Back, or reload the surface's route.
+    4. **Coverage:** the report has one section per surface listed above. Each section shows the enumerated control count and a row per control (surface | label or accessible name | selector | result | evidence), with zero rows marked UNKNOWN. Any surface not reached is listed as UNREACHABLE, with the reason.
+    5. **Summary:** the report opens with the totals per result. Then it lists every ERROR, and every NO-EFFECT control that should plainly do something, as a bug candidate: control, surface, steps, evidence and suspected file. Screenshots go to `C:\Projects\Blurby-artifacts\ui-sweep-1\` and are referenced by file name; they are not committed.
+    6. **The live profile is untouched:** the before and after sha256 of `%APPDATA%\blurby\blurby-data\library.json` and `settings.json` are equal, and recorded in the report.
+    7. **Fence:** `git diff --name-status refs/remotes/origin/main` lists exactly `A scripts/ui-sweep/sweep.mjs`, the report, and the time log and staging memo. Optionally it may also list `A scripts/ui-sweep/README.md`, a one-paragraph usage note.
+    8. **No product code and no TypeScript:** the full suite, typecheck and build are not gates here (standing rule 48 applies only to items that edit code). Building the `--dir` package of `47ae6e1f` is the run's own step.
+- **Effort:** M.
+- **Owners:** implementation agent; the planner files bugs from the report at close-out.
+- **Lane:** Platform & Maintenance. Execution surfaces B (evaluation harness) and D for the main-process log.
+- **Source:** the owner's question of 2026-10-22; CDP precedent in PAGE-POSITION-SAVE-2's and TOC-JUMP-SAVE-1's live checks (a `--dir` build, a scratch profile, CDP on a debug port); `main.js:29` (`BLURBY_USER_DATA_DIR`).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Launch:** `release\win-<arch>-unpacked\Blurby.exe --remote-debugging-port=<port>` on a copy of the build, with `BLURBY_USER_DATA_DIR` set to the scratch profile. Read the targets from `http://127.0.0.1:<port>/json/list`, and attach to the renderer page.
+- **Enumeration:** query visible elements matching `button, [role=button], [role=menuitem], [role=tab], a[href], input, select, textarea, [tabindex="0"]`. Dedupe by surface plus accessible name plus role. Order them by DOM position.
+- **Reaching surfaces:** drive each surface by its own controls, in a fixed walk order: library → settings panes → open each fixture book → each mode → each overlay. Log the walk in the report.
+- **Merge:** the report and the script may merge during the Stage 8 freeze (the planner's tier-1 call), because neither ships: `scripts/` is not in `build.files`.
+- **Branch:** `eb/ui-sweep-1` from `refs/remotes/origin/main`, in worktree `C:\Projects\Blurby\.worktrees\ui-sweep-1`. Build the `--dir` package from a separate detached worktree at `47ae6e1f`.
+- **Failure handling:**
+  - If CDP will not attach to the packaged build, record the error and try the dev build. Label the run as dev in the report, and say so.
+  - If a press hangs the app, record ERROR (hang), restart the app on the same profile, and continue from the next control.
+  - If the positive control fails, stop (Done-when 2).
+  - Rollback: `git revert -m 1 <merge>`.
+- **Lane ownership (parallel run):** surfaces B and D, read-only on product code.
+  - **Forbidden:** any edit to `src/`, `main/`, `preload.js`, `package.json` or the lockfile; the owner's live profile; the owner's screen while the smoke agent runs.
+  - **Shared-core touches:** none.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Sweep script that enumerates and presses every control and classifies each press, dry-run on one surface | calculable | feature | bounded | medium | 60m (CDP driver, enumerator, classifier, reset) | — | — |
+| 2 | Full run on a `--dir` build of 47ae6e1f, positive control red on BUG-187, every surface covered | frontier | diagnosis | bounded | medium | — | ≤2h — stop and report the coverage reached | — |
+| 3 | Report written with totals and bug candidates; live profile hashes equal; merged and pushed | calculable | docs and merge | bounded | medium | 30m (one report, one --no-ff merge) | — | — |
+
+**Total:** chain 12m · sum 12m + 1 timeboxed ≤2h; 2 of 2 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **Standing rule 43 (LL-138):** the positive control is BUG-187's known flood. A sweep that cannot see it cannot be trusted with a "no error" row.
+- **LL-142:** each result is classified from a measurement (DOM digest, exceptions, `error.log` bytes), never from a label.
+- **LL-146:** the sweep lives under `scripts/`, never under a collectable test name.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register. The planner files the bugs.
+- **Standing rule 41 (LL-136):** the fence exempts the time log and staging memo.
+- **LL-164:** no lesson-status line is appended.
+
+
+## Archived at close-out 2026-10-23: UI-SWEEP-TRIAGE-1
+
+
+#### UI-SWEEP-TRIAGE-1 — Confirm or dismiss UI-SWEEP-1's NO-EFFECT and unreachable candidates *(position 74 — Full Spec; authored 2026-10-23 on main from UI-SWEEP-1's report; diagnosis only, non-shipping; not a release gate unless a candidate is confirmed as a release-blocking defect)*
+
+- **What:** re-test every candidate in UI-SWEEP-1's report (`docs/studies/investigations/UI-SWEEP-1.2026-10-23.md`, "Bug candidates") on the same `--dir` build of `97527896`. That is the 104 NO-EFFECT rows plus W1–W3. Use a detector that sees what the sweep's DOM digest cannot:
+  - **Style and settings:** the computed style hash of `:root` and the reader iframe body, plus the `settings` object read through the renderer (themes, accents, fonts, layout and library-layout options change styles or settings, not DOM text).
+  - **Focus:** the active element (text fields take focus and change nothing else).
+  - **Reader state:** the scroll position and the reader's word index (`wordIndex`), read before and after (keyboard seeks, chapters, lines).
+  - **Library state:** the selected row and each document's archived and trashed flags (J/K, Ctrl+Up/Down, E, Shift+E, #), with a row selected first where the action needs one.
+  - **Preconditions:** each press is retried from a state where it should act (for example "Previous chapter" from chapter 2, not from the first).
+- **Classify each candidate:**
+  - **WORKS:** the stronger detector saw the effect. It was a sweep blind spot.
+  - **BY-DESIGN:** there is nothing to do in that state, and none is expected (for example "Close menu" on a closed menu).
+  - **DEFECT:** it should act and does not. Give the steps, the evidence, and a suspected `file:line` from a read of the handler.
+- **Done when:**
+  1. A triage table in a new report, `docs/studies/investigations/UI-SWEEP-TRIAGE-1.2026-10-23.md`, has one row per candidate (107 rows) and no unclassified row.
+  2. **Positive control:** before the run, the stronger detector must detect at least one effect that the sweep's digest marked NO-EFFECT and that is known to work, for example the dark theme changing `--bg`. If it can't, stop and report.
+  3. Every DEFECT row gives its severity (release-blocking, High, Medium or Low) and is reproduced twice.
+  4. W1–W3 are confirmed or refuted by reading the code (the route, the key comparison, the listener), with `file:line`.
+  5. Fence: the report, the memo, the time log, and any `scripts/ui-sweep/` change (non-shipping). No product code. The live profile's hashes are unchanged.
+- **Branch:** `eb/ui-sweep-triage-1` from `refs/remotes/origin/main`. Reuse `C:\Projects\Blurby-artifacts\ui-sweep-1\build-97527896-x64` and a scratch profile.
+- **Merge:** non-shipping (docs and scripts), so it may merge during the freeze. The planner files the DEFECT rows as bugs at close-out. Any release-blocking defect goes to Blurby.Brain before it is filed.
+- **Lane:** Platform & Maintenance. Execution surface B. Effort: M. **Path:** dispatch.
+- **Lessons applied:** standing rule 43 (positive control); LL-142 (classified from measurement, never from a label).
+
+
+## Archived at close-out 2026-10-23: SMOKE8-DIAG-1
+
+
+#### SMOKE8-DIAG-1 — Diagnose the two smoke failures: Page reopen position (BUG-201) and the stale folder header (BUG-202) *(position 6, the head — Full Spec; authored 2026-10-23 on main @ `a3ff7003`; release blocker for gate (2))*
+
+- **What:** A read-only diagnosis of the two product failures in the Stage 8 owner smoke (`docs/governance/close-outs/Smoke.STAGE8.2026-10-23.md`, checks #8 and #28). It finds each root cause by measurement on a build of the frozen `47ae6e1f`, and ends with a D.5.2 fix specification for each. It commits no product code.
+- **Why:** release gate (2) failed. BUG-201 (the reader loses their place on reopen) is a release blocker. BUG-202 needs a real-click reproduction before its severity is known.
+- **Done when:** run every command in PowerShell 7 (`pwsh`) from the worktree root.
+    1. **Report:** `docs/studies/investigations/SMOKE8-DIAG-1.2026-10-23.md` gives each bug a verdict (reproduced, or not reproduced, with the conditions), the measurement behind it, and the root cause with file and line.
+    2. **BUG-201, reproduce on a scratch profile** (`BLURBY_USER_DATA_DIR`), on an installed or `--dir` build of `47ae6e1f`. Turn about 30 pages in a long EPUB in Page mode, close, and reopen. Record each save from `library.json` (position and cfi, with timestamps) and every `page-turn-lost` diagnostic. Name the write that overwrites the cfi or leaves it stale: which handler, which line, and which event order. Use the owner's book only as a copy.
+    3. **BUG-202, reproduce with a real click** (computer-use or a CDP mouse event at the element's box, never a DOM `.click()`). If it does not reproduce with a real click, record it as a harness artifact, with both results, and downgrade BUG-202 to that finding. If it does reproduce, trace why the renderer's settings copy misses the `sourceFolder` change: which IPC event fires, and who listens.
+    4. **Fix specs:** one D.5.2 fix specification per reproduced bug, with the task list and lessons applied. Each one's merge order is "into the frozen release line": it lands on `main` as the release fix, and gate (1) and the smoke re-run on the new sha.
+    5. **Fence:** `git diff --name-status refs/remotes/origin/main` lists the report and `BUG_REPORT.md` (BUG-201 and BUG-202 updated with the verdicts), plus the time log and memo. `git diff --name-only refs/remotes/origin/main -- src main preload.js` prints nothing. Temporary instrumentation stays in the worktree and is never committed.
+- **Effort:** M. **Owners:** implementation agent (read-only diagnosis); the planner registers the fix items.
+- **Lane:** Reader Engine and Library & Content. Execution surface B.
+- **Source:** the smoke results file (checks #8 and #28, with screenshots under `smoke-stage8/`); `src/components/LibraryView.tsx:414`; the Page save path (PAGE-POSITION-SAVE-1/2, PAGE-SAVE-RESTAMP-GUARD-1/-2 in `ROADMAP_snapshot_2026-10-22.md` and `ROADMAP.md`).
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Branch:** `eb/smoke8-diag-1` from `refs/remotes/origin/main`. Build `47ae6e1f` in a separate detached worktree, or reuse the smoke's build at `.worktrees/smoke-47ae6e1f`.
+- **Sandbox:** scratch profiles only. Never open the owner's live profile. Close every Blurby window you start.
+- **Failure handling:** if BUG-201 does not reproduce in 3 attempts, record the conditions of each attempt and widen once: a longer book, a mid-chapter reopen, and a reopen after a mode switch. Then report what you found. Don't invent a cause.
+- **Merge:** docs only, so it may merge during the freeze.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | BUG-201 reproduced and its overwriting write named, by measurement | frontier | diagnosis | cross-cutting | high | — | ≤2h — stop and report the measurements so far | — |
+| 2 | BUG-202 reproduced with a real click, or recorded as a harness artifact | frontier | diagnosis | bounded | medium | — | ≤1h — stop and report | — |
+| 3 | Report and fix specifications written; bugs updated; merged and pushed | calculable | docs and merge | bounded | medium | 40m (report, two D.5.2 fix specs, one --no-ff merge) | — | — |
+
+**Total:** chain 3m · sum 3m + 2 timeboxed ≤3h; 1 of 1 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+- **LL-142:** each verdict rests on a measurement on the running build, not on reading the code.
+- **LL-161:** a position is checked by its word's text and its cfi, not by index alone.
+- **Standing rule 45 (LL-141):** the smoke's owner-observed route is preserved. The fix is re-checked in the re-run smoke.
+- **LL-146:** measurement scripts are never committed under a collectable test name.
+- **Standing rule 46 (LL-153):** the run writes nothing to the register.
+- **LL-164:** no lesson-status line is appended.
+
+##### Mid-Dispatch Amendment — 2026-10-23 (Blurby.Brain, tier 1)
+
+- **Gate (1) waits for the fix sha** and runs once, on the final tree. The freeze moves to that sha.
+- **BUG-201:** reproduce it in a test or a scratch profile before any fix. Name which writer reverts the cfi while the position stays, and give its timeline. The candidates: a held-turn replay, the restamp guard's cfi-only save, a full-library save from the renderer, or the quit flush. The fix spec must carry a regression test that fails on `47ae6e1f`.
+- **BUG-207 is added to scope** (the 13.9 s quit with Narrate paused, against 2.3 s while playing, plus the RADAR memory warning). Find where the time goes: QUIT-FLUSH-1 awaits the Narrate producer's shutdown uncapped. Report the timeline of each quit step. Brain rules gate or not on the cause; it is likely a gate if a normal paused-Narrate quit routinely takes more than about 3 s.
+- **BUG-202:** unchanged. It needs a real-click reproduction. If it reproduces, the fix joins the same release fix.
+- **BUG-206 (drop cap):** not a gate, but measure how often it breaks Narrate. Over the bundled sample, the repo's EPUB fixtures and a read-only copy of a sample of the owner's library, count how many books' first chapters hit the `setEnd` failure. If many first chapters fail, report it, and the planner takes it back to Brain as a gate candidate.
+- BUG-203, BUG-204 and BUG-205 are not gates and are out of this item's scope.
+- New Done-when rows: (8) BUG-207's quit timeline, with each step's duration, paused and playing, 3 runs each; (9) BUG-206's frequency count, with the book list (hashes, not titles, for the owner's books).
