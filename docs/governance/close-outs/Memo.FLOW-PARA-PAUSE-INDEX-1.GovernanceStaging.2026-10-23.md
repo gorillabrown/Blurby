@@ -69,6 +69,13 @@
     - An A/B launch of the base package (`61cbbf7e`), same script and a fresh profile, printed the same lines. They predate this item (LL-152).
     - There was no unhandled rejection and no crash line.
   - Logs: `pv-launch.log`, `pv-launch.stdout.txt`, `pv-launch.stderr.txt`, and the base A/B `pv-launch-base.*`.
+- **(b) on the native arch (Blurby.Brain ruling 1):**
+  - This machine and the owner's installed Blurby are ARM64, so the x64 launch above ran under emulation.
+  - `releasewin-arm64-unpackedBlurby.exe` (PE machine `0xAA64`) ran the same 25 s scratch-profile launch.
+    - It stayed alive, and the scratch `blurby-data` was created.
+    - The live profile was unchanged, no `error.log` was written, no new crash dump appeared, and stdout was empty.
+  - stderr holds only the two known-noise lines named in rule 53 (b): BUG-217 (`Backup failed … library.json ENOENT` on a fresh profile) and `EADDRINUSE 127.0.0.1:48924`, held by the owner's pid 16120.
+  - Logs: `pv-launch-arm64.log`, `pv-launch-arm64.stdout.txt`, `pv-launch-arm64.stderr.txt`. The x64 results stay as extra evidence.
 - **(c) asar:**
   - `npx asar list` lists 11,581 entries (`pv-asar-list.txt`).
   - No `main/` file differs from `61cbbf7e` or from `origin/main`.
