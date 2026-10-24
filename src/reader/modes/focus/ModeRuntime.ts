@@ -67,6 +67,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
+import { bookParagraphBreaks } from "./helpers/foliateParagraphStarts";
 import { findBookParagraphStart, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 
 /**
@@ -148,6 +149,11 @@ export class FocusMode implements ReadingMode {
 
   updateWords(words: string[]): void {
     this.config.words = words;
+  }
+
+  /** FLOW-PARA-PAUSE-INDEX-1: replace the paragraph pauses (a newly loaded section's paragraph ends). */
+  setParagraphBreaks(breaks: Set<number>): void {
+    this.paragraphBreaks = breaks;
   }
 
   destroy(): void {
@@ -550,7 +556,7 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     this.anchorDeps.jumpDisplayToWord(startWord); // reader.jumpToWord(startWord)
     s.playing = true;
     this.ports.settings.update({ readingMode: "focus", lastReadingMode: "focus", isNarrating: false });
-    const paragraphBreaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
+    const paragraphBreaks = this.engineParagraphBreaks();
     const token = Symbol("focus-start");
     s.pendingStartToken = token;
     this.setTimer(() => {
@@ -777,6 +783,19 @@ export class FocusModeRuntime implements ReaderModeRuntime {
   }
 
   /**
+   * FLOW-PARA-PAUSE-INDEX-1: the word engine's paragraph pauses, in the index space of effectiveWords(). With full-book
+   * words (book-wide indices) they come from the rendered block starts of book-stamped sections and the book's section
+   * starts, because the view's breaks index the loaded slice. Otherwise the view's or the document's breaks, as before.
+   */
+  private engineParagraphBreaks(): readonly number[] {
+    if (!this.document.useFoliate) return this.document.paragraphBreaks;
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return this.surface.getParagraphBreaks();
+    const sectionStarts = bookWords.sections.map((section) => section.startWordIdx);
+    return [...bookParagraphBreaks(this.surface.getParagraphStarts(), sectionStarts, this.effectiveWords().length - 1)];
+  }
+
+  /**
    * The paragraph start to move to, in the index space of effectiveWords(). With full-book words (book-wide indices)
    * it comes from the rendered block starts of book-stamped sections and the book's section starts (Blurby.Brain,
    * ruling A); null when no section is known. Otherwise the view's loaded-slice breaks or the document's breaks
@@ -890,6 +909,9 @@ export class FocusModeRuntime implements ReaderModeRuntime {
     if (!this.document.bookWords) {
       this.engineWords = [...words];
       this.engine?.updateWords(this.engineWords);
+    } else {
+      // FLOW-PARA-PAUSE-INDEX-1: a newly stamped section's paragraph starts pause too (playing or paused).
+      this.engine?.setParagraphBreaks(numberArrayToSet(this.engineParagraphBreaks()));
     }
     this.state.notify();
   };

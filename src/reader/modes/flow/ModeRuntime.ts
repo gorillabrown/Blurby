@@ -75,6 +75,7 @@ import {
 import { resolveCanonicalWordAnchor, resolveFoliateStartWord, resolveModeStartWordIndex } from "./helpers/startWordIndex";
 import { calculatePauseMs } from "./helpers/rhythm";
 import { findSectionForWord } from "./helpers/narration";
+import { bookParagraphBreaks } from "./helpers/foliateParagraphStarts";
 import { findBookParagraphStart, findParagraphStart, findSentenceBoundary } from "../../../utils/text";
 import { createChunkReadingVisualState } from "./helpers/chunkReadingVisualState";
 import { FlowScrollEngine, type FlowProgress } from "./helpers/FlowScrollEngine";
@@ -191,6 +192,11 @@ export class FlowMode implements ReadingMode {
    */
   updateWords(words: string[]): void {
     this.config.words = words;
+  }
+
+  /** FLOW-PARA-PAUSE-INDEX-1: replace the paragraph pauses (a newly loaded section's paragraph ends). */
+  setParagraphBreaks(breaks: Set<number>): void {
+    this.paragraphBreaks = breaks;
   }
 
   // ── Internal ─────────────────────────────────────────────────────
@@ -727,7 +733,7 @@ export class FlowModeRuntime implements ReaderModeRuntime {
       this.surface.highlight(startWord, "flow", { allowMotion: true });
     }
     this.ports.settings.update({ readingMode: "flow", lastReadingMode: "flow" });
-    const paragraphBreaks = this.document.useFoliate ? this.surface.getParagraphBreaks() : this.document.paragraphBreaks;
+    const paragraphBreaks = this.engineParagraphBreaks();
     s.playing = true;
     this.startEngine(startWord, effectiveWords, paragraphBreaks);
     s.notify();
@@ -953,6 +959,19 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   }
 
   /**
+   * FLOW-PARA-PAUSE-INDEX-1: the word engine's paragraph pauses, in the index space of effectiveWords(). With full-book
+   * words (book-wide indices) they come from the rendered block starts of book-stamped sections and the book's section
+   * starts, because the view's breaks index the loaded slice. Otherwise the view's or the document's breaks, as before.
+   */
+  private engineParagraphBreaks(): readonly number[] {
+    if (!this.document.useFoliate) return this.document.paragraphBreaks;
+    const bookWords = this.document.bookWords;
+    if (!bookWords) return this.surface.getParagraphBreaks();
+    const sectionStarts = bookWords.sections.map((section) => section.startWordIdx);
+    return [...bookParagraphBreaks(this.surface.getParagraphStarts(), sectionStarts, this.effectiveWords().length - 1)];
+  }
+
+  /**
    * FLOW-PARA-KEYS-1: the paragraph start to move to, in the index space of effectiveWords(). With full-book words
    * (book-wide indices) it comes from the rendered block starts of book-stamped sections and the book's section
    * starts (Blurby.Brain, ruling A, as Focus); null when no section is known. Otherwise the view's loaded-slice
@@ -1066,6 +1085,9 @@ export class FlowModeRuntime implements ReaderModeRuntime {
     if (!this.document.bookWords) {
       this.engineWords = [...words];
       this.engine?.updateWords(this.engineWords);
+    } else {
+      // FLOW-PARA-PAUSE-INDEX-1: a newly stamped section's paragraph starts pause too (playing or paused).
+      this.engine?.setParagraphBreaks(numberArrayToSet(this.engineParagraphBreaks()));
     }
     const pending = s.pendingResume;
     if (pending != null) {

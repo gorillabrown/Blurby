@@ -43,3 +43,21 @@ export function collectParagraphStartWordIndexes(
   }
   return [...starts].sort((a, b) => a - b);
 }
+
+/**
+ * FLOW-PARA-PAUSE-INDEX-1: the word engine's paragraph pauses in book-wide word indices, for a book with full-book
+ * words. The word before each paragraph or section start (a start above 0) ends a paragraph, and so does the book's
+ * last word. With no book-stamped section yet, this is the section ends plus the last word.
+ */
+export function bookParagraphBreaks(
+  paragraphStarts: readonly number[],
+  sectionStarts: readonly number[],
+  lastIndex: number,
+): Set<number> {
+  const breaks = new Set<number>();
+  for (const start of [...paragraphStarts, ...sectionStarts]) {
+    if (start > 0) breaks.add(start - 1);
+  }
+  if (lastIndex >= 0) breaks.add(lastIndex);
+  return breaks;
+}
