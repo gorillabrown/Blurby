@@ -1108,16 +1108,23 @@ export default function PageFoliateView({
       const contents = view?.renderer?.getContents?.() ?? [];
       for (const { doc, index } of contents) {
         if (!doc?.body) continue;
+        // PAGE-SAVE-RESTAMP-3: never interleave with the load's wrap. RESTAMP-RERUN-RACE-1 (W1): nor with an earlier
+        // re-stamp's, which registers its wrap below; a cancelled run stops here.
+        await sectionWrapsRef.current.get(doc)?.catch(() => {});
+        if (cancelled) return;
+        // RESTAMP-RERUN-RACE-1 (W2): the start is read after the wait, from the words loaded now.
         const sectionStart = getSectionGlobalOffset(index, foliateWordsRef.current, bookWordSections as SectionBoundary[]);
         if (sectionStart < 0) continue;
-        await sectionWrapsRef.current.get(doc)?.catch(() => {}); // PAGE-SAVE-RESTAMP-3: never interleave with the load's wrap
         unwrapWordSpans(doc);
         const sectionWords = foliateWordsRef.current.filter((word) => word.sectionIndex === index);
         const canonicalWords = getCanonicalSectionWordsRef.current?.(index);
-        await wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        const rewrap = wrapWordsInSpans(doc, index, sectionStart, sectionWords, canonicalWords);
+        sectionWrapsRef.current.set(doc, rewrap);
+        await rewrap;
+        if (cancelled) return;
         // PAGE-SAVE-RESTAMP-GUARD-1: the book's numbering now applies to this section; save the turn held on it.
         rendererNumberedDocsRef.current.delete(doc);
-        if (!cancelled) reportHeldTurnRef.current(doc);
+        reportHeldTurnRef.current(doc);
       }
       if (!cancelled) {
         scheduleWordPositionIndexRebuild("section-restamp", 0);
