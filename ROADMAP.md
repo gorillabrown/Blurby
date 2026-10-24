@@ -1571,6 +1571,90 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 - **LL-165:** not applied, because no live launch is made. Done-when 5 compares packaged files, and no build is started against a profile.
 
 
+<a id="flow-para-pause-index-1-spec"></a>
+
+#### FLOW-PARA-PAUSE-INDEX-1 — Flow and Focus paragraph pauses land at real paragraph ends *(position 108 — Full Spec; authored 2026-10-23 by Blurby.Roadmap on `eb/block-tag-case-1` @ `61cbbf7e`; owner tier-2 decision 2026-10-23: BLOCK-TAG-CASE-1 holds its merge until this lands, and the two merge together; build-and-hold now; not a release gate)*
+
+- **What:** with full-book words loaded (an EPUB with `bookWords`), Flow and Focus pause after the last word of each paragraph, numbered in the same whole-book word index they read in.
+- **Why:**
+  - Both modes pass `this.surface.getParagraphBreaks()` to `startEngine` (`flow/ModeRuntime.ts:730`, `focus/ModeRuntime.ts:553`).
+  - That set comes from `extractWordsFromView` (`flow/helpers/foliateHelpers.ts:233-253`, Focus's copy the same). It adds `words.length - 1` per block over the *loaded* sections only, so it is an index into the loaded slice.
+  - With `bookWords`, the engine reads `effectiveWords()`, whose indices are book-wide. The engine tests `paragraphBreaks.has(currentWord)` (`flow/ModeRuntime.ts:211`, `focus/ModeRuntime.ts:183`; Focus's rhythm helper `focus/helpers/rhythm.ts:65`). So every pause lands at the wrong word.
+  - Measured by BLOCK-TAG-CASE-1 Wave A: in *Meditations* INTRODUCTION, after a contents jump, the base has 1 pause and the block fix has 27. None of them falls at a paragraph end; one falls between "was" and "married". Evidence: `docs/studies/investigations/BLOCK-TAG-CASE-1.after.2026-10-23.md` and the pause probe `docs/studies/investigations/BLOCK-TAG-CASE-1.pause-probe.mjs.txt` on that branch.
+  - The book-wide paragraph starts already exist. `surface.getParagraphStarts()` (`flow/surface.ts:51`, `focus/surface.ts:46`) returns `collectParagraphStartWordIndexes` over book-stamped sections (`flow/helpers/foliateParagraphStarts.ts`). The paragraph keys use it through `findBookParagraphStart` (`flow/ModeRuntime.ts:968`, `focus/ModeRuntime.ts:792`).
+- **Prerequisites:** BLOCK-TAG-CASE-1 (built and held at `61cbbf7e`). This item stacks on it, and the two merge together.
+- **Done when** (every command in `pwsh` from the worktree root):
+  1. **Base measurement, no code change (LL-142).**
+     - Build a packaged `--dir` app of the base `61cbbf7e` from a clean `git archive` copy with real node_modules. Use a scratch profile, proved before the first input (LL-165), and check that the live-profile hashes are unchanged.
+     - Run the pause probe in Flow and in Focus on *Meditations* INTRODUCTION (reached by a contents jump) and on the g0 book's first two text sections.
+     - For each pause, record its word, the next word, and whether it is a paragraph's last word. Read the answer from runtime state, not screenshots (LL-166).
+     - Save the results to `docs/studies/investigations/FLOW-PARA-PAUSE-INDEX-1.base.2026-MM-DD.md`.
+  2. **Red first (standing rule 43).** Commit `tests/readerModes/bookParagraphBreaks.test.ts` on its own.
+     - **(p1)** Each mode's new helper `bookParagraphBreaks(paragraphStarts, sectionStarts, lastIndex)` returns `{9, 19, 39, 59}` for starts `[0, 10, 20]`, section starts `[0, 40]` and lastIndex 59. That is every start greater than 0 minus 1, plus `lastIndex`, deduplicated.
+     - **(p2)** Runtime test, per mode: with `bookWords` set and a stub surface whose `getParagraphStarts()` returns `[0, 10, 20]` and whose `getParagraphBreaks()` returns the slice set `{3, 5}`, the set given to the engine at play is the book-wide one, not `{3, 5}`. On the base this fails by assertion, because the slice set is passed.
+     - **(p3) Control:** without `bookWords`, the slice or document set is passed unchanged, as today.
+
+     Name the helper in a variable so the file runs on the base.
+  3. **The change, in each of Flow and Focus** (each mode's own files; no sibling import):
+     - Add `bookParagraphBreaks` to `src/reader/modes/<mode>/helpers/foliateParagraphStarts.ts`.
+     - At play (`flow/ModeRuntime.ts:730`, `focus/ModeRuntime.ts:553`), when `this.document.useFoliate && this.document.bookWords`, pass `bookParagraphBreaks(this.surface.getParagraphStarts(), bookWords.sections.map(s => s.startWordIdx), effectiveWords().length - 1)`. Otherwise keep today's expression.
+     - **Refresh:** in `onWordsReextracted` (`flow/ModeRuntime.ts:1060`, `focus/ModeRuntime.ts:885`), when playing with `bookWords`, recompute the set and hand it to the running engine. A newly loaded section's paragraph starts then pause too.
+       - Add a `setParagraphBreaks(breaks: Set<number>)` method to the mode classes that read `this.paragraphBreaks` (`flow/ModeRuntime.ts:100`, `focus/ModeRuntime.ts:89`). In Focus, the rhythm helper reads the same set.
+       - If Flow's `FlowScrollEngine` (`flow/helpers/FlowScrollEngine.ts:92`, `:373`) keeps its own `paragraphBreaks` for pauses, give it the same setter and call it.
+       - This is a mode-local file, not the shared-core `src/utils/FlowScrollEngine.ts`. Re-grep at the base (standing rule 36); if the path differs, name it.
+     - Leave Narrate and Page untouched.
+  4. **After measurement,** with the same recipe, probe and route as step 1 (LL-152). Every recorded pause is a paragraph's last word, in both modes and both books, and the per-section pause count equals the number of paragraphs read. A pause that is not a paragraph end stops the item, with that pause's words.
+  5. **Tests.** `npx vitest run tests/readerModes/bookParagraphBreaks.test.ts tests/readerModes/blockTagCase.test.ts tests/readerModes` passes. The FOCUS-KEYS-FIX-1, FLOW-PARA-KEYS-1 and BLOCK-TAG-CASE-1 tests are green and unedited, or named under standing rule 50.
+  6. `npm test`, `npm run typecheck` and `npm run build` exit 0 on the owner's machine (standing rules 47 and 48).
+  7. **Fence:** `git diff --name-status 61cbbf7e` lists exactly the following, plus the measurement files, staging memo and time log (standing rule 41):
+     - `M src/reader/modes/flow/helpers/foliateParagraphStarts.ts` and `M src/reader/modes/focus/helpers/foliateParagraphStarts.ts`;
+     - `M src/reader/modes/flow/ModeRuntime.ts` and `M src/reader/modes/focus/ModeRuntime.ts`;
+     - `M src/reader/modes/flow/helpers/FlowScrollEngine.ts`, only if step 3 needs it;
+     - `A tests/readerModes/bookParagraphBreaks.test.ts`.
+
+     Nothing in `main/`, `src/types.ts`, `src/components/ReaderContainer.tsx`, `src/utils/FlowScrollEngine.ts`, Narrate or Page.
+  8. **Owner (next smoke, added to gate (2)'s list):** in Flow and Focus with rhythm pauses on, reading *Meditations* INTRODUCTION pauses at paragraph ends only.
+- **Effort:** S.
+- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel; the owner at the next smoke.
+- **Source:** BLOCK-TAG-CASE-1 Wave A (`61cbbf7e`, its staging memo); the owner's tier-2 decision, 2026-10-23.
+- **Path:** dispatch.
+
+##### Implementation detail
+- **Edit sites:** listed under Done-when 3. Re-grep them at `61cbbf7e` (standing rule 36):
+
+  ```
+  git grep -n -E "getParagraphBreaks\(\)|paragraphBreaks.has|onWordsReextracted = |private paragraphBreaks" -- src/reader/modes/flow src/reader/modes/focus
+  ```
+- **Tests:** the new test file, plus the existing `tests/readerModes/` tests, unedited.
+- **Constants:** none.
+- **Branch:** `eb/flow-para-pause-index-1`, cut from `origin/eb/block-tag-case-1` @ `61cbbf7e` with `origin/main` merged in. Push it; do not merge (Stage 8 freeze). After the release it merges together with BLOCK-TAG-CASE-1, this branch carrying both, in the keys and band merge order: FOCUS-KEYS-FIX-1 → FLOW-KEYS-FIX-1 → FLOW-PARA-KEYS-1 → BAND-ALIGN-2 → this branch.
+- **Staging plan:** explicit paths only. `tests/perf-baseline-results.json` and the Timing backfills stay unstaged.
+- **Failure handling:**
+  - If `getParagraphStarts()` is empty at play, because no section is book-stamped yet, fall back to section ends plus `lastIndex` and refresh on re-extraction. A test covers this.
+  - If a pause lands off a paragraph end after the change, stop with the words around it.
+  - Rollback: `git revert -m 1 <merge>`.
+- **Shared-core touches:** none.
+- **Lane:** Reader Engine. Execution surface A.
+
+##### Task list
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Base pause measurement in Flow and Focus on both books, saved | calculable | measurement | bounded | medium | 40m | — | — |
+| 2 | Red file (p1–p3) committed alone, failures recorded | calculable | positive control | bounded | low | 20m | — | — |
+| 3 | Book-wide breaks at play and on re-extraction in Flow and Focus | calculable | bug fix | bounded | medium | 40m | — | — |
+| 4 | After measurement with the same recipe; every pause at a paragraph end | calculable | measurement | bounded | medium | 35m | — | — |
+| 5 | Targeted tests, then suite, typecheck and build; memo, time log, push | calculable | verify | bounded | medium | 35m | — | — |
+
+##### Lessons applied
+- **LL-142:** the misplacement was measured by BLOCK-TAG-CASE-1 Wave A before this item was written; this item measures again before and after.
+- **LL-152:** the before and after measurements use the same build recipe, probe and route.
+- **LL-165:** every live launch proves its scratch profile before the first input.
+- **LL-166:** each pause verdict reads runtime state through the probe, not a screenshot.
+- **Standing rule 43 (LL-138):** the red test goes first, with a control for the no-`bookWords` path.
+- **Standing rule 50 (LL-156):** a pinned test that asserts slice-indexed breaks is named, not edited.
+- **Standing rule 36:** every cited line is re-grepped at the base.
+- **LL-164 / standing rule 51:** this specification appends no lesson-status line.
+
 <a id="eink-controls-1"></a>
 
 #### EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*
@@ -1734,7 +1818,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - <a id="chapter-step-cfi-1"></a>**CHAPTER-STEP-CFI-1 — Focus and Flow chapter steps save the entry's word with the old page's cfi** *(position 97 — stub; added by roadmap review 2026-10-23-4 from JUMP-LANDING-SAVE-1's staging memo; after JUMP-LANDING-SAVE-1; not a release gate)*. From JUMP-LANDING-SAVE-1's live check (e): on an EPUB, a chapter step or contents jump in Focus calls the mode's `navigateTo`, which persists the entry's word with the previous section's cfi before `go-to-href` lands (seen: position 69100 saved with a section-15 page range). A reopen goes by cfi first, so it can land on the old section. Page's fix (C) and landing save are the model. Trace Focus and Flow (and Narrate's) `navigateTo` and `go-to-href` landing, live-check the reopen, and fix with a red test. Lane: Reader Engine.
 - <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1 — Two re-stamp runs in a row on one section document** *(position 98 — stub; added by roadmap review 2026-10-23-4 from PAGE-SAVE-RESTAMP-3's staging memo, fold-in 5; after PAGE-SAVE-RESTAMP-3; not a release gate)*. From PAGE-SAVE-RESTAMP-3's quality review (W1, W2): the re-stamp effect does not register its own wrap in `sectionWrapsRef` and does not check `cancelled` after waiting, so a second `bookWordSections` identity during the first run's yielding wrap could unwrap mid-wrap; it also computes `sectionStart` before the wait and `sectionWords` after it. Not reproduced in the harness (two and three immediate renders green). Find a reachable trigger first (does `bookWordSections` ever change identity twice in a session?); fix only with a red test. Lane: Reader Engine.
 - <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — After a contents jump, Focus makes the chapter's first word the reading word** *(position 99 — stub; owner ruling 2026-10-23 (tier 3): "First word of chapter"; added by roadmap review 2026-10-23-4; after BAND-ALIGN-2 and CHAPTER-STEP-CFI-1; not a release gate)*. Found live by BAND-ALIGN-2 (2026-10-23): after a contents-list jump in Focus, no cursor is painted in the new section, on the base and on the tip, because `go-to-href` only calls `surface.goTo`. The owner ruled that the reading word becomes the jumped-to chapter's first word, and that word is saved, matching what Page saves after the same jump (JUMP-LANDING-SAVE-1). It unblocks BAND-ALIGN-2's Done-when 7 contents-jump check. Specify it with CHAPTER-STEP-CFI-1 in view, since both touch Focus's `navigateTo` and the `go-to-href` landing; they may fold into one item. Lane: Reader Engine.
-- <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1 — Flow and Focus paragraph pauses land at real paragraph ends** *(position 108 — stub; owner decision 2026-10-23 (tier 2) on BLOCK-TAG-CASE-1: hold that merge until this lands, then merge the two together; build-and-hold next, ahead of its Seq)*. Found by BLOCK-TAG-CASE-1 Wave A: the paragraph-pause list numbers words within the loaded section, while Flow and Focus count words across the whole book, so every pause is misplaced (one on the base; 27 after the block fix, e.g. between "was" and "married" in *Meditations* INTRODUCTION). Build the pause list in whole-book numbering from the paragraph starts each mode's keys code already finds (`foliateParagraphStarts.ts`, per mode, no sibling import), stacked on `eb/block-tag-case-1` `61cbbf7e`. Measure first with BLOCK-TAG-CASE-1's pause probe (`docs/studies/investigations/BLOCK-TAG-CASE-1.pause-probe.mjs.txt` on that branch); pass mark: every pause after a paragraph's last word. Lane: Reader Engine.
+- <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
 
