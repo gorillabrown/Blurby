@@ -11,16 +11,22 @@ import "./lib/app-icu-guard.mjs"; // P6b: refuse plain Node (exit 3)
 // Usage (pwsh, in the phase worktree, after `npm run build`; never while npm test or npm run build runs):
 //   node scripts/narrate-rebuild/p5-latency-e2e.mjs [--only session|warm|cold] [--warm 20] [--cold 5] [--rates 1.0,2.0]
 //        [--minutes 5] [--out C:\Projects\Blurby-artifacts\narrate-rebuild-1\p5] [--analyze-only]
+//        [--types play,resume,click,speed] [--class auto|reference|mainstream]
 // Writes docs/studies/narrate-rebuild-1/phase5/latency-e2e.json (D6) and recorded-output.json (D3 and D5 in the app,
 // through p5-recorded-output-check.mjs's analysis). Exit 0 only when every warm trial < 2,000 ms, every cold trial
 // < 8,000 ms and every session analysis is PASS; 1 otherwise. --analyze-only re-reads the traces already in --out.
+// The warm budget follows the host's D6 class (Decision #22): reference 2,000 ms, mainstream 2,500 ms; a host below
+// mainstream exits 2 before any launch. Cold click is classified per trial (lib/coldclick.mjs) and counts only when
+// attributed (NARRATE-HARNESS-COLDCLICK-1).
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { spawn } from "node:child_process";
+import crypto from "node:crypto";
+import { spawn, spawnSync } from "node:child_process";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 import { analyze, readTraceEvents } from "./p5-recorded-output-check.mjs";
+import { classifyColdClick, clickStepOf } from "./lib/coldclick.mjs";
 
 const require = createRequire(import.meta.url);
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -43,8 +49,34 @@ let breakPlanted = false;
 const POSITION = Number(arg("--position", 8723));
 const MODELS_ROOT = process.env.NARRATE_MODELS_ROOT || "C:/Projects/Blurby-artifacts/narrate-rebuild-1/models";
 const RECORDS_DIR = path.join(ROOT, "docs/studies/narrate-rebuild-1/phase5");
-export const WARM_BUDGET_MS = 2000, COLD_BUDGET_MS = 8000; // R3
-const TYPES = ["play", "resume", "click", "speed"];
+// D6 hardware classes and budgets (charter, Decision #22): 8+ physical cores is the reference class, 4 to 7 the
+// mainstream class (the i7-1185G7), below 4 is not judged. The cold budget is the same for both classes.
+export const REFERENCE_MIN_CORES = 8, MAINSTREAM_MIN_CORES = 4;
+export const REFERENCE_WARM_BUDGET_MS = 2000, MAINSTREAM_WARM_BUDGET_MS = 2500, COLD_BUDGET_MS = 8000; // R3
+const ALL_TYPES = ["play", "resume", "click", "speed"];
+const TYPES = arg("--types", null) ? String(arg("--types")).split(",").map((t) => t.trim()).filter((t) => ALL_TYPES.includes(t)) : ALL_TYPES;
+if (!TYPES.length) { console.error(`--types: none of ${arg("--types")} is one of ${ALL_TYPES.join(",")}`); process.exit(2); }
+
+/** Physical cores, read as epic-window.ps1 reads them (Win32_Processor NumberOfCores, summed); null when unreadable. */
+function physicalCores() {
+  const r = spawnSync("pwsh", ["-NoProfile", "-NonInteractive", "-Command", "(Get-CimInstance Win32_Processor | Measure-Object -Property NumberOfCores -Sum).Sum"], { encoding: "utf8", windowsHide: true });
+  const n = parseInt(String(r.stdout ?? "").trim(), 10);
+  return Number.isFinite(n) ? n : null;
+}
+export const d6ClassOf = (cores) => (cores >= REFERENCE_MIN_CORES ? "reference" : cores >= MAINSTREAM_MIN_CORES ? "mainstream" : "below-mainstream");
+const CLASS_ARG = String(arg("--class", "auto"));
+if (!["auto", "reference", "mainstream"].includes(CLASS_ARG)) { console.error(`--class must be auto, reference or mainstream (got ${CLASS_ARG})`); process.exit(2); }
+const PHYSICAL_CORES = physicalCores();
+const D6CLASS = CLASS_ARG === "auto" ? (PHYSICAL_CORES === null ? "below-mainstream" : d6ClassOf(PHYSICAL_CORES)) : CLASS_ARG;
+if (D6CLASS === "below-mainstream") { console.error(`D6 class below-mainstream (${PHYSICAL_CORES ?? "unknown"} physical cores): no launch`); process.exit(2); }
+const WARM_BUDGET_MS = D6CLASS === "reference" ? REFERENCE_WARM_BUDGET_MS : MAINSTREAM_WARM_BUDGET_MS;
+
+// The live profile (LL-165): hashed before the first launch and after the last; any change fails the run.
+const LIVE_PROFILE = process.env.APPDATA ? path.join(process.env.APPDATA, "blurby") : null;
+const liveHashes = () => Object.fromEntries(["settings.json", "library.json"].map((f) => {
+  const p = LIVE_PROFILE ? path.join(LIVE_PROFILE, f) : null;
+  return [f, p && fs.existsSync(p) ? crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex") : null];
+}));
 
 const slug = (v) => String(v).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "trace"; // = main.js safeTraceSlug
 const rateLabel = (r) => r.toFixed(2);
@@ -94,7 +126,7 @@ async function launch(label, trial) {
     BLURBY_USER_DATA_DIR: profile,
     BLURBY_TTS_EVAL_TRACE_DIR: traceDir,
     BLURBY_TTS_EVAL_TRACE_CONFIG: JSON.stringify({ mode: label, runId: label }),
-    BLURBY_NARRATE_TRIAL: JSON.stringify({ ...trial, position: POSITION, timeoutMs: TRIAL_TIMEOUT_MS, diag: DIAG, out: path.join(OUT, "summaries") }),
+    BLURBY_NARRATE_TRIAL: JSON.stringify({ ...trial, label, position: POSITION, timeoutMs: TRIAL_TIMEOUT_MS, diag: DIAG, out: path.join(OUT, "summaries") }),
     NARRATE_MODELS_ROOT: MODELS_ROOT,
   };
   const before = cpuSnapshot();
@@ -140,7 +172,10 @@ function firstVoiced(tracePath) {
 }
 
 const failures = [];
-const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS, foreignCeilingPct: 25, cycleCap: 40 }, rates: RATES, runs: [], warm: {}, cold: {}, sessions: {} };
+const report = { generatedAt: new Date().toISOString(), host: { platform: os.platform(), release: os.release(), cpus: os.cpus().length, physicalCores: PHYSICAL_CORES, d6class: D6CLASS, model: os.cpus()[0]?.model ?? null, totalMemGb: +(os.totalmem() / 2 ** 30).toFixed(1) }, electron: process.versions.electron ?? null, budgets: { warmMs: WARM_BUDGET_MS, coldMs: COLD_BUDGET_MS, foreignCeilingPct: 25, cycleCap: 40 }, rates: RATES, types: TYPES, runs: [], warm: {}, cold: {}, sessions: {} };
+const liveBefore = ANALYZE_ONLY ? null : liveHashes();
+// A launch that exits 4 opened a profile other than its scratch one (main/narrate/trial.js profileMismatch, LL-165).
+const launchChecked = async (label, trial) => { const run = await launch(label, trial); if (run.code === 4) failures.push(`${label}: profile mismatch`); return run; };
 
 const want = (k) => !ONLY || ONLY === k;
 
@@ -148,7 +183,7 @@ const want = (k) => !ONLY || ONLY === k;
 if (want("session")) {
   for (const rate of RATES) {
     const label = `session-${rateLabel(rate)}`;
-    if (!ANALYZE_ONLY) report.runs.push(await launch(label, { kind: "session", rate, minutes: MINUTES }));
+    if (!ANALYZE_ONLY) report.runs.push(await launchChecked(label, { kind: "session", rate, minutes: MINUTES }));
     const tp = tracePathFor(label);
     const r = fs.existsSync(tp) ? analyze(readTraceEvents(tp), { minMinutes: MINUTES }) : { verdict: "INCONCLUSIVE", failures: [], holds: ["no trace written"], stats: {} };
     report.sessions[rateLabel(rate)] = { tracePath: tp, ...r };
@@ -180,7 +215,7 @@ if (want("warm")) {
       } else {
         const repeat = part === 1 ? WARM : Math.min(need(), CYCLE_CAP - cycles);
         if (repeat <= 0) break;
-        report.runs.push({ ...(await launch(label, { kind: "warm", rate, repeat })), cycles: repeat });
+        report.runs.push({ ...(await launchChecked(label, { kind: "warm", rate, repeat })), cycles: repeat });
         cycles += repeat;
       }
       all.push(...firstVoiced(tracePathFor(label)).map((x) => ({ ...x, run: label })));
@@ -214,19 +249,41 @@ if (want("cold")) {
     for (const type of TYPES) {
       const rows = [];
       const countingRows = () => rows.filter((x) => x.counts).length;
+      let erroredInRow = 0;
       for (let i = 1; i <= CYCLE_CAP && countingRows() < COLD; i++) {
         const label = `cold-${type}-${r}-${i}`;
         let run = null;
         if (ANALYZE_ONLY) { if (!fs.existsSync(tracePathFor(label))) break; }
-        else { run = await launch(label, { kind: "cold", rate, type }); report.runs.push(run); }
-        const first = firstVoiced(tracePathFor(label))[0] ?? null;
-        const row = { trial: i, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, cpu: first ? first.cpu : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null };
+        else { run = await launchChecked(label, { kind: "cold", rate, type }); report.runs.push(run); }
+        const voiced = firstVoiced(tracePathFor(label));
+        const first = voiced[0] ?? null;
+        const row = { trial: i, label, latencyMs: first ? first.latencyMs : null, cause: first ? first.cause : null, cpu: first ? first.cpu : null, hostBusyPct: run ? run.hostBusyPct : null, wallMs: run ? run.wallMs : null };
+        if (type === "click") {
+          // NARRATE-HARNESS-COLDCLICK-1: the class comes from engine state (the traced requests and the first voiced
+          // cause) beside the driver's step; only an attributed trial can count.
+          const summaryPath = path.join(OUT, "summaries", `trial-${label}.json`);
+          const summary = fs.existsSync(summaryPath) ? JSON.parse(fs.readFileSync(summaryPath, "utf8")) : null;
+          const step = clickStepOf(summary);
+          const events = fs.existsSync(tracePathFor(label)) ? readTraceEvents(tracePathFor(label)) : [];
+          const d = (step && step.detail) || {};
+          Object.assign(row, {
+            class: classifyColdClick({ events, step }), playWord: d.playWord ?? null, clicked: d.clicked ?? null,
+            spansReadyMs: d.spansReadyMs ?? null, voicedBeforeClick: d.voicedBeforeClick ?? null, clickRequested: d.clickRequested ?? null,
+            clickLatencyMs: voiced.find((x) => x.cause === "click")?.latencyMs ?? null, error: summary && summary.error ? String(summary.error).split("\n")[0] : null,
+          });
+          if (row.class === "undelivered") {
+            row.lastEvents = events.filter((e) => e.kind !== "narrate-commit").slice(-12);
+            failures.push(`cold click ${r} trial ${i}: click sent before the first voice and never requested`);
+          }
+        }
         if (!first) failures.push(`cold ${type} ${r} trial ${i}: no first voiced sample recorded`);
         else if (first.latencyMs === null) failures.push(`cold ${type} ${r} trial ${i}: no output-timestamp pair`);
-        else if (type === "click" && first.cause !== "click") failures.push(`cold click ${r} trial ${i}: the first voiced sample answered ${first.cause}, not the click`);
-        row.counts = Boolean(first) && counts(first) && !(type === "click" && first.cause !== "click");
+        row.counts = Boolean(first) && counts(first) && (type !== "click" || row.class === "attributed");
         if (row.counts && row.latencyMs >= COLD_BUDGET_MS) failures.push(`cold ${type} ${r} trial ${i}: ${row.latencyMs} ms >= ${COLD_BUDGET_MS}`);
         rows.push(row);
+        // Ten errored launches in a row stop the type: the harness, not the hardware, is failing (spec, failure handling).
+        erroredInRow = run && run.code !== 0 ? erroredInRow + 1 : 0;
+        if (erroredInRow >= 10) { failures.push(`cold ${type} ${r}: ten errored launches in a row (last ${label}) - stop and report to Blurby.Brain`); break; }
       }
       const counting = rows.filter((x) => x.counts);
       if (counting.length < COLD) failures.push(`cold ${type} ${r}: only ${counting.length} counting trials (< ${COLD}) within ${CYCLE_CAP} launches - ask the owner for a quiet window`);
@@ -239,6 +296,10 @@ if (want("cold")) {
   }
 }
 
+if (liveBefore) {
+  report.liveProfile = { path: LIVE_PROFILE, before: liveBefore, after: liveHashes() };
+  if (JSON.stringify(report.liveProfile.before) !== JSON.stringify(report.liveProfile.after)) failures.push("live profile changed");
+}
 report.verdict = failures.length ? "FAIL" : "PASS";
 report.failures = failures;
 fs.mkdirSync(RECORDS_DIR, { recursive: true });
