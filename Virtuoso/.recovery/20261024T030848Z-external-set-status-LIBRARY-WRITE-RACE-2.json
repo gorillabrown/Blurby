@@ -1,0 +1,36 @@
+{
+  "id": "20261024T030848Z-external-set-status-LIBRARY-WRITE-RACE-2",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-WRITE-RACE-2",
+  "created": "2026-10-24T03:08:48Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#library-write-race-2-spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-2:[('spec_link', 'ROADMAP.md#library-write-race-2-spec'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-WRITE-RACE-2",
+      "idempotencyKey": "set-status:LIBRARY-WRITE-RACE-2:[('spec_link', 'ROADMAP.md#library-write-race-2-spec'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T030848Z-external-set-status-LIBRARY-WRITE-RACE-2",
+      "detail": {},
+      "providerItemId": "4027c96cc31e81518972d9d03a4f221a"
+    }
+  },
+  "resolved": "2026-10-24T03:09:54Z",
+  "outcome": "succeeded"
+}
