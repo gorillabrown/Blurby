@@ -43,11 +43,14 @@ export default function useLibrary() {
         const doc = await api.addManualDoc(title, content);
         setLibrary((prev) => [doc, ...prev]);
       }
+      return true;
     } catch (err) {
-      showToast("Could not save document — please try again.");
+      // An edit's failure shows in the Edit form, which stays open (LIBRARY-WRITE-RACE-2); the Add form keeps its toast
+      if (!editingId) showToast("Could not save document — please try again.");
       window.electronAPI.logError?.(`addDoc error: ${err}`);
       const state = await api.getState();
       setLibrary(state.library);
+      return false;
     }
   }, [showToast]);
 

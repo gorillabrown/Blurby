@@ -19,6 +19,7 @@ const { getCloudStorage } = require("./cloud-storage");
 const { getAuthState, getAccessToken } = require("./auth");
 const syncQueue = require("./sync-queue");
 const { pickUserSettings } = require("./migrations");
+const { mergeEditedFields } = require("./library-write");
 const {
   TOMBSTONE_TTL_MS,
   STAGING_STALE_MS,
@@ -322,6 +323,8 @@ function mergeLibrary(localDocs, cloudDocs, currentRevision) {
     }
 
     const mergedDoc = { ...winner };
+    // Renderer and Edit-form fields come from the side with the later editedAt stamp (LIBRARY-WRITE-RACE-2)
+    mergeEditedFields(mergedDoc, localDoc, cloudDoc);
 
     // 19H: Merge reading position.
     // Check if there is a pending reset-progress op in the sync queue that is

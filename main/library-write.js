@@ -36,4 +36,40 @@ async function writeConversionResult(ctx, docId, fields, convertedPath) {
   return true;
 }
 
-module.exports = { writeConversionResult };
+// The fields a renderer save or the Edit form may set. Each edit stamps its field in the record's editedAt map, and
+// cloud sync's merge takes each field from the side with the later stamp (LIBRARY-WRITE-RACE-2). Main never writes the
+// doc-level modified for these edits: for a folder book it is the source file's mtime.
+const EDITED_FIELDS = ["title", "author", "unread", "seenAt", "tags", "collection"];
+
+function sameValue(a, b) {
+  if (Array.isArray(a) && Array.isArray(b)) return a.length === b.length && a.every((v, i) => v === b[i]);
+  return a === b;
+}
+
+/** Write one edited field and stamp it, only when the value changes. @returns {boolean} true when written */
+function setEditedField(doc, key, value, now) {
+  if (sameValue(doc[key], value)) return false;
+  doc[key] = value;
+  doc.editedAt = { ...(doc.editedAt || {}), [key]: now };
+  return true;
+}
+
+/**
+ * After the record-level pick, take each edited field from the side with the later editedAt stamp. A stamped edit
+ * beats an unstamped one; on a tie the winner's value stays. A field the later side lacks is removed.
+ */
+function mergeEditedFields(merged, local, cloud) {
+  for (const key of EDITED_FIELDS) {
+    const l = (local.editedAt && local.editedAt[key]) || 0;
+    const c = (cloud.editedAt && cloud.editedAt[key]) || 0;
+    if (!l && !c) continue;
+    if (l !== c) {
+      const later = l > c ? local : cloud;
+      if (key in later) merged[key] = later[key];
+      else delete merged[key];
+    }
+    merged.editedAt = { ...(merged.editedAt || {}), [key]: Math.max(l, c) };
+  }
+}
+
+module.exports = { writeConversionResult, EDITED_FIELDS, sameValue, setEditedField, mergeEditedFields };

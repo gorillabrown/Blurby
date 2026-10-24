@@ -26,7 +26,7 @@ interface LibraryViewProps {
   loadingContent: boolean;
   toast: ToastState | null;
   onOpenDoc: (doc: BlurbyDoc, mode?: string) => void;
-  onAddDoc: (title: string, content: string, editingId?: string | null) => void;
+  onAddDoc: (title: string, content: string, editingId?: string | null) => Promise<boolean> | void;
   onAddDocFromUrl: (url: string) => Promise<{ doc?: BlurbyDoc; error?: string }>;
   onDeleteDoc: (id: string) => void;
   onResetProgress: (id: string) => void;
@@ -284,20 +284,37 @@ export default function LibraryView({
   const gridClassName = `doc-grid doc-grid-size-${cardSize} doc-grid-spacing-${cardSpacing}`;
   const listClassName = `doc-list doc-list-spacing-${cardSpacing}`;
 
+  // An edit waits for main's answer. On failure the form stays open with the typed values and shows the inline retry;
+  // the record changes only when main has saved it and broadcast the library (LIBRARY-WRITE-RACE-2, owner ruling 2026-10-23)
   const handleAddDoc = async () => {
+    if (saving) return;
     if (editMetaMode && editingId) {
       // Metadata-only save (file-based docs — update title + author)
       const doc = library.find(d => d.id === editingId);
       if (doc) {
-        doc.title = newTitle.trim() || doc.title;
-        doc.author = newAuthor.trim() || doc.author;
-        void api.applyMetadataUpdates?.([{ docId: doc.id, updates: { title: doc.title, author: doc.author } }]);
+        const title = newTitle.trim() || doc.title;
+        const author = newAuthor.trim() || doc.author;
+        setSaveFailed(false); setSaving(true);
+        let ok = false;
+        try {
+          const result = api.applyMetadataUpdates
+            ? await api.applyMetadataUpdates([{ docId: doc.id, updates: { title, author } }])
+            : null;
+          ok = !!result && !result.error && (result.updated ?? 0) >= 1;
+        } catch (err) {
+          api.logError?.(`applyMetadataUpdates error: ${err}`);
+        }
+        setSaving(false);
+        if (!ok) { setSaveFailed(true); return; }
       }
       setNewTitle(""); setNewAuthor(""); setShowAdd(false); setEditingId(null); setEditMetaMode(false);
       return;
     }
     if (!newTitle.trim()) return;
-    await onAddDoc(newTitle.trim(), newText.trim(), editingId);
+    setSaveFailed(false); setSaving(true);
+    const ok = await onAddDoc(newTitle.trim(), newText.trim(), editingId);
+    setSaving(false);
+    if (editingId && ok === false) { setSaveFailed(true); return; }
     setNewTitle(""); setNewText(""); setShowAdd(false); setEditingId(null);
   };
 
@@ -313,8 +330,11 @@ export default function LibraryView({
 
   const [newAuthor, setNewAuthor] = useState("");
   const [editMetaMode, setEditMetaMode] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveFailed, setSaveFailed] = useState(false);
 
   const startEdit = useCallback((doc: BlurbyDoc) => {
+    setSaveFailed(false);
     setEditingId(doc.id);
     setNewTitle(doc.title);
     setNewAuthor(doc.author || "");
@@ -632,10 +652,12 @@ export default function LibraryView({
             newTitle={newTitle} newText={newText} editingId={editingId}
             onTitleChange={setNewTitle} onTextChange={setNewText}
             onSave={handleAddDoc}
-            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); }}
+            onCancel={() => { setShowAdd(false); setEditingId(null); setEditMetaMode(false); setSaveFailed(false); }}
             metaMode={editMetaMode}
             newAuthor={newAuthor}
             onAuthorChange={setNewAuthor}
+            saving={saving}
+            saveFailed={saveFailed}
           />
         )}
 

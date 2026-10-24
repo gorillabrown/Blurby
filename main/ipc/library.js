@@ -13,7 +13,7 @@ const { htmlToEpub } = require("../epub-converter");
 const { normalizeAuthor } = require("../author-normalize");
 const { pathKey } = require("../folder-sync");
 const { pickUserSettings } = require("../migrations");
-const { writeConversionResult } = require("../library-write");
+const { writeConversionResult, setEditedField } = require("../library-write");
 
 async function logToFile(message, errorLogPath) {
   try {
@@ -49,14 +49,33 @@ function isLibraryDocPath(resolved, library) {
 // The only fields a renderer library save may set; every other field is main's (SAVE-LIBRARY-MERGE-1).
 const RENDERER_FIELDS = ["unread", "seenAt", "tags", "collection"];
 
+// A value of the wrong type keeps main's value; the record's other fields still apply (LIBRARY-WRITE-RACE-2).
+const RENDERER_FIELD_VALID = {
+  unread: (v) => typeof v === "boolean",
+  seenAt: (v) => Number.isFinite(v),
+  tags: (v) => Array.isArray(v) && v.every((t) => typeof t === "string"),
+  collection: (v) => v === null || typeof v === "string",
+};
+
 // A renderer save edits main's records in place. It never adds, removes, reorders or replaces one, so tombstones,
 // main-side adds and main's fields survive a stale copy (SAVE-LIBRARY-TRUST-1, IPC-PATH-TRUST-1, SAVE-LIBRARY-MERGE-1).
+// An id sent more than once is skipped: neither copy is known to be the one the renderer meant (LIBRARY-WRITE-RACE-2).
 function mergeRendererEdits(newDocs, library) {
-  const sent = new Map(newDocs.filter((doc) => doc && typeof doc === "object").map((doc) => [doc.id, doc]));
+  const sent = new Map();
+  const repeated = new Set();
+  for (const doc of newDocs) {
+    if (!doc || typeof doc !== "object" || Array.isArray(doc) || typeof doc.id !== "string") continue;
+    if (sent.has(doc.id)) repeated.add(doc.id);
+    else sent.set(doc.id, doc);
+  }
+  if (repeated.size) console.warn("[save-library] skipped ids sent more than once:", [...repeated].join(", "));
+  const now = Date.now();
   for (const held of library || []) {
     const doc = sent.get(held.id);
-    if (!doc || held.deleted) continue;
-    for (const key of RENDERER_FIELDS) if (key in doc) held[key] = doc[key];
+    if (!doc || held.deleted || repeated.has(held.id)) continue;
+    for (const key of RENDERER_FIELDS) {
+      if (key in doc && RENDERER_FIELD_VALID[key](doc[key])) setEditedField(held, key, doc[key], now);
+    }
     // Both are Date.now() on this machine, so the later open wins (PAGE-POSITION-SAVE-1 N5).
     if (Number.isFinite(doc.lastReadAt) && doc.lastReadAt > (held.lastReadAt || 0)) held.lastReadAt = doc.lastReadAt;
   }
@@ -139,7 +158,7 @@ function register(ctx) {
       const syncStatus = syncEngine.getSyncStatus();
       const revision = syncStatus.revision || 0;
 
-      doc.title = title;
+      if (typeof title === "string") setEditedField(doc, "title", title, Date.now());
       doc.content = content;
       doc.wordCount = countWords(content);
       doc.modified = Date.now();
@@ -711,27 +730,34 @@ function register(ctx) {
   ipcMain.handle("apply-metadata-updates", async (_, updates) => {
     if (!Array.isArray(updates)) return { updated: 0 };
 
-    const ALLOWED_FIELDS = new Set(["title", "author"]);
+    // Allowed fields only, each with its type: a title must be a non-empty string, an author a string
+    const ALLOWED_FIELDS = {
+      title: (v) => typeof v === "string" && v.trim().length > 0,
+      author: (v) => typeof v === "string",
+    };
     const library = ctx.getLibrary();
     const updateMap = new Map();
-    for (const { docId, updates: fields } of updates) {
-      if (!docId || !fields || typeof fields !== "object") continue;
-      // Filter to allowed fields only
+    for (const entry of updates) {
+      if (!entry || typeof entry !== "object") continue;
+      const { docId, updates: fields } = entry;
+      if (typeof docId !== "string" || !fields || typeof fields !== "object") continue;
       const clean = {};
       for (const [key, value] of Object.entries(fields)) {
-        if (ALLOWED_FIELDS.has(key)) clean[key] = value;
+        if (Object.hasOwn(ALLOWED_FIELDS, key) && ALLOWED_FIELDS[key](value)) clean[key] = value;
       }
       if (Object.keys(clean).length > 0) updateMap.set(docId, clean);
     }
 
     if (updateMap.size === 0) return { updated: 0 };
 
+    // Stamped per field in editedAt, never the doc-level modified: a folder book's modified is its file's mtime (LIBRARY-WRITE-RACE-2)
+    const now = Date.now();
     let count = 0;
     for (const doc of library) {
       const fields = updateMap.get(doc.id);
-      if (!fields) continue;
+      if (!fields || doc.deleted) continue;
       count++;
-      Object.assign(doc, fields, { modified: Date.now() });
+      for (const [key, value] of Object.entries(fields)) setEditedField(doc, key, value, now);
     }
 
     ctx.saveLibrary();

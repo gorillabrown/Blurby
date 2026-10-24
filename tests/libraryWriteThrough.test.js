@@ -152,7 +152,8 @@ describe("main-side library writers update the live record (LIBRARY-WRITE-RACE-1
     expect(result).toEqual({ updated: 1 });
     expect(seeded[1].title).toBe("New");
     expect(seeded[1].author).toBe("Who");
-    expect(typeof seeded[1].modified).toBe("number");
+    expect(seeded[1].modified).toBeUndefined();
+    expect(seeded[1].editedAt).toEqual({ title: expect.any(Number), author: expect.any(Number) });
     expect(seeded[1].wordCount).toBeUndefined();
     expect(seeded[0].modified).toBeUndefined();
   });
