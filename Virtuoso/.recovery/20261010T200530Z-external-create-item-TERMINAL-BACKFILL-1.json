@@ -1,0 +1,53 @@
+{
+  "id": "20261010T200530Z-external-create-item-TERMINAL-BACKFILL-1",
+  "operation": "external-create-item",
+  "item_id": "TERMINAL-BACKFILL-1",
+  "created": "2026-10-10T20:05:30Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "create-item",
+    "fields": {
+      "title": "Record the 51 historical terminal items in the ledger",
+      "status": "Queued",
+      "sequence": 7,
+      "written_status": "Full Spec",
+      "prerequisites": [],
+      "effort": "S",
+      "lane": "Platform & Maintenance",
+      "group": "Governance Measurement",
+      "spec_link": "ROADMAP.md#terminal-backfill-1",
+      "branch": "eb/terminal-backfill-1",
+      "description": "Append one terminal record for each of the 51 items that reached a terminal status before the ledger existed, from the reviewed manifest docs/planning/roadmap-reviews/2026-10-10-backfill-manifest.json, via the plugin ledger API as pointer-closeout. Owner-approved exception: existing evidence, no re-verification.",
+      "notes": "Created by roadmap-review 2026-10-10 (audit F1). Full Spec: U1-U10 pass. Evidence policy owner-approved 2026-10-10.",
+      "id": "TERMINAL-BACKFILL-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-10T19:46:07Z",
+    "idempotencyKey": "create-item:monday:board/18432450217:TERMINAL-BACKFILL-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "TERMINAL-BACKFILL-1",
+      "idempotencyKey": "create-item:monday:board/18432450217:TERMINAL-BACKFILL-1",
+      "actualRevision": "2026-10-10T20:05:47Z",
+      "recoveryId": "20261010T200530Z-external-create-item-TERMINAL-BACKFILL-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-10T20:06:30Z"
+      },
+      "providerItemId": "13256739205",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-10T20:06:09Z",
+  "outcome": "succeeded"
+}

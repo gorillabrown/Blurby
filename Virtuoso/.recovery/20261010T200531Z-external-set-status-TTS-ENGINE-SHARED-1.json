@@ -1,0 +1,42 @@
+{
+  "id": "20261010T200531Z-external-set-status-TTS-ENGINE-SHARED-1",
+  "operation": "external-set-status",
+  "item_id": "TTS-ENGINE-SHARED-1",
+  "created": "2026-10-10T20:05:31Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 6,
+      "written_status": "Full Spec",
+      "effort": "M",
+      "branch": "eb/tts-engine-shared-1",
+      "evidence": "docs/planning/roadmap-reviews/2026-10-10-plan.md",
+      "notes": "Roadmap-review 2026-10-10: Full Spec (U1-U10 pass). Characterization first (LL-112), async-exit fakes (LL-132). Approved behavior change: MOSS status snapshot missing visible key -> null."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:TTS-ENGINE-SHARED-1:[('branch', 'eb/tts-engine-shared-1'), ('effort', 'M'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-10-plan.md'), ('notes', 'Roadmap-review 2026-10-10: Full Spec (U1-U10 pass). Characterization first (LL-112), async-exit fakes (LL-132). Approved behavior change: MOSS status snapshot missing visible key -> null.'), ('sequence', 6), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "TTS-ENGINE-SHARED-1",
+      "idempotencyKey": "set-status:TTS-ENGINE-SHARED-1:[('branch', 'eb/tts-engine-shared-1'), ('effort', 'M'), ('evidence', 'docs/planning/roadmap-reviews/2026-10-10-plan.md'), ('notes', 'Roadmap-review 2026-10-10: Full Spec (U1-U10 pass). Characterization first (LL-112), async-exit fakes (LL-132). Approved behavior change: MOSS status snapshot missing visible key -> null.'), ('sequence', 6), ('written_status', 'Full Spec')]",
+      "actualRevision": "2026-10-10T20:05:48Z",
+      "recoveryId": "20261010T200531Z-external-set-status-TTS-ENGINE-SHARED-1",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-10T20:06:30Z"
+      }
+    }
+  },
+  "resolved": "2026-10-10T20:06:09Z",
+  "outcome": "succeeded"
+}

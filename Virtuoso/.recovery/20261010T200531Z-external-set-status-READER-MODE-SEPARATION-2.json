@@ -1,0 +1,37 @@
+{
+  "id": "20261010T200531Z-external-set-status-READER-MODE-SEPARATION-2",
+  "operation": "external-set-status",
+  "item_id": "READER-MODE-SEPARATION-2",
+  "created": "2026-10-10T20:05:31Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Roadmap-review 2026-10-10: epic run paused at owner gate OS-1 since 2026-10-09. Waves B-E and speed dialog done on eb/reader-mode-separation-2 (final candidate c9d73ddd); automated gates pass. Owner rulings 2026-10-09b ratified Decisions #13, #28a, #30. Deadline in policy.roadmap.deadlines.mode-separation."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:READER-MODE-SEPARATION-2:[('notes', 'Roadmap-review 2026-10-10: epic run paused at owner gate OS-1 since 2026-10-09. Waves B-E and speed dialog done on eb/reader-mode-separation-2 (final candidate c9d73ddd); automated gates pass. Owner rulings 2026-10-09b ratified Decisions #13, #28a, #30. Deadline in policy.roadmap.deadlines.mode-separation.')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "READER-MODE-SEPARATION-2",
+      "idempotencyKey": "set-status:READER-MODE-SEPARATION-2:[('notes', 'Roadmap-review 2026-10-10: epic run paused at owner gate OS-1 since 2026-10-09. Waves B-E and speed dialog done on eb/reader-mode-separation-2 (final candidate c9d73ddd); automated gates pass. Owner rulings 2026-10-09b ratified Decisions #13, #28a, #30. Deadline in policy.roadmap.deadlines.mode-separation.')]",
+      "actualRevision": "2026-10-10T20:05:50Z",
+      "recoveryId": "20261010T200531Z-external-set-status-READER-MODE-SEPARATION-2",
+      "detail": {
+        "verifiedBy": "connector readback get_board_items_page",
+        "verifiedAt": "2026-10-10T20:06:30Z"
+      }
+    }
+  },
+  "resolved": "2026-10-10T20:06:10Z",
+  "outcome": "succeeded"
+}
