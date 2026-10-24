@@ -71,13 +71,18 @@ const { isSilentToken } = require("./normalize");
 // Monotone alignment of W words to G groups. Each unit is (k words <-> 1 group) or (1 word <-> k groups).
 // isoGroups[i]: word i's isolated phoneme groups, the evidence (syllables counted per group, P6b F3); spelled[i]: the
 // groups of an all-caps word read letter by letter, a second piece of evidence for a one-word unit, or null (P6b F5).
-function align(isoGroups, spelled, groupForms, lang) {
+// phrase (second pass only): phrase[i][k] holds the groups of words i..i+k-1 read together, a second piece of evidence
+// for a fused unit (NARRATE-RECONCILE-RESIDUAL-1). Each back pointer records which evidence won.
+function align(isoGroups, spelled, groupForms, lang, phrase = null) {
   const W = isoGroups.length, G = groupForms.length;
   const forms = (i, k) => isoGroups.slice(i, i + k).flat();
   const maxSplit = (i) => Math.max(MIN_SPLIT, isoGroups[i].length, spelled[i]?.length ?? 0);
   const cost = (i, k, gs) => {
     const c = relCost(forms(i, k), gs, lang);
-    return k === 1 && spelled[i] ? Math.min(c, relCost(spelled[i], gs, lang)) : c;
+    const alt = k === 1 ? spelled[i] : phrase?.[i]?.[k];
+    if (!alt) return { c, ev: "isolated" };
+    const a = relCost(alt, gs, lang);
+    return a < c ? { c: a, ev: k === 1 ? "spelled" : "phrase" } : { c, ev: "isolated" };
   };
   const INF = 1e9;
   const dp = Array.from({ length: W + 1 }, () => new Array(G + 1).fill(INF));
@@ -86,14 +91,14 @@ function align(isoGroups, spelled, groupForms, lang) {
   for (let i = 0; i <= W; i++) for (let j = 0; j <= G; j++) {
     if (dp[i][j] >= INF) continue;
     for (let k = 1; k <= MAX_FUSE && i + k <= W && j + 1 <= G; k++) { // k words -> 1 group
-      const c = cost(i, k, [groupForms[j]]);
+      const { c, ev } = cost(i, k, [groupForms[j]]);
       const v = dp[i][j] + c;
-      if (v < dp[i + k][j + 1]) { dp[i + k][j + 1] = v; back[i + k][j + 1] = { i, j, k: k, g: 1, c }; }
+      if (v < dp[i + k][j + 1]) { dp[i + k][j + 1] = v; back[i + k][j + 1] = { i, j, k: k, g: 1, c, ev }; }
     }
     for (let g = 2; i + 1 <= W && g <= maxSplit(i) && j + g <= G; g++) { // 1 word -> g groups
-      const c = cost(i, 1, groupForms.slice(j, j + g));
+      const { c, ev } = cost(i, 1, groupForms.slice(j, j + g));
       const v = dp[i][j] + c;
-      if (v < dp[i + 1][j + g]) { dp[i + 1][j + g] = v; back[i + 1][j + g] = { i, j, k: 1, g, c }; }
+      if (v < dp[i + 1][j + g]) { dp[i + 1][j + g] = v; back[i + 1][j + g] = { i, j, k: 1, g, c, ev }; }
     }
   }
   if (dp[W][G] >= INF) return null;
@@ -159,6 +164,19 @@ async function buildWordMap(rec, isolated) {
       let plan;
       if (W === G) plan = { cost: 0, units: seg.words.map((_, i) => ({ i, j: i, k: 1, g: 1, c: relCost([iso[i]], [groupTexts[i]], lang), diagonal: true })) };
       else plan = align(isoGroups, spelled, groupTexts, lang);
+      // Second pass, this segment only, when the first plan has a non-diagonal unit over the limit: each run of 2..MAX_FUSE
+      // words read together is a second piece of evidence for a fused candidate (NARRATE-RECONCILE-RESIDUAL-1). A segment
+      // that passes the first time is never re-planned. The phrase form is identification evidence only, never a span.
+      let phrase = null;
+      if (plan && plan.units.some((u) => !u.diagonal && !(u.c <= ACCEPT_UNIT_COST))) {
+        phrase = [];
+        for (let i = 0; i < W; i++) {
+          phrase.push([]);
+          for (let k = 2; k <= MAX_FUSE && i + k <= W; k++) phrase[i][k] = await groupsOf(seg.words.slice(i, i + k).join(" "));
+        }
+        const again = align(isoGroups, spelled, groupTexts, lang, phrase);
+        if (again) plan = again;
+      }
       if (!plan) { failures.push(`segment unalignable: ${seg.text}`); break; }
       for (const u of plan.units) {
         const gs = groups.slice(gi + u.j, gi + u.j + u.g);
@@ -169,8 +187,9 @@ async function buildWordMap(rec, isolated) {
           group: gs.map((g) => g.text).join(" "), charStart, charEnd,
           frameStart: charStartFrame[charStart], frameEnd: charStartFrame[charEnd],
           sampleStart: charStartFrame[charStart] * factor, sampleEnd: charStartFrame[charEnd] * factor,
-          evidenceCost: +u.c.toFixed(3), isolated: iso.slice(u.i, u.i + u.k),
+          evidenceCost: +u.c.toFixed(3), isolated: iso.slice(u.i, u.i + u.k), evidence: u.ev ?? "isolated",
         };
+        if (u.ev === "phrase") unit.phrase = phrase[u.i][u.k].join("");
         if (u.k > 1) {
           fusedRuns++; fusedWords += u.k;
           // Split option coverage: exact only when the group is the words' own isolated sounds back to back.

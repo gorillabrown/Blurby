@@ -41,9 +41,9 @@ const TOKENIZER_DIR = path.join(FIXTURES, "kokoro-tokenizer");
 export const TOKENIZER_SHA256 = "77a02c8e164413299b4b4c403b14f8e0e1c1b727db4d46a09d6327b861060a34";
 const ARTIFACTS_TOKENIZER = "C:/Projects/Blurby-artifacts/narrate-rebuild-1/models/local/kokoro-dur/tokenizer.json";
 // Owner-library chunks that still fail closed for a reason other than the token cap and that Blurby.Brain has ruled on,
-// by sha256(chunk text)[0:16] so no text is kept: NARRATE-RECONCILE-RESIDUAL-1 (2026-10-15), a two-word capitalised name
-// whose second word espeak reads [k] alone and [tʃ] in the phrase (fused unit cost 0.67; fails closed, never guesses).
-export const RULED_RESIDUALS = new Set(["4e7915ce2410e10e"]);
+// by sha256(chunk text)[0:16] so no text is kept. Emptied by NARRATE-RECONCILE-RESIDUAL-1 (2026-10-23): its one entry,
+// 4e7915ce2410e10e (a two-word name espeak reads [k] alone and [tʃ] together), now reconciles on phrase evidence.
+export const RULED_RESIDUALS = new Set();
 const LEGACY = ["chapter-transition", "dialogue-switches", "long-sentence", "pause-resume", "prose-basic", "punctuation-dense", "queued-handoff", "section-transition"];
 const GATE = [
   ["passage-a", path.join(FIXTURES, "passage-a.txt")],
