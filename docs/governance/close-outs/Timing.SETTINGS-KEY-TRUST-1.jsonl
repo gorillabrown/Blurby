@@ -4,3 +4,4 @@
 {"event": "start", "row": 2, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-15T06:06:00Z"}
 {"event": "end", "row": 2, "evidence": "C2 a085e226: Done-when 2 exit 0 (11 files, 221 tests); gates 3-9 pass on exact exit codes; npm test exit 0 (2268 passed, 1 skipped, 166 files); typecheck exit 0; build exit 0; fence (Done-when 11) matches", "result": "done", "at": "2026-10-15T06:08:57Z"}
 {"event": "close", "at": "2026-10-15T06:08:57Z"}
+{"event": "cost", "source": "backfilled", "window": ["2026-10-15T06:04:02Z", "2026-10-15T06:08:57Z"], "attribution": "session-window", "perRow": {"computable": false, "missing": ["a row N in each subagent's spawn (the dispatch predates the row rule)"]}, "computable": false, "missing": ["a transcript of this project, still kept by the host, that works a row of SETTINGS-KEY-TRUST-1 (`timing --dispatch SETTINGS-KEY-TRUST-1 --start|--end`) inside its work"], "at": "2026-10-23T22:27:28Z"}
