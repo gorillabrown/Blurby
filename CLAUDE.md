@@ -370,7 +370,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **Deferred lanes:** Cloud Sync is absorbed by BLURBY-SERVER-1; Android and RSS/News are Stage 9 items; long-form audio export dissolved (KOKORO-EXPORT-1).
 - **Most recent implementation:** NARRATE-REBUILD-1 completed 2026-10-15 (P6 with P6b, merge `f27c7def`; completion record `689edd46`): Narrate rebuilt on Kokoro as a fourth independent mode, the cursor is the word at the playing sample from an exact word table, epic checkers run under the app's Electron ICU (LL-160). Seven Stage 8 items merged the same day (ROADMAP.md Stage 8). Before it, QUIT-FLUSH-1 (merge `d21009b3`, 2026-10-14; `main/quit-sequence.js`; BUG-192 resolved). Earlier history: `docs/planning/CLAUDE_md_archive_session1.md`.
 - Suite on the owner's machine (2026-10-14, QUIT-FLUSH-1 tree `bd1216fc`): 2,080 passed / 1 skipped / 0 failed in 153 files; `npm run typecheck` exits 0; `npm run build` exits 0.
-- CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, nsis-web stub installer). The TTS `quality-gate` job was removed by NARRATE-REMOVE-1.
+- CI/CD active via GitHub Actions (split x64+ARM64 builds, --publish never + explicit gh upload, one full NSIS installer per architecture, built by hand per `docs/governance/RELEASE_RUNBOOK.md`). The TTS `quality-gate` job was removed by NARRATE-REMOVE-1.
 - Governance tooling: Virtuoso connector-backed register, timestamped snapshots, durable mutation recovery.
 - Performance baseline: 21 automated benchmarks via `npm run perf`
 

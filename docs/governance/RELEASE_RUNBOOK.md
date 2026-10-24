@@ -1,8 +1,8 @@
 # Blurby Desktop Release Runbook (Windows, manual)
 
-How to build, check, upload and publish a Blurby desktop release by hand. No workflow does this: `.github/workflows/release.yml` was deleted in `e9bbf56a` (2026-03-31) and `ci.yml` only tests. Written and validated by RELEASE-RUNBOOK-1 (2026-10-22) on `main` @ `6dc951ee` (Electron 42.11.18, electron-builder 26.15.3, electron-updater 6.8.9, npm 11.9.0, gh 2.88.1, PowerShell 7.6) on the owner's ARM64 Windows machine. Every build, merge, checksum and verification command below was run there without publishing (version `1.75.1`; output in `docs/governance/close-outs/Memo.RELEASE-RUNBOOK-1.GovernanceStaging.2026-10-22.md`). The commands that write to GitHub (`gh release create`, `upload`, `edit`, `delete`, and the `git push` of the release branch) are shown here and were never run by that item. The x64-host variants of the two `npm ci` lines were not validated, because only an ARM64 host was available.
+How to build, check, upload and publish a Blurby desktop release by hand. No workflow does this: `.github/workflows/release.yml` was deleted in `e9bbf56a` (2026-03-31) and `ci.yml` only tests. Written and validated by RELEASE-RUNBOOK-1 (2026-10-22) on `main` @ `6dc951ee` (Electron 42.11.18, electron-builder 26.15.3, electron-updater 6.8.9, npm 11.9.0, gh 2.88.1, PowerShell 7.6) on the owner's ARM64 Windows machine. The command-line overrides moved into `package.json` by WIN-TARGET-NSIS-1. Every build, merge, checksum and verification command below was run there without publishing (version `1.75.1`; output in `docs/governance/close-outs/Memo.RELEASE-RUNBOOK-1.GovernanceStaging.2026-10-22.md`). The commands that write to GitHub (`gh release create`, `upload`, `edit`, `delete`, and the `git push` of the release branch) are shown here and were never run by that item. The x64-host variants of the two `npm ci` lines were not validated, because only an ARM64 host was available.
 
-**Release format: one full NSIS installer per architecture** (`Blurby-Setup-<version>-x64.exe`, `Blurby-Setup-<version>-arm64.exe`), selected on the command line with `-c.win.target=nsis`. Owner decision, 2026-10-22, relayed by Blurby.Brain: "Yes, option B: release separate full installers for x64 and ARM64. The bigger download is fine; native ARM64 matters." `package.json` still names `nsis-web`, the web-installer stub that v1.1.2 shipped, and that format cannot serve ARM64. Its single-architecture ARM64 stub has no package name to download, and its combined stub always installs x64 unless an ia32 build is included (`app-builder-lib/templates/nsis/include/installer.nsh`). Until `package.json` is changed to match, the overrides in this runbook are the release configuration.
+**Release format: one full NSIS installer per architecture** (`Blurby-Setup-<version>-x64.exe`, `Blurby-Setup-<version>-arm64.exe`), set in `package.json`: `build.win.target` `nsis`, `build.win.artifactName`, `build.nsis.buildUniversalInstaller` `false` and `build.publish`. Owner decision, 2026-10-22, relayed by Blurby.Brain: "Yes, option B: release separate full installers for x64 and ARM64. The bigger download is fine; native ARM64 matters." The target is `nsis` because `nsis-web`, the web-installer stub that v1.1.2 shipped, cannot serve ARM64. Its single-architecture ARM64 stub has no package name to download, and its combined stub always installs x64 unless an ia32 build is included (`app-builder-lib/templates/nsis/include/installer.nsh`).
 
 Run everything in PowerShell 7.3 or later (`pwsh`), from the root of a checkout of the release commit; a git worktree works. Who runs it: the owner, or Blurby.Roadmap on the owner's go, after release gate (2), the batched owner smoke, passes.
 
@@ -14,13 +14,11 @@ Set these values first; every later step reads them. After a shell restart, set 
 $SmokedSha = '<40-char sha>'      # the main commit the owner smoked in gate (2); the build is exactly that commit
 $Tag       = "build-$($SmokedSha.Substring(0, 8))"   # GitHub release tag, one per build; electron-updater downloads from releases/download/<tag>/
 $Notes     = '<path to release-notes.md>'
-$Overrides = @('-c.win.target=nsis', '-c.win.artifactName=${productName}-Setup-${version}-${arch}.${ext}',
-               '-c.publish.provider=github', '-c.publish.owner=gorillabrown', '-c.publish.repo=Blurby')
 ```
 
 **No version bump** (owner direction, 2026-10-22: "We don't have to keep versioning. This is not released publicly. Drop this aspect."). The build uses `package.json`'s version as it stands on `$SmokedSha` and never changes it; Preflight reads it into `$Version`. Consequence for updates: see Verify.
 
-**Why the publish overrides.** `package.json` has no `repository` field. electron-builder otherwise reads the GitHub owner from `.git/config`, which a git worktree does not have (its `.git` is a file). Without the overrides, the installed app's `app-update.yml` has no `provider`, `owner` or `repo`, and the app can never find an update. Both build sections check for this.
+**Why `package.json` names the owner and repo.** `build.publish` carries `owner` and `repo` as well as `provider`. `package.json` has no `repository` field, so electron-builder would otherwise read the GitHub owner from `.git/config`, which a git worktree does not have (its `.git` is a file). Without them, the installed app's `app-update.yml` has no `provider`, `owner` or `repo`, and the app can never find an update. Both build sections still check `app-update.yml` for the three lines.
 
 ## Preflight
 
@@ -50,7 +48,7 @@ The full suite, typecheck and build must already be green on `$SmokedSha`. That 
 Remove-Item -Recurse -Force release, dist -ErrorAction SilentlyContinue      # both are gitignored build output
 npm ci --os=win32 --cpu=x64; if ($LASTEXITCODE) { throw 'npm ci (x64) failed' }          # on an x64 host: npm ci
 npm run build; if ($LASTEXITCODE) { throw 'renderer build failed' }
-npx electron-builder --win --x64 --publish never @Overrides; if ($LASTEXITCODE) { throw 'x64 build failed' }
+npx electron-builder --win --x64 --publish never; if ($LASTEXITCODE) { throw 'x64 build failed' }
 Move-Item -Force release/latest.yml release/latest-x64.yml                    # the ARM64 build writes its own
 $natives = (Get-ChildItem release/win-unpacked/resources/app.asar.unpacked -Recurse -Filter *.node).FullName -join "`n"
 foreach ($need in '@img\sharp-win32-x64\', '@napi-rs\canvas-win32-x64-msvc\', 'onnxruntime-node\bin\napi-v6\win32\x64\') { if (-not $natives.Contains($need)) { throw "x64 package lacks $need" } }
@@ -67,7 +65,7 @@ Expected: `release/Blurby-Setup-$Version-x64.exe` (about 248 MB) and `release/Bl
 npm ci; if ($LASTEXITCODE) { throw 'npm ci (arm64) failed' }                   # on an x64 host: npm ci --os=win32 --cpu=arm64
 npm run build; if ($LASTEXITCODE) { throw 'renderer build failed' }
 $env:ELECTRON_BUILDER_7Z_FILTER = 'BCJ'                                         # required for ARM64: see below
-try { npx electron-builder --win --arm64 --publish never @Overrides; if ($LASTEXITCODE) { throw 'ARM64 build failed' } }
+try { npx electron-builder --win --arm64 --publish never; if ($LASTEXITCODE) { throw 'ARM64 build failed' } }
 finally { Remove-Item Env:ELECTRON_BUILDER_7Z_FILTER -ErrorAction SilentlyContinue }
 Move-Item -Force release/latest.yml release/latest-arm64.yml
 $natives = (Get-ChildItem release/win-arm64-unpacked/resources/app.asar.unpacked -Recurse -Filter *.node).FullName -join "`n"

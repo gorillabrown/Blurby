@@ -942,7 +942,7 @@ Artifact naming: `Blurby-Setup-{version}-{arch}.exe`
 3. `installUpdate` IPC triggers download and quitAndInstall
 4. Delta updates supported for smaller download sizes
 
-There is no release workflow (`release.yml` was deleted in `e9bbf56a`; `ci.yml` only tests). Releases are built and uploaded by hand following `docs/governance/RELEASE_RUNBOOK.md`. It builds one full NSIS installer per architecture (`Blurby-Setup-<version>-<arch>.exe`, with `-c.win.target=nsis` on the command line; `package.json` still names `nsis-web`). It then merges the two `latest.yml` files into one that lists both installers, and electron-updater picks the one matching `process.arch`. The last release before the runbook, v1.1.2 (nsis-web), listed only x64, so ARM64 machines were offered the x64 build, which runs emulated. The runbook says how such a machine moves to the native ARM64 build.
+There is no release workflow (`release.yml` was deleted in `e9bbf56a`; `ci.yml` only tests). Releases are built and uploaded by hand following `docs/governance/RELEASE_RUNBOOK.md`. It builds one full NSIS installer per architecture (`Blurby-Setup-<version>-<arch>.exe`; `package.json` `build.win.target` is `nsis`). It then merges the two `latest.yml` files into one that lists both installers, and electron-updater picks the one matching `process.arch`. The last release before the runbook, v1.1.2 (nsis-web), listed only x64, so ARM64 machines were offered the x64 build, which runs emulated. The runbook says how such a machine moves to the native ARM64 build.
 
 ### Version Tagging
 

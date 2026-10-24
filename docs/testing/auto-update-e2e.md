@@ -51,7 +51,7 @@ User data lives in `%APPDATA%\blurby` (Electron's `app.getPath('userData')`). Da
    ```
 5. Build the installer manually, or use a future release workflow once one exists. This checkout currently has no `release.yml`.
 6. In GitHub, find the draft release created for `v0.9.9-test`. **Publish it** (remove draft status). The auto-updater checks published releases only.
-7. Download the installer matching your test machine from the release assets (e.g., `Blurby-Web-Setup-0.9.9-test-x64.exe` or `Blurby-Web-Setup-0.9.9-test-arm64.exe` — naming follows the `${productName}-Web-Setup-${version}-${arch}.${ext}` pattern).
+7. Download the installer matching your test machine from the release assets (e.g., `Blurby-Setup-0.9.9-test-x64.exe` or `Blurby-Setup-0.9.9-test-arm64.exe` — naming follows the `${productName}-Setup-${version}-${arch}.${ext}` pattern).
 8. Run the installer on the test machine. The current NSIS configuration uses one-click install, so no custom install directory prompt is expected.
 9. Launch Blurby. Navigate to **Settings > Help**.
 10. Expected: version shown is `0.9.9-test`.
