@@ -419,3 +419,84 @@ describe("(j) main.js quit step list", () => {
     expect(block).toContain("_libraryDirty ? saveLibraryNow() : undefined");
   });
 });
+
+// NARRATE-QUIT-LINGER-1 (BUG-207): a relaunch while the old, window-less process is still in its quit flush is taken
+// over by app.relaunch(), requested inside the awaited quit, before the final app.quit() (LL-157).
+function makeRelaunchApp() {
+  const app = makeApp();
+  const listeners = {};
+  app.on = vi.fn((name, fn) => { (listeners[name] ||= []).push(fn); return app; });
+  app.emit = (name) => { for (const fn of listeners[name] || []) fn(); };
+  app.relaunch = vi.fn();
+  return app;
+}
+
+function relaunchHandler(app) {
+  let release = () => {};
+  const shutdownProducer = vi.fn(() => new Promise((r) => { release = r; }));
+  app.handler = createWillQuitHandler({ app, stopNewWork: vi.fn(), shutdownProducer, steps: [["one", vi.fn()]] });
+  return { release: () => release() };
+}
+
+describe("(r) a relaunch during the quit flush (NARRATE-QUIT-LINGER-1)", () => {
+  it("(r1) second-instance during the flush relaunches once, before the final quit", async () => {
+    const app = makeRelaunchApp();
+    const h = relaunchHandler(app);
+    try {
+      app.quit();
+      await flush();
+      app.emit("second-instance");
+      h.release();
+      await waitFor(() => app.exits >= 1);
+      await flush();
+      expect(app.relaunch).toHaveBeenCalledTimes(1);
+      expect(app.relaunch.mock.invocationCallOrder[0]).toBeLessThan(app.quit.mock.invocationCallOrder.at(-1));
+      expect(app.exits).toBe(1);
+    } finally {
+      h.release();
+    }
+  });
+
+  it("(r2) second-instance twice during the flush still relaunches once", async () => {
+    const app = makeRelaunchApp();
+    const h = relaunchHandler(app);
+    try {
+      app.quit();
+      await flush();
+      app.emit("second-instance");
+      app.emit("second-instance");
+      h.release();
+      await waitFor(() => app.exits >= 1);
+      await flush();
+      expect(app.relaunch).toHaveBeenCalledTimes(1);
+      expect(app.exits).toBe(1);
+    } finally {
+      h.release();
+    }
+  });
+
+  it("(r3) control: a quit with no second-instance never relaunches", async () => {
+    const app = makeRelaunchApp();
+    const h = relaunchHandler(app);
+    app.quit();
+    await flush();
+    h.release();
+    await waitFor(() => app.exits >= 1);
+    await flush();
+    expect(app.exits).toBe(1);
+    expect(app.relaunch).not.toHaveBeenCalled();
+  });
+
+  it("(r4) control: second-instance before any quit, then a normal quit, never relaunches", async () => {
+    const app = makeRelaunchApp();
+    const h = relaunchHandler(app);
+    app.emit("second-instance");
+    app.quit();
+    await flush();
+    h.release();
+    await waitFor(() => app.exits >= 1);
+    await flush();
+    expect(app.exits).toBe(1);
+    expect(app.relaunch).not.toHaveBeenCalled();
+  });
+});

@@ -129,3 +129,47 @@ describe("narrate producer pool (D6)", () => {
     expect(workers.every((w) => w.exited && !w.terminated)).toBe(true); // asked to stop, never killed under a live run
   });
 });
+
+describe("pause cancels queued work (NARRATE-QUIT-LINGER-1)", () => {
+  it("(p1) cancelQueued rejects the queued jobs of a group prefix, keeps other groups queued and never touches a posted job", async () => {
+    await producer.ensureReady();
+    await settle();
+    expect(workers).toHaveLength(2);
+    const posted = producer.generate("posted prefetch", { priority: "prefetch", group: "e:1" }).catch((e) => e); // both idle: posted
+    await settle();
+    expect(workers[0].generates.map((m) => m.text)).toEqual(["posted prefetch"]);
+    const queuedSame = producer.generate("queued prefetch, same engine", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    const queuedOther = producer.generate("queued prefetch, other engine", { priority: "prefetch", group: "x:1" }).catch((e) => e);
+    await settle();
+    expect(workers[1].generates).toEqual([]); // both held: the last idle worker is reserved
+    expect(typeof producer.cancelQueued).toBe("function");
+    const removed = producer.cancelQueued("e:");
+    expect(removed).toBe(1);
+    const cancelled = await queuedSame;
+    expect(cancelled).toBeInstanceOf(Error);
+    expect(cancelled.message).toMatch(/narrate generation cancelled/);
+    expect(workers[0].generates).toHaveLength(1); // the posted job is untouched
+    expect(workers[1].generates).toEqual([]); // x:1 is still queued
+    workers[0].answer();
+    await expect(posted).resolves.toMatchObject({ sampleRate: 24000 });
+    await settle();
+    expect(workers.flatMap((w) => w.generates.map((m) => m.text))).toEqual(["queued prefetch, other engine"]); // posted once a worker answered
+    workers.find((w) => w.generates.length).answer();
+    await expect(queuedOther).resolves.toMatchObject({ sampleRate: 24000 });
+  });
+
+  it("(p2) control: a request of another group still drops a queued prefetch as superseded (Decision #18)", async () => {
+    await producer.ensureReady();
+    await settle();
+    const posted = producer.generate("posted prefetch", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    await settle();
+    const queued = producer.generate("queued prefetch", { priority: "prefetch", group: "e:1" }).catch((e) => e);
+    await settle();
+    const req = producer.generate("request, epoch 2", { priority: "request", group: "e:2" }).catch((e) => e);
+    await settle();
+    expect((await queued).message).toMatch(/superseded/);
+    workers[0].answer();
+    workers[1].answer();
+    await Promise.all([posted, req]);
+  });
+});
