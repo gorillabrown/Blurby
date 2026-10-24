@@ -1,0 +1,305 @@
+// CHAPTER-STEP-CFI-1 Done-when 1 and 5: contents jumps and chapter steps in Focus, Flow and Narrate.
+//   node cs-driver.mjs --exe <win-unpacked\Blurby.exe> --profile <scratch dir> --out <record.json> --mode focus|flow|narrate --phase one|two [--port 9583] [--label control]
+// phase one (fresh, empty profile): Page -> Next chapter until section 15; switch to <mode> (paused); (i) Next chapter;
+//   (ii) Previous chapter; (iii) contents-list jump to "THE SECOND BOOK". Focus also runs (iv) a contents jump while
+//   playing and (v) Play after a jump made paused-after-playing. Quit through the app with every debugger detached.
+// phase two (the same profile): reopen in the saved mode and probe the section and word shown.
+// Per action: every update-doc-progress save (IPC hook), library.json 4 s later, the relocate / view.goTo-resolve order
+// (a wrapper on the mode's own foliate-view element), the cursor classes on the entry word's span within 10 s.
+// Patterned on JUMP-LANDING-SAVE-1's jl-driver.mjs (launch line, LL-165 preflight, IPC hook). Node built-ins only.
+import { spawn } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+
+const args = { port: 9583, label: "run", phase: "one", mode: "focus" };
+for (let i = 2; i < process.argv.length; i++) {
+  const a = process.argv[i], v = () => process.argv[++i];
+  if (a === "--exe") args.exe = v(); else if (a === "--profile") args.profile = v(); else if (a === "--out") args.out = v();
+  else if (a === "--port") args.port = Number(v()); else if (a === "--label") args.label = v(); else if (a === "--phase") args.phase = v();
+  else if (a === "--mode") args.mode = v();
+  else throw new Error(`unknown argument ${a}`);
+}
+if (!args.exe || !args.profile || !args.out) throw new Error("--exe, --profile and --out are required");
+if (!["focus", "flow", "narrate"].includes(args.mode)) throw new Error("--mode must be focus, flow or narrate");
+args.profile = path.resolve(args.profile);
+const MODE_LABEL = { focus: "Focus mode", flow: "Flow mode", narrate: "Narrate mode" }[args.mode];
+const ROOT = `.rm-${args.mode}-root`;
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const sha = (b) => crypto.createHash("sha256").update(b).digest("hex");
+const log = (...m) => console.log(new Date().toISOString().slice(11, 19), ...m);
+const LIVE = path.join(process.env.APPDATA || "", "blurby");
+const LIVE_DATA = path.join(LIVE, "blurby-data");
+const hashLive = () => Object.fromEntries(["library.json", "settings.json"].map((f) => { const p = path.join(LIVE_DATA, f); return [f, fs.existsSync(p) ? sha(fs.readFileSync(p)) : "(absent)"]; }));
+const rec = { label: args.label, mode: args.mode, phase: args.phase, exe: args.exe, profile: args.profile, started: new Date().toISOString(), steps: [], checks: {} };
+const save = () => fs.writeFileSync(args.out, JSON.stringify(rec, null, 2));
+const step = (name, data) => { rec.steps.push({ t: Date.now(), name, data }); log(name, JSON.stringify(data)?.slice(0, 600)); save(); };
+
+class Cdp {
+  constructor(url) { this.url = url; this.id = 0; this.pending = new Map(); }
+  async open() {
+    this.ws = new WebSocket(this.url);
+    await new Promise((res, rej) => { this.ws.onopen = res; this.ws.onerror = () => rej(new Error("CDP websocket error")); });
+    this.ws.onmessage = (m) => { const d = JSON.parse(m.data); if (d.id && this.pending.has(d.id)) { const p = this.pending.get(d.id); this.pending.delete(d.id); d.error ? p.reject(new Error(`${p.method}: ${d.error.message}`)) : p.resolve(d.result); } };
+    this.ws.onclose = () => { for (const p of this.pending.values()) p.reject(new Error("CDP closed")); this.pending.clear(); this.closed = true; };
+  }
+  send(method, params = {}, timeoutMs = 15000) {
+    if (this.closed) return Promise.reject(new Error("CDP closed"));
+    const id = ++this.id; this.ws.send(JSON.stringify({ id, method, params }));
+    return new Promise((resolve, reject) => { this.pending.set(id, { resolve, reject, method }); setTimeout(() => { if (this.pending.has(id)) { this.pending.delete(id); reject(new Error(`${method}: timeout`)); } }, timeoutMs); });
+  }
+  async eval(expr, timeoutMs = 10000) {
+    const r = await this.send("Runtime.evaluate", { expression: expr, awaitPromise: true, returnByValue: true, timeout: timeoutMs }, timeoutMs + 2000);
+    if (r.exceptionDetails) throw new Error(`eval: ${r.exceptionDetails.exception?.description || r.exceptionDetails.text}`);
+    return r.result.value;
+  }
+  close() { try { this.ws.close(); } catch { /* gone */ } }
+}
+
+const HOOK = String.raw`(() => { const { ipcMain } = process.mainModule.require("electron"); const m = ipcMain._invokeHandlers; if (!m) return "no _invokeHandlers";
+  if (globalThis.__hooked) return "already"; globalThis.__hooked = true; globalThis.__saves = [];
+  const up = m.get("update-doc-progress"); m.set("update-doc-progress", (e, ...a) => { globalThis.__saves.push({ t: Date.now(), docId: a[0], position: a[1], cfi: a[2] || null }); return up(e, ...a); });
+  return "hooked " + typeof up; })()`;
+
+const DOC = "sample-meditations";
+let proc, exited, page, main;
+async function abort(why, code = 4) {
+  step("ABORT", why); console.error("ABORT:", why);
+  try { proc?.kill(); } catch { /* gone */ }
+  await Promise.race([exited, sleep(5000)]);
+  rec.liveAfter = hashLive(); rec.liveUnchanged = JSON.stringify(rec.liveBefore) === JSON.stringify(rec.liveAfter); save();
+  process.exit(code);
+}
+
+// ── 0. live hashes; profile checks ──────────────────────────────────────────────────────────────────────────────
+rec.liveBefore = hashLive(); step("live hashes before", rec.liveBefore);
+const want = args.profile.toLowerCase(), live = LIVE.toLowerCase();
+if (want === live || want.startsWith(live + path.sep)) { console.error("refusing: --profile is under the live profile"); process.exit(2); }
+if (args.phase === "one" && fs.existsSync(args.profile) && fs.readdirSync(args.profile).length) { console.error("refusing: phase one needs a fresh, empty profile"); process.exit(2); }
+if (args.phase === "two" && !fs.existsSync(path.join(args.profile, "blurby-data", "library.json"))) { console.error("refusing: phase two needs phase one's profile"); process.exit(2); }
+fs.mkdirSync(args.profile, { recursive: true });
+const libPath = path.join(args.profile, "blurby-data", "library.json");
+const readLib = () => { try { const lib = JSON.parse(fs.readFileSync(libPath, "utf8")); const docs = Array.isArray(lib) ? lib : lib.docs || lib.library || []; const d = docs.find((x) => x.id === DOC); return d ? { position: d.position, cfi: d.cfi ?? null } : { missing: true }; } catch (e) { return { error: e.message }; } };
+// The spine step of a cfi: epubcfi(/6/N!...) -> N (section index = N/2 - 1).
+const spineStep = (cfi) => { const m = /^epubcfi\(\/6\/(\d+)/.exec(String(cfi ?? "")); return m ? Number(m[1]) : null; };
+
+// ── 1. launch: both ports must be free (another session's app may hold one) ─────────────────────────────────────
+for (const p of [args.port, args.port + 1000]) {
+  const busy = await fetch(`http://127.0.0.1:${p}/json/version`).then(() => true, () => false);
+  if (busy) { console.error(`refusing: port ${p} already answers (another app)`); process.exit(2); }
+}
+const env = { ...process.env, BLURBY_USER_DATA_DIR: args.profile }; delete env.ELECTRON_RUN_AS_NODE;
+const argv = [`--remote-debugging-port=${args.port}`, `--inspect=${args.port + 1000}`, `--user-data-dir=${args.profile}`];
+proc = spawn(args.exe, argv, { env, stdio: ["ignore", "pipe", "pipe"] });
+const stderrLines = [];
+proc.stdout.on("data", () => {}); proc.stderr.on("data", (d) => { for (const l of String(d).split(/\r?\n/)) if (l.trim()) stderrLines.push(l.slice(0, 300)); });
+exited = new Promise((r) => proc.on("exit", (code) => r(code)));
+step("launched", { pid: proc.pid, argv, BLURBY_USER_DATA_DIR: args.profile });
+
+// ── 2. preflight (LL-165) before any driver action ──────────────────────────────────────────────────────────────
+let userData = null;
+for (let i = 0; i < 80 && userData === null; i++) {
+  try {
+    const node = (await (await fetch(`http://127.0.0.1:${args.port + 1000}/json/list`)).json())[0];
+    main = new Cdp(node.webSocketDebuggerUrl); await main.open();
+    userData = await main.eval("process.mainModule.require('electron').app.getPath('userData')");
+  } catch { main?.close(); main = null; await sleep(250); }
+}
+if (!userData) await abort("could not read app.getPath('userData') over the main-process inspector");
+const ud = path.resolve(userData).toLowerCase();
+step("preflight userData", { userData, scratch: args.profile, equal: ud === want, underLive: ud === live || ud.startsWith(live + path.sep) });
+if (ud === live || ud.startsWith(live + path.sep)) await abort(`userData is the live profile (${userData})`);
+if (ud !== want) await abort(`userData is ${userData}, not the scratch profile`);
+if (JSON.stringify(hashLive()) !== JSON.stringify(rec.liveBefore)) await abort("live profile hashes moved at launch");
+
+let target;
+for (let i = 0; i < 240 && !target; i++) {
+  try { const list = await (await fetch(`http://127.0.0.1:${args.port}/json/list`)).json(); target = list.find((t) => t.type === "page" && !/^devtools:/.test(t.url)); } catch { /* not up */ }
+  if (!target) await sleep(500);
+}
+if (!target) await abort("no CDP page target");
+page = new Cdp(target.webSocketDebuggerUrl); await page.open();
+await page.send("Runtime.enable"); await page.send("Page.enable");
+await page.send("Emulation.setFocusEmulationEnabled", { enabled: true }).catch(() => {});
+const consoleErrors = [];
+page.ws.addEventListener("message", (m) => { const d = JSON.parse(m.data); if (d.method === "Runtime.consoleAPICalled" && (d.params.type === "error" || d.params.type === "warning")) consoleErrors.push(`${d.params.type}: ` + d.params.args.map((a) => a.value ?? a.description ?? "").join(" ").slice(0, 300)); });
+
+const has = (sel) => page.eval(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return false; const r = el.getBoundingClientRect(); return r.width > 0 && r.height > 0; })()`).catch(() => false);
+const waitFor = async (sel, ms = 30000) => { for (let i = 0; i < ms / 250; i++) { if (await has(sel)) return true; await sleep(250); } return false; };
+async function mouseAt(b) { for (const type of ["mouseMoved", "mousePressed", "mouseReleased"]) await page.send("Input.dispatchMouseEvent", { type, x: b.x, y: b.y, button: "left", clickCount: 1 }); }
+async function clickSel(sel) {
+  const b = await page.eval(`(() => { const el = document.querySelector(${JSON.stringify(sel)}); if (!el) return null; el.scrollIntoView({ block: 'center', inline: 'center' }); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, disabled: !!el.disabled }; })()`);
+  if (!b) throw new Error(`${sel} not found`);
+  await mouseAt(b); return b;
+}
+const saves = () => main.eval("globalThis.__saves");
+
+// The probe (LL-166: state, not text): the active view (a mode's own root, else Page's), the section foliate reports,
+// the first word span inside lastLocation.range.
+const PROBE = (root) => String.raw`(() => {
+  const fv = document.querySelector(${JSON.stringify(root + " foliate-view")}); if (!fv?.renderer) return null; const loc = fv.lastLocation; const range = loc?.range;
+  const out = { cfi: loc?.cfi ?? null, sectionIndex: loc?.section?.current ?? loc?.index ?? null, first: null };
+  if (!range) return out; const d = range.startContainer?.ownerDocument ?? range.startContainer;
+  const c = fv.renderer.getContents().find((x) => x.doc === d); if (c) out.sectionIndex = c.index;
+  for (const s of d.querySelectorAll('[data-word-index]')) { if (range.intersectsNode(s)) { out.first = { index: c?.index ?? null, wi: Number(s.getAttribute('data-word-index')), text: s.textContent }; break; } }
+  return out; })()`;
+const probe = (root = ROOT) => page.eval(PROBE(root)).catch((e) => ({ error: e.message }));
+// The order probe: wrap the mode's own foliate-view goTo and listen for its relocate events, in one sequence.
+const WRAP = String.raw`(() => { const fv = document.querySelector(${JSON.stringify(ROOT + " foliate-view")}); if (!fv) return "no view";
+  window.__ord ??= []; if (fv.__csWrapped) return "already"; fv.__csWrapped = true; let n = 0;
+  fv.addEventListener('relocate', (e) => window.__ord.push({ k: 'relocate', t: performance.now(), cfi: e.detail?.cfi ?? null }));
+  const orig = fv.goTo.bind(fv);
+  fv.goTo = (target) => { const id = ++n; window.__ord.push({ k: 'goTo', id, t: performance.now(), target: String(target) });
+    const p = orig(target); Promise.resolve(p).then(() => window.__ord.push({ k: 'resolved', id, t: performance.now() }), (err) => window.__ord.push({ k: 'rejected', id, t: performance.now(), err: String(err) })); return p; };
+  return "wrapped"; })()`;
+const ordTake = () => page.eval("(() => { const o = window.__ord ?? []; window.__ord = []; return o; })()");
+// The classes on a word's span in the mode's own view (every loaded section).
+const SPAN = (wi) => String.raw`(() => { const fv = document.querySelector(${JSON.stringify(ROOT + " foliate-view")}); if (!fv?.renderer) return null;
+  for (const c of fv.renderer.getContents()) { const s = c.doc?.querySelector('[data-word-index="${wi}"]'); if (s) return { section: c.index, text: s.textContent, cls: s.className,
+    next: [...c.doc.querySelectorAll('[data-word-index]')].filter((x) => Number(x.getAttribute('data-word-index')) >= ${wi}).slice(0, 6).map((x) => x.textContent) }; }
+  return { none: true }; })()`;
+const span = (wi) => page.eval(SPAN(wi)).catch((e) => ({ error: e.message }));
+const CURSORS = String.raw`(() => { const fv = document.querySelector(${JSON.stringify(ROOT + " foliate-view")}); const out = [];
+  for (const c of fv?.renderer?.getContents() ?? []) for (const s of c.doc?.querySelectorAll('.page-word--flow-cursor, .page-word--highlighted, .page-word--narrate-cursor') ?? []) out.push({ section: c.index, wi: Number(s.getAttribute('data-word-index')), cls: s.className });
+  return out.slice(0, 6); })()`;
+const playing = () => has('[aria-label="Pause"]');
+// Play / Pause: the pointer first; if the state did not change (the button is covered), the button's own DOM click.
+async function press(label) {
+  const want = label === "Play";
+  await clickSel(`[aria-label="${label}"]`).catch(() => null); await sleep(300);
+  if ((await playing()) === want) return "pointer";
+  await page.eval(`document.querySelector('[aria-label="${label}"]')?.click()`).catch(() => null); await sleep(300);
+  return (await playing()) === want ? "dom-click" : "no-change";
+}
+// Focus's RSVP words: record each distinct word shown.
+const rsvpStart = () => page.eval(`window.__rsvp = []; clearInterval(window.__rsvpObs); window.__rsvpObs = setInterval(() => { const el = document.querySelector('.rm-focus-word-display'); const t = el ? el.textContent : null; if (t && window.__rsvp.at(-1) !== t) window.__rsvp.push(t); }, 10); 'ok'`);
+const rsvpTake = () => page.eval(`(clearInterval(window.__rsvpObs), (window.__rsvp ?? []).slice(0, 8))`);
+
+async function chooseContents(re) {
+  // The bottom bar may be hidden while playing: move the mouse over it first.
+  const vp = await page.eval("({ w: innerWidth, h: innerHeight })");
+  await page.send("Input.dispatchMouseEvent", { type: "mouseMoved", x: vp.w / 2, y: vp.h - 20 }); await sleep(700);
+  await clickSel(".rbb-chapter-name"); await sleep(500);
+  let via = "pointer";
+  if (!(await page.eval("document.querySelectorAll('li.rbb-chapter-option').length"))) {
+    // The pointer missed (an overlay covers the bar): the button's own click handler, through a DOM click.
+    via = "dom-click"; await page.eval("document.querySelector('.rbb-chapter-name').click()"); await sleep(500);
+  }
+  const b = await page.eval(String.raw`(() => { const re = ${re}; const li = [...document.querySelectorAll('li.rbb-chapter-option')].find((x) => re.test(x.textContent)); if (!li) return null;
+    li.scrollIntoView({ block: 'center' }); const r = li.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, text: li.textContent.trim() }; })()`);
+  if (!b) {
+    const opts = await page.eval("[...document.querySelectorAll('li.rbb-chapter-option')].map((x) => x.textContent)").catch(() => null);
+    step("contents entry not found", { re: String(re), opts, bar: await has(".rbb-chapter-name") });
+    throw new Error(`contents entry ${re} not found`);
+  }
+  if (via === "pointer") await mouseAt(b);
+  else await page.eval(String.raw`(() => { const re = ${re}; [...document.querySelectorAll('li.rbb-chapter-option')].find((x) => re.test(x.textContent)).click(); })()`);
+  return { ...b, via };
+}
+
+// One action: wrap, act, then the cursor poll (10 s) on the saved word, saves, library.json 4 s later, order.
+async function action(name, act) {
+  const wrap = await page.eval(WRAP); await ordTake();
+  const s0 = (await saves()).length; const before = await probe(); const wasPlaying = await playing();
+  const how = await act();
+  let cursor = null, sp = null, newSaves = [];
+  for (let i = 0; i < 40; i++) {
+    await sleep(250); newSaves = (await saves()).slice(s0);
+    const p = await probe(); const word = newSaves.at(-1)?.position ?? (p?.sectionIndex !== before?.sectionIndex ? p?.first?.wi : null);
+    if (word != null) { sp = await span(word); if (/page-word--(flow-cursor|highlighted)/.test(sp?.cls ?? "")) { cursor = { word, atMs: (i + 1) * 250 }; break; } }
+  }
+  await sleep(1000);
+  const after = await probe(); newSaves = (await saves()).slice(s0); await sleep(4000); const lib = readLib(); const ord = await ordTake();
+  const lastGoTo = ord.filter((o) => o.k === "goTo").at(-1);
+  const resolvedAt = lastGoTo ? ord.findIndex((o) => o.k === "resolved" && o.id === lastGoTo.id) : -1;
+  const goToAt = lastGoTo ? ord.indexOf(lastGoTo) : -1;
+  const relocates = ord.map((o, i) => ({ ...o, i })).filter((o) => o.k === "relocate" && o.i > goToAt);
+  const resolvedIds = ord.filter((o) => o.k === "resolved").map((o) => o.id);
+  const goToIds = ord.filter((o) => o.k === "goTo").map((o) => ({ id: o.id, target: o.target, resolved: resolvedIds.includes(o.id) }));
+  const r = { how, wrap, goToIds, before, after, wasPlaying, playingAfter: await playing(), newSaves: newSaves.map((x) => ({ ...x, spine: spineStep(x.cfi) })),
+    afterSpine: spineStep(after?.cfi), library: { ...lib, spine: spineStep(lib.cfi) }, order: ord,
+    relocateBeforeResolve: resolvedAt < 0 ? null : relocates.some((o) => o.i < resolvedAt), relocateAfterResolve: resolvedAt < 0 ? null : relocates.some((o) => o.i > resolvedAt),
+    span: sp, cursor, cursors: await page.eval(CURSORS).catch(() => null) };
+  step(name, r); return r;
+}
+
+async function openBook() {
+  if (!(await waitFor(".library-container", 60000))) await abort("library did not appear");
+  await sleep(800);
+  if (await has(".onboarding-btn-skip")) { await clickSel(".onboarding-btn-skip"); await sleep(800); step("onboarding skipped", true); }
+  const hookResult = await main.eval(HOOK);
+  step("hook", hookResult); if (!/^hooked function$/.test(hookResult)) await abort(`hook did not install: ${hookResult}`);
+  if (!(await has(".doc-list"))) { await clickSel(".view-toggle-btn"); await sleep(400); }
+  const cardSel = `.doc-card[data-doc-id="${DOC}"]`;
+  if (!(await waitFor(cardSel, 20000))) await abort("Meditations card not found");
+  step("library.json before open", readLib());
+  await clickSel(cardSel);
+  for (let i = 0; i < 180; i++) { if (await has(".rm-page-root foliate-view") || await has(`${ROOT} foliate-view`)) break; await sleep(250); }
+  await sleep(4000);
+}
+async function quit() {
+  rec.consoleErrors = consoleErrors.slice(-40); rec.stderr = stderrLines.slice(-40);
+  await main.eval("setTimeout(() => process.mainModule.require('electron').app.quit(), 2000), 'scheduled'").catch(() => null);
+  main.close(); page.close(); const quitAt = Date.now();
+  const code = await Promise.race([exited, sleep(30000).then(() => "timeout")]);
+  rec.exit = code === "timeout" ? { exitedWithin30sDetached: false } : { exitedWithin30sDetached: true, ms: Date.now() - quitAt, code };
+  if (code === "timeout") { try { proc.kill(); } catch { /* gone */ } rec.exit.killed = true; }
+  step("exit (detached quit)", rec.exit);
+  rec.libAfterQuit = readLib(); step("library.json after quit", rec.libAfterQuit);
+}
+
+// ═════ phase one ═════
+if (args.phase === "one") {
+  await openBook();
+  // Page: Next chapter until section 15.
+  for (let i = 0; i < 30; i++) { const p = await probe(".rm-page-root"); if ((p?.sectionIndex ?? -1) >= 15) break; await clickSel('[aria-label="Next chapter"]'); await sleep(1800); }
+  const atPage = await probe(".rm-page-root"); step("Page at section 15", { probe: atPage, library: readLib() });
+  if (atPage?.sectionIndex !== 15) await abort(`Page did not reach section 15 (${atPage?.sectionIndex})`);
+  await clickSel(`[aria-label="${MODE_LABEL}"]`);
+  for (let i = 0; i < 80; i++) { const p = await probe(); if (p?.first) break; await sleep(250); }
+  await sleep(3000);
+  const atMode = await probe(); step(`${args.mode} selected`, { probe: atMode, playing: await playing(), library: readLib(), cursors: await page.eval(CURSORS).catch(() => null) });
+  if (atMode?.sectionIndex !== 15) await abort(`${args.mode} did not open on section 15 (${atMode?.sectionIndex})`);
+
+  rec.checks.i = await action("(i) Next chapter", () => clickSel('[aria-label="Next chapter"]'));
+  rec.checks.ii = await action("(ii) Previous chapter", () => clickSel('[aria-label="Previous chapter"]'));
+  if (args.mode === "focus") {
+    // (iv) owner question 2: a contents jump while playing keeps playing from the entry's first word.
+    rec.presses = [...(rec.presses ?? []), await press("Play")]; await sleep(1500);
+    await rsvpStart();
+    rec.checks.iv = await action("(iv) contents jump while playing: THE THIRD BOOK", () => chooseContents("/^\\s*THE THIRD BOOK\\s*$/i"));
+    rec.checks.iv.rsvp = await rsvpTake();
+    if (await playing()) { rec.presses = [...(rec.presses ?? []), await press("Pause")]; await sleep(600); }
+    // (v) paused after playing: a chapter step, then Play shows the entry's first word first.
+    rec.checks.v = await action("(v) Previous chapter, paused after playing", () => clickSel('[aria-label="Previous chapter"]'));
+    await rsvpStart(); rec.presses = [...(rec.presses ?? []), await press("Play")]; await sleep(900); rec.presses = [...(rec.presses ?? []), await press("Pause")]; await sleep(500);
+    rec.checks.v.rsvpOnPlay = await rsvpTake();
+    rec.checks.v.entrySpan = rec.checks.v.newSaves.length ? await span(rec.checks.v.newSaves.at(-1).position) : null;
+  }
+  rec.checks.iii = await action("(iii) contents jump: THE SECOND BOOK", () => chooseContents("/^\\s*THE SECOND BOOK\\s*$/i"));
+  if (args.mode === "focus") {
+    // Play shows the entry's word first (c).
+    await rsvpStart(); rec.presses = [...(rec.presses ?? []), await press("Play")]; await sleep(900); rec.presses = [...(rec.presses ?? []), await press("Pause")]; await sleep(500);
+    rec.checks.iii.rsvpOnPlay = await rsvpTake();
+  }
+  await sleep(1500);
+  await quit();
+}
+
+// ═════ phase two ═════
+if (args.phase === "two") {
+  await openBook();
+  for (let i = 0; i < 60; i++) { const p = await probe(); if (p?.first) break; await sleep(250); }
+  await sleep(1500);
+  const shownRoot = (await has(`${ROOT} foliate-view`)) ? ROOT : ".rm-page-root";
+  rec.checks.reopen = { root: shownRoot, probe: await probe(shownRoot), library: readLib() };
+  rec.checks.reopen.spine = spineStep(rec.checks.reopen.library.cfi);
+  step("reopened", rec.checks.reopen);
+  await quit();
+}
+
+rec.liveAfter = hashLive(); rec.liveUnchanged = JSON.stringify(rec.liveBefore) === JSON.stringify(rec.liveAfter);
+step("live hashes after", { ...rec.liveAfter, unchanged: rec.liveUnchanged });
+try { proc.kill(); } catch { /* gone */ }
+main?.close(); page?.close();
+process.exit(0);
