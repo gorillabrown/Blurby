@@ -583,6 +583,18 @@ export class FlowModeRuntime implements ReaderModeRuntime {
   }
 
   /**
+   * S1 G6: B0's ReaderContainer narrate-publisher effect re-ran after every render (its deps held the
+   * per-render `narration` object) and, outside Narrate, set chunkReadingVisualState to null. Flow's published
+   * state therefore lived for one commit: the view applied it (and followed it to the reading zone), then
+   * cleared it, so Flow never kept page-word--active-word. useModeBindings calls this after every commit.
+   */
+  releaseChunkVisualState = (): void => {
+    if (!this.alive || this.state.chunkVisualState == null) return;
+    this.state.chunkVisualState = null;
+    this.state.notify();
+  };
+
+  /**
    * Decision #19: adopt a newer snapshot of this session's own document (same id and generation), e.g. the
    * full-book words that background extraction delivers after open, and re-render this mode's view.
    */

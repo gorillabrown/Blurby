@@ -45,6 +45,12 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
   const onZoneTopChangeRef = useRef(onZoneTopChange);
   onZoneTopChangeRef.current = onZoneTopChange;
 
+  // S1 G6: B0's ReaderContainer effect that nulled chunkReadingVisualState after every render outside Narrate.
+  // No deps on purpose; it runs after this commit's view effects, as B0's parent effect did.
+  useEffect(() => {
+    runtime.releaseChunkVisualState();
+  });
+
   // useFoliateSync effect 1: poll the view's browse-away flag (Flow is a browse-aware surface).
   useEffect(() => {
     if (!document.useFoliate) return;

@@ -436,5 +436,11 @@
     "src/reader/modes/focus/surface.ts",
     "tests/readerModes/arrivalCursor.test.ts",
     "tests/readerModes/foliateViewTeardown.test.tsx"
+  ],
+  "visualParityPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json",
+    "src/reader/modes/flow/ModeRuntime.ts",
+    "src/reader/modes/flow/useModeBindings.ts",
+    "tests/readerModes/chunkVisualParity.test.tsx"
   ]
 }
