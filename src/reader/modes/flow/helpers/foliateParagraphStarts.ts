@@ -1,13 +1,12 @@
 import { BLOCK_TAGS, parseWordIndexAttribute, queryWordSpans } from "./foliateHelpers";
 
 /**
- * A case-insensitive BLOCK_TAGS match. An EPUB section is application/xhtml+xml, where `tagName` keeps the source's
- * lowercase ("p"), so `BLOCK_TAGS.has(el.tagName)` never matches there (FLOW-PARA-KEYS-1, as FOCUS-KEYS-FIX-1's
- * amendment). The shared `getBlockParent` is fixed by BLOCK-TAG-CASE-1; this key path does not use it. It reuses the
- * declared BLOCK_TAGS rather than adding a lowercase module Set, which the mode-ownership gate counts as a new singleton.
+ * The block rule of this mode's `getBlockParent`, which now lives in `foliateHelpers.ts`: lowercase `BLOCK_TAGS`
+ * matched against `localName.toLowerCase()`, so an application/xhtml+xml EPUB section (lowercase `tagName`) and a
+ * text/html one match alike (BLOCK-TAG-CASE-1, folding in FLOW-PARA-KEYS-1's local case-insensitive match).
  */
 export function isParagraphBlock(el: Element): boolean {
-  return BLOCK_TAGS.has(el.localName.toUpperCase());
+  return BLOCK_TAGS.has(el.localName.toLowerCase());
 }
 
 /** The block's first stamped word that is not inside a nested block. */
