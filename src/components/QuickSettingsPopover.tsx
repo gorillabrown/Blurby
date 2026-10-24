@@ -26,7 +26,6 @@ const THEMES: Array<{ value: "blurby" | "dark" | "light" | "eink" | "system"; la
   { value: "dark", label: "Dark" },
   { value: "light", label: "Light" },
   { value: "system", label: "System" },
-  { value: "eink", label: "E-ink" },
 ];
 
 const SORT_OPTIONS = [

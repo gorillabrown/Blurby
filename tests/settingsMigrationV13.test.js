@@ -9,7 +9,8 @@ const require = createRequire(import.meta.url);
 const migrations = require("../main/migrations.js");
 const { CURRENT_SETTINGS_SCHEMA, settingsMigrations, runMigrations } = migrations;
 
-const upgrade = (data) => runMigrations(data, settingsMigrations, CURRENT_SETTINGS_SCHEMA);
+// EINK-CONTROLS-1 added v13 -> v14 (standing rule 50): these rows pin the v13 runner, its first 13 migrations.
+const upgrade = (data) => runMigrations(data, settingsMigrations.slice(0, 13), 13);
 
 // A realistic v12 profile: every narration-adjacent field the migration must leave alone.
 function v12Full() {
@@ -31,8 +32,8 @@ function v12Full() {
 
 describe("settings migration v12 -> v13 (Narrate removed)", () => {
   it("bumps the settings schema to 13 with a v12 -> v13 entry", () => {
-    expect(CURRENT_SETTINGS_SCHEMA).toBe(13);
-    expect(settingsMigrations.length).toBe(13);
+    expect(CURRENT_SETTINGS_SCHEMA).toBeGreaterThanOrEqual(13);
+    expect(settingsMigrations.length).toBe(CURRENT_SETTINGS_SCHEMA);
   });
 
   it("(a) migrates a saved narrate mode to flow and stamps schemaVersion 13", () => {

@@ -6,10 +6,16 @@ const path = require("path");
 const fsPromises = require("fs/promises");
 const { MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, MAIN_WINDOW_MIN_WIDTH, MAIN_WINDOW_MIN_HEIGHT } = require("./constants");
 
-function getThemeColors(settings) {
-  const resolvedTheme = settings.theme === "system"
+// EINK-CONTROLS-1: the E-ink switch carries the E-ink colours over the saved theme.
+function resolveWindowTheme(settings) {
+  if (settings.einkMode === true) return "eink";
+  return settings.theme === "system"
     ? (nativeTheme.shouldUseDarkColors ? "dark" : "light")
     : settings.theme;
+}
+
+function getThemeColors(settings) {
+  const resolvedTheme = resolveWindowTheme(settings);
   switch (resolvedTheme) {
     case "blurby":
       return { bg: "#1a2a4a", titleBar: "#152440", titleText: "#ffffff" };
@@ -18,7 +24,7 @@ function getThemeColors(settings) {
     case "eink":
       return { bg: "#e8e4d9", titleBar: "#b9b6ae", titleText: "#1a1a1a" };
     default: // dark
-      return { bg: "#0f0f0f", titleBar: "#1c1c1c", titleText: "#e8e4de" };
+      return { bg: "#000000", titleBar: "#1c1c1c", titleText: "#e8e4de" };
   }
 }
 
@@ -191,7 +197,7 @@ function setupAutoUpdater(mainWindow) {
 
 function updateWindowTheme(mainWindow, settings) {
   const colors = getThemeColors(settings);
-  const resolvedTheme = settings.theme === "system" ? getSystemTheme() : settings.theme;
+  const resolvedTheme = resolveWindowTheme(settings);
   nativeTheme.themeSource = resolvedTheme === "light" || resolvedTheme === "eink" ? "light" : "dark";
   if (mainWindow && !mainWindow.isDestroyed()) {
     mainWindow.setBackgroundColor(colors.bg);

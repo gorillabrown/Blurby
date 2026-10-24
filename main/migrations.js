@@ -3,7 +3,7 @@
 
 const { DEFAULT_INITIAL_PAUSE_MS, DEFAULT_PUNCTUATION_PAUSE_MS } = require('./constants');
 
-const CURRENT_SETTINGS_SCHEMA = 13;
+const CURRENT_SETTINGS_SCHEMA = 14;
 const CURRENT_LIBRARY_SCHEMA = 6;
 
 /** Count words without creating intermediate arrays. */
@@ -178,6 +178,15 @@ const settingsMigrations = [
   },
   // v12 → v13: Narrate removed (NARRATE-REMOVE-1) — a saved narrate mode becomes flow
   (data) => { normalizeReaderModes(data); data.schemaVersion = 13; return data; },
+  // v13 → v14: EINK-CONTROLS-1 — the E-ink theme is folded into the E-ink switch (light underneath)
+  (data) => {
+    if (data.theme === "eink") {
+      data.theme = "light";
+      data.einkMode = true;
+    }
+    data.schemaVersion = 14;
+    return data;
+  },
 ];
 
 const libraryMigrations = [

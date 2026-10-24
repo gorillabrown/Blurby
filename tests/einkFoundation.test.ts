@@ -43,7 +43,9 @@ describe("EINK-6A: E-Ink Foundation", () => {
   it("ThemeProvider applies data-eink from settings independently of data-theme", () => {
     const src = read("src/components/ThemeProvider.tsx");
     expect(src).toContain("setEinkMode(Boolean(state.settings.einkMode))");
-    expect(src).toContain('root.setAttribute("data-theme", resolvedTheme)');
+    // EINK-CONTROLS-1: the switch carries the E-ink colours, so data-theme is the applied theme.
+    expect(src).toContain('const appliedTheme = einkMode ? "eink" : resolvedTheme;');
+    expect(src).toContain('root.setAttribute("data-theme", appliedTheme)');
     expect(src).toContain('root.setAttribute("data-eink", "true")');
     expect(src).toContain('root.removeAttribute("data-eink")');
     expect(src).not.toContain('theme === "eink" ? "true"');
@@ -87,7 +89,9 @@ describe("EINK-6A: E-Ink Foundation", () => {
     expect(src).toContain("E-Ink Display Mode");
     expect(src).toContain("einkMode: !settings.einkMode");
     expect(src).toContain("settings.einkMode &&");
-    expect(src).toContain('"eink"');
+    // EINK-CONTROLS-1: the E-ink theme option is gone; the switch is the one E-ink control.
+    expect(src).toContain('["blurby", "dark", "light", "system"]');
+    expect(src).not.toContain('"eink"');
   });
 
   it("ReaderContainer enforces WPM ceiling from einkMode instead of theme", () => {

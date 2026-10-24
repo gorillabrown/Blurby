@@ -27,7 +27,7 @@ interface ThemeSettingsProps {
 
 export function ThemeSettings({ settings, onSettingsChange }: ThemeSettingsProps) {
   const { setTheme, setEinkMode, setAccentColor, setFontFamily } = useContext(ThemeContext);
-  const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "eink", "system"];
+  const themes: BlurbySettings["theme"][] = ["blurby", "dark", "light", "system"];
 
   // Wrap onSettingsChange to also update ThemeContext instantly
   const handleSettingsChange = (updates: Partial<BlurbySettings>) => {
