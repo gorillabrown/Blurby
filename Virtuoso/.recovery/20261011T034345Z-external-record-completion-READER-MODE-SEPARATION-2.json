@@ -1,0 +1,39 @@
+{
+  "id": "20261011T034345Z-external-record-completion-READER-MODE-SEPARATION-2",
+  "operation": "external-record-completion",
+  "item_id": "READER-MODE-SEPARATION-2",
+  "created": "2026-10-11T03:43:45Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "record-completion",
+    "fields": {
+      "status": "Completed",
+      "completed": "2026-10-11",
+      "evidence": "docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md",
+      "sequence": "",
+      "notes": "Completed 2026-10-11: merge d96d2f3f, packet ce740582; D1-D9 pass (D1/D7/D8 amended by owner ruling #32: Narrate listening checks dropped; D6 under KF-3 #33). Ledger TR-057. Owner ruling #31: Narrate to be removed next sprint and rebuilt. Close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md (merge c991e35c)"
+    },
+    "expectedRevision": "7cc33c298b569e7adb794dbca81f84e7c8d377c3336dcad637ce0c36cbc9fbde",
+    "idempotencyKey": "record-completion:READER-MODE-SEPARATION-2:[('completed', '2026-10-11'), ('evidence', 'docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md'), ('notes', 'Completed 2026-10-11: merge d96d2f3f, packet ce740582; D1-D9 pass (D1/D7/D8 amended by owner ruling #32: Narrate listening checks dropped; D6 under KF-3 #33). Ledger TR-057. Owner ruling #31: Narrate to be removed next sprint and rebuilt. Close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md (merge c991e35c)'), ('sequence', ''), ('status', 'Completed')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "record-completion",
+      "itemId": "READER-MODE-SEPARATION-2",
+      "idempotencyKey": "record-completion:READER-MODE-SEPARATION-2:[('completed', '2026-10-11'), ('evidence', 'docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md'), ('notes', 'Completed 2026-10-11: merge d96d2f3f, packet ce740582; D1-D9 pass (D1/D7/D8 amended by owner ruling #32: Narrate listening checks dropped; D6 under KF-3 #33). Ledger TR-057. Owner ruling #31: Narrate to be removed next sprint and rebuilt. Close-out docs/governance/close-outs/CloseOut.READER-MODE-SEPARATION-2.2026-10-11.md (merge c991e35c)'), ('sequence', ''), ('status', 'Completed')]",
+      "actualRevision": "2026-10-11T03:43:55Z",
+      "recoveryId": "20261011T034345Z-external-record-completion-READER-MODE-SEPARATION-2",
+      "detail": {},
+      "providerItemId": "13119306772"
+    }
+  },
+  "resolved": "2026-10-11T03:44:02Z",
+  "outcome": "succeeded"
+}
