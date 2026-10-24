@@ -351,6 +351,9 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** Chapter prev/next/jump (legacy commitSharedWordAnchor, explicit-navigation). */
   navigateTo(wordIndex: number): void {
     if (!this.alive) return;
+    // JUMP-LANDING-SAVE-1: on an EPUB the shell follows with go-to-href, whose landing saves the page. Committing here
+    // would save the entry's word with the old page's cfi, and a jump that never lands would keep it.
+    if (this.document.useFoliate) return;
     this.commitShared(wordIndex, "explicit-navigation", undefined);
     this.state.notify();
   }
@@ -575,6 +578,7 @@ export class PageModeRuntime implements ReaderModeRuntime {
   /** PAGE-POSITION-SAVE-1 (BUG-197): a page turn saves the first word of the page it landed on, at once. */
   onPageTurned = (first: { readonly wordIndex: number | null; readonly cfi: string }): void => {
     if (!this.alive) return;
+    this.heldClickAnchor = null; // PAGE-SAVE-RESTAMP-3: a saved turn replaces any held click
     const s = this.state;
     this.markEngaged();
     this.ports.persistence.markPageActivity();

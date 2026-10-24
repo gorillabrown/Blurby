@@ -393,6 +393,7 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     expect(String(lost[0].args[1]).startsWith("reason=section-load")).toBe(true);
     expect(lost[0].args[1]).toContain("section=5");
     expect(lost[0].args[1]).toContain("sectionStart=-1");
+    expect(lost[0].args[1]).toContain(" kind=turn"); // PAGE-HELD-TURN-FAIL-1
   });
 
   it("(n4b) control: a held turn that the section load stamps records no loss", async () => {
@@ -559,7 +560,44 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await render(BOOK_WORDS);
     await settle();
     expect(saves(fake)).toEqual([]);
-    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"))).toHaveLength(1);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=restamp"));
+    expect(lost).toHaveLength(1);
+    expect(lost[0].args[1]).toContain(" kind=turn"); // PAGE-HELD-TURN-FAIL-1
+  });
+
+  // PAGE-HELD-TURN-FAIL-1: a held turn the failed word count cannot save is reported, not left held in silence.
+  it("(hf1) a held turn the failed word count cannot report records page-turn-lost", async () => {
+    const { fake, view, renderer } = await mount({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+    const gap = doc.querySelector('[data-word-index="0"]')!.nextSibling!;
+    expect(gap.textContent).toBe(" "); // the space after "Alpha"
+    const range = doc.createRange();
+    range.setStart(gap, 0);
+    range.setEnd(gap, 1);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range };
+    await click("Next page");
+    await settle();
+    expect(saves(fake)).toEqual([]);
+    const lost = fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost");
+    expect(lost).toHaveLength(1);
+    expect(String(lost[0].args[1]).startsWith("reason=book-words-failed")).toBe(true);
+    expect(lost[0].args[1]).toContain("start=");
+    expect(lost[0].args[1]).toContain("end=");
+    expect(lost[0].args[1]).toContain(" kind=turn");
+  });
+
+  it("(hf2) control: a held turn on a word saves its cfi when the word count fails, and records no loss", async () => {
+    const { fake, view, renderer } = await mount({ ensureBookWords: () => Promise.reject(new Error("extract-epub-words failed")) });
+    const { doc } = rawDoc();
+    renderer.contents = [{ doc, index: 3 }];
+    await loadSection(view, doc, 3);
+    renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+    await click("Next page");
+    await settle();
+    expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:gamma"]]);
+    expect(fake.diagnostics.filter((d) => d.args[0] === "page-turn-lost" && String(d.args[1]).startsWith("reason=book-words-failed"))).toHaveLength(0);
   });
 
   // Rulings at registration (Blurby.Brain, 2026-10-15): a word click on provisional numbering holds its save like a turn.
@@ -635,5 +673,203 @@ describe("Page mode page turns save the first word of the new page (BUG-197)", (
     await electronAPIStub.updateDocProgress("sample-meditations", -1, "c13");
     const doc = stubControl.getLibrary().find((d) => d.id === "sample-meditations")!;
     expect([doc.position, doc.cfi]).toEqual([12, "c13"]);
+  });
+
+  // TOC-JUMP-SAVE-1: foliate fires the jump's relocate synchronously inside view.goTo, so the jump saves its landing.
+  describe("TOC-JUMP-SAVE-1 TOC jump", () => {
+    const tocJump = (runtime: any) => act(async () => { await runtime.handleCommand({ kind: "go-to-href", href: "ch2.xhtml" }); });
+
+    it("(tj1) a TOC jump saves the landed page's first word and cfi", async () => {
+      const { fake, runtime, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      (view as any).goTo = async () => {
+        await new Promise((r) => setTimeout(r, 0)); // like foliate: the landing relocate comes after awaits, before goTo resolves
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      };
+      await tocJump(runtime);
+      await settle(); // go-to-href does not await the jump; let its landing relocate run
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
+    });
+
+    it("(tj2) control: the same relocate after the jump has settled saves nothing", async () => {
+      const { fake, runtime, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      await tocJump(runtime); // the fake goTo fires no relocate
+      const before = saves(fake).length;
+      await relocate(view, { cfi: "jump-cfi", fraction: 0.5, range });
+      expect(saves(fake).slice(before)).toEqual([]);
+    });
+
+    it("(tj3) control: a jump onto renderer-numbered words is held, then saved once the book's numbers apply", async () => {
+      const { fake, runtime, view, renderer, render } = await mount();
+      const { doc } = rawDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+      const range = spanRange(doc, 2, 3);
+      (view as any).goTo = async () => {
+        await new Promise((r) => setTimeout(r, 0)); // like foliate: the landing relocate comes after awaits, before goTo resolves
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      };
+      await tocJump(runtime);
+      await settle(); // go-to-href does not await the jump; let its landing relocate run
+      expect(saves(fake)).toEqual([]);
+      await render(BOOK_WORDS);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    });
+  });
+
+  // PAGE-SAVE-RESTAMP-3 Wave A: rare page-save edge cases after the restamp guard.
+  describe("PAGE-SAVE-RESTAMP-3", () => {
+    // (pr1) the double-wrap race: the book's words arrive while the load's wrap is still yielding.
+    it("(pr1) book words arriving mid-wrap number every span of a long section", async () => {
+      const { view, renderer, render } = await mount();
+      const doc = document.implementation.createHTMLDocument();
+      doc.body.innerHTML = Array.from({ length: 160 }, (_, i) => `<p>Word${i}</p>`).join("");
+      renderer.contents = [{ doc, index: 3 }];
+      const words = Array.from({ length: 160 }, (_, i) => `Word${i}`);
+      await act(async () => { view.dispatchEvent(new CustomEvent("load", { detail: { doc, index: 3 } })); }); // not settled
+      await render({
+        bookWordSections: [{ sectionIndex: 3, startWordIdx: 20, endWordIdx: 180, wordCount: 160 }],
+        getCanonicalSectionWords: (i: number) => (i === 3 ? words : undefined),
+      });
+      await settle();
+      await settle();
+      const spans = Array.from(doc.querySelectorAll("[data-word-index]")) as HTMLElement[];
+      expect(spans).toHaveLength(160);
+      expect(spans.map((s) => [s.textContent, Number(s.getAttribute("data-word-index"))]))
+        .toEqual(words.map((w, i) => [w, 20 + i]));
+    });
+
+    // (pc1) a word click after the word count is known to have failed still saves its cfi.
+    it("(pc1) a second word click after a known word-count failure saves its cfi", async () => {
+      const { fake, doc } = await mountWiredClicks({ ensureBookWords: () => Promise.reject(new Error("x")) });
+      await clickWord(doc, 1);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"]]);
+      await clickWord(doc, 2);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", -1, "cfi:3:beta"], ["doc-1", -1, "cfi:3:gamma"]]);
+      expect(fake.effects.filter((e) => e.method === "persistence.updateProgress")).toEqual([]);
+    });
+
+    // (pn4) pin: opening without a cfi cancels a turn held during init.
+    it("(pn4) a held turn from a snap during init is cancelled when the book opens without a cfi", async () => {
+      const shared = rawDoc();
+      const original = FakeFoliateView.prototype.init;
+      FakeFoliateView.prototype.init = async function (this: FakeFoliateView) {
+        const { doc, range } = shared;
+        this.renderer.contents = [{ doc, index: 0 }];
+        this.renderer.page = 2;
+        this.renderer.dispatchEvent(new CustomEvent("relocate", { detail: { reason: "snap", cfi: "snap-cfi", fraction: 0.5, range } }));
+      };
+      try {
+        const { fake, view, renderer } = await mount({ initialCfi: undefined, bookWordSections: [{ sectionIndex: 0, startWordIdx: 0, endWordIdx: 4, wordCount: 4 }],
+          getCanonicalSectionWords: (i: number) => (i === 0 ? ["Alpha", "beta", "gamma", "delta"] : undefined) });
+        const { doc } = shared;
+        renderer.contents = [{ doc, index: 0 }];
+        await loadSection(view, doc, 0);
+        await settle();
+        expect(saves(fake)).toEqual([]);
+      } finally {
+        FakeFoliateView.prototype.init = original;
+      }
+    });
+
+    // (hc1) a turn that replaces a held click clears the click's anchor.
+    it("(hc1) a held turn replacing a held click saves the turn and clears heldClickAnchor", async () => {
+      const { fake, runtime, renderer, render, wired, doc } = await mountWiredClicks();
+      await clickWord(doc, 1);
+      renderer.detail = { cfi: "range-cfi", fraction: 0.5, range: spanRange(doc, 2, 3) };
+      await click("Next page");
+      await render({ ...wired, ...BOOK_WORDS });
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+      expect((runtime as any).heldClickAnchor).toBeNull();
+    });
+
+    // (fr1n) pin: fr1's guard, negative side. A held-click save after the anchor moved on leaves the anchor alone.
+    it("(fr1n) a held-click save after the anchor moved on does not overwrite it", async () => {
+      const { runtime, doc } = await mountWiredClicks();
+      await clickWord(doc, 1);
+      expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(1);
+      // JUMP-LANDING-SAVE-1: navigateTo no longer commits on an EPUB, so the anchor is moved on directly.
+      (runtime as any).state.explicitSelectionAnchor = 4;
+      runtime.onHeldClickSave({ wordIndex: 21, cfi: "cfi:3:beta" });
+      expect(runtime.exportHandoff("persistent").explicitSelectionAnchor).toBe(4);
+    });
+  });
+
+  // JUMP-LANDING-SAVE-1: an internal link or footnote reference saves the page it lands on, as a TOC jump does;
+  // a contents jump that never lands saves nothing.
+  describe("JUMP-LANDING-SAVE-1 link and chapter jumps", () => {
+    /** As foliate's #handleLinks (view.js:350-352): a cancelable link event, then its own goTo unless prevented. */
+    const followLink = (view: FakeFoliateView, href: string) =>
+      act(async () => {
+        const event = new CustomEvent("link", { detail: { a: null, href }, cancelable: true });
+        if (view.dispatchEvent(event)) await (view.goTo as (target: string) => Promise<void>)(href);
+      });
+    /** A goTo whose landing relocate fires on the view after an await, before it resolves (as foliate's does). */
+    const landingGoTo = (view: FakeFoliateView, range: Range) =>
+      vi.fn(async (_target: unknown) => {
+        await new Promise((r) => setTimeout(r, 0));
+        view.dispatchEvent(new CustomEvent("relocate", { detail: { cfi: "jump-cfi", fraction: 0.5, range } }));
+      });
+
+    it.each([
+      { name: "an internal link", href: "ch2.xhtml#sec-2" },
+      { name: "a footnote reference", href: "notes.xhtml#fn-1" },
+    ])("(jl1) $name saves the landed page's first word and cfi, through one goTo", async ({ href }) => {
+      const { fake, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      const goTo = landingGoTo(view, range);
+      (view as any).goTo = goTo;
+      await followLink(view, href);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 12, "cfi:0:twelve"]]);
+      expect(goTo).toHaveBeenCalledTimes(1);
+      expect(goTo).toHaveBeenCalledWith(href);
+    });
+
+    it("(jl2) control: a relocate after a link has settled saves nothing", async () => {
+      const { fake, view, renderer } = await mount();
+      const { doc, range } = stampedDoc();
+      renderer.contents = [{ doc, index: 0 }];
+      await followLink(view, "ch2.xhtml#sec-2"); // the fake goTo fires no relocate
+      await settle();
+      await relocate(view, { cfi: "jump-cfi", fraction: 0.5, range });
+      expect(saves(fake)).toEqual([]);
+    });
+
+    it("(jl3) control: a link onto renderer-numbered words is held, then saved once the book's numbers apply", async () => {
+      const { fake, view, renderer, render } = await mount();
+      const { doc } = rawDoc();
+      renderer.contents = [{ doc, index: 3 }];
+      await loadSection(view, doc, 3); // no book words yet: the renderer numbers the section 0..3
+      (view as any).goTo = landingGoTo(view, spanRange(doc, 2, 3));
+      await followLink(view, "ch2.xhtml#sec-2");
+      await settle();
+      expect(saves(fake)).toEqual([]);
+      await render(BOOK_WORDS);
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([["doc-1", 22, "cfi:3:gamma"]]);
+    });
+
+    it.each([
+      { name: "dropped while a turn holds the paginator's lock", goTo: () => vi.fn(async () => {}) },
+      { name: "an unresolvable href", goTo: () => vi.fn(() => Promise.resolve(undefined)) },
+    ])("(jl4) a contents jump that never lands saves nothing: $name", async ({ goTo }) => {
+      const { fake, runtime, view } = await mount();
+      (view as any).goTo = goTo();
+      await act(async () => {
+        runtime.navigateTo(20); // the shell's handleJumpToChapter: the entry's word, then go-to-href
+        runtime.handleCommand({ kind: "go-to-href", href: "ch9.xhtml" });
+      });
+      await settle();
+      expect(saves(fake).map((e) => e.args)).toEqual([]);
+    });
   });
 });
