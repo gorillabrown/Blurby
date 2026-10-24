@@ -1,0 +1,20 @@
+// node table.mjs <probe out.json> → markdown: per-run summary, then every pause (word, next word, verdict).
+import fs from "node:fs";
+const out = JSON.parse(fs.readFileSync(process.argv[2], "utf8"));
+const label = { M: "Meditations, contents jump to INTRODUCTION", G0: "g0, opened at the start (section 0)", G1: "g0, contents jump to Chapter Two (section 1)" };
+const esc = (w) => String(w ?? "—").replace(/\|/g, "\\|");
+const lines = [];
+lines.push("| Mode | Route | Loaded sections | Paragraphs (blocks) in the loaded section | Pauses in it | Of those on a paragraph end | All pauses | Block end | Section end | MID |");
+lines.push("|---|---|---|---|---|---|---|---|---|---|");
+for (const r of out.runs) {
+  const ps = r.perSection || [];
+  lines.push(`| ${r.mode} | ${label[r.route]} | ${(r.loadedSections || []).join(", ")} | ${ps.map((p) => p.blocks).join(", ")} | ${ps.map((p) => p.pausesInside).join(", ")} | ${ps.map((p) => p.pausesOnBlockEnd).join(", ")} | ${r.counts?.total ?? r.err} | ${r.counts?.blockEnd ?? ""} | ${r.counts?.sectionEnd ?? ""} | ${r.counts?.mid ?? ""} |`);
+}
+lines.push("");
+for (const r of out.runs) {
+  lines.push(`#### ${r.mode}, ${label[r.route]}`, "");
+  lines.push("| # | Word index | Section | Word | Next word | Verdict |", "|---|---|---|---|---|---|");
+  (r.pauses || []).forEach((p, i) => lines.push(`| ${i + 1} | ${p.g} | ${p.sec} | ${esc(p.word)} | ${esc(p.next)} | ${p.kind === "MID" ? "**not a paragraph end**" : p.kind} |`));
+  lines.push("");
+}
+process.stdout.write(lines.join("\n"));
