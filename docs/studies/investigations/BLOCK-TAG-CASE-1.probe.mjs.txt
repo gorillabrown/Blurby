@@ -1,0 +1,126 @@
+// Scratch (BLOCK-TAG-CASE-1 Done-when 1 and 4): per-section block figures from the running app's mode runtimes.
+// Route and runtime lookup follow C:\Projects\Blurby-artifacts\keys-fix\word-probe.mjs (React-fiber walk to the
+// mode runtime; Session.profilePreflight before the first input; live-profile hashes before and after).
+// node block-probe.mjs <sweep.mjs dir> <exe> <fresh empty profile dir> <port> <out.json> <g0-converted-chapters.epub>
+// Figures per section (sectionIndex from main's bookWords.sections):
+//  (a) blocks: distinct blockId among the Flow view's extracted words for the section (collectBlockTextNodes groups
+//      that yield at least one word); xhtmlBlockEls is the section body's block-tag element count, any case, for scale.
+//  (b) paragraphBreakAfter count among the same words.
+//  (c) wrapped: distinct data-word-index values stamped in the section document; main: endWordIdx - startWordIdx;
+//      missing: main words with no span (first few, with text around them) — the boundary text for a divergence.
+//  (d) Flow natural chunks (runtime readingChunks()) whose startWordIndex lies in the section.
+//  (e) Narrate: the chunk breaks its plan uses (runtime chunkBreaks(words)) inside the first two sections, plus the
+//      document's paragraph breaks there (the fallback source).
+//  pauseSet: the Flow surface's paragraph-break set (the Flow/Focus engine's pause source on a foliate book).
+import fs from "node:fs";
+import path from "node:path";
+const [sweepDir, exe, profile, portArg, outJson, g0] = process.argv.slice(2);
+const { Session, blurbyPlan, home, runSteps, sleep, hashLive } = await import("file:///" + path.join(sweepDir, "sweep.mjs").replace(/\\/g, "/"));
+const live = path.join(process.env.APPDATA, "blurby", "blurby-data");
+const liveBefore = hashLive(live);
+fs.mkdirSync(profile, { recursive: true });
+// Launch 1 creates the fresh profile (sample book only), then quits. Without a source folder, import-dropped-files
+// keeps an EPUB as text only ("needs to be re-imported"), so the g0 book is added to library.json between launches
+// as a file-backed EPUB (a copy inside the scratch profile), and launch 2 measures.
+const plan = blurbyPlan({});
+{ const s0 = new Session({ exe, profile, port: Number(portArg), liveProfile: live }); await s0.start(); console.log("launch 1 preflight OK:", s0.userData);
+  await plan.seed(s0, { seed: [] }); await s0.stop(); }
+const libPath = path.join(profile, "blurby-data", "library.json");
+const lib = JSON.parse(fs.readFileSync(libPath, "utf8"));
+const g0Copy = path.join(profile, "books", "g0-converted-chapters.epub"); fs.mkdirSync(path.dirname(g0Copy), { recursive: true }); fs.copyFileSync(g0, g0Copy);
+const st = fs.statSync(g0Copy);
+if (!lib.docs.some((d) => d.id === "g0-converted-chapters")) lib.docs.unshift({ id: "g0-converted-chapters", title: "g0-converted-chapters", filepath: g0Copy, filename: path.basename(g0Copy), ext: ".epub", size: st.size, modified: st.mtimeMs, wordCount: 0, position: 0, created: Date.now(), source: "manual", lastReadAt: null });
+fs.writeFileSync(libPath, JSON.stringify(lib, null, 2));
+const s = new Session({ exe, profile, port: Number(portArg) + 1, liveProfile: live });
+await s.start();
+const out = { exe, userData: s.userData, preflight: "passed twice (Session.profilePreflight, launches 1 and 2)", liveBefore, books: [] };
+console.log("launch 2 preflight OK, userData:", s.userData);
+plan.vars = { epub: "g0-converted-chapters" };
+for (let i = 0; i < 240; i++) { if (await s.sw('has(".library-container")')) break; await sleep(250); }
+out.seeded = (await s.cdp.eval("window.electronAPI.getState()", 20000)).library?.map((d) => `${d.id}: ${d.title} (${d.filepath})`);
+
+const FIND_RT = (mode) => `(() => {
+  const host = document.getElementById("root") || document.body.firstElementChild; const ck = host && Object.keys(host).find((x) => x.startsWith("__reactContainer$"));
+  const stack = ck ? [host[ck]] : []; let n = 0, rt = null;
+  while (stack.length && !rt && n++ < 400000) { const f = stack.pop(); if (!f) continue; const p = f.memoizedProps;
+    if (p && p.runtime && typeof p.runtime.getSnapshot === "function" && p.runtime.mode === ${JSON.stringify(mode)}) rt = p.runtime;
+    if (f.sibling) stack.push(f.sibling); if (f.child) stack.push(f.child); }
+  window.__rt = rt; return rt ? { ok: true, playing: rt.getSnapshot().playing } : { ok: false };
+})()`;
+
+const SECTION = (idx) => `(async () => {
+  const rt = window.__rt; const bw = rt.document.bookWords; const sec = bw.sections.find((x) => x.sectionIndex === ${idx});
+  await rt.surface.goToSection(${idx});
+  const fv = document.querySelector("foliate-view");
+  const read = () => {
+    const c = [...fv.renderer.getContents()].find((x) => x.index === ${idx});
+    if (!c || !c.doc || !c.doc.body) return null;
+    const spans = [...c.doc.querySelectorAll("[data-word-index]")];
+    const idxs = new Set(spans.map((e) => Number(e.getAttribute("data-word-index"))));
+    const fw = (rt.surface.getFoliateWords() || []).filter((w) => w.sectionIndex === ${idx});
+    return { c, spans, idxs, fw };
+  };
+  let r = null, last = -1, stable = 0;
+  for (let i = 0; i < 100; i++) { r = read(); const k = r ? r.idxs.size * 100000 + r.fw.length : -1;
+    if (r && r.idxs.size > 0 && k === last) { if (++stable >= 2) break; } else stable = 0; last = k; await new Promise((z) => setTimeout(z, 250)); }
+  const main = sec.endWordIdx - sec.startWordIdx;
+  if (!r) return { sectionIndex: ${idx}, main, err: "section document not loaded" };
+  const { c, idxs, fw } = r;
+  const BT = new Set(["p","div","h1","h2","h3","h4","h5","h6","blockquote","li","td","section","article"]);
+  const xhtmlBlockEls = [...c.doc.body.querySelectorAll("*")].filter((e) => BT.has(e.localName.toLowerCase())).length;
+  const blocks = new Set(fw.map((w) => w.blockId)).size;
+  const breaks = fw.filter((w) => w.paragraphBreakAfter).length;
+  const tags = {}; for (const id of new Set(fw.map((w) => w.blockId))) { const t = String(id).split(":")[2]; tags[t] = (tags[t] || 0) + 1; }
+  const missing = []; let nMissing = 0;
+  for (let g = sec.startWordIdx; g < sec.endWordIdx; g++) if (!idxs.has(g)) { nMissing++; if (missing.length < 6) missing.push({ g, word: bw.words[g], around: bw.words.slice(Math.max(sec.startWordIdx, g - 3), g + 4).join(" ") }); }
+  const outside = [...idxs].filter((g) => g < sec.startWordIdx || g >= sec.endWordIdx).length;
+  const mismatchText = []; for (const e of r.spans) { const g = Number(e.getAttribute("data-word-index")); if (mismatchText.length < 4 && bw.words[g] != null && e.textContent.trim() && !bw.words[g].includes(e.textContent.trim()) && !e.textContent.trim().includes(bw.words[g])) mismatchText.push({ g, span: e.textContent, main: bw.words[g] }); }
+  return { sectionIndex: ${idx}, start: sec.startWordIdx, end: sec.endWordIdx, main, wrapped: idxs.size, missingCount: nMissing, missing, outside, mismatchText,
+    blocks, breaks, blockTags: tags, foliateWords: fw.length, xhtmlBlockEls, contentType: c.doc.contentType };
+})()`;
+
+const CHUNKS = `(() => { const rt = window.__rt; const bw = rt.document.bookWords; const chunks = rt.readingChunks();
+  const per = {}; const kinds = {}; for (const ch of chunks) { const sec = bw.sections.find((x) => ch.startWordIndex >= x.startWordIdx && ch.startWordIndex < x.endWordIdx);
+    const k = sec ? sec.sectionIndex : "none"; per[k] = (per[k] || 0) + 1; const kk = k + ":" + ch.kind; kinds[kk] = (kinds[kk] || 0) + 1; }
+  const pause = rt.surface.getParagraphBreaks();
+  return { total: chunks.length, perSection: per, kindsPerSection: kinds, docParagraphBreaks: rt.document.paragraphBreaks.length,
+    pauseSetSize: pause.length, pauseSetMin: pause.length ? pause[0] : null, pauseSetMax: pause.length ? pause[pause.length - 1] : null, pauseSetHead: pause.slice(0, 12),
+    pauseWords: pause.slice(0, 8).map((g) => bw.words[g]) }; })()`;
+
+const NARRATE = `(() => { const rt = window.__rt; const bw = rt.document.bookWords; const s01 = bw.sections.slice(0, 2);
+  const inS = (g) => s01.some((x) => g >= x.startWordIdx && g < x.endWordIdx);
+  const plan = [...rt.chunkBreaks(bw.words)].filter(inS).sort((a, b) => a - b);
+  const docPb = [...rt.document.paragraphBreaks].filter(inS);
+  return { sections: s01.map((x) => [x.sectionIndex, x.startWordIdx, x.endWordIdx]), planBreaks: plan, planBreakWords: plan.map((g) => bw.words[g]),
+    docParagraphBreaksInFirstTwo: docPb.length, docParagraphBreaksHead: docPb.slice(0, 10) }; })()`;
+
+const which = (process.env.BOOKS || "meditations,g0").split(",");
+for (const id of which.map((b) => (b === "g0" ? plan.vars.epub : "sample-meditations"))) {
+  const book = { id, sections: [] };
+  try {
+  await home(s, plan);
+  await runSteps(s, [{ click: `.doc-card[data-doc-id="${id}"]`, sleep: 300 }, { wait: ".reader-layout", waitMs: 45000, sleep: 2500 }]);
+  await runSteps(s, [{ click: '[aria-label="Flow mode"]', sleep: 1500 }, { wait: ".rm-flow-root", waitMs: 45000, sleep: 4000 }]);
+  let f = await s.cdp.eval(FIND_RT("flow"));
+  if (f.playing) { await s.key("Space"); await sleep(1500); }
+  book.flowRuntime = f;
+  const secs = await s.cdp.eval(`window.__rt.document.bookWords.sections.map((x) => x.sectionIndex)`);
+  book.sectionIndexes = secs;
+  for (const idx of secs) { const r = await s.cdp.eval(SECTION(idx), 60000); book.sections.push(r); console.log(id, JSON.stringify({ i: r.sectionIndex, a: r.blocks, b: r.breaks, c: r.wrapped, main: r.main, miss: r.missingCount, err: r.err })); }
+  book.flow = await s.cdp.eval(CHUNKS, 60000);
+  console.log(id, "chunks", JSON.stringify(book.flow.perSection), "pause", book.flow.pauseSetSize);
+  await runSteps(s, [{ click: '[aria-label="Narrate mode"]', sleep: 1500 }, { wait: ".rm-narrate-root", waitMs: 45000, sleep: 3000 }]);
+  f = await s.cdp.eval(FIND_RT("narrate"));
+  if (f.playing) { await s.key("Space"); await sleep(1500); }
+  book.narrate = f.ok ? await s.cdp.eval(NARRATE, 30000) : { err: "narrate runtime not found" };
+  console.log(id, "narrate", JSON.stringify(book.narrate.planBreaks));
+  } catch (e) { book.err = String(e); book.shot = await s.screenshot(outJson.replace(/\.json$/, `-${id}-err.png`)); book.dom = await s.cdp.eval(`({ root: [...document.querySelectorAll("[class*=rm-]")].map((e) => e.className).slice(0, 8), body: document.body.innerText.slice(0, 400) })`).catch(() => null); console.log(id, "ERR", e.message, JSON.stringify(book.dom)); }
+  out.books.push(book);
+}
+out.errors = s.errors.slice(0, 20);
+await s.stop();
+out.liveAfter = hashLive(live);
+out.liveUnchanged = JSON.stringify(out.liveBefore) === JSON.stringify(out.liveAfter);
+fs.writeFileSync(outJson, JSON.stringify(out, null, 2));
+console.log("liveUnchanged", out.liveUnchanged);
+process.exit(0);
