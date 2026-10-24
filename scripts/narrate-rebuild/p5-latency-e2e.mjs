@@ -71,9 +71,10 @@ const D6CLASS = CLASS_ARG === "auto" ? (PHYSICAL_CORES === null ? "below-mainstr
 if (D6CLASS === "below-mainstream") { console.error(`D6 class below-mainstream (${PHYSICAL_CORES ?? "unknown"} physical cores): no launch`); process.exit(2); }
 const WARM_BUDGET_MS = D6CLASS === "reference" ? REFERENCE_WARM_BUDGET_MS : MAINSTREAM_WARM_BUDGET_MS;
 
-// The live profile (LL-165): hashed before the first launch and after the last; any change fails the run.
+// The live profile (LL-165): hashed before the first launch and after the last; any change fails the run. The app
+// keeps settings.json and library.json in the profile's blurby-data folder; the profile root is hashed too.
 const LIVE_PROFILE = process.env.APPDATA ? path.join(process.env.APPDATA, "blurby") : null;
-const liveHashes = () => Object.fromEntries(["settings.json", "library.json"].map((f) => {
+const liveHashes = () => Object.fromEntries(["settings.json", "library.json", "blurby-data/settings.json", "blurby-data/library.json"].map((f) => {
   const p = LIVE_PROFILE ? path.join(LIVE_PROFILE, f) : null;
   return [f, p && fs.existsSync(p) ? crypto.createHash("sha256").update(fs.readFileSync(p)).digest("hex") : null];
 }));
