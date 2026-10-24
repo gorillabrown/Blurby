@@ -1,0 +1,17 @@
+{
+  "manifestVersion": 1,
+  "label": "policy-set",
+  "created": "20261009T035818Z",
+  "projectRoot": "roadmap-review-2026-10-08",
+  "entries": [
+    {
+      "source": "Virtuoso/workspace-layout.json",
+      "destination": "Virtuoso/workspace-layout.json",
+      "bytes": 10122,
+      "sha256": "0b3d5b689adcfc51e859875be04551e5e0550904cc7ab0e824e4755258f1593d",
+      "timestamp": "20261009T035818Z",
+      "operation": "policy-set"
+    }
+  ],
+  "actor": "roadmap-review"
+}
