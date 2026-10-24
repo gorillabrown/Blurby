@@ -724,6 +724,13 @@
       "old": "render Narrate with ttsEngine=\"kokoro\" onSetTtsRate; expect [aria-label=\"Kokoro rate\"] not null and [aria-label=\"Legacy Kokoro rate\"] null",
       "new": "render Narrate with speed={{kind:\"rate\",rate:1}}; expect button.rbb-speed-trigger[aria-haspopup=\"dialog\"][aria-label=\"Speed 1.00x\"] not null and [aria-label=\"Legacy Kokoro rate\"] still null",
       "reason": "speed amendment acceptance item 2 / OC-7"
+    },
+    {
+      "test": "tests/readerSpeedDialog.test.tsx",
+      "name": "runtime setSpeed (acceptance items 2–5) > Narrate stores $rate and hands exactly that rate to its audio port, without starting playback (0.8 / 1.05 / 2.0)",
+      "old": "real timers; right after setSpeed, effects === [settings.update({ttsRate: r}), audio.adjustRate(r)]",
+      "new": "fake timers; right after setSpeed, effects === [settings.update({ttsRate: r})]; after vi.advanceTimersByTime(NARRATE_SPEED_SETTLE_MS = 250), effects === [settings.update({ttsRate: r}), audio.adjustRate(r)] with r exact (no rounding)",
+      "reason": "speed amendment acceptance item 2 / settle (parent Type 1b, live finding)"
     }
   ],
   "approvedSpeedDifferencesAdded": [
@@ -742,6 +749,10 @@
     {
       "test": "tests/readerSpeedDialog.test.tsx",
       "what": "new suite: values (89/89/25), runtime setSpeed per mode, isolation (OC-6), Page ↑/↓ by lastReadingMode (OC-8), keyboard dialog path, no side effects, range, end-to-end persisted = displayed"
+    },
+    {
+      "test": "tests/readerSpeedDialog.test.tsx",
+      "what": "describe \"Narrate applies one settled rate to audio (settle, live finding)\": 8 rapid steps 1.05→1.40 = 8 persisted writes (last 1.4) and exactly one audio.adjustRate(1.4) 250 ms after the last change, none before; stop / destroy inside the quiet window = 0 audio calls; returning to the engine's applied rate = 0 audio calls. Red on 966e3261 (8 calls / 1 call / 2 calls)"
     }
   ]
 }

@@ -26,6 +26,8 @@ export const FOCUS_FLOW_SPEED_MAX_HUNDREDTHS = 480;
 export const NARRATE_SPEED_MIN_HUNDREDTHS = 80;
 /** Narrate 2.00x (= KOKORO_UI_RATE_MAX) */
 export const NARRATE_SPEED_MAX_HUNDREDTHS = 200;
+/** Narrate applies a dialog speed to audio only after this quiet period from the last change (one re-seed per settle, not per step) */
+export const NARRATE_SPEED_SETTLE_MS = 250;
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 
