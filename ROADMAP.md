@@ -1043,6 +1043,8 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
      - the script/style filter tests `localName.toLowerCase()` against `"script"` and `"style"`.
 
      FOCUS-KEYS-FIX-1's and FLOW-PARA-KEYS-1's local `isParagraphBlock` then call their mode's `getBlockParent` rule, so each mode keeps one block rule. Their tests stay green and unedited, or are named under standing rule 50.
+     - **Concretely (next-dispatch, 2026-10-23, re-grepped on `100b41dd`):** `isParagraphBlock` is in `src/reader/modes/focus/helpers/foliateParagraphStarts.ts:9-11` and `src/reader/modes/flow/helpers/foliateParagraphStarts.ts:9-11`. Each returns `BLOCK_TAGS.has(el.localName.toUpperCase())`, which goes false once `BLOCK_TAGS` is lowercase. In both, it becomes `BLOCK_TAGS.has(el.localName.toLowerCase())`, the same test `getBlockParent` uses. Rewrite each doc comment (`:3-8`) to say the shared rule now lives in `foliateHelpers.ts`.
+     - `blockTag` is already lowercased at `foliateHelpers.ts:108` in each copy, so no consumer changes. `tests/componentStyleCleanup.test.ts` (a3) checks only `export const BLOCK_TAGS` and stays green.
   4. **After measurement, the same build recipe, route and probe as (1) (LL-152).** Record the same five figures per section beside the base figures, with the change per section.
      - Expected:
        - (a) and (b) rise to about the number of `<p>`/heading elements (*Meditations* INTRODUCTION has 26 `<p>`, measured);
@@ -1063,6 +1065,7 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   7. `npm test` exits 0 on the owner's machine (standing rule 47). `npm run typecheck` and `npm run build` exit 0 (standing rule 48). `npm run perf` shows no benchmark worse than its baseline by more than 10%.
   8. **Fence:** `git diff --name-status <base>` lists exactly these, plus the measurement files, staging memo and time log (standing rule 41):
      - the five `foliateHelpers.ts` copies;
+     - `M src/reader/modes/focus/helpers/foliateParagraphStarts.ts`, `M src/reader/modes/flow/helpers/foliateParagraphStarts.ts` (the keys collectors folded in; added at next-dispatch);
      - `A tests/readerModes/blockTagCase.test.ts`;
      - `M docs/governance/BUG_REPORT.md`, with a new bug: "renderer finds no paragraph blocks on XHTML pages".
 
@@ -1079,10 +1082,13 @@ The owner reviewed the band live on 2026-10-23 and ruled three requirements, plu
   git grep -n -E "BLOCK_TAGS|tagName (===|!==) \"[A-Z]" -- src
   ```
 
-  After the change, `git grep -n -E "tagName (===|!==) \"[A-Z]|\.has\([a-z]+\.tagName\)" -- src` prints nothing.
+  After the change, `git grep -n -E "tagName (===|!==) \"[A-Z]|\.has\([a-z]+\.tagName\)|localName\.toUpperCase\(\)" -- src` prints nothing.
 - **Tests:** `tests/readerModes/blockTagCase.test.ts` (t1–t3), plus the existing `tests/readerModes/`, `tests/flowReadingZone.test.ts`, `tests/foliate*.test.*` and the FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 tests, all unedited.
 - **Constants:** none. `BLOCK_TAGS` stays in each mode's helper (reading-mode separation).
-- **Branch:** `eb/block-tag-case-1` from `refs/remotes/origin/main`, after FOCUS-KEYS-FIX-1 and FLOW-PARA-KEYS-1 have merged.
+- **Branch (amended at next-dispatch, 2026-10-23, Stage 8 build-and-hold):** `eb/block-tag-case-1`, cut from FLOW-PARA-KEYS-1's held tip `100b41dd` (which contains FOCUS-KEYS-FIX-1 `3bfb016e` and FLOW-KEYS-FIX-1 `1d2ee3a4`), then merge `refs/remotes/origin/main` into it. `git merge-tree` of the two was clean on 2026-10-23. Push it and do not merge it. It merges after FOCUS-KEYS-FIX-1, FLOW-KEYS-FIX-1 and FLOW-PARA-KEYS-1, and after BAND-ALIGN-2, which also carries the keys changes to both `foliateParagraphStarts.ts` files (its versions equal `100b41dd`'s, so they don't conflict). It also waits for the owner's tier-2 OK.
+- **Waves:**
+  - **Wave A** (this dispatch): tasks 1–4. It ends with the before/after table sent to Blurby.Roadmap, plus the memo and time log, and then halts.
+  - **Wave B**, after the owner's OK: tasks 5–6.
 - **Staging plan:** explicit paths only. `tests/perf-baseline-results.json` stays unstaged.
 - **Failure handling:**
   - If (c) diverges anywhere, stop with the boundary text.
