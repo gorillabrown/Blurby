@@ -31,6 +31,13 @@ Book `dab1d9d7`, chunk starts at word 12529, 28 words, one failure: the fused un
 
 **Decision gate: phrase cost 0.000 ≤ 0.5 → pass; the item continues.** The planner's description (second word `k` alone, `tʃ` together) matches: the phrase and the group agree consonant for consonant.
 
-## 3. Context: the whole library, base tree (extra, outside this item's Done-when)
+## 3. Context: the whole library (extra, outside this item's Done-when)
 
-The same sweep over all 110 distinct books of the live library (6 shards, base tree): 558,175 chunks, 1,864 fail closed — 1,719 class E (token cap), **142 class D, 3 `Z:unreconciled`** (chunk plan positions only; no ruled entry covers them). The residual chunk's book is not in `library.json` any more, so the 3 ruled chunks are not among them. These D and Z chunks are not this item's; the final-tree sweep of the same shards is recorded in the staging memo.
+The same sweep over all 111 `.epub` files of the live library (6 shards of about equal size), run on the base tree and again on the final tree, compared chunk by chunk (book id, class, word position):
+
+| | chunks | class E (token cap) | class D | `Z:unreconciled` |
+|---|---|---|---|---|
+| base `28ec48e2` | 578,107 | 1,719 | 143 | 3 |
+| final tree | 578,107 | 1,719 | 117 | 3 |
+
+0 chunks newly fail or change class; 26 class D chunks no longer fail. 117 class D and 3 `Z:unreconciled` chunks (all in books outside P6b's eight) still fail closed, as they did on the base: the library-wide owner sweep still exits 1 and is not this item's gate (Done-when 5 uses the P6b book set). The residual chunk's book is no longer in `library.json`, so it is not among these counts. Wall time 5,475 s on 6 parallel shards (P6b: 462 s for 8 books on one process).
