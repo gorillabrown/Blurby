@@ -64,7 +64,8 @@ describe("the Edit form waits for its save (LIBRARY-WRITE-RACE-2)", () => {
   let container: HTMLDivElement;
   let root: Root;
   let api: any;
-  let unhandled: ReturnType<typeof vi.fn>;
+  let unhandled: ReturnType<typeof vi.fn<(reason: unknown) => void>>;
+  let onUnhandled: (reason: unknown) => void;
 
   beforeEach(() => {
     vi.resetModules();
@@ -77,12 +78,13 @@ describe("the Edit form waits for its save (LIBRARY-WRITE-RACE-2)", () => {
       disconnect() {}
     };
     (globalThis as any).IntersectionObserver = (window as any).IntersectionObserver;
-    unhandled = vi.fn();
-    process.on("unhandledRejection", unhandled);
+    unhandled = vi.fn<(reason: unknown) => void>();
+    onUnhandled = (reason) => { unhandled(reason); };
+    process.on("unhandledRejection", onUnhandled);
   });
 
   afterEach(async () => {
-    process.off("unhandledRejection", unhandled);
+    process.off("unhandledRejection", onUnhandled);
     await act(async () => {
       root.unmount();
     });
