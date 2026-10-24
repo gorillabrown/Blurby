@@ -37,7 +37,6 @@ import {
 } from "../../../constants";
 import { injectStyles } from "./helpers/foliateStyles";
 import {
-  bandAnchorY,
   collectLineBoxesAround,
   computeAnchorScrollTop,
   computeBandEdges,
@@ -563,6 +562,18 @@ export default function FlowFoliateView({
   /** The layout the zone effect last applied, so it can tell a settings change from a resize or a section load. */
   const appliedBandLayoutRef = useRef<{ anchor: number; lines: number } | null>(null);
 
+  /**
+   * R6 (owner, 2026-10-23): with no cursor line on screen (an image-only section such as the cover, or a cursor word
+   * not in the loaded sections) the zone host shows no band, as Lines Off: no --flow-zone-* and the band-off class.
+   */
+  const hideBand = useCallback((): void => {
+    const host = containerRef.current;
+    if (!host) return;
+    host.style.removeProperty("--flow-zone-top");
+    host.style.removeProperty("--flow-zone-bottom");
+    host.classList.add("rm-flow-view--band-off");
+  }, []);
+
   /** R1/R2: put the band on the zone host around a word span's line, from the rendered line boxes (no scroll). */
   const placeBandAroundSpan = useCallback((span: Element | null): boolean => {
     const host = containerRef.current;
@@ -575,29 +586,18 @@ export default function FlowFoliateView({
     }
     const around = span ? collectLineBoxesAround(span, Math.ceil((lines - 1) / 2)) : null;
     const band = around ? computeBandEdges(around.lines, around.cursor, lines) : null;
+    if (!band) {
+      hideBand();
+      return false;
+    }
     const hostRect = host.getBoundingClientRect();
-    if (!band || hostRect.height <= 0) return false;
+    if (hostRect.height <= 0) return false;
     const pct = (y: number) => `${Math.min(100, Math.max(0, ((y - hostRect.top) / hostRect.height) * 100))}%`;
     host.style.setProperty("--flow-zone-top", pct(band.top));
     host.style.setProperty("--flow-zone-bottom", pct(band.bottom));
+    host.classList.remove("rm-flow-view--band-off");
     return true;
-  }, []);
-
-  /** Before any cursor is painted, the band sits at the anchor: n line steps, centred on the anchor's y. */
-  const placeBandAtAnchor = useCallback((viewportHeightPx: number): void => {
-    const host = containerRef.current;
-    if (!host || viewportHeightPx <= 0) return;
-    const { anchor, lines } = bandLayoutRef.current;
-    if (lines === FLOW_ZONE_LINES_OFF) {
-      host.style.removeProperty("--flow-zone-top");
-      host.style.removeProperty("--flow-zone-bottom");
-      return;
-    }
-    const heightPx = readZoneLineStepPx(host) * lines;
-    const topPx = Math.max(0, bandAnchorY(anchor, viewportHeightPx, heightPx) - heightPx / 2);
-    host.style.setProperty("--flow-zone-top", `${(topPx / viewportHeightPx) * 100}%`);
-    host.style.setProperty("--flow-zone-bottom", `${(Math.min(viewportHeightPx, topPx + heightPx) / viewportHeightPx) * 100}%`);
-  }, []);
+  }, [hideBand]);
 
   /**
    * BAND-ALIGN-2: where the view scrolls. Foliate's scrolled paginator scrolls an element inside a closed shadow root;
@@ -731,6 +731,7 @@ export default function FlowFoliateView({
     clearVisualWordClasses(contents);
 
     if (!state.found || !state.span) {
+      if (!userBrowsingRef.current) hideBand(); // R6: no cursor word on screen, no band
       return false;
     }
 
@@ -753,7 +754,7 @@ export default function FlowFoliateView({
     // relies on explicit jump-back to clear (legacy: auto-clear only in page mode).
 
     return true;
-  }, [clearVisualWordClasses, viewApiRef, alignSpanToBand, placeBandAroundSpan]);
+  }, [clearVisualWordClasses, viewApiRef, alignSpanToBand, placeBandAroundSpan, hideBand]);
 
   const centerResolvedTokenInReadingWindow = useCallback((
     doc: Document,
@@ -1402,7 +1403,7 @@ export default function FlowFoliateView({
         viewportHeight * FLOW_ZONE_INITIAL_TOP,
         viewportHeight * (1 - FLOW_ZONE_INITIAL_TOP),
       );
-      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3); before a cursor is painted it sits at the anchor.
+      // BAND-ALIGN-2: the band sits around the cursor line (R1–R3); with no cursor painted there is no band (R6).
       // An anchor or Lines change re-places it at once (scrolling the cursor line to the new anchor) without moving
       // the reading word; a resize or a section load re-places the band only. It never moves while browsing away.
       const layout = bandLayoutRef.current;
@@ -1411,7 +1412,7 @@ export default function FlowFoliateView({
       appliedBandLayoutRef.current = layout;
       if (userBrowsingRef.current) return;
       const cursorSpan = findCursorSpan();
-      if (!cursorSpan) placeBandAtAnchor(viewportHeight);
+      if (!cursorSpan) hideBand();
       else if (layoutChanged) alignSpanToBand(cursorSpan);
       else placeBandAroundSpan(cursorSpan);
     };
@@ -1442,7 +1443,7 @@ export default function FlowFoliateView({
     findCursorSpan,
     alignSpanToBand,
     placeBandAroundSpan,
-    placeBandAtAnchor,
+    hideBand,
   ]);
 
   // Reflow text when the container resizes (window maximize/restore/drag)
