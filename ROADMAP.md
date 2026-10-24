@@ -1087,6 +1087,9 @@ None open. Part 2 was pending the owner. The owner ruled on 2026-10-23 (tier 3):
 - **Source:** Blurby.Brain's tier-1 ruling of 2026-10-15 (the offset diagnosis, LL-160); the stub at `#word-index-unify-1`; the planning measurement above.
 - **Path:** dispatch.
 
+##### Owner ruling (2026-10-23, roadmap review 2026-10-23-5): option (b), split them
+- In the shared join function, a closing section bracket followed by an opening quote is a word boundary. "10]'What" becomes two words, in every runtime and in Page's spans. Rewrite the probe expectations and the step-6 counts to the split numbering, measured on the base and the tip. The six places are listed under Done-when. The remap carries saved positions across this change like any other boundary shift.
+
 ##### Owner questions
 1. **Section numbers joined to the next word (6 places in *Meditations*: "10]'What", "14]O").** The ruled join puts a closing bracket and the quoted word that touches it into one word. Page's spans already join these, and the extractor now matches them, so Focus shows "10]'What" as one flash.
    - **(a) Accept it, as the ruling reads.** Recommended: it is rare, it already matches Page, and it keeps one rule in one function.
@@ -1784,6 +1787,7 @@ elease-final-maininal-main-d3d6\`. Read-only diagnosis in progress (Blurby.Road
 - <a id="chapter-step-cfi-1"></a>**CHAPTER-STEP-CFI-1** is now a full specification: [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec) (roadmap review 2026-10-23-5).
 - <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1** is now a full specification: [RESTAMP-RERUN-RACE-1](#restamp-rerun-race-1-spec) (roadmap review 2026-10-23-5).
 - <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — SUPERSEDED (roadmap review 2026-10-23-5):** folded into [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec). Both edit Focus's `navigateTo`, the `go-to-href` case and `onRelocate`, and the owner's "first word of chapter" ruling needs the landing hook that fix adds. The ruling is carried there.
+- <a id="flow-toc-jump-word-1"></a>**FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter's first word** *(position 110 — stub; owner ruling 2026-10-23: "Yes, as a follow-up" to CHAPTER-STEP-CFI-1; after CHAPTER-STEP-CFI-1)*. Flow gets the same paused cursor on the jumped-to chapter's first word that CHAPTER-STEP-CFI-1 gives Focus, using that item's landing hook. Specify it after CHAPTER-STEP-CFI-1's Done-when 1 has recorded what Flow shows today. Lane: Reader Engine.
 - <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).

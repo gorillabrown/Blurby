@@ -1,0 +1,50 @@
+{
+  "id": "20261024T031252Z-external-create-item-FLOW-TOC-JUMP-WORD-1",
+  "operation": "external-create-item",
+  "item_id": "FLOW-TOC-JUMP-WORD-1",
+  "created": "2026-10-24T03:12:52Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "After a contents jump, Flow highlights the chapter first word",
+      "status": "Queued",
+      "sequence": 110,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "CHAPTER-STEP-CFI-1"
+      ],
+      "spec_link": "ROADMAP.md#flow-toc-jump-word-1",
+      "description": "Flow gets the same paused cursor on the jumped-to chapter first word that CHAPTER-STEP-CFI-1 gives Focus, using its landing hook.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap; owner ruling: yes, as a follow-up to CHAPTER-STEP-CFI-1. Stub. Not a release gate.",
+      "id": "FLOW-TOC-JUMP-WORD-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-TOC-JUMP-WORD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FLOW-TOC-JUMP-WORD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-TOC-JUMP-WORD-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T031252Z-external-create-item-FLOW-TOC-JUMP-WORD-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81138dcee95c2441924c",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T03:13:14Z",
+  "outcome": "succeeded"
+}
