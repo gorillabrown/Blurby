@@ -139,6 +139,8 @@ export function assertLifecycle(module: ReaderModeModule, expectations: Lifecycl
     runtime.navigateTo(6);
     runtime.jumpBack();
     runtime.adjustSpeed(25);
+    runtime.setSpeed({ kind: "wpm", wpm: 112.5 });
+    runtime.setSpeed({ kind: "rate", rate: 1.05 });
     runtime.handleCommand({ kind: "move-selection", direction: "right" });
     expect(runtime.getSnapshot()).toEqual(stopped);
     // Destroyed runtimes produce zero side effects under fake timers.
@@ -212,4 +214,18 @@ export function assertNoLeak(module: ReaderModeModule): void {
     vi.clearAllTimers();
     vi.useRealTimers();
   }
+}
+
+/** Speed amendment (design §E, S4): a mode with no speed (Page) reports speed null and ignores setSpeed. */
+export function assertNoSpeed(module: ReaderModeModule): void {
+  const { runtime, calls } = openSession(module, { position: 7 });
+  runtime.select(7);
+  const before = runtime.getSnapshot();
+  expect(before.speed).toBeNull();
+  const callsBefore = calls.length;
+  runtime.setSpeed({ kind: "wpm", wpm: 112.5 });
+  runtime.setSpeed({ kind: "rate", rate: 1.05 });
+  expect(runtime.getSnapshot()).toEqual(before);
+  expect(calls.slice(callsBefore)).toEqual([]);
+  runtime.destroy();
 }

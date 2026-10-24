@@ -500,7 +500,7 @@ export default function ReaderContainer({
     active,
     handleTogglePlay, handlePauseToPage,
     handleEnterFocus, handleEnterFlow, handleEnterNarrate, handleToggleNarration,
-    handleExitToPage, handleNavigateTo, handleJumpBack, adjustSpeed, handleCommand,
+    handleExitToPage, handleNavigateTo, handleJumpBack, adjustSpeed, handleCommand, handleSetSpeed,
     handleCycleMode, handleCycleAndStart,
   } = modeHook;
 
@@ -971,7 +971,6 @@ export default function ReaderContainer({
           playing={modePlaying}
           isEink={isEink}
           chapters={docChapters}
-          onSetWpm={setWpm}
           flowProgress={isScrolledSurfaceMode ? flowProgress ?? undefined : undefined}
           currentChapterName={(() => {
             if (!isScrolledSurfaceMode || docChapters.length === 0) return undefined;
@@ -991,11 +990,8 @@ export default function ReaderContainer({
           chapterListRef={chapterListRef}
           lastReadingMode={settings.lastReadingMode || "flow"}
           ttsRate={settings.ttsRate || 1.0}
-          onSetTtsRate={(rate) => {
-            // Narrate applies the stored rate to the audio session (its settings bridge).
-            updateSettings({ ttsRate: rate });
-          }}
-          ttsEngine={settings.ttsEngine || "kokoro"}
+          speed={toolbar?.speed ?? null}
+          onSetSpeed={handleSetSpeed}
           foliateFraction={useFoliate ? foliateFraction : undefined}
           narrationWordIndex={narration.speaking ? narration.cursorWordIndex : null}
           flowZoneLines={settings.flowZoneLines}

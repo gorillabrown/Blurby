@@ -83,24 +83,15 @@ import type { FoliateWord } from "./helpers/foliateHelpers";
 /** The chunk-boundary metadata the audio port reports (its own type, read off the port contract). */
 type ChunkBoundaryMeta = Parameters<NonNullable<Parameters<ReaderAudioPort["setOnChunkBoundary"]>[0]>>[1];
 
-// Owner-local copy of the Kokoro UI speed step (src/utils/kokoroRatePlan.ts, same values; Q-D).
-// ponytail: duplicated 1.0–1.5 domain; the speed amendment (OC-7) must update this copy too.
-const KOKORO_UI_SPEEDS = [1.0, 1.1, 1.2, 1.3, 1.4, 1.5] as const;
-
-function normalizeKokoroUiSpeed(speed: number): number {
-  if (!Number.isFinite(speed)) return KOKORO_UI_SPEEDS[0];
-  const clamped = Math.max(KOKORO_UI_RATE_MIN, Math.min(KOKORO_UI_RATE_MAX, speed));
-  const stepped = Math.round(clamped / KOKORO_UI_RATE_STEP) * KOKORO_UI_RATE_STEP;
-  const normalized = Number(stepped.toFixed(1));
-  const match = KOKORO_UI_SPEEDS.find((uiSpeed) => uiSpeed === normalized);
-  return match ?? KOKORO_UI_SPEEDS[0];
-}
-
+// Owner-local copy of the Kokoro UI speed step (src/utils/kokoroRatePlan.ts, same domain; Q-D).
+// OC-7: 0.80–2.00 in 0.05 steps, read from the shared constants; integer hundredths, no rounding drift.
 function stepKokoroUiSpeed(current: number, delta: number): number {
-  const normalized = normalizeKokoroUiSpeed(current);
-  const idx = KOKORO_UI_SPEEDS.indexOf(normalized as (typeof KOKORO_UI_SPEEDS)[number]);
-  const nextIdx = Math.max(0, Math.min(KOKORO_UI_SPEEDS.length - 1, idx + (delta > 0 ? 1 : -1)));
-  return KOKORO_UI_SPEEDS[nextIdx];
+  const min = Math.round(KOKORO_UI_RATE_MIN * 100);
+  const step = Math.round(KOKORO_UI_RATE_STEP * 100);
+  const last = Math.round((KOKORO_UI_RATE_MAX * 100 - min) / step);
+  const clampIndex = (i: number) => Math.max(0, Math.min(last, i));
+  const idx = clampIndex(Math.round(((Number.isFinite(current) ? current : 1.0) * 100 - min) / step));
+  return (min + step * clampIndex(idx + (delta > 0 ? 1 : -1))) / 100;
 }
 
 /** Legacy onLoad delay (ReaderContainer: "Slightly longer delay to ensure foliate has finished rendering"). */
@@ -483,8 +474,18 @@ export class NarrateModeRuntime implements ReaderModeRuntime {
     this.state.notify();
   }
 
-  /** Speed dialog: arrives with the speed amendment (design §E, step S4). */
-  setSpeed(_speed: ReaderModeSpeed): void { /* not yet wired */ }
+  /**
+   * Speed dialog (design §E, step S4): store the exact rate and apply it to this session's audio.
+   * An out-of-domain rate is rejected, never clamped or rounded (the dialog only offers 0.80–2.00).
+   */
+  setSpeed(speed: ReaderModeSpeed): void {
+    if (!this.alive || speed.kind !== "rate") return;
+    if (!(speed.rate >= KOKORO_UI_RATE_MIN && speed.rate <= KOKORO_UI_RATE_MAX)) return;
+    this.rate = speed.rate;
+    this.ports.settings.update({ ttsRate: speed.rate });
+    this.ports.audio.adjustRate(speed.rate);
+    this.state.notify();
+  }
 
   // ── User intents ──────────────────────────────────────────────────────────
   /** Legacy FoliatePageView onWordClick (resolved and unresolved paths) + retargetActiveModeToWord. */
