@@ -38,6 +38,7 @@ import {
 } from "./helpers/foliateHelpers";
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
+import { isPageTurnKey } from "./helpers/pageTurnKey";
 
 const PAGE_HIGHLIGHT_MODE = "page";
 
@@ -1176,6 +1177,7 @@ export default function PageFoliateView({
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (!viewRef.current?.renderer) return;
+      if (!isPageTurnKey(e)) return;
       if (e.key === "ArrowRight" || e.key === "PageDown") {
         e.preventDefault();
         turnPage(1);

@@ -60,6 +60,7 @@ import {
 import { WordPositionIndex, type WordPositionEntry } from "./helpers/wordPositionIndex";
 import { unwrapWordSpans, wrapWordsInSpans } from "./helpers/foliateWordWrapping";
 import { logNarrateStartError } from "./helpers/logStartError";
+import { isNarrateBrowseKey } from "./helpers/narrateBrowseKey";
 
 const NARRATE_HIGHLIGHT_MODE = "narrate";
 /** Legacy narrate scroll-follow tuning (FoliatePageView, copied values). */
@@ -1419,11 +1420,12 @@ export default function NarrateFoliateView({
   // Keyboard (NARR-FIX-1): audio drives the reading position, but the user can still browse away
   // manually. Page navigation keys set the browse-away flag AND navigate the renderer so the user can
   // peek ahead/behind; jump-back returns to the active reading position.
+  // Modified arrows belong to useReaderKeys (READER-ARROW-GUARD-1), so they never browse away here.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const view = viewRef.current;
       if (!view?.renderer) return;
-      if (e.key === "ArrowRight" || e.key === "PageDown" || e.key === "ArrowLeft" || e.key === "PageUp") {
+      if (isNarrateBrowseKey(e)) {
         markUserBrowsingAway();
         // Navigate the Foliate renderer so the user sees different content.
         // The iframe's native handler won't see this window-level event.
