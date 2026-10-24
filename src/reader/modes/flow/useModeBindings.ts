@@ -59,6 +59,7 @@ export function useFlowModeBindings(runtime: FlowModeRuntime): {
     const botFrac = Math.min(topFrac + zoneHeightFrac, 0.95);
     host.style.setProperty("--flow-zone-top", `${topFrac * 100}%`);
     host.style.setProperty("--flow-zone-bottom", `${botFrac * 100}%`);
+    host.classList.remove("rm-flow-view--band-off");
   }, [runtime, flowZoneLines]);
   const onZoneTopChangeRef = useRef(onZoneTopChange);
   onZoneTopChangeRef.current = onZoneTopChange;
