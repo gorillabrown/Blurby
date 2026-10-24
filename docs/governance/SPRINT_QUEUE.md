@@ -56,10 +56,10 @@ HOW (Review / Closeout):
 ```
 SPRINT QUEUE STATUS:
 Finish line: Desktop v2.0 Shipping (three available engines at ship gate: Kokoro default, MOSS-Nano recommended opt-in per 13e, Pocket TTS available opt-in per POCKET-TTS-1)
-Queue depth: 1 post-v2 review sprint (YELLOW — remediation implementation complete; review/commit/merge remains)
-Next queue item: POSTV2-REVIEW-1 — Review, Commit, And Merge Post-v2 Audit Remediation
-Health: GREEN on Desktop v2 release closeout and post-v2 remediation implementation — E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, and POSTV2-NARR-1 are closed. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2.
-Roadmap reviews: 2026-05-02 AM (initial baseline) → 2026-05-02 PM (MOSS-NANO scope) → 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation). Verdict: GREEN on implementation; YELLOW only on uncommitted review/merge.
+Queue depth: 1 manual live validation sprint (YELLOW — READLIVE-REMEDIATION code is complete and automated gates are green; live Windows Kokoro audio smoke remains)
+Next queue item: READLIVE-LIVE-SMOKE-1 — Manual Windows Reading Mode Live Smoke
+Health: GREEN on Desktop v2 release closeout, post-v2 remediation, and READLIVE automated gates. E-Ink, Reading Goals, MOSS-NANO-13a–13e, POCKET-TTS-1, POLISH-1, RELEASE-1, POSTV2-REL-1, POSTV2-ENGINE-1, POSTV2-NARR-1, and READLIVE-REMEDIATION are code-complete. Engine posture remains Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2.
+Roadmap reviews: 2026-05-02 AM (initial baseline) -> 2026-05-02 PM (MOSS-NANO scope) -> 2026-05-04 PM (13d evidence closeout; 13e product-decision rescope; POCKET-TTS-1 third-engine integration; POLISH-1 release-readiness pass; RELEASE-1 closeout; POSTV2 audit remediation) -> 2026-05-05 READLIVE remediation closeout. Verdict: GREEN on implementation; YELLOW only on manual live audio/app smoke.
 ```
 
 ## Desktop v2.0 Conveyor Belt (Active)
@@ -85,16 +85,26 @@ Full specs: ROADMAP.md § "Desktop v2.0 — Active Conveyor Belt", § "Phase 6 C
 
 ---
 
-## Post-v2 Audit Remediation (Completed, Pending Review/Merge)
+## Post-v2 Audit Remediation (Completed)
 
 | Seq | Sprint | Stage | LOE | Deps | Status |
 |-----|--------|-------|-----|------|--------|
 | ~~1~~ | ~~POSTV2-REL-1~~ | ~~Release truth~~ | ~~M~~ | ~~RELEASE-1~~ | ✅ complete in `postv2-audit-remediation` worktree — package/version truth, sidecar packaged paths, update install gating |
 | ~~2~~ | ~~POSTV2-ENGINE-1~~ | ~~Engine contracts~~ | ~~L~~ | ~~POSTV2-REL-1~~ | ✅ complete in `postv2-audit-remediation` worktree — typecheck green, Qwen fail-closed, Pocket portability/errors, settings/type contracts |
 | ~~3~~ | ~~POSTV2-NARR-1~~ | ~~Narrate/security/hygiene~~ | ~~M~~ | ~~POSTV2-ENGINE-1~~ | ✅ complete in `postv2-audit-remediation` worktree — Narrate highlight, URL validation, artifact policy, debt map |
-| 4 | **POSTV2-REVIEW-1** | Review / commit / merge | S | POSTV2-REL-1 through POSTV2-NARR-1 | **next up — review, commit, merge** |
+| ~~4~~ | ~~POSTV2-REVIEW-1~~ | ~~Review / commit / merge~~ | ~~S~~ | ~~POSTV2-REL-1 through POSTV2-NARR-1~~ | complete — merged to main as `960a9b6` |
 
 Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
+
+---
+
+## Reading Mode Live Validation (Active Follow-Up)
+
+| Seq | Sprint | Stage | LOE | Deps | Status |
+|-----|--------|-------|-----|------|--------|
+| 1 | **READLIVE-LIVE-SMOKE-1** | Manual Windows live smoke | S | READLIVE-REMEDIATION | **next up — validate live Kokoro audio/startup truth and Meditations EPUB reader behavior** |
+
+Closeout: `docs/Close-Outs/CloseOut.READLIVE-REMEDIATION.2026-05-05.md`.
 
 ---
 
@@ -115,7 +125,8 @@ Closeout: `docs/Close-Outs/CloseOut.POSTV2-AUDIT-REMEDIATION.2026-05-04.md`.
 
 | Sprint | Date | Decision/Result |
 |--------|------|-----------------|
-| POSTV2-AUDIT-REMEDIATION | 2026-05-04 | PASS — Post-v2 audit remediation implemented in isolated worktree `C:\tmp\Blurby-worktrees\postv2-audit-remediation` on branch `postv2-audit-remediation`. POSTV2-REL-1 fixed package/release truth, version `1.75.1`, packaged sidecar path resolution, update install gating, and release-doc honesty. POSTV2-ENGINE-1 made `npm run typecheck` green, fail-closed Qwen IPC/stream compatibility, stale Qwen profile migration to Kokoro, Pocket profile support, Pocket/Nano error separation, and settings/type contract tightening. POSTV2-NARR-1 fixed EPUB Narrate highlighting, `open-doc-source` URL validation, artifact policy, Kokoro/Qwen copy, and debt mapping. Verification: `npm run typecheck` passed; full `npm test` passed 170 files / 2521 tests; `npm run build` passed with existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; focused `tests/mossNanoProbe.test.js` passed 132 tests. No commit made; review/commit/merge is next. |
+| READLIVE-REMEDIATION | 2026-05-05 | PASS — Reading Mode live-test remediation implemented and committed on branch `reading-mode-live-remediation` as `cfe6128 fix: remediate reading mode live test findings`. Code changes made Narrate startup truthful with loading/buffering/error states, hardened EPUB resume anchors and first Flow-to-Narrate position preservation, added Flow paused preview/line controls, preserved Focus pause context, improved Focus first-word startup, added Page exit/home affordance, strengthened Flow cursor visibility, and verified H home behavior. Verification: `npm test` passed 173 files / 2552 tests; `npm run typecheck` passed; `npm run build` passed with known `settings -> tts -> settings` circular warning; `git diff --check` passed; `npm audit --audit-level=high` passed with only the known moderate `uuid` chain. Solon APPROVED; Plato READY. Manual live smoke was not run, so live Kokoro audio on Windows remains pending under READLIVE-LIVE-SMOKE-1. |
+| POSTV2-AUDIT-REMEDIATION | 2026-05-04 | PASS — Post-v2 audit remediation implemented in isolated worktree `C:\tmp\Blurby-worktrees\postv2-audit-remediation` on branch `postv2-audit-remediation`. POSTV2-REL-1 fixed package/release truth, version `1.75.1`, packaged sidecar path resolution, update install gating, and release-doc honesty. POSTV2-ENGINE-1 made `npm run typecheck` green, fail-closed Qwen IPC/stream compatibility, stale Qwen profile migration to Kokoro, Pocket profile support, Pocket/Nano error separation, and settings/type contract tightening. POSTV2-NARR-1 fixed EPUB Narrate highlighting, `open-doc-source` URL validation, artifact policy, Kokoro/Qwen copy, and debt mapping. Branch commit `7fe45d2`; merged to main as `960a9b6`. Post-merge verification passed: `npm run typecheck`, full `npm test` 176 files / 2573 tests, `npm run build` with the known circular chunk warning, `git diff --check`, and `npm audit --audit-level=high` with only the known moderate `uuid` chain. |
 | RELEASE-1 | 2026-05-04 | PASS — Desktop v2.0 release closeout completed. Release notes/checklist: `docs/project/desktop-v2.0-release-notes.md`, `docs/project/desktop-v2.0-release-checklist.md`. Engine posture preserved exactly: Kokoro default/available, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, Qwen retired/disabled. |
 | POLISH-1 | 2026-05-04 | PASS — Desktop v2 polish completed across TTS, E-Ink, and Reading Goals settings surfaces. Copy now consistently states Kokoro default/operational floor, MOSS-Nano recommended opt-in, Pocket TTS available opt-in with upstream synthesis scaffolded pending separately approved adapter work, and Qwen retired/disabled for Desktop v2. E-Ink switches gained keyboard-operable switch semantics; Reading Goals empty/action states were cleaned up. Focused settings regression suite passed 9 files / 36 tests; full `npm test` passed 170 files / 2550 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning; `git diff --check` passed; `npm audit --audit-level=high` passed with 3 moderate `uuid` findings and no high-severity findings. RELEASE-1 is unblocked. |
 | POCKET-TTS-1 | 2026-05-04 | PASS — Pocket TTS added as a third explicit opt-in engine path. Engine posture: Kokoro remains default/available, MOSS-Nano remains recommended opt-in from 13e, Pocket TTS is available opt-in, and Qwen remains disabled. Scope guardrails held: no comparative engine gate, no MOSS-Nano productization changes, no Kokoro default change, no Qwen reactivation, and no public voice-cloning UX in v2.0. Verification: focused Pocket tests 4 files / 30 tests; full `npm test` 169 files / 2548 tests; `npm run build` passed with the existing `settings -> tts -> settings` circular chunk warning. |

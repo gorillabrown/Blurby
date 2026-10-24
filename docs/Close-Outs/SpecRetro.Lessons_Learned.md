@@ -203,3 +203,17 @@ Running log of workflow and dispatch-spec lessons from phase close-outs. Entries
 **Recommendation:** For future post-release audits, split remediation into dependency-ordered lanes: release truth first, contract/posture enforcement second, behavior/security/artifact cleanup third.
 **Applies to:** Post-release audits, stabilization bundles, and multi-lane remediation specs
 **Status:** Observation
+
+### SRL-026 — Closeout docs must be refreshed after the final commit (READLIVE-REMEDIATION, 2026-05-05)
+**Verdict:** Closeout metadata can become stale when documentation is drafted before the final commit.
+**Evidence:** READLIVE-REMEDIATION's closeout originally reported `pending commit; current HEAD 960a9b6` even though the branch later closed cleanly at `cfe6128 fix: remediate reading mode live test findings`.
+**Recommendation:** Closeout tasks should include a final metadata refresh after commit creation: update branch, commit hash, worktree cleanliness, verification totals, and any pending manual evidence before declaring merge readiness.
+**Applies to:** All CLI closeout tasks that create a commit after writing closeout docs
+**Status:** Observation
+
+### SRL-027 — Full-suite gates need a regression-fix reserve after focused gates pass (READLIVE-REMEDIATION, 2026-05-05)
+**Verdict:** Focused gates can pass while full-suite integration tests still encode stale contracts.
+**Evidence:** READLIVE-REMEDIATION focused gates passed, but full `npm test` initially failed because `tests/ttsContinuityReadiness.test.ts` mocked the old `FlowScrollEngine` shape and `tests/narrationIntegration.test.ts` still asserted the pre-remediation narration truth expression. A narrow regression-fix pass updated those tests, then full `npm test` passed.
+**Recommendation:** For cross-reader or cross-layer remediation sprints, reserve one explicit post-focused-gate fix task before release gates. The task should cover stale integration assertions and test doubles that model old contracts.
+**Applies to:** Reader, narration, IPC, and other cross-layer remediation sprints
+**Status:** Observation

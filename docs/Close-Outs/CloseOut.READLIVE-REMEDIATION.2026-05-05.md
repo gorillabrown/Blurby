@@ -2,8 +2,8 @@
 sprint: READLIVE-REMEDIATION
 date: 2026-05-05
 branch: reading-mode-live-remediation
-commit: pending commit; current HEAD 960a9b6 with uncommitted branch changes
-status: implementation-complete; manual live smoke pending
+commit: cfe6128 fix: remediate reading mode live test findings
+status: code-complete; automated gates green; ready for merge/push decision; manual live smoke pending
 ---
 
 # Phase Close-Out: Reading Mode Live Test Remediation
@@ -14,7 +14,7 @@ Reading Mode Live Test Remediation addressed the live Blurby v1.75.1 findings fr
 
 **Branch:** `reading-mode-live-remediation`
 
-**Commit state:** Not yet committed. Current worktree HEAD is `960a9b6`; implementation and documentation changes remain pending commit on the branch.
+**Commit state:** Implementation committed as `cfe6128 fix: remediate reading mode live test findings`. The branch was clean at CLI closeout; Cowork Wave 2 governance updates may be committed separately or folded into the merge.
 
 ## Implementation Summary
 
@@ -85,7 +85,7 @@ Narrate live audio still specifically needs confirmation on Windows audio/model 
 
 Added a concise lessons-learned entry for the review discovery: engine-specific startup failures/recovery must be scoped to the selected/current engine, and Flow preview must not schedule untracked advancement timers.
 
-No broad ROADMAP or SPRINT_QUEUE rewrite was made. There was no low-risk, clearly scoped READLIVE queue entry update required for this closeout.
+Cowork Wave 2 updated the roadmap and sprint queue to record READLIVE-REMEDIATION as code-complete at `cfe6128` while keeping manual live smoke pending. The next recommended pointer is `READLIVE-LIVE-SMOKE-1`, a narrow Windows manual validation pass for live Kokoro audio and reader behavior.
 
 ## Disposition
 
