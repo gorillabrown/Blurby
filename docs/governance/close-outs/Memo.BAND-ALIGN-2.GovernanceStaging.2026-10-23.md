@@ -162,8 +162,13 @@ In Focus and Flow: the band's edges sit between lines; the cursor line is the ba
 - **Package:** `C:\Projects\Blurby-artifacts\band-align-2-r6\eb-out-df80e5dc\win-unpacked\Blurby.exe`, from `npx electron-builder --win --dir --x64` on a clean archive of `df80e5dc`, which contains `origin/main`. It has its own output directory; nothing was built over another build. Log: `build-df80e5dc.log`.
 - **`BLURBY_USER_DATA_DIR`:** 2 hits in the packaged `main.js`.
 - **25 s launch on a fresh scratch profile:** alive at 25 s; no crash dump; stdout empty.
-  - stderr holds 6 lines of `[ws-server] Server error: listen EADDRINUSE 127.0.0.1:48924`. The port belongs to the installed Blurby, `C:\Users\estra\AppData\Local\Programs\blurby\Blurby.exe`, pid 16120, which was running. That is environmental: this branch changes no `main/` file.
+  - stderr holds 20 `[ws-server]` lines: `listen EADDRINUSE 127.0.0.1:48924`, 10 retries, then "giving up" (corrected by Blurby.Brain; first reported as 6). The port belongs to the installed Blurby, `C:\Users\estra\AppData\Local\Programs\blurby\Blurby.exe`, pid 16120, which was running. That is environmental: this branch changes no `main/` file.
+  - **Pre-existing, not clean:** stderr's first-launch line `Backup failed for …\profile\blurby-data\library.json: ENOENT … copyfile`. It is benign on a fresh profile, and it predates this branch (no `main/` file changed).
   - No other error, unhandled-rejection or crash line.
   - Logs: `pkgcheck-df80e5dc/`.
 - **`asar list`:** no `main/` file changed in this wave. The renderer bundle in `app.asar` (`dist/`) is identical to the build's `dist/` (`diff -rq` clean).
 - **Done-when re-run on the packaged exe:** the cover and text-section rows above.
+- **Blurby.Brain confirmed, 2026-10-23.**
+  - The extracted `main.js`, `preload.js` and `main/` match `git archive df80e5dc` byte for byte, and `dist/` matches the build's.
+  - `main` has since moved to `a87153be` with docs and governance commits only. Nothing under `build.files` changed, so the package is equivalent; `merge-tree` is clean.
+  - Superseded outputs deleted on Brain's word: `eb-out-89862a91`, `bba582e5`, `cfc44269` and `eabd0c07`. `eb-out-df80e5dc` stays until the merge lands.
