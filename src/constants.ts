@@ -11,6 +11,21 @@ export const MIN_WPM = 100;
 export const MAX_WPM = 1200;
 /** Amount WPM changes per up/down arrow or button press */
 export const WPM_STEP = 25;
+
+// ── Speed dialog (READER-MODE-SEPARATION-2 speed amendment) ───────────────────
+// Integer hundredths so every selectable value is exact (no float drift, no rounding).
+/** WPM that Focus/Flow display as 1.00x */
+export const SPEED_DIALOG_REFERENCE_WPM = 250;
+/** Dialog step: 0.05x (Focus/Flow: 12.5 WPM) */
+export const SPEED_DIALOG_STEP_HUNDREDTHS = 5;
+/** Focus/Flow 0.40x = MIN_WPM */
+export const FOCUS_FLOW_SPEED_MIN_HUNDREDTHS = 40;
+/** Focus/Flow 4.80x = MAX_WPM */
+export const FOCUS_FLOW_SPEED_MAX_HUNDREDTHS = 480;
+/** Narrate 0.80x (= KOKORO_UI_RATE_MIN) */
+export const NARRATE_SPEED_MIN_HUNDREDTHS = 80;
+/** Narrate 2.00x (= KOKORO_UI_RATE_MAX) */
+export const NARRATE_SPEED_MAX_HUNDREDTHS = 200;
 /** Words to rewind when seeking backward in Focus/Flow mode */
 export const REWIND_WORDS = 5;
 
@@ -247,12 +262,12 @@ export function resolveNarrationProfile(
 }
 
 // ── Kokoro Rate Buckets (TTS-6C) ────────────────────────────────────────────
-/** Kokoro UI rate slider minimum — generation/cache still snaps to fixed buckets */
-export const KOKORO_UI_RATE_MIN = 1.0;
-/** Kokoro UI rate slider maximum — generation/cache still snaps to fixed buckets */
-export const KOKORO_UI_RATE_MAX = 1.5;
-/** Kokoro UI rate slider step size */
-export const KOKORO_UI_RATE_STEP = 0.1;
+/** Kokoro UI speed minimum (OC-7) — generation/cache still snaps to fixed buckets; the tempo stage covers the gap (LL-101) */
+export const KOKORO_UI_RATE_MIN = 0.8;
+/** Kokoro UI speed maximum (OC-7) — generation/cache still snaps to fixed buckets */
+export const KOKORO_UI_RATE_MAX = 2.0;
+/** Kokoro UI speed step size (OC-7) */
+export const KOKORO_UI_RATE_STEP = 0.05;
 /** Supported Kokoro native generation rates — no pitch-shift, no scheduler stretch */
 export const KOKORO_RATE_BUCKETS = [1.0, 1.2, 1.5] as const;
 export type KokoroRateBucket = (typeof KOKORO_RATE_BUCKETS)[number];

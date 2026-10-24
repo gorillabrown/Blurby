@@ -387,9 +387,9 @@ describe("TTSSettings Kokoro truth wiring", () => {
 
     const speedButtons = Array.from(container.querySelectorAll(".tts-rate-bucket-toggle button"));
     expect(speedButtons.map((button) => button.textContent?.trim())).toEqual(
-      KOKORO_UI_SPEEDS.map((speed) => `${speed.toFixed(1)}x`),
+      KOKORO_UI_SPEEDS.map((speed) => `${speed.toFixed(2)}x`),
     );
-    expect(speedButtons.find((button) => button.className.includes("active"))?.textContent?.trim()).toBe("1.3x");
+    expect(speedButtons.find((button) => button.className.includes("active"))?.textContent?.trim()).toBe("1.30x");
   });
 
   it("routes Kokoro test preview through the rate plan so exact UI speed survives bucketed generation", async () => {

@@ -125,13 +125,12 @@ describe("ReaderBottomBar controls", () => {
           {...baseProps}
           readingMode="narrate"
           isNarrating={false}
-          ttsEngine="kokoro"
-          onSetTtsRate={vi.fn()}
+          speed={{ kind: "rate", rate: 1 }}
         />,
       );
     });
 
-    expect(container.querySelector('[aria-label="Kokoro rate"]')).not.toBeNull();
+    expect(container.querySelector('button.rbb-speed-trigger[aria-haspopup="dialog"][aria-label="Speed 1.00x"]')).not.toBeNull();
     expect(container.querySelector('[aria-label="Legacy Kokoro rate"]')).toBeNull();
   });
 });

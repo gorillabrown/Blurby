@@ -442,5 +442,42 @@
     "src/reader/modes/flow/ModeRuntime.ts",
     "src/reader/modes/flow/useModeBindings.ts",
     "tests/readerModes/chunkVisualParity.test.tsx"
-  ]
+  ],
+  "speedAmendmentPaths": [
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/paths.json",
+    "docs/planning/roadmap-reviews/reader-mode-separation-2/test-migration.json",
+    "src/components/ReaderSpeedDialog.tsx",
+    "src/components/ReaderBottomBar.tsx",
+    "src/components/ReaderContainer.tsx",
+    "src/components/settings/TTSSettings.tsx",
+    "src/constants.ts",
+    "src/styles/reader.css",
+    "src/types.ts",
+    "src/utils/kokoroRatePlan.ts",
+    "src/reader/useReaderModeOrchestrator.ts",
+    "src/reader/modes/page/ModeRuntime.ts",
+    "src/reader/modes/focus/ModeRuntime.ts",
+    "src/reader/modes/focus/ModeView.tsx",
+    "src/reader/modes/flow/ModeRuntime.ts",
+    "src/reader/modes/narrate/ModeRuntime.ts",
+    "tests/readerSpeedDialog.test.tsx",
+    "tests/readerModeControls.test.tsx",
+    "tests/readerModes/page.contract.test.ts",
+    "tests/readerModes/harness/contractAssertions.ts",
+    "tests/kokoroRatePlan.test.ts",
+    "tests/narrationControlsPolish.test.ts",
+    "tests/ttsSettingsKokoroTruth.test.tsx",
+    "tests/readerBottomBarControls.test.tsx"
+  ],
+  "speedAmendmentPathNotes": {
+    "src/types.ts": "OC-6: BlurbySettings lives only here (no non-freeze settings type file); two optional fields focusWpm/flowWpm, scheduled under this epic freeze ownership",
+    "src/components/settings/TTSSettings.tsx": "OC-7 consequence: KOKORO_UI_SPEEDS is derived (25 values); 1-decimal labels would show 1.05/1.10/1.15 all as 1.1x, so labels move to 2 decimals. No other change",
+    "src/reader/modes/focus/ModeView.tsx": "OC-6: the RSVP overlay WPM gauge reads Focus own key (focusWpm ?? wpm) instead of the shared legacy effectiveWpm",
+    "tests/readerModes/page.contract.test.ts": "G2 contract case: Page speed is null and setSpeed is a no-op",
+    "tests/readerModes/harness/contractAssertions.ts": "G2: setSpeed joins the after-destroy no-op list (all four modes); nothing weakened",
+    "tests/kokoroRatePlan.test.ts": "OC-7 old-domain assertions (approvedSpeedDifferences)",
+    "tests/narrationControlsPolish.test.ts": "OC-7 old-domain assertions (approvedSpeedDifferences)",
+    "tests/ttsSettingsKokoroTruth.test.tsx": "OC-7 settings label precision (approvedSpeedDifferences)",
+    "tests/readerBottomBarControls.test.tsx": "Added by coordinator decision (Type 1a, item 2 / OC-7): the Kokoro rate-label assertion becomes the speed-trigger assertion"
+  }
 }

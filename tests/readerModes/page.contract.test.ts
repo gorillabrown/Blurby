@@ -2,7 +2,7 @@
 // Page is imported only through its index.ts, in a fresh module registry per test.
 import { describe, it, vi } from "vitest";
 import type { ReaderModeModule } from "../../src/reader/modes/ReaderModeAdapter";
-import { assertLifecycle, assertNoLeak, assertSelectPausedAtZero } from "./harness/contractAssertions";
+import { assertLifecycle, assertNoLeak, assertNoSpeed, assertSelectPausedAtZero } from "./harness/contractAssertions";
 
 async function loadPage(): Promise<ReaderModeModule> {
   vi.resetModules();
@@ -21,5 +21,9 @@ describe("page mode runtime contract (G2)", () => {
 
   it("snapshots and start inputs do not leak mutable state", async () => {
     assertNoLeak(await loadPage());
+  });
+
+  it("exposes no speed and setSpeed is a no-op (speed amendment)", async () => {
+    assertNoSpeed(await loadPage());
   });
 });

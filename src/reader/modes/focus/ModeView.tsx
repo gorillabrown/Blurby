@@ -34,7 +34,7 @@ export interface FocusModeViewProps extends ReaderModeViewProps {
 function FocusRsvpOverlay({ runtime, shell }: { runtime: FocusModeRuntime; shell?: FocusOverlayShellCallbacks }) {
   const { wordIndex, words } = runtime.getDisplay();
   const settingsSnapshot = runtime.settings;
-  const wpm = settingsSnapshot.effectiveWpm;
+  const wpm = runtime.getEffectiveWpm(); // OC-6: Focus's own key
   const focusTextSize = settingsSnapshot.focusTextSize;
   const isMac = settingsSnapshot.isMac;
   const settings = {

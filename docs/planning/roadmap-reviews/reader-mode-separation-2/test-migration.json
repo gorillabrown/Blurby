@@ -541,5 +541,207 @@
       "test": "tests/documentLifecycleModeRestore.test.ts",
       "what": "parallel assertion at the new owner: router openDocument mounts Page from the initial handoff (src/reader/useReaderModeOrchestrator.ts) (design §D.5)"
     }
+  ],
+  "approvedSpeedDifferences": [
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > keeps the supported UI domain at 1.0-1.5 in 0.1 steps (renamed: keeps the supported UI domain at 0.80-2.00 in 0.05 steps (OC-7))",
+      "old": "expect(KOKORO_UI_SPEEDS).toEqual([1.0, 1.1, 1.2, 1.3, 1.4, 1.5])",
+      "new": "expect(KOKORO_UI_SPEEDS).toEqual([0.8, 0.85, …, 1.05, …, 2.0]) (25 values, 0.05 steps)",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 0.7 to $expected",
+      "old": "{ input: 0.7, expected: 1.0 }",
+      "new": "{ input: 0.7, expected: 0.8 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.04 to $expected",
+      "old": "{ input: 1.04, expected: 1.0 }",
+      "new": "{ input: 1.04, expected: 1.05 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.05 to $expected",
+      "old": "{ input: 1.05, expected: 1.1 }",
+      "new": "{ input: 1.05, expected: 1.05 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.14 to $expected",
+      "old": "{ input: 1.14, expected: 1.1 }",
+      "new": "{ input: 1.14, expected: 1.15 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.16 to $expected",
+      "old": "{ input: 1.16, expected: 1.2 }",
+      "new": "{ input: 1.16, expected: 1.15 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.24 to $expected",
+      "old": "{ input: 1.24, expected: 1.2 }",
+      "new": "{ input: 1.24, expected: 1.25 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.26 to $expected",
+      "old": "{ input: 1.26, expected: 1.3 }",
+      "new": "{ input: 1.26, expected: 1.25 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.34 to $expected",
+      "old": "{ input: 1.34, expected: 1.3 }",
+      "new": "{ input: 1.34, expected: 1.35 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.36 to $expected",
+      "old": "{ input: 1.36, expected: 1.4 }",
+      "new": "{ input: 1.36, expected: 1.35 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.44 to $expected",
+      "old": "{ input: 1.44, expected: 1.4 }",
+      "new": "{ input: 1.44, expected: 1.45 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.46 to $expected",
+      "old": "{ input: 1.46, expected: 1.5 }",
+      "new": "{ input: 1.46, expected: 1.45 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "normalizeKokoroUiSpeed > normalizes 1.8 to $expected",
+      "old": "{ input: 1.8, expected: 1.5 }",
+      "new": "{ input: 1.8, expected: 1.8 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "resolveKokoroRatePlan > normalizes 0.7 before resolving the rate plan",
+      "old": "{ input: 0.7, selectedSpeed: 1.0, generationBucket: 1.0, tempoFactor: 1.0 }",
+      "new": "{ input: 0.7, selectedSpeed: 0.8, generationBucket: 1.0, tempoFactor: 0.8 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "resolveKokoroRatePlan > normalizes 1.24 before resolving the rate plan",
+      "old": "{ input: 1.24, selectedSpeed: 1.2, generationBucket: 1.2, tempoFactor: 1.0 }",
+      "new": "{ input: 1.24, selectedSpeed: 1.25, generationBucket: 1.2, tempoFactor: 1.25 / 1.2 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "resolveKokoroRatePlan > normalizes 1.26 before resolving the rate plan",
+      "old": "{ input: 1.26, selectedSpeed: 1.3, generationBucket: 1.2, tempoFactor: 1.3 / 1.2 }",
+      "new": "{ input: 1.26, selectedSpeed: 1.25, generationBucket: 1.2, tempoFactor: 1.25 / 1.2 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "name": "resolveKokoroRatePlan > normalizes 1.8 before resolving the rate plan",
+      "old": "{ input: 1.8, selectedSpeed: 1.5, generationBucket: 1.5, tempoFactor: 1.0 }",
+      "new": "{ input: 1.8, selectedSpeed: 1.8, generationBucket: 1.5, tempoFactor: 1.8 / 1.5 }",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/narrationControlsPolish.test.ts",
+      "name": "narration keyboard stepping > Kokoro step-up walks the full 1.0-1.5 UI ladder (renamed: … 0.80-2.00 UI ladder in 0.05 steps)",
+      "old": "from 1.0, stepKokoroUiSpeed(+1) → 1.1, 1.2, 1.3, 1.4, 1.5, then 1.5 (clamp)",
+      "new": "from 0.8, 24 × stepKokoroUiSpeed(+1) walks exactly KOKORO_UI_SPEEDS (0.80…2.00), then 2.0 (clamp)",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/narrationControlsPolish.test.ts",
+      "name": "narration keyboard stepping > Kokoro step-down walks the full 1.5-1.0 UI ladder (renamed: … 2.00-0.80 UI ladder in 0.05 steps)",
+      "old": "from 1.5, stepKokoroUiSpeed(-1) → 1.4, 1.3, 1.2, 1.1, 1.0, then 1.0 (clamp)",
+      "new": "from 2.0, 24 × stepKokoroUiSpeed(-1) walks KOKORO_UI_SPEEDS reversed, then 0.8 (clamp)",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/narrationControlsPolish.test.ts",
+      "name": "control surface consistency > Kokoro UI exposes the six sprint-contract speeds (renamed: Kokoro UI exposes the 25 OC-7 speeds (0.80-2.00 in 0.05 steps))",
+      "old": "expect(KOKORO_UI_SPEEDS).toEqual([1.0, 1.1, 1.2, 1.3, 1.4, 1.5])",
+      "new": "length 25; [0] = 0.8; [5] = 1.05; [24] = 2.0",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/narrationControlsPolish.test.ts",
+      "name": "control surface consistency > UI speeds still resolve onto the fixed generation buckets",
+      "old": "KOKORO_UI_SPEEDS → buckets [1.0, 1.2, 1.2, 1.2, 1.5, 1.5]",
+      "new": "KOKORO_UI_SPEEDS → buckets [1.0 ×6 (0.80–1.05), 1.2 ×5 (1.10–1.30), 1.5 ×14 (1.35–2.00)]; buckets themselves unchanged [1.0, 1.2, 1.5]",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/narrationControlsPolish.test.ts",
+      "name": "control surface consistency > rate display format is consistent (1 decimal place) (renamed: … (2 decimal places))",
+      "old": "speed.toFixed(1) matches /^d.d$/",
+      "new": "speed.toFixed(2) matches /^d.dd$/ (0.05 steps need two decimals; the dialog and settings display two)",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/ttsSettingsKokoroTruth.test.tsx",
+      "name": "shows the full Kokoro speed ladder once the engine is ready",
+      "old": "button labels = KOKORO_UI_SPEEDS.map(s => `${s.toFixed(1)}x`); active button text \"1.3x\"",
+      "new": "button labels = KOKORO_UI_SPEEDS.map(s => `${s.toFixed(2)}x`); active button text \"1.30x\" (one-decimal labels would show 1.05/1.10/1.15 all as \"1.1x\")",
+      "reason": "speed amendment acceptance item 4 / OC-7"
+    },
+    {
+      "test": "tests/readerModeControls.test.tsx",
+      "name": "Page renders no speed control: no WPM slider, no WPM label, no speed trigger (speed amendment item 1) [added]",
+      "old": "no assertion; behavior: ReaderBottomBar rendered .rbb-wpm-label (\"N wpm\") and .rbb-wpm-slider (100–1200, step 25, parseInt) in Page from the shell's legacy wpm",
+      "new": "Page renders none of .rbb-wpm-slider, .rbb-wpm-label, input[aria-label=\"Words per minute\"], .rbb-speed-trigger",
+      "reason": "speed amendment acceptance item 1 / OC-8"
+    },
+    {
+      "test": "tests/readerModeControls.test.tsx",
+      "name": "Flow shows its speed as a dialog trigger instead of the WPM slider (speed amendment item 2) [added]",
+      "old": "no assertion; behavior: Focus/Flow showed the WPM label + slider; Narrate showed the Kokoro bucket buttons (1.0–1.5x) and a CONFIRMED/SET status",
+      "new": "Focus/Flow/Narrate show a .rbb-speed-trigger (aria-haspopup=dialog) with the current multiplier; the slider lives in ReaderSpeedDialog",
+      "reason": "speed amendment acceptance item 2 / OC-6"
+    },
+    {
+      "test": "tests/readerBottomBarControls.test.tsx",
+      "name": "ReaderBottomBar controls > uses neutral Kokoro wording for the assistive TTS rate label",
+      "old": "render Narrate with ttsEngine=\"kokoro\" onSetTtsRate; expect [aria-label=\"Kokoro rate\"] not null and [aria-label=\"Legacy Kokoro rate\"] null",
+      "new": "render Narrate with speed={{kind:\"rate\",rate:1}}; expect button.rbb-speed-trigger[aria-haspopup=\"dialog\"][aria-label=\"Speed 1.00x\"] not null and [aria-label=\"Legacy Kokoro rate\"] still null",
+      "reason": "speed amendment acceptance item 2 / OC-7"
+    }
+  ],
+  "approvedSpeedDifferencesAdded": [
+    {
+      "test": "tests/kokoroRatePlan.test.ts",
+      "what": "row { input: 2.4, expected: 2.0 } (clamp at the new max) and describe \"OC-7 widened Kokoro UI domain (speed amendment)\": 0.8/1.05/2.0 exact with buckets 1.0/1.0/1.5; 0.05 stepping and clamps; buckets stay [1.0, 1.2, 1.5]"
+    },
+    {
+      "test": "tests/readerModes/harness/contractAssertions.ts",
+      "what": "assertLifecycle: setSpeed (wpm and rate) joins the after-destroy no-op list for all four modes; new assertNoSpeed helper"
+    },
+    {
+      "test": "tests/readerModes/page.contract.test.ts",
+      "what": "exposes no speed and setSpeed is a no-op (speed amendment)"
+    },
+    {
+      "test": "tests/readerSpeedDialog.test.tsx",
+      "what": "new suite: values (89/89/25), runtime setSpeed per mode, isolation (OC-6), Page ↑/↓ by lastReadingMode (OC-8), keyboard dialog path, no side effects, range, end-to-end persisted = displayed"
+    }
   ]
 }
