@@ -1,0 +1,36 @@
+{
+  "id": "20261024T030907Z-external-set-status-CHAPTER-STEP-CFI-1",
+  "operation": "external-set-status",
+  "item_id": "CHAPTER-STEP-CFI-1",
+  "created": "2026-10-24T03:09:07Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#chapter-step-cfi-1-spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:CHAPTER-STEP-CFI-1:[('spec_link', 'ROADMAP.md#chapter-step-cfi-1-spec'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "CHAPTER-STEP-CFI-1",
+      "idempotencyKey": "set-status:CHAPTER-STEP-CFI-1:[('spec_link', 'ROADMAP.md#chapter-step-cfi-1-spec'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T030907Z-external-set-status-CHAPTER-STEP-CFI-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81e88532ccadd99fec35"
+    }
+  },
+  "resolved": "2026-10-24T03:10:20Z",
+  "outcome": "succeeded"
+}
