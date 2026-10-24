@@ -45,3 +45,31 @@
   - Standing rule 50: the inherited failure is named, not edited.
   - Standing rule 52: probe evidence copies are `.txt`.
 - **Candidate:** a held branch whose suite never ran can carry a red test into the branch stacked on it. A stacked item's base check should run the full suite on its base before any edit, so an inherited failure is found at minute zero, not at the closing gate. Standing rule 51: no lesson-status line is appended.
+
+## Package verification (standing rule 53 / LL-167)
+
+- **(a) Build:** `e41f6edc` is `30cc7e3a` plus the latest `origin/main` (`a87153be`; docs only) merged in, in this dispatch's own worktree. `npm run build` exited 0.
+  - The rule's `npx electron-builder --win --dir` exited 0, but it packaged **arm64 only** (`release\win-arm64-unpacked`), because this machine's Node is `arm64` (`process.arch`).
+  - `npx electron-builder --win --dir --x64` then wrote `release\win-unpacked` (exit 0). It did not overwrite the arm64 output.
+  - Both `app.asar` files have the same sha256, `abf3af7c…8fb4`, which is also the hash of the Done-when 4 build of `13e93a81`. The renderer is unchanged by the merge.
+  - The commit after `e41f6edc` only adds this memo section, so it is outside `build.files`: package unchanged.
+- **(b) Launch:**
+  - The built `main.js` has 2 matches for `BLURBY_USER_DATA_DIR`.
+  - `release\win-unpacked\Blurby.exe` ran on a fresh scratch profile (`--user-data-dir` and `BLURBY_USER_DATA_DIR`) for 25 s.
+    - It stayed alive, and the scratch `blurby-data` was created.
+    - The live profile was unchanged (`library.json` `d4b884bd…`, `settings.json` `2e1d5245…`).
+    - No `error.log` was written, and no new crash dump appeared. stdout was empty.
+  - **stderr is not clean, because of the environment.** It has five `[ws-server] Server error: listen EADDRINUSE 127.0.0.1:48924` lines with retries, plus one first-run `Backup failed … library.json: ENOENT`.
+    - The port is held by the owner's installed Blurby (`%LOCALAPPDATA%\Programs\blurby\Blurby.exe`, pid 16120, running since 2026-10-22 22:39).
+    - An A/B launch of the base package (`61cbbf7e`), same script and a fresh profile, printed the same lines. They predate this item (LL-152).
+    - There was no unhandled rejection and no crash line.
+  - Logs: `pv-launch.log`, `pv-launch.stdout.txt`, `pv-launch.stderr.txt`, and the base A/B `pv-launch-base.*`.
+- **(c) asar:**
+  - `npx asar list` lists 11,581 entries (`pv-asar-list.txt`).
+  - No `main/` file differs from `61cbbf7e` or from `origin/main`.
+  - The extracted `dist/` is byte-identical to the worktree's `dist/` (`diff -r`, no output). `App-CdWdeGJe.js` carries `setParagraphBreaks`.
+- **(d) Done-when on the packaged exe:**
+  - The Done-when 4 probe was re-run against `release\win-unpacked\Blurby.exe` (`pv-probe.json`, `pv-probe.log`), with a fresh profile and the preflight on both launches. `liveUnchanged: true`.
+  - **0 of 216 pauses are off a paragraph end.** In each loaded section, pauses = paragraphs: 27/27, 31/31 and 31/31, in Flow and Focus. This matches the after measurement.
+- **(e):** the package path, commit and logs were sent to Blurby.Brain. The `release/` output is kept until Brain confirms.
+- All logs are under `C:\Projects\Blurby-artifacts\flow-para-pause-index-1\`.
