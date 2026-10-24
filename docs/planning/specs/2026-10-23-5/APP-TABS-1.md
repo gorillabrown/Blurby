@@ -245,6 +245,12 @@
 - **The header's search button moves to the tab bar.** The hamburger stays: it opens the menu flap, whose first view is the reading queue, not settings. The tab bar's settings icon opens the flap on its settings view (`onOpenSettings("settings")`).
 - **A failed move** shows a toast and refreshes from `getState`, as `archiveDoc` does (`useLibrary.ts:178-189`).
 
+##### Owner rulings (2026-10-23)
+- **Question 1:** add a right-click menu to list rows, with Move to Newsroom / Library (the build default).
+- **Question 3:** show a "Saved to Newsroom" toast with a "View" link (the build default).
+- **Question 4:** pasted text goes to Newsroom (the build default).
+- **Question 2** (the Newsroom header) was not asked separately. Its build default stands, and the owner checks it at smoke.
+
 ##### Owner questions (tier 3, front of house; each has a build default, so the item stays dispatch-ready)
 1. **Moving an item in list view.** List cards have no right-click menu today; only grid cards do (`DocGridCard.tsx:49-137`).
    - (a) List cards get a right-click menu holding Move to Newsroom/Library. **Recommended, and the build default (b9):** it matches frame 2 in both views.
