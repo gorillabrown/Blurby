@@ -1,0 +1,48 @@
+{
+ "item": "NARRATE-RECONCILE-RESIDUAL-1",
+ "mode": "real",
+ "book": "dab1d9d7",
+ "bookWords": 16718,
+ "chunkStartWord": 12529,
+ "chunkWords": 28,
+ "chunkHash": "4e7915ce2410e10e",
+ "reconciled": true,
+ "failureCount": 0,
+ "provenanceSource": "model-output",
+ "durationsType": "float32",
+ "samplesPerFrame": 600,
+ "pcmSamples": 393600,
+ "sampleRate": 24000,
+ "verifyTable": {
+  "ok": true
+ },
+ "phraseUnit": {
+  "wordMapIndex": 9,
+  "tableIndex": 9,
+  "kind": "fused",
+  "sourceWords": 2,
+  "spokenWords": 2,
+  "fusedWords": 2,
+  "frameStart": 189,
+  "frameEnd": 212,
+  "sampleStart": 113400,
+  "sampleEnd": 127200,
+  "fusedFrameStart": 189,
+  "fusedFrameEnd": 212,
+  "lookup": {
+   "sampleStart": 9,
+   "midpoint": 9,
+   "sampleEndMinus1": 9,
+   "sampleStartMinus1": 8
+  },
+  "checks": {
+   "holdsTwoSourceWords": true,
+   "atStart": true,
+   "atMid": true,
+   "atEndMinus1": true,
+   "beforeStartIsPrevious": true
+  }
+ },
+ "ok": true
+}
+# command: $env:NARRATE_MODELS_ROOT=<scratch>\models (a copy of the profile's local/kokoro-dur, model_q4.onnx sha256 2eccfc53…b95cad = NARRATE_EXPOSED_MODEL_SHA256); pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 <scratch>\probe.mjs --repo <worktree> --owner <scratch>\owner-p6b --hash 4e7915ce2410e10e --out <scratch>\residual-private.real.json --real | exit 0 | 23 s | stderr bytes 0 | tree 415fcba3 | 2026-10-24 00:17

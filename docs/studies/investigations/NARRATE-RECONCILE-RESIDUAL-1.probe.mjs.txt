@@ -1,0 +1,189 @@
+// NARRATE-RECONCILE-RESIDUAL-1 — the residual probe. Committed as .txt (standing rule 52): copy it to a scratch folder as
+// probe.mjs and run it there, never from the repository.
+//
+// Usage (pwsh, worktree root):
+//   pwsh -NoProfile -File scripts/narrate-rebuild/app-node.ps1 <scratch>\probe.mjs --repo <worktree> --owner <epub copies>
+//        --hash 4e7915ce2410e10e --out <scratch>\residual-private.json [--real]
+//
+// Finds the owner-book chunk the engine plans whose sha256(text)[0:16] is --hash and runs the producer's text side on it
+// exactly as scripts/narrate-rebuild/reconcile-sweep.mjs does (capture.js, wordmap.js, normalize.js, verifyTable).
+//   default  a stub model (one frame per id): measures the failing fused unit on the tree's wordmap.js — its consonant
+//            counts, edit distance and operations, syllable difference and cost — and the phrase-evidence cost of the
+//            unit's words read together, and of the windows one word wider on each side.
+//   --real   the duration-exposed model from NARRATE_MODELS_ROOT, through the product path (synthesize, buildWordMap,
+//            mapUnitsToSourceWords, verifyTable), then lookupUnit at the phrase-evidence unit's edges (Done-when 7).
+// stdout carries no text from the book: ids, positions, counts, phoneme symbols and verdicts only. The words, forms and
+// groups go to --out, a private scratch file outside the repository. Exit 0 = measured; 1 = a check failed; 2 = usage.
+import fs from "node:fs";
+import path from "node:path";
+import crypto from "node:crypto";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
+
+const args = process.argv.slice(2);
+const has = (f) => args.includes(f);
+const argOf = (f) => (has(f) ? args[args.indexOf(f) + 1] : null);
+const die = (msg) => { console.error(msg); process.exit(2); };
+const ROOT = path.resolve(argOf("--repo") ?? die("--repo <worktree> is required"));
+createRequire(path.join(ROOT, "scripts/narrate-rebuild/lib/app-icu.cjs"))("./app-icu.cjs").assertAppIcu();
+const OWNER = path.resolve(argOf("--owner") ?? die("--owner <dir> is required"));
+const HASH = argOf("--hash") ?? die("--hash <sha256[0:16]> is required");
+const OUT = path.resolve(argOf("--out") ?? die("--out <private scratch file> is required"));
+if (OUT.toLowerCase().startsWith(ROOT.toLowerCase() + path.sep)) die("--out must be outside the repository");
+if (process.env.APPDATA && OWNER.toLowerCase().startsWith(path.join(process.env.APPDATA, "Blurby").toLowerCase())) die("refusing the live profile; probe copies");
+const REAL = has("--real");
+const sha256 = (s) => crypto.createHash("sha256").update(s).digest("hex");
+
+const req = createRequire(path.join(ROOT, "main/narrate/producer-worker.js"));
+const { attachCapture, synthesize } = req("./capture");
+const { buildWordMap, kokoroPost, consonants, syllables, SYLLABLE_WEIGHT, ACCEPT_UNIT_COST } = req("./wordmap");
+const { mapUnitsToSourceWords } = req("./normalize");
+const { extractWords } = req("../epub-word-extractor");
+const { planChunks } = await import(pathToFileURL(path.join(ROOT, "src/reader/modes/narrate/engine/chunkPlan.ts")).href);
+const { verifyTable, lookupUnit } = await import(pathToFileURL(path.join(ROOT, "src/reader/modes/narrate/engine/wordTable.ts")).href);
+const { NARRATE_CHUNK_RAMP, NARRATE_STEADY_CHUNK_MAX_WORDS } = await import(pathToFileURL(path.join(ROOT, "src/constants.ts")).href);
+const C = req("./constants");
+const kokoroPath = path.join(ROOT, "node_modules/kokoro-js/dist/kokoro.cjs");
+const kreq = createRequire(kokoroPath);
+const kokoro = kreq(kokoroPath), tf = kreq("@huggingface/transformers"), ph = kreq("phonemizer");
+
+let tts;
+if (REAL) {
+  const modelsRoot = process.env[C.NARRATE_MODELS_ROOT_ENV] ?? die(`--real needs ${C.NARRATE_MODELS_ROOT_ENV} (standing rule 47)`);
+  Object.assign(tf.env, { allowRemoteModels: false, allowLocalModels: true, localModelPath: modelsRoot.replace(/[\\/]*$/, "/"), useFSCache: false, useBrowserCache: false });
+  Object.assign(tf.env, { useCustomCache: true, customCache: req("./local-file-cache").localFileCache() });
+  const model = await tf.StyleTextToSpeech2Model.from_pretrained(C.NARRATE_EXPOSED_MODEL_ID, {
+    dtype: C.NARRATE_MODEL_DTYPE, device: "cpu", session_options: { intraOpNumThreads: C.NARRATE_INTRA_OP_THREADS, interOpNumThreads: C.NARRATE_INTER_OP_THREADS },
+  });
+  const tokenizer = await tf.AutoTokenizer.from_pretrained(C.NARRATE_EXPOSED_MODEL_ID);
+  tts = new kokoro.KokoroTTS(model, tokenizer);
+} else {
+  const FIXTURES = path.join(ROOT, "tests/fixtures/narrate-rebuild");
+  Object.assign(tf.env, { allowRemoteModels: false, allowLocalModels: true, localModelPath: FIXTURES.replace(/[\\/]*$/, "/"), useFSCache: false, useBrowserCache: false });
+  const tokenizer = await tf.AutoTokenizer.from_pretrained("kokoro-tokenizer");
+  const stubModel = async (inputs) => {
+    const n = inputs.input_ids.dims.at(-1);
+    return { waveform: { data: new Float32Array(600 * n) }, durations: { data: new Float32Array(n).fill(1), type: "float32", dims: [1, n] } };
+  };
+  tts = new kokoro.KokoroTTS(stubModel, tokenizer);
+}
+const capture = attachCapture(tts, ph);
+
+// ── Find the chunk (the sweep's planAll: one epoch from word 0) ──────────────────────────────────────────────────
+function planAll(words, breaks) {
+  const out = [];
+  for (let at = 0, step = 0; at < words.length; step++) {
+    const [e] = planChunks(words, at, { maxChunks: 1, breaks, ramp: NARRATE_CHUNK_RAMP, rampIndex: step, maxWords: NARRATE_STEADY_CHUNK_MAX_WORDS });
+    if (!e) break;
+    out.push(e); at = e.endWord;
+  }
+  return out;
+}
+let hit = null;
+for (const f of fs.readdirSync(OWNER).filter((x) => x.toLowerCase().endsWith(".epub")).sort()) {
+  const b = await extractWords(path.join(OWNER, f));
+  const breaks = new Set(b.sections.filter((s) => s.endWordIdx > 0).map((s) => s.endWordIdx - 1));
+  const e = planAll(b.words, breaks).find((x) => sha256(x.text).slice(0, 16) === HASH);
+  if (e) { hit = { book: sha256(f).slice(0, 8), bookWords: b.words.length, e, src: b.words.slice(e.startWord, e.endWord) }; break; }
+}
+if (!hit) { console.error(`no planned chunk with hash ${HASH} in ${OWNER}`); process.exit(1); }
+
+// ── The producer's text side ─────────────────────────────────────────────────────────────────────────────────────
+const rec = await synthesize(tts, capture, hit.e.text, { voice: C.NARRATE_DEFAULT_VOICE, speed: 1.0 });
+const wm = await buildWordMap(rec, capture.phonemizeIsolated);
+const lang = rec.segments[0]?.lang === "en" ? "b" : "a";
+const dropped = new Set(rec.droppedChars ?? []);
+const keep = (s) => (dropped.size ? [...s].filter((ch) => !dropped.has(ch)).join("") : s);
+const groupsOf = async (text) => kokoroPost((await capture.phonemizeIsolated(text, rec.segments[0].lang)).join(" "), lang).split(" ").map(keep).filter(Boolean);
+
+// Consonant edit distance with its operations (wordmap.js lev, with a backtrace; a linking r is a free insertion).
+function levOps(a, b, freeInsert = "ɹ") {
+  const ins = (ch) => (ch === freeInsert ? 0 : 1);
+  const m = a.length, n = b.length;
+  const d = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let j = 1; j <= n; j++) d[0][j] = d[0][j - 1] + ins(b[j - 1]);
+  for (let i = 1; i <= m; i++) { d[i][0] = i; for (let j = 1; j <= n; j++) d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + ins(b[j - 1]), d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)); }
+  const ops = [];
+  for (let i = m, j = n; i > 0 || j > 0;) {
+    if (i > 0 && j > 0 && d[i][j] === d[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1)) { if (a[i - 1] !== b[j - 1]) ops.unshift(`${a[i - 1]}→${b[j - 1]}`); i--; j--; }
+    else if (j > 0 && d[i][j] === d[i][j - 1] + ins(b[j - 1])) { if (ins(b[j - 1])) ops.unshift(`+${b[j - 1]}`); j--; }
+    else { ops.unshift(`-${a[i - 1]}`); i--; }
+  }
+  return { dist: d[m][n], ops };
+}
+const syl = (forms) => forms.reduce((n, f) => n + syllables(f), 0);
+function measure(isoForms, groupForms) {
+  const A = isoForms.flatMap(consonants), B = groupForms.flatMap(consonants);
+  const { dist, ops } = levOps(A, B);
+  const sylDiff = Math.abs(syl(isoForms) - syl(groupForms));
+  const cost = dist / Math.max(1, Math.max(A.length, B.length)) + SYLLABLE_WEIGHT * sylDiff;
+  return { consonantsEvidence: A.length, consonantsGroup: B.length, editDistance: dist, ops, syllableDiff: sylDiff, cost: +cost.toFixed(3) };
+}
+
+const out = { item: "NARRATE-RECONCILE-RESIDUAL-1", mode: REAL ? "real" : "stub", book: hit.book, bookWords: hit.bookWords, chunkStartWord: hit.e.startWord, chunkWords: hit.src.length, chunkHash: HASH, reconciled: wm.reconciled, failureCount: wm.failures.length };
+const priv = { book: hit.book, chunkStartWord: hit.e.startWord, text: hit.e.text, failures: wm.failures, units: wm.units.map((u) => ({ words: u.words, kind: u.kind, group: u.group, isolated: u.isolated, evidence: u.evidence, phrase: u.phrase, evidenceCost: u.evidenceCost })) };
+let ok = true;
+
+if (!REAL) {
+  // The fused unit over the limit (base), or the unit that phrase evidence identified (after the change).
+  const idx = wm.units.findIndex((u) => u.kind === "fused" && (u.evidenceCost > ACCEPT_UNIT_COST || u.evidence === "phrase"));
+  if (idx < 0) { out.unit = null; console.log(JSON.stringify(out)); fs.writeFileSync(OUT, JSON.stringify(priv, null, 1)); process.exit(1); }
+  const u = wm.units[idx];
+  const unitGroups = u.group.split(" ");
+  const isoGroups = [];
+  for (const w of u.words) isoGroups.push(await groupsOf(w));
+  const isoM = measure(isoGroups.flat(), unitGroups);
+  // Cross-check: the probe's recomputation equals the cost wordmap.js recorded for the unit's isolated evidence.
+  const recordedIsolated = u.evidence === "phrase" ? null : u.evidenceCost;
+  if (recordedIsolated !== null && Math.abs(recordedIsolated - isoM.cost) > 0.001) { console.error(`probe cost ${isoM.cost} != wordmap.js ${recordedIsolated}`); ok = false; }
+  const phraseOf = async (units) => { const ws = units.flatMap((x) => x.words); return { k: ws.length, ...measure(await groupsOf(ws.join(" ")), units.flatMap((x) => x.group.split(" "))) }; };
+  const prev = wm.units[idx - 1], next = wm.units[idx + 1];
+  out.unit = {
+    index: idx, kind: u.kind, k: u.words.length, groupCount: unitGroups.length, wordIndex: u.wordIndex, evidenceRecorded: u.evidence ?? "isolated", evidenceCostRecorded: u.evidenceCost,
+    isolated: isoM,
+    phrase: await phraseOf([u]),
+    phraseWiderLeft: prev ? await phraseOf([prev, u]) : null,
+    phraseWiderRight: next ? await phraseOf([u, next]) : null,
+    phraseWiderBoth: prev && next ? await phraseOf([prev, u, next]) : null,
+  };
+  out.decisionGate = { limit: ACCEPT_UNIT_COST, phraseCost: out.unit.phrase.cost, pass: out.unit.phrase.cost <= ACCEPT_UNIT_COST };
+  priv.unit = { index: idx, words: u.words, group: u.group, isolatedGroups: isoGroups, phraseGroups: await groupsOf(u.words.join(" ")) };
+} else {
+  // Done-when 7: the product path on the real model, then the cursor at the phrase-evidence unit's edges.
+  const units = wm.reconciled ? mapUnitsToSourceWords(hit.e.text, rec.segments, wm.units) : wm.units;
+  const table = {
+    provenance: rec.provenance, durations: rec.durations, samplesPerFrame: wm.law.factor, sampleRate: rec.sampleRate,
+    units: units.map((x) => ({ words: x.words, spoken: x.spoken ?? x.words, kind: x.kind, frameStart: x.frameStart, frameEnd: x.frameEnd, sampleStart: x.sampleStart, sampleEnd: x.sampleEnd })),
+    reconciled: wm.reconciled,
+  };
+  const v = verifyTable({ table, sourceWords: hit.src, pcmSamples: rec.pcm.length });
+  out.provenanceSource = rec.provenance.source; out.durationsType = rec.durationsType; out.samplesPerFrame = wm.law.factor; out.pcmSamples = rec.pcm.length; out.sampleRate = rec.sampleRate;
+  out.verifyTable = v;
+  ok = ok && v.ok === true && rec.provenance.source === "model-output";
+  const wi = wm.units.findIndex((x) => x.evidence === "phrase");
+  if (wi < 0) { out.phraseUnit = null; ok = false; }
+  else {
+    const fu = wm.units[wi];
+    // The table unit that holds the fused unit's spoken words (mapUnitsToSourceWords groups units on source-word bounds).
+    const ti = table.units.findIndex((x) => x.sampleStart <= fu.sampleStart && fu.sampleEnd <= x.sampleEnd);
+    const t = table.units[ti];
+    const mid = Math.floor((t.sampleStart + t.sampleEnd) / 2);
+    const at = { sampleStart: lookupUnit(table.units, t.sampleStart), midpoint: lookupUnit(table.units, mid), sampleEndMinus1: lookupUnit(table.units, t.sampleEnd - 1), sampleStartMinus1: lookupUnit(table.units, t.sampleStart - 1) };
+    const spokenWords = t.spoken.length;
+    out.phraseUnit = {
+      wordMapIndex: wi, tableIndex: ti, kind: t.kind, sourceWords: t.words.length, spokenWords, fusedWords: fu.words.length,
+      frameStart: t.frameStart, frameEnd: t.frameEnd, sampleStart: t.sampleStart, sampleEnd: t.sampleEnd,
+      fusedFrameStart: fu.frameStart, fusedFrameEnd: fu.frameEnd,
+      lookup: at,
+      checks: {
+        holdsTwoSourceWords: t.words.length === 2 && fu.words.length === 2,
+        atStart: at.sampleStart === ti, atMid: at.midpoint === ti, atEndMinus1: at.sampleEndMinus1 === ti, beforeStartIsPrevious: at.sampleStartMinus1 === ti - 1,
+      },
+    };
+    ok = ok && Object.values(out.phraseUnit.checks).every(Boolean);
+  }
+}
+fs.writeFileSync(OUT, JSON.stringify(priv, null, 1));
+out.ok = ok;
+console.log(JSON.stringify(out, null, 1));
+process.exit(ok ? 0 : 1);
