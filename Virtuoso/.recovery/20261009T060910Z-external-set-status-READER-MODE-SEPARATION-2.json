@@ -1,0 +1,38 @@
+{
+  "id": "20261009T060910Z-external-set-status-READER-MODE-SEPARATION-2",
+  "operation": "external-set-status",
+  "item_id": "READER-MODE-SEPARATION-2",
+  "created": "2026-10-09T06:09:10Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "monday:board/18432450217",
+    "operation": "set-status",
+    "fields": {
+      "status": "in-flight",
+      "started": "2026-10-09"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "rms2-s1-inflight-20261009",
+    "lastConfirmation": {
+      "succeeded": true,
+      "operation": "set-status",
+      "itemId": "READER-MODE-SEPARATION-2",
+      "idempotencyKey": "rms2-s1-inflight-20261009",
+      "actualRevision": "",
+      "recoveryId": "20261009T060910Z-external-set-status-READER-MODE-SEPARATION-2",
+      "detail": {
+        "status": "In Flight (label created; registry mapping in-flight)",
+        "started": "2026-10-09",
+        "changedAt": "2026-10-09T06:52:31Z"
+      },
+      "providerItemId": "13119306772"
+    }
+  },
+  "resolved": "2026-10-09T06:52:43Z"
+}
