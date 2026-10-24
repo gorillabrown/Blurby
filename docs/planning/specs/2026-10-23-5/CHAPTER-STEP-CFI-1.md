@@ -102,6 +102,11 @@
 - **Source:** JUMP-LANDING-SAVE-1 staging memo, live check (e) and Live findings 2 and 3 (`8a7c9db6`); BAND-ALIGN-2's live finding (2026-10-23); the owner's tier-3 ruling 2026-10-23, "First word of chapter".
 - **Path:** dispatch.
 
+##### Owner rulings (2026-10-23, roadmap review 2026-10-23-5)
+- **Question 1 — (A), as a follow-up:** Flow gets the same paused cursor on the chapter's first word in a separate stub, FLOW-TOC-JUMP-WORD-1 (Seq 110), after this item. This item changes only Flow's and Narrate's save.
+- **Question 2 — (A), keep playing:** a contents jump while Focus is playing retargets the running engine to the chapter's first word and keeps playing. **It joins this item:** add it in `completeLanding`, with a test (playing, contents jump → the engine's current word is the entry's first word, `playing` still true), and add it to the live check.
+- **Question 3:** unchanged. Decided by Done-when 1's count, as recommended.
+
 ##### Owner questions (none block dispatch; the spec is built around the current answer)
 1. **Flow and Narrate after a contents jump.** The ruling names Focus only, so this item changes only their save. Their cursor and reading word behave as today.
    - Options: (A) a follow-up gives Flow the same paused cursor on the chapter's first word (Narrate already restarts there when playing); (B) leave them as they are.
