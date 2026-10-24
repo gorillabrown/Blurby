@@ -34,7 +34,7 @@ function register(ctx) {
     const safe = pickUserSettings(newSettings);
     // Update in-memory state immediately so all readers see the new value
     Object.assign(settings, safe);
-    if (safe.theme !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
+    if (safe.theme !== undefined || safe.einkMode !== undefined) updateWindowTheme(ctx.getMainWindow(), settings);
 
     // Debounce the file write and sync enqueue — rapid toggles/sliders batch into one write
     clearTimeout(saveSettingsTimeout);
