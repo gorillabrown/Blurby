@@ -16,6 +16,11 @@ const path = require("path");
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
+// D6 cold click (NARRATE-HARNESS-COLDCLICK-1): how long a click may take to become the engine's "click" request, and
+// how far past the playing word the click lands (inside the playing section's spans, as a user would click).
+const COLDCLICK_REQUEST_WAIT_MS = 2000;
+const COLDCLICK_OFFSET_WORDS = 60;
+
 function readConfig() {
   try { return JSON.parse(process.env.BLURBY_NARRATE_TRIAL || "null"); } catch { return null; }
 }
@@ -67,6 +72,25 @@ const HELPERS = `
       return Number(el.getAttribute("data-word-index"));
     }
     return null;
+  };
+  // A word by its global index (data-word-index), across the loaded section documents.
+  h.hasWord = (w) => h.docs().some((d) => !!d.querySelector('[data-word-index="' + Number(w) + '"]'));
+  // Click the loaded word with the smallest index >= target, else the highest loaded word; the same click as clickWord.
+  h.clickWordAt = (target) => {
+    let at = null, top = null;
+    for (const d of h.docs()) {
+      for (const el of d.querySelectorAll("[data-word-index]")) {
+        const w = Number(el.getAttribute("data-word-index"));
+        if (w >= target && (!at || w < at.w)) at = { el, w, d };
+        if (!top || w > top.w) top = { el, w, d };
+      }
+    }
+    const pick = at || top;
+    if (!pick) return null;
+    pick.el.scrollIntoView({ block: "center" });
+    const r = pick.el.getBoundingClientRect();
+    pick.el.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2, view: pick.d.defaultView }));
+    return pick.w;
   };
   h.events = () => (window.__BLURBY_TTS_EVAL_TRACE__ && window.__BLURBY_TTS_EVAL_TRACE__.getEvents) ? window.__BLURBY_TTS_EVAL_TRACE__.getEvents() : [];
   h.count = (kind, cause) => h.events().filter((e) => e.kind === kind && (!cause || e.cause === cause)).length;
@@ -127,13 +151,28 @@ async function sectionFrame(wc) {
   return null;
 }
 
+/** Why the opened profile is not the launcher's scratch profile (LL-165), or null when it is (or none was asked for). */
+function profileMismatch(userData, env = process.env) {
+  if (!env.BLURBY_USER_DATA_DIR) return null;
+  const norm = (p) => path.resolve(p).replace(/[\\/]+$/, "").toLowerCase();
+  const want = norm(env.BLURBY_USER_DATA_DIR);
+  const got = norm(userData);
+  if (got !== want) return { userData, expected: path.resolve(env.BLURBY_USER_DATA_DIR) };
+  const live = env.APPDATA ? norm(path.join(env.APPDATA, "blurby")) : null;
+  if (live && (got === live || got.startsWith(live + path.sep))) return { userData, live: path.join(env.APPDATA, "blurby") };
+  return null;
+}
+
 async function run(ctx) {
   const cfg = readConfig();
   if (!cfg || typeof cfg !== "object") return;
   const summary = { config: cfg, startedAt: new Date().toISOString(), steps: [], error: null, tracePaths: null };
-  const step = (name, detail) => { summary.steps.push({ t: Date.now(), name, detail: detail ?? null }); console.log("[narrate-trial]", name, detail ?? ""); };
+  const step = (name, detail, t) => { summary.steps.push({ t: t ?? Date.now(), name, detail: detail ?? null }); console.log("[narrate-trial]", name, detail ?? ""); };
   let exitCode = 0;
-  try {
+  // Profile proof (LL-165): before any action, the profile the app opened must be the scratch one the launcher set.
+  const mismatch = profileMismatch(app.getPath("userData"));
+  if (mismatch) { step("profile mismatch", mismatch); exitCode = 4; }
+  if (!mismatch) try {
     // The main window: its library card opens the document in the reader shell (ReaderContainer with the bottom
     // bar). The "#reader/<id>" window is the legacy standalone reader without mode buttons, so it is not used.
     await waitFor(() => ctx.getDocById("sample-meditations"), { what: "the sample document", timeoutMs: 120000 });
@@ -291,11 +330,21 @@ async function run(ctx) {
       // epoch, Play's chunk is dropped when it arrives, and the process's first voiced sample answers the click. A click
       // before the engine starts would only move where Play starts. voicedBeforeClick records a lost race (the launcher
       // flags the trial too: its first voiced sample would answer "play").
+      // NARRATE-HARNESS-COLDCLICK-1: the click waits for the playing section's own spans (a user clicks only a word
+      // on screen), lands COLDCLICK_OFFSET_WORDS past the playing word, and is confirmed as the engine's click request.
       if (type === "click") {
-        await waitFor(async () => (await js('window.__narrateTrial.count("narrate-request", "play")')) > 0, { what: "the Play's request (the engine started)", timeoutMs, everyMs: 20 });
+        const playReq = JSON.parse(await waitFor(() => js('(() => { const e = window.__narrateTrial.events().find((x) => x.kind === "narrate-request" && x.cause === "play"); return e ? JSON.stringify({ word: e.word, ts: e.ts }) : null; })()'), { what: "the Play's request (the engine started)", timeoutMs, everyMs: 20 }));
+        const playWord = playReq.word;
+        await waitFor(() => js(`window.__narrateTrial.hasWord(${Number(playWord)})`), { what: `the playing word ${playWord}'s span`, timeoutMs, everyMs: 20 });
+        const spansReadyMs = typeof playReq.ts === "number" ? Date.now() - playReq.ts : null;
         const voicedBeforeClick = (await count(null)) > b;
-        const clicked = await clickWord(60);
-        step("clicked while playing", { clicked, voicedBeforeClick });
+        const clickT = Date.now();
+        const clicked = await js(`window.__narrateTrial.clickWordAt(${Number(playWord) + COLDCLICK_OFFSET_WORDS})`);
+        let clickRequested = true;
+        try {
+          await waitFor(async () => (await js('window.__narrateTrial.count("narrate-request", "click")')) > 0, { what: "the click's request", timeoutMs: COLDCLICK_REQUEST_WAIT_MS, everyMs: 20 });
+        } catch { clickRequested = false; }
+        step("clicked while playing", { playWord, clicked, spansReadyMs, voicedBeforeClick, clickRequested }, clickT);
       }
       await waitFor(async () => (await count(null)) > b, { what: `the first voiced sample (cold ${type})`, timeoutMs: 60000, everyMs: 50 });
       await sleep(1500);
@@ -326,7 +375,8 @@ async function run(ctx) {
   if (cfg.out) {
     try {
       await fsPromises.mkdir(cfg.out, { recursive: true });
-      await fsPromises.writeFile(path.join(cfg.out, `trial-${cfg.kind}-${cfg.type ?? ""}${cfg.rate ?? ""}-${Date.now()}.json`), JSON.stringify(summary, null, 2));
+      const name = cfg.label ? `trial-${cfg.label}.json` : `trial-${cfg.kind}-${cfg.type ?? ""}${cfg.rate ?? ""}-${Date.now()}.json`;
+      await fsPromises.writeFile(path.join(cfg.out, name), JSON.stringify(summary, null, 2));
     } catch (err) { console.error("[narrate-trial] summary write failed:", err.message); }
   }
   // app.exit skips will-quit: stop the producer workers here, so the exit code is the trial's, not a crash's.
@@ -334,4 +384,4 @@ async function run(ctx) {
   setTimeout(() => app.exit(exitCode), 500);
 }
 
-module.exports = { run, readConfig, HELPERS };
+module.exports = { run, readConfig, HELPERS, profileMismatch };
