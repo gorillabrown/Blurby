@@ -48,7 +48,7 @@ export interface UseProgressTrackerReturn {
   /** Handle "keep at furthest position" from backtrack prompt */
   handleKeepFurthest: () => void;
   /** Finish reading session — flush saves, log session, handle completion */
-  finishReading: (finalPos: number) => void;
+  finishReading: (finalPos: number, cfi?: string) => void;
   /** Finish reading without exiting — persists progress, logs session, archives if complete, but does NOT call onExitReader */
   finishReadingWithoutExit: (finalPos: number) => void;
   /** The debounced save timer ref (for cleanup) */
@@ -59,6 +59,8 @@ export interface UseProgressTrackerReturn {
   hasEngagedRef: React.MutableRefObject<boolean>;
   /** The furthest position ref */
   furthestPositionRef: React.MutableRefObject<number>;
+  /** The cfi of the furthest position's page (KEEP-FURTHEST-1) */
+  furthestCfiRef: React.MutableRefObject<string | null>;
   /** The cfi of the last relocate the view reported, with its doc (PAGE-REOPEN-CFI-1); set by the relocate save */
   lastRelocateCfiRef: React.MutableRefObject<{ docId: string; cfi: string } | null>;
 }
@@ -139,9 +141,11 @@ export function useProgressTracker({
 
   // High-water mark for backtrack detection
   const furthestPositionRef = useRef<number>((activeDoc as any)?.furthestPosition ?? activeDoc?.position ?? 0);
+  const furthestCfiRef = useRef<string | null>((activeDoc as any)?.furthestCfi ?? activeDoc?.cfi ?? null);
 
   useEffect(() => {
     furthestPositionRef.current = (activeDoc as any)?.furthestPosition ?? activeDoc?.position ?? 0;
+    furthestCfiRef.current = (activeDoc as any)?.furthestCfi ?? activeDoc?.cfi ?? null;
   }, [activeDoc?.id]);
 
   // Backtrack prompt state
@@ -221,7 +225,7 @@ export function useProgressTracker({
   }, [currentPos, activeDoc.id, markPageActivity, onPagesRead, onUpdateProgress, readingMode, useFoliate]);
 
   // Internal helper: persist progress, log session, archive if complete (shared by both finish variants)
-  const _persistAndLog = useCallback((finalPos: number) => {
+  const _persistAndLog = useCallback((finalPos: number, cfiOverride?: string) => {
     if (pageSaveTimerRef.current) { clearTimeout(pageSaveTimerRef.current); pageSaveTimerRef.current = null; }
     const normalizedFinalPos = Math.max(0, Math.trunc(finalPos));
     const fractionPos = Math.floor(foliateFractionRef.current * (activeDoc.wordCount || 0));
@@ -233,7 +237,7 @@ export function useProgressTracker({
     // PAGE-REOPEN-CFI-1: only the cfi of a relocate in this book, the page last on screen. With none since the open,
     // send no cfi, so main keeps the stored one rather than a landing the reader never turned from.
     const relocated = lastRelocateCfiRef.current;
-    const cfi = relocated && relocated.docId === activeDoc.id ? relocated.cfi : undefined;
+    const cfi = cfiOverride ?? (relocated && relocated.docId === activeDoc.id ? relocated.cfi : undefined);
     onUpdateProgress(activeDoc.id, savePos, cfi);
     api.updateDocProgress(activeDoc.id, savePos, cfi);
     // Use active reading time, not total elapsed
@@ -272,8 +276,8 @@ export function useProgressTracker({
   ]);
 
   // Finish reading — persist, log, archive, then exit reader
-  const finishReading = useCallback((finalPos: number) => {
-    _persistAndLog(finalPos);
+  const finishReading = useCallback((finalPos: number, cfi?: string) => {
+    _persistAndLog(finalPos, cfi);
     onExitReader(finalPos);
   }, [_persistAndLog, onExitReader]);
 
@@ -310,7 +314,7 @@ export function useProgressTracker({
 
   const handleKeepFurthest = useCallback(() => {
     setShowBacktrackPrompt(false);
-    finishReading(furthestPositionRef.current);
+    finishReading(furthestPositionRef.current, furthestCfiRef.current ?? undefined);
   }, [finishReading]);
 
   return {
@@ -329,6 +333,7 @@ export function useProgressTracker({
     lastSavedPosRef,
     hasEngagedRef,
     furthestPositionRef,
+    furthestCfiRef,
     lastRelocateCfiRef,
   };
 }

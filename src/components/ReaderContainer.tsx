@@ -266,6 +266,7 @@ export default function ReaderContainer({
     // useProgressTracker's refs (stable objects), bound after the tracker runs.
     pageSaveTimerRef: { current: null } as React.MutableRefObject<ReturnType<typeof setTimeout> | null>,
     furthestPositionRef: { current: 0 } as React.MutableRefObject<number>,
+    furthestCfiRef: { current: null } as React.MutableRefObject<string | null>,
     lastSavedPosRef: { current: 0 } as React.MutableRefObject<number>,
     lastRelocateCfiRef: { current: null } as React.MutableRefObject<{ docId: string; cfi: string } | null>,
   });
@@ -309,6 +310,9 @@ export default function ReaderContainer({
       // PAGE-REOPEN-CFI-1: a saved cfi also reaches the library copy a reopen opens from.
       updateDocProgress: (docId, wordIndex, cfi) => {
         void api.updateDocProgress(docId, wordIndex, cfi);
+        // KEEP-FURTHEST-1: a Page turn's save raises the high-water mark (the relocate save skips it under the resume anchor).
+        const live = shellRef.current;
+        if (wordIndex > live.furthestPositionRef.current) { live.furthestPositionRef.current = wordIndex; live.furthestCfiRef.current = cfi ?? null; }
         if (cfi) shellRef.current.onUpdateProgress(docId, wordIndex, cfi);
       },
       updateProgress: (docId, wordIndex) => shellRef.current.onUpdateProgress(docId, wordIndex),
@@ -320,6 +324,7 @@ export default function ReaderContainer({
       scheduleRelocateSave: ({ wordIndex, cfi }) => {
         const live = shellRef.current;
         const pageDelta = calculateHighWaterPagesReadDelta(live.furthestPositionRef.current, wordIndex);
+        if (pageDelta.highWater > live.furthestPositionRef.current) live.furthestCfiRef.current = cfi;
         live.furthestPositionRef.current = pageDelta.highWater;
         if (pageDelta.pages > 0) live.recordPages(pageDelta.pages);
         // Debounced save of CFI for resume on reopen
@@ -485,6 +490,7 @@ export default function ReaderContainer({
     requestCompletionToPage,
     pageSaveTimerRef: progress.pageSaveTimerRef,
     furthestPositionRef: progress.furthestPositionRef,
+    furthestCfiRef: progress.furthestCfiRef,
     lastSavedPosRef: progress.lastSavedPosRef,
     lastRelocateCfiRef: progress.lastRelocateCfiRef,
   };
