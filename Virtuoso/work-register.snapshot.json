@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-23T20:18:13Z",
+  "takenAt": "2026-10-24T01:28:08Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -100,8 +100,8 @@
       "id": "BAND-ALIGN-2",
       "title": "In Focus, the text scrolls the cursor's line into the fixed band",
       "sequence": 83,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -115,12 +115,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#band-align-2-spec",
       "branch": "eb/band-align-2",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "Owner amendment 2026-10-23: the band edges sit on line boxes, the cursor line is the band middle, the band follows the reading location when the scroll clamps, and the reader picks the anchor (Top, Top third, Center). Flow runs on one clock.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap from the owner's decision (\"keep band fixed\"). Stub. After BAND-ALIGN-1. Not a release gate.",
-      "revision": "dc9a7837d3bb17181495bca2df3e21ba7a0fc3b949a0f74d60a5778730f21e7a",
+      "revision": "3d6f9c62aeea942e0103ef76c46876f3970ffae9ce52f76aef02ac0473841f34",
       "extra": {}
     },
     {
@@ -153,8 +153,8 @@
       "id": "BLOCK-TAG-CASE-1",
       "title": "The renderer finds paragraph blocks in EPUB pages (case-insensitive tag checks)",
       "sequence": 85,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -167,12 +167,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#block-tag-case-1",
       "branch": "eb/block-tag-case-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "Every renderer block helper compares lowercase XHTML tag names with an uppercase set, so a whole EPUB section is one block. Measure before and after on two books; the owner decides before it merges (tier 2).",
       "notes": "",
-      "revision": "efe6c55244bd5417783587cb2faeab712445a7f2cab4aa736167ef46e2b6bf97",
+      "revision": "5312a862454c14df092176103d48485003feb272459af6f6b86e35075a99d0b1",
       "extra": {}
     },
     {
@@ -230,8 +230,7 @@
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
-        "BUG-208 fix (release fix) merges first",
-        "same four files"
+        "BOOK-TEXT-COLOUR-1"
       ],
       "effort": "S",
       "workstream": "UX polish",
@@ -244,7 +243,7 @@
       "evidence": "",
       "description": "Owner design decision: book pages in all four modes use the reader's font and one size ratio for headers, sub-headers and body text.",
       "notes": "",
-      "revision": "056421e72ec864f1f6bbf4bbb8f76f61f81cbb2c4c09c09175120fbc010da32e",
+      "revision": "4295cb345471c73cc2a6f43bb5c92da9c56af1785e879bf6f1e40d6026cd4c9f",
       "extra": {}
     },
     {
@@ -597,16 +596,16 @@
       "completed": "",
       "evidence": "",
       "description": "BUG-211: in Flow, the line, word, sentence and paragraph keys move both pacers (UI-SWEEP-TRIAGE-1 rows 100 to 103). Post-release.",
-      "notes": "",
-      "revision": "2f4c600b9d125b95548e6a3ae03540056fb6de87172c2eab67a0be86ae48ec8d",
+      "notes": "Amended 2026-10-23 (Blurby.Brain): Flow FoliateView browse-away keydown listener pauses playback on modified arrows; guard plus isFlowBrowseKey helper. Rebuild before merge; FLOW-PARA-KEYS-1 takes the amended tip in.",
+      "revision": "bca3a34995facbbea75231fa53f19473bd59345b04094f42e00c4ebf7a851095",
       "extra": {}
     },
     {
       "id": "FLOW-PARA-KEYS-1",
       "title": "Flow paragraph keys step over whole-book paragraph starts on an EPUB",
       "sequence": 84,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -618,12 +617,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#flow-para-keys-1",
       "branch": "eb/flow-para-keys-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "Flow paragraph keys: the check settled red live 2026-10-23 (187 to 5290 to the last word). Fix mirrors the amended FOCUS-KEYS-FIX-1 collector (case-insensitive block lookup) plus book-wide paragraph starts.",
       "notes": "",
-      "revision": "0ad582b230c840bce91a7acb7127e31251de10f1fafeb2763bc65b935ca10cdc",
+      "revision": "9e6afc1706a9098d183d1d8bb526efa03bf1e0e6a3b8bb67a5ba405d83c201ee",
       "extra": {}
     },
     {
@@ -1053,8 +1052,8 @@
       "id": "JUMP-LANDING-SAVE-1",
       "title": "Other jumps in Page mode save the page they land on",
       "sequence": 81,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -1066,12 +1065,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#jump-landing-save-1",
       "branch": "eb/jump-landing-save-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "Internal-link jumps, footnote jumps and next/previous chapter still leave the saved position on the page they jumped from. Route each through the in-flight-turn counting TOC-JUMP-SAVE-1 gives the API goTo.",
       "notes": "Created 2026-10-22 by Blurby.Roadmap from TOC-JUMP-SAVE-1's run (notes 3 and 4). Stub. Not a release gate.",
-      "revision": "8b00666f35c2930f172b911e0ac2e6799ec2af5b27e19ca60da1dec018454300",
+      "revision": "050062b4567d2407a205cb6bf6c5f2da5e79d1d66138565f17409b56695ddfa1",
       "extra": {}
     },
     {
@@ -2300,8 +2299,8 @@
       "id": "PAGE-SAVE-RESTAMP-3",
       "title": "Rare page-save edge cases after the restamp guard",
       "sequence": 80,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [],
@@ -2311,12 +2310,12 @@
       "group": "Reader Polish",
       "spec_link": "ROADMAP.md#page-save-restamp-3",
       "branch": "eb/page-save-restamp-3",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "The double-wrap race in long sections, and any failed-replay diagnostic beyond PAGE-SAVE-RESTAMP-2's.",
       "notes": "Created 2026-10-15 by Blurby.Roadmap on Blurby.Brain's ruling. Not a release gate.",
-      "revision": "975fefd4adf7fbfb97aede4352fa569ac994a71c898557fb0c76f5b7c9a4b9cd",
+      "revision": "3a901776349d5699f77cf00692d7ec373f7dc72350616131a7071a7713c92022",
       "extra": {}
     },
     {
@@ -2412,6 +2411,31 @@
       "description": "Cancel the first quit, run the library, settings, pending-write and best-effort cloud saves in order under a 3 s cap, keep the Narrate producer shutdown uncapped, then quit. Fixes BUG-192.",
       "notes": "Created by roadmap review 2026-10-14. BUG-192, LL-157. Merges after FOLDER-SCAN-PERF-1 (shared main process entry file, different hunks). Full Spec: U9/U10 pass. Dispatched 2026-10-14 by /next-pointer (branch eb/quit-flush-1 from main 80c71c70). Completed 2026-10-14: merge d21009b3, close-out merge a63048c2; ledger TR-073. Owner smoke (a)-(e) pass on the production build; (f) not testable as written (Page-mode page turns do not commit a position). Review fixes W1, W2 and N1 ruled by Blurby Brain (option A + N1); LL-159; BUG-192 resolved.",
       "revision": "b83a42ee3f212e61007ee9f63020ab569976a710b4aaa4193a40fee4d0c7ba8d",
+      "extra": {}
+    },
+    {
+      "id": "READER-ARROW-GUARD-1",
+      "title": "Narrate and Page ignore modified arrows in their page-turn listeners",
+      "sequence": 91,
+      "status": "queued",
+      "raw_status": "Queued",
+      "written_status": "stub",
+      "raw_written_status": "Stub",
+      "prerequisites": [
+        "FLOW-KEYS-FIX-1"
+      ],
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "deliverable": "",
+      "group": "",
+      "spec_link": "ROADMAP.md#reader-arrow-guard-1",
+      "branch": "",
+      "started": "",
+      "completed": "",
+      "evidence": "",
+      "description": "Narrate and Page book views turn a page (and Narrate pauses) on Shift or Ctrl with arrow keys, like Flow did. Probe live first, then copy FLOW-KEYS-FIX-1 amendment guard.",
+      "notes": "",
+      "revision": "fa1e09fa55d7b87b81d2853a7c4946da8f196c6b070bb6785a4fe132610d0520",
       "extra": {}
     },
     {
@@ -3688,8 +3712,8 @@
       "id": "ZIP-ASYNC-READ-1",
       "title": "Read EPUB archives asynchronously",
       "sequence": 82,
-      "status": "queued",
-      "raw_status": "Queued",
+      "status": "in-flight",
+      "raw_status": "In Flight",
       "written_status": "full-spec",
       "raw_written_status": "Full Spec",
       "prerequisites": [
@@ -3701,12 +3725,12 @@
       "group": "",
       "spec_link": "ROADMAP.md#zip-async-read-1",
       "branch": "eb/zip-async-read-1",
-      "started": "",
+      "started": "2026-10-23",
       "completed": "",
       "evidence": "",
       "description": "adm-zip's path constructor reads the archive with fs.readFileSync. In openZip (main/zip-read.js), read with fsPromises.readFile and pass the buffer to adm-zip, with the cap checked on the stat.",
       "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.",
-      "revision": "f36336d7ca092f5a4d1cf7917438f38b46a08290e7b4a16151817b0ec37d6247",
+      "revision": "6b4be4cd722793e2251c96dc998cee1dd93c3e6b1181988d3d4b381e45a05fb6",
       "extra": {}
     },
     {
