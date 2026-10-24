@@ -8,6 +8,16 @@
 
 ## Incomplete
 
+### BUG-218 — A modified ←/→ in Narrate or Page turns a page (and pauses Narrate)
+**Reported:** 2026-10-23 (Blurby.Brain, from FLOW-KEYS-FIX-1's diagnosis; measured live by READER-ARROW-GUARD-1's k0 on the `5bc18a6c` x64 `--dir` package)
+**Severity:** LOW (a modified arrow does its own job through `useReaderKeys` and also turns a page). Not a release gate.
+**Status:** RESOLVED in source (READER-ARROW-GUARD-1, branch `eb/reader-arrow-guard-1`, held for after the Stage 8 release). Lane: Reader Engine.
+**Location:** the book view's window keydown listeners: Narrate `src/reader/modes/narrate/FoliateView.tsx` (the `// Keyboard (NARR-FIX-1)` effect), Page `src/reader/modes/page/FoliateView.tsx` (the `// Keyboard page turn` effect). Neither checked Shift, Ctrl, Alt or Meta.
+**Description:**
+- **Page, paused:** Shift, Ctrl and Alt with ←/→ each turned a page (k0: every row moved `renderer.start` 720 ↔ 1440). Shift+←/→ also moved the highlight by paragraph through `useReaderKeys`.
+- **Narrate, playing:** each modified arrow turned a page and set `isBrowsedAway` true. Measured, it did not pause: `playing` stayed true and the engine word kept advancing. The title's "pauses" comes from the stub and was not borne out live.
+- **Fix:** `isNarrateBrowseKey` and `isPageTurnKey` (one helper per mode, FLOW-KEYS-FIX-1's pattern) ignore ←/→ with any modifier. Plain ←/→ and PageUp/PageDown (with or without a modifier) are unchanged. Evidence: `docs/governance/close-outs/Memo.READER-ARROW-GUARD-1.GovernanceStaging.2026-10-23.md`.
+
 ### BUG-217 — First launch on a fresh profile logs a library backup failure
 **Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)
 **Severity:** LOW (stderr noise; no data at risk). Pre-existing: BAND-ALIGN-2 changes nothing in `main/`. Not a release gate.
