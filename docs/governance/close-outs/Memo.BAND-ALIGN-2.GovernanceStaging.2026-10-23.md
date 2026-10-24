@@ -128,3 +128,42 @@ Records: `tip-100.json`, `tip-120.json`, `tip-100-extras.json`, `tip-120-extras.
 ## Done-when 7 (owner, next smoke batch)
 
 In Focus and Flow: the band's edges sit between lines; the cursor line is the band's middle line; at the top of a section the band is on the cursor; each of the three anchor buttons moves the text to that spot; Lines 3, 5 and 7 change the band's height, and Off removes it.
+
+## Wave 2 — owner amendment R6 (2026-10-23): no band on the cover
+
+- **Branch:** built on `origin/eb/band-align-2` @ `4ab25f8b` (one time-log commit after `508be445`), with `origin/main` merged in (`cfc44269`). Pushed to `refs/heads/eb/band-align-2`. Not merged.
+- **Measured first (no code change), packaged `--dir` build of `cfc44269`** (clean `git archive` copy with its own `npm ci`). Fresh scratch profile per run; the profile preflight passed (LL-165); the live hashes were unchanged on every run. Probe `C:\Projects\Blurby-artifacts\band-align-2-r6\cover-probe.mjs` (pattern: `keys-fix/word-probe.mjs`). It reads the zone host's `--flow-zone-*`, its class and its computed `mask-image` (LL-166).
+  - **The cover is image-only:** section 0 has 0 stamped words, 1 image and no text. No ruling on title pages is needed.
+  - **Base:** in both Focus and Flow the cover set `--flow-zone-top` 23.8% and `--flow-zone-bottom` 42.9%, and the mask dimmed the page. There was no cursor. The cause was the zone effect's `placeBandAtAnchor` when no cursor span exists.
+- **Red first (rule 43), `2f44528f`:** `tests/readerModes/bandAlign2Cover.test.tsx`. On the unchanged code, (c6) "no stamped words, no band" and (c7) "a highlight that finds no word removes the band" fail by assertion in both modes. The (c8) control, "a text section keeps its band", passes.
+- **Fix:** `eabd0c07`, `bba582e5`, `df80e5dc`.
+  - Each mode's view has its own `hideBand()`: it clears the `--flow-zone-*` properties and adds the band-off class, as Lines Off does. It replaces `placeBandAtAnchor` when no cursor is painted. It also runs when a highlight finds no word (except while browsing away) and when the cursor span has no line boxes.
+  - Placing a band removes the class. That covers the view and both band paths of the line pacer in `flow/useModeBindings.ts`. Live runs found each of those pacer paths in turn.
+  - There are no imports between modes.
+- **Pinned test (rule 50), edited under Blurby.Roadmap's tier-1 ruling of 2026-10-23:** `tests/readerModes/zoneLineStep.test.ts` (b1d), commit `89862a91`.
+  - **Old:** with no word painted, some element carries `--flow-zone-bottom`, the band is 21.43% tall, and its top is at the Top-third anchor (22.62%).
+  - **New:** no `--flow-zone-*` before any word is painted. Then, with word 17 painted, the zone host's `--zone-line-step-px` is 27, the band is 5 × 27 / 630 = 21.43% tall, and it contains the cursor line.
+  - **Red:** fails on the pre-R6 Focus view (band at 22.62% with no cursor), and with a 24 px pitch (step 24, not 27). **Green** on the tip.
+  - No other pinned test was touched.
+- **Live, packaged build of `df80e5dc`** (same recipe and probe):
+
+  | Check | Focus | Flow |
+  |---|---|---|
+  | Cover | no `--flow-zone-*`, band-off, mask `none` | no `--flow-zone-*`, band-off, mask `none` |
+  | First text section | arrival on section 1 (3 PageDown in Page): band 34–434 px, cursor "MEDITATIONS" 194–228 px inside it, dimmed | Play from the cover: band 113–215 px, cursor 115–145 px inside it, dimmed; paused again: band 115–223 px, cursor inside |
+
+  On `eabd0c07` the pacer set the band while Flow played, but the class stayed and nothing dimmed. `bba582e5` and `df80e5dc` fix its two band paths.
+- **Recorded, unchanged (Blurby.Roadmap: no change):** after PageDown Flow is browsing away. A paused Ctrl+Right then repaints the cursor, but the band does not move ("the band never moves while browsing"). The base does the same. Play brings the band back.
+- **Gates on `df80e5dc`:** `npm test` exit 0, 190 files, 2,547 passed / 2 skipped. `npm run typecheck` 0. `npm run build` 0.
+- **Fence (Wave 2):** `M src/reader/modes/flow/FoliateView.tsx`, `M src/reader/modes/focus/FoliateView.tsx`, `A tests/readerModes/bandAlign2Cover.test.tsx`, plus this memo and the time log. Outside the fence: `M src/reader/modes/flow/useModeBindings.ts`, accepted for BAND-ALIGN-2 earlier, and `M tests/readerModes/zoneLineStep.test.ts` (b1d, under the ruling). `src/utils`, `ReaderContainer.tsx`, `src/types.ts`, Page, Narrate, `main/` and the `mode.css` files are untouched.
+
+### Package verification (standing rule 53 / LL-167), `df80e5dc`
+
+- **Package:** `C:\Projects\Blurby-artifacts\band-align-2-r6\eb-out-df80e5dc\win-unpacked\Blurby.exe`, from `npx electron-builder --win --dir --x64` on a clean archive of `df80e5dc`, which contains `origin/main`. It has its own output directory; nothing was built over another build. Log: `build-df80e5dc.log`.
+- **`BLURBY_USER_DATA_DIR`:** 2 hits in the packaged `main.js`.
+- **25 s launch on a fresh scratch profile:** alive at 25 s; no crash dump; stdout empty.
+  - stderr holds 6 lines of `[ws-server] Server error: listen EADDRINUSE 127.0.0.1:48924`. The port belongs to the installed Blurby, `C:\Users\estra\AppData\Local\Programs\blurby\Blurby.exe`, pid 16120, which was running. That is environmental: this branch changes no `main/` file.
+  - No other error, unhandled-rejection or crash line.
+  - Logs: `pkgcheck-df80e5dc/`.
+- **`asar list`:** no `main/` file changed in this wave. The renderer bundle in `app.asar` (`dist/`) is identical to the build's `dist/` (`diff -rq` clean).
+- **Done-when re-run on the packaged exe:** the cover and text-section rows above.

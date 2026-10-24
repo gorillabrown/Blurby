@@ -17,3 +17,5 @@
 {"event": "end", "row": 8, "evidence": "31ebe974 live: Flow out-of-band 0/178 at 100% and 120% (base 99/128); Focus (i)(ii) in; anchors within 0.4 px; Lines exact; Off no mask; e-ink 1361/1361 on screen, page step at 18; live hashes unchanged", "result": "done", "at": "2026-10-23T23:33:21Z"}
 {"event": "start", "row": 9, "model": "claude-opus-5-5", "host": "claude-code", "at": "2026-10-23T23:33:21Z"}
 {"event": "end", "row": 9, "evidence": "508be445 pushed to origin/eb/band-align-2; artifacts exist on the pushed ref; report sent to Blurby.Roadmap", "result": "done", "at": "2026-10-23T23:34:15Z"}
+{"event": "start", "row": 10, "model": "claude-opus-5-5", "host": "claude-code", "note": "Wave 2: owner amendment R6 (no band on the cover)", "at": "2026-10-23T23:50:00Z"}
+{"event": "end", "row": 10, "evidence": "red 2f44528f (c6, c7 fail both modes; c8 passes); fix eabd0c07+bba582e5+df80e5dc; b1d 89862a91 under ruling; live df80e5dc: no band on the cover in Focus and Flow, band back on the cursor line in section 1; npm test 2547/2 skipped/0 failed, typecheck 0, build 0; rule 53 package verified", "result": "done", "at": "2026-10-24T01:30:00Z"}
