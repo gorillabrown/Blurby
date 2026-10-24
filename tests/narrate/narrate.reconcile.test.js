@@ -89,3 +89,15 @@ describe("narrate reconciliation (P6b)", () => {
     expectCovers(await reconcile(text), text);
   });
 });
+
+// NARRATE-RECONCILE-RESIDUAL-1 — a two-word name espeak reads as one fused group unlike its words read alone. This case
+// failed closed before that item, for the reason its title names.
+describe("narrate reconciliation (NARRATE-RECONCILE-RESIDUAL-1)", () => {
+  it("a fused name is identified by its words read together (was 'fused unit evidence cost 1.09 > 0.5: La Jolla ~ lɐhˈɔɪə')", async () => {
+    const text = "They drove south along the coast to La Jolla and stayed the night.";
+    const r = await reconcile(text);
+    expectCovers(r, text);
+    const name = r.wm.units.filter((u) => u.words.includes("Jolla")).map((u) => [u.kind, u.words.join(" "), u.group, u.evidence]);
+    expect(name).toEqual([["fused", "La Jolla", "lɐhˈɔɪə", "phrase"]]);
+  });
+});
