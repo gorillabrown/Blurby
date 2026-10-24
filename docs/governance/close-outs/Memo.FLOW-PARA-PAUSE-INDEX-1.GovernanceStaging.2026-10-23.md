@@ -85,4 +85,5 @@
   - **0 of 216 pauses are off a paragraph end.** In each loaded section, pauses = paragraphs: 27/27, 31/31 and 31/31, in Flow and Focus. This matches the after measurement.
 - **(e):** the package path, commit and logs were sent to Blurby.Brain. The `release/` output is kept until Brain confirms.
 - **After the carry-over fix:** package unchanged. `git diff --name-only 1b98815f -- main.js preload.js main dist assets/icon.ico assets/tray-icon.png` (the `build.files` roots) prints nothing. The fix changes only `docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json` and this memo, so the rule 53 verification above stands for the new tip.
+- **Confirmed:** Blurby.Brain confirmed the package under rule 53, (a)–(e), on 2026-10-23 for `e41f6edc` (tip `b57b0925`). The merge go comes from Blurby.Roadmap, and `release/` is kept until the merge lands.
 - All logs are under `C:\Projects\Blurby-artifacts\flow-para-pause-index-1\`.
