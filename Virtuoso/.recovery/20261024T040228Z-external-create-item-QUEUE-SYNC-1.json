@@ -1,0 +1,50 @@
+{
+  "id": "20261024T040228Z-external-create-item-QUEUE-SYNC-1",
+  "operation": "external-create-item",
+  "item_id": "QUEUE-SYNC-1",
+  "created": "2026-10-24T04:02:28Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "One reading queue and one listening queue, synced across every surface",
+      "status": "Queued",
+      "sequence": 112,
+      "written_status": "Stub",
+      "effort": "L",
+      "workstream": "Library & Content",
+      "prerequisites": [
+        "BLURBY-SERVER-1"
+      ],
+      "spec_link": "ROADMAP.md#queue-sync-1",
+      "description": "Reading and listening queues sync through the blrby.app server to desktop, Android, iOS, Android Auto and CarPlay.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap at the owner request. Stub; needs owner design decisions (one queue or two; podcasts in the listening queue; reorder conflicts).",
+      "id": "QUEUE-SYNC-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:QUEUE-SYNC-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "QUEUE-SYNC-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:QUEUE-SYNC-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T040228Z-external-create-item-QUEUE-SYNC-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e8140837be15918f2c0bc",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T04:02:47Z",
+  "outcome": "succeeded"
+}
