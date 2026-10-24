@@ -33,6 +33,42 @@ const MOSS_NANO_LIVE_EVIDENCE_KEYS = Object.freeze([
   "explicitFallback",
   "sidecarLifecycleStable",
 ]);
+const MOSS_NANO_13_ARTIFACT_FOLDER = "artifacts/tts-eval/moss-nano-13-live-selected-observations/";
+const MOSS_NANO_13_TOP_LEVEL_KEYS = Object.freeze([
+  "schemaVersion",
+  "sprintId",
+  "artifactType",
+  "capturedAt",
+  "appVersion",
+  "gitRef",
+  "host",
+  "engine",
+  "modes",
+  "notes",
+]);
+const MOSS_NANO_13_HOST_KEYS = Object.freeze(["platform", "arch", "node", "electron"]);
+const MOSS_NANO_13_ENGINE_KEYS = Object.freeze([
+  "selectedEngine",
+  "defaultEngineChanged",
+  "kokoroAvailable",
+  "silentFallbackObserved",
+  "timingTruth",
+  "wordTimestamps",
+]);
+const MOSS_NANO_13_MODE_KEYS = Object.freeze([
+  ...MOSS_NANO_LIVE_EVIDENCE_KEYS,
+  "fakeWordTimestamps",
+  "observation",
+]);
+const MOSS_NANO_13_OBSERVATION_KEYS = Object.freeze([
+  "bookId",
+  "startGlobalWordIndex",
+  "endGlobalWordIndex",
+  "segmentsHeard",
+  "fallbackState",
+  "notes",
+]);
+const MOSS_NANO_13_NOTES_KEYS = Object.freeze(["observer", "source", "artifactFolder"]);
 
 function isMossNanoProductScenario(scenario) {
   const gate = scenario?.nanoGate ?? {};
@@ -88,18 +124,219 @@ export function evaluateMossNanoProductGate({ matrixManifest, evidence = {} } = 
   };
 }
 
-function isMossNanoLiveEvidenceScenario(scenario) {
+function isMossNanoLiveEvidenceScenario(scenario, sprintId = "MOSS-NANO-12") {
   const gate = scenario?.nanoGate ?? {};
+  const tags = scenario.tags || [];
+  const sprintTag = sprintId === "MOSS-NANO-13" ? "moss-nano-13" : "moss-nano-12";
   return scenario?.engine === "nano"
     && gate.selectedEngine === "nano"
     && gate.readiness === "required"
-    && (scenario.tags || []).includes("moss-nano-12")
-    && (scenario.tags || []).includes("nano-live-evidence");
+    && tags.includes(sprintTag)
+    && tags.includes("nano-live-evidence");
 }
 
-export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence = {} } = {}) {
+function isPlainObject(value) {
+  return value != null && typeof value === "object" && !Array.isArray(value);
+}
+
+function hasOwn(value, key) {
+  return Object.prototype.hasOwnProperty.call(value, key);
+}
+
+function validateRequiredObject({ value, path: objectPath, requiredKeys, allowedKeys, errors }) {
+  if (!isPlainObject(value)) {
+    errors.push(`${objectPath} must be an object`);
+    return false;
+  }
+  for (const key of requiredKeys) {
+    if (!hasOwn(value, key)) errors.push(`${objectPath}.${key} is required`);
+  }
+  for (const key of Object.keys(value)) {
+    if (!allowedKeys.includes(key)) errors.push(`${objectPath}.${key} is not allowed`);
+  }
+  return true;
+}
+
+function isAllowedWordTimestampState(value) {
+  return value === "absent" || value === false || value === null;
+}
+
+function isAllowedFakeWordTimestampState(value) {
+  return value === "absent" || value === false;
+}
+
+function validateMossNano13LiveEvidenceSchema(liveEvidence) {
+  const errors = [];
+  const pauseReasons = [];
+
+  if (liveEvidence?.__readError) {
+    errors.push(`live-evidence.json could not be parsed: ${liveEvidence.__readError}`);
+    return { errors, pauseReasons };
+  }
+
+  if (!validateRequiredObject({
+    value: liveEvidence,
+    path: "liveEvidence",
+    requiredKeys: MOSS_NANO_13_TOP_LEVEL_KEYS,
+    allowedKeys: MOSS_NANO_13_TOP_LEVEL_KEYS,
+    errors,
+  })) {
+    return { errors, pauseReasons };
+  }
+
+  if (liveEvidence.schemaVersion !== "moss-nano-live-evidence.v1") {
+    errors.push("liveEvidence.schemaVersion must equal moss-nano-live-evidence.v1");
+  }
+  if (liveEvidence.sprintId !== "MOSS-NANO-13") {
+    errors.push("liveEvidence.sprintId must equal MOSS-NANO-13");
+  }
+  if (liveEvidence.artifactType !== "selected-nano-live-observations") {
+    errors.push("liveEvidence.artifactType must equal selected-nano-live-observations");
+  }
+  if (typeof liveEvidence.capturedAt !== "string" || Number.isNaN(Date.parse(liveEvidence.capturedAt))) {
+    errors.push("liveEvidence.capturedAt must be an ISO date-time string");
+  }
+  if (typeof liveEvidence.appVersion !== "string" || liveEvidence.appVersion.length < 1) {
+    errors.push("liveEvidence.appVersion must be a non-empty string");
+  }
+  if (typeof liveEvidence.gitRef !== "string" || liveEvidence.gitRef.length < 1) {
+    errors.push("liveEvidence.gitRef must be a non-empty string");
+  }
+
+  if (validateRequiredObject({
+    value: liveEvidence.host,
+    path: "liveEvidence.host",
+    requiredKeys: MOSS_NANO_13_HOST_KEYS,
+    allowedKeys: MOSS_NANO_13_HOST_KEYS,
+    errors,
+  })) {
+    for (const key of MOSS_NANO_13_HOST_KEYS) {
+      if (typeof liveEvidence.host[key] !== "string") errors.push(`liveEvidence.host.${key} must be a string`);
+    }
+  }
+
+  if (validateRequiredObject({
+    value: liveEvidence.engine,
+    path: "liveEvidence.engine",
+    requiredKeys: MOSS_NANO_13_ENGINE_KEYS,
+    allowedKeys: MOSS_NANO_13_ENGINE_KEYS,
+    errors,
+  })) {
+    if (liveEvidence.engine.selectedEngine !== "nano") errors.push("liveEvidence.engine.selectedEngine must equal nano");
+    if (liveEvidence.engine.defaultEngineChanged !== false) {
+      pauseReasons.push("Default engine changed during selected-Nano observation");
+    }
+    if (liveEvidence.engine.kokoroAvailable !== true) {
+      pauseReasons.push("Kokoro was not available during selected-Nano observation");
+    }
+    if (liveEvidence.engine.silentFallbackObserved !== false) {
+      pauseReasons.push("Silent fallback was observed during selected-Nano observation");
+    }
+    if (liveEvidence.engine.timingTruth !== "segment-following") {
+      errors.push("liveEvidence.engine.timingTruth must equal segment-following");
+    }
+    if (!isAllowedWordTimestampState(liveEvidence.engine.wordTimestamps)) {
+      pauseReasons.push("Fake word timestamps were observed at the engine level");
+    }
+  }
+
+  if (validateRequiredObject({
+    value: liveEvidence.modes,
+    path: "liveEvidence.modes",
+    requiredKeys: MOSS_NANO_PRODUCT_MODES,
+    allowedKeys: MOSS_NANO_PRODUCT_MODES,
+    errors,
+  })) {
+    for (const mode of MOSS_NANO_PRODUCT_MODES) {
+      const modeEvidence = liveEvidence.modes[mode];
+      if (!validateRequiredObject({
+        value: modeEvidence,
+        path: `liveEvidence.modes.${mode}`,
+        requiredKeys: MOSS_NANO_13_MODE_KEYS,
+        allowedKeys: MOSS_NANO_13_MODE_KEYS,
+        errors,
+      })) {
+        continue;
+      }
+
+      for (const key of MOSS_NANO_LIVE_EVIDENCE_KEYS) {
+        if (modeEvidence[key] !== true) errors.push(`liveEvidence.modes.${mode}.${key} must equal true`);
+      }
+      if (!isAllowedFakeWordTimestampState(modeEvidence.fakeWordTimestamps)) {
+        pauseReasons.push(`Fake word timestamps were observed in ${mode}`);
+      }
+
+      const observation = modeEvidence.observation;
+      if (validateRequiredObject({
+        value: observation,
+        path: `liveEvidence.modes.${mode}.observation`,
+        requiredKeys: MOSS_NANO_13_OBSERVATION_KEYS,
+        allowedKeys: MOSS_NANO_13_OBSERVATION_KEYS,
+        errors,
+      })) {
+        if (typeof observation.bookId !== "string" || observation.bookId.length < 1) {
+          errors.push(`liveEvidence.modes.${mode}.observation.bookId must be a non-empty string`);
+        }
+        if (typeof observation.startGlobalWordIndex !== "number") {
+          errors.push(`liveEvidence.modes.${mode}.observation.startGlobalWordIndex must be a number`);
+        }
+        if (typeof observation.endGlobalWordIndex !== "number") {
+          errors.push(`liveEvidence.modes.${mode}.observation.endGlobalWordIndex must be a number`);
+        }
+        if (typeof observation.segmentsHeard !== "number" || observation.segmentsHeard < 1) {
+          errors.push(`liveEvidence.modes.${mode}.observation.segmentsHeard must be a number >= 1`);
+        }
+        if (!["none", "explicit-blocked", "explicit-user-chosen"].includes(observation.fallbackState)) {
+          pauseReasons.push(`Unsafe fallback state was observed in ${mode}`);
+        }
+        if (typeof observation.notes !== "string") {
+          errors.push(`liveEvidence.modes.${mode}.observation.notes must be a string`);
+        }
+      }
+    }
+  }
+
+  if (validateRequiredObject({
+    value: liveEvidence.notes,
+    path: "liveEvidence.notes",
+    requiredKeys: MOSS_NANO_13_NOTES_KEYS,
+    allowedKeys: Object.keys(liveEvidence.notes || {}),
+    errors,
+  })) {
+    if (typeof liveEvidence.notes.observer !== "string" || liveEvidence.notes.observer.length < 1) {
+      errors.push("liveEvidence.notes.observer must be a non-empty string");
+    }
+    if (liveEvidence.notes.source !== "real-app-selected-nano") {
+      errors.push("liveEvidence.notes.source must equal real-app-selected-nano");
+    }
+    if (liveEvidence.notes.artifactFolder !== MOSS_NANO_13_ARTIFACT_FOLDER) {
+      errors.push(`liveEvidence.notes.artifactFolder must equal ${MOSS_NANO_13_ARTIFACT_FOLDER}`);
+    }
+  }
+
+  return { errors, pauseReasons };
+}
+
+function inferMossNanoLiveEvidenceSprintId({ sprintId, liveEvidence }) {
+  if (sprintId) return sprintId;
+  return liveEvidence?.sprintId === "MOSS-NANO-13" ? "MOSS-NANO-13" : "MOSS-NANO-12";
+}
+
+function isStrictMossNano13Evidence(liveEvidence, sprintId) {
+  return sprintId === "MOSS-NANO-13"
+    && isPlainObject(liveEvidence)
+    && Object.keys(liveEvidence).length > 0;
+}
+
+function formatMossNanoEvidenceLabel(sprintId) {
+  return sprintId === "MOSS-NANO-13" ? "MOSS-NANO-13" : "MOSS-NANO-12";
+}
+
+export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence = {}, sprintId = null } = {}) {
+  const targetSprintId = inferMossNanoLiveEvidenceSprintId({ sprintId, liveEvidence });
+  const evidenceLabel = formatMossNanoEvidenceLabel(targetSprintId);
   const scenarios = Array.isArray(matrixManifest?.scenarios) ? matrixManifest.scenarios : [];
-  const nanoLiveScenarios = scenarios.filter(isMossNanoLiveEvidenceScenario);
+  const nanoLiveScenarios = scenarios.filter((scenario) => isMossNanoLiveEvidenceScenario(scenario, targetSprintId));
   const modes = liveEvidence?.modes ?? {};
   const requiredModesPresent = Object.fromEntries(
     MOSS_NANO_PRODUCT_MODES.map((mode) => [
@@ -110,6 +347,13 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
 
   const reasons = [];
   const pauseReasons = [];
+  const strictSchema = isStrictMossNano13Evidence(liveEvidence, targetSprintId);
+
+  if (strictSchema) {
+    const schemaResult = validateMossNano13LiveEvidenceSchema(liveEvidence);
+    reasons.push(...schemaResult.errors.map((error) => `Invalid MOSS-NANO-13 live evidence schema: ${error}`));
+    pauseReasons.push(...schemaResult.pauseReasons);
+  }
 
   for (const mode of MOSS_NANO_PRODUCT_MODES) {
     if (!requiredModesPresent[mode]) {
@@ -126,14 +370,24 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
     if (modeEvidence.segmentProgressUnderstandable !== true) {
       pauseReasons.push(`Segment-following progress was not understandable in ${mode}`);
     }
+    if (strictSchema && !isAllowedFakeWordTimestampState(modeEvidence.fakeWordTimestamps)) {
+      const label = `Fake word timestamps were observed in ${mode}`;
+      if (!pauseReasons.includes(label)) pauseReasons.push(label);
+    }
 
     for (const key of MOSS_NANO_LIVE_EVIDENCE_KEYS) {
       if (modeEvidence[key] !== true) {
         const label = key === "segmentProgressUnderstandable"
           ? `Segment-following progress was not understandable in ${mode}`
-          : `Missing or failing MOSS-NANO-12 ${key} evidence in ${mode}`;
+          : `Missing or failing ${evidenceLabel} ${key} evidence in ${mode}`;
         if (key === "segmentProgressUnderstandable" && pauseReasons.includes(label)) continue;
-        if (["noUnderlineRace", "noStalePlayback", "explicitFallback", "sidecarLifecycleStable"].includes(key)) {
+        if ([
+          "noUnderlineRace",
+          "noStalePlayback",
+          "explicitFallback",
+          "sidecarLifecycleStable",
+          "modeSwitchAnchorPreserved",
+        ].includes(key)) {
           pauseReasons.push(label);
         } else {
           reasons.push(label);
@@ -153,6 +407,7 @@ export function evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence 
     requiredModes: [...MOSS_NANO_PRODUCT_MODES],
     requiredModesPresent,
     scenarioCount: nanoLiveScenarios.length,
+    sprintId: targetSprintId,
     liveEvidence,
     reasons: allReasons,
     decision,
@@ -583,12 +838,19 @@ function filterScenariosByTags(scenarios, tags) {
 function isExplicitNanoProductGateRun(args) {
   return args.tags.includes("moss-nano-11")
     || args.tags.includes("moss-nano-12")
+    || args.tags.includes("moss-nano-13")
     || args.tags.includes("nano-product-gate")
     || args.tags.includes("nano-live-evidence");
 }
 
 function isExplicitNanoLiveEvidenceRun(args) {
-  return args.tags.includes("moss-nano-12") || args.tags.includes("nano-live-evidence");
+  return args.tags.includes("moss-nano-12")
+    || args.tags.includes("moss-nano-13")
+    || args.tags.includes("nano-live-evidence");
+}
+
+function liveEvidenceSprintIdFromArgs(args) {
+  return args.tags.includes("moss-nano-13") ? "MOSS-NANO-13" : "MOSS-NANO-12";
 }
 
 function isRunnableMatrixScenario(scenario, args) {
@@ -832,11 +1094,20 @@ export async function runHarness(args, runtime = null) {
     const mossNanoProductGate = args.matrix && args.tags.includes("moss-nano-11")
       ? evaluateMossNanoProductGate({ matrixManifest })
       : null;
-    const nanoLiveEvidence = args.nanoLiveEvidencePath
-      ? await readJson(args.nanoLiveEvidencePath)
-      : {};
+    let nanoLiveEvidence = {};
+    if (args.nanoLiveEvidencePath) {
+      try {
+        nanoLiveEvidence = await readJson(args.nanoLiveEvidencePath);
+      } catch (error) {
+        nanoLiveEvidence = { __readError: error.message };
+      }
+    }
     const mossNanoLiveEvidenceGate = args.matrix && isExplicitNanoLiveEvidenceRun(args)
-      ? evaluateMossNanoLiveEvidenceGate({ matrixManifest, liveEvidence: nanoLiveEvidence })
+      ? evaluateMossNanoLiveEvidenceGate({
+          matrixManifest,
+          liveEvidence: nanoLiveEvidence,
+          sprintId: liveEvidenceSprintIdFromArgs(args),
+        })
       : null;
     const rollup = {
       generatedAt: new Date().toISOString(),
@@ -892,10 +1163,11 @@ export async function runHarness(args, runtime = null) {
       );
     }
     if (mossNanoLiveEvidenceGate) {
+      const evidenceLabel = mossNanoLiveEvidenceGate.sprintId === "MOSS-NANO-13" ? "MOSS-NANO-13" : "MOSS-NANO-12";
       lines.push(
         "",
-        `MOSS-NANO-12 decision: ${mossNanoLiveEvidenceGate.decision}`,
-        `MOSS-NANO-12 gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
+        `${evidenceLabel} live evidence decision: ${mossNanoLiveEvidenceGate.decision}`,
+        `${evidenceLabel} live evidence gate reasons: ${mossNanoLiveEvidenceGate.reasons.join("; ") || "none"}`,
       );
     }
     await fs.writeFile(path.join(outDir, "summary.txt"), `${lines.join("\n")}\n`, "utf8");

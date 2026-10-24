@@ -1,28 +1,28 @@
 {
-  "runCount": 9,
+  "runCount": 8,
   "startupLatency": {
-    "p50": 465,
-    "p95": 507.6,
-    "min": 370,
-    "max": 508
+    "p50": 402,
+    "p95": 499.65,
+    "min": 381,
+    "max": 507
   },
   "warmPreviewLatency": {
     "p50": 1120,
-    "p95": 1156,
-    "min": 1000,
-    "max": 1180
+    "p95": 1120,
+    "min": 1120,
+    "max": 1120
   },
   "warmFirstAudioLatency": {
-    "p50": 465,
-    "p95": 507.6,
-    "min": 370,
-    "max": 508
+    "p50": 402,
+    "p95": 499.65,
+    "min": 381,
+    "max": 507
   },
   "rateResponseLatency": {
-    "p50": 210,
-    "p95": 210,
-    "min": 210,
-    "max": 210
+    "p50": null,
+    "p95": null,
+    "min": null,
+    "max": null
   },
   "drift": {
     "p50": 2,
@@ -38,23 +38,11 @@
     "count": 0
   },
   "startupParity": {
-    "cachedStartLatencyMs": 370,
-    "uncachedStartLatencyMs": 508,
-    "deltaMs": 138,
-    "cachedOpeningChunkWordCounts": [
-      13,
-      26,
-      52,
-      104,
-      148
-    ],
-    "uncachedOpeningChunkWordCounts": [
-      13,
-      26,
-      52,
-      104,
-      148
-    ],
-    "openingRampMatches": true
+    "cachedStartLatencyMs": null,
+    "uncachedStartLatencyMs": null,
+    "deltaMs": null,
+    "cachedOpeningChunkWordCounts": [],
+    "uncachedOpeningChunkWordCounts": [],
+    "openingRampMatches": null
   }
 }

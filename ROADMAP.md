@@ -1,8 +1,8 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-05-02 — `MOSS-NANO-12` closed as `NANO_EXPERIMENTAL_ONLY`; four selected-Nano live-evidence slots exist and the runner accepts `--nano-live-evidence`, but no live observation artifact was supplied, so recommended opt-in is not promoted.
+**Last updated**: 2026-05-02 — `MOSS-NANO-13` is execution-ready as a live selected-observation hardening sprint. `MOSS-NANO-12` closed as `NANO_EXPERIMENTAL_ONLY`; four selected-Nano live-evidence slots exist and the runner accepts `--nano-live-evidence`, but no live observation artifact was supplied, so recommended opt-in is not promoted.
 **Current branch**: `main`
-**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4/MOSS-NANO-5/MOSS-NANO-5B/MOSS-NANO-5C/MOSS-NANO-6/MOSS-NANO-6B/MOSS-NANO-6C/MOSS-NANO-6D/MOSS-NANO-6E/MOSS-NANO-6F/MOSS-NANO-7/MOSS-NANO-8/MOSS-NANO-9/MOSS-NANO-10/MOSS-NANO-11/MOSS-NANO-12 evidence is recorded. Qwen remains the default engine and Kokoro remains available/unchanged. MOSS-NANO-12 added an explicit live-evidence gate for Page/Focus/Flow/Narrate, but simulated matrix output alone cannot promote Nano. Nano remains experimental, sidecar-readiness-gated, non-default, and no Kokoro retirement lane is opened.
+**Current state**: v1.75.0 stable. MOSS-0/MOSS-1/MOSS-2/MOSS-SPEED-1/MOSS-RCA-1/MOSS-RUNTIME-1/MOSS-HOST-1/MOSS-HOST-2/MOSS-NANO-1/MOSS-NANO-2/MOSS-NANO-3/MOSS-NANO-4/MOSS-NANO-5/MOSS-NANO-5B/MOSS-NANO-5C/MOSS-NANO-6/MOSS-NANO-6B/MOSS-NANO-6C/MOSS-NANO-6D/MOSS-NANO-6E/MOSS-NANO-6F/MOSS-NANO-7/MOSS-NANO-8/MOSS-NANO-9/MOSS-NANO-10/MOSS-NANO-11/MOSS-NANO-12 evidence is recorded. Qwen remains the default engine and Kokoro remains available/unchanged. MOSS-NANO-12 added an explicit live-evidence gate for Page/Focus/Flow/Narrate, but simulated matrix output alone cannot promote Nano. MOSS-NANO-13 now specifies the exact live-observation schema and code coordinates needed to capture selected Nano evidence under `artifacts/tts-eval/moss-nano-13-live-selected-observations/`. Nano remains experimental, sidecar-readiness-gated, non-default, and no Kokoro retirement lane is opened.
 **Governing roadmap**: This file is the single source of truth. Phase overview archived from `docs/project/ROADMAP_V2_ARCHIVED.md`.
 
 > **Navigation:** Forward-looking sprint specs below. Completed sprint full specs archived in `docs/project/ROADMAP_ARCHIVE.md`. Phase 1 fix specs in `docs/audit/AUDIT 1/AUDIT 1. STEP 2 TEAM RESPONSE.md`.
@@ -161,6 +161,8 @@ Track A: Flow Infinite Reader    Track B: Chrome Extension Enrichment
     MOSS-NANO-11: Productization Gate + Default Decision ✅ (NANO_EXPERIMENTAL_ONLY / KEEP_KOKORO_DEFAULT)
                     │
     MOSS-NANO-12: Live Four-Mode Evidence Capture ✅ (NANO_EXPERIMENTAL_ONLY)
+                    │
+    MOSS-NANO-13: Live Selected Observations Hardening (PLANNED)
                     │
     MOSS-3: Legacy flagship sidecar lane (SUPERSEDED/PAUSED)
                     │
@@ -1184,7 +1186,7 @@ Wave B (verify + docs):
 
 ```
 BEFORE (v1.49.0):                    AFTER (NARR-LAYER-1A):
-                                     
+
 readingMode = "narration"            readingMode = "flow" + isNarrating = true
   ↓                                    ↓
 NarrateMode.ts owns word timing      useNarration hook owns word timing (audio)
@@ -4873,6 +4875,226 @@ Herodotus/Hermes [sonnet/haiku]: Update roadmap/queue/runbooks, commit, merge, p
 **Verification:** Focused `npm test -- --run tests/ttsEvalMatrixRunner.test.ts` passed `1` file / `26` tests. `npm run tts:eval:matrix -- --run-id moss-nano-12-live-four-mode-evidence --tag moss-nano-12 --out artifacts\tts-eval\moss-nano-12-live-four-mode-evidence` completed four runs and wrote the experimental-only decision.
 
 **Tier:** Live evidence gate | **Branch:** `sprint/moss-nano-12-live-four-mode-evidence` | **Depends on:** MOSS-NANO-11
+
+---
+
+#### Sprint MOSS-NANO-13: Live Selected Observations Hardening (PLANNED)
+
+**Status:** Dispatch-ready Phase 0 spec hardening complete. This sprint captures real app-selected Nano observations and only implements the minimum harness/schema plumbing needed to make those observations auditable.
+
+**Type:** Live observation evidence capture + harness schema hardening. No default-engine change, no Kokoro retirement, no silent fallback, no fake word timestamps, and no app behavior change unless an observation-only trace field is required to classify the live run.
+
+**WHAT:** Convert the MOSS-NANO-12 "future live evidence" opening into an execution-ready MOSS-NANO-13 run that records selected Nano observations for Page, Focus, Flow, and Narrate in one canonical artifact folder:
+
+- `artifacts/tts-eval/moss-nano-13-live-selected-observations/live-evidence.json`
+- `artifacts/tts-eval/moss-nano-13-live-selected-observations/summary.json`
+- `artifacts/tts-eval/moss-nano-13-live-selected-observations/summary.txt`
+- `artifacts/tts-eval/moss-nano-13-live-selected-observations/observation-notes.md`
+
+**HYPOTHESIS:** Nano can be recommended only as an explicit opt-in if a real user can select Nano, start playback, understand that progress is segment-following, and move through Page/Focus/Flow/Narrate without stale playback, underline races, hidden fallback, lifecycle instability, or anchor loss. If the live observations are incomplete but no trust blocker appears, Nano remains experimental. If any trust blocker appears, pause Nano productization.
+
+**Hard constraints:**
+
+- Do not change the default engine.
+- Do not retire Kokoro, hide Kokoro, weaken Kokoro availability checks, or open a Kokoro-retirement lane.
+- Do not silently fall back from selected Nano to Kokoro, Qwen, or Web Speech. If Nano is selected and unavailable, the state must remain visible and blocked.
+- Do not fabricate word timestamps. Nano may report segment-following timing only; word timestamps must be `null`, `false`, or `"absent"` in evidence.
+- Do not change app behavior unless the change is strictly observation instrumentation needed to record the live evidence; any such instrumentation must be opt-in, trace-only, and inert outside the MOSS-NANO-13 run.
+- Do not treat simulated matrix output as live evidence.
+
+**Exact live evidence JSON schema:**
+
+`live-evidence.json` must be a single JSON object matching this schema. Extra keys are allowed only under `notes`; all gate keys below are required.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["schemaVersion", "sprintId", "artifactType", "capturedAt", "appVersion", "gitRef", "host", "engine", "modes", "notes"],
+  "properties": {
+    "schemaVersion": { "const": "moss-nano-live-evidence.v1" },
+    "sprintId": { "const": "MOSS-NANO-13" },
+    "artifactType": { "const": "selected-nano-live-observations" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "appVersion": { "type": "string", "minLength": 1 },
+    "gitRef": { "type": "string", "minLength": 1 },
+    "host": {
+      "type": "object",
+      "required": ["platform", "arch", "node", "electron"],
+      "properties": {
+        "platform": { "type": "string" },
+        "arch": { "type": "string" },
+        "node": { "type": "string" },
+        "electron": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "engine": {
+      "type": "object",
+      "required": ["selectedEngine", "defaultEngineChanged", "kokoroAvailable", "silentFallbackObserved", "timingTruth", "wordTimestamps"],
+      "properties": {
+        "selectedEngine": { "const": "nano" },
+        "defaultEngineChanged": { "const": false },
+        "kokoroAvailable": { "const": true },
+        "silentFallbackObserved": { "const": false },
+        "timingTruth": { "const": "segment-following" },
+        "wordTimestamps": { "enum": ["absent", false, null] }
+      },
+      "additionalProperties": false
+    },
+    "modes": {
+      "type": "object",
+      "required": ["page", "focus", "flow", "narrate"],
+      "properties": {
+        "page": { "$ref": "#/$defs/modeEvidence" },
+        "focus": { "$ref": "#/$defs/modeEvidence" },
+        "flow": { "$ref": "#/$defs/modeEvidence" },
+        "narrate": { "$ref": "#/$defs/modeEvidence" }
+      },
+      "additionalProperties": false
+    },
+    "notes": {
+      "type": "object",
+      "required": ["observer", "source", "artifactFolder"],
+      "properties": {
+        "observer": { "type": "string", "minLength": 1 },
+        "source": { "const": "real-app-selected-nano" },
+        "artifactFolder": { "const": "artifacts/tts-eval/moss-nano-13-live-selected-observations/" }
+      },
+      "additionalProperties": true
+    }
+  },
+  "$defs": {
+    "modeEvidence": {
+      "type": "object",
+      "required": ["live", "nanoSelected", "startable", "segmentProgressUnderstandable", "noUnderlineRace", "cachePrefetchContinuity", "noStalePlayback", "pauseResumeSameMode", "modeSwitchAnchorPreserved", "explicitFallback", "sidecarLifecycleStable", "fakeWordTimestamps", "observation"],
+      "properties": {
+        "live": { "const": true },
+        "nanoSelected": { "const": true },
+        "startable": { "const": true },
+        "segmentProgressUnderstandable": { "const": true },
+        "noUnderlineRace": { "const": true },
+        "cachePrefetchContinuity": { "const": true },
+        "noStalePlayback": { "const": true },
+        "pauseResumeSameMode": { "const": true },
+        "modeSwitchAnchorPreserved": { "const": true },
+        "explicitFallback": { "const": true },
+        "sidecarLifecycleStable": { "const": true },
+        "fakeWordTimestamps": { "enum": ["absent", false] },
+        "observation": {
+          "type": "object",
+          "required": ["bookId", "startGlobalWordIndex", "endGlobalWordIndex", "segmentsHeard", "fallbackState", "notes"],
+          "properties": {
+            "bookId": { "type": "string", "minLength": 1 },
+            "startGlobalWordIndex": { "type": "number" },
+            "endGlobalWordIndex": { "type": "number" },
+            "segmentsHeard": { "type": "number", "minimum": 1 },
+            "fallbackState": { "enum": ["none", "explicit-blocked", "explicit-user-chosen"] },
+            "notes": { "type": "string" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+Required type rules:
+
+- `schemaVersion`, `sprintId`, and `artifactType` must exactly equal the strings shown above.
+- `modes` must contain exactly the four required gate modes: `page`, `focus`, `flow`, `narrate`.
+- For every mode, all boolean gate fields except `fakeWordTimestamps` must be `true` to pass that field.
+- `fakeWordTimestamps` must be `"absent"` or `false`; `true` is a productization pause.
+- `engine.defaultEngineChanged` must be `false`; `engine.kokoroAvailable` must be `true`; `engine.silentFallbackObserved` must be `false`; `engine.wordTimestamps` must be `"absent"`, `false`, or `null`.
+- `observation.startGlobalWordIndex`, `observation.endGlobalWordIndex`, and `observation.segmentsHeard` must be numbers. `segmentsHeard` must be `>= 1` for a passing live observation.
+- Any missing required key is a failing observation. Any malformed JSON or schema mismatch is `NANO_EXPERIMENTAL_ONLY` unless it also hides fallback/stale/lifecycle risk, in which case it is `PAUSE_NANO_PRODUCTIZATION`.
+
+**Page / Focus / Flow / Narrate live checklist:**
+
+For each mode, record the checklist result into `live-evidence.json.modes.<mode>` and summarize the same facts in `observation-notes.md`.
+
+- Page: select Nano in settings; confirm Kokoro remains available; open a real book in Page; start Nano playback; verify Page stays Page; verify progress is visibly segment-following and understandable; pause/resume; switch Page -> Focus -> Page and confirm global anchor preservation; force/observe unavailable Nano state if applicable and confirm explicit blocked/fallback copy, never silent fallback.
+- Focus: select Nano; enter Focus from the same book; start playback from the intended focus/global anchor; verify no fake word underline and no underline race; pause/resume in Focus; switch Focus -> Flow -> Focus and confirm anchor preservation; confirm stale cached/prefetched audio is not heard after the switch.
+- Flow: select Nano; enter Flow; start playback; verify flow/follower visuals do not fight spoken segment truth; pause/resume; advance across at least one segment boundary; switch Flow -> Narrate -> Flow and confirm anchor preservation; confirm cache/prefetch continuity without stale playback.
+- Narrate: select Nano; enter Narrate; start playback; verify segment-following progress is understandable as not word-level timing; verify no fake word timestamps; pause/resume; switch Narrate -> Page -> Narrate and confirm anchor preservation; stop/restart and confirm sidecar lifecycle stability with no stale output reuse.
+
+**Decision rules:**
+
+- `NANO_RECOMMENDED_OPT_IN`: all four modes exist in the manifest and live evidence; every required mode field passes; `fakeWordTimestamps` is `"absent"` or `false`; default engine is unchanged; Kokoro remains available; no silent fallback, stale playback, underline race, lifecycle instability, or anchor loss is observed. This does not make Nano default and does not retire Kokoro.
+- `NANO_EXPERIMENTAL_ONLY`: one or more modes or non-critical fields are missing/incomplete, or the artifact is absent/malformed, but no trust blocker is observed. Nano stays experimental and sidecar-readiness-gated.
+- `PAUSE_NANO_PRODUCTIZATION`: any observation reports unclear segment-following progress, stale playback, silent/unsafe fallback, fake word timestamps, underline race, sidecar lifecycle instability, anchor loss on mode switch, Kokoro unavailability, or default-engine drift.
+
+**WHERE (read order):**
+
+1. `CLAUDE.md`
+2. `.claude/agents/zeus.md`
+3. `docs/governance/LESSONS_LEARNED.md` entries for stale state, TTS ownership/fallback, lifecycle, and timing truth: LL-017, LL-021, LL-022, LL-023, LL-104, LL-108, LL-109, LL-110, LL-111.
+4. `docs/testing/MOSS_DECISION_LOG.md`
+5. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+6. `scripts/tts_eval_runner.mjs`
+7. `tests/fixtures/narration/matrix.manifest.json`
+8. `tests/ttsEvalMatrixRunner.test.ts`
+9. `ROADMAP.md`
+10. `docs/governance/SPRINT_QUEUE.md`
+
+**Code-changing task coordinates:**
+
+1. `scripts/tts_eval_runner.mjs`:
+   - `MOSS_NANO_PRODUCT_MODES` near line 11: reuse this exact four-mode list; do not add modes.
+   - `MOSS_NANO_LIVE_EVIDENCE_KEYS` near lines 23-34: add `fakeWordTimestamps` only if the evaluator accepts `"absent"`/`false`; do not require it to be `true`.
+   - `evidencePassed()` near lines 52-55: use this helper for `fakeWordTimestamps` semantics or add an equivalent live-evidence helper.
+   - `isMossNanoLiveEvidenceScenario()` near lines 91-98: admit `moss-nano-13` tagged scenarios while preserving `moss-nano-12` compatibility.
+   - `evaluateMossNanoLiveEvidenceGate()` near lines 100-160: validate the schema above, classify schema errors, apply the three decision outcomes exactly, and preserve existing MOSS-NANO-12 behavior.
+   - `isExplicitNanoLiveEvidenceRun()` near lines 590-592: treat `moss-nano-13` as an explicit Nano live-evidence run.
+   - `runHarness()` near lines 832-849 and summary text near lines 894-898: write `mossNanoLiveEvidenceGate` into the rollup for `--tag moss-nano-13` and label the text output without implying a default or retirement decision.
+2. `tests/fixtures/narration/matrix.manifest.json`:
+   - Add four scenarios after the existing `moss-nano-12-*` entries: `moss-nano-13-page-live-selected-observation`, `moss-nano-13-focus-live-selected-observation`, `moss-nano-13-flow-live-selected-observation`, and `moss-nano-13-narrate-live-selected-observation`.
+   - Each scenario must use `engine: "nano"`, the matching `readingMode`, tags `["moss-nano-13", "nano-live-evidence", "live-book", "<mode>"]`, and `nanoGate: { "selectedEngine": "nano", "readiness": "required" }`.
+3. `tests/ttsEvalMatrixRunner.test.ts`:
+   - Extend the existing MOSS-NANO-12 live-evidence tests near lines 573-767 with MOSS-NANO-13 coverage.
+   - Add a schema test proving `fakeWordTimestamps: true` returns `PAUSE_NANO_PRODUCTIZATION`.
+   - Add a passing artifact test using the exact schema above and the artifact path `artifacts/tts-eval/moss-nano-13-live-selected-observations/live-evidence.json`.
+   - Add a compatibility test proving MOSS-NANO-12 tagged runs still behave as before.
+4. `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`:
+   - Add a MOSS-NANO-13 runbook subsection immediately after "MOSS-NANO-12 Live Four-Mode Evidence Pattern" with the exact command below and the schema summary.
+5. `docs/testing/MOSS_DECISION_LOG.md`:
+   - On closeout only, append `MOSS-NANO-13 Decision` with the selected decision and artifact links. Do not edit the decision log before evidence exists.
+
+No source files outside those coordinates may be changed in this sprint unless Solon first records a spec gap. In particular, do not change `src/hooks/useNarration.ts`, `src/hooks/narration/mossNanoStrategy.ts`, `src/components/settings/TTSSettings.tsx`, `src/components/ReaderContainer.tsx`, `src/types.ts`, `main/moss-nano-engine.js`, `main/ipc/tts.js`, or `preload.js` unless the live observation cannot be recorded without inert trace-only instrumentation.
+
+**Execution sequence:**
+
+1. Aristotle [opus] {high}: Re-read this spec and confirm the live schema, mode checklist, and decision rules are internally consistent with MOSS-NANO-12 closeout. No code edits.
+2. Hercules [sonnet] {medium}: Add the minimal runner/manifest/test hardening at the coordinates above. Preserve MOSS-NANO-12 behavior.
+3. Hippocrates [haiku]: Run `npm test -- --run tests/ttsEvalMatrixRunner.test.ts`.
+4. Hippocrates [haiku]: Run `npm run tts:eval:matrix -- --run-id moss-nano-13-live-selected-observations --tag moss-nano-13 --nano-live-evidence artifacts/tts-eval/moss-nano-13-live-selected-observations/live-evidence.json --out artifacts/tts-eval/moss-nano-13-live-selected-observations` after `live-evidence.json` exists. If the file does not exist, run the same command without `--nano-live-evidence` only to prove the shape stays `NANO_EXPERIMENTAL_ONLY`; do not call it live proof.
+5. Solon [sonnet]: Verify every success criterion, hard constraint, schema key, and code coordinate.
+6. Plato [sonnet]: Review for false readiness, silent fallback, fake timing, stale playback risk, and scope drift.
+7. Herodotus [sonnet]: Update runbook/decision docs only with evidence-backed results.
+8. Hermes [haiku]: Stage specific files only and follow the normal branch/merge policy if verification passes.
+
+**Commands:**
+
+```bash
+npm test -- --run tests/ttsEvalMatrixRunner.test.ts
+npm run tts:eval:matrix -- --run-id moss-nano-13-live-selected-observations --tag moss-nano-13 --nano-live-evidence artifacts/tts-eval/moss-nano-13-live-selected-observations/live-evidence.json --out artifacts/tts-eval/moss-nano-13-live-selected-observations
+```
+
+**SUCCESS CRITERIA:**
+
+1. `ROADMAP.md` and `docs/governance/SPRINT_QUEUE.md` point to this MOSS-NANO-13 spec.
+2. `scripts/tts_eval_runner.mjs` accepts `moss-nano-13` live-evidence runs without breaking MOSS-NANO-12 compatibility.
+3. `tests/fixtures/narration/matrix.manifest.json` has Page/Focus/Flow/Narrate selected-Nano observation scenarios for MOSS-NANO-13.
+4. `tests/ttsEvalMatrixRunner.test.ts` proves passing, incomplete, pause, fake-timestamp, and MOSS-NANO-12 compatibility behavior.
+5. The canonical artifact target is `artifacts/tts-eval/moss-nano-13-live-selected-observations/`.
+6. `summary.json.mossNanoLiveEvidenceGate.decision` is exactly one of `NANO_RECOMMENDED_OPT_IN`, `NANO_EXPERIMENTAL_ONLY`, or `PAUSE_NANO_PRODUCTIZATION`.
+7. No default-engine change, no Kokoro retirement, no silent fallback, no fake word timestamps, and no app behavior change outside observation instrumentation.
+8. Focused matrix-runner tests pass. Broader `npm test`/`npm run build` are required only if implementation touches app/runtime source outside the harness coordinates.
+
+**Tier:** Evidence hardening | **Branch:** `sprint/moss-nano-13-live-selected-observations` | **Depends on:** MOSS-NANO-12
 
 ---
 

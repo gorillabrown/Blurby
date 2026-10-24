@@ -1,0 +1,20 @@
+TTS eval matrix run complete (4 runs)
+- moss-nano-13-page-live-selected-observation: latency=486ms drift=2 failures=none
+- moss-nano-13-focus-live-selected-observation: latency=465ms drift=2 failures=none
+- moss-nano-13-flow-live-selected-observation: latency=402ms drift=2 failures=none
+- moss-nano-13-narrate-live-selected-observation: latency=395ms drift=2 failures=none
+
+Aggregate runs: 4
+Warm preview latency p50/p95: 1120 / 1120 ms
+Warm first-audio latency p50/p95: 433.5 / 482.85 ms
+Startup latency p50/p95: 433.5 / 482.85 ms
+Rate response latency p50/p95: n/a / n/a ms
+Drift p50/p95/max: 2 / 2 / 2
+Pause/resume failures: 0
+Handoff failures: 0
+Startup spikes above 3000 ms: 0
+Startup parity cached/uncached: n/a / n/a ms (delta n/a ms)
+Opening ramp parity: n/a
+
+MOSS-NANO-13 live evidence decision: NANO_EXPERIMENTAL_ONLY
+MOSS-NANO-13 live evidence gate reasons: Missing live selected-Nano evidence for page; Missing live selected-Nano evidence for focus; Missing live selected-Nano evidence for flow; Missing live selected-Nano evidence for narrate

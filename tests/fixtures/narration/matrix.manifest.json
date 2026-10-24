@@ -227,6 +227,66 @@
       }
     },
     {
+      "id": "moss-nano-13-page-live-selected-observation",
+      "label": "MOSS Nano 13 — Page selected Nano live observation",
+      "engine": "nano",
+      "readingMode": "page",
+      "fixtureId": "prose-basic",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-13", "nano-live-evidence", "live-book", "page"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-13-focus-live-selected-observation",
+      "label": "MOSS Nano 13 — Focus selected Nano live observation",
+      "engine": "nano",
+      "readingMode": "focus",
+      "fixtureId": "dialogue-switches",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-13", "nano-live-evidence", "live-book", "focus"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-13-flow-live-selected-observation",
+      "label": "MOSS Nano 13 — Flow selected Nano live observation",
+      "engine": "nano",
+      "readingMode": "flow",
+      "fixtureId": "queued-handoff",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-13", "nano-live-evidence", "live-book", "flow"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
+      "id": "moss-nano-13-narrate-live-selected-observation",
+      "label": "MOSS Nano 13 — Narrate selected Nano live observation",
+      "engine": "nano",
+      "readingMode": "narrate",
+      "fixtureId": "chapter-transition",
+      "voiceId": "af_bella",
+      "requestedRate": 1.0,
+      "durationClass": "medium",
+      "tags": ["moss-nano-13", "nano-live-evidence", "live-book", "narrate"],
+      "nanoGate": {
+        "selectedEngine": "nano",
+        "readiness": "required"
+      }
+    },
+    {
       "id": "streaming-cold-start",
       "label": "Streaming — cold start latency",
       "engine": "qwen-streaming",

@@ -79,6 +79,91 @@ async function createRuntimeWithFiles(baseDir: string) {
   return { fixtureManifest, matrixManifest, fixtureLookup };
 }
 
+const MOSS_NANO_PRODUCT_MODES = ["page", "focus", "flow", "narrate"] as const;
+
+function createNanoLiveEvidenceScenarios(sprintTag: "moss-nano-12" | "moss-nano-13") {
+  return MOSS_NANO_PRODUCT_MODES.map((mode) => ({
+    id: sprintTag === "moss-nano-13"
+      ? `moss-nano-13-${mode}-live-selected-observation`
+      : `moss-nano-12-${mode}-live-evidence`,
+    engine: "nano",
+    readingMode: mode,
+    fixtureId: "prose-basic",
+    voiceId: "af_bella",
+    requestedRate: 1.0,
+    durationClass: "medium",
+    tags: [sprintTag, "nano-live-evidence", "live-book", mode],
+    nanoGate: { selectedEngine: "nano", readiness: "required" },
+  }));
+}
+
+function createMossNano13LiveEvidence({
+  modeOverrides = {},
+  rootOverrides = {},
+}: {
+  modeOverrides?: Record<string, Record<string, any>>;
+  rootOverrides?: Record<string, any>;
+} = {}) {
+  const modes = Object.fromEntries(
+    MOSS_NANO_PRODUCT_MODES.map((mode, index) => [
+      mode,
+      {
+        live: true,
+        nanoSelected: true,
+        startable: true,
+        segmentProgressUnderstandable: true,
+        noUnderlineRace: true,
+        cachePrefetchContinuity: true,
+        noStalePlayback: true,
+        pauseResumeSameMode: true,
+        modeSwitchAnchorPreserved: true,
+        explicitFallback: true,
+        sidecarLifecycleStable: true,
+        fakeWordTimestamps: "absent",
+        observation: {
+          bookId: `book-${mode}`,
+          startGlobalWordIndex: index * 100,
+          endGlobalWordIndex: index * 100 + 24,
+          segmentsHeard: 2,
+          fallbackState: "none",
+          notes: `${mode} observed with selected Nano`,
+        },
+        ...(modeOverrides[mode] || {}),
+      },
+    ]),
+  );
+
+  return {
+    schemaVersion: "moss-nano-live-evidence.v1",
+    sprintId: "MOSS-NANO-13",
+    artifactType: "selected-nano-live-observations",
+    capturedAt: "2026-05-02T12:00:00.000Z",
+    appVersion: "1.75.0",
+    gitRef: "test-ref",
+    host: {
+      platform: "win32",
+      arch: "x64",
+      node: "v20.0.0",
+      electron: "35.0.0",
+    },
+    engine: {
+      selectedEngine: "nano",
+      defaultEngineChanged: false,
+      kokoroAvailable: true,
+      silentFallbackObserved: false,
+      timingTruth: "segment-following",
+      wordTimestamps: "absent",
+    },
+    modes,
+    notes: {
+      observer: "test",
+      source: "real-app-selected-nano",
+      artifactFolder: "artifacts/tts-eval/moss-nano-13-live-selected-observations/",
+    },
+    ...rootOverrides,
+  };
+}
+
 describe("tts eval matrix/soak runner", () => {
   it("parses matrix and soak args", () => {
     const args = parseArgs(["--matrix", "--soak-profile", "short", "--run-id", "nightly"]);
@@ -764,5 +849,155 @@ describe("tts eval matrix/soak runner", () => {
 
     expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_RECOMMENDED_OPT_IN");
     expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toEqual([]);
+  });
+
+  it("keeps the canonical matrix manifest eligible for the MOSS-NANO-13 four-mode live observation gate", async () => {
+    const matrixManifest = JSON.parse(
+      await fs.readFile(path.resolve("tests/fixtures/narration/matrix.manifest.json"), "utf8"),
+    );
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest,
+      liveEvidence: {},
+      sprintId: "MOSS-NANO-13",
+    } as any);
+
+    expect(result.requiredModesPresent).toEqual({
+      page: true,
+      focus: true,
+      flow: true,
+      narrate: true,
+    });
+    expect(result.scenarioCount).toBe(4);
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+  });
+
+  it("allows MOSS-NANO-13 recommended opt-in only with the complete strict live evidence schema", () => {
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: createNanoLiveEvidenceScenarios("moss-nano-13"),
+      },
+      liveEvidence: createMossNano13LiveEvidence(),
+      sprintId: "MOSS-NANO-13",
+    } as any);
+
+    expect(result.sprintId).toBe("MOSS-NANO-13");
+    expect(result.decision).toBe("NANO_RECOMMENDED_OPT_IN");
+    expect(result.reasons).toEqual([]);
+  });
+
+  it("caps MOSS-NANO-13 at experimental-only for incomplete live evidence artifacts", () => {
+    const liveEvidence = createMossNano13LiveEvidence();
+    delete (liveEvidence as any).modes.focus;
+
+    const result = evaluateMossNanoLiveEvidenceGate({
+      matrixManifest: {
+        scenarios: createNanoLiveEvidenceScenarios("moss-nano-13"),
+      },
+      liveEvidence,
+      sprintId: "MOSS-NANO-13",
+    } as any);
+
+    expect(result.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect(result.reasons).toContain("Invalid MOSS-NANO-13 live evidence schema: liveEvidence.modes.focus is required");
+  });
+
+  it("pauses MOSS-NANO-13 for stale playback, lifecycle, fallback, confusing progress, or fake timing blockers", () => {
+    const blockers = [
+      {
+        modeOverrides: { flow: { noStalePlayback: false } },
+        reason: "Missing or failing MOSS-NANO-13 noStalePlayback evidence in flow",
+      },
+      {
+        modeOverrides: { narrate: { sidecarLifecycleStable: false } },
+        reason: "Missing or failing MOSS-NANO-13 sidecarLifecycleStable evidence in narrate",
+      },
+      {
+        modeOverrides: { page: { explicitFallback: false } },
+        reason: "Missing or failing MOSS-NANO-13 explicitFallback evidence in page",
+      },
+      {
+        modeOverrides: { focus: { segmentProgressUnderstandable: false } },
+        reason: "Segment-following progress was not understandable in focus",
+      },
+      {
+        modeOverrides: { narrate: { fakeWordTimestamps: true } },
+        reason: "Fake word timestamps were observed in narrate",
+      },
+    ];
+
+    for (const blocker of blockers) {
+      const result = evaluateMossNanoLiveEvidenceGate({
+        matrixManifest: {
+          scenarios: createNanoLiveEvidenceScenarios("moss-nano-13"),
+        },
+        liveEvidence: createMossNano13LiveEvidence({ modeOverrides: blocker.modeOverrides }),
+        sprintId: "MOSS-NANO-13",
+      } as any);
+
+      expect(result.decision).toBe("PAUSE_NANO_PRODUCTIZATION");
+      expect(result.reasons).toContain(blocker.reason);
+    }
+  });
+
+  it("loads the MOSS-NANO-13 artifact path and writes run-id-specific matrix artifacts", async () => {
+    const tempRoot = await makeTempDir();
+    const artifactOutDir = path.join(tempRoot, "artifacts", "tts-eval", "moss-nano-13-live-selected-observations");
+    await fs.mkdir(artifactOutDir, { recursive: true });
+    const evidencePath = path.join(artifactOutDir, "live-evidence.json");
+    const runtime = await createRuntimeWithFiles(tempRoot);
+    runtime.matrixManifest.scenarios.push(...(createNanoLiveEvidenceScenarios("moss-nano-13") as any));
+    await fs.writeFile(evidencePath, JSON.stringify(createMossNano13LiveEvidence()), "utf8");
+
+    const args = parseArgs([
+      "--matrix",
+      "--tag",
+      "moss-nano-13",
+      "--nano-live-evidence",
+      evidencePath,
+      "--run-id",
+      "moss-nano-13-live-selected-observations",
+      "--out",
+      artifactOutDir,
+    ]);
+    const { rollup } = await runHarness(args, runtime as any);
+    const summaryText = await fs.readFile(path.join(artifactOutDir, "summary.txt"), "utf8");
+    const summaryArtifacts = await fs.readdir(path.join(artifactOutDir, "summaries"));
+
+    expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_RECOMMENDED_OPT_IN");
+    expect((rollup as any).mossNanoLiveEvidenceGate.liveEvidence.notes.artifactFolder).toBe(
+      "artifacts/tts-eval/moss-nano-13-live-selected-observations/",
+    );
+    expect(rollup.fixtureCount).toBe(4);
+    expect(summaryText).toContain("MOSS-NANO-13 live evidence decision: NANO_RECOMMENDED_OPT_IN");
+    expect(summaryArtifacts).toContain(
+      "moss-nano-13-live-selected-observations-matrix__moss-nano-13-page-live-selected-observation__it001.summary.json",
+    );
+  });
+
+  it("does not promote MOSS-NANO-13 from simulated matrix output alone", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push(...(createNanoLiveEvidenceScenarios("moss-nano-13") as any));
+    const args = parseArgs(["--matrix", "--tag", "moss-nano-13", "--run-id", "nano13-simulated-only", "--out", outDir]);
+    const { rollup } = await runHarness(args, runtime as any);
+
+    expect(rollup.fixtureCount).toBe(4);
+    expect((rollup as any).mossNanoLiveEvidenceGate.decision).toBe("NANO_EXPERIMENTAL_ONLY");
+    expect((rollup as any).mossNanoLiveEvidenceGate.reasons).toContain("Missing live selected-Nano evidence for page");
+  });
+
+  it("preserves MOSS-NANO-12 live evidence filtering when MOSS-NANO-13 scenarios are also present", async () => {
+    const outDir = await makeTempDir();
+    const runtime = await createRuntimeWithFiles(outDir);
+    runtime.matrixManifest.scenarios.push(
+      ...(createNanoLiveEvidenceScenarios("moss-nano-12") as any),
+      ...(createNanoLiveEvidenceScenarios("moss-nano-13") as any),
+    );
+    const args = parseArgs(["--matrix", "--tag", "moss-nano-12", "--run-id", "nano12-compat", "--out", outDir]);
+    const { rollup } = await runHarness(args, runtime as any);
+
+    expect((rollup as any).mossNanoLiveEvidenceGate.sprintId).toBe("MOSS-NANO-12");
+    expect((rollup as any).mossNanoLiveEvidenceGate.scenarioCount).toBe(4);
+    expect(rollup.summaries.every((summary: any) => summary.scenario.tags.includes("moss-nano-12"))).toBe(true);
   });
 });

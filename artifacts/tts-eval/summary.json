@@ -1,13 +1,13 @@
 {
-  "generatedAt": "2026-04-21T04:34:15.081Z",
-  "mode": "matrix",
+  "generatedAt": "2026-05-02T17:20:20.066Z",
+  "mode": "fixtures",
   "interrupted": false,
-  "fixtureCount": 9,
+  "fixtureCount": 8,
   "summaries": [
     {
       "fixtureId": "prose-basic",
-      "scenarioId": "smoke-prose-default",
-      "runId": "run-matrix__smoke-prose-default__it001",
+      "scenarioId": "prose-basic",
+      "runId": "run-fixture__prose-basic__it001",
       "startLatencyMs": 486,
       "warmPreviewLatencyMs": 1120,
       "warmFirstAudioLatencyMs": 486,
@@ -32,22 +32,28 @@
       "sectionHandoffLatencyMs": null,
       "crossBookResumeLatencyMs": null,
       "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "smoke-prose-default",
-        "voiceId": "af_bella",
-        "requestedRate": 1,
-        "durationClass": "short",
-        "tags": [
-          "smoke",
-          "baseline"
-        ]
-      }
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     },
     {
       "fixtureId": "dialogue-switches",
-      "scenarioId": "smoke-dialogue-fast",
-      "runId": "run-matrix__smoke-dialogue-fast__it002",
+      "scenarioId": "dialogue-switches",
+      "runId": "run-fixture__dialogue-switches__it002",
       "startLatencyMs": 465,
       "warmPreviewLatencyMs": 1120,
       "warmFirstAudioLatencyMs": 465,
@@ -72,62 +78,28 @@
       "sectionHandoffLatencyMs": null,
       "crossBookResumeLatencyMs": null,
       "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "smoke-dialogue-fast",
-        "voiceId": "af_bella",
-        "requestedRate": 1.1,
-        "durationClass": "short",
-        "tags": [
-          "smoke",
-          "dialogue"
-        ]
-      }
-    },
-    {
-      "fixtureId": "punctuation-dense",
-      "scenarioId": "punctuation-heavy-mid",
-      "runId": "run-matrix__punctuation-heavy-mid__it003",
-      "startLatencyMs": 402,
-      "warmPreviewLatencyMs": 1120,
-      "warmFirstAudioLatencyMs": 402,
-      "startupSpikeThresholdMs": 3000,
-      "startupSpikeCount": 0,
-      "maxDrift": 2,
-      "wordEventCount": 26,
-      "flowEventCount": 9,
-      "startupCacheMode": null,
-      "openingChunkWordCounts": [],
-      "pauseResumeIntegrity": {
-        "pauses": 0,
-        "resumes": 0,
-        "balanced": true
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
       },
-      "transitionCounts": {
-        "section": 0,
-        "chapter": 0,
-        "book": 0,
-        "handoff": 0
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
       },
-      "sectionHandoffLatencyMs": null,
-      "crossBookResumeLatencyMs": null,
-      "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "punctuation-heavy-mid",
-        "voiceId": "af_bella",
-        "requestedRate": 1.2,
-        "durationClass": "medium",
-        "tags": [
-          "punctuation",
-          "drift"
-        ]
-      }
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     },
     {
       "fixtureId": "long-sentence",
-      "scenarioId": "long-form-stability",
-      "runId": "run-matrix__long-form-stability__it004",
+      "scenarioId": "long-sentence",
+      "runId": "run-fixture__long-sentence__it003",
       "startLatencyMs": 507,
       "warmPreviewLatencyMs": 1120,
       "warmFirstAudioLatencyMs": 507,
@@ -152,22 +124,28 @@
       "sectionHandoffLatencyMs": null,
       "crossBookResumeLatencyMs": null,
       "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "long-form-stability",
-        "voiceId": "af_bella",
-        "requestedRate": 1.3,
-        "durationClass": "long",
-        "tags": [
-          "long-form",
-          "stability"
-        ]
-      }
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     },
     {
-      "fixtureId": "queued-handoff",
-      "scenarioId": "handoff-queue",
-      "runId": "run-matrix__handoff-queue__it005",
+      "fixtureId": "punctuation-dense",
+      "scenarioId": "punctuation-dense",
+      "runId": "run-fixture__punctuation-dense__it004",
       "startLatencyMs": 402,
       "warmPreviewLatencyMs": 1120,
       "warmFirstAudioLatencyMs": 402,
@@ -186,28 +164,80 @@
       "transitionCounts": {
         "section": 0,
         "chapter": 0,
-        "book": 1,
-        "handoff": 1
+        "book": 0,
+        "handoff": 0
       },
       "sectionHandoffLatencyMs": null,
-      "crossBookResumeLatencyMs": 474,
+      "crossBookResumeLatencyMs": null,
       "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "handoff-queue",
-        "voiceId": "af_bella",
-        "requestedRate": 1.4,
-        "durationClass": "medium",
-        "tags": [
-          "handoff",
-          "transition"
-        ]
-      }
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "section-transition",
+      "scenarioId": "section-transition",
+      "runId": "run-fixture__section-transition__it005",
+      "startLatencyMs": 381,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 381,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 23,
+      "flowEventCount": 8,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 0,
+        "resumes": 0,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 1,
+        "chapter": 0,
+        "book": 0,
+        "handoff": 0
+      },
+      "sectionHandoffLatencyMs": 228,
+      "crossBookResumeLatencyMs": null,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     },
     {
       "fixtureId": "chapter-transition",
       "scenarioId": "chapter-transition",
-      "runId": "run-matrix__chapter-transition__it006",
+      "runId": "run-fixture__chapter-transition__it006",
       "startLatencyMs": 395,
       "warmPreviewLatencyMs": 1120,
       "warmFirstAudioLatencyMs": 395,
@@ -232,124 +262,36 @@
       "sectionHandoffLatencyMs": null,
       "crossBookResumeLatencyMs": null,
       "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "chapter-transition",
-        "voiceId": "af_bella",
-        "requestedRate": 1.5,
-        "durationClass": "medium",
-        "tags": [
-          "transition",
-          "chapter"
-        ]
-      }
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     },
     {
-      "fixtureId": "prose-basic",
-      "scenarioId": "startup-parity-uncached",
-      "runId": "run-matrix__startup-parity-uncached__it007",
-      "startLatencyMs": 508,
-      "warmPreviewLatencyMs": 1180,
-      "warmFirstAudioLatencyMs": 508,
-      "startupSpikeThresholdMs": 3000,
-      "startupSpikeCount": 0,
-      "maxDrift": 2,
-      "wordEventCount": 38,
-      "flowEventCount": 13,
-      "startupCacheMode": "uncached",
-      "openingChunkWordCounts": [
-        13,
-        26,
-        52,
-        104,
-        148
-      ],
-      "pauseResumeIntegrity": {
-        "pauses": 0,
-        "resumes": 0,
-        "balanced": true
-      },
-      "transitionCounts": {
-        "section": 0,
-        "chapter": 0,
-        "book": 0,
-        "handoff": 0
-      },
-      "sectionHandoffLatencyMs": null,
-      "crossBookResumeLatencyMs": null,
-      "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "startup-parity-uncached",
-        "voiceId": "af_bella",
-        "requestedRate": 1,
-        "durationClass": "short",
-        "tags": [
-          "startup-parity",
-          "uncached",
-          "opening-ramp"
-        ]
-      }
-    },
-    {
-      "fixtureId": "prose-basic",
-      "scenarioId": "startup-parity-cached",
-      "runId": "run-matrix__startup-parity-cached__it008",
-      "startLatencyMs": 370,
-      "warmPreviewLatencyMs": 1000,
-      "warmFirstAudioLatencyMs": 370,
-      "startupSpikeThresholdMs": 3000,
-      "startupSpikeCount": 0,
-      "maxDrift": 2,
-      "wordEventCount": 38,
-      "flowEventCount": 13,
-      "startupCacheMode": "cached",
-      "openingChunkWordCounts": [
-        13,
-        26,
-        52,
-        104,
-        148
-      ],
-      "pauseResumeIntegrity": {
-        "pauses": 0,
-        "resumes": 0,
-        "balanced": true
-      },
-      "transitionCounts": {
-        "section": 0,
-        "chapter": 0,
-        "book": 0,
-        "handoff": 0
-      },
-      "sectionHandoffLatencyMs": null,
-      "crossBookResumeLatencyMs": null,
-      "rateResponseLatencyMs": null,
-      "failureClasses": [],
-      "scenario": {
-        "id": "startup-parity-cached",
-        "voiceId": "af_bella",
-        "requestedRate": 1,
-        "durationClass": "short",
-        "tags": [
-          "startup-parity",
-          "cached",
-          "opening-ramp"
-        ]
-      }
-    },
-    {
-      "fixtureId": "prose-basic",
-      "scenarioId": "rate-edit-live-response",
-      "runId": "run-matrix__rate-edit-live-response__it009",
-      "startLatencyMs": 486,
+      "fixtureId": "queued-handoff",
+      "scenarioId": "queued-handoff",
+      "runId": "run-fixture__queued-handoff__it007",
+      "startLatencyMs": 402,
       "warmPreviewLatencyMs": 1120,
-      "warmFirstAudioLatencyMs": 486,
+      "warmFirstAudioLatencyMs": 402,
       "startupSpikeThresholdMs": 3000,
       "startupSpikeCount": 0,
       "maxDrift": 2,
-      "wordEventCount": 38,
-      "flowEventCount": 13,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
       "startupCacheMode": null,
       "openingChunkWordCounts": [],
       "pauseResumeIntegrity": {
@@ -360,51 +302,102 @@
       "transitionCounts": {
         "section": 0,
         "chapter": 0,
+        "book": 1,
+        "handoff": 1
+      },
+      "sectionHandoffLatencyMs": null,
+      "crossBookResumeLatencyMs": 474,
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
+    },
+    {
+      "fixtureId": "pause-resume",
+      "scenarioId": "pause-resume",
+      "runId": "run-fixture__pause-resume__it008",
+      "startLatencyMs": 402,
+      "warmPreviewLatencyMs": 1120,
+      "warmFirstAudioLatencyMs": 402,
+      "startupSpikeThresholdMs": 3000,
+      "startupSpikeCount": 0,
+      "maxDrift": 2,
+      "wordEventCount": 26,
+      "flowEventCount": 9,
+      "startupCacheMode": null,
+      "openingChunkWordCounts": [],
+      "pauseResumeIntegrity": {
+        "pauses": 1,
+        "resumes": 1,
+        "balanced": true
+      },
+      "transitionCounts": {
+        "section": 0,
+        "chapter": 0,
         "book": 0,
         "handoff": 0
       },
       "sectionHandoffLatencyMs": null,
       "crossBookResumeLatencyMs": null,
-      "rateResponseLatencyMs": 210,
-      "failureClasses": [],
-      "scenario": {
-        "id": "rate-edit-live-response",
-        "voiceId": "af_bella",
-        "requestedRate": 1.3,
-        "durationClass": "short",
-        "tags": [
-          "rate-response",
-          "same-bucket",
-          "segmented"
-        ]
-      }
+      "rateResponseLatencyMs": null,
+      "nanoSegmentLatencyMs": {
+        "p50": null,
+        "p95": null,
+        "min": null,
+        "max": null
+      },
+      "nanoCache": {
+        "hits": 0,
+        "misses": 0,
+        "hitRate": null
+      },
+      "nanoPrefetch": {
+        "ready": 0,
+        "stale": 0,
+        "cancelled": 0
+      },
+      "failureClasses": []
     }
   ],
   "aggregate": {
-    "runCount": 9,
+    "runCount": 8,
     "startupLatency": {
-      "p50": 465,
-      "p95": 507.6,
-      "min": 370,
-      "max": 508
+      "p50": 402,
+      "p95": 499.65,
+      "min": 381,
+      "max": 507
     },
     "warmPreviewLatency": {
       "p50": 1120,
-      "p95": 1156,
-      "min": 1000,
-      "max": 1180
+      "p95": 1120,
+      "min": 1120,
+      "max": 1120
     },
     "warmFirstAudioLatency": {
-      "p50": 465,
-      "p95": 507.6,
-      "min": 370,
-      "max": 508
+      "p50": 402,
+      "p95": 499.65,
+      "min": 381,
+      "max": 507
     },
     "rateResponseLatency": {
-      "p50": 210,
-      "p95": 210,
-      "min": 210,
-      "max": 210
+      "p50": null,
+      "p95": null,
+      "min": null,
+      "max": null
     },
     "drift": {
       "p50": 2,
@@ -420,24 +413,12 @@
       "count": 0
     },
     "startupParity": {
-      "cachedStartLatencyMs": 370,
-      "uncachedStartLatencyMs": 508,
-      "deltaMs": 138,
-      "cachedOpeningChunkWordCounts": [
-        13,
-        26,
-        52,
-        104,
-        148
-      ],
-      "uncachedOpeningChunkWordCounts": [
-        13,
-        26,
-        52,
-        104,
-        148
-      ],
-      "openingRampMatches": true
+      "cachedStartLatencyMs": null,
+      "uncachedStartLatencyMs": null,
+      "deltaMs": null,
+      "cachedOpeningChunkWordCounts": [],
+      "uncachedOpeningChunkWordCounts": [],
+      "openingRampMatches": null
     }
   }
 }

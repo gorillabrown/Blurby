@@ -4,7 +4,7 @@ BLURBY
 
 **Purpose:** Conveyor belt of ready-to-dispatch sprint specs. Pull the top pointer, read the referenced Roadmap section, then execute from the full spec. After completion, remove it, log it, backfill to ≥3.
 
-**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained at all times. If depth drops below 3 after completion: Cluade Code investigates bottlenecks and issues; Cowork brainstorms and drafts specs (if next work is known) or stops to discuss (if not); Claude CLI performs work/receives dispatches. 
+**Queue rules:** FIFO — top sprint executes next. ≥3 depth maintained at all times. If depth drops below 3 after completion: Cluade Code investigates bottlenecks and issues; Cowork brainstorms and drafts specs (if next work is known) or stops to discuss (if not); Claude CLI performs work/receives dispatches.
 
 No dispatch fires until ≥3 pointers exist with full specs in the Roadmap, and no code-changing pointer is dispatch-ready unless its referenced spec names explicit edit-site coordinates.
 
@@ -53,9 +53,39 @@ HOW (Review / Closeout):
 
 ```
 SPRINT QUEUE STATUS:
-Queue depth: 2 for the Nano onboarding roadmap; no Nano default-change sprint is dispatch-ready.
-Next queue item: none for Nano productization until a new live observation capture sprint is approved.
-Health: GREEN/EXPERIMENTAL-ONLY — MOSS-NANO-12 closed `NANO_EXPERIMENTAL_ONLY`. Four selected-Nano live-evidence slots exist and the runner accepts `--nano-live-evidence`, but no live observation artifact was supplied, so recommended opt-in is not promoted.
+Queue depth: 1 active Nano evidence pointer; no Nano default-change sprint is dispatch-ready.
+Next queue item: MOSS-NANO-13 live selected observations hardening.
+Health: YELLOW/EXPERIMENTAL-ONLY — MOSS-NANO-12 closed `NANO_EXPERIMENTAL_ONLY`. Four selected-Nano live-evidence slots exist and the runner accepts `--nano-live-evidence`, but no live observation artifact was supplied, so recommended opt-in is not promoted. MOSS-NANO-13 is now the dispatch-ready evidence-capture/harness-hardening pointer; it still forbids default changes and Kokoro retirement.
+```
+
+---
+
+```text
+Sprint: MOSS-NANO-13 — Live Selected Observations Hardening
+Status: DISPATCH-READY for Phase 0 / evidence hardening. This is the approved next Nano pointer after MOSS-NANO-12 closed experimental-only because no live observation artifact was supplied.
+Type: Live observation evidence capture + harness schema hardening. No default-engine change, no Kokoro retirement, no silent fallback, no fake word timestamps, no app behavior change unless strictly required for opt-in observation instrumentation.
+
+WHAT: Add/validate the exact MOSS-NANO-13 live-evidence JSON schema, add explicit MOSS-NANO-13 Page/Focus/Flow/Narrate selected-Nano scenarios, and produce/consume the canonical artifact target `artifacts/tts-eval/moss-nano-13-live-selected-observations/`.
+
+HYPOTHESIS: Nano can become `NANO_RECOMMENDED_OPT_IN` only if real selected-Nano observations pass in Page, Focus, Flow, and Narrate with understandable segment-following progress, no stale playback, no underline race, no hidden fallback, stable sidecar lifecycle, preserved anchors, no default drift, and Kokoro still available. Incomplete evidence stays `NANO_EXPERIMENTAL_ONLY`; trust blockers pause productization.
+
+WHERE:
+  - Full spec: `ROADMAP.md` -> `#### Sprint MOSS-NANO-13: Live Selected Observations Hardening (PLANNED)`
+  - Runner coordinates: `scripts/tts_eval_runner.mjs` (`MOSS_NANO_PRODUCT_MODES`, `MOSS_NANO_LIVE_EVIDENCE_KEYS`, `evidencePassed()`, `isMossNanoLiveEvidenceScenario()`, `evaluateMossNanoLiveEvidenceGate()`, `isExplicitNanoLiveEvidenceRun()`, `runHarness()`)
+  - Manifest/test coordinates: `tests/fixtures/narration/matrix.manifest.json`; `tests/ttsEvalMatrixRunner.test.ts`
+  - Evidence docs: `docs/testing/MOSS_DECISION_LOG.md`; `docs/testing/TTS_EVAL_MATRIX_RUNBOOK.md`
+
+HOW (Phase 0):
+  Aristotle [opus] {high}: Confirm the ROADMAP schema/checklist/decision rules and constraints before implementation. No code edits in Phase 0.
+
+HOW (Implementation):
+  Hercules [sonnet] {medium}: Apply only the runner, manifest, and matrix-runner-test edits named in the ROADMAP coordinates. Preserve MOSS-NANO-12 compatibility.
+
+HOW (Verification):
+  Hippocrates [haiku]: Run `npm test -- --run tests/ttsEvalMatrixRunner.test.ts`; run the MOSS-NANO-13 matrix command against `artifacts/tts-eval/moss-nano-13-live-selected-observations/` when `live-evidence.json` exists, or run shape-only without live evidence and keep the decision experimental-only.
+
+HOW (Review / Closeout):
+  Solon [sonnet]: Verify spec compliance and the three decision outcomes. Plato [sonnet]: check false readiness/fallback/timing/stale/lifecycle risks. Herodotus [sonnet]: update runbook and decision log only with evidence-backed results. Hermes [haiku]: stage specific files only and follow normal branch/merge policy after verification.
 ```
 
 ---
