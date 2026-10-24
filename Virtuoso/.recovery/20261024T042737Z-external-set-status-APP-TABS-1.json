@@ -1,0 +1,36 @@
+{
+  "id": "20261024T042737Z-external-set-status-APP-TABS-1",
+  "operation": "external-set-status",
+  "item_id": "APP-TABS-1",
+  "created": "2026-10-24T04:27:37Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "docs/planning/specs/2026-10-23-5/APP-TABS-1.md"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:APP-TABS-1:[('spec_link', 'docs/planning/specs/2026-10-23-5/APP-TABS-1.md'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "APP-TABS-1",
+      "idempotencyKey": "set-status:APP-TABS-1:[('spec_link', 'docs/planning/specs/2026-10-23-5/APP-TABS-1.md'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T042737Z-external-set-status-APP-TABS-1",
+      "detail": {},
+      "providerItemId": "3fa7c96cc31e81c48b78ecaba7e48282"
+    }
+  },
+  "resolved": "2026-10-24T04:27:50Z",
+  "outcome": "succeeded"
+}
