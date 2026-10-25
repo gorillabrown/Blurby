@@ -1,0 +1,50 @@
+{
+  "id": "20261024T015957Z-external-create-item-FLOW-PARA-PAUSE-INDEX-1",
+  "operation": "external-create-item",
+  "item_id": "FLOW-PARA-PAUSE-INDEX-1",
+  "created": "2026-10-24T01:59:57Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Flow and Focus paragraph pauses land at real paragraph ends",
+      "status": "Queued",
+      "sequence": 108,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "BLOCK-TAG-CASE-1"
+      ],
+      "spec_link": "ROADMAP.md#flow-para-pause-index-1",
+      "description": "The paragraph-pause list uses section-local word numbers while Flow and Focus read in whole-book numbers, so pauses land mid-sentence. Build it in whole-book numbering from the paragraph starts the keys code finds.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap from BLOCK-TAG-CASE-1 Wave A; owner tier-2 decision: hold BLOCK-TAG-CASE-1 merge until this lands, merge together. Stub. Not a release gate.",
+      "id": "FLOW-PARA-PAUSE-INDEX-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-PARA-PAUSE-INDEX-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FLOW-PARA-PAUSE-INDEX-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FLOW-PARA-PAUSE-INDEX-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T015957Z-external-create-item-FLOW-PARA-PAUSE-INDEX-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81fbbccced3552d9af43",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T02:00:07Z",
+  "outcome": "succeeded"
+}
