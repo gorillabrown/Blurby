@@ -1,0 +1,37 @@
+{
+  "id": "20261024T012508Z-external-set-status-BLOCK-TAG-CASE-1",
+  "operation": "external-set-status",
+  "item_id": "BLOCK-TAG-CASE-1",
+  "created": "2026-10-24T01:25:08Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-23",
+      "branch": "eb/block-tag-case-1"
+    },
+    "expectedRevision": "efe6c55244bd5417783587cb2faeab712445a7f2cab4aa736167ef46e2b6bf97",
+    "idempotencyKey": "set-status:BLOCK-TAG-CASE-1:[('branch', 'eb/block-tag-case-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BLOCK-TAG-CASE-1",
+      "idempotencyKey": "set-status:BLOCK-TAG-CASE-1:[('branch', 'eb/block-tag-case-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T012508Z-external-set-status-BLOCK-TAG-CASE-1",
+      "detail": {},
+      "providerItemId": "4027c96cc31e810d84d7d52ab59bbbbc"
+    }
+  },
+  "resolved": "2026-10-24T01:25:47Z",
+  "outcome": "succeeded"
+}

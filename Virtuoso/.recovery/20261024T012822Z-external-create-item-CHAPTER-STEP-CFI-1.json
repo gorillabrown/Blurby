@@ -1,0 +1,50 @@
+{
+  "id": "20261024T012822Z-external-create-item-CHAPTER-STEP-CFI-1",
+  "operation": "external-create-item",
+  "item_id": "CHAPTER-STEP-CFI-1",
+  "created": "2026-10-24T01:28:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Focus and Flow chapter steps save the entry's word with its own section's cfi",
+      "sequence": 97,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "JUMP-LANDING-SAVE-1"
+      ],
+      "spec_link": "ROADMAP.md#chapter-step-cfi-1",
+      "description": "On an EPUB, a chapter step or contents jump in Focus (and Flow, Narrate) persists the entry's word with the previous section's cfi before go-to-href lands, so a reopen can land in the old section. Page's landing save is the model.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from JUMP-LANDING-SAVE-1's live check (e). Stub. Not a release gate.",
+      "status": "Queued",
+      "id": "CHAPTER-STEP-CFI-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CHAPTER-STEP-CFI-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "CHAPTER-STEP-CFI-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:CHAPTER-STEP-CFI-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T012822Z-external-create-item-CHAPTER-STEP-CFI-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81e88532ccadd99fec35",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T01:28:42Z",
+  "outcome": "succeeded"
+}

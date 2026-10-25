@@ -1,0 +1,36 @@
+{
+  "id": "20261024T013422Z-external-set-status-READER-ARROW-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "READER-ARROW-GUARD-1",
+  "created": "2026-10-24T01:34:22Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#reader-arrow-guard-1-spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:READER-ARROW-GUARD-1:[('spec_link', 'ROADMAP.md#reader-arrow-guard-1-spec'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "READER-ARROW-GUARD-1",
+      "idempotencyKey": "set-status:READER-ARROW-GUARD-1:[('spec_link', 'ROADMAP.md#reader-arrow-guard-1-spec'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T013422Z-external-set-status-READER-ARROW-GUARD-1",
+      "detail": {},
+      "providerItemId": "4027c96cc31e81209126c44f69373b07"
+    }
+  },
+  "resolved": "2026-10-24T01:34:41Z",
+  "outcome": "succeeded"
+}

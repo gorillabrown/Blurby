@@ -1,0 +1,35 @@
+{
+  "id": "20261024T012859Z-external-set-status-BROWSER-EXT-FINALIZE-1",
+  "operation": "external-set-status",
+  "item_id": "BROWSER-EXT-FINALIZE-1",
+  "created": "2026-10-24T01:28:59Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "sequence": 104
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:BROWSER-EXT-FINALIZE-1:[('sequence', 104)]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BROWSER-EXT-FINALIZE-1",
+      "idempotencyKey": "set-status:BROWSER-EXT-FINALIZE-1:[('sequence', 104)]",
+      "actualRevision": "",
+      "recoveryId": "20261024T012859Z-external-set-status-BROWSER-EXT-FINALIZE-1",
+      "detail": {},
+      "providerItemId": "3fa7c96cc31e810d9027c06d98a400e2"
+    }
+  },
+  "resolved": "2026-10-24T01:29:26Z",
+  "outcome": "succeeded"
+}

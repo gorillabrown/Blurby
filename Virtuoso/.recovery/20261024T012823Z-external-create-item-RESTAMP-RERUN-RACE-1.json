@@ -1,0 +1,50 @@
+{
+  "id": "20261024T012823Z-external-create-item-RESTAMP-RERUN-RACE-1",
+  "operation": "external-create-item",
+  "item_id": "RESTAMP-RERUN-RACE-1",
+  "created": "2026-10-24T01:28:23Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Two re-stamp runs in a row on one section document",
+      "sequence": 98,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "PAGE-SAVE-RESTAMP-3"
+      ],
+      "spec_link": "ROADMAP.md#restamp-rerun-race-1",
+      "description": "The re-stamp effect does not register its own wrap and does not check cancelled after waiting, and computes sectionStart before the wait. Unreproduced in the harness (W1, W2 of PAGE-SAVE-RESTAMP-3's quality review); needs a red test first.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4 from PAGE-SAVE-RESTAMP-3's staging memo (fold-in 5). Stub. Not a release gate.",
+      "status": "Queued",
+      "id": "RESTAMP-RERUN-RACE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RESTAMP-RERUN-RACE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "RESTAMP-RERUN-RACE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:RESTAMP-RERUN-RACE-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T012823Z-external-create-item-RESTAMP-RERUN-RACE-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81558045e0c739f39acf",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T01:28:43Z",
+  "outcome": "succeeded"
+}

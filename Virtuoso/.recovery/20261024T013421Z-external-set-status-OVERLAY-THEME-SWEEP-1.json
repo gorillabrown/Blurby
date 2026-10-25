@@ -1,0 +1,36 @@
+{
+  "id": "20261024T013421Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+  "operation": "external-set-status",
+  "item_id": "OVERLAY-THEME-SWEEP-1",
+  "created": "2026-10-24T01:34:21Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "written_status": "Full Spec",
+      "spec_link": "ROADMAP.md#overlay-theme-sweep-1-spec"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:OVERLAY-THEME-SWEEP-1:[('spec_link', 'ROADMAP.md#overlay-theme-sweep-1-spec'), ('written_status', 'Full Spec')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "OVERLAY-THEME-SWEEP-1",
+      "idempotencyKey": "set-status:OVERLAY-THEME-SWEEP-1:[('spec_link', 'ROADMAP.md#overlay-theme-sweep-1-spec'), ('written_status', 'Full Spec')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T013421Z-external-set-status-OVERLAY-THEME-SWEEP-1",
+      "detail": {},
+      "providerItemId": "3f97c96cc31e81d0b816e92fa540178b"
+    }
+  },
+  "resolved": "2026-10-24T01:34:40Z",
+  "outcome": "succeeded"
+}

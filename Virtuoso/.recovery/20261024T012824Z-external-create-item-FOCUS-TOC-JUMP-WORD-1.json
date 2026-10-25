@@ -1,0 +1,51 @@
+{
+  "id": "20261024T012824Z-external-create-item-FOCUS-TOC-JUMP-WORD-1",
+  "operation": "external-create-item",
+  "item_id": "FOCUS-TOC-JUMP-WORD-1",
+  "created": "2026-10-24T01:28:24Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "After a contents jump, Focus makes the chapter's first word the reading word",
+      "sequence": 99,
+      "written_status": "Stub",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "prerequisites": [
+        "BAND-ALIGN-2",
+        "CHAPTER-STEP-CFI-1"
+      ],
+      "spec_link": "ROADMAP.md#focus-toc-jump-word-1",
+      "description": "After a contents-list jump in Focus no cursor is painted in the new section. Owner ruling 2026-10-23: the jumped-to chapter's first word becomes the reading word and is saved, as Page does.",
+      "notes": "Created 2026-10-23 by roadmap review 2026-10-23-4; owner ruling 2026-10-23 (tier 3) \"First word of chapter\". Found live by BAND-ALIGN-2. Stub. Not a release gate.",
+      "status": "Queued",
+      "id": "FOCUS-TOC-JUMP-WORD-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-24T01:28:08Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOCUS-TOC-JUMP-WORD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOCUS-TOC-JUMP-WORD-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:FOCUS-TOC-JUMP-WORD-1",
+      "actualRevision": "",
+      "recoveryId": "20261024T012824Z-external-create-item-FOCUS-TOC-JUMP-WORD-1",
+      "detail": {},
+      "providerItemId": "4037c96cc31e81ed9f65f0bb2545e519",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-24T01:28:44Z",
+  "outcome": "succeeded"
+}
