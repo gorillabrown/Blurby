@@ -1,0 +1,37 @@
+{
+  "id": "20261024T024720Z-external-set-status-EINK-CONTROLS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-24T02:47:20Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-23",
+      "branch": "eb/eink-controls-1"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:EINK-CONTROLS-1:[('branch', 'eb/eink-controls-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "set-status:EINK-CONTROLS-1:[('branch', 'eb/eink-controls-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T024720Z-external-set-status-EINK-CONTROLS-1",
+      "detail": {},
+      "providerItemId": "3f97c96cc31e815cbbc0e3312a78958d"
+    }
+  },
+  "resolved": "2026-10-24T02:47:42Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,37 @@
+{
+  "id": "20261024T024718Z-external-set-status-WIN-TARGET-NSIS-1",
+  "operation": "external-set-status",
+  "item_id": "WIN-TARGET-NSIS-1",
+  "created": "2026-10-24T02:47:18Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "status": "In Flight",
+      "started": "2026-10-23",
+      "branch": "eb/win-target-nsis-1"
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:WIN-TARGET-NSIS-1:[('branch', 'eb/win-target-nsis-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "WIN-TARGET-NSIS-1",
+      "idempotencyKey": "set-status:WIN-TARGET-NSIS-1:[('branch', 'eb/win-target-nsis-1'), ('started', '2026-10-23'), ('status', 'In Flight')]",
+      "actualRevision": "",
+      "recoveryId": "20261024T024718Z-external-set-status-WIN-TARGET-NSIS-1",
+      "detail": {},
+      "providerItemId": "4027c96cc31e8125b455d0a0e9a8d04a"
+    }
+  },
+  "resolved": "2026-10-24T02:47:41Z",
+  "outcome": "succeeded"
+}
