@@ -11,6 +11,9 @@ Source-of-truth operational and governance documents. Several of these are the
 | `LESSONS_LEARNED.md` | markdown | Engineering discoveries, standing rules, anti-patterns |
 | `IDEAS.md` | markdown | Unroadmapped concepts, reviewed at phase pauses |
 | `DEVELOPMENT_SYNC.md` | markdown | Local-first git workflow SOP |
+| `RELEASE_RUNBOOK.md` | markdown | Manual desktop release procedure (build, check, upload, publish) |
+| `SMOKE_CHECKLIST_STAGE8.md` | markdown | Stage 8 batched owner smoke checklist (release gate 2) |
+| `DEPENDENCY_ADVISORIES.md` | markdown | `npm audit` advisory status after DEPS-AUDIT-1 |
 | `sprint-queue.xlsx` | binary/xlsx | Retired XLSX queue, read-only evidence. The live queue is the [Notion work register](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca) |
 | `terminal-ledger.jsonl` | jsonl | Append-only ledger of terminal (completed) work items |
 | `TTS_ARCHITECTURE_DECISIONS.md` | markdown | TTS architecture decisions (historical since NARRATE-REMOVE-1) |
