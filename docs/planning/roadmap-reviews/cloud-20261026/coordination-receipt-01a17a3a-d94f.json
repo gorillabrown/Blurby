@@ -1,0 +1,34 @@
+{
+  "reviewTask": "01a17a3a-d94f-760e-8d37-5805cd713020",
+  "reviewBranch": "eb/cloud-independent-review-20261026",
+  "reviewReportCommit": "ea088ba7b8a4bcb20ef62c3adc95741b5d74cd2f",
+  "validationCommit": "bea64824ea840209e0caa6424cc1c33029bf28aa",
+  "reportSha256": "e0e039f2eab37e9abe865e9f64923763e2fa9c197fea079156277aa2f20e76b2",
+  "reportGitBlob": "785ea9bd4a24eba54f0af6c12881b1e818f8d524",
+  "reportBytes": 12943,
+  "reviewedHandoff": "762d38ac53f22245a56f89e489ab367c905dcd91",
+  "reviewedStartup": "f299675dd8251e550f06ab47abb7c4b6ff1889f2",
+  "implementationBranchObservedPublished": false,
+  "folderProfilePublicationBranchResolved": false,
+  "workerThreadReadCapability": false,
+  "brainThreadReadCapability": false,
+  "monitoring": {
+    "surface": "published GitHub branch/commit evidence",
+    "automationCreationConfirmed": true,
+    "enabled": true,
+    "cadence": "hourly",
+    "unchangedPolicy": "quiet; preserve last reviewed SHA/cursors",
+    "stopCondition": "final bounded portable dispositions published, then disable",
+    "limitation": "No live cross-chat monitoring; no future execution result claimed"
+  },
+  "holds": [
+    "native Windows ARM64/owner-machine qualification",
+    "desktop and normal-profile custody",
+    "original full observer/census/four-mode/owned91/product-defaults/onboarding package routes",
+    "final Brain exact-package confirmation",
+    "no main integration/release/install/distribution/terminal completion"
+  ],
+  "sourceEdits": 0,
+  "providerEdits": 0,
+  "ledgerEdits": 0
+}
