@@ -1,0 +1,34 @@
+{
+  "id": "20261026T190546Z-external-set-status-BOOK-TYPE-SCALE-1",
+  "operation": "external-set-status",
+  "item_id": "BOOK-TYPE-SCALE-1",
+  "created": "2026-10-26T19:05:46Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "Owner design decision: book pages in all four modes use the reader's font and one size ratio for headers, sub-headers and body text. Smoke 2026-10-26 residual F2: mixed small caps/sizes and wide spacing on exact release. BOOK-TYPE-SCALE-2 / BUG-224 investigates publisher typography versus app overrides; no cause, acceptance or fix assumed."
+    },
+    "expectedRevision": "47f260969ec14905809a7a9d8d2b2d8e1ecffabf097aed0f7887ab9ad4f3588c",
+    "idempotencyKey": "smoke20261026-revision-BOOK-TYPE-SCALE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BOOK-TYPE-SCALE-1",
+      "idempotencyKey": "smoke20261026-revision-BOOK-TYPE-SCALE-1",
+      "actualRevision": "cc654d191cc09e39a803137ea06a4d198d3423245d0420757d8d1148874368f2",
+      "recoveryId": "20261026T190546Z-external-set-status-BOOK-TYPE-SCALE-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T19:08:00Z",
+  "outcome": "succeeded"
+}

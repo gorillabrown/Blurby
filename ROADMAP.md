@@ -1,9 +1,9 @@
 # Blurby — Development Roadmap
 
-**Last updated**: 2026-10-25, roadmap review 2026-10-25 (no item reached a terminal status since review 2026-10-23-5; LIBRARY-WRITE-RACE-2, NARRATE-RECONCILE-RESIDUAL-1 and NARRATE-HARNESS-COLDCLICK-1 built and held, their specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md`; RESTAMP-RERUN-RACE-1 built and held; CHAPTER-STEP-CFI-1 stopped at Done-when 1; APP-TABS-1 Wave A built; the met `mode-separation` deadline withdrawn from `policy.roadmap.deadlines`; PAGE-PAGES-READ-1 specified and FURTHEST-PERSIST-1 stubbed, both split from PAGE-SAVE-RESTAMP-3 Wave C; AUTO-ARCHIVE-1 specified with the owner's answers; FURTHEST-PERSIST-1's question ruled (furthest page ever reached); WORD-INDEX-UNIFY-1's hold cleared by Blurby.Brain's ruling (b), two copies with a parity test; Blurby.Brain's rulings 1–8 applied: NARRATE-ARROW-PAUSE-1 (99) and LIBRARY-WRITE-RACE-3 (89) specified, PAGE-PARA-KEYS-1 (115) stubbed, BUG-220 to BUG-223 filed and the BUG-218/219 collision settled, package verifications recorded on seven cards, NARRATE-QUIT-LINGER-1 re-scoped to (b), rule 53 (b) names the live files; standing rules 54 and 55 promoted). Earlier, review 2026-10-23-5 and the fourth review of 2026-10-23 (buffer refilled: NARRATE-QUIT-LINGER-1, OVERLAY-THEME-SWEEP-1, READER-ARROW-GUARD-1 and WIN-TARGET-NSIS-1 specified; CHAPTER-STEP-CFI-1, RESTAMP-RERUN-RACE-1 and FOCUS-TOC-JUMP-WORD-1 added; NARRATE-EXIT-CRASH-1 superseded; seven built-and-held specs moved to `docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-4.md`). Earlier the same day, third review (BLURBY-SERVER-1 absorbed from the held storyboard as Seq 97, `Path: epic`; Stage 9 now follows it; CLOUD-CONNECTORS-1 rescoped to book sources; FOLDER-NOTICE-2 dissolved, TR-084; the release-fix specs became cards ([`ROADMAP_snapshot_2026-10-23-3.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-3.md))). Second review (the five merged, gate-held specs became cards ([`ROADMAP_snapshot_2026-10-23-2.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23-2.md)), 1,944 lines; BAND-ALIGN-2 owner amendment; FOCUS-KEYS-FIX-1 reopened; BLOCK-TAG-CASE-1 at 85). Earlier the same day (roadmap review: the 19 built-and-held items become cards, with their specifications in [`ROADMAP_snapshot_2026-10-23.md`](docs/planning/.Archive/ROADMAP_snapshot_2026-10-23.md), cutting this file from 3,910 lines to about 2,530; UI-SWEEP-1, UI-SWEEP-TRIAGE-1 and SMOKE8-DIAG-1 closed (TR-081 to TR-083); FLOW-PARA-KEYS-1 specified; the queue re-sequenced to whole-number Seq; LL-164 and LL-146 promoted to standing rules 51 and 52; [review records](docs/planning/roadmap-reviews/2026-10-23-phase-brief.md))
-**Current state**: v1.75.1 baseline. Page, Focus and Flow run as independent runtimes behind a thin router (READER-MODE-SEPARATION-2, 2026-10-11). Narrate is removed (NARRATE-REMOVE-1, completed 2026-10-12; merge `386651fc`): the mode, its hooks, strategies, UI and tests are deleted, and so are the dormant MOSS-Nano, Pocket and Qwen engines. Kokoro stays in the main process, dormant and unreachable from the UI, until NARRATE-REBUILD-1 builds the new Narrate on it. The full suite passes on the owner's machine (2,068 passed / 1 skipped in 152 files, 0 failed, 2026-10-14, on FOLDER-SCAN-PERF-1's merge tree), and typecheck exits 0.
-**Finish line**: **The Stage 8 release** (owner ruling, 2026-10-22): a published build of `main` once release gates (1) to (11) hold. The 17 merged Stage 8 items then close out on that build's evidence. No dated deadline. Scope: the release gate's eleven conditions ([Stage 8](#stage-8--launch-quit-and-packaging-defects-found-at-g2-roadmap-review-2026-10-14)); the open gate item is ELECTRON-42-UPGRADE-1 (gate 11), after which gate (1) re-runs on the quiet machine and the batched owner smoke (gate 2) follows. History: the previous finish line, Narration rebuilt, was met on 2026-10-15 (NARRATE-REBUILD-1, TR-074); the reading-mode separation entry gate was met on 2026-10-11 (`policy.roadmap.deadlines.mode-separation`, met, and withdrawn from the policy by roadmap review 2026-10-25 with the owner's approval).
-**Queue**: release fix, In Flight and merged: PAGE-REOPEN-CFI-1 (1) → BOOK-TEXT-COLOUR-1 (2) → FOLDER-SWITCH-HEADER-1 (3) → NARRATE-START-STACK-1 (4) → BOOK-TYPE-SCALE-1 (5) → KEEP-FURTHEST-FIX-1 (6, the release-fix sha `36ac7466`). Gate (1) passed on it on 2026-10-23 (run 4: 0 of 51 launches crashed; `docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`), so the owner's smoke re-check, gate (2), is the one release gate still open. Then 40 more In Flight items: merged and gate-held, or built and freeze-held. Built and held for the release (In Flight): PAGE-SAVE-RESTAMP-3 (80, Wave A) → JUMP-LANDING-SAVE-1 (81) → ZIP-ASYNC-READ-1 (82) → BAND-ALIGN-2 (83) → FLOW-PARA-KEYS-1 (84); BLOCK-TAG-CASE-1 (85) is building Wave A. Dispatch buffer after review 2026-10-23-4 (Queued, Full Spec, post-release): NARRATE-QUIT-LINGER-1 (86) → OVERLAY-THEME-SWEEP-1 (90) → READER-ARROW-GUARD-1 (91) → WIN-TARGET-NSIS-1 (92) → EINK-CONTROLS-1 (96). Stubs 87, 88, 93–95 and 97–99; NARRATE-EXIT-CRASH-1 (89) superseded by ELECTRON-42-UPGRADE-1. BLURBY-SERVER-1 (100, `Path: epic`) and Stage 9 (101–107).
+**Last updated**: 2026-10-26, roadmap-review after approved PhasesA–C: five source-backed smoke specifications, a separate Narrate paused-click child, owner design choices recorded, unresolved diagnoses retained and release holds unchanged. Previous state is preserved in the dated pre-specification snapshot.
+**Current state**: v1.75.1; Page, Focus, Flow and rebuilt Narrate are four independent runtimes (Narrate completed 2026-10-15). Kokoro is the sole narration engine. Source baseline main d8e44864 has the same production code as tested release36ac7466. That release passed quiet gate(1) on 2026-10-23; the owner smoke on 2026-10-26 is RED. See the current review and live Notion register for evidence/status; built/merged held work is not complete.
+**Finish line**: the Stage8 release, only when all eleven gates hold on the approved exact candidate; no dated deadline. Gate(2) remains failed/partial after the 2026-10-26 owner smoke. This planning review does not grant a code integration window, merge go or release exception. Any changed candidate receives the applicable gates anew.
+**Queue**: live Notion is authority. The existing release-fix Seq1–6 and held merge train remain. This review specifies five smoke repairs, first LIBRARY-COMPLETION-VISIBILITY-1; the new paused-click child occupies117 and the residual Narrate visual diagnosis moves to124. Specifications are not dispatches: release, prerequisite, library ownership and execution-access holds remain. The phase brief reports all five readiness findings separately.
 **Last sprint**: SMOKE8-DIAG-1, UI-SWEEP-TRIAGE-1 and UI-SWEEP-1, all completed 2026-10-23 (TR-083, TR-082, TR-081; close-outs in `docs/governance/close-outs/`). Before them, READER-VISUAL-DIAG-1 (TR-080, 2026-10-23) and CI-AUDIT-ALLOWLIST-1 (TR-079, 2026-10-22).
 **Queue source of truth**: [Blurby.Roadmap on Notion](https://www.notion.so/heyevanbrown/3f87c96cc31e800580cfe019c89a56ca), registered as workRegister in Virtuoso/workspace-layout.json. Sprint Code is the identity, Seq is order, and Status is live state. Use the provider's mutation-plan → connector → mutation-confirm flow and refresh the timestamped snapshot after changes. ROADMAP.md remains the specification store. The old workbook is retained solely as migration evidence.
 
@@ -20,8 +20,8 @@ The owner requested product lanes on 2026-09-23. Each Notion record has one prim
 | Lane | Owns | Current / remaining disposition |
 |---|---|---|
 | UX polish | Controls, shortcuts, settings, themes, library presentation, accessibility | UX-POLISH-1 (Space resumes saved mode), unblocked stub awaiting re-authoring (also carries the stale `] / N` hotkey hint); BUG-184 Settings transparency is resolved in source and open until the owner's e-ink smoke; UX-POLISH-1 is merged (14, in flight until its G2 checks); roadmap review 2026-10-14: UX-POLISH-2 (15), OVERLAY-THEME-SWEEP-1 (18, stub), EINK-CONTROLS-1 (19, stub, owner decision); close-out 2026-10-14: UX-POLISH-1 → 13, UX-POLISH-2 → 14; close-out 2026-10-14 (QUIT-FLUSH-1): UX-POLISH-1 → 12, UX-POLISH-2 → 13, OVERLAY-THEME-SWEEP-1 → 17, EINK-CONTROLS-1 → 18 |
-| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | NARRATE-REBUILD-1 (epic, position 9, unblocked) is the only open item; Kokoro is dormant in the main process; MOSS-Nano, Pocket and Qwen are deleted; the earlier HEARD-CURSOR, APPLYRATECHANGE-COLLAPSE and SUBSCRIBER-CURSOR items are superseded and KOKORO-EXPORT dissolved (2026-10-11) |
-| Reader Engine | Page/Focus/Flow mode lifecycle (Narrate returns with NARRATE-REBUILD-1), EPUB rendering, selection/resume anchors, section handoff, visual highlighting and scroll-follow | READER-MODE-SEPARATION-2 (2026-10-11) and NARRATE-REMOVE-1 (2026-10-12) are complete: Page, Focus and Flow are independent runtimes and Narrate is removed; S9 Flow lazy-follow remains deferred; mode-barrel removal stub at position 13 (unblocked); the Focus/Flow horizontal cursor band placement is filed as a new bug (see BUG_REPORT); roadmap review 2026-10-12: READER-VISUAL-DIAG-1 (12, BUG-187/188, read-only) and CLEANUP-MODE-BARREL-1 (13) are Full Specs; close-out 2026-10-14: READER-VISUAL-DIAG-1 → 11; close-out 2026-10-14 (QUIT-FLUSH-1): READER-VISUAL-DIAG-1 → 10 |
+| TTS / Narration Engine | Synthesis, audio scheduling, spoken-word timing, voices, rate changes, audio pause/resume, audio export | Narrate was rebuilt2026-10-15; Kokoro is the sole engine. Current holds and delivery order come from the live register. Smoke repair: NARRATE-PAUSED-CLICK-1 (117); residual band/viewport diagnosis NARRATE-SELECTION-START-1 (124). |
+| Reader Engine | Independent Page/Focus/Flow/Narrate lifecycles, rendering, anchors, section handoff, highlighting and scroll-follow | Four isolated runtimes; no sibling-runtime imports or shared mutable state. Smoke work: Focus handoff118, Page entry keys119, Focus word-only123, plus the existing held band/position integrations. Full specs do not remove release or ownership holds. |
 | Chrome Extension | Browser capture and reader, pairing, transport/reconnect, desktop delivery of captured content | EXT-PAIR-1 completed with conflicting smoke records to reconcile; EXT-ENR-C and expansion deferred |
 | Library & Content | Import/extraction, format conversion, metadata, library persistence/search, reading-queue data | Existing product area; format/OCR/TOC ideas need revalidation before admission; legacy-parser removal stub at position 6; roadmap review 2026-10-14: FOLDER-SCAN-PERF-1 (10, BUG-193), FOLDER-UNREACHABLE-GUARD-1 (16, stub, BUG-195), PDF-IMPORT-DIAG-1 (17, stub, BUG-190); close-out 2026-10-14: FOLDER-SCAN-PERF-1 completed (BUG-193, merge `534b43d2`), LARGE-FOLDER-SYNC-1 (15, stub; technical half Full Spec 2026-10-14, design half open with the owner); close-out 2026-10-14 (QUIT-FLUSH-1): LARGE-FOLDER-SYNC-1 → 14 (prerequisite met), FOLDER-UNREACHABLE-GUARD-1 → 15, PDF-IMPORT-DIAG-1 → 16 |
 | Platform & Maintenance | Electron process/window/IPC, packaging, builds, shared test infrastructure, project governance | Historical reliability and governance work; terminal backfill, lessons reconciliation, and review upkeep remain support actions; cloud retry consolidation stub at position 9; roadmap review 2026-10-12: TEST-BUDGET-WORDINDEX-1 (10, BUG-186), SETTINGS-WRITE-DURABLE-1 (11, BUG-185); roadmap review 2026-10-14: QUIT-FLUSH-1 (11, BUG-192), PACKAGING-FIX-1 (13), KF2-WAIVER-RETIRE-1 (20, stub); DEV-PERF-MEASURE-1 dissolved into FOLDER-SCAN-PERF-1; close-out 2026-10-14: QUIT-FLUSH-1 → 10, PACKAGING-FIX-1 → 12; close-out 2026-10-14 (QUIT-FLUSH-1): QUIT-FLUSH-1 completed (BUG-192, merge `d21009b3`), PACKAGING-FIX-1 → 11, KF2-WAIVER-RETIRE-1 → 19 |
@@ -1563,123 +1563,9 @@ None. The thread count is a back-end tuning value inside the owner's D6 budgets 
 
 <a id="auto-archive-1-spec"></a>
 
-#### AUTO-ARCHIVE-1 — A finished book archives itself, with Undo *(Seq 111 — Full Spec; authored 2026-10-25 by roadmap review 2026-10-25 on `main` @ `1736bfee`, from the owner's request of 2026-10-23 and the owner's answers of 2026-10-25 (tier 3, all three recommended options); post-release, in its own `ReaderContainer.tsx` integration window; not a release gate)*
-
-- **What:**
-  1. **Mark complete.**
-     - A **Mark complete** button sits on the list card, beside Archive, and a **Mark complete** item sits in the grid card's context menu.
-     - Pressing either marks the book complete: its position moves to the last word, it counts as a completed book in history, and it is archived.
-  2. **Exit at the end.** Leaving the reader when the book is finished archives it, as today, and now also in Page mode:
-     - in Page, when the book's last page is on screen;
-     - in Focus, Flow and Narrate, when the last word is reached (today's rule).
-  3. **Undo.** Every auto-archive (both cases above) shows a toast for 5 s: `Archived "<title>"`, with an **Undo** button.
-     - Undo unarchives the book.
-     - For Mark complete, Undo also restores the book's previous position and cfi.
-     - Undo after an exit at the end only unarchives.
-- **Why:**
-  - **The owner's request:** "auto archive when manually marked complete or 0% remaining + exit".
-  - **Owner answers, 2026-10-25:**
-    - (1) the library card, list and grid;
-    - (2) a toast with Undo for 5 s;
-    - (3) "0% remaining" is the last page on screen in Page, or the last word in the other modes.
-  - **Traced on `1736bfee` by roadmap review 2026-10-25:**
-    - No "Mark complete" control exists. "Marked as read" only toggles `unread` (`LibraryContainer.tsx:349-357`). The list card hides Archive once a book is complete (`DocCard.tsx:208-219`).
-    - The exit archive exists already: `useProgressTracker._persistAndLog` calls `markDocCompleted`, `onBookCompleted` and `onArchiveDoc` when `savePos >= resolvedTotalWords - 1` (`src/hooks/useProgressTracker.ts:278-282`).
-    - Page saves the first word of each page (`page/ModeRuntime.ts:575-595`), so paging to the end never meets that test.
-    - The exit archive's toast is `useLibrary.archiveDoc`'s "Document archived", which has no Undo (`useLibrary.ts:178-189`). Undo exists only as the keyboard Z after E (`LibraryContainer.tsx:313-320`).
-    - The toast already supports an action button (`showToast(message, duration, action)`, `useLibrary.ts:32`; rendered at `LibraryView.tsx:363-372`).
-    - `mark-doc-completed` only counts the completion in history (`main/ipc/documents.js:125-129`).
-- **Design (tier 1, Blurby.Roadmap 2026-10-25, inside the owner's answers):**
-  - **Page knows its last page.** foliate's paginator exposes `atEnd`: no next section, and the last page of this one (`node_modules/foliate-js/paginator.js:1088-1090`).
-    - Page's FoliateView relocate listener (`src/reader/modes/page/FoliateView.tsx:797-801`) adds `atEnd: view.renderer?.atEnd === true` to the detail it reports.
-    - `PageModeRuntime.onRelocate` (`page/ModeRuntime.ts:436-440`) passes it to `ports.shell.reportRelocate`, whose value type (`src/reader/ports/ReaderPorts.ts:54`) gains an optional `atEnd?: boolean`. Focus, Flow and Narrate send no `atEnd`, so they are unchanged.
-    - The shell (`ReaderContainer.tsx:367-371`) stores it in `pageAtEndRef` and passes the ref to `useProgressTracker` as `atBookEndRef`.
-  - **The exit rule.** In `_persistAndLog`, when `readingMode === "page"` and `atBookEndRef.current` is true, `savePos` becomes `resolvedTotalWords - 1`, and the save keeps the last page's cfi. The completion test at `:278` is then met. Other modes are unchanged.
-  - **One archive-with-Undo handler** in `LibraryContainer`: `archiveWithUndo(docId, restore?)` calls `archiveDoc` and replaces its toast with `showToast(\`Archived "${title}"\`, UNDO_DISMISS_MS, { label: "Undo", onClick })`. `UNDO_DISMISS_MS = 5000` already exists (`src/constants.ts:152`).
-    - `onClick` calls `unarchiveDoc(docId)`, then `restore?.()`.
-    - `useLibrary.archiveDoc` takes an optional `{ silent: true }`, so it shows no toast of its own.
-    - `ReaderContainer`'s `onArchiveDoc` prop (`LibraryContainer.tsx:555`, `:677`) becomes `archiveWithUndo`, with no restore.
-  - **Mark complete** in `LibraryContainer`: `markComplete(doc)` records `prev = { position, cfi }`, then:
-    - `api.updateDocProgress(doc.id, doc.wordCount - 1, doc.cfi)`, which keeps the cfi, because main sets `cfi` only when given (`documents.js:24`);
-    - `api.markDocCompleted()`;
-    - `archiveWithUndo(doc.id, () => api.updateDocProgress(doc.id, prev.position, prev.cfi))`.
-    - With no `wordCount`, it skips the position move and still archives.
-    - The history completion count is not taken back on Undo, because main has no decrement. This is recorded as accepted.
-    - The reading-goal books count (`onBookCompleted`) is not touched from the library. Only a finish in the reader counts toward the goal, as today.
-  - **Controls.**
-    - `DocCard` shows the Mark complete icon button only when the book is neither complete nor archived, next to Archive. Its label is `aria-label="Mark complete"`.
-    - `DocGridCard`'s context menu gets a "Mark complete" item under the same condition.
-    - `LibraryView` passes `onMarkComplete` down.
-    - Icons use existing `icon-btn` styles. No inline styles (standing rule 2).
-  - **Unchanged:** the legacy standalone reader window (`src/App.tsx:74-89`) and the keyboard E/Z undo.
-- **Prerequisites:**
-  - The Stage 8 release and the post-freeze merge train. Cut from `main` after it.
-  - PAGE-PAGES-READ-1 merges first: both edit `ReaderContainer.tsx` and `useProgressTracker.ts`.
-  - Re-grep every cited line at the cut (standing rule 36).
-- **Done when** (PowerShell 7, `pwsh`, from the worktree root):
-  1. **Red first (standing rule 43).** Commit the new tests alone. On the base, each listed failure appears and each control passes; record the output in the memo.
-     - **`tests/useProgressTracker.test.ts`**, a new describe `AUTO-ARCHIVE-1 exit at the end`, mounting the hook as `tests/keepFurthest.test.tsx` does, with `markDocCompleted`, `onArchiveDoc` and `onBookCompleted` as spies:
-       - **(ae1)** Page mode, `atBookEndRef.current = true`, on screen at word 79,900 of 80,000. `finishReading(79900)` saves position 79,999 and calls `markDocCompleted`, `onBookCompleted` and `onArchiveDoc` once each. *Fails on the base: saves 79,900 and no archive.*
-       - **(ae2) control:** Page, `atBookEndRef.current = false`: it saves 79,900 and does not archive.
-       - **(ae3) control:** Focus at word 79,999: it archives, as today.
-     - **`tests/readerModes/page.contract.test.ts`** (or the Page test file that drives `onRelocate` with fake ports; name it in the memo): **(ae4)** `onRelocate({ cfi, fraction, atEnd: true })` reaches `shell.reportRelocate` with `atEnd: true`. *Fails on the base: the field is dropped.*
-     - **`tests/autoArchive.test.tsx`** (new), rendering the library with `tests/editFormSave.test.tsx`'s harness pattern (`createElectronApiMock`, `renderLibrary`, `toastTexts`), copied, not imported (standing rule 52):
-       - **(am1)** The list card of an unfinished book has a "Mark complete" button. Pressing it calls `updateDocProgress(id, wordCount - 1, cfi)`, `markDocCompleted()` and `archiveDoc(id)`, and shows a toast `Archived "<title>"` with an "Undo" button. *Fails on the base: no button.*
-       - **(am2)** Pressing Undo calls `unarchiveDoc(id)` and `updateDocProgress(id, <previous position>, <previous cfi>)`.
-       - **(am3)** The grid card's context menu has "Mark complete" with the same effect as (am1).
-       - **(am4) control:** a complete or archived book shows no Mark complete button.
-  2. **The change** in the files of Done-when 7. `npx vitest run tests/useProgressTracker.test.ts tests/autoArchive.test.tsx tests/keepFurthest.test.tsx tests/readerModes tests/useLibrary.test.ts tests/features.test.js` exits 0.
-  3. **Standing rule 50:** `tests/features.test.js` "auto-archive at 100% completion" and "does not auto-archive if not complete" are logic re-implementations that stay green unedited. Any test that asserts the toast text "Document archived" on the exit path is named in the memo and updated in scope.
-  4. `npm test` exits 0, `npm run typecheck` exits 0 and `npm run build` exits 0 on the owner's machine (standing rules 47 and 48).
-  5. **Live, packaged (standing rule 53(a), `--arm64`; a fresh scratch profile proved before the first input, LL-165).** The trigger that commits state is the exit save and the archive IPC. The check reads the scratch profile's `library.json` after a 2 s settle, plus the toast through a DOM probe (standing rule 54).
-     - **Page:** open a short sample book, go to its last page (the contents list's last entry, then Next page until `renderer.atEnd` reads true in the probe), and exit to the library. `library.json` shows `archived: true` and `position` equal to `wordCount - 1`, and the toast reads `Archived "<title>"` with Undo. Press Undo: `archived: false`.
-     - **Mark complete:** on another book at 10%, press Mark complete on its list card. It is `archived: true` at `position = wordCount - 1`. Press Undo: `archived: false`, with the previous `position` and `cfi`.
-     - **Control on a base `--dir` build (standing rules 54 and 55):** the same Page route leaves `archived` false. That shows the check sees the difference.
-  6. **Package verification (standing rule 53):** (a)–(e) on the final commit with `origin/main` merged in. Blurby.Brain confirms.
-  7. **Fence (standing rule 41):** `git diff --name-status <base>` lists exactly the following, plus the staging memo and the time log:
-     - `M src/reader/modes/page/FoliateView.tsx`, `M src/reader/modes/page/ModeRuntime.ts`, `M src/reader/ports/ReaderPorts.ts`;
-     - `M src/components/ReaderContainer.tsx`, `M src/hooks/useProgressTracker.ts`, `M src/hooks/useLibrary.ts`;
-     - `M src/components/LibraryContainer.tsx`, `M src/components/LibraryView.tsx`, `M src/components/DocCard.tsx`, `M src/components/DocGridCard.tsx`;
-     - `M tests/useProgressTracker.test.ts`, the Page test file of (ae4), and `A tests/autoArchive.test.tsx`.
-- **Effort:** M.
-- **Owners:** the implementation agent; reviewers for spec compliance and quality, in parallel (standing rule 9); Blurby.Brain for package verification.
-- **Source:** the owner's request (2026-10-23) and answers (2026-10-25); the stub at `#auto-archive-1`; the code trace by roadmap review 2026-10-25 on `1736bfee`.
-- **Path:** dispatch.
-
-##### Implementation detail
-- **Edit sites:** the Done-when 7 list, with the lines cited in Design.
-- **Constants:** `UNDO_DISMISS_MS` (`src/constants.ts:152`, 5000), reused. No new constant.
-- **Branch:** `eb/auto-archive-1` from `main` after the post-freeze merge train and PAGE-PAGES-READ-1.
-- **Staging plan:** stage the fence paths by exact path (policy.git: push). Merge with `--no-ff` (Rule 5b) once the package is verified.
-- **Shared-core touches:** `src/components/ReaderContainer.tsx` (the `atEnd` ref in `reportRelocate` and its pass to `useProgressTracker`). It runs in its own integration window, after PAGE-PAGES-READ-1. It must not run in parallel with any item that edits `ReaderContainer.tsx`.
-- **Lane ownership:** Library & Content, with Reader Engine as the cross-lane owner of Page's relocate detail. Execution surfaces C (cards, toast) and A (the exit rule). **Forbidden during a parallel run:** `src/types.ts`, `src/utils/FlowScrollEngine.ts`, and the Focus, Flow and Narrate runtimes. **Merge order:** after PAGE-PAGES-READ-1.
-- **Mode isolation:** the new `atEnd` field travels the existing shell port. No mode imports another.
-- **Failure handling:**
-  - **`renderer.atEnd` is never true on the last page of a sample book (the probe shows false):** stop and report the paginator's `page` and `pages` there. Do not substitute a fraction threshold without a Blurby.Brain ruling.
-  - **The toast host does not render action buttons on the exit path:** the library view renders the toast after it returns (`LibraryContainer.tsx:666`). If the button is missing, report it. Do not add a second toast system.
-  - **Rollback:** `git revert -m 1 <merge>`. No stored data changes shape.
-
-##### Task list
-| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
-|---|---|---|---|---|---|---|---|---|
-| 1 | Red tests (ae1–ae4, am1–am4) and controls committed alone, failures recorded | calculable | positive control | bounded | medium | 40m | — | — |
-| 2 | Page reports its last page; the exit rule archives a Page book at the end | calculable | feature | bounded | medium | 35m | — | — |
-| 3 | Archive with Undo toast; Mark complete on list and grid cards | calculable | feature | bounded | medium | 45m | — | — |
-| 4 | Suite, typecheck, build | calculable | verify | bounded | low | 15m | — | — |
-| 5 | Packaged live Page-end and Mark-complete checks with base control; rule 53; memo, time log, push | calculable | live verification | bounded | medium | 55m | — | — |
-
-**Total:** 3h10m (estimate; the timing tool is not installed in this plugin version)
-
-##### Lessons applied
-- **LL-158 / standing rule 54:** the live rows name their commit triggers (the exit save and the archive IPC) and run a base control first.
-- **LL-166 / standing rule 55:** the verdict reads `library.json` and the paginator's `atEnd` through a probe. The base control shows the check sees the difference.
-- **LL-165:** the scratch profile is proved before the first input.
-- **LL-138 / standing rule 43:** red first, with controls (ae2, ae3, am4).
-- **LL-146 / standing rule 52:** the library harness is copied into the new test file.
-- **LL-156 / standing rule 50:** the logic re-implementation tests stay unedited, and any pinned "Document archived" assertion is named.
-- **LL-149 / standing rule 48:** typecheck and build are restated.
-- **LL-167 / standing rule 53:** not done until the packaged arm64 build is verified and Blurby.Brain confirms.
-- **Standing rule 51:** this specification appends no lesson-status line.
+#### AUTO-ARCHIVE-1 — Confirm completion before archiving *(Seq111; Queued / Stub; owner amendment approved 2026-10-26)*
+- **Outcome:** on assumed completion, Keep in Library or Archive; dismissal/default keeps it visible. Archive needs an affirmative action. Preserve compatible explicit Mark complete/Undo behavior; amended completion/history/prompt tests are required before Full Spec.
+- **History:** the superseded automatic-on-exit design and its earlier assertions are preserved in [the dated snapshot](docs/planning/roadmap-reviews/2026-10-26-roadmap-before-specification.md#auto-archive-1-spec); they are not executable instructions. LIBRARY-COMPLETION-VISIBILITY-1 repairs the display independently.
 
 #### Stubs beyond the buffer (roadmap review 2026-10-14)
 
@@ -1729,7 +1615,7 @@ Each stub needs investigation or an owner decision before it can be specified (R
 - <a id="restamp-rerun-race-1"></a>**RESTAMP-RERUN-RACE-1** is now a full specification: [RESTAMP-RERUN-RACE-1](#restamp-rerun-race-1-spec) (roadmap review 2026-10-23-5).
 - <a id="focus-toc-jump-word-1"></a>**FOCUS-TOC-JUMP-WORD-1 — SUPERSEDED (roadmap review 2026-10-23-5):** folded into [CHAPTER-STEP-CFI-1](#chapter-step-cfi-1-spec). Both edit Focus's `navigateTo`, the `go-to-href` case and `onRelocate`, and the owner's "first word of chapter" ruling needs the landing hook that fix adds. The ruling is carried there.
 - <a id="flow-toc-jump-word-1"></a>**FLOW-TOC-JUMP-WORD-1 — After a contents jump, Flow highlights the chapter's first word** *(position 110 — stub; owner ruling 2026-10-23: "Yes, as a follow-up" to CHAPTER-STEP-CFI-1; after CHAPTER-STEP-CFI-1)*. Flow gets the same paused cursor on the jumped-to chapter's first word that CHAPTER-STEP-CFI-1 gives Focus, using that item's landing hook. Specify it after CHAPTER-STEP-CFI-1's Done-when 1 has recorded what Flow shows today. Lane: Reader Engine.
-- <a id="auto-archive-1"></a>**AUTO-ARCHIVE-1** is now a full specification: [AUTO-ARCHIVE-1](#auto-archive-1-spec) (roadmap review 2026-10-25, with the owner's answers).
+- <a id="auto-archive-1"></a>**AUTO-ARCHIVE-1** requires a specification amendment: [confirmation-first owner direction](#auto-archive-1-spec), 2026-10-26. Queued, Stub; the earlier automatic-on-exit design is historical.
 - <a id="flow-para-pause-index-1"></a>**FLOW-PARA-PAUSE-INDEX-1** is now a full specification: [FLOW-PARA-PAUSE-INDEX-1](#flow-para-pause-index-1-spec) (Blurby.Roadmap, 2026-10-23; dispatched the same day).
 - <a id="overlay-theme-sweep-1"></a>**OVERLAY-THEME-SWEEP-1** is now a full specification: [OVERLAY-THEME-SWEEP-1](#overlay-theme-sweep-1-spec) (roadmap review 2026-10-23-4).
 - **EINK-CONTROLS-1** is now a full specification: [EINK-CONTROLS-1](#eink-controls-1) (owner decision 2026-10-23).
@@ -1807,6 +1693,267 @@ Added by Blurby.Roadmap at the owner's request. Every item is a stub: each needs
 - <a id="browser-ext-finalize-1"></a>**BROWSER-EXT-FINALIZE-1 — Finalize the Chrome and Firefox extensions** *(position 103 — stub; ahead of BLURBY-SERVER-1 by owner decision 2026-10-23, desktop-only until the server adds sign-in and plan limits; once the server lands, `add-article` goes through its intake (roadmap review 2026-10-23-3))*. Finish the browser extension for Chrome and port it to Firefox: save the current page to Blurby (the existing extension pairing and add-article path), packaging and store listings for both. Supersedes the deferred Track B lane (EXT-ENR-C and beyond). After APP-TABS-1, so saved pages land in Newsroom. Needs the owner's list of what "finalized" covers (features, store publishing, accounts). Lane: Chrome Extension.
 
 ---
+
+## Smoke findings intake — 2026-10-26
+
+### Verification contract for the five smoke-fix specifications
+Every Done-when below includes these **unwaived** gates (standing rules43/47/48/53/54/55): decisive new tests committed red on the pinned execution base, applicable controls green, then the smallest fix; at most two bounded repair passes, otherwise stop with an issue. The full suite/typecheck/build run locally on the owner machine. A pre-existing unrelated failure is reported, not retuned or waived.
+Build the final implementation with approved main integrated: npm run build; npx electron-builder --win --arm64 --dir --publish never. The output is release/win-arm64-unpacked/Blurby.exe. Before first input, launch with both BLURBY_USER_DATA_DIR and --user-data-dir pointing to a fresh owned profile, read back actual app userData/data path/PID/exe, and abort if normal profile. Hash exactly %APPDATA%/blurby/blurby-data/library.json and settings.json before/after. Preserve logs, build/asar hashes, package files and fixture hashes; source staging never includes personal books/audio.
+Standing-rule53 requires 25-second native-ARM64 survival, no unhandled/crash/error beyond its enumerated known noise, unchanged live hashes, matching renderer bundle/asar inclusion, automatable checks rerun against the exact package, owner UI/heard-audio acceptance where named, and confirmation by the designated package verifier before merge. A missing capability or unavailable owner is an execution-environment hold, never a perceptual PASS. Use no install/uninstall operation for these reader/UI items; retain LL-168 if packaging scope later changes.
+All five run **serially in approved integration windows**. No sibling mode imports or shared mutable mode store; do not widen the shared-core freeze set. This review creates no implementation branch or exception to the Stage8 freeze. Rollback is revert of the item's own implementation commits, never reset/restore of user data. The plan/repository must be committed and reachable from the execution base before any kickoff.
+
+
+Owner-authorized targeted roadmap update from the Stage 8 smoke of release 36ac7466749688c9ba5e17de841224fab08d7bae (v1.75.1 ARM64). **Overall RED.** All 17 findings and 13 requests are traced in the [intake and priority report](docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md); defects are indexed in [Issue.SMOKE8-20261026](docs/governance/bug-reports/Issue.SMOKE8-20261026.2026-10-26.md) and BUG_REPORT.md. Notion remains live status authority. No code changes, dispatch, release waiver, completion, merge or new release-gate classification is implied.
+
+**Priority recommendation:** (1) completion visibility/confirmation; (2) Narrate selection/start, paused Focus handoff and Page-entry input; (3) folder responsiveness and profile-isolation diagnosis; (4) verify held Flow/observer fixes and residual typography; (5) device-local E-ink behavior; (6) interaction clarity; (7) low-risk polish. Recheck smoke coverage after an approved candidate integration. These are proposed relative fix priorities, not a silent re-sequencing of the existing release and held merge train. The smoke-fix segment uses whole-number Seq116–139; this review inserts the focused Narrate child at117 and moves its residual parent to124. Five items now have full specifications; the rest remain stubs. No delivery date is assigned.
+
+**Existing scope reconciled:** F5 stays with BUG-188 / BAND-ALIGN-1 and BAND-ALIGN-2; R4 removes only Focus's band in a separate follow-up, leaving Flow's fix intact. F15 stays with BUG-187 / FOLIATE-OBSERVER-LEAK-1 and existing log-cap work. EINK-CONTROLS-1 and BOOK-TYPE-SCALE-1 receive new evidence/directions without claiming their held or merged implementations satisfy them. AUTO-ARCHIVE-1 is amended above and loses its prior Full Spec readiness.
+
+Five full specifications below define source-backed changes; the remaining stubs retain explicit investigation/design gates. Rule 6a applies before dispatch. Mode-owned implementations stay isolated, with no sibling-runtime imports or shared mutable stores.
+
+#### LIBRARY-COMPLETION-VISIBILITY-1 — Completed reads remain visible in the correct library tab *(Queued; Full Spec; planning rank 1; Seq116; Library & Content)* <a id="library-completion-visibility-1"></a>
+
+- **What:** Keep every record admitted by the existing tab/type/search filters visible exactly once in list and grid, including position at or beyond wordCount. Preserve the existing Reading Now / Not Started groups; do not silently archive, reset progress or change completion detection.
+- **Why:** SMOKE-F14 / BUG-230: the 91/91-word read remains on disk/in the library but neither displayed group accepts it. The same partition also hides already-archived completed records from Archive.
+- **Prerequisites:** No hard AUTO-ARCHIVE-1 prerequisite. Wait for an approved Stage8 integration window and exclusive LibraryView ownership; APP-TABS-1 currently owns overlapping surfaces in its active worktree. Re-read its home/tab filtering before the cut; preserve it rather than replace it. No dispatch until this planning commit is reachable from the execution base.
+- **Done when:**
+  1. `tests/libraryCompletionVisibility.test.tsx` (new, file absent on the source baseline), rendered through the real LibraryView/LibraryContainer: `(lv1)` 91/91 unarchived appears once in All in list and grid, with 91/91 unchanged and no archive/progress callback; `(lv2)` archived 91/91 appears once in Archive and not All; `(lv3)` 91/91 and 92/91 remain reopenable via the existing card callback.
+  2. `(lv4)` parameterizes positions missing/0/2/3/90/91/92 and known/unknown wordCount: every admitted doc appears once; `(lv5)` New/Favorites/type/search include/exclude controls remain correct; `(lv6)` live progress 90→91 and archive/unarchive transitions never create a missing or double card. The base must fail lv1/lv2 for missing cards, not a harness exception; incomplete and filter-exclusion controls pass.
+  3. `npx vitest run tests/libraryCompletionVisibility.test.tsx tests/folderNoticeBanner.test.tsx tests/useLibrary.test.ts tests/saveLibraryMerge.test.js` exits0. New assertions inspect real `[data-doc-id]` cards, not a copied filter; copy the lawful mock/setup from folderNoticeBanner.test.tsx rather than importing a test file.
+  4. `npm test`, `npm run typecheck`, `npm run build` each exit0 locally. The packaged ARM64 route in the verification contract below shows the owned 91-word text after return/reopen and a completed archived fixture in Archive. Record baseline failure and candidate success; original data is unchanged.
+- **Effort:** S; default medium; positive-control task1 high for Narrate/Page, UI-only fix task2 low for visibility/Focus/copy. Durations are task-row estimates, not effort levels.
+- **Owners:** planner; local implementation agent; spec/quality reviewers; repository operator; designated package verifier for standing-rule53.
+- **Source:** [smoke intake](docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md#all-smoke-sources-mapped), F14/R12; 30-library-after-disappearance-172154.json in the smoke evidence directory; LibraryView.tsx on main d8e44864.
+- **Path:** dispatch; execution remains held, not launched.
+
+##### Implementation detail
+
+- **Edit sites:** `src/components/LibraryView.tsx`, the readingNow/notStarted useMemo at source lines242–278: remove the upper wordCount bound from readingNow; keep its engagement threshold, sort and existing tab/type/search filters. A record below the threshold still routes to notStarted. No Card, runtime, progress-hook, IPC or schema edit is needed.
+- **Tests:** New `tests/libraryCompletionVisibility.test.tsx`; real-root mock pattern from `tests/folderNoticeBanner.test.tsx:26–103`. Existing `tests/features.test.js` copies filter logic and is not the decisive test. Fixtures use stable unique IDs and both viewMode values.
+- **Constants:** FOLIATE_MIN_ENGAGEMENT_POSITION is3 (`src/constants.ts:172`); retain it. No new constant, migration or persistence field.
+- **Branch / baseline:** eb/library-completion-visibility-1 from approved main; source pin d8e44864708d40e2a472f3e6436d936e9ee96bfa plus only the explicitly awaited integrated stack. Re-grep every named symbol at the cut; a changed contract returns to the planner, never an improvised edit.
+- **Staging plan:** exact source/test fence src/components/LibraryView.tsx, tests/libraryCompletionVisibility.test.tsx; plus only this item’s own BUG_REPORT subcase, docs/governance/close-outs/Memo.LIBRARY-COMPLETION-VISIBILITY-1.GovernanceStaging.2026-10-26.md and Timing.LIBRARY-COMPLETION-VISIBILITY-1.jsonl. Preserve unrelated work; inspect cached paths before commit; commit/push only as policy and the merge hold permit.
+- **Lane ownership / integration:** Library & Content; source/test fence above. No parallel code run is authorized. Forbidden: sibling runtimes, production queue/settings resets, terminal status/Seq writes, unrelated refactors. Shared-core touches: none. Merge only in the prerequisite/owner-approved order, then recheck downstream specs.
+- **Failure handling:** If a record still disappears after the partition becomes exhaustive, capture admitted IDs versus rendered IDs and stop; do not compensate by changing wordCount/position or auto-archiving. Two bounded repair passes maximum; an unrelated gate failure becomes an issue. Rollback is `git revert` of this item’s implementation commit(s) in reverse order; conflicts stop, never reset user data. Verification/package failure keeps the item In Flight and the release held; only closeout records terminal state.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Production-path regression controls distinguish the defect from the accepted behavior | repeat | positive-control | bounded | medium | 4m (median of 20 runs) | — | — |
+| 2 | The scoped reader/library behavior satisfies its approved contract | repeat | renderer-fix | bounded | low | 2m (median of 5 runs) | — | — |
+| 3 | Local gates, independent review and exact-package evidence are complete | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+**Total:** chain 18m · sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+
+- LL-090 — current tab and group paths are read directly; the test renders the production component.
+- LL-030 — visibility must never create engagement, progress, history or automatic completion writes; LL-165 — prove actual scratch-profile identity and normal-profile hashes before input.
+- Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
+
+#### NARRATE-PAUSED-CLICK-1 — Narrate resumes from the word explicitly selected while paused *(Queued; Full Spec; planning rank 2; Seq117; TTS / Narration Engine)* <a id="narrate-paused-click-1"></a>
+
+- **What:** After a paused explicit word click, Play, Space and direct resume start at that exact word, including word0; preserve ordinary sentence-resume behavior. This fixes only F9; the parent NARRATE-SELECTION-START-1 retains F7/F8 band/viewport diagnosis.
+- **Why:** The artifact-only production-runtime probe records pause8→select20→Play requesting8, then cursor9; the existing start-path control requests20 then21. An immediate snapshot still says20 and would falsely pass.
+- **Prerequisites:** Wait for NARRATE-SENTENCE-RESUME-1 to integrate in the approved candidate: its held tip is35716c5fa8a494322766bb307b99002ec66e5f79 and its start() exempts explicit clicks from sentence rewind. Base starts from main d8e44864 plus that approved integration; no dependency on stopped CHAPTER-STEP-CFI-1. Freeze and package/owner gates remain.
+- **Done when:**
+  1. In existing `tests/narrate/narrate.mode.test.ts`, add `(ns1)` pause8→hardSelect20→togglePlay and `(ns2)` direct resume: assert latest narrate-request word20, producer text begins w20, scheduled/next timed cursor20→21 and no old8/9 voiced source after the new start; `(ns3)` click0; `(ns4)` two paused clicks, last wins. Tests fail the base for the actual request/clock mismatch, not just snapshot state.
+  2. `(ns5)` hold old prefetch, select20, Play, release old result: old epoch never schedules; `(ns6)` no-selection resume retains the integrated sentence-start policy; `(ns7)` playing click retains existing click cause; `(ns8)` click before engine creation stays paused until Play; `(ns9)` stop/destroy suppresses late work. Existing timing-missing/voice-loading controls remain green.
+  3. `npx vitest run tests/narrate/narrate.mode.test.ts tests/narrate/narrate.engine.test.ts tests/narrate/narrate.crossings.test.ts tests/narrate/narrate.trace.test.ts tests/readerModes/narrate.contract.test.ts` exits0; preserve engine timing and fail-closed table validation.
+  4. `npm test`, `npm run typecheck`, `npm run build` exit0 locally. On the exact ARM64 package, the owner hears the clicked word first after pause/click/Play; repeat zero/two selections and ordinary resume. Record request word, heard text and timed cursor. F7/F8 are not accepted by these checks.
+- **Effort:** S; default medium; positive-control task1 high for Narrate/Page, UI-only fix task2 low for visibility/Focus/copy. Durations are task-row estimates, not effort levels.
+- **Owners:** planner; local implementation agent; spec/quality reviewers; repository operator; designated package verifier for standing-rule53.
+- **Source:** F9 / BUG-227 in [smoke intake](docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md); narrate-paused-selection-probe-result.json and control-result.json; ModeRuntime.start/pause/resume/togglePlay/hardSelect on d8e44864 and held sentence-resume tip35716c5f.
+- **Path:** dispatch; execution remains held, not launched.
+
+##### Implementation detail
+
+- **Edit sites:** `src/reader/modes/narrate/ModeRuntime.ts`, resume() at source314–319: after the alive/engine/not-playing and engine-paused guards, if `this.state.explicitSelectionAnchor != null`, call the existing `this.start({ cause: "play-button" })` and return; otherwise retain engine.resume(). Do not add engine state, a timer, shared types or producer changes.
+- **Tests:** Extend only `tests/narrate/narrate.mode.test.ts`, using its open() and fake producer/audio clock. Diagnostic failure/control sources and results are in the smoke run as narrate-paused-selection-*.ts.txt/.json; they are source evidence, not collected tests or heard-audio proof.
+- **Constants:** No new constant. `!= null` must honor index0. Preserve main’s NARRATE-START-STACK-1 logging when integrating the older sentence-resume branch.
+- **Branch / baseline:** eb/narrate-paused-click-1 from approved main; source pin d8e44864708d40e2a472f3e6436d936e9ee96bfa plus only the explicitly awaited integrated stack. Re-grep every named symbol at the cut; a changed contract returns to the planner, never an improvised edit.
+- **Staging plan:** exact source/test fence src/reader/modes/narrate/ModeRuntime.ts, tests/narrate/narrate.mode.test.ts; plus only this item’s own BUG_REPORT subcase, docs/governance/close-outs/Memo.NARRATE-PAUSED-CLICK-1.GovernanceStaging.2026-10-26.md and Timing.NARRATE-PAUSED-CLICK-1.jsonl. Preserve unrelated work; inspect cached paths before commit; commit/push only as policy and the merge hold permit.
+- **Lane ownership / integration:** TTS / Narration Engine; source/test fence above. No parallel code run is authorized. Forbidden: sibling runtimes, production queue/settings resets, terminal status/Seq writes, unrelated refactors. Shared-core touches: none. Merge only in the prerequisite/owner-approved order, then recheck downstream specs.
+- **Failure handling:** If the integrated base cannot reproduce the wrong request, stop and re-plan rather than weaken the test. If ordinary resume changes, preserve its approved sentence policy and stop. If hardSelect resolves the wrong global word, file that separate mapping failure; never patch with estimated timing. Two repair passes maximum; rollback implementation commits with git revert, stopping on conflicts. Verification/package failure keeps the item In Flight and the release held; only closeout records terminal state.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Production-path regression controls distinguish the defect from the accepted behavior | repeat | positive-control | bounded | high | 4m (median of 20 runs) | — | — |
+| 2 | The scoped reader/library behavior satisfies its approved contract | repeat | renderer-fix | bounded | medium | 2m (median of 5 runs) | — | — |
+| 3 | Local gates, independent review and exact-package evidence are complete | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+**Total:** chain 18m · sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+
+- LL-072 and LL-108 — assert exact occurrence/text and preserve word0; LL-073 — explicit selection persists until start consumes it.
+- LL-031 and LL-109 — old async generation must never schedule after replacement/stop; LL-160 and LL-161 — packaged word checks use Electron numbering and text; LL-165 — actual scratch-profile proof.
+- Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
+
+#### FOCUS-PAUSED-HANDOFF-1 — Focus shows the correct word immediately on entry *(Seq118; Queued / Stub; Reader Engine; proposed P1) <a id="focus-paused-handoff-1"></a>
+Switching from Page to paused Focus initially shows the wrong word; Play corrects it. No evidence yet distinguishes stale display from stale position. The handoff word is correct before playback, remains correct after pause, and persists through reopen. Fix within Focus ownership; no sibling-mode imports or shared mutable mode state.
+#### PAGE-ENTRY-KEYS-1 — Page receives section navigation keys before word wrapping completes *(Queued; Full Spec; planning rank 3; Seq119; Reader Engine)* <a id="page-entry-keys-1"></a>
+
+- **What:** Install Page-owned native section key forwarding before asynchronous wrapping yields, with one listener per document and teardown cleanup. This repairs the proven forwarding gap; input before a paginator exists remains unchanged.
+- **Why:** F3 / BUG-225: first PageDown failed until mouse Next. Page onSectionLoad awaits wrapWordsInSpans before installing its key forwarder, while mouse Next already reaches the parent handler. The gap is proven in source; the owner-session causal match still needs the exact control.
+- **Prerequisites:** Wait for an approved integration window and serialize with held Page view/save/key edits. Preserve READER-ARROW-GUARD-1 (held51202c1c), PAGE-HELD-TURN-FAIL-1, PAGE-SAVE-RESTAMP-3, JUMP-LANDING-SAVE-1 and RESTAMP-RERUN-RACE-1 on the final cut. Re-read symbols/tests; these related stacks are not silently overwritten.
+- **Done when:**
+  1. Extend real-FoliateView `tests/readerModes/pagePositionSave.test.tsx`: `(ek1)` load60 block groups, hold first-wrap yield, send native section PageDown before release/mouse input and assert paginator.next once immediately; after canonical stamping, assert the landed text/CFI saved once. `(ek2)` PageUp similarly calls prev once. The base fails for absent forwarding; the existing `(u)` mouse-next control passes.
+  2. `(ek3)` one physical key after wrapping gives one turn; `(ek4)` repeated load of the same document does not double forward; `(ek5)` retained section document after unmount forwards nothing to the parent. Retain modifier/repeat, held-turn persistence and stale-load controls; do not add replay-all-key behavior.
+  3. `npx vitest run tests/readerModes/pagePositionSave.test.tsx tests/readerModes/foliateViewTeardown.test.tsx tests/readerModeBoundaries.test.ts tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts` exits0.
+  4. `npm test`, `npm run typecheck`, `npm run build` exit0 locally. Exact-package owner check uses section focus, then PageDown/Left/Right before mouse navigation; compare real paginator/CFI changes during early wrapping and after settling. Record any residual pre-renderer no-op separately.
+- **Effort:** S; default medium; positive-control task1 high for Narrate/Page, UI-only fix task2 low for visibility/Focus/copy. Durations are task-row estimates, not effort levels.
+- **Owners:** planner; local implementation agent; spec/quality reviewers; repository operator; designated package verifier for standing-rule53.
+- **Source:** F3 / BUG-225; [assessment](docs/planning/roadmap-reviews/2026-10-26-assessment.md#risk-and-planning-order); current Page onSectionLoad, wrapping and parent key handlers on d8e44864; held arrow guard51202c1c.
+- **Path:** dispatch; execution remains held, not launched.
+
+##### Implementation detail
+
+- **Edit sites:** `src/reader/modes/page/FoliateView.tsx`: onSectionLoad at638–790 installs its section key forwarder synchronously before await wrapWordsInSpans at664. Keep existing forwarded fields, including repeat. Use a Page-effect-local per-document handler map and the named forwardSectionKeyDown registration before the await; dedupe repeated loads, guard canceled loads and remove all registered handlers in both effect cleanup exits. In docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json, change only the Page doc:keydown privateCopyMap copy.anchor from its anonymous registration to doc.addEventListener("keydown", forwardSectionKeyDown);. Preserve every other row and the historical ownership.json census.
+- **Tests:** Extend `tests/readerModes/pagePositionSave.test.tsx`; retain its `(u) a turn while the section's first wrap is still running is held too (review W1)` assertions. Its60-paragraph fixture exceeds WRAP_BATCH_SIZE50 and provides a deterministic yield; add a deferred Promise if needed rather than an arbitrary sleep.
+- **Constants:** WRAP_BATCH_SIZE is50 block groups (`page/helpers/foliateWordWrapping.ts:11,143–144`), not words. Parent page handler at1167–1189 returns before renderer existence; that policy stays unchanged.
+- **Branch / baseline:** eb/page-entry-keys-1 from approved main; source pin d8e44864708d40e2a472f3e6436d936e9ee96bfa plus only the explicitly awaited integrated stack. Re-grep every named symbol at the cut; a changed contract returns to the planner, never an improvised edit.
+- **Staging plan:** exact source/test/ownership-map fence src/reader/modes/page/FoliateView.tsx, tests/readerModes/pagePositionSave.test.tsx, docs/planning/roadmap-reviews/reader-mode-separation-2/census/boundary-policy.json; plus only this item’s own BUG_REPORT subcase, docs/governance/close-outs/Memo.PAGE-ENTRY-KEYS-1.GovernanceStaging.2026-10-26.md and Timing.PAGE-ENTRY-KEYS-1.jsonl. Preserve unrelated work; inspect cached paths before commit; commit/push only as policy and the merge hold permit.
+- **Lane ownership / integration:** Reader Engine; source/test fence above. No parallel code run is authorized. Forbidden: sibling runtimes, production queue/settings resets, terminal status/Seq writes, unrelated refactors. Shared-core touches: none. Merge only in the prerequisite/owner-approved order, then recheck downstream specs.
+- **Failure handling:** If the early-wrap test is not red on the integrated base for missing forwarding, stop for diagnosis; do not count a timer failure as proof. If modifier/persistence controls regress, stop and preserve held work. Two repair passes maximum; revert only this item’s commits on rollback, never a sibling runtime or user file. Verification/package failure keeps the item In Flight and the release held; only closeout records terminal state.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Production-path regression controls distinguish the defect from the accepted behavior | repeat | positive-control | bounded | high | 4m (median of 20 runs) | — | — |
+| 2 | The scoped reader/library behavior satisfies its approved contract | repeat | renderer-fix | bounded | medium | 2m (median of 5 runs) | — | — |
+| 3 | Local gates, independent review and exact-package evidence are complete | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+**Total:** chain 18m · sum 18m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+
+- LL-031 — canceled/old loads cannot reattach; LL-080 — preserve input-target guards and native event semantics.
+- LL-160 and LL-161 — saved word acceptance checks text under Electron numbering; LL-165 — fresh package profile identity; standing rules43/54/55 require a red forwarder control, actual committing turn and reliable detector.
+- Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
+
+#### FOLDER-SWITCH-CONTENT-1 — Folder switching shows the correct books promptly *(Seq120; Queued / Stub; Library & Content; proposed P1) <a id="folder-switch-content-1"></a>
+The header follows selection, but old-folder cards remain during a long cancellation/scan gap. Readings records began arriving after about 93 seconds; this is eventual loading, not permanent failure. Measure loading and cancellation separately on small and large collections; prevent stale cards being presented as the new folder's books, keep the UI responsive, and preserve existing records/progress. No local import cap or subfolder picker is authorized.
+#### PROFILE-QUEUE-ISOLATION-1 — Explain the normal-profile sync-queue change during isolated QA *(Seq121; Queued / Stub; Platform & Maintenance; proposed P1) <a id="profile-queue-isolation-1"></a>
+Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json changed. Which process wrote it and whether isolation was breached are unresolved. Attribute the writer using bounded evidence, classify intended versus unintended writes, and fix a proven isolation defect if found. Preserve the queue and user data; do not call this data loss or attribute it to the scratch app without proof.
+#### BOOK-TYPE-SCALE-2 — Diagnose residual uneven book typography on the release build *(Seq122; Queued / Stub; Reader Engine; proposed P2) <a id="book-type-scale-2"></a>
+Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved. Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
+#### FOCUS-WORD-ONLY-1 — Focus retains its word cursor without a horizontal dimming band *(Queued; Full Spec; planning rank 4; Seq123; Reader Engine)* <a id="focus-word-only-1"></a>
+
+- **What:** Remove only Focus’s visual reading-zone mask and Focus band-only controls, if any. Keep its word cursor, paused/playing selection, RSVP, speed/font settings and existing private scroll/follow geometry.
+- **Why:** Owner R4 removes Focus’s horizontal highlight; F5 still requires Flow alignment. Held BAND-ALIGN-2 preserves Focus’s band and adds controls, so this follow-up must reconcile that stack explicitly.
+- **Prerequisites:** Wait for BAND-ALIGN-2’s approved integration (held85e327775d1e09701b2bab52cd4e42a9698ae048), exclusive Focus/C-bottom-bar ownership and the release integration window. FOCUS-PAUSED-HANDOFF-1 remains a distinct diagnosis and is not certified fixed by mask removal.
+- **Done when:**
+  1. New `tests/readerModes/focusWordOnly.test.tsx`: `(fw1)` load real Focus CSS and assert both mask-image properties resolve none paused/playing; `(fw2)` selected span retains the existing cursor class and canonical/CFI state; `(fw3)` real bottom bar has neither Band position nor Band lines in Focus; `(fw4)` Flow retains both working groups and its mask; Narrate’s mask/Page remain unchanged. Base controls must demonstrate Focus mask/groups present.
+  2. `npx vitest run tests/readerModes/focusWordOnly.test.tsx tests/readerModes/focus.contract.test.ts tests/readerModes/focus.behavior.test.tsx tests/readerModeIsolation.test.ts tests/readerModeOwnership.test.ts` exits0. A CSS-source regex is not computed-style/live proof; assert the final styles in the packaged renderer too.
+  3. `npm test`, `npm run typecheck`, `npm run build` exit0 locally. Exact-package owner check selects a known Focus word, plays and pauses: underline remains, horizontal dimming is absent; Flow/Narrate still behave under their own contracts.
+  4. Package/fence checks show only the two production files below plus this item’s tests/docs. No private zone/inset observer, follow offset, progress or sibling-mode helper is deleted just because it uses the historical word flow in its name.
+- **Effort:** S; default medium; positive-control task1 high for Narrate/Page, UI-only fix task2 low for visibility/Focus/copy. Durations are task-row estimates, not effort levels.
+- **Owners:** planner; local implementation agent; spec/quality reviewers; repository operator; designated package verifier for standing-rule53.
+- **Source:** SMOKE-R4, focus-band-offset.png and focus-paused-cursor-band-offset.png; [approved plan](docs/planning/roadmap-reviews/2026-10-26-plan.md#macro-steps-in-the-agreed-priority-order); Focus mode.css on d8e44864 and BAND-ALIGN-2 held85e32777.
+- **Path:** dispatch; execution remains held, not launched.
+
+##### Implementation detail
+
+- **Edit sites:** `src/reader/modes/focus/mode.css:34–56` on main sets the Focus view’s mask-image and -webkit-mask-image gradients; replace those visual masks with explicit none. On the integrated BAND-ALIGN-2 stack, `src/components/ReaderBottomBar.tsx` guards rbb-flow-zone-controls with focus||flow: narrow only those band groups to Flow.
+- **Tests:** Create `tests/readerModes/focusWordOnly.test.tsx`; use real stylesheet/provider and real bottom bar, with a controlled Focus document based on readerModes/foliateViewTeardown.test.tsx. Capture computed masks in a real packaged renderer if jsdom lacks CSS support; do not mock the property under assertion.
+- **Constants:** No new state/constant/schema. Retain Focus-owned layout/follow values and all shared-core types; no change to FlowScrollEngine or sibling mode copies.
+- **Branch / baseline:** eb/focus-word-only-1 from approved main; source pin d8e44864708d40e2a472f3e6436d936e9ee96bfa plus only the explicitly awaited integrated stack. Re-grep every named symbol at the cut; a changed contract returns to the planner, never an improvised edit.
+- **Staging plan:** exact source/test fence src/reader/modes/focus/mode.css, src/components/ReaderBottomBar.tsx, tests/readerModes/focusWordOnly.test.tsx; plus only this item’s own BUG_REPORT subcase, docs/governance/close-outs/Memo.FOCUS-WORD-ONLY-1.GovernanceStaging.2026-10-26.md and Timing.FOCUS-WORD-ONLY-1.jsonl. Preserve unrelated work; inspect cached paths before commit; commit/push only as policy and the merge hold permit.
+- **Lane ownership / integration:** Reader Engine; source/test fence above. No parallel code run is authorized. Forbidden: sibling runtimes, production queue/settings resets, terminal status/Seq writes, unrelated refactors. Shared-core touches: none. Merge only in the prerequisite/owner-approved order, then recheck downstream specs.
+- **Failure handling:** If the held stack removes/renames the mask or controls, re-read before editing and stop for a fence amendment if needed. If cursor/geometry changes, revert the visual-only change and investigate separately. Two repair passes maximum; rollback only this item’s commits with git revert. Verification/package failure keeps the item In Flight and the release held; only closeout records terminal state.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Production-path regression controls distinguish the defect from the accepted behavior | repeat | positive-control | bounded | medium | 4m (median of 20 runs) | — | — |
+| 2 | The scoped reader/library behavior satisfies its approved contract | repeat | ui-fix | bounded | low | 5m (median of 3 runs) | — | — |
+| 3 | Local gates, independent review and exact-package evidence are complete | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+**Total:** chain 21m · sum 21m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+
+- LL-090 — inspect the real Focus mask and held bottom-bar controls; no assumed common mode root cause.
+- LL-120 and LL-165 — keep mode-owned visual state and prove the actual package profile; standing rules37/43/53/55 require isolated ownership, red visual controls and exact-package verification.
+- Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
+
+#### NARRATE-SELECTION-START-1 — Diagnose Narrate's paused band and start viewport *(Seq124; Queued / Stub; TTS / Narration Engine; P1 residual F7/F8)* <a id="narrate-selection-start-1"></a>
+F9 moves to NARRATE-PAUSED-CLICK-1 at117. This parent keeps the separate paused-band mismatch and Play viewport jump. Owner policy approved 2026-10-26: keep the current viewport when the selected word is already visible, align its paused highlight, and follow only when it leaves the reading area or on explicit Jump back. Before a visual fix, record actual scroll writers/geometry with a known-failing control; no causal attribution to the click fix or other modes.
+
+#### EINK-DEVICE-SETTINGS-1 — Remember E-ink preferences separately on each device *(Seq125; Queued / Stub; Platform & Maintenance; proposed P2) <a id="eink-device-settings-1"></a>
+An unconfigured device should start in regular mode; an explicitly configured E-ink device remembers E-ink. The tested upgrade inherited einkMode=true; source defaults are already false. Classify device-local settings and exclude them from cross-device upload/apply. Clean-profile default is off; explicit on survives local restarts; computer/phone settings do not override the E-ink device. Preserve migration and existing choices.
+#### EINK-APPEARANCE-2 — E-ink uses white-dominant grayscale and contrast-only appearance controls *(Seq126; Queued / Stub; UX polish; proposed P2) <a id="eink-appearance-2"></a>
+Extend the held EINK-CONTROLS-1 direction with the owner's new grayscale/white appearance and contrast-only controls. E-ink surfaces are grayscale with white dominant; no E-ink theme chooser; contrast is the sole E-ink appearance option. Ordinary display themes remain available outside E-ink.
+#### EINK-MODE-AVAILABILITY-1 — Focus is unavailable while E-ink is enabled *(Seq127; Queued / Stub; UX polish; proposed P2) <a id="eink-mode-availability-1"></a>
+Hide Focus in E-ink, including entry via shortcuts and remembered-mode restore. Enabling E-ink while Focus is active needs a specified fallback. No route enters Focus while E-ink is enabled; decide and document the active-Focus transition before implementation. Regular displays retain Focus.
+#### EINK-FLOW-VIEWPORT-1 — Flow advances a screen at a time on E-ink *(Seq128; Queued / Stub; Reader Engine; proposed P2) <a id="eink-flow-viewport-1"></a>
+In E-ink, keep Flow's viewport stationary until its reading position reaches the bottom, then advance. Compare the held BAND-ALIGN-2 Flow stepping before prescribing residual work. Flow-owned implementation: correct word tracking throughout a stationary viewport, one advance at the bottom boundary, defined browse/clamp/chapter behavior, and regular-mode behavior unchanged. No Narrate-runtime dependency.
+#### EINK-NARRATE-VIEWPORT-1 — Narrate advances a screen at a time on E-ink *(Seq129; Queued / Stub; TTS / Narration Engine; proposed P2) <a id="eink-narrate-viewport-1"></a>
+In E-ink, keep Narrate's viewport stationary while the heard word advances, then move at the bottom boundary. Narrate-owned implementation retains exact audio-word timing, advances once per screen boundary, defines manual browsing and chapters, and leaves regular-mode behavior unchanged. Mirror the contract, not Flow's mutable runtime.
+#### EINK-VIEW-REFRESH-1 — Refresh E-ink on view changes instead of elapsed time *(Seq130; Queued / Stub; UX polish; proposed P2) <a id="eink-view-refresh-1"></a>
+Flashing is the existing E-ink ghosting overlay, confirmed absent when E-ink is off. No periodic timer defect was established. Owner wants view-change-driven refreshes. Page/screen advances, menu changes and book entry/exit trigger the declared refresh policy; idle time and per-word updates do not. Preserve finite flash cleanup/duration and avoid duplicate flashes for one transition.
+#### FOLDER-RETRY-FEEDBACK-1 — Retry visibly reports checking and an unavailable folder *(Seq131; Queued / Stub; UX polish; proposed P2) <a id="folder-retry-feedback-1"></a>
+The single Retry works and logs one null root result, but its unchanged UI leaves the reader unsure anything happened. FOLDER-NOTICE-2 is dissolved and is not reopened. Show an accessible checking state and a clear unavailable result after failure; successful retry clears the banner. Preserve single-click/single-request behavior and no repeated toast loop.
+#### LIBRARY-UI-TEXT-SIZE-1 — Make library interface text comfortably readable *(Seq132; Queued / Stub; UX polish; proposed P2) <a id="library-ui-text-size-1"></a>
+The owner requests larger library UI text; the warning banner and Retry screenshot make the problem especially clear. This is distinct from in-book typography. Specify a larger library UI type scale covering metadata, tabs, controls and notices; warning/Retry text is readable without clipping at tested display scaling. Do not silently restrict this to the banner.
+#### DROPDOWN-DISMISS-1 — Dropdowns close on outside click and preserve the selection *(Seq133; Queued / Stub; UX polish; proposed P2) <a id="dropdown-dismiss-1"></a>
+The Folder dropdown remains open after outside clicks. The owner requests consistent dismissal across all dropdowns; only Folder is observed failing. Inventory dropdowns, dismiss on outside click without selecting/changing a value, and preserve normal inside clicks and selection. Verify each supported menu rather than assume all are currently broken.
+#### POSITION-PROMPT-COPY-1 — Keep Previous Position precedes Move Position in the save prompt *(Queued; Full Spec; planning rank 5; Seq134; UX polish)* <a id="position-prompt-copy-1"></a>
+
+- **What:** Show first Keep Previous Position (pg{furthestPage}), then Move Position (pg{currentPage}); preserve existing handler meanings, primary focus, Enter/Escape and page calculations. This is copy/order only.
+- **Why:** Owner R3 says Keep is the previous protected position and should be first; Save becomes Move. This does not redefine current/furthest anchors or implement the separately approved approximate page-counter feature.
+- **Prerequisites:** KEEP-FURTHEST-FIX-1 is merged but In Flight until its existing close-out gate; encode that wait and the approved integration window. The prompt edit is independent of FURTHEST-PERSIST-1’s schema work; preserve future compatibility and re-grep at the cut.
+- **Done when:**
+  1. New `tests/backtrackPrompt.test.tsx`: `(bp1)` currentPage40/furthestPage53 renders exact buttons in order Keep Previous Position (pg53), Move Position (pg40); `(bp2)` first/second invokes only keep/save respectively once; `(bp3)` first autofocus is retained; `(bp4)` Enter/Escape invokes Keep once without propagation; `(bp5)` unmount removes the capture listener.
+  2. `npx vitest run tests/backtrackPrompt.test.tsx tests/keepFurthest.test.tsx tests/useProgressTracker.test.ts` exits0. Preserve keepFurthest.test.tsx unchanged: Keep saves2673 with its CFI, Save saves displayed416 with its CFI; no handler swap or progress arithmetic change.
+  3. `npm test`, `npm run typecheck`, `npm run build` exit0 locally. Exact-package owner route backtracks, checks labels/order and keyboard focus at normal/narrow widths, then separately exercises both choices and reopens at the corresponding saved word/CFI.
+  4. The production diff is only BacktrackPrompt.tsx; no ReaderContainer, useProgressTracker, runtime, shared type, CSS or backend change is needed. Record any existing label overflow separately rather than widen the fence silently.
+- **Effort:** XS; default low; positive-control task1 high for Narrate/Page, UI-only fix task2 low for visibility/Focus/copy. Durations are task-row estimates, not effort levels.
+- **Owners:** planner; local implementation agent; spec/quality reviewers; repository operator; designated package verifier for standing-rule53.
+- **Source:** SMOKE-R3,09-page-save-options.png; [approved smoke intake](docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md); BacktrackPrompt.tsx, useProgressTracker callbacks and unchanged tests/keepFurthest.test.tsx on d8e44864.
+- **Path:** dispatch; execution remains held, not launched.
+
+##### Implementation detail
+
+- **Edit sites:** `src/components/BacktrackPrompt.tsx:32–48`: move the existing Keep button first, retain onKeepFurthest, primary class and autoFocus; rename it Keep Previous Position (pg{furthestPage}). Move existing Save second, retain onSaveAtCurrent/secondary class; rename Move Position (pg{currentPage}).
+- **Tests:** Create `tests/backtrackPrompt.test.tsx` with real component/createRoot/act; inspect DOM button order and actual callback/focus behavior. Read the existing key listener at16–24 and reader wiring at ReaderContainer827–834, but do not edit either contract.
+- **Constants:** No new constant. Existing prompt pages approximate250 words through useProgressTracker; the separate page-counter choice does not alter these calculations in this item.
+- **Branch / baseline:** eb/position-prompt-copy-1 from approved main; source pin d8e44864708d40e2a472f3e6436d936e9ee96bfa plus only the explicitly awaited integrated stack. Re-grep every named symbol at the cut; a changed contract returns to the planner, never an improvised edit.
+- **Staging plan:** exact source/test fence src/components/BacktrackPrompt.tsx, tests/backtrackPrompt.test.tsx; plus only this item’s own BUG_REPORT subcase, docs/governance/close-outs/Memo.POSITION-PROMPT-COPY-1.GovernanceStaging.2026-10-26.md and Timing.POSITION-PROMPT-COPY-1.jsonl. Preserve unrelated work; inspect cached paths before commit; commit/push only as policy and the merge hold permit.
+- **Lane ownership / integration:** UX polish; source/test fence above. No parallel code run is authorized. Forbidden: sibling runtimes, production queue/settings resets, terminal status/Seq writes, unrelated refactors. Shared-core touches: none. Merge only in the prerequisite/owner-approved order, then recheck downstream specs.
+- **Failure handling:** If the real integrated prompt has different callbacks, stop and re-anchor rather than relabel by intuition. If existing anchor tests regress, stop without updating their expectations. Two repair passes maximum; rollback this item’s commits via git revert, never restore an old library. Verification/package failure keeps the item In Flight and the release held; only closeout records terminal state.
+
+##### Task list
+
+| # | Task | Class | Kind | Tier | Effort | Estimate | Timebox | Group |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Production-path regression controls distinguish the defect from the accepted behavior | repeat | positive-control | bounded | low | 4m (median of 20 runs) | — | — |
+| 2 | The scoped reader/library behavior satisfies its approved contract | repeat | ui-fix | bounded | low | 5m (median of 3 runs) | — | — |
+| 3 | Local gates, independent review and exact-package evidence are complete | repeat | packaging-verify | bounded | medium | 12m (median of 4 runs) | — | — |
+**Total:** chain 21m · sum 21m; 3 of 3 estimated tasks calibrated (priced by kind, then tier and effort, then the task's own estimate)
+
+##### Lessons applied
+
+- LL-073 — retain protected anchors and consume them only through existing actions; LL-090 — source verified callback association before changing wording.
+- LL-165 — exact scratch-profile identity in package checks; standing rules43/48/53/54 require red order/callback tests, type/build gates and a real committing user choice.
+- Standing rules36/43/47/48/50/51/52/53/54/55 apply: fresh sites, red controls, local type/build gates, no moved waiver/status downgrade, copied evidence uncollected, real committing triggers and package verification. All115 live lessons were reviewed; non-applicable ones are listed by ID/theme in this review’s lessons-applied record.
+
+#### READER-PAGE-COUNTER-1 — Display the reading page near the remaining time *(Seq135; Queued / Stub; UX polish; proposed P3) <a id="reader-page-counter-1"></a>
+Add a page display near reading time. This is distinct from PAGE-PAGES-READ-1's goal counter. Specify pagination semantics for reflowable books, PDFs and each mode; display the current page and an honest total where computable, with coherent resize/font-change behavior.
+#### LIBRARY-FOOTER-REMOVE-1 — Remove the unused settings controls from the library footer *(Seq136; Queued / Stub; UX polish; proposed P3) <a id="library-footer-remove-1"></a>
+Remove the footer speed/WPM slider, Start at login checkbox, Backup and Restore buttons shown by the owner. Remove those UI controls only. Preserve backup/restore capability, user data and login support elsewhere; decide placement only if needed. Do not conflate with completed LIBRARY-SETTINGS-FIX-1.
+#### TRAY-ICON-SIZE-1 — Make the Windows tray icon legible at normal scaling *(Seq137; Queued / Stub; Platform & Maintenance; proposed P3) <a id="tray-icon-size-1"></a>
+Existing BUG-203: tiny Windows tray icon recurs in this smoke. PACKAGING-FIX-1 shipped assets but did not fix the visual sizing. Inspect actual icon padding and Windows raster size/DPI handling, then verify legible tray rendering at normal and scaled displays with menu behavior intact.
+#### LIBRARY-CONTENT-DEDUP-1 — Make identical books at different source paths understandable *(Seq138; Queued / Stub; Library & Content; proposed P3) <a id="library-content-dedup-1"></a>
+Duplicate-looking cards came from different Books and Books\\Books paths; two sampled pairs had identical SHA256. No repeated exact filepath was found. Specify non-destructive content-identity detection/presentation, distinguish editions, and preserve progress/favorites. No source deletion, auto-merge or automatic hiding is authorized by this report.
+#### SMOKE8-COVERAGE-RECHECK-1 — Close the remaining smoke coverage gaps on one candidate build *(Seq139; Queued / Stub; Platform & Maintenance; proposed P1) <a id="smoke8-coverage-recheck-1"></a>
+The smoke is RED. Check31 visual deadlines/immediate quit, check32 active-scan overlap, check33 exact scenario, check35 disconnected quit, and earlier input/handoff gaps remain unverified. After candidate fixes and an approved release integration window, run the missing exact scenarios with owner-observed UI/audio where required; keep one build identity, per-check timing and before/after evidence. No partial is promoted to PASS and no release hold is lifted by backlog registration.
+
+**Known gaps:** check 31 visual timing and immediate-quit sequence, check 32 active-scan overlap, check 33 exact scenario, check 35 disconnected quit, and earlier keyboard/handoff partials remain open. SMOKE8-COVERAGE-RECHECK-1 owns missing evidence; successful later checks do not close failed or partial ones.
+
+**Evidence limits:** sampled duplicate-looking books had identical contents at distinct paths, not repeated exact paths; E-ink/on was inherited while defaults are off; the flash overlay is explained but a periodic timer fault is not established; the normal-profile sync queue changed without an attributed writer. No source deletion, automatic book merge, preference reset, data-loss claim or inferred shared root cause is authorized.
 
 ## Deferred Lanes
 

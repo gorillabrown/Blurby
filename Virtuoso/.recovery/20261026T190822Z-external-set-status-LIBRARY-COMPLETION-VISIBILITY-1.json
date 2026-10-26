@@ -1,0 +1,34 @@
+{
+  "id": "20261026T190822Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+  "operation": "external-set-status",
+  "item_id": "LIBRARY-COMPLETION-VISIBILITY-1",
+  "created": "2026-10-26T19:08:22Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "prerequisites": []
+    },
+    "expectedRevision": "7ba255e106c438adaf7d2d700b0e152e4dd2e91dbd7869541b352f78c7376d67",
+    "idempotencyKey": "smoke20261026-refinement-LIBRARY-COMPLETION-VISIBILITY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "idempotencyKey": "smoke20261026-refinement-LIBRARY-COMPLETION-VISIBILITY-1",
+      "actualRevision": "8016c1d7a957c8c23a1cb57af60d5bd80df0fb6ac7015e85dc223c630be81e78",
+      "recoveryId": "20261026T190822Z-external-set-status-LIBRARY-COMPLETION-VISIBILITY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T19:10:02Z",
+  "outcome": "succeeded"
+}

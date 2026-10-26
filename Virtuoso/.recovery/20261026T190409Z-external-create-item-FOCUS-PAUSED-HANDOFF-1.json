@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190409Z-external-create-item-FOCUS-PAUSED-HANDOFF-1",
+  "operation": "external-create-item",
+  "item_id": "FOCUS-PAUSED-HANDOFF-1",
+  "created": "2026-10-26T19:04:09Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Focus shows the correct word immediately on entry",
+      "status": "Queued",
+      "sequence": 118,
+      "written_status": "Stub",
+      "workstream": "Reader Engine",
+      "spec_link": "ROADMAP.md#focus-paused-handoff-1",
+      "description": "Switching from Page to paused Focus initially shows the wrong word; Play corrects it. No evidence yet distinguishes stale display from stale position.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F4. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "The handoff word is correct before playback, remains correct after pause, and persists through reopen. Fix within Focus ownership; no sibling-mode imports or shared mutable mode state.",
+      "id": "FOCUS-PAUSED-HANDOFF-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-FOCUS-PAUSED-HANDOFF-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "FOCUS-PAUSED-HANDOFF-1",
+      "idempotencyKey": "smoke20261026-FOCUS-PAUSED-HANDOFF-1",
+      "actualRevision": "f55ad6d729b1dd55fa9b3c433392ce3e6211d44d5e122ac1ae4ac80ce416dd8f",
+      "recoveryId": "20261026T190409Z-external-create-item-FOCUS-PAUSED-HANDOFF-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81c1-be4c-ed7f49d221ef",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:31Z",
+  "outcome": "succeeded"
+}

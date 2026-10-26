@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190325Z-external-create-item-LIBRARY-COMPLETION-VISIBILITY-1",
+  "operation": "external-create-item",
+  "item_id": "LIBRARY-COMPLETION-VISIBILITY-1",
+  "created": "2026-10-26T19:03:25Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Finished books remain visible until the reader archives them",
+      "status": "Queued",
+      "sequence": 116,
+      "written_status": "Stub",
+      "workstream": "Library & Content",
+      "spec_link": "ROADMAP.md#library-completion-visibility-1",
+      "description": "A 91-word text was saved at 91/91, kept on disk and in the register, yet excluded from every library display group. Diagnose first-open completion separately from the proven visibility hole.",
+      "prerequisites": [
+        "AUTO-ARCHIVE-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "A completed, unarchived read remains findable in All until an explicit archive decision. Confirmed archived reads appear in Archive. Declining or dismissing confirmation never hides the read; no reset, forced completion or silent archive workaround.",
+      "id": "LIBRARY-COMPLETION-VISIBILITY-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "LIBRARY-COMPLETION-VISIBILITY-1",
+      "idempotencyKey": "smoke20261026-LIBRARY-COMPLETION-VISIBILITY-1",
+      "actualRevision": "7ba255e106c438adaf7d2d700b0e152e4dd2e91dbd7869541b352f78c7376d67",
+      "recoveryId": "20261026T190325Z-external-create-item-LIBRARY-COMPLETION-VISIBILITY-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81a2-a666-c329943a6ff8",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:29Z",
+  "outcome": "succeeded"
+}

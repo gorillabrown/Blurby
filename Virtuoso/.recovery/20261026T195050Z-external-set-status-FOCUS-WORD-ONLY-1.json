@@ -1,0 +1,45 @@
+{
+  "id": "20261026T195050Z-external-set-status-FOCUS-WORD-ONLY-1",
+  "operation": "external-set-status",
+  "item_id": "FOCUS-WORD-ONLY-1",
+  "created": "2026-10-26T19:50:50Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "title": "Focus retains its word cursor without a horizontal dimming band",
+      "written_status": "full-spec",
+      "effort": "S",
+      "workstream": "Reader Engine",
+      "group": "Reader Polish",
+      "branch": "eb/focus-word-only-1",
+      "spec_link": "ROADMAP.md#focus-word-only-1",
+      "prerequisites": [
+        "BAND-ALIGN-2"
+      ],
+      "description": "Remove only Focus’s visual reading-zone mask and Focus band-only controls, if any. Keep its word cursor, paused/playing selection, RSVP, speed/font settings and existing private scroll/follow geometry.",
+      "deliverable": "Full specification in ROADMAP.md; U1–U10 checked. Execution remains held by release, prerequisite/ownership and exact-package/owner verification gates."
+    },
+    "expectedRevision": "1aac3255cfaed650af045c88bbc7064af3aa7f60aa67b9ba1e2c90bd23963e6c",
+    "idempotencyKey": "review20261026-spec-FOCUS-WORD-ONLY-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "FOCUS-WORD-ONLY-1",
+      "idempotencyKey": "review20261026-spec-FOCUS-WORD-ONLY-1",
+      "actualRevision": "76c99b5e3623f435e6ed935fe9c5433153a526596bdd9128ad419c8c0b07a97b",
+      "recoveryId": "20261026T195050Z-external-set-status-FOCUS-WORD-ONLY-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:03:05Z",
+  "outcome": "succeeded"
+}

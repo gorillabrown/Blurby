@@ -2,13 +2,85 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-25
+**Last updated:** 2026-10-26 (owner smoke intake)
 
 ---
 
 ## Incomplete
 
-**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. The next free number is BUG-224.
+### BUG-232 — Normal-profile sync queue changed during isolated smoke; writer unresolved
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** INVESTIGATION; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; PROFILE-QUEUE-ISOLATION-1, Queued / Stub. Lane: Platform & Maintenance.
+**Evidence / scope:** F17; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Normal library.json/settings.json hashes stayed unchanged, but sync-queue.json changed. Which process wrote it and whether isolation was breached are unresolved.
+**Next:** Attribute the writer using bounded evidence, classify intended versus unintended writes, and fix a proven isolation defect if found. Preserve the queue and user data; do not call this data loss or attribute it to the scratch app without proof.
+
+### BUG-231 — Failed Retry has no clear visible acknowledgement or result
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; FOLDER-RETRY-FEEDBACK-1, Queued / Stub. Lane: UX polish.
+**Evidence / scope:** F16; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The single Retry works and logs one null root result, but its unchanged UI leaves the reader unsure anything happened. FOLDER-NOTICE-2 is dissolved and is not reopened.
+**Next:** Show an accessible checking state and a clear unavailable result after failure; successful retry clears the banner. Preserve single-click/single-request behavior and no repeated toast loop.
+
+### BUG-230 — Completed unarchived reads vanish from visible library groups
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; LIBRARY-COMPLETION-VISIBILITY-1, Queued / Stub. Lane: Library & Content.
+**Evidence / scope:** F14; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** A 91-word text was saved at 91/91, kept on disk and in the register, yet excluded from every library display group. Diagnose first-open completion separately from the proven visibility hole.
+**Next:** A completed, unarchived read remains findable in All until an explicit archive decision. Confirmed archived reads appear in Archive. Declining or dismissing confirmation never hides the read; no reset, forced completion or silent archive workaround.
+
+### BUG-229 — Folder dropdown stays open after an outside click
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; DROPDOWN-DISMISS-1, Queued / Stub. Lane: UX polish.
+**Evidence / scope:** F12; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The Folder dropdown remains open after outside clicks. The owner requests consistent dismissal across all dropdowns; only Folder is observed failing.
+**Next:** Inventory dropdowns, dismiss on outside click without selecting/changing a value, and preserve normal inside clicks and selection. Verify each supported menu rather than assume all are currently broken.
+
+### BUG-228 — Folder content lags behind its header and large libraries stall
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; FOLDER-SWITCH-CONTENT-1, Queued / Stub. Lane: Library & Content.
+**Evidence / scope:** F10, F13; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** The header follows selection, but old-folder cards remain during a long cancellation/scan gap. Readings records began arriving after about 93 seconds; this is eventual loading, not permanent failure.
+**Next:** Measure loading and cancellation separately on small and large collections; prevent stale cards being presented as the new folder's books, keep the UI responsive, and preserve existing records/progress. No local import cap or subfolder picker is authorized.
+
+### BUG-227 — Narrate ignores a paused clicked word and its paused display is offset
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; NARRATE-SELECTION-START-1, Queued / Stub. Lane: TTS / Narration Engine.
+**Evidence / scope:** F7, F8, F9; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Paused word clicks are ignored on Play; the paused horizontal band is offset, and Play scrolls the underlined word to the top. Diagnose the three paths independently before fixing.
+**Next:** A paused clicked word determines the next start per explicit-selection rules; paused band/cursor agree; playback viewport policy is deliberate. Preserve exact heard-word timing and distinguish scrolling from changing the logical word.
+
+### BUG-226 — Paused Page-to-Focus entry initially highlights the wrong word
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; FOCUS-PAUSED-HANDOFF-1, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F4; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Switching from Page to paused Focus initially shows the wrong word; Play corrects it. No evidence yet distinguishes stale display from stale position.
+**Next:** The handoff word is correct before playback, remains correct after pause, and persists through reopen. Fix within Focus ownership; no sibling-mode imports or shared mutable mode state.
+
+### BUG-225 — Initial PageDown does not work until mouse navigation
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** HIGH; proposed intake priority P1, not a new release-gate ruling.
+**Status:** OPEN; PAGE-ENTRY-KEYS-1, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F3; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Initial PageDown did nothing until mouse Next was used; Left/Right and PageDown then worked. Readiness/focus cause is unverified and differs from paragraph-key BUG-220.
+**Next:** Reproduce initial keyboard use without mouse navigation; PageDown and arrows advance when ready, with no dropped or double page turns and correct saved progress.
+
+### BUG-224 — Uneven book typography remains after the release type-scale fix
+**Reported:** 2026-10-26, owner smoke on release 36ac7466 (v1.75.1 ARM64).
+**Severity:** MEDIUM; proposed intake priority P2, not a new release-gate ruling.
+**Status:** OPEN; BOOK-TYPE-SCALE-2, Queued / Stub. Lane: Reader Engine.
+**Evidence / scope:** F2; [smoke intake](../planning/roadmap-reviews/2026-10-26-smoke-triage.md) and [issue record](bug-reports/Issue.SMOKE8-20261026.2026-10-26.md).
+**Observation:** Mixed small caps/letter sizes and wide justified spacing remain on the exact release that includes BOOK-TYPE-SCALE-1. Publisher typography versus app overrides is unresolved.
+**Next:** Compare the source EPUB and app styles, identify the responsible rule, then specify the smallest correction to the intended heading/body scale. Retain semantic emphasis and check all modes independently.
+
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. Smoke intake 2026-10-26 uses BUG-224 through BUG-232. The next free number is BUG-233.
 
 ### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
 **Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
@@ -1600,3 +1672,5 @@ On pause/resume, the truth-sync mechanism fires and snaps the visual cursor back
 **Location:** `src/components/ReaderBottomBar.tsx`
 **Problem:** Bottom bar had `opacity: 0.08` during Focus/Flow/Narration, making controls nearly invisible.
 **Solution:** Remov
+
+**2026-10-26 review clarification (BUG-227 remains OPEN):** F9 paused-click playback has a separate investigated specification, NARRATE-PAUSED-CLICK-1 (Seq117). F7/F8 paused-band and viewport behavior stays under NARRATE-SELECTION-START-1 (Seq124), investigation-gated. No implementation or packaged acceptance occurred.

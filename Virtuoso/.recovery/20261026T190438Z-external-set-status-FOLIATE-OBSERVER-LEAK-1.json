@@ -1,0 +1,25 @@
+{
+  "id": "20261026T190438Z-external-set-status-FOLIATE-OBSERVER-LEAK-1",
+  "operation": "external-set-status",
+  "item_id": "FOLIATE-OBSERVER-LEAK-1",
+  "created": "2026-10-26T19:04:38Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "description": "A patch-package patch (patches/foliate-js+1.0.1.patch) makes foliate-js's View.destroy() and Paginator.destroy() call this.#observer.disconnect(). The leaked observers on dead section bodies stop flooding error.log (14,428 lines a session on the base, 0 after). Smoke 2026-10-26 F15 repeats the ResizeObserver flood on release36ac7466. Keep with BUG-187 and this held fix; verify on integrated candidate. No proven causal link to completed-read visibility."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "smoke20261026-FOLIATE-OBSERVER-LEAK-1"
+  },
+  "resolved": "2026-10-26T19:05:47Z",
+  "outcome": "abandoned",
+  "reason": "Superseded before execution by a plan pinned to the fresh provider snapshot revision."
+}

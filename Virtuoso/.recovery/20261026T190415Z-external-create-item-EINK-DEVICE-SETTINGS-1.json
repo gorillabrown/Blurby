@@ -1,0 +1,50 @@
+{
+  "id": "20261026T190415Z-external-create-item-EINK-DEVICE-SETTINGS-1",
+  "operation": "external-create-item",
+  "item_id": "EINK-DEVICE-SETTINGS-1",
+  "created": "2026-10-26T19:04:15Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Remember E-ink preferences separately on each device",
+      "status": "Queued",
+      "sequence": 124,
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#eink-device-settings-1",
+      "description": "An unconfigured device should start in regular mode; an explicitly configured E-ink device remembers E-ink. The tested upgrade inherited einkMode=true; source defaults are already false.",
+      "prerequisites": [
+        "EINK-CONTROLS-1"
+      ],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P2. Sources R2, R9. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "Classify device-local settings and exclude them from cross-device upload/apply. Clean-profile default is off; explicit on survives local restarts; computer/phone settings do not override the E-ink device. Preserve migration and existing choices.",
+      "id": "EINK-DEVICE-SETTINGS-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-EINK-DEVICE-SETTINGS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "EINK-DEVICE-SETTINGS-1",
+      "idempotencyKey": "smoke20261026-EINK-DEVICE-SETTINGS-1",
+      "actualRevision": "e0a1bc23d2b9abcc413e74bff14d693ded6fb5a851173870b20faa26a213ffb9",
+      "recoveryId": "20261026T190415Z-external-create-item-EINK-DEVICE-SETTINGS-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-8151-97ae-f3090001e3e4",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:38Z",
+  "outcome": "succeeded"
+}

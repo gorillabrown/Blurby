@@ -1,0 +1,48 @@
+{
+  "id": "20261026T190432Z-external-create-item-SMOKE8-COVERAGE-RECHECK-1",
+  "operation": "external-create-item",
+  "item_id": "SMOKE8-COVERAGE-RECHECK-1",
+  "created": "2026-10-26T19:04:32Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "Close the remaining smoke coverage gaps on one candidate build",
+      "status": "Queued",
+      "sequence": 138,
+      "written_status": "Stub",
+      "workstream": "Platform & Maintenance",
+      "spec_link": "ROADMAP.md#smoke8-coverage-recheck-1",
+      "description": "The smoke is RED. Check31 visual deadlines/immediate quit, check32 active-scan overlap, check33 exact scenario, check35 disconnected quit, and earlier input/handoff gaps remain unverified.",
+      "prerequisites": [],
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources . Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
+      "deliverable": "After candidate fixes and an approved release integration window, run the missing exact scenarios with owner-observed UI/audio where required; keep one build identity, per-check timing and before/after evidence. No partial is promoted to PASS and no release hold is lifted by backlog registration.",
+      "id": "SMOKE8-COVERAGE-RECHECK-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T19:00:30Z",
+    "idempotencyKey": "smoke20261026-SMOKE8-COVERAGE-RECHECK-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "SMOKE8-COVERAGE-RECHECK-1",
+      "idempotencyKey": "smoke20261026-SMOKE8-COVERAGE-RECHECK-1",
+      "actualRevision": "155ad20a9da10777fdfc924de7c2fdace07dec8d5cf84fe450c6806d05de2921",
+      "recoveryId": "20261026T190432Z-external-create-item-SMOKE8-COVERAGE-RECHECK-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81d9-a265-ec3c679ce50d",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T19:07:55Z",
+  "outcome": "succeeded"
+}
