@@ -3068,3 +3068,12 @@ Related: LL-151, standing rule 43, LL-142.
 **Applies to:** every dispatch's close-out and merge go, In Flight items included; release gates.
 **Status:** Promoted -> ROADMAP standing rule 53 (owner directive, 2026-10-23)
 Related: LL-165, standing rules 47 and 48.
+
+### LL-158 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 54
+
+### LL-151 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 55
+
+### LL-166 — status (2026-10-25, 2026-10-26)
+**Status:** Promoted -> standing rule 55
