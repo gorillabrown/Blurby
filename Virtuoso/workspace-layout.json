@@ -395,7 +395,8 @@
             ]
           }
         }
-      }
+      },
+      "lengthCeilingLines": 2000
     },
     "git": {
       "policy": "push",

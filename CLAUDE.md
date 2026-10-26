@@ -188,7 +188,7 @@ The dispatch's Task table tells Zeus:
 Before committing, verify ALL of these:
 
 - [ ] Every SUCCESS CRITERIA item from the dispatch is met (Solon pass)
-- [ ] `npm test` passes (2,080+ tests, 0 failures; count as of 2026-10-14 after QUIT-FLUSH-1) and `npm run typecheck` exits 0
+- [ ] `npm test` passes (2,452+ tests, 0 failures; count as of 2026-10-23, release gate (1) run 4) and `npm run typecheck` exits 0
 - [ ] `npm run build` succeeds (if UI changes were made)
 - [ ] No files were accidentally truncated (check `git diff --stat` for unexpected size changes)
 - [ ] LESSONS_LEARNED guardrails were not violated
@@ -309,7 +309,7 @@ When a sprint **completes**:
 
 - **Every sprint completion**: Run steps 1-6 above.
 - **Every 3rd sprint**: Review `docs/` for stale files. Archive anything from completed work.
-- **ROADMAP.md target**: <500 lines. If approaching, check for completed specs that weren't archived.
+- **ROADMAP.md ceiling**: 2,000 lines (`policy.roadmap.lengthCeilingLines`). When crossed, roadmap review moves specs to a dated snapshot in `docs/planning/.Archive/`.
 - **CLAUDE.md target**: <35k chars. Archive completed sprint details to `docs/planning/CLAUDE_md_archive_sessionN.md`.
 
 ---
@@ -369,7 +369,7 @@ Run a structured codebase audit at regular intervals: after every 3rd sprint com
 - **Open bugs:** see `docs/governance/BUG_REPORT.md` (BUG-217 is the latest, 2026-10-24); it is the single list, so none are restated here.
 - **Deferred lanes:** Cloud Sync is absorbed by BLURBY-SERVER-1; Android and RSS/News are Stage 9 items; long-form audio export dissolved (KOKORO-EXPORT-1).
 - **Most recent implementation:** NARRATE-REBUILD-1 completed 2026-10-15 (P6 with P6b, merge `f27c7def`; completion record `689edd46`): Narrate rebuilt on Kokoro as a fourth independent mode, the cursor is the word at the playing sample from an exact word table, epic checkers run under the app's Electron ICU (LL-160). Seven Stage 8 items merged the same day (ROADMAP.md Stage 8). Before it, QUIT-FLUSH-1 (merge `d21009b3`, 2026-10-14; `main/quit-sequence.js`; BUG-192 resolved). Earlier history: `docs/planning/CLAUDE_md_archive_session1.md`.
-- Suite on the owner's machine (2026-10-14, QUIT-FLUSH-1 tree `bd1216fc`): 2,080 passed / 1 skipped / 0 failed in 153 files; `npm run typecheck` exits 0; `npm run build` exits 0.
+- Suite (2026-10-23, release gate (1) run 4 on `36ac7466`, quiet machine): 2,452 passed / 1 skipped / 0 failed in 181 files; `npm run typecheck` exits 0 (`docs/governance/close-outs/Gate1.STAGE8-RUN4.2026-10-23.md`).
 - CI: GitHub Actions `ci.yml` runs tests only. Releases are built and published by hand per `docs/governance/RELEASE_RUNBOOK.md` (one full NSIS installer per architecture).
 - Governance tooling: Virtuoso connector-backed register, timestamped snapshots, durable mutation recovery.
 - Performance baseline: 21 automated benchmarks via `npm run perf`
