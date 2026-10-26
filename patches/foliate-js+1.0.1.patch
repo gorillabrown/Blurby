@@ -1,0 +1,20 @@
+diff --git a/node_modules/foliate-js/paginator.js b/node_modules/foliate-js/paginator.js
+index 95c4d0d..d229bc0 100644
+--- a/node_modules/foliate-js/paginator.js
++++ b/node_modules/foliate-js/paginator.js
+@@ -409,6 +409,7 @@ class View {
+     }
+     destroy() {
+         if (this.document) this.#observer.unobserve(this.document.body)
++        this.#observer.disconnect()
+     }
+ }
+ 
+@@ -1156,6 +1157,7 @@ export class Paginator extends HTMLElement {
+     }
+     destroy() {
+         this.#observer.unobserve(this)
++        this.#observer.disconnect()
+         this.#view.destroy()
+         this.#view = null
+         this.sections[this.#index]?.unload?.()
