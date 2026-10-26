@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204135Z-external-set-status-ZIP-ASYNC-READ-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-ASYNC-READ-1",
+  "created": "2026-10-26T20:41:35Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/zip-async-read-1 at a089ace6e41177a845aee9645d643b3bd3acd079; ancestor of planning baseline=False; ROADMAP heading: ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 — Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Created 2026-10-23 by Blurby.Roadmap on Blurby.Brain's ruling, from ZIP-READ-FOLLOWUPS-1. Stub. Not a release gate.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. branch eb/zip-async-read-1 at a089ace6e41177a845aee9645d643b3bd3acd079; ancestor of planning baseline=False; ROADMAP heading: ZIP-ASYNC-READ-1 — Read EPUB archives asynchronously *(**built `4e821a04` on `eb/zip-async-read-1`, stacked on ZIP-READ-FOLLOWUPS-1 `29b3e7e5`, 2026-10-23: red first `6ad30e42`, fix `16064a99`, `npm test` 2,439 passed / 1 skipped / 0 failed, typecheck and build 0; In Flight, merge held for the Stage 8 freeze, after ZIP-READ-FOLLOWUPS-1**; Seq 82 — Full Spec; authored 2026-10-23 on `eb/zip-read-followups-1` @ `29b3e7e5`, ZIP-READ-FOLLOWUPS-1's held tip; not a release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "f7b9e487bab538e4097664ae969220bdf8a7972726b3fc2d80b894bbcc323e33",
+    "idempotencyKey": "parallelgov20261026-ZIP-ASYNC-READ-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-ASYNC-READ-1",
+      "idempotencyKey": "parallelgov20261026-ZIP-ASYNC-READ-1",
+      "actualRevision": "eab38f4eb2f7fa86e0ae3849f764c09097cfe14df5c169558a6f4d7a494fee33",
+      "recoveryId": "20261026T204135Z-external-set-status-ZIP-ASYNC-READ-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:06Z",
+  "outcome": "succeeded"
+}

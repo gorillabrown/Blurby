@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204127Z-external-set-status-BAND-ALIGN-1",
+  "operation": "external-set-status",
+  "item_id": "BAND-ALIGN-1",
+  "created": "2026-10-26T20:41:27Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/band-align-1 at 105a07c190b232caf40afdb42a6d23cc003add4c; ancestor of planning baseline=False; ROADMAP heading: BAND-ALIGN-1 — The Focus/Flow reading band is sized from the real line step (Part A) *(built `105a07c1` on `eb/band-align-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "9c236d1a34dfd8ff1de12172d986da2dc75b39ea43e777c3611316bd9a6d421e",
+    "idempotencyKey": "parallelgov20261026-BAND-ALIGN-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "BAND-ALIGN-1",
+      "idempotencyKey": "parallelgov20261026-BAND-ALIGN-1",
+      "actualRevision": "fb73b2e53b19ae3a30d951e7c312b53a65af97e0e154f5bff6e1bff9bf4b4718",
+      "recoveryId": "20261026T204127Z-external-set-status-BAND-ALIGN-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:59Z",
+  "outcome": "succeeded"
+}

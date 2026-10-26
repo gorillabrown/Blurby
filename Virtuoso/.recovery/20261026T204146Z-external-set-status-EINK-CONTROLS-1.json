@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204146Z-external-set-status-EINK-CONTROLS-1",
+  "operation": "external-set-status",
+  "item_id": "EINK-CONTROLS-1",
+  "created": "2026-10-26T20:41:46Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "unmerged branch verified; evidence gap: build/package result is not established by the inspected heading and branch ancestry. Evidence: branch eb/eink-controls-1 at e6bf358cccb1d9cde17655abd2c68b30def085f8; ancestor of planning baseline=False; ROADMAP heading: EINK-CONTROLS-1 — One E-ink switch: the theme is dropped and the switch carries its colours; Dark becomes pure black *(position 96 — Full Spec; authored 2026-10-23 by Blurby.Roadmap from the owner's decision of 2026-10-23 (tier 3); post-release; no shared-core touch)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "6090cffa08cbddb1bcf5243e09dc08c533d519a0b87c710b5160c5647e175263",
+    "idempotencyKey": "parallelgov20261026-EINK-CONTROLS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "EINK-CONTROLS-1",
+      "idempotencyKey": "parallelgov20261026-EINK-CONTROLS-1",
+      "actualRevision": "750c58f32daadd560e4bb1017d8e24a2b9967b2bdc5de8e25e2543d54f40e6a4",
+      "recoveryId": "20261026T204146Z-external-set-status-EINK-CONTROLS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:46:15Z",
+  "outcome": "succeeded"
+}

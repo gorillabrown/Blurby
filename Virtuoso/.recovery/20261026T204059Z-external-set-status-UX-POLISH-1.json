@@ -1,0 +1,35 @@
+{
+  "id": "20261026T204059Z-external-set-status-UX-POLISH-1",
+  "operation": "external-set-status",
+  "item_id": "UX-POLISH-1",
+  "created": "2026-10-26T20:40:59Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/ux-polish-1 at 871f3c1802d08136efd183ea73819f04bc6f220f; ancestor of planning baseline=True; ROADMAP heading: UX-POLISH-1 — Space resumes the last-used reading mode *(merged `e942e3fd` 2026-10-13; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements.",
+      "notes": "Roadmap review 2026-10-11: re-stubbed. Waits on NARRATE-REMOVE-1 (its v13 migration turns a saved narrate mode into flow). Page Space enters the saved last mode (Focus or Flow) with Flow fallback; no Narrate references. Unblocked 2026-10-12: NARRATE-REMOVE-1 completed (merge 386651fc; close-out docs/governance/close-outs/CloseOut.NARRATE-REMOVE-1.2026-10-12.md). Full Spec by roadmap review 2026-10-12: U9/U10 pass.\n\nGovernance reconciliation2026-10-26: live Spec State=Full Spec; historical Stub/stopped/gate prose does not override current source evidence. source merged; release/acceptance held. branch eb/ux-polish-1 at 871f3c1802d08136efd183ea73819f04bc6f220f; ancestor of planning baseline=True; ROADMAP heading: UX-POLISH-1 — Space resumes the last-used reading mode *(merged `e942e3fd` 2026-10-13; In Flight, close-out held by the Stage 8 release gate)*. Status and Seq remain unchanged."
+    },
+    "expectedRevision": "7eda22dbc6123fd134453fdbda400fc0b75458f918c14d6ec0cc76f69c442c13",
+    "idempotencyKey": "parallelgov20261026-UX-POLISH-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "UX-POLISH-1",
+      "idempotencyKey": "parallelgov20261026-UX-POLISH-1",
+      "actualRevision": "541c324dc00a8c95c7d32503fbc53daaa0397314a6b1d8bf5d2e27a35b751398",
+      "recoveryId": "20261026T204059Z-external-set-status-UX-POLISH-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:34Z",
+  "outcome": "succeeded"
+}

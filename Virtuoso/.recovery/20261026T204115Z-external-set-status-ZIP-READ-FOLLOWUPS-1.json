@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204115Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+  "operation": "external-set-status",
+  "item_id": "ZIP-READ-FOLLOWUPS-1",
+  "created": "2026-10-26T20:41:15Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source heading reports built/held; unmerged branch tip verified; candidate package/merge acceptance remains outstanding. Evidence: branch eb/zip-read-followups-1 at 29b3e7e53e23e990e5038e2fbd1d27f8ba52edaf; ancestor of planning baseline=False; ROADMAP heading: ZIP-READ-FOLLOWUPS-1 — Every EPUB archive is opened through one size-checked door *(built `29b3e7e5` on `eb/zip-read-followups-1`; In Flight, merge held for the Stage 8 freeze)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "afdf5256a580c6152ad0caa3f434173a99b8913a86f74bd61b8550428a51d66a",
+    "idempotencyKey": "parallelgov20261026-ZIP-READ-FOLLOWUPS-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "ZIP-READ-FOLLOWUPS-1",
+      "idempotencyKey": "parallelgov20261026-ZIP-READ-FOLLOWUPS-1",
+      "actualRevision": "336e15f5aeefe326dfec6df333927b1a22a0e9b78487e1d2672292145210feb1",
+      "recoveryId": "20261026T204115Z-external-set-status-ZIP-READ-FOLLOWUPS-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:48Z",
+  "outcome": "succeeded"
+}

@@ -1,0 +1,34 @@
+{
+  "id": "20261026T204111Z-external-set-status-PAGE-SAVE-RESTAMP-GUARD-1",
+  "operation": "external-set-status",
+  "item_id": "PAGE-SAVE-RESTAMP-GUARD-1",
+  "created": "2026-10-26T20:41:11Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "deliverable": "source merged; release/acceptance held. Evidence: branch eb/page-save-restamp-guard-1 at 880289cdc29b92b94af4a3639b254f982a69bf6c; ancestor of planning baseline=True; ROADMAP heading: PAGE-SAVE-RESTAMP-GUARD-1 — A page turn never saves a position before the book's word numbers apply *(merged `813ff38a` 2026-10-15; In Flight, close-out held by the Stage 8 release gate)*. No completion inferred; preserve existing package, merge and release requirements."
+    },
+    "expectedRevision": "c5a856727c4bd6a07324b429cef4c99523a0e3763a3dfb69545940f6a64d50a9",
+    "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-GUARD-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "PAGE-SAVE-RESTAMP-GUARD-1",
+      "idempotencyKey": "parallelgov20261026-PAGE-SAVE-RESTAMP-GUARD-1",
+      "actualRevision": "a9dc733447d9dd5f2721d5c7f6c7851362fdb1ef7ff861a5de3572f80acac690",
+      "recoveryId": "20261026T204111Z-external-set-status-PAGE-SAVE-RESTAMP-GUARD-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T20:45:45Z",
+  "outcome": "succeeded"
+}
