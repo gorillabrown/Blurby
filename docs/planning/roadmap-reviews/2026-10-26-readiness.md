@@ -93,3 +93,7 @@ The registry leaves dispatchBuffer unspecified, so this review uses the skill de
 | SMOKE8-COVERAGE-RECHECK-1, Seq 139 | Exact missing scenarios on one approved integrated candidate: checks 31–33/35 and earlier input/handoff partials. No partial becomes PASS through planning. |
 
 These gaps and their routing are recorded in [Issue.SMOKE8-SPEC-GAPS.2026-10-26](../../governance/bug-reports/Issue.SMOKE8-SPEC-GAPS.2026-10-26.md). The original smoke remains RED. This is a completed specification/readiness assessment, not an implementation, dispatch, package qualification, epic completion or release decision.
+
+## Follow-up owner decision — visibility implementation window
+
+The owner subsequently requested clearing integration and ownership for LIBRARY-COMPLETION-VISIBILITY-1. The [admission decision](2026-10-26-library-visibility-admission.md) grants that item the first exclusive LibraryView/new-test implementation/build-and-hold window. APP-TABS-1 remains built/held and integrates the accepted visibility result later. The general visibility entry-hold statements above are superseded only to that extent. No other item, package qualification, code-merge go or Stage8 release gate is cleared. No implementation is launched by this amendment.

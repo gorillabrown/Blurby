@@ -1,6 +1,6 @@
 {
   "snapshotVersion": 1,
-  "takenAt": "2026-10-26T20:03:03Z",
+  "takenAt": "2026-10-26T20:23:38Z",
   "provider": "snapshot",
   "source": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
   "fields": [
@@ -5829,8 +5829,8 @@
       "completed": "",
       "evidence": "",
       "description": "The app gets four top-level tabs. Library is the home for all books. Newsroom is the home for all articles and periodicals (saved articles, RSS feeds and the like). Podcasts and Marketplace show a \"Coming Soon\" banner. Library and Newsroom are built now; this item is the tab shell, the two banners, and moving articles out of the book library into Newsroom without losing positions, highli",
-      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9). Storyboarded and fully specified 2026-10-23 (docs/planning/specs/2026-10-23-5/APP-TABS-1.md). Package verified under rule 53 by Blurby.Brain 2026-10-25: package 48da10c8, tip 8539ec4c; suite 2,493 passed / 2 skipped / 0 failed. Built and held; touches src/types.ts (3 lines), post-release train, no other types.ts branch merges around it without a rebase. Not a release gate.",
-      "revision": "acca981c89aa27858f3034540aaceadefe4081b86c9006709cad75403d73bd2c",
+      "notes": "Created 2026-10-15 by Blurby.Roadmap at the owner's request (Stage 9). Storyboarded and fully specified 2026-10-23 (docs/planning/specs/2026-10-23-5/APP-TABS-1.md). Package verified under rule 53 by Blurby.Brain 2026-10-25: package 48da10c8, tip 8539ec4c; suite 2,493 passed / 2 skipped / 0 failed. Built and held; touches src/types.ts (3 lines), post-release train, no other types.ts branch merges around it without a rebase. Not a release gate.\n\nOwner scheduling decision 2026-10-26: LIBRARY-COMPLETION-VISIBILITY-1 owns the next exclusive LibraryView.tsx window. APP-TABS-1 stays built/held; its next LibraryView integration waits, then incorporates the accepted visibility commit and reruns real list/grid home/status regression tests plus the existing exact-package/merge gates. Preserve its branch, home/tab filtering and evidence. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.",
+      "revision": "55ffaa9ea47b85d2e520db6ef12f6b765828e9f89604854ae3640d0df0c846f6",
       "extra": {
         "id": "3fa7c96c-c31e-81c4-8b78-ecaba7e48282",
         "url": "https://app.notion.com/3fa7c96cc31e81c48b78ecaba7e48282",
@@ -6443,7 +6443,7 @@
       "prerequisites": [],
       "effort": "S",
       "workstream": "Library & Content",
-      "deliverable": "Full specification in ROADMAP.md; U1–U10 checked. Execution remains held by release, prerequisite/ownership and exact-package/owner verification gates.",
+      "deliverable": "Full specification in ROADMAP.md; implementation integration/ownership window cleared by owner 2026-10-26. Visibility first, APP-TABS-1 integration later. Package verification, designated confirmation, code-merge and release gates remain. See the admission decision.",
       "group": "Platform Health",
       "spec_link": "ROADMAP.md#library-completion-visibility-1",
       "branch": "eb/library-completion-visibility-1",
@@ -6451,8 +6451,8 @@
       "completed": "",
       "evidence": "",
       "description": "Keep every record admitted by the existing tab/type/search filters visible exactly once in list and grid, including position at or beyond wordCount. Preserve the existing Reading Now / Not Started groups; do not silently archive, reset progress or change completion detection.",
-      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Stub; investigation/specification required. Release hold unchanged.",
-      "revision": "c0ef2feb24e2dae860965599397f90903e353c1ce1f4eb03cf57397154f46694",
+      "notes": "Owner smoke intake 2026-10-26. Proposed priority P1. Sources F14. Acceptance/evidence: docs/planning/roadmap-reviews/2026-10-26-smoke-triage.md. Full Spec after the owner-approved roadmap review. Release hold unchanged; implementation entry is governed by the dated admission below.\n\nOwner decision 2026-10-26: implementation integration/ownership entry cleared. Exclusive LibraryView source + new visibility test window on eb/library-completion-visibility-1 from published main containing the admission decision; visibility runs before APP-TABS-1 integration. No APP held code is pulled into this repair. Stage8 code-merge/release and exact-package/confirmation gates remain; this is not a dispatch or completion. Decision: docs/planning/roadmap-reviews/2026-10-26-library-visibility-admission.md.",
+      "revision": "8a4e2e10415dc86991caa22a7130c49cde4096a1361c0e6a5f54c9a37d9a31f3",
       "extra": {
         "id": "4057c96c-c31e-81a2-a666-c329943a6ff8",
         "url": "https://app.notion.com/4057c96cc31e81a2a666c329943a6ff8",

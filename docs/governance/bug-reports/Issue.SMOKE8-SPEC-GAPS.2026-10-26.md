@@ -59,3 +59,7 @@ SMOKE8-COVERAGE-RECHECK-1 owns missing exact evidence: check 31 visual deadlines
 ## Disposition
 
 Keep each gap explicit in the live item and its next specification. The planner resolves diagnosis and design before implementation dispatch; the repository operator resolves custody/base admission; the designated verifier and available owner resolve package/UI/audio acceptance. This issue does not alter Status/Seq, waive an existing gate, create a release exception, or authorize implementation. No original smoke failure or partial result is promoted to PASS.
+
+## Decision — visibility integration and ownership
+
+Owner direction2026-10-26 clears only LIBRARY-COMPLETION-VISIBILITY-1's implementation entry and assigns it the first exclusive LibraryView/new-test window. APP-TABS-1 remains held on that source surface and later integrates the accepted fix. [Concrete admission and guards](../../planning/roadmap-reviews/2026-10-26-library-visibility-admission.md). This issue stays OPEN for all other gaps and for the unchanged package/code-merge/release gates.
