@@ -10,7 +10,7 @@
   "providerCreationConfirmed": true,
   "branch": "eb/foliate-display-lifetime-1",
   "executionOwner": "FOLIATE-DISPLAY-LIFETIME-1 \u2014 cloud implementation",
-  "actualThreadId": "Record in own execution receipt before source edit after task creation",
+  "actualThreadId": "01a17a3a-7d81-71bf-93be-37c6ca352037",
   "sourceBase": "4c9724e60cd6bbab79ad78b0f11b25f78ad31ab7",
   "shippingBase": "aa5f1485eb023ca232b5a8f8234ad6fdea51f2bb",
   "mainPin": "85e6e5aaedccb0501c529dbc9f739e50a0689fd7",
@@ -32,5 +32,12 @@
     "two bounded repair passes maximum; material scope/harness issue goes to Brain",
     "independent source/spec/quality review",
     "new exact native package and Brain confirmation before any later integration go"
-  ]
+  ],
+  "cloudPeers": {
+    "implementation": "01a17a3a-7d81-71bf-93be-37c6ca352037",
+    "folderProfile": "01a17a3a-dcdb-7308-8560-3989bd32a015",
+    "reviewCoordinator": "01a17a3a-d94f-760e-8d37-5805cd713020"
+  },
+  "cloudHost": "durable",
+  "coordinationCapability": "Cloud workers report no direct cross-chat/Brain messaging tool. Parent relays while connected; independent reviewer can inspect published Git branches. A later missing material technical ruling is a real hold, not permission to improvise."
 }
