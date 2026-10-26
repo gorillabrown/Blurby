@@ -1202,6 +1202,19 @@ The four items below, and BOOK-TYPE-SCALE-1 (owner, 2026-10-23), are the release
 
 - **Full specification:** [snapshot](docs/planning/.Archive/ROADMAP_snapshot_2026-10-25.md) (moved by roadmap review 2026-10-25 to keep ROADMAP.md under its length ceiling; the item is In Flight). The branch's staging memo records the build.
 - **Package verification (standing rule 53; Blurby.Brain, 2026-10-25):** (a)–(c) pass for `0ca285e5`. Done-when 5, 6 and 10 wait on Brain's quiet-machine runs. The Done-when 5 shortfall on the loaded host is void because of the load, so it is not a stop.
+- **Quiet-machine result and ruling (Blurby.Brain, 2026-10-25): outcome R4, on 240/240 trials across two hosts. Decision #22's question closes as R4.**
+  - The run: x64, package `0ca285e5`, i7-1185G7.
+    - 80/80 trials were lost-race, with 0 undelivered and 0 errors.
+    - In 0/80 trials were the word spans ready before Play's first voice.
+    - Medians at 1.00x: spans ready at 1,189 ms, first voice at 871 ms.
+    - Medians at 2.00x: spans ready at 1,419 ms, first voice at 1,134 ms.
+    - Foreign CPU averaged 14.3% and 11.5%.
+    - Evidence: `C:\Projects\Blurby-artifacts\narrate-harness-coldclick-1\quiet-x64\` on the quiet machine.
+  - **Done-when 5 and 6** close as "stopped: R4 measured", not pass. Done-when 6 was not run.
+  - **Done-when 10** (rule 53) stays confirmed for `0ca285e5`.
+  - **`second-machine.md:22`** stays unchanged, per Done-when 8.
+  - **Cross-arch note:** the x64 asar is 1,424 bytes larger than the arm64 one (291,698,446 against 291,697,022), which is expected. Rule 53 compares each package with its own build only.
+  - **Owner question 1** (A, B or C; the spec recommends B) is now live. Blurby.Roadmap is asking the owner.
 
 
 

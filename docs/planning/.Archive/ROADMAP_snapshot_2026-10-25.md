@@ -1307,6 +1307,21 @@ None open. Part 2 was pending the owner. The owner ruled on 2026-10-23 (tier 3):
 
 #### NARRATE-HARNESS-COLDCLICK-1 — Cold click is measured on mainstream hardware *(Seq 94 — Full Spec; authored 2026-10-23 by Blurby.Roadmap (roadmap review 2026-10-23-5) from the stub, Decision #22 and gate (1) run 4; build-and-hold under the Stage 8 freeze; not a release gate)*
 
+- **Status recorded after the snapshot (roadmap review 2026-10-25):**
+  - **Quiet-machine result and ruling (Blurby.Brain, 2026-10-25): outcome R4, on 240/240 trials across two hosts. Decision #22's question closes as R4.**
+    - The run: x64, package `0ca285e5`, i7-1185G7.
+      - 80/80 trials were lost-race, with 0 undelivered and 0 errors.
+      - In 0/80 trials were the word spans ready before Play's first voice.
+      - Medians at 1.00x: spans ready at 1,189 ms, first voice at 871 ms.
+      - Medians at 2.00x: spans ready at 1,419 ms, first voice at 1,134 ms.
+      - Foreign CPU averaged 14.3% and 11.5%.
+      - Evidence: `C:\Projects\Blurby-artifacts\narrate-harness-coldclick-1\quiet-x64\` on the quiet machine.
+    - **Done-when 5 and 6** close as "stopped: R4 measured", not pass. Done-when 6 was not run.
+    - **Done-when 10** (rule 53) stays confirmed for `0ca285e5`.
+    - **`second-machine.md:22`** stays unchanged, per Done-when 8.
+    - **Cross-arch note:** the x64 asar is 1,424 bytes larger than the arm64 one (291,698,446 against 291,697,022), which is expected. Rule 53 compares each package with its own build only.
+    - **Owner question 1** (A, B or C; the spec recommends B) is now live. Blurby.Roadmap is asking the owner.
+
 - **What:** the D6 harness's cold-click trial clicks a word only once the playing section's word spans exist, confirms the click reached the engine, and classifies every trial. Then one run on the quiet machine (mainstream class) judges cold click against the 8,000 ms cold budget, or shows with numbers why it cannot be measured on that hardware.
 - **Why:**
   - Decision #22 (`docs/planning/epics/2026-10-12-narrate-rebuild/state.md:221`): "Cold click on mainstream hardware stays unmeasured until follow-up NARRATE-HARNESS-COLDCLICK-1; until then cold click is judged on the reference run only."
