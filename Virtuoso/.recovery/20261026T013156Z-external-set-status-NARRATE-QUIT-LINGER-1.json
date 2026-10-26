@@ -1,0 +1,34 @@
+{
+  "id": "20261026T013156Z-external-set-status-NARRATE-QUIT-LINGER-1",
+  "operation": "external-set-status",
+  "item_id": "NARRATE-QUIT-LINGER-1",
+  "created": "2026-10-26T01:31:56Z",
+  "completed_steps": [
+    "planned external mutation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "set-status",
+    "fields": {
+      "notes": "Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25)."
+    },
+    "expectedRevision": "",
+    "idempotencyKey": "set-status:NARRATE-QUIT-LINGER-1:[('notes', 'Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).')]",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "set-status",
+      "itemId": "NARRATE-QUIT-LINGER-1",
+      "idempotencyKey": "set-status:NARRATE-QUIT-LINGER-1:[('notes', 'Re-scoped 2026-10-25 by Blurby.Brain (relayed by Blurby.Roadmap): build (b), the relaunch takeover, only; drop (a). Branch stops at 977bf209; WIP f107a761 on eb/narrate-quit-linger-1-tests. Re-dispatch instructions on the ROADMAP card (roadmap review 2026-10-25).')]",
+      "actualRevision": "",
+      "recoveryId": "20261026T013156Z-external-set-status-NARRATE-QUIT-LINGER-1",
+      "detail": {}
+    }
+  },
+  "resolved": "2026-10-26T01:32:13Z",
+  "outcome": "succeeded"
+}

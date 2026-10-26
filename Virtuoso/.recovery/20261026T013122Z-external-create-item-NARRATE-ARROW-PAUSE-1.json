@@ -1,0 +1,52 @@
+{
+  "id": "20261026T013122Z-external-create-item-NARRATE-ARROW-PAUSE-1",
+  "operation": "external-create-item",
+  "item_id": "NARRATE-ARROW-PAUSE-1",
+  "created": "2026-10-26T01:31:22Z",
+  "completed_steps": [
+    "planned external creation"
+  ],
+  "remaining_steps": [
+    "execute the host connector instruction",
+    "confirm the external mutation result"
+  ],
+  "detail": {
+    "register": "notion:database/3f87c96cc31e800580cfe019c89a56ca",
+    "operation": "create-item",
+    "fields": {
+      "title": "In Narrate, an arrow with a modifier key pauses and the cursor holds its word",
+      "status": "Queued",
+      "sequence": 99,
+      "written_status": "Full Spec",
+      "effort": "S",
+      "prerequisites": [
+        "READER-ARROW-GUARD-1"
+      ],
+      "group": "Narration UX",
+      "workstream": "TTS / Narration Engine",
+      "spec_link": "ROADMAP.md#narrate-arrow-pause-1",
+      "branch": "eb/narrate-arrow-pause-1",
+      "description": "Owner ruling 2026-10-25: Shift/Ctrl/Alt/Meta + left/right pauses Narrate; plain arrows and PageUp/Down unchanged; Narrate-local key listener.",
+      "notes": "origin: owner ruling 2026-10-25 via Blurby.Brain; specified by roadmap review 2026-10-25 (U9 pass). Stacked on READER-ARROW-GUARD-1 tip 51202c1c; build-and-hold. Not a release gate.",
+      "id": "NARRATE-ARROW-PAUSE-1"
+    },
+    "expectedRevision": "",
+    "expectedAbsent": true,
+    "snapshotTakenAt": "2026-10-26T01:09:26Z",
+    "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-ARROW-PAUSE-1",
+    "lastConfirmation": {
+      "succeeded": true,
+      "outcome": "succeeded",
+      "operation": "create-item",
+      "itemId": "NARRATE-ARROW-PAUSE-1",
+      "idempotencyKey": "create-item:notion:database/3f87c96cc31e800580cfe019c89a56ca:NARRATE-ARROW-PAUSE-1",
+      "actualRevision": "",
+      "recoveryId": "20261026T013122Z-external-create-item-NARRATE-ARROW-PAUSE-1",
+      "detail": {},
+      "providerItemId": "4057c96c-c31e-81ff-a0ed-d9a1ca705083",
+      "nextStep": "refresh the canonical snapshot so the new item is readable through the provider"
+    }
+  },
+  "resolved": "2026-10-26T01:31:55Z",
+  "outcome": "succeeded"
+}

@@ -2,11 +2,41 @@
 
 **Purpose:** Tracks bugs in EXISTING implemented features. Each entry contains enough context for any developer to understand and fix the issue without additional direction. New features, enhancements, and architecture changes are tracked in ROADMAP.md.
 
-**Last updated:** 2026-10-23
+**Last updated:** 2026-10-25
 
 ---
 
 ## Incomplete
+
+**Numbers reserved by held branches (roadmap review 2026-10-25):** BUG-218 is READER-ARROW-GUARD-1's entry on `eb/reader-arrow-guard-1`, and BUG-219 is OVERLAY-THEME-SWEEP-1's entry, which its branch files as BUG-218 and renames to BUG-219 before its merge. Both entries land with their branches. The next free number is BUG-224.
+
+### BUG-223 — A stale renderer copy is stamped as a fresh edit and can beat a newer cloud edit
+**Reported:** 2026-10-24 (LIBRARY-WRITE-RACE-2's quality review, W2; filed by roadmap review 2026-10-25 on Blurby.Brain's ruling)
+**Severity:** MEDIUM. It must be fixed before BLURBY-SERVER-1's sync is on for anyone. Not a Stage 8 release gate.
+**Status:** OPEN; scheduled as LIBRARY-WRITE-RACE-3. Lane: Library & Content.
+**Location:** the per-field edit stamps that LIBRARY-WRITE-RACE-2 part 3 adds (branch `eb/library-write-race-2` @ `c46e9332`), and the renderer's whole-record library saves.
+**Description:** a cloud merge can change a field, such as `tags`, in main. If a renderer that has not yet received the broadcast then saves its older copy, main sees a real change against its own value. It stamps the stale value `editedAt = now`, and that value beats the cloud copy at the next sync. Before LIBRARY-WRITE-RACE-2 the stale value already overwrote main, but carried no stamp. **Fix:** the renderer sends only the fields it edited, with the values it loaded, and main stamps only those fields (LIBRARY-WRITE-RACE-3).
+
+### BUG-222 — Foliate's paginator throws "Cannot destructure property 'style' of 'r' as it is null" during a fast reader open and close
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW. It is error-log noise on a fast open and close, and the base has it too. Not a release gate.
+**Status:** OPEN; unscheduled. Lane: Reader Engine.
+**Location:** foliate-js's paginator, reached while a book view is torn down before its first layout.
+**Description:** opening and closing a book quickly logs `Cannot destructure property 'style' of 'r' as it is null` from the paginator. No position or library data is affected. **Next step:** reproduce on a scratch profile with a driver that opens and closes within the first layout, then decide whether the teardown should wait for the first layout or swallow the error in that window.
+
+### BUG-221 — `g` shows no go-to badge: GoToIndicator mounts after `blurby:goto-pending` has fired
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW. The go-to chord still works; only its badge is missing.
+**Status:** OPEN; unscheduled. Lane: UX polish.
+**Location:** `GoToIndicator` (grep `blurby:goto-pending` in `src/`) and the keyboard handler that dispatches the event.
+**Description:** pressing `g` dispatches `blurby:goto-pending` before `GoToIndicator` has mounted and subscribed, so the badge never shows. **Fix approach:** mount the indicator with the reader or library shell, so it is listening before the first key, or have it read a pending flag on mount. A red test dispatches the event before mounting, then mounts.
+
+### BUG-220 — In Page, Shift+→ moves the highlight from word 187 to −1, and Shift+← moves it to 0
+**Reported:** 2026-10-25 (Blurby.Brain, during package verification of the held branches)
+**Severity:** LOW–MEDIUM. Page's paragraph keys put the highlight on an invalid word (−1) or the book's first word.
+**Status:** OPEN; stubbed as PAGE-PARA-KEYS-1. Lane: Reader Engine.
+**Location:** Page's paragraph-step command (Shift+←/→ through `useReaderKeys`). The probable cause is the paragraph command's slice index.
+**Description:** measured on a packaged build: in Page, with the highlight on word 187, Shift+→ set it to −1, and Shift+← set it to 0. Focus and Flow have their own paragraph-key fixes (FOCUS-KEYS-FIX-1, FLOW-PARA-KEYS-1, BLOCK-TAG-CASE-1). **Next step:** trace Page's paragraph command on the held key-fix stack, then specify (PAGE-PARA-KEYS-1).
 
 ### BUG-217 — First launch on a fresh profile logs a library backup failure
 **Reported:** 2026-10-23 (Blurby.Brain, during BAND-ALIGN-2 R6's rule 53 package verification)

@@ -382,21 +382,22 @@
         "Library & Content",
         "Platform & Maintenance"
       ],
-      "deadlines": {
-        "mode-separation": {
-          "date": "2026-11-30",
-          "owner": "project owner (roadmap review 2026-10-08)",
-          "label": "Reading-mode separation complete",
-          "finishLine": "Stage 2 — Reading-mode separation (owner-mandated step 1)",
-          "scope": {
-            "field": "id",
-            "values": [
-              "READER-MODE-SEPARATION-2"
-            ]
-          }
-        }
-      },
-      "lengthCeilingLines": 2000
+      "deadlines": {},
+      "lengthCeilingLines": 2000,
+      "effortScale": {
+        "xs": 0.5,
+        "xs-s": 0.75,
+        "s": 1,
+        "s-m": 2,
+        "m": 3,
+        "m-l": 5,
+        "l": 8,
+        "xl": 20,
+        "1": 1,
+        "2": 2,
+        "3": 3,
+        "8": 8
+      }
     },
     "git": {
       "policy": "push",
