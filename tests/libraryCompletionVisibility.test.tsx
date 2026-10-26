@@ -73,6 +73,12 @@ describe("completed reads remain visible (LIBRARY-COMPLETION-VISIBILITY-1)", () 
     await act(async () => { button!.click(); await flush(); });
   }
   async function search(value: string) {
+    if (!container.querySelector('input[aria-label="Search library"]')) {
+      await act(async () => {
+        container.querySelector<HTMLButtonElement>('button[aria-label="Search library"]')!.click();
+        await flush();
+      });
+    }
     const input = container.querySelector<HTMLInputElement>('input[aria-label="Search library"]');
     expect(input).not.toBeNull();
     await act(async () => {
